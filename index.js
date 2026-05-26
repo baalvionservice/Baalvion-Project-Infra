@@ -73,5 +73,7 @@ const start = async () => {
     server.listen(config.port, () => console.log(`[trade-service] running on port ${config.port}`));
 };
 
-start();
+// Only auto-boot when run directly (`node index.js`). When imported (tests),
+// the app is exported without starting the server / workers / realtime.
+if (require.main === module) start();
 module.exports = app;

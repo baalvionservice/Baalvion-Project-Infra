@@ -1,0 +1,58 @@
+name: trade-service CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: baalvion_db
+          POSTGRES_USER: baalvion
+          POSTGRES_PASSWORD: baalvion_dev_pass
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U baalvion"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+      redis:
+        image: redis:7
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+
+    env:
+      NODE_ENV: test
+      DB_HOST: localhost
+      DB_PORT: '5432'
+      DB_NAME: baalvion_db
+      DB_USER: baalvion
+      DB_PASSWORD: baalvion_dev_pass
+      REDIS_HOST: localhost
+      REDIS_PORT: '6379'
+      JWT_ACCESS_SECRET: ci-test-secret-not-for-production
+      DB_SYNC: 'false'           # schema comes from versioned migrations, never sync
+      QUEUE_WORKERS: 'false'     # tests drive the app via supertest, no background workers
+      RATE_LIMIT_IP_MAX: '1000000'
+      FX_MODE: static            # deterministic FX in CI (no external network dependency)
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Run database migrations (creates schema on fresh DB)
+        run: node migrate.js
+      - name: Verify migration status (drift check)
+        run: node migrate.js status
+      - name: Run test suite
+        run: npm test

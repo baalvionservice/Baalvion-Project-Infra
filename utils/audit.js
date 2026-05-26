@@ -28,7 +28,11 @@ function computeHash(prevHash, entry) {
 async function recordAudit({ actorId, action, resourceType, resourceId, metadata = {}, tenantId = 'T-DEMO' }) {
     const t = await db.sequelize.transaction();
     try {
-        const last = await db.AuditLog.findOne({ order: [['seq', 'DESC']], transaction: t, lock: t.LOCK.UPDATE });
+        // Global serialization of chain appends (across processes) — a row-level
+        // FOR UPDATE on "latest" can still fork under concurrency, so use a
+        // transaction-scoped advisory lock keyed to the audit chain.
+        await db.sequelize.query('SELECT pg_advisory_xact_lock(91532)', { transaction: t });
+        const last = await db.AuditLog.findOne({ order: [['seq', 'DESC']], transaction: t });
         const prevHash = last ? last.hash : GENESIS;
         const createdAt = new Date().toISOString();
         const entry = { tenantId, actorId: String(actorId || 'system'), action, resourceType, resourceId: String(resourceId || ''), metadata, createdAt };
@@ -61,4 +65,22 @@ async function verifyChain() {
     return { valid: true, entries: rows.length, headHash: prevHash === GENESIS ? null : prevHash };
 }
 
-module.exports = { recordAudit, verifyChain, computeHash, GENESIS };
+// One-time chain repair: recompute prevHash/hash sequentially. Use only to
+// recover from a chain corrupted by a pre-fix concurrency fork.
+async function repairChain() {
+    const rows = await db.AuditLog.findAll({ order: [['seq', 'ASC']] });
+    let prevHash = GENESIS;
+    let fixed = 0;
+    for (const row of rows) {
+        const hash = computeHash(prevHash, {
+            tenantId: row.tenantId, actorId: row.actorId, action: row.action,
+            resourceType: row.resourceType, resourceId: row.resourceId,
+            metadata: row.metadata, createdAt: row.createdAt,
+        });
+        if (row.prevHash !== prevHash || row.hash !== hash) { await row.update({ prevHash, hash }); fixed += 1; }
+        prevHash = hash;
+    }
+    return { fixed, total: rows.length, headHash: prevHash === GENESIS ? null : prevHash };
+}
+
+module.exports = { recordAudit, verifyChain, repairChain, computeHash, GENESIS };
