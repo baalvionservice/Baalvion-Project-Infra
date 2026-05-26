@@ -87,26 +87,62 @@ const consumeBackupCode = async (user, code) => {
     return true;
 };
 
+// --- Brute-force lockout ---------------------------------------------------
+
+const lockoutError = (lockedUntil) => {
+    const retryAfterSeconds = Math.max(1, Math.ceil((new Date(lockedUntil).getTime() - Date.now()) / 1000));
+    return new AppError('ACCOUNT_LOCKED', 'Account temporarily locked due to repeated failed logins', 423, { retryAfterSeconds });
+};
+
+// Record a failed attempt; lock the account once the threshold is reached.
+// (Account-scoped, so it survives an attacker rotating source IPs; the IP rate
+// limiter guards the orthogonal case. A correct login resets the counter.)
+const registerFailedLogin = async (user, req) => {
+    const max = config.security.loginMaxAttempts;
+    const attempts = (user.failed_login_attempts || 0) + 1;
+    if (attempts >= max) {
+        const lockedUntil = new Date(Date.now() + config.security.loginLockoutMinutes * 60 * 1000);
+        await user.update({ failed_login_attempts: 0, locked_until: lockedUntil });
+        await recordAudit({ actorId: user.id, action: 'auth.account_locked', resourceType: 'user', resourceId: user.id, tenantId: user.tenant_id, metadata: { ip: req.ip, threshold: max, lockedUntil } });
+        return { locked: true, lockedUntil };
+    }
+    await user.update({ failed_login_attempts: attempts });
+    return { locked: false, remaining: max - attempts };
+};
+
 const login = async (req, res, next) => {
     try {
         const { email, password, mfaCode } = req.body;
         if (!email || !password) return next(new AppError('BAD_REQUEST', 'email and password are required', 400));
         const user = await db.User.findOne({ where: { email } });
         if (!user) return next(new AppError('UNAUTHORIZED', 'Invalid credentials', 401));
+
+        // Reject locked accounts before spending a bcrypt comparison.
+        if (user.locked_until && new Date(user.locked_until).getTime() > Date.now()) {
+            await recordAudit({ actorId: user.id, action: 'auth.login_blocked_locked', resourceType: 'user', resourceId: user.id, tenantId: user.tenant_id, metadata: { ip: req.ip } });
+            return next(lockoutError(user.locked_until));
+        }
+
         const valid = await bcrypt.compare(password, user.password_hash);
-        if (!valid) return next(new AppError('UNAUTHORIZED', 'Invalid credentials', 401));
+        if (!valid) {
+            const r = await registerFailedLogin(user, req);
+            return next(r.locked ? lockoutError(r.lockedUntil) : new AppError('UNAUTHORIZED', 'Invalid credentials', 401));
+        }
         if (!user.is_active) return next(new AppError('FORBIDDEN', 'Account is deactivated', 403));
 
-        // Step-up: enforce MFA when enabled.
+        // Step-up: enforce MFA when enabled (a wrong code is also a failed attempt).
         if (user.mfa_enabled) {
             if (!mfaCode) return next(new AppError('MFA_REQUIRED', 'MFA verification code required', 401));
             const ok = totp.verify(user.mfa_secret, mfaCode) || await consumeBackupCode(user, mfaCode);
             if (!ok) {
                 await recordAudit({ actorId: user.id, action: 'auth.mfa_failed', resourceType: 'user', resourceId: user.id, tenantId: user.tenant_id });
-                return next(new AppError('UNAUTHORIZED', 'Invalid MFA code', 401));
+                const r = await registerFailedLogin(user, req);
+                return next(r.locked ? lockoutError(r.lockedUntil) : new AppError('UNAUTHORIZED', 'Invalid MFA code', 401));
             }
         }
 
+        // Success → reset the failure counter and stamp the login time.
+        await user.update({ failed_login_attempts: 0, locked_until: null, last_login_at: new Date() });
         await recordAudit({ actorId: user.id, action: 'auth.login', resourceType: 'user', resourceId: user.id, tenantId: user.tenant_id, metadata: { ip: req.ip } });
         return issueAuthResult(req, res, user, 200, { mfaEnabled: user.mfa_enabled });
     } catch (err) { return next(err); }

@@ -5,3 +5,5 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'test';
 process.env.RATE_LIMIT_IP_MAX = '1000000';
 process.env.DB_SYNC = 'false';
 process.env.QUEUE_WORKERS = 'false';
+// Low brute-force threshold so the lockout test is fast + deterministic.
+process.env.LOGIN_MAX_ATTEMPTS = process.env.LOGIN_MAX_ATTEMPTS || '3';

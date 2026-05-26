@@ -15,6 +15,9 @@ module.exports = (sequelize, DataTypes) => {
         mfa_secret: { type: DataTypes.TEXT },                          // base32 TOTP secret
         mfa_backup_codes: { type: DataTypes.JSONB, defaultValue: [] }, // sha256 hashes
         is_active: { type: DataTypes.BOOLEAN, defaultValue: true },
+        failed_login_attempts: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+        locked_until: { type: DataTypes.DATE },     // set when attempts exceed the threshold
+        last_login_at: { type: DataTypes.DATE },
     }, {
         schema: 'trade',
         tableName: 'users',

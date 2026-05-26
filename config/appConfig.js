@@ -23,5 +23,11 @@ module.exports = {
         user: process.env.DB_USER || 'baalvion',
         password: process.env.DB_PASSWORD || '',
     },
-    security: { ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 120) },
+    security: {
+        ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 120),
+        // Per-account brute-force lockout: after N consecutive failed logins the
+        // account is locked for M minutes (counter resets on a successful login).
+        loginMaxAttempts: Number(process.env.LOGIN_MAX_ATTEMPTS || 5),
+        loginLockoutMinutes: Number(process.env.LOGIN_LOCKOUT_MINUTES || 15),
+    },
 };
