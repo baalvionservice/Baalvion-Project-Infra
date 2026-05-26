@@ -34,6 +34,7 @@ db.Listing         = require('./listings')(sequelize, Sequelize.DataTypes);
 db.Quotation       = require('./quotations')(sequelize, Sequelize.DataTypes);
 db.Message         = require('./messages')(sequelize, Sequelize.DataTypes);
 db.Collection      = require('./collections')(sequelize, Sequelize.DataTypes);
+db.AuditLog        = require('./audit_logs')(sequelize, Sequelize.DataTypes);
 
 Object.values(db).forEach(model => {
     if (model && model.associate) model.associate(db);

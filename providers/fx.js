@@ -13,6 +13,16 @@ const BASE_URL = process.env.FX_PROVIDER_URL || 'https://api.frankfurter.app';
 const TIMEOUT_MS = Number(process.env.FX_TIMEOUT_MS || 3000);
 const MODE = (process.env.FX_MODE || 'live').toLowerCase();
 
+// SSRF guard: outbound FX calls may only target an explicit https host allowlist.
+const ALLOWED_HOSTS = new Set(['api.frankfurter.app']);
+try { ALLOWED_HOSTS.add(new URL(BASE_URL).host); } catch { /* ignore malformed override */ }
+
+function assertAllowedHost(url) {
+    const u = new URL(url);
+    if (u.protocol !== 'https:') throw new Error('ssrf_blocked_insecure_protocol');
+    if (!ALLOWED_HOSTS.has(u.host)) throw new Error(`ssrf_blocked_host:${u.host}`);
+}
+
 // Static fallback corridor (mid-market approximations).
 const STATIC = {
     USD_EUR: 0.92, USD_INR: 83.45, USD_SGD: 1.35, USD_CNY: 7.24, USD_AED: 3.67,
@@ -31,10 +41,12 @@ function staticRate(base, target, reason) {
 }
 
 async function fetchLiveRate(base, target) {
+    const url = `${BASE_URL}/latest?from=${base}&to=${target}`;
+    assertAllowedHost(url);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     try {
-        const res = await fetch(`${BASE_URL}/latest?from=${base}&to=${target}`, { signal: controller.signal });
+        const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) throw new Error(`fx_http_${res.status}`);
         const json = await res.json();
         const rate = json && json.rates && json.rates[target];
@@ -80,4 +92,4 @@ async function health() {
     }
 }
 
-module.exports = { getRate, convert, health };
+module.exports = { getRate, convert, health, assertAllowedHost };

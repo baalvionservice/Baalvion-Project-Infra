@@ -24,6 +24,7 @@ router.use('/admin',         require('./adminRoutes'));
 router.get('/platform_stats', require('../controller/statsController').platformStats);
 router.use('/fx', require('./fxRoutes'));
 router.get('/providers/health', require('../controller/providersController').health);
+router.use('/audit', require('./auditRoutes'));
 
 // Generic persistence store — MUST be last so it only catches collections that
 // have no bespoke typed route above (alerts, risk_signals, contracts, ...).
