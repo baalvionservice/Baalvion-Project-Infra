@@ -4,6 +4,12 @@ const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 
+// Resolve an org by integer PK or by external code ('COMP-101').
+const resolveOrg = (idOrCode) =>
+    (/^\d+$/.test(String(idOrCode))
+        ? db.Organization.findByPk(idOrCode)
+        : db.Organization.findOne({ where: { code: String(idOrCode) } }));
+
 const listOrgs = async (req, res, next) => {
     try {
         const { type, country, status, search, page = 1, limit = 20 } = req.query;
@@ -24,7 +30,7 @@ const listOrgs = async (req, res, next) => {
 
 const getOrg = async (req, res, next) => {
     try {
-        const org = await db.Organization.findByPk(req.params.id);
+        const org = await resolveOrg(req.params.id);
         if (!org) return next(new AppError('NOT_FOUND', 'Organization not found', 404));
         return sendSuccess(req, res, org);
     } catch (err) {
@@ -43,7 +49,7 @@ const createOrg = async (req, res, next) => {
 
 const updateOrg = async (req, res, next) => {
     try {
-        const org = await db.Organization.findByPk(req.params.id);
+        const org = await resolveOrg(req.params.id);
         if (!org) return next(new AppError('NOT_FOUND', 'Organization not found', 404));
         await org.update(req.body);
         return sendSuccess(req, res, org);
@@ -54,7 +60,7 @@ const updateOrg = async (req, res, next) => {
 
 const deleteOrg = async (req, res, next) => {
     try {
-        const org = await db.Organization.findByPk(req.params.id);
+        const org = await resolveOrg(req.params.id);
         if (!org) return next(new AppError('NOT_FOUND', 'Organization not found', 404));
         await org.destroy();
         return sendSuccess(req, res, { deleted: true });
@@ -65,7 +71,7 @@ const deleteOrg = async (req, res, next) => {
 
 const updateKyc = async (req, res, next) => {
     try {
-        const org = await db.Organization.findByPk(req.params.id);
+        const org = await resolveOrg(req.params.id);
         if (!org) return next(new AppError('NOT_FOUND', 'Organization not found', 404));
         const { kyc_status, risk_score } = req.body;
         await org.update({ kyc_status, risk_score });
