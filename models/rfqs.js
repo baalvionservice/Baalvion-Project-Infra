@@ -6,6 +6,9 @@ module.exports = (sequelize, DataTypes) => {
         buyer_org_id: { type: DataTypes.INTEGER },
         title: { type: DataTypes.STRING(255) },
         commodity: { type: DataTypes.STRING(255) },
+        product_name: { type: DataTypes.STRING(255) },
+        category: { type: DataTypes.STRING(120) },
+        description: { type: DataTypes.TEXT },
         quantity: { type: DataTypes.DECIMAL(15, 4) },
         unit: { type: DataTypes.STRING(50) },
         origin_country: { type: DataTypes.STRING(100) },
@@ -15,6 +18,8 @@ module.exports = (sequelize, DataTypes) => {
         },
         required_delivery_date: { type: DataTypes.DATEONLY },
         budget_usd: { type: DataTypes.DECIMAL(15, 2) },
+        target_price: { type: DataTypes.DECIMAL(15, 2) },
+        currency: { type: DataTypes.STRING(8), defaultValue: 'USD' },
         status: {
             type: DataTypes.ENUM('draft', 'open', 'closed', 'awarded', 'cancelled'),
             defaultValue: 'open',
