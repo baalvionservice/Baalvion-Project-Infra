@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# Platform base — overlays in ../overlays/<region> patch replicas/region/images.
+resources:
+  - namespaces.yaml
+  - config.yaml
+  - gateway.yaml
+  - api.yaml
+  - workers.yaml
+  - ml-service.yaml
+  - streaming-kafka.yaml
+
+commonLabels:
+  app.kubernetes.io/part-of: baalvion
+
+images:
+  - name: ghcr.io/baalvion/gateway
+    newTag: latest
+  - name: ghcr.io/baalvion/proxy-backend
+    newTag: latest
+  - name: ghcr.io/baalvion/ml-service
+    newTag: latest

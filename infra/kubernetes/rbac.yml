@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: baalvion-sa
+  namespace: baalvion
+  labels:
+    app: baalvion
+
+---
+# Minimal RBAC — services only need to read their own pod metadata
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: baalvion-pod-reader
+  namespace: baalvion
+rules:
+  - apiGroups: [""]
+    resources: [pods]
+    verbs:     [get, list]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: baalvion-pod-reader-binding
+  namespace: baalvion
+subjects:
+  - kind:      ServiceAccount
+    name:      baalvion-sa
+    namespace: baalvion
+roleRef:
+  kind:     Role
+  name:     baalvion-pod-reader
+  apiGroup: rbac.authorization.k8s.io

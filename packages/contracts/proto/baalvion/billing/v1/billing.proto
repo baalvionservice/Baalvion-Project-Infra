@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+package baalvion.billing.v1;
+
+// BillingService is the shared billing platform every product (proxy, commerce,
+// jobs, …) consumes. Products NEVER implement their own invoicing/payments —
+// they report usage + read subscription/quota state through this contract.
+service BillingService {
+  rpc GetSubscription(GetSubscriptionRequest) returns (Subscription);
+  // Idempotent usage ingestion (keyed by idempotency_key) for usage-based billing.
+  rpc RecordUsage(RecordUsageRequest) returns (RecordUsageResponse);
+  // Read remaining quota / overage projection for quota enforcement.
+  rpc GetQuota(GetQuotaRequest) returns (Quota);
+}
+
+message GetSubscriptionRequest { string org_id = 1; }
+
+message Subscription {
+  string org_id = 1;
+  string plan = 2;
+  string status = 3;        // active|past_due|canceled|trialing
+  int64 current_period_end = 4;
+  double included_gb = 5;
+}
+
+message RecordUsageRequest {
+  string org_id = 1;
+  string product = 2;       // proxy|commerce|...
+  string metric = 3;        // bytes|requests|...
+  double quantity = 4;
+  int64 occurred_at = 5;
+  string idempotency_key = 6;
+}
+
+message RecordUsageResponse {
+  bool accepted = 1;
+  bool duplicate = 2;
+}
+
+message GetQuotaRequest { string org_id = 1; string metric = 2; }
+
+message Quota {
+  string org_id = 1;
+  string metric = 2;
+  double used = 3;
+  double included = 4;
+  double hard_ceiling = 5;
+  bool blocked = 6;         // true when over hard ceiling
+}

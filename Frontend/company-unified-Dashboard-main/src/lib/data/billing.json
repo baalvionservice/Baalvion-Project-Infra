@@ -1,0 +1,39 @@
+
+{
+  "subscription": {
+    "plan": "Pro",
+    "price": 299,
+    "annualPrice": 2990,
+    "billingCycle": "annually",
+    "status": "Active",
+    "nextBillingDate": "2026-02-01",
+    "paymentMethod": {
+      "type": "Visa",
+      "last4": "4242",
+      "expiry": "09/27"
+    }
+  },
+  "usage": {
+    "businesses": {
+      "used": 5,
+      "limit": 5
+    },
+    "users": {
+      "used": 14,
+      "limit": 25
+    },
+    "apiCalls": {
+      "used": 48240,
+      "limit": 100000
+    },
+    "storage": {
+      "used": 2.4,
+      "limit": 10
+    }
+  },
+  "billingContact": {
+    "name": "Alex Davis",
+    "email": "alex.davis@baalvion.com",
+    "address": "123 Market St, San Francisco, CA 94103"
+  }
+}

@@ -1,0 +1,56 @@
+# Istio service mesh — STRICT mTLS + authorization for the control plane.
+# (Edge gateways are intentionally NOT in the mesh; see namespaces.yaml.)
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: default
+  namespace: baalvion
+spec:
+  mtls:
+    mode: STRICT                       # all in-namespace traffic must be mTLS
+---
+# Only the ingress gateway + same-namespace workloads may call the API.
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: api-allow
+  namespace: baalvion
+spec:
+  selector: { matchLabels: { app: api } }
+  action: ALLOW
+  rules:
+    - from:
+        - source: { namespaces: ["istio-system", "baalvion"] }
+      to:
+        - operation: { ports: ["4000"] }
+---
+# Workers accept NO inbound traffic (they only consume Redis/DB + Razorpay).
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: workers-deny-ingress
+  namespace: baalvion
+spec:
+  selector: { matchLabels: { app: workers } }
+  action: DENY
+  rules:
+    - {}
+---
+# Edge → control-plane API calls (gateway reads DB/Redis directly, but any HTTP
+# call into the API uses this ingress). mTLS origination at the ingress gateway.
+apiVersion: networking.istio.io/v1
+kind: DestinationRule
+metadata:
+  name: api-mtls
+  namespace: baalvion
+spec:
+  host: api.baalvion.svc.cluster.local
+  trafficPolicy:
+    tls: { mode: ISTIO_MUTUAL }
+    connectionPool:
+      tcp: { maxConnections: 2000 }
+      http: { http2MaxRequests: 4000, maxRequestsPerConnection: 100 }
+    outlierDetection:                  # eject unhealthy api pods
+      consecutive5xxErrors: 5
+      interval: 10s
+      baseEjectionTime: 30s

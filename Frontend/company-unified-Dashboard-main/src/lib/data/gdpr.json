@@ -1,0 +1,30 @@
+
+{
+  "statusCards": [
+    { "title": "Data Inventory", "status": "Complete", "description": "All data assets mapped" },
+    { "title": "Consent Records", "status": "Compliant", "description": "Active and auditable" },
+    { "title": "DPAs Signed", "status": "89% Complete", "description": "2 pending with sub-processors" },
+    { "title": "Breach Protocol", "status": "In Place", "description": "Last tested Q2 2024" },
+    { "title": "DPO Assigned", "status": "Assigned", "description": "Alex Davis (Interim)" }
+  ],
+  "subjectRequests": [
+    { "id": "dsr_1", "type": "Access", "name": "John Doe", "submitted": "2024-07-28T10:00:00Z", "status": "Pending", "dueDate": "2024-08-27T10:00:00Z" },
+    { "id": "dsr_2", "type": "Deletion", "name": "Jane Smith", "submitted": "2024-07-25T14:30:00Z", "status": "Completed", "dueDate": "2024-08-24T14:30:00Z" },
+    { "id": "dsr_3", "type": "Portability", "name": "Peter Jones", "submitted": "2024-07-22T09:00:00Z", "status": "Completed", "dueDate": "2024-08-21T09:00:00Z" },
+    { "id": "dsr_4", "type": "Access", "name": "Mary Williams", "submitted": "2024-07-30T11:00:00Z", "status": "In Progress", "dueDate": "2024-08-29T11:00:00Z" }
+  ],
+  "retentionPolicies": [
+    { "dataType": "Customer PII", "period": "5 years post-relationship", "legalBasis": "Contractual Necessity, Legal Obligation" },
+    { "dataType": "Financial Transactions", "period": "7 years", "legalBasis": "Legal Obligation (AML, Tax)" },
+    { "dataType": "Employee Records", "period": "7 years post-employment", "legalBasis": "Legal Obligation, Legitimate Interest" },
+    { "dataType": "Marketing Consent", "period": "2 years post-last interaction", "legalBasis": "Consent" },
+    { "dataType": "Server Logs", "period": "180 days", "legalBasis": "Legitimate Interest (Security)" }
+  ],
+  "cookieConsent": [
+    { "domain": "techcorp.in", "rate": 92.5 },
+    { "domain": "baalvionmedia.co.uk", "rate": 95.1 },
+    { "domain": "retailchain.ae", "rate": 88.2 },
+    { "domain": "financehub.com", "rate": 91.8 },
+    { "domain": "digitalagency.sg", "rate": 89.5 }
+  ]
+}

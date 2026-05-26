@@ -1,0 +1,89 @@
+# Baalvion ML inference service (FastAPI + scikit-learn). Stateless inference +
+# on-demand training; CPU-bound, horizontally scaled by the HPA. Model artifacts
+# persist on a PVC shared via ReadWriteMany (or per-pod RWO + S3 sync in prod).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-service
+  namespace: baalvion
+  labels: { app: ml-service, tier: intelligence }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: ml-service }
+  template:
+    metadata:
+      labels: { app: ml-service, tier: intelligence }
+    spec:
+      securityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: ml-service
+          image: ghcr.io/baalvion/ml-service:latest
+          ports:
+            - { name: http, containerPort: 8000 }
+          envFrom:
+            - configMapRef: { name: baalvion-common }
+          env:
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: api-secrets, key: database-url } }
+            - name: CLICKHOUSE_URL
+              valueFrom: { secretKeyRef: { name: api-secrets, key: clickhouse-url, optional: true } }
+            - name: ML_SERVICE_SECRET
+              valueFrom: { secretKeyRef: { name: api-secrets, key: ml-service-secret } }
+            - name: MODEL_DIR
+              value: /var/lib/baalvion/models
+          volumeMounts:
+            - { name: models, mountPath: /var/lib/baalvion/models }
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 20
+            periodSeconds: 20
+          resources:
+            requests: { cpu: "500m", memory: 512Mi }
+            limits: { cpu: "2", memory: 2Gi }
+      volumes:
+        - name: models
+          persistentVolumeClaim: { claimName: ml-models }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata: { name: ml-models, namespace: baalvion }
+spec:
+  accessModes: ["ReadWriteMany"]
+  resources: { requests: { storage: 5Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ml-service
+  namespace: baalvion
+  labels: { app: ml-service }
+spec:
+  selector: { app: ml-service }
+  ports:
+    - { name: http, port: 8000, targetPort: http }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: ml-service, namespace: baalvion }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: ml-service }
+  minReplicas: 2
+  maxReplicas: 12
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } }
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: ml-service, namespace: baalvion }
+spec:
+  minAvailable: 1
+  selector: { matchLabels: { app: ml-service } }

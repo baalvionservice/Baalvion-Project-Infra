@@ -1,0 +1,22 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Luxurious law office background",
+      "imageUrl": "https://picsum.photos/seed/law1/1920/1080",
+      "imageHint": "law office luxury"
+    },
+    {
+      "id": "lawyer-avatar",
+      "description": "Professional lawyer headshot",
+      "imageUrl": "https://picsum.photos/seed/lawyer1/400/400",
+      "imageHint": "professional lawyer headshot"
+    },
+    {
+      "id": "scale-icon",
+      "description": "Scales of justice",
+      "imageUrl": "https://picsum.photos/seed/scales/600/400",
+      "imageHint": "scales justice"
+    }
+  ]
+}

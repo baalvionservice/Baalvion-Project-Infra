@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: oauth-service
+  namespace: baalvion
+  labels:
+    app:  oauth-service
+    tier: identity
+spec:
+  selector: { app: oauth-service }
+  ports:
+    - name:       http
+      port:       3023
+      targetPort: 3023
+    - name:       metrics
+      port:       9464
+      targetPort: 9464
+  type: ClusterIP

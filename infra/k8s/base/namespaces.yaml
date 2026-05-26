@@ -1,0 +1,37 @@
+# Control-plane (API, workers, billing) and edge (proxy gateways) are separated
+# so edge clusters can run gateways-only and node pools/policies differ.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: baalvion
+  labels:
+    app.kubernetes.io/part-of: baalvion
+    tier: control-plane
+    istio-injection: enabled            # control-plane services get mTLS sidecars
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/audit: restricted
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: baalvion-edge
+  labels:
+    app.kubernetes.io/part-of: baalvion
+    tier: edge
+    # NO istio-injection: the gateway IS a forward proxy — a sidecar would
+    # intercept/break its upstream tunnels. Gateways are secured by NetworkPolicy
+    # + their own auth/SSRF, not the mesh.
+    pod-security.kubernetes.io/enforce: baseline
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: edge-quota
+  namespace: baalvion-edge
+spec:
+  hard:
+    requests.cpu: "32"
+    requests.memory: 64Gi
+    limits.cpu: "64"
+    limits.memory: 128Gi
+    pods: "500"

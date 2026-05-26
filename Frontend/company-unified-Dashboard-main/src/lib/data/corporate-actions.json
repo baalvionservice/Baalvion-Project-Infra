@@ -1,0 +1,54 @@
+
+{
+  "dueDiligenceItems": [
+    "Financial statement audit (3 years)",
+    "Legal and litigation review",
+    "Intellectual property audit (patents, trademarks)",
+    "Employee contracts and benefits review",
+    "Key customer and supplier contract review",
+    "Technology and cybersecurity assessment",
+    "Real estate and asset appraisal",
+    "Debt and liability analysis",
+    "Compliance and regulatory check",
+    "Market and competitive analysis"
+  ],
+  "activeDeals": [
+    {
+      "id": "deal_1",
+      "name": "Project Eagle - Acquisition of Innovate Solutions",
+      "type": "Acquisition",
+      "stage": "Due Diligence",
+      "value": "25M",
+      "started": "2024-06-15",
+      "close": "2024-09-30",
+      "owner": "Alex Davis"
+    },
+    {
+      "id": "deal_2",
+      "name": "Project Phoenix - Merger with Connecta Inc.",
+      "type": "Merger",
+      "stage": "Valuation",
+      "value": "150M",
+      "started": "2024-05-20",
+      "close": "2024-11-15",
+      "owner": "Priya Sharma"
+    }
+  ],
+  "completedDeals": [
+    {
+      "id": "deal_comp_1",
+      "name": "Acquisition of DataLeap Analytics",
+      "type": "Acquisition",
+      "value": "12.5M",
+      "completed": "2023-12-20",
+      "timeline": [
+        { "date": "2023-09-01", "event": "Initial contact and NDA signed" },
+        { "date": "2023-09-20", "event": "Letter of Intent (LOI) signed" },
+        { "date": "2023-10-05", "event": "Due diligence process started" },
+        { "date": "2023-11-15", "event": "Definitive agreement signed" },
+        { "date": "2023-12-18", "event": "Regulatory approvals received" },
+        { "date": "2023-12-20", "event": "Deal closed and funds transferred" }
+      ]
+    }
+  ]
+}

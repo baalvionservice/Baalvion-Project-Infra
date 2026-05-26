@@ -1,0 +1,15 @@
+{
+  "name": "@baalvion/baalctl",
+  "version": "1.0.0",
+  "description": "Baalvion platform CLI — scaffold services, validate the catalog, inspect the event registry + dependency graph.",
+  "private": true,
+  "type": "module",
+  "bin": { "baalctl": "./baalctl.mjs" },
+  "scripts": {
+    "catalog:validate": "node baalctl.mjs catalog validate",
+    "catalog:list": "node baalctl.mjs catalog list"
+  },
+  "optionalDependencies": {
+    "yaml": "^2.6.0"
+  }
+}

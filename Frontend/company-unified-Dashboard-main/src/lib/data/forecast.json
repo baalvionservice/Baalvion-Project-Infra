@@ -1,0 +1,69 @@
+
+{
+  "revenueForecast": {
+    "historical": [
+      { "month": "Jan '24", "revenue": 8.2 },
+      { "month": "Feb '24", "revenue": 8.5 },
+      { "month": "Mar '24", "revenue": 9.1 },
+      { "month": "Apr '24", "revenue": 9.5 },
+      { "month": "May '24", "revenue": 9.8 },
+      { "month": "Jun '24", "revenue": 10.2 }
+    ],
+    "forecast": [
+      { "month": "Jun '24", "base": 10.2, "low": 10.2, "high": 10.2 },
+      { "month": "Jul '24", "base": 10.5, "low": 10.3, "high": 10.8 },
+      { "month": "Aug '24", "base": 10.9, "low": 10.6, "high": 11.3 },
+      { "month": "Sep '24", "base": 11.3, "low": 10.9, "high": 11.8 },
+      { "month": "Oct '24", "base": 11.8, "low": 11.2, "high": 12.5 },
+      { "month": "Nov '24", "base": 12.2, "low": 11.5, "high": 13.0 },
+      { "month": "Dec '24", "base": 12.8, "low": 12.0, "high": 13.8 }
+    ],
+    "scenarios": {
+      "conservative": 11.5,
+      "baseCase": 12.8,
+      "optimistic": 13.8
+    }
+  },
+  "aiRecommendations": [
+    {
+      "id": "rec_1",
+      "category": "Revenue",
+      "title": "Expand TechCorp India SaaS pricing tiers",
+      "description": "Analysis of user data suggests a segment of power users would be willing to pay for a higher-tier plan with advanced features. Introduce a 'Pro' tier.",
+      "impact": "+₹18 Lakh/month",
+      "confidence": 84
+    },
+    {
+      "id": "rec_2",
+      "category": "Cost",
+      "title": "Consolidate server infrastructure for Baalvion Media UK",
+      "description": "Server usage analysis indicates that migrating from dedicated servers to a scalable cloud solution could reduce monthly hosting costs without impacting performance.",
+      "impact": "-$2,200/month",
+      "confidence": 92
+    },
+    {
+      "id": "rec_3",
+      "category": "Expansion",
+      "title": "Target the Australian market for FinanceHub USA",
+      "description": "Market trend data shows a growing demand for fintech solutions in Australia. A targeted marketing campaign could capture significant market share.",
+      "impact": "+$1.2M revenue/year",
+      "confidence": 75
+    },
+    {
+      "id": "rec_4",
+      "category": "Risk",
+      "title": "Address high customer churn in DigitalAgency SG",
+      "description": "A recent spike in customer churn is correlated with the latest software update. Reviewing user feedback and patching critical bugs should be a priority.",
+      "impact": "Reduce churn by 15%",
+      "confidence": 88
+    },
+    {
+      "id": "rec_5",
+      "category": "Efficiency",
+      "title": "Automate invoice processing for RetailChain UAE",
+      "description": "Implementing an automated invoicing system could save an estimated 40 man-hours per week, reducing operational overhead and minimizing errors.",
+      "impact": "40 hours/week saved",
+      "confidence": 95
+    }
+  ]
+}

@@ -1,0 +1,537 @@
+
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user of the platform, who can be a candidate, a company representative, or an admin.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the user, typically from Firebase Auth."
+        },
+        "name": {
+          "type": "string",
+          "description": "The full name of the user."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "candidate",
+            "admin"
+          ],
+          "description": "The user's global role on the platform. A user's association with a company is managed via Memberships."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the user account was created."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether the user account is active or suspended. Defaults to true."
+        },
+        "isVerified": {
+          "type": "boolean",
+          "description": "Whether the user has verified their email address. Defaults to false."
+        },
+        "profile": {
+          "type": "object",
+          "description": "User's public-facing profile information, primarily for candidates.",
+          "properties": {
+            "avatarUrl": {
+              "type": "string",
+              "format": "uri",
+              "description": "URL for the user's profile picture."
+            },
+            "bio": {
+              "type": "string",
+              "description": "A short biography of the user."
+            },
+            "location": {
+              "type": "string",
+              "description": "The user's general location (e.g., 'San Francisco, CA')."
+            },
+            "experienceLevel": {
+              "type": "string",
+              "enum": [
+                "Beginner",
+                "Intermediate",
+                "Advanced",
+                "Expert"
+              ],
+              "description": "The candidate's self-assessed experience level."
+            },
+            "skills": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "An array of the candidate's skills."
+            },
+            "githubUrl": {
+              "type": "string",
+              "format": "uri",
+              "description": "A link to the user's GitHub profile."
+            },
+            "linkedinUrl": {
+              "type": "string",
+              "format": "uri",
+              "description": "A link to the user's LinkedIn profile."
+            },
+            "portfolioLinks": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "format": "uri"
+              },
+              "description": "An array of links to the user's personal portfolio or projects."
+            }
+          }
+        },
+        "candidatePerformance": {
+          "type": "object",
+          "description": "Aggregated performance metrics for a candidate, updated via background jobs.",
+          "properties": {
+            "completedTasks": {
+              "type": "number",
+              "description": "Total number of tasks completed and evaluated."
+            },
+            "averageScore": {
+              "type": "number",
+              "description": "The candidate's average score across all evaluated submissions."
+            },
+            "ranking": {
+              "type": "number",
+              "description": "The candidate's overall ranking on the platform, recalculated periodically."
+            }
+          }
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "role",
+        "createdAt",
+        "isActive"
+      ]
+    },
+    "Company": {
+      "title": "Company",
+      "description": "Represents a company (tenant) that posts tasks and hires candidates.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the company."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the company."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A unique, URL-friendly slug for the company."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the company."
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "The ID of the user who owns/created the company."
+        },
+        "domains": {
+          "type": "array",
+          "description": "A list of domains and subdomains associated with the company.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "The domain or subdomain name (e.g., 'app.baalvion.com')."
+              },
+              "verified": {
+                "type": "boolean",
+                "description": "Whether the domain ownership has been verified.",
+                "default": false
+              },
+              "purpose": {
+                "type": "string",
+                "description": "The purpose of the domain (e.g., 'Primary Website', 'App Backend', 'Marketing')."
+              }
+            },
+            "required": ["name"]
+          }
+        },
+        "logoUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL for the company's logo."
+        },
+        "industry": {
+          "type": "string",
+          "description": "The industry the company operates in (e.g., 'Technology', 'Finance')."
+        },
+        "size": {
+          "type": "string",
+          "enum": [
+            "small",
+            "medium",
+            "large"
+          ],
+          "description": "The size of the company."
+        },
+        "location": {
+          "type": "string",
+          "description": "The company's primary location (e.g., 'San Francisco, CA')."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the company profile was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the company profile was last updated."
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Whether the company account is active. Defaults to true."
+        },
+        "isVerified": {
+          "type": "boolean",
+          "description": "Whether the company has been verified by an admin. Defaults to false."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "slug",
+        "ownerId",
+        "createdAt",
+        "updatedAt",
+        "isActive"
+      ]
+    },
+    "Membership": {
+      "title": "Company Membership",
+      "description": "Links a user to a company with a specific role, enabling multi-tenancy. This acts as a join table, allowing a single user to be a member of multiple companies with different roles.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who is a member."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "The ID of the company the user belongs to."
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "owner",
+            "admin",
+            "member"
+          ],
+          "description": "The user's role within that specific company."
+        },
+        "joinedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the user joined the company."
+        }
+      },
+      "required": [
+        "userId",
+        "companyId",
+        "role",
+        "joinedAt"
+      ]
+    },
+    "Task": {
+      "title": "Task",
+      "description": "Represents a skill-based task created by a company for candidates to complete.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the task."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the task."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the task."
+        },
+        "roleCategory": {
+          "type": "string",
+          "enum": [
+            "Engineering",
+            "Design",
+            "Marketing",
+            "Business",
+            "Data"
+          ],
+          "description": "The professional vertical the task belongs to."
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": [
+            "Beginner",
+            "Intermediate",
+            "Advanced",
+            "Expert"
+          ],
+          "description": "The difficulty level of the task."
+        },
+        "taskTypes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of types that categorize the task (e.g., 'Coding', 'Design')."
+        },
+        "deadline": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The submission deadline for the task."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "The ID of the company that created the task."
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "The ID of the user who created the task."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "draft",
+            "published",
+            "closed",
+            "archived"
+          ],
+          "description": "The current lifecycle state of the task."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the task was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the task was last updated."
+        }
+      },
+      "required": [
+        "id",
+        "title",
+        "description",
+        "roleCategory",
+        "difficulty",
+        "deadline",
+        "companyId",
+        "createdBy",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Submission": {
+      "title": "Submission",
+      "description": "Represents a candidate's submission for a specific task.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the submission."
+        },
+        "taskId": {
+          "type": "string",
+          "description": "The ID of the task being submitted for."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the candidate who made the submission."
+        },
+        "companyId": {
+          "type": "string",
+          "description": "The ID of the company that owns the task (denormalized for security rules and querying)."
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "assigned",
+            "in-progress",
+            "pending",
+            "in-review",
+            "evaluated",
+            "shortlisted",
+            "rejected"
+          ],
+          "description": "The current lifecycle status of the submission."
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the submission was made."
+        },
+        "lastUpdated": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the submission was last updated."
+        },
+        "content": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "link",
+                "file"
+              ]
+            },
+            "value": {
+              "type": "string",
+              "description": "The URL to the submission content (e.g., GitHub repo, Figma file) or a path to a stored file."
+            }
+          }
+        },
+        "requestedDomains": {
+          "type": "array",
+          "description": "Domains requested by the candidate for this submission, including their access status.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "domainName": {
+                "type": "string",
+                "description": "The domain name requested."
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "pending",
+                  "approved",
+                  "revoked"
+                ],
+                "description": "The status of the access request."
+              },
+              "reason": {
+                "type": "string",
+                "description": "The reason provided by the candidate for the request."
+              }
+            },
+            "required": [
+              "domainName",
+              "status"
+            ]
+          }
+        }
+      },
+      "required": [
+        "id",
+        "taskId",
+        "userId",
+        "companyId",
+        "status",
+        "submittedAt"
+      ]
+    },
+    "Evaluation": {
+      "title": "Evaluation",
+      "description": "Represents a company's evaluation of a candidate's submission.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the evaluation."
+        },
+        "submissionId": {
+          "type": "string",
+          "description": "The ID of the submission being evaluated."
+        },
+        "score": {
+          "type": "number",
+          "description": "The final overall score (0-100) given to the submission."
+        },
+        "feedback": {
+          "type": "string",
+          "description": "Constructive, high-level feedback provided by the evaluator."
+        },
+        "evaluatedBy": {
+          "type": "string",
+          "description": "The ID of the company user who performed the evaluation."
+        },
+        "evaluatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the evaluation was completed."
+        }
+      },
+      "required": [
+        "id",
+        "submissionId",
+        "score",
+        "feedback",
+        "evaluatedBy",
+        "evaluatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "google.com"
+    ]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores individual user profiles for all roles."
+    },
+    "/companies/{companyId}": {
+      "schema": {
+        "$ref": "#/entities/Company"
+      },
+      "description": "Stores company (tenant) profiles."
+    },
+    "/memberships/{membershipId}": {
+      "schema": {
+        "$ref": "#/entities/Membership"
+      },
+      "description": "Stores the many-to-many relationship between users and companies, defining roles within a company."
+    },
+    "/tasks/{taskId}": {
+      "schema": {
+        "$ref": "#/entities/Task"
+      },
+      "description": "Stores all tasks created by companies."
+    },
+    "/submissions/{submissionId}": {
+      "schema": {
+        "$ref": "#/entities/Submission"
+      },
+      "description": "Stores all candidate submissions for tasks."
+    },
+    "/evaluations/{evaluationId}": {
+      "schema": {
+        "$ref": "#/entities/Evaluation"
+      },
+      "description": "Stores evaluation feedback and scores for submissions."
+    }
+  }
+}

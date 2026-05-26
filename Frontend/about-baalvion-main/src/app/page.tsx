@@ -1,0 +1,76 @@
+import type { Metadata } from "next";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import HomePageServer from "@/components/home-page-server";
+import {
+  getHomePageData,
+  getProjects,
+  getEcosystemItems,
+} from "@/lib/server-data";
+
+export const metadata: Metadata = {
+  title: "Baalvion — Global Trade Infrastructure Platform",
+  description:
+    "Baalvion builds global trade infrastructure connecting businesses, finance, compliance, and intelligence into one unified platform.",
+  openGraph: {
+    title: "Baalvion — Global Trade Infrastructure Platform",
+    description:
+      "Baalvion builds global trade infrastructure connecting businesses, finance, compliance, and intelligence into one unified platform.",
+    url: "https://about.baalvion.com",
+    siteName: "Baalvion Operating System (BOS)",
+    images: [
+      {
+        url: "https://picsum.photos/seed/baalvion-home/1200/630",
+        width: 1200,
+        height: 630,
+        alt: "Baalvion Operating System (BOS) Home",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Baalvion — Global Trade Infrastructure Platform",
+    description:
+      "Baalvion builds global trade infrastructure connecting businesses, finance, compliance, and intelligence into one unified platform.",
+    images: ["https://picsum.photos/seed/baalvion-home/1200/630"],
+  },
+};
+
+export default async function BaalvionHomePage() {
+  // Fetch data on the server for SEO optimization
+  const [homePageData, projects, ecoItems] = await Promise.all([
+    getHomePageData(),
+    getProjects(),
+    getEcosystemItems(),
+  ]);
+
+  // Handle error cases gracefully
+  if (!homePageData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Service Temporarily Unavailable
+          </h1>
+          <p className="text-gray-600">
+            The Baalvion Operating System is currently undergoing maintenance.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Navbar />
+      <HomePageServer
+        homePageData={homePageData}
+        projects={projects}
+        ecoItems={ecoItems}
+      />
+      <Footer />
+    </>
+  );
+}

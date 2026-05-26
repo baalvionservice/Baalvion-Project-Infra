@@ -1,0 +1,42 @@
+[
+  {
+    "id": "resolved_1",
+    "field": "Customer Email",
+    "businessId": "biz_4",
+    "resolvedBy": "Alex Davis",
+    "resolvedAt": "2024-07-29T10:05:00Z",
+    "action": "Kept Online Value"
+  },
+  {
+    "id": "resolved_2",
+    "field": "Product Stock",
+    "businessId": "biz_3",
+    "resolvedBy": "System (Auto-merge)",
+    "resolvedAt": "2024-07-29T08:30:00Z",
+    "action": "Merged"
+  },
+  {
+    "id": "resolved_3",
+    "field": "Employee Role",
+    "businessId": "biz_1",
+    "resolvedBy": "Priya Sharma",
+    "resolvedAt": "2024-07-28T15:20:00Z",
+    "action": "Kept Offline Value"
+  },
+  {
+    "id": "resolved_4",
+    "field": "Transaction Amount",
+    "businessId": "biz_2",
+    "resolvedBy": "Alex Davis",
+    "resolvedAt": "2024-07-28T11:00:00Z",
+    "action": "Kept Online Value"
+  },
+  {
+    "id": "resolved_5",
+    "field": "Domain Expiry",
+    "businessId": "biz_5",
+    "resolvedBy": "System (Auto-sync)",
+    "resolvedAt": "2024-07-27T23:00:00Z",
+    "action": "Kept Online Value"
+  }
+]

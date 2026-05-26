@@ -1,0 +1,35 @@
+module.exports = function (sequelize, DataTypes) {
+    return sequelize.define('brand_profiles', {
+        id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
+        user_id: { type: DataTypes.BIGINT, allowNull: false },
+        org_id: { type: DataTypes.UUID, allowNull: false },
+        brand_name: { type: DataTypes.STRING(255), allowNull: false },
+        tagline: { type: DataTypes.TEXT, allowNull: true },
+        description: { type: DataTypes.TEXT, allowNull: true },
+        logo_url: { type: DataTypes.TEXT, allowNull: true },
+        website_url: { type: DataTypes.TEXT, allowNull: true },
+        industry: { type: DataTypes.STRING(100), allowNull: true },
+        categories: { type: DataTypes.JSONB, defaultValue: [] },
+        target_audience: { type: DataTypes.TEXT, allowNull: true },
+        budget_range_min: { type: DataTypes.BIGINT, allowNull: true },
+        budget_range_max: { type: DataTypes.BIGINT, allowNull: true },
+        currency: { type: DataTypes.STRING(10), defaultValue: 'INR' },
+        social_links: { type: DataTypes.JSONB, defaultValue: {} },
+        verified: { type: DataTypes.BOOLEAN, defaultValue: false },
+        status: { type: DataTypes.STRING(32), defaultValue: 'active' },
+        followers_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+        campaigns_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+        total_spent: { type: DataTypes.BIGINT, defaultValue: 0 },
+    }, {
+        tableName: 'brand_profiles',
+        schema: 'brand',
+        timestamps: true,
+        underscored: true,
+        indexes: [
+            { fields: ['user_id'] },
+            { fields: ['org_id'] },
+            { fields: ['status'] },
+            { fields: ['industry'] },
+        ],
+    });
+};

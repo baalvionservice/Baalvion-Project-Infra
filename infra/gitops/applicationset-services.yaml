@@ -1,0 +1,58 @@
+# ArgoCD ApplicationSet — generates one Application per service in the catalog.
+# The service catalog (catalog/services/*.yaml) is the SINGLE source of truth:
+# adding a descriptor + merging to main provisions the deployment automatically
+# (GitOps). Each app deploys the standard baalvion-service Helm chart with the
+# service's values file. Sync waves order tier-0 (identity/gateway) first.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: baalvion-services
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/baalvion/baalvion-platform.git
+        revision: main
+        files:
+          - path: "catalog/services/*.yaml"
+  template:
+    metadata:
+      name: "{{ .metadata.name }}"
+      labels:
+        baalvion.io/division: "{{ .metadata.division }}"
+        baalvion.io/tier: "{{ .metadata.tier }}"
+      annotations:
+        # tier-0 syncs first (wave 0), tier-1 wave 1, etc.
+        argocd.argoproj.io/sync-wave: "{{ trimPrefix `tier-` .metadata.tier }}"
+    spec:
+      project: baalvion
+      source:
+        repoURL: https://github.com/baalvion/baalvion-platform.git
+        targetRevision: main
+        path: infra/helm/baalvion-service
+        helm:
+          releaseName: "{{ .metadata.name }}"
+          valueFiles:
+            - "values-{{ .metadata.name }}.yaml"
+          parameters:
+            - name: namespace
+              value: "{{ .spec.deploy.namespace }}"
+            - name: division
+              value: "{{ .metadata.division }}"
+            - name: tier
+              value: "{{ .metadata.tier }}"
+            - name: replicas.min
+              value: "{{ .spec.deploy.minReplicas }}"
+            - name: replicas.max
+              value: "{{ .spec.deploy.maxReplicas }}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ .spec.deploy.namespace }}"
+      syncPolicy:
+        automated: { prune: true, selfHeal: true }
+        syncOptions: ["CreateNamespace=true", "ApplyOutOfSyncOnly=true"]
+        retry:
+          limit: 5
+          backoff: { duration: 10s, factor: 2, maxDuration: 3m }

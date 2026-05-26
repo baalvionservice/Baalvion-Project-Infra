@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/provider.health.changed.v1.json",
+  "title": "ProviderHealthChanged",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "provider.health.changed" },
+    "payload": {
+      "type": "object",
+      "required": ["provider", "previousState", "newState", "successRate", "banRate", "latencyMs"],
+      "additionalProperties": false,
+      "properties": {
+        "provider": { "type": "string" },
+        "previousState": { "type": "string" },
+        "newState": { "type": "string" },
+        "successRate": { "type": "number" },
+        "banRate": { "type": "number" },
+        "latencyMs": { "type": "number" },
+        "region": { "type": "string" }
+      }
+    }
+  }
+}

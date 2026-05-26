@@ -1,0 +1,125 @@
+groups:
+  - name: baalvion.identity
+    interval: 30s
+    rules:
+
+      # ── Auth service availability ────────────────────────────────────────
+      - alert: AuthServiceDown
+        expr: up{job="auth-service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team:     platform
+        annotations:
+          summary:     "Auth service is down"
+          description: "The auth-service has been unreachable for more than 1 minute."
+          runbook:     "https://internal.baalvion.com/runbooks/auth-service-down"
+
+      # ── High error rate ──────────────────────────────────────────────────
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(baalvion_http_requests_total{status=~"5.."}[5m])) by (service)
+          /
+          sum(rate(baalvion_http_requests_total[5m])) by (service) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary:     "High error rate on {{ $labels.service }}"
+          description: "{{ $labels.service }} is returning >5% 5xx errors (current: {{ $value | humanizePercentage }})"
+
+      # ── Login failure spike ──────────────────────────────────────────────
+      - alert: LoginFailureSpike
+        expr: |
+          increase(baalvion_auth_login_failures_total[5m]) > 100
+        for: 2m
+        labels:
+          severity: warning
+          team:     security
+        annotations:
+          summary:     "Login failure spike detected"
+          description: "More than 100 login failures in the last 5 minutes — possible brute-force attack."
+
+      # ── Impossible travel alerts ─────────────────────────────────────────
+      - alert: ImpossibleTravelDetected
+        expr: increase(baalvion_session_risk_signals_total{signal="impossible_travel"}[5m]) > 5
+        for: 0m
+        labels:
+          severity: warning
+          team:     security
+        annotations:
+          summary:     "Multiple impossible travel events"
+          description: "{{ $value }} impossible travel events detected in 5 minutes."
+
+      # ── Token abuse ──────────────────────────────────────────────────────
+      - alert: HighTokenRevocationRate
+        expr: increase(baalvion_auth_token_revocations_total[10m]) > 50
+        for: 2m
+        labels:
+          severity: warning
+          team:     security
+        annotations:
+          summary:     "High token revocation rate"
+          description: "Unusually high number of token revocations — possible credential compromise."
+
+      # ── Slow request latency ─────────────────────────────────────────────
+      - alert: SlowAuthRequests
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(baalvion_http_request_duration_ms_bucket{service="auth-service"}[5m])) by (le, route)
+          ) > 2000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary:     "Slow auth requests on {{ $labels.route }}"
+          description: "p95 latency on {{ $labels.route }} is {{ $value }}ms (threshold: 2000ms)"
+
+      # ── Redis unavailable ─────────────────────────────────────────────────
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis is down"
+          description: "Redis has been unreachable for more than 1 minute. Auth and session services degraded."
+
+      # ── Email queue backlog ───────────────────────────────────────────────
+      - alert: EmailQueueBacklog
+        expr: bullmq_queue_waiting_total{queue="baalvion:queue:email"} > 500
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary:     "Email queue backlog growing"
+          description: "Email queue has {{ $value }} waiting jobs — workers may be overwhelmed."
+
+      # ── Postgres connection exhaustion ────────────────────────────────────
+      - alert: PostgresConnectionNearLimit
+        expr: |
+          pg_stat_database_numbackends{datname="baalvion_db"}
+          / pg_settings_max_connections > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary:     "PostgreSQL connections near limit"
+          description: "Database is using {{ $value | humanizePercentage }} of max connections."
+
+  - name: baalvion.slo
+    rules:
+      # SLO: auth-service availability > 99.9%
+      - record: slo:auth_availability:ratio_rate5m
+        expr: |
+          sum(rate(baalvion_http_requests_total{service="auth-service",status!~"5.."}[5m]))
+          / sum(rate(baalvion_http_requests_total{service="auth-service"}[5m]))
+
+      - alert: AuthSLOBreach
+        expr: slo:auth_availability:ratio_rate5m < 0.999
+        for: 10m
+        labels:
+          severity: critical
+          slo:      auth-availability
+        annotations:
+          summary: "Auth service SLO breach (availability < 99.9%)"

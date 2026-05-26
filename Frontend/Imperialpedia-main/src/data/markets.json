@@ -1,0 +1,17 @@
+[
+  {
+    "id": "market-1",
+    "name": "Artificial Intelligence Market",
+    "slug": "ai-market",
+    "type": "market",
+    "description": "The global market for AI hardware, software, and services.",
+    "industry": "technology",
+    "market_size": "$500B",
+    "growth_rate": "37%",
+    "key_companies": ["nvidia", "microsoft", "google"],
+    "regions": ["north-america", "asia-pacific", "europe"],
+    "tags": ["growth", "innovation", "investing"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

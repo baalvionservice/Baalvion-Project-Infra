@@ -1,0 +1,6 @@
+
+[
+  { "id": 1, "name": "Deepak", "role": "Founder", "equity_percentage": 40 },
+  { "id": 2, "name": "Co-Founder", "role": "CEO", "equity_percentage": 30 },
+  { "id": 3, "name": "Investor", "role": "Investor", "equity_percentage": 30 }
+]

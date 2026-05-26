@@ -1,0 +1,160 @@
+groups:
+  - name: baalvion_slo
+    interval: 30s
+    rules:
+
+      # -----------------------------------------------------------------------
+      # Auth Service SLO: >= 99.5% success rate over a 5-minute window
+      #
+      # Fires when the error rate on /v1/auth/* routes exceeds 0.5%.
+      # Source metric: http_requests_total (labels: method, route, status_code)
+      # from proxy-backend's metricsMiddleware.
+      # -----------------------------------------------------------------------
+      - alert: AuthServiceErrorRateTooHigh
+        expr: |
+          (
+            sum(rate(http_requests_total{route=~"/v1/auth.*", status_code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{route=~"/v1/auth.*"}[5m]))
+          ) > 0.005
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          slo: auth_availability
+        annotations:
+          summary: "Auth service error rate exceeds SLO (99.5% availability)"
+          description: >
+            The 5-minute error rate on auth routes is {{ $value | humanizePercentage }},
+            which breaches the 99.5% availability SLO.
+            Investigate proxy-backend logs and the upstream auth-service.
+          runbook_url: "https://wiki.baalvion.internal/runbooks/auth-error-rate"
+
+      # -----------------------------------------------------------------------
+      # API Latency SLO: p95 response time < 500 ms over a 5-minute window
+      #
+      # histogram_quantile requires the _bucket series produced by
+      # httpRequestDuration (Histogram) in metricsMiddleware.
+      # -----------------------------------------------------------------------
+      - alert: APILatencyP95High
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, route)
+          ) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+          team: platform
+          slo: api_latency
+        annotations:
+          summary: "p95 API latency exceeds 500 ms SLO"
+          description: >
+            The 95th-percentile response time for route {{ $labels.route }} is
+            {{ $value | humanizeDuration }}, which exceeds the 500 ms latency SLO.
+            Check for slow DB queries, upstream service degradation, or resource contention.
+          runbook_url: "https://wiki.baalvion.internal/runbooks/api-latency"
+
+      # -----------------------------------------------------------------------
+      # API Latency SLO (aggregate): p95 across all routes
+      # -----------------------------------------------------------------------
+      - alert: APILatencyP95HighAggregate
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le)
+          ) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+          team: platform
+          slo: api_latency_aggregate
+        annotations:
+          summary: "Aggregate p95 API latency exceeds 500 ms SLO"
+          description: >
+            Aggregate p95 response time across all routes is {{ $value | humanizeDuration }}.
+            At least one high-traffic route is likely the culprit — check
+            APILatencyP95High for per-route detail.
+          runbook_url: "https://wiki.baalvion.internal/runbooks/api-latency"
+
+      # -----------------------------------------------------------------------
+      # Realtime Connections Drop
+      #
+      # Fires when the number of active WebSocket / Socket.IO connections falls
+      # by more than 30% within a 5-minute window, suggesting a crash or
+      # mass-disconnect event.
+      #
+      # Relies on:
+      #   - http_active_connections gauge from metricsMiddleware, AND / OR
+      #   - realtime_active_connections gauge exported by the realtime-service
+      #     (socket.io metrics, if instrumented separately).
+      # -----------------------------------------------------------------------
+      - alert: RealtimeConnectionsDrop
+        expr: |
+          (
+            http_active_connections
+            - http_active_connections offset 5m
+          ) / (http_active_connections offset 5m + 1) < -0.3
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          slo: realtime_availability
+        annotations:
+          summary: "Realtime active connections dropped by >30% in 5 minutes"
+          description: >
+            Active HTTP/WS connection count dropped by
+            {{ $value | humanizePercentage }} over the last 5 minutes.
+            This may indicate a proxy-backend crash, a Redis disconnect, or a
+            Socket.IO namespace error.
+          runbook_url: "https://wiki.baalvion.internal/runbooks/realtime-drop"
+
+      # -----------------------------------------------------------------------
+      # Realtime Connections Drop (realtime-service native gauge)
+      #
+      # If the realtime-service exports its own gauge named
+      # realtime_active_connections, this rule provides dedicated alerting
+      # for that signal.
+      # -----------------------------------------------------------------------
+      - alert: RealtimeServiceConnectionsDrop
+        expr: |
+          (
+            realtime_active_connections
+            - realtime_active_connections offset 5m
+          ) / (realtime_active_connections offset 5m + 1) < -0.3
+        for: 2m
+        labels:
+          severity: critical
+          team: platform
+          slo: realtime_availability
+        annotations:
+          summary: "Realtime-service active connections dropped by >30% in 5 minutes"
+          description: >
+            realtime_active_connections fell by
+            {{ $value | humanizePercentage }} in 5 minutes.
+            Check the realtime-service logs and its Redis / Socket.IO state.
+          runbook_url: "https://wiki.baalvion.internal/runbooks/realtime-drop"
+
+      # -----------------------------------------------------------------------
+      # BullMQ — failed job rate (proxy-backend workers)
+      #
+      # Bonus rule: alert when the job failure rate across any queue is high.
+      # Relies on bullmq_job_duration_seconds or similar if you add BullMQ
+      # OpenTelemetry instrumentation in the future.
+      # -----------------------------------------------------------------------
+      - alert: WorkerJobFailureRateHigh
+        expr: |
+          (
+            sum(rate(http_requests_total{route="/internal/worker-health", status_code=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{route="/internal/worker-health"}[5m]) + 1)
+          ) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          team: platform
+        annotations:
+          summary: "BullMQ worker health endpoint showing elevated failures"
+          description: >
+            More than 10% of worker health checks are failing.
+            Inspect notificationWorker / emailWorker logs and the Redis connection.

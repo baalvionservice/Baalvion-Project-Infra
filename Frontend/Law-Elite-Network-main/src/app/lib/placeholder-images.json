@@ -1,0 +1,29 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Luxurious law office background with a view",
+      "imageUrl": "https://picsum.photos/seed/elite-law-1/1920/1080",
+      "imageHint": "luxury office"
+    },
+    {
+      "id": "lawyer-avatar",
+      "description": "Professional headshot of a distinguished attorney",
+      "imageUrl": "https://picsum.photos/seed/practitioner-1/400/400",
+      "imageHint": "lawyer portrait"
+    },
+    {
+      "id": "scale-icon",
+      "description": "Polished scales of justice symbol",
+      "imageUrl": "https://picsum.photos/seed/justice-scales/600/400",
+      "imageHint": "justice scales"
+    },
+    {
+      "id": "dashboard-banner",
+      "description": "Abstract professional networking background",
+      "imageUrl": "https://picsum.photos/seed/network-dash/1200/400",
+      "imageHint": "abstract tech"
+    }
+  ]
+}

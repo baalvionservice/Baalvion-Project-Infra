@@ -1,0 +1,32 @@
+[
+  {
+    "country": "India",
+    "provider": "AWS Mumbai",
+    "cost": 2400,
+    "services": "EC2, RDS, S3"
+  },
+  {
+    "country": "United Kingdom",
+    "provider": "AWS London",
+    "cost": 1800,
+    "services": "EC2, RDS"
+  },
+  {
+    "country": "UAE",
+    "provider": "AWS Bahrain",
+    "cost": 1200,
+    "services": "EC2"
+  },
+  {
+    "country": "USA",
+    "provider": "AWS N.Virginia",
+    "cost": 3100,
+    "services": "EC2, Lambda, RDS"
+  },
+  {
+    "country": "Singapore",
+    "provider": "AWS Singapore",
+    "cost": 890,
+    "services": "EC2"
+  }
+]

@@ -1,0 +1,18 @@
+{
+  "todaysRevenue": 8320,
+  "walkInCustomers": 164,
+  "avgTransaction": 50.73,
+  "topStore": {
+    "name": "Dubai Mall",
+    "business": "RetailChain UAE"
+  },
+  "revenueLast7Days": [
+    { "day": "Mon", "revenue": 7100 },
+    { "day": "Tue", "revenue": 6800 },
+    { "day": "Wed", "revenue": 7500 },
+    { "day": "Thu", "revenue": 8100 },
+    { "day": "Fri", "revenue": 9200 },
+    { "day": "Sat", "revenue": 10500 },
+    { "day": "Sun", "revenue": 8320 }
+  ]
+}

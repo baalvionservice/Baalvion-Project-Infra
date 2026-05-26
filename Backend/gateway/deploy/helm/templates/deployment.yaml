@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-gateway
+  labels: { app: {{ .Release.Name }}-gateway }
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels: { app: {{ .Release.Name }}-gateway }
+  template:
+    metadata:
+      labels: { app: {{ .Release.Name }}-gateway }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "{{ .Values.ports.metrics }}"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+      containers:
+        - name: gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - { containerPort: {{ .Values.ports.http }} }
+            - { containerPort: {{ .Values.ports.socks }} }
+            - { containerPort: {{ .Values.ports.metrics }} }
+          env:
+            - { name: LISTEN_HTTP, value: ":{{ .Values.ports.http }}" }
+            - { name: LISTEN_SOCKS, value: ":{{ .Values.ports.socks }}" }
+            - { name: LISTEN_METRICS, value: ":{{ .Values.ports.metrics }}" }
+            - { name: USAGE_STREAM, value: "{{ .Values.config.usageStream }}" }
+            - { name: SESSION_TTL_SECONDS, value: "{{ .Values.config.sessionTtlSeconds }}" }
+            - { name: ALLOW_DIRECT, value: "{{ .Values.config.allowDirect }}" }
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: {{ .Release.Name }}-gateway-secrets, key: database-url } }
+            - name: REDIS_URL
+              valueFrom: { secretKeyRef: { name: {{ .Release.Name }}-gateway-secrets, key: redis-url } }
+            - name: PROVIDERS_JSON
+              valueFrom: { secretKeyRef: { name: {{ .Release.Name }}-gateway-secrets, key: providers-json } }
+          resources: {{ toYaml .Values.resources | nindent 12 }}
+          readinessProbe:
+            httpGet: { path: /readyz, port: {{ .Values.ports.metrics }} }
+          livenessProbe:
+            httpGet: { path: /healthz, port: {{ .Values.ports.metrics }} }
+      terminationGracePeriodSeconds: 40

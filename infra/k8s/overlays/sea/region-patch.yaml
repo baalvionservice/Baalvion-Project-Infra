@@ -1,0 +1,33 @@
+# ap-southeast-1 (Singapore): SEA hub — serves SG/ID/TH/VN/MY edge traffic.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+spec:
+  replicas: 3
+  template:
+    spec:
+      nodeSelector:
+        workload: edge
+        topology.kubernetes.io/region: ap-southeast-1
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+spec:
+  minReplicas: 3
+  maxReplicas: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: baalvion
+spec:
+  template:
+    spec:
+      nodeSelector:
+        topology.kubernetes.io/region: ap-southeast-1

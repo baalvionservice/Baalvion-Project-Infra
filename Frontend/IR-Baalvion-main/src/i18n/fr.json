@@ -1,0 +1,44 @@
+{
+  "common": {
+    "portal": "Portail Investisseur",
+    "sign_out": "Déconnexion",
+    "view": "Voir",
+    "download": "Télécharger",
+    "actions": "Actions",
+    "status": "Statut",
+    "date": "Date"
+  },
+  "dashboard": {
+    "title": "Commandement Unifié du Portefeuille",
+    "subtitle": "Gestion consolidée du cycle de vie du capital et analyse de performance.",
+    "metrics": {
+      "net_irr": "TRI Net",
+      "tvpi": "TVPI",
+      "dpi": "DPI",
+      "nav": "VNI Actuelle",
+      "deployed": "Capital Déployé",
+      "liquidity": "Réserve de Liquidité"
+    },
+    "charts": {
+      "nav_growth": "Historique de Croissance de la VNI",
+      "nav_desc": "Valeur de marché consolidée de tous les actifs sous-jacents.",
+      "capital_lifecycle": "Chronologie du Cycle de Vie du Capital",
+      "capital_desc": "Analyse trimestrielle du capital appelé par rapport aux distributions réalisées.",
+      "called": "Capital Appelé",
+      "distributed": "Distributions"
+    },
+    "table": {
+      "title": "Performance des Actifs Stratégiques",
+      "asset": "Actif Stratégique",
+      "deployed": "Capital Déployé",
+      "market_value": "Valeur de Marché",
+      "roi": "ROI Brut"
+    }
+  },
+  "roles": {
+    "admin": "Super Admin (GP)",
+    "investor": "Investisseur Principal (LP)",
+    "compliance": "Responsable de la Conformité",
+    "public": "Visiteur"
+  }
+}

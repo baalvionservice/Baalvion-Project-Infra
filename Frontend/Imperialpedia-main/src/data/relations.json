@@ -1,0 +1,22 @@
+[
+  {
+    "source_id": "comp-1",
+    "target_id": "ind-1",
+    "relation_type": "COMPANY_INDUSTRY"
+  },
+  {
+    "source_id": "comp-1",
+    "target_id": "country-1",
+    "relation_type": "COMPANY_COUNTRY"
+  },
+  {
+    "source_id": "comp-1",
+    "target_id": "tech-1",
+    "relation_type": "COMPANY_TECHNOLOGY"
+  },
+  {
+    "source_id": "tech-1",
+    "target_id": "ind-1",
+    "relation_type": "TECHNOLOGY_INDUSTRY"
+  }
+]

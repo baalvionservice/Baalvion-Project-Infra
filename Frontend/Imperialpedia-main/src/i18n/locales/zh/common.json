@@ -1,0 +1,94 @@
+{
+  "hero": {
+    "badge": "Alpha 索引节点已激活",
+    "title": "全球人工智能知识基础设施",
+    "subtitle": "利用结构化全球数据即时研究任何内容。探索超过 100 万个可索引节点。",
+    "cta": "加入候补名单",
+    "secondary_cta": "早期访问"
+  },
+  "nav": {
+    "home": "首页",
+    "news": "新闻",
+    "about": "关于我们",
+    "discovery": "探索",
+    "tools": "工具",
+    "community": "社区",
+    "company": "公司",
+    "main_navigation": "主导航",
+    "discovery_research": "探索与研究",
+    "tools_resources": "工具与资源",
+    "community_learning": "社区与学习",
+    "company_legal": "公司与法律",
+    "settings": "设置",
+    "countries": "国家",
+    "companies": "公司",
+    "industries": "行业",
+    "technologies": "技术",
+    "stocks": "股票",
+    "brokers": "经纪商",
+    "financial_tools": "金融工具",
+    "ai_analyst": "AI分析师",
+    "research_ai": "研究AI",
+    "calculators": "计算器",
+    "datasets": "数据集",
+    "glossary": "词汇表",
+    "creators": "创作者",
+    "learning_paths": "学习路径",
+    "knowledge_map": "知识地图",
+    "articles": "文章",
+    "topics": "主题",
+    "pricing": "定价",
+    "contact": "联系我们",
+    "experts": "专家",
+    "transparency": "透明度",
+    "privacy_policy": "隐私政策",
+    "terms_of_service": "服务条款"
+  },
+  "features": {
+    "label": "核心能力",
+    "title": "为什么选择 Imperialpedia？",
+    "subtitle": "我们为金融情报的未来提供建筑基础。",
+    "ai_engine": "人工智能知识引擎",
+    "ai_engine_desc": "从全球数百万个数据点实时合成的即时结构化洞察。",
+    "datasets": "全球数据集",
+    "datasets_desc": "访问涵盖国家、公司、行业和技术的数百万个实体。",
+    "assistant": "研究助手",
+    "assistant_desc": "人工智能驱动的报告和摘要触手可及。大规模的高保真研究。",
+    "api": "企业级 API",
+    "api_desc": "将我们的结构化知识图谱直接连接到您的机构应用程序。"
+  },
+  "faq": {
+    "label": "信息分选",
+    "title": "常见问题解答",
+    "subtitle": "关于全球最具扩展性的情报基础设施，您需要了解的一切。",
+    "support_title": "还有疑问吗？",
+    "support_desc": "我们的人工智能研究助手可以提供关于我们路线图的更深层背景。",
+    "support_button": "咨询分析师中心"
+  },
+  "pricing": {
+    "label": "投资矩阵",
+    "title": "情报计划",
+    "subtitle": "选择符合您研究发现目标的层级。",
+    "disclaimer": "需要自定义 SLA 的机构节点应直接联系治理支持团队。"
+  },
+  "cta": {
+    "label": "最终发现握手",
+    "title": "准备好审计全球经济了吗？",
+    "subtitle": "加入我们的机构分析师和专家研究员网络。立即在索引中锁定您的节点。",
+    "button": "锁定我的位置"
+  },
+  "waitlist": {
+    "input_placeholder": "机构电子邮件...",
+    "submit_button": "加入矩阵",
+    "caption": "加入 142,000 多名接收高保真情报节点的分析师行列。",
+    "error_required": "电子邮件是必填项。",
+    "error_invalid": "检测到无效的电子邮件节点。"
+  },
+  "footer": {
+    "description": "全球最具扩展性的人工智能驱动金融情报引擎。对 1,000,000 多个节点进行深入研究。",
+    "stay_synced": "保持同步",
+    "sync_desc": "订阅 Intelligence Wire，获取实时市场审计和 pSEO 警报。",
+    "copyright": "© {{year}} Imperialpedia。人工智能知识基础设施。",
+    "enc_status": "数据传输已加密"
+  }
+}

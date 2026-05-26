@@ -1,0 +1,42 @@
+# Copy to terraform.tfvars (never commit that file) and fill in real values
+project     = "baalvion"
+environment = "staging"   # or "production"
+region      = "ap-south-1"
+
+# Kubernetes
+k8s_version        = "1.31"
+node_pool_min      = 2
+node_pool_max      = 6
+node_instance_type = "t3.medium"
+
+# PostgreSQL — pass db_password via TF_VAR_db_password env var instead
+db_instance_class = "db.t3.small"
+db_name           = "baalvion_db"
+db_username       = "baalvion"
+db_storage_gb     = 20
+db_multi_az       = false   # set true in production
+
+# Redis — pass redis_auth_token via TF_VAR_redis_auth_token env var
+redis_node_type = "cache.t3.micro"
+
+# Networking
+vpc_cidr             = "10.0.0.0/16"
+availability_zones   = ["ap-south-1a", "ap-south-1b"]
+public_subnet_cidrs  = ["10.0.1.0/24", "10.0.2.0/24"]
+private_subnet_cidrs = ["10.0.10.0/24", "10.0.11.0/24"]
+
+alert_email = "infra.baalvion@gmail.com"
+
+# ── Global edge network (Anycast + GeoDNS) ──────────────────────────────────────
+# Leave edge_regions = [] (default) until per-region gateway NLBs exist; then add
+# one entry per region with its NLB ARN + DNS name. Exactly one is_default = true.
+proxy_dns_zone        = "proxy.baalvion.com"
+create_proxy_dns_zone = false
+gateway_port          = 8080
+
+# edge_regions = [
+#   { key = "india",   aws_region = "ap-south-1",     endpoint_arn = "arn:aws:elasticloadbalancing:ap-south-1:ACCT:loadbalancer/net/gw/abc",     endpoint_dns = "gw-india.elb.ap-south-1.amazonaws.com",     continents = ["AS"], is_default = true },
+#   { key = "us-east", aws_region = "us-east-1",      endpoint_arn = "arn:aws:elasticloadbalancing:us-east-1:ACCT:loadbalancer/net/gw/def",      endpoint_dns = "gw-use1.elb.us-east-1.amazonaws.com",       continents = ["NA", "SA"] },
+#   { key = "eu",      aws_region = "eu-west-1",      endpoint_arn = "arn:aws:elasticloadbalancing:eu-west-1:ACCT:loadbalancer/net/gw/ghi",      endpoint_dns = "gw-euw1.elb.eu-west-1.amazonaws.com",       continents = ["EU", "AF"] },
+#   { key = "sea",     aws_region = "ap-southeast-1", endpoint_arn = "arn:aws:elasticloadbalancing:ap-southeast-1:ACCT:loadbalancer/net/gw/jkl", endpoint_dns = "gw-apse1.elb.ap-southeast-1.amazonaws.com", continents = ["OC"] },
+# ]

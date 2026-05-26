@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/billing.invoice.generated.v1.json",
+  "title": "BillingInvoiceGenerated",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "billing.invoice.generated" },
+    "payload": {
+      "type": "object",
+      "required": ["invoiceId", "orgId", "periodStart", "periodEnd", "totalGb", "amount", "currency", "signature"],
+      "additionalProperties": false,
+      "properties": {
+        "invoiceId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "periodStart": { "type": "string", "format": "date-time" },
+        "periodEnd": { "type": "string", "format": "date-time" },
+        "totalGb": { "type": "number", "minimum": 0 },
+        "amount": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 3, "maxLength": 3 },
+        "signature": { "type": "string" }
+      }
+    }
+  }
+}

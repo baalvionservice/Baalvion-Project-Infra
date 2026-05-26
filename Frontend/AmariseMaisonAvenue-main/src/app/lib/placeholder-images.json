@@ -1,0 +1,106 @@
+{
+  "placeholderImages": [
+    {
+      "id": "home-hero-banner-main",
+      "description": "Maison Amarisé Primary Heritage Banner",
+      "imageUrl": "https://picsum.photos/seed/amarise-hero/1600/800",
+      "imageHint": "luxury banner"
+    },
+    {
+      "id": "madave-live-section",
+      "description": "MadAve Live Handbag Archive",
+      "imageUrl": "https://picsum.photos/seed/amarise-live/1200/800",
+      "imageHint": "luxury handbags"
+    },
+    {
+      "id": "home-authenticity-banner",
+      "description": "Authenticity Guarantee Visual",
+      "imageUrl": "https://picsum.photos/seed/amarise-auth/720/480",
+      "imageHint": "luxury bag"
+    },
+    {
+      "id": "home-mission-banner",
+      "description": "Maison Mission Statement Visual",
+      "imageUrl": "https://picsum.photos/seed/amarise-mission/1200/800",
+      "imageHint": "luxury fashion"
+    },
+    {
+      "id": "home-grid-spring",
+      "description": "Spring Edit Curatorial Block",
+      "imageUrl": "https://picsum.photos/seed/amarise-spring/800/1000",
+      "imageHint": "luxury bags"
+    },
+    {
+      "id": "home-grid-arrivals",
+      "description": "New Arrivals Curatorial Block",
+      "imageUrl": "https://picsum.photos/seed/amarise-arrivals/800/1000",
+      "imageHint": "hermes collection"
+    },
+    {
+      "id": "home-grid-visit",
+      "description": "Visit Us Curatorial Block",
+      "imageUrl": "https://picsum.photos/seed/amarise-visit/800/1000",
+      "imageHint": "luxury boutique"
+    },
+    {
+      "id": "home-info-auth",
+      "description": "Informational Grid: Authenticity",
+      "imageUrl": "https://picsum.photos/seed/amarise-info-auth/800/600",
+      "imageHint": "hermes boxes"
+    },
+    {
+      "id": "home-info-sell",
+      "description": "Informational Grid: Sell To Us",
+      "imageUrl": "https://picsum.photos/seed/amarise-info-sell/800/600",
+      "imageHint": "exotic bags"
+    },
+    {
+      "id": "home-info-showrooms",
+      "description": "Informational Grid: Showrooms",
+      "imageUrl": "https://picsum.photos/seed/amarise-info-showrooms/800/600",
+      "imageHint": "luxury interior"
+    },
+    {
+      "id": "maison-popup-invitation",
+      "description": "Private Invitation Popup Visual",
+      "imageUrl": "https://picsum.photos/seed/amarise-invitation/1200/1500",
+      "imageHint": "luxury fashion"
+    },
+    {
+      "id": "product-luxury-default",
+      "description": "Default High-Fidelity Product Placeholder",
+      "imageUrl": "https://picsum.photos/seed/amarise-artifact/800/1000",
+      "imageHint": "luxury artifact"
+    },
+    {
+      "id": "mega-new-arrivals",
+      "description": "New Arrivals Mega Menu Image",
+      "imageUrl": "https://picsum.photos/seed/amarise-mega-new/1000/600",
+      "imageHint": "luxury bags"
+    },
+    {
+      "id": "mega-hermes",
+      "description": "Hermes Mega Menu Image",
+      "imageUrl": "https://picsum.photos/seed/amarise-mega-hermes/1000/600",
+      "imageHint": "hermes collection"
+    },
+    {
+      "id": "mega-chanel",
+      "description": "Chanel Mega Menu Image",
+      "imageUrl": "https://picsum.photos/seed/amarise-mega-chanel/1000/600",
+      "imageHint": "chanel collection"
+    },
+    {
+      "id": "mega-goyard",
+      "description": "Goyard Mega Menu Image",
+      "imageUrl": "https://picsum.photos/seed/amarise-mega-goyard/1000/600",
+      "imageHint": "goyard bags"
+    },
+    {
+      "id": "mega-jewelry",
+      "description": "Jewelry Mega Menu Image",
+      "imageUrl": "https://picsum.photos/seed/amarise-mega-jewelry/1000/600",
+      "imageHint": "luxury jewelry"
+    }
+  ]
+}

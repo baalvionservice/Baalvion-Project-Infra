@@ -1,0 +1,11 @@
+'use strict';
+const router = require('express').Router();
+router.use('/minerals', require('./listingsRoutes'));
+router.use('/rfq', require('./rfqRoutes'));
+router.use('/orders', require('./ordersRoutes'));
+router.use('/logistics', require('./logisticsRoutes'));
+router.use('/warehouses', require('./warehouseRoutes'));
+router.use('/disputes', require('./disputeRoutes'));
+router.use('/verification', require('./verificationRoutes'));
+router.use('/analytics', require('./analyticsRoutes'));
+module.exports = router;

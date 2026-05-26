@@ -1,0 +1,30 @@
+[
+  {
+    "id": "dist_1",
+    "date": "2026-02-25",
+    "total_profit": 15000,
+    "retention_percentage": 20,
+    "retained_amount": 3000,
+    "distributed_amount": 12000,
+    "payouts": [
+      {
+        "shareholder_id": 1,
+        "name": "Deepak",
+        "role": "Founder",
+        "amount": 4800
+      },
+      {
+        "shareholder_id": 2,
+        "name": "Co-Founder",
+        "role": "CEO",
+        "amount": 3600
+      },
+      {
+        "shareholder_id": 3,
+        "name": "Investor",
+        "role": "Investor",
+        "amount": 3600
+      }
+    ]
+  }
+]

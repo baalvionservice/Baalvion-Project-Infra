@@ -1,0 +1,67 @@
+
+[
+  {
+    "businessId": "biz_1",
+    "valuation": 60000000,
+    "stakeholders": [
+      { "name": "Priya Sharma", "role": "Co-Founder", "equity": 40, "usdValue": 24000000, "vestingStatus": "Fully Vested", "notes": "Founder Shares" },
+      { "name": "Startup-F", "role": "Lead Investor", "equity": 40, "usdValue": 24000000, "vestingStatus": "N/A", "notes": "Series B" },
+      { "name": "John Smith", "role": "Investor", "equity": 20, "usdValue": 12000000, "vestingStatus": "N/A", "notes": "Seed Round" }
+    ],
+    "equityHistory": [
+      { "id": "hist_1_1", "date": "2019-05-10", "event": "Initial Grant", "stakeholder": "Priya Sharma", "change": "+50.0%", "newTotal": "50.0%" },
+      { "id": "hist_1_2", "date": "2020-08-20", "event": "Seed Round", "stakeholder": "John Smith", "change": "+20.0%", "newTotal": "20.0%" },
+      { "id": "hist_1_3", "date": "2022-01-15", "event": "Series B", "stakeholder": "Startup-F", "change": "+40.0%", "newTotal": "40.0%" }
+    ]
+  },
+  {
+    "businessId": "biz_2",
+    "valuation": 25000000,
+    "stakeholders": [
+      { "name": "Alex Davis", "role": "Admin/Owner", "equity": 70, "usdValue": 17500000, "vestingStatus": "Fully Vested", "notes": "Founder Shares" },
+      { "name": "John Smith", "role": "Investor", "equity": 20, "usdValue": 5000000, "vestingStatus": "N/A", "notes": "Angel Investment" },
+      { "name": "VC-Media", "role": "Investor", "equity": 10, "usdValue": 2500000, "vestingStatus": "N/A", "notes": "Strategic Partner" }
+    ],
+    "equityHistory": [
+      { "id": "hist_2_1", "date": "2018-02-01", "event": "Initial Grant", "stakeholder": "Alex Davis", "change": "+90.0%", "newTotal": "90.0%" },
+      { "id": "hist_2_2", "date": "2019-11-12", "event": "Angel Round", "stakeholder": "John Smith", "change": "+20.0%", "newTotal": "20.0%" },
+      { "id": "hist_2_3", "date": "2021-06-30", "event": "Strategic", "stakeholder": "VC-Media", "change": "+10.0%", "newTotal": "10.0%" }
+    ]
+  },
+  {
+    "businessId": "biz_3",
+    "valuation": 80000000,
+    "stakeholders": [
+      { "name": "Fatima Al-Fassi", "role": "Co-Founder", "equity": 40, "usdValue": 32000000, "vestingStatus": "Fully Vested", "notes": "Founder" },
+      { "name": "Global Retail Group", "role": "Partner", "equity": 45, "usdValue": 36000000, "vestingStatus": "N/A", "notes": "Corporate Partner" },
+      { "name": "John Smith", "role": "Investor", "equity": 15, "usdValue": 12000000, "vestingStatus": "N/A", "notes": "Early Investor" }
+    ],
+    "equityHistory": []
+  },
+  {
+    "businessId": "biz_4",
+    "valuation": 150000000,
+    "stakeholders": [
+      { "name": "John Smith", "role": "Co-Founder", "equity": 30, "usdValue": 45000000, "vestingStatus": "4yr vesting (36mo done)", "notes": "Cliff: Apr 2021" },
+      { "name": "Alex Davis", "role": "Co-Founder", "equity": 30, "usdValue": 45000000, "vestingStatus": "4yr vesting (36mo done)", "notes": "Cliff: Apr 2021" },
+      { "name": "Priya Sharma", "role": "Investor", "equity": 20, "usdValue": 30000000, "vestingStatus": "N/A", "notes": "Series A Lead" },
+      { "name": "ESOP Pool", "role": "Employees", "equity": 10, "usdValue": 15000000, "vestingStatus": "Various", "notes": "22 grants" },
+      { "name": "Angel Investors", "role": "Investor", "equity": 10, "usdValue": 15000000, "vestingStatus": "N/A", "notes": "Seed Round" }
+    ],
+    "equityHistory": [
+      { "id": "hist_4_1", "date": "2020-04-01", "event": "Initial Grants", "stakeholder": "Founders", "change": "+30.0% each", "newTotal": "60.0%" },
+      { "id": "hist_4_2", "date": "2021-09-01", "event": "Seed Round", "stakeholder": "Angels", "change": "+10.0%", "newTotal": "10.0%" },
+      { "id": "hist_4_3", "date": "2022-07-20", "event": "Series A", "stakeholder": "Priya Sharma", "change": "+20.0%", "newTotal": "20.0%" },
+      { "id": "hist_4_4", "date": "2022-07-21", "event": "ESOP Allocation", "stakeholder": "ESOP Pool", "change": "+10.0%", "newTotal": "10.0%" }
+    ]
+  },
+  {
+    "businessId": "biz_5",
+    "valuation": 10000000,
+    "stakeholders": [
+      { "name": "Li Wei", "role": "Admin/Owner", "equity": 70, "usdValue": 7000000, "vestingStatus": "Fully Vested", "notes": "Founder" },
+      { "name": "John Smith", "role": "Investor", "equity": 30, "usdValue": 3000000, "vestingStatus": "N/A", "notes": "Acquisition terms" }
+    ],
+    "equityHistory": []
+  }
+]

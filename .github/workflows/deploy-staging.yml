@@ -1,0 +1,92 @@
+name: Deploy Staging
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      services:
+        description: 'Comma-separated list of services to deploy (leave empty = all changed)'
+        required: false
+        default: ''
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}/baalvion
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service:
+          - { name: auth-service,            port: 3001, context: Backend/auth-service }
+          - { name: admin-service,           port: 3021, context: Backend/admin-service }
+          - { name: session-service,         port: 3022, context: Backend/session-service }
+          - { name: oauth-service,           port: 3023, context: Backend/oauth-service }
+          - { name: jobs-service,            port: 3002, context: Backend/jobs-service }
+          - { name: ctm-service,             port: 3011, context: Backend/ctm-service }
+          - { name: mining-service,          port: 3003, context: Backend/mining-service }
+          - { name: imperialpedia-service,   port: 3004, context: Backend/imperialpedia-service }
+          - { name: real-estate-service,     port: 3005, context: Backend/real-estate-service }
+          - { name: brand-connector-service, port: 3006, context: Backend/brand-connector-service }
+          - { name: market-service,          port: 3007, context: Backend/market-service }
+          - { name: ir-service,              port: 3008, context: Backend/ir-service }
+          - { name: dashboard-service,       port: 3009, context: Backend/dashboard-service }
+          - { name: about-service,           port: 3010, context: Backend/about-service }
+          - { name: realtime-service,        port: 3040, context: Backend/realtime-service }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service.name }}
+          tags: |
+            type=sha,prefix=staging-
+            type=raw,value=staging-latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.service.context }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - name: Deploy to staging
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/baalvion
+            docker compose --profile identity --profile backend pull
+            docker compose --profile identity --profile backend up -d --no-build
+            docker system prune -f
+
+      - name: Health checks
+        run: |
+          sleep 20
+          for port in 3001 3021 3022 3023 3002 3011 3003 3004 3005 3006 3007 3008 3009 3010 3040; do
+            curl -sf "http://${{ secrets.STAGING_HOST }}:${port}/health" && echo "Port ${port} healthy" || echo "Port ${port} not responding (may not be deployed)"
+          done

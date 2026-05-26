@@ -1,0 +1,100 @@
+
+{
+  "categories": [
+    {
+      "name": "Businesses",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/businesses",
+          "description": "Returns a list of all businesses in your portfolio.",
+          "parameters": [
+            { "name": "limit", "type": "integer", "required": false, "description": "The number of businesses to return." },
+            { "name": "offset", "type": "integer", "required": false, "description": "The offset for pagination." }
+          ],
+          "request": "curl https://api.baalvion.com/v1/businesses",
+          "response": "[\n  {\n    \"id\": \"biz_1\",\n    \"name\": \"TechCorp India\",\n    \"country\": \"India\",\n    \"status\": \"Growth\"\n  },\n  {\n    \"id\": \"biz_2\",\n    \"name\": \"Baalvion Media UK\",\n    \"country\": \"United Kingdom\",\n    \"status\": \"Active\"\n  }\n]"
+        },
+        {
+          "method": "GET",
+          "path": "/api/businesses/{id}",
+          "description": "Retrieves the details of a specific business by its ID.",
+          "parameters": [
+            { "name": "id", "type": "string", "required": true, "description": "The ID of the business to retrieve." }
+          ],
+          "request": "curl https://api.baalvion.com/v1/businesses/biz_1",
+          "response": "{\n  \"id\": \"biz_1\",\n  \"name\": \"TechCorp India\",\n  \"country\": \"India\",\n  \"currency\": \"INR\",\n  \"status\": \"Growth\",\n  \"currentMetrics\": {\n    \"revenue\": 75000000,\n    \"profit\": 15000000,\n    \"employees\": 120\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Employees",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/employees",
+          "description": "Returns a paginated list of all employees.",
+          "parameters": [
+            { "name": "page", "type": "integer", "required": false, "description": "The page number for pagination." },
+            { "name": "businessId", "type": "string", "required": false, "description": "Filter employees by business ID." }
+          ],
+          "request": "curl https://api.baalvion.com/v1/employees?page=1&businessId=biz_1",
+          "response": "[\n  {\n    \"id\": \"emp_002\",\n    \"name\": \"Priya Sharma\",\n    \"email\": \"priya.sharma@techcorp.com\",\n    \"role\": \"Managing Director\"\n  }\n]"
+        },
+        {
+            "method": "GET",
+            "path": "/api/employees/{id}",
+            "description": "Retrieves the details of a specific employee.",
+            "parameters": [
+                { "name": "id", "type": "string", "required": true, "description": "The ID of the employee to retrieve." }
+            ],
+            "request": "curl https://api.baalvion.com/v1/employees/emp_002",
+            "response": "{\n  \"id\": \"emp_002\",\n  \"name\": \"Priya Sharma\",\n  \"email\": \"priya.sharma@techcorp.com\",\n  \"role\": \"Managing Director\",\n  \"department\": \"Management\",\n  \"businessId\": \"biz_1\",\n  \"country\": \"India\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Finance",
+      "endpoints": [
+        {
+          "method": "GET",
+          "path": "/api/finance/overview",
+          "description": "Returns a high-level financial overview of the entire portfolio.",
+          "parameters": [],
+          "request": "curl https://api.baalvion.com/v1/finance/overview",
+          "response": "{\n  \"netWorth\": {\n    \"total\": 24600000,\n    \"change\": {\n      \"amount\": 340000,\n      \"percentage\": 1.4\n    }\n  },\n  \"totalRevenue\": 4301411\n}"
+        },
+        {
+          "method": "GET",
+          "path": "/api/transactions",
+          "description": "Returns a paginated list of financial transactions.",
+          "parameters": [
+            { "name": "limit", "type": "integer", "required": false, "description": "Number of transactions to return." },
+            { "name": "status", "type": "string", "required": false, "description": "Filter by status (Success, Failed, Pending)." }
+          ],
+          "request": "curl https://api.baalvion.com/v1/transactions?limit=2&status=Success",
+          "response": "[\n  {\n    \"id\": \"txn_01\",\n    \"businessId\": \"biz_1\",\n    \"amount\": 50000,\n    \"currency\": \"INR\",\n    \"status\": \"Success\"\n  },\n  {\n    \"id\": \"txn_02\",\n    \"businessId\": \"biz_4\",\n    \"amount\": 1200,\n    \"currency\": \"USD\",\n    \"status\": \"Success\"\n  }\n]"
+        },
+        {
+          "method": "POST",
+          "path": "/api/reports",
+          "description": "Generates a new financial report.",
+          "parameters": [
+            { "name": "type", "type": "string", "required": true, "description": "Type of report (e.g., 'pnl', 'executive')." },
+            { "name": "period", "type": "string", "required": true, "description": "The reporting period (e.g., 'Q3 2024')." }
+          ],
+          "request": "curl -X POST https://api.baalvion.com/v1/reports \\\n -H \"Content-Type: application/json\" \\\n -d '{\n   \"type\": \"pnl\",\n   \"period\": \"July 2024\"\n }'",
+          "response": "{\n  \"reportId\": \"rep_11\",\n  \"status\": \"generating\",\n  \"message\": \"Report generation has started.\"\n}"
+        },
+        {
+          "method": "GET",
+          "path": "/api/equity",
+          "description": "Returns the equity distribution for all businesses.",
+          "parameters": [],
+          "request": "curl https://api.baalvion.com/v1/equity",
+          "response": "[\n  {\n    \"businessId\": \"biz_1\",\n    \"valuation\": 60000000,\n    \"stakeholders\": [\n      {\n        \"name\": \"Priya Sharma\",\n        \"equity\": 40\n      }\n    ]\n  }\n]"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "common": {
+    "portal": "Investor Portal",
+    "sign_out": "Sign Out",
+    "view": "View",
+    "download": "Download",
+    "actions": "Actions",
+    "status": "Status",
+    "date": "Date"
+  },
+  "dashboard": {
+    "title": "Unified Portfolio Command",
+    "subtitle": "Consolidated capital lifecycle management and performance analytics.",
+    "metrics": {
+      "net_irr": "Net IRR",
+      "tvpi": "TVPI",
+      "dpi": "DPI",
+      "nav": "Current NAV",
+      "deployed": "Deployed Capital",
+      "liquidity": "Liquidity Reserve"
+    },
+    "charts": {
+      "nav_growth": "NAV Growth History",
+      "nav_desc": "Consolidated market value of all underlying assets.",
+      "capital_lifecycle": "Capital Lifecycle Timeline",
+      "capital_desc": "Quarterly analysis of called capital vs. realized distributions.",
+      "called": "Called Capital",
+      "distributed": "Distributions"
+    },
+    "table": {
+      "title": "Strategic Asset Performance",
+      "asset": "Strategic Asset",
+      "deployed": "Deployed Capital",
+      "market_value": "Market Value",
+      "roi": "Gross ROI"
+    }
+  },
+  "roles": {
+    "admin": "Super Admin (GP)",
+    "investor": "Lead Investor (LP)",
+    "compliance": "Compliance Officer",
+    "public": "Guest Viewer"
+  }
+}

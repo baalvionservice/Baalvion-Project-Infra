@@ -1,0 +1,77 @@
+# Zero-trust network policies: default-deny, then explicit allows.
+# Requires a CNI that enforces NetworkPolicy (Calico/Cilium).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: default-deny, namespace: baalvion }
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+# DNS egress allowed for everyone (kube-dns).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-dns, namespace: baalvion }
+spec:
+  podSelector: {}
+  policyTypes: [Egress]
+  egress:
+    - to: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: kube-system } } }]
+      ports: [{ protocol: UDP, port: 53 }, { protocol: TCP, port: 53 }]
+---
+# API: ingress from istio-ingress; egress to Postgres pooler, Redis, OTel.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: api, namespace: baalvion }
+spec:
+  podSelector: { matchLabels: { app: api } }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from:
+        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: istio-system } }
+      ports: [{ protocol: TCP, port: 4000 }]
+  egress:
+    - to: [{ podSelector: { matchLabels: { cnpg.io/cluster: baalvion-pg } } }]
+      ports: [{ protocol: TCP, port: 5432 }]
+    - to: [{ podSelector: { matchLabels: { app: redis } } }]
+      ports: [{ protocol: TCP, port: 6379 }]
+    - to: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: observability } } }]
+      ports: [{ protocol: TCP, port: 4318 }]
+    # Razorpay / external HTTPS (payment gateway).
+    - to: [{ ipBlock: { cidr: 0.0.0.0/0, except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16] } }]
+      ports: [{ protocol: TCP, port: 443 }]
+---
+# Workers: NO ingress; egress to DB/Redis/external (Razorpay/Slack).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: workers, namespace: baalvion }
+spec:
+  podSelector: { matchLabels: { app: workers } }
+  policyTypes: [Ingress, Egress]
+  egress:
+    - to: [{ podSelector: { matchLabels: { cnpg.io/cluster: baalvion-pg } } }]
+      ports: [{ protocol: TCP, port: 5432 }]
+    - to: [{ podSelector: { matchLabels: { app: redis } } }]
+      ports: [{ protocol: TCP, port: 6379 }]
+    - to: [{ ipBlock: { cidr: 0.0.0.0/0, except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16] } }]
+      ports: [{ protocol: TCP, port: 443 }]
+---
+# Edge gateways: ingress from the NLB on proxy ports + metrics scrape; egress
+# is open to the internet (upstream providers) but BLOCKS internal ranges +
+# cloud metadata (defense-in-depth on top of the app's SSRF guard).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: gateway, namespace: baalvion-edge }
+spec:
+  podSelector: { matchLabels: { app: gateway } }
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - ports: [{ protocol: TCP, port: 10000 }, { protocol: TCP, port: 1080 }]
+    - from: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: observability } } }]
+      ports: [{ protocol: TCP, port: 9090 }]
+  egress:
+    - to: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: kube-system } } }]
+      ports: [{ protocol: UDP, port: 53 }, { protocol: TCP, port: 53 }]
+    - to: [{ podSelector: { matchLabels: { app: redis } } }]
+      ports: [{ protocol: TCP, port: 6379 }]
+    # Upstream providers + destinations: internet only, internal ranges blocked.
+    - to: [{ ipBlock: { cidr: 0.0.0.0/0, except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16, 100.64.0.0/10] } }]

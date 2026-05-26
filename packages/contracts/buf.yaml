@@ -1,0 +1,15 @@
+# buf governance — lint + breaking-change detection for all inter-service protos.
+# CI runs `buf lint` (style) and `buf breaking --against main` (contract safety)
+# on every PR touching proto/. A breaking change is a blocking review gate.
+version: v2
+modules:
+  - path: proto
+lint:
+  use:
+    - STANDARD
+  enum_zero_value_suffix: _UNSPECIFIED
+  service_suffix: Service
+breaking:
+  use:
+    - FILE
+  ignore_unstable_packages: true

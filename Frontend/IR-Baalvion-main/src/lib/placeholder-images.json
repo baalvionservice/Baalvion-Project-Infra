@@ -1,0 +1,246 @@
+{
+  "placeholderImages": [
+  
+    {
+      "id": "dilip-photo",
+      "description": "Portrait of the company founder.",
+      "imageUrl": "/photos/DilipKuldeepYadav.jpeg",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "executive-1-photo",
+      "description": "Portrait of a female executive.",
+      "imageUrl": "/photos/aadarshPatra.jpeg",
+      "imageHint": "portrait female"
+    },
+    {
+      "id": "tamanna-photo",
+      "description": "Portrait of tamanna.",
+      "imageUrl": "/photos/tamannaShaaikh.png",
+      "imageHint": "portrait tamanna"
+    },
+    {
+      "id": "sasmita-photo",
+      "description": "Portrait of sasmita.",
+      "imageUrl": "/photos/sasmitagamel.jpeg",
+      "imageHint": "portrait sasmita"
+    },
+    {
+      "id": "biswajeet-photo",
+      "description": "Portrait of biswajeet.",
+      "imageUrl": "/photos/Biswajeet patra.jpeg",
+      "imageHint": "portrait biswajeet"
+    },
+    {
+      "id": "laxman-photo",
+      "description": "Portrait of laxman.",
+      "imageUrl": "/photos/Laxman Singh Champia.jpeg",
+      "imageHint": "portrait laxman"
+    },
+    {
+      "id": "bishal-photo",
+      "description": "Portrait of bishal.",
+      "imageUrl": "/photos/bishalkumarpingua.jpeg",
+      "imageHint": "portrait bishal"
+    },
+    {
+      "id": "rashmika-photo",
+      "description": "Portrait of rashmika.",
+      "imageUrl": "/photos/Rashmika Singh.jpeg",
+      "imageHint": "portrait rashmika"
+    },
+    {
+      "id": "jaid-photo",
+      "description": "Portrait of jaid.",
+      "imageUrl": "/photos/Jaid Alam.jpeg",
+      "imageHint": "portrait jaid"
+    },
+    {
+      "id": "preeti-photo",
+      "description": "Portrait of preeti.",
+      "imageUrl": "/photos/Preeti snigdha Mallick.jpeg",
+      "imageHint": "portrait preeti"
+    },
+    
+
+
+    {
+      "id": "prathamesh-photo",
+      "description": "Portrait of Prathamesh Pawer.",
+      "imageUrl": "/photos/Prathamesh Pawer.jpeg",
+      "imageHint": "portrait male"
+    },
+
+
+
+
+      {
+      "id": "roadmap-infographic",
+      "description": "A futuristic infographic showing a 5-year roadmap.",
+      "imageUrl": "https://images.unsplash.com/photo-1642428899339-db778a4af19a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxyb2FkbWFwJTIwaW5mb2dyYXBoaXxlbnwwfHx8fDE3NzE5NDk3Mjc1fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "roadmap infographic"
+    },
+    {
+      "id": "thesis-chart-1",
+      "description": "A line graph showing upward market growth.",
+      "imageUrl": "https://images.unsplash.com/photo-1592495989226-03f88104f8cc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxsaW5lJTIwZ3JhcGh8ZW58MHx8fHwxNzcxOTQ5NzI3fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "line graph"
+    },
+    {
+      "id": "thesis-chart-2",
+      "description": "A pie chart showing capital allocation.",
+      "imageUrl": "https://images.unsplash.com/photo-1542744173-05336fcc7ad4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwaWUlMjBjaGFydHxlbnwwfHx8fDE3NzE5MzQ5OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "pie chart"
+    },
+    {
+      "id": "executive-2-photo",
+      "description": "Portrait of a male executive.",
+      "imageUrl": "https://images.unsplash.com/photo-1556474835-b0f3ac40d4d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcxOTQ5NzI2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "news-1-image",
+      "description": "Abstract technology background.",
+      "imageUrl": "https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8YWJzdHJhY3QlMjB0ZWNobm9sb2d5fGVufDB8fHx8MTc3MTkwMzkyOXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "abstract technology"
+    },
+    {
+      "id": "news-2-image",
+      "description": "Image of sustainable energy infrastructure.",
+      "imageUrl": "https://images.unsplash.com/photo-1616596091194-eaec099773e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHx3aW5kJTIwdHVyYmluZXN8ZW58MHx8fHwxNzcxOTQ4MDYwfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wind turbines"
+    },
+    {
+      "id": "news-3-image",
+      "description": "A conference stage with a speaker.",
+      "imageUrl": "https://images.unsplash.com/photo-1582192730841-2a682d7375f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxjb25mZXJlbmNlJTIwc3RhZ2V8ZW58MHx8fHwxNzcxOTQ5NzI2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "conference stage"
+    },
+    {
+      "id": "quarterly-results-bg",
+      "description": "Cityscape for quarterly results background",
+      "imageUrl": "https://s24.q4cdn.com/856567660/files/design/latest-quarter.jpg",
+      "imageHint": "cityscape background"
+    },
+    {
+      "id": "webcast-banner",
+      "description": "Aerial view of a crowd of people.",
+      "imageUrl": "https://images.unsplash.com/photo-1668707146327-9555b8e053ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxjcm93ZCUyMGFlcmlhbHxlbnwwfHx8fDE3NzIwMjA4OTR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "crowd aerial"
+    },
+    {
+      "id": "bod-1",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1595514191830-3e96a518989b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-2",
+      "description": "Portrait of a female executive",
+      "imageUrl": "https://images.unsplash.com/photo-1676904521030-3fe0afbba0bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cG9ydHJhaXQlMjBmZW1hbGV8ZW58MHx8fHwxNzcyMDI0NjYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait female"
+    },
+    {
+      "id": "bod-3",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1556474835-b0f3ac40d4d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-4",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1621273929349-678e4bdad4ad?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-5",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1576110598658-096ae24cdb97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-6",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1684549742130-c2083354da35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-7",
+      "description": "Portrait of a female executive",
+      "imageUrl": "https://images.unsplash.com/photo-1646589391794-566792b13cae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwb3J0cmFpdCUyMGZlbWFsZXxlbnwwfHx8fDE3NzIwMjQ2NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait female"
+    },
+    {
+      "id": "bod-8",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1576110598658-096ae24cdb97?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-9",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/flagged/photo-1595514191830-3e96a518989b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-10",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-11",
+      "description": "Portrait of a female executive",
+      "imageUrl": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwb3J0cmFpdCUyMGZlbWFsZXxlbnwwfHx8fDE3NzIwMjQ2NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait female"
+    },
+    {
+      "id": "bod-12",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1556474835-b0f3ac40d4d1?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-13",
+      "description": "Portrait of a female executive",
+      "imageUrl": "https://images.unsplash.com/photo-1676904452896-1a999d5970fb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwb3J0cmFpdCUyMGZlbWFsZXxlbnwwfHx8fDE3NzIwMjQ2NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait female"
+    },
+    {
+      "id": "bod-14",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1635914085943-3d85568631e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cG9ydHJhaXQlMjBtYWxlfGVufDB8fHx8MTc3MjAyNDM3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-15",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-16",
+      "description": "Portrait of a female executive",
+      "imageUrl": "https://images.unsplash.com/photo-1676904521030-3fe0afbba0bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cG9ydHJhaXQlMjBmZW1hbGV8ZW58MHx8fHwxNzcyMDI0NjYyfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait female"
+    },
+    {
+      "id": "bod-17",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1635914085943-3d85568631e6?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8cG9ydHJhaXQlMjBtYWxlfGVufDB8fHx8MTc3MjAyNDM3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    },
+    {
+      "id": "bod-18",
+      "description": "Portrait of a female executive",
+      "imageUrl": "https://images.unsplash.com/photo-1676904479879-2ef3ce54cdec?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxwb3J0cmFpdCUyMGZlbWFsZXxlbnwwfHx8fDE3NzIwMjQ2NjJ8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait female"
+    },
+    {
+      "id": "bod-19",
+      "description": "Portrait of a male executive",
+      "imageUrl": "https://images.unsplash.com/photo-1684549742130-c2083354da35?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxwb3J0cmFpdCUyMG1hbGV8ZW58MHx8fHwxNzcyMDI0Mzc2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "portrait male"
+    }
+  ]
+}

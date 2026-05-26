@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://baalvion.com/</loc><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://baalvion.com/pricing</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://baalvion.com/residential</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://baalvion.com/mobile</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://baalvion.com/datacenter</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://baalvion.com/enterprise</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://baalvion.com/proxy-comparison</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://baalvion.com/integrations</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://baalvion.com/infrastructure</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://baalvion.com/about</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://baalvion.com/contact</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://baalvion.com/docs</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://baalvion.com/status</loc><changefreq>daily</changefreq><priority>0.7</priority></url>
+  <url><loc>https://baalvion.com/case-studies</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://baalvion.com/calculator</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://baalvion.com/book-demo</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://baalvion.com/security</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://baalvion.com/sla</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://baalvion.com/compliance-info</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://baalvion.com/transparency</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://baalvion.com/privacy</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://baalvion.com/aup</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://baalvion.com/refund</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://baalvion.com/cookies</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://baalvion.com/changelog</loc><changefreq>weekly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://baalvion.com/forgot-password</loc><changefreq>monthly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://baalvion.com/login</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://baalvion.com/signup</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://baalvion.com/faq</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://baalvion.com/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://baalvion.com/enterprise-vs-smb</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+</urlset>

@@ -1,0 +1,77 @@
+
+{
+  "categories": [
+    { "slug": "getting-started", "name": "Getting Started", "description": "Basics of setting up and using Baalvion." },
+    { "slug": "finance", "name": "Finance & Equity", "description": "Managing financials, payments, and equity." },
+    { "slug": "employees", "name": "Employees", "description": "HR features, from onboarding to analytics." },
+    { "slug": "analytics", "name": "Analytics", "description": "Understanding your data and forecasts." },
+    { "slug": "compliance", "name": "Compliance", "description": "Navigating global compliance and security." },
+    { "slug": "billing", "name": "Billing", "description": "Managing your subscription and payments." }
+  ],
+  "articles": [
+    {
+      "slug": "adding-your-first-business",
+      "title": "Adding Your First Business",
+      "category": "Getting Started",
+      "readingTime": "3 min",
+      "lastUpdated": "2024-07-15",
+      "content": "Welcome to Baalvion! Adding your first business is the initial step to unlocking the power of our platform. Navigate to the 'Businesses' section from the main sidebar. Here, you'll find an 'Add Business' button. Clicking this will open a form where you can input all the essential details about your new entity, including its name, country of operation, currency, and initial financial metrics.\n\nOnce you've filled out the required information, our system will guide you through connecting its primary bank accounts and payment gateways. This is crucial for enabling real-time financial tracking. Ensure you have the necessary credentials handy for a smooth setup process. Our secure integration process ensures your data is always encrypted and protected.\n\nAfter a business is added, it will immediately appear on your main dashboard. You can then start inviting team members, assigning roles, and setting up specific KPIs for that business unit. Explore the 'Settings' for the new business to configure custom alerts and reporting preferences.\n\n**Tip:** Use the 'Bulk Import' feature if you are adding more than five businesses at once. This can save you significant time by allowing you to upload a CSV file with all your business details."
+    },
+    {
+      "slug": "understanding-your-dashboard",
+      "title": "Understanding Your Dashboard",
+      "category": "Getting Started",
+      "readingTime": "5 min",
+      "lastUpdated": "2024-07-20",
+      "content": "The Baalvion dashboard is your command center. It provides a high-level, real-time overview of your entire business empire. The main widgets display key metrics like total revenue, total profit, number of businesses, and total employees. These figures are aggregated from all your connected business units and converted to your primary currency (USD) for easy comparison.\n\nThe 'Overall Performance' chart gives you a visual trend of your revenue versus profit over the last six months. This is perfect for spotting seasonal trends or the impact of major business decisions. Beside it, the 'Revenue by Business' chart breaks down the contribution of each business to your total revenue, helping you identify top performers and businesses that may need more attention.\n\nThe dashboard is customizable. You can switch between different user roles (Admin, Investor, etc.) using the user menu in the top-right corner to see how the dashboard appears to different stakeholders. This is especially useful for preparing for board meetings or investor updates."
+    },
+    {
+      "slug": "connecting-payment-gateways",
+      "title": "Connecting Payment Gateways",
+      "category": "Finance & Equity",
+      "readingTime": "4 min",
+      "lastUpdated": "2024-06-30",
+      "content": "Integrating your payment gateways is essential for accurate revenue tracking and financial reporting. Baalvion supports direct integration with Stripe, PayPal, and Razorpay. To connect a gateway, navigate to the 'Payments' page and click on the 'Manage Gateways' button. From there, select your provider.\n\nYou will be redirected to the payment provider's secure authentication page to grant Baalvion read-only access to your transaction data. We never store your login credentials. Once authorized, our system will begin a historical sync of your transaction data. This initial sync can take anywhere from a few minutes to a few hours, depending on your transaction volume.\n\n**Tip:** We recommend connecting all your gateways for a complete financial picture. If you use a provider not listed, you can use our 'Manual Upload' feature to import transaction data via CSV files."
+    },
+    {
+      "slug": "managing-employee-roles",
+      "title": "Managing Employee Roles and Permissions",
+      "category": "Employees",
+      "readingTime": "6 min",
+      "lastUpdated": "2024-07-25",
+      "content": "Baalvion uses a role-based access control (RBAC) system to ensure users can only see and do what's appropriate for their position. You can manage these roles from the 'Security' > 'Permissions' page. The default roles are Admin, Co-Founder, Investor, and Employee, but you can create custom roles if needed.\n\nThe permission matrix gives you a clear grid view of what each role can do. Checkboxes indicate a simple yes/no permission, while some permissions might have more granular control (e.g., 'View Financials' can be limited to 'Portfolio Only' for investors). Clicking the 'Edit Permissions' button allows you to modify these settings in a safe, controlled manner."
+    },
+    {
+      "slug": "interpreting-ai-forecasts",
+      "title": "Interpreting AI Forecasts",
+      "category": "Analytics",
+      "readingTime": "4 min",
+      "lastUpdated": "2024-07-18",
+      "content": "The 'AI Intelligence' page is where our machine learning models provide you with predictive insights. The Revenue Predictions table forecasts your Monthly Recurring Revenue (MRR) for the next 3, 6, and 12 months. The 'Confidence' score indicates how certain our model is about its prediction, based on the stability and volume of your historical data.\n\nThe 'Growth Opportunities' and 'Risk Alerts' are generated by a separate model that analyzes your operational data against market trends. These cards are designed to be actionable. An opportunity might suggest a new market to enter, while a risk might highlight a high customer concentration. Use the 'Explore' button on these cards to get a more detailed breakdown and suggested next steps."
+    },
+    {
+      "slug": "how-compliance-scores-are-calculated",
+      "title": "How Compliance Scores Are Calculated",
+      "category": "Compliance",
+      "readingTime": "5 min",
+      "lastUpdated": "2024-07-10",
+      "content": "Your overall compliance score is a weighted average of the compliance status across all your countries of operation. Each country is scored out of 100 based on several key areas: Tax Status, Data Law Adherence, Local License Validity, and Employment Law Compliance.\n\nOur system regularly checks public records and integrates with legal databases to assess your status. For example, for 'Tax Status,' we verify if your VAT/GST filings are up to date. For 'Data Laws,' we check your privacy policy against the requirements of local regulations like GDPR or CCPA. A 'Review Needed' status is triggered when a new law is passed or a deadline is approaching, prompting you to take action."
+    },
+    {
+      "slug": "setting-up-report-scheduling",
+      "title": "Setting Up Report Scheduling",
+      "category": "Finance & Equity",
+      "readingTime": "3 min",
+      "lastUpdated": "2024-06-25",
+      "content": "Automate your reporting process by using the scheduling feature on the 'Executive Reports' page. You can configure Baalvion to automatically generate and email key reports to stakeholders at regular intervals.\n\nTo schedule a report, simply toggle the switch next to the desired report (e.g., 'Weekly Summary'). A configuration modal will appear, allowing you to set the frequency (daily, weekly, monthly), the day and time of delivery, and the recipient email addresses. You can add multiple recipients, including external stakeholders like investors or accountants. All scheduled reports are generated as PDFs and sent as email attachments."
+    },
+    {
+      "slug": "using-the-century-simulator",
+      "title": "Using the Century Simulator",
+      "category": "Analytics",
+      "readingTime": "7 min",
+      "lastUpdated": "2024-07-28",
+      "content": "The Century Simulator is a powerful long-term planning tool. It uses compound growth formulas to project the future of your business empire based on a set of core assumptions. By adjusting the sliders for revenue growth, cost growth, and expansion rate, you can model different scenarios and see their potential impact over 5 to 100 years.\n\nThe 'Projection Results' section provides a snapshot of key metrics for your chosen time horizon. The 'Revenue Trajectory' chart visualizes this growth over time. For very long time horizons, switching to a logarithmic scale can make it easier to understand the compounding nature of the growth.\n\n**Tip:** The 'Scenario Comparison' table at the bottom is perfect for comparing a conservative, base, and aggressive growth model side-by-side. This is invaluable for strategic planning and board discussions about long-term goals."
+    }
+  ]
+}

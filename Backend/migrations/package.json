@@ -1,0 +1,15 @@
+{
+  "name": "baalvion-migrations",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "migrate": "node migrate.js up",
+    "migrate:status": "node migrate.js status",
+    "migrate:validate": "node migrate.js validate",
+    "migrate:dry": "node migrate.js up --dry-run",
+    "migrate:rollback": "node migrate.js rollback 1"
+  },
+  "dependencies": {
+    "pg": "^8.20.0"
+  }
+}

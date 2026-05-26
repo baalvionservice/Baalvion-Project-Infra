@@ -1,0 +1,87 @@
+# ──────────────────────────────────────────────
+# Environment / Secrets — NEVER commit
+# ──────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials.json
+service-account.json
+
+# ──────────────────────────────────────────────
+# Node / Package managers
+# ──────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ──────────────────────────────────────────────
+# Build outputs
+# ──────────────────────────────────────────────
+dist/
+build/
+.next/
+.turbo/
+out/
+*.tsbuildinfo
+
+# ──────────────────────────────────────────────
+# Test / Coverage
+# ──────────────────────────────────────────────
+coverage/
+playwright-report/
+test-results/
+.nyc_output/
+*.lcov
+.lighthouseci/
+
+# ──────────────────────────────────────────────
+# OS / Editor
+# ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/settings.json
+*.swp
+*.swo
+*~
+
+# ──────────────────────────────────────────────
+# Logs
+# ──────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ──────────────────────────────────────────────
+# Docker / Infra
+# ──────────────────────────────────────────────
+docker-compose.override.yml
+*.tfstate
+*.tfstate.backup
+.terraform/
+terraform.tfvars
+
+# ──────────────────────────────────────────────
+# Uploads / Generated files
+# ──────────────────────────────────────────────
+uploads/
+public/uploads/
+*.sqlite
+*.db

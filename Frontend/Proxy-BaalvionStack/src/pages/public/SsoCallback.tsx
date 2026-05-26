@@ -1,0 +1,69 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+
+// Decode a JWT payload (no verification — server already verified; this just
+// extracts identity for the local session).
+function decodeJwt(token: string): Record<string, unknown> | null {
+  try {
+    const part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(decodeURIComponent(escape(atob(part))));
+  } catch {
+    return null;
+  }
+}
+
+export default function SsoCallback() {
+  const navigate = useNavigate();
+  const { loginWithTokens } = useAuth();
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+    const token = params.get("token");
+    const refresh = params.get("refresh");
+    if (!token || !refresh) { setError(true); return; }
+
+    const claims = decodeJwt(token);
+    if (!claims) { setError(true); return; }
+
+    loginWithTokens({
+      accessToken: token,
+      refreshToken: refresh,
+      user: {
+        id: String(claims.sub ?? ""),
+        email: String(claims.email ?? ""),
+        fullName: String(claims.email ?? "").split("@")[0],
+        avatarUrl: null,
+        status: "active",
+        emailVerified: true,
+        mfaEnabled: false,
+        role: claims.role as string | undefined,
+        orgId: claims.organizationId as string | undefined,
+      },
+    });
+    // Clear the fragment (don't leave tokens in history) and enter the app.
+    window.history.replaceState(null, "", window.location.pathname);
+    navigate("/app", { replace: true });
+  }, [loginWithTokens, navigate]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background">
+      <div className="text-center space-y-3">
+        {error ? (
+          <>
+            <AlertTriangle className="w-8 h-8 text-destructive mx-auto" />
+            <p className="font-medium">SSO sign-in failed</p>
+            <button className="text-sm text-primary underline" onClick={() => navigate("/login")}>Back to login</button>
+          </>
+        ) : (
+          <>
+            <ShieldCheck className="w-8 h-8 text-primary mx-auto" />
+            <div className="flex items-center gap-2 text-muted-foreground"><Loader2 className="w-4 h-4 animate-spin" /> Completing single sign-on…</div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}

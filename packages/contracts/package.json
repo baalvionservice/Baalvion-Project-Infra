@@ -1,0 +1,16 @@
+{
+  "name": "@baalvion/contracts",
+  "version": "1.0.0",
+  "description": "Canonical inter-service contracts — gRPC protobuf APIs + JSON Schema event registry. The single source of truth for the integration surface between bounded contexts.",
+  "private": true,
+  "scripts": {
+    "lint": "buf lint",
+    "breaking": "buf breaking --against '.git#branch=main'",
+    "generate": "buf generate",
+    "validate:events": "node scripts/validate-events.mjs"
+  },
+  "devDependencies": {
+    "@bufbuild/buf": "^1.47.2",
+    "ajv": "^8.17.1"
+  }
+}

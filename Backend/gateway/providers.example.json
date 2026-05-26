@@ -1,0 +1,47 @@
+[
+  {
+    "name": "brightdata",
+    "kind": "http",
+    "address": "brd.superproxy.io:22225",
+    "usernameTemplate": "brd-customer-CUSTOMER_ID-zone-residential-country-{country}-session-{session}",
+    "password": "YOUR_BRIGHTDATA_ZONE_PASSWORD",
+    "countries": ["us", "gb", "de", "fr", "ca", "*"],
+    "weight": 100
+  },
+  {
+    "name": "oxylabs",
+    "kind": "http",
+    "address": "pr.oxylabs.io:7777",
+    "usernameTemplate": "customer-CUSTOMER_ID-cc-{country}-sessid-{session}",
+    "password": "YOUR_OXYLABS_PASSWORD",
+    "countries": ["us", "gb", "de", "*"],
+    "weight": 80
+  },
+  {
+    "name": "smartproxy",
+    "kind": "http",
+    "address": "gate.smartproxy.com:7000",
+    "usernameTemplate": "user-CUSTOMER_ID-country-{country}-session-{session}",
+    "password": "YOUR_SMARTPROXY_PASSWORD",
+    "countries": ["us", "*"],
+    "weight": 60
+  },
+  {
+    "name": "iproyal",
+    "kind": "socks5",
+    "address": "geo.iproyal.com:32325",
+    "usernameTemplate": "CUSTOMER_ID_country-{country}_session-{session}",
+    "password": "YOUR_IPROYAL_PASSWORD",
+    "countries": ["*"],
+    "weight": 40
+  },
+  {
+    "name": "soax",
+    "kind": "http",
+    "address": "proxy.soax.com:5000",
+    "usernameTemplate": "package-PACKAGE_ID-country-{country}-sessionid-{session}",
+    "password": "YOUR_SOAX_PASSWORD",
+    "countries": ["*"],
+    "weight": 40
+  }
+]

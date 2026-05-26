@@ -1,0 +1,43 @@
+# Child Applications managed by the root app-of-apps. Each region cluster runs
+# its own ArgoCD pointed at its overlay; this file is the us-east example set.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: baalvion-regions
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - { region: us-east, cluster: https://us-east.k8s.baalvion.net }
+          - { region: eu,      cluster: https://eu-west.k8s.baalvion.net }
+  template:
+    metadata: { name: 'baalvion-{{region}}' }
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/baalvion/platform.git
+        targetRevision: main
+        path: 'infra/k8s/overlays/{{region}}'
+      destination: { server: '{{cluster}}', namespace: baalvion-edge }
+      syncPolicy:
+        automated: { prune: true, selfHeal: true }
+        syncOptions: [CreateNamespace=true, ServerSideApply=true]
+        retry: { limit: 5, backoff: { duration: 10s, factor: 2, maxDuration: 3m } }
+---
+# Shared platform components (observability, db operators, secrets) per cluster.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata: { name: baalvion-platform-addons, namespace: argocd }
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/baalvion/platform.git
+    targetRevision: main
+    path: infra
+    directory:
+      include: '{observability/*.yaml,database/*.yaml,mesh/*.yaml,secrets/*.yaml,dr/velero-schedules.yaml}'
+  destination: { server: https://kubernetes.default.svc, namespace: baalvion }
+  syncPolicy:
+    automated: { prune: false, selfHeal: true }    # prune off for stateful/CRDs
+    syncOptions: [CreateNamespace=true]

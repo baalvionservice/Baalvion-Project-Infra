@@ -1,0 +1,32 @@
+{
+  "name": "@baalvion/logger",
+  "version": "1.0.0",
+  "description": "Structured Pino logger with correlation IDs and field redaction",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types":   "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import":  "./dist/index.mjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build":      "tsup",
+    "dev":        "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "clean":      "rimraf dist"
+  },
+  "dependencies": {
+    "pino":         "^10.3.1",
+    "pino-http":    "^11.0.0"
+  },
+  "devDependencies": {
+    "tsup":         "^8.3.0",
+    "typescript":   "^5.7.2",
+    "rimraf":       "^6.0.1",
+    "@types/node":  "^22.0.0"
+  }
+}

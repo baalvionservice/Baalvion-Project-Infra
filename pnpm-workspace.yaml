@@ -1,0 +1,12 @@
+packages:
+  # Shared library packages — built first, depended on by services and apps
+  - 'packages/*'
+
+  # Backend microservices
+  - 'Backend/*'
+
+  # Frontend applications
+  - 'Frontend/*'
+
+  # Platform engineering tooling (CLI, scaffolding) — federated monorepo (ADR-0001)
+  - 'platform/*'

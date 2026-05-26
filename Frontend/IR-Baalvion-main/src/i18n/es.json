@@ -1,0 +1,44 @@
+{
+  "common": {
+    "portal": "Portal del Inversor",
+    "sign_out": "Cerrar Sesión",
+    "view": "Ver",
+    "download": "Descargar",
+    "actions": "Acciones",
+    "status": "Estado",
+    "date": "Fecha"
+  },
+  "dashboard": {
+    "title": "Mando Unificado de Cartera",
+    "subtitle": "Gestión consolidada del ciclo de vida del capital y análisis de rendimiento.",
+    "metrics": {
+      "net_irr": "TIR Neta",
+      "tvpi": "TVPI",
+      "dpi": "DPI",
+      "nav": "NAV Actual",
+      "deployed": "Capital Desplegado",
+      "liquidity": "Reserva de Liquidez"
+    },
+    "charts": {
+      "nav_growth": "Historial de Crecimiento del NAV",
+      "nav_desc": "Valor de mercado consolidado de todos los activos subyacentes.",
+      "capital_lifecycle": "Cronología del Ciclo de Vida del Capital",
+      "capital_desc": "Análisis trimestral del capital solicitado frente a las distribuciones realizadas.",
+      "called": "Capital Solicitado",
+      "distributed": "Distribuciones"
+    },
+    "table": {
+      "title": "Rendimiento de Activos Estratégicos",
+      "asset": "Activo Estratégico",
+      "deployed": "Capital Desplegado",
+      "market_value": "Valor de Mercado",
+      "roi": "ROI Bruto"
+    }
+  },
+  "roles": {
+    "admin": "administrador (GP)",
+    "investor": "Inversor Principal (LP)",
+    "compliance": "Oficial de Cumplimiento",
+    "public": "Visitante"
+  }
+}

@@ -1,0 +1,33 @@
+# ap-south-1 (Mumbai): India residential/mobile growth region + data-residency.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+spec:
+  replicas: 4
+  template:
+    spec:
+      nodeSelector:
+        workload: edge
+        topology.kubernetes.io/region: ap-south-1
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+spec:
+  minReplicas: 4
+  maxReplicas: 100
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: baalvion
+spec:
+  template:
+    spec:
+      nodeSelector:
+        topology.kubernetes.io/region: ap-south-1

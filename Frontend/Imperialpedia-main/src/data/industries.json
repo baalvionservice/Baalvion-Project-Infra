@@ -1,0 +1,17 @@
+[
+  {
+    "id": "ind-1",
+    "name": "Semiconductors",
+    "slug": "semiconductors",
+    "type": "industry",
+    "description": "The backbone of modern electronic devices and AI infrastructure.",
+    "global_market_size": "$600B",
+    "growth_rate": "12%",
+    "top_countries": ["united-states", "taiwan", "south-korea"],
+    "related_technologies": ["generative-ai", "quantum-computing"],
+    "key_companies": ["nvidia", "intel", "tsmc"],
+    "tags": ["hardware", "tech", "infrastructure"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

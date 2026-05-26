@@ -1,0 +1,234 @@
+{
+  "__inputs": [{ "name": "DS_POSTGRES", "label": "PostgreSQL", "type": "datasource", "pluginId": "postgres" }],
+  "__requires": [{ "type": "datasource", "id": "postgres", "name": "PostgreSQL", "version": "1.0.0" }],
+  "annotations": { "list": [] },
+  "description": "CTM (controlthemarket) — company activity, task pipeline, submission volume, and evaluation metrics",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Active Companies",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT COUNT(*) AS value FROM ctm.companies WHERE status = 'active'",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Open Tasks",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT COUNT(*) AS value FROM ctm.tasks WHERE status = 'open'",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Submissions (30d)",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT COUNT(*) AS value FROM ctm.submissions WHERE submitted_at >= NOW() - INTERVAL '30 days'",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "id": 4,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Accepted Submissions (30d)",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT COUNT(*) AS value FROM ctm.submissions WHERE status = 'accepted' AND submitted_at >= NOW() - INTERVAL '30 days'",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "id": 5,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Avg Evaluation Score",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT ROUND(AVG(score), 1) AS value FROM ctm.evaluations WHERE is_final = true",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "yellow", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "id": 6,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Total Evaluations",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT COUNT(*) AS value FROM ctm.evaluations",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 4 },
+      "id": 7,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "pieType": "donut" },
+      "title": "Tasks by Status",
+      "type": "piechart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT status AS metric, COUNT(*) AS value FROM ctm.tasks GROUP BY status ORDER BY value DESC",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 4 },
+      "id": 8,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "pieType": "donut" },
+      "title": "Submissions by Status",
+      "type": "piechart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT status AS metric, COUNT(*) AS value FROM ctm.submissions GROUP BY status ORDER BY value DESC",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } }, "overrides": [] },
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 4 },
+      "id": 9,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "pieType": "donut" },
+      "title": "Companies by Tier",
+      "type": "piechart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT tier AS metric, COUNT(*) AS value FROM ctm.companies GROUP BY tier ORDER BY value DESC",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 10,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "title": "Submissions Over Time (Daily)",
+      "type": "timeseries",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT DATE_TRUNC('day', submitted_at) AS time, COUNT(*) AS submissions FROM ctm.submissions WHERE submitted_at >= NOW() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
+        "format": "time_series"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "id": 11,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "title": "Tasks Created Over Time (Daily)",
+      "type": "timeseries",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT DATE_TRUNC('day', created_at) AS time, COUNT(*) AS tasks FROM ctm.tasks WHERE created_at >= NOW() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
+        "format": "time_series"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 20 },
+      "id": 12,
+      "options": { "barWidth": 0.6, "fillOpacity": 80 },
+      "title": "Top Companies by Task Volume",
+      "type": "barchart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT c.name AS metric, COUNT(t.id) AS value FROM ctm.tasks t JOIN ctm.companies c ON c.id = t.company_id GROUP BY c.name ORDER BY value DESC LIMIT 10",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 20 },
+      "id": 13,
+      "options": { "barWidth": 0.6, "fillOpacity": 80 },
+      "title": "Avg Score by Task Difficulty",
+      "type": "barchart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT t.difficulty AS metric, ROUND(AVG(e.score), 1) AS value FROM ctm.evaluations e JOIN ctm.submissions s ON s.id = e.submission_id JOIN ctm.tasks t ON t.id = s.task_id WHERE e.is_final = true GROUP BY t.difficulty ORDER BY value DESC",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 28 },
+      "id": 14,
+      "options": { "barWidth": 0.6, "fillOpacity": 80 },
+      "title": "Tasks by Difficulty",
+      "type": "barchart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT difficulty AS metric, COUNT(*) AS value FROM ctm.tasks GROUP BY difficulty ORDER BY value DESC",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 28 },
+      "id": 15,
+      "options": { "barWidth": 0.6, "fillOpacity": 80 },
+      "title": "Top Tasks by Submission Volume",
+      "type": "barchart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT t.title AS metric, COUNT(s.id) AS value FROM ctm.submissions s JOIN ctm.tasks t ON t.id = s.task_id GROUP BY t.title ORDER BY value DESC LIMIT 10",
+        "format": "table"
+      }]
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "tags": ["ctm", "controlthemarket", "submissions", "tasks"],
+  "time": { "from": "now-30d", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "CTM — Platform Analytics",
+  "uid": "baalvion-ctm-analytics",
+  "version": 1
+}

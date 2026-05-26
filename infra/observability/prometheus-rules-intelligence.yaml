@@ -1,0 +1,65 @@
+# Network-intelligence layer SLI/alert rules. Metrics are emitted by the Node
+# control plane (observability/intelligenceMetrics.js) and scraped from the api +
+# workers /metrics endpoints. Covers model quality, anomaly volume, predictive
+# failover activity, and ML inference latency.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: baalvion-intelligence
+  namespace: observability
+  labels: { release: kube-prometheus-stack, role: alert-rules }
+spec:
+  groups:
+    - name: baalvion.intelligence.recording
+      interval: 60s
+      rules:
+        - record: job:ml_inference_p95_ms:5m
+          expr: histogram_quantile(0.95, sum(rate(ml_inference_latency_ms_bucket[5m])) by (le, model))
+        - record: job:anomaly_rate:rate1h
+          expr: sum(rate(anomaly_detection_total[1h])) by (severity)
+
+    - name: baalvion.intelligence.alerts
+      rules:
+        - alert: BanModelQualityDegraded
+          # AUC at/below coin-flip means the ban model has lost signal → retrain.
+          expr: ban_prediction_accuracy < 0.55
+          for: 30m
+          labels: { severity: warning, component: ml }
+          annotations:
+            summary: "Ban prediction model AUC degraded (<0.55)"
+            description: "AUC={{ $value }}. Investigate drift / retrain ban_predictor."
+
+        - alert: AnomalyStormCritical
+          # A burst of critical anomalies suggests a real network-wide incident.
+          expr: sum(increase(anomaly_detection_total{severity="critical"}[15m])) > 5
+          for: 5m
+          labels: { severity: critical, component: intelligence }
+          annotations:
+            summary: "Critical-anomaly storm ({{ $value }} in 15m)"
+            description: "Multiple critical anomalies detected — check provider health + abuse."
+
+        - alert: MLInferenceLatencyHigh
+          expr: job:ml_inference_p95_ms:5m > 500
+          for: 10m
+          labels: { severity: warning, component: ml }
+          annotations:
+            summary: "ML inference p95 > 500ms for {{ $labels.model }}"
+            description: "ml-service is slow or saturated; Node is likely on local fallback."
+
+        - alert: PredictiveFailoverChurn
+          # Sustained predictive failovers mean providers are flapping.
+          expr: sum(increase(predictive_failover_total[30m])) > 20
+          for: 10m
+          labels: { severity: warning, component: routing }
+          annotations:
+            summary: "High predictive-failover rate ({{ $value }}/30m)"
+            description: "Routing brain is repeatedly de-weighting providers — review provider stability."
+
+        - alert: ForecastBandwidthSurge
+          # Forecast trending toward a large capacity need → pre-scale.
+          expr: forecast_horizon_bandwidth_gb > (avg_over_time(forecast_horizon_bandwidth_gb[7d]) * 1.5)
+          for: 1h
+          labels: { severity: info, component: capacity }
+          annotations:
+            summary: "Forecasted bandwidth 1.5x above 7d average"
+            description: "Capacity planning: provision ahead of the projected surge."

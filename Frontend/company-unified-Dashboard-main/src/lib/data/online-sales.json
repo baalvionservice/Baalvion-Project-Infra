@@ -1,0 +1,18 @@
+{
+  "todaysRevenue": 12840,
+  "ordersToday": 284,
+  "avgOrderValue": 45.21,
+  "topChannels": {
+    "website": 62,
+    "app": 38
+  },
+  "revenueLast7Days": [
+    { "day": "Mon", "revenue": 9800 },
+    { "day": "Tue", "revenue": 10500 },
+    { "day": "Wed", "revenue": 11200 },
+    { "day": "Thu", "revenue": 9500 },
+    { "day": "Fri", "revenue": 13500 },
+    { "day": "Sat", "revenue": 15200 },
+    { "day": "Sun", "revenue": 12840 }
+  ]
+}

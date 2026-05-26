@@ -1,0 +1,56 @@
+# Baalvion code ownership — routes PR reviews to the owning team per bounded
+# context. Enforced via branch protection (required review from code owners).
+# A change to another context's contract REQUIRES that context's team approval —
+# this is how bounded-context boundaries are enforced in code review.
+# Teams are defined in the GitHub org; mirror them in catalog/services/*.yaml `owner`.
+
+# ── Default ──────────────────────────────────────────────────────────────────
+*                                       @baalvion/platform-core
+
+# ── Shared platform packages (changes ripple everywhere — extra scrutiny) ──────
+/packages/                              @baalvion/platform-core
+/packages/contracts/                    @baalvion/platform-core @baalvion/architecture
+/packages/events/                       @baalvion/platform-core @baalvion/architecture
+/packages/auth-sdk/                     @baalvion/platform-core
+/packages/rbac/                         @baalvion/platform-core
+/packages/telemetry/                    @baalvion/observability
+
+# ── Contracts are co-owned by producer + architecture (breaking-change gate) ───
+/packages/contracts/proto/baalvion/identity/   @baalvion/platform-core @baalvion/architecture
+/packages/contracts/proto/baalvion/billing/    @baalvion/platform-core @baalvion/architecture
+/packages/contracts/proto/baalvion/proxy/      @baalvion/proxy-division @baalvion/architecture
+
+# ── Proxy infrastructure division ──────────────────────────────────────────────
+/Backend/backend-Proxy-BaalvionStack/   @baalvion/proxy-division
+/Backend/gateway/                       @baalvion/proxy-division
+/Backend/ml-service/                    @baalvion/data-platform @baalvion/proxy-division
+/Frontend/Proxy-BaalvionStack/          @baalvion/proxy-division
+
+# ── Platform core / identity ───────────────────────────────────────────────────
+/Backend/auth-service/                  @baalvion/platform-core
+/Backend/admin-service/                 @baalvion/platform-core
+/Backend/session-service/               @baalvion/platform-core
+/Backend/oauth-service/                 @baalvion/platform-core
+/Backend/notification-service/          @baalvion/platform-core
+
+# ── Other business divisions ───────────────────────────────────────────────────
+/Backend/commerce-service/              @baalvion/commerce-division
+/Backend/order-service/                 @baalvion/commerce-division
+/Backend/fulfillment-service/           @baalvion/commerce-division
+/Backend/inventory-service/             @baalvion/commerce-division
+/Backend/mining-service/                @baalvion/mining-division
+/Backend/law-service/                   @baalvion/legal-division
+/Backend/real-estate-service/           @baalvion/real-estate-division
+/Backend/jobs-service/                  @baalvion/jobs-division
+/Backend/market-service/                @baalvion/commerce-division
+/Backend/trade-service/                 @baalvion/commerce-division
+/Backend/ir-service/                    @baalvion/platform-core
+/Backend/ctm-service/                   @baalvion/platform-core
+
+# ── Governance + infra (platform engineering + SRE) ────────────────────────────
+/catalog/                               @baalvion/architecture
+/infra/                                 @baalvion/sre @baalvion/platform-core
+/docs/architecture/                     @baalvion/architecture
+/docs/adr/                              @baalvion/architecture
+/platform/cli/                          @baalvion/platform-core
+/CODEOWNERS                             @baalvion/architecture

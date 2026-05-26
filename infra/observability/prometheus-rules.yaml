@@ -1,0 +1,111 @@
+# SLO recording + alerting rules (kube-prometheus-stack / Prometheus Operator).
+# SLO: 99.9% of proxy connections succeed (error budget = 0.1%).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: baalvion-slo
+  namespace: observability
+  labels: { release: kube-prometheus-stack, role: alert-rules }
+spec:
+  groups:
+    # ── SLI recording rules: gateway connection error ratio per window ──
+    - name: baalvion.sli
+      interval: 30s
+      rules:
+        - record: job:gateway_error_ratio:rate5m
+          expr: |
+            sum(rate(upstream_failures_total[5m]))
+            / clamp_min(sum(rate(proxy_requests_total[5m])) + sum(rate(upstream_failures_total[5m])), 1)
+        - record: job:gateway_error_ratio:rate30m
+          expr: |
+            sum(rate(upstream_failures_total[30m]))
+            / clamp_min(sum(rate(proxy_requests_total[30m])) + sum(rate(upstream_failures_total[30m])), 1)
+        - record: job:gateway_error_ratio:rate1h
+          expr: |
+            sum(rate(upstream_failures_total[1h]))
+            / clamp_min(sum(rate(proxy_requests_total[1h])) + sum(rate(upstream_failures_total[1h])), 1)
+        - record: job:gateway_error_ratio:rate6h
+          expr: |
+            sum(rate(upstream_failures_total[6h]))
+            / clamp_min(sum(rate(proxy_requests_total[6h])) + sum(rate(upstream_failures_total[6h])), 1)
+        - record: job:gateway_p95_latency_ms:5m
+          expr: histogram_quantile(0.95, sum(rate(proxy_connect_latency_ms_bucket[5m])) by (le))
+
+    # ── Multi-window multi-burn-rate SLO alerts (Google SRE workbook) ──
+    - name: baalvion.slo.burn
+      rules:
+        - alert: GatewaySLOErrorBudgetFastBurn
+          # 14.4x burn over 1h AND 5m → ~2% budget in 1h. Page.
+          expr: |
+            job:gateway_error_ratio:rate1h > (14.4 * 0.001)
+            and job:gateway_error_ratio:rate5m > (14.4 * 0.001)
+          for: 2m
+          labels: { severity: critical, slo: gateway_availability }
+          annotations:
+            summary: "Gateway availability SLO fast-burning (14.4x)"
+            runbook: "infra/sre/RUNBOOKS.md#gateway-down"
+        - alert: GatewaySLOErrorBudgetSlowBurn
+          # 6x burn over 6h AND 30m. Page.
+          expr: |
+            job:gateway_error_ratio:rate6h > (6 * 0.001)
+            and job:gateway_error_ratio:rate30m > (6 * 0.001)
+          for: 15m
+          labels: { severity: critical, slo: gateway_availability }
+          annotations: { summary: "Gateway availability SLO slow-burning (6x)" }
+
+    # ── Domain / product alerts ──
+    - name: baalvion.product
+      rules:
+        - alert: GatewayHighConnectLatency
+          expr: job:gateway_p95_latency_ms:5m > 2000
+          for: 10m
+          labels: { severity: warning }
+          annotations: { summary: "Gateway p95 upstream connect latency > 2s" }
+        - alert: NoActiveGateways
+          expr: sum(active_connections) == 0 and sum(rate(proxy_requests_total[10m])) == 0
+          for: 5m
+          labels: { severity: critical }
+          annotations: { summary: "No gateway is serving traffic" }
+        - alert: ProviderOffline
+          expr: max by (provider) (provider_state) == 3
+          for: 5m
+          labels: { severity: critical }
+          annotations: { summary: "Provider {{ $labels.provider }} is OFFLINE", runbook: "infra/sre/RUNBOOKS.md#provider-outage" }
+        - alert: ProviderDegraded
+          expr: max by (provider) (provider_state) >= 1 < 3
+          for: 15m
+          labels: { severity: warning }
+          annotations: { summary: "Provider {{ $labels.provider }} degraded" }
+        - alert: HighProviderBanRate
+          expr: max by (provider) (provider_ban_rate) > 0.3
+          for: 10m
+          labels: { severity: warning }
+          annotations: { summary: "Provider {{ $labels.provider }} ban rate > 30%" }
+        - alert: AuthFailureSpike
+          expr: sum(rate(auth_failures_total[5m])) > 20
+          for: 5m
+          labels: { severity: warning }
+          annotations: { summary: "Elevated auth failures (possible credential stuffing)" }
+        - alert: QuotaDenialSpike
+          expr: sum(rate(quota_denials_total[5m])) > 50
+          for: 10m
+          labels: { severity: info }
+          annotations: { summary: "Many quota-blocked connections (upsell / abuse signal)" }
+
+    # ── Pipeline / billing health ──
+    - name: baalvion.pipeline
+      rules:
+        - alert: MeteringIngestStalled
+          expr: sum(rate(metering_ingest_total[10m])) == 0 and sum(rate(bytes_transferred_total[10m])) > 0
+          for: 10m
+          labels: { severity: critical }
+          annotations: { summary: "Traffic is flowing but metering ingestion has stalled (billing at risk)" }
+        - alert: MeteringDeadLetters
+          expr: increase(metering_dlq_total[15m]) > 0
+          for: 1m
+          labels: { severity: warning }
+          annotations: { summary: "Metering events are being dead-lettered" }
+        - alert: BillingFailures
+          expr: increase(billing_failures_total[30m]) > 0
+          labels: { severity: warning }
+          annotations: { summary: "Billing run failures detected", runbook: "infra/sre/RUNBOOKS.md#billing" }

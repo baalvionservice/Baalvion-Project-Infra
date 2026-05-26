@@ -1,0 +1,33 @@
+replicaCount: 3
+
+image:
+  repository: ghcr.io/baalvion/gateway
+  tag: latest
+  pullPolicy: IfNotPresent
+
+ports:
+  http: 10000
+  socks: 1080
+  metrics: 9090
+
+resources:
+  requests: { cpu: 250m, memory: 128Mi }
+  limits: { cpu: "2", memory: 512Mi }
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 50
+  targetCPUUtilizationPercentage: 65
+  activeConnectionsTarget: "2000"
+
+config:
+  usageStream: "usage:events"
+  sessionTtlSeconds: "600"
+  allowDirect: "false"
+
+# Provide via `--set-file secrets.providersJson=providers.json` or an external secret.
+secrets:
+  databaseUrl: ""
+  redisUrl: ""
+  providersJson: "[]"

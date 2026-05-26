@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: baalvion
+  labels:
+    app:       notification-service
+    component: api
+    version:   "1.0.0"
+    tier:      platform
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels:
+      app:       notification-service
+      component: api
+  template:
+    metadata:
+      labels:
+        app:       notification-service
+        component: api
+        version:   "1.0.0"
+        tier:      platform
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port:   "9467"
+        prometheus.io/path:   "/metrics"
+    spec:
+      serviceAccountName: baalvion-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser:    1000
+        fsGroup:      1000
+      terminationGracePeriodSeconds: 30
+
+      containers:
+        - name: notification-service
+          image: ghcr.io/baalvion/notification-service:latest
+          imagePullPolicy: Always
+          # Runs the API server (index.js)
+          command: ["node", "index.js"]
+          ports:
+            - containerPort: 3031
+              name: http
+            - containerPort: 9467
+              name: metrics
+          envFrom:
+            - configMapRef: { name: baalvion-common }
+            - secretRef:    { name: baalvion-secrets }
+          env:
+            - name:  PORT
+              value: "3031"
+            - name:  PROMETHEUS_PORT
+              value: "9467"
+            - name:  LOG_LEVEL
+              value: info
+            - name:  POD_NAME
+              valueFrom:
+                fieldRef: { fieldPath: metadata.name }
+            - name:  POD_NAMESPACE
+              valueFrom:
+                fieldRef: { fieldPath: metadata.namespace }
+
+          resources:
+            requests: { cpu: "100m", memory: "192Mi" }
+            limits:   { cpu: "500m", memory: "384Mi" }
+
+          livenessProbe:
+            httpGet: { path: /health, port: 3031 }
+            initialDelaySeconds: 20
+            periodSeconds:       15
+            failureThreshold:    3
+
+          readinessProbe:
+            httpGet: { path: /health, port: 3031 }
+            initialDelaySeconds: 10
+            periodSeconds:       10
+            failureThreshold:    3
+
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 5"]
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem:   true
+            capabilities:
+              drop: [ALL]
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app:       notification-service
+                    component: api
+                topologyKey: kubernetes.io/hostname

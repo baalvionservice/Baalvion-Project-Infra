@@ -1,0 +1,176 @@
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+  external_labels:
+    cluster: baalvion-local
+    env:     development
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: [alertmanager:9093]
+
+rule_files:
+  - /etc/prometheus/alerts/*.yml
+
+scrape_configs:
+
+  # ── Baalvion services (via OTel Collector) ────────────────────────────────
+  - job_name: otel-collector
+    static_configs:
+      - targets: [otel-collector:8889]
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: baalvion_(.*)
+        action: keep
+
+  # ── Direct service scrape (fallback if OTel not available) ────────────────
+  - job_name: auth-service
+    static_configs:
+      - targets: [baalvion-auth:9461]
+    relabel_configs:
+      - target_label: service
+        replacement:  auth-service
+
+  - job_name: admin-service
+    static_configs:
+      - targets: [baalvion-admin-svc:9462]
+    relabel_configs:
+      - target_label: service
+        replacement:  admin-service
+
+  - job_name: session-service
+    static_configs:
+      - targets: [baalvion-session:9463]
+    relabel_configs:
+      - target_label: service
+        replacement:  session-service
+
+  - job_name: oauth-service
+    static_configs:
+      - targets: [baalvion-oauth:9464]
+    relabel_configs:
+      - target_label: service
+        replacement:  oauth-service
+
+  - job_name: notification-service
+    static_configs:
+      - targets: [baalvion-notification:9467]
+    relabel_configs:
+      - target_label: service
+        replacement:  notification-service
+
+  # ── Domain microservices (scrape /metrics on app port) ────────────────────
+  - job_name: proxy-backend
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-proxy:4000]
+    relabel_configs:
+      - target_label: service
+        replacement:  proxy-backend
+
+  - job_name: jobs-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-jobs:3002]
+    relabel_configs:
+      - target_label: service
+        replacement:  jobs-service
+
+  - job_name: ctm-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-ctm:3011]
+    relabel_configs:
+      - target_label: service
+        replacement:  ctm-service
+
+  - job_name: mining-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-mining:3003]
+    relabel_configs:
+      - target_label: service
+        replacement:  mining-service
+
+  - job_name: imperialpedia-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-imperialpedia:3004]
+    relabel_configs:
+      - target_label: service
+        replacement:  imperialpedia-service
+
+  - job_name: real-estate-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-real-estate:3005]
+    relabel_configs:
+      - target_label: service
+        replacement:  real-estate-service
+
+  - job_name: brand-connector-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-brand:3006]
+    relabel_configs:
+      - target_label: service
+        replacement:  brand-connector-service
+
+  - job_name: market-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-market:3007]
+    relabel_configs:
+      - target_label: service
+        replacement:  market-service
+
+  - job_name: ir-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-ir:3008]
+    relabel_configs:
+      - target_label: service
+        replacement:  ir-service
+
+  - job_name: dashboard-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-dashboard:3009]
+    relabel_configs:
+      - target_label: service
+        replacement:  dashboard-service
+
+  - job_name: about-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-about:3010]
+    relabel_configs:
+      - target_label: service
+        replacement:  about-service
+
+  - job_name: realtime-service
+    metrics_path: /metrics
+    static_configs:
+      - targets: [baalvion-realtime:3040]
+    relabel_configs:
+      - target_label: service
+        replacement:  realtime-service
+
+  # ── Infrastructure exporters ──────────────────────────────────────────────
+  - job_name: node-exporter
+    static_configs:
+      - targets: [node-exporter:9100]
+
+  - job_name: redis
+    static_configs:
+      - targets: [redis-exporter:9121]
+
+  - job_name: postgres
+    static_configs:
+      - targets: [postgres-exporter:9187]
+
+  # ── Prometheus itself ─────────────────────────────────────────────────────
+  - job_name: prometheus
+    static_configs:
+      - targets: [localhost:9090]

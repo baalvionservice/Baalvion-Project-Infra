@@ -1,0 +1,195 @@
+
+[
+  {
+    "id": "notif_1",
+    "type": "Alert",
+    "title": "Revenue Below Target",
+    "description": "RetailChain UAE revenue is 18% below target for this week.",
+    "timestamp": "2024-07-31T10:00:00Z",
+    "isRead": false
+  },
+  {
+    "id": "notif_2",
+    "type": "Finance",
+    "title": "Payment Succeeded",
+    "description": "A payment of $1,200 from Emily Carter for FinanceHub USA succeeded.",
+    "timestamp": "2024-07-31T09:45:00Z",
+    "isRead": false
+  },
+  {
+    "id": "notif_3",
+    "type": "Team",
+    "title": "New Employee Onboarded",
+    "description": "Li Wei has been added to the DigitalAgency SG team.",
+    "timestamp": "2024-07-31T09:30:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_4",
+    "type": "System",
+    "title": "Database Backup Complete",
+    "description": "The daily backup of the production database completed successfully.",
+    "timestamp": "2024-07-31T04:00:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_5",
+    "type": "Finance",
+    "title": "Payout Pending",
+    "description": "A payout of $18,400 is scheduled for August 5, 2024.",
+    "timestamp": "2024-07-30T18:00:00Z",
+    "isRead": false
+  },
+  {
+    "id": "notif_6",
+    "type": "Alert",
+    "title": "Server Response Time Elevated",
+    "description": "TechCorp India servers are experiencing high latency.",
+    "timestamp": "2024-07-30T17:15:00Z",
+    "isRead": false
+  },
+  {
+    "id": "notif_7",
+    "type": "Team",
+    "title": "Vacation Request Approved",
+    "description": "Priya Sharma's vacation request for Aug 12-16 has been approved.",
+    "timestamp": "2024-07-30T16:45:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_8",
+    "type": "Finance",
+    "title": "Invoice Overdue",
+    "description": "Invoice #INV-0451 for Baalvion Media UK is 5 days overdue.",
+    "timestamp": "2024-07-30T11:00:00Z",
+    "isRead": false
+  },
+  {
+    "id": "notif_9",
+    "type": "System",
+    "title": "New Integration Added",
+    "description": "The HubSpot integration has been successfully configured.",
+    "timestamp": "2024-07-30T10:00:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_10",
+    "type": "Alert",
+    "title": "Profit Target Exceeded",
+    "description": "TechCorp India exceeded its profit target by 22% this quarter.",
+    "timestamp": "2024-07-29T14:30:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_11",
+    "type": "Finance",
+    "title": "Payment Failed",
+    "description": "A payment of $350 from Oliver Twist to Baalvion Media UK failed.",
+    "timestamp": "2024-07-29T09:30:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_12",
+    "type": "Team",
+    "title": "Performance Review",
+    "description": "Your quarterly performance review with Alex Davis is scheduled for Friday.",
+    "timestamp": "2024-07-29T09:00:00Z",
+    "isRead": false
+  },
+  {
+    "id": "notif_13",
+    "type": "Alert",
+    "title": "High Refund Rate",
+    "description": "DigitalAgency SG has a product return rate of 8.2% this month.",
+    "timestamp": "2024-07-28T15:00:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_14",
+    "type": "System",
+    "title": "Terms of Service Update",
+    "description": "Our Terms of Service have been updated. Please review the changes.",
+    "timestamp": "2024-07-28T12:00:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_15",
+    "type": "Finance",
+    "title": "Large Transaction",
+    "description": "A new transaction of $50,000 was processed for TechCorp India.",
+    "timestamp": "2024-07-28T10:30:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_16",
+    "type": "Team",
+    "title": "Role Change",
+    "description": "Your role has been updated to 'ADMIN'. You now have new permissions.",
+    "timestamp": "2024-07-27T11:00:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_17",
+    "type": "Finance",
+    "title": "Expense Report Approved",
+    "description": "Your Q2 expense report for $1,850 has been approved.",
+    "timestamp": "2024-07-27T10:00:00Z",
+    "isRead": false
+  },
+  {
+    "id": "notif_18",
+    "type": "Alert",
+    "title": "Data Sync Conflict",
+    "description": "3 data sync conflicts require your resolution.",
+    "timestamp": "2024-07-26T18:00:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_19",
+    "type": "Team",
+    "title": "Company Offsite",
+    "description": "Don't forget to RSVP for the annual company offsite by this Friday.",
+    "timestamp": "2024-07-26T14:00:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_20",
+    "type": "System",
+    "title": "API Key Expiration",
+    "description": "The Stripe API key for FinanceHub USA is set to expire in 7 days.",
+    "timestamp": "2024-07-26T09:00:00Z",
+    "isRead": false
+  },
+  {
+    "id": "notif_21",
+    "type": "Finance",
+    "title": "New Subscription",
+    "description": "A new monthly subscription of $299 has started for Baalvion Media UK.",
+    "timestamp": "2024-07-25T16:20:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_22",
+    "type": "Team",
+    "title": "John Smith joined FinanceHub USA",
+    "description": "A new team member has been added to your business unit.",
+    "timestamp": "2024-07-25T11:30:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_23",
+    "type": "Team",
+    "title": "Team Goal Achieved",
+    "description": "The sales team has reached its quarterly target of $1M in new revenue.",
+    "timestamp": "2024-07-24T17:00:00Z",
+    "isRead": true
+  },
+  {
+    "id": "notif_24",
+    "type": "Finance",
+    "title": "Budget Update",
+    "description": "The Q3 marketing budget for TechCorp India has been increased by 15%.",
+    "timestamp": "2024-07-24T14:15:00Z",
+    "isRead": true
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Abstract creative purple background",
+      "imageUrl": "https://picsum.photos/seed/baalvion-hero/1200/800",
+      "imageHint": "abstract purple"
+    },
+    {
+      "id": "creator-1",
+      "description": "Influencer lifestyle portrait",
+      "imageUrl": "https://picsum.photos/seed/creator1/400/400",
+      "imageHint": "lifestyle influencer"
+    },
+    {
+      "id": "brand-logo-1",
+      "description": "Modern minimalist brand logo",
+      "imageUrl": "https://picsum.photos/seed/brand1/200/200",
+      "imageHint": "minimalist logo"
+    },
+    {
+      "id": "campaign-tech",
+      "description": "Tech gadget marketing campaign",
+      "imageUrl": "https://picsum.photos/seed/tech-campaign/800/600",
+      "imageHint": "tech gadget"
+    },
+    {
+      "id": "campaign-fashion",
+      "description": "Fashion lifestyle photography",
+      "imageUrl": "https://picsum.photos/seed/fashion-campaign/800/600",
+      "imageHint": "fashion lifestyle"
+    }
+  ]
+}

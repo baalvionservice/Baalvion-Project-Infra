@@ -1,0 +1,94 @@
+{
+  "hero": {
+    "badge": "Nœud d'index Alpha actif",
+    "title": "L'infrastructure mondiale de connaissances par l'IA",
+    "subtitle": "Recherchez n'importe quoi instantanément avec des données mondiales structurées. Explorez plus d'un million de nœuds indexables.",
+    "cta": "Rejoindre la liste d'attente",
+    "secondary_cta": "Accès anticipé"
+  },
+  "nav": {
+    "home": "Accueil",
+    "news": "Actualités",
+    "about": "À propos",
+    "discovery": "Découverte",
+    "tools": "Outils",
+    "community": "Communauté",
+    "company": "Entreprise",
+    "main_navigation": "Navigation Principale",
+    "discovery_research": "Découverte et Recherche",
+    "tools_resources": "Outils et Ressources",
+    "community_learning": "Communauté et Apprentissage",
+    "company_legal": "Entreprise et Légal",
+    "settings": "Paramètres",
+    "countries": "Pays",
+    "companies": "Entreprises",
+    "industries": "Industries",
+    "technologies": "Technologies",
+    "stocks": "Actions",
+    "brokers": "Courtiers",
+    "financial_tools": "Outils Financiers",
+    "ai_analyst": "Analyste IA",
+    "research_ai": "Recherche IA",
+    "calculators": "Calculatrices",
+    "datasets": "Jeux de Données",
+    "glossary": "Glossaire",
+    "creators": "Créateurs",
+    "learning_paths": "Parcours d'Apprentissage",
+    "knowledge_map": "Carte de Connaissances",
+    "articles": "Articles",
+    "topics": "Sujets",
+    "pricing": "Tarifs",
+    "contact": "Contact",
+    "experts": "Experts",
+    "transparency": "Transparence",
+    "privacy_policy": "Politique de Confidentialité",
+    "terms_of_service": "Conditions de Service"
+  },
+  "features": {
+    "label": "Capacités de base",
+    "title": "Pourquoi Imperialpedia ?",
+    "subtitle": "Nous fournissons la base architecturale de l'avenir de l'intelligence financière.",
+    "ai_engine": "Moteur de connaissance IA",
+    "ai_engine_desc": "Informations structurées instantanées synthétisées à partir de millions de points de données mondiaux en temps réel.",
+    "datasets": "Ensembles de données mondiaux",
+    "datasets_desc": "Accédez à des millions d'entités dans les pays, les entreprises, les industries et les technologies.",
+    "assistant": "Assistant de recherche",
+    "assistant_desc": "Rapports et résumés alimentés par l'IA à portée de main. Recherche haute fidélité à grande échelle.",
+    "api": "API d'entreprise",
+    "api_desc": "Connectez notre graphique de connaissances structuré directement à vos applications institutionnelles."
+  },
+  "faq": {
+    "label": "Triage de l'information",
+    "title": "Foire aux questions",
+    "subtitle": "Tout ce que vous devez savoir sur l'infrastructure d'intelligence la plus évolutive au monde.",
+    "support_title": "Encore des questions ?",
+    "support_desc": "Notre assistant de recherche IA peut fournir un contexte plus approfondi sur notre feuille de route.",
+    "support_button": "Interroger le hub"
+  },
+  "pricing": {
+    "label": "Matrice d'investissement",
+    "title": "Plans d'intelligence",
+    "subtitle": "Sélectionnez le niveau de découverte qui correspond à vos objectifs de recherche.",
+    "disclaimer": "Les nœuds institutionnels nécessitant des protocoles SLA personnalisés doivent contacter directement le support de gouvernance."
+  },
+  "cta": {
+    "label": "Dernier échange de découverte",
+    "title": "Prêt à auditer l'économie mondiale ?",
+    "subtitle": "Rejoignez notre réseau d'analystes institutionnels et de chercheurs experts. Sécurisez votre nœud dans l'index dès aujourd'hui.",
+    "button": "Sécuriser ma place"
+  },
+  "waitlist": {
+    "input_placeholder": "Email institutionnel...",
+    "submit_button": "Rejoindre la matrice",
+    "caption": "Rejoignez plus de 142 000 analystes recevant des nœuds d'intelligence haute fidélité.",
+    "error_required": "L'email est requis.",
+    "error_invalid": "Email invalide détecté."
+  },
+  "footer": {
+    "description": "Le moteur d'intelligence financière alimenté par l'IA le plus évolutif au monde. Recherche approfondie sur plus d'un million de nœuds.",
+    "stay_synced": "Rester synchronisé",
+    "sync_desc": "Abonnez-vous au fil d'actualité pour des audits de marché en temps réel et des alertes pSEO.",
+    "copyright": "© {{year}} Imperialpedia. Infrastructure de connaissances IA.",
+    "enc_status": "Données cryptées"
+  }
+}

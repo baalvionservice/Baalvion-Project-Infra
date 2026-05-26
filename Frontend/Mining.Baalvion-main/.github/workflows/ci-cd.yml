@@ -1,0 +1,56 @@
+name: GeoTrade Nexus CI/CD
+
+on:
+  push:
+    branches: [main, staging]
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Static Analysis (Lint & Types)
+        run: |
+          pnpm run lint
+          pnpm run typecheck
+
+      - name: Production Build Verification
+        run: pnpm run build
+        env:
+          NEXT_PUBLIC_GA_MEASUREMENT_ID: ${{ secrets.GA_MEASUREMENT_ID }}
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: validate
+    if: github.ref == 'refs/heads/staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Firebase App Hosting (Staging)
+        run: echo "Deployment triggered via Firebase GitHub Integration"
+
+  deploy-production:
+    name: Deploy to Production
+    needs: validate
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Firebase App Hosting (Production)
+        run: echo "Production deployment triggered via Firebase GitHub Integration"

@@ -1,0 +1,20 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: organization-platform
+  description: Multi-tenant org governance — orgs, members, roles (RBAC), org units, policies, quota & environment separation. Shared across all divisions.
+  division: platform-core
+  context: organization
+  owner: "@baalvion/platform-core"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/admin-service
+spec:
+  lifecycle: beta
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [identity-platform]
+  producesEvents: [org.created, org.member.invited, org.member.joined, org.member.removed]
+  apis: ["/v1/organization"]
+  slo: { availability: 0.999, latencyP95Ms: 200 }
+  deploy: { chart: baalvion-service, namespace: baalvion-identity, minReplicas: 2, maxReplicas: 15 }

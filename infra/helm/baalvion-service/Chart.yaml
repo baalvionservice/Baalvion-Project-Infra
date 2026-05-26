@@ -1,0 +1,9 @@
+apiVersion: v2
+name: baalvion-service
+description: The standard chart EVERY Baalvion service deploys with — Deployment + Service + HPA + PDB + ServiceMonitor + zero-trust NetworkPolicy. One chart, per-service values, so deployment is correct-by-construction.
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+maintainers:
+  - name: platform-engineering
+    email: infra.baalvion@gmail.com

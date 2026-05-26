@@ -1,0 +1,63 @@
+{
+  "title": "Baalvion — Proxy Gateway",
+  "uid": "baalvion-gateway",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "tags": ["baalvion", "proxy", "sre"],
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      { "name": "datasource", "type": "datasource", "query": "prometheus", "current": {} },
+      { "name": "region", "type": "query", "datasource": "${datasource}",
+        "query": "label_values(active_connections, region)", "includeAll": true, "multi": true }
+    ]
+  },
+  "panels": [
+    { "id": 1, "type": "stat", "title": "Active Connections", "gridPos": {"h":4,"w":6,"x":0,"y":0},
+      "datasource": "${datasource}",
+      "targets": [{ "expr": "sum(active_connections)" }] },
+    { "id": 2, "type": "stat", "title": "Requests/sec", "gridPos": {"h":4,"w":6,"x":6,"y":0},
+      "datasource": "${datasource}",
+      "targets": [{ "expr": "sum(rate(proxy_requests_total[5m]))" }] },
+    { "id": 3, "type": "stat", "title": "Error budget burn (1h)", "gridPos": {"h":4,"w":6,"x":12,"y":0},
+      "datasource": "${datasource}",
+      "targets": [{ "expr": "job:gateway_error_ratio:rate1h / 0.001" }],
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [
+        {"color":"green","value":null},{"color":"orange","value":6},{"color":"red","value":14.4}] } } } },
+    { "id": 4, "type": "stat", "title": "Bandwidth (MB/s)", "gridPos": {"h":4,"w":6,"x":18,"y":0},
+      "datasource": "${datasource}",
+      "targets": [{ "expr": "sum(rate(bytes_transferred_total[5m])) / 1048576" }] },
+    { "id": 5, "type": "timeseries", "title": "Connect latency p50/p95/p99 (ms)", "gridPos": {"h":8,"w":12,"x":0,"y":4},
+      "datasource": "${datasource}",
+      "targets": [
+        { "expr": "histogram_quantile(0.5, sum(rate(proxy_connect_latency_ms_bucket[5m])) by (le))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum(rate(proxy_connect_latency_ms_bucket[5m])) by (le))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum(rate(proxy_connect_latency_ms_bucket[5m])) by (le))", "legendFormat": "p99" }
+      ] },
+    { "id": 6, "type": "timeseries", "title": "Bandwidth by provider (MB/s)", "gridPos": {"h":8,"w":12,"x":12,"y":4},
+      "datasource": "${datasource}",
+      "targets": [{ "expr": "sum by (provider) (rate(bytes_transferred_total[5m])) / 1048576", "legendFormat": "{{provider}}" }] },
+    { "id": 7, "type": "timeseries", "title": "Upstream failures & failovers /s", "gridPos": {"h":8,"w":12,"x":0,"y":12},
+      "datasource": "${datasource}",
+      "targets": [
+        { "expr": "sum by (provider) (rate(upstream_failures_total[5m]))", "legendFormat": "fail {{provider}}" },
+        { "expr": "sum(rate(failover_events_total[5m]))", "legendFormat": "failovers" }
+      ] },
+    { "id": 8, "type": "timeseries", "title": "Auth failures & quota denials /s", "gridPos": {"h":8,"w":12,"x":12,"y":12},
+      "datasource": "${datasource}",
+      "targets": [
+        { "expr": "sum by (reason) (rate(auth_failures_total[5m]))", "legendFormat": "auth {{reason}}" },
+        { "expr": "sum(rate(quota_denials_total[5m]))", "legendFormat": "quota_denied" }
+      ] },
+    { "id": 9, "type": "table", "title": "Provider health", "gridPos": {"h":8,"w":24,"x":0,"y":20},
+      "datasource": "${datasource}",
+      "targets": [
+        { "expr": "provider_state", "format": "table", "instant": true, "legendFormat": "{{provider}}" },
+        { "expr": "provider_success_rate", "format": "table", "instant": true },
+        { "expr": "provider_latency_ms", "format": "table", "instant": true },
+        { "expr": "provider_ban_rate", "format": "table", "instant": true }
+      ] }
+  ]
+}

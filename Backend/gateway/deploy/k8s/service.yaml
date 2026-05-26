@@ -1,0 +1,26 @@
+# Customer-facing proxy traffic (HTTP/CONNECT + SOCKS5). Use NLB for raw TCP.
+apiVersion: v1
+kind: Service
+metadata:
+  name: baalvion-gateway
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector: { app: baalvion-gateway }
+  ports:
+    - { name: http-proxy, port: 10000, targetPort: 10000, protocol: TCP }
+    - { name: socks5, port: 1080, targetPort: 1080, protocol: TCP }
+---
+# Internal-only metrics/health (scraped by Prometheus, not public).
+apiVersion: v1
+kind: Service
+metadata:
+  name: baalvion-gateway-metrics
+  labels: { app: baalvion-gateway }
+spec:
+  type: ClusterIP
+  selector: { app: baalvion-gateway }
+  ports:
+    - { name: metrics, port: 9090, targetPort: 9090 }

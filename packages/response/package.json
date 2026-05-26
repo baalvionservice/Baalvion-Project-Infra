@@ -1,0 +1,34 @@
+{
+  "name": "@baalvion/response",
+  "version": "1.0.0",
+  "description": "HTTP response helpers: sendSuccess, sendError, sendPaginated",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types":   "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import":  "./dist/index.mjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build":      "tsup",
+    "dev":        "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "clean":      "rimraf dist"
+  },
+  "dependencies": {
+    "@baalvion/types":  "workspace:*",
+    "@baalvion/errors": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup":        "^8.3.0",
+    "typescript":  "^5.7.2",
+    "rimraf":      "^6.0.1",
+    "@types/node": "^22.0.0",
+    "@types/express": "^5.0.0",
+    "express":     "^5.2.1"
+  }
+}

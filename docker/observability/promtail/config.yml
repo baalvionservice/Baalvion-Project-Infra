@@ -1,0 +1,42 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Docker container logs
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: label
+            values: [com.docker.compose.project=baalvion]
+    relabel_configs:
+      - source_labels: [__meta_docker_container_name]
+        regex: /baalvion-(.*)
+        target_label: service
+        replacement: $1
+      - source_labels: [__meta_docker_container_label_com_docker_compose_service]
+        target_label: container
+    pipeline_stages:
+      # Parse JSON logs from pino
+      - json:
+          expressions:
+            level:     level
+            msg:       msg
+            requestId: requestId
+            traceId:   traceId
+            spanId:    spanId
+            service:   service
+      - labels:
+          level:
+          service:
+      - timestamp:
+          source: time
+          format: RFC3339Nano

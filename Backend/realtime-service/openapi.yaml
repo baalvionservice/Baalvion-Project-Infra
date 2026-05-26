@@ -1,0 +1,122 @@
+openapi: '3.0.3'
+info:
+  title: Baalvion Realtime Service API
+  version: '1.0.0'
+  description: >
+    WebSocket gateway for the Baalvion platform. Provides Socket.IO namespaces
+    (/dashboard, /ir, /jobs, /admin, /ctm) for real-time events, presence tracking,
+    and event replay. This spec documents the HTTP endpoints only; WebSocket
+    connections are established via Socket.IO (see description below).
+servers:
+  - url: http://localhost:3040
+    description: Development (no path prefix — HTTP endpoints are at root)
+
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:   { type: string }
+        message: { type: string }
+
+    HealthResponse:
+      type: object
+      properties:
+        status:    { type: string, enum: [ok] }
+        service:   { type: string, example: realtime-service }
+        uptime:    { type: number, description: Process uptime in seconds }
+        redis:     { type: boolean, description: Whether Redis pub/sub is connected }
+        ts:        { type: string, format: date-time }
+
+    MetricsResponse:
+      type: object
+      properties:
+        connected:
+          type: integer
+          description: Total Socket.IO clients connected across all namespaces
+        namespaces:
+          type: object
+          description: Per-namespace socket count
+          properties:
+            /dashboard: { type: integer }
+            /ir:        { type: integer }
+            /jobs:      { type: integer }
+            /admin:     { type: integer }
+            /ctm:       { type: integer }
+        presence:
+          type: object
+          description: Per-org online user count (orgId -> count)
+          additionalProperties: { type: integer }
+        uptime:
+          type: number
+          description: Process uptime in seconds
+        redisAvailable:
+          type: boolean
+        ts:
+          type: string
+          format: date-time
+
+paths:
+
+  /health:
+    get:
+      tags: [Utility]
+      summary: Health check — used by docker-compose and load balancers (no auth)
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/HealthResponse' }
+
+  /metrics:
+    get:
+      tags: [Utility]
+      summary: Runtime metrics — connected socket counts and per-org presence snapshot (no auth)
+      responses:
+        '200':
+          description: Live metrics snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MetricsResponse' }
+
+# ── WebSocket Documentation (informational) ────────────────────────────────────
+# Socket.IO endpoint: ws://localhost:3040
+# Namespaces and required JWT roles:
+#
+#   /dashboard  — member, admin, super_admin, org_admin
+#   /ir         — member, admin, super_admin, org_admin, investor
+#   /jobs       — member, admin, super_admin, org_admin, recruiter
+#   /admin      — admin, super_admin
+#   /ctm        — member, admin, super_admin, org_admin, trader
+#
+# Authentication: Supply a bearer JWT in one of:
+#   • socket.handshake.auth.token
+#   • socket.handshake.query.token  (or .auth)
+#   • Authorization: Bearer <token> header
+#
+# Supported algorithms: RS256 (JWKS from auth-service), RS256 (static key), HS256
+#
+# Automatic rooms on connect:
+#   user:<userId>     — personal room
+#   org:<orgId>       — organisation room (if orgId present in token)
+#   admin:global      — admin-only broadcast room
+#
+# Client events:
+#   join:room <roomName>   — request to join an additional authorised room
+#   message <payload>      — generic message (rate-limited: 60/min)
+#   pong <data>            — heartbeat acknowledgement
+#
+# Server events:
+#   service_health <data>  — periodic upstream service health broadcast (every 10s)
+#   platform_stats <data>  — periodic platform KPI broadcast (every 5s)
+#   replay { events, count } — missed events from last 5 min on reconnect
+#   ping { ts }            — server heartbeat (every 30s)
+#   server:shutdown { reconnectIn } — graceful shutdown notice
+#   room:joined { room, ts }       — confirmation of explicit room join
+#   presence { userId, status, orgId, ts } — member online/offline events
+#   error { code, message, ts }    — per-socket error (e.g. RATE_LIMITED, ROOM_FORBIDDEN)
+#
+# Error codes on connect (Socket.IO error.code):
+#   4001 — authentication required or invalid/expired token
+#   4003 — insufficient role for namespace

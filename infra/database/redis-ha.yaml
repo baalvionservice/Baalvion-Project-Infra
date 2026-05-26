@@ -1,0 +1,75 @@
+# Redis HA (3 replicas + 3 Sentinels) for sessions, quota flags, rate limits and
+# the usage:events stream. AOF persistence; Sentinel handles primary failover.
+# For very large scale, swap to Redis Cluster (sharded) — values noted at bottom.
+apiVersion: v1
+kind: ConfigMap
+metadata: { name: redis-config, namespace: baalvion }
+data:
+  redis.conf: |
+    appendonly yes
+    appendfsync everysec
+    maxmemory-policy noeviction
+    save 900 1
+    save 300 10
+  sentinel.conf: |
+    sentinel resolve-hostnames yes
+    sentinel monitor mymaster redis-0.redis.baalvion.svc.cluster.local 6379 2
+    sentinel down-after-milliseconds mymaster 5000
+    sentinel failover-timeout mymaster 60000
+    sentinel parallel-syncs mymaster 1
+---
+apiVersion: v1
+kind: Service
+metadata: { name: redis, namespace: baalvion, labels: { app: redis } }
+spec:
+  clusterIP: None
+  selector: { app: redis }
+  ports: [{ name: redis, port: 6379 }]
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: { name: redis, namespace: baalvion }
+spec:
+  serviceName: redis
+  replicas: 3
+  selector: { matchLabels: { app: redis } }
+  template:
+    metadata: { labels: { app: redis } }
+    spec:
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector: { matchLabels: { app: redis } }
+      containers:
+        - name: redis
+          image: redis:7.2-alpine
+          command: ["redis-server", "/etc/redis/redis.conf"]
+          ports: [{ containerPort: 6379 }]
+          volumeMounts:
+            - { name: data, mountPath: /data }
+            - { name: cfg, mountPath: /etc/redis }
+          resources: { requests: { cpu: "200m", memory: 512Mi }, limits: { cpu: "1", memory: 2Gi } }
+        - name: sentinel
+          image: redis:7.2-alpine
+          command: ["redis-sentinel", "/etc/redis/sentinel.conf"]
+          ports: [{ containerPort: 26379 }]
+          volumeMounts: [{ name: cfg, mountPath: /etc/redis }]
+      volumes:
+        - name: cfg
+          configMap: { name: redis-config }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: gp3
+        resources: { requests: { storage: 20Gi } }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: redis, namespace: baalvion }
+spec:
+  minAvailable: 2
+  selector: { matchLabels: { app: redis } }
+# Scale-out option: deploy redis-cluster (6 nodes, 3 shards) and point apps at it;
+# go-redis + ioredis both support cluster mode transparently.

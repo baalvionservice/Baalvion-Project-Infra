@@ -1,0 +1,52 @@
+# Scheduled backups. Postgres is handled by CloudNativePG (WAL + ScheduledBackup);
+# these cover Redis (RDB snapshot) and ClickHouse (native BACKUP) → S3.
+apiVersion: batch/v1
+kind: CronJob
+metadata: { name: redis-backup, namespace: baalvion }
+spec:
+  schedule: "0 */6 * * *"             # every 6h
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: redis-backup
+              image: amazon/aws-cli:2.15.0
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -euo pipefail
+                  apk add --no-cache redis || true
+                  redis-cli -h redis.baalvion.svc.cluster.local -a "$REDIS_PASSWORD" --no-auth-warning BGSAVE
+                  sleep 20
+                  redis-cli -h redis.baalvion.svc.cluster.local -a "$REDIS_PASSWORD" --no-auth-warning --rdb /tmp/dump.rdb
+                  aws s3 cp /tmp/dump.rdb "s3://baalvion-redis-backups/$(date +%Y%m%d-%H%M).rdb"
+              env:
+                - { name: REDIS_PASSWORD, valueFrom: { secretKeyRef: { name: redis-secret, key: password } } }
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata: { name: clickhouse-backup, namespace: observability }
+spec:
+  schedule: "30 2 * * *"             # daily 02:30 UTC
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: ch-backup
+              image: clickhouse/clickhouse-server:24.3
+              command: ["/bin/bash", "-c"]
+              args:
+                - |
+                  set -euo pipefail
+                  BK="ch_$(date +%Y%m%d)"
+                  clickhouse-client -h clickhouse.observability --query \
+                    "BACKUP DATABASE baalvion TO S3('https://s3.amazonaws.com/baalvion-ch-backups/${BK}', '${AWS_ACCESS_KEY_ID}', '${AWS_SECRET_ACCESS_KEY}')"
+              envFrom: [{ secretRef: { name: ch-backup-creds } }]

@@ -1,0 +1,46 @@
+# Helm values for the logging (Loki) + tracing (Tempo) backends.
+# Install:
+#   helm install loki grafana/loki   -n observability -f values-loki-tempo.yaml
+#   helm install tempo grafana/tempo -n observability -f values-loki-tempo.yaml
+# (kube-prometheus-stack provides Prometheus + Grafana + Alertmanager.)
+
+# ── grafana/loki (scalable, S3-backed, 30-day retention) ──
+loki:
+  loki:
+    auth_enabled: false
+    storage:
+      type: s3
+      bucketNames: { chunks: baalvion-loki-chunks, ruler: baalvion-loki-ruler }
+      s3: { region: us-east-1 }
+    limits_config:
+      retention_period: 720h          # 30 days
+      ingestion_rate_mb: 16
+      max_query_parallelism: 32
+    schemaConfig:
+      configs:
+        - from: "2024-01-01"
+          store: tsdb
+          object_store: s3
+          schema: v13
+          index: { prefix: index_, period: 24h }
+  backend: { replicas: 2 }
+  read: { replicas: 3 }
+  write: { replicas: 3 }
+  compactor:
+    retention_enabled: true
+
+# ── grafana/tempo (S3-backed traces, OTLP ingest) ──
+tempo:
+  tempo:
+    retention: 168h                   # 7 days of traces
+    storage:
+      trace:
+        backend: s3
+        s3: { bucket: baalvion-tempo, region: us-east-1 }
+    receivers:
+      otlp:
+        protocols:
+          grpc: { endpoint: 0.0.0.0:4317 }
+  metricsGenerator:
+    enabled: true                     # service graph + span metrics → Prometheus
+    remoteWriteUrl: http://kube-prometheus-stack-prometheus.observability:9090/api/v1/write

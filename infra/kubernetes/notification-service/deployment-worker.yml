@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-worker
+  namespace: baalvion
+  labels:
+    app:       notification-service
+    component: worker
+    version:   "1.0.0"
+    tier:      platform
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    # Workers drain in-flight jobs before shutdown; allow zero unavailable
+    rollingUpdate: { maxSurge: 1, maxUnavailable: 0 }
+  selector:
+    matchLabels:
+      app:       notification-service
+      component: worker
+  template:
+    metadata:
+      labels:
+        app:       notification-service
+        component: worker
+        version:   "1.0.0"
+        tier:      platform
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port:   "9468"
+        prometheus.io/path:   "/metrics"
+    spec:
+      serviceAccountName: baalvion-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser:    1000
+        fsGroup:      1000
+      # BullMQ workers need time to finish in-flight jobs
+      terminationGracePeriodSeconds: 60
+
+      containers:
+        - name: notification-worker
+          image: ghcr.io/baalvion/notification-service:latest
+          imagePullPolicy: Always
+          # Separate Docker target: CMD ["node", "workers/index.js"]
+          command: ["node", "workers/index.js"]
+          ports:
+            - containerPort: 9468
+              name: metrics
+          envFrom:
+            - configMapRef: { name: baalvion-common }
+            - secretRef:    { name: baalvion-secrets }
+          env:
+            - name:  PROMETHEUS_PORT
+              value: "9468"
+            - name:  EMAIL_WORKER_CONCURRENCY
+              value: "5"
+            - name:  WEBHOOK_WORKER_CONCURRENCY
+              value: "10"
+            - name:  LOG_LEVEL
+              value: info
+            - name:  POD_NAME
+              valueFrom:
+                fieldRef: { fieldPath: metadata.name }
+            - name:  POD_NAMESPACE
+              valueFrom:
+                fieldRef: { fieldPath: metadata.namespace }
+
+          resources:
+            requests: { cpu: "200m", memory: "256Mi" }
+            limits:   { cpu: "1",    memory: "512Mi" }
+
+          livenessProbe:
+            # Workers expose a lightweight /healthz on a separate port
+            httpGet: { path: /healthz, port: 9468 }
+            initialDelaySeconds: 30
+            periodSeconds:       20
+            failureThreshold:    3
+
+          lifecycle:
+            preStop:
+              # Signal BullMQ worker to drain — default drain timeout is 5s inside node
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem:   true
+            capabilities:
+              drop: [ALL]
+
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+
+      volumes:
+        - name: tmp
+          emptyDir: {}
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app:       notification-service
+                    component: worker
+                topologyKey: kubernetes.io/hostname

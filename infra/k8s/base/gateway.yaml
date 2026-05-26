@@ -1,0 +1,139 @@
+# Proxy data-plane gateway (Go). Runs in edge clusters/namespace. Scales on CPU,
+# memory, and the custom `active_connections` metric (via prometheus-adapter).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+  labels: { app: gateway, tier: edge }
+spec:
+  replicas: 3
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 2 }   # zero-downtime rollouts
+  selector:
+    matchLabels: { app: gateway }
+  template:
+    metadata:
+      labels: { app: gateway, tier: edge }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      # Spread across zones; never co-locate two gateways on one node.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector: { matchLabels: { app: gateway } }
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector: { matchLabels: { app: gateway } }
+      tolerations:
+        - { key: workload, operator: Equal, value: edge, effect: NoSchedule }
+        - { key: spot, operator: Equal, value: "true", effect: NoSchedule }
+      nodeSelector: { workload: edge }
+      terminationGracePeriodSeconds: 45
+      containers:
+        - name: gateway
+          image: ghcr.io/baalvion/gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http-proxy, containerPort: 10000 }
+            - { name: socks5, containerPort: 1080 }
+            - { name: metrics, containerPort: 9090 }
+          envFrom:
+            - configMapRef: { name: gateway-config }
+          env:
+            # REGION is stamped per-region via the overlay (kustomize label +
+            # OTel resourcedetection); node labels aren't readable via Downward API.
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: gateway-secrets, key: database-url } }
+            - name: REDIS_URL
+              valueFrom: { secretKeyRef: { name: gateway-secrets, key: redis-url } }
+            - name: PROVIDERS_JSON
+              valueFrom: { secretKeyRef: { name: gateway-secrets, key: providers-json } }
+          resources:
+            requests: { cpu: "500m", memory: 256Mi }
+            limits: { cpu: "4", memory: 1Gi }
+          readinessProbe:
+            httpGet: { path: /readyz, port: 9090 }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 9090 }
+            periodSeconds: 15
+          lifecycle:
+            preStop:
+              exec: { command: ["sleep", "15"] }  # let the LB drain before SIGTERM
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local       # preserve client IP for lockout/abuse
+  selector: { app: gateway }
+  ports:
+    - { name: http-proxy, port: 10000, targetPort: 10000 }
+    - { name: socks5, port: 1080, targetPort: 1080 }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: gateway }
+  minReplicas: 3
+  maxReplicas: 100
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 65 } }
+    - type: Resource
+      resource: { name: memory, target: { type: Utilization, averageUtilization: 75 } }
+    - type: Pods
+      pods:
+        metric: { name: active_connections }
+        target: { type: AverageValue, averageValue: "2000" }
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 15
+      policies: [{ type: Percent, value: 100, periodSeconds: 30 }]
+    scaleDown:
+      stabilizationWindowSeconds: 180
+      policies: [{ type: Percent, value: 20, periodSeconds: 60 }]
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+spec:
+  minAvailable: 75%
+  selector: { matchLabels: { app: gateway } }
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+  labels: { release: kube-prometheus-stack }
+spec:
+  selector: { matchLabels: { app: gateway } }
+  endpoints:
+    - { port: metrics, path: /metrics, interval: 15s }

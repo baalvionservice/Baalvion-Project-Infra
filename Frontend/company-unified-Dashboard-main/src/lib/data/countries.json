@@ -1,0 +1,43 @@
+
+[
+  {
+    "id": "india",
+    "name": "India",
+    "flag": "🇮🇳",
+    "continent": "Asia",
+    "complianceStatus": "Compliant",
+    "serverCosts": 12000
+  },
+  {
+    "id": "united-kingdom",
+    "name": "United Kingdom",
+    "flag": "🇬🇧",
+    "continent": "Europe",
+    "complianceStatus": "Compliant",
+    "serverCosts": 15000
+  },
+  {
+    "id": "uae",
+    "name": "UAE",
+    "flag": "🇦🇪",
+    "continent": "Asia",
+    "complianceStatus": "Review Needed",
+    "serverCosts": 18000
+  },
+  {
+    "id": "usa",
+    "name": "USA",
+    "flag": "🇺🇸",
+    "continent": "North America",
+    "complianceStatus": "Compliant",
+    "serverCosts": 25000
+  },
+  {
+    "id": "singapore",
+    "name": "Singapore",
+    "flag": "🇸🇬",
+    "continent": "Asia",
+    "complianceStatus": "Compliant",
+    "serverCosts": 10000
+  }
+]

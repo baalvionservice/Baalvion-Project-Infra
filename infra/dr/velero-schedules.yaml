@@ -1,0 +1,41 @@
+# Velero — Kubernetes object + PV backups to S3, with cross-region copy.
+# Install: velero install --provider aws --bucket baalvion-velero --use-node-agent
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: baalvion-daily
+  namespace: velero
+spec:
+  schedule: "0 1 * * *"              # 01:00 UTC
+  template:
+    includedNamespaces: [baalvion, baalvion-edge, observability]
+    snapshotVolumes: true
+    defaultVolumesToFsBackup: false
+    storageLocation: aws-primary
+    volumeSnapshotLocations: [aws-primary]
+    ttl: 720h0m0s                     # 30-day retention
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: baalvion-hourly-config
+  namespace: velero
+spec:
+  schedule: "0 * * * *"             # hourly config-only (no volumes) snapshot
+  template:
+    includedNamespaces: [baalvion, baalvion-edge]
+    includedResources: [configmaps, secrets, deployments, services, networkpolicies, horizontalpodautoscalers]
+    snapshotVolumes: false
+    storageLocation: aws-primary
+    ttl: 168h0m0s
+---
+# Secondary backup-storage location in another region for cross-region DR.
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: aws-dr
+  namespace: velero
+spec:
+  provider: aws
+  objectStorage: { bucket: baalvion-velero-dr }
+  config: { region: eu-west-1 }

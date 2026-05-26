@@ -1,0 +1,46 @@
+{
+  "name": "@baalvion/auth-sdk",
+  "version": "1.0.0",
+  "description": "Frontend auth SDK: token management, refresh, API client factory",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types":   "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import":  "./dist/index.mjs"
+    },
+    "./react": {
+      "types":   "./dist/react/index.d.ts",
+      "require": "./dist/react/index.js",
+      "import":  "./dist/react/index.mjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build":      "tsup",
+    "dev":        "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "clean":      "rimraf dist"
+  },
+  "dependencies": {
+    "@baalvion/types": "workspace:*"
+  },
+  "peerDependencies": {
+    "react":   ">=18.0.0",
+    "zustand": ">=4.0.0"
+  },
+  "peerDependenciesMeta": {
+    "react":   { "optional": true },
+    "zustand": { "optional": true }
+  },
+  "devDependencies": {
+    "tsup":             "^8.3.0",
+    "typescript":       "^5.7.2",
+    "rimraf":           "^6.0.1",
+    "react":            "^19.0.0",
+    "zustand":          "^5.0.2",
+    "@types/react":     "^19.0.0"
+  }
+}

@@ -1,0 +1,51 @@
+
+[
+  {
+    "id": "alert_1",
+    "type": "Critical",
+    "title": "RetailChain UAE daily revenue 34% below target",
+    "timestamp": "Today 3:45pm"
+  },
+  {
+    "id": "alert_2",
+    "type": "Warning",
+    "title": "TechCorp India server response time elevated",
+    "timestamp": "Today 1:22pm"
+  },
+  {
+    "id": "alert_3",
+    "type": "Info",
+    "title": "DigitalAgency SG new client onboarded (+$4,200 MRR)",
+    "timestamp": "Today 10:08am"
+  },
+  {
+    "id": "alert_4",
+    "type": "Success",
+    "title": "FinanceHub USA exceeded monthly target",
+    "timestamp": "Yesterday 11:59pm"
+  },
+  {
+    "id": "alert_5",
+    "type": "Warning",
+    "title": "Baalvion Media UK has 5 invoices overdue",
+    "timestamp": "Yesterday 5:00pm"
+  },
+  {
+    "id": "alert_6",
+    "type": "Critical",
+    "title": "Stripe API connection failed for FinanceHub USA",
+    "timestamp": "2 days ago"
+  },
+  {
+    "id": "alert_7",
+    "type": "Info",
+    "title": "New employee 'John Doe' onboarded to TechCorp India",
+    "timestamp": "3 days ago"
+  },
+  {
+    "id": "alert_8",
+    "type": "Success",
+    "title": "Database backup completed successfully",
+    "timestamp": "3 days ago"
+  }
+]

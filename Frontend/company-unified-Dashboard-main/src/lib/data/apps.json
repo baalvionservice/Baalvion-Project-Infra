@@ -1,0 +1,260 @@
+
+[
+  {
+    "slug": "gst-billing-india",
+    "name": "GST Billing 🇮🇳",
+    "category": "Finance",
+    "description": "Automate GST invoicing, filing, and reconciliation for your Indian businesses. Compliant with the latest GST portal updates.",
+    "rating": 4.8,
+    "installs": 5200,
+    "developer": "Baalvion Inc.",
+    "version": "1.2.0",
+    "lastUpdated": "2024-07-25",
+    "featured": true,
+    "icon": "/icons/gst.png",
+    "permissions": ["Read Finance Data", "Write Invoices", "Access Business Settings"],
+    "pricing": "₹999/month",
+    "features": [
+      "Automatic e-invoicing generation",
+      "GSTR-1, GSTR-3B, and GSTR-9 filing assistance",
+      "Input Tax Credit (ITC) reconciliation",
+      "Multi-rate and multi-state GST support",
+      "Integration with major Indian payment gateways"
+    ],
+    "screenshots": [
+      "https://picsum.photos/seed/gst-ss1/1200/800",
+      "https://picsum.photos/seed/gst-ss2/1200/800"
+    ],
+    "reviews": [
+      { "user": "Rohan Kumar", "rating": 5, "comment": "This saved us countless hours every month. A must-have for any Indian business." },
+      { "user": "Anjali Mehta", "rating": 4, "comment": "Good, but the UI could be a bit more intuitive for complex filings." }
+    ]
+  },
+  {
+    "slug": "payroll-pro",
+    "name": "Payroll Pro",
+    "category": "HR",
+    "description": "A comprehensive payroll management system for your global workforce. Handle salaries, deductions, and compliance across multiple countries.",
+    "rating": 4.9,
+    "installs": 8500,
+    "developer": "Baalvion Inc.",
+    "version": "2.0.1",
+    "lastUpdated": "2024-07-28",
+    "featured": true,
+    "icon": "/icons/payroll.png",
+    "permissions": ["Read Employee Data", "Write Financial Transactions", "Access Compliance Info"],
+    "pricing": "Free",
+    "features": [
+      "Multi-country payroll processing",
+      "Automated tax and social security deductions",
+      "Direct deposit to employee bank accounts",
+      "Payslip generation and distribution",
+      "Integration with attendance and leave management"
+    ],
+    "screenshots": [
+      "https://picsum.photos/seed/payroll-ss1/1200/800",
+      "https://picsum.photos/seed/payroll-ss2/1200/800"
+    ],
+    "reviews": [
+      { "user": "Alex Davis", "rating": 5, "comment": "Manages payroll for our 5 countries seamlessly. It's incredibly powerful." },
+      { "user": "Priya Sharma", "rating": 5, "comment": "The compliance features are top-notch." }
+    ]
+  },
+  {
+    "slug": "crm-lite",
+    "name": "CRM Lite",
+    "category": "CRM",
+    "description": "A lightweight CRM to manage your customer relationships, track leads, and monitor your sales pipeline directly within Baalvion.",
+    "rating": 4.5,
+    "installs": 12000,
+    "developer": "Baalvion Inc.",
+    "version": "1.0.0",
+    "lastUpdated": "2024-06-15",
+    "featured": true,
+    "icon": "/icons/crm.png",
+    "permissions": ["Access Customer Data", "Manage Tasks"],
+    "pricing": "Free",
+    "features": [
+      "Contact and lead management",
+      "Simple sales pipeline visualization",
+      "Task and activity tracking for each contact",
+      "Email integration for conversation history",
+      "Basic reporting on lead sources and conversion"
+    ],
+    "screenshots": [
+      "https://picsum.photos/seed/crm-ss1/1200/800",
+      "https://picsum.photos/seed/crm-ss2/1200/800"
+    ],
+    "reviews": [
+      { "user": "Li Wei", "rating": 4, "comment": "It's not Salesforce, but it's perfect for what we need without the complexity." }
+    ]
+  },
+  {
+    "slug": "whatsapp-notifications",
+    "name": "WhatsApp Notifications",
+    "category": "Marketing",
+    "description": "Send automated order confirmations, shipping updates, and marketing messages to your customers via WhatsApp.",
+    "rating": 4.7,
+    "installs": 9800,
+    "developer": "Baalvion Inc.",
+    "version": "1.1.0",
+    "lastUpdated": "2024-07-01",
+    "featured": false,
+    "icon": "/icons/whatsapp.png",
+    "permissions": ["Access Customer Data", "Send Notifications"],
+    "pricing": "$49/month",
+    "features": [
+      "Template-based message automation",
+      "Integration with payment and order events",
+      "Two-way communication logging",
+      "Opt-in/opt-out management",
+      "Broadcast messaging for marketing campaigns"
+    ],
+    "screenshots": [],
+    "reviews": []
+  },
+  {
+    "slug": "inventory-pro",
+    "name": "Inventory Pro",
+    "category": "Operations",
+    "description": "Manage stock levels, track inventory across multiple warehouses, and automate purchase orders for your retail and e-commerce businesses.",
+    "rating": 4.6,
+    "installs": 3400,
+    "developer": "Baalvion Inc.",
+    "version": "1.5.0",
+    "lastUpdated": "2024-05-20",
+    "featured": false,
+    "icon": "/icons/inventory.png",
+    "permissions": ["Read/Write Business Data", "Manage Suppliers"],
+    "pricing": "$99/month",
+    "features": [
+      "Real-time stock level tracking",
+      "Multi-location warehouse management",
+      "Low-stock level alerts",
+      "Automated purchase order generation",
+      "Barcode scanning support"
+    ],
+    "screenshots": [],
+    "reviews": []
+  },
+  {
+    "slug": "slack-integration",
+    "name": "Slack Integration",
+    "category": "Integrations",
+    "description": "Get real-time notifications for important Baalvion events directly in your Slack channels.",
+    "rating": 4.9,
+    "installs": 25000,
+    "developer": "Slack",
+    "version": "2.3.0",
+    "lastUpdated": "2024-07-22",
+    "featured": false,
+    "icon": "/icons/slack.png",
+    "permissions": ["Read All Data"],
+    "pricing": "Free",
+    "features": [
+      "Notifications for revenue milestones",
+      "Alerts for KPI misses",
+      "Daily summary reports",
+      "New employee notifications",
+      "Customizable event notifications"
+    ],
+    "screenshots": [],
+    "reviews": []
+  },
+  {
+    "slug": "quickbooks-sync",
+    "name": "QuickBooks Sync",
+    "category": "Finance",
+    "description": "Automatically sync your Baalvion financial data with QuickBooks Online for seamless accounting.",
+    "rating": 4.8,
+    "installs": 7600,
+    "developer": "Intuit",
+    "version": "1.8.0",
+    "lastUpdated": "2024-06-30",
+    "featured": false,
+    "icon": "/icons/quickbooks.png",
+    "permissions": ["Read Finance Data"],
+    "pricing": "$29/month",
+    "features": [
+      "Sync revenue, expenses, and invoices",
+      "Map Baalvion categories to QuickBooks accounts",
+      "Daily, weekly, or monthly sync frequency",
+      "Reconciliation assistance",
+      "Support for multiple currencies"
+    ],
+    "screenshots": [],
+    "reviews": []
+  },
+  {
+    "slug": "salesforce-connector",
+    "name": "Salesforce Connector",
+    "category": "CRM",
+    "description": "Sync customer and deal data between Baalvion and Salesforce to keep your sales and finance teams aligned.",
+    "rating": 4.7,
+    "installs": 4100,
+    "developer": "Salesforce",
+    "version": "3.1.0",
+    "lastUpdated": "2024-07-18",
+    "featured": false,
+    "icon": "/icons/salesforce.png",
+    "permissions": ["Read/Write Customer Data", "Read Finance Data"],
+    "pricing": "$149/month",
+    "features": [
+      "Bi-directional sync of customer data",
+      "Create Baalvion businesses from Salesforce accounts",
+      "Sync deal stages and values",
+      "View Baalvion financial data within Salesforce",
+      "Custom field mapping"
+    ],
+    "screenshots": [],
+    "reviews": []
+  },
+  {
+    "slug": "hubspot-marketing-sync",
+    "name": "HubSpot Marketing Sync",
+    "category": "Marketing",
+    "description": "Sync your customer lists and marketing campaign performance between Baalvion and HubSpot.",
+    "rating": 4.6,
+    "installs": 6200,
+    "developer": "HubSpot",
+    "version": "1.5.0",
+    "lastUpdated": "2024-07-05",
+    "featured": false,
+    "icon": "/icons/hubspot.png",
+    "permissions": ["Read/Write Customer Data"],
+    "pricing": "$49/month",
+    "features": [
+      "Sync contact lists and properties",
+      "Trigger Baalvion events from HubSpot workflows",
+      "View marketing campaign ROI in Baalvion",
+      "Segment Baalvion users in HubSpot",
+      "Track customer journey across both platforms"
+    ],
+    "screenshots": [],
+    "reviews": []
+  },
+  {
+    "slug": "trello-task-sync",
+    "name": "Trello Task Sync",
+    "category": "Operations",
+    "description": "Sync Baalvion tasks with your Trello boards for seamless project management.",
+    "rating": 4.4,
+    "installs": 11500,
+    "developer": "Atlassian",
+    "version": "1.2.0",
+    "lastUpdated": "2024-06-25",
+    "featured": false,
+    "icon": "/icons/trello.png",
+    "permissions": ["Manage Tasks"],
+    "pricing": "Free",
+    "features": [
+      "Two-way sync of tasks and statuses",
+      "Map Baalvion projects to Trello boards",
+      "Assign users across platforms",
+      "Sync due dates and priorities",
+      "Add comments from either platform"
+    ],
+    "screenshots": [],
+    "reviews": []
+  }
+]

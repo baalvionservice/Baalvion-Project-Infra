@@ -1,0 +1,28 @@
+# Example per-service override (proxy-platform). The chart defaults supply the
+# platform standards; a service overrides only what's specific to it.
+nameOverride: proxy-platform
+namespace: baalvion
+division: proxy-infrastructure
+tier: tier-0
+
+image:
+  repository: ghcr.io/baalvion/proxy-backend
+  tag: v1.0.0
+command: ["node", "server.js"]
+containerPort: 4000
+
+replicas:
+  min: 3
+  max: 50
+  targetCPUUtilization: 65
+
+resources:
+  requests: { cpu: "300m", memory: 512Mi }
+  limits:   { cpu: "2", memory: 2Gi }
+
+networkPolicy:
+  enabled: true
+  allowFrom: [kong-gateway, baalvion, baalvion-edge]
+
+podDisruptionBudget:
+  minAvailable: 2

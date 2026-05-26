@@ -1,0 +1,52 @@
+
+{
+  "snapshot": {
+    "todaysRevenue": 21160,
+    "revenueChange": 8.2,
+    "ordersPlaced": 448,
+    "activeEmployees": 231,
+    "totalEmployees": 284,
+    "openSupportTickets": 12,
+    "pendingApprovals": 5
+  },
+  "businessToday": [
+    { "businessId": "biz_1", "revenue": 850000, "currency": "INR", "orders": 150, "employeesIn": 110, "profit": 180000, "changeVsYesterday": 5.2, "status": "Growth" },
+    { "businessId": "biz_2", "revenue": 4500, "currency": "GBP", "orders": 50, "employeesIn": 32, "profit": 900, "changeVsYesterday": -2.1, "status": "Active" },
+    { "businessId": "biz_3", "revenue": 95000, "currency": "AED", "orders": 120, "employeesIn": 45, "profit": 7000, "changeVsYesterday": 10.5, "status": "Active" },
+    { "businessId": "biz_4", "revenue": 18000, "currency": "USD", "orders": 80, "employeesIn": 58, "profit": 6000, "changeVsYesterday": 7.8, "status": "Growth" },
+    { "businessId": "biz_5", "revenue": 1500, "currency": "SGD", "orders": 48, "employeesIn": 18, "profit": 300, "changeVsYesterday": 1.5, "status": "Review" }
+  ],
+  "hourlyRevenue": [
+    { "hour": "12am", "revenue": 0 },
+    { "hour": "1am", "revenue": 0 },
+    { "hour": "2am", "revenue": 0 },
+    { "hour": "3am", "revenue": 0 },
+    { "hour": "4am", "revenue": 0 },
+    { "hour": "5am", "revenue": 0 },
+    { "hour": "6am", "revenue": 500 },
+    { "hour": "7am", "revenue": 1200 },
+    { "hour": "8am", "revenue": 2500 },
+    { "hour": "9am", "revenue": 4800 },
+    { "hour": "10am", "revenue": 7200 },
+    { "hour": "11am", "revenue": 9800 },
+    { "hour": "12pm", "revenue": 12500 },
+    { "hour": "1pm", "revenue": 14800 },
+    { "hour": "2pm", "revenue": 16500 },
+    { "hour": "3pm", "revenue": 18200 },
+    { "hour": "4pm", "revenue": 19800 },
+    { "hour": "5pm", "revenue": 20500 },
+    { "hour": "6pm", "revenue": 21160 }
+  ],
+  "activityFeed": [
+    { "id": "act_1", "description": "New order #4821 received", "business": "FinanceHub USA", "detail": "$340", "timestamp": "2 min ago" },
+    { "id": "act_2", "description": "Employee Priya Sharma clocked in", "business": "TechCorp India", "detail": "9:02 AM", "timestamp": "14 min ago" },
+    { "id": "act_3", "description": "Support ticket #8231 resolved", "business": "Baalvion Media UK", "detail": "by Alex Davis", "timestamp": "21 min ago" },
+    { "id": "act_4", "description": "Server costs for UAE exceeded threshold", "business": "RetailChain UAE", "detail": "$1,950", "timestamp": "35 min ago" },
+    { "id": "act_5", "description": "New employee Li Wei onboarded", "business": "DigitalAgency SG", "detail": "Marketing Manager", "timestamp": "1 hour ago" },
+    { "id": "act_6", "description": "New order #4820 received", "business": "TechCorp India", "detail": "₹12,500", "timestamp": "1 hour ago" },
+    { "id": "act_7", "description": "Q3 Marketing budget approved", "business": "FinanceHub USA", "detail": "by John Smith", "timestamp": "2 hours ago" },
+    { "id": "act_8", "description": "FX Rate for INR updated", "business": "System", "detail": "83.45", "timestamp": "3 hours ago" },
+    { "id": "act_9", "description": "Database backup completed successfully", "business": "System", "detail": "5m 32s duration", "timestamp": "4 hours ago" },
+    { "id": "act_10", "description": "New order #4819 received", "business": "RetailChain UAE", "detail": "AED 850", "timestamp": "4 hours ago" }
+  ]
+}

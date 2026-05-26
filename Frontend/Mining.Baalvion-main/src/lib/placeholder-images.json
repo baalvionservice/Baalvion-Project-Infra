@@ -1,0 +1,40 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-trading",
+      "description": "Professional mineral trading environment",
+      "imageUrl": "https://picsum.photos/seed/geotrade-hero/1200/600",
+      "imageHint": "mineral trading"
+    },
+    {
+      "id": "gold-ore",
+      "description": "High grade gold ore sample",
+      "imageUrl": "https://picsum.photos/seed/gold-ore/400/300",
+      "imageHint": "gold ore"
+    },
+    {
+      "id": "iron-ore",
+      "description": "Industrial iron ore pile",
+      "imageUrl": "https://picsum.photos/seed/iron-ore/400/300",
+      "imageHint": "iron ore"
+    },
+    {
+      "id": "lithium-spodumene",
+      "description": "Lithium mineral samples",
+      "imageUrl": "https://picsum.photos/seed/lithium/400/300",
+      "imageHint": "lithium mineral"
+    },
+    {
+      "id": "copper-concentrate",
+      "description": "Copper concentrate bags",
+      "imageUrl": "https://picsum.photos/seed/copper/400/300",
+      "imageHint": "copper concentrate"
+    },
+    {
+      "id": "warehouse-logistics",
+      "description": "Modern mining warehouse",
+      "imageUrl": "https://picsum.photos/seed/mining-warehouse/800/400",
+      "imageHint": "mining warehouse"
+    }
+  ]
+}

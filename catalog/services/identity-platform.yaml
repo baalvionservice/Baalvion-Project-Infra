@@ -1,0 +1,32 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: identity-platform
+  description: Centralized identity — JWT/JWKS, SSO/SAML, OAuth, SCIM, MFA, sessions, RBAC. The platform trust anchor every service verifies against.
+  division: platform-core
+  context: identity
+  owner: "@baalvion/platform-core"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/auth-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: []
+  producesEvents:
+    - org.created
+    - auth.login.success
+    - auth.session.revoked
+    - security.incident
+  apis:
+    - baalvion.identity.v1.IdentityService
+    - /v1/auth
+  slo:
+    availability: 0.9999
+    latencyP95Ms: 150
+  deploy:
+    chart: baalvion-service
+    namespace: baalvion-identity
+    minReplicas: 3
+    maxReplicas: 30

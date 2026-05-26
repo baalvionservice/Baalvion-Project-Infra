@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://catalog/service-descriptor.json",
+  "title": "BaalvionServiceDescriptor",
+  "description": "Governance descriptor for a service / bounded context. One per service, validated in CI. Drives the ArgoCD ApplicationSet, CODEOWNERS review routing, dependency graph and SLO dashboards.",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": { "const": "baalvion.io/v1" },
+    "kind": { "enum": ["Service", "Library", "Frontend"] },
+    "metadata": {
+      "type": "object",
+      "required": ["name", "division", "context", "owner", "tier"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+        "description": { "type": "string" },
+        "division": { "enum": ["platform-core", "proxy-infrastructure", "commerce", "mining", "legal", "real-estate", "jobs", "shared-developer-platform"] },
+        "context": { "type": "string", "description": "bounded context name" },
+        "owner": { "type": "string", "pattern": "^@baalvion/.+", "description": "owning team (GitHub team handle)" },
+        "tier": { "enum": ["tier-0", "tier-1", "tier-2", "tier-3"], "description": "tier-0 = critical path (identity, gateway, billing)" },
+        "repo": { "type": "string" },
+        "path": { "type": "string" }
+      }
+    },
+    "spec": {
+      "type": "object",
+      "required": ["lifecycle", "language"],
+      "additionalProperties": false,
+      "properties": {
+        "lifecycle": { "enum": ["production", "beta", "experimental", "deprecated"] },
+        "language": { "enum": ["node", "go", "python", "react"] },
+        "datastores": { "type": "array", "items": { "enum": ["postgres", "timescaledb", "clickhouse", "redis", "kafka", "nats", "s3"] } },
+        "dependsOn": { "type": "array", "items": { "type": "string" }, "description": "other service names (sync gRPC deps)" },
+        "consumesEvents": { "type": "array", "items": { "type": "string" } },
+        "producesEvents": { "type": "array", "items": { "type": "string" } },
+        "apis": { "type": "array", "items": { "type": "string" }, "description": "proto packages or REST base paths exposed" },
+        "slo": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "availability": { "type": "number", "minimum": 0, "maximum": 1 },
+            "latencyP95Ms": { "type": "number" }
+          }
+        },
+        "deploy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "chart": { "type": "string" },
+            "namespace": { "type": "string" },
+            "minReplicas": { "type": "integer" },
+            "maxReplicas": { "type": "integer" }
+          }
+        }
+      }
+    }
+  }
+}

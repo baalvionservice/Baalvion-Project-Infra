@@ -1,0 +1,22 @@
+# us-east-1: highest-traffic region — more gateway capacity + region-pinned nodes.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+spec:
+  replicas: 6
+  template:
+    spec:
+      nodeSelector:
+        workload: edge
+        topology.kubernetes.io/region: us-east-1
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+spec:
+  minReplicas: 6
+  maxReplicas: 150

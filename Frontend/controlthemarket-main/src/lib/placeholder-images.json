@@ -1,0 +1,40 @@
+{
+  "placeholderImages": [
+    {
+      "id": "avatar-1",
+      "description": "User avatar 1",
+      "imageUrl": "https://picsum.photos/seed/avatar1/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar-2",
+      "description": "User avatar 2",
+      "imageUrl": "https://picsum.photos/seed/avatar2/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar-3",
+      "description": "User avatar 3",
+      "imageUrl": "https://picsum.photos/seed/avatar3/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "avatar-4",
+      "description": "User avatar 4",
+      "imageUrl": "https://picsum.photos/seed/avatar4/100/100",
+      "imageHint": "person portrait"
+    },
+    {
+      "id": "task-placeholder-1",
+      "description": "Task placeholder image",
+      "imageUrl": "https://picsum.photos/seed/task1/600/400",
+      "imageHint": "abstract tech"
+    },
+    {
+      "id": "task-placeholder-2",
+      "description": "Task placeholder image 2",
+      "imageUrl": "https://picsum.photos/seed/task2/600/400",
+      "imageHint": "modern office"
+    }
+  ]
+}

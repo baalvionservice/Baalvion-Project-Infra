@@ -1,0 +1,37 @@
+{
+  "Day": [
+    { "businessId": "biz_1", "revenue": { "target": 2500000, "actual": 2650000 }, "profitMargin": { "value": 21.5, "trend": "up" }, "customers": { "total": 52340, "change": 120 }, "returnRate": 1.2, "nps": 82 },
+    { "businessId": "biz_2", "revenue": { "target": 166667, "actual": 160000 }, "profitMargin": { "value": 24.0, "trend": "flat" }, "customers": { "total": 15021, "change": 15 }, "returnRate": 2.5, "nps": 88 },
+    { "businessId": "biz_3", "revenue": { "target": 4000000, "actual": 3800000 }, "profitMargin": { "value": 7.5, "trend": "down" }, "customers": { "total": 105829, "change": 250 }, "returnRate": 6.1, "nps": 65 },
+    { "businessId": "biz_4", "revenue": { "target": 833333, "actual": 850000 }, "profitMargin": { "value": 32.0, "trend": "up" }, "customers": { "total": 75102, "change": 80 }, "returnRate": 0.8, "nps": 91 },
+    { "businessId": "biz_5", "revenue": { "target": 66667, "actual": 68000 }, "profitMargin": { "value": 20.0, "trend": "flat" }, "customers": { "total": 805, "change": 5 }, "returnRate": 4.5, "nps": 72 }
+  ],
+  "Week": [
+    { "businessId": "biz_1", "revenue": { "target": 17500000, "actual": 18000000 }, "profitMargin": { "value": 21.0, "trend": "up" }, "customers": { "total": 52340, "change": 840 }, "returnRate": 1.3, "nps": 81 },
+    { "businessId": "biz_2", "revenue": { "target": 1166669, "actual": 1150000 }, "profitMargin": { "value": 24.2, "trend": "up" }, "customers": { "total": 15021, "change": 105 }, "returnRate": 2.4, "nps": 88 },
+    { "businessId": "biz_3", "revenue": { "target": 28000000, "actual": 22960000 }, "profitMargin": { "value": 7.2, "trend": "down" }, "customers": { "total": 105829, "change": 1750 }, "returnRate": 6.5, "nps": 64 },
+    { "businessId": "biz_4", "revenue": { "target": 5833331, "actual": 6100000 }, "profitMargin": { "value": 32.5, "trend": "up" }, "customers": { "total": 75102, "change": 560 }, "returnRate": 0.9, "nps": 90 },
+    { "businessId": "biz_5", "revenue": { "target": 466669, "actual": 450000 }, "profitMargin": { "value": 19.8, "trend": "down" }, "customers": { "total": 805, "change": 35 }, "returnRate": 4.7, "nps": 71 }
+  ],
+  "Month": [
+    { "businessId": "biz_1", "revenue": { "target": 75000000, "actual": 78000000 }, "profitMargin": { "value": 20.0, "trend": "up" }, "customers": { "total": 52340, "change": 3500 }, "returnRate": 1.5, "nps": 80 },
+    { "businessId": "biz_2", "revenue": { "target": 5000000, "actual": 5100000 }, "profitMargin": { "value": 24.0, "trend": "flat" }, "customers": { "total": 15021, "change": 420 }, "returnRate": 2.2, "nps": 89 },
+    { "businessId": "biz_3", "revenue": { "target": 120000000, "actual": 115000000 }, "profitMargin": { "value": 7.5, "trend": "flat" }, "customers": { "total": 105829, "change": 7000 }, "returnRate": 6.8, "nps": 62 },
+    { "businessId": "biz_4", "revenue": { "target": 25000000, "actual": 26000000 }, "profitMargin": { "value": 32.0, "trend": "up" }, "customers": { "total": 75102, "change": 2240 }, "returnRate": 1.0, "nps": 92 },
+    { "businessId": "biz_5", "revenue": { "target": 2000000, "actual": 1900000 }, "profitMargin": { "value": 20.0, "trend": "down" }, "customers": { "total": 805, "change": 140 }, "returnRate": 4.9, "nps": 70 }
+  ],
+  "Quarter": [
+    { "businessId": "biz_1", "revenue": { "target": 225000000, "actual": 240000000 }, "profitMargin": { "value": 22.0, "trend": "up" }, "customers": { "total": 52340, "change": 10500 }, "returnRate": 1.4, "nps": 82 },
+    { "businessId": "biz_2", "revenue": { "target": 15000000, "actual": 14800000 }, "profitMargin": { "value": 23.8, "trend": "down" }, "customers": { "total": 15021, "change": 1260 }, "returnRate": 2.3, "nps": 87 },
+    { "businessId": "biz_3", "revenue": { "target": 360000000, "actual": 350000000 }, "profitMargin": { "value": 7.8, "trend": "up" }, "customers": { "total": 105829, "change": 21000 }, "returnRate": 6.5, "nps": 66 },
+    { "businessId": "biz_4", "revenue": { "target": 75000000, "actual": 82000000 }, "profitMargin": { "value": 33.0, "trend": "up" }, "customers": { "total": 75102, "change": 6720 }, "returnRate": 0.9, "nps": 93 },
+    { "businessId": "biz_5", "revenue": { "target": 6000000, "actual": 6100000 }, "profitMargin": { "value": 20.5, "trend": "up" }, "customers": { "total": 805, "change": 420 }, "returnRate": 4.8, "nps": 74 }
+  ],
+  "Year": [
+    { "businessId": "biz_1", "revenue": { "target": 900000000, "actual": 910000000 }, "profitMargin": { "value": 21.0, "trend": "flat" }, "customers": { "total": 52340, "change": 42000 }, "returnRate": 1.6, "nps": 81 },
+    { "businessId": "biz_2", "revenue": { "target": 60000000, "actual": 62000000 }, "profitMargin": { "value": 24.5, "trend": "up" }, "customers": { "total": 15021, "change": 5040 }, "returnRate": 2.1, "nps": 88 },
+    { "businessId": "biz_3", "revenue": { "target": 1440000000, "actual": 1400000000 }, "profitMargin": { "value": 7.0, "trend": "down" }, "customers": { "total": 105829, "change": 84000 }, "returnRate": 7.0, "nps": 60 },
+    { "businessId": "biz_4", "revenue": { "target": 300000000, "actual": 310000000 }, "profitMargin": { "value": 31.0, "trend": "up" }, "customers": { "total": 75102, "change": 26880 }, "returnRate": 1.1, "nps": 91 },
+    { "businessId": "biz_5", "revenue": { "target": 24000000, "actual": 23500000 }, "profitMargin": { "value": 19.5, "trend": "down" }, "customers": { "total": 805, "change": 1680 }, "returnRate": 5.2, "nps": 68 }
+  ]
+}

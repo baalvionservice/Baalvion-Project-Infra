@@ -1,0 +1,62 @@
+[
+  {
+    "id": "cron_1",
+    "name": "Daily Revenue Sync",
+    "description": "Syncs revenue data from all payment gateways.",
+    "frequency": "Daily at 2:00 AM UTC",
+    "lastRun": "2024-07-29T02:00:15Z",
+    "nextRun": "2024-07-30T02:00:00Z",
+    "duration": "12.5s",
+    "status": "Success"
+  },
+  {
+    "id": "cron_2",
+    "name": "FX Rate Update",
+    "description": "Updates foreign exchange rates from the central bank API.",
+    "frequency": "Every 4 hours",
+    "lastRun": "2024-07-29T08:00:05Z",
+    "nextRun": "2024-07-29T12:00:00Z",
+    "duration": "2.1s",
+    "status": "Success"
+  },
+  {
+    "id": "cron_3",
+    "name": "Employee Attendance Pull",
+    "description": "Pulls daily attendance records from HR system.",
+    "frequency": "Daily at 9:00 AM UTC",
+    "lastRun": "2024-07-29T09:00:22Z",
+    "nextRun": "2024-07-30T09:00:00Z",
+    "duration": "8.9s",
+    "status": "Success"
+  },
+  {
+    "id": "cron_4",
+    "name": "Weekly Invoice Generator",
+    "description": "Generates and sends weekly invoices to clients.",
+    "frequency": "Weekly on Monday",
+    "lastRun": "2024-07-29T05:00:45Z",
+    "nextRun": "2024-08-05T05:00:00Z",
+    "duration": "45.2s",
+    "status": "Success"
+  },
+  {
+    "id": "cron_5",
+    "name": "Failed Transaction Retry",
+    "description": "Attempts to re-process failed transactions from the last 24 hours.",
+    "frequency": "Every 6 hours",
+    "lastRun": "2024-07-29T06:00:00Z",
+    "nextRun": "2024-07-29T12:00:00Z",
+    "duration": "In Progress...",
+    "status": "Running"
+  },
+  {
+    "id": "cron_6",
+    "name": "Database Backup",
+    "description": "Performs a full backup of the production database.",
+    "frequency": "Daily at 4:00 AM UTC",
+    "lastRun": "2024-07-29T04:00:00Z",
+    "nextRun": "2024-07-30T04:00:00Z",
+    "duration": "5m 32s",
+    "status": "Paused"
+  }
+]

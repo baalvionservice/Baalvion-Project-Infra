@@ -1,0 +1,214 @@
+{
+  "placeholderImages": [
+    {
+      "id": "user-alex-davis",
+      "description": "Avatar for Alex Davis",
+      "imageUrl": "https://picsum.photos/seed/user1/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "user-priya-sharma",
+      "description": "Avatar for Priya Sharma",
+      "imageUrl": "https://picsum.photos/seed/user2/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "user-john-smith",
+      "description": "Avatar for John Smith",
+      "imageUrl": "https://picsum.photos/seed/user3/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "user-li-wei",
+      "description": "Avatar for Li Wei",
+      "imageUrl": "https://picsum.photos/seed/user4/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "user-fatima-al-fassi",
+      "description": "Avatar for Fatima Al-Fassi",
+      "imageUrl": "https://picsum.photos/seed/user5/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_006",
+      "description": "Avatar for Rohan Kumar",
+      "imageUrl": "https://picsum.photos/seed/emp006/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_007",
+      "description": "Avatar for Ananya Reddy",
+      "imageUrl": "https://picsum.photos/seed/emp007/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_008",
+      "description": "Avatar for David Chen",
+      "imageUrl": "https://picsum.photos/seed/emp008/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_009",
+      "description": "Avatar for Chloe Carter",
+      "imageUrl": "https://picsum.photos/seed/emp009/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_010",
+      "description": "Avatar for Youssef Ahmed",
+      "imageUrl": "https://picsum.photos/seed/emp010/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_011",
+      "description": "Avatar for Omar Hassan",
+      "imageUrl": "https://picsum.photos/seed/emp011/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_012",
+      "description": "Avatar for Sarah Tan",
+      "imageUrl": "https://picsum.photos/seed/emp012/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_013",
+      "description": "Avatar for Michael Brown",
+      "imageUrl": "https://picsum.photos/seed/emp013/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_014",
+      "description": "Avatar for George Evans",
+      "imageUrl": "https://picsum.photos/seed/emp014/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_015",
+      "description": "Avatar for Aisha Khan",
+      "imageUrl": "https://picsum.photos/seed/emp015/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_016",
+      "description": "Avatar for Siddharth Menon",
+      "imageUrl": "https://picsum.photos/seed/emp016/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_017",
+      "description": "Avatar for Olivia Green",
+      "imageUrl": "https://picsum.photos/seed/emp017/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_018",
+      "description": "Avatar for Harry Wilson",
+      "imageUrl": "https://picsum.photos/seed/emp018/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_019",
+      "description": "Avatar for Noor Ali",
+      "imageUrl": "https://picsum.photos/seed/emp019/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_020",
+      "description": "Avatar for Emily White",
+      "imageUrl": "https://picsum.photos/seed/emp020/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_021",
+      "description": "Avatar for Arjun Sharma",
+      "imageUrl": "https://picsum.photos/seed/emp021/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_022",
+      "description": "Avatar for Isabella Rossi",
+      "imageUrl": "https://picsum.photos/seed/emp022/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_023",
+      "description": "Avatar for Abdullah Khan",
+      "imageUrl": "https://picsum.photos/seed/emp023/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_024",
+      "description": "Avatar for Madison Clark",
+      "imageUrl": "https://picsum.photos/seed/emp024/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_025",
+      "description": "Avatar for Ahmad Abdullah",
+      "imageUrl": "https://picsum.photos/seed/emp025/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_026",
+      "description": "Avatar for Diya Patel",
+      "imageUrl": "https://picsum.photos/seed/emp026/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_027",
+      "description": "Avatar for William King",
+      "imageUrl": "https://picsum.photos/seed/emp027/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_028",
+      "description": "Avatar for Aisha Al Marzooqi",
+      "imageUrl": "https://picsum.photos/seed/emp028/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_029",
+      "description": "Avatar for Ethan Martinez",
+      "imageUrl": "https://picsum.photos/seed/emp029/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "emp_030",
+      "description": "Avatar for Zulfaqqar",
+      "imageUrl": "https://picsum.photos/seed/emp030/100/100",
+      "imageHint": "person face"
+    },
+    {
+      "id": "logo-techcorp",
+      "description": "Logo for TechCorp India",
+      "imageUrl": "https://picsum.photos/seed/logo1/100/100",
+      "imageHint": "tech logo"
+    },
+    {
+      "id": "logo-baalvion-media",
+      "description": "Logo for Baalvion Media UK",
+      "imageUrl": "https://picsum.photos/seed/logo2/100/100",
+      "imageHint": "media logo"
+    },
+    {
+      "id": "logo-retailchain",
+      "description": "Logo for RetailChain UAE",
+      "imageUrl": "https://picsum.photos/seed/logo3/100/100",
+      "imageHint": "retail logo"
+    },
+    {
+      "id": "logo-financehub",
+      "description": "Logo for FinanceHub USA",
+      "imageUrl": "https://picsum.photos/seed/logo4/100/100",
+      "imageHint": "finance logo"
+    },
+    {
+      "id": "logo-digitalagency",
+      "description": "Logo for DigitalAgency SG",
+      "imageUrl": "https://picsum.photos/seed/logo5/100/100",
+      "imageHint": "digital logo"
+    }
+  ]
+}

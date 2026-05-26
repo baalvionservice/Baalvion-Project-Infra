@@ -1,0 +1,27 @@
+{
+  "name": "@baalvion/types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for the Baalvion platform",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types":   "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import":  "./dist/index.mjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build":      "tsup",
+    "dev":        "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "clean":      "rimraf dist"
+  },
+  "devDependencies": {
+    "tsup":       "^8.3.0",
+    "typescript": "^5.7.2",
+    "rimraf":     "^6.0.1"
+  }
+}

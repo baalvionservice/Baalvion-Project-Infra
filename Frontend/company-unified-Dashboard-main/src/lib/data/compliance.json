@@ -1,0 +1,87 @@
+[
+  {
+    "countryId": "india",
+    "country": "India",
+    "business": "TechCorp India",
+    "flag": "🇮🇳",
+    "taxStatus": "GST Compliant",
+    "taxStatusCode": "ok",
+    "vatGst": "18% GST",
+    "licenses": "Valid",
+    "dataLaws": "IT Act 2000",
+    "employmentLaw": "Compliant",
+    "overallScore": 91,
+    "actionItems": [
+      "Review upcoming changes to e-invoicing.",
+      "Annual statutory audit scheduled for Q4."
+    ]
+  },
+  {
+    "countryId": "united-kingdom",
+    "country": "United Kingdom",
+    "business": "Baalvion Media UK",
+    "flag": "🇬🇧",
+    "taxStatus": "VAT Registered",
+    "taxStatusCode": "ok",
+    "vatGst": "20% VAT",
+    "licenses": "Valid",
+    "dataLaws": "UK GDPR",
+    "employmentLaw": "Compliant",
+    "overallScore": 95,
+    "actionItems": [
+      "Confirm Digital Services Tax applicability for new revenue stream.",
+      "No other outstanding items."
+    ]
+  },
+  {
+    "countryId": "uae",
+    "country": "UAE",
+    "business": "RetailChain UAE",
+    "flag": "🇦🇪",
+    "taxStatus": "VAT Review Needed",
+    "taxStatusCode": "warning",
+    "vatGst": "5% VAT",
+    "licenses": "Valid",
+    "dataLaws": "DIFC Laws",
+    "employmentLaw": "Review",
+    "overallScore": 74,
+    "actionItems": [
+      "Quarterly VAT return due.",
+      "Review new employment contract templates for compliance with updated labor laws."
+    ]
+  },
+  {
+    "countryId": "usa",
+    "country": "USA",
+    "business": "FinanceHub USA",
+    "flag": "🇺🇸",
+    "taxStatus": "Federal & State OK",
+    "taxStatusCode": "ok",
+    "vatGst": "Varies",
+    "licenses": "Valid",
+    "dataLaws": "CCPA / CPRA",
+    "employmentLaw": "Compliant",
+    "overallScore": 89,
+    "actionItems": [
+      "Review state-specific sales tax nexus for Q3.",
+      "Monitor developments in new state privacy laws."
+    ]
+  },
+  {
+    "countryId": "singapore",
+    "country": "Singapore",
+    "business": "DigitalAgency SG",
+    "flag": "🇸🇬",
+    "taxStatus": "GST Registered",
+    "taxStatusCode": "ok",
+    "vatGst": "9% GST",
+    "licenses": "Valid",
+    "dataLaws": "PDPA",
+    "employmentLaw": "Compliant",
+    "overallScore": 93,
+    "actionItems": [
+      "Submit annual corporate tax filing.",
+      "No other outstanding items."
+    ]
+  }
+]

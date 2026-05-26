@@ -1,0 +1,46 @@
+name: Imperialpedia CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Run TypeScript checks
+        run: pnpm run type-check
+
+      - name: Run linter
+        run: |
+          if [ -f "eslint.config.js" ] || [ -f "eslint.config.mjs" ] || [ -f "eslint.config.cjs" ] || [ -f ".eslintrc.json" ] || [ -f ".eslintrc.js" ] || [ -f ".eslintrc.cjs" ] || [ -f ".eslintrc.yaml" ] || [ -f ".eslintrc.yml" ]; then
+            pnpm run lint --max-warnings 2000
+          else
+            echo "Skipping lint: no ESLint config found in repo."
+          fi
+
+      - name: Build application
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: pnpm run build

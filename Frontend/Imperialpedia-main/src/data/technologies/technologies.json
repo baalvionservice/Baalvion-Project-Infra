@@ -1,0 +1,19 @@
+[
+  {
+    "id": "tech-1",
+    "name": "Generative AI",
+    "slug": "generative-ai",
+    "type": "technology",
+    "category": "Software",
+    "description": "Artificial intelligence systems capable of generating new content and solving complex problems.",
+    "industry": "software",
+    "applications": ["content-creation", "coding", "scientific-research"],
+    "use_cases": ["Automation", "Personalization", "Research"],
+    "invented_year": 2014,
+    "key_companies": ["nvidia", "openai", "google"],
+    "related_technologies": ["large-language-models", "machine-learning"],
+    "tags": ["AI", "innovation", "LLM"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

@@ -1,0 +1,21 @@
+# Codegen: TypeScript (connect-es) + Go stubs for cross-language service comms.
+# `buf generate` writes typed clients/servers each service imports — no service
+# hand-writes a wire client. gRPC over mTLS is the synchronous transport (ADR-0005).
+version: v2
+plugins:
+  - remote: buf.build/connectrpc/es:v1.6.1
+    out: gen/ts
+    opt:
+      - target=ts
+  - remote: buf.build/bufbuild/es:v2.2.3
+    out: gen/ts
+    opt:
+      - target=ts
+  - remote: buf.build/protocolbuffers/go:v1.35.2
+    out: gen/go
+    opt:
+      - paths=source_relative
+  - remote: buf.build/grpc/go:v1.5.1
+    out: gen/go
+    opt:
+      - paths=source_relative

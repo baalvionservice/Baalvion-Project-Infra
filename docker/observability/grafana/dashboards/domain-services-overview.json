@@ -1,0 +1,231 @@
+{
+  "id": null,
+  "uid": "baalvion-domain-overview",
+  "title": "Baalvion — Domain Services Overview",
+  "description": "Health, throughput, latency and error rates for all domain microservices",
+  "tags": ["baalvion", "domain", "overview"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(baalvion_http_requests_total, service)",
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": {}
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "stat",
+      "title": "Services Up",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "datasource": "Prometheus",
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "reduceOptions": { "calcs": ["lastNotNull"] }
+      },
+      "targets": [
+        {
+          "expr": "count(up{job=~\"jobs-service|ctm-service|mining-service|imperialpedia-service|real-estate-service|brand-connector-service|market-service|ir-service|dashboard-service|about-service|realtime-service|proxy-backend\"} == 1)",
+          "legendFormat": "Up"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 8 },
+              { "color": "green", "value": 12 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "type": "stat",
+      "title": "Total RPS",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "datasource": "Prometheus",
+      "options": { "colorMode": "value", "graphMode": "area", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "expr": "sum(rate(baalvion_http_requests_total[2m]))",
+          "legendFormat": "RPS"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps", "color": { "mode": "palette-classic" } } }
+    },
+    {
+      "id": 3,
+      "type": "stat",
+      "title": "Overall Error Rate",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "datasource": "Prometheus",
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "expr": "sum(rate(baalvion_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(baalvion_http_requests_total[5m]))",
+          "legendFormat": "Error Rate"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.01 },
+              { "color": "red", "value": 0.05 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "type": "stat",
+      "title": "p95 Latency (all services)",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "datasource": "Prometheus",
+      "options": { "colorMode": "background", "graphMode": "none", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(baalvion_http_request_duration_ms_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1000 },
+              { "color": "red", "value": 3000 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Request Rate by Service",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "options": { "legend": { "displayMode": "table", "placement": "right" } },
+      "targets": [
+        {
+          "expr": "sum(rate(baalvion_http_requests_total{service=~\"$service\"}[2m])) by (service)",
+          "legendFormat": "{{ service }}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "reqps", "custom": { "lineWidth": 2 } } }
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Error Rate by Service",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "options": { "legend": { "displayMode": "table", "placement": "right" } },
+      "targets": [
+        {
+          "expr": "sum(rate(baalvion_http_requests_total{status=~\"5..\",service=~\"$service\"}[5m])) by (service) / sum(rate(baalvion_http_requests_total{service=~\"$service\"}[5m])) by (service)",
+          "legendFormat": "{{ service }}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percentunit", "custom": { "lineWidth": 2 } } }
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "p50 / p95 / p99 Latency by Service",
+      "gridPos": { "x": 0, "y": 12, "w": 24, "h": 8 },
+      "datasource": "Prometheus",
+      "options": { "legend": { "displayMode": "table", "placement": "right" } },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(baalvion_http_request_duration_ms_bucket{service=~\"$service\"}[5m])) by (le, service))",
+          "legendFormat": "p50 {{ service }}"
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(baalvion_http_request_duration_ms_bucket{service=~\"$service\"}[5m])) by (le, service))",
+          "legendFormat": "p95 {{ service }}"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(baalvion_http_request_duration_ms_bucket{service=~\"$service\"}[5m])) by (le, service))",
+          "legendFormat": "p99 {{ service }}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "ms", "custom": { "lineWidth": 1 } } }
+    },
+    {
+      "id": 8,
+      "type": "table",
+      "title": "Service Health Table",
+      "gridPos": { "x": 0, "y": 20, "w": 24, "h": 6 },
+      "datasource": "Prometheus",
+      "options": { "sortBy": [{ "desc": true, "displayName": "Error Rate" }] },
+      "targets": [
+        {
+          "expr": "sum(rate(baalvion_http_requests_total[5m])) by (service)",
+          "legendFormat": "{{ service }}",
+          "instant": true
+        }
+      ],
+      "transformations": [{ "id": "labelsToFields", "options": { "mode": "rows" } }],
+      "fieldConfig": { "defaults": { "unit": "reqps" } }
+    },
+    {
+      "id": 9,
+      "type": "timeseries",
+      "title": "BullMQ Queue Depths",
+      "gridPos": { "x": 0, "y": 26, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "options": { "legend": { "displayMode": "table", "placement": "right" } },
+      "targets": [
+        {
+          "expr": "bullmq_queue_waiting_total",
+          "legendFormat": "{{ queue }}"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short", "custom": { "lineWidth": 2 } } }
+    },
+    {
+      "id": 10,
+      "type": "timeseries",
+      "title": "PostgreSQL Active Connections",
+      "gridPos": { "x": 12, "y": 26, "w": 12, "h": 8 },
+      "datasource": "Prometheus",
+      "options": { "legend": { "displayMode": "table", "placement": "right" } },
+      "targets": [
+        {
+          "expr": "pg_stat_database_numbackends{datname=\"baalvion_db\"}",
+          "legendFormat": "Active connections"
+        },
+        {
+          "expr": "pg_settings_max_connections",
+          "legendFormat": "Max connections"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "short" } }
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package baalvion.identity.v1;
+
+// IdentityService is the platform trust anchor. Every service verifies caller
+// tokens through it (or the JWKS it publishes) — no service mints or trusts its
+// own identity. Synchronous, gRPC over mTLS inside the mesh.
+service IdentityService {
+  // Verify an access token (RS256/JWKS). Used by the API gateway + service-kit.
+  rpc VerifyToken(VerifyTokenRequest) returns (VerifyTokenResponse);
+  // Mint a short-lived service-to-service token (workload identity, audience-scoped).
+  rpc IssueServiceToken(IssueServiceTokenRequest) returns (IssueServiceTokenResponse);
+  // Resolve a principal + its effective permissions in an org (RBAC).
+  rpc GetPrincipal(GetPrincipalRequest) returns (GetPrincipalResponse);
+}
+
+message VerifyTokenRequest {
+  string token = 1;
+  string audience = 2; // expected aud (the calling service)
+}
+
+message VerifyTokenResponse {
+  bool valid = 1;
+  string subject = 2;       // user id or service id
+  string org_id = 3;
+  repeated string scopes = 4;
+  repeated string roles = 5;
+  int64 expires_at = 6;     // unix seconds
+  string reason = 7;        // populated when valid=false
+}
+
+message IssueServiceTokenRequest {
+  string service_id = 1;
+  string audience = 2;
+  repeated string scopes = 3;
+  int32 ttl_seconds = 4;
+}
+
+message IssueServiceTokenResponse {
+  string token = 1;
+  int64 expires_at = 2;
+}
+
+message GetPrincipalRequest {
+  string subject = 1;
+  string org_id = 2;
+}
+
+message GetPrincipalResponse {
+  string subject = 1;
+  string org_id = 2;
+  repeated string roles = 3;
+  repeated string permissions = 4; // resolved (custom-role aware)
+  bool mfa_enabled = 5;
+  bool active = 6;
+}

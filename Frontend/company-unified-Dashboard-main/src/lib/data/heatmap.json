@@ -1,0 +1,68 @@
+
+[
+  {
+    "businessId": "biz_1",
+    "businessName": "TechCorp India",
+    "dailyPerformance": [
+      { "day": "Mon", "revenue": 11500, "target": 10000 },
+      { "day": "Tue", "revenue": 12500, "target": 10500 },
+      { "day": "Wed", "revenue": 9800, "target": 11000 },
+      { "day": "Thu", "revenue": 14000, "target": 11000 },
+      { "day": "Fri", "revenue": 15500, "target": 12000 },
+      { "day": "Sat", "revenue": 8500, "target": 9000 },
+      { "day": "Sun", "revenue": 7000, "target": 9000 }
+    ]
+  },
+  {
+    "businessId": "biz_2",
+    "businessName": "Baalvion Media UK",
+    "dailyPerformance": [
+      { "day": "Mon", "revenue": 5500, "target": 6000 },
+      { "day": "Tue", "revenue": 6200, "target": 6000 },
+      { "day": "Wed", "revenue": 7800, "target": 6500 },
+      { "day": "Thu", "revenue": 5000, "target": 6500 },
+      { "day": "Fri", "revenue": 4500, "target": 7000 },
+      { "day": "Sat", "revenue": 9500, "target": 8000 },
+      { "day": "Sun", "revenue": 8800, "target": 8000 }
+    ]
+  },
+  {
+    "businessId": "biz_3",
+    "businessName": "RetailChain UAE",
+    "dailyPerformance": [
+      { "day": "Mon", "revenue": 25000, "target": 30000 },
+      { "day": "Tue", "revenue": 28000, "target": 30000 },
+      { "day": "Wed", "revenue": 31000, "target": 30000 },
+      { "day": "Thu", "revenue": 35000, "target": 32000 },
+      { "day": "Fri", "revenue": 45000, "target": 40000 },
+      { "day": "Sat", "revenue": 52000, "target": 45000 },
+      { "day": "Sun", "revenue": 21000, "target": 35000 }
+    ]
+  },
+  {
+    "businessId": "biz_4",
+    "businessName": "FinanceHub USA",
+    "dailyPerformance": [
+      { "day": "Mon", "revenue": 18000, "target": 15000 },
+      { "day": "Tue", "revenue": 19500, "target": 16000 },
+      { "day": "Wed", "revenue": 22000, "target": 17000 },
+      { "day": "Thu", "revenue": 14000, "target": 18000 },
+      { "day": "Fri", "revenue": 12000, "target": 18000 },
+      { "day": "Sat", "revenue": 25000, "target": 20000 },
+      { "day": "Sun", "revenue": 24000, "target": 20000 }
+    ]
+  },
+  {
+    "businessId": "biz_5",
+    "businessName": "DigitalAgency SG",
+    "dailyPerformance": [
+      { "day": "Mon", "revenue": 1800, "target": 2000 },
+      { "day": "Tue", "revenue": 2100, "target": 2000 },
+      { "day": "Wed", "revenue": 2300, "target": 2200 },
+      { "day": "Thu", "revenue": 1500, "target": 2200 },
+      { "day": "Fri", "revenue": 900, "target": 2500 },
+      { "day": "Sat", "revenue": 3000, "target": 2500 },
+      { "day": "Sun", "revenue": 2800, "target": 2500 }
+    ]
+  }
+]

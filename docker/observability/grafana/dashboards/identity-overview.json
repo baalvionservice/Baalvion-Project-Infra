@@ -1,0 +1,73 @@
+{
+  "title": "Baalvion Identity Platform — Overview",
+  "uid":   "baalvion-identity",
+  "tags":  ["baalvion", "identity", "auth"],
+  "time":  { "from": "now-1h", "to": "now" },
+  "refresh": "30s",
+  "schemaVersion": 39,
+  "panels": [
+    {
+      "id": 1, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "title": "Active Sessions",
+      "targets": [{ "expr": "baalvion_active_sessions_total", "datasource": { "type": "prometheus", "uid": "prometheus" } }],
+      "options": { "colorMode": "background", "graphMode": "area" },
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "steps": [{"color":"green","value":0},{"color":"yellow","value":1000},{"color":"red","value":5000}] } } }
+    },
+    {
+      "id": 2, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "title": "Logins (1h)",
+      "targets": [{ "expr": "increase(baalvion_auth_logins_total[1h])", "datasource": { "type": "prometheus", "uid": "prometheus" } }],
+      "options": { "colorMode": "background" }
+    },
+    {
+      "id": 3, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "title": "Failed Logins (1h)",
+      "targets": [{ "expr": "increase(baalvion_auth_login_failures_total[1h])", "datasource": { "type": "prometheus", "uid": "prometheus" } }],
+      "options": { "colorMode": "background" },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color":"green","value":0},{"color":"yellow","value":50},{"color":"red","value":200}] } } }
+    },
+    {
+      "id": 4, "type": "stat", "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "title": "High-Risk Sessions",
+      "targets": [{ "expr": "baalvion_high_risk_sessions_active", "datasource": { "type": "prometheus", "uid": "prometheus" } }],
+      "options": { "colorMode": "background" },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [{"color":"green","value":0},{"color":"red","value":1}] } } }
+    },
+    {
+      "id": 5, "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "title": "Auth Request Rate",
+      "targets": [
+        { "expr": "sum(rate(baalvion_http_requests_total{service='auth-service',status='200'}[5m]))", "legendFormat": "success", "datasource": { "type": "prometheus", "uid": "prometheus" } },
+        { "expr": "sum(rate(baalvion_http_requests_total{service='auth-service',status=~'4..'}[5m]))", "legendFormat": "4xx", "datasource": { "type": "prometheus", "uid": "prometheus" } },
+        { "expr": "sum(rate(baalvion_http_requests_total{service='auth-service',status=~'5..'}[5m]))", "legendFormat": "5xx", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ],
+      "fieldConfig": { "defaults": { "custom": { "lineWidth": 2 } } }
+    },
+    {
+      "id": 6, "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "title": "Auth Latency (p50 / p95 / p99)",
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum(rate(baalvion_http_request_duration_ms_bucket{service='auth-service'}[5m])) by (le))", "legendFormat": "p50", "datasource": { "type": "prometheus", "uid": "prometheus" } },
+        { "expr": "histogram_quantile(0.95, sum(rate(baalvion_http_request_duration_ms_bucket{service='auth-service'}[5m])) by (le))", "legendFormat": "p95", "datasource": { "type": "prometheus", "uid": "prometheus" } },
+        { "expr": "histogram_quantile(0.99, sum(rate(baalvion_http_request_duration_ms_bucket{service='auth-service'}[5m])) by (le))", "legendFormat": "p99", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    },
+    {
+      "id": 7, "type": "timeseries", "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "title": "Risk Signal Detections",
+      "targets": [
+        { "expr": "increase(baalvion_session_risk_signals_total{signal='impossible_travel'}[5m])", "legendFormat": "impossible travel", "datasource": { "type": "prometheus", "uid": "prometheus" } },
+        { "expr": "increase(baalvion_session_risk_signals_total{signal='new_country'}[5m])", "legendFormat": "new country", "datasource": { "type": "prometheus", "uid": "prometheus" } },
+        { "expr": "increase(baalvion_session_risk_signals_total{signal='new_device'}[5m])", "legendFormat": "new device", "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ]
+    },
+    {
+      "id": 8, "type": "table", "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "title": "Service Health",
+      "targets": [
+        { "expr": "up{job=~'auth-service|admin-service|session-service|oauth-service|notification-service'}", "instant": true, "datasource": { "type": "prometheus", "uid": "prometheus" } }
+      ],
+      "transformations": [{ "id": "labelsToFields", "options": {} }]
+    }
+  ]
+}

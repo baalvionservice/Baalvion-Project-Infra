@@ -1,0 +1,94 @@
+{
+  "hero": {
+    "badge": "Alpha-Index-Knoten aktiv",
+    "title": "Die weltweite KI-Wissensinfrastruktur",
+    "subtitle": "Recherchieren Sie alles sofort mit strukturierten globalen Daten. Erkunden Sie über 1 Million indexierbare Knoten.",
+    "cta": "Warteliste beitreten",
+    "secondary_cta": "Früher Zugang"
+  },
+  "nav": {
+    "home": "Startseite",
+    "news": "Nachrichten",
+    "about": "Über uns",
+    "discovery": "Entdeckung",
+    "tools": "Werkzeuge",
+    "community": "Gemeinschaft",
+    "company": "Unternehmen",
+    "main_navigation": "Hauptnavigation",
+    "discovery_research": "Entdeckung und Forschung",
+    "tools_resources": "Werkzeuge und Ressourcen",
+    "community_learning": "Gemeinschaft und Lernen",
+    "company_legal": "Unternehmen und Rechtliches",
+    "settings": "Einstellungen",
+    "countries": "Länder",
+    "companies": "Unternehmen",
+    "industries": "Branchen",
+    "technologies": "Technologien",
+    "stocks": "Aktien",
+    "brokers": "Makler",
+    "financial_tools": "Finanzwerkzeuge",
+    "ai_analyst": "KI-Analyst",
+    "research_ai": "Forschungs-KI",
+    "calculators": "Rechner",
+    "datasets": "Datensätze",
+    "glossary": "Glossar",
+    "creators": "Ersteller",
+    "learning_paths": "Lernpfade",
+    "knowledge_map": "Wissenskarte",
+    "articles": "Artikel",
+    "topics": "Themen",
+    "pricing": "Preise",
+    "contact": "Kontakt",
+    "experts": "Experten",
+    "transparency": "Transparenz",
+    "privacy_policy": "Datenschutzrichtlinie",
+    "terms_of_service": "Nutzungsbedingungen"
+  },
+  "features": {
+    "label": "Kernkompetenzen",
+    "title": "Warum Imperialpedia?",
+    "subtitle": "Wir bieten die architektonische Grundlage für die Zukunft der Finanzintelligenz.",
+    "ai_engine": "KI-Wissensmaschine",
+    "ai_engine_desc": "Sofortige strukturierte Einblicke, die in Echtzeit aus Millionen globaler Datenpunkte synthetisiert werden.",
+    "datasets": "Globale Datensätze",
+    "datasets_desc": "Greifen Sie auf Millionen von Einheiten in Ländern, Unternehmen, Branchen und Technologien zu.",
+    "assistant": "Forschungsassistent",
+    "assistant_desc": "KI-gestützte Berichte und Zusammenfassungen auf Knopfdruck. Hochpräzise Forschung in großem Maßstab.",
+    "api": "Enterprise-API",
+    "api_desc": "Verbinden Sie unseren strukturierten Wissensgraphen direkt mit Ihren institutionellen Anwendungen."
+  },
+  "faq": {
+    "label": "Informations-Triage",
+    "title": "Häufig gestellte Fragen",
+    "subtitle": "Alles, was Sie über die skalierbarste Intelligenzinfrastruktur der Welt wissen müssen.",
+    "support_title": "Haben Sie noch Fragen?",
+    "support_desc": "Unser KI-Forschungsassistent kann tieferen Kontext zu unserer Roadmap liefern.",
+    "support_button": "Analysten-Hub abfragen"
+  },
+  "pricing": {
+    "label": "Investitionsmatrix",
+    "title": "Intelligenzpläne",
+    "subtitle": "Wählen Sie die Entdeckungsstufe, die Ihren Forschungszielen entspricht.",
+    "disclaimer": "Institutionelle Knoten, die benutzerdefinierte SLA-Protokolle erfordern, sollten sich direkt an das Governance-Support-Team wenden."
+  },
+  "cta": {
+    "label": "Finaler Entdeckungs-Handschlag",
+    "title": "Bereit, die Weltwirtschaft zu prüfen?",
+    "subtitle": "Treten Sie unserem Netzwerk aus institutionellen Analysten und Experten bei. Sichern Sie sich heute Ihren Platz im Index.",
+    "button": "Meinen Platz sichern"
+  },
+  "waitlist": {
+    "input_placeholder": "Institutionelle E-Mail...",
+    "submit_button": "Matrix beitreten",
+    "caption": "Schließen Sie sich über 142.000 Analysten an, die hochpräzise Intelligenzknoten erhalten.",
+    "error_required": "E-Mail ist erforderlich.",
+    "error_invalid": "Ungültige E-Mail erkannt."
+  },
+  "footer": {
+    "description": "Die skalierbarste KI-gestützte Finanzintelligenzmaschine der Welt. Tiefgehende Forschung über 1.000.000 Knoten.",
+    "stay_synced": "Synchronisiert bleiben",
+    "sync_desc": "Abonnieren Sie den Intelligence Wire für Echtzeit-Marktaudits und pSEO-Warnungen.",
+    "copyright": "© {{year}} Imperialpedia. KI-Wissensinfrastruktur.",
+    "enc_status": "Datenübertragung verschlüsselt"
+  }
+}

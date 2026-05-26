@@ -1,0 +1,59 @@
+{
+  "name": "baalvion-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Baalvion Identity Platform — enterprise monorepo",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "build":           "turbo run build",
+    "build:packages":  "turbo run build --filter='./packages/*'",
+    "dev":             "turbo run dev --filter='./Backend/*' --filter='./Frontend/*'",
+    "dev:identity":    "turbo run dev --filter='{./Backend/auth-service,./Backend/admin-service,./Backend/session-service,./Backend/oauth-service,./Frontend/admin-platform}'",
+    "dev:backends":    "turbo run dev --filter='./Backend/*'",
+    "dev:frontends":   "turbo run dev --filter='./Frontend/*'",
+    "test":            "jest --passWithNoTests",
+    "test:watch":      "jest --watch",
+    "test:e2e":        "playwright test",
+    "test:e2e:report": "playwright show-report",
+    "lighthouse":      "lhci autorun",
+    "test:packages":   "turbo run test --filter='./packages/*'",
+    "lint":            "turbo run lint",
+    "type-check":      "turbo run type-check",
+    "clean":           "turbo run clean && rimraf node_modules",
+
+    "db:up":           "docker compose up -d postgres redis",
+    "db:down":         "docker compose down",
+    "db:logs":         "docker compose logs -f postgres redis",
+    "db:reset":        "docker compose down -v && docker compose up -d postgres redis",
+    "infra:up":        "docker compose up -d postgres redis pgadmin",
+    "infra:down":      "docker compose down",
+
+    "migrate":         "turbo run migrate --filter='./Backend/*'",
+    "migrate:auth":    "cd Backend/auth-service && npm run migrate",
+
+    "generate:keys":   "cd Backend/auth-service && npm run generate-keys",
+    "generate:api":    "turbo run generate:api",
+
+    "catalog:validate":"node catalog/validate.mjs",
+    "catalog:list":    "node platform/cli/baalctl.mjs catalog list",
+    "contracts:lint":  "cd packages/contracts && buf lint",
+    "contracts:events":"node packages/contracts/scripts/validate-events.mjs",
+    "baalctl":         "node platform/cli/baalctl.mjs"
+  },
+  "devDependencies": {
+    "turbo":              "^2.3.0",
+    "concurrently":       "^8.2.2",
+    "rimraf":             "^6.0.1",
+    "prettier":           "^3.4.2",
+    "typescript":         "^5.7.2",
+    "@playwright/test":   "^1.48.0",
+    "@lhci/cli":          "^0.14.0",
+    "jest":               "^29.7.0",
+    "ts-jest":            "^29.2.0",
+    "@types/jest":        "^29.5.0"
+  }
+}

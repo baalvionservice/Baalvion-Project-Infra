@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package baalvion.proxy.v1;
+
+// OrchestrationService is the proxy division's routing brain, exposed to internal
+// callers (enterprise API, edge control plane). The data plane (Go gateway) reads
+// routing state from Redis on the hot path; this gRPC surface is for control-plane
+// allocation/preview + outcome reporting, not per-request dialing.
+service OrchestrationService {
+  rpc AllocateEndpoint(AllocateRequest) returns (ProxyEndpoint);
+  rpc ReportOutcome(OutcomeRequest) returns (OutcomeResponse);
+  rpc ProviderStates(ProviderStatesRequest) returns (ProviderStatesResponse);
+}
+
+message AllocateRequest {
+  string org_id = 1;
+  string country = 2;
+  int32 asn = 3;
+  string session_id = 4;
+  string rotation = 5;       // sticky|rotating
+  string plan = 6;
+  string target = 7;
+}
+
+message ProxyEndpoint {
+  string provider = 1;
+  string host = 2;
+  int32 port = 3;
+  string username = 4;
+  string kind = 5;
+  string country = 6;
+  string session_id = 7;
+}
+
+message OutcomeRequest {
+  string provider = 1;
+  string target = 2;
+  int32 status = 3;
+  bool banned = 4;
+}
+
+message OutcomeResponse { bool recorded = 1; }
+
+message ProviderStatesRequest {}
+
+message ProviderState {
+  string name = 1;
+  string state = 2;          // HEALTHY|DEGRADED|UNHEALTHY|OFFLINE
+  double success_rate = 3;
+  double latency_ms = 4;
+  double ban_rate = 5;
+}
+
+message ProviderStatesResponse { repeated ProviderState providers = 1; }

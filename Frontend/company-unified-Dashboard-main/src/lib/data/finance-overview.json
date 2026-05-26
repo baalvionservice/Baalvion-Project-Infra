@@ -1,0 +1,68 @@
+{
+  "netWorth": {
+    "total": 24600000,
+    "breakdown": {
+      "businessAssets": 18200000,
+      "cashAndLiquid": 3800000,
+      "investments": 2600000
+    },
+    "change": {
+      "amount": 340000,
+      "percentage": 1.4
+    }
+  },
+  "netWorthHistory": [
+    { "month": "Jul '22", "value": 15.2 },
+    { "month": "Aug '22", "value": 15.5 },
+    { "month": "Sep '22", "value": 15.8 },
+    { "month": "Oct '22", "value": 16.1 },
+    { "month": "Nov '22", "value": 16.5 },
+    { "month": "Dec '22", "value": 17.0 },
+    { "month": "Jan '23", "value": 17.3 },
+    { "month": "Feb '23", "value": 17.7 },
+    { "month": "Mar '23", "value": 18.1 },
+    { "month": "Apr '23", "value": 18.5 },
+    { "month": "May '23", "value": 19.0 },
+    { "month": "Jun '23", "value": 19.5 },
+    { "month": "Jul '23", "value": 19.8 },
+    { "month": "Aug '23", "value": 20.2 },
+    { "month": "Sep '23", "value": 20.7 },
+    { "month": "Oct '23", "value": 21.1 },
+    { "month": "Nov '23", "value": 21.6 },
+    { "month": "Dec '23", "value": 22.2 },
+    { "month": "Jan '24", "value": 22.5 },
+    { "month": "Feb '24", "value": 23.0 },
+    { "month": "Mar '24", "value": 23.4 },
+    { "month": "Apr '24", "value": 23.8 },
+    { "month": "May '24", "value": 24.26 },
+    { "month": "Jun '24", "value": 24.6 }
+  ],
+  "financialSummary": [
+    { "businessId": "biz_1", "revenue": 502410, "totalCosts": 310450, "grossProfit": 191960, "netProfit": 154280, "margin": 30.7 },
+    { "businessId": "biz_2", "revenue": 632911, "totalCosts": 480000, "grossProfit": 152911, "netProfit": 110500, "margin": 17.5 },
+    { "businessId": "biz_3", "revenue": 888888, "totalCosts": 750000, "grossProfit": 138888, "netProfit": 99400, "margin": 11.2 },
+    { "businessId": "biz_4", "revenue": 2083333, "totalCosts": 1500000, "grossProfit": 583333, "netProfit": 433333, "margin": 20.8 },
+    { "businessId": "biz_5", "revenue": 166667, "totalCosts": 130000, "grossProfit": 36667, "netProfit": 29800, "margin": 17.9 }
+  ],
+  "costBreakdown": [
+    { "name": "Salaries", "value": 42 },
+    { "name": "Infrastructure", "value": 8 },
+    { "name": "Marketing", "value": 18 },
+    { "name": "Operations", "value": 22 },
+    { "name": "Other", "value": 10 }
+  ],
+  "profitTrend": [
+    { "month": "Jul", "profit": 3.1 },
+    { "month": "Aug", "profit": 3.3 },
+    { "month": "Sep", "profit": 3.5 },
+    { "month": "Oct", "profit": 3.4 },
+    { "month": "Nov", "profit": 3.7 },
+    { "month": "Dec", "profit": 4.1 },
+    { "month": "Jan", "profit": 4.0 },
+    { "month": "Feb", "profit": 4.2 },
+    { "month": "Mar", "profit": 4.5 },
+    { "month": "Apr", "profit": 4.7 },
+    { "month": "May", "profit": 4.9 },
+    { "month": "Jun", "profit": 5.2 }
+  ]
+}

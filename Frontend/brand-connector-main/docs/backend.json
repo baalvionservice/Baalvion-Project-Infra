@@ -1,0 +1,192 @@
+
+{
+  "entities": {
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Core user identity and role information.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["BRAND", "CREATOR", "ADMIN"] },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "phone": { "type": "string" },
+        "status": { "type": "string", "enum": ["ACTIVE", "SUSPENDED", "PENDING"] },
+        "isVerified": { "type": "boolean" },
+        "notificationPreferences": {
+          "type": "object",
+          "properties": {
+            "campaigns": { "type": "boolean" },
+            "payments": { "type": "boolean" },
+            "messages": { "type": "boolean" },
+            "system": { "type": "boolean" }
+          }
+        },
+        "twoFactorEnabled": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email", "role"]
+    },
+    "CreatorProfile": {
+      "title": "Creator Profile",
+      "description": "Detailed profile for creative talent.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "username": { "type": "string" },
+        "bio": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "niches": { "type": "array", "items": { "type": "string" } },
+        "socialStats": { "type": "object" },
+        "baseRates": { "type": "object" },
+        "packages": { "type": "array" },
+        "location": { "type": "string" },
+        "rating": { "type": "number" },
+        "visibility": { "type": "string", "enum": ["PUBLIC", "PRIVATE"] },
+        "isVerified": { "type": "boolean" },
+        "verificationStatus": { "type": "string", "enum": ["UNVERIFIED", "PENDING", "VERIFIED", "FLAGGED"] },
+        "authenticityScore": { "type": "number" },
+        "privacySettings": {
+          "type": "object",
+          "properties": {
+            "canMessage": { "type": "string" },
+            "canSeeRates": { "type": "string" }
+          }
+        },
+        "payoutAccounts": {
+          "type": "array",
+          "items": { "type": "object" }
+        },
+        "onboardingStatus": { "type": "string", "enum": ["PENDING", "IN_PROGRESS", "COMPLETED"] },
+        "onboardingStep": { "type": "number" },
+        "payoutMethod": { "type": "object" },
+        "portfolioSamples": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["id", "userId", "username"]
+    },
+    "BrandProfile": {
+      "title": "Brand Profile",
+      "description": "Detailed profile for brands creating campaigns.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "companyName": { "type": "string" },
+        "industry": { "type": "string" },
+        "website": { "type": "string" },
+        "teamSize": { "type": "string" },
+        "plan": { "type": "string", "enum": ["STARTER", "GROWTH", "ENTERPRISE"] },
+        "brandGuidelines": { "type": "string" },
+        "logoUrl": { "type": "string" },
+        "socialLinks": { "type": "object" },
+        "gstNumber": { "type": "string" },
+        "billingAddress": { "type": "string" },
+        "verificationStatus": { "type": "string", "enum": ["UNVERIFIED", "PENDING", "VERIFIED"] },
+        "apiKeys": { "type": "array", "items": { "type": "string" } },
+        "defaultBriefTemplate": { "type": "string" },
+        "onboardingStatus": { "type": "string", "enum": ["PENDING", "IN_PROGRESS", "COMPLETED"] },
+        "onboardingStep": { "type": "number" },
+        "billingMethod": { "type": "object" }
+      },
+      "required": ["id", "userId", "companyName"]
+    },
+    "Broadcast": {
+      "title": "Broadcast",
+      "description": "A mass notification job sent by administrators.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "cta": { "type": "string" },
+        "audience": { "type": "string", "enum": ["ALL", "BRANDS", "CREATORS", "NICHE", "PLAN"] },
+        "audienceValue": { "type": "string" },
+        "type": { "type": "string", "enum": ["IN_APP", "EMAIL", "BOTH"] },
+        "status": { "type": "string", "enum": ["SENT", "SCHEDULED"] },
+        "sentAt": { "type": "string", "format": "date-time" },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "recipients": { "type": "number" },
+            "opens": { "type": "number" }
+          }
+        }
+      }
+    },
+    "SupportTicket": {
+      "title": "Support Ticket",
+      "description": "A user-submitted request for help or information.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userEmail": { "type": "string" },
+        "subject": { "type": "string" },
+        "message": { "type": "string" },
+        "category": { "type": "string", "enum": ["TECHNICAL", "BILLING", "CAMPAIGN", "OTHER"] },
+        "priority": { "type": "string", "enum": ["LOW", "MEDIUM", "HIGH", "URGENT"] },
+        "status": { "type": "string", "enum": ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"] },
+        "assignedTo": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "subject", "message"]
+    },
+    "AuditLog": {
+      "title": "Audit Log",
+      "description": "An immutable record of administrative actions.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "adminId": { "type": "string" },
+        "adminName": { "type": "string" },
+        "actionType": { "type": "string" },
+        "entityId": { "type": "string" },
+        "entityType": { "type": "string" },
+        "oldValue": { "type": "object" },
+        "newValue": { "type": "object" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "isCritical": { "type": "boolean" },
+        "ipAddress": { "type": "string" }
+      },
+      "required": ["id", "adminId", "actionType", "timestamp"]
+    }
+  },
+  "auth": {
+    "providers": ["email", "google"]
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profiles and roles."
+    },
+    "/creators/{creatorId}": {
+      "schema": "CreatorProfile",
+      "description": "Creator specific details."
+    },
+    "/brands/{brandId}": {
+      "schema": "BrandProfile",
+      "description": "Brand specific details."
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "In-app user alerts."
+    },
+    "/broadcasts/{broadcastId}": {
+      "schema": "Broadcast",
+      "description": "Mass announcement history."
+    },
+    "/support_tickets/{ticketId}": {
+      "schema": "SupportTicket",
+      "description": "Customer support requests."
+    },
+    "/audit_logs/{logId}": {
+      "schema": "AuditLog",
+      "description": "Administrative audit trail."
+    }
+  }
+}

@@ -1,0 +1,21 @@
+[
+  {
+    "id": "country-1",
+    "name": "United States",
+    "slug": "united-states",
+    "type": "country",
+    "category": "Global Economy",
+    "description": "The world's largest economy by nominal GDP and a global leader in technology and finance.",
+    "capital": "Washington, D.C.",
+    "region": "North America",
+    "population": 331000000,
+    "gdp": "$25T",
+    "currency": "USD",
+    "official_language": "English",
+    "industries": ["semiconductors", "software", "finance"],
+    "technologies": ["generative-ai", "blockchain"],
+    "tags": ["economy", "global", "reserve-currency"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  }
+]

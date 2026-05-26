@@ -1,0 +1,57 @@
+# SLOs as code (Pyrra). Pyrra generates the multi-burn-rate Prometheus rules +
+# error-budget dashboards from these objectives.
+apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: gateway-availability
+  namespace: observability
+  labels: { role: alert-rules }
+spec:
+  target: "99.9"                       # of proxy connections succeed
+  window: 30d
+  indicator:
+    ratio:
+      errors:  { metric: 'upstream_failures_total' }
+      total:   { metric: 'proxy_requests_total' }
+---
+apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: gateway-latency
+  namespace: observability
+  labels: { role: alert-rules }
+spec:
+  target: "99"                         # 99% of connects under 1s
+  window: 30d
+  indicator:
+    latency:
+      success: { metric: 'proxy_connect_latency_ms_bucket{le="1000"}' }
+      total:   { metric: 'proxy_connect_latency_ms_count' }
+---
+apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: api-availability
+  namespace: observability
+  labels: { role: alert-rules }
+spec:
+  target: "99.95"
+  window: 30d
+  indicator:
+    ratio:
+      errors: { metric: 'http_requests_total{job="api",code=~"5.."}' }
+      total:  { metric: 'http_requests_total{job="api"}' }
+---
+apiVersion: pyrra.dev/v1alpha1
+kind: ServiceLevelObjective
+metadata:
+  name: metering-freshness          # billing accuracy SLI
+  namespace: observability
+  labels: { role: alert-rules }
+spec:
+  target: "99.9"
+  window: 30d
+  indicator:
+    ratio:
+      errors: { metric: 'metering_events_failed_total' }
+      total:  { metric: 'metering_ingest_total' }

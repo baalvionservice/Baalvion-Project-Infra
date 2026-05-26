@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: baalvion-common
+  namespace: baalvion
+data:
+  NODE_ENV:       production
+  DB_HOST:        postgres-service
+  DB_PORT:        "5432"
+  DB_NAME:        baalvion_db
+  REDIS_HOST:     redis-service
+  REDIS_PORT:     "6379"
+  JWT_ISSUER:     baalvion-auth
+  JWT_AUDIENCE:   baalvion
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+  CORS_ORIGINS:   "https://baalvion.com,https://admin.baalvion.com"
+  APP_URL:        "https://baalvion.com"
+  ADMIN_URL:      "https://admin.baalvion.com"

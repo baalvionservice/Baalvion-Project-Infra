@@ -1,0 +1,694 @@
+openapi: '3.0.3'
+info:
+  title: Imperialpedia Service API
+  version: '1.0.0'
+  description: Content and knowledge platform — articles, financial assets, community posts, creators, leaderboard, and calculators.
+servers:
+  - url: http://localhost:3004/v1
+    description: Development
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:   { type: string }
+        message: { type: string }
+
+    MessageResponse:
+      type: object
+      properties:
+        message: { type: string }
+
+    PaginatedMeta:
+      type: object
+      properties:
+        total:   { type: integer }
+        page:    { type: integer }
+        perPage: { type: integer }
+
+    Article:
+      type: object
+      properties:
+        id:          { type: string, format: uuid }
+        title:       { type: string }
+        slug:        { type: string }
+        content:     { type: string }
+        summary:     { type: string }
+        tags:        { type: array, items: { type: string } }
+        status:      { type: string, enum: [draft, published, archived] }
+        authorId:    { type: string, format: uuid }
+        likes:       { type: integer }
+        publishedAt: { type: string, format: date-time, nullable: true }
+        createdAt:   { type: string, format: date-time }
+        updatedAt:   { type: string, format: date-time }
+
+    Asset:
+      type: object
+      properties:
+        symbol:      { type: string }
+        name:        { type: string }
+        type:        { type: string, enum: [stock, crypto, etf, commodity, index, forex] }
+        exchange:    { type: string }
+        description: { type: string }
+        tags:        { type: array, items: { type: string } }
+        createdAt:   { type: string, format: date-time }
+
+    AssetSummary:
+      type: object
+      properties:
+        symbol:        { type: string }
+        price:         { type: number }
+        change:        { type: number }
+        changePct:     { type: number }
+        volume:        { type: integer }
+        marketCap:     { type: number, nullable: true }
+        high52w:       { type: number, nullable: true }
+        low52w:        { type: number, nullable: true }
+        updatedAt:     { type: string, format: date-time }
+
+    CommunityPost:
+      type: object
+      properties:
+        id:        { type: string, format: uuid }
+        title:     { type: string }
+        body:      { type: string }
+        authorId:  { type: string, format: uuid }
+        votes:     { type: integer }
+        comments:  { type: integer }
+        createdAt: { type: string, format: date-time }
+
+    Comment:
+      type: object
+      properties:
+        id:        { type: string, format: uuid }
+        body:      { type: string }
+        authorId:  { type: string, format: uuid }
+        postId:    { type: string, format: uuid }
+        createdAt: { type: string, format: date-time }
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:      { type: integer }
+        userId:    { type: string, format: uuid }
+        username:  { type: string }
+        score:     { type: number }
+        period:    { type: string }
+        category:  { type: string }
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+paths:
+
+  # ── Articles ──────────────────────────────────────────────────────────────────
+  /articles:
+    get:
+      tags: [Articles]
+      summary: List published articles
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: tag
+          schema: { type: string }
+        - in: query
+          name: search
+          schema: { type: string }
+        - in: query
+          name: status
+          schema: { type: string, enum: [draft, published, archived] }
+      responses:
+        '200':
+          description: Article list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Article' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Articles]
+      summary: Create a new article (auth required)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, content]
+              properties:
+                title:   { type: string }
+                content: { type: string }
+                summary: { type: string }
+                tags:    { type: array, items: { type: string } }
+                status:  { type: string, enum: [draft, published] }
+      responses:
+        '201':
+          description: Article created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Article' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /articles/{id}:
+    get:
+      tags: [Articles]
+      summary: Get a single article by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Article
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Article' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Articles]
+      summary: Update an article (auth required — must be author or admin)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:   { type: string }
+                content: { type: string }
+                summary: { type: string }
+                tags:    { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Updated article
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Article' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Articles]
+      summary: Delete an article (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Article deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /articles/{id}/publish:
+    post:
+      tags: [Articles]
+      summary: Publish a draft article (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Article published
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Article' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /articles/{id}/like:
+    post:
+      tags: [Articles]
+      summary: Like or unlike an article (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Like toggled
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  liked: { type: boolean }
+                  likes: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Assets ────────────────────────────────────────────────────────────────────
+  /assets:
+    get:
+      tags: [Assets]
+      summary: List financial assets
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: type
+          schema: { type: string, enum: [stock, crypto, etf, commodity, index, forex] }
+        - in: query
+          name: exchange
+          schema: { type: string }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: Asset list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Asset' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Assets]
+      summary: Upsert an asset (auth required — admin/creator)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [symbol, name, type]
+              properties:
+                symbol:      { type: string }
+                name:        { type: string }
+                type:        { type: string, enum: [stock, crypto, etf, commodity, index, forex] }
+                exchange:    { type: string }
+                description: { type: string }
+                tags:        { type: array, items: { type: string } }
+      responses:
+        '200':
+          description: Asset upserted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Asset' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /assets/{symbol}:
+    get:
+      tags: [Assets]
+      summary: Get asset details by ticker symbol
+      parameters:
+        - in: path
+          name: symbol
+          required: true
+          schema: { type: string }
+          example: AAPL
+      responses:
+        '200':
+          description: Asset details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Asset' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /assets/{symbol}/summary:
+    get:
+      tags: [Assets]
+      summary: Get real-time price summary for an asset
+      parameters:
+        - in: path
+          name: symbol
+          required: true
+          schema: { type: string }
+          example: AAPL
+      responses:
+        '200':
+          description: Asset price summary
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssetSummary' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Community ─────────────────────────────────────────────────────────────────
+  /community/posts:
+    get:
+      tags: [Community]
+      summary: List community posts
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: sort
+          schema: { type: string, enum: [newest, top, hot] }
+      responses:
+        '200':
+          description: Post list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/CommunityPost' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Community]
+      summary: Create a community post (auth required)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, body]
+              properties:
+                title: { type: string }
+                body:  { type: string }
+                tags:  { type: array, items: { type: string } }
+      responses:
+        '201':
+          description: Post created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CommunityPost' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /community/posts/{id}:
+    get:
+      tags: [Community]
+      summary: Get a community post by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Post details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CommunityPost' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Community]
+      summary: Update a community post (auth required — must be author)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                body:  { type: string }
+      responses:
+        '200':
+          description: Updated post
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/CommunityPost' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Community]
+      summary: Delete a community post (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Post deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /community/posts/{id}/vote:
+    post:
+      tags: [Community]
+      summary: Upvote or downvote a post (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [direction]
+              properties:
+                direction: { type: string, enum: [up, down] }
+      responses:
+        '200':
+          description: Vote recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  votes: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /community/posts/{id}/comments:
+    get:
+      tags: [Community]
+      summary: List comments on a post
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          description: Comment list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Comment' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    post:
+      tags: [Community]
+      summary: Add a comment to a post (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string }
+      responses:
+        '201':
+          description: Comment added
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Comment' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Leaderboard ───────────────────────────────────────────────────────────────
+  /leaderboard:
+    get:
+      tags: [Leaderboard]
+      summary: Get the global leaderboard
+      parameters:
+        - in: query
+          name: period
+          schema: { type: string, enum: [daily, weekly, monthly, alltime], default: weekly }
+        - in: query
+          name: category
+          schema: { type: string, description: e.g. traders, writers, contributors }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 100 }
+      responses:
+        '200':
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  period:  { type: string }
+                  data:    { type: array, items: { $ref: '#/components/schemas/LeaderboardEntry' } }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  # ── Calculators ───────────────────────────────────────────────────────────────
+  /calculators:
+    get:
+      tags: [Calculators]
+      summary: List available financial calculators
+      responses:
+        '200':
+          description: Calculator registry
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:          { type: string }
+                        name:        { type: string }
+                        description: { type: string }
+                        inputs:      { type: array, items: { type: object } }
+
+  /calculators/{id}/run:
+    post:
+      tags: [Calculators]
+      summary: Run a financial calculator with provided inputs
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+          description: Calculator identifier, e.g. sip, compound-interest, loan-emi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Input values vary per calculator
+              additionalProperties: true
+      responses:
+        '200':
+          description: Calculation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  calculatorId: { type: string }
+                  inputs:       { type: object }
+                  result:       { type: object }
+                  chart:        { type: array, items: { type: object }, nullable: true }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Analytics ─────────────────────────────────────────────────────────────────
+  /analytics:
+    get:
+      tags: [Analytics]
+      summary: Get platform content analytics (reads, likes, engagement)
+      parameters:
+        - in: query
+          name: period
+          schema: { type: string, enum: [day, week, month], default: week }
+        - in: query
+          name: type
+          schema: { type: string, enum: [articles, community, assets] }
+      responses:
+        '200':
+          description: Analytics snapshot
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalArticles:    { type: integer }
+                  totalPosts:       { type: integer }
+                  totalViews:       { type: integer }
+                  topArticles:      { type: array, items: { $ref: '#/components/schemas/Article' } }
+                  topPosts:         { type: array, items: { $ref: '#/components/schemas/CommunityPost' } }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  # ── Utility ───────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [Utility]
+      summary: Health check (no auth)
+      responses:
+        '200':
+          description: Service health
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:    { type: string, enum: [ok] }
+                  timestamp: { type: string, format: date-time }

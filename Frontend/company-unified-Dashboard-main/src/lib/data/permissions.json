@@ -1,0 +1,55 @@
+{
+  "roles": {
+    "Admin": {
+      "dashboard": true,
+      "financials": true,
+      "analytics": true,
+      "employees": true,
+      "settings": true,
+      "security": true,
+      "reports": true,
+      "notifications": true
+    },
+    "Investor": {
+      "dashboard": true,
+      "financials": true,
+      "analytics": true,
+      "employees": false,
+      "settings": false,
+      "security": false,
+      "reports": true,
+      "notifications": true
+    },
+    "Co-Founder": {
+      "dashboard": true,
+      "financials": true,
+      "analytics": true,
+      "employees": true,
+      "settings": true,
+      "security": false,
+      "reports": true,
+      "notifications": true
+    },
+    "Employee": {
+      "dashboard": true,
+      "financials": false,
+      "analytics": false,
+      "employees": false,
+      "settings": false,
+      "security": false,
+      "reports": false,
+      "notifications": true
+    }
+  },
+  "permissions": [
+    { "id": 1, "user_id": 101, "module": "FinancialEntries", "access": "Edit" },
+    { "id": 2, "user_id": 101, "module": "Dashboard", "access": "View" },
+    {
+      "id": 3,
+      "user_id": 102,
+      "module": "ProfitDistributions",
+      "access": "Admin"
+    },
+    { "id": 4, "user_id": 103, "module": "Shareholders", "access": "View" }
+  ]
+}

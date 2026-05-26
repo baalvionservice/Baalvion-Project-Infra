@@ -1,0 +1,213 @@
+
+[
+  {
+    "id": "techcorp.in",
+    "domain": "techcorp.in",
+    "businessId": "biz_1",
+    "businessName": "TechCorp India",
+    "sslStatus": "valid",
+    "monthlyVisitors": 48200,
+    "pageViews": 124500,
+    "bounceRate": 34.2,
+    "avgSessionDuration": "3m 42s",
+    "webRevenue": 42800,
+    "domainCost": 15,
+    "hostingCost": 50,
+    "uptime": 99.97,
+    "trafficTrend": [
+      { "date": "Jul 1", "visitors": 1500 },
+      { "date": "Jul 5", "visitors": 1800 },
+      { "date": "Jul 10", "visitors": 1700 },
+      { "date": "Jul 15", "visitors": 2100 },
+      { "date": "Jul 20", "visitors": 2500 },
+      { "date": "Jul 25", "visitors": 2300 },
+      { "date": "Jul 30", "visitors": 2800 }
+    ],
+    "trafficSources": [
+      { "name": "Organic", "value": 54 },
+      { "name": "Direct", "value": 22 },
+      { "name": "Social", "value": 14 },
+      { "name": "Referral", "value": 10 }
+    ],
+    "topPages": [
+      { "url": "/pricing", "views": 25000, "avgTime": "2m 15s", "bounceRate": 25.1 },
+      { "url": "/features/ai-analytics", "views": 18000, "avgTime": "4m 30s", "bounceRate": 30.5 },
+      { "url": "/blog/top-10-kpis", "views": 12000, "avgTime": "5m 10s", "bounceRate": 45.2 }
+    ],
+    "geoVisitors": [
+      { "country": "India", "flag": "🇮🇳", "visitors": 35000, "percentage": 72.6 },
+      { "country": "USA", "flag": "🇺🇸", "visitors": 5000, "percentage": 10.4 },
+      { "country": "UK", "flag": "🇬🇧", "visitors": 3000, "percentage": 6.2 }
+    ],
+    "revenueAttribution": { "orders": 120, "totalValue": 42800 },
+    "seo": { "da": 45, "backlinks": 12000, "keywords": 500 }
+  },
+  {
+    "id": "baalvionmedia.co.uk",
+    "domain": "baalvionmedia.co.uk",
+    "businessId": "biz_2",
+    "businessName": "Baalvion Media UK",
+    "sslStatus": "valid",
+    "monthlyVisitors": 22500,
+    "pageViews": 68000,
+    "bounceRate": 41.8,
+    "avgSessionDuration": "2m 55s",
+    "webRevenue": 18500,
+    "domainCost": 12,
+    "hostingCost": 40,
+    "uptime": 99.99,
+    "trafficTrend": [
+      { "date": "Jul 1", "visitors": 800 },
+      { "date": "Jul 5", "visitors": 900 },
+      { "date": "Jul 10", "visitors": 850 },
+      { "date": "Jul 15", "visitors": 1100 },
+      { "date": "Jul 20", "visitors": 1300 },
+      { "date": "Jul 25", "visitors": 1200 },
+      { "date": "Jul 30", "visitors": 1400 }
+    ],
+    "trafficSources": [
+      { "name": "Organic", "value": 65 },
+      { "name": "Direct", "value": 15 },
+      { "name": "Social", "value": 12 },
+      { "name": "Referral", "value": 8 }
+    ],
+    "topPages": [
+      { "url": "/articles/latest-design-trends", "views": 15000, "avgTime": "3m 45s", "bounceRate": 38.0 },
+      { "url": "/showcase", "views": 10000, "avgTime": "2m 10s", "bounceRate": 45.1 },
+      { "url": "/contact", "views": 8000, "avgTime": "1m 05s", "bounceRate": 55.2 }
+    ],
+    "geoVisitors": [
+      { "country": "UK", "flag": "🇬🇧", "visitors": 18000, "percentage": 80.0 },
+      { "country": "USA", "flag": "🇺🇸", "visitors": 2000, "percentage": 8.9 },
+      { "country": "Germany", "flag": "🇩🇪", "visitors": 1000, "percentage": 4.4 }
+    ],
+    "revenueAttribution": { "orders": 85, "totalValue": 18500 },
+    "seo": { "da": 52, "backlinks": 25000, "keywords": 800 }
+  },
+  {
+    "id": "retailchain.ae",
+    "domain": "retailchain.ae",
+    "businessId": "biz_3",
+    "businessName": "RetailChain UAE",
+    "sslStatus": "valid",
+    "monthlyVisitors": 75000,
+    "pageViews": 250000,
+    "bounceRate": 28.5,
+    "avgSessionDuration": "4m 10s",
+    "webRevenue": 150000,
+    "domainCost": 30,
+    "hostingCost": 120,
+    "uptime": 99.98,
+    "trafficTrend": [
+      { "date": "Jul 1", "visitors": 2000 },
+      { "date": "Jul 5", "visitors": 2200 },
+      { "date": "Jul 10", "visitors": 2100 },
+      { "date": "Jul 15", "visitors": 2800 },
+      { "date": "Jul 20", "visitors": 3500 },
+      { "date": "Jul 25", "visitors": 3300 },
+      { "date": "Jul 30", "visitors": 4000 }
+    ],
+    "trafficSources": [
+      { "name": "Organic", "value": 30 },
+      { "name": "Direct", "value": 40 },
+      { "name": "Social", "value": 20 },
+      { "name": "Paid", "value": 10 }
+    ],
+    "topPages": [
+      { "url": "/offers", "views": 80000, "avgTime": "1m 50s", "bounceRate": 22.1 },
+      { "url": "/electronics", "views": 50000, "avgTime": "3m 20s", "bounceRate": 30.2 },
+      { "url": "/locations", "views": 30000, "avgTime": "0m 45s", "bounceRate": 40.5 }
+    ],
+    "geoVisitors": [
+      { "country": "UAE", "flag": "🇦🇪", "visitors": 60000, "percentage": 80.0 },
+      { "country": "Saudi Arabia", "flag": "🇸🇦", "visitors": 8000, "percentage": 10.7 },
+      { "country": "India", "flag": "🇮🇳", "visitors": 4000, "percentage": 5.3 }
+    ],
+    "revenueAttribution": { "orders": 500, "totalValue": 150000 },
+    "seo": { "da": 38, "backlinks": 8000, "keywords": 300 }
+  },
+  {
+    "id": "financehub.com",
+    "domain": "financehub.com",
+    "businessId": "biz_4",
+    "businessName": "FinanceHub USA",
+    "sslStatus": "valid",
+    "monthlyVisitors": 150000,
+    "pageViews": 450000,
+    "bounceRate": 30.1,
+    "avgSessionDuration": "5m 20s",
+    "webRevenue": 250000,
+    "domainCost": 20,
+    "hostingCost": 200,
+    "uptime": 99.99,
+    "trafficTrend": [
+      { "date": "Jul 1", "visitors": 4000 },
+      { "date": "Jul 5", "visitors": 4500 },
+      { "date": "Jul 10", "visitors": 4200 },
+      { "date": "Jul 15", "visitors": 5500 },
+      { "date": "Jul 20", "visitors": 6000 },
+      { "date": "Jul 25", "visitors": 5800 },
+      { "date": "Jul 30", "visitors": 7000 }
+    ],
+    "trafficSources": [
+      { "name": "Organic", "value": 70 },
+      { "name": "Direct", "value": 18 },
+      { "name": "Referral", "value": 8 },
+      { "name": "Social", "value": 4 }
+    ],
+    "topPages": [
+      { "url": "/tools/loan-calculator", "views": 120000, "avgTime": "6m 10s", "bounceRate": 20.5 },
+      { "url": "/market-analysis", "views": 80000, "avgTime": "7m 30s", "bounceRate": 25.1 },
+      { "url": "/signup", "views": 50000, "avgTime": "2m 00s", "bounceRate": 35.8 }
+    ],
+    "geoVisitors": [
+      { "country": "USA", "flag": "🇺🇸", "visitors": 120000, "percentage": 80.0 },
+      { "country": "Canada", "flag": "🇨🇦", "visitors": 15000, "percentage": 10.0 },
+      { "country": "UK", "flag": "🇬🇧", "visitors": 5000, "percentage": 3.3 }
+    ],
+    "revenueAttribution": { "orders": 800, "totalValue": 250000 },
+    "seo": { "da": 65, "backlinks": 50000, "keywords": 2000 }
+  },
+  {
+    "id": "digitalagency.sg",
+    "domain": "digitalagency.sg",
+    "businessId": "biz_5",
+    "businessName": "DigitalAgency SG",
+    "sslStatus": "valid",
+    "monthlyVisitors": 15000,
+    "pageViews": 40000,
+    "bounceRate": 45.5,
+    "avgSessionDuration": "1m 50s",
+    "webRevenue": 30000,
+    "domainCost": 50,
+    "hostingCost": 30,
+    "uptime": 99.95,
+    "trafficTrend": [
+      { "date": "Jul 1", "visitors": 400 },
+      { "date": "Jul 5", "visitors": 450 },
+      { "date": "Jul 10", "visitors": 420 },
+      { "date": "Jul 15", "visitors": 550 },
+      { "date": "Jul 20", "visitors": 600 },
+      { "date": "Jul 25", "visitors": 580 },
+      { "date": "Jul 30", "visitors": 700 }
+    ],
+    "trafficSources": [
+      { "name": "Organic", "value": 40 },
+      { "name": "Social", "value": 30 },
+      { "name": "Paid", "value": 20 },
+      { "name": "Direct", "value": 10 }
+    ],
+    "topPages": [
+      { "url": "/portfolio", "views": 12000, "avgTime": "2m 30s", "bounceRate": 40.1 },
+      { "url": "/services", "views": 8000, "avgTime": "1m 45s", "bounceRate": 50.2 },
+      { "url": "/contact-us", "views": 5000, "avgTime": "0m 50s", "bounceRate": 60.3 }
+    ],
+    "geoVisitors": [
+      { "country": "Singapore", "flag": "🇸🇬", "visitors": 10000, "percentage": 66.7 },
+      { "country": "Malaysia", "flag": "🇲🇾", "visitors": 2000, "percentage": 13.3 },
+      { "country": "Australia", "flag": "🇦🇺", "visitors": 1000, "percentage": 6.7 }
+    ],
+    "revenueAttribution": { "orders": 30, "totalValue": 30000 },
+    "seo": { "da": 35, "backlinks": 5000, "keywords": 250 }
+  }
+]

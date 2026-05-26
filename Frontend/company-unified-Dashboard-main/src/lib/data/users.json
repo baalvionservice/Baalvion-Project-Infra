@@ -1,0 +1,38 @@
+
+[
+  {
+    "id": "user_1",
+    "name": "Alex Davis",
+    "email": "alex.davis@baalvion.com",
+    "role": "ADMIN",
+    "imageId": "user-alex-davis"
+  },
+  {
+    "id": "user_2",
+    "name": "Priya Sharma",
+    "email": "priya.sharma@techcorp.com",
+    "role": "CO_FOUNDER",
+    "imageId": "user-priya-sharma"
+  },
+  {
+    "id": "user_3",
+    "name": "John Smith",
+    "email": "john.smith@financehub.com",
+    "role": "INVESTOR",
+    "imageId": "user-john-smith"
+  },
+  {
+    "id": "user_4",
+    "name": "Li Wei",
+    "email": "li.wei@digitalagencysg.com",
+    "role": "EMPLOYEE",
+    "imageId": "user-li-wei"
+  },
+  {
+    "id": "user_5",
+    "name": "Fatima Al-Fassi",
+    "email": "fatima.alfassi@retailchain.ae",
+    "role": "CO_FOUNDER",
+    "imageId": "user-fatima-al-fassi"
+  }
+]

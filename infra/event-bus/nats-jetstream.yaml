@@ -1,0 +1,111 @@
+# NATS JetStream — the enterprise DOMAIN-EVENT bus (ADR-0002).
+# 3-node clustered StatefulSet with JetStream (persistent, replicated streams,
+# replay, dedup). Redpanda/Kafka (infra/k8s/base/streaming-kafka.yaml) remains the
+# high-volume telemetry log; NATS carries the lower-volume, latency-sensitive
+# cross-context domain events with subject wildcards (`proxy.>`, `billing.>`).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nats-config
+  namespace: baalvion-eventbus
+data:
+  nats.conf: |
+    server_name: $POD_NAME
+    jetstream {
+      store_dir: /data
+      max_memory_store: 1Gi
+      max_file_store: 50Gi
+    }
+    cluster {
+      name: baalvion
+      port: 6222
+      routes: [
+        nats://nats-0.nats.baalvion-eventbus.svc:6222
+        nats://nats-1.nats.baalvion-eventbus.svc:6222
+        nats://nats-2.nats.baalvion-eventbus.svc:6222
+      ]
+    }
+    http_port: 8222
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nats
+  namespace: baalvion-eventbus
+  labels: { app: nats, tier: eventbus }
+spec:
+  serviceName: nats
+  replicas: 3
+  selector: { matchLabels: { app: nats } }
+  template:
+    metadata:
+      labels: { app: nats, tier: eventbus }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 1000, fsGroup: 1000 }
+      containers:
+        - name: nats
+          image: nats:2.10-alpine
+          args: ["-c", "/etc/nats/nats.conf"]
+          env:
+            - name: POD_NAME
+              valueFrom: { fieldRef: { fieldPath: metadata.name } }
+          ports:
+            - { name: client, containerPort: 4222 }
+            - { name: cluster, containerPort: 6222 }
+            - { name: monitor, containerPort: 8222 }
+          volumeMounts:
+            - { name: config, mountPath: /etc/nats }
+            - { name: data, mountPath: /data }
+          readinessProbe:
+            httpGet: { path: /healthz, port: monitor }
+            initialDelaySeconds: 10
+          resources:
+            requests: { cpu: "250m", memory: 512Mi }
+            limits: { cpu: "1", memory: 1.5Gi }
+      volumes:
+        - name: config
+          configMap: { name: nats-config }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources: { requests: { storage: 50Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nats
+  namespace: baalvion-eventbus
+  labels: { app: nats }
+spec:
+  clusterIP: None
+  selector: { app: nats }
+  ports:
+    - { name: client, port: 4222 }
+    - { name: cluster, port: 6222 }
+    - { name: monitor, port: 8222 }
+---
+# Declarative JetStream stream provisioning (run as a Job / nats-box init).
+# Mirrors @baalvion/events createNatsBus stream config.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nats-stream-bootstrap
+  namespace: baalvion-eventbus
+spec:
+  backoffLimit: 5
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: bootstrap
+          image: natsio/nats-box:latest
+          command:
+            - sh
+            - -c
+            - |
+              nats --server nats://nats:4222 stream add BAALVION \
+                --subjects "auth.>,org.>,proxy.>,billing.>,provider.>,abuse.>,security.>" \
+                --storage file --replicas 3 --retention limits \
+                --max-age 7d --dupe-window 2m --defaults || \
+              nats --server nats://nats:4222 stream info BAALVION

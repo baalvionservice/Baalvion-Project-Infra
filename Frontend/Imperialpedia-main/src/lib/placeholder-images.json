@@ -1,0 +1,28 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Abstract financial network background",
+      "imageUrl": "https://picsum.photos/seed/financial-network/1920/1080",
+      "imageHint": "financial data"
+    },
+    {
+      "id": "glossary-thumb",
+      "description": "Financial books and charts",
+      "imageUrl": "https://picsum.photos/seed/glossary/600/400",
+      "imageHint": "finance library"
+    },
+    {
+      "id": "creator-thumb",
+      "description": "Modern workstation for creators",
+      "imageUrl": "https://picsum.photos/seed/creator/600/400",
+      "imageHint": "creator workspace"
+    },
+    {
+      "id": "analytics-thumb",
+      "description": "Digital financial dashboard",
+      "imageUrl": "https://picsum.photos/seed/analytics/600/400",
+      "imageHint": "data analytics"
+    }
+  ]
+}

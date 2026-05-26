@@ -1,0 +1,714 @@
+openapi: 3.1.0
+info:
+  title: Baalvion Auth Service
+  version: 2.0.0
+  description: |
+    Central SSO microservice for all Baalvion products.
+    Issues RS256 JWTs (access + refresh token rotation with family-based reuse detection).
+    All other services verify tokens locally using the JWKS endpoint.
+
+servers:
+  - url: http://localhost:3001
+    description: Local development
+  - url: https://auth.baalvion.com
+    description: Production
+
+tags:
+  - name: Auth
+    description: Registration, login, token lifecycle
+  - name: MFA
+    description: TOTP two-factor authentication
+  - name: Profile
+    description: Current user profile management
+  - name: Sessions
+    description: Active session listing and revocation
+  - name: Organizations
+    description: Org and team management
+  - name: Invitations
+    description: Invite-based onboarding
+  - name: Audit
+    description: Audit log access
+  - name: Well-Known
+    description: JWKS and OIDC discovery
+
+# ── Reusable components ──────────────────────────────────────────────────────────
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:       { type: string, example: INVALID_CREDENTIALS }
+            message:    { type: string, example: Invalid email or password }
+            details:    { type: object }
+            requestId:  { type: string, format: uuid }
+
+    UserObject:
+      type: object
+      properties:
+        id:            { type: string }
+        email:         { type: string, format: email }
+        fullName:      { type: string, nullable: true }
+        avatarUrl:     { type: string, nullable: true }
+        status:        { type: string, enum: [active, suspended, inactive] }
+        emailVerified: { type: boolean }
+        mfaEnabled:    { type: boolean }
+        orgId:         { type: string, format: uuid, nullable: true }
+        role:          { type: string, example: owner }
+
+    OrgObject:
+      type: object
+      properties:
+        id:   { type: string, format: uuid }
+        name: { type: string }
+        slug: { type: string }
+
+    TokenPair:
+      type: object
+      properties:
+        accessToken:  { type: string, description: RS256 JWT, expires in 15m }
+        refreshToken: { type: string, description: RS256 JWT, expires in 7d }
+        expiresAt:    { type: string, format: date-time }
+
+    SessionObject:
+      type: object
+      properties:
+        id:          { type: string, format: uuid }
+        ipAddress:   { type: string }
+        userAgent:   { type: string }
+        createdAt:   { type: string, format: date-time }
+        lastSeenAt:  { type: string, format: date-time }
+        expiresAt:   { type: string, format: date-time }
+
+    AuditLogItem:
+      type: object
+      properties:
+        id:           { type: integer }
+        userId:       { type: string }
+        orgId:        { type: string, format: uuid, nullable: true }
+        action:       { type: string, example: user.login }
+        resourceType: { type: string, nullable: true }
+        resourceId:   { type: string, nullable: true }
+        metadata:     { type: object }
+        ipAddress:    { type: string }
+        createdAt:    { type: string, format: date-time }
+
+    PaginatedAuditLogs:
+      type: object
+      properties:
+        total: { type: integer }
+        page:  { type: integer }
+        limit: { type: integer }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AuditLogItem' }
+
+# ── Paths ────────────────────────────────────────────────────────────────────────
+paths:
+
+  # ── Auth ──────────────────────────────────────────────────────────────────────
+
+  /v1/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user + workspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:    { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                fullName: { type: string }
+                orgName:  { type: string }
+      responses:
+        '201':
+          description: User registered and logged in
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TokenPair'
+                  - type: object
+                    properties:
+                      user: { $ref: '#/components/schemas/UserObject' }
+                      org:  { $ref: '#/components/schemas/OrgObject' }
+        '409':
+          description: Email already registered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /v1/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email + password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:    { type: string, format: email }
+                password: { type: string }
+      responses:
+        '200':
+          description: Authenticated (or MFA challenge required)
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - allOf:
+                      - $ref: '#/components/schemas/TokenPair'
+                      - type: object
+                        properties:
+                          user: { $ref: '#/components/schemas/UserObject' }
+                  - type: object
+                    description: MFA required — proceed to POST /mfa/challenge
+                    properties:
+                      mfa_required:   { type: boolean, example: true }
+                      challengeToken: { type: string }
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '429':
+          description: Too many attempts
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /v1/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate refresh token, get new access token
+      description: |
+        Accepts the refresh token from the `baalvion_refresh` cookie or `refreshToken` body field.
+        Implements family-based reuse detection — presenting a previously rotated token
+        revokes the entire family and forces re-login.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200':
+          description: New token pair issued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenPair' }
+        '401':
+          description: Invalid, expired, or reused refresh token
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /v1/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke current session and blacklist access token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string, example: Logged out successfully }
+
+  /v1/auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Send password reset email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200':
+          description: Reset email sent (always 200 to prevent email enumeration)
+
+  /v1/auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password with token from email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, newPassword]
+              properties:
+                token:       { type: string }
+                newPassword: { type: string, minLength: 8 }
+      responses:
+        '200':
+          description: Password reset. All existing sessions revoked.
+        '400':
+          description: Invalid or expired token
+
+  /v1/auth/verify-email:
+    get:
+      tags: [Auth]
+      summary: Verify email address via token from email link
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Email verified
+        '400':
+          description: Invalid or expired token
+
+  /v1/auth/verify-token:
+    post:
+      tags: [Auth]
+      summary: Validate an access token (service-to-service)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string }
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:   { type: boolean }
+                  payload: { type: object }
+                  reason:  { type: string }
+
+  # ── MFA ───────────────────────────────────────────────────────────────────────
+
+  /v1/auth/mfa/challenge:
+    post:
+      tags: [MFA]
+      summary: Complete MFA login with TOTP code
+      description: |
+        Step 2 of MFA login. Supply the challengeToken from POST /login
+        together with the current TOTP code.
+        Enforces max 5 failed attempts before revoking the challenge.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challengeToken, code]
+              properties:
+                challengeToken: { type: string }
+                code:           { type: string, minLength: 6, maxLength: 6 }
+      responses:
+        '200':
+          description: MFA verified — full token pair issued
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TokenPair'
+                  - type: object
+                    properties:
+                      user: { $ref: '#/components/schemas/UserObject' }
+        '401':
+          description: Invalid TOTP code or expired challenge
+        '429':
+          description: Too many failed MFA attempts
+
+  /v1/auth/mfa/enable:
+    post:
+      tags: [MFA]
+      summary: Initiate MFA setup — returns QR code + secret
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: MFA setup data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  qrCodeUrl:     { type: string, description: data:image/png base64 }
+                  secret:        { type: string, description: base32 TOTP secret }
+                  recoveryCodes: { type: array, items: { type: string } }
+
+  /v1/auth/mfa/verify:
+    post:
+      tags: [MFA]
+      summary: Confirm TOTP code to activate MFA
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, minLength: 6, maxLength: 6 }
+      responses:
+        '200':
+          description: MFA activated
+        '400':
+          description: Invalid TOTP code or setup not started
+
+  /v1/auth/mfa/disable:
+    delete:
+      tags: [MFA]
+      summary: Disable MFA for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: MFA disabled
+
+  # ── Profile ───────────────────────────────────────────────────────────────────
+
+  /v1/auth/me:
+    get:
+      tags: [Profile]
+      summary: Get current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserObject' }
+
+    patch:
+      tags: [Profile]
+      summary: Update current user profile
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fullName:  { type: string }
+                avatarUrl: { type: string, format: uri }
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserObject' }
+
+  # ── Sessions ──────────────────────────────────────────────────────────────────
+
+  /v1/auth/sessions:
+    get:
+      tags: [Sessions]
+      summary: List all active sessions for the current user
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Active sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/SessionObject' }
+
+    delete:
+      tags: [Sessions]
+      summary: Revoke all sessions except the current one
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: All other sessions revoked
+
+  /v1/auth/sessions/{sessionId}:
+    delete:
+      tags: [Sessions]
+      summary: Revoke a specific session
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Session revoked
+        '404':
+          description: Session not found
+
+  # ── Audit logs ────────────────────────────────────────────────────────────────
+
+  /v1/auth/audit-logs:
+    get:
+      tags: [Audit]
+      summary: Paginated audit trail for the caller's organization
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: limit
+          schema: { type: integer, default: 50, maximum: 200 }
+        - in: query
+          name: userId
+          schema: { type: string }
+        - in: query
+          name: action
+          schema: { type: string, example: user.login }
+      responses:
+        '200':
+          description: Paginated audit logs
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaginatedAuditLogs' }
+
+  # ── Orgs ──────────────────────────────────────────────────────────────────────
+
+  /v1/auth/orgs:
+    get:
+      tags: [Organizations]
+      summary: List organizations the current user belongs to
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Organization list
+    post:
+      tags: [Organizations]
+      summary: Create a new organization
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+      responses:
+        '201':
+          description: Organization created
+
+  /v1/auth/orgs/{orgId}/members:
+    get:
+      tags: [Organizations]
+      summary: List members of an organization
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Member list
+
+  /v1/auth/orgs/{orgId}/invite:
+    post:
+      tags: [Organizations]
+      summary: Send an invitation email to join the organization
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+                role:  { type: string, enum: [admin, member, viewer], default: member }
+      responses:
+        '200':
+          description: Invitation sent
+
+  /v1/auth/orgs/{orgId}/members/{userId}:
+    patch:
+      tags: [Organizations]
+      summary: Change a member's role
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:         { type: string, enum: [admin, member, viewer] }
+                serviceRoles: { type: object }
+      responses:
+        '200':
+          description: Role updated
+
+    delete:
+      tags: [Organizations]
+      summary: Remove a member from the organization
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Member removed
+
+  # ── Invitations ───────────────────────────────────────────────────────────────
+
+  /v1/auth/validate-invite:
+    get:
+      tags: [Invitations]
+      summary: Validate an invitation token and return its details
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Invitation details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:     { type: string }
+                  role:      { type: string }
+                  orgName:   { type: string }
+                  expiresAt: { type: string, format: date-time }
+        '400':
+          description: Invalid or expired invitation
+
+  /v1/auth/accept-invite:
+    post:
+      tags: [Invitations]
+      summary: Accept an invitation and create/join an account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, email, password]
+              properties:
+                token:    { type: string }
+                email:    { type: string, format: email }
+                password: { type: string, minLength: 8 }
+                fullName: { type: string }
+      responses:
+        '201':
+          description: Account created and logged in
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TokenPair'
+                  - type: object
+                    properties:
+                      user: { $ref: '#/components/schemas/UserObject' }
+
+  # ── Well-Known ────────────────────────────────────────────────────────────────
+
+  /.well-known/jwks.json:
+    get:
+      tags: [Well-Known]
+      summary: JSON Web Key Set for token verification
+      description: |
+        Public keys used to verify RS256 JWTs issued by this service.
+        Cache-Control: public, max-age=3600. kid matches the alg header in issued tokens.
+      responses:
+        '200':
+          description: JWKS document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kty: { type: string, example: RSA }
+                        use: { type: string, example: sig }
+                        alg: { type: string, example: RS256 }
+                        kid: { type: string }
+                        n:   { type: string }
+                        e:   { type: string }
+
+  /.well-known/openid-configuration:
+    get:
+      tags: [Well-Known]
+      summary: OpenID Connect discovery document
+      responses:
+        '200':
+          description: OIDC discovery

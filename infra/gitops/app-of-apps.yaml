@@ -1,0 +1,18 @@
+# ArgoCD app-of-apps: one root Application that owns all platform Applications.
+# GitOps = git is the source of truth; ArgoCD reconciles each region/cluster.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: baalvion-root
+  namespace: argocd
+  finalizers: [resources-finalizer.argocd.argoproj.io]
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/baalvion/platform.git
+    targetRevision: main
+    path: infra/gitops/applications
+  destination: { server: https://kubernetes.default.svc, namespace: argocd }
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=true]

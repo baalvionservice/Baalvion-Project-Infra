@@ -1,0 +1,22 @@
+# Settings to manage and configure a Firebase App Hosting backend.
+# Optimized for Production Traffic & Scaling.
+
+runConfig:
+  # Maximum number of instances to spin up in response to traffic.
+  maxInstances: 10
+  # Minimum number of instances to keep warm (prevents cold starts).
+  minInstances: 1
+  # Maximum concurrent requests per instance.
+  concurrency: 80
+  # CPU allocation per instance.
+  cpu: 1
+  # Memory allocation per instance.
+  memoryMiB: 1024
+
+env:
+  - variable: NEXT_PUBLIC_GA_MEASUREMENT_ID
+    availability:
+      - BUILD
+      - RUNTIME
+  - variable: NODE_ENV
+    value: production

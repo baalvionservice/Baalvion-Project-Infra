@@ -1,0 +1,26 @@
+[
+    {
+        "question": "What is Baalvion?",
+        "answer": "Baalvion is a global business operating system designed to help you manage all your businesses, employees, finances, and equity from a single, unified platform, no matter where in the world they are."
+    },
+    {
+        "question": "Is my financial data secure?",
+        "answer": "Yes, security is our top priority. We use 256-bit encryption for all data, both in transit and at rest. We are SOC 2 compliant and our infrastructure is built on world-class, secure cloud providers."
+    },
+    {
+        "question": "Which payment gateways do you support?",
+        "answer": "We currently support direct integrations with Stripe, PayPal, and Razorpay. We are continuously adding more gateways. For unsupported gateways, you can upload transaction data via CSV."
+    },
+    {
+        "question": "Can I customize the platform with my own branding?",
+        "answer": "Yes! Our Enterprise plan includes full white-label capabilities, allowing you to customize the platform with your own logo, brand colors, custom domain, and email settings."
+    },
+    {
+        "question": "What happens if I exceed my plan's user or business limit?",
+        "answer": "If you exceed the limits of your plan, you'll be prompted to upgrade to a higher tier. We will never automatically charge you or block your access without notice."
+    },
+    {
+        "question": "Do you offer a free trial?",
+        "answer": "Yes, we offer a 14-day free trial on our Starter and Pro plans. You can explore all the features without needing to enter a credit card."
+    }
+]

@@ -1,0 +1,42 @@
+import { Role } from "./roles";
+import { Permission, PERMISSIONS } from "./permissions";
+
+/**
+ * @fileOverview Mapping of roles to their allowed permissions.
+ */
+
+export const rolePermissions: Record<Role, Permission[]> = {
+  super_admin: ["*"],
+
+  country_admin: [
+    PERMISSIONS.VIEW_DASHBOARD,
+    PERMISSIONS.VIEW_LEADS,
+    PERMISSIONS.MANAGE_LEADS,
+    PERMISSIONS.DISPATCH_WHATSAPP,
+    PERMISSIONS.CREATE_CONTENT,
+    PERMISSIONS.EDIT_CONTENT,
+    PERMISSIONS.PUBLISH_CONTENT,
+    PERMISSIONS.ACCESS_SEO,
+    PERMISSIONS.MANAGE_METADATA,
+    PERMISSIONS.VIEW_REVENUE,
+    PERMISSIONS.CREATE_LISTING,
+    PERMISSIONS.EDIT_LISTING,
+  ],
+
+  operator: [
+    PERMISSIONS.VIEW_DASHBOARD,
+    PERMISSIONS.VIEW_LEADS,
+    PERMISSIONS.CREATE_CONTENT,
+    PERMISSIONS.EDIT_CONTENT,
+  ],
+
+  vendor: [
+    PERMISSIONS.CREATE_LISTING,
+    PERMISSIONS.EDIT_LISTING,
+    PERMISSIONS.MANAGE_OWN_LISTINGS,
+  ],
+
+  client: [
+    PERMISSIONS.VIEW_OWN_ACTIVITY,
+  ],
+};

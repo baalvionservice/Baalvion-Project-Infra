@@ -1,0 +1,91 @@
+# Durable telemetry streaming backbone — Redpanda (Kafka API-compatible, single
+# binary, no ZooKeeper). This is the OPTIONAL high-throughput alternative to the
+# default Redis Streams pipeline: at millions of telemetry events/day with long
+# replay windows, a partitioned log scales better and decouples producers
+# (gateway) from consumers (telemetry pipeline, feature jobs, ml-service).
+#
+# Topics (create with `rpk topic create`): routing.telemetry (24 partitions),
+# routing.outcomes, intel.features. The Node telemetryPipeline can consume from
+# here instead of Redis by setting STREAM_BACKEND=kafka + KAFKA_BROKERS (the
+# pipeline abstraction point); Redis Streams remains the zero-dependency default.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: redpanda
+  namespace: baalvion
+  labels: { app: redpanda, tier: streaming }
+spec:
+  serviceName: redpanda
+  replicas: 3
+  selector:
+    matchLabels: { app: redpanda }
+  template:
+    metadata:
+      labels: { app: redpanda, tier: streaming }
+    spec:
+      securityContext: { fsGroup: 101, runAsUser: 101, runAsNonRoot: true }
+      containers:
+        - name: redpanda
+          image: redpandadata/redpanda:v24.2.7
+          args:
+            - redpanda
+            - start
+            - --smp=2
+            - --memory=4G
+            - --reserve-memory=0M
+            - --overprovisioned
+            - --node-id=$(POD_ORDINAL)
+            - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+            - --advertise-kafka-addr=PLAINTEXT://$(POD_NAME).redpanda.baalvion.svc.cluster.local:9092
+            - --rpc-addr=0.0.0.0:33145
+            - --seeds=redpanda-0.redpanda.baalvion.svc.cluster.local:33145
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            # node-id from the StatefulSet pod-index label (downward API). Quoted
+            # because the bracketed key is not valid YAML flow syntax.
+            - name: POD_ORDINAL
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.labels['apps.kubernetes.io/pod-index']"
+          ports:
+            - { name: kafka, containerPort: 9092 }
+            - { name: rpc, containerPort: 33145 }
+            - { name: admin, containerPort: 9644 }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/redpanda/data }
+          readinessProbe:
+            httpGet: { path: /v1/status/ready, port: admin }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests: { cpu: "1", memory: 4Gi }
+            limits: { cpu: "2", memory: 5Gi }
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources: { requests: { storage: 100Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redpanda
+  namespace: baalvion
+  labels: { app: redpanda }
+spec:
+  clusterIP: None   # headless for stable per-broker DNS
+  selector: { app: redpanda }
+  ports:
+    - { name: kafka, port: 9092 }
+    - { name: rpc, port: 33145 }
+    - { name: admin, port: 9644 }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: redpanda, namespace: baalvion }
+spec:
+  minAvailable: 2
+  selector: { matchLabels: { app: redpanda } }

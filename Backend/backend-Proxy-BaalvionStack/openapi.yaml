@@ -1,0 +1,3013 @@
+openapi: '3.0.3'
+info:
+  title: Baalvion Proxy / NetStack API
+  version: '1.0.0'
+  description: Main proxy and platform management backend — auth, users, proxies, billing, analytics, support, admin.
+servers:
+  - url: http://localhost:4000/v1
+    description: Development
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:   { type: string }
+        message: { type: string }
+
+    MessageResponse:
+      type: object
+      properties:
+        message: { type: string }
+
+    PaginatedMeta:
+      type: object
+      properties:
+        total:   { type: integer }
+        page:    { type: integer }
+        perPage: { type: integer }
+
+    User:
+      type: object
+      properties:
+        id:        { type: string, format: uuid }
+        email:     { type: string, format: email }
+        firstName: { type: string }
+        lastName:  { type: string }
+        role:      { type: string }
+        status:    { type: string, enum: [active, suspended, banned] }
+        createdAt: { type: string, format: date-time }
+
+    Org:
+      type: object
+      properties:
+        id:        { type: string, format: uuid }
+        name:      { type: string }
+        plan:      { type: string }
+        status:    { type: string }
+        createdAt: { type: string, format: date-time }
+
+    Proxy:
+      type: object
+      properties:
+        id:       { type: string, format: uuid }
+        host:     { type: string }
+        port:     { type: integer }
+        protocol: { type: string, enum: [http, https, socks5] }
+        country:  { type: string }
+        status:   { type: string, enum: [active, inactive, rotating] }
+
+    Plan:
+      type: object
+      properties:
+        id:       { type: string }
+        name:     { type: string }
+        price:    { type: number }
+        currency: { type: string }
+        interval: { type: string, enum: [monthly, yearly] }
+        features: { type: array, items: { type: string } }
+
+    Invoice:
+      type: object
+      properties:
+        id:        { type: string }
+        amount:    { type: number }
+        currency:  { type: string }
+        status:    { type: string }
+        createdAt: { type: string, format: date-time }
+        pdfUrl:    { type: string, format: uri }
+
+    Ticket:
+      type: object
+      properties:
+        id:        { type: string, format: uuid }
+        subject:   { type: string }
+        status:    { type: string, enum: [open, pending, closed] }
+        priority:  { type: string, enum: [low, medium, high, urgent] }
+        createdAt: { type: string, format: date-time }
+
+    ApiKey:
+      type: object
+      properties:
+        id:        { type: string, format: uuid }
+        name:      { type: string }
+        prefix:    { type: string }
+        createdAt: { type: string, format: date-time }
+        expiresAt: { type: string, format: date-time, nullable: true }
+
+    AuditLog:
+      type: object
+      properties:
+        id:        { type: string, format: uuid }
+        action:    { type: string }
+        actorId:   { type: string, format: uuid }
+        targetId:  { type: string, nullable: true }
+        metadata:  { type: object }
+        createdAt: { type: string, format: date-time }
+
+    Provider:
+      type: object
+      properties:
+        id:     { type: string, format: uuid }
+        name:   { type: string }
+        type:   { type: string }
+        status: { type: string, enum: [active, inactive, degraded] }
+        weight: { type: integer }
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Unprocessable Entity — validation failed
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+paths:
+
+  # ── Auth ──────────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, firstName, lastName]
+              properties:
+                email:     { type: string, format: email }
+                password:  { type: string, minLength: 8 }
+                firstName: { type: string }
+                lastName:  { type: string }
+      responses:
+        '201':
+          description: Account created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:     { type: string }
+                  accessToken: { type: string }
+                  user:        { $ref: '#/components/schemas/User' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate and obtain tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:    { type: string, format: email }
+                password: { type: string }
+                mfaCode:  { type: string, description: TOTP code if MFA is enabled }
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:  { type: string }
+                  expiresIn:    { type: integer }
+                  user:         { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Invalidate current session and refresh token
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Exchange refresh token (cookie) for a new access token
+      responses:
+        '200':
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  expiresIn:   { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Send a password-reset e-mail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200':
+          description: Reset link sent (response identical regardless of whether e-mail exists)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password using token from e-mail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:    { type: string }
+                password: { type: string, minLength: 8 }
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/verify-email:
+    post:
+      tags: [Auth]
+      summary: Verify e-mail address with token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string }
+      responses:
+        '200':
+          description: E-mail verified
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/mfa/enable:
+    post:
+      tags: [Auth]
+      summary: Enable TOTP MFA for the current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: MFA setup secret and QR code URI
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secret:    { type: string }
+                  otpauthUrl: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/mfa/verify:
+    post:
+      tags: [Auth]
+      summary: Confirm and activate MFA using a TOTP code
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, description: 6-digit TOTP }
+      responses:
+        '200':
+          description: MFA verified and enabled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/mfa/disable:
+    post:
+      tags: [Auth]
+      summary: Disable MFA for the current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: MFA disabled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/validate-invite:
+    get:
+      tags: [Auth]
+      summary: Validate an invitation token
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Token details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:     { type: boolean }
+                  email:     { type: string }
+                  orgName:   { type: string }
+                  expiresAt: { type: string, format: date-time }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/accept-invite:
+    post:
+      tags: [Auth]
+      summary: Accept an organisation invitation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:     { type: string }
+                password:  { type: string, minLength: 8 }
+                firstName: { type: string }
+                lastName:  { type: string }
+      responses:
+        '200':
+          description: Invitation accepted and account created/linked
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: { type: string }
+                  user:        { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  # ── Users ─────────────────────────────────────────────────────────────────────
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get the authenticated user's profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Current user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /users/change-password:
+    post:
+      tags: [Users]
+      summary: Change the authenticated user's password
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currentPassword, newPassword]
+              properties:
+                currentPassword: { type: string }
+                newPassword:     { type: string, minLength: 8 }
+      responses:
+        '200':
+          description: Password changed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List users in the organisation (requires user:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: search
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated user list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/User' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /users/invite:
+    post:
+      tags: [Users]
+      summary: Invite a new user to the organisation (requires user:invite)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email: { type: string, format: email }
+                role:  { type: string }
+      responses:
+        '201':
+          description: Invitation sent
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /users/{id}:
+    put:
+      tags: [Users]
+      summary: Update a user (requires user:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName: { type: string }
+                lastName:  { type: string }
+                email:     { type: string, format: email }
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Users]
+      summary: Delete a user (requires user:delete)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: User deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /users/{id}/role:
+    put:
+      tags: [Users]
+      summary: Update a user's role (requires user:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string }
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /users/{id}/suspend:
+    post:
+      tags: [Users]
+      summary: Suspend a user account (requires user:suspend)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: User suspended
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /users/{id}/reactivate:
+    post:
+      tags: [Users]
+      summary: Reactivate a suspended user (requires user:suspend)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: User reactivated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  # ── Proxies ───────────────────────────────────────────────────────────────────
+  /proxies:
+    get:
+      tags: [Proxies]
+      summary: List proxies (requires proxy:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: country
+          schema: { type: string }
+        - in: query
+          name: status
+          schema: { type: string, enum: [active, inactive, rotating] }
+      responses:
+        '200':
+          description: Proxy list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Proxy' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Proxies]
+      summary: Create a proxy (requires proxy:create)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [host, port, protocol]
+              properties:
+                host:     { type: string }
+                port:     { type: integer }
+                protocol: { type: string, enum: [http, https, socks5] }
+                country:  { type: string }
+                username: { type: string }
+                password: { type: string }
+      responses:
+        '201':
+          description: Proxy created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Proxy' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /proxies/test:
+    post:
+      tags: [Proxies]
+      summary: Test connectivity through a proxy (requires proxy:view)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                proxyId:   { type: string, format: uuid }
+                targetUrl: { type: string, format: uri }
+      responses:
+        '200':
+          description: Test result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:    { type: boolean }
+                  latencyMs:  { type: number }
+                  statusCode: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /proxies/export:
+    post:
+      tags: [Proxies]
+      summary: Export proxy list (requires proxy:view)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                format:  { type: string, enum: [csv, json, txt] }
+                filters: { type: object }
+      responses:
+        '200':
+          description: Export file
+          content:
+            text/csv:
+              schema: { type: string }
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Proxy' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /proxies/{id}:
+    get:
+      tags: [Proxies]
+      summary: Get a single proxy (requires proxy:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Proxy details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Proxy' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    put:
+      tags: [Proxies]
+      summary: Update a proxy (requires proxy:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200':
+          description: Updated proxy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Proxy' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Proxies]
+      summary: Delete a proxy (requires proxy:delete)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Proxy deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /proxies/{id}/rotate:
+    post:
+      tags: [Proxies]
+      summary: Rotate proxy credentials/IP (requires proxy:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Rotation result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  newHost: { type: string }
+                  newPort: { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /proxies/{id}/logs:
+    get:
+      tags: [Proxies]
+      summary: Get usage logs for a proxy (requires proxy:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+        - in: query
+          name: from
+          schema: { type: string, format: date-time }
+        - in: query
+          name: to
+          schema: { type: string, format: date-time }
+      responses:
+        '200':
+          description: Proxy logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Presets ───────────────────────────────────────────────────────────────────
+  /presets:
+    get:
+      tags: [Presets]
+      summary: List proxy presets (requires preset:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Preset list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Presets]
+      summary: Create a preset (requires preset:create)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:     { type: string }
+                filters:  { type: object }
+                rotation: { type: object }
+      responses:
+        '201':
+          description: Preset created
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /presets/{id}:
+    put:
+      tags: [Presets]
+      summary: Update a preset (requires preset:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200':
+          description: Updated preset
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [Presets]
+      summary: Delete a preset (requires preset:delete)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Preset deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Usage ─────────────────────────────────────────────────────────────────────
+  /usage/summary:
+    get:
+      tags: [Usage]
+      summary: Get usage summary (requires usage:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: period
+          schema: { type: string, enum: [today, week, month, custom] }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Usage summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalRequests:    { type: integer }
+                  successRequests:  { type: integer }
+                  failedRequests:   { type: integer }
+                  bandwidthBytes:   { type: integer }
+                  avgLatencyMs:     { type: number }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /usage/history:
+    get:
+      tags: [Usage]
+      summary: Get usage history time series (requires usage:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+        - in: query
+          name: granularity
+          schema: { type: string, enum: [hour, day, week] }
+      responses:
+        '200':
+          description: Usage history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Analytics ─────────────────────────────────────────────────────────────────
+  /analytics/bandwidth:
+    get:
+      tags: [Analytics]
+      summary: Bandwidth usage over time (requires analytics:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Bandwidth data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/success-rate:
+    get:
+      tags: [Analytics]
+      summary: Request success rate over time (requires analytics:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Success rate series
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/top-countries:
+    get:
+      tags: [Analytics]
+      summary: Top exit countries by traffic (requires analytics:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Country breakdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object, properties: { country: { type: string }, requests: { type: integer } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/top-domains:
+    get:
+      tags: [Analytics]
+      summary: Top target domains (requires analytics:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Domain breakdown
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/latency-distribution:
+    get:
+      tags: [Analytics]
+      summary: Latency percentile distribution (requires analytics:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Latency histogram
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  p50: { type: number }
+                  p90: { type: number }
+                  p99: { type: number }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/anomalies:
+    get:
+      tags: [Analytics]
+      summary: Detected traffic anomalies (requires analytics:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Anomaly list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /analytics/export:
+    get:
+      tags: [Analytics]
+      summary: Export analytics data (requires analytics:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: format
+          schema: { type: string, enum: [csv, json] }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Export data
+          content:
+            text/csv:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Billing ───────────────────────────────────────────────────────────────────
+  /billing/subscription:
+    get:
+      tags: [Billing]
+      summary: Get current subscription details (requires billing:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Subscription details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  planId:     { type: string }
+                  planName:   { type: string }
+                  status:     { type: string, enum: [active, past_due, canceled, trialing] }
+                  renewsAt:   { type: string, format: date-time }
+                  cancelledAt: { type: string, format: date-time, nullable: true }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /billing/plans:
+    get:
+      tags: [Billing]
+      summary: List available plans (requires billing:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Available plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Plan' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /billing/invoices:
+    get:
+      tags: [Billing]
+      summary: List invoices (requires billing:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          description: Invoice list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Invoice' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /billing/invoices/{id}:
+    get:
+      tags: [Billing]
+      summary: Get a single invoice (requires billing:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Invoice details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Invoice' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /billing/change-plan:
+    post:
+      tags: [Billing]
+      summary: Change subscription plan (requires billing:update)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [planId]
+              properties:
+                planId:    { type: string }
+                immediate: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Plan changed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /billing/payment-methods:
+    get:
+      tags: [Billing]
+      summary: List payment methods (requires billing:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Payment methods
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:      { type: string }
+                        type:    { type: string, enum: [card, bank_account, upi] }
+                        last4:   { type: string }
+                        brand:   { type: string }
+                        isDefault: { type: boolean }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Billing]
+      summary: Add a payment method (requires billing:update)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:     { type: string, description: Provider payment token }
+                setDefault: { type: boolean }
+      responses:
+        '201':
+          description: Payment method added
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /billing/payment-methods/{id}:
+    delete:
+      tags: [Billing]
+      summary: Remove a payment method (requires billing:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Payment method removed
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /billing/usage-forecast:
+    get:
+      tags: [Billing]
+      summary: Projected usage and cost for current billing period (requires billing:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Usage forecast
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  projectedCost:    { type: number }
+                  projectedRequests: { type: integer }
+                  currency:         { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /billing/webhook:
+    post:
+      tags: [Billing]
+      summary: Receive billing provider webhooks (no auth — signature-verified)
+      responses:
+        '200':
+          description: Webhook acknowledged
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+
+  # ── Payment ───────────────────────────────────────────────────────────────────
+  /payment/order:
+    post:
+      tags: [Payment]
+      summary: Create a payment order
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, currency, planId]
+              properties:
+                amount:   { type: number }
+                currency: { type: string }
+                planId:   { type: string }
+                provider: { type: string, enum: [razorpay, payu] }
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderId:  { type: string }
+                  amount:   { type: number }
+                  currency: { type: string }
+                  provider: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/verify:
+    post:
+      tags: [Payment]
+      summary: Verify a completed payment
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentId, orderId, signature]
+              properties:
+                paymentId: { type: string }
+                orderId:   { type: string }
+                signature: { type: string }
+      responses:
+        '200':
+          description: Payment verified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:       { type: boolean }
+                  transactionId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/transactions:
+    get:
+      tags: [Payment]
+      summary: List payment transactions
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Transaction list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/plans:
+    get:
+      tags: [Payment]
+      summary: List payment plans
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Plans
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Plan' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/payment-methods:
+    get:
+      tags: [Payment]
+      summary: List saved payment methods
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Payment methods
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/razorpay/subscription:
+    post:
+      tags: [Payment]
+      summary: Create a Razorpay subscription
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [planId]
+              properties:
+                planId:     { type: string }
+                totalCount: { type: integer }
+      responses:
+        '201':
+          description: Razorpay subscription
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/razorpay/subscription/{id}:
+    get:
+      tags: [Payment]
+      summary: Fetch Razorpay subscription
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Subscription details
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [Payment]
+      summary: Cancel a Razorpay subscription
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Subscription cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/razorpay/payment/{id}:
+    get:
+      tags: [Payment]
+      summary: Fetch Razorpay payment details
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Payment details
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/razorpay/refund:
+    post:
+      tags: [Payment]
+      summary: Create a Razorpay refund
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paymentId, amount]
+              properties:
+                paymentId: { type: string }
+                amount:    { type: integer, description: Amount in paisa }
+                reason:    { type: string }
+      responses:
+        '200':
+          description: Refund created
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/webhook/razorpay:
+    post:
+      tags: [Payment]
+      summary: Razorpay webhook receiver (no auth — HMAC-verified)
+      responses:
+        '200':
+          description: Webhook acknowledged
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+
+  /payment/payu/subscription:
+    post:
+      tags: [Payment]
+      summary: Create a PayU subscription
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [planId]
+              properties:
+                planId: { type: string }
+      responses:
+        '201':
+          description: PayU subscription created
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/payu/subscription/{token}:
+    delete:
+      tags: [Payment]
+      summary: Cancel a PayU subscription
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Subscription cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/payu/refund:
+    post:
+      tags: [Payment]
+      summary: Create a PayU refund
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [txnId, amount]
+              properties:
+                txnId:  { type: string }
+                amount: { type: number }
+      responses:
+        '200':
+          description: Refund initiated
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/payu/transaction/{txnId}:
+    get:
+      tags: [Payment]
+      summary: Get a PayU transaction
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: txnId
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Transaction details
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/webhook/payu:
+    post:
+      tags: [Payment]
+      summary: PayU webhook receiver (no auth — form POST)
+      responses:
+        '200':
+          description: Webhook acknowledged
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+
+  /payment/payout:
+    post:
+      tags: [Payment]
+      summary: Create a RazorpayX payout
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, currency, fundAccountId]
+              properties:
+                amount:        { type: integer }
+                currency:      { type: string }
+                fundAccountId: { type: string }
+                mode:          { type: string, enum: [NEFT, RTGS, IMPS, UPI] }
+                narration:     { type: string }
+      responses:
+        '201':
+          description: Payout created
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /payment/reconcile:
+    post:
+      tags: [Payment]
+      summary: Reconcile payment records with provider
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:     { type: string, format: date }
+                to:       { type: string, format: date }
+                provider: { type: string }
+      responses:
+        '200':
+          description: Reconciliation result
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Organisation ──────────────────────────────────────────────────────────────
+  /org:
+    get:
+      tags: [Organisation]
+      summary: Get organisation details (requires org:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Organisation details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Org' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    put:
+      tags: [Organisation]
+      summary: Update organisation (requires org:update)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:    { type: string }
+                website: { type: string }
+                logoUrl: { type: string }
+      responses:
+        '200':
+          description: Updated organisation
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Org' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /org/members:
+    get:
+      tags: [Organisation]
+      summary: List org members (requires org:member:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Member list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/User' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /org/members/invite:
+    post:
+      tags: [Organisation]
+      summary: Invite a member to the org (requires org:member:invite)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email: { type: string, format: email }
+                role:  { type: string }
+      responses:
+        '201':
+          description: Invitation sent
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /org/members/{id}/role:
+    put:
+      tags: [Organisation]
+      summary: Update an org member's role (requires org:member:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string }
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /org/members/{id}:
+    delete:
+      tags: [Organisation]
+      summary: Remove a member from the org (requires org:member:remove)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Member removed
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /org/roles:
+    get:
+      tags: [Organisation]
+      summary: List available roles (requires org:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Roles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object, properties: { name: { type: string }, permissions: { type: array, items: { type: string } } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /org/activity:
+    get:
+      tags: [Organisation]
+      summary: Get org activity feed (requires org:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Activity events
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── API Keys ──────────────────────────────────────────────────────────────────
+  /api-keys:
+    get:
+      tags: [API Keys]
+      summary: List API keys (requires apikey:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: API key list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/ApiKey' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [API Keys]
+      summary: Create an API key (requires apikey:create)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:      { type: string }
+                expiresAt: { type: string, format: date-time, nullable: true }
+                scopes:    { type: array, items: { type: string } }
+      responses:
+        '201':
+          description: API key created — key value shown only once
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiKey'
+                  - type: object
+                    properties:
+                      key: { type: string, description: Full key shown once only }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api-keys/{id}:
+    delete:
+      tags: [API Keys]
+      summary: Delete an API key (requires apikey:revoke)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: API key deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /api-keys/{id}/revoke:
+    post:
+      tags: [API Keys]
+      summary: Revoke an API key without deleting it (requires apikey:revoke)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Key revoked
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Security ──────────────────────────────────────────────────────────────────
+  /security/sessions:
+    get:
+      tags: [Security]
+      summary: List active sessions (requires security:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Active sessions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        sessionId:  { type: string }
+                        userAgent:  { type: string }
+                        ip:         { type: string }
+                        createdAt:  { type: string, format: date-time }
+                        isCurrent:  { type: boolean }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /security/sessions/{id}:
+    delete:
+      tags: [Security]
+      summary: Terminate a specific session (requires security:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Session terminated
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /security/login-history:
+    get:
+      tags: [Security]
+      summary: Get login history (requires security:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Login history
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /security/ip-allowlist:
+    get:
+      tags: [Security]
+      summary: Get IP allowlist (requires security:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Allowed IPs/CIDRs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object, properties: { ip: { type: string }, note: { type: string } } } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Security]
+      summary: Add IP to allowlist (requires security:update)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ip]
+              properties:
+                ip:   { type: string, description: IPv4/IPv6 address or CIDR }
+                note: { type: string }
+      responses:
+        '201':
+          description: IP added
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /security/ip-allowlist/{ip}:
+    delete:
+      tags: [Security]
+      summary: Remove IP from allowlist (requires security:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: ip
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: IP removed
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Notifications ─────────────────────────────────────────────────────────────
+  /notifications:
+    get:
+      tags: [Notifications]
+      summary: List notifications (requires notification:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: unreadOnly
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Notification list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:        { type: string, format: uuid }
+                        type:      { type: string }
+                        message:   { type: string }
+                        read:      { type: boolean }
+                        createdAt: { type: string, format: date-time }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /notifications/{id}/read:
+    put:
+      tags: [Notifications]
+      summary: Mark a notification as read (requires notification:update)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Marked as read
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /notifications/mark-all-read:
+    post:
+      tags: [Notifications]
+      summary: Mark all notifications as read (requires notification:update)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: All marked as read
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Audit Logs ────────────────────────────────────────────────────────────────
+  /audit-logs:
+    get:
+      tags: [Audit]
+      summary: List audit logs (requires audit:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: action
+          schema: { type: string }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/AuditLog' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /audit-logs/export:
+    get:
+      tags: [Audit]
+      summary: Export audit logs as CSV (requires audit:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Support ───────────────────────────────────────────────────────────────────
+  /support/tickets:
+    get:
+      tags: [Support]
+      summary: List support tickets (requires support:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: status
+          schema: { type: string, enum: [open, pending, closed] }
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+      responses:
+        '200':
+          description: Ticket list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Ticket' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Support]
+      summary: Create a support ticket (requires support:view)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subject, message]
+              properties:
+                subject:  { type: string }
+                message:  { type: string }
+                priority: { type: string, enum: [low, medium, high, urgent] }
+                category: { type: string }
+      responses:
+        '201':
+          description: Ticket created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Ticket' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /support/tickets/{id}:
+    get:
+      tags: [Support]
+      summary: Get ticket details (requires support:view)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Ticket with messages
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Ticket'
+                  - type: object
+                    properties:
+                      messages: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /support/tickets/{id}/reply:
+    post:
+      tags: [Support]
+      summary: Reply to a ticket (requires support:reply)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string }
+      responses:
+        '201':
+          description: Reply added
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /support/tickets/{id}/close:
+    put:
+      tags: [Support]
+      summary: Close a ticket (requires support:reply)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Ticket closed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Dashboard ─────────────────────────────────────────────────────────────────
+  /dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Get dashboard KPI summary (requires dashboard:view)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalRequests:   { type: integer }
+                  activeSessions:  { type: integer }
+                  bandwidthBytes:  { type: integer }
+                  successRate:     { type: number }
+                  activeProxies:   { type: integer }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Exports ───────────────────────────────────────────────────────────────────
+  /exports/usage-logs:
+    post:
+      tags: [Exports]
+      summary: Export usage logs (requires export:create)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:   { type: string, format: date }
+                to:     { type: string, format: date }
+                format: { type: string, enum: [csv, json] }
+      responses:
+        '202':
+          description: Export queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exportId: { type: string }
+                  message:  { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /exports/api-logs:
+    post:
+      tags: [Exports]
+      summary: Export API access logs (requires export:create)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from:   { type: string, format: date }
+                to:     { type: string, format: date }
+                format: { type: string, enum: [csv, json] }
+      responses:
+        '202':
+          description: Export queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exportId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /exports/account-data:
+    post:
+      tags: [Exports]
+      summary: Export full account data (GDPR) (requires export:create)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '202':
+          description: Export queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exportId: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Account ───────────────────────────────────────────────────────────────────
+  /account:
+    delete:
+      tags: [Account]
+      summary: Delete own account permanently
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Account deleted
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Feature Flags ─────────────────────────────────────────────────────────────
+  /feature-flags/evaluate:
+    get:
+      tags: [Feature Flags]
+      summary: Evaluate feature flags for the current user/org
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Feature flag map
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: { type: boolean }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Upload ────────────────────────────────────────────────────────────────────
+  /upload/presign:
+    post:
+      tags: [Upload]
+      summary: Get a presigned S3 PUT URL for direct client upload
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filename, contentType]
+              properties:
+                filename:      { type: string }
+                contentType:   { type: string }
+                module:        { type: string, description: Logical bucket prefix, e.g. avatars, documents }
+                fileSizeBytes: { type: integer }
+      responses:
+        '200':
+          description: Presigned upload URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:       { type: string, format: uri }
+                  key:       { type: string }
+                  expiresAt: { type: string, format: date-time }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /upload/signed/{key}:
+    get:
+      tags: [Upload]
+      summary: Get a presigned S3 GET URL for a stored object
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema: { type: string }
+          description: Full S3 object key (may contain slashes)
+      responses:
+        '200':
+          description: Presigned download URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:       { type: string, format: uri }
+                  expiresAt: { type: string, format: date-time }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /upload/{key}:
+    delete:
+      tags: [Upload]
+      summary: Permanently delete an S3 object
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema: { type: string }
+          description: Full S3 object key
+      responses:
+        '204':
+          description: Object deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Admin (Platform Super-Admin) ──────────────────────────────────────────────
+  /admin/dashboard:
+    get:
+      tags: [Admin]
+      summary: Platform admin dashboard stats (platform_admin role)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Admin dashboard KPIs
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /admin/tenants:
+    get:
+      tags: [Admin]
+      summary: List all tenants (organisations)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: status
+          schema: { type: string }
+      responses:
+        '200':
+          description: Tenant list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Org' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /admin/tenants/{orgId}:
+    get:
+      tags: [Admin]
+      summary: Get tenant details
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Tenant details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Org' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /admin/tenants/{orgId}/suspend:
+    put:
+      tags: [Admin]
+      summary: Suspend a tenant
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Tenant suspended
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/tenants/{orgId}/reactivate:
+    put:
+      tags: [Admin]
+      summary: Reactivate a suspended tenant
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Tenant reactivated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/tenants/{orgId}/override-bandwidth:
+    post:
+      tags: [Admin]
+      summary: Override bandwidth quota for a tenant
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bytes]
+              properties:
+                bytes: { type: integer }
+      responses:
+        '200':
+          description: Quota overridden
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/tenants/{orgId}/override-credits:
+    post:
+      tags: [Admin]
+      summary: Override credit balance for a tenant
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [credits]
+              properties:
+                credits: { type: number }
+      responses:
+        '200':
+          description: Credits overridden
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/users:
+    get:
+      tags: [Admin]
+      summary: List all platform users
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: User list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/User' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/users/{id}/ban:
+    put:
+      tags: [Admin]
+      summary: Ban a user
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: User banned
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/users/{id}/suspend:
+    put:
+      tags: [Admin]
+      summary: Suspend a user
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: User suspended
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/users/{id}/reactivate:
+    put:
+      tags: [Admin]
+      summary: Reactivate a suspended user
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: User reactivated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/providers:
+    get:
+      tags: [Admin]
+      summary: List proxy providers
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Provider list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Provider' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Admin]
+      summary: Create a proxy provider
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201':
+          description: Provider created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Provider' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/providers/{id}:
+    get:
+      tags: [Admin]
+      summary: Get provider details
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Provider
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Provider' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    put:
+      tags: [Admin]
+      summary: Update a provider
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200':
+          description: Updated provider
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Provider' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [Admin]
+      summary: Delete a provider
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/providers/{id}/health:
+    get:
+      tags: [Admin]
+      summary: Get provider health status
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Provider health
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/providers/{id}/incidents:
+    get:
+      tags: [Admin]
+      summary: Get provider incidents
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Incident list
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/routing-rules:
+    get:
+      tags: [Admin]
+      summary: List routing rules
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Routing rules
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Admin]
+      summary: Create a routing rule
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '201':
+          description: Rule created
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/routing-rules/{id}:
+    put:
+      tags: [Admin]
+      summary: Update a routing rule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200':
+          description: Updated rule
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [Admin]
+      summary: Delete a routing rule
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/routing-rules/reorder:
+    post:
+      tags: [Admin]
+      summary: Reorder routing rules
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [order]
+              properties:
+                order: { type: array, items: { type: string, format: uuid } }
+      responses:
+        '200':
+          description: Rules reordered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/system/services:
+    get:
+      tags: [Admin]
+      summary: Get status of all system services
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Service status map
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/system/metrics:
+    get:
+      tags: [Admin]
+      summary: Get system-level metrics
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: System metrics
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/abuse/logs:
+    get:
+      tags: [Admin]
+      summary: List abuse logs
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Abuse logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/abuse/logs/{id}/resolve:
+    put:
+      tags: [Admin]
+      summary: Mark an abuse log as resolved
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Resolved
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/abuse/rate-limits:
+    get:
+      tags: [Admin]
+      summary: List rate limit overrides
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Rate limits
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/abuse/rate-limits/{id}:
+    put:
+      tags: [Admin]
+      summary: Update a rate limit override
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/revenue/summary:
+    get:
+      tags: [Admin]
+      summary: Revenue summary across all tenants
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Revenue data
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/revenue/cohort-retention:
+    get:
+      tags: [Admin]
+      summary: Cohort retention data
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Cohort retention matrix
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/feature-flags:
+    get:
+      tags: [Admin]
+      summary: List all feature flags
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Feature flags
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { type: object } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/feature-flags/{key}:
+    put:
+      tags: [Admin]
+      summary: Update a feature flag
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: key
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled:    { type: boolean }
+                rolloutPct: { type: number, minimum: 0, maximum: 100 }
+      responses:
+        '200':
+          description: Flag updated
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/audit-logs:
+    get:
+      tags: [Admin]
+      summary: Platform-wide audit logs
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Audit logs
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/AuditLog' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /admin/audit-logs/export:
+    post:
+      tags: [Admin]
+      summary: Export platform audit logs
+      security: [{ bearerAuth: [] }]
+      responses:
+        '202':
+          description: Export queued
+          content:
+            application/json:
+              schema: { type: object }
+        '401': { $ref: '#/components/responses/Unauthorized' }

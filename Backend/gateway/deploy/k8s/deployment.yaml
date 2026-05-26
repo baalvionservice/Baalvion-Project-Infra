@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baalvion-gateway
+  labels: { app: baalvion-gateway }
+spec:
+  replicas: 3
+  selector:
+    matchLabels: { app: baalvion-gateway }
+  template:
+    metadata:
+      labels: { app: baalvion-gateway }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: gateway
+          image: ghcr.io/baalvion/gateway:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - { name: http-proxy, containerPort: 10000 }
+            - { name: socks5, containerPort: 1080 }
+            - { name: metrics, containerPort: 9090 }
+          env:
+            - { name: LISTEN_HTTP, value: ":10000" }
+            - { name: LISTEN_SOCKS, value: ":1080" }
+            - { name: LISTEN_METRICS, value: ":9090" }
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: gateway-secrets, key: database-url } }
+            - name: REDIS_URL
+              valueFrom: { secretKeyRef: { name: gateway-secrets, key: redis-url } }
+            - name: PROVIDERS_JSON
+              valueFrom: { secretKeyRef: { name: gateway-secrets, key: providers-json } }
+            - { name: USAGE_STREAM, value: "usage:events" }
+            - { name: SESSION_TTL_SECONDS, value: "600" }
+            - { name: OTEL_SERVICE_NAME, value: "baalvion-gateway" }
+          resources:
+            requests: { cpu: "250m", memory: "128Mi" }
+            limits: { cpu: "2", memory: "512Mi" }
+          readinessProbe:
+            httpGet: { path: /readyz, port: 9090 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 9090 }
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          lifecycle:
+            preStop:
+              exec: { command: ["sleep", "10"] } # let LB drain before SIGTERM
+      terminationGracePeriodSeconds: 40

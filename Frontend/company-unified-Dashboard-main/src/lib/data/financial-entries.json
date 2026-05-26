@@ -1,0 +1,6 @@
+[
+  { "id": 1, "domain_id": 1, "type": "Revenue", "amount": 5000, "date": "2026-03-25" },
+  { "id": 2, "domain_id": 1, "type": "Expense", "amount": 1000, "date": "2026-03-25" },
+  { "id": 3, "domain_id": 2, "type": "Revenue", "amount": 8000, "date": "2026-03-25" },
+  { "id": 4, "domain_id": 2, "type": "Expense", "amount": 3000, "date": "2026-03-25" }
+]

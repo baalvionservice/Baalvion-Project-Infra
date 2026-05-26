@@ -1,0 +1,38 @@
+module.exports = function (sequelize, DataTypes) {
+    return sequelize.define('campaigns', {
+        id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
+        brand_id: { type: DataTypes.BIGINT, allowNull: false },
+        org_id: { type: DataTypes.UUID, allowNull: false },
+        title: { type: DataTypes.STRING(500), allowNull: false },
+        description: { type: DataTypes.TEXT, allowNull: true },
+        objectives: { type: DataTypes.JSONB, defaultValue: [] },
+        platforms: { type: DataTypes.JSONB, defaultValue: [] },
+        categories: { type: DataTypes.JSONB, defaultValue: [] },
+        budget: { type: DataTypes.BIGINT, allowNull: false },
+        currency: { type: DataTypes.STRING(10), defaultValue: 'INR' },
+        deliverable_type: { type: DataTypes.JSONB, defaultValue: [] },
+        start_date: { type: DataTypes.DATEONLY, allowNull: true },
+        end_date: { type: DataTypes.DATEONLY, allowNull: true },
+        min_followers: { type: DataTypes.INTEGER, defaultValue: 0 },
+        min_engagement_rate: { type: DataTypes.DECIMAL(5, 2), defaultValue: 0 },
+        max_influencers: { type: DataTypes.INTEGER, defaultValue: 10 },
+        current_influencers: { type: DataTypes.INTEGER, defaultValue: 0 },
+        status: { type: DataTypes.STRING(32), defaultValue: 'draft' },
+        requirements: { type: DataTypes.TEXT, allowNull: true },
+        application_deadline: { type: DataTypes.DATEONLY, allowNull: true },
+        views_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+        applications_count: { type: DataTypes.INTEGER, defaultValue: 0 },
+    }, {
+        tableName: 'campaigns',
+        schema: 'brand',
+        timestamps: true,
+        underscored: true,
+        indexes: [
+            { fields: ['brand_id'] },
+            { fields: ['org_id'] },
+            { fields: ['status'] },
+            { fields: ['start_date'] },
+            { fields: ['end_date'] },
+        ],
+    });
+};

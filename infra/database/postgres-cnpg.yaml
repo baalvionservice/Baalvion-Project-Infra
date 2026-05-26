@@ -1,0 +1,90 @@
+# Production PostgreSQL via CloudNativePG: 1 primary + 2 synchronous replicas,
+# continuous WAL archiving + scheduled base backups to S3 (PITR), connection
+# pooling via the built-in PgBouncer Pooler. (TimescaleDB image so the metering
+# hypertables + continuous aggregates run on the same cluster.)
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: baalvion-pg
+  namespace: baalvion
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/timescaledb:16
+  primaryUpdateStrategy: unsupervised
+  postgresql:
+    parameters:
+      max_connections: "400"
+      shared_buffers: "1GB"
+      effective_cache_size: "3GB"
+      work_mem: "16MB"
+      wal_compression: "on"
+      shared_preload_libraries: "timescaledb"
+    synchronous:
+      method: any
+      number: 1                       # at least 1 replica must ack (zero data loss)
+  storage:
+    size: 200Gi
+    storageClass: gp3
+  walStorage:
+    size: 50Gi
+    storageClass: gp3
+  resources:
+    requests: { cpu: "1", memory: 4Gi }
+    limits: { cpu: "4", memory: 8Gi }
+  monitoring:
+    enablePodMonitor: true
+  bootstrap:
+    initdb:
+      database: baalvion_db
+      owner: baalvion
+  # Continuous backup to S3 (WAL + base) → PITR. RPO ≈ 5 min (WAL archive).
+  backup:
+    retentionPolicy: "30d"
+    barmanObjectStore:
+      destinationPath: s3://baalvion-pg-backups/
+      s3Credentials:
+        accessKeyId: { name: pg-backup-creds, key: ACCESS_KEY_ID }
+        secretAccessKey: { name: pg-backup-creds, key: SECRET_ACCESS_KEY }
+      wal: { compression: gzip, maxParallel: 4 }
+      data: { compression: gzip }
+  # Cross-region DR replica is bootstrapped in another cluster via `replica` mode
+  # from this same object store (see infra/dr/RUNBOOK-dr.md).
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: ScheduledBackup
+metadata:
+  name: baalvion-pg-daily
+  namespace: baalvion
+spec:
+  schedule: "0 2 * * *"               # 02:00 UTC daily base backup
+  backupOwnerReference: self
+  cluster: { name: baalvion-pg }
+---
+# PgBouncer transaction pooler — apps connect here, not directly to Postgres.
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: baalvion-pg-rw
+  namespace: baalvion
+spec:
+  cluster: { name: baalvion-pg }
+  instances: 2
+  type: rw
+  pgbouncer:
+    poolMode: transaction
+    parameters:
+      max_client_conn: "2000"
+      default_pool_size: "50"
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: baalvion-pg-ro
+  namespace: baalvion
+spec:
+  cluster: { name: baalvion-pg }
+  instances: 2
+  type: ro                            # read replicas for analytics/reporting
+  pgbouncer:
+    poolMode: transaction
+    parameters: { max_client_conn: "2000", default_pool_size: "80" }

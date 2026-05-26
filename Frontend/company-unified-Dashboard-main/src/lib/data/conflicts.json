@@ -1,0 +1,26 @@
+[
+  {
+    "id": "conflict_1",
+    "businessId": "biz_1",
+    "field": "Employee Count",
+    "offlineValue": "47",
+    "onlineValue": "51",
+    "detectedAt": "2024-07-30T14:14:00Z"
+  },
+  {
+    "id": "conflict_2",
+    "businessId": "biz_3",
+    "field": "Daily Revenue",
+    "offlineValue": "AED 24,800",
+    "onlineValue": "AED 31,200",
+    "detectedAt": "2024-07-30T11:32:00Z"
+  },
+  {
+    "id": "conflict_3",
+    "businessId": "biz_5",
+    "field": "Active Projects",
+    "offlineValue": "12",
+    "onlineValue": "9",
+    "detectedAt": "2024-07-29T18:45:00Z"
+  }
+]

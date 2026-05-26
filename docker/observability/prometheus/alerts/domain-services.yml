@@ -1,0 +1,226 @@
+groups:
+  - name: baalvion.domain.availability
+    interval: 30s
+    rules:
+
+      - alert: ServiceDown
+        expr: up{job=~"jobs-service|ctm-service|mining-service|imperialpedia-service|real-estate-service|brand-connector-service|market-service|ir-service|dashboard-service|about-service|realtime-service|proxy-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          team: platform
+        annotations:
+          summary: "{{ $labels.job }} is down"
+          description: "{{ $labels.job }} ({{ $labels.instance }}) has been unreachable for more than 1 minute."
+
+      - alert: HighErrorRateDomain
+        expr: |
+          sum(rate(baalvion_http_requests_total{status=~"5..", service!~"auth-service|admin-service"}[5m])) by (service)
+          /
+          sum(rate(baalvion_http_requests_total{service!~"auth-service|admin-service"}[5m])) by (service) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "{{ $labels.service }} is returning >5% 5xx responses (current: {{ $value | humanizePercentage }})"
+
+      - alert: HighLatencyDomain
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(baalvion_http_request_duration_ms_bucket[5m])) by (le, service)
+          ) > 3000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow responses on {{ $labels.service }}"
+          description: "p95 latency on {{ $labels.service }} is {{ $value }}ms (threshold: 3s)"
+
+  - name: baalvion.jobs
+    interval: 30s
+    rules:
+
+      - alert: JobsHighApplicationFailureRate
+        expr: |
+          increase(baalvion_jobs_application_errors_total[10m]) > 50
+        for: 5m
+        labels:
+          severity: warning
+          team: engineering
+        annotations:
+          summary: "High job application failure rate"
+          description: "{{ $value }} application submission errors in the last 10 minutes."
+
+      - alert: ScoringQueueBacklog
+        expr: bullmq_queue_waiting_total{queue="baalvion:queue:scoring"} > 200
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Scoring queue backlog"
+          description: "Resume scoring queue has {{ $value }} waiting jobs."
+
+      - alert: ResumeParseQueueBacklog
+        expr: bullmq_queue_waiting_total{queue="baalvion:queue:resume"} > 300
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Resume parse queue backlog"
+          description: "Resume parse queue has {{ $value }} waiting jobs — S3/parser may be slow."
+
+      - alert: IndexingQueueBacklog
+        expr: bullmq_queue_waiting_total{queue="baalvion:queue:indexing"} > 500
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Search indexing queue backlog"
+          description: "Elasticsearch indexing queue has {{ $value }} pending items."
+
+      - alert: BullMQWorkerDead
+        expr: |
+          increase(bullmq_job_failed_total[5m]) > 100
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "BullMQ worker failure spike"
+          description: "{{ $value }} BullMQ job failures in the last 5 minutes — worker may have crashed."
+
+  - name: baalvion.ctm
+    interval: 30s
+    rules:
+
+      - alert: CTMHighSubmissionFailures
+        expr: increase(baalvion_ctm_submission_errors_total[10m]) > 30
+        for: 5m
+        labels:
+          severity: warning
+          team: engineering
+        annotations:
+          summary: "CTM task submission failures"
+          description: "{{ $value }} task submission errors in 10 minutes on CTM service."
+
+      - alert: CTMPlanUpgradeErrors
+        expr: increase(baalvion_ctm_subscription_errors_total[10m]) > 10
+        for: 5m
+        labels:
+          severity: warning
+          team: payments
+        annotations:
+          summary: "CTM subscription/plan errors"
+          description: "{{ $value }} subscription upgrade errors in 10 minutes — payment flow may be broken."
+
+  - name: baalvion.payments
+    interval: 30s
+    rules:
+
+      - alert: RazorpayWebhookFailures
+        expr: increase(baalvion_payment_webhook_failures_total{provider="razorpay"}[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          team: payments
+        annotations:
+          summary: "Razorpay webhook processing failures"
+          description: "{{ $value }} Razorpay webhook failures in 5 minutes — subscription activation may be blocked."
+
+      - alert: PayUWebhookFailures
+        expr: increase(baalvion_payment_webhook_failures_total{provider="payu"}[5m]) > 5
+        for: 2m
+        labels:
+          severity: critical
+          team: payments
+        annotations:
+          summary: "PayU webhook processing failures"
+          description: "{{ $value }} PayU webhook failures in 5 minutes."
+
+      - alert: HighRefundVolume
+        expr: increase(baalvion_payment_refunds_total[1h]) > 50
+        for: 5m
+        labels:
+          severity: warning
+          team: payments
+        annotations:
+          summary: "Unusual refund volume"
+          description: "{{ $value }} refunds processed in the last hour — investigate for potential payment issues."
+
+  - name: baalvion.realtime
+    interval: 15s
+    rules:
+
+      - alert: RealtimeConnectionsDrop
+        expr: |
+          delta(baalvion_realtime_active_connections[5m]) < -100
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Realtime connections dropping"
+          description: "Active WebSocket connections dropped by {{ $value | humanize }} in 5 minutes."
+
+      - alert: RealtimeRedisDisconnected
+        expr: baalvion_realtime_redis_connected == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Realtime service lost Redis connection"
+          description: "Realtime service cannot reach Redis — pub/sub and real-time updates are broken."
+
+  - name: baalvion.database
+    interval: 60s
+    rules:
+
+      - alert: PostgresSlowQueries
+        expr: |
+          rate(pg_stat_statements_total_time_seconds[5m])
+          / rate(pg_stat_statements_calls[5m]) > 1.0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Slow PostgreSQL queries detected"
+          description: "Average query time exceeds 1 second over the last 5 minutes."
+
+      - alert: PostgresDiskUsageHigh
+        expr: |
+          pg_database_size_bytes{datname="baalvion_db"} > 10 * 1024 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "PostgreSQL database size > 10GB"
+          description: "baalvion_db is {{ $value | humanize1024 }}B — consider archiving or storage expansion."
+
+  - name: baalvion.slo.domain
+    rules:
+      - record: slo:jobs_availability:ratio_rate5m
+        expr: |
+          sum(rate(baalvion_http_requests_total{service="jobs-service",status!~"5.."}[5m]))
+          / sum(rate(baalvion_http_requests_total{service="jobs-service"}[5m]))
+
+      - alert: JobsServiceSLOBreach
+        expr: slo:jobs_availability:ratio_rate5m < 0.999
+        for: 10m
+        labels:
+          severity: critical
+          slo: jobs-availability
+        annotations:
+          summary: "Jobs service SLO breach (availability < 99.9%)"
+
+      - record: slo:ctm_availability:ratio_rate5m
+        expr: |
+          sum(rate(baalvion_http_requests_total{service="ctm-service",status!~"5.."}[5m]))
+          / sum(rate(baalvion_http_requests_total{service="ctm-service"}[5m]))
+
+      - alert: CTMServiceSLOBreach
+        expr: slo:ctm_availability:ratio_rate5m < 0.999
+        for: 10m
+        labels:
+          severity: critical
+          slo: ctm-availability
+        annotations:
+          summary: "CTM service SLO breach (availability < 99.9%)"

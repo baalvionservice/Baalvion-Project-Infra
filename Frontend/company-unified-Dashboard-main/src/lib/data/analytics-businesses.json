@@ -1,0 +1,111 @@
+
+{
+  "ranking": [
+    {
+      "rank": 1,
+      "businessId": "biz_1",
+      "revenue": 903614,
+      "growth": 18,
+      "profit": 30.7,
+      "score": 94,
+      "trend": "up"
+    },
+    {
+      "rank": 2,
+      "businessId": "biz_4",
+      "revenue": 3012048,
+      "growth": 12,
+      "profit": 25.1,
+      "score": 88,
+      "trend": "up"
+    },
+    {
+      "rank": 3,
+      "businessId": "biz_3",
+      "revenue": 32673267,
+      "growth": 6,
+      "profit": 22.1,
+      "score": 81,
+      "trend": "flat"
+    },
+    {
+      "rank": 4,
+      "businessId": "biz_2",
+      "revenue": 6329113,
+      "growth": 8,
+      "profit": 18.5,
+      "score": 75,
+      "trend": "down"
+    },
+    {
+      "rank": 5,
+      "businessId": "biz_5",
+      "revenue": 1481481,
+      "growth": 4,
+      "profit": 15.2,
+      "score": 68,
+      "trend": "flat"
+    }
+  ],
+  "comparison": {
+    "revenueLast3Months": [
+      { "month": "Apr", "TechCorp India": 68, "RetailChain UAE": 110, "Baalvion Media UK": 4.5, "FinanceHub USA": 23, "DigitalAgency SG": 1.8 },
+      { "month": "May", "TechCorp India": 70, "RetailChain UAE": 115, "Baalvion Media UK": 4.8, "FinanceHub USA": 24, "DigitalAgency SG": 1.9 },
+      { "month": "Jun", "TechCorp India": 75, "RetailChain UAE": 120, "Baalvion Media UK": 5.0, "FinanceHub USA": 25, "DigitalAgency SG": 2.0 }
+    ],
+    "growthRates": [
+      { "name": "TechCorp India", "growth": 18 },
+      { "name": "FinanceHub USA", "growth": 12 },
+      { "name": "Baalvion Media UK", "growth": 8 },
+      { "name": "RetailChain UAE", "growth": 6 },
+      { "name": "DigitalAgency SG", "growth": 4 }
+    ],
+    "profitMargins": [
+      { "name": "TechCorp India", "margin": 30.7 },
+      { "name": "FinanceHub USA", "margin": 25.1 },
+      { "name": "RetailChain UAE", "margin": 22.1 },
+      { "name": "Baalvion Media UK", "margin": 18.5 },
+      { "name": "DigitalAgency SG", "margin": 15.2 }
+    ]
+  },
+  "deepDive": {
+    "biz_1": {
+      "revenueTrend": [
+        { "month": "Jul", "revenue": 55 },
+        { "month": "Aug", "revenue": 58 },
+        { "month": "Sep", "revenue": 60 },
+        { "month": "Oct", "revenue": 62 },
+        { "month": "Nov", "revenue": 64 },
+        { "month": "Dec", "revenue": 66 },
+        { "month": "Jan", "revenue": 60 },
+        { "month": "Feb", "revenue": 62 },
+        { "month": "Mar", "revenue": 65 },
+        { "month": "Apr", "revenue": 68 },
+        { "month": "May", "revenue": 70 },
+        { "month": "Jun", "revenue": 75 }
+      ],
+      "expenseBreakdown": [
+        { "name": "Salaries", "value": 45 },
+        { "name": "R&D", "value": 25 },
+        { "name": "Marketing", "value": 15 },
+        { "name": "Infra", "value": 10 },
+        { "name": "Other", "value": 5 }
+      ],
+      "revenueSources": [
+        { "source": "Analytics Platform (Enterprise)", "revenue": 450000, "percentage": 50 },
+        { "source": "API Usage", "revenue": 225000, "percentage": 25 },
+        { "source": "Analytics Platform (SMB)", "revenue": 135000, "percentage": 15 },
+        { "source": "Consulting", "revenue": 67500, "percentage": 7.5 },
+        { "source": "Training", "revenue": 22500, "percentage": 2.5 }
+      ],
+      "monthlyMetrics": [
+        { "month": "Jan", "revenue": "60M", "profit": "10M", "growth": "+3.4%" },
+        { "month": "Feb", "revenue": "62M", "profit": "11M", "growth": "+3.3%" },
+        { "month": "Mar", "revenue": "65M", "profit": "12M", "growth": "+4.8%" },
+        { "month": "Apr", "revenue": "68M", "profit": "13M", "growth": "+4.6%" },
+        { "month": "May", "revenue": "70M", "profit": "14M", "growth": "+2.9%" },
+        { "month": "Jun", "revenue": "75M", "profit": "15M", "growth": "+7.1%" }
+      ]
+    }
+  }
+}

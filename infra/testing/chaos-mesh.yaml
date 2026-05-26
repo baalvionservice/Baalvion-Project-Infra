@@ -1,0 +1,52 @@
+# Chaos Mesh experiments — run in staging (or game-days in prod with guardrails).
+# Validates: failover, autoscaling, DR resilience, graceful degradation.
+
+# 1. Kill a random gateway pod every 10 min — proves PDB + HPA + LB drain hold.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata: { name: gateway-pod-kill, namespace: baalvion-edge }
+spec:
+  schedule: "*/10 * * * *"
+  type: PodChaos
+  podChaos:
+    action: pod-kill
+    mode: one
+    selector: { namespaces: [baalvion-edge], labelSelectors: { app: gateway } }
+---
+# 2. Inject 800ms latency to one provider's egress — proves latency-aware routing
+#    + circuit breaker shift traffic to faster providers.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata: { name: provider-latency, namespace: baalvion-edge }
+spec:
+  action: delay
+  mode: all
+  selector: { namespaces: [baalvion-edge], labelSelectors: { app: gateway } }
+  delay: { latency: "800ms", jitter: "200ms", correlation: "50" }
+  direction: to
+  # external target = a provider gateway IP range (set per provider).
+  externalTargets: ["1.2.3.0/24"]
+  duration: "5m"
+---
+# 3. Partition the API from Redis — proves fail-open rate limiting + degraded mode.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata: { name: api-redis-partition, namespace: baalvion }
+spec:
+  action: partition
+  mode: all
+  selector: { namespaces: [baalvion], labelSelectors: { app: api } }
+  direction: to
+  target: { mode: all, selector: { namespaces: [baalvion], labelSelectors: { app: redis } } }
+  duration: "3m"
+---
+# 4. Kill the Postgres primary — proves CloudNativePG synchronous failover RTO.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata: { name: pg-primary-kill, namespace: baalvion }
+spec:
+  action: pod-kill
+  mode: one
+  selector:
+    namespaces: [baalvion]
+    labelSelectors: { cnpg.io/cluster: baalvion-pg, role: primary }

@@ -1,0 +1,55 @@
+# Metering + billing workers (Node workers/index.js). Multiple replicas are safe:
+# metering uses a Redis Streams consumer group (load-balanced) and the monthly
+# billing run is idempotent (claims a billing_runs row).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workers
+  namespace: baalvion
+  labels: { app: workers, tier: control-plane }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: workers }
+  template:
+    metadata:
+      labels: { app: workers, tier: control-plane }
+    spec:
+      securityContext: { runAsNonRoot: true, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: workers
+          image: ghcr.io/baalvion/proxy-backend:latest
+          command: ["node", "workers/index.js"]
+          envFrom:
+            - configMapRef: { name: baalvion-common }
+          env:
+            - name: DATABASE_URL
+              valueFrom: { secretKeyRef: { name: api-secrets, key: database-url } }
+            - name: REDIS_URL
+              valueFrom: { secretKeyRef: { name: api-secrets, key: redis-url } }
+            - name: TIMESERIES_DATABASE_URL
+              valueFrom: { secretKeyRef: { name: api-secrets, key: timeseries-url } }
+            - name: RAZORPAY_KEY_SECRET
+              valueFrom: { secretKeyRef: { name: api-secrets, key: razorpay-secret } }
+            - name: BILLING_SIGNING_SECRET
+              valueFrom: { secretKeyRef: { name: api-secrets, key: billing-signing-secret } }
+            - name: ALERT_SLACK_WEBHOOK_URL
+              valueFrom: { secretKeyRef: { name: api-secrets, key: slack-webhook, optional: true } }
+            # AI intelligence loop: ClickHouse feature pipeline + Python ML tier.
+            - name: CLICKHOUSE_URL
+              valueFrom: { secretKeyRef: { name: api-secrets, key: clickhouse-url, optional: true } }
+            - name: ML_SERVICE_URL
+              value: http://ml-service.baalvion.svc.cluster.local:8000
+            - name: ML_SERVICE_SECRET
+              valueFrom: { secretKeyRef: { name: api-secrets, key: ml-service-secret, optional: true } }
+          resources:
+            requests: { cpu: "250m", memory: 256Mi }
+            limits: { cpu: "2", memory: 1Gi }
+      terminationGracePeriodSeconds: 30   # lets meteringWorker drain its buffer
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: { name: workers, namespace: baalvion }
+spec:
+  minAvailable: 1
+  selector: { matchLabels: { app: workers } }

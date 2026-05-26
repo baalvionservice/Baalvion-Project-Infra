@@ -1,0 +1,139 @@
+{
+  "__inputs": [{ "name": "DS_POSTGRES", "label": "PostgreSQL", "type": "datasource", "pluginId": "postgres" }],
+  "__requires": [{ "type": "datasource", "id": "postgres", "name": "PostgreSQL", "version": "1.0.0" }],
+  "annotations": { "list": [] },
+  "description": "TalentOS — Hiring funnel, application volume, and candidate pipeline",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } }
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Total Published Jobs",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT COUNT(*) AS value FROM jobs.job_listings WHERE status = 'published'",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Total Applications (30d)",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT COUNT(*) AS value FROM jobs.applications WHERE created_at >= NOW() - INTERVAL '30 days'",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "id": 3,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Total Candidates",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT COUNT(*) AS value FROM jobs.candidates",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "thresholds" }, "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] } } },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "id": 4,
+      "options": { "colorMode": "background", "graphMode": "none", "orientation": "auto", "reduceOptions": { "calcs": ["lastNotNull"] } },
+      "title": "Hires (30d)",
+      "type": "stat",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT COUNT(*) AS value FROM jobs.applications WHERE status = 'hired' AND hired_at >= NOW() - INTERVAL '30 days'",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" } },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "id": 5,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" }, "pieType": "donut" },
+      "title": "Hiring Funnel — Application Stages",
+      "type": "piechart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT status AS metric, COUNT(*) AS value FROM jobs.applications GROUP BY status ORDER BY value DESC",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "id": 6,
+      "options": { "legend": { "displayMode": "list", "placement": "bottom" } },
+      "title": "Applications Over Time (Daily)",
+      "type": "timeseries",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT DATE_TRUNC('day', created_at) AS time, COUNT(*) AS applications FROM jobs.applications WHERE created_at >= NOW() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1",
+        "format": "time_series"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 7,
+      "options": { "barWidth": 0.6, "fillOpacity": 80 },
+      "title": "Top Jobs by Application Volume",
+      "type": "barchart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT jl.title AS metric, COUNT(a.id) AS value FROM jobs.applications a JOIN jobs.job_listings jl ON jl.id = a.job_id GROUP BY jl.title ORDER BY value DESC LIMIT 10",
+        "format": "table"
+      }]
+    },
+    {
+      "datasource": "${DS_POSTGRES}",
+      "fieldConfig": { "defaults": { "color": { "mode": "palette-classic" } } },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "id": 8,
+      "options": { "barWidth": 0.6, "fillOpacity": 80 },
+      "title": "Average Candidate Score by Job",
+      "type": "barchart",
+      "targets": [{
+        "datasource": "${DS_POSTGRES}",
+        "rawSql": "SELECT jl.title AS metric, ROUND(AVG(a.score), 1) AS value FROM jobs.applications a JOIN jobs.job_listings jl ON jl.id = a.job_id WHERE a.score IS NOT NULL GROUP BY jl.title ORDER BY value DESC LIMIT 10",
+        "format": "table"
+      }]
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 39,
+  "tags": ["jobs", "hiring", "talentOS"],
+  "time": { "from": "now-30d", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "TalentOS — Hiring Funnel",
+  "uid": "baalvion-jobs-funnel",
+  "version": 1
+}

@@ -1,0 +1,46 @@
+# Alertmanager routing (Prometheus Operator AlertmanagerConfig).
+# critical → PagerDuty (page) + Slack; warning/info → Slack only.
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: baalvion-routes
+  namespace: observability
+  labels: { release: kube-prometheus-stack }
+spec:
+  route:
+    receiver: slack-warning
+    groupBy: ["alertname", "severity", "provider"]
+    groupWait: 30s
+    groupInterval: 5m
+    repeatInterval: 4h
+    routes:
+      - receiver: pagerduty-critical
+        matchers: [{ name: severity, value: critical }]
+        groupWait: 10s
+        repeatInterval: 1h
+        continue: true
+      - receiver: slack-critical
+        matchers: [{ name: severity, value: critical }]
+  inhibitRules:
+    # If a region is fully OFFLINE, suppress the noisier degraded/latency alerts.
+    - sourceMatch: [{ name: alertname, value: NoActiveGateways }]
+      targetMatch: [{ name: severity, value: warning }]
+      equal: ["topology.kubernetes.io/region"]
+  receivers:
+    - name: pagerduty-critical
+      pagerdutyConfigs:
+        - routingKey: { name: pagerduty-secret, key: routing-key }
+          severity: critical
+          description: "{{ .CommonAnnotations.summary }}"
+    - name: slack-critical
+      slackConfigs:
+        - apiURL: { name: slack-secret, key: webhook-url }
+          channel: "#sre-incidents"
+          title: "🔴 {{ .CommonLabels.alertname }}"
+          text: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
+    - name: slack-warning
+      slackConfigs:
+        - apiURL: { name: slack-secret, key: webhook-url }
+          channel: "#sre-alerts"
+          title: "⚠️ {{ .CommonLabels.alertname }}"
+          text: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"

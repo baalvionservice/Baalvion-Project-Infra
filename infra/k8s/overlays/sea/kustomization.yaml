@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+# Region identity is stamped on every object so dashboards/routing can split by it.
+labels:
+  - pairs:
+      topology.kubernetes.io/region: ap-southeast-1
+    includeSelectors: false
+
+patches:
+  - path: region-patch.yaml
+
+# Pin a released tag per region for controlled, staggered rollouts.
+images:
+  - name: ghcr.io/baalvion/gateway
+    newTag: v1.0.0
+  - name: ghcr.io/baalvion/proxy-backend
+    newTag: v1.0.0

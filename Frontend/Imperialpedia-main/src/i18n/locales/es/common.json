@@ -1,0 +1,92 @@
+{
+  "hero": {
+    "badge": "Nodo de Índice Alfa Activo",
+    "title": "La Infraestructura de Conocimiento IA del Mundo",
+    "subtitle": "Investigue cualquier cosa al instante con datos globales estructurados. Explore más de 1 millón de nodos indexables en países, empresas, industrias y tecnologías.",
+    "cta": "Unirse a la lista",
+    "secondary_cta": "Acceso Anticipado"
+  },
+  "nav": {
+    "home": "Inicio",
+    "news": "Noticias",
+    "about": "Acerca de",
+    "discovery": "Descubrimiento",
+    "tools": "Herramientas",
+    "community": "Comunidad",
+    "company": "Empresa",
+    "main_navigation": "Navegación Principal",
+    "discovery_research": "Descubrimiento e Investigación",
+    "tools_resources": "Herramientas y Recursos",
+    "community_learning": "Comunidad y Aprendizaje",
+    "company_legal": "Empresa y Legal",
+    "settings": "Configuración",
+    "countries": "Países",
+    "companies": "Empresas",
+    "industries": "Industrias",
+    "technologies": "Tecnologías",
+    "stocks": "Acciones",
+    "brokers": "Corredores",
+    "financial_tools": "Herramientas Financieras",
+    "ai_analyst": "Analista IA",
+    "research_ai": "Investigación IA",
+    "calculators": "Calculadoras",
+    "datasets": "Conjuntos de Datos",
+    "glossary": "Glosario",
+    "creators": "Creadores",
+    "learning_paths": "Rutas de Aprendizaje",
+    "knowledge_map": "Mapa de Conocimiento",
+    "articles": "Artículos",
+    "topics": "Temas",
+    "pricing": "Precios",
+    "contact": "Contacto",
+    "experts": "Expertos",
+    "transparency": "Transparencia",
+    "privacy_policy": "Política de Privacidad",
+    "terms_of_service": "Términos de Servicio"
+  },
+  "features": {
+    "label": "Capacidades Principales",
+    "title": "¿Por qué Imperialpedia?",
+    "subtitle": "Proporcionamos la base arquitectónica para el futuro de la inteligencia financiera, fusionando la experiencia humana con el procesamiento de datos a escala de máquina.",
+    "ai_engine": "Motor de Conocimiento IA",
+    "ai_engine_desc": "Información estructurada instantánea sintetizada a partir de millones de puntos de datos globales en tiempo real.",
+    "datasets": "Conjuntos de Datos Globales",
+    "datasets_desc": "Acceda a millones de entidades en países, empresas, industrias y tecnologías.",
+    "assistant": "Asistente de Investigación",
+    "assistant_desc": "Informes y resúmenes impulsados por IA a su alcance. Investigación de alta fidelidad a escala.",
+    "api": "API Empresarial",
+    "api_desc": "Conecte nuestro gráfico de conocimiento estructurado directamente con sus aplicaciones institucionales."
+  },
+  "faq": {
+    "label": "Triaje de Información",
+    "title": "Preguntas Frecuentes",
+    "subtitle": "Todo lo que necesita saber sobre la infraestructura de inteligencia más escalable del mundo.",
+    "support_title": "¿Aún tiene preguntas?",
+    "support_desc": "Nuestro Asistente de Investigación de IA puede proporcionar un contexto más profundo sobre nuestra hoja de ruta.",
+    "support_button": "Consultar al Analista"
+  },
+  "pricing": {
+    "label": "Matriz de Inversión",
+    "title": "Planes de Inteligencia",
+    "subtitle": "Seleccione el nivel de descubrimiento que se alinee con sus objetivos de investigación. Desde definiciones minoristas hasta auditorías institucionales.",
+    "disclaimer": "Los nodos institucionales que requieran protocolos SLA personalizados o asignaciones masivas deben contactar directamente con el clúster de soporte de Gobernanza."
+  },
+  "cta": {
+    "label": "Apretón de Manos Final",
+    "title": "¿Listo para auditar la economía global?",
+    "subtitle": "Únase a nuestra red de analistas institucionales e investigadores expertos. Asegure su nodo en el Índice Imperialpedia hoy mismo.",
+    "button": "Asegurar Mi Lugar"
+  },
+  "waitlist": {
+    "input_placeholder": "Correo institucional...",
+    "submit_button": "Unirse a la Matriz",
+    "caption": "Únase a más de 142,000 analistas que reciben nodos de inteligencia de alta fidelidad."
+  },
+  "footer": {
+    "description": "El motor de inteligencia financiera impulsado por IA más escalable del mundo. Proporcionando investigación profunda en más de 1,000,000 de nodos.",
+    "stay_synced": "Manténgase Sincronizado",
+    "sync_desc": "Suscríbase al Intelligence Wire para recibir auditorías de mercado en tiempo real y alertas de pSEO.",
+    "copyright": "© {{year}} Imperialpedia. Infraestructura de Conocimiento IA.",
+    "enc_status": "Travesía de Datos Encriptada"
+  }
+}

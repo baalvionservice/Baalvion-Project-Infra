@@ -1,0 +1,77 @@
+# Kong declarative config (DB-less mode) — the centralized north-south API gateway.
+# Responsibilities (ADR-0004 chose Kong over Envoy Gateway for the richer plugin
+# ecosystem + declarative config; Istio remains the east-west mesh, see infra/mesh):
+#   auth (JWT/JWKS via the identity platform) · rate limiting · routing ·
+#   tracing (OpenTelemetry) · correlation-id · request governance.
+#
+# Apply with the Kong Ingress Controller or `deck sync`. JWKS + upstreams are
+# environment-substituted in CI.
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: identity-platform
+    url: http://identity-platform.baalvion-identity.svc.cluster.local:3000
+    routes:
+      - name: identity-public
+        paths: ["/v1/auth", "/v1/sso", "/.well-known/jwks.json"]
+        strip_path: false
+      - name: identity-protected
+        paths: ["/v1/users", "/v1/organization"]
+        strip_path: false
+        plugins:
+          - name: jwt
+
+  - name: proxy-platform
+    url: http://proxy-platform.baalvion.svc.cluster.local:4000
+    routes:
+      - name: proxy-api
+        paths: ["/v1/proxies", "/v1/usage", "/v1/analytics", "/v1/developer", "/v1/billing"]
+        strip_path: false
+        plugins:
+          - name: jwt
+          - name: rate-limiting
+            config: { minute: 600, policy: redis, redis: { host: redis.baalvion.svc.cluster.local } }
+
+  - name: billing-platform
+    url: http://billing-platform.baalvion.svc.cluster.local:4010
+    routes:
+      - name: billing-api
+        paths: ["/v1/payment"]
+        strip_path: false
+        plugins:
+          - name: jwt
+
+# ── Global plugins (apply to every route) ──────────────────────────────────────
+plugins:
+  - name: correlation-id
+    config:
+      header_name: X-Request-Id
+      generator: uuid
+      echo_downstream: true
+  - name: opentelemetry
+    config:
+      endpoint: http://otel-collector.observability.svc.cluster.local:4318/v1/traces
+      resource_attributes:
+        service.name: kong-gateway
+  - name: rate-limiting
+    config:
+      minute: 1200
+      policy: redis
+      redis: { host: redis.baalvion.svc.cluster.local }
+  - name: request-size-limiting
+    config: { allowed_payload_size: 8 }
+  - name: cors
+    config:
+      origins: ["https://*.baalvion.com"]
+      credentials: true
+
+# JWT consumer keyed to the identity platform's JWKS (RS256). In production the
+# JWKS is synced into Kong consumers/keys by an operator job; here we declare the
+# verification contract: aud + iss must match the identity platform.
+consumers:
+  - username: baalvion-identity
+    jwt_secrets:
+      - key: "https://identity.baalvion.com/"   # iss
+        algorithm: RS256
+        rsa_public_key: "${IDENTITY_JWKS_PUBLIC_KEY}"

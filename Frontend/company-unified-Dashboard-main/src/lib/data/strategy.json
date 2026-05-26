@@ -1,0 +1,43 @@
+{
+  "expand": {
+    "cost": "1.5M",
+    "timeToRevenue": "9-12 months",
+    "riskLevel": "Medium-High",
+    "confidence": 78,
+    "requirements": [
+      "Incorporate a local subsidiary.",
+      "Obtain financial services license from MAS.",
+      "Comply with PDPA for data handling.",
+      "Establish local banking relationships."
+    ],
+    "competitors": [
+      "Sea Group",
+      "Grab",
+      "Razorpay (Regional)"
+    ]
+  },
+  "acquire": {
+    "roi": "28%",
+    "integrationCost": "750K",
+    "synergySavings": "1.2M",
+    "offerRange": "22M - 25M",
+    "confidence": 82,
+    "summary": "Acquiring 'PayNow SG' offers significant market penetration and technology synergies. The target's existing user base of 500,000 provides immediate growth. Integration costs are manageable, and projected ROI is strong."
+  },
+  "merge": {
+    "combinedRevenue": "100M",
+    "costSavings": "4.5M",
+    "redundantHeadcount": 25,
+    "newEntityValue": "85M",
+    "confidence": 85,
+    "summary": "Merging TechCorp India and FinanceHub USA creates a global fintech powerhouse. Projected cost savings from consolidating engineering and finance teams are substantial. The new entity would have a valuation of approx. $85M."
+  },
+  "windDown": {
+    "outstandingLiabilities": "1.2M",
+    "employeeSeverance": "450K",
+    "assetLiquidationValue": "800K",
+    "netPosition": "-850K",
+    "confidence": 91,
+    "summary": "Winding down DigitalAgency SG results in a net negative position due to outstanding long-term client contracts and severance costs. Asset liquidation is insufficient to cover all liabilities."
+  }
+}

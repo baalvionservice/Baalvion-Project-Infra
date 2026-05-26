@@ -1,0 +1,17 @@
+# Non-secret gateway config (secrets come from external-secrets → gateway-secrets).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gateway-config
+  namespace: baalvion-edge
+data:
+  LISTEN_HTTP: ":10000"
+  LISTEN_SOCKS: ":1080"
+  LISTEN_METRICS: ":9090"
+  USAGE_STREAM: "usage:events"
+  SESSION_TTL_SECONDS: "600"
+  ALLOW_DIRECT: "false"
+  DIAL_TIMEOUT_MS: "15000"
+  IDLE_TIMEOUT_S: "120"
+  OTEL_SERVICE_NAME: "baalvion-gateway"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.observability:4318"

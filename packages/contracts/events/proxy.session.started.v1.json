@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/proxy.session.started.v1.json",
+  "title": "ProxySessionStarted",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "proxy.session.started" },
+    "payload": {
+      "type": "object",
+      "required": ["sessionId", "orgId", "provider", "rotation", "kind", "startedAt"],
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": { "type": "string" },
+        "orgId": { "type": "string" },
+        "apiKeyId": { "type": ["string", "null"] },
+        "provider": { "type": "string" },
+        "country": { "type": ["string", "null"] },
+        "rotation": { "enum": ["sticky", "rotating"] },
+        "kind": { "type": "string" },
+        "startedAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  }
+}

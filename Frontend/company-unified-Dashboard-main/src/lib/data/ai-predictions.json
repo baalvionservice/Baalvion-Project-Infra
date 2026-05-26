@@ -1,0 +1,93 @@
+
+{
+  "confidenceScore": 78,
+  "revenuePredictions": [
+    {
+      "businessId": "biz_1",
+      "currentMrr": 3500000,
+      "forecasts": {
+        "threeMonth": 4100000,
+        "sixMonth": 4800000,
+        "twelveMonth": 6100000
+      },
+      "confidence": 82
+    },
+    {
+      "businessId": "biz_2",
+      "currentMrr": 416667,
+      "forecasts": {
+        "threeMonth": 450000,
+        "sixMonth": 480000,
+        "twelveMonth": 520000
+      },
+      "confidence": 75
+    },
+    {
+      "businessId": "biz_3",
+      "currentMrr": 10000000,
+      "forecasts": {
+        "threeMonth": 10500000,
+        "sixMonth": 11200000,
+        "twelveMonth": 12500000
+      },
+      "confidence": 85
+    },
+    {
+      "businessId": "biz_4",
+      "currentMrr": 2083333,
+      "forecasts": {
+        "threeMonth": 2200000,
+        "sixMonth": 2500000,
+        "twelveMonth": 3000000
+      },
+      "confidence": 88
+    },
+    {
+      "businessId": "biz_5",
+      "currentMrr": 166667,
+      "forecasts": {
+        "threeMonth": 175000,
+        "sixMonth": 180000,
+        "twelveMonth": 195000
+      },
+      "confidence": 68
+    }
+  ],
+  "growthOpportunities": [
+    {
+      "id": "opp_1",
+      "title": "Launch SaaS tier in UK market",
+      "description": "Analysis suggests a strong market fit for a premium SaaS offering within Baalvion Media UK's audience.",
+      "estimatedImpact": "+£120K/yr",
+      "confidence": 76
+    },
+    {
+      "id": "opp_2",
+      "title": "Reduce customer churn at RetailChain UAE",
+      "description": "Implementing a targeted loyalty program could reduce churn by an estimated 8%, directly impacting revenue.",
+      "estimatedImpact": "+AED 280K/yr",
+      "confidence": 81
+    },
+    {
+      "id": "opp_3",
+      "title": "Automate FinanceHub USA invoice processing",
+      "description": "AI-powered automation can reduce manual data entry, saving significant man-hours and reducing errors.",
+      "estimatedImpact": "$44K/yr cost saving",
+      "confidence": 88
+    }
+  ],
+  "riskAlerts": [
+    {
+      "id": "risk_1",
+      "business": "DigitalAgency SG",
+      "description": "High dependency on 2 clients (68% of revenue)",
+      "level": "HIGH"
+    },
+    {
+      "id": "risk_2",
+      "business": "RetailChain UAE",
+      "description": "Seasonal revenue dip predicted for Q2",
+      "level": "MEDIUM"
+    }
+  ]
+}

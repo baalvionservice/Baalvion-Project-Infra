@@ -1,0 +1,24 @@
+# eu-west-1: GDPR region. Pins nodes + keeps EU customer/session data in-region.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway
+  namespace: baalvion-edge
+spec:
+  replicas: 4
+  template:
+    spec:
+      nodeSelector:
+        workload: edge
+        topology.kubernetes.io/region: eu-west-1
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+  namespace: baalvion
+spec:
+  template:
+    spec:
+      nodeSelector:
+        topology.kubernetes.io/region: eu-west-1

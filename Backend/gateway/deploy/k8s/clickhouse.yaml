@@ -1,0 +1,57 @@
+# ClickHouse for IP/provider routing analytics (Backend/clickhouse/001_*.sql).
+# Orchestration itself runs IN the gateway process (no separate provider-worker),
+# so this is the only extra stateful dependency Prompt 5 adds.
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: clickhouse
+  labels: { app: clickhouse }
+spec:
+  serviceName: clickhouse
+  replicas: 1
+  selector:
+    matchLabels: { app: clickhouse }
+  template:
+    metadata:
+      labels: { app: clickhouse }
+    spec:
+      securityContext:
+        fsGroup: 101
+      containers:
+        - name: clickhouse
+          image: clickhouse/clickhouse-server:24.3
+          ports:
+            - { name: http, containerPort: 8123 }
+            - { name: native, containerPort: 9000 }
+          env:
+            - { name: CLICKHOUSE_DB, value: baalvion }
+            - name: CLICKHOUSE_PASSWORD
+              valueFrom: { secretKeyRef: { name: clickhouse-secret, key: password } }
+          resources:
+            requests: { cpu: "500m", memory: "1Gi" }
+            limits: { cpu: "4", memory: "8Gi" }
+          volumeMounts:
+            - { name: data, mountPath: /var/lib/clickhouse }
+          readinessProbe:
+            httpGet: { path: /ping, port: 8123 }
+            initialDelaySeconds: 10
+          livenessProbe:
+            httpGet: { path: /ping, port: 8123 }
+            initialDelaySeconds: 30
+  volumeClaimTemplates:
+    - metadata: { name: data }
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources: { requests: { storage: 100Gi } }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: clickhouse
+  labels: { app: clickhouse }
+spec:
+  clusterIP: None
+  selector: { app: clickhouse }
+  ports:
+    - { name: http, port: 8123 }
+    - { name: native, port: 9000 }

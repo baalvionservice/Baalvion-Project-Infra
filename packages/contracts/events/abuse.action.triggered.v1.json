@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/abuse.action.triggered.v1.json",
+  "title": "AbuseActionTriggered",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "abuse.action.triggered" },
+    "payload": {
+      "type": "object",
+      "required": ["orgId", "action", "reason", "severity"],
+      "additionalProperties": false,
+      "properties": {
+        "orgId": { "type": "string" },
+        "action": { "type": "string" },
+        "reason": { "type": "string" },
+        "severity": { "enum": ["low", "medium", "high", "critical"] },
+        "caseId": { "type": "string" },
+        "actorId": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

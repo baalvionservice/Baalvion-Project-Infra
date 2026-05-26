@@ -1,0 +1,162 @@
+[
+  {
+    "id": "biz_1",
+    "name": "TechCorp India",
+    "imageId": "logo-techcorp",
+    "country": "India",
+    "countryCode": "in",
+    "currency": "INR",
+    "status": "Growth",
+    "currentMetrics": {
+      "revenue": 75000000,
+      "profit": 15000000,
+      "employees": 120,
+      "domains": 15
+    },
+    "revenueHistory": [
+      { "month": "Jan", "revenue": 60, "profit": 10 },
+      { "month": "Feb", "revenue": 62, "profit": 11 },
+      { "month": "Mar", "revenue": 65, "profit": 12 },
+      { "month": "Apr", "revenue": 68, "profit": 13 },
+      { "month": "May", "revenue": 70, "profit": 14 },
+      { "month": "Jun", "revenue": 75, "profit": 15 }
+    ],
+    "equitySplit": [
+      { "name": "Priya Sharma", "percentage": 40 },
+      { "name": "Startup-F", "percentage": 40 },
+      { "name": "John Smith", "percentage": 20 }
+    ],
+    "notableEvents": [
+      "Launched new AI-powered analytics tool",
+      "Expanded operations to Southeast Asia"
+    ]
+  },
+  {
+    "id": "biz_2",
+    "name": "Baalvion Media UK",
+    "imageId": "logo-baalvion-media",
+    "country": "United Kingdom",
+    "countryCode": "gb",
+    "currency": "GBP",
+    "status": "Active",
+    "currentMetrics": {
+      "revenue": 5000000,
+      "profit": 1200000,
+      "employees": 35,
+      "domains": 25
+    },
+    "revenueHistory": [
+      { "month": "Jan", "revenue": 3.8, "profit": 0.8 },
+      { "month": "Feb", "revenue": 4.0, "profit": 0.9 },
+      { "month": "Mar", "revenue": 4.2, "profit": 1.0 },
+      { "month": "Apr", "revenue": 4.5, "profit": 1.1 },
+      { "month": "May", "revenue": 4.8, "profit": 1.15 },
+      { "month": "Jun", "revenue": 5.0, "profit": 1.2 }
+    ],
+    "equitySplit": [
+      { "name": "Alex Davis", "percentage": 70 },
+      { "name": "John Smith", "percentage": 20 },
+      { "name": "VC-Media", "percentage": 10 }
+    ],
+    "notableEvents": [
+      "Acquired a popular design blog",
+      "Nominated for a Webby Award"
+    ]
+  },
+  {
+    "id": "biz_3",
+    "name": "RetailChain UAE",
+    "imageId": "logo-retailchain",
+    "country": "UAE",
+    "countryCode": "ae",
+    "currency": "AED",
+    "status": "Active",
+    "currentMetrics": {
+      "revenue": 120000000,
+      "profit": 9000000,
+      "employees": 50,
+      "domains": 5
+    },
+    "revenueHistory": [
+      { "month": "Jan", "revenue": 90, "profit": 6 },
+      { "month": "Feb", "revenue": 95, "profit": 6.5 },
+      { "month": "Mar", "revenue": 100, "profit": 7 },
+      { "month": "Apr", "revenue": 110, "profit": 8 },
+      { "month": "May", "revenue": 115, "profit": 8.5 },
+      { "month": "Jun", "revenue": 120, "profit": 9 }
+    ],
+    "equitySplit": [
+      { "name": "Fatima Al-Fassi", "percentage": 40 },
+      { "name": "Global Retail Group", "percentage": 45 },
+      { "name": "John Smith", "percentage": 15 }
+    ],
+    "notableEvents": [
+      "Opened 10 new stores across the GCC",
+      "Launched a loyalty program with 1M+ sign-ups"
+    ]
+  },
+  {
+    "id": "biz_4",
+    "name": "FinanceHub USA",
+    "imageId": "logo-financehub",
+    "country": "USA",
+    "countryCode": "us",
+    "currency": "USD",
+    "status": "Growth",
+    "currentMetrics": {
+      "revenue": 25000000,
+      "profit": 8000000,
+      "employees": 60,
+      "domains": 8
+    },
+    "revenueHistory": [
+      { "month": "Jan", "revenue": 20, "profit": 6.0 },
+      { "month": "Feb", "revenue": 21, "profit": 6.5 },
+      { "month": "Mar", "revenue": 22, "profit": 7.0 },
+      { "month": "Apr", "revenue": 23, "profit": 7.2 },
+      { "month": "May", "revenue": 24, "profit": 7.5 },
+      { "month": "Jun", "revenue": 25, "profit": 8.0 }
+    ],
+    "equitySplit": [
+      { "name": "John Smith", "percentage": 30 },
+      { "name": "Alex Davis", "percentage": 30 },
+      { "name": "Priya Sharma", "percentage": 20 },
+      { "name": "Angel Investors", "percentage": 20 }
+    ],
+    "notableEvents": [
+      "Received Series A funding of $15M",
+      "Crossed 500,000 active users"
+    ]
+  },
+  {
+    "id": "biz_5",
+    "name": "DigitalAgency SG",
+    "imageId": "logo-digitalagency",
+    "country": "Singapore",
+    "countryCode": "sg",
+    "currency": "SGD",
+    "status": "Review",
+    "currentMetrics": {
+      "revenue": 2000000,
+      "profit": 400000,
+      "employees": 19,
+      "domains": 50
+    },
+    "revenueHistory": [
+      { "month": "Jan", "revenue": 1.5, "profit": 0.25 },
+      { "month": "Feb", "revenue": 1.6, "profit": 0.28 },
+      { "month": "Mar", "revenue": 1.7, "profit": 0.3 },
+      { "month": "Apr", "revenue": 1.8, "profit": 0.32 },
+      { "month": "May", "revenue": 1.9, "profit": 0.35 },
+      { "month": "Jun", "revenue": 2.0, "profit": 0.4 }
+    ],
+    "equitySplit": [
+      { "name": "Li Wei", "percentage": 70 },
+      { "name": "John Smith", "percentage": 30 }
+    ],
+    "notableEvents": [
+      "Won 'Agency of the Year' award",
+      "Signed a major client in the automotive industry"
+    ]
+  }
+]

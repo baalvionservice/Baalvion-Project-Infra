@@ -1,0 +1,45 @@
+# Cost optimization: spot nodes for stateless/edge workloads + VPA right-sizing.
+# Karpenter NodePool — spot-first edge nodes for gateways (stateless, tolerant).
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata: { name: edge-spot }
+spec:
+  template:
+    metadata:
+      labels: { workload: edge }
+    spec:
+      taints:
+        - { key: spot, value: "true", effect: NoSchedule }
+        - { key: workload, value: edge, effect: NoSchedule }
+      requirements:
+        - { key: karpenter.sh/capacity-type, operator: In, values: ["spot", "on-demand"] }
+        - { key: kubernetes.io/arch, operator: In, values: ["amd64", "arm64"] }
+        - { key: node.kubernetes.io/instance-type, operator: In, values: ["c7g.large", "c7g.xlarge", "c6i.large", "c6i.xlarge"] }
+      nodeClassRef: { name: default, group: karpenter.k8s.aws, kind: EC2NodeClass }
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 60s
+  limits: { cpu: "1000", memory: 2000Gi }
+---
+# Stateful/control-plane stays on on-demand (no taint) — DBs never on spot.
+# VPA right-sizes API + workers (Recreate / Auto for non-latency-critical).
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata: { name: api, namespace: baalvion }
+spec:
+  targetRef: { apiVersion: apps/v1, kind: Deployment, name: api }
+  updatePolicy: { updateMode: "Off" }   # recommendations only; HPA owns scaling
+  resourcePolicy:
+    containerPolicies:
+      - { containerName: api, minAllowed: { cpu: 100m, memory: 128Mi }, maxAllowed: { cpu: "2", memory: 2Gi } }
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata: { name: workers, namespace: baalvion }
+spec:
+  targetRef: { apiVersion: apps/v1, kind: Deployment, name: workers }
+  updatePolicy: { updateMode: "Auto" }  # workers tolerate restarts → auto right-size
+---
+# Cost/margin visibility: OpenCost scrapes cluster spend; provider $/GB comes from
+# provider_costs (Prompt 5) → margin gauge `provider_margin_ratio`. Grafana panel
+# joins infra cost (OpenCost) + provider cost → true gross margin per region.

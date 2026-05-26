@@ -1,0 +1,149 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 216 67% 98%;
+    --foreground: 224 71.4% 4.1%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71.4% 4.1%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71.4% 4.1%;
+    --primary: 226 82% 44%;
+    --primary-foreground: 210 20% 98%;
+    --secondary: 220 14.3% 95.9%;
+    --secondary-foreground: 220.9 39.3% 11%;
+    --muted: 220 14.3% 95.9%;
+    --muted-foreground: 220 8.9% 46.1%;
+    --accent: 193 83% 60%;
+    --accent-foreground: 220.9 39.3% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 226 82% 44%;
+    --radius: 0.5rem;
+    
+    --chart-1: 226 82% 44%;
+    --chart-2: 193 83% 60%;
+    --chart-3: 27 87% 67%;
+    --chart-4: 173 58% 39%;
+    --chart-5: 43 74% 66%;
+
+    /* Custom Sidebar Variables */
+    --sidebar-background: 233 7% 15%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 226 82% 44%;
+    --sidebar-primary-foreground: 210 20% 98%;
+    --sidebar-accent: 233 7% 25%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 233 7% 22%;
+    --sidebar-ring: 226 82% 54%;
+  }
+
+  .dark {
+    --background: 233 7% 10%;
+    --foreground: 210 20% 98%;
+    --card: 233 7% 15%;
+    --card-foreground: 210 20% 98%;
+    --popover: 233 7% 10%;
+    --popover-foreground: 210 20% 98%;
+    --primary: 210 20% 98%;
+    --primary-foreground: 226 82% 44%;
+    --secondary: 233 7% 25%;
+    --secondary-foreground: 210 20% 98%;
+    --muted: 233 7% 25%;
+    --muted-foreground: 220 8.9% 55%;
+    --accent: 193 83% 60%;
+    --accent-foreground: 233 7% 15%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 20% 98%;
+    --border: 233 7% 22%;
+    --input: 233 7% 22%;
+    --ring: 226 82% 54%;
+    
+    --chart-1: 210 20% 98%;
+    --chart-2: 193 83% 60%;
+    --chart-3: 27 87% 67%;
+    --chart-4: 173 58% 39%;
+    --chart-5: 43 74% 66%;
+
+    /* Custom Sidebar Variables */
+    --sidebar-background: 233 7% 15%;
+    --sidebar-foreground: 210 20% 98%;
+    --sidebar-primary: 226 82% 44%;
+    --sidebar-primary-foreground: 210 20% 98%;
+    --sidebar-accent: 233 7% 25%;
+    --sidebar-accent-foreground: 210 20% 98%;
+    --sidebar-border: 233 7% 22%;
+    --sidebar-ring: 226 82% 54%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+  .page-enter {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+  }
+
+  .page-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Confetti Animation */
+@keyframes confetti-fall {
+  0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 8px;
+  height: 16px;
+  background-color: var(--confetti-color);
+  top: -20px;
+  opacity: 0;
+  animation: confetti-fall 3s linear infinite;
+}
+
+@keyframes toast-progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+
+.toast-progress {
+  animation: toast-progress linear forwards;
+}
+
+@media print {
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+  main {
+    padding: 0 !important;
+  }
+  .print-show {
+    display: block !important;
+  }
+  .print-card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+}

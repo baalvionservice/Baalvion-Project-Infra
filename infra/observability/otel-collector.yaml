@@ -1,0 +1,108 @@
+# OpenTelemetry Collector — single OTLP ingest for traces/metrics/logs from the
+# gateway (Go) and API/workers (Node), fanning out to Tempo / Prometheus / Loki.
+apiVersion: v1
+kind: Namespace
+metadata: { name: observability }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: observability
+data:
+  config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc: { endpoint: 0.0.0.0:4317 }
+          http: { endpoint: 0.0.0.0:4318 }
+    processors:
+      memory_limiter: { check_interval: 5s, limit_percentage: 80, spike_limit_percentage: 25 }
+      batch: { send_batch_size: 1024, timeout: 5s }
+      resourcedetection: { detectors: [env, system], timeout: 5s }
+      # Attach k8s region/zone so traces & metrics can be sliced per region.
+      resource:
+        attributes:
+          - { key: service.namespace, value: baalvion, action: upsert }
+    exporters:
+      otlp/tempo:
+        endpoint: tempo.observability:4317
+        tls: { insecure: true }
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        resource_to_telemetry_conversion: { enabled: true }
+      loki:
+        endpoint: http://loki.observability:3100/loki/api/v1/push
+      debug: { verbosity: basic }
+    extensions:
+      health_check: { endpoint: 0.0.0.0:13133 }
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, resourcedetection, resource, batch]
+          exporters: [otlp/tempo]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [prometheus]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [loki]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels: { app: otel-collector }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: otel-collector } }
+  template:
+    metadata:
+      labels: { app: otel-collector }
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.103.1
+          args: ["--config=/etc/otel/config.yaml"]
+          ports:
+            - { name: otlp-grpc, containerPort: 4317 }
+            - { name: otlp-http, containerPort: 4318 }
+            - { name: prom, containerPort: 8889 }
+            - { name: health, containerPort: 13133 }
+          resources:
+            requests: { cpu: "200m", memory: 256Mi }
+            limits: { cpu: "1", memory: 1Gi }
+          volumeMounts: [{ name: cfg, mountPath: /etc/otel }]
+          livenessProbe: { httpGet: { path: /, port: 13133 } }
+      volumes:
+        - name: cfg
+          configMap: { name: otel-collector-config, items: [{ key: config.yaml, path: config.yaml }] }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels: { app: otel-collector, release: kube-prometheus-stack }
+spec:
+  selector: { app: otel-collector }
+  ports:
+    - { name: otlp-grpc, port: 4317, targetPort: 4317 }
+    - { name: otlp-http, port: 4318, targetPort: 4318 }
+    - { name: prom, port: 8889, targetPort: 8889 }
+---
+# Scrape the collector's converted OTLP metrics into Prometheus.
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels: { release: kube-prometheus-stack }
+spec:
+  selector: { matchLabels: { app: otel-collector } }
+  endpoints: [{ port: prom, path: /metrics, interval: 15s }]

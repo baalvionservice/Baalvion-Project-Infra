@@ -1,0 +1,849 @@
+openapi: '3.0.3'
+info:
+  title: Investor Relations (IR) Service API
+  version: '1.0.0'
+  description: Investor relations platform — reports, filings, data-room documents, earnings calls, shareholders, and IR contacts.
+servers:
+  - url: http://localhost:3008/v1
+    description: Development
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:   { type: string }
+        message: { type: string }
+
+    MessageResponse:
+      type: object
+      properties:
+        message: { type: string }
+
+    PaginatedMeta:
+      type: object
+      properties:
+        total:   { type: integer }
+        page:    { type: integer }
+        perPage: { type: integer }
+
+    Report:
+      type: object
+      properties:
+        id:          { type: string, format: uuid }
+        title:       { type: string }
+        type:        { type: string, enum: [annual, quarterly, monthly, special] }
+        fiscalYear:  { type: integer, nullable: true }
+        fiscalQuarter: { type: integer, nullable: true, minimum: 1, maximum: 4 }
+        summary:     { type: string }
+        fileUrl:     { type: string, format: uri, nullable: true }
+        status:      { type: string, enum: [draft, published, archived] }
+        publishedAt: { type: string, format: date-time, nullable: true }
+        createdAt:   { type: string, format: date-time }
+        updatedAt:   { type: string, format: date-time }
+
+    Filing:
+      type: object
+      properties:
+        id:         { type: string, format: uuid }
+        type:       { type: string, description: e.g. 10-K, 10-Q, 8-K, 20-F }
+        title:      { type: string }
+        filedAt:    { type: string, format: date-time }
+        periodEnd:  { type: string, format: date }
+        fileUrl:    { type: string, format: uri, nullable: true }
+        regulator:  { type: string, description: e.g. SEC, SEBI, MCA }
+        createdAt:  { type: string, format: date-time }
+        updatedAt:  { type: string, format: date-time }
+
+    Document:
+      type: object
+      properties:
+        id:          { type: string, format: uuid }
+        name:        { type: string }
+        category:    { type: string, description: e.g. prospectus, presentation, press-release }
+        description: { type: string }
+        fileUrl:     { type: string, format: uri, nullable: true }
+        sizeBytes:   { type: integer, nullable: true }
+        mimeType:    { type: string, nullable: true }
+        isPublic:    { type: boolean }
+        createdAt:   { type: string, format: date-time }
+        updatedAt:   { type: string, format: date-time }
+
+    Earnings:
+      type: object
+      properties:
+        id:             { type: string, format: uuid }
+        fiscalYear:     { type: integer }
+        fiscalQuarter:  { type: integer, minimum: 1, maximum: 4 }
+        callDate:       { type: string, format: date-time }
+        replayUrl:      { type: string, format: uri, nullable: true }
+        transcriptReady: { type: boolean }
+        eps:            { type: number, nullable: true }
+        revenue:        { type: number, nullable: true }
+        guidance:       { type: string, nullable: true }
+        createdAt:      { type: string, format: date-time }
+        updatedAt:      { type: string, format: date-time }
+
+    Shareholder:
+      type: object
+      properties:
+        id:           { type: string, format: uuid }
+        name:         { type: string }
+        type:         { type: string, enum: [institutional, retail, insider, mutual_fund, etf] }
+        sharesHeld:   { type: integer }
+        ownershipPct: { type: number }
+        reportDate:   { type: string, format: date }
+        createdAt:    { type: string, format: date-time }
+
+    Contact:
+      type: object
+      properties:
+        id:       { type: string, format: uuid }
+        name:     { type: string }
+        title:    { type: string }
+        email:    { type: string, format: email }
+        phone:    { type: string, nullable: true }
+        isPublic: { type: boolean }
+        createdAt: { type: string, format: date-time }
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+paths:
+
+  # ── Reports ───────────────────────────────────────────────────────────────────
+  /reports:
+    get:
+      tags: [Reports]
+      summary: List investor reports (public access)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: type
+          schema: { type: string, enum: [annual, quarterly, monthly, special] }
+        - in: query
+          name: fiscalYear
+          schema: { type: integer }
+        - in: query
+          name: status
+          schema: { type: string, enum: [published] }
+      responses:
+        '200':
+          description: Report list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Report' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Reports]
+      summary: Create a report (auth required)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, type]
+              properties:
+                title:         { type: string }
+                type:          { type: string, enum: [annual, quarterly, monthly, special] }
+                fiscalYear:    { type: integer }
+                fiscalQuarter: { type: integer, minimum: 1, maximum: 4 }
+                summary:       { type: string }
+                fileUrl:       { type: string, format: uri }
+      responses:
+        '201':
+          description: Report created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Report' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /reports/{id}:
+    get:
+      tags: [Reports]
+      summary: Get a report by ID (public access)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Report details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Report' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Reports]
+      summary: Update a report (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:   { type: string }
+                summary: { type: string }
+                fileUrl: { type: string, format: uri }
+                status:  { type: string, enum: [draft, archived] }
+      responses:
+        '200':
+          description: Updated report
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Report' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Reports]
+      summary: Delete a report (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Report deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /reports/{id}/publish:
+    post:
+      tags: [Reports]
+      summary: Publish a draft report (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Report published
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Report' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Filings ───────────────────────────────────────────────────────────────────
+  /filings:
+    get:
+      tags: [Filings]
+      summary: List regulatory filings (public access)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: type
+          schema: { type: string, description: Filing type e.g. 10-K, 10-Q }
+        - in: query
+          name: regulator
+          schema: { type: string }
+        - in: query
+          name: from
+          schema: { type: string, format: date }
+        - in: query
+          name: to
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Filing list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Filing' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Filings]
+      summary: Create a filing record (auth required)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, title, filedAt]
+              properties:
+                type:      { type: string }
+                title:     { type: string }
+                filedAt:   { type: string, format: date-time }
+                periodEnd: { type: string, format: date }
+                fileUrl:   { type: string, format: uri }
+                regulator: { type: string }
+      responses:
+        '201':
+          description: Filing created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Filing' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+
+  /filings/{id}:
+    get:
+      tags: [Filings]
+      summary: Get a filing by ID (public access)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Filing details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Filing' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Filings]
+      summary: Update a filing (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:     { type: string }
+                fileUrl:   { type: string, format: uri }
+                periodEnd: { type: string, format: date }
+      responses:
+        '200':
+          description: Updated filing
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Filing' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Filings]
+      summary: Delete a filing (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Filing deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Documents (Data Room) ─────────────────────────────────────────────────────
+  /documents:
+    get:
+      tags: [Documents]
+      summary: List data-room documents (public documents available without auth)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: category
+          schema: { type: string }
+        - in: query
+          name: isPublic
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Document list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Document' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Documents]
+      summary: Upload / register a data-room document (auth required)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, category]
+              properties:
+                name:        { type: string }
+                category:    { type: string }
+                description: { type: string }
+                fileUrl:     { type: string, format: uri }
+                sizeBytes:   { type: integer }
+                mimeType:    { type: string }
+                isPublic:    { type: boolean, default: false }
+      responses:
+        '201':
+          description: Document registered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /documents/{id}:
+    get:
+      tags: [Documents]
+      summary: Get document metadata by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Document metadata
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Documents]
+      summary: Update document metadata (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:        { type: string }
+                description: { type: string }
+                isPublic:    { type: boolean }
+                fileUrl:     { type: string, format: uri }
+      responses:
+        '200':
+          description: Updated document
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Document' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Documents]
+      summary: Delete a document (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Document deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Earnings Calls ────────────────────────────────────────────────────────────
+  /earnings:
+    get:
+      tags: [Earnings]
+      summary: List earnings calls (public access)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: fiscalYear
+          schema: { type: integer }
+        - in: query
+          name: fiscalQuarter
+          schema: { type: integer, minimum: 1, maximum: 4 }
+      responses:
+        '200':
+          description: Earnings call list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Earnings' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Earnings]
+      summary: Create an earnings call record (auth required)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [fiscalYear, fiscalQuarter, callDate]
+              properties:
+                fiscalYear:    { type: integer }
+                fiscalQuarter: { type: integer, minimum: 1, maximum: 4 }
+                callDate:      { type: string, format: date-time }
+                replayUrl:     { type: string, format: uri }
+                eps:           { type: number }
+                revenue:       { type: number }
+                guidance:      { type: string }
+      responses:
+        '201':
+          description: Earnings call created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Earnings' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /earnings/{id}:
+    get:
+      tags: [Earnings]
+      summary: Get an earnings call by ID (public access)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Earnings call details
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Earnings' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [Earnings]
+      summary: Update an earnings call record (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                callDate:        { type: string, format: date-time }
+                replayUrl:       { type: string, format: uri }
+                transcriptReady: { type: boolean }
+                eps:             { type: number }
+                revenue:         { type: number }
+                guidance:        { type: string }
+      responses:
+        '200':
+          description: Updated earnings record
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Earnings' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  /earnings/{id}/transcript:
+    get:
+      tags: [Earnings]
+      summary: Download the call transcript (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Transcript content
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:         { type: string, format: uuid }
+                  text:       { type: string }
+                  segments:   { type: array, items: { type: object } }
+                  updatedAt:  { type: string, format: date-time }
+            text/plain:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Shareholders ──────────────────────────────────────────────────────────────
+  /shareholders:
+    get:
+      tags: [Shareholders]
+      summary: List shareholders (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: type
+          schema: { type: string, enum: [institutional, retail, insider, mutual_fund, etf] }
+        - in: query
+          name: reportDate
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: Shareholder list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Shareholder' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Shareholders]
+      summary: Add a shareholder record (auth required)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, type, sharesHeld, reportDate]
+              properties:
+                name:         { type: string }
+                type:         { type: string, enum: [institutional, retail, insider, mutual_fund, etf] }
+                sharesHeld:   { type: integer }
+                ownershipPct: { type: number }
+                reportDate:   { type: string, format: date }
+      responses:
+        '201':
+          description: Shareholder created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Shareholder' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /shareholders/{id}:
+    patch:
+      tags: [Shareholders]
+      summary: Update a shareholder record (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sharesHeld:   { type: integer }
+                ownershipPct: { type: number }
+                reportDate:   { type: string, format: date }
+      responses:
+        '200':
+          description: Updated shareholder
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Shareholder' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Shareholders]
+      summary: Delete a shareholder record (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── IR Contacts ───────────────────────────────────────────────────────────────
+  /contacts:
+    get:
+      tags: [Contacts]
+      summary: List IR contacts (public contacts visible without auth)
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+        - in: query
+          name: isPublic
+          schema: { type: boolean }
+      responses:
+        '200':
+          description: Contact list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Contact' } }
+                  meta: { $ref: '#/components/schemas/PaginatedMeta' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Contacts]
+      summary: Create an IR contact (auth required)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, title, email]
+              properties:
+                name:     { type: string }
+                title:    { type: string }
+                email:    { type: string, format: email }
+                phone:    { type: string }
+                isPublic: { type: boolean, default: true }
+      responses:
+        '201':
+          description: Contact created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Contact' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /contacts/{id}:
+    patch:
+      tags: [Contacts]
+      summary: Update an IR contact (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:     { type: string }
+                title:    { type: string }
+                email:    { type: string, format: email }
+                phone:    { type: string }
+                isPublic: { type: boolean }
+      responses:
+        '200':
+          description: Updated contact
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Contact' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    delete:
+      tags: [Contacts]
+      summary: Delete an IR contact (auth required)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Contact deleted
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Utility ───────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [Utility]
+      summary: Health check (no auth)
+      responses:
+        '200':
+          description: Service health
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:    { type: string, enum: [ok] }
+                  timestamp: { type: string, format: date-time }

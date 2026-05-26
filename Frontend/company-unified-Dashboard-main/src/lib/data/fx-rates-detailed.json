@@ -1,0 +1,8 @@
+
+[
+  { "currency": "US Dollar", "code": "USD", "symbol": "$", "rate": 1.0000, "change24h": 0, "change7d": 0, "lastUpdated": "now" },
+  { "currency": "Indian Rupee", "code": "INR", "symbol": "₹", "rate": 83.42, "change24h": -0.12, "change7d": 0.34, "lastUpdated": "2 min ago" },
+  { "currency": "British Pound", "code": "GBP", "symbol": "£", "rate": 1.2634, "change24h": 0.08, "change7d": -0.21, "lastUpdated": "2 min ago" },
+  { "currency": "UAE Dirham", "code": "AED", "symbol": "د.إ", "rate": 3.67, "change24h": 0, "change7d": 0, "lastUpdated": "2 min ago (pegged)" },
+  { "currency": "Singapore Dollar", "code": "SGD", "symbol": "S$", "rate": 1.35, "change24h": 0.03, "change7d": 0.11, "lastUpdated": "2 min ago" }
+]

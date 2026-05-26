@@ -1,0 +1,790 @@
+openapi: '3.0.3'
+info:
+  title: Baalvion Auth Service API
+  version: '1.0.0'
+  description: Core authentication service — issues RS256 JWTs, manages sessions, MFA, teams, and OIDC discovery.
+servers:
+  - url: http://localhost:3001/v1
+    description: Development
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:   { type: string }
+        message: { type: string }
+
+    MessageResponse:
+      type: object
+      properties:
+        message: { type: string }
+
+    User:
+      type: object
+      properties:
+        id:              { type: string, format: uuid }
+        email:           { type: string, format: email }
+        firstName:       { type: string }
+        lastName:        { type: string }
+        role:            { type: string }
+        emailVerified:   { type: boolean }
+        mfaEnabled:      { type: boolean }
+        createdAt:       { type: string, format: date-time }
+
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:  { type: string, description: Short-lived RS256 JWT (15 min default) }
+        expiresIn:    { type: integer, description: Seconds until access token expires }
+        tokenType:    { type: string, enum: [Bearer] }
+
+    Session:
+      type: object
+      properties:
+        sessionId:  { type: string, format: uuid }
+        userAgent:  { type: string }
+        ip:         { type: string }
+        createdAt:  { type: string, format: date-time }
+        lastSeenAt: { type: string, format: date-time }
+        isCurrent:  { type: boolean }
+
+    Org:
+      type: object
+      properties:
+        id:        { type: string, format: uuid }
+        name:      { type: string }
+        createdAt: { type: string, format: date-time }
+
+    OrgMember:
+      type: object
+      properties:
+        userId:    { type: string, format: uuid }
+        email:     { type: string, format: email }
+        role:      { type: string }
+        joinedAt:  { type: string, format: date-time }
+
+    AuditLog:
+      type: object
+      properties:
+        id:        { type: string, format: uuid }
+        action:    { type: string }
+        actorId:   { type: string, format: uuid }
+        metadata:  { type: object }
+        ip:        { type: string }
+        createdAt: { type: string, format: date-time }
+
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    TooManyRequests:
+      description: Too Many Requests
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+    ValidationError:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
+paths:
+
+  # ── Core Auth ─────────────────────────────────────────────────────────────────
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user account
+      description: Rate-limited. Sends e-mail verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, firstName, lastName]
+              properties:
+                email:     { type: string, format: email }
+                password:  { type: string, minLength: 8 }
+                firstName: { type: string }
+                lastName:  { type: string }
+      responses:
+        '201':
+          description: Account created — e-mail verification sent
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TokenResponse'
+                  - type: object
+                    properties:
+                      user: { $ref: '#/components/schemas/User' }
+        '409':
+          description: E-mail already registered
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+        '422': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Authenticate with email + password
+      description: >
+        Returns an access token in the response body and sets a `baalvion_refresh` HttpOnly
+        cookie. If MFA is enabled the caller must supply `mfaCode`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:   { type: string, format: email }
+                password: { type: string }
+                mfaCode:  { type: string, description: 6-digit TOTP code (required when MFA enabled) }
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TokenResponse'
+                  - type: object
+                    properties:
+                      user:      { $ref: '#/components/schemas/User' }
+                      mfaRequired: { type: boolean, description: True when MFA code was not yet supplied }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Issue a new access token from the refresh cookie
+      description: >
+        Reads the `baalvion_refresh` HttpOnly cookie. Rotates the refresh token on success
+        (previous token is invalidated).
+      responses:
+        '200':
+          description: New access token
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revoke the current session and clear the refresh cookie
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Logged out
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request a password-reset e-mail (rate-limited)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200':
+          description: Reset link sent (response is identical regardless of whether address exists)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password using token from e-mail link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:    { type: string }
+                password: { type: string, minLength: 8 }
+      responses:
+        '200':
+          description: Password updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/verify-email:
+    get:
+      tags: [Auth]
+      summary: Verify e-mail address via GET (link from e-mail) — rate-limited
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: E-mail verified
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+    post:
+      tags: [Auth]
+      summary: Verify e-mail address via POST — rate-limited
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string }
+      responses:
+        '200':
+          description: E-mail verified
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/verify-token:
+    post:
+      tags: [Auth]
+      summary: Verify an arbitrary auth token (rate-limited)
+      description: Used by other services to validate one-time tokens.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token: { type: string }
+                type:  { type: string, description: Token type hint, e.g. invite, email_verify }
+      responses:
+        '200':
+          description: Token is valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:   { type: boolean }
+                  payload: { type: object }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/validate-invite:
+    get:
+      tags: [Auth]
+      summary: Validate an invitation token before the user registers
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Invitation details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:     { type: boolean }
+                  email:     { type: string }
+                  orgName:   { type: string }
+                  role:      { type: string }
+                  expiresAt: { type: string, format: date-time }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/accept-invite:
+    post:
+      tags: [Auth]
+      summary: Accept an organisation invitation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token:     { type: string }
+                password:  { type: string, minLength: 8 }
+                firstName: { type: string }
+                lastName:  { type: string }
+      responses:
+        '200':
+          description: Invitation accepted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/TokenResponse'
+                  - type: object
+                    properties:
+                      user: { $ref: '#/components/schemas/User' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  # ── Current User ──────────────────────────────────────────────────────────────
+  /auth/me:
+    get:
+      tags: [Profile]
+      summary: Get the authenticated user's profile
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Current user profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    patch:
+      tags: [Profile]
+      summary: Update the authenticated user's profile
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstName: { type: string }
+                lastName:  { type: string }
+                avatarUrl: { type: string, format: uri }
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Sessions ──────────────────────────────────────────────────────────────────
+  /auth/sessions:
+    get:
+      tags: [Sessions]
+      summary: List all active sessions for the current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Session list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Session' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    delete:
+      tags: [Sessions]
+      summary: Revoke all sessions except the current one
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: All other sessions revoked
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/sessions/{sessionId}:
+    delete:
+      tags: [Sessions]
+      summary: Revoke a specific session by ID
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: sessionId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Session revoked
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '404': { $ref: '#/components/responses/NotFound' }
+
+  # ── Audit Logs ────────────────────────────────────────────────────────────────
+  /auth/audit-logs:
+    get:
+      tags: [Audit]
+      summary: Get audit log for the current user's account
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, default: 1 }
+        - in: query
+          name: perPage
+          schema: { type: integer, default: 20 }
+      responses:
+        '200':
+          description: Audit log entries
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/AuditLog' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── MFA ───────────────────────────────────────────────────────────────────────
+  /auth/mfa/challenge:
+    post:
+      tags: [MFA]
+      summary: Initiate an MFA challenge (rate-limited)
+      description: >
+        Call this when login returns `mfaRequired: true` to get a challenge reference.
+        Then call POST /auth/login again with `mfaCode`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+      responses:
+        '200':
+          description: Challenge initiated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  challengeRef: { type: string }
+                  method:       { type: string, enum: [totp, sms, email] }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+
+  /auth/mfa/enable:
+    post:
+      tags: [MFA]
+      summary: Begin MFA setup — returns TOTP secret and QR code
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: MFA setup details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  secret:     { type: string }
+                  otpauthUrl: { type: string }
+                  qrDataUrl:  { type: string, description: Base64 PNG data URL }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/mfa/verify:
+    post:
+      tags: [MFA]
+      summary: Confirm TOTP code to activate MFA
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string, description: 6-digit TOTP code }
+      responses:
+        '200':
+          description: MFA activated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:      { type: string }
+                  backupCodes:  { type: array, items: { type: string }, description: One-time backup codes }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/mfa/disable:
+    delete:
+      tags: [MFA]
+      summary: Disable MFA for the current user
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: MFA disabled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── Teams / Organisations ─────────────────────────────────────────────────────
+  /auth/orgs:
+    get:
+      tags: [Teams]
+      summary: List organisations the current user belongs to
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Organisation list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/Org' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+    post:
+      tags: [Teams]
+      summary: Create a new organisation
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string }
+                plan: { type: string }
+      responses:
+        '201':
+          description: Organisation created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Org' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  /auth/orgs/{orgId}/members:
+    get:
+      tags: [Teams]
+      summary: List members of an organisation
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Member list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data: { type: array, items: { $ref: '#/components/schemas/OrgMember' } }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /auth/orgs/{orgId}/invite:
+    post:
+      tags: [Teams]
+      summary: Invite a user to an organisation
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, role]
+              properties:
+                email: { type: string, format: email }
+                role:  { type: string }
+      responses:
+        '201':
+          description: Invitation sent
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MessageResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /auth/orgs/{orgId}/members/{userId}:
+    delete:
+      tags: [Teams]
+      summary: Remove a member from an organisation
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Member removed
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    patch:
+      tags: [Teams]
+      summary: Update a member's role within an organisation
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: orgId
+          required: true
+          schema: { type: string, format: uuid }
+        - in: path
+          name: userId
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string }
+      responses:
+        '200':
+          description: Role updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrgMember' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /auth/invitations/{token}/accept:
+    post:
+      tags: [Teams]
+      summary: Accept an organisation invitation (authenticated user)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Invitation accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  org:     { $ref: '#/components/schemas/Org' }
+                  message: { type: string }
+        '400': { $ref: '#/components/responses/ValidationError' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+
+  # ── OIDC / JWKS ───────────────────────────────────────────────────────────────
+  /.well-known/jwks.json:
+    get:
+      tags: [OIDC]
+      summary: JSON Web Key Set — RS256 public keys for JWT verification
+      description: Consumed by downstream services to verify auth-service JWTs. Cached for 1 hour.
+      responses:
+        '200':
+          description: JWKS document
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        kty: { type: string }
+                        use: { type: string }
+                        kid: { type: string }
+                        alg: { type: string }
+                        n:   { type: string }
+                        e:   { type: string }
+
+  /.well-known/openid-configuration:
+    get:
+      tags: [OIDC]
+      summary: Minimal OpenID Connect discovery document
+      description: Cached for 1 hour.
+      responses:
+        '200':
+          description: OIDC configuration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  issuer:                  { type: string }
+                  jwks_uri:                { type: string }
+                  token_endpoint:          { type: string }
+                  userinfo_endpoint:       { type: string }
+                  response_types_supported: { type: array, items: { type: string } }
+                  subject_types_supported:  { type: array, items: { type: string } }
+                  id_token_signing_alg_values_supported: { type: array, items: { type: string } }
+
+  # ── Utility ───────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [Utility]
+      summary: Health check (no auth)
+      responses:
+        '200':
+          description: Service health
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:    { type: string, enum: [ok] }
+                  timestamp: { type: string, format: date-time }
+                  redis:     { type: boolean }

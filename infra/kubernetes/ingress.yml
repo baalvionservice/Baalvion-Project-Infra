@@ -1,0 +1,231 @@
+---
+# Kong Ingress Controller — routes external traffic to Kong Gateway
+# Kong itself routes to individual services via its declarative config (kong.yml)
+#
+# Apply order: namespace.yml → rbac.yml → configmaps/ → secrets/ → services → ingress.yml
+#
+# TLS: cert-manager issues Let's Encrypt certificates automatically via the
+# cert-manager.io/cluster-issuer annotation. Install cert-manager first:
+#   kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: baalvion-ingress
+  namespace: baalvion
+  labels:
+    app: baalvion-gateway
+  annotations:
+    # Ingress class — use Kong Ingress Controller
+    kubernetes.io/ingress.class: "kong"
+
+    # TLS certificate issued by cert-manager (Let's Encrypt production)
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+    # Kong-specific annotations
+    konghq.com/strip-path:    "false"
+    konghq.com/preserve-host: "true"
+
+    # Enable proxy-protocol if your LB supports it (optional)
+    # konghq.com/protocols: "https"
+spec:
+  tls:
+    - hosts:
+        - api.baalvion.com
+        - baalvion.com
+        - admin.baalvion.com
+      secretName: baalvion-tls
+
+  rules:
+    # ── Main API — all /api/* + /oauth + /.well-known routes ──────────────────
+    - host: api.baalvion.com
+      http:
+        paths:
+          - path:     /
+            pathType: Prefix
+            backend:
+              service:
+                name: kong-proxy          # Kong Gateway ClusterIP service
+                port: { number: 80 }
+
+    # ── Public domain — routes non-admin traffic through Kong ─────────────────
+    - host: baalvion.com
+      http:
+        paths:
+          - path:     /api
+            pathType: Prefix
+            backend:
+              service:
+                name: kong-proxy
+                port: { number: 80 }
+
+    # ── Admin panel — frontend Next.js app ────────────────────────────────────
+    - host: admin.baalvion.com
+      http:
+        paths:
+          - path:     /
+            pathType: Prefix
+            backend:
+              service:
+                name: admin-platform
+                port: { number: 3030 }
+
+---
+# Kong Gateway Deployment (self-managed, DB-less mode using kong.yml declarative config)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kong
+  namespace: baalvion
+  labels:
+    app:  kong
+    tier: gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: kong }
+  template:
+    metadata:
+      labels:
+        app:  kong
+        tier: gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port:   "8001"
+        prometheus.io/path:   "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser:    1000
+      terminationGracePeriodSeconds: 30
+
+      containers:
+        - name: kong
+          image: kong:3.8-alpine
+          env:
+            - name:  KONG_DATABASE
+              value: "off"
+            - name:  KONG_DECLARATIVE_CONFIG
+              value: "/kong/config/kong.yml"
+            - name:  KONG_PROXY_LISTEN
+              value: "0.0.0.0:8000, 0.0.0.0:8443 ssl"
+            - name:  KONG_ADMIN_LISTEN
+              value: "0.0.0.0:8001"
+            - name:  KONG_LOG_LEVEL
+              value: warn
+            - name:  KONG_PROXY_ACCESS_LOG
+              value: /dev/stdout
+            - name:  KONG_PROXY_ERROR_LOG
+              value: /dev/stderr
+            - name:  KONG_ADMIN_ACCESS_LOG
+              value: /dev/stdout
+            - name:  KONG_ADMIN_ERROR_LOG
+              value: /dev/stderr
+            - name:  KONG_PLUGINS
+              value: "bundled,prometheus"
+          ports:
+            - containerPort: 8000
+              name: proxy
+            - containerPort: 8443
+              name: proxy-ssl
+            - containerPort: 8001
+              name: admin
+          volumeMounts:
+            - name:      kong-config
+              mountPath: /kong/config
+              readOnly:  true
+            - name:      tmp
+              mountPath: /tmp
+          resources:
+            requests: { cpu: "200m", memory: "256Mi" }
+            limits:   { cpu: "1",    memory: "512Mi" }
+          livenessProbe:
+            httpGet: { path: /status, port: 8001 }
+            initialDelaySeconds: 15
+            periodSeconds:       10
+            failureThreshold:    3
+          readinessProbe:
+            httpGet: { path: /status, port: 8001 }
+            initialDelaySeconds: 10
+            periodSeconds:       5
+            failureThreshold:    3
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem:   true
+            capabilities:
+              drop: [ALL]
+              add:  [NET_BIND_SERVICE]
+
+      volumes:
+        - name: kong-config
+          configMap:
+            name: kong-config
+        - name: tmp
+          emptyDir: {}
+
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels: { app: kong }
+                topologyKey: kubernetes.io/hostname
+
+---
+# Kong proxy service — the ingress controller routes to this
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-proxy
+  namespace: baalvion
+  labels:
+    app: kong
+spec:
+  selector: { app: kong }
+  ports:
+    - name:       proxy
+      port:       80
+      targetPort: 8000
+    - name:       proxy-ssl
+      port:       443
+      targetPort: 8443
+  type: ClusterIP
+
+---
+# Kong admin service — internal only, never exposed externally
+apiVersion: v1
+kind: Service
+metadata:
+  name: kong-admin
+  namespace: baalvion
+  labels:
+    app: kong
+spec:
+  selector: { app: kong }
+  ports:
+    - name:       admin
+      port:       8001
+      targetPort: 8001
+  type: ClusterIP
+
+---
+# ConfigMap that mounts the kong.yml declarative config into the pod
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: baalvion
+  labels:
+    app: kong
+data:
+  # Inline the kong.yml content — or use kustomize/helm to populate from file
+  # For production, use: kubectl create configmap kong-config --from-file=kong.yml=docker/kong/kong.yml
+  kong.yml: |
+    _format_version: "3.0"
+    _transform: true
+    # See docker/kong/kong.yml for the full declarative configuration.
+    # Populate this configmap from that file in your deployment pipeline:
+    #   kubectl create configmap kong-config \
+    #     --from-file=kong.yml=docker/kong/kong.yml \
+    #     -n baalvion --dry-run=client -o yaml | kubectl apply -f -

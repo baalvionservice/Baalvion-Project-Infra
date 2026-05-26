@@ -1,0 +1,21 @@
+
+[
+  {
+    "id": "portal_abc123",
+    "name": "Q3 2024 General Update",
+    "url": "/portal/portal_abc123",
+    "pin": "1234",
+    "includedBusinesses": ["biz_1", "biz_2", "biz_3", "biz_4", "biz_5"],
+    "expires": "2024-10-31",
+    "investorName": "General Partners"
+  },
+  {
+    "id": "portal_xyz789",
+    "name": "Seed Investor Update",
+    "url": "/portal/portal_xyz789",
+    "pin": null,
+    "includedBusinesses": ["biz_1", "biz_4"],
+    "expires": null,
+    "investorName": "John Smith"
+  }
+]

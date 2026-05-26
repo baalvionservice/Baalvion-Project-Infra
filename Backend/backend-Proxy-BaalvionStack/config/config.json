@@ -1,0 +1,16 @@
+{
+    "development": {
+        "username": "neondb_owner",
+        "password": "npg_oYUcnb1MhN2O",
+        "database": "neondb",
+        "host": "ep-jolly-water-amvut2wv-pooler.c-5.us-east-1.aws.neon.tech",
+        "port": 5432,
+        "dialect": "postgres",
+        "dialectOptions": {
+            "ssl": {
+                "require": true,
+                "rejectUnauthorized": false
+            }
+        }
+    }
+}
