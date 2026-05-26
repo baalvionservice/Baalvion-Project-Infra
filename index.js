@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 
 const config = require('./config/appConfig');
+const { tenantContext } = require('./middleware/tenantContext');
 const requestContext = require('./middleware/requestContext');
 const rateLimit = require('./middleware/rateLimit');
 const v1Routes = require('./routes/v1');
@@ -23,6 +24,7 @@ app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
+app.use(tenantContext); // establishes per-request tenant ALS scope for query hooks
 app.use(requestContext);
 app.use(metricsMiddleware);
 app.use(rateLimit());
@@ -50,8 +52,14 @@ const start = async () => {
     try {
         await db.sequelize.authenticate();
         await db.sequelize.query('CREATE SCHEMA IF NOT EXISTS trade');
-        await db.sequelize.sync({ alter: false });
-        console.log('[trade-service] DB connected and synced');
+        // Dev convenience only: create missing base tables. In production set
+        // DB_SYNC=false — schema evolution is owned by versioned migrations.
+        if (process.env.DB_SYNC !== 'false' && config.env !== 'production') {
+            await db.sequelize.sync({ alter: false });
+        }
+        const { run: runMigrations } = require('./migrate');
+        const migrated = await runMigrations();
+        console.log(`[trade-service] DB ready (migrations applied this boot: ${migrated.applied.length})`);
         providers.logEnvReport();
     } catch (err) {
         console.error('[trade-service] DB connection failed:', err.message);
