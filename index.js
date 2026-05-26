@@ -61,6 +61,10 @@ const start = async () => {
         const migrated = await runMigrations();
         console.log(`[trade-service] DB ready (migrations applied this boot: ${migrated.applied.length})`);
         providers.logEnvReport();
+        // Start BullMQ workers in-process (set QUEUE_WORKERS=false to run them separately).
+        if (process.env.QUEUE_WORKERS !== 'false') {
+            require('./queue/workers').startWorkers();
+        }
     } catch (err) {
         console.error('[trade-service] DB connection failed:', err.message);
         process.exit(1);

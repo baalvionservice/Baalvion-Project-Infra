@@ -48,7 +48,42 @@ function metricsMiddleware(req, res, next) {
     next();
 }
 
+// --- Dynamic gauges (queues / cache / workers), refreshed on each scrape ---
+const queueJobs = new client.Gauge({
+    name: 'baalvion_queue_jobs', help: 'Jobs per queue and state',
+    labelNames: ['queue', 'state', 'service'], registers: [register],
+});
+const cacheGauge = new client.Gauge({
+    name: 'baalvion_cache', help: 'Cache statistics',
+    labelNames: ['metric', 'service'], registers: [register],
+});
+const queueWorkers = new client.Gauge({
+    name: 'baalvion_queue_workers_active', help: 'Active queue workers',
+    labelNames: ['service'], registers: [register],
+});
+
+async function refreshDynamicMetrics() {
+    try {
+        const queue = require('../queue'); // lazy to avoid load-order cycles
+        const { workerMetrics } = require('../queue/workers');
+        const cache = require('../cache');
+        const h = await queue.health();
+        for (const [q, counts] of Object.entries(h)) {
+            for (const [state, n] of Object.entries(counts)) {
+                queueJobs.set({ queue: q, state, service: SERVICE_NAME }, Number(n) || 0);
+            }
+        }
+        const c = cache.health();
+        cacheGauge.set({ metric: 'hits', service: SERVICE_NAME }, c.hits || 0);
+        cacheGauge.set({ metric: 'misses', service: SERVICE_NAME }, c.misses || 0);
+        cacheGauge.set({ metric: 'hit_rate', service: SERVICE_NAME }, c.hitRate || 0);
+        cacheGauge.set({ metric: 'connected', service: SERVICE_NAME }, c.connected ? 1 : 0);
+        queueWorkers.set({ service: SERVICE_NAME }, workerMetrics().active || 0);
+    } catch { /* metrics scrape is best-effort */ }
+}
+
 async function metricsHandler(req, res) {
+    await refreshDynamicMetrics();
     res.set('Content-Type', register.contentType);
     res.end(await register.metrics());
 }
