@@ -20,4 +20,8 @@ router.use('/wallets',       require('./walletRoutes'));
 router.use('/notifications', require('./notificationRoutes'));
 router.use('/admin',         require('./adminRoutes'));
 
+// Generic persistence store — MUST be last so it only catches collections that
+// have no bespoke typed route above (alerts, risk_signals, contracts, ...).
+router.use('/:collection',   require('./collectionRoutes'));
+
 module.exports = router;
