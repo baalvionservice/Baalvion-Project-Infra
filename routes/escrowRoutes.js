@@ -5,8 +5,8 @@ const {
     listEscrows, getEscrow, createEscrow, fundEscrow, releaseEscrow, refundEscrow,
 } = require('../controller/escrowController');
 
-router.get('/',              listEscrows);
-router.get('/:id',           getEscrow);
+router.get('/',              authMiddleware, listEscrows);
+router.get('/:id',           authMiddleware, getEscrow);
 router.post('/',             authMiddleware, createEscrow);
 router.patch('/:id/fund',    authMiddleware, fundEscrow);
 router.patch('/:id/release', authMiddleware, releaseEscrow);

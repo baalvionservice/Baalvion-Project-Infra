@@ -5,8 +5,8 @@ const {
     listCases, getCase, createCase, updateCase, clearCase, escalateCase,
 } = require('../controller/complianceController');
 
-router.get('/',                 listCases);
-router.get('/:id',              getCase);
+router.get('/',                 authMiddleware, listCases);
+router.get('/:id',              authMiddleware, getCase);
 router.post('/',                authMiddleware, createCase);
 router.put('/:id',              authMiddleware, updateCase);
 router.patch('/:id',            authMiddleware, updateCase);

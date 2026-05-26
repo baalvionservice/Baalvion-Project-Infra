@@ -5,8 +5,8 @@ const {
     listDisputes, getDispute, createDispute, updateDispute, addEvidence, resolveDispute,
 } = require('../controller/disputeController');
 
-router.get('/',                 listDisputes);
-router.get('/:id',              getDispute);
+router.get('/',                 authMiddleware, listDisputes);
+router.get('/:id',              authMiddleware, getDispute);
 router.post('/',                authMiddleware, createDispute);
 router.put('/:id',              authMiddleware, updateDispute);
 router.patch('/:id',            authMiddleware, updateDispute);

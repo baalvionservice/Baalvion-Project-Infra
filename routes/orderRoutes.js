@@ -5,8 +5,8 @@ const {
     listOrders, getOrder, createOrder, updateOrder, updateOrderStatus, updateOrderFulfillment,
 } = require('../controller/orderController');
 
-router.get('/',                    listOrders);
-router.get('/:id',                 getOrder);
+router.get('/',                    authMiddleware, listOrders);
+router.get('/:id',                 authMiddleware, getOrder);
 router.post('/',                   authMiddleware, createOrder);
 router.put('/:id',                 authMiddleware, updateOrder);
 router.patch('/:id',               authMiddleware, updateOrder);

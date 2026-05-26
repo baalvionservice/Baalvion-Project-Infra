@@ -6,8 +6,8 @@ const {
     addMilestone, addException, updateShipmentStatus,
 } = require('../controller/shipmentController');
 
-router.get('/',                    listShipments);
-router.get('/:id',                 getShipment);
+router.get('/',                    authMiddleware, listShipments);
+router.get('/:id',                 authMiddleware, getShipment);
 router.post('/',                   authMiddleware, createShipment);
 router.put('/:id',                 authMiddleware, updateShipment);
 router.patch('/:id',               authMiddleware, updateShipment);
