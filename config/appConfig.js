@@ -9,7 +9,13 @@ module.exports = {
     port: Number(process.env.PORT || 3025),
     apiVersion: 'v1',
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000']),
-    jwt: { accessSecret: process.env.JWT_ACCESS_SECRET || 'replace-with-strong-secret' },
+    jwt: {
+        accessSecret: process.env.JWT_ACCESS_SECRET || 'replace-with-strong-secret',
+        // Access-token lifetime. Default 24h for backward compatibility; tighten
+        // in production (e.g. 15m) now that rotating refresh tokens exist.
+        accessTtl: process.env.JWT_ACCESS_TTL || '24h',
+        refreshTtlDays: Number(process.env.JWT_REFRESH_TTL_DAYS || 30),
+    },
     db: {
         host: process.env.DB_HOST || 'localhost',
         port: Number(process.env.DB_PORT || 5432),

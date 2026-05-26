@@ -5,6 +5,8 @@ const { signAccessToken } = require('../utils/jwtserver');
 const totp = require('../utils/totp');
 const { recordAudit } = require('../utils/audit');
 const db = require('../models');
+const config = require('../config/appConfig');
+const sessions = require('../services/sessionService');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 
@@ -12,8 +14,49 @@ const sha256 = (s) => crypto.createHash('sha256').update(String(s)).digest('hex'
 
 const tokenFor = (user) => signAccessToken(
     { id: user.id, email: user.email, role: user.role, tenantId: user.tenant_id, orgCode: user.org_code || null },
-    '24h',
+    config.jwt.accessTtl,
 );
+
+const REFRESH_COOKIE = 'refresh_token';
+const setRefreshCookie = (res, token) => res.cookie(REFRESH_COOKIE, token, {
+    httpOnly: true,
+    secure: config.env === 'production',
+    sameSite: 'lax',
+    maxAge: sessions.REFRESH_TTL_MS,
+    path: '/',
+});
+const clearRefreshCookie = (res) => res.clearCookie(REFRESH_COOKIE, { path: '/' });
+const presentedRefreshToken = (req) => (req.cookies && req.cookies[REFRESH_COOKIE]) || req.body?.refreshToken || null;
+
+// Issue an access token + a rotating refresh-token session, set the httpOnly
+// cookie, and shape the auth success payload.
+const issueAuthResult = async (req, res, user, status = 200, extra = {}) => {
+    const { token: refreshToken } = await sessions.issueSession({
+        userId: user.id,
+        tenantId: user.tenant_id,
+        userAgent: req.headers['user-agent'],
+        ip: req.ip,
+    });
+    setRefreshCookie(res, refreshToken);
+    return sendSuccess(req, res, {
+        accessToken: tokenFor(user),
+        refreshToken,
+        role: user.role,
+        userId: user.id,
+        tenantId: user.tenant_id,
+        ...extra,
+    }, status);
+};
+
+const serializeSession = (row, currentId) => ({
+    id: row.id,
+    current: row.id === currentId,
+    userAgent: row.user_agent || null,
+    ip: row.ip || null,
+    createdAt: row.createdAt, // Sequelize timestamp attribute is camelCase
+    lastUsedAt: row.last_used_at,
+    expiresAt: row.expires_at,
+});
 
 const register = async (req, res, next) => {
     try {
@@ -31,7 +74,7 @@ const register = async (req, res, next) => {
             tenant_id: tenantId || 'T-DEMO',
         });
         await recordAudit({ actorId: user.id, action: 'auth.register', resourceType: 'user', resourceId: user.id, tenantId: user.tenant_id, metadata: { email } });
-        return sendSuccess(req, res, { accessToken: tokenFor(user), role: user.role, userId: user.id, tenantId: user.tenant_id }, 201);
+        return issueAuthResult(req, res, user, 201);
     } catch (err) { return next(err); }
 };
 
@@ -65,7 +108,7 @@ const login = async (req, res, next) => {
         }
 
         await recordAudit({ actorId: user.id, action: 'auth.login', resourceType: 'user', resourceId: user.id, tenantId: user.tenant_id, metadata: { ip: req.ip } });
-        return sendSuccess(req, res, { accessToken: tokenFor(user), role: user.role, userId: user.id, tenantId: user.tenant_id, mfaEnabled: user.mfa_enabled });
+        return issueAuthResult(req, res, user, 200, { mfaEnabled: user.mfa_enabled });
     } catch (err) { return next(err); }
 };
 
@@ -122,4 +165,83 @@ const disableMfa = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { register, login, me, enrollMfa, verifyMfa, disableMfa };
+// --- Refresh-token sessions ----------------------------------------------
+
+// Rotate a refresh token: validates + single-uses the presented token, issues a
+// fresh access+refresh pair. Replaying a spent token revokes the whole family.
+const refresh = async (req, res, next) => {
+    try {
+        const token = presentedRefreshToken(req);
+        if (!token) return next(new AppError('UNAUTHORIZED', 'No refresh token provided', 401));
+        const result = await sessions.rotateSession({ token, userAgent: req.headers['user-agent'], ip: req.ip });
+
+        if (result.reuseDetected) {
+            await recordAudit({ actorId: result.userId, action: 'auth.refresh_reuse_detected', resourceType: 'session', resourceId: result.familyId, metadata: { ip: req.ip } });
+            clearRefreshCookie(res);
+            return next(new AppError('UNAUTHORIZED', 'Refresh token reuse detected — all sessions revoked', 401));
+        }
+
+        const user = await db.User.findByPk(result.userId);
+        if (!user || !user.is_active) {
+            clearRefreshCookie(res);
+            return next(new AppError('UNAUTHORIZED', 'Account unavailable', 401));
+        }
+        await recordAudit({ actorId: user.id, action: 'auth.refresh', resourceType: 'session', resourceId: result.row.id, tenantId: user.tenant_id });
+        setRefreshCookie(res, result.token);
+        return sendSuccess(req, res, {
+            accessToken: tokenFor(user),
+            refreshToken: result.token,
+            role: user.role,
+            userId: user.id,
+            tenantId: user.tenant_id,
+        });
+    } catch (err) { return next(err); }
+};
+
+// Logout: revoke the presented session and clear the cookie. Idempotent.
+const logout = async (req, res, next) => {
+    try {
+        const token = presentedRefreshToken(req);
+        if (token) await sessions.revokeByToken(token);
+        clearRefreshCookie(res);
+        if (req.auth?.userId) {
+            await recordAudit({ actorId: req.auth.userId, action: 'auth.logout', resourceType: 'session', resourceId: req.auth.userId, tenantId: req.auth.tenantId });
+        }
+        return sendSuccess(req, res, { loggedOut: true });
+    } catch (err) { return next(err); }
+};
+
+// List the caller's active sessions (device/session management UI).
+const listSessions = async (req, res, next) => {
+    try {
+        const parsed = presentedRefreshToken(req);
+        const currentId = parsed ? String(parsed).split('.')[0] : null;
+        const rows = await sessions.listActive(req.auth.userId);
+        return sendSuccess(req, res, rows.map((r) => serializeSession(r, currentId)));
+    } catch (err) { return next(err); }
+};
+
+// Revoke a specific session by id (must belong to the caller).
+const revokeSession = async (req, res, next) => {
+    try {
+        const ok = await sessions.revokeById(req.params.id, req.auth.userId);
+        if (!ok) return next(new AppError('NOT_FOUND', 'Session not found', 404));
+        await recordAudit({ actorId: req.auth.userId, action: 'auth.session_revoked', resourceType: 'session', resourceId: req.params.id, tenantId: req.auth.tenantId });
+        return sendSuccess(req, res, { revoked: true });
+    } catch (err) { return next(err); }
+};
+
+// Revoke every session for the caller ("sign out everywhere").
+const revokeAllSessions = async (req, res, next) => {
+    try {
+        const count = await sessions.revokeAllForUser(req.auth.userId);
+        clearRefreshCookie(res);
+        await recordAudit({ actorId: req.auth.userId, action: 'auth.session_revoked_all', resourceType: 'session', resourceId: req.auth.userId, tenantId: req.auth.tenantId, metadata: { count } });
+        return sendSuccess(req, res, { revoked: count });
+    } catch (err) { return next(err); }
+};
+
+module.exports = {
+    register, login, me, enrollMfa, verifyMfa, disableMfa,
+    refresh, logout, listSessions, revokeSession, revokeAllSessions,
+};

@@ -35,6 +35,7 @@ db.Quotation       = require('./quotations')(sequelize, Sequelize.DataTypes);
 db.Message         = require('./messages')(sequelize, Sequelize.DataTypes);
 db.Collection      = require('./collections')(sequelize, Sequelize.DataTypes);
 db.AuditLog        = require('./audit_logs')(sequelize, Sequelize.DataTypes);
+db.RefreshToken    = require('./refresh_tokens')(sequelize, Sequelize.DataTypes);
 
 Object.values(db).forEach(model => {
     if (model && model.associate) model.associate(db);
@@ -57,6 +58,9 @@ const { currentTenant } = require('../middleware/tenantContext');
 const TENANT_EXCLUDED = new Set([
     'User', 'AuditLog', 'Sequelize', 'sequelize',
     'Listing', 'Rfq', 'Deal', 'Quotation', 'Message', 'Organization',
+    // RefreshToken: auth/session management is pre-tenant and scoped by user_id
+    // explicitly (the refresh endpoint has no valid access token / tenant ctx).
+    'RefreshToken',
 ]);
 
 const tenantAttr = (model) => {
