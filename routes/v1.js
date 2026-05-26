@@ -20,6 +20,9 @@ router.use('/wallets',       require('./walletRoutes'));
 router.use('/notifications', require('./notificationRoutes'));
 router.use('/admin',         require('./adminRoutes'));
 
+// Bespoke aggregation endpoint (returns a single object, not a collection array).
+router.get('/platform_stats', require('../controller/statsController').platformStats);
+
 // Generic persistence store — MUST be last so it only catches collections that
 // have no bespoke typed route above (alerts, risk_signals, contracts, ...).
 router.use('/:collection',   require('./collectionRoutes'));
