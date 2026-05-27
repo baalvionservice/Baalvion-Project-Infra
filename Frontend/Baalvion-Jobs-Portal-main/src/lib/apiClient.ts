@@ -5,32 +5,26 @@ export interface ApiResponse<T> {
   error: string | null;
 }
 
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_URL        || 'http://localhost:4000/v1/auth';
-const JOBS_BASE = process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || 'http://localhost:3002/api/v1';
+import { refresh as authRefresh } from './authClient';
 
-const TOKEN_KEY         = 'baalvion_jobs_token';
-const REFRESH_TOKEN_KEY = 'baalvion_jobs_refresh_token';
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_URL        || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+// Domain data via the gateway (port 4100 was a phantom backend).
+const JOBS_BASE = process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || 'https://api.baalvion.com/api/v1/ecosystem/jobs/api/v1';
+
+// Access token is held in MEMORY only. The refresh token is an httpOnly cookie set by
+// auth-service — never stored in localStorage (canonical, XSS-resistant).
+let _accessToken: string | null = null;
 
 export function getBearerToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(TOKEN_KEY);
+  return _accessToken;
 }
 
-export function setTokens(accessToken: string, refreshToken?: string) {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(TOKEN_KEY, accessToken);
-  if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+export function setTokens(accessToken: string) {
+  _accessToken = accessToken || null;
 }
 
 export function clearTokens() {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
-}
-
-function getRefreshToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(REFRESH_TOKEN_KEY);
+  _accessToken = null;
 }
 
 let refreshPromise: Promise<boolean> | null = null;
@@ -39,26 +33,10 @@ async function attemptTokenRefresh(): Promise<boolean> {
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = (async () => {
-    const refreshToken = getRefreshToken();
-    if (!refreshToken) return false;
-
     try {
-      const res = await fetch(`${AUTH_BASE}/refresh`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ refreshToken }),
-      });
-
-      if (!res.ok) return false;
-
-      const payload = await res.json();
-      const newAccess  = payload?.data?.accessToken  ?? payload?.accessToken;
-      const newRefresh = payload?.data?.refreshToken ?? payload?.refreshToken;
-
-      if (!newAccess) return false;
-
-      setTokens(newAccess, newRefresh);
+      const access = await authRefresh(); // uses the httpOnly refresh cookie
+      if (!access) return false;
+      setTokens(access);
       return true;
     } catch {
       return false;
@@ -154,7 +132,7 @@ export async function unwrap<T>(promise: Promise<ApiResponse<T>>): Promise<T> {
   return res.data;
 }
 
-// ── Auth client (proxy backend / auth-service) ────────────────────────────────
+// ── Auth client (auth-service) ────────────────────────────────────────────────
 export const authApiClient = {
   get:    <T>(path: string)                    => doRequest<T>(AUTH_BASE, 'GET',    path),
   post:   <T>(path: string, body: unknown)     => doRequest<T>(AUTH_BASE, 'POST',   path, body),
