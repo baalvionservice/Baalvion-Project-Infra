@@ -9,14 +9,15 @@ module.exports = {
     port: Number(process.env.PORT || 3015),
     apiVersion: 'v1',
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000']),
-    jwt: { accessSecret: require('@baalvion/auth-node').requireEnv('JWT_ACCESS_SECRET') },
-    // Dual-issue window (Phase 4 A3): law login ALSO mints a canonical RS256 token via auth-service.
-    dualIssue: {
-        enabled:        process.env.LAW_DUAL_ISSUE_ENABLED === 'true',   // default OFF
-        authServiceUrl: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
-        internalSecret: process.env.INTERNAL_SERVICE_SECRET || '',
-        serviceName:    'law',
+    // Phase 4 A4 cutover: law-service is VERIFY-ONLY (canonical RS256 from auth-service).
+    jwt: {
+        publicKey: require('@baalvion/auth-node').requireEnv('JWT_PUBLIC_KEY').replace(/\\n/g, '\n'),
+        issuer:    process.env.JWT_ISSUER   || 'baalvion-auth',
+        audience:  process.env.JWT_AUDIENCE || 'baalvion-platform',
+        jwksUri:   process.env.BAALVION_JWKS_URI || process.env.JWKS_URI || null,
     },
+    // /login + /register now redirect to the canonical issuer.
+    authServiceUrl: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
     db: {
         host: process.env.DB_HOST || 'localhost',
         port: Number(process.env.DB_PORT || 5432),

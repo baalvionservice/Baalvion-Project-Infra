@@ -1,51 +1,23 @@
 'use strict';
-const bcrypt = require('bcryptjs');
-const { signAccessToken } = require('../utils/jwtserver');
-const canonicalUpgrade = require('../service/canonicalUpgrade');
+// Phase 4 A4 cutover: law-service no longer issues tokens or writes auth users.
+// Authentication is the canonical auth-service's responsibility — /login and /register
+// redirect there (308 preserves the POST method + body). No local HS256 issuance, no
+// password handling, no local user-auth writes. `me` is a profile READ keyed by the
+// email-reconciled local id (req.user.id) set by authMiddleware.
 const db = require('../models');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const config = require('../config/appConfig');
 
-const register = async (req, res, next) => {
-    try {
-        const { email, password, name, role } = req.body;
-        if (!email || !password) return next(new AppError('BAD_REQUEST', 'email and password are required', 400));
-        const existing = await db.User.findOne({ where: { email } });
-        if (existing) return next(new AppError('CONFLICT', 'Email already registered', 409));
-        const password_hash = await bcrypt.hash(password, 10);
-        const user = await db.User.create({
-            email,
-            password_hash,
-            full_name: name || '',
-            role: ['admin', 'lawyer', 'client'].includes(role) ? role : 'client',
-        });
-        const payload = { id: user.id, email: user.email, role: user.role };
-        const accessToken = signAccessToken(payload, '24h');
-        return sendSuccess(req, res, { accessToken, role: user.role, userId: user.id }, 201);
-    } catch (err) { return next(err); }
-};
+const AUTH = config.authServiceUrl;
 
-const login = async (req, res, next) => {
-    try {
-        const { email, password } = req.body;
-        if (!email || !password) return next(new AppError('BAD_REQUEST', 'email and password are required', 400));
-        const user = await db.User.findOne({ where: { email } });
-        if (!user) return next(new AppError('UNAUTHORIZED', 'Invalid credentials', 401));
-        const valid = await bcrypt.compare(password, user.password_hash);
-        if (!valid) return next(new AppError('UNAUTHORIZED', 'Invalid credentials', 401));
-        if (!user.is_active) return next(new AppError('FORBIDDEN', 'Account is deactivated', 403));
-        const payload = { id: user.id, email: user.email, role: user.role };
-        const accessToken = signAccessToken(payload, '24h');
-        // Dual-issue window (Phase 4 A3): ALSO mint a canonical RS256 token via auth-service
-        // (feature-flagged LAW_DUAL_ISSUE_ENABLED). Never breaks login if the upgrade fails.
-        const canonicalAccessToken = await canonicalUpgrade.issueCanonicalToken({ email: user.email });
-        return sendSuccess(req, res, { accessToken, canonicalAccessToken, role: user.role, userId: user.id });
-    } catch (err) { return next(err); }
-};
+const register = (req, res) => res.redirect(308, `${AUTH}/v1/auth/register`);
+const login    = (req, res) => res.redirect(308, `${AUTH}/v1/auth/login`);
 
 const me = async (req, res, next) => {
     try {
-        const user = await db.User.findByPk(req.auth.userId, {
+        if (!req.user.id) return next(new AppError('NOT_FOUND', 'No local profile for this identity', 404));
+        const user = await db.User.findByPk(req.user.id, {
             attributes: { exclude: ['password_hash'] },
         });
         if (!user) return next(new AppError('NOT_FOUND', 'User not found', 404));
