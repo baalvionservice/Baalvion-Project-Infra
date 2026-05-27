@@ -13,10 +13,10 @@ module.exports = {
     baseUrl: process.env.API_BASE_URL || 'http://localhost:3006',
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000', 'http://localhost:5173']),
     jwt: {
-        accessSecret: require('@baalvion/auth-node').requireEnv('JWT_ACCESS_SECRET'),
-        refreshSecret: require('@baalvion/auth-node').requireEnv('JWT_REFRESH_SECRET'),
-        accessExpiresIn: process.env.JWT_ACCESS_EXPIRES_IN || '15m',
-        refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '7d',
+        publicKey: require('@baalvion/auth-node').requireEnv('JWT_PUBLIC_KEY').replace(/\\n/g, '\n'),
+        issuer:    process.env.JWT_ISSUER   || 'baalvion-auth',
+        audience:  process.env.JWT_AUDIENCE || 'baalvion-platform',
+        jwksUri:   process.env.BAALVION_JWKS_URI || process.env.JWKS_URI || null,
     },
     db: {
         host: process.env.DB_HOST || 'localhost',
