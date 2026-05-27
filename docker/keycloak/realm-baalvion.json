@@ -1,0 +1,69 @@
+{
+  "realm": "baalvion",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 900,
+  "roles": {
+    "realm": [
+      { "name": "admin", "description": "Platform administrator" },
+      { "name": "recruiter", "description": "Jobs portal recruiter" },
+      { "name": "creator", "description": "Brand-connector creator" },
+      { "name": "brand", "description": "Brand-connector brand" },
+      { "name": "lawyer", "description": "Law-Elite lawyer" },
+      { "name": "client", "description": "End client / candidate" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "baalvion-os",
+      "name": "Baalvion OS API",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "${KEYCLOAK_BAALVION_OS_SECRET}",
+      "serviceAccountsEnabled": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3026/*",
+        "http://localhost:3030/*",
+        "http://localhost:9002/*",
+        "http://localhost:9003/*"
+      ],
+      "webOrigins": [
+        "http://localhost:3026",
+        "http://localhost:3030",
+        "http://localhost:9002",
+        "http://localhost:9003"
+      ],
+      "protocolMappers": [
+        {
+          "name": "audience-baalvion-os",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "config": {
+            "included.client.audience": "baalvion-os",
+            "access.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "baalvion-web",
+      "name": "Baalvion Web Apps (SPA)",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": [
+        "http://localhost:3030/*",
+        "http://localhost:3035/*",
+        "http://localhost:3026/*",
+        "http://localhost:9002/*"
+      ],
+      "webOrigins": ["+"]
+    }
+  ]
+}

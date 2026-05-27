@@ -1,0 +1,17 @@
+{
+  "name": "@baalvion/auth-node",
+  "version": "1.0.0",
+  "description": "Canonical backend JWT authority for Baalvion services — the single permitted home for jsonwebtoken (verify, RS256/JWKS issue, HS256 fallback, refresh).",
+  "private": true,
+  "main": "index.js",
+  "files": [
+    "index.js",
+    "requireEnv.js"
+  ],
+  "scripts": {
+    "test": "node test.smoke.js"
+  },
+  "dependencies": {
+    "jsonwebtoken": "^9.0.3"
+  }
+}

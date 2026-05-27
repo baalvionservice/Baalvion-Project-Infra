@@ -29,6 +29,14 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * Dev-mock auth is OFF by default everywhere. It only activates when explicitly
+ * opted in via NEXT_PUBLIC_BAALVION_DEV_MOCK=1 AND outside production. This
+ * prevents the mock role-switcher from ever being reachable in a real build.
+ */
+const MOCK_ENABLED =
+  process.env.NEXT_PUBLIC_BAALVION_DEV_MOCK === '1' && process.env.NODE_ENV !== 'production';
+
 function getMockProfile(role: UserRole): User {
   return {
     id: role === 'ADMIN' ? 'admin_root' : role === 'BRAND' ? 'brand_user_1' : 'creator_user_1',
@@ -119,8 +127,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      // Development / no Firebase: restore from localStorage
-      if (typeof window !== 'undefined') {
+      // Development / no Firebase: restore from localStorage (mock auth — gated OFF by default)
+      if (MOCK_ENABLED && typeof window !== 'undefined') {
         const savedRole = localStorage.getItem('mock_role') as UserRole | null;
         if (savedRole) {
           setCurrentUser(getMockProfile(savedRole));
@@ -177,8 +185,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // ── signInAs (dev/test only) ────────────────────────────────────────────────
   const signInAs = useCallback((role: UserRole) => {
-    if (process.env.NODE_ENV === 'production') {
-      console.warn('[AuthContext] signInAs() is disabled in production.');
+    if (!MOCK_ENABLED) {
+      console.warn('[AuthContext] signInAs() mock auth is disabled — set NEXT_PUBLIC_BAALVION_DEV_MOCK=1 (non-production) to enable.');
       return;
     }
     const profile = getMockProfile(role);
