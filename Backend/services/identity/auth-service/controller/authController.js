@@ -29,8 +29,12 @@ exports.login = async (req, res, next) => {
             return sendSuccess(req, res, { mfa_required: true, challengeToken: result.challengeToken });
         }
         res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        req.audit?.log('login_success', { userId: result.user?.id, orgId: result.user?.orgId, metadata: { email: parsed.data.email } });
         sendSuccess(req, res, { accessToken: result.accessToken, refreshToken: result.refreshToken, user: result.user, expiresAt: result.expiresAt });
-    } catch (err) { next(err); }
+    } catch (err) {
+        req.audit?.log('login_failure', { metadata: { email: req.body?.email, reason: err.code || 'error' } });
+        next(err);
+    }
 };
 
 // Internal S2S (dual-issue window). Guarded by internalAuth (HMAC). Mints a canonical token
@@ -59,6 +63,7 @@ exports.refresh = async (req, res, next) => {
         const rawToken = req.cookies?.[config.refreshCookieName] || req.body?.refreshToken;
         const result = await authService.refresh(rawToken, req.ip);
         res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        req.audit?.log('refresh', { userId: result.userId ?? result.user?.id ?? null });
         sendSuccess(req, res, { accessToken: result.accessToken, refreshToken: result.refreshToken, expiresAt: result.expiresAt });
     } catch (err) { next(err); }
 };
@@ -68,6 +73,8 @@ exports.logout = async (req, res, next) => {
         const rawToken = req.cookies?.[config.refreshCookieName] || req.body?.refreshToken;
         await authService.logout(req.auth?.sessionId, rawToken, req.auth?.jti);
         res.clearCookie(config.refreshCookieName);
+        if (req.auth?.jti) req.audit?.log('token_revoked', { userId: req.auth.userId, orgId: req.auth.orgId, sessionId: req.auth.sessionId, jti: req.auth.jti, issuer: 'baalvion-auth' });
+        req.audit?.log('logout', { userId: req.auth?.userId, orgId: req.auth?.orgId, sessionId: req.auth?.sessionId });
         sendSuccess(req, res, { message: 'Logged out successfully' });
     } catch (err) { next(err); }
 };
@@ -77,6 +84,7 @@ exports.forgotPassword = async (req, res, next) => {
         const parsed = schemas.forgotPassword.safeParse(req.body);
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         await authService.forgotPassword({ email: parsed.data.email, ipAddress: req.ip });
+        req.audit?.log('password_reset_requested', { metadata: { email: parsed.data.email } });
         sendSuccess(req, res, { message: 'If that email exists, a reset link was sent' });
     } catch (err) { next(err); }
 };
@@ -86,6 +94,7 @@ exports.resetPassword = async (req, res, next) => {
         const parsed = schemas.resetPassword.safeParse(req.body);
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         await authService.resetPassword({ ...parsed.data, ipAddress: req.ip });
+        req.audit?.log('password_reset_completed', {});
         sendSuccess(req, res, { message: 'Password reset successful' });
     } catch (err) { next(err); }
 };

@@ -32,7 +32,7 @@ const _canonical = createAuthMiddleware({
     // prior behaviour); a present-but-throwing lookup fails CLOSED inside auth-node.
     isBlacklisted: async (jti) => {
         if (!(redis.isAvailable && redis.isAvailable())) return false;
-        const bl = await redis.getClient()?.get(`auth:bl:${jti}`);
+        const bl = await redis.getClient()?.get(`auth:blacklist:${jti}`); // Phase 9: canonical shared namespace
         return !!bl;
     },
 });

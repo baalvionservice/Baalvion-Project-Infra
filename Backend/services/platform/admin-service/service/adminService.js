@@ -246,6 +246,7 @@ async function createImpersonationToken(adminUserId, targetUserId) {
             role:            targetUser.role || 'member',     // DEPRECATED scalar compat
             permissions:     [],
             sid:             impersonationId,
+            impersonation:   true,                  // Phase 9: explicit impersonation marker
             impersonated_by: String(adminUserId),
             jti:             uuidv4(),
         },

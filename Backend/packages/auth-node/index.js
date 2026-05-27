@@ -32,6 +32,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { requireEnv } = require('./requireEnv');
 const rbac = require('./rbac');
+const blacklist = require('./blacklist');
 
 function readFileSafe(p) {
   try { return fs.readFileSync(p, 'utf8'); } catch (_) { return null; }
@@ -316,9 +317,12 @@ function createJwksVerifier(opts = {}) {
     jwksUri, jwksTtlMs = 300000, issuer, audience,
     staticPublicKey, staticPublicKeyB64, hs256Secret,
     requiredClaims = [], isBlacklisted, rejectHs256 = false,
-    validateRolesPermissions = false, logger = console,
+    validateRolesPermissions = false, logger = console, redis,
   } = opts;
   let _keys = null, _at = 0;
+  // Canonical shared revocation (Phase 9): when a Redis client is injected (and no explicit
+  // isBlacklisted fn), check auth:blacklist:<jti> on EVERY verify. One scheme, no per-service stores.
+  const _isBlacklisted = isBlacklisted || (redis ? blacklist.createRedisBlacklist(redis, { logger }) : null);
 
   function fetchJwks() {
     if (!jwksUri) return Promise.reject(new Error('No JWKS URI configured'));
@@ -358,16 +362,21 @@ function createJwksVerifier(opts = {}) {
         throw new VerifyError('malformed_permissions', 'Claim "permissions" must be an array');
       }
     }
-    if (typeof isBlacklisted === 'function' && payload.jti) {
+    if (typeof _isBlacklisted === 'function' && payload.jti) {
       let revoked;
       try {
-        revoked = await isBlacklisted(payload.jti);
+        revoked = await _isBlacklisted(payload.jti);
       } catch (e) {
-        // Fail CLOSED: a revocation-store outage must not let tokens through.
+        // Fail CLOSED: a revocation-store outage must NOT let tokens through.
         logger.error('[auth-node] blacklist lookup failed:', e.message);
         throw new VerifyError('blacklist_unavailable', 'Revocation check failed');
       }
-      if (revoked) throw new VerifyError('revoked', 'Token has been revoked (jti blacklisted)');
+      if (revoked) {
+        // Metrics/log of a blacklisted attempt with decodable identifiers. app_id is added at the
+        // request/audit layer (it carries the X-Baalvion-App header).
+        logger.warn('[auth-node] blacklisted token rejected', { jti: payload.jti, iss: payload.iss, sub: payload.sub });
+        throw new VerifyError('blacklisted', 'Token has been revoked (jti blacklisted)');
+      }
     }
     return payload;
   }
@@ -427,12 +436,12 @@ function createAuthMiddleware(opts = {}) {
   const {
     jwksUri, issuer, audience,
     requiredClaims = ['sub', 'org_id', 'sid', 'jti'],
-    isBlacklisted, jwksTtlMs, staticPublicKey, staticPublicKeyB64,
+    isBlacklisted, jwksTtlMs, staticPublicKey, staticPublicKeyB64, redis, logger,
   } = opts;
 
   const verifier = createJwksVerifier({
     jwksUri, issuer, audience, jwksTtlMs, staticPublicKey, staticPublicKeyB64,
-    requiredClaims, isBlacklisted,
+    requiredClaims, isBlacklisted, redis, logger,
     rejectHs256: true,
     validateRolesPermissions: true,
   });
@@ -445,16 +454,24 @@ function createAuthMiddleware(opts = {}) {
     try {
       const c = await verifier.verify(header.slice(7).trim());
       const roles = Array.isArray(c.roles) ? c.roles : (c.role != null ? [c.role] : []);
+      // Impersonation (Phase 9): surfaced additively. Tokens carry impersonation=true +
+      // impersonated_by and use iss='baalvion-auth-impersonation'; a service that honors
+      // impersonation opts in by configuring `issuer` to also accept that issuer.
+      const isImpersonation = c.impersonation === true || c.impersonated_by != null;
       req.auth = {
-        userId:      c.sub,
-        orgId:       c.org_id,
-        sessionId:   c.sid,
+        userId:         c.sub,
+        orgId:          c.org_id,
+        sessionId:      c.sid,
         roles,
-        permissions: Array.isArray(c.permissions) ? c.permissions : [],
-        jti:         c.jti,
-        issuer:      c.iss,
-        audience:    c.aud,
+        permissions:    Array.isArray(c.permissions) ? c.permissions : [],
+        jti:            c.jti,
+        issuer:         c.iss,
+        audience:       c.aud,
+        isImpersonation,
+        impersonatedBy: c.impersonated_by ?? null,
       };
+      // Banner metadata for frontends/proxies (Phase 9 Step 3.10).
+      if (isImpersonation && res && typeof res.setHeader === 'function') res.setHeader('x-baalvion-impersonation', 'true');
       return next();
     } catch (err) {
       return next(makeAuthError(401, err.code || 'invalid_token', err.message || 'Invalid or expired token'));
@@ -467,6 +484,8 @@ function createAuthMiddleware(opts = {}) {
 
 module.exports = {
   createAuthServer, createJwksVerifier, createAuthMiddleware, requireEnv, VerifyError,
+  // Canonical shared JTI revocation (Phase 9): auth:blacklist:<jti>
+  ...blacklist,
   // Hierarchical, roles[]-aware RBAC guards (see ./rbac.js)
   ...rbac,
 };
