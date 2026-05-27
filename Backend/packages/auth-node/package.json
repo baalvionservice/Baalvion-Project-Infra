@@ -9,7 +9,7 @@
     "requireEnv.js"
   ],
   "scripts": {
-    "test": "node test.smoke.js"
+    "test": "node test.smoke.js && node --test tests/"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.3"

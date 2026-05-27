@@ -42,6 +42,28 @@ function normalizePem(value) {
 }
 
 /**
+ * Classified verification error. `code` lets callers/middleware distinguish
+ * failure modes (alg_not_allowed, missing_claim, revoked, …) without string-matching.
+ */
+class VerifyError extends Error {
+  constructor(code, message) {
+    super(message || code);
+    this.name = 'VerifyError';
+    this.code = code;
+  }
+}
+
+/** Express-friendly auth error: carries an HTTP status + a machine code. */
+function makeAuthError(status, code, message) {
+  const err = new Error(message || code);
+  err.name = 'AuthError';
+  err.status = status;
+  err.statusCode = status;
+  err.code = code;
+  return err;
+}
+
+/**
  * @param {object} opts
  * @param {string}  [opts.accessSecret]        HS256 shared secret
  * @param {string}  [opts.refreshSecret]       HS256 refresh secret
@@ -157,6 +179,22 @@ function createAuthServer(opts = {}) {
         sessionId: p.sessionId,
       };
     }
+    if (claimStyle === 'canonical') {
+      // The Phase 2 canonical contract: RS256, sub/org_id/sid/roles[]/permissions[]/jti.
+      // `role` (scalar) is emitted ONLY as a deprecated one-phase compat alias.
+      const roles = Array.isArray(p.roles) ? p.roles : (p.role != null ? [p.role] : []);
+      return {
+        sub: String(p.userId ?? p.id ?? p.sub),
+        email: p.email,
+        org_id: p.org_id ?? p.organizationId ?? p.orgId ?? null,
+        sid: p.sid ?? p.sessionId ?? null,
+        roles,
+        role: roles[0] ?? null,                                   // DEPRECATED compat
+        permissions: Array.isArray(p.permissions) ? p.permissions : [],
+        tokenVersion: Number.isInteger(p.tokenVersion) ? p.tokenVersion : 0,
+        jti: crypto.randomUUID(),
+      };
+    }
     return {
       sub: String(p.userId ?? p.id ?? p.sub),
       email: p.email,
@@ -170,11 +208,21 @@ function createAuthServer(opts = {}) {
   }
   function normalize(decoded) {
     if (!normalizeClaims) return decoded;
+    // Canonical-aware: read canonical (org_id/sid/roles) first, fall back to the
+    // legacy aliases, and expose BOTH names during the migration window so
+    // existing consumers (which read organizationId/sessionId) keep working.
+    const orgId = decoded.org_id ?? decoded.organizationId ?? decoded.orgId ?? null;
+    const sid   = decoded.sid ?? decoded.sessionId ?? null;
+    const roles = Array.isArray(decoded.roles) ? decoded.roles : (decoded.role != null ? [decoded.role] : []);
     return {
       ...decoded,
-      userId: decoded.sub ?? decoded.id,
-      organizationId: decoded.organizationId ?? decoded.orgId ?? null,
-      tokenVersion: Number.isInteger(decoded.tokenVersion) ? decoded.tokenVersion : 0,
+      userId:         decoded.sub ?? decoded.id,
+      org_id:         orgId,
+      organizationId: orgId,
+      sid,
+      sessionId:      sid,
+      roles,
+      tokenVersion:   Number.isInteger(decoded.tokenVersion) ? decoded.tokenVersion : 0,
     };
   }
 
@@ -263,7 +311,12 @@ function createAuthServer(opts = {}) {
  * @param {string}  [opts.hs256Secret]        shared-secret fallback
  */
 function createJwksVerifier(opts = {}) {
-  const { jwksUri, jwksTtlMs = 300000, issuer, audience, staticPublicKey, staticPublicKeyB64, hs256Secret } = opts;
+  const {
+    jwksUri, jwksTtlMs = 300000, issuer, audience,
+    staticPublicKey, staticPublicKeyB64, hs256Secret,
+    requiredClaims = [], isBlacklisted, rejectHs256 = false,
+    validateRolesPermissions = false, logger = console,
+  } = opts;
   let _keys = null, _at = 0;
 
   function fetchJwks() {
@@ -287,28 +340,128 @@ function createJwksVerifier(opts = {}) {
   const jwkToPem = (jwk) => crypto.createPublicKey({ key: jwk, format: 'jwk' }).export({ type: 'spki', format: 'pem' });
   const rsaOpts = () => { const o = { algorithms: ['RS256'] }; if (issuer) o.issuer = issuer; if (audience) o.audience = audience; return o; };
 
+  // Canonical-contract enforcement. Opt-in via opts — default is a no-op so
+  // existing legacy callers (e.g. realtime-service) are byte-for-byte unaffected.
+  async function assertValid(payload) {
+    for (const claim of requiredClaims) {
+      const v = payload[claim];
+      if (v === undefined || v === null || v === '') {
+        throw new VerifyError('missing_claim', `Required claim '${claim}' is missing`);
+      }
+    }
+    if (validateRolesPermissions) {
+      if (payload.roles !== undefined && !Array.isArray(payload.roles)) {
+        throw new VerifyError('malformed_roles', 'Claim "roles" must be an array');
+      }
+      if (payload.permissions !== undefined && !Array.isArray(payload.permissions)) {
+        throw new VerifyError('malformed_permissions', 'Claim "permissions" must be an array');
+      }
+    }
+    if (typeof isBlacklisted === 'function' && payload.jti) {
+      let revoked;
+      try {
+        revoked = await isBlacklisted(payload.jti);
+      } catch (e) {
+        // Fail CLOSED: a revocation-store outage must not let tokens through.
+        logger.error('[auth-node] blacklist lookup failed:', e.message);
+        throw new VerifyError('blacklist_unavailable', 'Revocation check failed');
+      }
+      if (revoked) throw new VerifyError('revoked', 'Token has been revoked (jti blacklisted)');
+    }
+    return payload;
+  }
+
   async function verify(token) {
     const decoded = jwt.decode(token, { complete: true });
-    if (!decoded) throw new Error('Malformed token');
+    if (!decoded) throw new VerifyError('malformed', 'Malformed token');
     const kid = decoded.header?.kid;
     const alg = decoded.header?.alg;
+
+    // RS256-only mode rejects any non-RS256 alg before attempting verification.
+    if (rejectHs256 && alg && alg !== 'RS256') {
+      throw new VerifyError('alg_not_allowed', `Algorithm '${alg}' is not allowed (RS256 only)`);
+    }
+
+    let payload;
     if (alg === 'RS256' || !alg) {
       try {
         const keys = await fetchJwks();
         const jwk = kid ? keys.find((k) => k.kid === kid) : keys[0];
-        if (!jwk) throw new Error(`No JWKS key for kid=${kid}`);
-        return jwt.verify(token, jwkToPem(jwk), rsaOpts());
+        if (!jwk) throw new VerifyError('unknown_kid', `No JWKS key for kid=${kid}`);
+        payload = jwt.verify(token, jwkToPem(jwk), rsaOpts());
       } catch (jwksErr) {
         const raw = staticPublicKey || (staticPublicKeyB64 ? Buffer.from(staticPublicKeyB64, 'base64').toString('utf8') : null);
-        if (raw) { try { return jwt.verify(token, raw, rsaOpts()); } catch { /* fall through */ } }
-        if (!hs256Secret) throw jwksErr;
+        if (raw) { try { payload = jwt.verify(token, raw, rsaOpts()); } catch { /* fall through */ } }
+        if (payload === undefined && (!hs256Secret || rejectHs256)) throw jwksErr;
       }
     }
-    if (!hs256Secret) throw new Error('No valid JWT verification method available');
-    return jwt.verify(token, hs256Secret, { algorithms: ['HS256'] });
+    if (payload === undefined) {
+      if (!hs256Secret || rejectHs256) throw new VerifyError('no_method', 'No valid JWT verification method available');
+      payload = jwt.verify(token, hs256Secret, { algorithms: ['HS256'] });
+    }
+    return assertValid(payload);
   }
 
   return { verify, fetchJwks, resetCache() { _keys = null; _at = 0; } };
 }
 
-module.exports = { createAuthServer, createJwksVerifier, requireEnv };
+/**
+ * Canonical Express auth middleware — Phase 2 "One True Middleware".
+ *
+ * Verifies an RS256 token against the issuer's JWKS, enforces the canonical
+ * claim contract (sub/org_id/sid/jti + array roles/permissions), checks the JTI
+ * blacklist, then populates req.auth. Invalid tokens FAIL HARD — there is no
+ * legacy id/orgId/sessionId coercion in canonical mode.
+ *
+ * @param {object} opts
+ * @param {string}   opts.jwksUri
+ * @param {string}   [opts.issuer]
+ * @param {string}   [opts.audience]
+ * @param {string[]} [opts.requiredClaims=['sub','org_id','sid','jti']]
+ * @param {(jti:string)=>Promise<boolean>} [opts.isBlacklisted]
+ * @param {number}   [opts.jwksTtlMs]
+ * @param {string}   [opts.staticPublicKey] [opts.staticPublicKeyB64]
+ */
+function createAuthMiddleware(opts = {}) {
+  const {
+    jwksUri, issuer, audience,
+    requiredClaims = ['sub', 'org_id', 'sid', 'jti'],
+    isBlacklisted, jwksTtlMs, staticPublicKey, staticPublicKeyB64,
+  } = opts;
+
+  const verifier = createJwksVerifier({
+    jwksUri, issuer, audience, jwksTtlMs, staticPublicKey, staticPublicKeyB64,
+    requiredClaims, isBlacklisted,
+    rejectHs256: true,
+    validateRolesPermissions: true,
+  });
+
+  async function canonicalAuth(req, res, next) {
+    const header = (req.headers && req.headers.authorization) || '';
+    if (!header.startsWith('Bearer ')) {
+      return next(makeAuthError(401, 'unauthorized', 'Bearer token required'));
+    }
+    try {
+      const c = await verifier.verify(header.slice(7).trim());
+      const roles = Array.isArray(c.roles) ? c.roles : (c.role != null ? [c.role] : []);
+      req.auth = {
+        userId:      c.sub,
+        orgId:       c.org_id,
+        sessionId:   c.sid,
+        roles,
+        permissions: Array.isArray(c.permissions) ? c.permissions : [],
+        jti:         c.jti,
+        issuer:      c.iss,
+        audience:    c.aud,
+      };
+      return next();
+    } catch (err) {
+      return next(makeAuthError(401, err.code || 'invalid_token', err.message || 'Invalid or expired token'));
+    }
+  }
+  // Expose the verifier for tests / non-Express callers.
+  canonicalAuth.verifier = verifier;
+  return canonicalAuth;
+}
+
+module.exports = { createAuthServer, createJwksVerifier, createAuthMiddleware, requireEnv, VerifyError };
