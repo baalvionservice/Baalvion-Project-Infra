@@ -6,7 +6,8 @@
   "main": "index.js",
   "files": [
     "index.js",
-    "requireEnv.js"
+    "requireEnv.js",
+    "rbac.js"
   ],
   "scripts": {
     "test": "node test.smoke.js && node --test tests/"

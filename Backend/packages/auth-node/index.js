@@ -31,6 +31,7 @@ const https = require('https');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { requireEnv } = require('./requireEnv');
+const rbac = require('./rbac');
 
 function readFileSafe(p) {
   try { return fs.readFileSync(p, 'utf8'); } catch (_) { return null; }
@@ -464,4 +465,8 @@ function createAuthMiddleware(opts = {}) {
   return canonicalAuth;
 }
 
-module.exports = { createAuthServer, createJwksVerifier, createAuthMiddleware, requireEnv, VerifyError };
+module.exports = {
+  createAuthServer, createJwksVerifier, createAuthMiddleware, requireEnv, VerifyError,
+  // Hierarchical, roles[]-aware RBAC guards (see ./rbac.js)
+  ...rbac,
+};
