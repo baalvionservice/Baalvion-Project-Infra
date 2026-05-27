@@ -60,6 +60,7 @@ async function authMiddleware(req, res, next) {
       roles,                          // canonical
       permissions: expandPermissions(role, claims.permissions || []),
       sessionId: claims.sid ?? claims.sessionId ?? null,
+      jti: claims.jti ?? null,
       tokenVersion: claims.tokenVersion,
     };
     // Backward-compat shape consumed by legacy code paths:

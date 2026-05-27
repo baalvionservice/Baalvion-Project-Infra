@@ -20,7 +20,8 @@ const auth = createAuthServer({
     issuer:                     process.env.JWT_ISSUER || 'baalvion-auth',
     audience:                   process.env.JWT_AUDIENCE || 'baalvion-platform',
     requireRs256InProduction:   true,
-    hs256IncludeIssuerAudience: true,   // HS256 fallback tokens carry iss/aud
+    allowHs256Fallback:         false,  // Batch C: RS256-ONLY verify — HS256 tokens are rejected (when RS256 keys present)
+    hs256IncludeIssuerAudience: true,   // (legacy issuance fallback only; verify rejects HS256)
     refreshIncludeJti:          false,  // legacy refresh shape omits jti
 });
 
