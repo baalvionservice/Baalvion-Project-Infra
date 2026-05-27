@@ -9,7 +9,10 @@ module.exports = {
     apiVersion: 'v1',
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000']),
     jwt: {
-        accessSecret: require('@baalvion/auth-node').requireEnv('JWT_ACCESS_SECRET'),
+        publicKey: require('@baalvion/auth-node').requireEnv('JWT_PUBLIC_KEY').replace(/\\n/g, '\n'),
+        issuer:    process.env.JWT_ISSUER   || 'baalvion-auth',
+        audience:  process.env.JWT_AUDIENCE || 'baalvion-platform',
+        jwksUri:   process.env.BAALVION_JWKS_URI || process.env.JWKS_URI || null,
     },
     db: {
         host: process.env.DB_HOST || 'localhost',
