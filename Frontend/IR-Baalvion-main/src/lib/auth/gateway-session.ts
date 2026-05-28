@@ -22,7 +22,7 @@ export interface IRAuthUser { id: string; email: string; name?: string; role: Ap
 
 // roles[0] is a TRANSITIONAL shim — the canonical roles[] → IR vocabulary (p1_institutional, …)
 // mapping is RBAC-phase work, deliberately out of scope for this identity-only migration.
-const toUser = (s: { userId: string | null; email: string | null; roles: string[] }): IRAuthUser | null =>
+const toUser = (s: { userId: string | null; email?: string | null; roles: string[] }): IRAuthUser | null =>
   s.userId ? { id: s.userId, email: s.email ?? '', role: (s.roles[0] as AppRole) ?? 'public' } : null;
 
 export const irGatewayAuth = {

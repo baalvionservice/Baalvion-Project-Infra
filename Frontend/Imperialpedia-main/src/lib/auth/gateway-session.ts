@@ -18,7 +18,7 @@ const session = createGatewaySession({
 export interface GatewayIdentity { id: string; email: string; roles: string[]; permissions: string[]; orgId: string | null; }
 
 const toIdentity = (s: {
-  userId: string | null; email: string | null; roles: string[]; permissions: string[]; orgId: string | null;
+  userId: string | null; email?: string | null; roles: string[]; permissions: string[]; orgId: string | null;
 }): GatewayIdentity | null =>
   s.userId ? { id: s.userId, email: s.email ?? '', roles: s.roles, permissions: s.permissions, orgId: s.orgId } : null;
 
