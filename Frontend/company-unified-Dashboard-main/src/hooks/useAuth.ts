@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { tokenStore, authApi, type DashAuthUser } from '@/lib/api-client';
+import { tokenStore, authApi, bootstrapSession, type DashAuthUser } from '@/lib/api-client';
 import { realtimeClient } from '@/lib/realtime-client';
 
 export interface UseAuthReturn {
@@ -16,17 +16,23 @@ export function useAuth(): UseAuthReturn {
   const [user, setUser] = useState<DashAuthUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Initialise from localStorage on mount
+  // Silent session restore on mount: refresh via httpOnly cookie → /me. No storage reads.
   useEffect(() => {
-    const storedUser = tokenStore.getUser();
-    setUser(storedUser);
-    setIsLoading(false);
+    let cancelled = false;
+    (async () => {
+      const restored = await bootstrapSession();
+      if (cancelled) return;
+      setUser(restored);
+      setIsLoading(false);
 
-    // Connect realtime if already authenticated
-    const token = tokenStore.getAccess();
-    if (token && storedUser && !realtimeClient.connected) {
-      realtimeClient.connect(token);
-    }
+      const token = tokenStore.getAccess();
+      if (token && restored && !realtimeClient.connected) {
+        realtimeClient.connect(token);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
@@ -36,8 +42,8 @@ export function useAuth(): UseAuthReturn {
       tokenStore.set(tokens);
       setUser(tokens.user);
 
-      // Connect realtime WebSocket after successful login
-      realtimeClient.connect(tokens.accessToken);
+      // Realtime needs a token; BFF holds none in JS, so connect only if one is present (legacy).
+      if (tokens.accessToken) realtimeClient.connect(tokens.accessToken);
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +68,7 @@ export function useAuth(): UseAuthReturn {
 
   return {
     user,
-    isAuthenticated: user !== null && tokenStore.getAccess() !== null,
+    isAuthenticated: user !== null,
     isLoading,
     login,
     logout,

@@ -50,7 +50,8 @@ export function logout(): void {
 }
 
 export function isAuthenticated(): boolean {
-  return tokenStore.getAccess() !== null && tokenStore.getUser() !== null;
+  // BFF model: identity (from /auth/me) — there is no JS-readable token to check.
+  return tokenStore.getUser() !== null;
 }
 
 export function getUserRole(): Role | null {

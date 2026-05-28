@@ -4,55 +4,55 @@ import type { NextRequest } from 'next/server';
 /**
  * Route protection middleware for company-unified-dashboard.
  *
- * Protected: all routes except /marketing/*, /auth/*, /install, /portal/*
- * Auth check: reads `baalvion_dash_token` cookie (set by the login page after
- * localStorage write + cookie sync) or Authorization cookie.
+ * SECURITY MODEL (P0 remediation):
+ *  - The access token is held in memory by the client and is NOT visible to middleware.
+ *  - The only auth cookie is the httpOnly, sameSite=strict `baalvion_refresh` refresh cookie
+ *    set by auth-service. The client cannot forge or read it.
+ *  - This middleware is a coarse UX gate on the presence of that un-forgeable cookie. REAL
+ *    enforcement happens at the API boundary (every data call requires a valid Bearer access
+ *    token, obtained only via a successful cookie refresh) and in client route guards.
+ *  - We deliberately do NOT trust any client-readable role/session cookie (the old forgeable
+ *    `baalvion_dash_token` / `Authorization` cookies are no longer honored).
  */
+
+// Gateway-BFF: the un-forgeable HttpOnly refresh cookie the gateway sets is named `refresh_token`.
+const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'refresh_token';
 
 const PUBLIC_PREFIXES = [
   '/marketing',
   '/auth',
+  '/auth-bff', // same-origin auth proxy (login/refresh/logout) must be reachable unauthenticated
   '/install',
   '/portal',
-  '/api',           // API routes handle their own auth
+  '/api', // API routes handle their own auth
   '/_next',
   '/favicon.ico',
   '/public',
 ];
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
+  return PUBLIC_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix + '/') || pathname.startsWith(prefix));
 }
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Allow public paths through immediately
   if (isPublicPath(pathname)) {
     return NextResponse.next();
   }
 
-  // Check for auth token in cookies
-  const token =
-    request.cookies.get('baalvion_dash_token')?.value ||
-    request.cookies.get('Authorization')?.value;
+  // Presence of the un-forgeable httpOnly refresh cookie gates entry to protected shells.
+  const hasSession = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
 
-  if (!token) {
+  if (!hasSession) {
     const loginUrl = new URL('/auth/login', request.url);
-    // Preserve the original destination so the login page can redirect back
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // Token present — allow the request through
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all paths except static files and Next.js internals.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|public).*)'],
 };

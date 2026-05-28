@@ -1,17 +1,18 @@
 /**
- * JWT-based API client for company-unified-dashboard.
- * Connects to proxy-backend (:4000/v1/auth) for authentication
- * and dashboard-service (:3009) for dashboard data.
+ * Gateway-BFF API client for company-unified-dashboard.
+ *
+ * CUTOVER — pure BFF cookie model (auth-gateway):
+ *  - Auth + data both go SAME-ORIGIN and are rewritten to the auth-gateway (see next.config.ts):
+ *      /auth-bff/*  ->  gateway /auth/*   (login, me, refresh, logout)
+ *      /api-bff/*   ->  gateway /api/*    (data, proxied to backend services)
+ *  - NO token in JS. Auth is HttpOnly cookies set by the gateway (access_token + refresh_token)
+ *    plus a JS-readable csrf_token (double-submit). Every request uses credentials:'include';
+ *    unsafe methods send x-csrf-token. "Authenticated" == an identity exists (from /auth/me),
+ *    not a token in memory.
  */
 
-const AUTH_URL =
-  process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
-const DASHBOARD_URL =
-  process.env.NEXT_PUBLIC_DASHBOARD_API_URL || 'https://api.baalvion.com/api/v1/platform/dashboard/api/v1';
-
-const TOKEN_KEY = 'baalvion_dash_token';
-const REFRESH_KEY = 'baalvion_dash_refresh';
-const USER_KEY = 'baalvion_dash_user';
+const AUTH_URL = '/auth-bff';
+const API_URL  = '/api-bff';
 
 export interface DashAuthUser {
   id: string;
@@ -23,165 +24,171 @@ export interface DashAuthUser {
 }
 
 export interface DashAuthTokens {
-  accessToken: string;
-  refreshToken: string;
+  accessToken: string; // always '' in the BFF model (no JS-readable token); kept for call-site compat
+  refreshToken?: string;
   expiresAt?: string;
   user: DashAuthUser;
 }
 
-// ─── Token helpers ────────────────────────────────────────────────────────────
+// ─── In-memory session — identity only (no token in the BFF model) ───────────────
+let _user: DashAuthUser | null = null;
+
 export const tokenStore = {
-  getAccess: () => (typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null),
-  getRefresh: () => (typeof window !== 'undefined' ? localStorage.getItem(REFRESH_KEY) : null),
-  getUser: (): DashAuthUser | null => {
-    if (typeof window === 'undefined') return null;
-    try {
-      const raw = localStorage.getItem(USER_KEY);
-      return raw ? (JSON.parse(raw) as DashAuthUser) : null;
-    } catch {
-      return null;
-    }
-  },
-  set: (tokens: DashAuthTokens) => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(TOKEN_KEY, tokens.accessToken);
-    localStorage.setItem(REFRESH_KEY, tokens.refreshToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(tokens.user));
-  },
-  clear: () => {
-    if (typeof window === 'undefined') return;
-    [TOKEN_KEY, REFRESH_KEY, USER_KEY].forEach((k) => localStorage.removeItem(k));
-  },
+  getAccess: (): string | null => null,   // BFF: there is no JS-readable access token
+  getRefresh: (): string | null => null,
+  getUser: (): DashAuthUser | null => _user,
+  set: (tokens: DashAuthTokens) => { if (tokens.user) _user = tokens.user; },
+  setUser: (user: DashAuthUser | null) => { _user = user; },
+  clear: () => { _user = null; },
 };
 
-// ─── Core fetch with auth + refresh ──────────────────────────────────────────
-let isRefreshing = false;
-let refreshQueue: Array<(token: string | null) => void> = [];
-
-async function refreshTokens(): Promise<string | null> {
-  const refreshToken = tokenStore.getRefresh();
-  if (!refreshToken) return null;
-
-  try {
-    const res = await fetch(`${AUTH_URL}/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    const raw = json.data ?? json;
-    const newAccess: string = raw.accessToken ?? raw.token ?? '';
-    const newRefresh: string = raw.refreshToken ?? refreshToken;
-    const user = tokenStore.getUser()!;
-    tokenStore.set({ accessToken: newAccess, refreshToken: newRefresh, user });
-    return newAccess;
-  } catch {
-    return null;
-  }
+function csrf(): string {
+  if (typeof document === 'undefined') return '';
+  return document.cookie.split('; ').find((c) => c.startsWith('csrf_token='))?.split('=')[1] ?? '';
 }
 
-async function authFetch<T>(
-  url: string,
-  options: RequestInit = {},
-): Promise<T> {
-  const token = tokenStore.getAccess();
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string>),
+function normalizeUser(raw: Record<string, unknown>): DashAuthUser {
+  const roles = raw.roles;
+  return {
+    id: String(raw.userId ?? raw.id ?? ''),
+    email: String(raw.email ?? ''),
+    name: String(raw.fullName ?? raw.name ?? raw.email ?? ''),
+    role: String((Array.isArray(roles) ? roles[0] : raw.role) ?? 'EMPLOYEE'),
+    orgId: (raw.orgId as string | undefined) ?? undefined,
+    avatarUrl: (raw.avatarUrl as string | null) ?? null,
   };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
+}
 
-  let res = await fetch(url, { ...options, headers });
+// ─── Single-flight refresh (rotates the HttpOnly cookies; nothing returned to JS) ───
+let refreshPromise: Promise<boolean> | null = null;
 
-  if (res.status === 401 && token) {
-    if (isRefreshing) {
-      const newToken = await new Promise<string | null>((resolve) => {
-        refreshQueue.push(resolve);
+async function refreshSession(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${AUTH_URL}/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf() },
       });
-      if (newToken) {
-        headers['Authorization'] = `Bearer ${newToken}`;
-        res = await fetch(url, { ...options, headers });
-      }
-    } else {
-      isRefreshing = true;
-      const newToken = await refreshTokens();
-      refreshQueue.forEach((cb) => cb(newToken));
-      refreshQueue = [];
-      isRefreshing = false;
+      return res.ok;
+    } catch {
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+  return refreshPromise;
+}
 
-      if (newToken) {
-        headers['Authorization'] = `Bearer ${newToken}`;
-        res = await fetch(url, { ...options, headers });
-      } else {
-        tokenStore.clear();
-        if (typeof window !== 'undefined') window.location.href = '/auth/login';
-        throw new Error('Session expired');
-      }
+// ─── Data fetch via the gateway proxy: cookie + csrf, single-flight 401→refresh→retry ───
+async function authFetch<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const method = (options.method ?? 'GET').toUpperCase();
+  const build = (): RequestInit => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(options.headers as Record<string, string>),
+    };
+    if (method !== 'GET' && method !== 'HEAD') headers['x-csrf-token'] = csrf();
+    return { ...options, credentials: 'include', headers };
+  };
+
+  let res = await fetch(`${API_URL}${path}`, build());
+  if (res.status === 401) {
+    if (await refreshSession()) {
+      res = await fetch(`${API_URL}${path}`, build());
+    } else {
+      tokenStore.clear();
+      if (typeof window !== 'undefined') window.location.href = '/auth/login';
+      throw new Error('Session expired');
     }
   }
 
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw Object.assign(new Error(json?.error?.message || `Request failed (${res.status})`), {
+    throw Object.assign(new Error((json as { error?: { message?: string } })?.error?.message || `Request failed (${res.status})`), {
       status: res.status,
-      code: json?.error?.code || 'UNKNOWN',
+      code: (json as { error?: { code?: string } })?.error?.code || 'UNKNOWN',
     });
   }
-  return (json.data ?? json) as T;
+  return ((json as { data?: T }).data ?? json) as T;
 }
 
-// ─── Auth API ─────────────────────────────────────────────────────────────────
-function normalizeTokenResponse(raw: Record<string, unknown>): DashAuthTokens {
-  const userRaw = (raw.user as Record<string, unknown>) ?? {};
-  return {
-    accessToken: String(raw.accessToken ?? raw.token ?? ''),
-    refreshToken: String(raw.refreshToken ?? ''),
-    expiresAt: raw.expiresAt as string | undefined,
-    user: {
-      id: String(userRaw.id ?? ''),
-      email: String(userRaw.email ?? ''),
-      name: String(userRaw.fullName ?? userRaw.name ?? ''),
-      role: String(userRaw.role ?? 'EMPLOYEE'),
-      orgId: userRaw.orgId as string | undefined,
-      avatarUrl: (userRaw.avatarUrl as string | null) ?? null,
-    },
-  };
-}
-
+// ─── Auth API (gateway BFF) ─────────────────────────────────────────────────────
 export const authApi = {
   login: async (email: string, password: string): Promise<DashAuthTokens> => {
     const res = await fetch(`${AUTH_URL}/login`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
-    const json = await res.json();
-    if (!res.ok || !json.success) {
-      throw new Error(json?.error?.message || 'Login failed');
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error((json as { error?: { message?: string } })?.error?.message || 'Login failed');
     }
-    return normalizeTokenResponse(json.data as Record<string, unknown>);
+    // Gateway returns { user, csrfToken } (no token). Tolerate auth-service { success, data:{user} } too.
+    const rawUser = (json as { user?: unknown; data?: { user?: unknown } }).user
+      ?? (json as { data?: { user?: unknown } }).data?.user
+      ?? {};
+    const user = normalizeUser(rawUser as Record<string, unknown>);
+    _user = user;
+    return { accessToken: '', user };
   },
 
   logout: async (): Promise<void> => {
-    const token = tokenStore.getAccess();
-    if (token) {
+    try {
       await fetch(`${AUTH_URL}/logout`, {
         method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-      }).catch(() => {});
+        credentials: 'include',
+        headers: { 'x-csrf-token': csrf() },
+      });
+    } catch {
+      /* best-effort; the gateway clears cookies server-side regardless */
     }
-    tokenStore.clear();
+    _user = null;
   },
 
-  me: (): Promise<DashAuthUser> =>
-    authFetch<DashAuthUser>(`${AUTH_URL}/users/me`),
+  me: async (): Promise<DashAuthUser> => {
+    const res = await fetch(`${AUTH_URL}/me`, {
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    if (!res.ok) throw new Error('Not authenticated');
+    const json = await res.json().catch(() => ({}));
+    const raw = (json as { user?: unknown; data?: unknown }).user
+      ?? (json as { data?: unknown }).data
+      ?? json;
+    return normalizeUser(raw as Record<string, unknown>);
+  },
 };
 
-// ─── Dashboard API ────────────────────────────────────────────────────────────
-const get = <T>(path: string) => authFetch<T>(`${DASHBOARD_URL}${path}`);
+/** Silent session restore on app start: probe the cookie session; refresh once if needed. */
+export async function bootstrapSession(): Promise<DashAuthUser | null> {
+  try {
+    const u = await authApi.me();
+    _user = u;
+    return u;
+  } catch {
+    /* no live cookie session — try a refresh */
+  }
+  if (await refreshSession()) {
+    try {
+      const u = await authApi.me();
+      _user = u;
+      return u;
+    } catch {
+      /* refresh succeeded but /me failed — treat as unauthenticated */
+    }
+  }
+  _user = null;
+  return null;
+}
+
+// ─── Dashboard API (proxied through the gateway /api) ────────────────────────────
+const get = <T>(path: string) => authFetch<T>(path);
 const post = <T>(path: string, body?: object) =>
-  authFetch<T>(`${DASHBOARD_URL}${path}`, {
+  authFetch<T>(path, {
     method: 'POST',
     body: body ? JSON.stringify(body) : undefined,
   });

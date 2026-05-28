@@ -53,6 +53,19 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Same-origin auth proxy: the browser only ever talks to this app's origin, so the
+  // httpOnly `baalvion_refresh` cookie set by auth-service is stored against THIS origin
+  // and flows on every /auth-bff request in dev and prod. No cross-origin cookie issues.
+  async rewrites() {
+    // Gateway-BFF cutover: auth + data proxied SAME-ORIGIN to the auth-gateway so the HttpOnly
+    // cookies it sets are first-party to this origin. /auth-bff/* -> gateway /auth/*, and
+    // /api-bff/* -> gateway /api/* (data, proxied on to backend services).
+    const gw = process.env.NEXT_PUBLIC_GATEWAY_URL || 'http://localhost:3099';
+    return [
+      { source: '/auth-bff/:path*', destination: `${gw}/auth/:path*` },
+      { source: '/api-bff/:path*',  destination: `${gw}/api/:path*` },
+    ];
+  },
   experimental: {
     serverComponentsExternalPackages: ['@genkit-ai/core', 'genkit'],
   },
