@@ -3,6 +3,7 @@ require('dotenv').config();
 const express      = require('express');
 const helmet       = require('helmet');
 const cors         = require('cors');
+const cookieParser = require('cookie-parser');
 const crypto       = require('crypto');
 const config       = require('./config/appConfig');
 const redis        = require('./config/redis');
@@ -19,6 +20,7 @@ app.use(cors({ origin: config.corsOrigins, credentials: true }));
 // Raw body needed before JSON parse so token endpoint can read application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '512kb' }));
+app.use(cookieParser());
 
 app.use((req, _res, next) => {
     req.requestId = crypto.randomUUID();

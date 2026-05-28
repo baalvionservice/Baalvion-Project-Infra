@@ -27,4 +27,9 @@ router.post('/revoke', extractClientAuth, ctrl.revoke);
 router.get('/userinfo',  authMiddleware, ctrl.userinfo);
 router.post('/userinfo', authMiddleware, ctrl.userinfo);
 
+// RP-Initiated Logout — OIDC. Auth is derived from the hub cookie / id_token_hint inside the
+// handler (no authMiddleware: browser logout redirects carry no Authorization header).
+router.get('/logout',  ctrl.endSession);
+router.post('/logout', ctrl.endSession);
+
 module.exports = router;

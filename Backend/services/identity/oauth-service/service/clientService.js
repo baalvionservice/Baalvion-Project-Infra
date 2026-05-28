@@ -114,4 +114,41 @@ async function deleteClient(clientId, ownerId) {
     );
 }
 
-module.exports = { createClient, getClientByClientId, verifyClientSecret, listClients, rotateClientSecret, deleteClient };
+// ── Logout configuration (slice #2) ──────────────────────────────────────────
+// Read in the logout path ONLY, behind try/catch, so the new columns are optional: if the
+// 001_backchannel_logout.sql migration hasn't run, this degrades to "no back-channel" instead of
+// breaking. The hot-path getClientByClientId query is deliberately left unchanged.
+
+async function getClientLogoutConfig(clientId) {
+    const db = getDb();
+    try {
+        const [row] = await db.sequelize.query(
+            `SELECT backchannel_logout_uri, post_logout_redirect_uris
+             FROM auth.oauth_clients WHERE client_id = $1`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind: [clientId] }
+        );
+        if (!row) return { backchannelLogoutUri: null, postLogoutRedirectUris: [] };
+        const plr = row.post_logout_redirect_uris;
+        return {
+            backchannelLogoutUri:   row.backchannel_logout_uri || null,
+            postLogoutRedirectUris: typeof plr === 'string' ? JSON.parse(plr) : (plr || []),
+        };
+    } catch {
+        return { backchannelLogoutUri: null, postLogoutRedirectUris: [] };
+    }
+}
+
+async function setClientLogoutConfig(clientId, { backchannelLogoutUri, postLogoutRedirectUris } = {}) {
+    const db = getDb();
+    await db.sequelize.query(
+        `UPDATE auth.oauth_clients
+           SET backchannel_logout_uri = $1, post_logout_redirect_uris = $2, updated_at = NOW()
+         WHERE client_id = $3`,
+        { bind: [backchannelLogoutUri || null, JSON.stringify(postLogoutRedirectUris || []), clientId] }
+    );
+}
+
+module.exports = {
+    createClient, getClientByClientId, verifyClientSecret, listClients,
+    rotateClientSecret, deleteClient, getClientLogoutConfig, setClientLogoutConfig,
+};

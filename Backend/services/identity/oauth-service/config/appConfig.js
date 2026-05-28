@@ -33,6 +33,14 @@ module.exports = {
         audience:       process.env.JWT_AUDIENCE           || 'baalvion',
     },
 
+    // Hub first-party session cookie (set by auth-gateway; auth-service-signed RS256 access token).
+    // Used by /authorize to recognize a logged-in browser for silent SSO. Audience must match the
+    // audience auth-service mints access tokens with (the gateway uses 'baalvion-platform').
+    session: {
+        cookieName: process.env.COOKIE_ACCESS_NAME    || 'access_token',
+        audience:   process.env.SESSION_TOKEN_AUDIENCE || 'baalvion-platform',
+    },
+
     oauth: {
         authCodeTtl:       parseInt(process.env.AUTH_CODE_TTL           || '600',    10),  // 10 min
         accessTokenTtl:    parseInt(process.env.OAUTH_ACCESS_TOKEN_TTL  || '3600',   10),  // 1 hour

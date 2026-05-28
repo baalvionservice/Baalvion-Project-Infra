@@ -240,6 +240,20 @@ export interface AuthSessionOptions {
   readIslandSession?: () => unknown | null;
   /** probe the HttpOnly cookie session via credentials:'include' /me (default true) */
   cookieMode?:        boolean;
+  /**
+   * Phase 2 — cookie-only refresh for the hardened deployment model (in-memory access token +
+   * httpOnly refresh cookie, NO JS-readable refresh token). When true:
+   *   - refreshSession() POSTs to `${authUrl}/refresh` with credentials:'include' and NO body; the
+   *     server reads the httpOnly cookie, rotates it, and returns a fresh accessToken which is stored
+   *     via setTokens(). There is no client refresh token.
+   *   - getSession() restores via (in-memory access token → /me) else (cookie refresh → /me). It does
+   *     NOT perform the unauthenticated cookie /me probe, because auth-service `/me` is Bearer-only.
+   * Use this for every Phase-1-hardened app (auth-bff / trade-bff). Legacy modes are unchanged when
+   * this is omitted.
+   */
+  cookieRefresh?:     boolean;
+  /** path of the current-user endpoint relative to authUrl (default '/me'). */
+  mePath?:            string;
 }
 
 /** Map ANY known session/token shape (RS256 canonical, legacy, island) into the canonical contract. */
@@ -268,6 +282,7 @@ export function toCanonicalSession(src: any, mode: AuthMode): CanonicalSession {
  * NEVER removes Supabase/Firebase/localStorage; it READS whichever the app uses and normalizes.
  */
 export function createAuthSession(opts: AuthSessionOptions) {
+  const mePath = opts.mePath ?? '/me';
   const client = new BaalvionClient({
     authUrl:          opts.authUrl,
     getAccessToken:   opts.getAccessToken  ?? (() => null),
@@ -277,12 +292,60 @@ export function createAuthSession(opts: AuthSessionOptions) {
   });
   let cache: CanonicalSession | null = null;
 
+  // Cookie-only refresh (Phase 2): no JS refresh token — the httpOnly cookie is presented.
+  async function doCookieRefresh(): Promise<boolean> {
+    if (typeof fetch === 'undefined') return false;
+    try {
+      const res = await fetch(`${opts.authUrl}/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!res.ok) return false;
+      const j: any = await res.json().catch(() => ({}));
+      const data = j?.data ?? j;
+      const accessToken: string = data?.accessToken ?? data?.token ?? '';
+      if (!accessToken) return false;
+      opts.setTokens?.({ accessToken } as TokenPair);
+      return true;
+    } catch { return false; }
+  }
+
+  // Bearer GET of the current-user endpoint (configurable path).
+  async function fetchMeBearer(): Promise<any | null> {
+    const token = opts.getAccessToken?.();
+    if (!token || typeof fetch === 'undefined') return null;
+    try {
+      const res = await fetch(`${opts.authUrl}${mePath}`, {
+        credentials: opts.cookieMode !== false ? 'include' : 'same-origin',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return null;
+      const j: any = await res.json();
+      return j?.data ?? j;
+    } catch { return null; }
+  }
+
   async function getSession(force = false): Promise<CanonicalSession> {
     if (cache && !force) return cache;
+
+    // ── Phase 2 cookie-refresh mode (in-memory token + httpOnly cookie; Bearer /me) ──
+    if (opts.cookieRefresh) {
+      let u = await fetchMeBearer();                                   // (1) memory token → /me
+      if (!u && (await doCookieRefresh())) u = await fetchMeBearer();  // (2) cookie refresh → /me
+      if (u && (u.id ?? u.userId ?? u.sub)) {
+        return (cache = toCanonicalSession(u, opts.getAccessToken?.() ? 'localStorage' : 'cookie'));
+      }
+      const island = opts.readIslandSession?.();                       // (3) island
+      if (island) return (cache = toCanonicalSession(island, 'island'));
+      return (cache = { ...GUEST_SESSION });                          // (4) guest
+    }
+
+    // ── Legacy multi-mode (unchanged) ──
     // (1) HttpOnly cookie session — credentials:'include' /me (no Bearer)
     if (opts.cookieMode !== false && typeof fetch !== 'undefined') {
       try {
-        const res = await fetch(`${opts.authUrl}/me`, { credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+        const res = await fetch(`${opts.authUrl}${mePath}`, { credentials: 'include', headers: { 'Content-Type': 'application/json' } });
         if (res.ok) {
           const j: any = await res.json();
           const u = j?.data ?? j;
@@ -309,6 +372,7 @@ export function createAuthSession(opts: AuthSessionOptions) {
 
   async function refreshSession(): Promise<CanonicalSession> {
     cache = null;
+    if (opts.cookieRefresh) { await doCookieRefresh(); return getSession(true); }
     const rt = opts.getRefreshToken?.();
     if (rt) { try { const t = await client.auth.refresh(rt); opts.setTokens?.(t); } catch { /* cookie/island modes don't need it */ } }
     return getSession(true);
@@ -321,6 +385,126 @@ export function createAuthSession(opts: AuthSessionOptions) {
   }
 
   return { client, getSession, getUser, refreshSession, logout, toCanonical: toCanonicalSession };
+}
+
+// ─── Gateway (BFF) session — the unified cookie model ───────────────────────────
+// Hardened deployment: browser ⇄ auth-gateway. NO token in JS — auth is HttpOnly cookies plus a
+// JS-readable csrf_token. login/me/refresh/logout hit the gateway; data calls go through the
+// gateway /api/* proxy with credentials:'include' + x-csrf-token. This is the single auth path
+// every Baalvion frontend should adopt. Returns a createAuthSession-compatible surface so the same
+// <AuthProvider> drives either controller.
+
+export interface GatewaySessionOptions {
+  /** Gateway base URL or same-origin proxy prefix, e.g. 'http://localhost:3099' or '/auth-bff'. */
+  gatewayUrl:      string;
+  /** current-user endpoint relative to gatewayUrl (default '/auth/me'). */
+  mePath?:         string;
+  /** name of the JS-readable CSRF cookie the gateway sets (default 'csrf_token'). */
+  csrfCookie?:     string;
+  /** called when a (re)bootstrap resolves to unauthenticated. */
+  onUnauthorized?: () => void;
+}
+
+function readCookie(name: string): string {
+  if (typeof document === 'undefined') return '';
+  return document.cookie.split('; ').find(c => c.startsWith(`${name}=`))?.split('=')[1] ?? '';
+}
+
+export function createGatewaySession(opts: GatewaySessionOptions) {
+  const base   = opts.gatewayUrl.replace(/\/$/, '');
+  const mePath = opts.mePath ?? '/auth/me';
+  const csrf   = () => readCookie(opts.csrfCookie ?? 'csrf_token');
+  let cache: CanonicalSession | null = null;
+  let refreshing: Promise<boolean> | null = null;
+
+  // Single-flight refresh — concurrent 401s share one /auth/refresh round-trip.
+  function doRefresh(): Promise<boolean> {
+    if (refreshing) return refreshing;
+    refreshing = (async () => {
+      if (typeof fetch === 'undefined') return false;
+      try {
+        const r = await fetch(`${base}/auth/refresh`, {
+          method: 'POST', credentials: 'include',
+          headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf() },
+        });
+        return r.ok;
+      } catch { return false; }
+      finally { refreshing = null; }
+    })();
+    return refreshing;
+  }
+
+  async function fetchMe(): Promise<any | null> {
+    if (typeof fetch === 'undefined') return null;
+    try {
+      const r = await fetch(`${base}${mePath}`, { credentials: 'include', headers: { 'Content-Type': 'application/json' } });
+      if (!r.ok) return null;
+      const j: any = await r.json();
+      return j?.user ?? j?.data ?? j;
+    } catch { return null; }
+  }
+
+  async function getSession(force = false): Promise<CanonicalSession> {
+    if (cache && !force) return cache;
+    let u = await fetchMe();
+    if (!u && (await doRefresh())) u = await fetchMe();
+    const authed = !!(u && (u.userId ?? u.id ?? u.sub));
+    cache = authed ? toCanonicalSession(u, 'cookie') : { ...GUEST_SESSION };
+    if (!authed) opts.onUnauthorized?.();
+    return cache;
+  }
+
+  async function login(email: string, password: string): Promise<{ user: unknown; csrfToken?: string }> {
+    if (typeof fetch === 'undefined') throw new ApiError('NO_FETCH', 'fetch unavailable', 0);
+    const r = await fetch(`${base}/auth/login`, {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+    if (!r.ok) {
+      const e: any = await r.json().catch(() => ({}));
+      throw new ApiError(e?.error?.code ?? 'LOGIN_FAILED', e?.error?.message ?? 'Login failed', r.status);
+    }
+    cache = null;
+    return r.json();
+  }
+
+  async function logout(): Promise<void> {
+    try {
+      await fetch(`${base}/auth/logout`, { method: 'POST', credentials: 'include', headers: { 'x-csrf-token': csrf() } });
+    } catch { /* cookie cleared server-side regardless */ }
+    cache = { ...GUEST_SESSION };
+  }
+
+  // The ONE data client. No Bearer (cookie-only); injects CSRF on unsafe methods; single-flight
+  // refresh + one retry on 401. Never reads localStorage.
+  async function authFetch(path: string, init: RequestInit = {}): Promise<Response> {
+    if (typeof fetch === 'undefined') throw new ApiError('NO_FETCH', 'fetch unavailable', 0);
+    const method = (init.method ?? 'GET').toUpperCase();
+    const build = (): RequestInit => {
+      const headers: Record<string, string> = { ...(init.headers as Record<string, string> ?? {}) };
+      if (method !== 'GET' && method !== 'HEAD') headers['x-csrf-token'] = csrf();
+      return { ...init, credentials: 'include', headers };
+    };
+    let res = await fetch(`${base}/api${path}`, build());
+    if (res.status === 401 && (await doRefresh())) {
+      res = await fetch(`${base}/api${path}`, build());
+    }
+    return res;
+  }
+
+  return {
+    client: { auth: { login: (b: { email: string; password: string }) => login(b.email, b.password), logout } },
+    getSession,
+    getUser:          async () => { const s = await getSession(); return s.authenticated ? s : null; },
+    bootstrapSession: () => getSession(true),
+    refreshSession:   async () => { cache = null; await doRefresh(); return getSession(true); },
+    login,
+    logout,
+    authFetch,
+    getCsrfToken:     csrf,
+    toCanonical:      toCanonicalSession,
+  };
 }
 
 // ─── Re-exports ───────────────────────────────────────────────────────────────
