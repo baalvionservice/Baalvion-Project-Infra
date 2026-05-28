@@ -28,11 +28,12 @@ function findLeaderBySlug(slug: string): Leader | null {
 }
 
 export interface SingleLeaderPageParams {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export function generateMetadata({ params }: SingleLeaderPageParams): Metadata {
-  const leader = findLeaderBySlug(params.slug);
+export async function generateMetadata({ params }: SingleLeaderPageParams): Promise<Metadata> {
+  const { slug } = await params;
+  const leader = findLeaderBySlug(slug);
   if (!leader) return { title: 'Leader not found | Baalvion' };
   return {
     title: `${leader.name} | Leadership`,
@@ -40,8 +41,9 @@ export function generateMetadata({ params }: SingleLeaderPageParams): Metadata {
   };
 }
 
-export default function SingleLeaderPage({ params }: SingleLeaderPageParams) {
-  const leader = findLeaderBySlug(params.slug);
+export default async function SingleLeaderPage({ params }: SingleLeaderPageParams) {
+  const { slug } = await params;
+  const leader = findLeaderBySlug(slug);
   if (!leader) return notFound();
   console.log(leader)
 

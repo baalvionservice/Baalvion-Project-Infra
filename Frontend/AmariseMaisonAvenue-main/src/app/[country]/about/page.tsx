@@ -6,9 +6,9 @@ import { Sparkles, History, Gem, ShieldCheck, ChevronRight } from 'lucide-react'
 import Link from 'next/link';
 
 type AboutPageProps = {
-  params: {
+  params: Promise<{
     country: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: AboutPageProps): Promise<Metadata> {
@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: AboutPageProps): Promise<Meta
 }
 
 export default async function AboutPage({ params }: AboutPageProps) {
-  const country = params.country;
+  const country = (await params).country;
   const countryCode = (country as string) || 'us';
 
   return (

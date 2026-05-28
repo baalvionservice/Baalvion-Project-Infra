@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 interface SEOPageProps {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 /**
