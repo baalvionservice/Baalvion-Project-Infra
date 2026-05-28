@@ -1,0 +1,8 @@
+export default function GlossaryTermPage() {
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-semibold">Glossary term</h1>
+      <p className="text-muted-foreground">This page is under construction.</p>
+    </div>
+  );
+}
