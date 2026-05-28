@@ -14,7 +14,7 @@
  * To adopt incrementally: a component can call `getSession()/getUser()` instead of reading
  * useAuthStore directly. The old useAuth()/useAuthStore continue to work side-by-side.
  */
-import { createAuthSession } from '@baalvion/auth-sdk';
+import { createAuthSession, createGatewaySession } from '@baalvion/auth-sdk';
 import { useAuthStore } from '@/lib/store/authStore';
 
 const AUTH_URL =
@@ -37,3 +37,12 @@ export const getSession = () => authSession.getSession();
 export const getUser = () => authSession.getUser();
 export const refreshSession = () => authSession.refreshSession();
 export const logout = () => authSession.logout();
+
+// ── Unified gateway (BFF) session — additive, gated by NEXT_PUBLIC_BFF_MODE ──────
+// The target model: no token in JS (cookies + CSRF), data via gatewaySession.authFetch. At cutover
+// this replaces the zustand-Bearer/axios path in lib/api/client.ts and the localStorage-persisted
+// access token. Left additive here so the existing path keeps working until the switch.
+export const BFF_ENABLED = process.env.NEXT_PUBLIC_BFF_MODE === 'on';
+export const gatewaySession = createGatewaySession({
+  gatewayUrl: process.env.NEXT_PUBLIC_GATEWAY_URL ?? '/auth-bff',
+});
