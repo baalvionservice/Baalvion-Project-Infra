@@ -1,0 +1,103 @@
+# BAALVION ALPHA-OMEGA OS: PLANETARY RUNTIME TOPOLOGY
+# Deployment Strategy: Multi-Cloud / Sovereign Regional Federation
+# Security Level: SUPREME (mTLS / SPIFFE / Kyverno)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baalvion-execution-kernel
+  namespace: alpha-omega-core
+spec:
+  replicas: 48 # Multi-region distribution across Zurich, Singapore, Ashburn
+  selector:
+    matchLabels:
+      app: core-kernel
+  template:
+    metadata:
+      labels:
+        app: core-kernel
+        security.baalvion.gov/mtls: "true"
+        tier: supreme-execution
+        domain: global-kernel
+    spec:
+      containers:
+      - name: sgek-runtime
+        image: vault.baalvion.gov/core/sgek-runtime:v6.0.0-SINGULARITY
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - secretRef:
+            name: kernel-authority-secrets
+        - configMapRef:
+            name: planetary-topology-config
+        resources:
+          limits:
+            cpu: "2"
+            memory: "4Gi"
+          requests:
+            cpu: "1"
+            memory: "2Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+
+---
+# SOVEREIGN ISOLATION POLICY (Kyverno)
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enforce-civilization-isolation
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: require-sovereign-mtls
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Nodes must utilize the Sovereign mTLS fabric (SPIFFE) for institutional cross-talk."
+      pattern:
+        metadata:
+          labels:
+            security.baalvion.gov/mtls: "true"
+  - name: pin-data-jurisdiction
+    match:
+      any:
+      - resources:
+          kinds:
+          - PersistentVolumeClaim
+    validate:
+      message: "Data residency violation: Persistent storage must be bound to the jurisdictional regional cluster."
+      pattern:
+        metadata:
+          labels:
+            residency: "{{region}}"
+
+---
+# PLANETARY INGRESS TOPOLOGY (Istio)
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: planetary-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: MUTUAL
+      credentialName: planetary-mtls-bundle
+    hosts:
+    - "*.baalvion.gov"

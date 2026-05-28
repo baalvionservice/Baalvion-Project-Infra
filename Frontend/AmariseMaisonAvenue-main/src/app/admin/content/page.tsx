@@ -187,7 +187,7 @@ export default function ContentAdminHub() {
                 subcategoryId: "top-handle",
                 collectionId: "heritage",
                 basePrice: 0,
-                imageUrl: "https://picsum.photos/seed/new/800/1000",
+                imageUrl: ["https://picsum.photos/seed/new/800/1000"],
                 isVip: false,
                 rating: 5.0,
                 reviewsCount: 0,

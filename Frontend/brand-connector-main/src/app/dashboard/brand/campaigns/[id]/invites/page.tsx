@@ -28,7 +28,7 @@ import {
   orderBy,
   doc,
   deleteDoc
-} from 'firebase/firestore';
+} from '@/lib/fb-compat/firestore';
 import { useFirestore, useCollection } from '@/firebase';
 import { InviteStatus } from '@/types';
 import { useToast } from '@/hooks/use-toast';

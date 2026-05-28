@@ -27,15 +27,41 @@ jobs:
         with:
           filters: |
             auth:
-              - 'Backend/auth-service/**'
+              - 'Backend/services/identity/auth-service/**'
             admin:
-              - 'Backend/admin-service/**'
+              - 'Backend/services/platform/admin-service/**'
             session:
-              - 'Backend/session-service/**'
+              - 'Backend/services/identity/session-service/**'
             oauth:
-              - 'Backend/oauth-service/**'
+              - 'Backend/services/identity/oauth-service/**'
             packages:
-              - 'packages/**'
+              - 'Backend/packages/**'
+
+  # ── Architecture contract (always runs; required) ────────────────────────
+  architecture-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      # FULL pnpm workspace install (build model: Option A). engine-strict=false in
+      # .npmrc lets the Node-22 frontend deps install as warnings on the Node-20 runner.
+      - name: Install workspace (pnpm)
+        run: pnpm install --frozen-lockfile
+      - name: Install catalog tooling
+        working-directory: Backend/catalog
+        run: npm ci
+      - name: Validate + enforce architecture contract
+        run: pnpm run architecture:check
+      - name: Build migrated template service end-to-end (about-service + @baalvion/* workspace deps)
+        run: pnpm exec turbo run build --filter=about-service...
+      - name: auth-node authority smoke test
+        run: pnpm --filter @baalvion/auth-node test
 
   # ── Lint & type-check shared packages ─────────────────────────────────────
   packages:
@@ -52,8 +78,8 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo run build --filter='./packages/*'
-      - run: pnpm turbo run type-check --filter='./packages/*'
+      - run: pnpm turbo run build --filter='./Backend/packages/*'
+      - run: pnpm turbo run type-check --filter='./Backend/packages/*'
 
   # ── Auth Service ──────────────────────────────────────────────────────────
   auth-service:
@@ -79,15 +105,16 @@ jobs:
         options: --health-cmd "redis-cli ping" --health-interval 10s --health-retries 5
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: Backend/auth-service/package-lock.json
-      - working-directory: Backend/auth-service
-        run: npm ci
-      - working-directory: Backend/auth-service
-        run: npm test
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter auth-service...
+      - working-directory: Backend/services/identity/auth-service
+        run: pnpm test
         env:
           NODE_ENV: test
           DB_HOST: localhost
@@ -105,15 +132,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: Backend/admin-service/package-lock.json
-      - working-directory: Backend/admin-service
-        run: npm ci
-      - name: Docker build smoke test
-        run: docker build -t admin-service:ci Backend/admin-service
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter admin-service...
+      - name: Docker build smoke test (monorepo context = repo root)
+        run: docker build -f Backend/services/platform/admin-service/Dockerfile -t admin-service:ci .
 
   # ── Session Service ───────────────────────────────────────────────────────
   session-service:
@@ -122,15 +150,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: Backend/session-service/package-lock.json
-      - working-directory: Backend/session-service
-        run: npm ci
-      - name: Docker build smoke test
-        run: docker build -t session-service:ci Backend/session-service
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter session-service...
+      - name: Docker build smoke test (monorepo context = repo root)
+        run: docker build -f Backend/services/identity/session-service/Dockerfile -t session-service:ci .
 
   # ── OAuth Service ─────────────────────────────────────────────────────────
   oauth-service:
@@ -139,19 +168,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: npm
-          cache-dependency-path: Backend/oauth-service/package-lock.json
-      - working-directory: Backend/oauth-service
-        run: npm ci
-      - name: Docker build smoke test
-        run: docker build -t oauth-service:ci Backend/oauth-service
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile --filter oauth-service...
+      - name: Docker build smoke test (monorepo context = repo root)
+        run: docker build -f Backend/services/identity/oauth-service/Dockerfile -t oauth-service:ci .
 
   # ── Summary gate (required check for branch protection) ───────────────────
   ci-success:
-    needs: [auth-service, admin-service, session-service, oauth-service]
+    needs: [architecture-contract, auth-service, admin-service, session-service, oauth-service]
     if: always()
     runs-on: ubuntu-latest
     steps:

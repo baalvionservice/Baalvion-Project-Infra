@@ -1,0 +1,127 @@
+# BAALVION API GATEWAY — declarative routing (Traefik file provider).
+#
+# SINGLE public ingress. Per-service routing (NOT a global rewrite): each router
+# uses its OWN `stripPrefix` to remove exactly its gateway namespace
+# `/api/v1/<domain>/<service>` and forwards the REMAINDER VERBATIM to the service.
+#
+# WHY stripPrefix (verified): service route depth is inconsistent — some serve
+# `/v1/<context>/...` (auth→/v1/auth, commerce→/api/v1/commerce, order→/v1/orders),
+# others serve resources directly under base (about→/v1/pages, market→/v1/trades),
+# bases differ (/v1 vs /api/v1-only vs root), oauth's context is /clients. A single
+# re-prefix rule would break many services. stripPrefix forwards the service's REAL
+# path unchanged, so NO per-service route-depth assumption is made.
+#
+# FRONTEND CONTRACT (cutover): set base = https://api.baalvion.com/api/v1/<domain>/<service>
+# and KEEP the service's existing path suffix (e.g. about FE keeps `/v1/pages`;
+# commerce FE keeps `/api/v1/commerce/...`; auth FE keeps `/v1/auth/login`). The
+# gateway strips only its namespace; the service receives exactly what it gets today.
+#
+# AUTH: `jwt-auth` (forwardAuth → auth-service) on PROTECTED routes only. Excluded:
+# identity/auth + identity/oauth (token issuers, public), knowledge/ml (HMAC
+# verify_signature, NOT user JWT), infrastructure/realtime (WS, self-verifies via
+# JWKS), ecosystem/law-elite (sub-gateway owns its auth — passthrough).
+
+http:
+  middlewares:
+    # AUTH is enforced PER-ROUTE inside each service via @baalvion/auth-node (the single
+    # authority). Verified: services mix PUBLIC + protected routes under the same prefix
+    # (e.g. about GET /pages = public, POST = protected), so blanket gateway auth would
+    # break public endpoints. The gateway forwards the Authorization header verbatim;
+    # services verify. No gateway-level jwt-auth middleware.
+    ratelimit:
+      rateLimit: { average: 100, burst: 50 }
+    sec-headers:
+      headers: { stsSeconds: 31536000, frameDeny: true, contentTypeNosniff: true, browserXssFilter: true }
+    sp-identity-auth:              { stripPrefix: { prefixes: ["/api/v1/identity/auth"] } }
+    sp-identity-oauth:             { stripPrefix: { prefixes: ["/api/v1/identity/oauth"] } }
+    sp-identity-session:           { stripPrefix: { prefixes: ["/api/v1/identity/session"] } }
+    sp-commerce-trade:             { stripPrefix: { prefixes: ["/api/v1/commerce/trade"] } }
+    sp-commerce-order:             { stripPrefix: { prefixes: ["/api/v1/commerce/order"] } }
+    sp-commerce-inventory:         { stripPrefix: { prefixes: ["/api/v1/commerce/inventory"] } }
+    sp-commerce-fulfillment:       { stripPrefix: { prefixes: ["/api/v1/commerce/fulfillment"] } }
+    sp-commerce-commerce:          { stripPrefix: { prefixes: ["/api/v1/commerce/commerce"] } }
+    sp-commerce-market:            { stripPrefix: { prefixes: ["/api/v1/commerce/market"] } }
+    sp-knowledge-imperialpedia:    { stripPrefix: { prefixes: ["/api/v1/knowledge/imperialpedia"] } }
+    sp-knowledge-cms:              { stripPrefix: { prefixes: ["/api/v1/knowledge/cms"] } }
+    sp-knowledge-law:              { stripPrefix: { prefixes: ["/api/v1/knowledge/law"] } }
+    sp-knowledge-ml:               { stripPrefix: { prefixes: ["/api/v1/knowledge/ml"] } }
+    sp-infrastructure-realtime:    { stripPrefix: { prefixes: ["/api/v1/infrastructure/realtime"] } }
+    sp-infrastructure-notification: { stripPrefix: { prefixes: ["/api/v1/infrastructure/notification"] } }
+    sp-infrastructure-proxy:       { stripPrefix: { prefixes: ["/api/v1/infrastructure/proxy"] } }
+    sp-platform-admin:             { stripPrefix: { prefixes: ["/api/v1/platform/admin"] } }
+    sp-platform-dashboard:         { stripPrefix: { prefixes: ["/api/v1/platform/dashboard"] } }
+    sp-ecosystem-about:            { stripPrefix: { prefixes: ["/api/v1/ecosystem/about"] } }
+    sp-ecosystem-brand-connector:  { stripPrefix: { prefixes: ["/api/v1/ecosystem/brand-connector"] } }
+    sp-ecosystem-ctm:              { stripPrefix: { prefixes: ["/api/v1/ecosystem/ctm"] } }
+    sp-ecosystem-insiders:         { stripPrefix: { prefixes: ["/api/v1/ecosystem/insiders"] } }
+    sp-ecosystem-elite-circle:     { stripPrefix: { prefixes: ["/api/v1/ecosystem/elite-circle"] } }
+    sp-ecosystem-ir:               { stripPrefix: { prefixes: ["/api/v1/ecosystem/ir"] } }
+    sp-ecosystem-jobs:             { stripPrefix: { prefixes: ["/api/v1/ecosystem/jobs"] } }
+    sp-ecosystem-mining:           { stripPrefix: { prefixes: ["/api/v1/ecosystem/mining"] } }
+    sp-ecosystem-real-estate:      { stripPrefix: { prefixes: ["/api/v1/ecosystem/real-estate"] } }
+    sp-ecosystem-law-elite:        { stripPrefix: { prefixes: ["/api/v1/ecosystem/law-elite"] } }
+
+  routers:
+    # PUBLIC token issuers (no jwt-auth)
+    identity-auth:    { rule: "PathPrefix(`/api/v1/identity/auth`)",    entryPoints: [websecure], service: identity-auth,    middlewares: [sp-identity-auth, ratelimit, sec-headers], tls: {} }
+    identity-oauth:   { rule: "PathPrefix(`/api/v1/identity/oauth`)",   entryPoints: [websecure], service: identity-oauth,   middlewares: [sp-identity-oauth, ratelimit, sec-headers], tls: {} }
+    # PROTECTED (jwt-auth)
+    identity-session: { rule: "PathPrefix(`/api/v1/identity/session`)", entryPoints: [websecure], service: identity-session, middlewares: [sp-identity-session, ratelimit, sec-headers], tls: {} }
+    commerce-trade:       { rule: "PathPrefix(`/api/v1/commerce/trade`)",       entryPoints: [websecure], service: commerce-trade,       middlewares: [sp-commerce-trade, ratelimit, sec-headers], tls: {} }
+    commerce-order:       { rule: "PathPrefix(`/api/v1/commerce/order`)",       entryPoints: [websecure], service: commerce-order,       middlewares: [sp-commerce-order, ratelimit, sec-headers], tls: {} }
+    commerce-inventory:   { rule: "PathPrefix(`/api/v1/commerce/inventory`)",   entryPoints: [websecure], service: commerce-inventory,   middlewares: [sp-commerce-inventory, ratelimit, sec-headers], tls: {} }
+    commerce-fulfillment: { rule: "PathPrefix(`/api/v1/commerce/fulfillment`)", entryPoints: [websecure], service: commerce-fulfillment, middlewares: [sp-commerce-fulfillment, ratelimit, sec-headers], tls: {} }
+    commerce-commerce:    { rule: "PathPrefix(`/api/v1/commerce/commerce`)",    entryPoints: [websecure], service: commerce-commerce,    middlewares: [sp-commerce-commerce, ratelimit, sec-headers], tls: {} }
+    commerce-market:      { rule: "PathPrefix(`/api/v1/commerce/market`)",      entryPoints: [websecure], service: commerce-market,      middlewares: [sp-commerce-market, ratelimit, sec-headers], tls: {} }
+    knowledge-imperialpedia: { rule: "PathPrefix(`/api/v1/knowledge/imperialpedia`)", entryPoints: [websecure], service: knowledge-imperialpedia, middlewares: [sp-knowledge-imperialpedia, ratelimit, sec-headers], tls: {} }
+    knowledge-cms:           { rule: "PathPrefix(`/api/v1/knowledge/cms`)",           entryPoints: [websecure], service: knowledge-cms,           middlewares: [sp-knowledge-cms, ratelimit, sec-headers], tls: {} }
+    knowledge-law:           { rule: "PathPrefix(`/api/v1/knowledge/law`)",           entryPoints: [websecure], service: knowledge-law,           middlewares: [sp-knowledge-law, ratelimit, sec-headers], tls: {} }
+    # ml: NO jwt-auth (HMAC verify_signature, internal)
+    knowledge-ml:            { rule: "PathPrefix(`/api/v1/knowledge/ml`)",            entryPoints: [websecure], service: knowledge-ml,            middlewares: [sp-knowledge-ml, ratelimit, sec-headers], tls: {} }
+    # realtime: NO jwt-auth (WS upgrade passthrough; service self-verifies via JWKS)
+    infrastructure-realtime:     { rule: "PathPrefix(`/api/v1/infrastructure/realtime`)",     entryPoints: [websecure], service: infrastructure-realtime,     middlewares: [sp-infrastructure-realtime, sec-headers], tls: {} }
+    infrastructure-notification: { rule: "PathPrefix(`/api/v1/infrastructure/notification`)", entryPoints: [websecure], service: infrastructure-notification, middlewares: [sp-infrastructure-notification, ratelimit, sec-headers], tls: {} }
+    infrastructure-proxy:        { rule: "PathPrefix(`/api/v1/infrastructure/proxy`)",        entryPoints: [websecure], service: infrastructure-proxy,        middlewares: [sp-infrastructure-proxy, ratelimit, sec-headers], tls: {} }
+    platform-admin:     { rule: "PathPrefix(`/api/v1/platform/admin`)",     entryPoints: [websecure], service: platform-admin,     middlewares: [sp-platform-admin, ratelimit, sec-headers], tls: {} }
+    platform-dashboard: { rule: "PathPrefix(`/api/v1/platform/dashboard`)", entryPoints: [websecure], service: platform-dashboard, middlewares: [sp-platform-dashboard, ratelimit, sec-headers], tls: {} }
+    ecosystem-about:           { rule: "PathPrefix(`/api/v1/ecosystem/about`)",           entryPoints: [websecure], service: ecosystem-about,           middlewares: [sp-ecosystem-about, ratelimit, sec-headers], tls: {} }
+    ecosystem-brand-connector: { rule: "PathPrefix(`/api/v1/ecosystem/brand-connector`)", entryPoints: [websecure], service: ecosystem-brand-connector, middlewares: [sp-ecosystem-brand-connector, ratelimit, sec-headers], tls: {} }
+    ecosystem-ctm:             { rule: "PathPrefix(`/api/v1/ecosystem/ctm`)",             entryPoints: [websecure], service: ecosystem-ctm,             middlewares: [sp-ecosystem-ctm, ratelimit, sec-headers], tls: {} }
+    ecosystem-insiders:        { rule: "PathPrefix(`/api/v1/ecosystem/insiders`)",        entryPoints: [websecure], service: ecosystem-insiders,        middlewares: [sp-ecosystem-insiders, ratelimit, sec-headers], tls: {} }
+    ecosystem-elite-circle:    { rule: "PathPrefix(`/api/v1/ecosystem/elite-circle`)",    entryPoints: [websecure], service: ecosystem-elite-circle,    middlewares: [sp-ecosystem-elite-circle, ratelimit, sec-headers], tls: {} }
+    ecosystem-ir:              { rule: "PathPrefix(`/api/v1/ecosystem/ir`)",              entryPoints: [websecure], service: ecosystem-ir,              middlewares: [sp-ecosystem-ir, ratelimit, sec-headers], tls: {} }
+    ecosystem-jobs:            { rule: "PathPrefix(`/api/v1/ecosystem/jobs`)",            entryPoints: [websecure], service: ecosystem-jobs,            middlewares: [sp-ecosystem-jobs, ratelimit, sec-headers], tls: {} }
+    ecosystem-mining:          { rule: "PathPrefix(`/api/v1/ecosystem/mining`)",          entryPoints: [websecure], service: ecosystem-mining,          middlewares: [sp-ecosystem-mining, ratelimit, sec-headers], tls: {} }
+    ecosystem-real-estate:     { rule: "PathPrefix(`/api/v1/ecosystem/real-estate`)",     entryPoints: [websecure], service: ecosystem-real-estate,     middlewares: [sp-ecosystem-real-estate, ratelimit, sec-headers], tls: {} }
+    # law-elite: NO jwt-auth (sub-gateway owns auth; passthrough of /api/* verbatim)
+    ecosystem-law-elite:       { rule: "PathPrefix(`/api/v1/ecosystem/law-elite`)",       entryPoints: [websecure], service: ecosystem-law-elite,       middlewares: [sp-ecosystem-law-elite, ratelimit, sec-headers], tls: {} }
+
+  services:
+    identity-auth:              { loadBalancer: { servers: [{ url: "http://auth-service:3001" }] } }
+    identity-oauth:             { loadBalancer: { servers: [{ url: "http://oauth-service:3023" }] } }
+    identity-session:           { loadBalancer: { servers: [{ url: "http://session-service:3022" }] } }
+    commerce-trade:             { loadBalancer: { servers: [{ url: "http://trade-service:3025" }] } }
+    commerce-order:             { loadBalancer: { servers: [{ url: "http://order-service:3013" }] } }
+    commerce-inventory:         { loadBalancer: { servers: [{ url: "http://inventory-service:3014" }] } }
+    commerce-fulfillment:       { loadBalancer: { servers: [{ url: "http://fulfillment-service:3016" }] } }
+    commerce-commerce:          { loadBalancer: { servers: [{ url: "http://commerce-service:3012" }] } }
+    commerce-market:            { loadBalancer: { servers: [{ url: "http://market-service:3007" }] } }
+    knowledge-imperialpedia:    { loadBalancer: { servers: [{ url: "http://imperialpedia-service:3004" }] } }
+    knowledge-cms:              { loadBalancer: { servers: [{ url: "http://cms-service:3011" }] } }
+    knowledge-law:              { loadBalancer: { servers: [{ url: "http://law-service:3015" }] } }
+    knowledge-ml:               { loadBalancer: { servers: [{ url: "http://ml-service:8000" }] } }
+    infrastructure-realtime:    { loadBalancer: { servers: [{ url: "http://realtime-service:3040" }] } }
+    infrastructure-notification: { loadBalancer: { servers: [{ url: "http://notification-service:3031" }] } }
+    infrastructure-proxy:       { loadBalancer: { servers: [{ url: "http://proxy-service:4000" }] } }
+    platform-admin:             { loadBalancer: { servers: [{ url: "http://admin-service:3021" }] } }
+    platform-dashboard:         { loadBalancer: { servers: [{ url: "http://dashboard-service:3009" }] } }
+    ecosystem-about:            { loadBalancer: { servers: [{ url: "http://about-service:3010" }] } }
+    ecosystem-brand-connector:  { loadBalancer: { servers: [{ url: "http://brand-connector-service:3006" }] } }
+    ecosystem-ctm:              { loadBalancer: { servers: [{ url: "http://ctm-service:3017" }] } }
+    ecosystem-insiders:         { loadBalancer: { servers: [{ url: "http://insiders-service:3050" }] } }
+    ecosystem-elite-circle:     { loadBalancer: { servers: [{ url: "http://elite-circle-service:3051" }] } }
+    ecosystem-ir:               { loadBalancer: { servers: [{ url: "http://ir-service:3008" }] } }
+    ecosystem-jobs:             { loadBalancer: { servers: [{ url: "http://jobs-service:3002" }] } }
+    ecosystem-mining:           { loadBalancer: { servers: [{ url: "http://mining-service:3003" }] } }
+    ecosystem-real-estate:      { loadBalancer: { servers: [{ url: "http://real-estate-service:3005" }] } }
+    ecosystem-law-elite:        { loadBalancer: { servers: [{ url: "http://law-elite-gateway:8090" }] } }

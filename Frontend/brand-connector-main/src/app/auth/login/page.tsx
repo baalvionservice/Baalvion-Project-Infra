@@ -3,16 +3,38 @@
 import React from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Rocket, ShieldCheck, Building2, UserCircle2, Zap, ArrowRight, Star } from 'lucide-react';
+import { Rocket, ShieldCheck, Building2, Zap, ArrowRight, Star, Mail, Lock, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signInAs } = useAuth();
+  const { signInAs, loginWithEmail } = useAuth();
+
+  // Primary email + password auth (wired to the real Firebase + JWT login in AuthContext).
+  const [email, setEmail] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
+  const [formError, setFormError] = React.useState<string | null>(null);
+
+  const handleEmailLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) return;
+    setFormError(null);
+    setSubmitting(true);
+    try {
+      await loginWithEmail(email, password);
+      router.push('/dashboard/brand');
+    } catch (err) {
+      setFormError(err instanceof Error ? err.message : 'Login failed. Please check your credentials.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const handleRoleSelect = (role: 'ADMIN' | 'BRAND' | 'CREATOR') => {
     signInAs(role);
@@ -68,54 +90,116 @@ export default function LoginPage() {
               Baalvion <span className="text-primary">Connect</span>
             </span>
           </Link>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Select Workspace</h1>
-          <p className="text-slate-500 mt-2 text-lg">Choose an entry point to explore the platform modules.</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Welcome Back</h1>
+          <p className="text-slate-500 mt-2 text-lg">Sign in to your account to continue.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {ROLES.map((role, i) => (
-            <motion.div
-              key={role.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1 }}
-            >
-              <Card 
-                className="h-full border-none shadow-xl hover:shadow-2xl transition-all cursor-pointer group rounded-[2rem] overflow-hidden bg-white"
-                onClick={() => handleRoleSelect(role.id as any)}
-              >
-                <CardContent className="p-8 flex flex-col items-center text-center space-y-6">
-                  <div className={cn(
-                    "h-16 w-16 rounded-[1.5rem] flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 duration-500",
-                    role.color
-                  )}>
-                    <role.icon className="h-8 w-8" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">{role.title}</h3>
-                    <p className="text-xs font-medium text-slate-400 mt-2 leading-relaxed">
-                      {role.desc}
-                    </p>
-                  </div>
-                  <Button variant="ghost" size="sm" className="rounded-full h-10 w-10 p-0 group-hover:bg-primary group-hover:text-white transition-colors">
-                    <ArrowRight className="h-5 w-5" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        <Card className="border-none shadow-sm rounded-3xl bg-white p-6">
-          <CardContent className="p-0 flex items-center justify-center gap-4 text-center">
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <Zap className="h-5 w-5 text-emerald-600" />
-            </div>
-            <p className="text-sm font-bold text-slate-600 uppercase tracking-widest">
-              Mock session active. Authentication bypassed for demo.
+        {/* Email + password — primary auth path */}
+        <Card className="border-none shadow-xl rounded-[2rem] bg-white max-w-md mx-auto">
+          <CardContent className="p-8">
+            <form onSubmit={handleEmailLogin} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    id="email"
+                    type="email"
+                    autoComplete="email"
+                    placeholder="you@example.com"
+                    className="pl-9 h-12 rounded-xl"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Input
+                    id="password"
+                    type="password"
+                    autoComplete="current-password"
+                    placeholder="••••••••"
+                    className="pl-9 h-12 rounded-xl"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+              {formError && (
+                <p className="text-sm font-medium text-red-600" role="alert">{formError}</p>
+              )}
+              <Button type="submit" className="w-full h-12 rounded-xl font-bold" disabled={submitting}>
+                {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Sign In
+              </Button>
+            </form>
+            <p className="text-center text-sm text-slate-500 mt-6">
+              Don&apos;t have an account?{' '}
+              <Link href="/auth/signup" className="text-primary font-bold hover:underline">
+                Sign up
+              </Link>
             </p>
           </CardContent>
         </Card>
+
+        {/* Quick demo access — preserves the original mock role-selector workspace entry */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-center gap-3 text-[10px] text-slate-400 font-black uppercase tracking-widest">
+            <span className="h-px w-12 bg-slate-200" />
+            Or explore a workspace (demo)
+            <span className="h-px w-12 bg-slate-200" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {ROLES.map((role, i) => (
+              <motion.div
+                key={role.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+              >
+                <Card
+                  className="h-full border-none shadow-xl hover:shadow-2xl transition-all cursor-pointer group rounded-[2rem] overflow-hidden bg-white"
+                  onClick={() => handleRoleSelect(role.id as any)}
+                >
+                  <CardContent className="p-8 flex flex-col items-center text-center space-y-6">
+                    <div className={cn(
+                      "h-16 w-16 rounded-[1.5rem] flex items-center justify-center shadow-lg transition-transform group-hover:scale-110 duration-500",
+                      role.color
+                    )}>
+                      <role.icon className="h-8 w-8" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900 uppercase tracking-tighter">{role.title}</h3>
+                      <p className="text-xs font-medium text-slate-400 mt-2 leading-relaxed">
+                        {role.desc}
+                      </p>
+                    </div>
+                    <Button variant="ghost" size="sm" className="rounded-full h-10 w-10 p-0 group-hover:bg-primary group-hover:text-white transition-colors">
+                      <ArrowRight className="h-5 w-5" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+
+          <Card className="border-none shadow-sm rounded-3xl bg-white p-6">
+            <CardContent className="p-0 flex items-center justify-center gap-4 text-center">
+              <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <Zap className="h-5 w-5 text-emerald-600" />
+              </div>
+              <p className="text-sm font-bold text-slate-600 uppercase tracking-widest">
+                Demo workspaces use a mock session (enable with NEXT_PUBLIC_BAALVION_DEV_MOCK=1).
+              </p>
+            </CardContent>
+          </Card>
+        </div>
 
         <div className="flex justify-center gap-8 text-[10px] text-slate-400 font-black uppercase tracking-widest">
           <Link href="/status" className="hover:text-primary">System Status</Link>

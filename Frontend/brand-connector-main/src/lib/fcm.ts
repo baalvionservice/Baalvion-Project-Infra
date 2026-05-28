@@ -7,7 +7,7 @@
  * and foreground message handling.
  */
 
-import { getToken, onMessage, Messaging } from 'firebase/messaging';
+import { getToken, onMessage, Messaging } from '@/lib/fb-compat/messaging';
 import { initializeFirebase } from '@/firebase';
 
 const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || "YOUR_PUBLIC_VAPID_KEY";

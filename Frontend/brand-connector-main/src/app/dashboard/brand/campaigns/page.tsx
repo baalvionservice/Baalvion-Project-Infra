@@ -29,7 +29,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, where, doc, updateDoc, addDoc, orderBy } from 'firebase/firestore';
+import { collection, query, where, doc, updateDoc, addDoc, orderBy } from '@/lib/fb-compat/firestore';
 import { Campaign, CampaignStatus } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { errorEmitter } from '@/firebase/error-emitter';

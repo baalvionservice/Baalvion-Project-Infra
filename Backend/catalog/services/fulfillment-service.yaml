@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: fulfillment-service
+  description: TODO — describe this bounded context.
+  domain: commerce
+  division: commerce
+  context: fulfillment
+  owner: "@baalvion/commerce"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/commerce/fulfillment-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres]
+  dependsOn: [identity-platform]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/fulfillment"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }

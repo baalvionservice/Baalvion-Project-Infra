@@ -36,7 +36,7 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CreatorReviews } from '@/components/profile/CreatorReviews';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, where, limit } from 'firebase/firestore';
+import { collection, query, where, limit } from '@/lib/fb-compat/firestore';
 import { CreatorProfile } from '@/types';
 import { InviteCreatorDialog } from '@/components/dashboard/brand/InviteCreatorDialog';
 

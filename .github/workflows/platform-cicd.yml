@@ -52,14 +52,14 @@ jobs:
       - name: Validate Kustomize overlays
         run: |
           curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-          for o in infra/k8s/overlays/*/; do ./kustomize build "$o" > /dev/null && echo "ok: $o"; done
+          for o in Backend/infra/k8s/overlays/*/; do ./kustomize build "$o" > /dev/null && echo "ok: $o"; done
       - name: kubeconform (schema, incl. CRDs)
         run: |
           curl -sL https://github.com/yannh/kubeconform/releases/latest/download/kubeconform-linux-amd64.tar.gz | tar xz
-          ./kustomize build infra/k8s/overlays/us-east | ./kubeconform -strict -ignore-missing-schemas -summary
+          ./kustomize build Backend/infra/k8s/overlays/us-east | ./kubeconform -strict -ignore-missing-schemas -summary
       - name: tfsec (Terraform security)
         uses: aquasecurity/tfsec-action@v1.0.3
-        with: { working_directory: infra/terraform, soft_fail: true }
+        with: { working_directory: Backend/infra/terraform, soft_fail: true }
 
   # ── 4. Build + scan + push images (only on main) ──
   build-push:
@@ -103,7 +103,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Stage 1 — bump us-east overlay tag (canary region)
         run: |
-          cd infra/k8s/overlays/us-east
+          cd Backend/infra/k8s/overlays/us-east
           sed -i "s/newTag: .*/newTag: ${{ github.sha }}/" kustomization.yaml
       - name: Commit image bump (ArgoCD auto-syncs)
         run: |

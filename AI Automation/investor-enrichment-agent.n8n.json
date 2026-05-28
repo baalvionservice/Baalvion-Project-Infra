@@ -1,0 +1,421 @@
+{
+  "name": "Investor Enrichment Agent (v2)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      },
+      "id": "a1b2c3d4-0001-0000-0000-000000000001",
+      "name": "Every 5 min",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-200, 0]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "WITH next_batch AS (\n  SELECT id\n  FROM investors\n  WHERE enrichment_status = 'pending'\n  ORDER BY created_at ASC\n  FOR UPDATE SKIP LOCKED\n  LIMIT 3\n)\nUPDATE investors i\nSET enrichment_status = 'processing',\n    enrichment_started_at = NOW()\nFROM next_batch b\nWHERE i.id = b.id\nRETURNING i.id, i.name, i.firm_type, i.region, i.website;",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0002-0000-0000-000000000002",
+      "name": "Claim Pending Rows",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [0, 0],
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_WITH_PG_CRED_ID",
+          "name": "Postgres MarketUnderworld"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "a1b2c3d4-0003-0000-0000-000000000003",
+      "name": "Loop Each Investor",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Investor name: {{ $json.name }}\nFirm type (if known): {{ $json.firm_type || 'unknown' }}\nRegion (if known): {{ $json.region || 'unknown' }}\nKnown website: {{ $json.website || 'none' }}\nInvestor row id: {{ $json.id }}\n\nResearch this investor using your tools and return enriched JSON data per the schema in your instructions. Do not invent data. Always cite sources.",
+        "hasOutputParser": false,
+        "options": {
+          "systemMessage": "You are an investor research agent for a paid investor-intelligence database. Your job is to enrich investor records with verifiable data.\n\nSTRICT RULES:\n1. Only use data from official sources: the firm's own website, Crunchbase profile, AngelList, or social profiles linked from those sources.\n2. NEVER invent social media handles or URLs. If you can't find a verified link from an official source, return null for that platform.\n3. Always include the source URL for every non-null field.\n4. If the investor name is common or ambiguous (e.g. multiple firms share it), set confidence='low' and explain in notes.\n5. Stop after 6 tool calls maximum. Return whatever you have with appropriate confidence.\n\nTOOLS:\n- crunchbase_search: query Crunchbase for an organization or person profile.\n- google_search: SerpAPI Google search. Use to find official firm websites, AngelList profiles, and to verify social handles.\n- fetch_url: GET any public URL and return cleaned text. Use this to read the firm's website or Crunchbase page.\n\nOUTPUT: respond with ONLY a valid JSON object matching this schema. No markdown. No prose.\n{\n  \"website\": string|null,\n  \"website_source\": string|null,\n  \"aum_usd\": number|null,\n  \"aum_source\": string|null,\n  \"firm_type\": \"VC\"|\"Angel\"|\"Family Office\"|\"PE\"|\"CVC\"|null,\n  \"headquarters\": string|null,\n  \"focus_sectors\": string[],\n  \"socials\": [{\"platform\":\"twitter\"|\"linkedin\"|\"instagram\"|\"facebook\",\"url\":string,\"handle\":string,\"source\":string}],\n  \"confidence\": \"high\"|\"medium\"|\"low\",\n  \"notes\": string\n}",
+          "maxIterations": 8,
+          "returnIntermediateSteps": false
+        }
+      },
+      "id": "a1b2c3d4-0004-0000-0000-000000000004",
+      "name": "Enrichment Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [460, 0]
+    },
+    {
+      "parameters": {
+        "model": "claude-sonnet-4-5",
+        "options": {
+          "temperature": 0.2,
+          "maxTokensToSample": 2000
+        }
+      },
+      "id": "a1b2c3d4-0005-0000-0000-000000000005",
+      "name": "Claude Sonnet",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [340, 220],
+      "credentials": {
+        "anthropicApi": {
+          "id": "REPLACE_WITH_ANTHROPIC_CRED_ID",
+          "name": "Anthropic API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "crunchbase_search",
+        "description": "Search Crunchbase for an organization or person. Use to find a firm or investor profile, AUM, founding year, headquarters, website, and linked social profiles.",
+        "method": "GET",
+        "url": "https://api.crunchbase.com/api/v4/searches/organizations",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "valueProvider": "modelRequired",
+              "value": "={{ $fromAI('query', 'Firm or investor name to search Crunchbase for', 'string') }}"
+            }
+          ]
+        },
+        "optimizeResponse": true,
+        "responseType": "json"
+      },
+      "id": "a1b2c3d4-0006-0000-0000-000000000006",
+      "name": "Crunchbase Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [460, 220],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_CRUNCHBASE_CRED_ID",
+          "name": "Crunchbase API (X-cb-user-key header)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "google_search",
+        "description": "Google search via SerpAPI. Use to find a firm's official website, AngelList page, Crunchbase profile, or to verify a social media handle is the official one. Input: a search query string.",
+        "method": "GET",
+        "url": "https://serpapi.com/search.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "valueProvider": "modelRequired",
+              "value": "={{ $fromAI('q', 'Google search query', 'string') }}"
+            },
+            {
+              "name": "engine",
+              "value": "google"
+            },
+            {
+              "name": "num",
+              "value": "10"
+            }
+          ]
+        },
+        "optimizeResponse": true,
+        "responseType": "json"
+      },
+      "id": "a1b2c3d4-0007-0000-0000-000000000007",
+      "name": "Google Search Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [580, 220],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "REPLACE_WITH_SERPAPI_CRED_ID",
+          "name": "SerpAPI Query Auth (api_key)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "name": "fetch_url",
+        "description": "Fetch a public URL via HTTP GET and return the cleaned page text. Use to read a firm's About page, a Crunchbase profile, or any source you find via google_search. Input: a fully qualified URL.",
+        "method": "GET",
+        "url": "={{ $fromAI('url', 'Full URL to fetch (must include https://)', 'string') }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 15000
+        },
+        "optimizeResponse": true
+      },
+      "id": "a1b2c3d4-0008-0000-0000-000000000008",
+      "name": "Fetch URL Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [700, 220]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse the agent's JSON output and consolidate the investor id and parsed payload\n// into a single item that downstream nodes can reliably reference via $json.\nconst raw = $input.first().json.output ?? $input.first().json.text ?? '';\nconst loopItem = $('Loop Each Investor').item.json;\nconst investorId = loopItem.id;\nconst investorName = loopItem.name;\n\nlet parsed;\ntry {\n  const cleaned = raw.replace(/^```(?:json)?/i, '').replace(/```$/, '').trim();\n  parsed = JSON.parse(cleaned);\n} catch (e) {\n  return [{ json: {\n    investor_id: investorId,\n    name: investorName,\n    parse_ok: false,\n    error: 'Agent output was not valid JSON: ' + String(e.message).slice(0, 500),\n    raw: String(raw).slice(0, 2000)\n  }}];\n}\n\nconst validPlatforms = new Set(['twitter','linkedin','instagram','facebook']);\nconst socials = Array.isArray(parsed.socials)\n  ? parsed.socials.filter(s => s && validPlatforms.has(s.platform) && s.url)\n  : [];\n\nreturn [{ json: {\n  investor_id: investorId,\n  name: investorName,\n  parse_ok: true,\n  website: parsed.website || null,\n  website_source: parsed.website_source || null,\n  aum_usd: (typeof parsed.aum_usd === 'number' && isFinite(parsed.aum_usd)) ? parsed.aum_usd : null,\n  aum_source: parsed.aum_source || null,\n  firm_type: parsed.firm_type || null,\n  headquarters: parsed.headquarters || null,\n  focus_sectors: Array.isArray(parsed.focus_sectors) ? parsed.focus_sectors.map(String) : [],\n  socials,\n  confidence: parsed.confidence || 'low',\n  notes: parsed.notes || ''\n}}];"
+      },
+      "id": "a1b2c3d4-0009-0000-0000-000000000009",
+      "name": "Parse Agent Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 0]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "parse-ok",
+              "leftValue": "={{ $json.parse_ok }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a1b2c3d4-0010-0000-0000-00000000000a",
+      "name": "Parse OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [920, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build a single safe SQL UPDATE for the investor row.\n// We escape strings by doubling single quotes and reject any non-allowlisted firm_type / confidence value.\nfunction sqlStr(v) { return v == null ? 'NULL' : \"'\" + String(v).replace(/'/g, \"''\") + \"'\"; }\nfunction sqlNum(v) { return (typeof v === 'number' && isFinite(v)) ? String(v) : 'NULL'; }\nfunction sqlEnum(v, allowed, fallback) {\n  if (!v) return fallback ? \"'\" + fallback + \"'\" : 'NULL';\n  return allowed.includes(v) ? \"'\" + v + \"'\" : (fallback ? \"'\" + fallback + \"'\" : 'NULL');\n}\nfunction sqlJsonb(arr) {\n  const safe = Array.isArray(arr) ? arr.map(String) : [];\n  return \"'\" + JSON.stringify(safe).replace(/'/g, \"''\") + \"'::jsonb\";\n}\n\nconst d = $json;\nconst sql = `UPDATE investors\nSET website = COALESCE(${sqlStr(d.website)}, website),\n    aum_usd = COALESCE(${sqlNum(d.aum_usd)}, aum_usd),\n    firm_type = COALESCE(${sqlEnum(d.firm_type, ['VC','Angel','Family Office','PE','CVC'], null)}, firm_type),\n    headquarters = COALESCE(${sqlStr(d.headquarters)}, headquarters),\n    focus_sectors = ${sqlJsonb(d.focus_sectors)},\n    enrichment_confidence = ${sqlEnum(d.confidence, ['high','medium','low'], 'low')},\n    enrichment_notes = ${sqlStr(d.notes)},\n    enrichment_status = 'enriched',\n    enrichment_completed_at = NOW()\nWHERE id = ${sqlStr(d.investor_id)}\nRETURNING id;`;\n\nreturn [{ json: { sql, investor_id: d.investor_id, socials: d.socials, parsed: d } }];"
+      },
+      "id": "a1b2c3d4-0011-0000-0000-00000000000b",
+      "name": "Build Update SQL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1140, -120]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.sql }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0012-0000-0000-00000000000c",
+      "name": "Update Investor",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1360, -120],
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_WITH_PG_CRED_ID",
+          "name": "Postgres MarketUnderworld"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pull the socials forward from Parse Agent Output (Postgres UPDATE doesn't pass them through).\nconst parsed = $('Parse Agent Output').item.json;\nconst investorId = parsed.investor_id;\nconst socials = parsed.socials || [];\nif (socials.length === 0) return [];\n\nfunction sqlStr(v) { return v == null ? 'NULL' : \"'\" + String(v).replace(/'/g, \"''\") + \"'\"; }\nconst allowed = new Set(['twitter','linkedin','instagram','facebook']);\n\nreturn socials\n  .filter(s => s && allowed.has(s.platform) && s.url)\n  .map(s => {\n    const sql = `INSERT INTO investor_socials (investor_id, platform, url, handle, source, last_checked_at)\nVALUES (${sqlStr(investorId)}, ${sqlStr(s.platform)}, ${sqlStr(s.url)}, ${sqlStr(s.handle || null)}, ${sqlStr(s.source || null)}, NOW())\nON CONFLICT (investor_id, platform) DO UPDATE\nSET url = EXCLUDED.url,\n    handle = EXCLUDED.handle,\n    source = EXCLUDED.source,\n    last_checked_at = NOW();`;\n    return { json: { sql, investor_id: investorId, platform: s.platform } };\n  });"
+      },
+      "id": "a1b2c3d4-0013-0000-0000-00000000000d",
+      "name": "Build Socials SQL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1580, -120]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.sql }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0014-0000-0000-00000000000e",
+      "name": "Upsert Social",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1800, -120],
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_WITH_PG_CRED_ID",
+          "name": "Postgres MarketUnderworld"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SLACK_CHANNEL_ID",
+          "mode": "id"
+        },
+        "text": "=:mag: *Investor enriched* — *{{ $('Parse Agent Output').item.json.name }}*\nConfidence: *{{ $('Parse Agent Output').item.json.confidence }}*\nWebsite: {{ $('Parse Agent Output').item.json.website || '—' }}\nFirm type: {{ $('Parse Agent Output').item.json.firm_type || '—' }}\nHQ: {{ $('Parse Agent Output').item.json.headquarters || '—' }}\nSocials found: {{ ($('Parse Agent Output').item.json.socials || []).length }}\nNotes: {{ $('Parse Agent Output').item.json.notes || '—' }}",
+        "otherOptions": {}
+      },
+      "id": "a1b2c3d4-0015-0000-0000-00000000000f",
+      "name": "Notify QA Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [2020, -120],
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_SLACK_CRED_ID",
+          "name": "Slack Workspace"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "function sqlStr(v) { return v == null ? 'NULL' : \"'\" + String(v).replace(/'/g, \"''\") + \"'\"; }\nconst d = $json;\nconst sql = `UPDATE investors\nSET enrichment_status = 'enrichment_failed',\n    enrichment_notes = ${sqlStr(d.error)},\n    enrichment_completed_at = NOW()\nWHERE id = ${sqlStr(d.investor_id)};`;\nreturn [{ json: { sql, investor_id: d.investor_id, name: d.name, error: d.error } }];"
+      },
+      "id": "a1b2c3d4-0016-0000-0000-000000000010",
+      "name": "Build Failure SQL",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1140, 120]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "={{ $json.sql }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0017-0000-0000-000000000011",
+      "name": "Mark Failed",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [1360, 120],
+      "credentials": {
+        "postgres": {
+          "id": "REPLACE_WITH_PG_CRED_ID",
+          "name": "Postgres MarketUnderworld"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "REPLACE_WITH_SLACK_CHANNEL_ID",
+          "mode": "id"
+        },
+        "text": "=:warning: *Enrichment failed* — investor id `{{ $json.investor_id }}` ({{ $json.name }})\nError: {{ $json.error }}",
+        "otherOptions": {}
+      },
+      "id": "a1b2c3d4-0018-0000-0000-000000000012",
+      "name": "Slack Failure Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.2,
+      "position": [1580, 120],
+      "credentials": {
+        "slackApi": {
+          "id": "REPLACE_WITH_SLACK_CRED_ID",
+          "name": "Slack Workspace"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 5 min": {
+      "main": [[{ "node": "Claim Pending Rows", "type": "main", "index": 0 }]]
+    },
+    "Claim Pending Rows": {
+      "main": [[{ "node": "Loop Each Investor", "type": "main", "index": 0 }]]
+    },
+    "Loop Each Investor": {
+      "main": [
+        [],
+        [{ "node": "Enrichment Agent", "type": "main", "index": 0 }]
+      ]
+    },
+    "Enrichment Agent": {
+      "main": [[{ "node": "Parse Agent Output", "type": "main", "index": 0 }]]
+    },
+    "Claude Sonnet": {
+      "ai_languageModel": [[{ "node": "Enrichment Agent", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Crunchbase Tool": {
+      "ai_tool": [[{ "node": "Enrichment Agent", "type": "ai_tool", "index": 0 }]]
+    },
+    "Google Search Tool": {
+      "ai_tool": [[{ "node": "Enrichment Agent", "type": "ai_tool", "index": 0 }]]
+    },
+    "Fetch URL Tool": {
+      "ai_tool": [[{ "node": "Enrichment Agent", "type": "ai_tool", "index": 0 }]]
+    },
+    "Parse Agent Output": {
+      "main": [[{ "node": "Parse OK?", "type": "main", "index": 0 }]]
+    },
+    "Parse OK?": {
+      "main": [
+        [{ "node": "Build Update SQL", "type": "main", "index": 0 }],
+        [{ "node": "Build Failure SQL", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Update SQL": {
+      "main": [[{ "node": "Update Investor", "type": "main", "index": 0 }]]
+    },
+    "Update Investor": {
+      "main": [[{ "node": "Build Socials SQL", "type": "main", "index": 0 }]]
+    },
+    "Build Socials SQL": {
+      "main": [[{ "node": "Upsert Social", "type": "main", "index": 0 }]]
+    },
+    "Upsert Social": {
+      "main": [[{ "node": "Notify QA Slack", "type": "main", "index": 0 }]]
+    },
+    "Notify QA Slack": {
+      "main": [[{ "node": "Loop Each Investor", "type": "main", "index": 0 }]]
+    },
+    "Build Failure SQL": {
+      "main": [[{ "node": "Mark Failed", "type": "main", "index": 0 }]]
+    },
+    "Mark Failed": {
+      "main": [[{ "node": "Slack Failure Alert", "type": "main", "index": 0 }]]
+    },
+    "Slack Failure Alert": {
+      "main": [[{ "node": "Loop Each Investor", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": [
+    { "name": "investor-db", "createdAt": "2026-05-26T00:00:00.000Z" }
+  ]
+}

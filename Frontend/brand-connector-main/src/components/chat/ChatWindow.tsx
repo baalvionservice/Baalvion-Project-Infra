@@ -30,8 +30,8 @@ import {
   Timestamp,
   startAfter,
   getDocs
-} from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+} from '@/lib/fb-compat/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from '@/lib/fb-compat/storage';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useStorage } from '@/firebase';
 import { ChatMessage, Conversation } from '@/types';

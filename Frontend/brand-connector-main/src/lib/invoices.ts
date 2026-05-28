@@ -15,8 +15,8 @@ import {
   uploadBytes,
   getDownloadURL,
   FirebaseStorage,
-} from "firebase/storage";
-import { doc, updateDoc, Firestore } from "firebase/firestore";
+} from "@/lib/fb-compat/storage";
+import { doc, updateDoc, Firestore } from "@/lib/fb-compat/firestore";
 import { Transaction } from "@/types";
 
 interface InvoiceContext {

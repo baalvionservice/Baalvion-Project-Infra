@@ -6,8 +6,9 @@
 
 import authClient from './auth-client';
 
+// gateway namespace + service's own /api/v1 mount (service does NOT serve a bare /api).
 const IMPERIALPEDIA_URL =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3004/api';
+  process.env.NEXT_PUBLIC_API_URL || 'https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1';
 
 // ─── Shared types ─────────────────────────────────────────────────────────────
 

@@ -28,15 +28,14 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAuthContext } from "@/context/AuthContext";
 import { KeywordMappingRepository, KeywordMapping } from "@/lib/api/repositories/keyword-mapping.repository";
-import { useFirestore } from "@/firebase";
+import { Card } from "@/components/ui/card";
 
 /**
  * @fileOverview KeywordManager
  * Executive module for managing the platform's automated internal linking graph.
  */
 export default function KeywordManager() {
-  const db = useFirestore();
-  const repo = new KeywordMappingRepository(db);
+  const repo = new KeywordMappingRepository();
   const { toast } = useToast();
   
   const [mappings, setMappings] = useState<KeywordMapping[]>([]);

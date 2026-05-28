@@ -14,7 +14,7 @@ import { useApiKeys, useCreateApiKey, useRevokeApiKey, useDeleteApiKey } from "@
 import type { ApiKeyCreated } from "@/lib/platformClient";
 
 const codeExamples = {
-  curl: `curl -X GET "http://localhost:4000/v1/proxies" \\
+  curl: `curl -X GET "https://api.baalvion.com/v1/proxies" \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "X-Org-Id: org_demo" \\
   -H "Content-Type: application/json"`,
@@ -28,11 +28,11 @@ headers = {
 }
 
 response = requests.get(
-    "http://localhost:4000/v1/proxies",
+    "https://api.baalvion.com/v1/proxies",
     headers=headers
 )
 print(response.json())`,
-  node: `const response = await fetch('http://localhost:4000/v1/proxies', {
+  node: `const response = await fetch('https://api.baalvion.com/v1/proxies', {
   headers: {
     'Authorization': \`Bearer \${apiKey}\`,
     'X-Org-Id': 'org_demo',

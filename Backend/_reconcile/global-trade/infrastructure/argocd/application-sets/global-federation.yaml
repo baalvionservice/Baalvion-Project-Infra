@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: baalvion-global-federation
+  namespace: argocd
+spec:
+  generators:
+    - list:
+        elements:
+          - cluster: apac-sg-01
+            url: https://api.sg.baalvion.gov
+            region: apac
+          - cluster: eu-ch-01
+            url: https://api.ch.baalvion.gov
+            region: europe
+          - cluster: us-east-01
+            url: https://api.us.baalvion.gov
+            region: americas
+  template:
+    metadata:
+      name: '{{cluster}}-core-services'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/baalvion/infrastructure.git'
+        targetRevision: HEAD
+        path: kubernetes/manifests/core
+        helm:
+          parameters:
+            - name: "global.region"
+              value: "{{region}}"
+            - name: "global.clusterId"
+              value: "{{cluster}}"
+      destination:
+        server: '{{url}}'
+        namespace: sovereign-core
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m

@@ -52,8 +52,8 @@ import {
 } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useCollection, useStorage } from '@/firebase';
-import { collection, query, where, addDoc, doc, limit } from 'firebase/firestore';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { collection, query, where, addDoc, doc, limit } from '@/lib/fb-compat/firestore';
+import { ref, uploadBytesResumable, getDownloadURL } from '@/lib/fb-compat/storage';
 import { useToast } from '@/hooks/use-toast';
 import { DisputeStatus, Dispute } from '@/types';
 import { errorEmitter } from '@/firebase/error-emitter';

@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: inventory-service
+  description: TODO — describe this bounded context.
+  domain: commerce
+  division: commerce
+  context: inventory
+  owner: "@baalvion/commerce"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/commerce/inventory-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres]
+  dependsOn: [identity-platform]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/inventory"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-commerce, minReplicas: 2, maxReplicas: 10 }

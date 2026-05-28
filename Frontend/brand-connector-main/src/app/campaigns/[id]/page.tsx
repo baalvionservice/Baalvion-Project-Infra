@@ -42,7 +42,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
-import { collection, doc, setDoc, query, where, addDoc } from 'firebase/firestore';
+import { collection, doc, setDoc, query, where, addDoc } from '@/lib/fb-compat/firestore';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 import { ApplicationStatus, Campaign } from '@/types';

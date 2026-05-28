@@ -12,7 +12,7 @@ const config = {
         port:     parseInt(process.env.DB_PORT || '5432', 10),
         name:     process.env.DB_NAME     || 'baalvion_db',
         user:     process.env.DB_USER     || 'baalvion',
-        password: process.env.DB_PASSWORD || 'baalvion_dev_pass',
+        password: require('@baalvion/auth-node').requireEnv('DB_PASSWORD'), // fail-closed: no dev-default password
     },
 
     redis: {

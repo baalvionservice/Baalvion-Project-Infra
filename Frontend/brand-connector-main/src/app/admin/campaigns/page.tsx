@@ -34,7 +34,7 @@ import {
   updateDoc,
   addDoc,
   where,
-} from "firebase/firestore";
+} from "@/lib/fb-compat/firestore";
 import { useFirestore, useCollection } from "@/firebase";
 import { Campaign, CampaignStatus } from "@/types";
 import { useToast } from "@/hooks/use-toast";

@@ -1,0 +1,35 @@
+{
+  "name": "admin-service",
+  "version": "1.0.0",
+  "description": "Baalvion Identity Admin Microservice — super-admin operations, impersonation, platform stats",
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev":   "nodemon index.js",
+    "test":  "vitest run",
+    "lint":  "eslint ."
+  },
+  "dependencies": {
+    "@baalvion/auth-node": "workspace:*",
+    "express":       "^5.2.1",
+    "helmet":        "^8.1.0",
+    "cors":          "^2.8.6",
+    "cookie-parser": "^1.4.7",
+    "dotenv":        "^17.3.1",
+    "sequelize":     "^6.37.8",
+    "pg":            "^8.20.0",
+    "pg-hstore":     "^2.3.4",
+    "jsonwebtoken":  "^9.0.3",
+    "ioredis":       "^5.10.1",
+    "pino":          "^10.3.1",
+    "pino-http":     "^11.0.0",
+    "uuid":          "^11.1.0",
+    "zod":           "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "vitest":  "^4.1.7"
+  }
+}

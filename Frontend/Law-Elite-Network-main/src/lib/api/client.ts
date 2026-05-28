@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3015/v1';
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.baalvion.com/api/v1/knowledge/law/v1';
 export const TOKEN_KEY = 'baalvion_law_token';
 
 export function getToken(): string | null {

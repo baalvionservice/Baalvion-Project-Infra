@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: auth-service
+  description: TODO — describe this bounded context.
+  domain: identity
+  division: platform-core
+  context: auth
+  owner: "@baalvion/platform-core"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/services/identity/auth-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: []
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/auth"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-identity, minReplicas: 2, maxReplicas: 10 }

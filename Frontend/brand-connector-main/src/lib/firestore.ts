@@ -10,7 +10,7 @@ import {
   deleteDoc,
   DocumentData,
   WithFieldValue,
-} from "firebase/firestore";
+} from "@/lib/fb-compat/firestore";
 import { db } from "./firebase";
 
 export const getDocument = async <T>(

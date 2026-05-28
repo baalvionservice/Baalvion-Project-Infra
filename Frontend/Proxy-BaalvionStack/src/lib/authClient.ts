@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_AUTH_BASE_URL || 'http://localhost:3001/v1/auth';
+const BASE = import.meta.env.VITE_API_AUTH_BASE_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
 
 export interface AuthUser {
   id: string;

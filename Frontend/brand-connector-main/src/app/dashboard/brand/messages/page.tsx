@@ -35,7 +35,7 @@ import {
   doc, 
   updateDoc, 
   limit
-} from 'firebase/firestore';
+} from '@/lib/fb-compat/firestore';
 import { useMessages } from '@/hooks/use-realtime-data';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';

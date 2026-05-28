@@ -21,7 +21,7 @@ import {
 import { jsPDF } from "jspdf";
 import autoTable from "jspdf-autotable";
 import { format } from "date-fns";
-import { collection, addDoc, query, orderBy } from "firebase/firestore";
+import { collection, addDoc, query, orderBy } from "@/lib/fb-compat/firestore";
 import { useFirestore, useCollection } from "@/firebase";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";

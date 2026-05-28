@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { onSnapshot, Query, FirestoreError } from 'firebase/firestore';
+import { onSnapshot, Query, FirestoreError } from '@/lib/fb-compat/firestore';
 import { errorEmitter } from '../error-emitter';
 import { FirestorePermissionError } from '../errors';
 

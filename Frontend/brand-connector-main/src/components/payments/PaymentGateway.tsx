@@ -30,7 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { lockFunds } from '@/lib/escrow';
 import { useFirestore } from '@/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from '@/lib/fb-compat/firestore';
 import { CampaignStatus } from '@/types';
 
 interface PaymentGatewayProps {

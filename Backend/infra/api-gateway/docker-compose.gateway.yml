@@ -1,0 +1,33 @@
+# Baalvion API gateway — runnable Traefik stack (Phase 2 deploy + verify).
+# Stands up ONLY the gateway with the validated routing table. Backend services
+# join the same network (`baalvion-edge`) under their service-name hostnames, which
+# is exactly what dynamic.yml targets (http://auth-service:3001, etc.).
+#
+#   docker compose -f docker-compose.gateway.yml up -d
+#   ./verify-routes.sh                # Phase-2 direct-vs-gateway comparison
+#
+# This does NOT modify any service and does NOT touch frontends. Reversible:
+#   docker compose -f docker-compose.gateway.yml down
+services:
+  api-gateway:
+    image: traefik:v3.1
+    container_name: baalvion-api-gateway
+    restart: unless-stopped
+    command: ["--configFile=/etc/traefik/traefik.yml"]
+    ports:
+      # Sole public ingress on the standard web ports (Docker Desktop Kubernetes
+      # disabled, so :80/:443 are free). HTTP redirects to HTTPS (traefik.yml).
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./dynamic.yml:/etc/traefik/dynamic.yml:ro
+    networks: [baalvion-net]
+
+networks:
+  # Shared platform network — the SAME one the services + law-elite-gateway attach to,
+  # so dynamic.yml targets (http://auth-service:3001, http://law-elite-gateway:8090, …)
+  # resolve. Create once with: docker network create baalvion-net
+  baalvion-net:
+    external: true
+    name: baalvion-net

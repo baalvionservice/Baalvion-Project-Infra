@@ -13,11 +13,11 @@ export const env = {
 
   api: {
     // Primary mining-service base URL
-    miningUrl: process.env.NEXT_PUBLIC_MINING_API_URL || 'http://localhost:3003',
-    // Auth proxy (JWT issue / refresh)
-    authUrl: process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:4000/v1/auth',
+    miningUrl: process.env.NEXT_PUBLIC_MINING_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/mining',
+    // Single identity authority (auth-service) via gateway
+    authUrl: process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth',
     // Legacy alias — kept for backward-compat with older imports
-    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_MINING_API_URL || 'http://localhost:3003/api',
+    baseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_MINING_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/mining',
   },
 
   app: {

@@ -50,7 +50,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, where, deleteDoc, doc, orderBy } from 'firebase/firestore';
+import { collection, query, where, deleteDoc, doc, orderBy } from '@/lib/fb-compat/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { ApplicationStatus } from '@/types';
 import { cn } from '@/lib/utils';

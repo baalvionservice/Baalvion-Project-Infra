@@ -14,7 +14,7 @@ import {
   updateDoc,
   deleteDoc,
   serverTimestamp,
-} from "firebase/firestore";
+} from "@/lib/fb-compat/firestore";
 import { NotificationType, Notification } from "@/types";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";

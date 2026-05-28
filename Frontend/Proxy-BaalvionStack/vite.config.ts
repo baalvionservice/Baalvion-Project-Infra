@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => ({
         "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com",
         "font-src 'self' data:",
-        `connect-src 'self' ${process.env.VITE_API_AUTH_BASE_URL || 'http://localhost:3001'} ${process.env.VITE_API_PLATFORM_BASE_URL || 'http://localhost:4000'}`,
+        `connect-src 'self' ${process.env.VITE_API_AUTH_BASE_URL || 'https://api.baalvion.com'} ${process.env.VITE_API_PLATFORM_BASE_URL || 'https://api.baalvion.com'}`,
         "frame-ancestors 'none'",
         "form-action 'self'",
         "base-uri 'self'",

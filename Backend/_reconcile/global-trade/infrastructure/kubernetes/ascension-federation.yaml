@@ -1,0 +1,80 @@
+# BAALVION INFINITE SOVEREIGN ASCENSION: UNIVERSAL RUNTIME TOPOLOGY
+# Deployment Strategy: Multi-Cloud / Universal Sovereign Hypermatrix
+# Security Level: ABSOLUTE (mTLS / SPIFFE / Kyverno / Zero-Trust / Biometric)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: baalvion-ascension-coordinator
+  namespace: ascension-core
+spec:
+  replicas: 424 # Distributed across 14,240 universal clusters in blocks of 424
+  selector:
+    matchLabels:
+      app: ascension-coordinator
+  template:
+    metadata:
+      labels:
+        app: ascension-coordinator
+        security.baalvion.gov/mtls: "true"
+        tier: universal-execution
+        domain: global-kernel
+    spec:
+      containers:
+      - name: coordinator-runtime
+        image: vault.baalvion.gov/core/ascension-coordinator:v13.0.0-FINAL
+        ports:
+        - containerPort: 3000
+        envFrom:
+        - secretRef:
+            name: ascension-authority-secrets
+        resources:
+          limits:
+            cpu: "16"
+            memory: "32Gi"
+          requests:
+            cpu: "8"
+            memory: "16Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 3000
+
+---
+# SOVEREIGN ISOLATION POLICY (Kyverno)
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enforce-ascension-isolation
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: require-sovereign-mtls
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Nodes must utilize the Ascension mTLS fabric (SPIFFE) for institutional cross-talk."
+      pattern:
+        metadata:
+          labels:
+            security.baalvion.gov/mtls: "true"
+  - name: pin-data-jurisdiction
+    match:
+      any:
+      - resources:
+          kinds:
+          - PersistentVolumeClaim
+    validate:
+      message: "Data residency violation: Persistent storage must be bound to the jurisdictional universal cluster."
+      pattern:
+        metadata:
+          labels:
+            residency: "{{region}}"

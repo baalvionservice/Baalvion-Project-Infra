@@ -49,7 +49,7 @@ export default function SpecialArchivePage() {
           {/* Previous Design: Simple 2-column layout */}
           <div className="w-full lg:w-3/5 space-y-8">
             <div className="relative aspect-[4/5] bg-white border border-border shadow-luxury overflow-hidden">
-              <Image src={product.imageUrl} alt={product.name} fill className="object-cover" priority />
+              <Image src={product.imageUrl[0]} alt={product.name} fill className="object-cover" priority />
             </div>
           </div>
 

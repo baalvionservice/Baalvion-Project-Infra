@@ -17,7 +17,7 @@ import {
   query,
   where,
   getDocs,
-} from "firebase/firestore";
+} from "@/lib/fb-compat/firestore";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { BrandProfile, SubscriptionStatus } from "@/types";

@@ -37,7 +37,9 @@ module.exports = {
     audience:     process.env.JWT_AUDIENCE        || 'baalvion-platform',
     jwksUri:      process.env.JWKS_URI            || 'http://localhost:3001/.well-known/jwks.json',
     jwksTtlMs:    Number(process.env.JWKS_TTL_MS  || 300_000),
-    bypassAuth:   process.env.JWT_BYPASS_AUTH === 'true',
+    // Hardened: auth bypass is impossible in production regardless of env (default-secure).
+    // Only honored outside production for local dev.
+    bypassAuth:   process.env.NODE_ENV !== 'production' && process.env.JWT_BYPASS_AUTH === 'true',
   },
 
   rateLimit: {

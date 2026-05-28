@@ -14,7 +14,7 @@ import {
   ExternalLink,
   Trash2
 } from 'lucide-react';
-import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytesResumable, getDownloadURL } from '@/lib/fb-compat/storage';
 import { useStorage } from '@/firebase';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';

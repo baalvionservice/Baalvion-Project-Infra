@@ -21,7 +21,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
-import { doc, updateDoc, setDoc, collection, query, orderBy, addDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc, collection, query, orderBy, addDoc } from '@/lib/fb-compat/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';

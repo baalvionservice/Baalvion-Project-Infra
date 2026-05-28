@@ -1,0 +1,23 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: ai-reasoning-scaler
+  namespace: ai-runtime
+spec:
+  scaleTargetRef:
+    name: ai-orchestrator
+  minReplicaCount: 3
+  maxReplicaCount: 50
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: kafka-cluster-kafka-bootstrap.messaging:9092
+        consumerGroup: ai-reasoning-group
+        topic: baalvion.intelligence.cognition
+        lagThreshold: "100"
+    - type: prometheus
+      metadata:
+        serverAddress: http://prometheus-server.observability:9090
+        metricName: cognitive_load_index
+        threshold: "0.85"
+        query: sum(rate(ai_inference_duration_seconds_count[1m]))

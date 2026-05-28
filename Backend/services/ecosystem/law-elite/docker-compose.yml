@@ -1,0 +1,53 @@
+# Isolated legal sub-stack. The platform reaches it ONLY through the API gateway,
+# which routes /api/v1/ecosystem/law-elite → law-elite-gateway:8090 (see
+# Backend/infra/api-gateway/dynamic.yml). Internal services (user/case/payment)
+# are NOT published to the host and live on the private `law-elite` network; only
+# the gateway joins `baalvion-net` so Traefik can reach it.
+#
+# Prereq: the shared network must exist →  docker network create baalvion-net
+# Secret:  export LAW_ELITE_JWT_SECRET=<random>   (no insecure default any more)
+services:
+  law-elite-gateway:
+    build: ./gateway
+    container_name: law-elite-gateway
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    environment:
+      - PORT=8090
+      - USER_SERVICE_URL=http://user-service:3001
+      - CASE_SERVICE_URL=http://case-service:3002
+      - PAYMENT_SERVICE_URL=http://payment-service:8080
+      - JWT_SECRET=${LAW_ELITE_JWT_SECRET:?LAW_ELITE_JWT_SECRET must be set}
+    depends_on: [user-service, case-service, payment-service]
+    networks: [law-elite, baalvion-net]
+
+  user-service:
+    build: ./services/user-service
+    container_name: law-elite-user
+    restart: unless-stopped
+    environment:
+      - PORT=3001
+    networks: [law-elite]          # internal only — never published
+
+  case-service:
+    build: ./services/case-service
+    container_name: law-elite-case
+    restart: unless-stopped
+    environment:
+      - PORT=3002
+    networks: [law-elite]          # internal only — never published
+
+  payment-service:
+    build: ./services/payment-service
+    container_name: law-elite-payment
+    restart: unless-stopped
+    environment:
+      - SERVER_PORT=8080
+    networks: [law-elite]          # internal only — never published (Java/Spring)
+
+networks:
+  law-elite:
+    name: law-elite
+  baalvion-net:
+    external: true                 # shared platform net; create with: docker network create baalvion-net

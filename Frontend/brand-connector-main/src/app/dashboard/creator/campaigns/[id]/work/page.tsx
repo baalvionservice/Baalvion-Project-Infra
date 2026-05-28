@@ -36,7 +36,7 @@ import { Separator } from '@/components/ui/separator';
 import { DeliverableUpload } from '@/components/dashboard/creator/DeliverableUpload';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, doc, query, where, orderBy } from 'firebase/firestore';
+import { collection, doc, query, where, orderBy } from '@/lib/fb-compat/firestore';
 import { DeliverableStatus } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';

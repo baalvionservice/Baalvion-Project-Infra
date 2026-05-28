@@ -12,7 +12,7 @@ import { cookies } from "next/headers";
  * irAuthClient on the client, or passed as a server-side header here).
  */
 async function getDashboardData(authToken?: string) {
-  const IR_URL = process.env.NEXT_PUBLIC_IR_API_URL || 'http://localhost:3008';
+  const IR_URL = process.env.NEXT_PUBLIC_IR_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ir';
 
   // Server-side helper that forwards the JWT without going through irAuthClient
   // (which requires window/localStorage). We directly call the IR service with

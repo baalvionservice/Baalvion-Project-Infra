@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useDoc, useCollection } from '@/firebase';
-import { doc, updateDoc, collection, addDoc, query, where, orderBy, limit } from 'firebase/firestore';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { doc, updateDoc, collection, addDoc, query, where, orderBy, limit } from '@/lib/fb-compat/firestore';
+import { sendPasswordResetEmail } from '@/lib/fb-compat/auth';
 import { auth } from '@/lib/firebase';
 import {
   User,

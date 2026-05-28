@@ -1,10 +1,10 @@
 'use client';
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { FirebaseApp } from 'firebase/app';
-import { Firestore } from 'firebase/firestore';
-import { Auth } from 'firebase/auth';
-import { FirebaseStorage } from 'firebase/storage';
+import { FirebaseApp } from '@/lib/fb-compat/app';
+import { Firestore } from '@/lib/fb-compat/firestore';
+import { Auth } from '@/lib/fb-compat/auth';
+import { FirebaseStorage } from '@/lib/fb-compat/storage';
 
 interface FirebaseContextType {
   app?: FirebaseApp;

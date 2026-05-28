@@ -6,7 +6,7 @@
 
 import irAuthClient from './auth-client';
 
-const IR_URL = process.env.NEXT_PUBLIC_IR_API_URL || 'http://localhost:3008';
+const IR_URL = process.env.NEXT_PUBLIC_IR_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ir';
 
 // ─── Shared types ─────────────────────────────────────────────────────────────
 

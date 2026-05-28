@@ -22,7 +22,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:3006 http://localhost:4000 https://*.firebaseio.com https://*.googleapis.com wss://*.baalvion.com",
+      "connect-src 'self' https://api.baalvion.com wss://api.baalvion.com https://*.firebaseio.com https://*.googleapis.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -32,6 +32,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Single env-driven base for the ~61 BFF route handlers. Defaulting it here makes
+  // process.env.BRAND_API_URL always defined, so the per-file `|| 'http://localhost:3006'`
+  // fallbacks are never reached (no individual route edits needed). The service's
+  // additive `/api` compat mount makes the BFF's `${BRAND_API_URL}/api/<resource>` resolve.
+  env: {
+    BRAND_API_URL: process.env.BRAND_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/brand-connector',
+  },
   typescript: {
     ignoreBuildErrors: false,
   },

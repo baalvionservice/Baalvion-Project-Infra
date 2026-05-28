@@ -1,7 +1,7 @@
 "use client";
 
 import { useCollection, useDoc, useFirestore } from "@/firebase";
-import { collection, query, where, orderBy, limit } from "firebase/firestore";
+import { collection, query, where, orderBy, limit } from "@/lib/fb-compat/firestore";
 import { useMemo } from "react";
 import { Notification, Campaign, Wallet } from "@/types";
 

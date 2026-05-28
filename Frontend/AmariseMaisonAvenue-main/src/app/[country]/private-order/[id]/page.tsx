@@ -124,9 +124,9 @@ export default function PrivateOrderPage() {
           {/* Left Narrative Column */}
           <div className="lg:w-3/5 space-y-16">
             <div className="relative aspect-[4/5] bg-white border border-border shadow-luxury group overflow-hidden">
-              <Image 
-                src={product.imageUrl} 
-                alt={product.name} 
+              <Image
+                src={product.imageUrl[0]}
+                alt={product.name}
                 fill 
                 className="object-contain p-12 transition-transform duration-[3s] group-hover:scale-105" 
               />

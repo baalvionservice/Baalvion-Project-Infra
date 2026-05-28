@@ -5,8 +5,8 @@
  */
 
 // ── Base URLs ──────────────────────────────────────────────────────────────
-const MINING_URL = process.env.NEXT_PUBLIC_MINING_API_URL || 'http://localhost:3003';
-const AUTH_URL   = process.env.NEXT_PUBLIC_AUTH_URL       || 'http://localhost:4000/v1/auth';
+const MINING_URL = process.env.NEXT_PUBLIC_MINING_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/mining';
+const AUTH_URL   = process.env.NEXT_PUBLIC_AUTH_URL       || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
 
 // ── Shared Response Types ──────────────────────────────────────────────────
 

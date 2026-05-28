@@ -16,8 +16,8 @@ import {
   increment,
   Firestore,
   getDoc,
-} from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+} from "@/lib/fb-compat/firestore";
+import { getStorage } from "@/lib/fb-compat/storage";
 import { errorEmitter } from "@/firebase/error-emitter";
 import { FirestorePermissionError } from "@/firebase/errors";
 import { generateAndAttachInvoice } from "./invoices";

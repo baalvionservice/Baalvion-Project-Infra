@@ -1,6 +1,13 @@
 # ADR-0004: Kong for north-south API gateway; Istio for east-west mesh
 
-**Status:** Accepted · **Date:** 2026-05-26 · **Deciders:** Architecture, SRE, Platform Core
+**Status:** SUPERSEDED (2026-05-27) → **Traefik** is the single north-south gateway.
+The Kong declarative configs and the Kong k8s ingress were removed; routing now
+lives in `Backend/infra/api-gateway/dynamic.yml` (Traefik file provider) and is
+deployed via `Backend/infra/kubernetes/ingress.yml`. Rationale: one gateway, no
+duplicate routing tables, and auth is enforced per-service via `@baalvion/auth-node`
+(RS256/JWKS) rather than at the edge. Istio (east-west mTLS) is unchanged.
+
+**Original status:** Accepted · **Date:** 2026-05-26 · **Deciders:** Architecture, SRE, Platform Core
 
 ## Context
 We need a centralized edge for client traffic (auth, rate limiting, routing, API

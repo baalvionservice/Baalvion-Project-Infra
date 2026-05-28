@@ -26,7 +26,7 @@ import {
   doc,
   writeBatch,
   serverTimestamp,
-} from "firebase/firestore";
+} from "@/lib/fb-compat/firestore";
 
 const NICHES = [
   "Tech & Gadgets",

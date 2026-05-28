@@ -1,0 +1,149 @@
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# BAALVION LAW-ELITE — isolated legal sub-stack (own namespace, own identity).
+# Reachable from the platform ONLY through Traefik, which routes
+# /api/v1/ecosystem/law-elite → law-elite-gateway:8090.
+#
+# Isolation: gateway is the only ingress; user/case/payment are ClusterIP and
+# locked down by NetworkPolicy so ONLY the gateway pod can reach them. law-elite
+# keeps its OWN HS256 secret (NOT the platform RS256 authority) — see the audit;
+# migration is deferred (Phase 4 dependency report).
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: baalvion-legal
+  labels: { tier: legal, istio-injection: enabled }
+---
+# Cross-namespace alias so Traefik (ns baalvion) resolves the short name
+# `law-elite-gateway:8090` exactly as dynamic.yml declares it.
+apiVersion: v1
+kind: Service
+metadata:
+  name: law-elite-gateway
+  namespace: baalvion
+spec:
+  type: ExternalName
+  externalName: law-elite-gateway.baalvion-legal.svc.cluster.local
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: law-elite-gateway
+  namespace: baalvion-legal
+  labels: { app: law-elite-gateway, tier: legal }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: law-elite-gateway } }
+  template:
+    metadata:
+      labels: { app: law-elite-gateway, tier: legal }
+    spec:
+      securityContext: { runAsNonRoot: true, runAsUser: 1000, seccompProfile: { type: RuntimeDefault } }
+      containers:
+        - name: gateway
+          image: ghcr.io/baalvion/law-elite-gateway:latest
+          ports: [{ name: http, containerPort: 8090 }]
+          env:
+            - { name: PORT, value: "8090" }
+            - { name: USER_SERVICE_URL, value: "http://user-service:3001" }
+            - { name: CASE_SERVICE_URL, value: "http://case-service:3002" }
+            - { name: PAYMENT_SERVICE_URL, value: "http://payment-service:8080" }
+            - name: JWT_SECRET
+              valueFrom: { secretKeyRef: { name: law-elite-secrets, key: jwt-secret } }
+          readinessProbe: { httpGet: { path: /health, port: http }, periodSeconds: 10 }
+          securityContext: { allowPrivilegeEscalation: false, readOnlyRootFilesystem: true, capabilities: { drop: [ALL] } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: law-elite-gateway, namespace: baalvion-legal, labels: { app: law-elite-gateway } }
+spec:
+  selector: { app: law-elite-gateway }
+  ports: [{ name: http, port: 8090, targetPort: http }]
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: user-service, namespace: baalvion-legal, labels: { app: user-service, tier: legal } }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: user-service } }
+  template:
+    metadata: { labels: { app: user-service, tier: legal } }
+    spec:
+      containers:
+        - name: user-service
+          image: ghcr.io/baalvion/law-elite-user:latest
+          ports: [{ name: http, containerPort: 3001 }]
+          env: [{ name: PORT, value: "3001" }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: user-service, namespace: baalvion-legal }
+spec: { selector: { app: user-service }, ports: [{ port: 3001, targetPort: http }] }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: case-service, namespace: baalvion-legal, labels: { app: case-service, tier: legal } }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: case-service } }
+  template:
+    metadata: { labels: { app: case-service, tier: legal } }
+    spec:
+      containers:
+        - name: case-service
+          image: ghcr.io/baalvion/law-elite-case:latest
+          ports: [{ name: http, containerPort: 3002 }]
+          env: [{ name: PORT, value: "3002" }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: case-service, namespace: baalvion-legal }
+spec: { selector: { app: case-service }, ports: [{ port: 3002, targetPort: http }] }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: payment-service, namespace: baalvion-legal, labels: { app: payment-service, tier: legal } }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: payment-service } }
+  template:
+    metadata: { labels: { app: payment-service, tier: legal } }
+    spec:
+      containers:
+        - name: payment-service
+          image: ghcr.io/baalvion/law-elite-payment:latest   # Java/Spring
+          ports: [{ name: http, containerPort: 8080 }]
+          env: [{ name: SERVER_PORT, value: "8080" }]
+---
+apiVersion: v1
+kind: Service
+metadata: { name: payment-service, namespace: baalvion-legal }
+spec: { selector: { app: payment-service }, ports: [{ port: 8080, targetPort: http }] }
+---
+# Default-deny ingress in the namespace…
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: default-deny-ingress, namespace: baalvion-legal }
+spec: { podSelector: {}, policyTypes: [Ingress] }
+---
+# …only the gateway pod may reach the internal services.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-from-gateway, namespace: baalvion-legal }
+spec:
+  podSelector: { matchExpressions: [{ key: app, operator: In, values: [user-service, case-service, payment-service] }] }
+  policyTypes: [Ingress]
+  ingress:
+    - from: [{ podSelector: { matchLabels: { app: law-elite-gateway } } }]
+---
+# Gateway accepts ingress only from the Traefik namespace.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: { name: allow-gateway-from-traefik, namespace: baalvion-legal }
+spec:
+  podSelector: { matchLabels: { app: law-elite-gateway } }
+  policyTypes: [Ingress]
+  ingress:
+    - from: [{ namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: baalvion } } }]
+      ports: [{ protocol: TCP, port: 8090 }]

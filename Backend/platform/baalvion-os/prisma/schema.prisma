@@ -1,0 +1,581 @@
+// Baalvion OS — unified data model (replaces Firestore)
+// One PostgreSQL database, dedicated schema `os` so it can run beside the
+// legacy per-service schemas during cut-over, then become canonical.
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures  = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["os"]
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Enums
+// ─────────────────────────────────────────────────────────────────────────────
+enum UserStatus {
+  active
+  suspended
+  pending
+  deleted
+
+  @@schema("os")
+}
+
+enum JobStatus {
+  draft
+  open
+  paused
+  closed
+  archived
+
+  @@schema("os")
+}
+
+enum ApplicationStatus {
+  applied
+  screening
+  shortlisted
+  interview
+  offer
+  hired
+  rejected
+  withdrawn
+
+  @@schema("os")
+}
+
+enum CampaignStatus {
+  draft
+  active
+  paused
+  completed
+  cancelled
+
+  @@schema("os")
+}
+
+enum DeliverableStatus {
+  pending
+  submitted
+  approved
+  revision_requested
+  rejected
+
+  @@schema("os")
+}
+
+enum TransactionStatus {
+  pending
+  held
+  released
+  refunded
+  failed
+
+  @@schema("os")
+}
+
+enum NotificationChannel {
+  in_app
+  email
+  push
+
+  @@schema("os")
+}
+
+enum FileScope {
+  resume
+  image
+  document
+  invoice
+  deliverable
+  avatar
+  other
+
+  @@schema("os")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Identity & RBAC  (Keycloak is the IdP; these mirror/extend it locally)
+// ─────────────────────────────────────────────────────────────────────────────
+model User {
+  id           String     @id @default(uuid()) @db.Uuid
+  keycloakId   String     @unique @map("keycloak_id")
+  email        String     @unique
+  name         String?
+  avatarUrl    String?    @map("avatar_url")
+  status       UserStatus @default(active)
+  orgId        String?    @map("org_id") @db.Uuid
+  metadata     Json       @default("{}")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  roles            UserRole[]
+  jobsCreated      Job[]               @relation("JobCreatedBy")
+  applications     JobApplication[]
+  creator          Creator?
+  notifications    Notification[]
+  messagesSent     Message[]           @relation("MessageSender")
+  files            FileObject[]
+  auditLogs        SystemLog[]
+
+  @@index([orgId])
+  @@map("users")
+  @@schema("os")
+}
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique // matches Keycloak realm role
+  name        String
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  users       UserRole[]
+  permissions RolePermission[]
+
+  @@map("roles")
+  @@schema("os")
+}
+
+model Permission {
+  id          String   @id @default(uuid()) @db.Uuid
+  key         String   @unique // e.g. "jobs:create", "campaigns:approve"
+  description String?
+
+  roles RolePermission[]
+
+  @@map("permissions")
+  @@schema("os")
+}
+
+model UserRole {
+  userId String @map("user_id") @db.Uuid
+  roleId String @map("role_id") @db.Uuid
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+  @@map("user_roles")
+  @@schema("os")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+  @@schema("os")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Jobs domain  (Baalvion-Jobs-Portal: jobs, candidates, applications)
+// ─────────────────────────────────────────────────────────────────────────────
+model Job {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+  department  String?
+  location    String?
+  remote      Boolean   @default(false)
+  employmentType String? @map("employment_type")
+  salaryMin   Decimal?  @map("salary_min") @db.Decimal(15, 2)
+  salaryMax   Decimal?  @map("salary_max") @db.Decimal(15, 2)
+  currency    String    @default("USD")
+  status      JobStatus @default(draft)
+  tags        String[]
+  createdById String?   @map("created_by_id") @db.Uuid
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  createdBy    User?            @relation("JobCreatedBy", fields: [createdById], references: [id])
+  applications JobApplication[]
+
+  @@index([status])
+  @@index([department])
+  @@map("jobs")
+  @@schema("os")
+}
+
+model Candidate {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String
+  name      String?
+  phone     String?
+  resumeKey String?  @map("resume_key") // S3 object key
+  profile   Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  applications JobApplication[]
+
+  @@unique([email])
+  @@map("candidates")
+  @@schema("os")
+}
+
+model JobApplication {
+  id          String            @id @default(uuid()) @db.Uuid
+  jobId       String            @map("job_id") @db.Uuid
+  candidateId String?           @map("candidate_id") @db.Uuid
+  userId      String?           @map("user_id") @db.Uuid
+  status      ApplicationStatus @default(applied)
+  coverLetter String?           @map("cover_letter")
+  resumeKey   String?           @map("resume_key")
+  answers     Json              @default("{}")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  job       Job        @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidate Candidate? @relation(fields: [candidateId], references: [id])
+  user      User?      @relation(fields: [userId], references: [id])
+
+  @@index([jobId])
+  @@index([status])
+  @@map("job_applications")
+  @@schema("os")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Content / CMS  (articles, cms pages)
+// ─────────────────────────────────────────────────────────────────────────────
+model Article {
+  id          String    @id @default(uuid()) @db.Uuid
+  slug        String    @unique
+  title       String
+  body        String?
+  excerpt     String?
+  coverKey    String?   @map("cover_key")
+  authorId    String?   @map("author_id") @db.Uuid
+  tags        String[]
+  status      String    @default("draft") // draft | published | archived
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("articles")
+  @@schema("os")
+}
+
+model CmsPage {
+  id        String   @id @default(uuid()) @db.Uuid
+  slug      String   @unique
+  title     String
+  blocks    Json     @default("[]") // structured page blocks
+  published Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("cms_pages")
+  @@schema("os")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Notifications / settings / system logs  (shared)
+// ─────────────────────────────────────────────────────────────────────────────
+model Notification {
+  id        String              @id @default(uuid()) @db.Uuid
+  userId    String              @map("user_id") @db.Uuid
+  channel   NotificationChannel @default(in_app)
+  type      String
+  title     String
+  body      String?
+  data      Json                @default("{}")
+  readAt    DateTime?           @map("read_at")
+  createdAt DateTime            @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@map("notifications")
+  @@schema("os")
+}
+
+model Broadcast {
+  id        String   @id @default(uuid()) @db.Uuid
+  title     String
+  body      String?
+  audience  Json     @default("{}") // targeting rules
+  sentAt    DateTime? @map("sent_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("broadcasts")
+  @@schema("os")
+}
+
+model Setting {
+  id        String   @id @default(uuid()) @db.Uuid
+  scope     String   @default("global") // global | org:<id> | user:<id>
+  key       String
+  value     Json     @default("{}")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([scope, key])
+  @@map("settings")
+  @@schema("os")
+}
+
+model SystemLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  actorId   String?  @map("actor_id") @db.Uuid
+  action    String
+  entity    String?
+  entityId  String?  @map("entity_id")
+  ip        String?
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  actor User? @relation(fields: [actorId], references: [id])
+
+  @@index([action])
+  @@index([entity, entityId])
+  @@map("system_logs")
+  @@schema("os")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// File storage metadata  (S3 / MinIO)
+// ─────────────────────────────────────────────────────────────────────────────
+model FileObject {
+  id          String    @id @default(uuid()) @db.Uuid
+  ownerId     String?   @map("owner_id") @db.Uuid
+  scope       FileScope @default(other)
+  bucket      String
+  key         String    @unique
+  filename    String?
+  contentType String?   @map("content_type")
+  sizeBytes   Int?      @map("size_bytes")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  owner User? @relation(fields: [ownerId], references: [id])
+
+  @@map("file_objects")
+  @@schema("os")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Brand-connector domain  (creators, campaigns, deliverables, messaging, …)
+// ─────────────────────────────────────────────────────────────────────────────
+model Creator {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @unique @map("user_id") @db.Uuid
+  handle      String   @unique
+  bio         String?
+  niches      String[]
+  followers   Int      @default(0)
+  verified    Boolean  @default(false)
+  rateCard    Json     @default("{}") @map("rate_card")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applications  CampaignApplication[]
+  portfolio     PortfolioItem[]
+
+  @@map("creators")
+  @@schema("os")
+}
+
+model Campaign {
+  id          String         @id @default(uuid()) @db.Uuid
+  brandUserId String         @map("brand_user_id") @db.Uuid
+  title       String
+  brief       String?
+  budget      Decimal?       @db.Decimal(15, 2)
+  currency    String         @default("USD")
+  status      CampaignStatus @default(draft)
+  startsAt    DateTime?      @map("starts_at")
+  endsAt      DateTime?      @map("ends_at")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  applications CampaignApplication[]
+  deliverables Deliverable[]
+  invites      Invite[]
+
+  @@index([status])
+  @@map("campaigns")
+  @@schema("os")
+}
+
+model CampaignApplication {
+  id         String            @id @default(uuid()) @db.Uuid
+  campaignId String            @map("campaign_id") @db.Uuid
+  creatorId  String            @map("creator_id") @db.Uuid
+  status     ApplicationStatus @default(applied)
+  pitch      String?
+  quote      Decimal?          @db.Decimal(15, 2)
+  createdAt  DateTime          @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  creator  Creator  @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, creatorId])
+  @@map("campaign_applications")
+  @@schema("os")
+}
+
+model Deliverable {
+  id          String            @id @default(uuid()) @db.Uuid
+  campaignId  String            @map("campaign_id") @db.Uuid
+  creatorId   String            @map("creator_id") @db.Uuid
+  title       String
+  status      DeliverableStatus @default(pending)
+  fileKey     String?           @map("file_key")
+  notes       String?
+  dueAt       DateTime?         @map("due_at")
+  submittedAt DateTime?         @map("submitted_at")
+  createdAt   DateTime          @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("deliverables")
+  @@schema("os")
+}
+
+model Invite {
+  id         String   @id @default(uuid()) @db.Uuid
+  campaignId String   @map("campaign_id") @db.Uuid
+  creatorId  String?  @map("creator_id") @db.Uuid
+  email      String?
+  status     String   @default("sent") // sent | accepted | declined | expired
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("invites")
+  @@schema("os")
+}
+
+model PortfolioItem {
+  id        String   @id @default(uuid()) @db.Uuid
+  creatorId String   @map("creator_id") @db.Uuid
+  title     String?
+  mediaKey  String?  @map("media_key")
+  url       String?
+  meta      Json     @default("{}")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  creator Creator @relation(fields: [creatorId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_items")
+  @@schema("os")
+}
+
+model Conversation {
+  id           String    @id @default(uuid()) @db.Uuid
+  participants String[]   // user ids
+  subject      String?
+  lastMessageAt DateTime? @map("last_message_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  messages Message[]
+
+  @@map("conversations")
+  @@schema("os")
+}
+
+model Message {
+  id             String   @id @default(uuid()) @db.Uuid
+  conversationId String   @map("conversation_id") @db.Uuid
+  senderId       String   @map("sender_id") @db.Uuid
+  body           String?
+  attachmentKey  String?  @map("attachment_key")
+  readBy         String[] @map("read_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id])
+
+  @@index([conversationId, createdAt])
+  @@map("messages")
+  @@schema("os")
+}
+
+model Dispute {
+  id         String   @id @default(uuid()) @db.Uuid
+  campaignId String?  @map("campaign_id") @db.Uuid
+  openedById String   @map("opened_by_id") @db.Uuid
+  reason     String
+  status     String   @default("open") // open | reviewing | resolved | rejected
+  resolution String?
+  evidenceKey String? @map("evidence_key")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  @@map("disputes")
+  @@schema("os")
+}
+
+model Transaction {
+  id          String            @id @default(uuid()) @db.Uuid
+  campaignId  String?           @map("campaign_id") @db.Uuid
+  payerId     String?           @map("payer_id") @db.Uuid
+  payeeId     String?           @map("payee_id") @db.Uuid
+  amount      Decimal           @db.Decimal(15, 2)
+  currency    String            @default("USD")
+  status      TransactionStatus @default(pending)
+  type        String            @default("payment") // payment | payout | refund | escrow
+  invoiceKey  String?           @map("invoice_key")
+  externalRef String?           @map("external_ref")
+  createdAt   DateTime          @default(now()) @map("created_at")
+  updatedAt   DateTime          @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("transactions")
+  @@schema("os")
+}
+
+model Review {
+  id         String   @id @default(uuid()) @db.Uuid
+  campaignId String?  @map("campaign_id") @db.Uuid
+  authorId   String   @map("author_id") @db.Uuid
+  subjectId  String   @map("subject_id") @db.Uuid
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("reviews")
+  @@schema("os")
+}
+
+model SupportTicket {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @map("user_id") @db.Uuid
+  subject   String
+  body      String?
+  priority  String   @default("normal")
+  status    String   @default("open")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@map("support_tickets")
+  @@schema("os")
+}
+
+model SubscriptionPlan {
+  id        String   @id @default(uuid()) @db.Uuid
+  key       String   @unique
+  name      String
+  priceCents Int     @map("price_cents")
+  currency  String   @default("USD")
+  features  Json     @default("[]")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("subscription_plans")
+  @@schema("os")
+}

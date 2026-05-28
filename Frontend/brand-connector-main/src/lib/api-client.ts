@@ -5,9 +5,9 @@
  */
 
 const BRAND_URL =
-  process.env.NEXT_PUBLIC_BRAND_API_URL || 'http://localhost:3006';
+  process.env.NEXT_PUBLIC_BRAND_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/brand-connector';
 const AUTH_URL =
-  process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:4000/v1/auth';
+  process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
 
 // ─── Token helpers ─────────────────────────────────────────────────────────────
 const TOKEN_KEY = 'baalvion_brand_token';

@@ -1,9 +1,9 @@
 /**
  * Imperialpedia Auth Client
- * Handles JWT authentication against proxy-backend at :4000/v1/auth
+ * Authenticates against the SINGLE identity authority (auth-service) via the gateway.
  */
 
-const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:4000/v1/auth';
+const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
 const TOKEN_KEY = 'imperialpedia_access_token';
 const REFRESH_KEY = 'imperialpedia_refresh_token';
 

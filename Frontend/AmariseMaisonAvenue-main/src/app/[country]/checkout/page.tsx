@@ -23,8 +23,10 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { paymentService } from "@/lib/services/paymentService";
+import { placeOrder } from "@/lib/checkout";
 import { apiOrchestrator } from "@/lib/api/orchestrator";
+import { handleNotImplementedError } from "@/lib/feature-policy";
+import { onMissingCheckoutDependency } from "@/lib/checkout-policy";
 import { PaymentGateway, CountryCode } from "@/lib/types";
 import { TaxEngine } from "@/lib/finance/tax-engine";
 import { RiskEngine } from "@/lib/fraud/risk-engine";
@@ -43,6 +45,7 @@ export default function CheckoutPage() {
     getLocalizedPrice,
     taxRules,
     recordFraudLog,
+    catalogSource,
   } = useAppStore();
   const { country } = useParams();
   const searchParams = useSearchParams();
@@ -60,6 +63,10 @@ export default function CheckoutPage() {
   const [inventoryLockId, setInventoryLockId] = useState<string | null>(null);
   const [lockedFXRate, setLockedFXRate] = useState<number | null>(null);
   const [fraudBlocked, setFraudBlocked] = useState(false);
+  // Stable per-checkout idempotency key — repeated submits/retries dedupe server-side.
+  const idempotencyKeyRef = React.useRef(
+    `amarise-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  );
 
   // Prevent hydration mismatch for random order ID
   useEffect(() => {
@@ -149,13 +156,35 @@ export default function CheckoutPage() {
         currentUser?.id || "guest"
       );
 
-      if (lockRes.status === "success") {
+      if (lockRes.status === "success" && lockRes.data) {
         setInventoryLockId(lockRes.data.lock_id);
         const currentHubRate =
           fxRates.find((r) => r.currencyCode === currentCountryConfig?.currency)
             ?.rate || 1;
         setLockedFXRate(currentHubRate);
         setStep(2);
+      } else if (lockRes.code === 501) {
+        // Inventory lock has no backend → CONTINUITY policy: proceed WITHOUT a reservation,
+        // logging an explicit warning (no silent failure, no permanent hard block).
+        handleNotImplementedError("inventoryLock", lockRes.error);
+        const decision = onMissingCheckoutDependency("inventoryLock");
+        if (decision.proceed) {
+          const currentHubRate =
+            fxRates.find((r) => r.currencyCode === currentCountryConfig?.currency)
+              ?.rate || 1;
+          setLockedFXRate(currentHubRate);
+          toast({
+            title: "Proceeding to Settlement",
+            description: "Inventory reservation is unavailable; continuing without a hold.",
+          });
+          setStep(2);
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Checkout Unavailable",
+            description: decision.message,
+          });
+        }
       } else {
         toast({
           variant: "destructive",
@@ -170,79 +199,102 @@ export default function CheckoutPage() {
 
   const handlePlaceOrder = async () => {
     setIsSettling(true);
-    const idempotencyKey = `maison_set_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 5)}`;
+
+    // Phase 4: fallback checkout is FORBIDDEN — never place a real order against an
+    // offline/mock catalog (that would mix fallback products with real orders).
+    if (catalogSource !== "backend") {
+      setIsSettling(false);
+      toast({
+        variant: "destructive",
+        title: "Checkout Unavailable",
+        description:
+          "The commerce backend is offline; orders cannot be placed against the offline catalog.",
+      });
+      return;
+    }
 
     try {
-      const response = await paymentService.createPaymentIntent({
-        amount: totalYield,
-        currency: countryCode.toUpperCase(),
-        gateway: selectedGateway,
-        userId: currentUser?.id || "guest",
-        tenantId: activeBrandId,
-        idempotencyKey,
+      // REAL backend order is the source of truth (order-service is items-based).
+      const result = await placeOrder({
+        lines: cart.map((c) => ({
+          id: c.id,
+          productId: c.id, // backend product uuid (catalog is backend-driven; fallback checkout is blocked)
+          name: c.name,
+          basePrice: c.basePrice,
+          quantity: c.quantity,
+        })),
+        currencyCode: currentCountryConfig?.currency || "USD",
+        shippingAmount: 0,
+        customerId: currentUser?.id,
+        idempotencyKey: idempotencyKeyRef.current,
+        // shippingAddress omitted: the form lacks a full address (addressSchema requires
+        // address1/city/countryCode) — a partial would fail backend validation.
       });
 
-      if (response.success) {
-        const orderId = `AM-${(Math.random() * 10000).toFixed(0)}`;
-        const invoiceId = `inv-${Date.now()}`;
-        const customerName = `${firstName} ${lastName}`;
-
-        createInvoice({
-          id: invoiceId,
-          orderId,
-          customerName,
-          amount: totalYield,
-          currency: countryCode.toUpperCase(),
-          status: selectedGateway === "BANK_TRANSFER" ? "pending" : "paid",
-          date: new Date().toISOString(),
-          taxAmount: taxCalculation.totalTax,
-          taxRate: (taxCalculation.totalTax / taxCalculation.subtotal) * 100,
-          complianceCertified: true,
-          brandId: activeBrandId,
-          gateway: selectedGateway,
-          fxRate: lockedFXRate || 1,
-        });
-
-        createTransaction({
-          id: `tx-${Date.now()}`,
-          country: countryCode as CountryCode,
-          type: selectedPlan ? "Subscription" : "Sale",
-          clientName: customerName,
-          amount: totalYield,
-          netAmount: taxCalculation.subtotal,
-          taxAmount: taxCalculation.totalTax,
-          currency: countryCode.toUpperCase(),
-          status: selectedGateway === "BANK_TRANSFER" ? "Pending" : "Settled",
-          timestamp: new Date().toISOString(),
-          invoiceId: invoiceId,
-          brandId: activeBrandId,
-          artifactName: selectedPlan
-            ? selectedPlan.name
-            : cart[0]?.name || "Atelier Bundle",
-          isProvenanceCertified: true,
-          gateway: selectedGateway,
-          lockedRate: lockedFXRate || 1,
-        });
-
+      if (!result.ok) {
         setIsSettling(false);
-        setStep(3);
-        clearCart();
+        // Phase 7: failure visibility — never a silent degradation.
+        console.error("[checkout] backend order creation failed:", result.error);
         toast({
-          title: response.gateway_order_id
-            ? "Order Created"
-            : "Settlement Confirmed",
-          description: response.message,
+          variant: "destructive",
+          title: "Order Failed",
+          description: result.error.message, // explicit — no fake confirmation
         });
+        return;
       }
+
+      const order = result.data;
+      setOrderRef(order.id);
+
+      // Local MIRROR for the admin/account demo views — NOT the order truth (backend is).
+      const customerName = `${firstName} ${lastName}`;
+      const invoiceId = `inv-${order.id}`;
+      createInvoice({
+        id: invoiceId,
+        orderId: order.id,
+        customerName,
+        amount: totalYield,
+        currency: countryCode.toUpperCase(),
+        status: selectedGateway === "BANK_TRANSFER" ? "pending" : "paid",
+        date: new Date().toISOString(),
+        taxAmount: taxCalculation.totalTax,
+        taxRate: (taxCalculation.totalTax / taxCalculation.subtotal) * 100,
+        complianceCertified: true,
+        brandId: activeBrandId,
+        gateway: selectedGateway,
+        fxRate: lockedFXRate || 1,
+      });
+      createTransaction({
+        id: `tx-${order.id}`,
+        country: countryCode as CountryCode,
+        type: selectedPlan ? "Subscription" : "Sale",
+        clientName: customerName,
+        amount: totalYield,
+        netAmount: taxCalculation.subtotal,
+        taxAmount: taxCalculation.totalTax,
+        currency: countryCode.toUpperCase(),
+        status: selectedGateway === "BANK_TRANSFER" ? "Pending" : "Settled",
+        timestamp: new Date().toISOString(),
+        invoiceId,
+        brandId: activeBrandId,
+        artifactName: selectedPlan
+          ? selectedPlan.name
+          : cart[0]?.name || "Atelier Bundle",
+        isProvenanceCertified: true,
+        gateway: selectedGateway,
+        lockedRate: lockedFXRate || 1,
+      });
+
+      setIsSettling(false);
+      setStep(3);
+      clearCart();
+      toast({ title: "Order Created", description: `Order ${order.id} confirmed.` });
     } catch (e) {
       setIsSettling(false);
       toast({
         variant: "destructive",
-        title: "Settlement Failed",
-        description:
-          "The payment gateway rejected the intent. Please try another method.",
+        title: "Order Failed",
+        description: e instanceof Error ? e.message : "Unexpected error.",
       });
     }
   };
@@ -253,6 +305,33 @@ export default function CheckoutPage() {
       router.push(`/${countryCode}/cart`);
     }
   }, [cart.length, selectedPlan, step, router, countryCode]);
+
+  // Phase 4: explicit unavailable state when the catalog is the offline mock fallback.
+  if (catalogSource === "fallback") {
+    return (
+      <div className="container mx-auto px-6 py-40 flex flex-col items-center justify-center space-y-10 animate-fade-in text-center">
+        <div className="p-12 bg-amber-50 border border-amber-100 rounded-full text-amber-600">
+          <AlertTriangle className="w-20 h-20" />
+        </div>
+        <div className="space-y-4">
+          <h1 className="text-5xl font-headline font-bold italic tracking-tight">
+            Checkout Unavailable
+          </h1>
+          <p className="text-gray-500 font-light italic max-w-md mx-auto">
+            Our acquisition registry is temporarily offline. Browsing remains available;
+            settlement is disabled until the registry is restored.
+          </p>
+        </div>
+        <Button
+          onClick={() => router.push(`/${countryCode}`)}
+          size="lg"
+          className="rounded-none bg-black hover:bg-plum px-16 h-16 text-[10px] font-bold uppercase tracking-[0.4em]"
+        >
+          Return to Maison
+        </Button>
+      </div>
+    );
+  }
 
   if (fraudBlocked) {
     return (

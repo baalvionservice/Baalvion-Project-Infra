@@ -1,0 +1,21 @@
+{
+  "name": "@baalvion/auth-gateway",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BFF / cookie gateway + trust boundary — HttpOnly cookie sessions backed by auth-service RS256, signed identity injection to backends. No JWT reaches the browser.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "@baalvion/auth-node": "workspace:*",
+    "express": "^4.21.2",
+    "cookie-parser": "^1.4.7",
+    "helmet": "^8.0.0",
+    "cors": "^2.8.5",
+    "ioredis": "^5.4.1",
+    "dotenv": "^16.4.7",
+    "http-proxy-middleware": "^3.0.3"
+  }
+}

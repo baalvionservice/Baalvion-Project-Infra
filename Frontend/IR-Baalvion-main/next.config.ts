@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https://picsum.photos https://images.unsplash.com https://placehold.co https://s24.q4cdn.com https://www.cdprojektred.com",
               "font-src 'self'",
-              "connect-src 'self' http://localhost:4000 http://localhost:3008",
+              "connect-src 'self' https://api.baalvion.com",
               "frame-ancestors 'self'",
             ].join('; '),
           },

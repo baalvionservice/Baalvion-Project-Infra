@@ -1,0 +1,32 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: enforce-institutional-isolation
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+  - name: require-mtls-labels
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Nodes must have sovereign-mtls enabled for institutional cross-talk."
+      pattern:
+        metadata:
+          labels:
+            security.baalvion.gov/mtls: "true"
+  - name: restrict-unauthorized-registries
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+    validate:
+      message: "Images must originate from the Sovereign Registry (vault.baalvion.gov)."
+      pattern:
+        spec:
+          containers:
+          - image: "vault.baalvion.gov/*"

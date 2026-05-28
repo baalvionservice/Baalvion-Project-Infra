@@ -131,6 +131,11 @@ services:
       dockerfile: Backend/services/commerce/order-service/Dockerfile
     container_name: baalvion-orders
     restart: unless-stopped
+    # Join the shared gateway network so Traefik resolves http://order-service:3013.
+    # Keeps `default` for existing intra-compose connectivity (postgres/redis are on both).
+    networks:
+      - default
+      - baalvion-net
     ports:
       - "3013:3013"
     environment:
@@ -227,6 +232,11 @@ services:
       dockerfile: Backend/services/identity/auth-service/Dockerfile
     container_name: baalvion-auth
     restart: unless-stopped
+    # Join the shared gateway network so Traefik resolves http://auth-service:3001.
+    # Keeps `default` for existing intra-compose connectivity (postgres/redis are on both).
+    networks:
+      - default
+      - baalvion-net
     ports:
       - "3001:3001"
     environment:

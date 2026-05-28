@@ -3,7 +3,7 @@ module.exports = {
         // ── Auth Service ─────────────────────────────────────────────────────
         {
             name: 'auth-service',
-            cwd: './Backend/auth-service',
+            cwd: './Backend/services/identity/auth-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3001 },
@@ -12,7 +12,7 @@ module.exports = {
         // ── Proxy Backend ────────────────────────────────────────────────────
         {
             name: 'proxy-backend',
-            cwd: './Backend/backend-Proxy-BaalvionStack',
+            cwd: './Backend/services/infrastructure/proxy-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 4000 },
@@ -21,7 +21,7 @@ module.exports = {
         // ── Jobs Service ─────────────────────────────────────────────────────
         {
             name: 'jobs-service',
-            cwd: './Backend/jobs-service',
+            cwd: './Backend/services/ecosystem/jobs-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3002 },
@@ -30,7 +30,7 @@ module.exports = {
         // ── Mining Service ───────────────────────────────────────────────────
         {
             name: 'mining-service',
-            cwd: './Backend/mining-service',
+            cwd: './Backend/services/ecosystem/mining-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3003 },
@@ -39,7 +39,7 @@ module.exports = {
         // ── Imperialpedia Service ────────────────────────────────────────────
         {
             name: 'imperialpedia-service',
-            cwd: './Backend/imperialpedia-service',
+            cwd: './Backend/services/knowledge/imperialpedia-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3004 },
@@ -48,7 +48,7 @@ module.exports = {
         // ── Real Estate Service ───────────────────────────────────────────────
         {
             name: 'real-estate-service',
-            cwd: './Backend/real-estate-service',
+            cwd: './Backend/services/ecosystem/real-estate-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3005 },
@@ -57,7 +57,7 @@ module.exports = {
         // ── Brand Connector Service ──────────────────────────────────────────
         {
             name: 'brand-connector-service',
-            cwd: './Backend/brand-connector-service',
+            cwd: './Backend/services/ecosystem/brand-connector-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3006 },
@@ -66,7 +66,7 @@ module.exports = {
         // ── Market Service ───────────────────────────────────────────────────
         {
             name: 'market-service',
-            cwd: './Backend/market-service',
+            cwd: './Backend/services/commerce/market-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3007 },
@@ -75,7 +75,7 @@ module.exports = {
         // ── IR Service ───────────────────────────────────────────────────────
         {
             name: 'ir-service',
-            cwd: './Backend/ir-service',
+            cwd: './Backend/services/ecosystem/ir-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3008 },
@@ -84,7 +84,7 @@ module.exports = {
         // ── Dashboard Service ────────────────────────────────────────────────
         {
             name: 'dashboard-service',
-            cwd: './Backend/dashboard-service',
+            cwd: './Backend/services/platform/dashboard-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3009 },
@@ -93,7 +93,7 @@ module.exports = {
         // ── About Service ────────────────────────────────────────────────────
         {
             name: 'about-service',
-            cwd: './Backend/about-service',
+            cwd: './Backend/services/ecosystem/about-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3010 },
@@ -102,7 +102,7 @@ module.exports = {
         // ── CMS Service ──────────────────────────────────────────────────────
         {
             name: 'cms-service',
-            cwd: './Backend/cms-service',
+            cwd: './Backend/services/knowledge/cms-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3011 },
@@ -111,7 +111,7 @@ module.exports = {
         // ── Commerce Service ─────────────────────────────────────────────────
         {
             name: 'commerce-service',
-            cwd: './Backend/commerce-service',
+            cwd: './Backend/services/commerce/commerce-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3012 },
@@ -120,7 +120,7 @@ module.exports = {
         // ── Order Service ────────────────────────────────────────────────────
         {
             name: 'order-service',
-            cwd: './Backend/order-service',
+            cwd: './Backend/services/commerce/order-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3013 },
@@ -129,7 +129,7 @@ module.exports = {
         // ── Inventory Service ────────────────────────────────────────────────
         {
             name: 'inventory-service',
-            cwd: './Backend/inventory-service',
+            cwd: './Backend/services/commerce/inventory-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3014 },
@@ -138,7 +138,7 @@ module.exports = {
         // ── Fulfillment Service ──────────────────────────────────────────────
         {
             name: 'fulfillment-service',
-            cwd: './Backend/fulfillment-service',
+            cwd: './Backend/services/commerce/fulfillment-service',
             script: 'index.js',
             watch: false,
             env: { NODE_ENV: 'development', PORT: 3015 },

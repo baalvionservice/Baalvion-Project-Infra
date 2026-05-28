@@ -2,7 +2,7 @@ import axios from "axios";
 import { ApiResponse } from "@/types/api";
 
 export const apiClient = axios.create({
-  baseURL:  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api",
+  baseURL:  process.env.NEXT_PUBLIC_API_URL || "https://api.baalvion.com/api/v1/knowledge/imperialpedia/api/v1",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",

@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: notification-service
+  description: TODO — describe this bounded context.
+  domain: infrastructure
+  division: shared-developer-platform
+  context: notification
+  owner: "@baalvion/infrastructure"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/infrastructure/notification-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [identity-platform]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/notification"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-infrastructure, minReplicas: 2, maxReplicas: 10 }

@@ -8,17 +8,17 @@
 *                                       @baalvion/platform-core
 
 # ── Shared platform packages (changes ripple everywhere — extra scrutiny) ──────
-/packages/                              @baalvion/platform-core
-/packages/contracts/                    @baalvion/platform-core @baalvion/architecture
-/packages/events/                       @baalvion/platform-core @baalvion/architecture
-/packages/auth-sdk/                     @baalvion/platform-core
-/packages/rbac/                         @baalvion/platform-core
-/packages/telemetry/                    @baalvion/observability
+/Backend/packages/                              @baalvion/platform-core
+/Backend/packages/contracts/                    @baalvion/platform-core @baalvion/architecture
+/Backend/packages/events/                       @baalvion/platform-core @baalvion/architecture
+/Backend/packages/auth-sdk/                     @baalvion/platform-core
+/Backend/packages/rbac/                         @baalvion/platform-core
+/Backend/packages/telemetry/                    @baalvion/observability
 
 # ── Contracts are co-owned by producer + architecture (breaking-change gate) ───
-/packages/contracts/proto/baalvion/identity/   @baalvion/platform-core @baalvion/architecture
-/packages/contracts/proto/baalvion/billing/    @baalvion/platform-core @baalvion/architecture
-/packages/contracts/proto/baalvion/proxy/      @baalvion/proxy-division @baalvion/architecture
+/Backend/packages/contracts/proto/baalvion/identity/   @baalvion/platform-core @baalvion/architecture
+/Backend/packages/contracts/proto/baalvion/billing/    @baalvion/platform-core @baalvion/architecture
+/Backend/packages/contracts/proto/baalvion/proxy/      @baalvion/proxy-division @baalvion/architecture
 
 # ── Proxy infrastructure division ──────────────────────────────────────────────
 /Backend/backend-Proxy-BaalvionStack/   @baalvion/proxy-division
@@ -48,7 +48,7 @@
 /Backend/ctm-service/                   @baalvion/platform-core
 
 # ── Governance + infra (platform engineering + SRE) ────────────────────────────
-/catalog/                               @baalvion/architecture
+/Backend/catalog/                               @baalvion/architecture
 /infra/                                 @baalvion/sre @baalvion/platform-core
 /docs/architecture/                     @baalvion/architecture
 /docs/adr/                              @baalvion/architecture

@@ -1,0 +1,17 @@
+# Keep the monorepo build context lean (used by the repo-root Docker builds).
+**/node_modules
+**/.next
+**/dist
+**/build
+**/.turbo
+**/coverage
+.git
+.github
+**/*.log
+**/.env
+**/.env.local
+**/.env.*.local
+Frontend
+e2e
+docs
+*.md

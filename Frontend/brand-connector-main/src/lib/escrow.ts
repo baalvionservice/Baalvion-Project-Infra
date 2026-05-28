@@ -20,8 +20,8 @@ import {
   query,
   where,
   limit,
-} from "firebase/firestore";
-import { getStorage } from "firebase/storage";
+} from "@/lib/fb-compat/firestore";
+import { getStorage } from "@/lib/fb-compat/storage";
 import { errorEmitter } from "@/firebase/error-emitter";
 import {
   FirestorePermissionError,

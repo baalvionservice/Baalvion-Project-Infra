@@ -1,0 +1,23 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: gateway
+  description: TODO — describe this bounded context.
+  domain: infrastructure
+  division: shared-developer-platform
+  context: api-gateway
+  owner: "@baalvion/infrastructure"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/gateway
+spec:
+  lifecycle: production
+  language: go
+  ingress: public
+  datastores: [redis]
+  dependsOn: []
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/api-gateway"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-infrastructure, minReplicas: 2, maxReplicas: 10 }

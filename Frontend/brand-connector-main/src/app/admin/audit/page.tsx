@@ -23,7 +23,7 @@ import {
   CheckCircle2,
   Eye
 } from 'lucide-react';
-import { collection, query, orderBy, doc, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, doc, getDocs } from '@/lib/fb-compat/firestore';
 import { useFirestore, useCollection } from '@/firebase';
 import { AuditLog } from '@/types';
 import { useToast } from '@/hooks/use-toast';

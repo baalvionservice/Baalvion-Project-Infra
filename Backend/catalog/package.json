@@ -1,0 +1,14 @@
+{
+  "name": "@baalvion/catalog",
+  "private": true,
+  "type": "module",
+  "description": "Service catalog governance gate (schema validation + dependency graph).",
+  "scripts": {
+    "validate": "node validate.mjs",
+    "register": "node register-services.mjs"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "yaml": "^2.6.1"
+  }
+}

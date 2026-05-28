@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: baalvion-os
+  description: TODO — describe this bounded context.
+  domain: platform
+  division: platform-core
+  context: platform-kernel
+  owner: "@baalvion/platform-core"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/platform/baalvion-os
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: []
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/platform-kernel"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-platform, minReplicas: 2, maxReplicas: 10 }

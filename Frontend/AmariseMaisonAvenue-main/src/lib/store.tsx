@@ -8,6 +8,8 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
+import { productApi, collectionsApi } from "./api-client";
+import { toProducts, toCollections } from "./product-adapter";
 import {
   Product,
   CountryCode,
@@ -98,6 +100,7 @@ interface AppContextType {
   adminJurisdiction: CountryCode | "global";
   globalSyncHistory: GlobalSyncSession[];
   products: Product[];
+  catalogSource: "backend" | "fallback";
   transactions: Transaction[];
   notifications: MaisonNotification[];
   globalSettings: GlobalSettings;
@@ -293,6 +296,48 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         } as Product)
     )
   );
+
+  const [collections, setCollections] =
+    useState<Collection[]>(INITIAL_COLLECTIONS);
+  // 'backend' ONLY when real backend products are loaded; 'fallback' = offline mock catalog.
+  // Checkout is permitted only when 'backend' (see checkout) — never mix mock products with real orders.
+  const [catalogSource, setCatalogSource] =
+    useState<"backend" | "fallback">("fallback");
+
+  // Storefront catalog is backend-driven: load published products + collections from
+  // commerce-service (adapted to the rich app shapes). Backend is primary; the mock seeds
+  // remain only as an offline fallback so the storefront still renders if the API is down.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const [prodRes, collRes] = await Promise.all([
+        productApi.list({ status: "published", pageSize: 100 }),
+        collectionsApi.list(),
+      ]);
+      if (cancelled) return;
+      if (prodRes.ok && prodRes.data.items.length) {
+        setProducts(toProducts(prodRes.data.items));
+        setCatalogSource("backend");
+      } else {
+        setCatalogSource("fallback");
+        console.warn(
+          "[store] backend catalog unavailable or empty; offline fallback active (checkout disabled):",
+          prodRes.ok ? "empty result" : prodRes.error.message
+        );
+      }
+      if (collRes.ok) {
+        if (collRes.data.items.length) setCollections(toCollections(collRes.data.items));
+      } else {
+        console.warn(
+          "[store] backend collections unavailable; using offline fallback:",
+          collRes.error.message
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [notifications, setNotifications] = useState<MaisonNotification[]>([]);
@@ -516,6 +561,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     adminJurisdiction,
     globalSyncHistory,
     products,
+    catalogSource,
     transactions,
     notifications,
     globalSettings,
@@ -562,7 +608,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     activeVendor,
     vendors: VENDORS,
     messagingTemplates: ACQUISITION_SCRIPTS,
-    collections: INITIAL_COLLECTIONS,
+    collections,
     editorials: EDITOR_INITIAL,
     buyingGuides: BUYING_GUIDES,
     activeBrandId,

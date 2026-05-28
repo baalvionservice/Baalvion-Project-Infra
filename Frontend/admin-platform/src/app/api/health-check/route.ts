@@ -12,7 +12,7 @@ const SERVICES: ServiceDef[] = [
   { name: 'Session Service',      url: process.env.SESSION_SERVICE_URL || 'http://localhost:3022', port: 3022 },
   { name: 'OAuth Service',        url: process.env.OAUTH_SERVICE_URL   || 'http://localhost:3023', port: 3023 },
   { name: 'Notification Service', url: process.env.NOTIF_SERVICE_URL   || 'http://localhost:3031', port: 3031 },
-  { name: 'CTM Service',          url: process.env.CTM_SERVICE_URL     || 'http://localhost:3011', port: 3011 },
+  { name: 'CTM Service',          url: process.env.CTM_SERVICE_URL     || 'http://localhost:3017', port: 3017 },
 ];
 
 async function checkService(svc: ServiceDef) {

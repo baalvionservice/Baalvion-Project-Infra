@@ -22,7 +22,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:4000 http://localhost:3009 ws://localhost:3040 wss://*.baalvion.com",
+      "connect-src 'self' https://api.baalvion.com wss://api.baalvion.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -32,6 +32,13 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Server-side BFF base — defaulting here makes process.env.DASHBOARD_API_URL always
+  // defined, so the per-route `|| 'http://localhost:3009'` fallbacks are never reached.
+  // BFF routes call ${DASHBOARD_API_URL}/api/v1/<resource>, which the gateway strips to
+  // /api/v1/<resource> on dashboard-service. No route-file edits needed.
+  env: {
+    DASHBOARD_API_URL: process.env.DASHBOARD_API_URL || 'https://api.baalvion.com/api/v1/platform/dashboard',
+  },
   typescript: {
     ignoreBuildErrors: false,
   },

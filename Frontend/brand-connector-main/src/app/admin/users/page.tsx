@@ -26,7 +26,7 @@ import {
   UserX,
   UserPlus
 } from 'lucide-react';
-import { collection, query, where, orderBy, doc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import { collection, query, where, orderBy, doc, updateDoc, deleteDoc, writeBatch } from '@/lib/fb-compat/firestore';
 import { useFirestore, useCollection } from '@/firebase';
 import { User, UserRole } from '@/types';
 import { useToast } from '@/hooks/use-toast';

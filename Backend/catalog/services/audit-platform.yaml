@@ -1,0 +1,29 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: audit-platform
+  description: Append-only audit + compliance trail. Subscribes to every domain event for an immutable, signed, queryable record (SOC2 / GDPR evidence).
+  domain: platform
+  division: platform-core
+  context: audit
+  owner: "@baalvion/platform-core"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/infrastructure/proxy-service
+spec:
+  lifecycle: beta
+  language: node
+  datastores: [postgres, clickhouse]
+  dependsOn: []
+  consumesEvents:
+    - org.created
+    - proxy.session.started
+    - billing.invoice.generated
+    - abuse.action.triggered
+    - provider.health.changed
+    - security.incident
+    - admin.impersonation
+  producesEvents: []
+  apis: ["/v1/admin/audit-logs"]
+  slo: { availability: 0.999, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion, minReplicas: 2, maxReplicas: 8 }

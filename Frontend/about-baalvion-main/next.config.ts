@@ -22,7 +22,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos",
       "font-src 'self' data:",
-      "connect-src 'self' http://localhost:3010",
+      "connect-src 'self' https://api.baalvion.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",

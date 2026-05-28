@@ -1,12 +1,20 @@
 packages:
   # Shared library packages — built first, depended on by services and apps
-  - 'packages/*'
+  - 'Backend/packages/*'
 
-  # Backend microservices
+  # Backend microservices — flat (legacy) layout, migrating away (see Backend/MIGRATION.md)
   - 'Backend/*'
+  # Backend microservices — domain-grouped target layout (Backend/services/<domain>/<service>)
+  - 'Backend/services/*/*'
+  # Exclude flat copies of services already migrated to services/<domain>/ whose old dir is
+  # still on disk (e.g. a running process holds it). Remove once the old dir is deleted.
+  - '!Backend/insiders-service'
+  - '!Backend/elite-circle-service'
+  # Backend platform: gateway, baalvion-os kernel, baalctl CLI
+  - 'Backend/platform/*'
+  # Backend shared database tooling (migrations, seeds)
+  - 'Backend/database/*'
 
   # Frontend applications
   - 'Frontend/*'
 
-  # Platform engineering tooling (CLI, scaffolding) — federated monorepo (ADR-0001)
-  - 'platform/*'

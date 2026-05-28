@@ -23,21 +23,21 @@ jobs:
     strategy:
       matrix:
         service:
-          - { name: auth-service,            port: 3001, context: Backend/auth-service }
-          - { name: admin-service,           port: 3021, context: Backend/admin-service }
-          - { name: session-service,         port: 3022, context: Backend/session-service }
-          - { name: oauth-service,           port: 3023, context: Backend/oauth-service }
-          - { name: jobs-service,            port: 3002, context: Backend/jobs-service }
-          - { name: ctm-service,             port: 3011, context: Backend/ctm-service }
-          - { name: mining-service,          port: 3003, context: Backend/mining-service }
-          - { name: imperialpedia-service,   port: 3004, context: Backend/imperialpedia-service }
-          - { name: real-estate-service,     port: 3005, context: Backend/real-estate-service }
-          - { name: brand-connector-service, port: 3006, context: Backend/brand-connector-service }
-          - { name: market-service,          port: 3007, context: Backend/market-service }
-          - { name: ir-service,              port: 3008, context: Backend/ir-service }
-          - { name: dashboard-service,       port: 3009, context: Backend/dashboard-service }
-          - { name: about-service,           port: 3010, context: Backend/about-service }
-          - { name: realtime-service,        port: 3040, context: Backend/realtime-service }
+          - { name: auth-service,            port: 3001, context: ., file: Backend/services/identity/auth-service/Dockerfile }
+          - { name: admin-service,           port: 3021, context: ., file: Backend/services/platform/admin-service/Dockerfile }
+          - { name: session-service,         port: 3022, context: ., file: Backend/services/identity/session-service/Dockerfile }
+          - { name: oauth-service,           port: 3023, context: ., file: Backend/services/identity/oauth-service/Dockerfile }
+          - { name: jobs-service,            port: 3002, context: ., file: Backend/services/ecosystem/jobs-service/Dockerfile }
+          - { name: ctm-service,             port: 3011, context: ., file: Backend/services/ecosystem/ctm-service/Dockerfile }
+          - { name: mining-service,          port: 3003, context: ., file: Backend/services/ecosystem/mining-service/Dockerfile }
+          - { name: imperialpedia-service,   port: 3004, context: ., file: Backend/services/knowledge/imperialpedia-service/Dockerfile }
+          - { name: real-estate-service,     port: 3005, context: ., file: Backend/services/ecosystem/real-estate-service/Dockerfile }
+          - { name: brand-connector-service, port: 3006, context: ., file: Backend/services/ecosystem/brand-connector-service/Dockerfile }
+          - { name: market-service,          port: 3007, context: ., file: Backend/services/commerce/market-service/Dockerfile }
+          - { name: ir-service,              port: 3008, context: ., file: Backend/services/ecosystem/ir-service/Dockerfile }
+          - { name: dashboard-service,       port: 3009, context: ., file: Backend/services/platform/dashboard-service/Dockerfile }
+          - { name: about-service,           port: 3010, context: ., file: Backend/services/ecosystem/about-service/Dockerfile }
+          - { name: realtime-service,        port: 3040, context: ., file: Backend/services/infrastructure/realtime-service/Dockerfile }
     steps:
       - uses: actions/checkout@v4
 
@@ -61,6 +61,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.file }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

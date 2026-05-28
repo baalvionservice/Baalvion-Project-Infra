@@ -68,7 +68,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useCollection, useDoc } from '@/firebase';
-import { collection, query, where, orderBy } from 'firebase/firestore';
+import { collection, query, where, orderBy } from '@/lib/fb-compat/firestore';
 import { TransactionHistory } from '@/components/payments/TransactionHistory';
 import { formatCurrency, fromBase } from '@/lib/currency';
 import { cn } from '@/lib/utils';

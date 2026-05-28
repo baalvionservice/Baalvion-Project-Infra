@@ -39,7 +39,7 @@ const nextConfig: NextConfig = {
       font-src 'self' data: https://fonts.gstatic.com;
       object-src 'none';
       base-uri 'self';
-      connect-src 'self' http://localhost:3003 http://localhost:4000 https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://picsum.photos https://www.google-analytics.com https://stats.g.doubleclick.net;
+      connect-src 'self' https://api.baalvion.com https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://picsum.photos https://www.google-analytics.com https://stats.g.doubleclick.net;
       form-action 'self';
       frame-ancestors 'none';
       upgrade-insecure-requests;

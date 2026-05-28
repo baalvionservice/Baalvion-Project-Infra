@@ -4,26 +4,26 @@ on:
   push:
     branches: [main, develop]
     paths:
-      - 'Backend/mining-service/**'
-      - 'Backend/imperialpedia-service/**'
-      - 'Backend/real-estate-service/**'
-      - 'Backend/market-service/**'
-      - 'Backend/ir-service/**'
-      - 'Backend/about-service/**'
-      - 'Backend/brand-connector-service/**'
-      - 'Backend/dashboard-service/**'
+      - 'Backend/services/ecosystem/mining-service/**'
+      - 'Backend/services/knowledge/imperialpedia-service/**'
+      - 'Backend/services/ecosystem/real-estate-service/**'
+      - 'Backend/services/commerce/market-service/**'
+      - 'Backend/services/ecosystem/ir-service/**'
+      - 'Backend/services/ecosystem/about-service/**'
+      - 'Backend/services/ecosystem/brand-connector-service/**'
+      - 'Backend/services/platform/dashboard-service/**'
       - '.github/workflows/domain-services.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'Backend/mining-service/**'
-      - 'Backend/imperialpedia-service/**'
-      - 'Backend/real-estate-service/**'
-      - 'Backend/market-service/**'
-      - 'Backend/ir-service/**'
-      - 'Backend/about-service/**'
-      - 'Backend/brand-connector-service/**'
-      - 'Backend/dashboard-service/**'
+      - 'Backend/services/ecosystem/mining-service/**'
+      - 'Backend/services/knowledge/imperialpedia-service/**'
+      - 'Backend/services/ecosystem/real-estate-service/**'
+      - 'Backend/services/commerce/market-service/**'
+      - 'Backend/services/ecosystem/ir-service/**'
+      - 'Backend/services/ecosystem/about-service/**'
+      - 'Backend/services/ecosystem/brand-connector-service/**'
+      - 'Backend/services/platform/dashboard-service/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -54,21 +54,21 @@ jobs:
         with:
           filters: |
             mining:
-              - 'Backend/mining-service/**'
+              - 'Backend/services/ecosystem/mining-service/**'
             imperialpedia:
-              - 'Backend/imperialpedia-service/**'
+              - 'Backend/services/knowledge/imperialpedia-service/**'
             real_estate:
-              - 'Backend/real-estate-service/**'
+              - 'Backend/services/ecosystem/real-estate-service/**'
             market:
-              - 'Backend/market-service/**'
+              - 'Backend/services/commerce/market-service/**'
             ir:
-              - 'Backend/ir-service/**'
+              - 'Backend/services/ecosystem/ir-service/**'
             about:
-              - 'Backend/about-service/**'
+              - 'Backend/services/ecosystem/about-service/**'
             brand:
-              - 'Backend/brand-connector-service/**'
+              - 'Backend/services/ecosystem/brand-connector-service/**'
             dashboard:
-              - 'Backend/dashboard-service/**'
+              - 'Backend/services/platform/dashboard-service/**'
 
   # ── Mining Service ─────────────────────────────────────────────────────────
   mining-service:
@@ -101,22 +101,21 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: Backend/mining-service/package-lock.json
-      - name: Install
-        working-directory: Backend/mining-service
-        run: npm ci
-      - name: Syntax check
-        working-directory: Backend/mining-service
-        run: node --check index.js
+          cache: pnpm
+      - name: Install (pnpm workspace)
+        run: pnpm install --frozen-lockfile --filter mining-service...
+      - name: Build / compile check
+        run: pnpm exec turbo run build --filter=mining-service...
       - name: Tests
-        working-directory: Backend/mining-service
-        run: npm test --if-present
-      - name: Docker build
-        run: docker build -t baalvion-mining:ci Backend/mining-service
+        run: pnpm --filter mining-service test --if-present
+      - name: Docker build (monorepo context = repo root)
+        run: docker build -f Backend/services/ecosystem/mining-service/Dockerfile -t baalvion-mining:ci .
 
   # ── Imperialpedia Service ──────────────────────────────────────────────────
   imperialpedia-service:
@@ -149,22 +148,21 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: Backend/imperialpedia-service/package-lock.json
-      - name: Install
-        working-directory: Backend/imperialpedia-service
-        run: npm ci
-      - name: Syntax check
-        working-directory: Backend/imperialpedia-service
-        run: node --check index.js
+          cache: pnpm
+      - name: Install (pnpm workspace)
+        run: pnpm install --frozen-lockfile --filter imperialpedia-service...
+      - name: Build / compile check
+        run: pnpm exec turbo run build --filter=imperialpedia-service...
       - name: Tests
-        working-directory: Backend/imperialpedia-service
-        run: npm test --if-present
-      - name: Docker build
-        run: docker build -t baalvion-imperialpedia:ci Backend/imperialpedia-service
+        run: pnpm --filter imperialpedia-service test --if-present
+      - name: Docker build (monorepo context = repo root)
+        run: docker build -f Backend/services/knowledge/imperialpedia-service/Dockerfile -t baalvion-imperialpedia:ci .
 
   # ── Real Estate Service ────────────────────────────────────────────────────
   real-estate-service:
@@ -197,22 +195,21 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: Backend/real-estate-service/package-lock.json
-      - name: Install
-        working-directory: Backend/real-estate-service
-        run: npm ci
-      - name: Syntax check
-        working-directory: Backend/real-estate-service
-        run: node --check index.js
+          cache: pnpm
+      - name: Install (pnpm workspace)
+        run: pnpm install --frozen-lockfile --filter real-estate-service...
+      - name: Build / compile check
+        run: pnpm exec turbo run build --filter=real-estate-service...
       - name: Tests
-        working-directory: Backend/real-estate-service
-        run: npm test --if-present
-      - name: Docker build
-        run: docker build -t baalvion-real-estate:ci Backend/real-estate-service
+        run: pnpm --filter real-estate-service test --if-present
+      - name: Docker build (monorepo context = repo root)
+        run: docker build -f Backend/services/ecosystem/real-estate-service/Dockerfile -t baalvion-real-estate:ci .
 
   # ── Market Service ─────────────────────────────────────────────────────────
   market-service:
@@ -245,22 +242,21 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: Backend/market-service/package-lock.json
-      - name: Install
-        working-directory: Backend/market-service
-        run: npm ci
-      - name: Syntax check
-        working-directory: Backend/market-service
-        run: node --check index.js
+          cache: pnpm
+      - name: Install (pnpm workspace)
+        run: pnpm install --frozen-lockfile --filter market-service...
+      - name: Build / compile check
+        run: pnpm exec turbo run build --filter=market-service...
       - name: Tests
-        working-directory: Backend/market-service
-        run: npm test --if-present
-      - name: Docker build
-        run: docker build -t baalvion-market:ci Backend/market-service
+        run: pnpm --filter market-service test --if-present
+      - name: Docker build (monorepo context = repo root)
+        run: docker build -f Backend/services/commerce/market-service/Dockerfile -t baalvion-market:ci .
 
   # ── IR Service ─────────────────────────────────────────────────────────────
   ir-service:
@@ -293,22 +289,21 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: Backend/ir-service/package-lock.json
-      - name: Install
-        working-directory: Backend/ir-service
-        run: npm ci
-      - name: Syntax check
-        working-directory: Backend/ir-service
-        run: node --check index.js
+          cache: pnpm
+      - name: Install (pnpm workspace)
+        run: pnpm install --frozen-lockfile --filter ir-service...
+      - name: Build / compile check
+        run: pnpm exec turbo run build --filter=ir-service...
       - name: Tests
-        working-directory: Backend/ir-service
-        run: npm test --if-present
-      - name: Docker build
-        run: docker build -t baalvion-ir:ci Backend/ir-service
+        run: pnpm --filter ir-service test --if-present
+      - name: Docker build (monorepo context = repo root)
+        run: docker build -f Backend/services/ecosystem/ir-service/Dockerfile -t baalvion-ir:ci .
 
   # ── About Service ──────────────────────────────────────────────────────────
   about-service:
@@ -341,22 +336,22 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: Backend/about-service/package-lock.json
-      - name: Install
-        working-directory: Backend/about-service
-        run: npm ci
-      - name: Syntax check
-        working-directory: Backend/about-service
-        run: node --check index.js
+          cache: pnpm
+      # Workspace model (Option A): install the service + its @baalvion/* workspace deps.
+      - name: Install (pnpm workspace)
+        run: pnpm install --frozen-lockfile --filter about-service...
+      - name: Build / compile check
+        run: pnpm exec turbo run build --filter=about-service...
       - name: Tests
-        working-directory: Backend/about-service
-        run: npm test --if-present
-      - name: Docker build
-        run: docker build -t baalvion-about:ci Backend/about-service
+        run: pnpm --filter about-service test --if-present
+      - name: Docker build (monorepo context = repo root)
+        run: docker build -f Backend/services/ecosystem/about-service/Dockerfile -t baalvion-about:ci .
 
   # ── Brand Connector Service ────────────────────────────────────────────────
   brand-connector-service:
@@ -389,22 +384,21 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: Backend/brand-connector-service/package-lock.json
-      - name: Install
-        working-directory: Backend/brand-connector-service
-        run: npm ci
-      - name: Syntax check
-        working-directory: Backend/brand-connector-service
-        run: node --check index.js
+          cache: pnpm
+      - name: Install (pnpm workspace)
+        run: pnpm install --frozen-lockfile --filter brand-connector-service...
+      - name: Build / compile check
+        run: pnpm exec turbo run build --filter=brand-connector-service...
       - name: Tests
-        working-directory: Backend/brand-connector-service
-        run: npm test --if-present
-      - name: Docker build
-        run: docker build -t baalvion-brand:ci Backend/brand-connector-service
+        run: pnpm --filter brand-connector-service test --if-present
+      - name: Docker build (monorepo context = repo root)
+        run: docker build -f Backend/services/ecosystem/brand-connector-service/Dockerfile -t baalvion-brand:ci .
 
   # ── Dashboard Service ──────────────────────────────────────────────────────
   dashboard-service:
@@ -437,22 +431,21 @@ jobs:
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: npm
-          cache-dependency-path: Backend/dashboard-service/package-lock.json
-      - name: Install
-        working-directory: Backend/dashboard-service
-        run: npm ci
-      - name: Syntax check
-        working-directory: Backend/dashboard-service
-        run: node --check index.js
+          cache: pnpm
+      - name: Install (pnpm workspace)
+        run: pnpm install --frozen-lockfile --filter dashboard-service...
+      - name: Build / compile check
+        run: pnpm exec turbo run build --filter=dashboard-service...
       - name: Tests
-        working-directory: Backend/dashboard-service
-        run: npm test --if-present
-      - name: Docker build
-        run: docker build -t baalvion-dashboard:ci Backend/dashboard-service
+        run: pnpm --filter dashboard-service test --if-present
+      - name: Docker build (monorepo context = repo root)
+        run: docker build -f Backend/services/platform/dashboard-service/Dockerfile -t baalvion-dashboard:ci .
 
   # ── Docker push on main (all changed services) ────────────────────────────
   push-images:
@@ -476,27 +469,43 @@ jobs:
           - service: mining-service
             port: 3003
             image: baalvion-mining
+            context: .
+            file: Backend/services/ecosystem/mining-service/Dockerfile
           - service: imperialpedia-service
             port: 3004
             image: baalvion-imperialpedia
+            context: .
+            file: Backend/services/knowledge/imperialpedia-service/Dockerfile
           - service: real-estate-service
             port: 3005
             image: baalvion-real-estate
+            context: .
+            file: Backend/services/ecosystem/real-estate-service/Dockerfile
           - service: market-service
             port: 3007
             image: baalvion-market
+            context: .
+            file: Backend/services/commerce/market-service/Dockerfile
           - service: ir-service
             port: 3008
             image: baalvion-ir
+            context: .
+            file: Backend/services/ecosystem/ir-service/Dockerfile
           - service: about-service
             port: 3010
             image: baalvion-about
+            context: .
+            file: Backend/services/ecosystem/about-service/Dockerfile
           - service: brand-connector-service
             port: 3006
             image: baalvion-brand
+            context: .
+            file: Backend/services/ecosystem/brand-connector-service/Dockerfile
           - service: dashboard-service
             port: 3009
             image: baalvion-dashboard
+            context: .
+            file: Backend/services/platform/dashboard-service/Dockerfile
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
@@ -514,7 +523,9 @@ jobs:
             type=raw,value=latest
       - uses: docker/build-push-action@v5
         with:
-          context: Backend/${{ matrix.service }}
+          # Migrated services set matrix.context/.file (monorepo build); flat services default.
+          context: ${{ matrix.context || format('Backend/{0}', matrix.service) }}
+          file: ${{ matrix.file }}
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

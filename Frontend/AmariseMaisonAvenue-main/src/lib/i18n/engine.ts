@@ -56,7 +56,8 @@ export class LocalizationEngine {
       uk: 'en-GB',
       ae: 'ar-AE',
       in: 'en-IN',
-      sg: 'en-SG'
+      sg: 'en-SG',
+      ca: 'en-CA'
     };
 
     const hubCurrencies: Record<CountryCode, string> = {
@@ -64,7 +65,8 @@ export class LocalizationEngine {
       uk: 'GBP',
       ae: 'AED',
       in: 'INR',
-      sg: 'SGD'
+      sg: 'SGD',
+      ca: 'CAD'
     };
 
     return new Intl.NumberFormat(hubLocales[countryCode], {

@@ -9,9 +9,9 @@
 import type { AppRole } from '@/lib/rbac/roles';
 
 const AUTH_URL =
-  process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:4000/v1/auth';
+  process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
 const IR_URL =
-  process.env.NEXT_PUBLIC_IR_API_URL || 'http://localhost:3008';
+  process.env.NEXT_PUBLIC_IR_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ir';
 
 const TOKEN_KEY = 'ir_baalvion_access_token';
 const REFRESH_KEY = 'ir_baalvion_refresh_token';

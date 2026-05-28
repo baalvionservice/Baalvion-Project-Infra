@@ -128,3 +128,6 @@ export function useRole() {
 
 // Legacy compat — old code imported these from AuthContext
 export { AuthContext };
+
+// `useAuthContext` is an alias used by src/hooks/useAuth.ts
+export const useAuthContext = useAuth;

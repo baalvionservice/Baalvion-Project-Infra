@@ -4,23 +4,12 @@ const fs = require('fs');
 
 const root = path.resolve(__dirname, '..');
 
+// NOTE: This per-service `npm install` helper is the legacy (pre-pnpm) flow. The
+// canonical install is now `corepack pnpm install` at the repo root (build model:
+// Option A — pnpm workspace). Services already migrated to the workspace (e.g.
+// about-service, which declares `@baalvion/*: workspace:*`) are intentionally NOT
+// listed here — standalone `npm install` cannot resolve the workspace protocol.
 const backends = [
-    'Backend/auth-service',
-    'Backend/backend-Proxy-BaalvionStack',
-    'Backend/jobs-service',
-    'Backend/mining-service',
-    'Backend/imperialpedia-service',
-    'Backend/real-estate-service',
-    'Backend/brand-connector-service',
-    'Backend/market-service',
-    'Backend/ir-service',
-    'Backend/dashboard-service',
-    'Backend/about-service',
-    'Backend/cms-service',
-    'Backend/commerce-service',
-    'Backend/order-service',
-    'Backend/inventory-service',
-    'Backend/fulfillment-service',
 ];
 
 const frontends = [

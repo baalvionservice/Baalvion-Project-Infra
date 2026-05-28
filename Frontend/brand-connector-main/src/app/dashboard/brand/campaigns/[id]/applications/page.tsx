@@ -39,7 +39,7 @@ import {
   addDoc,
   writeBatch,
   orderBy
-} from 'firebase/firestore';
+} from '@/lib/fb-compat/firestore';
 import { useFirestore, useCollection } from '@/firebase';
 import { ApplicationStatus, UserRole } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';

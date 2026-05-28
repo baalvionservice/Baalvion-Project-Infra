@@ -26,7 +26,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, where, orderBy, deleteDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, orderBy, deleteDoc, doc, updateDoc } from '@/lib/fb-compat/firestore';
 import { PortfolioItem } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 

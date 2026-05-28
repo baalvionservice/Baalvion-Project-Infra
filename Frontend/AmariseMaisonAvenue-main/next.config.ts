@@ -41,7 +41,7 @@ const nextConfig: NextConfig = {
       font-src 'self' data: https://fonts.gstatic.com;
       object-src 'none';
       base-uri 'self';
-      connect-src 'self' http://localhost:3003 http://localhost:3005 http://localhost:3012 http://localhost:3013 http://localhost:3014 http://localhost:4000 https://*.googleapis.com https://www.google-analytics.com https://stats.g.doubleclick.net;
+      connect-src 'self' https://api.baalvion.com https://*.googleapis.com https://www.google-analytics.com https://stats.g.doubleclick.net;
       form-action 'self';
       frame-ancestors 'none';
       upgrade-insecure-requests;

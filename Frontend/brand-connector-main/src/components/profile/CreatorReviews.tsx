@@ -22,7 +22,7 @@ import {
   orderBy,
   doc,
   updateDoc
-} from 'firebase/firestore';
+} from '@/lib/fb-compat/firestore';
 import { useFirestore, useCollection } from '@/firebase';
 import { Review } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';

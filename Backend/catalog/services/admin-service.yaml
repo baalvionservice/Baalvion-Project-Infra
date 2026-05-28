@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: admin-service
+  description: TODO — describe this bounded context.
+  domain: platform
+  division: platform-core
+  context: admin
+  owner: "@baalvion/platform-core"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/platform/admin-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres]
+  dependsOn: [identity-platform]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/admin"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-platform, minReplicas: 2, maxReplicas: 10 }

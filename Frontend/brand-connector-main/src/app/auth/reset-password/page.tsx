@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { verifyPasswordResetCode, confirmPasswordReset } from 'firebase/auth';
+import { verifyPasswordResetCode, confirmPasswordReset } from '@/lib/fb-compat/auth';
 import { useAuth } from '@/firebase';
 import { 
   Rocket, 

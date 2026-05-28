@@ -25,7 +25,7 @@ import {
   UserPlus,
   ChevronDown
 } from 'lucide-react';
-import { collection, query, orderBy, doc, updateDoc, addDoc, where, limit } from 'firebase/firestore';
+import { collection, query, orderBy, doc, updateDoc, addDoc, where, limit } from '@/lib/fb-compat/firestore';
 import { useFirestore, useCollection } from '@/firebase';
 import { SupportTicket, TicketMessage, SupportStatus, SupportPriority } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';

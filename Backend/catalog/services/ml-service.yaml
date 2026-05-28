@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: ml-service
+  description: TODO — describe this bounded context.
+  domain: knowledge
+  division: platform-core
+  context: ml
+  owner: "@baalvion/knowledge"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/knowledge/ml-service
+spec:
+  lifecycle: production
+  language: python
+  datastores: [postgres, clickhouse]
+  dependsOn: [identity-platform]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/ml"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-knowledge, minReplicas: 2, maxReplicas: 10 }

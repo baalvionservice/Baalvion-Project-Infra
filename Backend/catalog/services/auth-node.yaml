@@ -1,0 +1,19 @@
+apiVersion: baalvion.io/v1
+kind: Library
+metadata:
+  name: auth-node
+  description: Canonical backend JWT authority — the single permitted home for jsonwebtoken (verify, RS256/JWKS issue, HS256 fallback, refresh). Enforced by catalog/enforce.mjs C3.
+  domain: identity
+  division: platform-core
+  context: auth
+  owner: "@baalvion/platform-core"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/packages/auth-node
+spec:
+  lifecycle: production
+  language: node
+  datastores: []
+  dependsOn: []
+  consumesEvents: []
+  producesEvents: []

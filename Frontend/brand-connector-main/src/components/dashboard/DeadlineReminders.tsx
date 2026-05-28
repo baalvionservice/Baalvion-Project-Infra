@@ -26,7 +26,7 @@ import {
   getDocs,
   Timestamp,
   orderBy
-} from 'firebase/firestore';
+} from '@/lib/fb-compat/firestore';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useCollection } from '@/firebase';
 import { Button } from '@/components/ui/button';

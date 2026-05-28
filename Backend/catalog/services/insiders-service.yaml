@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: insiders-service
+  description: TODO — describe this bounded context.
+  domain: ecosystem
+  division: commerce
+  context: insiders
+  owner: "@baalvion/ecosystem"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/ecosystem/insiders-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres]
+  dependsOn: [identity-platform]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/insiders"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-ecosystem, minReplicas: 2, maxReplicas: 10 }

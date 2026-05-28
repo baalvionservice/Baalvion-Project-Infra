@@ -6,7 +6,8 @@ import * as dataLayer from './data-layer';
 import type { User, Company, Task, Submission, Evaluation, Plan, Subscription, TaskDifficulty, TaskStatus, SubmissionStatus } from './types';
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
-const CTM_BASE = process.env.NEXT_PUBLIC_CTM_API_URL || 'http://localhost:3011/api/v1';
+// ctm-service is /api/v1/ecosystem/ctm at the gateway (was wrongly pointed at :3011 = cms-service).
+const CTM_BASE = process.env.NEXT_PUBLIC_CTM_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1';
 
 // ── Server-side fetch helper (no auth — optionalAuth endpoints) ──────────────
 async function ctmGet<T>(path: string): Promise<T> {

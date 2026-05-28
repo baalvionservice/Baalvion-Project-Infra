@@ -24,7 +24,7 @@ import {
   TrendingUp as TrendingIcon,
   IndianRupee
 } from 'lucide-react';
-import { collection, addDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, getDoc } from '@/lib/fb-compat/firestore';
 import { useFirestore } from '@/firebase';
 import { useAuth } from '@/contexts/AuthContext';
 import { CampaignStatus, CampaignDeliverable, Campaign } from '@/types';

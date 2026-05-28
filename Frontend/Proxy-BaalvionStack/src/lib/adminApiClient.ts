@@ -1,4 +1,4 @@
-const BASE = import.meta.env.VITE_API_PLATFORM_BASE_URL || "http://localhost:4000/v1";
+const BASE = import.meta.env.VITE_API_PLATFORM_BASE_URL || "https://api.baalvion.com/api/v1/infrastructure/proxy/v1";
 
 const getToken = () => localStorage.getItem("baalvion_access_token");
 

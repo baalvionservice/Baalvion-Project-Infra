@@ -1,10 +1,10 @@
 "use client";
 
-import { initializeApp, getApps, FirebaseApp } from "firebase/app";
-import { getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
-import { getStorage, FirebaseStorage } from "firebase/storage";
-import { getMessaging, Messaging, isSupported } from "firebase/messaging";
+import { initializeApp, getApps, FirebaseApp } from "@/lib/fb-compat/app";
+import { getAuth, Auth } from "@/lib/fb-compat/auth";
+import { getFirestore, Firestore } from "@/lib/fb-compat/firestore";
+import { getStorage, FirebaseStorage } from "@/lib/fb-compat/storage";
+import { getMessaging, Messaging, isSupported } from "@/lib/fb-compat/messaging";
 import { firebaseConfig } from "./config";
 
 let app: FirebaseApp;

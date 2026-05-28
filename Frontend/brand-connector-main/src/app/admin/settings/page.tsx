@@ -25,7 +25,7 @@ import {
   Server,
   Star
 } from 'lucide-react';
-import { doc, updateDoc, setDoc } from 'firebase/firestore';
+import { doc, updateDoc, setDoc } from '@/lib/fb-compat/firestore';
 import { useFirestore, useDoc } from '@/firebase';
 import { useToast } from '@/hooks/use-toast';
 import { errorEmitter } from '@/firebase/error-emitter';

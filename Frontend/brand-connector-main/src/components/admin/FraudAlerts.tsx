@@ -27,7 +27,7 @@ import {
   Info,
   Sparkles
 } from 'lucide-react';
-import { collection, query, orderBy, doc, updateDoc, addDoc, where, limit } from 'firebase/firestore';
+import { collection, query, orderBy, doc, updateDoc, addDoc, where, limit } from '@/lib/fb-compat/firestore';
 import { useFirestore, useCollection } from '@/firebase';
 import { FraudAlert, FraudAlertType } from '@/types';
 import { useToast } from '@/hooks/use-toast';

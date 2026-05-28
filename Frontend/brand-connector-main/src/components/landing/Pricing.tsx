@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { collection } from 'firebase/firestore';
+import { collection } from '@/lib/fb-compat/firestore';
 import { cn } from '@/lib/utils';
 import { useFirestore, useCollection } from '@/firebase';
 

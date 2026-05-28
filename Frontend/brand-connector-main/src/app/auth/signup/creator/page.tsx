@@ -28,8 +28,8 @@ import {
   createUserWithEmailAndPassword,
   updateProfile,
   sendEmailVerification
-} from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+} from '@/lib/fb-compat/auth';
+import { doc, setDoc } from '@/lib/fb-compat/firestore';
 import { useAuth, useFirestore } from '@/firebase';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';

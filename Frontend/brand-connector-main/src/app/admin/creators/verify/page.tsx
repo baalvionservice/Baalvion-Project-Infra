@@ -33,7 +33,7 @@ import {
   updateDoc,
   addDoc,
   orderBy,
-} from "firebase/firestore";
+} from "@/lib/fb-compat/firestore";
 import { useFirestore, useCollection } from "@/firebase";
 import { CreatorProfile, UserRole } from "@/types";
 import { useToast } from "@/hooks/use-toast";

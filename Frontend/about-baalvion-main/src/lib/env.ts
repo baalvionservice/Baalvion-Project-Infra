@@ -14,7 +14,7 @@ const clientSchema = z.object({
   NEXT_PUBLIC_ABOUT_API_URL: z
     .string()
     .url()
-    .default('http://localhost:3010'),
+    .default('https://api.baalvion.com/api/v1/ecosystem/about'),
   NEXT_PUBLIC_APP_URL: z
     .string()
     .url()
@@ -43,7 +43,7 @@ export const env = {
     nodeEnv: (process.env.NODE_ENV as 'development' | 'test' | 'production') ?? 'development',
   },
   client: {
-    aboutApiUrl: process.env.NEXT_PUBLIC_ABOUT_API_URL ?? 'http://localhost:3010',
+    aboutApiUrl: process.env.NEXT_PUBLIC_ABOUT_API_URL ?? 'https://api.baalvion.com/api/v1/ecosystem/about',
     appUrl: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3020',
   },
 };

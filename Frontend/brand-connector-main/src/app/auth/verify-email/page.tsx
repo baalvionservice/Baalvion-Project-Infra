@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { sendEmailVerification, signOut } from 'firebase/auth';
+import { sendEmailVerification, signOut } from '@/lib/fb-compat/auth';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Mail, 

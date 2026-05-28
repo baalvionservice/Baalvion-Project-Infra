@@ -26,7 +26,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useCollection } from '@/firebase';
-import { collection, query, where, orderBy, limit } from 'firebase/firestore';
+import { collection, query, where, orderBy, limit } from '@/lib/fb-compat/firestore';
 import { ApplicationStatus } from '@/types';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';

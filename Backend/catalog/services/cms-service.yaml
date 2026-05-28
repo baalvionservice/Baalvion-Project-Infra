@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: cms-service
+  description: TODO — describe this bounded context.
+  domain: knowledge
+  division: platform-core
+  context: cms
+  owner: "@baalvion/knowledge"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/knowledge/cms-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres]
+  dependsOn: [identity-platform]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/cms"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-knowledge, minReplicas: 2, maxReplicas: 10 }

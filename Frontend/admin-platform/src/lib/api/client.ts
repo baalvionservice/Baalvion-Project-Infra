@@ -5,11 +5,11 @@ import axios, {
 } from 'axios';
 import { useAuthStore } from '@/lib/store/authStore';
 
-const BASE_URL      = process.env.NEXT_PUBLIC_API_URL        || 'http://localhost:4000/v1';
-const AUTH_URL      = process.env.NEXT_PUBLIC_AUTH_URL       || 'http://localhost:3001/v1/auth';
-const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL  || 'http://localhost:3021/v1';
-const SESSION_URL   = process.env.NEXT_PUBLIC_SESSION_API_URL || 'http://localhost:3022/v1';
-const OAUTH_URL     = process.env.NEXT_PUBLIC_OAUTH_URL       || 'http://localhost:3023';
+const BASE_URL      = process.env.NEXT_PUBLIC_API_URL        || 'https://api.baalvion.com/api/v1/infrastructure/proxy/v1';
+const AUTH_URL      = process.env.NEXT_PUBLIC_AUTH_URL       || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL  || 'https://api.baalvion.com/api/v1/platform/admin/v1';
+const SESSION_URL   = process.env.NEXT_PUBLIC_SESSION_API_URL || 'https://api.baalvion.com/api/v1/identity/session/v1';
+const OAUTH_URL     = process.env.NEXT_PUBLIC_OAUTH_URL       || 'https://api.baalvion.com/api/v1/identity/oauth';
 
 // ─── Main API client ──────────────────────────────────────────────────────────
 export const apiClient = axios.create({

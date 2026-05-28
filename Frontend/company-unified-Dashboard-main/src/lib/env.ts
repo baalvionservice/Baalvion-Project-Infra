@@ -1,9 +1,9 @@
 import { z } from 'zod';
 
 const clientSchema = z.object({
-  NEXT_PUBLIC_AUTH_URL: z.string().url().default('http://localhost:4000/v1/auth'),
-  NEXT_PUBLIC_DASHBOARD_API_URL: z.string().url().default('http://localhost:3009/api/v1'),
-  NEXT_PUBLIC_REALTIME_WS_URL: z.string().default('ws://localhost:3040'),
+  NEXT_PUBLIC_AUTH_URL: z.string().url().default('https://api.baalvion.com/api/v1/identity/auth/v1/auth'),
+  NEXT_PUBLIC_DASHBOARD_API_URL: z.string().url().default('https://api.baalvion.com/api/v1/platform/dashboard/api/v1'),
+  NEXT_PUBLIC_REALTIME_WS_URL: z.string().default('wss://api.baalvion.com/api/v1/infrastructure/realtime'),
   NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3024'),
 });
 

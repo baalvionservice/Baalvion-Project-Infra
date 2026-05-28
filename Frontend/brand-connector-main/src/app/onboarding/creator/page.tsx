@@ -23,7 +23,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFirestore, useDoc } from '@/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from '@/lib/fb-compat/firestore';
 import { CreatorProfile, OnboardingStatus } from '@/types';
 import { setAuthCookies } from '@/lib/auth-cookies';
 

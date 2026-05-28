@@ -1,0 +1,122 @@
+---
+# ─────────────────────────────────────────────────────────────────────────────
+# BAALVION SINGLE PUBLIC INGRESS — Traefik (replaces the former Kong stack).
+#
+# Traefik is THE one north-south gateway (ADR-0004 superseded → Traefik). The
+# routing table is the file-provider config in infra/api-gateway/dynamic.yml,
+# synced into the `traefik-dynamic` ConfigMap by the deploy pipeline:
+#   kubectl create configmap traefik-dynamic \
+#     --from-file=dynamic.yml=Backend/infra/api-gateway/dynamic.yml \
+#     -n baalvion --dry-run=client -o yaml | kubectl apply -f -
+#
+# Backend services are reached by their in-cluster Service name + port exactly
+# as dynamic.yml declares (http://auth-service:3001, …). No service exposes a
+# public entrypoint; only this Traefik LoadBalancer is internet-facing.
+# TLS: cert-manager issues the cert into secret `baalvion-tls`.
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik-static
+  namespace: baalvion
+  labels: { app: traefik, tier: gateway }
+data:
+  traefik.yml: |
+    entryPoints:
+      web:
+        address: ":80"
+        http:
+          redirections:
+            entryPoint: { to: websecure, scheme: https }
+      websecure:
+        address: ":443"
+    providers:
+      file:
+        filename: /etc/traefik/dynamic/dynamic.yml
+        watch: true
+    api:
+      dashboard: false
+      insecure: false
+    log:
+      level: INFO
+    accessLog: {}
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik
+  namespace: baalvion
+  labels: { app: traefik, tier: gateway }
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: traefik }
+  template:
+    metadata:
+      labels: { app: traefik, tier: gateway }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8082"
+        prometheus.io/path: "/metrics"
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: traefik
+          image: traefik:v3.1
+          args: ["--configFile=/etc/traefik/traefik.yml", "--metrics.prometheus=true", "--metrics.prometheus.entrypoint=metrics", "--entrypoints.metrics.address=:8082"]
+          ports:
+            - { containerPort: 80,   name: web }
+            - { containerPort: 443,  name: websecure }
+            - { containerPort: 8082, name: metrics }
+          volumeMounts:
+            - { name: static,  mountPath: /etc/traefik/traefik.yml, subPath: traefik.yml, readOnly: true }
+            - { name: dynamic, mountPath: /etc/traefik/dynamic, readOnly: true }
+            - { name: certs,   mountPath: /certs, readOnly: true }
+          resources:
+            requests: { cpu: "200m", memory: "256Mi" }
+            limits:   { cpu: "1",    memory: "512Mi" }
+          livenessProbe:
+            httpGet: { path: /ping, port: 80 }
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL], add: [NET_BIND_SERVICE] }
+      volumes:
+        - name: static
+          configMap: { name: traefik-static }
+        - name: dynamic
+          configMap: { name: traefik-dynamic }   # synced from infra/api-gateway/dynamic.yml
+        - name: certs
+          secret: { secretName: baalvion-tls }
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector: { matchLabels: { app: traefik } }
+                topologyKey: kubernetes.io/hostname
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: baalvion
+  labels: { app: traefik }
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  selector: { app: traefik }
+  ports:
+    - { name: web,       port: 80,  targetPort: 80 }
+    - { name: websecure, port: 443, targetPort: 443 }

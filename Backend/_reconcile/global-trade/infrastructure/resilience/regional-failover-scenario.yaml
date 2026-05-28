@@ -1,0 +1,25 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: Schedule
+metadata:
+  name: multi-region-failover-simulation
+  namespace: chaos-mesh
+spec:
+  schedule: "0 0 * * 0" # Weekly automated stress test
+  historyLimit: 5
+  concurrencyPolicy: "Forbid"
+  type: "NetworkChaos"
+  networkChaos:
+    action: partition
+    mode: one
+    selector:
+      labelSelectors:
+        "app.kubernetes.io/name": "kafka"
+    direction: both
+    target:
+      selector:
+        labelSelectors:
+          "region": "apac"
+      mode: all
+    duration: "60s"
+    externalTargets:
+      - "api.sg.baalvion.gov"

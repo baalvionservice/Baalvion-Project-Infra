@@ -28,7 +28,7 @@ import {
   History,
   Info
 } from 'lucide-react';
-import { collection, query, orderBy, doc, updateDoc, addDoc, where } from 'firebase/firestore';
+import { collection, query, orderBy, doc, updateDoc, addDoc, where } from '@/lib/fb-compat/firestore';
 import { useFirestore, useCollection } from '@/firebase';
 import { Dispute, DisputeStatus } from '@/types';
 import { useToast } from '@/hooks/use-toast';

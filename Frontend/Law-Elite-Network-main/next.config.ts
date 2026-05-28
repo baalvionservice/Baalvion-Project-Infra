@@ -19,7 +19,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos https://firebasestorage.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://*.algolianet.com https://*.algolia.net wss://*.firebaseio.com http://localhost:3015",
+      "connect-src 'self' https://api.baalvion.com https://*.googleapis.com https://*.firebaseio.com https://*.algolianet.com https://*.algolia.net wss://*.firebaseio.com",
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",

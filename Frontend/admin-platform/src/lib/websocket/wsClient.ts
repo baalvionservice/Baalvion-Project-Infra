@@ -1,7 +1,7 @@
 import { useRealtimeStore } from '@/lib/store/realtimeStore';
 import type { LiveEvent } from '@/lib/types/realtime.types';
 
-const WS_URL          = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:3040';
+const WS_URL          = process.env.NEXT_PUBLIC_WS_URL || 'wss://api.baalvion.com/api/v1/infrastructure/realtime';
 const RECONNECT_DELAY = 3000;
 const PING_INTERVAL   = 25_000;
 

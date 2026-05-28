@@ -5,9 +5,9 @@
  */
 
 const AUTH_URL =
-  process.env.NEXT_PUBLIC_AUTH_URL || 'http://localhost:4000/v1/auth';
+  process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
 const DASHBOARD_URL =
-  process.env.NEXT_PUBLIC_DASHBOARD_API_URL || 'http://localhost:3009/api/v1';
+  process.env.NEXT_PUBLIC_DASHBOARD_API_URL || 'https://api.baalvion.com/api/v1/platform/dashboard/api/v1';
 
 const TOKEN_KEY = 'baalvion_dash_token';
 const REFRESH_KEY = 'baalvion_dash_refresh';

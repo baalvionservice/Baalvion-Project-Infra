@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Megaphone,
@@ -23,13 +23,10 @@ import {
   Mail,
   Smartphone
 } from 'lucide-react';
-import { collection, query, orderBy, doc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore, useCollection } from '@/firebase';
+import { collection } from '@/lib/baalvion';
 import { Broadcast } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,7 +48,6 @@ import { cn } from '@/lib/utils';
 import { CREATOR_NICHES, PLAN_TYPES } from '@/constants';
 
 export default function NotificationBroadcastPage() {
-  const db = useFirestore();
   const { currentUser } = useAuth();
   const { toast } = useToast();
 
@@ -66,12 +62,29 @@ export default function NotificationBroadcastPage() {
   const [audienceValue, setAudienceValue] = useState<string>('');
   const [channelType, setChannelType] = useState<string>('IN_APP');
 
-  // 1. Fetch Broadcast History
-  const broadcastsQuery = useMemo(() => {
-    if (!db) return null;
-    return query(collection(db, 'broadcasts'), orderBy('sentAt', 'desc'));
-  }, [db]);
-  const { data: broadcasts, loading: historyLoading } = useCollection<Broadcast>(broadcastsQuery);
+  // 1. Fetch Broadcast History (Baalvion OS REST — replaces Firestore onSnapshot)
+  const [broadcasts, setBroadcasts] = useState<Broadcast[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const loadBroadcasts = async () => {
+    setHistoryLoading(true);
+    try {
+      const raw = await collection<any>('broadcasts').list();
+      setBroadcasts(
+        raw.map((b: any) => ({
+          id: b.id,
+          title: b.title,
+          body: b.body,
+          audience: b.audience?.segment ?? 'ALL',
+          type: b.audience?.channel ?? 'IN_APP',
+          sentAt: b.sentAt ?? b.createdAt,
+          stats: b.audience?.stats ?? { recipients: 0, opens: 0 },
+        })) as Broadcast[],
+      );
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+  useEffect(() => { loadBroadcasts(); }, []);
 
   const handleSendBroadcast = async () => {
     if (!title || !body || isSending) return;
@@ -93,20 +106,30 @@ export default function NotificationBroadcastPage() {
     };
 
     try {
-      // 1. Record the broadcast
-      await addDoc(collection(db!, 'broadcasts'), broadcastData);
+      // 1. Record the broadcast on Baalvion OS (rich fields kept under `audience`)
+      await collection('broadcasts').create({
+        title,
+        body,
+        audience: {
+          segment: audience,
+          value: audienceValue,
+          channel: channelType,
+          cta,
+          stats: broadcastData.stats,
+        },
+      });
 
-      // 2. Demonstration: Create one real notification for the admin themselves
+      // 2. Best-effort: notify the admin via the notifications service
       if (currentUser?.id) {
-        await addDoc(collection(db!, 'notifications'), {
-          userId: currentUser.id,
-          title: `[BROADCAST] ${title}`,
-          message: body,
-          type: 'SYSTEM',
-          read: false,
-          link: cta || undefined,
-          createdAt: new Date().toISOString()
-        });
+        try {
+          await collection('notifications').create({
+            userId: currentUser.id,
+            type: 'system',
+            title: `[BROADCAST] ${title}`,
+            body,
+            data: { link: cta || undefined },
+          });
+        } catch { /* userId may not map to a Baalvion user yet — non-fatal */ }
       }
 
       toast({
@@ -114,17 +137,14 @@ export default function NotificationBroadcastPage() {
         description: "The notification is being delivered to the target audience."
       });
 
-      // Reset form
+      // Reset form + refresh history
       setTitle('');
       setBody('');
       setCta('');
       setActiveTab('history');
+      await loadBroadcasts();
     } catch (err: any) {
-      errorEmitter.emitPermissionError(new FirestorePermissionError({
-        path: '/broadcasts',
-        operation: 'create',
-        requestResourceData: broadcastData
-      }));
+      toast({ variant: "destructive", title: "Broadcast failed", description: err?.message ?? 'Could not send broadcast.' });
     } finally {
       setIsSending(false);
     }

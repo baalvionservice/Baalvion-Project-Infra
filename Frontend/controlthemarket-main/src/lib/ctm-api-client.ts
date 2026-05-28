@@ -1,5 +1,7 @@
-const CTM_BASE  = process.env.NEXT_PUBLIC_CTM_API_URL ?? 'http://localhost:3011/api/v1';
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_URL    ?? 'http://localhost:4000/v1/auth';
+// ctm-service is /api/v1/ecosystem/ctm at the gateway (was wrongly pointed at :3011 = cms-service).
+const CTM_BASE  = process.env.NEXT_PUBLIC_CTM_API_URL ?? 'https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1';
+// auth via the single identity authority (auth-service) through the gateway, NOT proxy-service:4000.
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_URL    ?? 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
 const PROXY_BASE = AUTH_BASE.replace(/\/auth$/, '');
 
 export const CTM_TOKEN_KEY         = 'ctm_access_token';
