@@ -60,8 +60,8 @@ export class BaalvionClient {
           this.opts.onUnauthorized?.();
           return;
         }
-        const { data } = await res.json() as ApiResponse<TokenPair>;
-        if (data) this.opts.onTokenRefreshed?.(data as TokenPair);
+        const json = await res.json() as ApiResponse<TokenPair>;
+        if (json.success) this.opts.onTokenRefreshed?.(json.data as TokenPair);
       } finally {
         this.refreshPromise = null;
       }
@@ -117,7 +117,9 @@ export class BaalvionClient {
 
   get auth() {
     const { authUrl } = this.opts;
-    const r = this.request.bind(this);
+    // Arrow wrapper (not .bind) so the generic <T> survives under strictBindCallApply.
+    const r = <T>(baseUrl: string, path: string, options: RequestInit & { skipAuth?: boolean } = {}): Promise<T> =>
+      this.request<T>(baseUrl, path, options);
     return {
       login:          (body: { email: string; password: string }) =>
         r<TokenPair & { user: User; org?: Organization; mfa_required?: boolean; challengeToken?: string }>(authUrl, '/login', { method: 'POST', body: JSON.stringify(body), skipAuth: true }),
