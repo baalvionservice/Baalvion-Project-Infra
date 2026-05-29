@@ -28,17 +28,15 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { RoleWelcomeBanner } from "@/components/role-welcome-banner";
-import businessesData from "@/lib/data/businesses";
-import fxRatesData from "@/lib/data/fx-rates.json";
-import type { Business, FxRate, BusinessStatus } from "@/lib/types";
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
+import { dashboardApi } from "@/lib/api-client";
+import type { BusinessStatus } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import RevenueByBusinessChart from "@/components/charts/revenue-by-business-chart";
 import OverallPerformanceChart from "@/components/charts/overall-performance-chart";
 import AiInsightsCard from "@/components/ai-insights-card";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import operationsData from "@/lib/data/operations.json";
-import alertsData from "@/lib/data/alerts.json";
 import Link from "next/link";
 import { PiggyBank } from "lucide-react";
 import PushNotificationPrompt from "@/components/push-notification-prompt";
@@ -47,9 +45,6 @@ import Confetti from "@/components/confetti";
 import SetupChecklist from "@/components/setup-checklist";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-
-const businesses: Business[] = businessesData;
-const fxRates: FxRate = fxRatesData;
 
 function DashboardSkeleton() {
   return (
@@ -106,20 +101,6 @@ function DashboardSkeleton() {
   );
 }
 
-const totalRevenue = businesses.reduce(
-  (acc, biz) => acc + biz.currentMetrics.revenue / (fxRates[biz.currency] || 1),
-  0
-);
-const totalProfit = businesses.reduce(
-  (acc, biz) => acc + biz.currentMetrics.profit / (fxRates[biz.currency] || 1),
-  0
-);
-const totalEmployees = businesses.reduce(
-  (acc, biz) => acc + biz.currentMetrics.employees,
-  0
-);
-const countryCount = new Set(businesses.map((b) => b.country)).size;
-
 const statusColors: Record<BusinessStatus, string> = {
   Active:
     "border-green-300 bg-green-100 text-green-800 dark:border-green-700 dark:bg-green-950 dark:text-green-300",
@@ -136,11 +117,44 @@ const getIconForActivity = (description: string) => {
   return <Briefcase className="h-4 w-4" />;
 };
 
+interface AlertItem { id: string; title: string }
+interface ActivityItem { id: string; description: string; business: string; timestamp: string }
+
 export default function AdminView() {
   const isMobile = useIsMobile();
-  const revenueToday = operationsData.snapshot.todaysRevenue;
-  const recentAlerts = alertsData.slice(0, 3);
-  const recentActivities = operationsData.activityFeed.slice(0, 5);
+  const { businesses, fxRates } = useGlobalFinancials();
+  const [recentAlerts, setRecentAlerts] = React.useState<AlertItem[]>([]);
+  const [recentActivities, setRecentActivities] = React.useState<ActivityItem[]>([]);
+
+  // Live aggregates (USD-converted).
+  const totalRevenue = businesses.reduce((acc, b) => acc + b.currentMetrics.revenue / (fxRates[b.currency] || 1), 0);
+  const totalProfit = businesses.reduce((acc, b) => acc + b.currentMetrics.profit / (fxRates[b.currency] || 1), 0);
+  const totalEmployees = businesses.reduce((acc, b) => acc + b.currentMetrics.employees, 0);
+  const countryCount = new Set(businesses.map((b) => b.country)).size;
+  const revenueToday = Math.round(totalRevenue / 30); // daily run-rate from monthly revenue
+
+  // Recent alerts (from notifications) + activity (from audit log) — live.
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [nRes, aRes] = await Promise.all([dashboardApi.notifications(), dashboardApi.auditLogs({ limit: 5 })]);
+        const nArr = ((nRes as { data?: unknown[] })?.data ?? (Array.isArray(nRes) ? nRes : [])) as Record<string, unknown>[];
+        const aData = (aRes as { data?: { data?: unknown[] } })?.data;
+        const aArr = (aData?.data ?? (aRes as { data?: unknown[] })?.data ?? []) as Record<string, unknown>[];
+        if (cancelled) return;
+        setRecentAlerts(nArr.slice(0, 3).map((n) => ({ id: String(n.id), title: String(n.title ?? "") })));
+        setRecentActivities(aArr.slice(0, 5).map((a) => ({
+          id: String(a.id),
+          description: `${a.action ?? "Action"} on ${a.resource ?? a.entity_type ?? "resource"}`,
+          business: String(a.user_name ?? "System"),
+          timestamp: new Date(String(a.created_at ?? a.createdAt ?? Date.now())).toLocaleString(),
+        })));
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const [tourVisible, setTourVisible] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
 
@@ -428,7 +442,7 @@ export default function AdminView() {
                                 variant="outline"
                                 className={cn(
                                   "capitalize",
-                                  statusColors[biz.status]
+                                  statusColors[biz.status as BusinessStatus]
                                 )}
                               >
                                 {biz.status}

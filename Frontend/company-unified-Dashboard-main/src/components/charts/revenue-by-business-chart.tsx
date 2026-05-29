@@ -15,19 +15,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 
-import businessesData from "@/lib/data/businesses";
-import fxRates from "@/lib/data/fx-rates.json";
-
-const chartData = businessesData.map((biz) => ({
-  business: biz.name
-    .split(" ")
-    .map((word) => word[0])
-    .join(""),
-  revenue: Math.round(
-    biz.currentMetrics.revenue / (fxRates[biz.currency] || 1) / 1000000
-  ),
-  fill: `hsl(var(--chart-${(businessesData.indexOf(biz) % 5) + 1}))`,
-}));
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
 
 const chartConfig = {
   revenue: {
@@ -37,6 +25,12 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function RevenueByBusinessChart() {
+  const { businesses, fxRates } = useGlobalFinancials();
+  const chartData = businesses.map((biz, i) => ({
+    business: biz.name.split(" ").map((w) => w[0]).join(""),
+    revenue: Math.round(biz.currentMetrics.revenue / (fxRates[biz.currency] || 1) / 1000000),
+    fill: `hsl(var(--chart-${(i % 5) + 1}))`,
+  }));
   return (
     <Card>
       <CardHeader>
