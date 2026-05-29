@@ -5,12 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import appsData from "@/lib/data/apps.json";
-
-const allCategories = [
-  "All",
-  ...Array.from(new Set(appsData.map((app) => app.category))),
-];
+import { useMarketplace } from "@/hooks/use-marketplace";
 
 const sidebarNav = [
   { href: "/marketplace/installed", label: "My Installed Apps" },
@@ -20,6 +15,8 @@ const sidebarNav = [
 function MarketplaceSidebarContent() {
   const searchParams = useSearchParams();
   const activeCategory = searchParams.get("category") || "All";
+  const { apps } = useMarketplace();
+  const allCategories = ["All", ...Array.from(new Set(apps.map((app) => app.category)))];
 
   return (
     <div className="space-y-6 sticky top-20">

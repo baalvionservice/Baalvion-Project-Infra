@@ -142,6 +142,32 @@ router.get('/gdpr', authMiddleware, (req, res) =>
     }),
 );
 
+// Marketplace — installable apps catalog + installed list (no marketplace table yet; reference data).
+router.get('/marketplace', authMiddleware, (req, res) => {
+    const mkApp = (slug, name, category, description, rating, installs, developer, pricing, featured) => ({
+        slug, name, category, description, rating, installs, developer, version: '1.2.0', lastUpdated: '2026-05-20',
+        featured, icon: `/icons/${slug}.png`,
+        permissions: ['Read Finance Data', 'Write Invoices', 'Access Business Settings'],
+        pricing,
+        features: [`${name} core automation`, 'Real-time sync', 'Audit logging', 'Role-based access'],
+        screenshots: [`/screens/${slug}-1.png`, `/screens/${slug}-2.png`],
+        reviews: [
+            { user: 'Aisha R.', rating: 5, comment: 'Saves us hours every week.' },
+            { user: 'Marcus C.', rating: 4, comment: 'Solid, a few rough edges.' },
+        ],
+    });
+    return sendSuccess(req, res, {
+        apps: [
+            mkApp('gst-billing-india', 'GST Billing', 'Finance', 'Automate GST invoicing, filing and reconciliation for India.', 4.8, 5200, 'Baalvion Inc.', '$12/month', true),
+            mkApp('quickbooks-sync', 'QuickBooks Sync', 'Finance', 'Two-way sync of invoices and ledgers with QuickBooks.', 4.6, 8900, 'Intuit', '$19/month', true),
+            mkApp('slack-integration', 'Slack Integration', 'Productivity', 'Push alerts and approvals to Slack channels.', 4.7, 14200, 'Slack', 'Free', false),
+            mkApp('hr-onboarding', 'HR Onboarding', 'People', 'Automated onboarding workflows for new hires.', 4.5, 3100, 'Baalvion Inc.', '$9/month', false),
+            mkApp('ad-optimizer', 'Ad Optimizer', 'Marketing', 'AI-driven ad spend optimization across channels.', 4.4, 2600, 'AdWorks', '$29/month', false),
+        ],
+        installed: ['quickbooks-sync', 'slack-integration'],
+    });
+});
+
 // Automation — scheduled jobs + recent webhook deliveries (no automation table yet; reference data).
 router.get('/automation', authMiddleware, (req, res) =>
     sendSuccess(req, res, {

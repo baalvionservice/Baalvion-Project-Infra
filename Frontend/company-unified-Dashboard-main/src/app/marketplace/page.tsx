@@ -1,10 +1,9 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search, Star } from 'lucide-react';
-import appsData from '@/lib/data/apps.json';
-import installedAppsData from '@/lib/data/installed-apps.json';
+import { useMarketplace, type MarketApp } from '@/hooks/use-marketplace';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 import Image from 'next/image';
 
-type App = typeof appsData[0];
+type App = MarketApp;
 
 function AppCard({ app, isInstalled, onInstall }: { app: App, isInstalled: boolean, onInstall: (app: App) => void }) {
   return (
@@ -45,20 +44,23 @@ function AppCard({ app, isInstalled, onInstall }: { app: App, isInstalled: boole
 
 
 export default function MarketplacePage() {
+  const { apps: appsData, installed } = useMarketplace();
   const [searchTerm, setSearchTerm] = useState('');
-  const [installedApps, setInstalledApps] = useState<string[]>(installedAppsData);
+  const [installedApps, setInstalledApps] = useState<string[]>([]);
   const [appToInstall, setAppToInstall] = useState<App | null>(null);
   const { toast } = useToast();
+
+  useEffect(() => { setInstalledApps(installed); }, [installed]);
 
   const featuredApps = appsData.filter(app => app.featured);
 
   const filteredApps = useMemo(() => {
-    return appsData.filter(app => 
+    return appsData.filter(app =>
       app.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
       app.description.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm]);
+  }, [searchTerm, appsData]);
 
   const handleInstall = (app: App) => {
     setAppToInstall(app);

@@ -1,9 +1,7 @@
 "use client";
 
-import { notFound } from "next/navigation";
-import appsData from "@/lib/data/apps.json";
-import installedAppsData from "@/lib/data/installed-apps.json";
-import { useState, use } from "react";
+import { useMarketplace, type MarketApp } from "@/hooks/use-marketplace";
+import { useState, use, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,7 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import Image from "next/image";
 
-type App = (typeof appsData)[0];
+type App = MarketApp;
 
 export default function AppDetailPage({
   params,
@@ -34,14 +32,17 @@ export default function AppDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
-  const app = appsData.find((a) => a.slug === slug);
-  const [installedApps, setInstalledApps] =
-    useState<string[]>(installedAppsData);
+  const { apps, installed, loading } = useMarketplace();
+  const app = apps.find((a) => a.slug === slug);
+  const [installedApps, setInstalledApps] = useState<string[]>([]);
   const [appToInstall, setAppToInstall] = useState<App | null>(null);
   const { toast } = useToast();
 
+  useEffect(() => { setInstalledApps(installed); }, [installed]);
+
+  if (loading) return null;
   if (!app) {
-    notFound();
+    return <div className="p-12 text-center text-muted-foreground">App not found.</div>;
   }
 
   const isInstalled = installedApps.includes(app.slug);

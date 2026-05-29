@@ -12,27 +12,27 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Search, Settings, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
-import appsData from '@/lib/data/apps.json';
-import initialInstalledApps from '@/lib/data/installed-apps.json';
+import { useMarketplace } from '@/hooks/use-marketplace';
+import { useEffect } from 'react';
 import Image from 'next/image';
 import EmptyState from '@/components/empty-state';
 
 export default function InstalledAppsPage() {
-  const [installedApps, setInstalledApps] = useState(initialInstalledApps);
-  const [statuses, setStatuses] = useState<Record<string, boolean>>(() => {
-    const initialStatuses: Record<string, boolean> = {};
-    initialInstalledApps.forEach(slug => {
-        initialStatuses[slug] = true; // All are active initially
-    });
-    return initialStatuses;
-  });
+  const { apps: appsData, installed } = useMarketplace();
+  const [installedApps, setInstalledApps] = useState<string[]>([]);
+  const [statuses, setStatuses] = useState<Record<string, boolean>>({});
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
 
+  useEffect(() => {
+    setInstalledApps(installed);
+    setStatuses(Object.fromEntries(installed.map((s) => [s, true])));
+  }, [installed]);
+
   const appDetails = useMemo(() => {
     return installedApps.map(slug => appsData.find(app => app.slug === slug)).filter(Boolean);
-  }, [installedApps]);
+  }, [installedApps, appsData]);
   
   const filteredApps = useMemo(() => {
     return appDetails.filter(app => {

@@ -1,7 +1,7 @@
 "use client";
-import { notFound, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useState, use } from "react";
-import appsData from "@/lib/data/apps.json";
+import { useMarketplace } from "@/hooks/use-marketplace";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -43,12 +43,14 @@ export default function AppSettingsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
+  const { apps: appsData, loading } = useMarketplace();
   const app = appsData.find((a) => a.slug === slug);
   const router = useRouter();
   const { toast } = useToast();
 
+  if (loading) return null;
   if (!app) {
-    notFound();
+    return <div className="p-12 text-center text-muted-foreground">App not found.</div>;
   }
 
   const [isActive, setIsActive] = useState(true);
