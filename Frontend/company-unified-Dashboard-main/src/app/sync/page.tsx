@@ -19,17 +19,18 @@ import {
 } from "@/components/ui/table";
 import Link from "next/link";
 
-import onlineSalesData from "@/lib/data/online-sales.json";
-import offlineSalesData from "@/lib/data/offline-sales.json";
-import businessesData from "@/lib/data/businesses";
+import { useSync } from "@/hooks/use-sync";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 
 import DailyRevenueMiniChart from "@/components/charts/daily-revenue-mini-chart";
 import OnlineVsOfflinePieChart from "@/components/charts/online-vs-offline-pie-chart";
 
 export default function SyncPage() {
+  const { online: onlineSalesData, offline: offlineSalesData, conflicts } = useSync();
+  const { businesses: businessesData } = useDashboardRefs();
   const totalToday =
     onlineSalesData.todaysRevenue + offlineSalesData.todaysRevenue;
-  const conflictCount = 3;
+  const conflictCount = conflicts.length;
 
   return (
     <div className="space-y-8">

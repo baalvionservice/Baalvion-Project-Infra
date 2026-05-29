@@ -22,13 +22,17 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, formatDistanceToNow } from "date-fns";
-import allConflicts from "@/lib/data/conflicts.json";
-import resolvedConflicts from "@/lib/data/resolved-conflicts.json";
-import businessesData from "@/lib/data/businesses";
+import { useSync, type Conflict } from "@/hooks/use-sync";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
+import { useEffect } from "react";
 
 export default function ConflictResolutionPage() {
-  const [conflicts, setConflicts] = useState(allConflicts);
+  const { conflicts: liveConflicts, resolvedConflicts } = useSync();
+  const { businesses: businessesData } = useDashboardRefs();
+  const [conflicts, setConflicts] = useState<Conflict[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => { setConflicts(liveConflicts); }, [liveConflicts]);
 
   const handleResolve = (conflictId: string, resolution: string) => {
     setConflicts(conflicts.filter((c) => c.id !== conflictId));

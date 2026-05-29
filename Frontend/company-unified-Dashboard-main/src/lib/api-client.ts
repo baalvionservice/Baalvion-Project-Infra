@@ -220,6 +220,7 @@ export const dashboardApi = {
   automation: () => get('/automation'),
   marketplace: () => get('/marketplace'),
   billing: () => get('/billing'),
+  sync: () => get('/sync'),
   permissionMatrix: () => get('/permissions/matrix'),
   markNotificationRead: (id: string) => post(`/notifications/${id}/read`),
   auditLogs: (params?: { page?: number; limit?: number }) => {

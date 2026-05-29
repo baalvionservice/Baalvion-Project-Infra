@@ -142,6 +142,23 @@ router.get('/gdpr', authMiddleware, (req, res) =>
     }),
 );
 
+// Sync — online/offline sales snapshots + data conflicts (no sync table yet; reference data).
+router.get('/sync', authMiddleware, (req, res) => {
+    const week = (base) => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => ({ day, revenue: Math.round(base * (0.8 + (i % 4) * 0.12)) }));
+    return sendSuccess(req, res, {
+        online: { todaysRevenue: 12840, ordersToday: 284, avgOrderValue: 45.21, topChannels: { website: 62, app: 38 }, revenueLast7Days: week(10500) },
+        offline: { todaysRevenue: 8320, walkInCustomers: 164, avgTransaction: 50.73, topStore: { name: 'Dubai Mall', business: 'Baalvion Mining Co' }, revenueLast7Days: week(7800) },
+        conflicts: [
+            { id: 'conflict_1', businessId: '2', field: 'Employee Count', offlineValue: '47', onlineValue: '51', detectedAt: '2026-05-28T14:14:00Z' },
+            { id: 'conflict_2', businessId: '3', field: 'Inventory SKU-204', offlineValue: '120', onlineValue: '118', detectedAt: '2026-05-28T13:02:00Z' },
+        ],
+        resolvedConflicts: [
+            { id: 'resolved_1', field: 'Customer Email', businessId: '4', resolvedBy: 'Aisha Rahman', resolvedAt: '2026-05-27T10:05:00Z', action: 'Kept Online Value' },
+            { id: 'resolved_2', field: 'Price List', businessId: '2', resolvedBy: 'Marcus Chen', resolvedAt: '2026-05-26T16:40:00Z', action: 'Kept Offline Value' },
+        ],
+    });
+});
+
 // Billing — subscription, usage, contact + invoice history (no billing table yet; reference data).
 router.get('/billing', authMiddleware, (req, res) =>
     sendSuccess(req, res, {
