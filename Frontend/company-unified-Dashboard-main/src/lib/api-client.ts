@@ -218,8 +218,8 @@ export const dashboardApi = {
     return get(`/audit/logs${qs ? `?${qs}` : ''}`);
   },
   analytics: {
-    businesses: () => get('/analytics/businesses'),
-    domains: () => get('/analytics/domains'),
-    forecast: () => get('/analytics/forecast'),
+    businesses: () => get('/analytics/company/summary'),
+    domains: () => get('/analytics/domains/trends'),
+    forecast: () => get('/analytics/company/summary'),
   },
 };
