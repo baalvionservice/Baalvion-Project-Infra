@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -26,8 +26,13 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import allNotificationsData from "@/lib/data/notifications.json";
+import { dashboardApi } from "@/lib/api-client";
 import type { Notification, NotificationType } from "@/lib/types";
+
+// Map live notification types (info/success/warning/error) to the page's display categories.
+const TYPE_MAP: Record<string, NotificationType> = {
+  warning: "Alert", error: "Alert", success: "Finance", info: "System", team: "Team",
+};
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
@@ -49,13 +54,28 @@ type FilterType = "All" | "Unread" | NotificationType;
 
 export default function NotificationsPage() {
   const [activeTab, setActiveTab] = useState<FilterType>("All");
-  const [notifications, setNotifications] = useState<Notification[]>(
-    allNotificationsData.map((n) => ({
-      ...n,
-      type: n.type as NotificationType,
-    }))
-  );
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.notifications();
+        const arr = ((d as { data?: unknown[] })?.data ?? (Array.isArray(d) ? d : [])) as Record<string, unknown>[];
+        if (cancelled) return;
+        setNotifications(arr.map((n) => ({
+          id: String(n.id),
+          title: String(n.title ?? ""),
+          description: String(n.message ?? n.description ?? ""),
+          type: TYPE_MAP[String(n.type ?? "info").toLowerCase()] ?? "System",
+          timestamp: String(n.created_at ?? n.createdAt ?? new Date().toISOString()),
+          isRead: Boolean(n.read ?? n.isRead ?? false),
+        })) as Notification[]);
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleDismiss = (notificationId: string) => {
     setNotifications(notifications.filter((n) => n.id !== notificationId));
