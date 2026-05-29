@@ -11,10 +11,26 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { CheckCircle } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
-import corporateActionsData from '@/lib/data/corporate-actions.json';
+import { useEffect, useState } from 'react';
+import { dashboardApi } from '@/lib/api-client';
+
+interface CompletedDeal { id: string; name: string; type: string; value: string; completed: string; timeline: { date: string; event: string }[] }
 
 export default function CompletedDeals() {
-  const deal = corporateActionsData.completedDeals[0];
+  const [deal, setDeal] = useState<CompletedDeal | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.corporate();
+        const obj = ((d as { data?: unknown })?.data ?? d) as { completedDeals?: CompletedDeal[] };
+        if (!cancelled) setDeal(obj?.completedDeals?.[0] ?? null);
+      } catch { /* leave null */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!deal) return null;
 
   return (
     <Card>

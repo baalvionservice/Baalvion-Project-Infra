@@ -28,18 +28,38 @@ import { Progress } from '@/components/ui/progress';
 import { ArrowLeft, CalendarIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import corporateActionsData from '@/lib/data/corporate-actions.json';
-import countriesData from '@/lib/data/countries.json';
+import { useEffect } from 'react';
+import { dashboardApi } from '@/lib/api-client';
 
 interface AcquisitionWizardProps {
   onBack: () => void;
 }
+
+interface DueDiligenceItem { id: string; label: string }
+interface CountryRef { name: string; flag?: string }
 
 const industries = ["Fintech", "E-commerce", "Media", "SaaS", "Logistics", "Retail", "Healthcare"];
 const paymentTerms = ["All Cash", "70% Cash / 30% Stock", "50% Cash / 50% Stock"];
 
 export default function AcquisitionWizard({ onBack }: AcquisitionWizardProps) {
   const [step, setStep] = useState(1);
+  const [countriesData, setCountriesData] = useState<CountryRef[]>([]);
+  const [dueDiligenceItems, setDueDiligenceItems] = useState<DueDiligenceItem[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [ca, ct] = await Promise.all([dashboardApi.corporate(), dashboardApi.countries()]);
+        const caObj = ((ca as { data?: unknown })?.data ?? ca) as { dueDiligenceItems?: DueDiligenceItem[] };
+        const ctArr = (Array.isArray(ct) ? ct : (ct as { data?: unknown[] })?.data ?? []) as Record<string, unknown>[];
+        if (cancelled) return;
+        setDueDiligenceItems(caObj?.dueDiligenceItems ?? []);
+        setCountriesData(ctArr.map((c) => ({ name: String(c.name ?? "") })));
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
   const [formData, setFormData] = useState({
     targetName: 'Innovate Solutions',
     website: 'innovate.com',
@@ -76,7 +96,7 @@ export default function AcquisitionWizard({ onBack }: AcquisitionWizardProps) {
         </div>
         <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2"><Label>Industry</Label><Select value={formData.industry} onValueChange={v => setFormData({...formData, industry: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{industries.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent></Select></div>
-            <div className="space-y-2"><Label>Country</Label><Select value={formData.country} onValueChange={v => setFormData({...formData, country: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{countriesData.map(c => <SelectItem key={c.name} value={c.name}>{c.flag} {c.name}</SelectItem>)}</SelectContent></Select></div>
+            <div className="space-y-2"><Label>Country</Label><Select value={formData.country} onValueChange={v => setFormData({...formData, country: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{countriesData.map(c => <SelectItem key={c.name} value={c.name}>{c.flag ? `${c.flag} ` : ""}{c.name}</SelectItem>)}</SelectContent></Select></div>
         </div>
         <div className="grid grid-cols-2 gap-4">
              <div className="space-y-2"><Label>Estimated Revenue ($)</Label><Input type="number" value={formData.revenue} onChange={e => setFormData({...formData, revenue: Number(e.target.value)})} /></div>
@@ -89,15 +109,15 @@ export default function AcquisitionWizard({ onBack }: AcquisitionWizardProps) {
      <div className="space-y-4">
         <p className="text-sm text-muted-foreground">Select all items that have been completed or verified.</p>
         <div className="grid grid-cols-2 gap-4">
-            {corporateActionsData.dueDiligenceItems.map(item => (
-                <div key={item} className="flex items-center space-x-2">
-                    <Checkbox id={item} onCheckedChange={(checked) => {
+            {dueDiligenceItems.map(item => (
+                <div key={item.id} className="flex items-center space-x-2">
+                    <Checkbox id={item.id} onCheckedChange={(checked) => {
                         setFormData(prev => ({
                             ...prev,
-                            diligence: checked ? [...prev.diligence, item] : prev.diligence.filter(d => d !== item)
+                            diligence: checked ? [...prev.diligence, item.label] : prev.diligence.filter(d => d !== item.label)
                         }))
                     }} />
-                    <label htmlFor={item} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{item}</label>
+                    <label htmlFor={item.id} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{item.label}</label>
                 </div>
             ))}
         </div>

@@ -18,10 +18,24 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
-import corporateActionsData from '@/lib/data/corporate-actions.json';
+import { useEffect, useState } from 'react';
+import { dashboardApi } from '@/lib/api-client';
+
+interface Deal { id: string; name: string; type: string; stage: string; value: string; close: string; owner: string }
 
 export default function ActiveDealsTable() {
-  const deals = corporateActionsData.activeDeals;
+  const [deals, setDeals] = useState<Deal[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.corporate();
+        const obj = ((d as { data?: unknown })?.data ?? d) as { activeDeals?: Deal[] };
+        if (!cancelled) setDeals(obj?.activeDeals ?? []);
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   return (
     <Card>

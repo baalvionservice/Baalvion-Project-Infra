@@ -24,13 +24,32 @@ router.get('/countries', authMiddleware, async (req, res, next) => {
     } catch (err) { next(err); }
 });
 
-// Corporate actions — reference list (no dedicated table yet).
+// Corporate actions / M&A deals — deal pipeline (no dedicated table yet; served as reference data).
 router.get('/corporate-actions', authMiddleware, (req, res) =>
-    sendSuccess(req, res, [
-        { id: 1, type: 'Dividend',    description: 'Q1 cash dividend',          amount: 0.45,    currency: 'USD', date: '2026-03-31', status: 'Paid' },
-        { id: 2, type: 'Stock Split', description: '2-for-1 share split',        ratio: '2:1',                     date: '2026-02-15', status: 'Completed' },
-        { id: 3, type: 'Buyback',     description: 'Share repurchase programme', amount: 5000000, currency: 'USD', date: '2026-05-01', status: 'Active' },
-    ]),
+    sendSuccess(req, res, {
+        dueDiligenceItems: [
+            { id: 'dd_1', label: 'Financial statements review' },
+            { id: 'dd_2', label: 'Legal & compliance audit' },
+            { id: 'dd_3', label: 'IP & technology assessment' },
+            { id: 'dd_4', label: 'Customer contract review' },
+            { id: 'dd_5', label: 'HR & key-personnel review' },
+        ],
+        activeDeals: [
+            { id: 'deal_1', name: 'Project Eagle — Acquisition of Innovate Solutions', type: 'Acquisition', stage: 'Due Diligence', value: '25M', started: '2026-02-15', close: '2026-09-30', owner: 'Aisha Rahman' },
+            { id: 'deal_2', name: 'Trade House — Minority Stake in PortLink', type: 'Investment', stage: 'Negotiation', value: '8M', started: '2026-03-01', close: '2026-08-15', owner: 'Marcus Chen' },
+            { id: 'deal_3', name: 'Amarisé — Joint Venture (EU Distribution)', type: 'Joint Venture', stage: 'LOI Signed', value: '15M', started: '2026-04-10', close: '2026-11-01', owner: 'Elena Dubois' },
+        ],
+        completedDeals: [
+            { id: 'deal_comp_1', name: 'Acquisition of DataLeap Analytics', type: 'Acquisition', value: '12.5M', completed: '2025-12-20', timeline: [
+                { date: '2025-09-01', event: 'Initial contact and NDA signed' },
+                { date: '2025-09-20', event: 'Letter of Intent (LOI) signed' },
+                { date: '2025-10-05', event: 'Due diligence process started' },
+                { date: '2025-11-15', event: 'Definitive agreement signed' },
+                { date: '2025-12-18', event: 'Regulatory approvals received' },
+                { date: '2025-12-20', event: 'Deal closed and funds transferred' },
+            ] },
+        ],
+    }),
 );
 
 // FX rates — reference rates (external data; surfaced for the dashboard).
