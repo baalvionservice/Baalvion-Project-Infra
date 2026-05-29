@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -43,8 +43,7 @@ import type {
   Business,
   Currency,
 } from "@/lib/types";
-import transactionsData from "@/lib/data/transactions.json";
-import businessesData from "@/lib/data/businesses";
+import { dashboardApi } from "@/lib/api-client";
 import { FilterBar } from "./components/filter-bar";
 import {
   parse,
@@ -61,8 +60,6 @@ import TransactionDetail from "./components/transaction-detail";
 type TransactionWithBusiness = Transaction & { businessName: string };
 
 const PAGE_SIZE = 20;
-
-const businesses: Business[] = businessesData;
 
 const gatewayColors: Record<PaymentGateway, string> = {
   Stripe:
@@ -111,18 +108,36 @@ export default function PaymentsPage({
 
   const params = searchParams ? use(searchParams) : undefined;
 
-  const allTransactions: TransactionWithBusiness[] = transactionsData.map(
-    (tx: any) => {
-      const business = businesses.find((b) => b.id === tx.businessId);
-      return {
-        ...tx,
-        gateway: tx.gateway as PaymentGateway,
-        currency: tx.currency as Currency,
-        status: tx.status as TransactionStatus,
-        businessName: business?.name || "N/A",
-      };
-    }
-  );
+  const [allTransactions, setAllTransactions] = useState<TransactionWithBusiness[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [txRes, bizRes] = await Promise.all([dashboardApi.payments(), dashboardApi.businesses()]);
+        const txArr = ((txRes as { data?: unknown[] })?.data ?? (Array.isArray(txRes) ? txRes : [])) as Record<string, unknown>[];
+        const bizArr = ((bizRes as { data?: unknown[] })?.data ?? (Array.isArray(bizRes) ? bizRes : [])) as Record<string, unknown>[];
+        if (cancelled) return;
+        const bizName = (id: string) => bizArr.find((b) => String(b.id) === id)?.name as string | undefined;
+        setAllTransactions(txArr.map((tx) => {
+          const businessId = String(tx.business_id ?? "");
+          return {
+            id: String(tx.id),
+            businessId,
+            gateway: String(tx.gateway ?? "") as PaymentGateway,
+            customer: { name: String(tx.customer_name ?? ""), email: String(tx.customer_email ?? "") },
+            amount: Number(tx.amount ?? 0),
+            fee: Number(tx.fee ?? 0),
+            currency: String(tx.currency ?? "USD") as Currency,
+            status: String(tx.status ?? "") as TransactionStatus,
+            date: String(tx.created_at ?? tx.createdAt ?? new Date().toISOString()),
+            businessName: bizName(businessId) ?? "N/A",
+          } as TransactionWithBusiness;
+        }));
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Calculate stats from all transactions
   const totalCollected = allTransactions

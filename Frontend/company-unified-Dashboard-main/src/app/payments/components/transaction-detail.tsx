@@ -11,8 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import type { Transaction, Business } from "@/lib/types";
-import businesses from "@/lib/data/businesses";
+import type { Transaction } from "@/lib/types";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { cn } from "@/lib/utils";
 import { FileCheck, FileClock, FileX, Mail, User, Globe } from "lucide-react";
@@ -33,12 +32,9 @@ export default function TransactionDetail({
 }: TransactionDetailProps) {
   if (!transaction) return null;
 
-  const business = businesses.find(
-    (b) => b.id === transaction.businessId
-  ) as Business;
-  const businessImage = PlaceHolderImages.find(
-    (p) => p.id === business.imageId
-  );
+  // Business display comes from the transaction's joined businessName (live data has no logo/country).
+  const business = { name: transaction.businessName, country: "—" };
+  const businessImage = PlaceHolderImages.find((p) => p.id === "business-default");
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>

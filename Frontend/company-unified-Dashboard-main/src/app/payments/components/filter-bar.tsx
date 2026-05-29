@@ -21,12 +21,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import businesses from "@/lib/data/businesses";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 
 export function FilterBar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { businesses } = useDashboardRefs();
 
   const gateway = searchParams.get("gateway") ?? "all";
   const status = searchParams.get("status") ?? "all";
