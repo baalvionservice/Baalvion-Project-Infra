@@ -215,6 +215,7 @@ export const dashboardApi = {
   financeReports: () => get('/finance-reports'),
   domainAnalytics: () => get('/domain-analytics'),
   operationsAlerts: () => get('/operations/alerts'),
+  gdpr: () => get('/gdpr'),
   permissionMatrix: () => get('/permissions/matrix'),
   markNotificationRead: (id: string) => post(`/notifications/${id}/read`),
   auditLogs: (params?: { page?: number; limit?: number }) => {

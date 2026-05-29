@@ -6,8 +6,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { CheckCircle, Clock, Download, FileText, XCircle } from 'lucide-react';
-import gdprData from '@/lib/data/gdpr.json';
+import { useEffect, useState } from 'react';
+import { dashboardApi } from '@/lib/api-client';
 import { format, formatDistanceToNow } from 'date-fns';
+
+interface GdprData {
+  statusCards: { title: string; status: string; description: string }[];
+  subjectRequests: { id: string; type: string; name: string; submitted: string; status: string; dueDate: string }[];
+  cookieConsent: { domain: string; rate: number }[];
+  retentionPolicies: { dataType: string; period: string; legalBasis: string }[];
+}
+const EMPTY_GDPR: GdprData = { statusCards: [], subjectRequests: [], cookieConsent: [], retentionPolicies: [] };
 
 const statusConfig = {
     Complete: { icon: CheckCircle, color: 'text-green-500' },
@@ -26,6 +35,18 @@ const dsrStatusColors = {
 }
 
 export default function GdprPage() {
+    const [gdprData, setGdprData] = useState<GdprData>(EMPTY_GDPR);
+    useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const d = await dashboardApi.gdpr();
+                const obj = ((d as { data?: unknown })?.data ?? d) as GdprData;
+                if (!cancelled && obj) setGdprData({ ...EMPTY_GDPR, ...obj });
+            } catch { /* leave empty */ }
+        })();
+        return () => { cancelled = true; };
+    }, []);
     return (
         <div className="space-y-8">
             <div>

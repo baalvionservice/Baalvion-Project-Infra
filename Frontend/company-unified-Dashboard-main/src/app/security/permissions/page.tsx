@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -16,194 +16,110 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Check, X, AlertTriangle } from "lucide-react";
-import { cn } from "@/lib/utils";
-import permissionsData from "@/lib/data/permissions.json";
-import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Check, X } from "lucide-react";
+import { dashboardApi } from "@/lib/api-client";
 
-type Role = "Admin" | "Investor" | "Co-Founder" | "Employee";
-const roles: Role[] = ["Admin", "Investor", "Co-Founder", "Employee"];
+// The backend RBAC model uses SYSTEM roles (admin/manager/viewer) with per-module action arrays.
+// This page renders that live matrix faithfully (was a static business-role boolean grid).
+interface ModulePerm { module: string; actions: string[] }
+type Matrix = Record<string, ModulePerm[]>;
+
+const actionColor: Record<string, string> = {
+  read: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border-blue-300",
+  write: "bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300 border-green-300",
+  delete: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300 border-red-300",
+};
 
 export default function PermissionsPage() {
-  const [isModalOpen, setModalOpen] = useState(false);
-  const [permissions, setPermissions] = useState(permissionsData.roles);
-  const { toast } = useToast();
+  const [matrix, setMatrix] = useState<Matrix>({});
 
-  const handlePermissionChange = (
-    role: Role,
-    permission: string,
-    value: boolean
-  ) => {
-    setPermissions((prev) => ({
-      ...prev,
-      [role]: {
-        ...prev[role],
-        [permission]: value,
-      },
-    }));
-  };
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.permissionMatrix();
+        const obj = ((d as { data?: unknown })?.data ?? d) as Matrix;
+        if (!cancelled && obj) setMatrix(obj);
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
-  const handleSaveChanges = () => {
-    setModalOpen(false);
-    toast({
-      title: "Permissions Updated",
-      description: "Role access levels have been successfully saved.",
-    });
-  };
-
-  const renderPermissionCell = (permissionValue: boolean | string) => {
-    if (typeof permissionValue === "boolean") {
-      return permissionValue ? (
-        <Check className="h-5 w-5 text-green-500" />
-      ) : (
-        <X className="h-5 w-5 text-red-500" />
-      );
-    }
-    return (
-      <span className="text-xs text-muted-foreground">{permissionValue}</span>
-    );
-  };
+  const roles = Object.keys(matrix);
+  // Union of all modules across roles, stable order.
+  const modules = Array.from(
+    new Set(roles.flatMap((r) => (matrix[r] ?? []).map((m) => m.module)))
+  );
+  const actionsFor = (role: string, module: string): string[] =>
+    (matrix[role] ?? []).find((m) => m.module === module)?.actions ?? [];
 
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Role Access Matrix
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight">Role Access Matrix</h1>
         <p className="text-muted-foreground">
-          Define and manage what each role can see and do.
+          Live permissions for each system role across modules.
         </p>
       </div>
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Permission Overview</CardTitle>
-            <CardDescription>
-              A detailed grid of permissions for each role in the organization.
-            </CardDescription>
-          </div>
-          <Button onClick={() => setModalOpen(true)}>Edit Permissions</Button>
+        <CardHeader>
+          <CardTitle>Permission Overview</CardTitle>
+          <CardDescription>
+            A detailed grid of allowed actions per role and module (from the live RBAC policy).
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-32 sm:w-[250px]">
-                    Permission
-                  </TableHead>
+                  <TableHead className="w-32 sm:w-[250px]">Module</TableHead>
                   {roles.map((role) => (
-                    <TableHead key={role} className="text-center">
-                      {role}
+                    <TableHead key={role} className="text-center capitalize">
+                      {role.replace("_", " ")}
                     </TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {permissionsData.permissions.map((permission) => (
-                  <TableRow key={permission.id}>
-                    <TableCell className="font-medium">
-                      {permission.module}
-                    </TableCell>
-                    {roles.map((role) => (
-                      <TableCell key={role} className="text-center">
-                        <div className="flex justify-center">
-                          {renderPermissionCell(
-                            permissions[role][
-                              permission.module.toLowerCase() as keyof (typeof permissions)[Role]
-                            ]
+                {modules.map((module) => (
+                  <TableRow key={module}>
+                    <TableCell className="font-medium capitalize">{module}</TableCell>
+                    {roles.map((role) => {
+                      const actions = actionsFor(role, module);
+                      return (
+                        <TableCell key={role} className="text-center">
+                          {actions.length > 0 ? (
+                            <div className="flex flex-wrap justify-center gap-1">
+                              {actions.map((a) => (
+                                <Badge key={a} variant="outline" className={actionColor[a] ?? ""}>
+                                  {a}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <X className="mx-auto h-4 w-4 text-muted-foreground/40" />
                           )}
-                        </div>
-                      </TableCell>
-                    ))}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 ))}
+                {modules.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={roles.length + 1} className="text-center text-muted-foreground py-8">
+                      <Check className="mx-auto h-6 w-6 mb-2 text-muted-foreground/40" />
+                      Loading permission matrix…
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
-
-      <Dialog open={isModalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Edit Role Permissions</DialogTitle>
-            <DialogDescription>
-              Toggle permissions for each role. Changes will apply immediately
-              after saving.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="max-h-[60vh] overflow-y-auto p-1">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-32 sm:w-[250px]">
-                    Permission
-                  </TableHead>
-                  {roles.map((role) => (
-                    <TableHead key={role} className="text-center">
-                      {role}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {permissionsData.permissions.map((permission) => (
-                  <TableRow key={permission.id}>
-                    <TableCell className="font-medium text-sm">
-                      {permission.module}
-                    </TableCell>
-                    {roles.map((role) => (
-                      <TableCell key={role} className="text-center">
-                        <div className="flex justify-center">
-                          {typeof permissions[role][
-                            permission.module.toLowerCase() as keyof (typeof permissions)[Role]
-                          ] === "boolean" ? (
-                            <Switch
-                              checked={
-                                permissions[role][
-                                  permission.module.toLowerCase() as keyof (typeof permissions)[Role]
-                                ] as boolean
-                              }
-                              onCheckedChange={(value) =>
-                                handlePermissionChange(
-                                  role,
-                                  permission.module.toLowerCase(),
-                                  value
-                                )
-                              }
-                            />
-                          ) : (
-                            <AlertTriangle className="h-5 w-5 text-yellow-500" />
-                          )}
-                        </div>
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setModalOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveChanges}>Save Changes</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

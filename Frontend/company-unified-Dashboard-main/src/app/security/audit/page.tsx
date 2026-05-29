@@ -38,9 +38,10 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
-import auditLogsData from "@/lib/data/audit-logs.json";
-import usersData from "@/lib/data/users.json";
+import { dashboardApi } from "@/lib/api-client";
 import { Calendar } from "@/components/ui/calendar";
+
+interface AuditLog { id: string; user: string; role: string; action: string; severity: string; status: string; timestamp: string; resource: string; ipAddress: string; location: string; details: string }
 
 type Severity = "Info" | "Warning" | "Critical";
 type Action =
@@ -86,12 +87,33 @@ export default function AuditLogPage() {
     status: "all",
   });
   const [lastUpdated, setLastUpdated] = useState(new Date());
+  const [auditLogsData, setAuditLogsData] = useState<AuditLog[]>([]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setLastUpdated(new Date());
-    }, 30000);
-    return () => clearInterval(interval);
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.auditLogs({ limit: 100 });
+        const aData = (d as { data?: { data?: unknown[] } })?.data;
+        const arr = (aData?.data ?? (d as { data?: unknown[] })?.data ?? (Array.isArray(d) ? d : [])) as Record<string, unknown>[];
+        if (cancelled) return;
+        setAuditLogsData(arr.map((l) => ({
+          id: String(l.id),
+          user: String(l.user_name ?? l.user ?? "System"),
+          role: String(l.role ?? ""),
+          action: String(l.action ?? ""),
+          severity: String(l.severity ?? "Info"),
+          status: String(l.status ?? "Success"),
+          timestamp: String(l.created_at ?? l.createdAt ?? new Date().toISOString()),
+          resource: String(l.resource ?? l.entity_type ?? ""),
+          ipAddress: String(l.ip_address ?? l.ipAddress ?? ""),
+          location: String(l.location ?? l.ip_address ?? "—"),
+          details: String(l.details ?? `${l.action ?? ""} on ${l.resource ?? l.entity_type ?? ""}`),
+        })));
+      } catch { /* leave empty */ }
+    })();
+    const interval = setInterval(() => setLastUpdated(new Date()), 30000);
+    return () => { cancelled = true; clearInterval(interval); };
   }, []);
 
   const handleFilterChange = (filterName: string) => (value: string) => {
@@ -102,7 +124,7 @@ export default function AuditLogPage() {
     return auditLogsData.filter(
       (log) => log.severity === "Critical" || log.severity === "Warning"
     );
-  }, []);
+  }, [auditLogsData]);
 
   const filteredLogs = useMemo(() => {
     return auditLogsData.filter((log) => {
@@ -117,7 +139,7 @@ export default function AuditLogPage() {
       if (date?.to && new Date(log.timestamp) > date.to) return false;
       return true;
     });
-  }, [filters, date]);
+  }, [filters, date, auditLogsData]);
 
   return (
     <div className="space-y-8">
@@ -190,7 +212,7 @@ export default function AuditLogPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Users</SelectItem>
-                    {[...new Set(usersData.map((u) => u.name))].map((u) => (
+                    {[...new Set(auditLogsData.map((l) => l.user))].map((u) => (
                       <SelectItem key={u} value={u}>
                         {u}
                       </SelectItem>

@@ -114,4 +114,32 @@ router.get('/domain-analytics', authMiddleware, (req, res) =>
     ]),
 );
 
+// GDPR / data-privacy posture — reference data (no privacy-ops table yet).
+router.get('/gdpr', authMiddleware, (req, res) =>
+    sendSuccess(req, res, {
+        statusCards: [
+            { title: 'Data Inventory', status: 'Complete', description: 'All data assets mapped' },
+            { title: 'Consent Management', status: 'Active', description: 'Cookie + marketing consent tracked' },
+            { title: 'DSR Workflow', status: 'Operational', description: 'Subject requests handled within SLA' },
+            { title: 'Breach Readiness', status: 'Ready', description: '72-hour notification plan in place' },
+        ],
+        subjectRequests: [
+            { id: 'dsr_1', type: 'Access', name: 'John Doe', submitted: '2026-04-28T10:00:00Z', status: 'Pending', dueDate: '2026-05-28T10:00:00Z' },
+            { id: 'dsr_2', type: 'Erasure', name: 'Mei Lin', submitted: '2026-04-20T09:00:00Z', status: 'Completed', dueDate: '2026-05-20T09:00:00Z' },
+            { id: 'dsr_3', type: 'Portability', name: 'Raj Patel', submitted: '2026-05-02T14:00:00Z', status: 'In Progress', dueDate: '2026-06-01T14:00:00Z' },
+        ],
+        cookieConsent: [
+            { domain: 'baalvionmining.com', rate: 92.5 },
+            { domain: 'baalviontrade.com', rate: 88.2 },
+            { domain: 'amarisemaison.com', rate: 95.1 },
+        ],
+        retentionPolicies: [
+            { dataType: 'Customer PII', period: '5 years post-relationship', legalBasis: 'Contractual Necessity, Legal Obligation' },
+            { dataType: 'Transaction records', period: '7 years', legalBasis: 'Legal Obligation (tax)' },
+            { dataType: 'Marketing consent', period: 'Until withdrawn', legalBasis: 'Consent' },
+            { dataType: 'Employee records', period: '6 years post-employment', legalBasis: 'Legal Obligation' },
+        ],
+    }),
+);
+
 module.exports = router;
