@@ -1,0 +1,65 @@
+# Prometheus alerting rules for the Baalvion financial services (design §10.3).
+# Load via prometheus.yml `rule_files:` or a PrometheusRule CR (kube-prometheus-stack).
+# Metrics come from Micrometer/Actuator (/actuator/prometheus) + Resilience4j + Hikari.
+groups:
+  - name: financial-services
+    rules:
+      - alert: HighTransactionErrorRate
+        # >1% 5xx over 5m (design §10.3 → PagerDuty P1)
+        expr: |
+          sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m])) by (application)
+            / sum(rate(http_server_requests_seconds_count[5m])) by (application) > 0.01
+        for: 5m
+        labels: { severity: critical, page: "P1" }
+        annotations:
+          summary: "High 5xx error rate on {{ $labels.application }}"
+          description: "5xx error ratio is above 1% for 5 minutes."
+
+      - alert: PaymentLatencyP99High
+        # payment p99 > 3s over 5m (design §10.3 → PagerDuty P2)
+        expr: |
+          histogram_quantile(0.99,
+            sum(rate(http_server_requests_seconds_bucket{application="payment-service",uri=~"/api/v1/payments.*"}[5m])) by (le)) > 3
+        for: 5m
+        labels: { severity: warning, page: "P2" }
+        annotations:
+          summary: "Payment p99 latency > 3s"
+          description: "99th percentile latency for payment endpoints exceeded 3s for 5 minutes."
+
+      - alert: CircuitBreakerOpen
+        # any Resilience4j breaker OPEN (design §10.3 → PagerDuty P1)
+        expr: resilience4j_circuitbreaker_state{state="open"} == 1
+        for: 1m
+        labels: { severity: critical, page: "P1" }
+        annotations:
+          summary: "Circuit breaker {{ $labels.name }} OPEN on {{ $labels.application }}"
+          description: "A downstream dependency is failing; breaker is open."
+
+      - alert: DbConnectionPoolExhaustion
+        # >90% Hikari pool utilisation (design §10.3 → PagerDuty P2)
+        expr: |
+          hikaricp_connections_active / hikaricp_connections_max > 0.9
+        for: 5m
+        labels: { severity: warning, page: "P2" }
+        annotations:
+          summary: "DB connection pool > 90% on {{ $labels.application }}"
+          description: "Hikari active/max connection ratio above 90% for 5 minutes."
+
+      - alert: OutboxBacklogGrowing
+        # transactional-outbox publish lag: PENDING rows not draining
+        expr: increase(outbox_pending[10m]) > 0 and outbox_pending > 100
+        for: 10m
+        labels: { severity: warning, page: "P2" }
+        annotations:
+          summary: "Outbox backlog growing on {{ $labels.application }}"
+          description: "Pending outbox events are accumulating; check the Kafka broker / publisher."
+
+      - alert: DltMessagesPresent
+        # any dead-lettered message (design §10.3 → Slack #alerts). Gauge exported by
+        # audit-service (DltMetrics) for audit.dlt_messages where status='DEAD'.
+        expr: dlt_messages_dead > 0
+        for: 1m
+        labels: { severity: warning, channel: "slack" }
+        annotations:
+          summary: "Dead-letter messages present"
+          description: "Inspect /api/v1/audit/dlt and replay or discard."

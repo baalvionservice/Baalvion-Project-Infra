@@ -1,0 +1,106 @@
+spring:
+  application:
+    name: audit-service
+    version: 1.0.0
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        jdbc:
+          batch_size: 25
+          fetch_size: 50
+        order_inserts: true
+    show-sql: false
+    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 10000
+      max-lifetime: 1800000
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    consumer:
+      group-id: audit-service-group
+      auto-offset-reset: earliest
+      max-poll-records: 500
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    listener:
+      ack-mode: record
+
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+
+  # Per-service Flyway history table — services share one DB, so isolate migration state.
+  flyway:
+    enabled: true
+    table: flyway_history_audit
+
+server:
+  port: ${PORT:3020}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    min-response-size: 1024
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.baalvion: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+
+app:
+  name: Baalvion Audit Service
+  version: 1.0.0
+  description: Immutable audit trail and compliance log aggregation for Global Trade Infrastructure
+  audit:
+    # Topic pattern the aggregator subscribes to ({domain}.{entity}.{event}).
+    # Lowercase-only tail excludes uppercase `.DLT` topics (handled by the DLT monitor).
+    topic-pattern: (payments|ledger|settlement|escrow|account)\.[a-z.]+
+    # Search backend: "postgres" (JSONB+GIN, default) or "elasticsearch"
+    # (also set spring.elasticsearch.uris when enabling ES).
+    search: ${AUDIT_SEARCH:postgres}
+    es-index: ${AUDIT_ES_INDEX:baalvion-audit}
+  dlt:
+    # The DLT monitor subscribes to every dead-letter topic in its own consumer group.
+    topic-pattern: .*\.DLT
+    group-id: audit-dlt-group
+  webhook:
+    # Outbound HMAC-signed delivery (dispatcher poll + retry/DLQ).
+    poll-ms: 3000
+    batch-size: 50
+    max-attempts: 8
+    request-timeout-ms: 5000
+    backoff-cap-seconds: 3600

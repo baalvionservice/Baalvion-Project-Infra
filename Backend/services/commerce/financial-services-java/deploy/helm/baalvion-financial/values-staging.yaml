@@ -1,0 +1,28 @@
+# Staging overlay: helm upgrade --install financial ./baalvion-financial -f values.yaml -f values-staging.yaml
+image:
+  tag: staging
+replicaCount: 2
+
+config:
+  DB_HOST: postgres.staging.svc.cluster.local
+  KAFKA_BROKERS: kafka.staging.svc.cluster.local:9092
+  REDIS_HOST: redis.staging.svc.cluster.local
+  APP_SECURITY_ENABLED: "true"
+  OAUTH_ISSUER_URI: "https://auth.staging.baalvion.com"
+  OAUTH_JWK_SET_URI: "http://oauth-service.staging.svc.cluster.local:3023/.well-known/jwks.json"
+  # Distributed rate limiting once >1 replica.
+  APP_SECURITY_RATE_LIMIT_BACKEND: "redis"
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 6
+  targetCPUUtilizationPercentage: 70
+
+resources:
+  requests: { cpu: 250m, memory: 512Mi }
+  limits: { cpu: "1", memory: 1Gi }
+
+# DB_PASSWORD must come from the External Secrets Operator (see ADR 0006), NOT this file.
+secret:
+  DB_PASSWORD: "REPLACED_BY_EXTERNAL_SECRETS"

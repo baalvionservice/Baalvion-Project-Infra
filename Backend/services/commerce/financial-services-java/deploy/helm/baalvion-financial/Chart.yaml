@@ -1,0 +1,8 @@
+apiVersion: v2
+name: baalvion-financial
+description: Baalvion financial microservices (account, ledger, payment, escrow, settlement, reconciliation, audit, reporting, risk)
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+maintainers:
+  - name: Baalvion Platform

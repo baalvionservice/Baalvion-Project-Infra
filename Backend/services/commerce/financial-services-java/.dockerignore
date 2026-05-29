@@ -1,0 +1,7 @@
+**/target/
+**/*.iml
+**/.idea/
+**/.git/
+**/*.log
+INTEGRATION_SUMMARY.md
+deploy/

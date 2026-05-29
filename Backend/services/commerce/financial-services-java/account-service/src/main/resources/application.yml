@@ -1,0 +1,102 @@
+spring:
+  application:
+    name: account-service
+    version: 1.0.0
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        jdbc:
+          batch_size: 25
+          fetch_size: 50
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 10000
+      max-lifetime: 1800000
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      compression-type: snappy
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        linger.ms: 10
+        batch.size: 32768
+    consumer:
+      group-id: account-service-group
+      auto-offset-reset: earliest
+      max-poll-records: 500
+
+  sql:
+    init:
+      mode: always
+      continue-on-error: true
+
+  # Per-service Flyway history table — services share one DB, so isolate migration state.
+  flyway:
+    enabled: true
+    table: flyway_history_account
+
+server:
+  port: ${PORT:3016}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    min-response-size: 1024
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.baalvion: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+
+app:
+  name: Baalvion Account Service
+  version: 1.0.0
+  description: Multi-tenant account management and KYC for Global Trade Infrastructure
+  default-daily-limit: 1000000
+  kyc:
+    # High-entropy secret material; the AES-256 key is derived from it (SHA-256). DEV DEFAULT
+    # ONLY — production MUST override KYC_ENCRYPTION_KEY from the secret store (use a 32+ byte
+    # random secret) and rotate by re-encrypting under a new secret.
+    encryption-key: ${KYC_ENCRYPTION_KEY:dev-only-kyc-secret-change-me-please-32bytes+}
+    max-bytes: 10485760        # 10 MiB per document
+    retention-days: 1825       # 5-year retention
+    purge-ms: 3600000          # hourly expiry purge

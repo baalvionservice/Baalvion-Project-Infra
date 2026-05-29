@@ -1,0 +1,133 @@
+{
+  "__comment": "Baalvion Financial Services — operational overview. Import into Grafana (Dashboards → Import). Expects a Prometheus datasource scraping each service's /actuator/prometheus (Micrometer). Panels use the standard Spring Boot/Micrometer metric names plus the platform's custom gauges (outbox_pending, dlt_messages_dead).",
+  "title": "Baalvion Financial — Overview",
+  "uid": "baalvion-financial-overview",
+  "schemaVersion": 39,
+  "version": 1,
+  "editable": true,
+  "tags": ["baalvion", "financial", "fintech"],
+  "time": { "from": "now-6h", "to": "now" },
+  "refresh": "30s",
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "query": "prometheus",
+        "current": {}
+      },
+      {
+        "name": "application",
+        "type": "query",
+        "datasource": "${datasource}",
+        "query": "label_values(http_server_requests_seconds_count, application)",
+        "includeAll": true,
+        "multi": true,
+        "refresh": 2
+      }
+    ]
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request rate (req/s) by service",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum by (application) (rate(http_server_requests_seconds_count{application=~\"$application\"}[5m]))",
+          "legendFormat": "{{application}}"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "5xx error ratio",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "fieldConfig": { "defaults": { "unit": "percentunit", "thresholds": { "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 0.01 } ] } } },
+      "targets": [
+        {
+          "expr": "sum by (application) (rate(http_server_requests_seconds_count{application=~\"$application\",status=~\"5..\"}[5m])) / clamp_min(sum by (application) (rate(http_server_requests_seconds_count{application=~\"$application\"}[5m])), 1e-9)",
+          "legendFormat": "{{application}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Latency p99 (s)",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.99, sum by (le, application) (rate(http_server_requests_seconds_bucket{application=~\"$application\"}[5m])))",
+          "legendFormat": "{{application}} p99"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Circuit breakers (1 = OPEN)",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "resilience4j_circuitbreaker_state{state=\"open\"}",
+          "legendFormat": "{{application}}/{{name}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "Outbox pending (payment)",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
+      "targets": [ { "expr": "outbox_pending", "legendFormat": "pending" } ]
+    },
+    {
+      "id": 6,
+      "title": "Dead-letter messages (audit)",
+      "type": "stat",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
+      "fieldConfig": { "defaults": { "thresholds": { "steps": [ { "color": "green", "value": null }, { "color": "red", "value": 1 } ] } } },
+      "targets": [ { "expr": "dlt_messages_dead", "legendFormat": "DEAD" } ]
+    },
+    {
+      "id": 7,
+      "title": "JVM heap used (bytes) by service",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
+      "targets": [
+        { "expr": "sum by (application) (jvm_memory_used_bytes{area=\"heap\",application=~\"$application\"})", "legendFormat": "{{application}}" }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "DB connection pool utilisation",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+      "fieldConfig": { "defaults": { "unit": "percentunit" } },
+      "targets": [
+        { "expr": "hikaricp_connections_active{application=~\"$application\"} / clamp_min(hikaricp_connections_max{application=~\"$application\"}, 1)", "legendFormat": "{{application}}" }
+      ]
+    },
+    {
+      "id": 9,
+      "title": "Kafka consumer lag (records)",
+      "type": "timeseries",
+      "datasource": "${datasource}",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+      "targets": [
+        { "expr": "sum by (application, client_id) (kafka_consumer_fetch_manager_records_lag_max)", "legendFormat": "{{application}}/{{client_id}}" }
+      ]
+    }
+  ]
+}

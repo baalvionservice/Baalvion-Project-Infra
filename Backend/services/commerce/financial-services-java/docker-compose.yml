@@ -1,0 +1,135 @@
+# Local stack for the Baalvion financial services (design §8).
+# Infra: PostgreSQL 16, Kafka (KRaft-less w/ Zookeeper), Redis 7.
+# Each service builds from the shared parametrized Dockerfile (SERVICE build-arg).
+#
+#   docker compose up --build
+#
+# Note: every service runs a full Maven build in its image; first build is slow.
+# All services share the `baalvion` database (separate schemas + per-service Flyway history).
+
+name: baalvion-financial
+
+x-service-env: &service-env
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: baalvion
+  DB_USER: postgres
+  DB_PASSWORD: postgres
+  KAFKA_BROKERS: kafka:9092
+  # Local dev has no IdP — run permissive. In real environments set APP_SECURITY_ENABLED=true
+  # and OAUTH_ISSUER_URI / OAUTH_JWK_SET_URI to point at the platform's RS256 JWKS.
+  APP_SECURITY_ENABLED: "false"
+
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: baalvion
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports: ["5432:5432"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d baalvion"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    depends_on: [zookeeper]
+    ports: ["9092:9092"]
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  redis:
+    image: redis:7
+    ports: ["6379:6379"]
+
+  account-service:
+    build: { context: ., args: { SERVICE: account-service } }
+    environment: { <<: *service-env, PORT: "3016" }
+    ports: ["3016:3016"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  ledger-service:
+    build: { context: ., args: { SERVICE: ledger-service } }
+    environment: { <<: *service-env, PORT: "3014" }
+    ports: ["3014:3014"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  payment-service:
+    build: { context: ., args: { SERVICE: payment-service } }
+    environment: { <<: *service-env, PORT: "3015", REDIS_HOST: redis, REDIS_PORT: "6379" }
+    ports: ["3015:3015"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+      redis: { condition: service_started }
+
+  escrow-service:
+    build: { context: ., args: { SERVICE: escrow-service } }
+    environment: { <<: *service-env, PORT: "3017" }
+    ports: ["3017:3017"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  settlement-service:
+    build: { context: ., args: { SERVICE: settlement-service } }
+    environment: { <<: *service-env, PORT: "3018" }
+    ports: ["3018:3018"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  reconciliation-service:
+    build: { context: ., args: { SERVICE: reconciliation-service } }
+    environment: { <<: *service-env, PORT: "3019" }
+    ports: ["3019:3019"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  audit-service:
+    build: { context: ., args: { SERVICE: audit-service } }
+    environment: { <<: *service-env, PORT: "3020" }
+    ports: ["3020:3020"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  reporting-service:
+    build: { context: ., args: { SERVICE: reporting-service } }
+    environment: { <<: *service-env, PORT: "3024" }
+    ports: ["3024:3024"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  risk-service:
+    build: { context: ., args: { SERVICE: risk-service } }
+    environment: { <<: *service-env, PORT: "3025" }
+    ports: ["3025:3025"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+volumes:
+  pgdata:

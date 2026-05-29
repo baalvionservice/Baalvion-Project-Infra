@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Shared logging for all financial services (design §10.1).
+  - default / dev  : human-readable, PII-masked console
+  - 'json'/'prod'  : structured JSON via Logstash encoder, PII-masked
+  - traceId from the correlation-id MDC is included on every line
+  PII masking: 10+ digit runs (account/card numbers) are replaced with ****; common
+  PII JSON fields (accountNumber, email, phone) are masked in the JSON output.
+  Packaged in common-security so every dependent service picks it up automatically.
+-->
+<configuration>
+  <springProperty scope="context" name="appName" source="spring.application.name" defaultValue="financial-service"/>
+
+  <springProfile name="!json &amp; !prod">
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+        <pattern>%d{yyyy-MM-dd HH:mm:ss} [%X{traceId:-}] %-5level %logger{36} - %replace(%msg){'\b\d{10}\d*\b','****'}%n</pattern>
+      </encoder>
+    </appender>
+    <root level="INFO">
+      <appender-ref ref="CONSOLE"/>
+    </root>
+  </springProfile>
+
+  <springProfile name="json | prod">
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+        <includeMdcKeyName>traceId</includeMdcKeyName>
+        <customFields>{"service":"${appName}"}</customFields>
+        <jsonGeneratorDecorator class="net.logstash.logback.mask.MaskingJsonGeneratorDecorator">
+          <defaultMask>****</defaultMask>
+          <path>accountNumber</path>
+          <path>email</path>
+          <path>phone</path>
+          <path>phoneNumber</path>
+          <value>\b\d{10,}\b</value>
+        </jsonGeneratorDecorator>
+      </encoder>
+    </appender>
+    <root level="INFO">
+      <appender-ref ref="JSON"/>
+    </root>
+  </springProfile>
+
+  <logger name="com.baalvion" level="DEBUG"/>
+</configuration>

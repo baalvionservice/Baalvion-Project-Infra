@@ -1,0 +1,352 @@
+# Kubernetes manifests for the Baalvion financial services (design §8.2 / §9.2).
+# namespace + shared config + Deployment/Service/HPA per service.
+# Images are expected as baalvion/<service>:latest (built from the shared Dockerfile).
+# Secrets (DB password, etc.) should come from a Secret/External Secrets Operator in prod;
+# inline values here are for non-prod only.
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: financial
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: financial-config
+  namespace: financial
+data:
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: "baalvion"
+  DB_USER: "postgres"
+  KAFKA_BROKERS: "kafka:9092"
+  REDIS_HOST: "redis"
+  REDIS_PORT: "6379"
+  # Zero-trust: enforce JWT and point the resource server at the platform RS256 JWKS.
+  APP_SECURITY_ENABLED: "true"
+  OAUTH_ISSUER_URI: "https://auth.baalvion.com"
+  OAUTH_JWK_SET_URI: "http://oauth-service.default.svc.cluster.local:3023/.well-known/jwks.json"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: financial-secrets
+  namespace: financial
+type: Opaque
+stringData:
+  DB_PASSWORD: "postgres"   # replace via External Secrets Operator in prod
+---
+# ---------- account-service (3016) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: account-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: account-service } }
+  template:
+    metadata: { labels: { app: account-service } }
+    spec:
+      containers:
+        - name: account-service
+          image: baalvion/account-service:latest
+          ports: [{ containerPort: 3016 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3016" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3016 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3016 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: account-service, namespace: financial }
+spec:
+  selector: { app: account-service }
+  ports: [{ port: 3016, targetPort: 3016 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: account-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: account-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+# ---------- ledger-service (3014) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: ledger-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: ledger-service } }
+  template:
+    metadata: { labels: { app: ledger-service } }
+    spec:
+      containers:
+        - name: ledger-service
+          image: baalvion/ledger-service:latest
+          ports: [{ containerPort: 3014 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3014" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3014 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3014 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: ledger-service, namespace: financial }
+spec:
+  selector: { app: ledger-service }
+  ports: [{ port: 3014, targetPort: 3014 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: ledger-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: ledger-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+# ---------- payment-service (3015) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: payment-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: payment-service } }
+  template:
+    metadata: { labels: { app: payment-service } }
+    spec:
+      containers:
+        - name: payment-service
+          image: baalvion/payment-service:latest
+          ports: [{ containerPort: 3015 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3015" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3015 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3015 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "500m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: payment-service, namespace: financial }
+spec:
+  selector: { app: payment-service }
+  ports: [{ port: 3015, targetPort: 3015 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: payment-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: payment-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+# ---------- escrow-service (3017) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: escrow-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: escrow-service } }
+  template:
+    metadata: { labels: { app: escrow-service } }
+    spec:
+      containers:
+        - name: escrow-service
+          image: baalvion/escrow-service:latest
+          ports: [{ containerPort: 3017 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3017" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3017 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3017 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: escrow-service, namespace: financial }
+spec:
+  selector: { app: escrow-service }
+  ports: [{ port: 3017, targetPort: 3017 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: escrow-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: escrow-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+# ---------- settlement-service (3018) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: settlement-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: settlement-service } }
+  template:
+    metadata: { labels: { app: settlement-service } }
+    spec:
+      containers:
+        - name: settlement-service
+          image: baalvion/settlement-service:latest
+          ports: [{ containerPort: 3018 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3018" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3018 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3018 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: settlement-service, namespace: financial }
+spec:
+  selector: { app: settlement-service }
+  ports: [{ port: 3018, targetPort: 3018 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: settlement-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: settlement-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+# ---------- reconciliation-service (3019) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: reconciliation-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: reconciliation-service } }
+  template:
+    metadata: { labels: { app: reconciliation-service } }
+    spec:
+      containers:
+        - name: reconciliation-service
+          image: baalvion/reconciliation-service:latest
+          ports: [{ containerPort: 3019 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3019" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3019 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3019 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: reconciliation-service, namespace: financial }
+spec:
+  selector: { app: reconciliation-service }
+  ports: [{ port: 3019, targetPort: 3019 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: reconciliation-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: reconciliation-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+# ---------- audit-service (3020) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: audit-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: audit-service } }
+  template:
+    metadata: { labels: { app: audit-service } }
+    spec:
+      containers:
+        - name: audit-service
+          image: baalvion/audit-service:latest
+          ports: [{ containerPort: 3020 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3020" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3020 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3020 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: audit-service, namespace: financial }
+spec:
+  selector: { app: audit-service }
+  ports: [{ port: 3020, targetPort: 3020 }]
+---
+# ---------- reporting-service (3024) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: reporting-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: reporting-service } }
+  template:
+    metadata: { labels: { app: reporting-service } }
+    spec:
+      containers:
+        - name: reporting-service
+          image: baalvion/reporting-service:latest
+          ports: [{ containerPort: 3024 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3024" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3024 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3024 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: reporting-service, namespace: financial }
+spec:
+  selector: { app: reporting-service }
+  ports: [{ port: 3024, targetPort: 3024 }]
+---
+# ---------- risk-service (3025) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: risk-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: risk-service } }
+  template:
+    metadata: { labels: { app: risk-service } }
+    spec:
+      containers:
+        - name: risk-service
+          image: baalvion/risk-service:latest
+          ports: [{ containerPort: 3025 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3025" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3025 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3025 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: risk-service, namespace: financial }
+spec:
+  selector: { app: risk-service }
+  ports: [{ port: 3025, targetPort: 3025 }]

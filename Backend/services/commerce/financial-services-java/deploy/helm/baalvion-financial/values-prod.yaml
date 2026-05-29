@@ -1,0 +1,33 @@
+# Production overlay: helm upgrade --install financial ./baalvion-financial -f values.yaml -f values-prod.yaml
+# Secrets are injected by the External Secrets Operator (ADR 0006) — never commit real secrets.
+image:
+  tag: ""          # pin to an immutable release tag / digest at deploy time
+  pullPolicy: IfNotPresent
+replicaCount: 3
+
+config:
+  DB_HOST: postgres-rw.prod.svc.cluster.local        # Multi-AZ RDS / Patroni primary endpoint
+  KAFKA_BROKERS: "kafka-0.prod:9092,kafka-1.prod:9092,kafka-2.prod:9092"   # 3-broker, RF=3
+  REDIS_HOST: redis-master.prod.svc.cluster.local    # Sentinel/Cluster-fronted
+  APP_SECURITY_ENABLED: "true"
+  OAUTH_ISSUER_URI: "https://auth.baalvion.com"
+  OAUTH_JWK_SET_URI: "http://oauth-service.prod.svc.cluster.local:3023/.well-known/jwks.json"
+  APP_SECURITY_RATE_LIMIT_BACKEND: "redis"
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "0.1"      # 10% trace sampling
+  MANAGEMENT_OTLP_TRACING_ENDPOINT: "http://otel-collector.observability:4318/v1/traces"
+  SPRING_PROFILES_ACTIVE: "prod"                       # structured JSON logging (logback-spring.xml)
+  SPRINGDOC_API_DOCS_ENABLED: "false"                  # no public API schema/Swagger UI in prod
+  SPRINGDOC_SWAGGER_UI_ENABLED: "false"
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 65
+
+resources:
+  requests: { cpu: "1", memory: 1Gi }
+  limits: { cpu: "2", memory: 2Gi }
+
+secret:
+  DB_PASSWORD: "REPLACED_BY_EXTERNAL_SECRETS"

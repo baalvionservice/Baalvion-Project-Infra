@@ -1,0 +1,60 @@
+# Default values for the baalvion-financial chart.
+image:
+  registry: ghcr.io/baalvion
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 2
+
+# Shared, non-secret configuration injected into every service (ConfigMap).
+config:
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: baalvion
+  DB_USER: postgres
+  KAFKA_BROKERS: kafka:9092
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  # Zero-trust by default; point the resource server at the platform JWKS.
+  APP_SECURITY_ENABLED: "true"
+  OAUTH_ISSUER_URI: "https://auth.baalvion.com"
+  OAUTH_JWK_SET_URI: "http://oauth-service:3023/.well-known/jwks.json"
+
+# Secret values (use --set or a sealed/external secret in real environments).
+secret:
+  DB_PASSWORD: postgres
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+# One entry per microservice; Deployment/Service/HPA are templated from this list.
+services:
+  - name: account-service
+    port: 3016
+  - name: ledger-service
+    port: 3014
+  - name: payment-service
+    port: 3015
+  - name: escrow-service
+    port: 3017
+  - name: settlement-service
+    port: 3018
+  - name: reconciliation-service
+    port: 3019
+  - name: audit-service
+    port: 3020
+  - name: reporting-service
+    port: 3024
+  - name: risk-service
+    port: 3025
