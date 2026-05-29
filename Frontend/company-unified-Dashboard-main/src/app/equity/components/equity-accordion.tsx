@@ -19,17 +19,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+"use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import businessesData from "@/lib/data/businesses";
-import equityData from "@/lib/data/equity.json";
-import type { EquityData } from "@/lib/types";
+import { useEquity } from "@/hooks/use-equity";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import EquityDistributionDonutChart from "@/components/charts/equity-distribution-donut-chart";
 
-const allEquityData: EquityData[] = equityData;
-
 export default function EquityAccordion() {
+  const { equity: allEquityData } = useEquity();
   return (
     <Card>
       <CardHeader>
@@ -41,24 +39,19 @@ export default function EquityAccordion() {
       <CardContent>
         <Accordion type="single" collapsible defaultValue="item-biz_1">
           {allEquityData.map((data) => {
-            const business = businessesData.find(
-              (b) => b.id === data.businessId
-            );
-            if (!business) return null;
-            const image = PlaceHolderImages.find(
-              (i) => i.id === business.imageId
-            );
+            const businessName = "Company Cap Table";
+            const image = PlaceHolderImages.find((i) => i.id === "business-default");
 
             return (
-              <AccordionItem value={`item-${business.id}`} key={business.id}>
+              <AccordionItem value={`item-${data.businessId}`} key={data.businessId}>
                 <AccordionTrigger>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-8 w-8">
                       {image && <AvatarImage src={image.imageUrl} />}
-                      <AvatarFallback>{business.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{businessName.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <span className="font-semibold text-lg">
-                      {business.name}
+                      {businessName}
                     </span>
                     <Badge variant="outline">
                       Valuation: ${(data.valuation / 1_000_000).toFixed(0)}M

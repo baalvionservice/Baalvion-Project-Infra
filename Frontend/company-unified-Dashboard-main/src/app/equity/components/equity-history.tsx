@@ -1,4 +1,4 @@
-
+'use client';
 import {
   Card,
   CardContent,
@@ -15,12 +15,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import equityData from '@/lib/data/equity.json';
+import { useEquity } from '@/hooks/use-equity';
 import { format } from 'date-fns';
 
-const allHistory = equityData.flatMap(biz => biz.equityHistory);
+interface EquityEvent { id: string; date: string; event: string; stakeholder: string; change: string; newTotal: string }
 
 export default function EquityHistory() {
+  const { equity } = useEquity();
+  const allHistory = equity.flatMap((biz) => (biz as unknown as { equityHistory?: EquityEvent[] }).equityHistory ?? []);
   return (
     <Card>
       <CardHeader>

@@ -28,24 +28,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { DollarSign } from "lucide-react";
-import businessesData from "@/lib/data/businesses";
-import equityData from "@/lib/data/equity.json";
-import type { EquityData } from "@/lib/types";
-
-const allEquityData: EquityData[] = equityData;
+import { useEquity } from "@/hooks/use-equity";
 
 export default function ProfitCalculator() {
-  const [selectedBusinessId, setSelectedBusinessId] = useState(
-    allEquityData[0].businessId
-  );
+  const { equity: allEquityData } = useEquity();
+  const [selectedBusinessId, setSelectedBusinessId] = useState<string>("");
   const [profitAmount, setProfitAmount] = useState<number | string>(1000000);
 
+  const effectiveId = selectedBusinessId || allEquityData[0]?.businessId || "";
   const selectedBusiness = allEquityData.find(
-    (b) => b.businessId === selectedBusinessId
+    (b) => b.businessId === effectiveId
   );
-  const businessDetails = businessesData.find(
-    (b) => b.id === selectedBusinessId
-  );
+  const businessDetails = { currency: "USD" };
 
   const distributions = selectedBusiness?.stakeholders.map((s) => ({
     name: s.name,
@@ -65,16 +59,16 @@ export default function ProfitCalculator() {
         <div className="space-y-2">
           <Label>Business</Label>
           <Select
-            value={selectedBusinessId}
+            value={effectiveId}
             onValueChange={setSelectedBusinessId}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select a business" />
             </SelectTrigger>
             <SelectContent>
-              {businessesData.map((biz) => (
-                <SelectItem key={biz.id} value={biz.id}>
-                  {biz.name}
+              {allEquityData.map((eq) => (
+                <SelectItem key={eq.businessId} value={eq.businessId}>
+                  Company Cap Table
                 </SelectItem>
               ))}
             </SelectContent>
