@@ -1,20 +1,35 @@
+'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, DollarSign, Users, TrendingUp, BarChart2 } from 'lucide-react';
-import type { Business } from '@/lib/types';
+import type { GFBusiness } from '@/hooks/use-global-financials';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import kpiData from '@/lib/data/kpis.json';
+import { dashboardApi } from '@/lib/api-client';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
 interface BusinessDetailsProps {
-  business: Business;
+  business: GFBusiness;
 }
 
 export default function BusinessDetails({ business }: BusinessDetailsProps) {
   const image = PlaceHolderImages.find(i => i.id === business.imageId);
-  const kpi = kpiData.Month.find(k => k.businessId === business.id);
+  const [kpi, setKpi] = useState<{ nps: number } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.kpis();
+        const arr = ((d as { data?: unknown[] })?.data ?? (Array.isArray(d) ? d : [])) as Record<string, unknown>[];
+        const row = arr.find((k) => String(k.business_id ?? "") === business.id);
+        if (!cancelled) setKpi(row ? { nps: Number(row.nps ?? 0) } : null);
+      } catch { /* leave null */ }
+    })();
+    return () => { cancelled = true; };
+  }, [business.id]);
 
   return (
     <div className="space-y-6">

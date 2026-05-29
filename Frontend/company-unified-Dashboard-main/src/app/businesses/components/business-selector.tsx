@@ -4,13 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import type { Business } from '@/lib/types';
+import type { GFBusiness } from '@/hooks/use-global-financials';
 import { cn } from '@/lib/utils';
 
 interface BusinessSelectorProps {
-  businesses: Business[];
-  selectedBusiness: Business;
-  onSelectBusiness: (business: Business) => void;
+  businesses: GFBusiness[];
+  selectedBusiness: GFBusiness;
+  onSelectBusiness: (business: GFBusiness) => void;
 }
 
 export default function BusinessSelector({ businesses, selectedBusiness, onSelectBusiness }: BusinessSelectorProps) {

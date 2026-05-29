@@ -13,12 +13,16 @@ export interface GFBusiness {
   id: string; name: string; country: string; currency: string; status: string; imageId: string;
   currentMetrics: { revenue: number; profit: number; employees: number };
 }
-export interface GFCountry { id: string; name: string; flag: string }
+export interface GFCountry { id: string; name: string; flag: string; continent: string; complianceStatus: string }
 export interface GFServerCost { country: string; provider: string; services: string; cost: number }
 
 const FLAGS: Record<string, string> = {
   "United Arab Emirates": "🇦🇪", Singapore: "🇸🇬", India: "🇮🇳", "United Kingdom": "🇬🇧",
   France: "🇫🇷", "United States": "🇺🇸", Germany: "🇩🇪",
+};
+const CONTINENTS: Record<string, string> = {
+  "United Arab Emirates": "Asia", Singapore: "Asia", India: "Asia", "United Kingdom": "Europe",
+  France: "Europe", "United States": "North America", Germany: "Europe",
 };
 const PROVIDERS = ["AWS", "Google Cloud", "Azure"];
 
@@ -66,9 +70,13 @@ export function useGlobalFinancials() {
           };
         });
 
-        const gfCountries: GFCountry[] = ctys.map((c, i) => ({
-          id: String(c.code ?? c.name ?? i), name: String(c.name ?? ""), flag: FLAGS[String(c.name ?? "")] ?? "🌐",
-        }));
+        const gfCountries: GFCountry[] = ctys.map((c, i) => {
+          const name = String(c.name ?? "");
+          return {
+            id: String(c.code ?? c.name ?? i), name, flag: FLAGS[name] ?? "🌐",
+            continent: CONTINENTS[name] ?? "—", complianceStatus: "Compliant",
+          };
+        });
 
         // server costs: estimate ~3% of country USD revenue (no infra-cost table yet)
         const gfServerCosts: GFServerCost[] = gfCountries.map((c, i) => {

@@ -9,48 +9,11 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+"use client";
+
 import { Briefcase, Users, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import businessesData from "@/lib/data/businesses";
-import countriesData from "@/lib/data/countries.json";
-import fxRates from "@/lib/data/fx-rates.json";
-import type { Business, FxRate } from "@/lib/types";
-
-const businesses: Business[] = businessesData;
-const rates: FxRate = fxRates;
-
-const countryStats = countriesData.map((country) => {
-  const countryBusinesses = businesses.filter(
-    (b) => b.country === country.name
-  );
-  const businessCount = countryBusinesses.length;
-  const totalEmployees = countryBusinesses.reduce(
-    (acc, b) => acc + b.currentMetrics.employees,
-    0
-  );
-  const { totalRevenueLocal, localCurrency } = countryBusinesses.reduce(
-    (acc, b) => {
-      acc.totalRevenueLocal += b.currentMetrics.revenue;
-      acc.localCurrency = b.currency;
-      return acc;
-    },
-    { totalRevenueLocal: 0, localCurrency: "" as Business["currency"] | "" }
-  );
-
-  const totalRevenueUsd = countryBusinesses.reduce((acc, b) => {
-    const rate = rates[b.currency] || 1;
-    return acc + b.currentMetrics.revenue / rate;
-  }, 0);
-
-  return {
-    ...country,
-    businessCount,
-    totalEmployees,
-    totalRevenueLocal,
-    totalRevenueUsd,
-    localCurrency,
-  };
-});
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
 
 function formatCurrency(amount: number, currency: string) {
   if (currency === "INR") {
@@ -65,6 +28,18 @@ function formatCurrency(amount: number, currency: string) {
 }
 
 export default function CountriesPage() {
+  const { businesses, countries: countriesData, fxRates } = useGlobalFinancials();
+
+  const countryStats = countriesData.map((country) => {
+    const cb = businesses.filter((b) => b.country === country.name);
+    const businessCount = cb.length;
+    const totalEmployees = cb.reduce((acc, b) => acc + b.currentMetrics.employees, 0);
+    const totalRevenueLocal = cb.reduce((acc, b) => acc + b.currentMetrics.revenue, 0);
+    const localCurrency = cb[0]?.currency ?? "USD";
+    const totalRevenueUsd = cb.reduce((acc, b) => acc + b.currentMetrics.revenue / (fxRates[b.currency] || 1), 0);
+    return { ...country, businessCount, totalEmployees, totalRevenueLocal, totalRevenueUsd, localCurrency };
+  });
+
   return (
     <div className="space-y-8">
       <div>
