@@ -20,11 +20,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 import CodeBlock from '@/components/code-block';
 import { Button } from '@/components/ui/button';
-import apiDocsData from '@/lib/data/api-docs.json';
+import { useDocs } from '@/hooks/use-docs';
 import { cn } from '@/lib/utils';
 
 export default function ApiDocsPage() {
-  const { categories } = apiDocsData;
+  const { apiDocs } = useDocs();
+  const { categories } = apiDocs;
   const mainRef = useRef<HTMLElement>(null);
   const [activeId, setActiveId] = useState('');
 

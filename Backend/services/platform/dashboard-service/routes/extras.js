@@ -142,6 +142,48 @@ router.get('/gdpr', authMiddleware, (req, res) =>
     }),
 );
 
+// Docs — API reference, help articles, FAQ (static content; served from the backend).
+router.get('/docs', authMiddleware, (req, res) =>
+    sendSuccess(req, res, {
+        apiDocs: {
+            categories: [
+                { name: 'Businesses', endpoints: [
+                    { method: 'GET', path: '/api/businesses', description: 'List all businesses in your portfolio.', parameters: [{ name: 'limit', type: 'integer', required: false, description: 'Max results.' }, { name: 'offset', type: 'integer', required: false, description: 'Pagination offset.' }], request: 'curl https://api.baalvion.com/v1/businesses', response: '[{"id":"2","name":"Baalvion Mining Co","country":"UAE","status":"Active"}]' },
+                ] },
+                { name: 'Employees', endpoints: [
+                    { method: 'GET', path: '/api/employees', description: 'List employees.', parameters: [{ name: 'business_id', type: 'string', required: false, description: 'Filter by business.' }], request: 'curl https://api.baalvion.com/v1/employees', response: '[{"id":1,"name":"Aisha Rahman","department":"Operations"}]' },
+                ] },
+                { name: 'Finance', endpoints: [
+                    { method: 'GET', path: '/api/financials', description: 'List financial entries.', parameters: [], request: 'curl https://api.baalvion.com/v1/financials', response: '[{"type":"Revenue","amount":1850000}]' },
+                ] },
+            ],
+        },
+        helpArticles: {
+            categories: [
+                { slug: 'getting-started', name: 'Getting Started', description: 'Basics of setting up Baalvion.' },
+                { slug: 'finance', name: 'Finance & Equity', description: 'Manage finances and cap tables.' },
+                { slug: 'employees', name: 'People & HR', description: 'Manage your workforce.' },
+                { slug: 'operations', name: 'Operations', description: 'Daily ops, alerts and automation.' },
+                { slug: 'compliance', name: 'Compliance', description: 'Stay compliant across regions.' },
+                { slug: 'billing', name: 'Billing', description: 'Plans, invoices and usage.' },
+            ],
+            articles: [
+                { slug: 'adding-your-first-business', title: 'Adding Your First Business', category: 'Getting Started', readingTime: '3 min', lastUpdated: '2026-05-15', content: 'Adding your first business is the first step to unlocking Baalvion. Go to Businesses → Add Business, fill in the name, country and currency, then save.' },
+                { slug: 'understanding-equity', title: 'Understanding Equity & Cap Tables', category: 'Finance & Equity', readingTime: '5 min', lastUpdated: '2026-05-10', content: 'The Equity page shows your cap table with each stakeholder\'s percentage and USD value derived from the latest valuation.' },
+                { slug: 'managing-alerts', title: 'Managing Operational Alerts', category: 'Operations', readingTime: '4 min', lastUpdated: '2026-05-08', content: 'Alerts surface revenue drops, compliance deadlines and high-value events. Configure rules under Operations → Alerts.' },
+            ],
+        },
+        faq: [
+            { question: 'What is Baalvion?', answer: 'Baalvion is a global business operating system to manage businesses, employees, finances and operations from one dashboard.' },
+            { question: 'How do I add a business?', answer: 'Go to Businesses → Add Business and complete the form.' },
+            { question: 'Can I manage multiple currencies?', answer: 'Yes — the dashboard converts all figures to USD using live FX rates while preserving local-currency views.' },
+            { question: 'Is my data secure?', answer: 'Auth uses HttpOnly cookies via a BFF gateway; no tokens are exposed to JavaScript.' },
+            { question: 'How does billing work?', answer: 'Plans are billed monthly or annually; view invoices and usage under Settings → Billing.' },
+            { question: 'Can I invite investors?', answer: 'Yes — create read-only Investor Portals under Reports → Investor Portals.' },
+        ],
+    }),
+);
+
 // AI — revenue predictions, growth opportunities, risk alerts + strategic scenarios (reference data).
 router.get('/ai', authMiddleware, (req, res) =>
     sendSuccess(req, res, {

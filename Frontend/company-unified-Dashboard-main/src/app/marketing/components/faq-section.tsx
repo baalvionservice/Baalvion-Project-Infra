@@ -1,7 +1,9 @@
+'use client';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import faqData from '@/lib/data/faq.json';
+import { useDocs } from '@/hooks/use-docs';
 
 export default function FaqSection() {
+  const { faq: faqData } = useDocs();
   return (
     <section className="py-20">
       <div className="container mx-auto px-4 max-w-3xl">

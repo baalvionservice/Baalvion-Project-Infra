@@ -222,6 +222,7 @@ export const dashboardApi = {
   billing: () => get('/billing'),
   sync: () => get('/sync'),
   ai: () => get('/ai'),
+  docs: () => get('/docs'),
   permissionMatrix: () => get('/permissions/matrix'),
   markNotificationRead: (id: string) => post(`/notifications/${id}/read`),
   auditLogs: (params?: { page?: number; limit?: number }) => {

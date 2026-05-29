@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Search } from 'lucide-react';
-import helpArticlesData from '@/lib/data/help-articles.json';
+import { useDocs } from '@/hooks/use-docs';
 import { Separator } from '@/components/ui/separator';
 
 export default function HelpCenterPage() {
-  const { categories, articles } = helpArticlesData;
+  const { helpArticles } = useDocs();
+  const { categories, articles } = helpArticles;
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredArticles = useMemo(() => {

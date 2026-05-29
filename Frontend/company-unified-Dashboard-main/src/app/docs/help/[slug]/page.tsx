@@ -1,21 +1,21 @@
+"use client";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { useParams } from "next/navigation";
 import { ArrowLeft, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import helpArticlesData from "@/lib/data/help-articles.json";
+import { useDocs } from "@/hooks/use-docs";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-export default async function HelpArticlePage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
-  const article = helpArticlesData.articles.find((a) => a.slug === slug);
+export default function HelpArticlePage() {
+  const params = useParams();
+  const slug = String(params?.slug ?? "");
+  const { helpArticles } = useDocs();
+  const article = helpArticles.articles.find((a) => a.slug === slug);
 
+  if (helpArticles.articles.length === 0) return null; // loading
   if (!article) {
-    notFound();
+    return <main className="container mx-auto max-w-3xl py-12 px-4 text-center text-muted-foreground">Article not found.</main>;
   }
 
   const paragraphs = article.content.split("\n\n");
