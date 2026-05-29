@@ -2,10 +2,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem } from '@/components/ui/carousel';
-import financeData from '@/lib/data/finance-overview.json';
+import { useFinance } from '@/hooks/use-finance';
 
 export default function FinanceStatCards() {
-    const totals = financeData.financialSummary.reduce((acc, summary) => {
+    const { view } = useFinance();
+    const totals = (view?.financialSummary ?? []).reduce((acc, summary) => {
       acc.revenue += summary.revenue;
       acc.totalCosts += summary.totalCosts;
       acc.netProfit += summary.netProfit;

@@ -14,9 +14,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
-import chartData from '@/lib/data/finance-overview.json';
-
-const profitTrend = chartData.profitTrend;
+import { useFinance } from '@/hooks/use-finance';
 
 const chartConfig = {
   profit: {
@@ -26,6 +24,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function ProfitTrendChart() {
+  const { view } = useFinance();
+  const profitTrend = view?.profitTrend ?? [];
   return (
     <Card>
       <CardHeader>

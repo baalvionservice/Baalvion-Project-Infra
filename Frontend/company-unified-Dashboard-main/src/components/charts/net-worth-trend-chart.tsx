@@ -14,9 +14,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from '@/components/ui/chart';
-import chartData from '@/lib/data/finance-overview.json';
-
-const netWorthHistory = chartData.netWorthHistory;
+import { useFinance } from '@/hooks/use-finance';
 
 const chartConfig = {
   value: {
@@ -26,6 +24,8 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function NetWorthTrendChart() {
+  const { view } = useFinance();
+  const netWorthHistory = view?.netWorthHistory ?? [];
   return (
     <Card>
       <CardHeader>

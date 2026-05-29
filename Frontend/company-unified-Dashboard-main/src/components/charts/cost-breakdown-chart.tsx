@@ -13,13 +13,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
-import chartData from '@/lib/data/finance-overview.json';
+import { useFinance } from '@/hooks/use-finance';
 
-const costData = chartData.costBreakdown;
 const colors = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
 export default function CostBreakdownChart() {
+  const { view } = useFinance();
+  const costData = view?.costBreakdown ?? [];
   return (
     <Card>
       <CardHeader>

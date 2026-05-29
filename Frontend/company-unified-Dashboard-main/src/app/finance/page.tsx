@@ -20,9 +20,7 @@ import { ArrowUp, LinkIcon } from "lucide-react";
 import NetWorthTrendChart from "@/components/charts/net-worth-trend-chart";
 import CostBreakdownChart from "@/components/charts/cost-breakdown-chart";
 import ProfitTrendChart from "@/components/charts/profit-trend-chart";
-import financeData from "@/lib/data/finance-overview.json";
-import businessesData from "@/lib/data/businesses";
-import type { Business } from "@/lib/types";
+import { useFinance } from "@/hooks/use-finance";
 import { cn } from "@/lib/utils";
 import EmptyState from "@/components/empty-state";
 import { Button } from "@/components/ui/button";
@@ -33,11 +31,10 @@ import FinanceStatCards from "./components/finance-stat-cards";
 import DailyRevenueChart from "./components/daily-revenue-chart";
 import Link from "next/link";
 
-const allBusinesses: Business[] = businessesData;
-
 export default function FinanceOverviewPage() {
   const [isNewUser, setIsNewUser] = useState(false);
   const isMobile = useIsMobile();
+  const { view } = useFinance();
 
   useEffect(() => {
     const isDemo = localStorage.getItem("baalvion_demo_mode") === "true";
@@ -92,7 +89,8 @@ export default function FinanceOverviewPage() {
     );
   }
 
-  const { netWorth, financialSummary } = financeData;
+  const netWorth = view?.netWorth ?? { total: 0, breakdown: { businessAssets: 0, cashAndLiquid: 0, investments: 0 }, change: { amount: 0, percentage: 0 } };
+  const financialSummary = view?.financialSummary ?? [];
 
   const totals = financialSummary.reduce(
     (acc, summary) => {
@@ -108,9 +106,8 @@ export default function FinanceOverviewPage() {
   const totalMargin =
     totals.revenue > 0 ? (totals.netProfit / totals.revenue) * 100 : 0;
 
-  const getBusinessName = (businessId: string) => {
-    return allBusinesses.find((b) => b.id === businessId)?.name || businessId;
-  };
+  const getBusinessName = (businessId: string) =>
+    financialSummary.find((f) => f.businessId === businessId)?.businessName || businessId;
 
   return (
     <div className="space-y-8">

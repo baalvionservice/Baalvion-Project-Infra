@@ -1,9 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+'use client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowUp } from 'lucide-react';
-import financeData from '@/lib/data/finance-overview.json';
+import { useFinance } from '@/hooks/use-finance';
 
 export default function NetWorthCard() {
-    const { netWorth } = financeData;
+    const { view } = useFinance();
+    const netWorth = view?.netWorth ?? { total: 0, change: { amount: 0, percentage: 0 } };
     return (
         <Card className="bg-primary text-primary-foreground">
             <CardHeader>
