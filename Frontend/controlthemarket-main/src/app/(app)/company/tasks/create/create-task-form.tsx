@@ -51,8 +51,8 @@ import type {
   TaskType,
   TaskTemplate,
 } from "@/lib/types";
-import { getTemplates, saveTemplate } from "@/lib/api";
-import { createTask } from "@/lib/write-api";
+import { getTemplates } from "@/lib/api";
+import { createTask, createTemplate } from "@/lib/write-api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import Link from "next/link";
@@ -337,7 +337,7 @@ export function CreateTaskForm() {
       createdBy: user.companyId,
     };
 
-    await saveTemplate(templateData);
+    await createTemplate(templateData);
     const updatedTemplates = await getTemplates();
     setTemplates(updatedTemplates);
 

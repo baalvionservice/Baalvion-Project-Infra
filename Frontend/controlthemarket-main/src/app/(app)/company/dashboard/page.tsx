@@ -5,6 +5,7 @@ import {
   getUsers,
   getCompany,
 } from "@/lib/api";
+import { getScopedUserId } from "@/lib/server-auth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,12 +40,14 @@ import { TopCandidates } from "./top-candidates";
 import type { User } from "@/lib/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// For prototype, we'll use a hardcoded user ID. In a real app, this would come from auth.
-const CURRENT_USER_ID = "user-2";
-
 export default async function CompanyDashboard() {
   const allUsers = await getUsers();
-  const user = allUsers.find((u) => u.id === CURRENT_USER_ID);
+  // Resolve the logged-in company user from the ctm_user_id cookie (set at login);
+  // fall back to the first company user for dev/demo when the cookie is absent.
+  const scopedId = await getScopedUserId();
+  const user =
+    (scopedId && allUsers.find((u) => String(u.id) === String(scopedId))) ||
+    allUsers.find((u) => u.role === "company");
   if (!user || !user.companyId) return <div>Company not found</div>;
 
   const [company, tasks, allSubmissions, allEvaluations] = await Promise.all([

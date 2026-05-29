@@ -25,6 +25,7 @@ import { Search, MoreHorizontal, Power, PowerOff, Send, Eye, Trash2 } from 'luci
 import type { Webhook, WebhookStatus, WebhookEvent } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { WebhookDetailsDialog } from './webhook-details-dialog';
+import { testWebhook, updateWebhook, deleteWebhook } from '@/lib/write-api';
 
 const webhookStatuses: (WebhookStatus | 'All')[] = ["All", "Active", "Inactive", "Error"];
 const webhookEvents: (WebhookEvent | 'All')[] = ["All", "submission.created", "submission.evaluated", "task.published", "user.created"];
@@ -55,33 +56,44 @@ export function WebhookList({ initialData }: { initialData: Webhook[] }) {
     }).sort((a, b) => new Date(b.lastTriggered || 0).getTime() - new Date(a.lastTriggered || 0).getTime());
   }, [data, searchTerm, statusFilter, eventFilter]);
   
-  const handleAction = (webhookId: string, action: 'trigger' | 'toggle' | 'delete') => {
+  const handleAction = async (webhookId: string, action: 'trigger' | 'toggle' | 'delete') => {
     const webhook = data.find(d => d.id === webhookId);
     if (!webhook) return;
-    
+
     if (action === 'trigger') {
-        toast({
-            title: 'Webhook Triggered (Mock)',
-            description: `A test event has been sent to ${webhook.name}.`,
-        });
-        setData(prev => prev.map(item => 
+        setData(prev => prev.map(item =>
             item.id === webhookId ? { ...item, lastTriggered: new Date().toISOString() } : item
         ));
+        try {
+            const { data: res } = await testWebhook(webhookId);
+            toast({
+                title: res?.delivered ? 'Webhook Delivered' : 'Webhook Delivery Failed',
+                description: res?.delivered ? `A signed test event reached ${webhook.name}.` : `${webhook.name} did not return a 2xx response.`,
+                variant: res?.delivered ? undefined : 'destructive',
+            });
+        } catch (err: any) {
+            toast({ title: 'Trigger failed', description: err?.message ?? 'Could not send test event.', variant: 'destructive' });
+        }
     } else if (action === 'toggle') {
-        const newStatus = webhook.status === 'Active' ? 'Inactive' : 'Active';
-        setData(prev => prev.map(item => 
-            item.id === webhookId ? { ...item, status: newStatus } : item
-        ));
-        toast({
-            title: 'Webhook Updated',
-            description: `${webhook.name} has been ${newStatus === 'Active' ? 'activated' : 'deactivated'}.`,
-        });
+        const newStatus: WebhookStatus = webhook.status === 'Active' ? 'Inactive' : 'Active';
+        setData(prev => prev.map(item => item.id === webhookId ? { ...item, status: newStatus } : item));
+        try {
+            await updateWebhook(webhookId, { status: newStatus });
+            toast({ title: 'Webhook Updated', description: `${webhook.name} has been ${newStatus === 'Active' ? 'activated' : 'deactivated'}.` });
+        } catch (err: any) {
+            setData(prev => prev.map(item => item.id === webhookId ? { ...item, status: webhook.status } : item)); // revert
+            toast({ title: 'Update failed', description: err?.message ?? 'Could not update webhook.', variant: 'destructive' });
+        }
     } else { // delete
+        const snapshot = data;
         setData(prev => prev.filter(item => item.id !== webhookId));
-        toast({
-            title: 'Webhook Deleted',
-            description: `${webhook.name} has been deleted.`,
-        });
+        try {
+            await deleteWebhook(webhookId);
+            toast({ title: 'Webhook Deleted', description: `${webhook.name} has been deleted.` });
+        } catch (err: any) {
+            setData(snapshot); // revert
+            toast({ title: 'Delete failed', description: err?.message ?? 'Could not delete webhook.', variant: 'destructive' });
+        }
     }
   };
 

@@ -244,3 +244,87 @@ export async function createCompany(data: {
     throw new Error(err.message ?? 'Failed to create company');
   }
 }
+
+// ── Phase 2: integrations & payments (client-side, authed via ctmClient) ────────
+
+export async function createWebhook(data: { name: string; url: string; events?: string[]; companyId?: string }) {
+  if (USE_MOCK) return { data: { id: 'mock', ...data } };
+  // The response includes `secret` exactly once — surface it so the caller can store it.
+  return { data: await ctmClient.post<any>('/webhooks', { name: data.name, url: data.url, events: data.events ?? [], company_id: data.companyId }) };
+}
+
+export async function updateWebhook(id: string, updates: { name?: string; url?: string; events?: string[]; status?: string }) {
+  if (USE_MOCK) return { data: { id, ...updates } };
+  return { data: await ctmClient.patch<any>(`/webhooks/${id}`, updates) };
+}
+
+export async function deleteWebhook(id: string) {
+  if (USE_MOCK) return { data: { id, deleted: true } };
+  return { data: await ctmClient.delete<any>(`/webhooks/${id}`) };
+}
+
+export async function testWebhook(id: string) {
+  if (USE_MOCK) return { data: { delivered: true } };
+  return { data: await ctmClient.post<any>(`/webhooks/${id}/test`, {}) };
+}
+
+export async function createApiIntegration(data: { name: string; category?: string; description?: string; apiKey?: string; endpointUrl?: string; subscribedEvents?: string[]; companyId?: string }) {
+  if (USE_MOCK) return { data: { id: 'mock', ...data } };
+  return { data: await ctmClient.post<any>('/api-integrations', {
+    name: data.name, category: data.category, description: data.description,
+    api_key: data.apiKey, endpoint_url: data.endpointUrl, subscribed_events: data.subscribedEvents, company_id: data.companyId,
+  }) };
+}
+
+export async function updateApiIntegration(id: string, updates: { name?: string; category?: string; description?: string; status?: string; apiKey?: string; endpointUrl?: string; subscribedEvents?: string[] }) {
+  if (USE_MOCK) return { data: { id, ...updates } };
+  return { data: await ctmClient.patch<any>(`/api-integrations/${id}`, {
+    name: updates.name, category: updates.category, description: updates.description, status: updates.status,
+    api_key: updates.apiKey, endpoint_url: updates.endpointUrl, subscribed_events: updates.subscribedEvents,
+  }) };
+}
+
+export async function deleteApiIntegration(id: string) {
+  if (USE_MOCK) return { data: { id, deleted: true } };
+  return { data: await ctmClient.delete<any>(`/api-integrations/${id}`) };
+}
+
+export async function testApiIntegration(id: string) {
+  if (USE_MOCK) return { data: { ok: true } };
+  return { data: await ctmClient.post<any>(`/api-integrations/${id}/test`, {}) };
+}
+
+// Provider-agnostic checkout: returns { checkoutUrl, provider, invoiceId, paymentId, status }.
+export async function createPaymentCheckout(data: { companyId: string; planId?: string; amount?: number; planName?: string; billingCycle?: string; currency?: string; email?: string }) {
+  if (USE_MOCK) return { data: { provider: 'manual', status: 'pending', amount: data.amount ?? 0 } };
+  return { data: await ctmClient.post<any>('/payments/checkout', {
+    company_id: data.companyId, plan_id: data.planId, amount: data.amount,
+    plan_name: data.planName, billing_cycle: data.billingCycle, currency: data.currency, email: data.email,
+  }) };
+}
+
+export async function runTestCases(submissionId: string, opts?: { sourceCode?: string; language?: string; cases?: any[] }) {
+  if (USE_MOCK) return { data: { ran: 0, total: 0, sandbox: false, testCases: [] } };
+  return { data: await ctmClient.post<any>(`/submissions/${submissionId}/test-cases/run`, opts ?? {}) };
+}
+
+// Save a task as a reusable template (POST /templates). Accepts the camelCase
+// TaskTemplate-ish shape used by the create-task form.
+export async function createTemplate(data: any): Promise<{ data: any }> {
+  if (USE_MOCK) return mockApi.saveTaskAsTemplate(data);
+  const created = await ctmClient.post<any>('/templates', {
+    company_id: data.createdBy ?? data.companyId,
+    title: data.title,
+    description: data.description,
+    role_category: data.roleCategory,
+    difficulty: DIFF_TO_BACKEND[data.difficulty ?? 'Intermediate'] ?? 'medium',
+    task_types: data.taskTypes ?? [],
+    instructions: data.instructions,
+    expected_outputs: data.expectedOutputs,
+    time_limit_minutes: data.timeLimitMinutes,
+    multi_round: data.multiRound,
+    rounds: data.rounds,
+    is_private: data.isPrivate,
+  });
+  return { data: created };
+}

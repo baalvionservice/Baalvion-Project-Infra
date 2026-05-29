@@ -7,14 +7,15 @@ import {
   getAllEvaluations,
   getUsers,
 } from "@/lib/api";
+import { getScopedUserId } from "@/lib/server-auth";
 import type { Submission, Evaluation } from "@/lib/types";
-
-// For prototype, we'll use a hardcoded user ID. In a real app, this would come from auth.
-const CURRENT_USER_ID = "user-2";
 
 export default async function AnalyticsPage() {
   const allUsers = await getUsers();
-  const user = allUsers.find((u) => u.id === CURRENT_USER_ID);
+  const scopedId = await getScopedUserId();
+  const user =
+    (scopedId && allUsers.find((u) => String(u.id) === String(scopedId))) ||
+    allUsers.find((u) => u.role === "company");
   if (!user || !user.companyId) return <div>Company not found</div>;
 
   const tasks = await getTasksByCompany(user.companyId);

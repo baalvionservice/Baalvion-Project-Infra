@@ -25,6 +25,7 @@ import { Search, Power, PowerOff, Settings2, Trash2, TestTube2, CheckCircle, Ale
 import type { ApiIntegration, ApiIntegrationStatus, ApiIntegrationCategory } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { ApiDetailsDialog } from './api-details-dialog';
+import { testApiIntegration, updateApiIntegration, deleteApiIntegration } from '@/lib/write-api';
 
 const apiStatuses: (ApiIntegrationStatus | 'All')[] = ["All", "Active", "Inactive", "Error"];
 const apiCategories: (ApiIntegrationCategory | 'All')[] = ["All", "Analytics", "Chat", "Cloud Storage", "DevOps", "Monitoring", "Payments", "Other"];
@@ -64,22 +65,40 @@ export function ApiIntegrationDashboard({ initialData }: { initialData: ApiInteg
     }).sort((a, b) => new Date(b.lastSync).getTime() - new Date(a.lastSync).getTime());
   }, [data, searchTerm, statusFilter, categoryFilter]);
   
-  const handleAction = (apiId: string, action: 'toggle' | 'delete' | 'test') => {
+  const handleAction = async (apiId: string, action: 'toggle' | 'delete' | 'test') => {
     const api = data.find(d => d.id === apiId);
     if (!api) return;
-    
+
     if (action === 'test') {
-        toast({ title: 'Test Connection (Mock)', description: `Sending a test request to ${api.name}...` });
-        setTimeout(() => {
-            toast({ title: 'Test Successful', description: `Successfully received a 200 OK response from ${api.name}.` });
-        }, 1500)
+        toast({ title: 'Testing connection…', description: `Sending a request to ${api.name}.` });
+        try {
+            const { data: res } = await testApiIntegration(apiId);
+            const ok = res?.ok ?? res?.integration?.status === 'Active';
+            if (res?.integration) setData(prev => prev.map(item => item.id === apiId ? { ...item, status: res.integration.status, lastSync: res.integration.lastSync } : item));
+            toast({ title: ok ? 'Test Successful' : 'Test Failed', description: res?.detail ?? (ok ? `Connected to ${api.name}.` : `${api.name} did not respond.`), variant: ok ? undefined : 'destructive' });
+        } catch (err: any) {
+            toast({ title: 'Test failed', description: err?.message ?? 'Could not reach the integration.', variant: 'destructive' });
+        }
     } else if (action === 'toggle') {
-        const newStatus = api.status === 'Active' ? 'Inactive' : 'Active';
+        const newStatus: ApiIntegrationStatus = api.status === 'Active' ? 'Inactive' : 'Active';
         setData(prev => prev.map(item => item.id === apiId ? { ...item, status: newStatus } : item));
-        toast({ title: 'Integration Updated', description: `${api.name} has been ${newStatus === 'Active' ? 'activated' : 'deactivated'}.` });
+        try {
+            await updateApiIntegration(apiId, { status: newStatus });
+            toast({ title: 'Integration Updated', description: `${api.name} has been ${newStatus === 'Active' ? 'activated' : 'deactivated'}.` });
+        } catch (err: any) {
+            setData(prev => prev.map(item => item.id === apiId ? { ...item, status: api.status } : item)); // revert
+            toast({ title: 'Update failed', description: err?.message ?? 'Could not update integration.', variant: 'destructive' });
+        }
     } else { // delete
+        const snapshot = data;
         setData(prev => prev.filter(item => item.id !== apiId));
-        toast({ title: 'Integration Deleted', description: `${api.name} has been deleted.` });
+        try {
+            await deleteApiIntegration(apiId);
+            toast({ title: 'Integration Deleted', description: `${api.name} has been deleted.` });
+        } catch (err: any) {
+            setData(snapshot); // revert
+            toast({ title: 'Delete failed', description: err?.message ?? 'Could not delete integration.', variant: 'destructive' });
+        }
     }
   };
 

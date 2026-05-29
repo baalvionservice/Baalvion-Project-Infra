@@ -4,6 +4,7 @@ import {
   getTasksByCompany,
   getAllEvaluations,
 } from "@/lib/api";
+import { getScopedUserId } from "@/lib/server-auth";
 import { FeedbackList } from "./feedback-list";
 import type {
   Submission,
@@ -20,9 +21,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-// For prototype, we'll use a hardcoded user ID. In a real app, this would come from auth.
-const CURRENT_USER_ID = "user-2";
-
 export type FeedbackData = {
   submissionId: string;
   candidate: User;
@@ -38,7 +36,10 @@ export type FeedbackData = {
 
 export default async function FeedbackDashboardPage() {
   const allUsers = await getUsers();
-  const user = allUsers.find((u) => u.id === CURRENT_USER_ID);
+  const scopedId = await getScopedUserId();
+  const user =
+    (scopedId && allUsers.find((u) => String(u.id) === String(scopedId))) ||
+    allUsers.find((u) => u.role === "company");
   if (!user || !user.companyId) return <div>Company not found</div>;
 
   const [tasks, allSubmissions, allEvaluations] = await Promise.all([

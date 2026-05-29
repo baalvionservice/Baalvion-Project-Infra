@@ -11,9 +11,19 @@ import {
   storeToken,
   clearStoredToken,
   getStoredToken,
+  bootstrapSession,
 } from "@/lib/ctm-api-client";
 
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
+// SECURITY (P0): REAL auth by default. Mock is a DEV-ONLY opt-in and can NEVER activate in
+// production — `process.env.NODE_ENV` is inlined at build time so the mock branches below are
+// dead-code-eliminated from production bundles.
+const USE_MOCK =
+  process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_USE_MOCK === 'true';
+
+// Build-time safety net: fail loudly if anyone tries to force mock auth in a production build.
+if (process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_USE_MOCK === 'true') {
+  throw new Error('[CTM] Refusing to start: mock auth (NEXT_PUBLIC_USE_MOCK=true) is forbidden in production.');
+}
 
 export interface LoginCredentials {
   email: string;
@@ -50,15 +60,24 @@ interface AuthContextType {
   completeCandidateOnboarding: () => void;
 }
 
+// Accepts both the old auth-service shape and the gateway BFF shape.
 interface ProxyUser {
-  id: number | string;
-  orgId: string;
-  email: string;
-  name: string;
-  role: string;
-  status: string;
-  mfaEnabled: boolean;
-  emailVerified: boolean;
+  // old shape (direct auth-service)
+  id?: number | string;
+  name?: string;
+  role?: string;
+  status?: string;
+  mfaEnabled?: boolean;
+  emailVerified?: boolean;
+  // gateway BFF shape (cookie-only, no token)
+  userId?: number | string;
+  fullName?: string;
+  roles?: string[];
+  permissions?: string[];
+  sessionId?: string;
+  // shared
+  orgId?: string | null;
+  email?: string;
 }
 
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
@@ -71,20 +90,34 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
   }
 }
 
-function mapRole(proxyRole: string): UserRole {
+function mapRole(proxyRole: string | undefined): UserRole {
+  if (!proxyRole) return 'company';
   if (proxyRole === 'candidate') return 'candidate';
-  if (proxyRole === 'super_admin' || proxyRole === 'admin') return 'admin';
+  if (proxyRole === 'super_admin' || proxyRole === 'admin' || proxyRole === 'platform_admin') return 'admin';
   return 'company';
 }
 
+function mapRoles(roles: string[] | undefined, role: string | undefined): UserRole {
+  // Gateway BFF sends roles[] (array); old auth-service sends role (string).
+  if (roles && roles.length > 0) {
+    if (roles.includes('candidate')) return 'candidate';
+    if (roles.some((r) => ['admin', 'super_admin', 'platform_admin'].includes(r))) return 'admin';
+  }
+  return mapRole(role);
+}
+
 function mapProxyUserToCTM(u: ProxyUser): User {
+  // Normalise id: gateway uses userId, old auth-service uses id.
+  const rawId = u.id ?? u.userId;
+  // Normalise name: gateway uses fullName, old auth-service uses name.
+  const rawName = u.name ?? u.fullName ?? u.email ?? 'User';
   const orgId = u.orgId && u.orgId !== 'org_demo' ? u.orgId : undefined;
   return {
-    id: String(u.id),
-    name: u.name,
-    email: u.email,
-    role: mapRole(u.role),
-    isActive: u.status === 'active',
+    id: String(rawId),
+    name: rawName,
+    email: u.email ?? '',
+    role: mapRoles(u.roles, u.role),
+    isActive: u.status !== 'inactive',
     isVerified: !!u.emailVerified,
     companyId: orgId,
     createdAt: new Date().toISOString(),
@@ -132,6 +165,120 @@ function mapCtmPlan(p: CtmPlan): Plan {
     limits: { tasks: -1, submissions: -1, teamMembers: -1 },
     features: [],
   };
+}
+
+// Mirror the gateway identity into ctm-service (user_profiles) so admin user lists,
+// leaderboards and public profiles carry real name/email. Client-side, non-fatal.
+// NOTE: role is only sent when `includeRole` is true (signup) — on login we must NOT
+// clobber the app-role stored in the profile, since the identity service issues every
+// user the org role 'owner' (no candidate/admin concept).
+function mirrorCtmProfile(u: User, includeRole = false) {
+  ctmClient
+    .post('/users', {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      ...(includeRole ? { role: u.role } : {}),
+      company_id: u.companyId,
+      avatar_url: u.profile?.avatarUrl,
+      is_verified: u.isVerified,
+    })
+    .catch(() => { /* non-fatal */ });
+}
+
+// The app-role (candidate | company | admin) AND the onboarding/consent flags are the
+// source of truth in the ctm profile, NOT the identity JWT (which only carries org role
+// 'owner' and no app state). Fetch the full profile after auth and merge it onto the user
+// — critically including the onboarding flags, else the redirect guard bounces the user
+// to onboarding forever.
+async function fetchCtmProfileFields(userId: string): Promise<Partial<User> | null> {
+  try {
+    const p = await ctmProxyClientCtmProfile(userId);
+    if (!p) return null;
+    return {
+      role: (p.role as UserRole) || undefined,
+      companyId: p.company_id ?? p.companyId ?? undefined,
+      name: p.name || undefined,
+      isVerified: !!p.is_verified,
+      onboardingCompleted: p.onboarding_completed ?? undefined,
+      candidateOnboardingCompleted: p.candidate_onboarding_completed ?? undefined,
+      consentAccepted: !!p.consent_accepted,
+      consentAcceptedAt: p.consent_accepted_at ?? undefined,
+      profile: {
+        avatarUrl: p.avatar_url ?? undefined,
+        bio: p.bio ?? undefined,
+        location: p.location ?? undefined,
+        experienceLevel: p.experience_level ?? undefined,
+        skills: Array.isArray(p.skills) ? p.skills : undefined,
+        githubUrl: p.github_url ?? undefined,
+        linkedinUrl: p.linkedin_url ?? undefined,
+        portfolioLinks: Array.isArray(p.portfolio_links) ? p.portfolio_links : undefined,
+      },
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Merge ctm profile fields onto the identity-derived user.
+function applyProfile(ctmUser: User, prof: Partial<User> | null): void {
+  if (!prof) return;
+  if (prof.role) ctmUser.role = prof.role;
+  if (prof.companyId) ctmUser.companyId = prof.companyId;
+  if (prof.name) ctmUser.name = prof.name;
+  if (prof.isVerified !== undefined) ctmUser.isVerified = prof.isVerified;
+  if (prof.onboardingCompleted !== undefined) ctmUser.onboardingCompleted = prof.onboardingCompleted;
+  if (prof.candidateOnboardingCompleted !== undefined) ctmUser.candidateOnboardingCompleted = prof.candidateOnboardingCompleted;
+  if (prof.consentAccepted !== undefined) ctmUser.consentAccepted = prof.consentAccepted;
+  if (prof.consentAcceptedAt) ctmUser.consentAcceptedAt = prof.consentAcceptedAt;
+  if (prof.profile) ctmUser.profile = { ...(ctmUser.profile || {}), ...prof.profile };
+}
+
+// GET /users/:id off ctm-service (optionalAuth — works without a bearer token).
+async function ctmProxyClientCtmProfile(userId: string): Promise<any> {
+  return ctmClient.get<any>(`/users/${userId}`);
+}
+
+// Server components (the company dashboard pages) can't read the in-memory auth state,
+// so we mirror the current user/company into readable cookies they can pick up via
+// next/headers cookies(). Not secrets — just ids for scoping the demo.
+function setCtmScopeCookies(u: User | null) {
+  if (typeof document === 'undefined') return;
+  if (u) {
+    const opts = '; path=/; max-age=2592000; samesite=lax';
+    document.cookie = `ctm_user_id=${encodeURIComponent(u.id)}${opts}`;
+    document.cookie = `ctm_company_id=${encodeURIComponent(u.companyId || '')}${opts}`;
+    document.cookie = `ctm_role=${encodeURIComponent(u.role)}${opts}`;
+  } else {
+    document.cookie = 'ctm_user_id=; path=/; max-age=0';
+    document.cookie = 'ctm_company_id=; path=/; max-age=0';
+    document.cookie = 'ctm_role=; path=/; max-age=0';
+  }
+}
+
+// Persist a Partial<User> edit to ctm-service (PATCH /users/:id). Maps camelCase →
+// the snake_case CTM contract. Client-side (token in memory), non-fatal.
+function patchCtmProfile(id: string, updates: Partial<User>) {
+  const body: Record<string, unknown> = {};
+  if (updates.name !== undefined) body.name = updates.name;
+  if (updates.isActive !== undefined) body.is_active = updates.isActive;
+  if (updates.isVerified !== undefined) body.is_verified = updates.isVerified;
+  if (updates.consentAccepted !== undefined) body.consent_accepted = updates.consentAccepted;
+  if (updates.consentAcceptedAt !== undefined) body.consent_accepted_at = updates.consentAcceptedAt;
+  if (updates.onboardingCompleted !== undefined) body.onboarding_completed = updates.onboardingCompleted;
+  if (updates.candidateOnboardingCompleted !== undefined) body.candidate_onboarding_completed = updates.candidateOnboardingCompleted;
+  const p = updates.profile;
+  if (p) {
+    if (p.avatarUrl !== undefined) body.avatar_url = p.avatarUrl;
+    if (p.bio !== undefined) body.bio = p.bio;
+    if (p.location !== undefined) body.location = p.location;
+    if (p.experienceLevel !== undefined) body.experience_level = p.experienceLevel;
+    if (p.skills !== undefined) body.skills = p.skills;
+    if (p.githubUrl !== undefined) body.github_url = p.githubUrl;
+    if (p.linkedinUrl !== undefined) body.linkedin_url = p.linkedinUrl;
+    if (p.portfolioLinks !== undefined) body.portfolio_links = p.portfolioLinks;
+  }
+  if (Object.keys(body).length) ctmClient.patch(`/users/${id}`, body).catch(() => { /* non-fatal */ });
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -250,29 +397,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Session restoration
   useEffect(() => {
     if (!USE_MOCK) {
-      const token = getStoredToken();
-      if (token) {
-        const decoded = decodeJwtPayload(token);
-        if (decoded && typeof decoded.exp === 'number' && decoded.exp * 1000 > Date.now()) {
-          const ctmUser = mapProxyUserToCTM(decoded as unknown as ProxyUser);
-          setUser(ctmUser);
-          if (ctmUser.role === 'company' && ctmUser.companyId) {
-            fetchRealCompanyData(ctmUser.companyId);
+      let cancelled = false;
+      // Silent restore: refresh via the httpOnly cookie (no redirect), then load /users/me.
+      bootstrapSession()
+        .then(async (ok) => {
+          if (cancelled || !ok) return;
+          try {
+            // Gateway BFF /me returns { user: { userId, email, ... }, csrfToken }.
+            // ctmApiClient strips the `data` wrapper but not the `user` sub-key.
+            const meResp = await ctmProxyClient.get<any>('/me');
+            if (cancelled || !meResp) return;
+            // Handle both direct ProxyUser shape and gateway { user: {...} } wrapper.
+            const freshUser: ProxyUser = meResp?.user ?? meResp;
+            if (!freshUser?.userId && !freshUser?.id) return;
+            const ctmUser = mapProxyUserToCTM(freshUser);
+            // Adopt app-role, companyId, onboarding/consent flags + profile from the ctm profile.
+            applyProfile(ctmUser, await fetchCtmProfileFields(ctmUser.id));
+            if (cancelled) return;
+            setUser(ctmUser);
+            setCtmScopeCookies(ctmUser);
+            mirrorCtmProfile(ctmUser);
+            if (ctmUser.role === 'company' && ctmUser.companyId) {
+              fetchRealCompanyData(ctmUser.companyId);
+            }
+          } catch {
+            /* no valid session */
           }
-          // Background refresh from /users/me
-          ctmProxyClient
-            .get<ProxyUser>('/users/me')
-            .then((freshUser) => {
-              const enriched = mapProxyUserToCTM(freshUser);
-              setUser(enriched);
-            })
-            .catch(() => {});
-        } else {
-          clearStoredToken();
-        }
-      }
-      setLoading(false);
-      return;
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+      return () => {
+        cancelled = true;
+      };
     }
 
     // Mock mode session restoration
@@ -304,6 +461,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (USE_MOCK) {
         localStorage.setItem("skillmatch-user", JSON.stringify(updatedUser));
         api.updateUser(prevUser.id, updates);
+      } else {
+        // Persist profile edits / consent / onboarding flags to ctm-service (authed, non-fatal).
+        patchCtmProfile(prevUser.id, updates);
       }
       return updatedUser;
     });
@@ -320,14 +480,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (credentials: LoginCredentials): Promise<AuthResult> => {
     if (!USE_MOCK) {
       try {
-        const result = await ctmAuthClient.post<{
-          token: string;
-          refreshToken: string;
-          user: ProxyUser;
-        }>('/login', credentials);
-        storeToken(result.token);
-        const ctmUser = mapProxyUserToCTM(result.user);
+        const raw = await ctmAuthClient.post<any>('/login', credentials);
+        // Old auth-service: { token, refreshToken, user }
+        // Gateway BFF:      { user: { userId, email, fullName, roles, orgId }, csrfToken }
+        const token = raw?.token ?? raw?.data?.accessToken;
+        if (token) storeToken(token);
+        const proxyUser: ProxyUser = raw?.user ?? raw;
+        const ctmUser = mapProxyUserToCTM(proxyUser);
+        // Adopt app-role, companyId, onboarding/consent flags + profile from the ctm profile
+        // (identity only knows org role 'owner'). Onboarding flags MUST be applied to avoid
+        // the redirect guard bouncing the user to the onboarding flow.
+        applyProfile(ctmUser, await fetchCtmProfileFields(ctmUser.id));
         setUser(ctmUser);
+        setCtmScopeCookies(ctmUser);
+        mirrorCtmProfile(ctmUser); // name/email only — never clobbers the profile role
         if (ctmUser.role === 'company' && ctmUser.companyId) {
           await fetchRealCompanyData(ctmUser.companyId);
         }
@@ -359,21 +525,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signup = async (details: SignupDetails): Promise<AuthResult> => {
     if (!USE_MOCK) {
       try {
-        await ctmAuthClient.post('/register', {
+        // Gateway register expects fullName/orgName; it issues the org role 'owner'.
+        const reg = await ctmAuthClient.post<any>('/register', {
           email: details.email,
           password: details.password,
-          name: details.name,
-          role: details.role,
+          fullName: details.name,
+          orgName: details.companyName,
         });
+        const newId = reg?.user?.id ? String(reg.user.id) : undefined;
+        const newOrg = reg?.user?.orgId ?? undefined;
         // Auto-login after successful registration
         const loginResult = await login({ email: details.email, password: details.password });
-        if (loginResult.success && details.role === 'company' && details.companyName) {
-          // Create company in ctm-service
-          await ctmClient.post('/companies', {
-            name: details.companyName,
-            description: details.companyDescription,
-            website: details.companyWebsite,
-          }).catch(() => {}); // Non-fatal
+        if (loginResult.success && newId) {
+          if (details.role === 'company') {
+            // Create the ctm company with id = orgId so the frontend's companyId (=orgId) resolves it.
+            if (details.companyName && newOrg) {
+              await ctmClient.post('/companies', {
+                id: newOrg,
+                name: details.companyName,
+                description: details.companyDescription,
+                website: details.companyWebsite,
+              }).catch(() => {});
+            }
+            await ctmClient.post('/users', { id: newId, role: 'company', company_id: newOrg }).catch(() => {});
+            updateUser({ role: 'company', companyId: newOrg });
+          } else {
+            // candidate / admin: stamp the chosen app-role on the new profile
+            await ctmClient.post('/users', { id: newId, role: details.role }).catch(() => {});
+            updateUser({ role: details.role });
+          }
         }
         return loginResult;
       } catch (err: unknown) {
@@ -415,6 +595,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!USE_MOCK) {
       ctmAuthClient.post('/logout', {}).catch(() => {});
       clearStoredToken();
+      setCtmScopeCookies(null);
     } else {
       localStorage.removeItem("skillmatch-user");
     }

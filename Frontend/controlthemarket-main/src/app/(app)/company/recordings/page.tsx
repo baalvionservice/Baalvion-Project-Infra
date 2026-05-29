@@ -1,4 +1,5 @@
 import { getSubmissions, getUsers, getTasksByCompany } from "@/lib/api";
+import { getScopedUserId } from "@/lib/server-auth";
 import { RecordingList } from "./recording-list";
 import type { Submission, Task, User, Company } from "@/lib/types";
 import {
@@ -8,9 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-// For prototype, we'll use a hardcoded user ID. In a real app, this would come from auth.
-const CURRENT_USER_ID = "user-2";
 
 export type RecordingDashboardData = {
   id: string; // submissionId
@@ -22,7 +20,10 @@ export type RecordingDashboardData = {
 
 export default async function CompanySessionRecordingsPage() {
   const allUsers = await getUsers();
-  const user = allUsers.find((u) => u.id === CURRENT_USER_ID);
+  const scopedId = await getScopedUserId();
+  const user =
+    (scopedId && allUsers.find((u) => String(u.id) === String(scopedId))) ||
+    allUsers.find((u) => u.role === "company");
   if (!user || !user.companyId) return <div>Company not found</div>;
 
   const [allSubmissions, allTasks] = await Promise.all([

@@ -1,30 +1,33 @@
-// ctm-service is /api/v1/ecosystem/ctm at the gateway (was wrongly pointed at :3011 = cms-service).
+// ctm-service is /api/v1/ecosystem/ctm at the gateway.
 const CTM_BASE  = process.env.NEXT_PUBLIC_CTM_API_URL ?? 'https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1';
-// auth via the single identity authority (auth-service) through the gateway, NOT proxy-service:4000.
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_URL    ?? 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
-const PROXY_BASE = AUTH_BASE.replace(/\/auth$/, '');
+// Auth via the SAME-ORIGIN proxy (next.config rewrite → gateway) so the httpOnly
+// `baalvion_refresh` cookie flows in dev and prod. NEVER an absolute cross-origin URL.
+const AUTH_BASE = '/auth-bff';
+const PROXY_BASE = AUTH_BASE; // /users/me etc. resolve under the auth base via the proxy
 
-export const CTM_TOKEN_KEY         = 'ctm_access_token';
-const        CTM_REFRESH_TOKEN_KEY = 'ctm_refresh_token';
+// Retained export for back-compat with importers; NO LONGER a web-storage key.
+export const CTM_TOKEN_KEY = 'ctm_access_token';
+
+// ── In-memory access token (P0: NO localStorage/sessionStorage). Refresh = httpOnly cookie. ──
+let _accessToken: string | null = null;
 
 export function getStoredToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(CTM_TOKEN_KEY);
+  return _accessToken;
 }
 
-export function storeTokens(accessToken: string, refreshToken?: string): void {
-  localStorage.setItem(CTM_TOKEN_KEY, accessToken);
-  if (refreshToken) localStorage.setItem(CTM_REFRESH_TOKEN_KEY, refreshToken);
+export function storeTokens(accessToken: string, _refreshToken?: string): void {
+  // Only the access token is held (in memory). The refresh token is the httpOnly cookie.
+  _accessToken = accessToken || null;
 }
 
 export function storeToken(token: string): void {
-  localStorage.setItem(CTM_TOKEN_KEY, token);
+  _accessToken = token || null;
 }
 
 export function clearStoredToken(): void {
-  localStorage.removeItem(CTM_TOKEN_KEY);
-  localStorage.removeItem(CTM_REFRESH_TOKEN_KEY);
-  localStorage.removeItem('skillmatch-user');
+  _accessToken = null;
+  // Best-effort cleanup of any legacy mock-mode user blob (not a credential).
+  if (typeof window !== 'undefined') localStorage.removeItem('skillmatch-user');
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -35,26 +38,27 @@ async function attemptTokenRefresh(): Promise<boolean> {
   if (refreshPromise) return refreshPromise;
 
   refreshPromise = (async () => {
-    const refreshToken = typeof window !== 'undefined'
-      ? localStorage.getItem(CTM_REFRESH_TOKEN_KEY)
-      : null;
-    if (!refreshToken) return false;
-
     try {
+      // No body: the refresh token rides the httpOnly cookie. Backend rotates it.
       const res = await fetch(`${AUTH_BASE}/refresh`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
-        body: JSON.stringify({ refreshToken }),
       });
       if (!res.ok) return false;
 
-      const payload = await res.json();
-      const newAccess  = payload?.data?.accessToken  ?? payload?.accessToken;
-      const newRefresh = payload?.data?.refreshToken ?? payload?.refreshToken;
-
-      if (!newAccess) return false;
-      storeTokens(newAccess, newRefresh);
+      const payload = await res.json().catch(() => ({}));
+      const newAccess = payload?.data?.accessToken ?? payload?.accessToken ?? payload?.data?.token ?? payload?.token;
+      if (newAccess) {
+        // Old auth-service pattern: token returned in body.
+        _accessToken = newAccess;
+      } else if (payload?.ok === true) {
+        // Gateway BFF pattern: { ok: true, csrfToken } — cookie was rotated, no token in body.
+        // _accessToken stays null; reads work (optionalAuth); writes route through the gateway.
+        _accessToken = null;
+      } else {
+        return false;
+      }
       return true;
     } catch {
       return false;
@@ -64,6 +68,11 @@ async function attemptTokenRefresh(): Promise<boolean> {
   })();
 
   return refreshPromise;
+}
+
+/** Silent session restore on app start: refresh via the httpOnly cookie. No redirect side-effects. */
+export async function bootstrapSession(): Promise<boolean> {
+  return attemptTokenRefresh();
 }
 
 async function request<T>(
