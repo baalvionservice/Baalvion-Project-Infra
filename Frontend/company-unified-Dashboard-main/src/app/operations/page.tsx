@@ -1,4 +1,4 @@
-
+"use client";
 import {
   Card,
   CardContent,
@@ -7,14 +7,16 @@ import {
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUp, UserCheck, BarChart, FileCheck, AlertCircle } from 'lucide-react';
-import operationsData from '@/lib/data/operations.json';
+import { useOperations } from '@/hooks/use-operations';
 import OperationsTable from './components/operations-table';
 import ActivityFeed from './components/activity-feed';
 import HourlyRevenueChart from '@/components/charts/hourly-revenue-chart';
 import { cn } from '@/lib/utils';
 
 export default function OperationsPage() {
-  const { snapshot, hourlyRevenue } = operationsData;
+  const { view } = useOperations();
+  const snapshot = view?.snapshot ?? { todaysRevenue: 0, revenueChange: 0, ordersPlaced: 0, activeEmployees: 0, totalEmployees: 0, openSupportTickets: 0, pendingApprovals: 0 };
+  const hourlyRevenue = view?.hourlyRevenue ?? [];
 
   const summaryCards = [
     { title: "Today's Revenue", value: `$${snapshot.todaysRevenue.toLocaleString()}`, change: `+${snapshot.revenueChange}% vs yesterday`, icon: BarChart },

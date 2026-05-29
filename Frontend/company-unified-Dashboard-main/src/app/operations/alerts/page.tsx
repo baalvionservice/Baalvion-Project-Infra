@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Card,
@@ -20,9 +20,15 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import alertsData from '@/lib/data/alerts.json';
+import { dashboardApi } from '@/lib/api-client';
 
 type AlertType = 'Critical' | 'Warning' | 'Info' | 'Success';
+interface AlertItem { id: string; type: AlertType; title: string; timestamp: string }
+
+// Map operations_alerts.severity to the page's alert type.
+const SEVERITY_MAP: Record<string, AlertType> = {
+  critical: 'Critical', high: 'Critical', warning: 'Warning', medium: 'Warning', info: 'Info', low: 'Info', success: 'Success',
+};
 
 const alertConfig: Record<
   AlertType,
@@ -51,8 +57,26 @@ const alertConfig: Record<
 };
 
 export default function AlertsPage() {
-  const [alerts, setAlerts] = useState(alertsData);
+  const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const { toast } = useToast();
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.operationsAlerts();
+        const arr = ((d as { data?: unknown[] })?.data ?? (Array.isArray(d) ? d : [])) as Record<string, unknown>[];
+        if (cancelled) return;
+        setAlerts(arr.map((a) => ({
+          id: String(a.id),
+          type: SEVERITY_MAP[String(a.severity ?? 'info').toLowerCase()] ?? 'Info',
+          title: String(a.title ?? ''),
+          timestamp: new Date(String(a.created_at ?? a.createdAt ?? Date.now())).toLocaleString(),
+        })));
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleDismiss = (alertId: string) => {
     setAlerts(alerts.filter((a) => a.id !== alertId));

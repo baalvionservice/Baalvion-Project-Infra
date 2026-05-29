@@ -7,21 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import operationsData from "@/lib/data/operations.json";
-import businessesData from "@/lib/data/businesses";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useOperations } from "@/hooks/use-operations";
 import {
-  ArrowDown,
-  ArrowUp,
   Briefcase,
   Check,
   DollarSign,
   Server,
   User,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const getIconForActivity = (description: string) => {
   if (description.includes("order")) return <DollarSign className="h-4 w-4" />;
@@ -36,6 +29,8 @@ const getIconForActivity = (description: string) => {
 };
 
 export default function ActivityFeed() {
+  const { view } = useOperations();
+  const activityFeed = view?.activityFeed ?? [];
   return (
     <Card>
       <CardHeader>
@@ -46,7 +41,7 @@ export default function ActivityFeed() {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {operationsData.activityFeed.map((activity) => (
+          {activityFeed.map((activity) => (
             <div key={activity.id} className="flex gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
                 {getIconForActivity(activity.description)}
@@ -59,10 +54,7 @@ export default function ActivityFeed() {
                     &mdash; {activity.business}
                   </span>
                 </p>
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    {activity.detail}
-                  </p>
+                <div className="flex items-center justify-end">
                   <p className="text-xs text-muted-foreground">
                     {activity.timestamp}
                   </p>

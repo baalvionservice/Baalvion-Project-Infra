@@ -16,15 +16,10 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import operationsData from "@/lib/data/operations.json";
-import businessesData from "@/lib/data/businesses";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { useOperations } from "@/hooks/use-operations";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { BusinessStatus } from "@/lib/types";
-
-const businessTodayData = operationsData.businessToday;
-const allBusinesses = businessesData;
 
 const statusColors: Record<BusinessStatus, string> = {
   Active:
@@ -36,6 +31,8 @@ const statusColors: Record<BusinessStatus, string> = {
 };
 
 export default function OperationsTable() {
+  const { view } = useOperations();
+  const businessTodayData = view?.businessToday ?? [];
   return (
     <Card>
       <CardHeader>
@@ -60,16 +57,12 @@ export default function OperationsTable() {
             </TableHeader>
             <TableBody>
               {businessTodayData.map((data) => {
-                const business = allBusinesses.find(
-                  (b) => b.id === data.businessId
-                );
-                if (!business) return null;
                 return (
                   <TableRow key={data.businessId}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        <span>{business.countryCode}</span>
-                        <span>{business.name}</span>
+                        <span>{data.countryCode}</span>
+                        <span>{data.name}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right font-mono">
