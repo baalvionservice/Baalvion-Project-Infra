@@ -1,7 +1,6 @@
-
+'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-'use client';
 import { Lightbulb, TrendingUp, Zap } from 'lucide-react';
 import { useAi } from '@/hooks/use-ai';
 

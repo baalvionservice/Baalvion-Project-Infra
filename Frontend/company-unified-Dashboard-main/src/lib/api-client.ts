@@ -35,13 +35,19 @@ export interface DashAuthTokens {
 // ─── In-memory session — identity only (no token in the BFF model) ───────────────
 let _user: DashAuthUser | null = null;
 
+// Fired whenever the in-memory identity changes (login / bootstrap / logout) so reactive consumers
+// (e.g. the role context) can re-derive the user's role without re-reading on a fixed lifecycle.
+function notifyAuthChanged() {
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('auth-changed'));
+}
+
 export const tokenStore = {
   getAccess: (): string | null => null,   // BFF: there is no JS-readable access token
   getRefresh: (): string | null => null,
   getUser: (): DashAuthUser | null => _user,
-  set: (tokens: DashAuthTokens) => { if (tokens.user) _user = tokens.user; },
-  setUser: (user: DashAuthUser | null) => { _user = user; },
-  clear: () => { _user = null; },
+  set: (tokens: DashAuthTokens) => { if (tokens.user) _user = tokens.user; notifyAuthChanged(); },
+  setUser: (user: DashAuthUser | null) => { _user = user; notifyAuthChanged(); },
+  clear: () => { _user = null; notifyAuthChanged(); },
 };
 
 function csrf(): string {
@@ -138,6 +144,38 @@ export const authApi = {
     return { accessToken: '', user };
   },
 
+  register: async (params: { email: string; password: string; fullName?: string; orgName?: string }): Promise<DashAuthTokens> => {
+    const res = await fetch(`${AUTH_URL}/register`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error((json as { error?: { message?: string } })?.error?.message || 'Registration failed');
+    }
+    const rawUser = (json as { user?: unknown; data?: { user?: unknown } }).user
+      ?? (json as { data?: { user?: unknown } }).data?.user
+      ?? {};
+    const user = normalizeUser(rawUser as Record<string, unknown>);
+    _user = user;
+    return { accessToken: '', user };
+  },
+
+  invite: async (params: { email: string; role: string }): Promise<void> => {
+    const res = await fetch(`${AUTH_URL}/invite`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json', 'x-csrf-token': csrf() },
+      body: JSON.stringify(params),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error((json as { error?: { message?: string } })?.error?.message || 'Invitation failed');
+    }
+  },
+
   logout: async (): Promise<void> => {
     try {
       await fetch(`${AUTH_URL}/logout`, {
@@ -170,6 +208,7 @@ export async function bootstrapSession(): Promise<DashAuthUser | null> {
   try {
     const u = await authApi.me();
     _user = u;
+    notifyAuthChanged();
     return u;
   } catch {
     /* no live cookie session — try a refresh */
@@ -178,27 +217,66 @@ export async function bootstrapSession(): Promise<DashAuthUser | null> {
     try {
       const u = await authApi.me();
       _user = u;
+      notifyAuthChanged();
       return u;
     } catch {
       /* refresh succeeded but /me failed — treat as unauthenticated */
     }
   }
   _user = null;
+  notifyAuthChanged();
   return null;
 }
 
 // ─── Dashboard API (proxied through the gateway /api) ────────────────────────────
-const get = <T>(path: string) => authFetch<T>(path);
-const post = <T>(path: string, body?: object) =>
-  authFetch<T>(path, {
+// ─── GET de-duplication + short cache ───────────────────────────────────────────────
+// Many components mount together and request the same reference data (measured: /domains and
+// /employees each fired ×7 on a single page). Collapse concurrent identical GETs into ONE network
+// call and reuse the result briefly; any mutation (post) clears the cache so writes show immediately.
+const _getCache = new Map<string, { data: unknown; at: number }>();
+const _getInflight = new Map<string, Promise<unknown>>();
+const GET_TTL_MS = 8000;
+
+const get = <T>(path: string): Promise<T> => {
+  const hit = _getCache.get(path);
+  if (hit && Date.now() - hit.at < GET_TTL_MS) return Promise.resolve(hit.data as T);
+  const existing = _getInflight.get(path);
+  if (existing) return existing as Promise<T>;
+  const p = authFetch<T>(path)
+    .then((data) => { _getCache.set(path, { data, at: Date.now() }); return data; })
+    .finally(() => { _getInflight.delete(path); });
+  _getInflight.set(path, p);
+  return p as Promise<T>;
+};
+
+const post = <T>(path: string, body?: object) => {
+  _getCache.clear(); // a mutation may change any list → drop cached reads so they refetch
+  return authFetch<T>(path, {
     method: 'POST',
     body: body ? JSON.stringify(body) : undefined,
   });
+};
+const patch = <T>(path: string, body?: object) => {
+  _getCache.clear();
+  return authFetch<T>(path, {
+    method: 'PATCH',
+    body: body ? JSON.stringify(body) : undefined,
+  });
+};
+const del = <T>(path: string) => {
+  _getCache.clear();
+  return authFetch<T>(path, { method: 'DELETE' });
+};
 
 export const dashboardApi = {
   summary: () => get('/dashboard/total'),
   businesses: () => get('/domains'),        // dashboard-service models "businesses" as domains
+  createBusiness: (body: { name: string; type?: string; country?: string; currency?: string }) => post('/domains', body),
+  updateBusiness: (id: string, body: Record<string, unknown>) => patch(`/domains/${id}`, body),
+  deleteBusiness: (id: string) => del(`/domains/${id}`),
   employees: () => get('/employees'),
+  updateEmployee: (id: string, body: Record<string, unknown>) => patch(`/employees/${id}`, body),
+  deleteEmployee: (id: string) => del(`/employees/${id}`),
   kpis: () => get('/kpis'),
   payments: () => get('/transactions'),     // payments are transactions in dashboard-service
   finance: () => get('/financials'),
@@ -210,6 +288,7 @@ export const dashboardApi = {
   notifications: () => get('/notifications'),
   compliance: () => get('/compliance'),
   attendance: () => get('/employees/attendance'),
+  attendanceSummary: () => get('/employees/attendance/summary'),
   tasks: () => get('/tasks'),
   departments: () => get('/employees/departments'),
   financeReports: () => get('/finance-reports'),
@@ -236,6 +315,7 @@ export const dashboardApi = {
   analytics: {
     businesses: () => get('/analytics/company/summary'),
     domains: () => get('/analytics/domains/trends'),
-    forecast: () => get('/analytics/company/summary'),
+    forecast: () => get('/analytics/forecast'),               // revenueForecast + aiRecommendations
+    businessPerformance: () => get('/analytics/businesses'), // ranking / comparison / deep-dive
   },
 };

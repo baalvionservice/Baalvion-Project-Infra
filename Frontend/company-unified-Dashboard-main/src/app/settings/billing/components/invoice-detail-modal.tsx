@@ -7,7 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Download } from 'lucide-react';
 import type { Invoice } from '@/lib/types';
 import { useBilling } from '@/hooks/use-billing';
-import { format } from 'date-fns';
+import { safeFormatDate } from '@/lib/utils';
 
 interface InvoiceDetailModalProps {
   invoice: Invoice | null;
@@ -40,7 +40,7 @@ export default function InvoiceDetailModal({ invoice, isOpen, onOpenChange }: In
             <div className="text-right">
               <h2 className="text-2xl font-bold uppercase">Invoice</h2>
               <p className="text-muted-foreground">{invoice.id}</p>
-              <p className="text-sm mt-2">Date: {format(new Date(invoice.paymentDate), 'PP')}</p>
+              <p className="text-sm mt-2">Date: {safeFormatDate(invoice.paymentDate, 'PP')}</p>
             </div>
           </header>
 
@@ -80,7 +80,7 @@ export default function InvoiceDetailModal({ invoice, isOpen, onOpenChange }: In
           </section>
 
           <footer className="mt-8 pt-4 border-t text-sm">
-            <p><strong>Paid:</strong> {format(new Date(invoice.paymentDate), 'PP')}</p>
+            <p><strong>Paid:</strong> {safeFormatDate(invoice.paymentDate, 'PP')}</p>
             <p><strong>Payment Method:</strong> {billingData.subscription.paymentMethod.type} ending in {billingData.subscription.paymentMethod.last4}</p>
           </footer>
         </div>

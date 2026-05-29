@@ -5,36 +5,19 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { mockUsers } from "@/lib/auth";
 
+// NOTE: In the gateway-BFF auth model there are no hardcoded demo passwords in source.
+// This card now documents the role-based views only; sign in with a real account to test them.
 export function DemoCredentials() {
   return (
     <Card className="mt-6">
       <CardHeader>
-        <CardTitle className="text-lg">Demo Accounts</CardTitle>
+        <CardTitle className="text-lg">Role-Based Dashboards</CardTitle>
         <CardDescription>
-          Use these credentials to test different role-based dashboards
+          Sign in with an account to see the dashboard for its role
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {mockUsers.map((user) => (
-          <div
-            key={user.id}
-            className="flex items-center justify-between p-3 border rounded-lg"
-          >
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <p className="font-medium">{user.name}</p>
-                <Badge variant="outline">{user.role.replace("_", " ")}</Badge>
-              </div>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
-              <p className="text-xs text-muted-foreground">
-                Password: {user.password}
-              </p>
-            </div>
-          </div>
-        ))}
         <div className="text-xs text-muted-foreground mt-4 p-3 bg-muted/50 rounded-lg">
           <p className="font-medium mb-1">Role Differences:</p>
           <ul className="space-y-1">

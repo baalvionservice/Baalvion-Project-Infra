@@ -1,5 +1,28 @@
 import type { NextConfig } from 'next';
 
+// Next.js dev mode (webpack HMR + react-refresh) evaluates code via eval(), and the HMR channel
+// uses a localhost websocket. A production-grade CSP that omits 'unsafe-eval' / ws: therefore
+// BREAKS the entire client bundle in dev (nothing hydrates → forms fall back to native submits).
+// So we relax the CSP in development only; production keeps the strict policy.
+const isDev = process.env.NODE_ENV !== 'production';
+
+const csp = [
+  "default-src 'self'",
+  // 'unsafe-eval' is dev-only (HMR). cdn.jsdelivr.net serves the canvas-confetti script (layout).
+  `script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net${isDev ? " 'unsafe-eval'" : ''}`,
+  // Google Fonts stylesheet is loaded in the root layout.
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos https://fastly.picsum.photos",
+  // Google Fonts files come from fonts.gstatic.com.
+  "font-src 'self' data: https://fonts.gstatic.com",
+  // In dev, allow the localhost HMR websocket + same-origin API; prod talks to the API host.
+  `connect-src 'self' https://api.baalvion.com wss://api.baalvion.com${isDev ? ' ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*' : ''}`,
+  "frame-ancestors 'none'",
+  "form-action 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+].join('; ');
+
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
@@ -14,21 +37,7 @@ const securityHeaders = [
     key: 'Strict-Transport-Security',
     value: 'max-age=63072000; includeSubDomains; preload',
   },
-  {
-    key: 'Content-Security-Policy',
-    value: [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline'",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos",
-      "font-src 'self' data:",
-      "connect-src 'self' https://api.baalvion.com wss://api.baalvion.com",
-      "frame-ancestors 'none'",
-      "form-action 'self'",
-      "base-uri 'self'",
-      "object-src 'none'",
-    ].join('; '),
-  },
+  { key: 'Content-Security-Policy', value: csp },
 ];
 
 const nextConfig: NextConfig = {

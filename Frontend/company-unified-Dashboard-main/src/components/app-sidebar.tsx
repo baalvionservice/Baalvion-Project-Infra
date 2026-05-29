@@ -29,15 +29,13 @@ import {
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 
-import businessesData from "@/lib/data/businesses";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { getCurrentUser } from "@/lib/auth";
-import type { Business, User } from "@/lib/types";
+import type { User } from "@/lib/types";
 import { useIsMobile } from "@/hooks/use-mobile";
 import BottomNav from "./bottom-nav";
 import { navItems } from "@/lib/nav-config";
-
-const allBusinesses: Business[] = businessesData;
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 
 const BaalvionLogo = () => (
   <svg
@@ -59,6 +57,7 @@ function AppSidebarContent() {
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const { toggleSidebar } = useSidebar();
+  const { businesses } = useDashboardRefs();
   const [currentUser, setCurrentUser] = React.useState<User | null>(null);
   const [mounted, setMounted] = React.useState(false);
   const [isDemoMode, setIsDemoMode] = React.useState(false);
@@ -83,9 +82,6 @@ function AppSidebarContent() {
   const userImage = PlaceHolderImages.find(
     (img) => img.id === currentUser.imageId
   );
-
-  // Show all businesses - role-based filtering removed
-  const businesses: Business[] = allBusinesses;
 
   if (isMobile) {
     return <BottomNav />;
@@ -126,20 +122,14 @@ function AppSidebarContent() {
           >
             <DropdownMenuLabel>Switch Business Group</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            {businesses.map((biz) => {
-              const image = PlaceHolderImages.find(
-                (img) => img.id === biz.imageId
-              );
-              return (
-                <DropdownMenuItem key={biz.id}>
-                  <Avatar className="mr-2 h-6 w-6">
-                    {image && <AvatarImage src={image.imageUrl} />}
-                    <AvatarFallback>{biz.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <span>{biz.name}</span>
-                </DropdownMenuItem>
-              );
-            })}
+            {businesses.map((biz) => (
+              <DropdownMenuItem key={biz.id}>
+                <Avatar className="mr-2 h-6 w-6">
+                  <AvatarFallback>{biz.name.charAt(0)}</AvatarFallback>
+                </Avatar>
+                <span>{biz.name}</span>
+              </DropdownMenuItem>
+            ))}
           </DropdownMenuContent>
         </DropdownMenu>
        

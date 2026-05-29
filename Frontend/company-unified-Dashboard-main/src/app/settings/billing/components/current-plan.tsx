@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle } from 'lucide-react';
-import { format } from 'date-fns';
+import { safeFormatDate } from '@/lib/utils';
 import PlanComparisonModal from './plan-comparison-modal';
 
 interface Subscription {
@@ -49,7 +49,7 @@ export default function CurrentPlan({ subscription }: CurrentPlanProps) {
                         <p className="text-sm text-muted-foreground">Billed Annually (${subscription.annualPrice.toLocaleString()}/yr, you save ${savedAmount.toLocaleString()})</p>
                     </div>
                     <div className="text-sm text-muted-foreground space-y-1">
-                        <p><strong>Next billing date:</strong> {format(new Date(subscription.nextBillingDate), 'MMMM d, yyyy')}</p>
+                        <p><strong>Next billing date:</strong> {safeFormatDate(subscription.nextBillingDate, 'MMMM d, yyyy')}</p>
                         <p><strong>Payment method:</strong> {subscription.paymentMethod.type} ending in {subscription.paymentMethod.last4}</p>
                     </div>
                 </CardContent>

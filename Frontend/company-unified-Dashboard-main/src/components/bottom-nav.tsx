@@ -8,8 +8,10 @@ import { Separator } from './ui/separator';
 import { cn } from '@/lib/utils';
 import { navItems } from '@/lib/nav-config';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import allUsers from '@/lib/data/users.json';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { getCurrentUser } from '@/lib/auth';
+import type { User } from '@/lib/types';
+import { useState, useEffect } from 'react';
 
 const mainNav = [
   { href: '/dashboard', icon: Grid3x3, label: 'Dashboard' },
@@ -22,8 +24,9 @@ export default function BottomNav() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const role = searchParams.get('role');
-  const currentUser = allUsers[0];
-  const userImage = PlaceHolderImages.find(img => img.id === currentUser.imageId);
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  useEffect(() => { setCurrentUser(getCurrentUser()); }, []);
+  const userImage = PlaceHolderImages.find(img => img.id === currentUser?.imageId);
 
   const secondaryNav = navItems.filter(
     item => !mainNav.some(mainItem => mainItem.href === item.href || (item.href !== '/dashboard' && item.href.startsWith(mainItem.href + '/')))
@@ -56,11 +59,11 @@ export default function BottomNav() {
                 <div className="flex items-center gap-3 rounded-lg p-3 bg-muted">
                     <Avatar className="h-10 w-10">
                         {userImage && <AvatarImage src={userImage.imageUrl} />}
-                        <AvatarFallback>{currentUser.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>{currentUser?.name?.charAt(0) ?? '?'}</AvatarFallback>
                     </Avatar>
                     <div>
-                        <p className="font-semibold">{currentUser.name}</p>
-                        <p className="text-sm text-muted-foreground">{currentUser.email}</p>
+                        <p className="font-semibold">{currentUser?.name ?? ''}</p>
+                        <p className="text-sm text-muted-foreground">{currentUser?.email ?? ''}</p>
                     </div>
                 </div>
                 <Separator />

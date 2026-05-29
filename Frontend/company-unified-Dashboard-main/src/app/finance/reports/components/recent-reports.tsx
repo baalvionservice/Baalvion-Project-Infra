@@ -1,6 +1,6 @@
+'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-'use client';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { useEffect, useState } from 'react';

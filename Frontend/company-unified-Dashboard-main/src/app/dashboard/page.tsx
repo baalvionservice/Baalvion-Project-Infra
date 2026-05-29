@@ -2,21 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/protected-route";
-import { getUserRole } from "@/lib/auth";
-import type { Role } from "@/lib/types";
+import { useViewRole } from "@/hooks/use-view-role";
 import AdminView from "./admin-view";
 import InvestorView from "./investor-view";
 import CoFounderView from "./co-founder-view";
 import EmployeeView from "./employee-view";
 
 function DashboardContent() {
-  const [currentRole, setCurrentRole] = useState<Role>("ADMIN");
+  const { role: currentRole } = useViewRole();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const userRole = getUserRole();
-    setCurrentRole(userRole || "ADMIN");
   }, []);
 
   if (!mounted) {

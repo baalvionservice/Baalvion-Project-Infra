@@ -21,7 +21,8 @@ import {
 } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import countriesData from '@/lib/data/countries.json';
+import { useCountries } from '@/hooks/use-countries';
+import { dashboardApi } from '@/lib/api-client';
 
 interface AddBusinessModalProps {
   isOpen: boolean;
@@ -32,26 +33,38 @@ const industries = ["Fintech", "E-commerce", "Media", "SaaS", "Logistics", "Reta
 
 export default function AddBusinessModal({ isOpen, onOpenChange }: AddBusinessModalProps) {
   const { toast } = useToast();
+  const { countries } = useCountries();
   const [step, setStep] = useState(1);
+  const [name, setName] = useState('');
+  const [country, setCountry] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [currency, setCurrency] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   const handleNext = () => setStep(step => Math.min(step + 1, 3));
   const handleBack = () => setStep(step => Math.max(step - 1, 1));
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const reset = () => { setStep(1); setName(''); setCountry(''); setIndustry(''); setCurrency(''); };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onOpenChange(false);
-    setStep(1); // Reset for next time
-    
-    // In a real app, you would check if this is the first business.
-    // For this demo, we'll assume it is if the user isn't in demo mode.
-    const isDemo = localStorage.getItem('baalvion_demo_mode') === 'true';
-    if (!isDemo) {
+    if (!name.trim()) { toast({ title: 'Business name required', variant: 'destructive' }); setStep(1); return; }
+    setSubmitting(true);
+    try {
+      // Real create → dashboard-service POST /domains (a "business" is modelled as a domain).
+      await dashboardApi.createBusiness({ name: name.trim(), type: industry || undefined, country: country || undefined, currency: currency || undefined });
+      onOpenChange(false);
+      reset();
+      window.dispatchEvent(new CustomEvent('business-created')); // business-management refetches
+      const isDemo = localStorage.getItem('baalvion_demo_mode') === 'true';
+      if (!isDemo) {
         window.dispatchEvent(new CustomEvent('celebrate', { detail: { message: 'Your first business is live on Baalvion!' } }));
-    } else {
-        toast({
-            title: 'Business Created',
-            description: 'Your new business has been added to the platform.',
-        });
+      }
+      toast({ title: 'Business Created', description: `${name.trim()} has been added to the platform.` });
+    } catch (err) {
+      toast({ title: 'Could not create business', description: err instanceof Error ? err.message : 'Please try again.', variant: 'destructive' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -74,19 +87,19 @@ export default function AddBusinessModal({ isOpen, onOpenChange }: AddBusinessMo
                 <div className="space-y-4">
                     <div className="space-y-2">
                         <Label htmlFor="biz-name">Business Name</Label>
-                        <Input id="biz-name" placeholder="e.g., QuantumLeap AI" required />
+                        <Input id="biz-name" placeholder="e.g., QuantumLeap AI" value={name} onChange={(e) => setName(e.target.value)} required />
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="biz-country">Country of Operation</Label>
-                        <Select><SelectTrigger id="biz-country"><SelectValue placeholder="Select a country" /></SelectTrigger><SelectContent>{countriesData.map(c => <SelectItem key={c.id} value={c.name}>{c.flag} {c.name}</SelectItem>)}</SelectContent></Select>
+                        <Select value={country} onValueChange={setCountry}><SelectTrigger id="biz-country"><SelectValue placeholder="Select a country" /></SelectTrigger><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.name}>{c.flag} {c.name}</SelectItem>)}</SelectContent></Select>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="biz-industry">Industry</Label>
-                        <Select><SelectTrigger id="biz-industry"><SelectValue placeholder="Select an industry" /></SelectTrigger><SelectContent>{industries.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent></Select>
+                        <Select value={industry} onValueChange={setIndustry}><SelectTrigger id="biz-industry"><SelectValue placeholder="Select an industry" /></SelectTrigger><SelectContent>{industries.map(i => <SelectItem key={i} value={i}>{i}</SelectItem>)}</SelectContent></Select>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="biz-currency">Primary Currency</Label>
-                        <Select><SelectTrigger id="biz-currency"><SelectValue placeholder="Select currency" /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="INR">INR</SelectItem><SelectItem value="GBP">GBP</SelectItem></SelectContent></Select>
+                        <Select value={currency} onValueChange={setCurrency}><SelectTrigger id="biz-currency"><SelectValue placeholder="Select currency" /></SelectTrigger><SelectContent><SelectItem value="USD">USD</SelectItem><SelectItem value="INR">INR</SelectItem><SelectItem value="GBP">GBP</SelectItem></SelectContent></Select>
                     </div>
                 </div>
             )}
@@ -106,10 +119,10 @@ export default function AddBusinessModal({ isOpen, onOpenChange }: AddBusinessMo
                 <div className="space-y-4">
                     <h4 className="font-semibold">Review Details</h4>
                     <div className="text-sm space-y-2 rounded-md border p-4 bg-muted/50">
-                        <p><strong>Name:</strong> QuantumLeap AI</p>
-                        <p><strong>Country:</strong> USA</p>
-                        <p><strong>Industry:</strong> SaaS</p>
-                        <p><strong>Currency:</strong> USD</p>
+                        <p><strong>Name:</strong> {name || '—'}</p>
+                        <p><strong>Country:</strong> {country || '—'}</p>
+                        <p><strong>Industry:</strong> {industry || '—'}</p>
+                        <p><strong>Currency:</strong> {currency || '—'}</p>
                     </div>
                 </div>
             )}
@@ -120,7 +133,7 @@ export default function AddBusinessModal({ isOpen, onOpenChange }: AddBusinessMo
                 {step < 3 ? (
                     <Button type="button" className="w-full" onClick={handleNext}>Next</Button>
                 ) : (
-                    <Button type="submit" className="w-full">Create Business</Button>
+                    <Button type="submit" className="w-full" disabled={submitting}>{submitting ? 'Creating…' : 'Create Business'}</Button>
                 )}
               </div>
             </DialogFooter>

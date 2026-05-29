@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import countriesData from '@/lib/data/countries.json';
+import { useCountries } from '@/hooks/use-countries';
 
 interface AddBusinessModalProps {
   isOpen: boolean;
@@ -32,6 +32,7 @@ const industries = ["Fintech", "E-commerce", "Media", "SaaS", "Logistics", "Reta
 
 export default function AddBusinessModal({ isOpen, onOpenChange }: AddBusinessModalProps) {
   const { toast } = useToast();
+  const { countries } = useCountries();
   const [step, setStep] = useState(1);
 
   const handleNext = () => setStep(step => Math.min(step + 1, 3));
@@ -78,7 +79,7 @@ export default function AddBusinessModal({ isOpen, onOpenChange }: AddBusinessMo
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="biz-country">Country of Operation</Label>
-                        <Select><SelectTrigger id="biz-country"><SelectValue placeholder="Select a country" /></SelectTrigger><SelectContent>{countriesData.map(c => <SelectItem key={c.id} value={c.name}>{c.flag} {c.name}</SelectItem>)}</SelectContent></Select>
+                        <Select><SelectTrigger id="biz-country"><SelectValue placeholder="Select a country" /></SelectTrigger><SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.name}>{c.flag} {c.name}</SelectItem>)}</SelectContent></Select>
                     </div>
                      <div className="space-y-2">
                         <Label htmlFor="biz-industry">Industry</Label>

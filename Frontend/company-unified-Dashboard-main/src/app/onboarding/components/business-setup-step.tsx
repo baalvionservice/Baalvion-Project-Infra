@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import countriesData from '@/lib/data/countries.json';
+import { useCountries } from '@/hooks/use-countries';
 import { useToast } from '@/hooks/use-toast';
 
 interface BusinessSetupStepProps {
@@ -26,10 +26,11 @@ export default function BusinessSetupStep({ onNext, onBack, updateFormData, form
   const [currency, setCurrency] = useState(formData.currency || '');
   const [employees, setEmployees] = useState(formData.employees || '1-10');
   const { toast } = useToast();
+  const { countries } = useCountries();
 
   useEffect(() => {
     if (country) {
-      const countryData = countriesData.find(c => c.name === country);
+      const countryData = countries.find(c => c.name === country);
       if (countryData) {
         const currencyMap: Record<string, string> = { "India": "INR", "United Kingdom": "GBP", "UAE": "AED", "USA": "USD", "Singapore": "SGD" };
         const suggestedCurrency = currencyMap[countryData.name];
@@ -70,7 +71,7 @@ export default function BusinessSetupStep({ onNext, onBack, updateFormData, form
           <Label htmlFor="biz-country">Country</Label>
           <Select value={country} onValueChange={setCountry}>
             <SelectTrigger id="biz-country"><SelectValue placeholder="Select a country" /></SelectTrigger>
-            <SelectContent>{countriesData.map(c => <SelectItem key={c.id} value={c.name}>{c.flag} {c.name}</SelectItem>)}</SelectContent>
+            <SelectContent>{countries.map(c => <SelectItem key={c.code} value={c.name}>{c.flag} {c.name}</SelectItem>)}</SelectContent>
           </Select>
         </div>
       </div>

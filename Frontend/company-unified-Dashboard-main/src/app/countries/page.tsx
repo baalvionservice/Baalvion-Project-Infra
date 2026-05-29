@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import {
   Card,
@@ -9,8 +11,6 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-"use client";
-
 import { Briefcase, Users, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useGlobalFinancials } from "@/hooks/use-global-financials";

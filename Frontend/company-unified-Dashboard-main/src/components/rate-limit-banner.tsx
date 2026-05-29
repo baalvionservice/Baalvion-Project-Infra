@@ -3,11 +3,13 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { AlertCircle } from 'lucide-react';
-import billingData from '@/lib/data/billing.json';
+import { useBilling } from '@/hooks/use-billing';
 import Link from 'next/link';
 
 export default function RateLimitBanner() {
-    const usage = (billingData.usage.apiCalls.used / billingData.usage.apiCalls.limit) * 100;
+    const billingData = useBilling();
+    const { used, limit } = billingData.usage.apiCalls;
+    const usage = limit ? (used / limit) * 100 : 0;
 
     if (usage < 80) {
         return null;

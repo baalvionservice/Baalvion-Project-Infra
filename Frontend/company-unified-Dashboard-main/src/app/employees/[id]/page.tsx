@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import {
   Card,
@@ -34,23 +35,69 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import employeesData from "@/lib/data/employees.json";
-import businessesData from "@/lib/data/businesses";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import type { Business } from "@/lib/types";
 import { CircularProgress } from "@/components/ui/circular-progress";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { dashboardApi } from "@/lib/api-client";
 
-export default async function EmployeeProfilePage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
-  const employee = employeesData.find((e) => e.id === id);
-  const business = businessesData.find((b) => b.id === employee?.businessId) as
-    | Business
-    | undefined;
+interface EmployeeView {
+  name: string; role: string; email: string; country: string; department: string;
+  joinDate: string; employmentType: string; manager: string | null;
+  directReports: unknown[]; imageId: string;
+  performance: { score: number; tasksCompleted: number; attendance: number };
+  business: { name: string };
+}
 
+export default function EmployeeProfilePage() {
+  const params = useParams();
+  const id = String(params?.id ?? "");
+  const [employee, setEmployee] = useState<EmployeeView | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await dashboardApi.employees();
+        const list = (((res as { data?: unknown[] })?.data ?? res ?? []) as Record<string, unknown>[]);
+        const e = list.find((x) => String(x.id) === id);
+        if (cancelled) return;
+        if (e) {
+          const rawScore = Number(e.performance_score) || 0;
+          // DB stores either /5 (e.g. 4.6) or /100; normalise to /100 for the gauges.
+          const score = rawScore <= 5 ? Math.round(rawScore * 20) : Math.round(rawScore);
+          const reports = list.filter((x) => String(x.manager_id) === id);
+          const mgr = e.manager_id
+            ? ((list.find((x) => String(x.id) === String(e.manager_id))?.name as string) ?? null)
+            : null;
+          const biz = e.business as { name?: string } | undefined;
+          setEmployee({
+            name: String(e.name ?? ""), role: String(e.role ?? ""), email: String(e.email ?? ""),
+            country: String(e.country ?? ""), department: String(e.department ?? ""),
+            joinDate: String(e.join_date ?? ""),
+            employmentType: String(e.employment_type ?? "").replace(/_/g, " "),
+            manager: mgr, directReports: reports, imageId: `user-${e.id}`,
+            performance: {
+              score,
+              tasksCompleted: Number(e.tasks_completed) || 0,
+              attendance: Math.round(Number(e.attendance_rate) || 0),
+            },
+            business: { name: String(biz?.name ?? "") },
+          });
+        }
+      } catch { /* leave null */ } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
+
+  if (loading) {
+    return <div className="p-8 text-center text-muted-foreground">Loading employee…</div>;
+  }
+
+  const business = employee?.business;
   if (!employee || !business) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
@@ -69,9 +116,6 @@ export default async function EmployeeProfilePage({
 
   const userImage = PlaceHolderImages.find(
     (img) => img.id === employee.imageId
-  );
-  const businessImage = PlaceHolderImages.find(
-    (img) => img.id === business.imageId
   );
 
   return (

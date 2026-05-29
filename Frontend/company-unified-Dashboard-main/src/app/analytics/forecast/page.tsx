@@ -1,4 +1,4 @@
-
+'use client';
 import {
   Card,
   CardContent,
@@ -7,14 +7,15 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { DollarSign, TrendingDown, TrendingUp } from 'lucide-react';
-import forecastData from '@/lib/data/forecast.json';
 import RevenueForecastChart from './components/revenue-forecast-chart';
 import AiRecommendations from './components/ai-recommendations';
 import ScenarioModeler from './components/scenario-modeler';
 import { Separator } from '@/components/ui/separator';
+import { useForecast } from '@/hooks/use-forecast';
 
 export default function ForecastPage() {
-  const { scenarios } = forecastData.revenueForecast;
+  const { revenueForecast } = useForecast();
+  const { scenarios } = revenueForecast;
   return (
     <div className="space-y-8">
       <div>

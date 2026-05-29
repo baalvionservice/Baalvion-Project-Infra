@@ -11,10 +11,9 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { FileText, Building, Users, Banknote, SearchX } from "lucide-react";
-import businesses from "@/lib/data/businesses";
-import employees from "@/lib/data/employees.json";
-import reports from "@/lib/data/reports.json";
 import { navItems } from "@/lib/nav-config";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
+import { dashboardApi } from "@/lib/api-client";
 
 interface GlobalSearchProps {
   open: boolean;
@@ -27,6 +26,20 @@ export default function GlobalSearch({
 }: GlobalSearchProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
+  const { businesses, employees } = useDashboardRefs();
+  const [reports, setReports] = useState<{ id: string; name: string }[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await dashboardApi.financeReports();
+        const raw = ((res as { data?: unknown }).data ?? res) as unknown;
+        const list = (Array.isArray(raw) ? raw : ((raw as { reports?: unknown[] })?.reports ?? [])) as Record<string, unknown>[];
+        if (!cancelled) setReports(list.map((r) => ({ id: String(r.id ?? r.name), name: String(r.name ?? "") })));
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleSelect = (path: string) => {
     router.push(path);

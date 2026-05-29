@@ -19,11 +19,18 @@ export interface User {
 
 function mapToUser(authUser: DashAuthUser): User {
   const roleMap: Record<string, Role> = {
+    // Platform owner / super-admin → the full Admin panel.
+    owner: 'ADMIN',
+    super_admin: 'ADMIN',
+    superadmin: 'ADMIN',
     admin: 'ADMIN',
     co_founder: 'CO_FOUNDER',
     cofounder: 'CO_FOUNDER',
     investor: 'INVESTOR',
+    viewer: 'INVESTOR',     // read-only viewer → read-only metrics view
     employee: 'EMPLOYEE',
+    member: 'EMPLOYEE',
+    staff: 'EMPLOYEE',
   };
   return {
     id: authUser.id,
@@ -37,6 +44,20 @@ function mapToUser(authUser: DashAuthUser): User {
 
 export function setCurrentUser(tokens: DashAuthTokens): void {
   tokenStore.set(tokens);
+}
+
+/**
+ * Update the in-memory profile from a mapped `User` (e.g. the client-side role-view switch).
+ * Server-side RBAC remains authoritative — this only changes the local view.
+ */
+export function setCurrentUserProfile(user: User): void {
+  tokenStore.setUser({
+    id: user.id,
+    email: user.email,
+    name: user.name,
+    role: user.role,
+    orgId: user.orgId,
+  });
 }
 
 export function getCurrentUser(): User | null {

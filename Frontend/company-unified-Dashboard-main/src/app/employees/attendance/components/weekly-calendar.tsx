@@ -15,8 +15,8 @@ import {
 } from '@/components/ui/tooltip';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import attendanceData from '@/lib/data/attendance.json';
-import employeesData from '@/lib/data/employees.json';
+import { useAttendanceSummary } from '@/hooks/use-attendance-summary';
+import { useDashboardRefs } from '@/hooks/use-dashboard-refs';
 
 type Status = 'Present' | 'Late' | 'Absent' | 'Remote' | 'Holiday';
 
@@ -32,10 +32,11 @@ const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
 export default function WeeklyCalendar() {
   const [showAll, setShowAll] = useState(false);
-  const weeklyData = attendanceData.weeklyCalendar;
-  const displayData = showAll ? weeklyData : weeklyData.slice(0, 5);
+  const { weeklyCalendar } = useAttendanceSummary();
+  const { employees } = useDashboardRefs();
+  const displayData = showAll ? weeklyCalendar : weeklyCalendar.slice(0, 5);
 
-  const getEmployeeName = (id: string) => employeesData.find(e => e.id === id)?.name || 'Unknown';
+  const getEmployeeName = (id: string) => employees.find(e => e.id === id)?.name || 'Unknown';
 
   return (
     <Card>

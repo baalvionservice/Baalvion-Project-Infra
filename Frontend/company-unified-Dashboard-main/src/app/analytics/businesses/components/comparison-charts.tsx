@@ -16,24 +16,23 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import analyticsData from "@/lib/data/analytics-businesses.json";
-import businessesData from "@/lib/data/businesses";
+import { useBusinessAnalytics } from "@/hooks/use-business-analytics";
 
-const comparisonData = analyticsData.comparison;
-const businessNames = businessesData.map((b) => b.name);
-const businessColors: Record<string, string> = {
-  "TechCorp India": "hsl(var(--chart-1))",
-  "Baalvion Media UK": "hsl(var(--chart-2))",
-  "RetailChain UAE": "hsl(var(--chart-3))",
-  "FinanceHub USA": "hsl(var(--chart-4))",
-  "DigitalAgency SG": "hsl(var(--chart-5))",
-};
+const CHART_COLORS = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+];
 
 export default function ComparisonCharts() {
-  const profitMarginData = [...comparisonData.profitMargins].sort(
+  const { comparison } = useBusinessAnalytics();
+  const businessNames = comparison.growthRates.map((g) => g.name);
+  const profitMarginData = [...comparison.profitMargins].sort(
     (a, b) => a.margin - b.margin
   );
-  const growthRatesData = [...comparisonData.growthRates].sort(
+  const growthRatesData = [...comparison.growthRates].sort(
     (a, b) => a.growth - b.growth
   );
 
@@ -46,7 +45,7 @@ export default function ComparisonCharts() {
         </CardHeader>
         <CardContent>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={comparisonData.revenueLast3Months}>
+            <BarChart data={comparison.revenueLast3Months}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis
                 dataKey="month"
@@ -62,11 +61,11 @@ export default function ComparisonCharts() {
               />
               <Tooltip formatter={(value, name) => [`${value}M`, name]} />
               <Legend />
-              {businessNames.map((name) => (
+              {businessNames.map((name, i) => (
                 <Bar
                   key={name}
                   dataKey={name}
-                  fill={businessColors[name]}
+                  fill={CHART_COLORS[i % CHART_COLORS.length]}
                   radius={[4, 4, 0, 0]}
                 />
               ))}

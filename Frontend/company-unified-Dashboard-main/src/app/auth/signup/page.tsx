@@ -23,6 +23,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, UserPlus } from "lucide-react";
 import { setCurrentUser } from "@/lib/auth";
+import { authApi } from "@/lib/api-client";
 import { Role } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 
@@ -60,8 +61,8 @@ export default function SignupPage() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    if (formData.password.length < 8) {
+      setError("Password must be at least 8 characters long");
       setIsLoading(false);
       return;
     }
@@ -73,26 +74,25 @@ export default function SignupPage() {
     }
 
     try {
-      // Create new user (in a real app, this would be an API call)
-      const newUser = {
-        id: `user_${Date.now()}`,
-        name: formData.name,
+      // Real registration via the gateway BFF: creates the account, an org, and a cookie session.
+      const tokens = await authApi.register({
         email: formData.email,
-        role: formData.role,
-        imageId: "default-user",
-      };
+        password: formData.password,
+        fullName: formData.name,
+        orgName: `${formData.name}'s Organization`,
+      });
 
-      setCurrentUser(newUser);
+      setCurrentUser(tokens);
 
       toast({
         title: "Account created successfully!",
-        description: `Welcome to Baalvion, ${newUser.name}`,
+        description: `Welcome to Baalvion, ${tokens.user.name}`,
       });
 
-      // Redirect to dashboard - role will be handled by localStorage
+      // Cookie session is set by the gateway; go to the dashboard.
       router.push("/dashboard");
     } catch (err) {
-      setError("An error occurred during signup");
+      setError(err instanceof Error ? err.message : "An error occurred during signup");
     } finally {
       setIsLoading(false);
     }

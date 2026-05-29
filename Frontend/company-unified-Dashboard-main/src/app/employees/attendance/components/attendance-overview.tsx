@@ -11,9 +11,9 @@ import {
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { UserCheck, Clock, UserX } from 'lucide-react';
-import attendanceData from '@/lib/data/attendance.json';
+import { useAttendanceSummary, type BusinessAttendance } from '@/hooks/use-attendance-summary';
 
-const BusinessAttendanceItem = ({ biz }: { biz: (typeof attendanceData.businessAttendance)[0] }) => {
+const BusinessAttendanceItem = ({ biz }: { biz: BusinessAttendance }) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
@@ -34,7 +34,7 @@ const BusinessAttendanceItem = ({ biz }: { biz: (typeof attendanceData.businessA
 };
 
 export default function AttendanceOverview() {
-  const { overview, businessAttendance } = attendanceData;
+  const { overview, businessAttendance } = useAttendanceSummary();
 
   const overviewCards = [
     { title: "Today's Attendance", value: `${overview.attendanceRate}%`, description: `${overview.present}/${overview.totalEmployees} employees`, icon: UserCheck },

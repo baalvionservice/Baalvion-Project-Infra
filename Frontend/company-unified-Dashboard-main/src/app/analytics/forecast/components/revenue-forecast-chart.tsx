@@ -30,16 +30,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import forecastData from "@/lib/data/forecast.json";
-import businesses from "@/lib/data/businesses";
-
-const chartData = [
-  ...forecastData.revenueForecast.historical,
-  ...forecastData.revenueForecast.forecast.slice(1),
-].map((d) => ({
-  ...d,
-  forecast: "low" in d && "high" in d ? [d.low, d.high] : undefined,
-}));
+import { useForecast } from "@/hooks/use-forecast";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 
 const chartConfig = {
   revenue: {
@@ -57,6 +49,15 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function RevenueForecastChart() {
+  const { revenueForecast } = useForecast();
+  const { businesses } = useDashboardRefs();
+  const chartData = [
+    ...revenueForecast.historical,
+    ...revenueForecast.forecast.slice(1),
+  ].map((d) => ({
+    ...d,
+    forecast: "low" in d && "high" in d ? [d.low, d.high] : undefined,
+  }));
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bot, Loader2 } from "lucide-react";
 import {
   Card,
@@ -19,11 +19,15 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { getAiSummaryAction } from "@/app/dashboard/actions";
-import businesses from "@/lib/data/businesses";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
 export default function AiInsightsCard() {
-  const [selectedBusiness, setSelectedBusiness] = useState(businesses[0].id);
+  const { businesses } = useDashboardRefs();
+  const [selectedBusiness, setSelectedBusiness] = useState("");
+  useEffect(() => {
+    if (!selectedBusiness && businesses.length) setSelectedBusiness(businesses[0].id);
+  }, [businesses, selectedBusiness]);
   const [loading, setLoading] = useState(false);
   const [summary, setSummary] = useState("");
   const [error, setError] = useState("");

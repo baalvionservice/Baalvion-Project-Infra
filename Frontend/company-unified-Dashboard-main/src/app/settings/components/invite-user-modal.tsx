@@ -19,12 +19,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import businessesData from "@/lib/data/businesses";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { useToast } from "@/hooks/use-toast";
-import { type Role } from "@/lib/types";
+import { authApi } from "@/lib/api-client";
+import { useState } from "react";
 import { Separator } from "@/components/ui/separator";
 
-const roles: Role[] = ["ADMIN", "INVESTOR", "CO_FOUNDER", "EMPLOYEE"];
+// Org-membership roles understood by auth-service's invite API.
+const roles = [
+  { value: "admin", label: "Admin" },
+  { value: "member", label: "Member" },
+  { value: "viewer", label: "Viewer" },
+];
 
 interface InviteUserModalProps {
   isOpen: boolean;
@@ -36,14 +42,27 @@ export default function InviteUserModal({
   onOpenChange,
 }: InviteUserModalProps) {
   const { toast } = useToast();
+  const { businesses: businessesData } = useDashboardRefs();
+  const [email, setEmail] = useState("");
+  const [role, setRole] = useState("member");
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onOpenChange(false);
-    toast({
-      title: "Invitation Sent",
-      description: "The user has been invited to join your platform.",
-    });
+    if (!email.trim()) { toast({ title: "Email required", variant: "destructive" }); return; }
+    setSubmitting(true);
+    try {
+      // Real invite → auth-gateway POST /auth/invite → auth-service team API (org member invite).
+      await authApi.invite({ email: email.trim(), role });
+      onOpenChange(false);
+      setEmail("");
+      setRole("member");
+      toast({ title: "Invitation Sent", description: `An invite was sent to ${email.trim()}.` });
+    } catch (err) {
+      toast({ title: "Could not send invitation", description: err instanceof Error ? err.message : "Please try again.", variant: "destructive" });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -62,20 +81,21 @@ export default function InviteUserModal({
               id="email"
               type="email"
               placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select>
+            <Select value={role} onValueChange={setRole}>
               <SelectTrigger id="role">
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>
               <SelectContent>
-                {roles.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {role.charAt(0) +
-                      role.slice(1).toLowerCase().replace("_", "-")}
+                {roles.map((r) => (
+                  <SelectItem key={r.value} value={r.value}>
+                    {r.label}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -108,7 +128,7 @@ export default function InviteUserModal({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">Send Invitation</Button>
+            <Button type="submit" disabled={submitting}>{submitting ? "Sending…" : "Send Invitation"}</Button>
           </DialogFooter>
         </form>
       </DialogContent>

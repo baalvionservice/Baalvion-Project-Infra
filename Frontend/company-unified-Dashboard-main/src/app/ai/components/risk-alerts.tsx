@@ -1,7 +1,6 @@
-
+'use client';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
-'use client';
 import { Badge } from '@/components/ui/badge';
 import { useAi } from '@/hooks/use-ai';
 import { cn } from '@/lib/utils';

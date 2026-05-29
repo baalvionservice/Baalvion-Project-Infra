@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Fragment } from "react";
 import {
   Card,
   CardContent,
@@ -16,11 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -130,23 +125,18 @@ export default function DepartmentsTable() {
                 const isExpanded = openDepartment === dept.id;
 
                 return (
-                  <Collapsible
-                    asChild
-                    key={dept.id}
-                    open={isExpanded}
-                    onOpenChange={() =>
-                      setOpenDepartment(isExpanded ? null : dept.id)
-                    }
-                  >
-                    <>
-                      <TableRow className="cursor-pointer">
+                  <Fragment key={dept.id}>
+                      <TableRow
+                        className="cursor-pointer"
+                        onClick={() =>
+                          setOpenDepartment(isExpanded ? null : dept.id)
+                        }
+                      >
                         <TableCell>
-                          <CollapsibleTrigger asChild>
                             <Button variant="ghost" size="sm">
                               <ChevronsUpDown className="h-4 w-4" />
                               <span className="sr-only">Toggle</span>
                             </Button>
-                          </CollapsibleTrigger>
                         </TableCell>
                         <TableCell className="font-medium">
                           {dept.name}
@@ -190,7 +180,7 @@ export default function DepartmentsTable() {
                           </span>
                         </TableCell>
                       </TableRow>
-                      <CollapsibleContent asChild>
+                      {isExpanded && (
                         <tr className="bg-muted/50 hover:bg-muted/50">
                           <TableCell colSpan={8} className="p-0">
                             <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -272,9 +262,8 @@ export default function DepartmentsTable() {
                             </div>
                           </TableCell>
                         </tr>
-                      </CollapsibleContent>
-                    </>
-                  </Collapsible>
+                      )}
+                  </Fragment>
                 );
               })}
             </TableBody>

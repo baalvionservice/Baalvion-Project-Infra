@@ -18,20 +18,9 @@ import {
 } from "@/components/ui/card";
 import { ArrowUp, ArrowDown, ArrowRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import analyticsData from "@/lib/data/analytics-businesses.json";
-import businessesData from "@/lib/data/businesses.json";
-import countriesData from "@/lib/data/countries.json";
 import DeepDive from "./deep-dive";
-import type { Business, Currency, BusinessStatus } from "@/lib/types";
+import { useBusinessAnalytics } from "@/hooks/use-business-analytics";
 
-const rankingData = analyticsData.ranking as RankingItem[];
-const allBusinesses: Business[] = businessesData.map((biz) => ({
-  ...biz,
-  currency: biz.currency as Currency,
-  status: biz.status as BusinessStatus,
-}));
-
-type RankingItem = (typeof analyticsData.ranking)[0];
 type SortableKey = "rank" | "revenue" | "growth" | "profit" | "score";
 
 const getTrendIcon = (trend: "up" | "down" | "flat") => {
@@ -41,6 +30,7 @@ const getTrendIcon = (trend: "up" | "down" | "flat") => {
 };
 
 export default function BusinessRankingTable() {
+  const { ranking, deepDive } = useBusinessAnalytics();
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<{
     key: SortableKey;
@@ -48,7 +38,7 @@ export default function BusinessRankingTable() {
   }>({ key: "score", direction: "desc" });
 
   const sortedData = React.useMemo(() => {
-    const sortableItems = [...rankingData];
+    const sortableItems = [...ranking];
     sortableItems.sort((a, b) => {
       if (a[sortConfig.key] < b[sortConfig.key]) {
         return sortConfig.direction === "asc" ? -1 : 1;
@@ -59,7 +49,7 @@ export default function BusinessRankingTable() {
       return 0;
     });
     return sortableItems;
-  }, [sortConfig]);
+  }, [ranking, sortConfig]);
 
   const requestSort = (key: SortableKey) => {
     let direction: "asc" | "desc" = "desc";
@@ -143,13 +133,6 @@ export default function BusinessRankingTable() {
             </TableHeader>
             <TableBody>
               {sortedData.map((item) => {
-                const business = allBusinesses.find(
-                  (b) => b.id === item.businessId
-                );
-                const country = countriesData.find(
-                  (c) => c.name === business?.country
-                );
-                if (!business) return null;
                 const isExpanded = expandedRow === item.businessId;
 
                 return (
@@ -160,10 +143,10 @@ export default function BusinessRankingTable() {
                     >
                       <TableCell className="font-bold">{item.rank}</TableCell>
                       <TableCell className="font-medium">
-                        {business.name}
+                        {item.businessName}
                       </TableCell>
                       <TableCell className="text-center">
-                        {country?.flag}
+                        {item.flag}
                       </TableCell>
                       <TableCell className="text-right">
                         ${(item.revenue / 1000).toFixed(0)}K
@@ -192,7 +175,7 @@ export default function BusinessRankingTable() {
                     {isExpanded && (
                       <TableRow className="bg-muted/30 hover:bg-muted/40">
                         <TableCell colSpan={8} className="p-0">
-                          <DeepDive businessId={item.businessId} />
+                          <DeepDive data={deepDive[item.businessId]} />
                         </TableCell>
                       </TableRow>
                     )}

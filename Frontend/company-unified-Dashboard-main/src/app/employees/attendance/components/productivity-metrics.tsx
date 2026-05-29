@@ -11,8 +11,8 @@ import {
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { Target, Clock, Users, Star } from "lucide-react";
-import attendanceData from "@/lib/data/attendance.json";
-import employeesData from "@/lib/data/employees.json";
+import { useAttendanceSummary } from "@/hooks/use-attendance-summary";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { useSearchParams } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -22,11 +22,13 @@ function ProductivityMetricsContent() {
   const role = searchParams.get("role");
   const isAdmin = !role || role === "ADMIN";
 
-  const { productivity } = attendanceData;
-  const tasksAchievement =
-    (productivity.tasksCompleted / productivity.tasksTarget) * 100;
+  const { productivity } = useAttendanceSummary();
+  const { employees } = useDashboardRefs();
+  const tasksAchievement = productivity.tasksTarget
+    ? (productivity.tasksCompleted / productivity.tasksTarget) * 100
+    : 0;
 
-  const getEmployee = (id: string) => employeesData.find((e) => e.id === id);
+  const getEmployee = (id: string) => employees.find((e) => e.id === id);
 
   return (
     <Card>

@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import type { Transaction, PaymentGateway } from '@/lib/types';
-import fxRates from '@/lib/data/fx-rates.json';
+import { useFxRates } from '@/hooks/use-fx-rates';
 
 interface GatewayPerformanceTableProps {
   transactions: Transaction[];
@@ -21,6 +21,7 @@ const gateways: PaymentGateway[] = ['Stripe', 'Razorpay', 'PayPal'];
 export default function GatewayPerformanceTable({
   transactions,
 }: GatewayPerformanceTableProps) {
+  const { map: fxRates } = useFxRates();
   const stats = gateways.map((gateway) => {
     const gatewayTxs = transactions.filter((tx) => tx.gateway === gateway);
     const successfulTxs = gatewayTxs.filter((tx) => tx.status === 'Success');

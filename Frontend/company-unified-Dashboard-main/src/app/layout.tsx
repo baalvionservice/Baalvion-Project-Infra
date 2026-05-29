@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import PwaLoader from '@/components/pwa-loader';
 import InstallPrompt from '@/components/install-prompt';
 import Script from 'next/script';
+import { RoleProvider } from '@/hooks/use-view-role';
 
 export const metadata: Metadata = {
   title: 'Baalvion',
@@ -45,7 +46,7 @@ export default function RootLayout({
           'min-h-screen bg-background font-body antialiased'
         )}
       >
-        {children}
+        <RoleProvider>{children}</RoleProvider>
         <PwaLoader />
         <Toaster />
         <InstallPrompt />

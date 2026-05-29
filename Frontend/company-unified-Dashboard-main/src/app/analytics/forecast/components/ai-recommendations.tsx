@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Zap, X, ChevronDown } from 'lucide-react';
-import forecastData from '@/lib/data/forecast.json';
+import { useForecast, type AiRecommendation } from '@/hooks/use-forecast';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 
 const categoryColors: Record<string, string> = {
@@ -72,7 +72,9 @@ const recommendationDetails: Record<string, { title: string, steps: string[] }> 
 };
 
 export default function AiRecommendations() {
-  const [recommendations, setRecommendations] = useState(forecastData.aiRecommendations);
+  const { aiRecommendations } = useForecast();
+  const [recommendations, setRecommendations] = useState<AiRecommendation[]>([]);
+  useEffect(() => { setRecommendations(aiRecommendations); }, [aiRecommendations]);
   const [expandedRecId, setExpandedRecId] = useState<string | null>(null);
   const { toast } = useToast();
 

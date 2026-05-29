@@ -1,34 +1,37 @@
-// A basic service worker for PWA caching
+// KILL-SWITCH service worker.
+//
+// A previous cache-first service worker could serve STALE JS chunks / a trapped error page,
+// which breaks React hydration (the page falls back to native form submits — login appears to
+// just "refresh"). This worker removes itself, clears every cache, and reloads any controlled
+// tab so the app runs straight from the network with no SW interference.
+//
+// There is intentionally NO fetch handler — the browser handles all requests normally.
 
-const CACHE_NAME = 'baalvion-cache-v1';
-const urlsToCache = [
-  '/',
-  '/dashboard',
-  '/manifest.json',
-  '/favicon.ico',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
+self.addEventListener('install', () => {
+  self.skipWaiting();
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
+self.addEventListener('activate', (event) => {
+  event.waitUntil((async () => {
+    try {
+      const keys = await caches.keys();
+      await Promise.all(keys.map((k) => caches.delete(k)));
+    } catch (_e) {
+      /* ignore */
+    }
+    try {
+      await self.registration.unregister();
+    } catch (_e) {
+      /* ignore */
+    }
+    // Reload every open tab once so it re-fetches fresh, consistent assets.
+    try {
+      const clients = await self.clients.matchAll({ type: 'window' });
+      for (const client of clients) {
+        client.navigate(client.url);
       }
-    )
-  );
+    } catch (_e) {
+      /* ignore */
+    }
+  })());
 });

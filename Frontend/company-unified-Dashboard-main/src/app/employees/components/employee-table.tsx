@@ -356,7 +356,7 @@ export default function EmployeeTable({ searchParams }: EmployeeTableProps) {
                       <Link href={`/employees/${employee.id}`} passHref>
                         <DropdownMenuItem>View Profile</DropdownMenuItem>
                       </Link>
-                      <DropdownMenuItem>Edit</DropdownMenuItem>
+                      <Link href={`/employees/${employee.id}`} passHref><DropdownMenuItem>Edit</DropdownMenuItem></Link>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -457,7 +457,7 @@ export default function EmployeeTable({ searchParams }: EmployeeTableProps) {
                           <Link href={`/employees/${employee.id}`} passHref>
                             <DropdownMenuItem>View Profile</DropdownMenuItem>
                           </Link>
-                          <DropdownMenuItem>Edit</DropdownMenuItem>
+                          <Link href={`/employees/${employee.id}`} passHref><DropdownMenuItem>Edit</DropdownMenuItem></Link>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>

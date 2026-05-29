@@ -14,11 +14,30 @@ import Image from 'next/image';
 
 type App = MarketApp;
 
+// App icons may reference files that don't exist yet (/icons/<slug>.png); fall back to a
+// generated placeholder on error so a missing icon never produces a broken-image 400.
+function AppIcon({ src, alt }: { src: string; alt: string }) {
+  const [errored, setErrored] = useState(false);
+  // /png forces PNG output (placehold.co defaults to SVG, which next/image rejects with a 400).
+  const fallback = `https://placehold.co/48x48/e2e8f0/64748b/png?text=${encodeURIComponent((alt || '?').charAt(0).toUpperCase())}`;
+  return (
+    <Image
+      src={errored || !src ? fallback : src}
+      alt={alt}
+      width={48}
+      height={48}
+      className="rounded-lg border"
+      onError={() => setErrored(true)}
+      data-ai-hint="logo"
+    />
+  );
+}
+
 function AppCard({ app, isInstalled, onInstall }: { app: App, isInstalled: boolean, onInstall: (app: App) => void }) {
   return (
     <Card className="flex flex-col">
       <CardHeader className="flex-row items-start gap-4">
-        <Image src={app.icon} alt={`${app.name} logo`} width={48} height={48} className="rounded-lg border" data-ai-hint="logo" />
+        <AppIcon src={app.icon} alt={`${app.name} logo`} />
         <div>
           <CardTitle className="text-base">{app.name}</CardTitle>
           <CardDescription className="text-xs">{app.category}</CardDescription>

@@ -16,7 +16,10 @@ interface ComplianceOverviewProps {
 }
 
 export default function ComplianceOverview({ complianceData }: ComplianceOverviewProps) {
-  const overallScore = Math.round(complianceData.reduce((acc, c) => acc + c.overallScore, 0) / complianceData.length);
+  // Guard against divide-by-zero when there are no records yet (would yield NaN → React warning + bad UI).
+  const overallScore = complianceData.length
+    ? Math.round(complianceData.reduce((acc, c) => acc + c.overallScore, 0) / complianceData.length)
+    : 0;
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {

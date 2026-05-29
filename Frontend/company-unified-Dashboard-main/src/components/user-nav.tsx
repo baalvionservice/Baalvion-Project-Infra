@@ -33,27 +33,23 @@ import {
   getCurrentUser,
   logout,
   isAuthenticated,
-  getUserRole,
-  setCurrentUser,
 } from "@/lib/auth";
 import type { Role, User as UserType } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { useViewRole } from "@/hooks/use-view-role";
 
 export function UserNav() {
   const router = useRouter();
   const { toast } = useToast();
+  const { role: currentRole, canSwitch, setViewRole } = useViewRole();
   const [currentUser, setCurrentUserState] = useState<UserType | null>(null);
-  const [currentRole, setCurrentRole] = useState<Role>("ADMIN");
   const [mounted, setMounted] = useState(false);
 
   const roles: Role[] = ["ADMIN", "INVESTOR", "CO_FOUNDER", "EMPLOYEE"];
 
   useEffect(() => {
     setMounted(true);
-    const user = getCurrentUser();
-    const role = getUserRole();
-    setCurrentUserState(user);
-    setCurrentRole(role || "ADMIN");
+    setCurrentUserState(getCurrentUser());
   }, []);
 
   if (!mounted) {
@@ -75,20 +71,13 @@ export function UserNav() {
 
   const handleRoleChange = (role: string) => {
     const newRole = role as Role;
-
-    // Update the user's role in localStorage
-    const updatedUser = { ...currentUser, role: newRole };
-    setCurrentUser(updatedUser);
-    setCurrentUserState(updatedUser);
-    setCurrentRole(newRole);
-
+    // Reactive view switch via the role context — the dashboard re-renders instantly.
+    // This changes the VIEW only; the real identity/role is unchanged (server RBAC is authoritative).
+    setViewRole(newRole);
     toast({
       title: "Role switched",
-      description: `Switched to ${newRole.replace("_", " ")} view`,
+      description: `Now viewing as ${newRole.replace(/_/g, " ").toLowerCase()}`,
     });
-
-    // Refresh the dashboard to show the new role view
-    router.refresh();
   };
 
   const handleLogout = () => {
@@ -157,27 +146,29 @@ export function UserNav() {
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuSub>
-            <DropdownMenuSubTrigger>
-              <Users className="mr-2 h-4 w-4" />
-              <span>Switch Role</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuPortal>
-              <DropdownMenuSubContent>
-                <DropdownMenuRadioGroup
-                  value={currentRole}
-                  onValueChange={handleRoleChange}
-                >
-                  {roles.map((role) => (
-                    <DropdownMenuRadioItem key={role} value={role}>
-                      {role.charAt(0) +
-                        role.slice(1).toLowerCase().replace(/_/g, "-")}
-                    </DropdownMenuRadioItem>
-                  ))}
-                </DropdownMenuRadioGroup>
-              </DropdownMenuSubContent>
-            </DropdownMenuPortal>
-          </DropdownMenuSub>
+          {canSwitch && (
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                <Users className="mr-2 h-4 w-4" />
+                <span>Switch Role (preview)</span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuPortal>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup
+                    value={currentRole}
+                    onValueChange={handleRoleChange}
+                  >
+                    {roles.map((role) => (
+                      <DropdownMenuRadioItem key={role} value={role}>
+                        {role.charAt(0) +
+                          role.slice(1).toLowerCase().replace(/_/g, "-")}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuPortal>
+            </DropdownMenuSub>
+          )}
           <DropdownMenuItem onClick={handleTour}>
             <BookOpen className="mr-2 h-4 w-4" />
             <span>Take a Tour</span>

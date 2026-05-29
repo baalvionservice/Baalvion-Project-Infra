@@ -17,22 +17,20 @@ import {
 } from '@/components/ui/table';
 import { Progress } from '@/components/ui/progress';
 import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, Pie, PieChart, Cell } from 'recharts';
-import analyticsData from '@/lib/data/analytics-businesses.json';
+import type { DeepDiveData } from '@/hooks/use-business-analytics';
 
 interface DeepDiveProps {
-  businessId: string;
+  data?: DeepDiveData;
 }
 
 const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
 
-export default function DeepDive({ businessId }: DeepDiveProps) {
-  const deepDiveData = analyticsData.deepDive[businessId as keyof typeof analyticsData.deepDive];
-
-  if (!deepDiveData) {
+export default function DeepDive({ data }: DeepDiveProps) {
+  if (!data) {
     return <div className="p-8 text-center text-muted-foreground">Detailed data not available for this business.</div>;
   }
 
-  const { revenueTrend, expenseBreakdown, revenueSources, monthlyMetrics } = deepDiveData;
+  const { revenueTrend, expenseBreakdown, revenueSources, monthlyMetrics } = data;
 
   return (
     <div className="p-4 space-y-6">

@@ -22,7 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Link from "next/link";
-import notificationsData from "@/lib/data/notifications.json";
+import { dashboardApi } from "@/lib/api-client";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import type { Notification, NotificationType } from "@/lib/types";
@@ -34,7 +34,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import businessesData from "@/lib/data/businesses";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import TrialBanner from "./trial-banner";
 import RateLimitBanner from "./rate-limit-banner";
 import OfflineBanner from "./offline-banner";
@@ -59,6 +59,20 @@ const notificationColors: Record<NotificationType, string> = {
   System: "text-blue-500",
   Team: "text-purple-500",
 };
+
+// Map a live dashboard-service notification row to the shape the header renders.
+interface HeaderNotification { id: string; type: NotificationType; title: string; description: string; timestamp: string; isRead: boolean }
+const NOTIF_TYPE_MAP: Record<string, NotificationType> = { alert: "Alert", finance: "Finance", system: "System", team: "Team", info: "System" };
+function mapNotification(n: Record<string, unknown>): HeaderNotification {
+  return {
+    id: String(n.id),
+    type: NOTIF_TYPE_MAP[String(n.type ?? "").toLowerCase()] ?? "System",
+    title: String(n.title ?? ""),
+    description: String(n.message ?? n.description ?? ""),
+    timestamp: String(n.createdAt ?? n.timestamp ?? new Date().toISOString()),
+    isRead: Boolean(n.read ?? n.isRead),
+  };
+}
 
 function DemoBanner() {
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -98,8 +112,21 @@ function DemoBanner() {
 }
 
 export function Header() {
-  const latestNotifications = notificationsData.slice(0, 5);
-  const unreadCount = notificationsData.filter((n) => !n.isRead).length;
+  const { businesses: businessesData } = useDashboardRefs();
+  const [notifications, setNotifications] = useState<HeaderNotification[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await dashboardApi.notifications();
+        const list = (((res as { data?: unknown[] })?.data ?? res ?? []) as Record<string, unknown>[]);
+        if (!cancelled) setNotifications(list.map(mapNotification));
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+  const latestNotifications = notifications.slice(0, 5);
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const router = useRouter();
   const pathname = usePathname();

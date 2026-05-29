@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MoreHorizontal, View, Download, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { useBilling } from '@/hooks/use-billing';
-import { format } from 'date-fns';
+import { safeFormatDate } from '@/lib/utils';
 import type { Invoice } from '@/lib/types';
 import InvoiceDetailModal from './invoice-detail-modal';
 import { useToast } from '@/hooks/use-toast';
@@ -57,7 +57,7 @@ export default function InvoiceHistory() {
                     <TableCell>{invoice.period}</TableCell>
                     <TableCell>${invoice.amount.toFixed(2)}</TableCell>
                     <TableCell><Badge variant="default" className="bg-green-100 text-green-800">{invoice.status}</Badge></TableCell>
-                    <TableCell>{format(new Date(invoice.paymentDate), 'PP')}</TableCell>
+                    <TableCell>{safeFormatDate(invoice.paymentDate, 'PP')}</TableCell>
                     <TableCell className="text-right">
                        <DropdownMenu>
                         <DropdownMenuTrigger asChild>

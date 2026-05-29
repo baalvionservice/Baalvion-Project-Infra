@@ -18,11 +18,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { KpiData } from "@/lib/types";
-import businesses from "@/lib/data/businesses";
 import { ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 
 interface KpiTableProps {
   kpiData: KpiData[];
@@ -30,6 +29,7 @@ interface KpiTableProps {
 
 export default function KpiTable({ kpiData }: KpiTableProps) {
   const isMobile = useIsMobile();
+  const { businesses } = useDashboardRefs();
 
   const getAchievementColor = (achievement: number) => {
     if (achievement > 90)
@@ -51,19 +51,15 @@ export default function KpiTable({ kpiData }: KpiTableProps) {
     return (
       <div className="space-y-4">
         {kpiData.map((kpi) => {
-          const business = businesses.find((b) => b.id === kpi.businessId);
+          const business = businesses.find((b) => b.id === String(kpi.businessId));
           if (!business) return null;
           const achievement = (kpi.revenue.actual / kpi.revenue.target) * 100;
-          const image = PlaceHolderImages.find(
-            (i) => i.id === business.imageId
-          );
 
           return (
             <Card key={kpi.businessId}>
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
-                    {image && <AvatarImage src={image.imageUrl} />}
                     <AvatarFallback>{business.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <CardTitle className="text-base">{business.name}</CardTitle>
@@ -139,7 +135,7 @@ export default function KpiTable({ kpiData }: KpiTableProps) {
             <TableBody>
               {kpiData.map((kpi) => {
                 const business = businesses.find(
-                  (b) => b.id === kpi.businessId
+                  (b) => b.id === String(kpi.businessId)
                 );
                 if (!business) return null;
                 const achievement =
