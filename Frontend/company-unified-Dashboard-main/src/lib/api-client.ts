@@ -208,6 +208,7 @@ export const dashboardApi = {
   corporate: () => get('/corporate-actions'),
   fxRates: () => get('/fx-rates'),
   notifications: () => get('/notifications'),
+  compliance: () => get('/compliance'),
   markNotificationRead: (id: string) => post(`/notifications/${id}/read`),
   auditLogs: (params?: { page?: number; limit?: number }) => {
     const qs = new URLSearchParams(
