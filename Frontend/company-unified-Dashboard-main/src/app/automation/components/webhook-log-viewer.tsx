@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import webhookLogs from '@/lib/data/webhooks.json';
+import { useAutomation } from '@/hooks/use-automation';
 import { format } from 'date-fns';
 
 interface WebhookLogViewerProps {
@@ -25,6 +25,7 @@ interface WebhookLogViewerProps {
 }
 
 export default function WebhookLogViewer({ onViewPayload }: WebhookLogViewerProps) {
+  const { webhooks: webhookLogs } = useAutomation();
   return (
     <Card>
       <CardHeader>

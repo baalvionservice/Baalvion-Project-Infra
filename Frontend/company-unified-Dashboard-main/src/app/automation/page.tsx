@@ -17,11 +17,11 @@ import {
 import CronJobsTable from './components/cron-jobs-table';
 import WebhookLogViewer from './components/webhook-log-viewer';
 import JsonViewerModal from './components/json-viewer-modal';
-import cronJobs from '@/lib/data/cron-jobs.json';
-import webhooks from '@/lib/data/webhooks.json';
+import { useAutomation } from '@/hooks/use-automation';
 
 export default function AutomationPage() {
   const [selectedPayload, setSelectedPayload] = useState<string | null>(null);
+  const { cronJobs, webhooks } = useAutomation();
 
   const summaryCards = [
     { title: 'Jobs Running', value: cronJobs.filter(j => j.status === 'Running').length, icon: PlayCircle },

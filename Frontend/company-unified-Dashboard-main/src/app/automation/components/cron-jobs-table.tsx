@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Play, LogIn, Loader2, CheckCircle, XCircle, PauseCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import cronJobsData from '@/lib/data/cron-jobs.json';
+import { useAutomation } from '@/hooks/use-automation';
 import { format, formatDistanceToNow } from 'date-fns';
 
 type CronJobStatus = 'Success' | 'Running' | 'Failed' | 'Paused';
@@ -36,6 +36,7 @@ const statusConfig: Record<
 };
 
 export default function CronJobsTable() {
+  const { cronJobs: cronJobsData } = useAutomation();
   return (
     <Card>
       <CardHeader>

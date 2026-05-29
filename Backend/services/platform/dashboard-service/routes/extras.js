@@ -142,6 +142,23 @@ router.get('/gdpr', authMiddleware, (req, res) =>
     }),
 );
 
+// Automation — scheduled jobs + recent webhook deliveries (no automation table yet; reference data).
+router.get('/automation', authMiddleware, (req, res) =>
+    sendSuccess(req, res, {
+        cronJobs: [
+            { id: 'cron_1', name: 'Daily Revenue Sync', description: 'Syncs revenue from all payment gateways.', frequency: 'Daily at 2:00 AM UTC', lastRun: '2026-05-28T02:00:15Z', nextRun: '2026-05-29T02:00:00Z', duration: '12.5s', status: 'Success' },
+            { id: 'cron_2', name: 'KPI Snapshot', description: 'Captures hourly KPI metrics.', frequency: 'Hourly', lastRun: '2026-05-28T14:00:03Z', nextRun: '2026-05-28T15:00:00Z', duration: '3.1s', status: 'Success' },
+            { id: 'cron_3', name: 'FX Rate Refresh', description: 'Pulls latest FX rates.', frequency: 'Every 6 hours', lastRun: '2026-05-28T12:00:00Z', nextRun: '2026-05-28T18:00:00Z', duration: '1.8s', status: 'Success' },
+            { id: 'cron_4', name: 'Weekly Report Mailer', description: 'Emails the Monday summary.', frequency: 'Weekly (Mon 8 AM)', lastRun: '2026-05-26T08:00:00Z', nextRun: '2026-06-02T08:00:00Z', duration: '8.4s', status: 'Failed' },
+        ],
+        webhooks: [
+            { id: 'wh_1', timestamp: '2026-05-28T10:30:01Z', eventType: 'payment_intent.succeeded', source: 'Stripe', payload: '{"id":"pi_3P...","amount":50000,"currency":"usd"}', responseCode: 200, status: 'Success' },
+            { id: 'wh_2', timestamp: '2026-05-28T10:18:44Z', eventType: 'payout.paid', source: 'Razorpay', payload: '{"id":"pout_9","amount":23000}', responseCode: 200, status: 'Success' },
+            { id: 'wh_3', timestamp: '2026-05-28T09:55:12Z', eventType: 'charge.failed', source: 'PayPal', payload: '{"id":"ch_2","error":"insufficient_funds"}', responseCode: 402, status: 'Failed' },
+        ],
+    }),
+);
+
 // Investor portals — shareable report portals (no portal-registry surfaced yet; reference list).
 router.get('/portals', authMiddleware, (req, res) =>
     sendSuccess(req, res, [
