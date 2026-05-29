@@ -29,65 +29,34 @@ import { DollarSign, Percent, TrendingUp } from "lucide-react";
 import OverallPerformanceChart from "@/components/charts/overall-performance-chart";
 import RevenueByCountryChart from "@/components/charts/revenue-by-country-chart";
 import CountryPerformanceChart from "@/components/charts/country-performance-chart";
-import businessesData from "@/lib/data/businesses";
-import countriesData from "@/lib/data/countries.json";
-import serverCostsData from "@/lib/data/server-costs.json";
-import fxRatesData from "@/lib/data/fx-rates.json";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import type { Business, FxRate } from "@/lib/types";
-
-const businesses: Business[] = businessesData;
-const fxRates: FxRate = fxRatesData;
-
-// Calculations for Global View
-const globalStats = (() => {
-  const totalRevenue = businesses.reduce(
-    (acc, biz) =>
-      acc + biz.currentMetrics.revenue / (fxRates[biz.currency] || 1),
-    0
-  );
-  const totalCosts =
-    serverCostsData.reduce((acc, cost) => acc + cost.cost, 0) * 12; // Annualized
-
-  const operationalProfit = businesses.reduce(
-    (acc, biz) =>
-      acc + biz.currentMetrics.profit / (fxRates[biz.currency] || 1),
-    0
-  );
-
-  const netProfit = operationalProfit - totalCosts;
-  const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
-
-  return { totalRevenue, totalCosts, netProfit, profitMargin };
-})();
-
-const countryFinancials = countriesData.map((country) => {
-  const countryBusinesses = businesses.filter(
-    (b) => b.country === country.name
-  );
-  const revenue = countryBusinesses.reduce(
-    (acc, b) => acc + b.currentMetrics.revenue / (fxRates[b.currency] || 1),
-    0
-  );
-  const profit = countryBusinesses.reduce(
-    (acc, b) => acc + b.currentMetrics.profit / (fxRates[b.currency] || 1),
-    0
-  );
-  const serverCost =
-    serverCostsData.find((sc) => sc.country === country.name)?.cost || 0; // Monthly cost
-  return {
-    name: country.name,
-    revenue,
-    costs: serverCost * 12,
-    profit: profit - serverCost * 12,
-  };
-});
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
 
 function GlobalFinancialsContent() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const selectedCountry = searchParams.get("country") || "global";
+
+  const { businesses, countries: countriesData, serverCosts: serverCostsData, fxRates } = useGlobalFinancials();
+
+  // Global aggregates (USD-converted) from live data.
+  const globalStats = useMemo(() => {
+    const totalRevenue = businesses.reduce((acc, biz) => acc + biz.currentMetrics.revenue / (fxRates[biz.currency] || 1), 0);
+    const totalCosts = serverCostsData.reduce((acc, cost) => acc + cost.cost, 0) * 12;
+    const operationalProfit = businesses.reduce((acc, biz) => acc + biz.currentMetrics.profit / (fxRates[biz.currency] || 1), 0);
+    const netProfit = operationalProfit - totalCosts;
+    const profitMargin = totalRevenue > 0 ? (netProfit / totalRevenue) * 100 : 0;
+    return { totalRevenue, totalCosts, netProfit, profitMargin };
+  }, [businesses, serverCostsData, fxRates]);
+
+  const countryFinancials = useMemo(() => countriesData.map((country) => {
+    const cb = businesses.filter((b) => b.country === country.name);
+    const revenue = cb.reduce((acc, b) => acc + b.currentMetrics.revenue / (fxRates[b.currency] || 1), 0);
+    const profit = cb.reduce((acc, b) => acc + b.currentMetrics.profit / (fxRates[b.currency] || 1), 0);
+    const serverCost = serverCostsData.find((sc) => sc.country === country.name)?.cost || 0;
+    return { name: country.name, revenue, costs: serverCost * 12, profit: profit - serverCost * 12 };
+  }), [businesses, countriesData, serverCostsData, fxRates]);
 
   const handleCountryChange = (countryId: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -122,7 +91,7 @@ function GlobalFinancialsContent() {
         totalRevenue > 0 ? ((cost.cost * 12) / totalRevenue) * 100 : 0;
       return { ...cost, percentageOfRevenue };
     });
-  }, []);
+  }, [serverCostsData, businesses, fxRates]);
 
   return (
     <div className="space-y-8">

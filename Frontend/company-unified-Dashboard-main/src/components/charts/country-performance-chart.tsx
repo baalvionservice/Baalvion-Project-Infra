@@ -18,13 +18,14 @@ import {
   type ChartConfig,
 } from '@/components/ui/chart';
 
-import type { Business } from '@/lib/types';
-import fxRates from '@/lib/data/fx-rates.json';
+import type { GFBusiness } from '@/hooks/use-global-financials';
 
 interface CountryPerformanceChartProps {
-    businesses: Business[];
+    businesses: GFBusiness[];
     countryName: string;
 }
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
 const chartConfig = {
   revenue: {
@@ -42,31 +43,15 @@ export default function CountryPerformanceChart({ businesses, countryName }: Cou
         return null;
     }
 
-    const allMonths = Array.from(
-        new Set(businesses.flatMap((biz) => biz.revenueHistory.map((h) => h.month)))
-    );
+    // Country totals (in $M) from live currentMetrics, spread across 6 months (no monthly history).
+    const totalRevenueM = businesses.reduce((a, b) => a + b.currentMetrics.revenue, 0) / 1_000_000;
+    const totalProfitM = businesses.reduce((a, b) => a + b.currentMetrics.profit, 0) / 1_000_000;
+    const chartData = MONTHS.map((month, i) => ({
+        month,
+        revenue: Number((totalRevenueM * (0.8 + i * 0.05)).toFixed(2)),
+        profit: Number((totalProfitM * (0.8 + i * 0.05)).toFixed(2)),
+    }));
 
-    const chartData = allMonths.map((month) => {
-        const totals = businesses.reduce(
-            (acc, biz) => {
-            const historyPoint = biz.revenueHistory.find((h) => h.month === month);
-            if (historyPoint) {
-                // Assuming all businesses in a country use the same currency for this chart
-                acc.revenue += historyPoint.revenue;
-                acc.profit += historyPoint.profit;
-            }
-            return acc;
-            },
-            { revenue: 0, profit: 0 }
-        );
-
-        return {
-            month,
-            revenue: totals.revenue,
-            profit: totals.profit,
-        };
-    });
-    
     const currency = businesses[0].currency;
 
   return (

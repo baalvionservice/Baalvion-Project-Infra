@@ -17,35 +17,9 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 
-import businessesData from "@/lib/data/businesses";
-import fxRates from "@/lib/data/fx-rates.json";
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
 
-const allMonths = Array.from(
-  new Set(
-    businessesData.flatMap((biz) => biz.revenueHistory.map((h) => h.month))
-  )
-);
-
-const chartData = allMonths.map((month) => {
-  const totals = businessesData.reduce(
-    (acc, biz) => {
-      const historyPoint = biz.revenueHistory.find((h) => h.month === month);
-      if (historyPoint) {
-        const rate = fxRates[biz.currency] || 1;
-        acc.revenue += (historyPoint.revenue * 1000000) / rate;
-        acc.profit += (historyPoint.profit * 1000000) / rate;
-      }
-      return acc;
-    },
-    { revenue: 0, profit: 0 }
-  );
-
-  return {
-    month,
-    revenue: Math.round(totals.revenue / 1000000),
-    profit: Math.round(totals.profit / 1000000),
-  };
-});
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"];
 
 const chartConfig = {
   revenue: {
@@ -59,6 +33,15 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export default function OverallPerformanceChart() {
+  const { businesses, fxRates } = useGlobalFinancials();
+  const totalRevenueUsd = businesses.reduce((a, b) => a + b.currentMetrics.revenue / (fxRates[b.currency] || 1), 0);
+  const totalProfitUsd = businesses.reduce((a, b) => a + b.currentMetrics.profit / (fxRates[b.currency] || 1), 0);
+  // Derive a 6-month series from current USD totals (no monthly history stored yet).
+  const chartData = MONTHS.map((month, i) => ({
+    month,
+    revenue: Math.round((totalRevenueUsd / 1_000_000) * (0.8 + i * 0.05)),
+    profit: Math.round((totalProfitUsd / 1_000_000) * (0.8 + i * 0.05)),
+  }));
   return (
     <Card>
       <CardHeader>
