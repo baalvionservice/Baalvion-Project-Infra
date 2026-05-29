@@ -215,7 +215,7 @@ export const dashboardApi = {
         .filter(([, v]) => v !== undefined)
         .map(([k, v]) => [k, String(v)]),
     ).toString();
-    return get(`/audit${qs ? `?${qs}` : ''}`);
+    return get(`/audit/logs${qs ? `?${qs}` : ''}`);
   },
   analytics: {
     businesses: () => get('/analytics/businesses'),
