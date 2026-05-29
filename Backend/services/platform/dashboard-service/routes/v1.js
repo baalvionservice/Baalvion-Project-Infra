@@ -58,4 +58,7 @@ router.use('/operations', require('./operations'));
 // ── Analytics (aggregated) ───────────────────────────────────────────────────
 router.use('/analytics', require('./analytics'));
 
+// ── Reference panels (countries / corporate-actions / fx-rates) ──────────────
+router.use('/', require('./extras'));
+
 module.exports = router;

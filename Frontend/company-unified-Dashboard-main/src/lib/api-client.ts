@@ -196,7 +196,7 @@ const post = <T>(path: string, body?: object) =>
   });
 
 export const dashboardApi = {
-  summary: () => get('/summary'),
+  summary: () => get('/dashboard/total'),
   businesses: () => get('/domains'),        // dashboard-service models "businesses" as domains
   employees: () => get('/employees'),
   kpis: () => get('/kpis'),
@@ -204,7 +204,7 @@ export const dashboardApi = {
   finance: () => get('/financials'),
   financials: () => get('/financials'),
   countries: () => get('/countries'),
-  equity: () => get('/equity'),
+  equity: () => get('/shareholders'),      // equity = cap table (shareholders)
   corporate: () => get('/corporate-actions'),
   fxRates: () => get('/fx-rates'),
   notifications: () => get('/notifications'),
