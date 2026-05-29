@@ -38,10 +38,10 @@ export default function LoginForm() {
       });
 
       // Unified role-based redirection logic
-      const userRole = user.roleId || user.role;
-      
-      if (userRole === 'admin') {
-        router.push('/admin/dashboard');
+      const userRole = (user?.roleId || user?.role) as string | undefined;
+
+      if (userRole && ['admin', 'owner', 'super_admin'].includes(userRole)) {
+        router.push('/admin');
       } else if (userRole === 'lawyer') {
         router.push('/lawyer/dashboard');
       } else {

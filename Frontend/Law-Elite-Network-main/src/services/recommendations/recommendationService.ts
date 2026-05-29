@@ -1,20 +1,8 @@
 /**
- * @fileOverview Recommendation Service Orchestrator
- * Provides personalized actionable insights for network members.
+ * @fileOverview Recommendation Service — LIVE-safe. No mock, no Firebase.
+ * Personalized recommendations are a future ML feature; returns an empty set today so
+ * the dashboard renders real data only (no fabricated suggestions).
  */
-
-import * as mockService from './recommendation.mock';
-
-const USE_MOCK = true;
-
-/**
- * Generates personalized recommendations for a specific user.
- */
-export const generateRecommendations = async (userId: string) => {
-  if (USE_MOCK) {
-    return await mockService.mockGenerateRecommendations(userId);
-  }
-  
-  // Future: Machine Learning / Behavioral Analysis via custom endpoint
-  return await mockService.mockGenerateRecommendations(userId);
+export const generateRecommendations = async (_userId?: string): Promise<any[]> => {
+  return [];
 };

@@ -4,6 +4,8 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 const ctrl = require('../controller/lawyerController');
 
 router.get('/',              ctrl.listLawyers);
+router.get('/countries',     ctrl.countriesSummary);
+router.get('/search',        ctrl.searchLawyers);
 router.get('/me',            authMiddleware, ctrl.getMyProfile);
 router.post('/',             authMiddleware, ctrl.createLawyer);
 router.get('/:id',           ctrl.getLawyer);

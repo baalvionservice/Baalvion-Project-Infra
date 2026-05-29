@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { ensureClient } = require('../utils/provision');
 
 const listCases = async (req, res, next) => {
     try {
@@ -12,7 +13,7 @@ const listCases = async (req, res, next) => {
         if (priority) where.priority = priority;
         if (category) where.category = { [Op.iLike]: `%${category}%` };
 
-        if (!(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (!req.user.isAdmin) {
             const client = await db.Client.findOne({ where: { user_id: String(req.user.id) } });
             const lawyer = await db.Lawyer.findOne({ where: { user_id: String(req.user.id) } });
             const conditions = [];
@@ -56,8 +57,8 @@ const getCase = async (req, res, next) => {
 
 const createCase = async (req, res, next) => {
     try {
-        const client = await db.Client.findOne({ where: { user_id: String(req.user.id) } });
-        if (!client) return next(new AppError('NOT_FOUND', 'Client profile not found', 404));
+        const client = await ensureClient(req);
+        if (!client) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
         const { title, description, category, priority } = req.body;
         const legalCase = await db.Case.create({
             client_id: client.id,

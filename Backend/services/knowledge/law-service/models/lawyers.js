@@ -7,6 +7,11 @@ module.exports = (sequelize, DataTypes) => {
         email: { type: DataTypes.STRING(255), allowNull: false },
         specializations: { type: DataTypes.ARRAY(DataTypes.TEXT), defaultValue: [] },
         bar_number: { type: DataTypes.STRING(100) },
+        // Global directory: country of practice (ISO alpha-2 + display name) so the
+        // network is browsable across all 188 countries; jurisdictions = sub-regions.
+        country_code: { type: DataTypes.STRING(2) },
+        country: { type: DataTypes.STRING(100) },
+        city: { type: DataTypes.STRING(120) },
         jurisdictions: { type: DataTypes.ARRAY(DataTypes.TEXT), defaultValue: [] },
         experience: { type: DataTypes.INTEGER, defaultValue: 0 },
         hourly_rate: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },

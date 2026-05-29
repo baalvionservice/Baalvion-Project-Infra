@@ -4,6 +4,7 @@
 import React, { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
 import { useLawyerDashboardData } from "@/hooks/useLawyerDashboardData";
+import { useAuthStore } from "@/store/authStore";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import RoleGuard from "@/components/auth/RoleGuard";
 import { 
@@ -16,7 +17,8 @@ import {
   Wallet,
   ArrowUpRight,
   ChevronRight,
-  FileText
+  FileText,
+  CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

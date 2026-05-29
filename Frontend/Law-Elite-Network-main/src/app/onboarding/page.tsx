@@ -9,8 +9,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Gavel, User, Briefcase, MapPin, ChevronRight, Loader2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Gavel, User, Briefcase, MapPin, ChevronRight, Loader2, Globe } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { createLawyerProfile } from '@/services/lawyers/lawyerService';
+import { apiClient } from '@/lib/api/client';
+import { COUNTRIES } from '@/lib/countries';
 
 /**
  * @fileOverview OnboardingPage
@@ -18,7 +22,7 @@ import { useToast } from '@/hooks/use-toast';
  * Updated with Role-Based Redirection.
  */
 export default function OnboardingPage() {
-  const { user, role, profileStatus, userController, loading } = useAuthContext();
+  const { user, role, loading } = useAuthContext();
   const [step, setStep] = useState<'role' | 'details'>('role');
   const [roleId, setRoleId] = useState<'lawyer' | 'client' | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -26,7 +30,9 @@ export default function OnboardingPage() {
     fullName: '',
     specialization: '',
     experienceYears: '',
-    city: 'New York',
+    city: '',
+    countryCode: 'US',
+    hourlyRate: '',
     contactDetails: ''
   });
   
@@ -35,14 +41,8 @@ export default function OnboardingPage() {
 
   useEffect(() => {
     if (!loading && !user) router.push('/login');
-    if (!loading && profileStatus === 'active') {
-      // Role-specific redirect
-      if (role === 'admin') router.push('/admin/dashboard');
-      else if (role === 'lawyer') router.push('/lawyer/dashboard');
-      else router.push('/dashboard');
-    }
     if (user && !formData.fullName) setFormData(prev => ({ ...prev, fullName: user.name || '' }));
-  }, [user, role, profileStatus, loading, router, formData.fullName]);
+  }, [user, role, loading, router, formData.fullName]);
 
   const handleRoleSelect = (selectedRole: 'lawyer' | 'client') => {
     setRoleId(selectedRole);
@@ -51,42 +51,38 @@ export default function OnboardingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user || !roleId || !userController) return;
+    if (!user || !roleId) return;
 
     setSubmitting(true);
     try {
-      const profilePayload = roleId === 'lawyer' ? {
-        fullName: formData.fullName,
-        specialization: formData.specialization.split(',').map(s => s.trim()),
-        experienceYears: parseInt(formData.experienceYears),
-        location: { city: formData.city, state: 'NY', country: 'USA' },
-        rating: 5.0,
-        totalCasesHandled: 0,
-        profileStatus: 'active'
-      } : {
-        fullName: formData.fullName,
-        contactDetails: formData.contactDetails,
-        caseType: 'General',
-        preferredLocation: formData.city,
-        profileStatus: 'active'
-      };
-
-      const response = await userController.completeOnboarding({
-        userId: user.userId,
-        roleId,
-        profileData: profilePayload
-      });
-
-      if (response.success) {
-        toast({ title: "Welcome Aboard", description: "Your elite profile is now active." });
-        // Redirect based on the role just selected
-        if (roleId === 'lawyer') router.push('/lawyer/dashboard');
-        else router.push('/dashboard');
+      if (roleId === 'lawyer') {
+        const country = COUNTRIES.find((c) => c.code === formData.countryCode);
+        // Creates a PENDING practitioner profile — an admin verifies before it goes live.
+        await createLawyerProfile({
+          name: formData.fullName,
+          email: user.email,
+          specializations: formData.specialization.split(',').map((s) => s.trim()).filter(Boolean),
+          experience: parseInt(formData.experienceYears) || 0,
+          hourly_rate: formData.hourlyRate ? Number(formData.hourlyRate) : 0,
+          country: country?.name,
+          country_code: country?.code,
+          city: formData.city,
+          bio: `${formData.fullName} — ${formData.specialization} practitioner in ${formData.city || country?.name}.`,
+        });
+        toast({ title: 'Application Submitted', description: 'Your practitioner profile is pending verification. Our team will review your credentials shortly.' });
+        router.push('/lawyer/dashboard');
       } else {
-        throw new Error(response.message);
+        // Client profile (auto-provisioned on first activity; refine it here).
+        await apiClient.post('/clients', {
+          name: formData.fullName,
+          phone: formData.contactDetails,
+          location: formData.city,
+        }).catch(() => { /* already exists — fine */ });
+        toast({ title: 'Welcome Aboard', description: 'Your profile is ready.' });
+        router.push('/dashboard');
       }
     } catch (error: any) {
-      toast({ title: "Onboarding Error", description: error.message, variant: "destructive" });
+      toast({ title: 'Onboarding Error', description: error?.message || 'Please try again.', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -163,26 +159,47 @@ export default function OnboardingPage() {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
+                          <Label className="text-white">Country of Practice</Label>
+                          <Select value={formData.countryCode} onValueChange={(v) => setFormData({ ...formData, countryCode: v })}>
+                            <SelectTrigger className="glass-panel border-white/10 text-white">
+                              <div className="flex items-center gap-2"><Globe className="w-4 h-4 text-muted-foreground" /><SelectValue placeholder="Select country" /></div>
+                            </SelectTrigger>
+                            <SelectContent className="max-h-72">
+                              {COUNTRIES.map((c) => <SelectItem key={c.code} value={c.code}>{c.name}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-white">City of Practice</Label>
+                          <div className="relative">
+                            <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                            <Input
+                              className="pl-10 glass-panel border-white/10 text-white"
+                              value={formData.city}
+                              onChange={e => setFormData({...formData, city: e.target.value})}
+                              required
+                            />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
                           <Label className="text-white">Years of Experience</Label>
-                          <Input 
-                            type="number" 
-                            className="glass-panel border-white/10 text-white" 
+                          <Input
+                            type="number"
+                            className="glass-panel border-white/10 text-white"
                             value={formData.experienceYears}
                             onChange={e => setFormData({...formData, experienceYears: e.target.value})}
                             required
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-white">City of Practice</Label>
-                          <div className="relative">
-                            <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                            <Input 
-                              className="pl-10 glass-panel border-white/10 text-white" 
-                              value={formData.city}
-                              onChange={e => setFormData({...formData, city: e.target.value})}
-                              required
-                            />
-                          </div>
+                          <Label className="text-white">Hourly Rate (USD)</Label>
+                          <Input
+                            type="number"
+                            placeholder="e.g. 250"
+                            className="glass-panel border-white/10 text-white"
+                            value={formData.hourlyRate}
+                            onChange={e => setFormData({...formData, hourlyRate: e.target.value})}
+                          />
                         </div>
                       </div>
                     </>

@@ -75,41 +75,24 @@ export default function BookingPage() {
 
     setIsSubmitting(true);
     try {
-      const bookingId = Date.now().toString();
-      await createBooking({
-        id: bookingId,
+      // Create the real booking; the backend returns the canonical id used for checkout.
+      const created = await createBooking({
         lawyerId: lawyerId as string,
-        userId: user.id,
         date,
         time,
-        status: "pending",
-        amount: lawyer.consultationFee,
-        currency: "INR",
-        createdAt: Date.now(),
+        notes: `Consultation with ${lawyer.name}`,
       });
+      const bookingId = created?.id || created?.appointmentId;
+      if (!bookingId) throw new Error('Booking was not created');
 
-      // 1. Automated internal network event
-      await handleEvent(EVENTS.BOOKING_CREATED, {
-        userId: user.id,
-      });
+      // Fire-and-forget engagement signals (non-blocking).
+      handleEvent(EVENTS.BOOKING_CREATED, { userId: user.id }).catch(() => {});
+      sendEmail("booking", { lawyerName: lawyer.name, date, time, bookingId }).catch(() => {});
+      sendWhatsApp("booking", { lawyerName: lawyer.name, date, time }).catch(() => {});
 
-      // 2. External communication broadcast
-      await sendEmail("booking", {
-        lawyerName: lawyer.name,
-        date,
-        time,
-        bookingId
-      });
-
-      await sendWhatsApp("booking", {
-        lawyerName: lawyer.name,
-        date,
-        time
-      });
-
-      toast({ 
-        title: "Engagement Initiated", 
-        description: "External confirmations have been broadcasted. Please complete settlement." 
+      toast({
+        title: "Engagement Initiated",
+        description: "Your consultation request is reserved. Please complete settlement.",
       });
 
       // Transition to Checkout flow

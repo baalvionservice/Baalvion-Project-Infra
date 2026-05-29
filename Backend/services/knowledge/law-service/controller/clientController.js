@@ -5,7 +5,7 @@ const { AppError } = require('../utils/errors');
 
 const listClients = async (req, res, next) => {
     try {
-        if (!(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) return next(new AppError('FORBIDDEN', 'Admin only', 403));
+        if (!req.user.isAdmin) return next(new AppError('FORBIDDEN', 'Admin only', 403));
         const { page = 1, limit = 20, tier } = req.query;
         const where = {};
         if (tier) where.subscription_tier = tier;
@@ -27,7 +27,7 @@ const getClient = async (req, res, next) => {
     try {
         const client = await db.Client.findByPk(req.params.id);
         if (!client) return next(new AppError('NOT_FOUND', 'Client not found', 404));
-        if (client.user_id !== String(req.user.id) && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (client.user_id !== String(req.user.id) && !req.user.isAdmin) {
             return next(new AppError('FORBIDDEN', 'Not authorised', 403));
         }
         return sendSuccess(req, res, client);
@@ -55,7 +55,7 @@ const updateClient = async (req, res, next) => {
     try {
         const client = await db.Client.findByPk(req.params.id);
         if (!client) return next(new AppError('NOT_FOUND', 'Client not found', 404));
-        if (client.user_id !== String(req.user.id) && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (client.user_id !== String(req.user.id) && !req.user.isAdmin) {
             return next(new AppError('FORBIDDEN', 'Not authorised', 403));
         }
         delete req.body.subscription_tier; // tier is changed via subscriptions
@@ -67,7 +67,7 @@ const updateClient = async (req, res, next) => {
 
 const deleteClient = async (req, res, next) => {
     try {
-        if (!(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) return next(new AppError('FORBIDDEN', 'Admin only', 403));
+        if (!req.user.isAdmin) return next(new AppError('FORBIDDEN', 'Admin only', 403));
         const client = await db.Client.findByPk(req.params.id);
         if (!client) return next(new AppError('NOT_FOUND', 'Client not found', 404));
         await client.destroy();

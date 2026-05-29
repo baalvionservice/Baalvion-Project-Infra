@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { ensureClient } = require('../utils/provision');
 
 const listBookings = async (req, res, next) => {
     try {
@@ -10,7 +11,7 @@ const listBookings = async (req, res, next) => {
         const where = {};
         if (status) where.status = status;
 
-        if (!(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (!req.user.isAdmin) {
             // Find client or lawyer profile for current user
             const client = await db.Client.findOne({ where: { user_id: String(req.user.id) } });
             const lawyer = await db.Lawyer.findOne({ where: { user_id: String(req.user.id) } });
@@ -57,8 +58,8 @@ const getBooking = async (req, res, next) => {
 const createBooking = async (req, res, next) => {
     try {
         const { lawyer_id, type, scheduled_at, duration, notes, case_id } = req.body;
-        const client = await db.Client.findOne({ where: { user_id: String(req.user.id) } });
-        if (!client) return next(new AppError('NOT_FOUND', 'Client profile not found. Create a client profile first.', 404));
+        const client = await ensureClient(req);
+        if (!client) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
         const lawyer = await db.Lawyer.findOne({ where: { id: lawyer_id, status: 'active' } });
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found or not active', 404));
         const durationMins = Number(duration) || 60;

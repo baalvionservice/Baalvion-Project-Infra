@@ -1,42 +1,52 @@
 /**
- * @fileOverview Invoice Service Orchestrator
- * Centralized entry point for professional billing and reconciliation.
+ * @fileOverview Invoice Service — LIVE. Invoices are derived from real payments
+ * (law-service / Postgres); there is no separate invoices table. No mock, no Firebase.
  */
+import { paymentApi } from '@/lib/api/client';
 
-import * as mock from './invoice.mock';
-import { logAction } from '@/services/audit/auditService';
+export interface InvoiceData {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  totalAmount: number;
+  currency: string;
+  status: string;
+  bookingId?: string;
+  provider?: string;
+  createdAt?: string;
+  [key: string]: any;
+}
 
-export type { InvoiceData } from './invoice.mock';
-
-/**
- * Provisions a new professional invoice following a verified settlement.
- */
-export const createInvoice = async (paymentData: any) => {
-  const result = await mock.mockCreateInvoice(paymentData);
-
-  // Audit Event
-  await logAction({
-    userId: paymentData.userId,
-    userRole: 'system',
-    action: 'status_change',
-    entityType: 'system',
-    entityId: result.id,
-    details: { totalAmount: result.totalAmount, type: 'invoice_generated' }
-  });
-
-  return result;
+const toInvoice = (p: any): InvoiceData => {
+  const created = p.created_at || p.createdAt;
+  return {
+    id: String(p.id),
+    invoiceId: `INV-${String(p.id).padStart(6, '0')}`,
+    amount: Number(p.amount || 0),
+    totalAmount: Number(p.amount || 0),
+    currency: p.currency || 'USD',
+    // InvoiceList badge distinguishes paid/pending; a settled payment is a paid invoice.
+    status: p.status === 'succeeded' ? 'paid' : (p.status || 'pending'),
+    bookingId: p.booking_id != null ? String(p.booking_id) : undefined,
+    provider: p.provider,
+    lawyerName: p.lawyer?.name,
+    // InvoiceList formats `inv.date` with date-fns — always provide a valid Date.
+    date: created ? new Date(created) : new Date(),
+    createdAt: created,
+  };
 };
 
-/**
- * Retrieves the chronological billing ledger for a member.
- */
-export const getUserInvoices = async (userId: string) => {
-  return await mock.mockGetUserInvoices(userId);
+// Invoices are generated from settled payments server-side; nothing to create client-side.
+export const createInvoice = async (paymentData: any): Promise<InvoiceData> => toInvoice(paymentData || {});
+
+export const getUserInvoices = async (_userId?: string): Promise<InvoiceData[]> => {
+  const res = await paymentApi.list({ limit: 100 });
+  const items = res?.data?.data?.items || res?.data?.data || [];
+  return items.map(toInvoice);
 };
 
-/**
- * Retrieves a specific invoice dossier for auditing.
- */
-export const getInvoiceById = async (invoiceId: string) => {
-  return await mock.mockGetInvoiceById(invoiceId);
+export const getInvoiceById = async (invoiceId: string): Promise<InvoiceData | null> => {
+  const id = invoiceId.replace(/^INV-/, '').replace(/^0+/, '');
+  const list = await getUserInvoices();
+  return list.find((i) => i.id === id || i.invoiceId === invoiceId) || null;
 };

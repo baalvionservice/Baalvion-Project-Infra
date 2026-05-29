@@ -61,7 +61,7 @@ const getArticle = async (req, res, next) => {
             ],
         });
         if (!article) return next(new AppError('NOT_FOUND', 'Article not found', 404));
-        if (article.status !== 'published' && !(req.auth && (req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r)))) {
+        if (article.status !== 'published' && !(req.auth && req.user.isAdmin)) {
             return next(new AppError('NOT_FOUND', 'Article not found', 404));
         }
         await article.increment('views');
@@ -98,7 +98,7 @@ const updateArticle = async (req, res, next) => {
     try {
         const article = await db.Article.findByPk(req.params.id);
         if (!article) return next(new AppError('NOT_FOUND', 'Article not found', 404));
-        if (article.author_id !== req.user.id && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (article.author_id !== req.user.id && !req.user.isAdmin) {
             return next(new AppError('FORBIDDEN', 'Not authorised', 403));
         }
         delete req.body.slug;
@@ -115,7 +115,7 @@ const publishArticle = async (req, res, next) => {
     try {
         const article = await db.Article.findByPk(req.params.id);
         if (!article) return next(new AppError('NOT_FOUND', 'Article not found', 404));
-        if (article.author_id !== req.user.id && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (article.author_id !== req.user.id && !req.user.isAdmin) {
             return next(new AppError('FORBIDDEN', 'Not authorised', 403));
         }
         await article.update({ status: 'published', published_at: new Date() });
@@ -127,7 +127,7 @@ const archiveArticle = async (req, res, next) => {
     try {
         const article = await db.Article.findByPk(req.params.id);
         if (!article) return next(new AppError('NOT_FOUND', 'Article not found', 404));
-        if (!(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) return next(new AppError('FORBIDDEN', 'Admin only', 403));
+        if (!req.user.isAdmin) return next(new AppError('FORBIDDEN', 'Admin only', 403));
         await article.update({ status: 'archived' });
         return sendSuccess(req, res, article);
     } catch (err) { return next(err); }

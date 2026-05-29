@@ -1,43 +1,50 @@
 /**
- * @fileOverview Subscription Service Orchestrator
- * Primary entry point for professional standing and recurring revenue management.
+ * @fileOverview Subscription Service — LIVE (law-service subscriptions / Postgres).
+ * Plan catalog (pricing tiers) is static config; the member's subscription is real data.
+ * No Firebase, no mock user records.
  */
+import { subscriptionApi } from '@/lib/api/client';
+import { LAWYER_PLANS, CLIENT_PLANS } from './subscription.mock';
 
-import * as mock from './subscription.mock';
-import { createNotification } from '@/services/notifications/notificationService';
-import { logAction } from '@/services/audit/auditService';
+// Plan catalog = pricing configuration (not user data).
+export const getPlansByRole = (role: string) => (role === 'lawyer' ? LAWYER_PLANS : CLIENT_PLANS);
 
-export const getPlansByRole = (role: string) => {
-  return role === 'lawyer' ? mock.LAWYER_PLANS : mock.CLIENT_PLANS;
+// Map a plan id (e.g. "pro", "elite", "professional") to a backend tier.
+const planToTier = (planId: string): 'BASIC' | 'PROFESSIONAL' | 'ENTERPRISE' => {
+  const p = String(planId).toLowerCase();
+  if (/(enterprise|elite|premier|max)/.test(p)) return 'ENTERPRISE';
+  if (/(pro|professional|plus|growth)/.test(p)) return 'PROFESSIONAL';
+  return 'BASIC';
 };
 
-export const createSubscription = async (userId: string, planId: string, role = 'client') => {
-  const result = await mock.mockCreateSubscription(userId, planId);
-
-  await createNotification({
-    userId,
-    title: 'Professional Standing Upgraded',
-    message: `Your account has been successfully transitioned to ${planId.toUpperCase()} status.`,
-    type: 'status_changed',
-    priority: 'high'
-  });
-
-  await logAction({
-    userId,
-    userRole: role,
-    action: 'status_change',
-    entityType: 'system',
-    entityId: userId,
-    details: { newPlan: planId, cycle: '30_day' }
-  });
-
-  return result;
+const adaptSub = (s: any) => {
+  if (!s) return null;
+  return {
+    id: String(s.id),
+    tier: s.tier,
+    planId: String(s.tier || '').toLowerCase(),
+    status: s.status,
+    active: s.status === 'active',
+    startDate: s.started_at,
+    expiryDate: s.expires_at,
+  };
 };
 
-export const getUserSubscription = async (userId: string) => {
-  return await mock.mockGetSubscription(userId);
+export const createSubscription = async (_userId: string, planId: string, _role = 'client') => {
+  const res = await subscriptionApi.create({ tier: planToTier(planId) });
+  return adaptSub(res?.data?.data);
 };
 
-export const cancelSubscription = async (userId: string) => {
-  return await mock.mockCancelSubscription(userId);
+export const getUserSubscription = async (_userId?: string) => {
+  try {
+    const res = await subscriptionApi.get();
+    return adaptSub(res?.data?.data);
+  } catch {
+    return null;
+  }
+};
+
+export const cancelSubscription = async (_userId?: string) => {
+  await subscriptionApi.cancel();
+  return { success: true };
 };

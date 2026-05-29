@@ -1,56 +1,32 @@
 /**
- * @fileOverview CaseService
- * Primary service layer for managing legal briefs and document synchronization.
+ * @fileOverview CaseService (top-level) — LIVE (law-service cases / Postgres).
+ * No mock, no Firebase. Endpoints are user-scoped by the session token, so a client
+ * sees their cases and a lawyer sees their assigned cases.
  */
+import { caseApi } from '@/lib/api/client';
+import { adaptCase, unwrapList, unwrapOne } from '@/services/_law/adapters';
 
-import {
-  getCasesMock,
-  saveCasesMock,
-} from "@/lib/mock/caseMock";
-import { Case } from "@/types/case";
-
-/**
- * Commits a new legal brief to the network ledger.
- */
-export const createCase = async (caseData: Case): Promise<void> => {
-  // Simulate network synchronization latency
-  await new Promise(resolve => setTimeout(resolve, 800));
-  
-  const data = getCasesMock();
-  saveCasesMock([...data, caseData]);
+export const createCase = async (caseData: any) => {
+  const res = await caseApi.create({
+    title: caseData.title,
+    description: caseData.description,
+    category: caseData.category,
+    priority: caseData.priority || 'medium',
+  });
+  return adaptCase(unwrapOne(res));
 };
 
-/**
- * Retrieves all active briefs for a specific member.
- */
-export const getUserCases = async (userId: string): Promise<Case[]> => {
-  await new Promise(resolve => setTimeout(resolve, 400));
-  const data = getCasesMock();
-  return data.filter((c: Case) => c.userId === userId);
+export const getUserCases = async (_userId?: string) => {
+  const res = await caseApi.list({ limit: 100 });
+  return unwrapList(res).map(adaptCase);
 };
 
-/**
- * Retrieves all briefs assigned to a specific practitioner.
- */
-export const getLawyerCases = async (lawyerId: string): Promise<Case[]> => {
-  await new Promise(resolve => setTimeout(resolve, 400));
-  const data = getCasesMock();
-  return data.filter((c: Case) => c.lawyerId === lawyerId);
+export const getLawyerCases = async (_lawyerId?: string) => {
+  const res = await caseApi.list({ limit: 100 });
+  return unwrapList(res).map(adaptCase);
 };
 
-/**
- * Synchronizes the status of a specific legal matter.
- */
-export const updateCaseStatus = async (
-  caseId: string,
-  status: "open" | "in_progress" | "closed"
-): Promise<void> => {
-  await new Promise(resolve => setTimeout(resolve, 600));
-  const data = getCasesMock();
-
-  const updated = data.map((c: Case) =>
-    c.id === caseId ? { ...c, status, updatedAt: Date.now() } : c
-  );
-
-  saveCasesMock(updated);
+export const updateCaseStatus = async (caseId: string, status: 'open' | 'in_progress' | 'closed' | string) => {
+  const res = await caseApi.updateStatus(caseId, status);
+  return adaptCase(unwrapOne(res));
 };

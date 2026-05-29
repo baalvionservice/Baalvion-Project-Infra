@@ -18,6 +18,9 @@ module.exports = {
     },
     // /login + /register now redirect to the canonical issuer.
     authServiceUrl: process.env.AUTH_SERVICE_URL || 'http://localhost:3001',
+    // Platform-admin bootstrap: these emails are always treated as Law Elite admins
+    // (identity org-roles like "owner" do NOT grant platform admin — law authz is local).
+    adminEmails: parseList(process.env.LAW_ADMIN_EMAILS, ['infra.baalvion@gmail.com']),
     db: {
         host: process.env.DB_HOST || 'localhost',
         port: Number(process.env.DB_PORT || 5432),

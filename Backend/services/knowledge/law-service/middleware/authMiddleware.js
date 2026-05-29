@@ -43,14 +43,31 @@ const authMiddleware = async (req, res, next) => {
         jti: claims.jti, email: claims.email ?? null,
     };
     // Map canonical identity -> local legal.users by email; req.user.id = LEGAL id for joins.
+    // JIT provisioning: every authenticated identity gets a local legal.users mirror on first
+    // request (keyed by the stable email), so new sign-ups are immediately usable.
+    // Law authorization is LOCAL: the platform role lives in legal.users.role
+    // (client | lawyer | admin), NOT the identity org-role. A bootstrap email allowlist
+    // designates the first admins; everyone else provisions as a client.
+    const emailIsBootstrapAdmin = !!req.auth.email && config.adminEmails.includes(req.auth.email.toLowerCase());
     let legalId = null;
+    let legalRole = null;
     try {
         if (req.auth.email) {
-            const local = await db.User.findOne({ where: { email: req.auth.email }, attributes: ['id'] });
+            const [local] = await db.User.findOrCreate({
+                where: { email: req.auth.email },
+                defaults: {
+                    email: req.auth.email,
+                    password_hash: 'external-auth',
+                    full_name: (req.auth.email.split('@')[0] || '').replace(/[._-]+/g, ' '),
+                    role: emailIsBootstrapAdmin ? 'admin' : 'client',
+                },
+            });
             legalId = local ? local.id : null;
+            legalRole = local ? local.role : null;
         }
-    } catch (_) { /* lookup failure -> null; law-specific endpoints handle absence */ }
-    req.user = { id: legalId, orgId: req.auth.orgId, roles: req.auth.roles, email: req.auth.email };
+    } catch (_) { /* provisioning failure -> null; law-specific endpoints handle absence */ }
+    const isAdmin = legalRole === 'admin' || emailIsBootstrapAdmin;
+    req.user = { id: legalId, role: legalRole, isAdmin, orgId: req.auth.orgId, roles: req.auth.roles, email: req.auth.email };
     return next();
 };
 
@@ -58,4 +75,14 @@ const wrap = (mw) => (req, res, next) => mw(req, res, (err) => (err ? next(toApp
 const requireRole = (...roles) => wrap(rbacRequireRole(...roles));
 const requirePermission = (...perms) => wrap(rbacRequirePermission(...perms));
 
-module.exports = { authMiddleware, requireRole, requirePermission };
+// Explicit admin gate used by the admin console surface. Accepts the platform admin roles.
+const ADMIN_ROLES = ['admin', 'owner', 'super_admin'];
+const adminOnly = (req, res, next) => {
+    if (!req.user) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
+    if (!req.user.isAdmin) {
+        return next(new AppError('FORBIDDEN', 'Admin access required', 403));
+    }
+    return next();
+};
+
+module.exports = { authMiddleware, requireRole, requirePermission, adminOnly, ADMIN_ROLES };

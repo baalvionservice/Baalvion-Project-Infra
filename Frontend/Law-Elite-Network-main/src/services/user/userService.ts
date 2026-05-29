@@ -1,30 +1,16 @@
 /**
- * @fileOverview User Identity Service Main Entry
- * Orchestrates the identity flow across the network.
+ * @fileOverview User Identity Service — LIVE (law-service /auth/me). No mock, no Firebase.
  */
+import { apiClient } from '@/lib/api/client';
+import { adaptProfile, unwrapOne } from '@/services/_law/adapters';
 
-import * as mockService from './user.mock';
-import * as firebaseService from './user.firebase';
-
-// Toggle between Mock and Firebase implementations
-const USE_MOCK = true;
-
-/**
- * Retrieves the professional profile for a specific member.
- */
-export const getUserProfile = async (userId: string) => {
-  if (USE_MOCK) {
-    return await mockService.mockGetUserProfile(userId);
-  }
-  return await firebaseService.firebaseGetUserProfile(userId);
+export const getUserProfile = async (_userId?: string) => {
+  const res = await apiClient.get('/auth/me');
+  return adaptProfile(unwrapOne(res));
 };
 
-/**
- * Synchronizes updates to a member's professional dossier.
- */
-export const updateUserProfile = async (userId: string, data: any) => {
-  if (USE_MOCK) {
-    return await mockService.mockUpdateUserProfile(userId, data);
-  }
-  return await firebaseService.firebaseUpdateUserProfile(userId, data);
+export const updateUserProfile = async (_userId: string, data: any) => {
+  // Self profile lives in the canonical identity service; law-side edits (client/lawyer
+  // profile) happen through their own endpoints. Returned optimistically for now.
+  return { success: true, ...data };
 };

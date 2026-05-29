@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { authLawApi, setToken, clearToken, getToken, TOKEN_KEY } from '@/lib/api/client';
+import { authLawApi, setToken, clearToken, getToken, TOKEN_KEY, silentRefresh } from '@/lib/api/client';
+import { useAuthStore } from '@/store/authStore';
 
 export type UserRole = 'admin' | 'lawyer' | 'client' | null;
 
@@ -16,7 +17,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   role: UserRole;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthUser | null>;
   register: (email: string, password: string, name: string, role?: string) => Promise<void>;
   logout: () => void;
 }
@@ -25,7 +26,7 @@ const AuthContext = createContext<AuthContextValue>({
   user: null,
   role: null,
   loading: true,
-  login: async () => {},
+  login: async () => null,
   register: async () => {},
   logout: () => {},
 });
@@ -39,52 +40,96 @@ function parseJwt(token: string): { id: string; email: string; role: string } | 
   }
 }
 
+// Resolve the authoritative LAW role (client | lawyer | admin) from law-service /auth/me.
+// The identity token only carries org-roles (every user is an org "owner"); platform
+// authorization is local to law-service, so the app role must come from /auth/me.
+async function resolveLawRole(): Promise<{ role: UserRole; profile: any } | null> {
+  try {
+    const me = await authLawApi.me();
+    const profile = me.data?.data || null;
+    return { role: (profile?.role ?? 'client') as UserRole, profile };
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
 
-  // The access token is in memory; on a fresh load there is nothing to restore (no refresh cookie
-  // on law-service yet — see lib/api/client.ts). If a token survives in memory (same-session
-  // remount), repopulate from its claims.
+  const hydrateFromToken = async (token: string) => {
+    const claims = parseJwt(token) as any;
+    const resolved = await resolveLawRole();
+    const lawRole = (resolved?.role ?? 'client') as UserRole;
+    const authUser: AuthUser = {
+      userId: String(claims?.sub ?? claims?.id ?? resolved?.profile?.id ?? ''),
+      email: claims?.email ?? resolved?.profile?.email,
+      name: resolved?.profile?.full_name,
+      role: lawRole,
+    };
+    setUser(authUser);
+    setRole(lawRole);
+    // Mirror into the zustand store used by booking/checkout/lawyer/profile/etc. pages,
+    // so there is a single source of truth for the session across both auth layers.
+    try {
+      useAuthStore.getState().setUser({
+        id: authUser.userId,
+        uid: authUser.userId,
+        email: authUser.email,
+        name: authUser.name,
+        role: lawRole,
+      } as any);
+    } catch { /* store optional */ }
+    return authUser;
+  };
+
+  // Access token lives in memory. On a fresh load, attempt a silent refresh against the
+  // BFF (/api/auth/refresh) using the httpOnly refresh cookie — this restores the session
+  // across reloads (persistent login) without ever putting the token in localStorage.
   useEffect(() => {
-    const token = getToken();
-    if (token) {
-      const claims = parseJwt(token);
-      if (claims) {
-        setUser({ userId: String(claims.id), email: claims.email, role: claims.role as UserRole });
-        setRole(claims.role as UserRole);
+    let alive = true;
+    (async () => {
+      let token = getToken();
+      if (!token) {
+        // Shared, deduped refresh (same in-flight promise the apiClient uses) so we never
+        // fire two concurrent refreshes against the rotating refresh token.
+        token = await silentRefresh();
       }
-    }
-    setLoading(false);
+      if (token && alive) {
+        await hydrateFromToken(token);
+      } else if (alive) {
+        // No active session — clear any stale persisted zustand user.
+        try { useAuthStore.getState().logout(); } catch { /* noop */ }
+      }
+      if (alive) setLoading(false);
+    })();
+    return () => { alive = false; };
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<AuthUser | null> => {
     const res = await authLawApi.login(email, password);
-    const { accessToken, role: userRole } = res.data?.data || res.data;
+    const accessToken = res.data?.data?.accessToken || res.data?.accessToken;
+    if (!accessToken) return null;
     setToken(accessToken);
-    const claims = parseJwt(accessToken);
-    if (claims) {
-      setUser({ userId: String(claims.id), email: claims.email, role: userRole });
-      setRole(userRole as UserRole);
-    }
+    return hydrateFromToken(accessToken);
   };
 
   const register = async (email: string, password: string, name: string, userRole?: string) => {
     const res = await authLawApi.register(email, password, name, userRole);
-    const { accessToken, role: newRole } = res.data?.data || res.data;
-    setToken(accessToken);
-    const claims = parseJwt(accessToken);
-    if (claims) {
-      setUser({ userId: String(claims.id), email: claims.email, name, role: newRole });
-      setRole(newRole as UserRole);
+    const accessToken = res.data?.data?.accessToken || res.data?.accessToken;
+    if (accessToken) {
+      setToken(accessToken);
+      await hydrateFromToken(accessToken);
     }
   };
 
   const logout = () => {
+    authLawApi.logout().catch(() => {});
     clearToken();
     setUser(null);
     setRole(null);
+    try { useAuthStore.getState().logout(); } catch { /* noop */ }
   };
 
   return (

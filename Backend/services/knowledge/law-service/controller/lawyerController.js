@@ -9,12 +9,15 @@ const listLawyers = async (req, res, next) => {
         const {
             page = 1, limit = 20,
             specialization, jurisdiction, minRate, maxRate,
-            minRating, verified, language, search,
+            minRating, verified, language, search, country, countryCode, city,
         } = req.query;
         const where = { status: 'active' };
         if (specialization) where.specializations = { [Op.contains]: [specialization] };
         if (jurisdiction) where.jurisdictions = { [Op.contains]: [jurisdiction] };
         if (language) where.languages = { [Op.contains]: [language] };
+        if (countryCode) where.country_code = String(countryCode).toUpperCase();
+        if (country) where.country = { [Op.iLike]: `%${country}%` };
+        if (city) where.city = { [Op.iLike]: `%${city}%` };
         if (verified !== undefined) where.verified = verified === 'true';
         if (minRate) where.hourly_rate = { ...where.hourly_rate, [Op.gte]: Number(minRate) };
         if (maxRate) where.hourly_rate = { ...where.hourly_rate, [Op.lte]: Number(maxRate) };
@@ -37,6 +40,27 @@ const listLawyers = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// Global directory: active-lawyer counts grouped by country (for "browse by country").
+const countriesSummary = async (req, res, next) => {
+    try {
+        const rows = await db.Lawyer.findAll({
+            attributes: ['country', 'country_code', [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'count']],
+            where: { status: 'active', country: { [Op.ne]: null } },
+            group: ['country', 'country_code'],
+            order: [[db.sequelize.fn('COUNT', db.sequelize.col('id')), 'DESC']],
+            raw: true,
+        });
+        return sendSuccess(req, res, rows.map((r) => ({ country: r.country, countryCode: r.country_code, count: Number(r.count) })));
+    } catch (err) { return next(err); }
+};
+
+// Public search — the frontend calls /lawyers/search?q=... ; map q -> the
+// `search` filter and reuse the list logic so filters keep working.
+const searchLawyers = (req, res, next) => {
+    if (req.query.q && !req.query.search) req.query.search = req.query.q;
+    return listLawyers(req, res, next);
+};
+
 const getLawyer = async (req, res, next) => {
     try {
         const lawyer = await db.Lawyer.findByPk(req.params.id);
@@ -47,9 +71,13 @@ const getLawyer = async (req, res, next) => {
 
 const createLawyer = async (req, res, next) => {
     try {
-        const existing = await db.Lawyer.findOne({ where: { user_id: req.user.id } });
+        const existing = await db.Lawyer.findOne({ where: { user_id: String(req.user.id) } });
         if (existing) return next(new AppError('CONFLICT', 'Lawyer profile already exists for this user', 409));
-        const lawyer = await db.Lawyer.create({ ...req.body, user_id: req.user.id, status: 'pending' });
+        // Force server-controlled fields; applicants always start pending + unverified.
+        const { rating, total_reviews, verified, status, user_id, ...safe } = req.body || {};
+        const lawyer = await db.Lawyer.create({ ...safe, user_id: String(req.user.id), status: 'pending', verified: false });
+        // Promote the local identity to a lawyer-role user (still pending verification for the directory).
+        if (req.user.id) await db.User.update({ role: 'lawyer' }, { where: { id: req.user.id } });
         return sendSuccess(req, res, lawyer, 201);
     } catch (err) { return next(err); }
 };
@@ -58,7 +86,7 @@ const updateLawyer = async (req, res, next) => {
     try {
         const lawyer = await db.Lawyer.findByPk(req.params.id);
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found', 404));
-        if (lawyer.user_id !== String(req.user.id) && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (lawyer.user_id !== String(req.user.id) && !req.user.isAdmin) {
             return next(new AppError('FORBIDDEN', 'Not authorised to update this profile', 403));
         }
         const forbidden = ['rating', 'total_reviews', 'verified', 'status'];
@@ -72,7 +100,7 @@ const deleteLawyer = async (req, res, next) => {
     try {
         const lawyer = await db.Lawyer.findByPk(req.params.id);
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found', 404));
-        if (!(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (!req.user.isAdmin) {
             return next(new AppError('FORBIDDEN', 'Admin only', 403));
         }
         await lawyer.destroy();
@@ -92,7 +120,7 @@ const updateAvailability = async (req, res, next) => {
     try {
         const lawyer = await db.Lawyer.findByPk(req.params.id);
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found', 404));
-        if (lawyer.user_id !== String(req.user.id) && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (lawyer.user_id !== String(req.user.id) && !req.user.isAdmin) {
             return next(new AppError('FORBIDDEN', 'Not authorised', 403));
         }
         await lawyer.update({ availability: req.body.availability });
@@ -102,7 +130,7 @@ const updateAvailability = async (req, res, next) => {
 
 const verifyLawyer = async (req, res, next) => {
     try {
-        if (!(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) return next(new AppError('FORBIDDEN', 'Admin only', 403));
+        if (!req.user.isAdmin) return next(new AppError('FORBIDDEN', 'Admin only', 403));
         const lawyer = await db.Lawyer.findByPk(req.params.id);
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found', 404));
         await lawyer.update({ verified: true, status: 'active' });
@@ -118,4 +146,4 @@ const getMyProfile = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listLawyers, getLawyer, createLawyer, updateLawyer, deleteLawyer, getAvailability, updateAvailability, verifyLawyer, getMyProfile };
+module.exports = { listLawyers, countriesSummary, searchLawyers, getLawyer, createLawyer, updateLawyer, deleteLawyer, getAvailability, updateAvailability, verifyLawyer, getMyProfile };

@@ -27,7 +27,7 @@ const getDocument = async (req, res, next) => {
     try {
         const doc = await db.Document.findByPk(req.params.id);
         if (!doc) return next(new AppError('NOT_FOUND', 'Document not found', 404));
-        if (doc.owner_id !== String(req.user.id) && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (doc.owner_id !== String(req.user.id) && !req.user.isAdmin) {
             return next(new AppError('FORBIDDEN', 'Not authorised', 403));
         }
         return sendSuccess(req, res, doc);
@@ -55,7 +55,7 @@ const deleteDocument = async (req, res, next) => {
     try {
         const doc = await db.Document.findByPk(req.params.id);
         if (!doc) return next(new AppError('NOT_FOUND', 'Document not found', 404));
-        if (doc.owner_id !== String(req.user.id) && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (doc.owner_id !== String(req.user.id) && !req.user.isAdmin) {
             return next(new AppError('FORBIDDEN', 'Not authorised', 403));
         }
         await doc.destroy();

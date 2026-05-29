@@ -1,91 +1,35 @@
 /**
- * @fileOverview Appointment Service Main Entry
- * Decouples the UI from the backend implementation and triggers executive alerts/activities.
+ * @fileOverview Appointment Service — LIVE (law-service bookings / Postgres).
+ * "Appointments" in the UI map to law-service bookings. No mock, no Firebase.
  */
+import { bookingApi } from '@/lib/api/client';
+import { adaptAppointment, unwrapList, unwrapOne } from '@/services/_law/adapters';
 
-import * as mockService from './appointment.mock';
-import * as firebaseService from './appointment.firebase';
-import { createNotification } from '@/services/notifications/notificationService';
-import { assignLawyerToCase } from '@/services/cases/caseService';
-import { createActivity } from '@/services/activities/activityService';
-import { logAction } from '@/services/audit/auditService';
-import { Appointment } from '@/types/appointment';
-
-// Flag to toggle between Mock and Firebase implementations
-const USE_MOCK = true;
-
-/**
- * Initiates a new consultation appointment in the network ledger.
- */
-export const createAppointment = async (data: Omit<Appointment, "status" | "createdAt" | "id" | "appointmentId">, userRole = 'client') => {
-  const appointment = USE_MOCK 
-    ? await mockService.mockCreateAppointment(data)
-    : await firebaseService.firebaseCreateAppointment(data);
-
-  const caseId = data.caseId;
-  const clientId = data.clientId;
-
-  // 1. Trigger Enhanced Notification
-  await createNotification({
-    userId: clientId,
-    title: 'Consultation Scheduled',
-    message: `Your executive consultation request for ${data.date} at ${data.time} has been successfully synchronized.`,
-    type: 'status_changed',
-    relatedCaseId: caseId
-  });
-
-  // 2. Log Activity
-  await createActivity({
-    caseId,
-    type: 'appointment_booked',
-    message: 'Executive consultation session scheduled and confirmed.',
-    performedBy: clientId,
-    metadata: { date: data.date, time: data.time }
-  });
-
-  // 3. Audit Log
-  await logAction({
-    userId: clientId,
-    userRole,
-    action: 'book_appointment',
-    entityType: 'appointment',
-    entityId: appointment.id || appointment.appointmentId || 'unknown',
-    details: { date: data.date, time: data.time, lawyerId: data.lawyerId }
-  });
-
-  // 4. Automated Action: Assign lawyer to the linked case and activate it
-  if (caseId && data.lawyerId) {
-    await assignLawyerToCase(caseId, data.lawyerId);
-  }
-
-  return appointment;
+const toScheduledAt = (date?: string, time?: string) => {
+  if (!date) return new Date().toISOString();
+  const iso = time ? `${date}T${time.length === 5 ? time + ':00' : time}` : `${date}T09:00:00`;
+  const d = new Date(iso);
+  return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
 };
 
-/**
- * Retrieves all consultation records for a specific client.
- */
-export const getAppointmentsByClient = async (userId: string) => {
-  if (USE_MOCK) {
-    return await mockService.mockGetAppointmentsByClient(userId);
-  }
-  return await firebaseService.firebaseGetAppointmentsByClient(userId);
+export const createAppointment = async (data: any, _userRole = 'client') => {
+  const res = await bookingApi.create({
+    lawyer_id: data.lawyerId ? Number(data.lawyerId) : undefined,
+    case_id: data.caseId ? Number(data.caseId) : undefined,
+    type: data.type || 'consultation',
+    scheduled_at: data.scheduledAt || toScheduledAt(data.date, data.time),
+    duration: data.duration || 60,
+    notes: data.notes || data.message || '',
+  });
+  return adaptAppointment(unwrapOne(res));
 };
 
-/**
- * Terminates a consultation appointment.
- */
-export const cancelAppointment = async (appointmentId: string, clientId: string) => {
-  const result = USE_MOCK
-    ? await mockService.mockCancelAppointment(appointmentId)
-    : await firebaseService.firebaseCancelAppointment(appointmentId);
+export const getAppointmentsByClient = async (_userId?: string) => {
+  const res = await bookingApi.list({ limit: 100 });
+  return unwrapList(res).map(adaptAppointment);
+};
 
-  // Trigger Enhanced Notification
-  await createNotification({
-    userId: clientId,
-    title: 'Consultation Terminated',
-    message: 'Your scheduled consultation engagement has been successfully removed from the active ledger.',
-    type: 'status_changed'
-  });
-
-  return result;
+export const cancelAppointment = async (appointmentId: string, _clientId?: string) => {
+  const res = await bookingApi.cancel(appointmentId);
+  return adaptAppointment(unwrapOne(res));
 };

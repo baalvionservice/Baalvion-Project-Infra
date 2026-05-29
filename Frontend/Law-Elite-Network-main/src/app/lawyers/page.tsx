@@ -13,16 +13,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { 
-  Search, 
-  SlidersHorizontal, 
-  Loader2, 
-  Award, 
+  Search,
+  SlidersHorizontal,
+  Loader2,
+  Award,
   FilterX,
   Sparkles,
-  Gavel
+  Gavel,
+  Globe
 } from 'lucide-react';
 import LawyerCard from '@/components/cards/LawyerCard';
-import { searchLawyers, getAllLawyers } from '@/services/lawyers/lawyerService';
+import { searchLawyers, getAllLawyers, getCountries } from '@/services/lawyers/lawyerService';
 import { getCaseById } from '@/services/cases/caseService';
 import { rankLawyersForCase } from '@/services/matching/matchingService';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -48,13 +49,20 @@ function LawyerMarketplaceContent() {
   const [loading, setLoading] = useState(true);
   const [activeCase, setActiveCase] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [countries, setCountries] = useState<{ country: string; countryCode: string; count: number }[]>([]);
   const [filters, setFilters] = useState({
     specialization: 'all',
     minRating: 'all',
-    maxPrice: 'all'
+    maxPrice: 'all',
+    countryCode: 'all',
   });
 
-  const fetchLawyers = async () => {
+  // Load the real "browse by country" index once.
+  useEffect(() => {
+    getCountries().then(setCountries).catch(() => setCountries([]));
+  }, []);
+
+  const fetchLawyers = async (overrides: Partial<typeof filters> = {}) => {
     setLoading(true);
     try {
       // 1. Fetch case context if provided
@@ -64,11 +72,14 @@ function LawyerMarketplaceContent() {
         setActiveCase(caseContext);
       }
 
-      // 2. Fetch base lawyer list
+      // 2. Fetch base lawyer list (overrides win over current state so chip/select
+      //    selections apply immediately, without waiting for a state re-render).
+      const f = { ...filters, ...overrides };
       const searchParams: any = { query: searchQuery };
-      if (filters.specialization !== 'all') searchParams.specialization = filters.specialization;
-      if (filters.minRating !== 'all') searchParams.minRating = parseFloat(filters.minRating);
-      if (filters.maxPrice !== 'all') searchParams.maxPrice = parseInt(filters.maxPrice);
+      if (f.specialization !== 'all') searchParams.specialization = f.specialization;
+      if (f.minRating !== 'all') searchParams.minRating = parseFloat(f.minRating);
+      if (f.maxPrice !== 'all') searchParams.maxPrice = parseInt(f.maxPrice);
+      if (f.countryCode !== 'all') searchParams.countryCode = f.countryCode;
 
       let data = await searchLawyers(searchParams);
 
@@ -91,12 +102,14 @@ function LawyerMarketplaceContent() {
 
   const handleReset = () => {
     setSearchQuery('');
-    setFilters({
-      specialization: 'all',
-      minRating: 'all',
-      maxPrice: 'all'
-    });
-    setTimeout(fetchLawyers, 0);
+    const reset = { specialization: 'all', minRating: 'all', maxPrice: 'all', countryCode: 'all' };
+    setFilters(reset);
+    fetchLawyers(reset);
+  };
+
+  const selectCountry = (cc: string) => {
+    setFilters((f) => ({ ...f, countryCode: cc }));
+    fetchLawyers({ countryCode: cc });
   };
 
   return (
@@ -146,7 +159,22 @@ function LawyerMarketplaceContent() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <Select value={filters.countryCode} onValueChange={selectCountry}>
+              <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
+                <div className="flex items-center gap-2">
+                  <Globe className="w-3 h-3 text-blue-600" />
+                  <SelectValue placeholder="Country" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200 text-slate-900 max-h-72">
+                <SelectItem value="all">All Countries</SelectItem>
+                {countries.map((c) => (
+                  <SelectItem key={c.countryCode} value={c.countryCode}>{c.country} ({c.count})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
             <Select value={filters.specialization} onValueChange={(val) => setFilters({...filters, specialization: val})}>
               <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
                 <div className="flex items-center gap-2">
@@ -197,6 +225,32 @@ function LawyerMarketplaceContent() {
             </Button>
           </div>
         </div>
+
+        {/* Browse by country — real active-lawyer counts across the global network */}
+        {countries.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 flex items-center gap-2 mb-3">
+              <Globe className="w-3.5 h-3.5 text-blue-600" /> Browse by Country
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => selectCountry('all')}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${filters.countryCode === 'all' ? 'bg-[#0B1F3A] text-white border-[#0B1F3A]' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'}`}
+              >
+                All Countries
+              </button>
+              {countries.map((c) => (
+                <button
+                  key={c.countryCode}
+                  onClick={() => selectCountry(c.countryCode)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${filters.countryCode === c.countryCode ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'}`}
+                >
+                  {c.country} <span className="opacity-60">{c.count}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Results Ledger */}
         <div className="space-y-8">

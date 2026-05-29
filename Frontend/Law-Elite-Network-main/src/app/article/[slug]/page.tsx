@@ -64,11 +64,12 @@ export default function ArticleDeepDivePage() {
   useEffect(() => {
     if (!slug) return;
     setArticleLoading(true);
-    articlesPublicApi.list({ slug, limit: 1, status: 'published' })
+    // /articles/:slug resolves by slug; the ?slug= list filter is not applied server-side.
+    articlesPublicApi.get(slug as string)
       .then(res => {
-        const items = res.data?.data?.items || res.data?.data || [];
-        if (items.length > 0) {
-          setArticle(items[0]);
+        const item = res.data?.data || null;
+        if (item) {
+          setArticle(item);
         } else {
           const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug);
           if (seedMatch) {

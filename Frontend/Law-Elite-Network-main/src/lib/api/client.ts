@@ -36,15 +36,58 @@ export const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-apiClient.interceptors.request.use((config) => {
-  const token = getToken();
+// Deduped in-flight refresh so concurrent callers (AuthProvider mount, apiClient request
+// interceptor, 401 retry) share ONE refresh call. The auth-service rotates refresh tokens,
+// so concurrent independent refreshes would trip reuse-detection and 401 — this prevents that.
+let _refreshInFlight: Promise<string | null> | null = null;
+export function silentRefresh(): Promise<string | null> {
+  if (!_refreshInFlight) {
+    _refreshInFlight = refreshAccessToken().finally(() => { _refreshInFlight = null; });
+  }
+  return _refreshInFlight;
+}
+const refreshOnce = silentRefresh;
+
+apiClient.interceptors.request.use(async (config) => {
+  let token = getToken();
+  // On a hard navigation the in-memory token isn't set yet; restore it from the
+  // httpOnly refresh cookie BEFORE the request so authed calls don't 401-then-retry.
+  if (!token && typeof window !== 'undefined') {
+    token = await refreshOnce();
+  }
   if (token) config.headers.Authorization = `Bearer ${token}`;
   return config;
 });
 
+// On 401, attempt a one-time silent refresh (via the same-origin BFF) and retry the
+// original request. This makes hard navigations to authed pages robust (the in-memory
+// token is restored mid-flight) and transparently handles access-token expiry.
+async function refreshAccessToken(): Promise<string | null> {
+  if (typeof window === 'undefined') return null;
+  try {
+    const res = await fetch('/api/auth/refresh', { method: 'POST', credentials: 'include' });
+    const json = await res.json().catch(() => null);
+    const at = json?.data?.accessToken || json?.accessToken || null;
+    if (at) setToken(at);
+    return at;
+  } catch {
+    return null;
+  }
+}
+
 apiClient.interceptors.response.use(
   (res) => res,
-  (err) => {
+  async (err) => {
+    const original = err.config;
+    if (err.response?.status === 401 && original && !original._retried) {
+      original._retried = true;
+      const at = await refreshOnce();
+      if (at) {
+        original.headers = original.headers || {};
+        original.headers.Authorization = `Bearer ${at}`;
+        return apiClient(original);
+      }
+    }
     const message = err.response?.data?.error?.message || err.message || 'An unexpected error occurred';
     return Promise.reject(new Error(message));
   },
@@ -53,11 +96,21 @@ apiClient.interceptors.response.use(
 // Legacy compat — components that called initBackendAuth can still call this safely
 export async function initBackendAuth(): Promise<void> {}
 
+// Auth goes through the same-origin Next.js BFF (/api/auth/*), which forwards to
+// the Node auth-service server-side (no CORS) and manages the httpOnly refresh cookie.
+// withCredentials so that cookie is sent/received on this origin.
+export const authBffClient = axios.create({
+  withCredentials: true,
+  headers: { 'Content-Type': 'application/json' },
+});
+
 export const authLawApi = {
   login: (email: string, password: string) =>
-    publicClient.post('/auth/login', { email, password }),
+    authBffClient.post('/api/auth/login', { email, password }),
   register: (email: string, password: string, name: string, role?: string) =>
-    publicClient.post('/auth/register', { email, password, name, role }),
+    authBffClient.post('/api/auth/register', { email, password, name, fullName: name, role }),
+  refresh: () => authBffClient.post('/api/auth/refresh'),
+  logout: () => authBffClient.post('/api/auth/logout'),
   me: () => apiClient.get('/auth/me'),
 };
 
@@ -118,13 +171,14 @@ export const paymentApi = {
 };
 
 export const subscriptionApi = {
-  get: () => apiClient.get('/subscriptions/me'),
+  get: () => apiClient.get('/subscriptions'),
   create: (data: unknown) => apiClient.post('/subscriptions', data),
-  cancel: () => apiClient.delete('/subscriptions/me'),
+  cancel: () => apiClient.post('/subscriptions/cancel'),
 };
 
 export const reviewApi = {
-  list: (lawyerId: string) => apiClient.get('/reviews', { params: { lawyerId } }),
+  // Public read (reviews are visible on lawyer profiles); backend filters by lawyer_id.
+  list: (lawyerId: string) => publicClient.get('/reviews', { params: { lawyer_id: lawyerId } }),
   create: (data: unknown) => apiClient.post('/reviews', data),
 };
 
@@ -140,8 +194,9 @@ export const notificationApi = {
 };
 
 export const referralApi = {
-  getMyCode: () => apiClient.get('/referrals/me'),
+  getMyCode: () => apiClient.get('/referrals/my-code'),
   stats: () => apiClient.get('/referrals/stats'),
+  apply: (code: string) => apiClient.post('/referrals/apply', { code }),
 };
 
 export const adminApi = {

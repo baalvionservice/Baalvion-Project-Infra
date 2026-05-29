@@ -10,7 +10,7 @@ const listPayments = async (req, res, next) => {
         const where = {};
         if (status) where.status = status;
 
-        if (!(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
+        if (!req.user.isAdmin) {
             const client = await db.Client.findOne({ where: { user_id: String(req.user.id) } });
             const lawyer = await db.Lawyer.findOne({ where: { user_id: String(req.user.id) } });
             const conditions = [];

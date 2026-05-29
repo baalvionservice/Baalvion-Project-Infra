@@ -1,54 +1,29 @@
 /**
- * @fileOverview LawyerService
- * Primary service layer for practitioner discovery and management.
- * Bridges the UI with either Mock Storage or a real API.
+ * @fileOverview LawyerService (top-level) — LIVE. Delegates to the real law-service
+ * adapter (Postgres). No mock, no Firebase.
  */
+import { apiClient } from '@/lib/api/client';
+import { apiGetAllLawyers, apiGetLawyerById, apiSearchLawyers, adaptLawyer } from '@/services/lawyers/lawyer.api';
 
-import { getLawyerProfileMock, updateLawyerProfileMock } from "@/lib/mock/lawyerMock";
-import { lawyerListMock } from "@/lib/mock/lawyerListMock";
+export const getLawyerById = async (id: string) => apiGetLawyerById(id);
 
-/**
- * Retrieves the specialized professional profile for a practitioner.
- */
-export const getLawyerProfile = async (userId: string) => {
-  return await getLawyerProfileMock(userId);
+export const getAllLawyers = async () => apiGetAllLawyers();
+
+export const searchLawyers = async (query: string) => apiSearchLawyers({ query });
+
+/** The authenticated practitioner's own profile (lawyer dashboard / editing). */
+export const getLawyerProfile = async (_userId?: string) => {
+  try {
+    const res = await apiClient.get('/lawyers/me');
+    return adaptLawyer(res?.data?.data);
+  } catch {
+    return null;
+  }
 };
 
-/**
- * Updates the specialized professional dossier for a practitioner.
- */
-export const updateLawyerProfile = async (userId: string, data: any) => {
-  return await updateLawyerProfileMock(userId, data);
-};
-
-/**
- * Retrieves a specific practitioner by their unique identifier.
- */
-export const getLawyerById = async (id: string) => {
-  // Simulate network latency
-  await new Promise(resolve => setTimeout(resolve, 300));
-  return lawyerListMock.find((l) => l.id === id);
-};
-
-/**
- * Retrieves all practitioners in the elite marketplace.
- */
-export const getAllLawyers = async () => {
-  // Simulate network latency
-  await new Promise(resolve => setTimeout(resolve, 500));
-  return lawyerListMock;
-};
-
-/**
- * Filters practitioners based on keyword search across names and specializations.
- */
-export const searchLawyers = async (query: string) => {
-  await new Promise(resolve => setTimeout(resolve, 300));
-  const normalizedQuery = query.toLowerCase();
-  return lawyerListMock.filter(
-    (lawyer) =>
-      lawyer.name.toLowerCase().includes(normalizedQuery) ||
-      lawyer.specialization.toLowerCase().includes(normalizedQuery) ||
-      lawyer.city.toLowerCase().includes(normalizedQuery)
-  );
+export const updateLawyerProfile = async (_userId: string, data: any) => {
+  const me = await apiClient.get('/lawyers/me').then((r) => r?.data?.data).catch(() => null);
+  if (!me?.id) throw new Error('No lawyer profile to update');
+  const res = await apiClient.patch(`/lawyers/${me.id}`, data);
+  return adaptLawyer(res?.data?.data);
 };

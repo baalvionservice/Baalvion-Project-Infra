@@ -1,70 +1,33 @@
 /**
- * @fileOverview ReferralService
- * Orchestrates the network's growth engine and reward synchronization.
+ * @fileOverview ReferralService — LIVE (law-service referrals / Postgres). No mock, no Firebase.
+ * Codes are generated/stored server-side; the member's code is fetched (created on first read).
  */
+import { referralApi } from '@/lib/api/client';
 
-import {
-  getReferralMock,
-  saveReferralMock,
-} from "@/lib/mock/referralMock";
-import { Referral } from "@/types/referral";
+const adaptReferral = (r: any, stats?: any) => ({
+  code: r?.code,
+  referralId: r?.referralId != null ? String(r.referralId) : undefined,
+  referredUsers: stats?.referred ?? stats?.referredUsers ?? [],
+  totalReferred: stats?.totalReferred ?? stats?.completed ?? 0,
+  rewards: stats?.rewards ?? stats?.totalRewards ?? 0,
+});
 
-/**
- * Generates a unique executive referral identifier.
- */
-export const generateReferralCode = (userId: string): string => {
-  const prefix = userId.slice(0, 4).toUpperCase();
-  const timestamp = Date.now().toString().slice(-4);
-  return `ELITE-${prefix}-${timestamp}`;
+export const getUserReferral = async (_userId?: string) => {
+  try {
+    const [codeRes, statsRes] = await Promise.all([
+      referralApi.getMyCode(),
+      referralApi.stats().catch(() => ({ data: { data: {} } })),
+    ]);
+    return adaptReferral(codeRes?.data?.data, statsRes?.data?.data);
+  } catch {
+    return null;
+  }
 };
 
-/**
- * Retrieves the referral dossier for a specific member.
- */
-export const getUserReferral = async (userId: string): Promise<Referral | null> => {
-  const data = getReferralMock();
-  return data.find((r) => r.userId === userId) || null;
-};
+// getMyCode creates the code on first access, so "create" == fetch.
+export const createReferral = async (_userId?: string) => getUserReferral();
 
-/**
- * Provisions a new referral record for a member.
- */
-export const createReferral = async (userId: string): Promise<Referral> => {
-  const data = getReferralMock();
-  const existing = data.find((r) => r.userId === userId);
-
-  if (existing) return existing;
-
-  const newReferral: Referral = {
-    userId,
-    code: generateReferralCode(userId),
-    referredUsers: [],
-    rewards: 0,
-  };
-
-  saveReferralMock([...data, newReferral]);
-  return newReferral;
-};
-
-/**
- * Applies a referral code during the onboarding protocol.
- */
-export const applyReferral = async (
-  code: string,
-  newUserId: string
-): Promise<void> => {
-  const data = getReferralMock();
-
-  const updated = data.map((r) => {
-    if (r.code.toUpperCase() === code.toUpperCase()) {
-      return {
-        ...r,
-        referredUsers: [...r.referredUsers, newUserId],
-        rewards: r.rewards + 100, // ₹100 Reward Credit
-      };
-    }
-    return r;
-  });
-
-  saveReferralMock(updated);
+export const applyReferral = async (code: string, _newUserId?: string) => {
+  await referralApi.apply(code);
+  return { success: true };
 };

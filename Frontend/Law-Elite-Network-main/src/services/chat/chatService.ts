@@ -1,72 +1,54 @@
 /**
- * @fileOverview Chat Service Orchestrator
- * Decouples the UI from real-time communication implementations.
+ * @fileOverview Chat Service (subfolder) — LIVE (law-service messages / Postgres).
+ * No mock, no Firebase. Real-time is approximated by polling the user-scoped thread.
  */
+import { messageApi } from '@/lib/api/client';
 
-import * as firebaseService from './chat.firebase';
-import * as mockService from './chat.mock';
-import { createNotification } from '@/services/notifications/notificationService';
-import { createActivity } from '@/services/activities/activityService';
-import { logAction } from '@/services/audit/auditService';
+const unwrapList = (res: any): any[] => res?.data?.data?.items || (Array.isArray(res?.data?.data) ? res.data.data : []);
 
-const USE_MOCK = true;
+const adaptMsg = (m: any) => ({
+  id: String(m.id),
+  caseId: m.case_id != null ? String(m.case_id) : undefined,
+  senderId: m.sender_id,
+  receiverId: m.receiver_id,
+  text: m.content,
+  content: m.content,
+  type: m.type,
+  fileUrl: m.file_url,
+  isRead: !!m.read_at,
+  createdAt: m.created_at || m.createdAt,
+});
 
-export const sendMessage = async (data: {
-  caseId: string;
-  senderId: string;
-  receiverId: string;
-  text: string;
-  userRole?: string;
-}) => {
-  const result = USE_MOCK 
-    ? await mockService.mockSendMessage(data)
-    : await firebaseService.firebaseSendMessage(data);
-
-  // 1. Trigger Enhanced Notification for Receiver
-  await createNotification({
-    userId: data.receiverId,
-    title: 'New Secure Message Received',
-    message: 'A practitioner or client has broadcasted a secure intelligence update to your dossier channel.',
-    type: 'case_updated',
-    relatedCaseId: data.caseId
+export const sendMessage = async (data: { caseId: string; senderId?: string; receiverId?: string; text: string; userRole?: string }) => {
+  const res = await messageApi.send({
+    content: data.text,
+    case_id: data.caseId ? Number(data.caseId) : undefined,
+    receiver_id: data.receiverId || undefined,
+    type: 'text',
   });
-
-  // 2. Log Activity
-  await createActivity({
-    caseId: data.caseId,
-    type: 'message_sent',
-    message: 'New intelligence broadcasted to the secure context-aware chat channel.',
-    performedBy: data.senderId
-  });
-
-  // 3. Audit Log
-  await logAction({
-    userId: data.senderId,
-    userRole: data.userRole || 'member',
-    action: 'send_message',
-    entityType: 'case',
-    entityId: data.caseId,
-    details: { textLength: data.text.length }
-  });
-
-  return result;
+  return res?.data?.data;
 };
 
-export const subscribeToMessages = (caseId: string, callback: (messages: any[]) => void) => {
-  if (USE_MOCK) {
-    const handler = () => {
-      callback(mockService.mockGetMessages(caseId));
-    };
-    window.addEventListener('chat_update', handler);
-    handler(); // Initial pull
-    return () => window.removeEventListener('chat_update', handler);
-  }
-  return firebaseService.firebaseSubscribeToMessages(caseId, callback);
+export const getMessages = async (caseId: string) => {
+  const res = await messageApi.list({ case_id: caseId });
+  return unwrapList(res).map(adaptMsg);
+};
+
+export const subscribeToMessages = (caseId: string, callback: (messages: any[]) => void): (() => void) => {
+  let active = true;
+  const tick = async () => {
+    try {
+      const res = await messageApi.list({ case_id: caseId });
+      if (active) callback(unwrapList(res).map(adaptMsg));
+    } catch { /* transient */ }
+  };
+  tick();
+  const interval = setInterval(tick, 12_000);
+  return () => { active = false; clearInterval(interval); };
 };
 
 export const markAsRead = async (messageId: string) => {
-  if (USE_MOCK) {
-    return await mockService.mockMarkAsRead(messageId);
-  }
-  return await firebaseService.firebaseMarkAsRead(messageId);
+  const { apiClient } = await import('@/lib/api/client');
+  await apiClient.patch(`/messages/${messageId}/read`);
+  return { success: true };
 };

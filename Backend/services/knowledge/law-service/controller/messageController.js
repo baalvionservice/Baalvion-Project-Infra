@@ -29,10 +29,37 @@ const listMessages = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// Resolve the counterparty's legal.users id for a case/booking thread, given the sender.
+const deriveReceiver = async (req, caseId, bookingId) => {
+    let clientId = null;
+    let lawyerId = null;
+    if (caseId) {
+        const c = await db.Case.findByPk(caseId, { attributes: ['client_id', 'lawyer_id'] });
+        if (c) { clientId = c.client_id; lawyerId = c.lawyer_id; }
+    } else if (bookingId) {
+        const b = await db.Booking.findByPk(bookingId, { attributes: ['client_id', 'lawyer_id'] });
+        if (b) { clientId = b.client_id; lawyerId = b.lawyer_id; }
+    }
+    if (!clientId && !lawyerId) return null;
+    const myLawyer = await db.Lawyer.findOne({ where: { user_id: String(req.user.id) }, attributes: ['id'] });
+    // If I'm the lawyer on this matter, the receiver is the client; otherwise the lawyer.
+    if (myLawyer && lawyerId === myLawyer.id) {
+        const cl = clientId ? await db.Client.findByPk(clientId, { attributes: ['user_id'] }) : null;
+        return cl ? cl.user_id : null;
+    }
+    const lw = lawyerId ? await db.Lawyer.findByPk(lawyerId, { attributes: ['user_id'] }) : null;
+    return lw ? lw.user_id : null;
+};
+
 const sendMessage = async (req, res, next) => {
     try {
-        const { receiver_id, content, type = 'text', file_url, case_id, booking_id } = req.body;
-        if (!receiver_id || !content) return next(new AppError('BAD_REQUEST', 'receiver_id and content are required', 400));
+        let { receiver_id, content, type = 'text', file_url, case_id, booking_id } = req.body;
+        // Thread messages don't need an explicit receiver — derive the counterparty from the matter.
+        if (!receiver_id && (case_id || booking_id)) {
+            receiver_id = await deriveReceiver(req, case_id ? Number(case_id) : null, booking_id ? Number(booking_id) : null);
+        }
+        if (!content) return next(new AppError('BAD_REQUEST', 'content is required', 400));
+        if (!receiver_id) return next(new AppError('BAD_REQUEST', 'receiver_id is required (or a case/booking with an assigned counterparty)', 400));
         const message = await db.Message.create({
             sender_id: String(req.user.id),
             receiver_id: String(receiver_id),
