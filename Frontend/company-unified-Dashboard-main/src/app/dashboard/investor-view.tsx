@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -9,16 +10,12 @@ import { DollarSign, Briefcase, TrendingUp, PieChart } from "lucide-react";
 import { RoleWelcomeBanner } from "@/components/role-welcome-banner";
 import RoiChart from "@/components/charts/roi-chart";
 import EquityPieChart from "@/components/charts/equity-pie-chart";
-import businesses from "@/lib/data/businesses";
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import type { Business } from "@/lib/types";
 
 export default function InvestorView() {
-  const investorBusinessIds = ["biz_1", "biz_3", "biz_5"];
-  const myBusinesses: Business[] = businesses.filter((b) =>
-    investorBusinessIds.includes(b.id)
-  );
+  const { businesses: myBusinesses } = useGlobalFinancials();
 
   return (
     <div className="space-y-8 min-w-0">
@@ -99,9 +96,7 @@ export default function InvestorView() {
             const image = PlaceHolderImages.find(
               (img) => img.id === biz.imageId
             );
-            const equity = biz.equitySplit.find(
-              (e) => e.name === "John Smith"
-            )?.percentage;
+            const equity = 25; // default holding (per-business equity split not modeled yet)
             return (
               <Card key={biz.id}>
                 <CardHeader className="flex flex-row items-center gap-4 space-y-0">

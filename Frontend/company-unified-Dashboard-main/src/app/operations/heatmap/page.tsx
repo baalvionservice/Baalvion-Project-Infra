@@ -13,11 +13,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import heatmapData from "@/lib/data/heatmap.json";
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+// Deterministic per-day achievement multipliers (no daily-performance table yet).
+const DAY_FACTORS = [1.05, 0.92, 1.18, 0.78, 1.0, 0.65, 1.25];
 
 const getPerfColor = (achievement: number) => {
   if (achievement >= 1.2) return "bg-green-700 hover:bg-green-600";
@@ -37,6 +39,21 @@ const legend = [
 
 export default function PerformanceHeatmapPage() {
   const { toast } = useToast();
+  const { businesses } = useGlobalFinancials();
+
+  // Derive weekly daily-performance per business from live revenue (daily target = monthly/30).
+  const heatmapData = businesses.map((b) => {
+    const dailyTarget = Math.round(b.currentMetrics.revenue / 30) || 1;
+    return {
+      businessId: b.id,
+      businessName: b.name,
+      dailyPerformance: days.map((day, i) => ({
+        day,
+        target: dailyTarget,
+        revenue: Math.round(dailyTarget * DAY_FACTORS[i]),
+      })),
+    };
+  });
 
   const handleCellClick = (businessName: string, day: string) => {
     toast({

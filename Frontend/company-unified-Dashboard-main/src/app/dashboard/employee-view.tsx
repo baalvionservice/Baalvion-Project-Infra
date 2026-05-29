@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -9,12 +10,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Clock, Star, Target } from "lucide-react";
 import { RoleWelcomeBanner } from "@/components/role-welcome-banner";
-import users from "@/lib/data/users.json";
-import businesses from "@/lib/data/businesses";
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-
-const employee = users.find((u) => u.role === "EMPLOYEE"); // Li Wei
-const business = businesses.find((b) => b.id === "biz_5"); // DigitalAgency SG
 
 const myTasks = [
   { id: 1, title: "Create social media graphics for Client X", status: "Done" },
@@ -41,6 +39,11 @@ const attendance = [
 ];
 
 export default function EmployeeView() {
+  const { businesses } = useGlobalFinancials();
+  const { employees } = useDashboardRefs();
+  const employee = employees[0];
+  const business = businesses[0];
+
   if (!employee || !business) return <div>Loading...</div>;
 
   const userImage = PlaceHolderImages.find(
