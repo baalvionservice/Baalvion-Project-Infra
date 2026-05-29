@@ -20,9 +20,10 @@ import UsageMetrics from './components/usage-metrics';
 import PaymentMethods from './components/payment-methods';
 import BillingContact from './components/billing-contact';
 import InvoiceHistory from './components/invoice-history';
-import billingData from '@/lib/data/billing.json';
+import { useBilling } from '@/hooks/use-billing';
 
 export default function BillingPage() {
+  const billingData = useBilling();
   const [isCancelled, setIsCancelled] = useState(false);
   const { toast } = useToast();
   

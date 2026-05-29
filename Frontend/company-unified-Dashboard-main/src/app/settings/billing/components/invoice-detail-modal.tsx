@@ -6,7 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Download } from 'lucide-react';
 import type { Invoice } from '@/lib/types';
-import billingData from '@/lib/data/billing.json';
+import { useBilling } from '@/hooks/use-billing';
 import { format } from 'date-fns';
 
 interface InvoiceDetailModalProps {
@@ -22,6 +22,7 @@ const BaalvionLogo = () => (
 )
 
 export default function InvoiceDetailModal({ invoice, isOpen, onOpenChange }: InvoiceDetailModalProps) {
+  const billingData = useBilling();
   if (!invoice) return null;
 
   return (

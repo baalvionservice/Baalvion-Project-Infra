@@ -142,6 +142,24 @@ router.get('/gdpr', authMiddleware, (req, res) =>
     }),
 );
 
+// Billing — subscription, usage, contact + invoice history (no billing table yet; reference data).
+router.get('/billing', authMiddleware, (req, res) =>
+    sendSuccess(req, res, {
+        subscription: { plan: 'Pro', price: 299, annualPrice: 2990, billingCycle: 'annually', status: 'Active', nextBillingDate: '2026-07-01', paymentMethod: { type: 'Visa', last4: '4242', expiry: '09/27' } },
+        usage: {
+            businesses: { used: 3, limit: 5 },
+            users: { used: 14, limit: 25 },
+            apiCalls: { used: 48240, limit: 100000 },
+            storage: { used: 2.4, limit: 10 },
+        },
+        billingContact: { name: 'Demo User', email: 'demo@baalvion.test', company: 'Baalvion Holdings', address: 'DIFC, Dubai, UAE' },
+        invoices: Array.from({ length: 6 }, (_, i) => {
+            const m = 5 - i; const d = new Date(2026, m, 1);
+            return { id: `INV-2026-${String(m + 1).padStart(3, '0')}`, period: d.toLocaleString('en-US', { month: 'long', year: 'numeric' }), amount: 299, status: 'Paid', paymentDate: d.toISOString().slice(0, 10) };
+        }),
+    }),
+);
+
 // Marketplace — installable apps catalog + installed list (no marketplace table yet; reference data).
 router.get('/marketplace', authMiddleware, (req, res) => {
     const mkApp = (slug, name, category, description, rating, installs, developer, pricing, featured) => ({

@@ -219,6 +219,7 @@ export const dashboardApi = {
   portals: () => get('/portals'),
   automation: () => get('/automation'),
   marketplace: () => get('/marketplace'),
+  billing: () => get('/billing'),
   permissionMatrix: () => get('/permissions/matrix'),
   markNotificationRead: (id: string) => post(`/notifications/${id}/read`),
   auditLogs: (params?: { page?: number; limit?: number }) => {

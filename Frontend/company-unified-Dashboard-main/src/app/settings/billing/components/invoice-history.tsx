@@ -7,13 +7,14 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, View, Download, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import invoicesData from '@/lib/data/invoices.json';
+import { useBilling } from '@/hooks/use-billing';
 import { format } from 'date-fns';
 import type { Invoice } from '@/lib/types';
 import InvoiceDetailModal from './invoice-detail-modal';
 import { useToast } from '@/hooks/use-toast';
 
 export default function InvoiceHistory() {
+  const invoicesData = { invoices: useBilling().invoices };
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const { toast } = useToast();
