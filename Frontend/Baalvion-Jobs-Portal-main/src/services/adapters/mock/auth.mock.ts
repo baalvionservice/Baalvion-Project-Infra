@@ -1,7 +1,8 @@
 
 import { mockUsers } from './user.mock';
 
-const SESSION_KEY = 'auth_session';
+// P0: mock session held in memory only (no sessionStorage/localStorage). Dev-only adapter.
+let _mockSession: { userId: string } | null = null;
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
 export const authMockService = {
@@ -9,27 +10,21 @@ export const authMockService = {
         await delay(500);
         const user = mockUsers.find(u => u.email === email); // Password check is ignored in mock
         if (user) {
-            sessionStorage.setItem(SESSION_KEY, JSON.stringify({ userId: user.id }));
+            _mockSession = { userId: user.id };
             return { success: true, userId: user.id };
         }
         return { success: false, message: "Invalid credentials" };
     },
-    
+
     async logout(): Promise<void> {
         await delay(100);
-        sessionStorage.removeItem(SESSION_KEY);
+        _mockSession = null;
     },
 
     async checkSession(): Promise<{ isAuthenticated: boolean; userId: string | null; }> {
         await delay(300);
-        const session = sessionStorage.getItem(SESSION_KEY);
-        if (session) {
-            try {
-                const { userId } = JSON.parse(session);
-                return { isAuthenticated: true, userId };
-            } catch (e) {
-                return { isAuthenticated: false, userId: null };
-            }
+        if (_mockSession) {
+            return { isAuthenticated: true, userId: _mockSession.userId };
         }
         return { isAuthenticated: false, userId: null };
     }

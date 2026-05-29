@@ -1,9 +1,7 @@
 
 import { NextRequest } from "next/server";
-import { addApplication } from '@/mocks/talent-platform/applications.mock';
 
 const JOBS_SERVICE = process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || 'http://localhost:3002/api/v1';
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK !== 'false';
 
 export async function POST(
     request: NextRequest,
@@ -14,17 +12,7 @@ export async function POST(
     try {
         const formData = await request.json();
 
-        if (USE_MOCK) {
-            // In-memory mock path — kept for local dev without a backend
-            const newApplication = addApplication(formData);
-            return Response.json({
-                success: true,
-                data: { applicationId: newApplication.id },
-                error: null,
-            }, { status: 201 });
-        }
-
-        // Real path — forward to jobs-service
+        // Forward to the real jobs-service (public application endpoint).
         const payload = {
             job_id: parseInt(formData.jobId, 10),
             email: formData.email,

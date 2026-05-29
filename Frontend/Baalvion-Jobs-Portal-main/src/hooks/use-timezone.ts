@@ -10,7 +10,10 @@ export function useTimezone() {
     setTimezone(Intl.DateTimeFormat().resolvedOptions().timeZone);
   }, []);
 
-  const toLocalTime = useCallback((date: Date, options?: Intl.DateTimeFormatOptions): string => {
+  const toLocalTime = useCallback((date: Date | string | number, options?: Intl.DateTimeFormatOptions): string => {
+    // Coerce strings/numbers (backend sends ISO strings) to a Date defensively.
+    const d = date instanceof Date ? date : new Date(date);
+    if (isNaN(d.getTime())) return '—';
     const defaultOptions: Intl.DateTimeFormatOptions = {
       year: 'numeric',
       month: 'long',
@@ -18,10 +21,10 @@ export function useTimezone() {
       ...options,
     };
     try {
-      return new Intl.DateTimeFormat('en-US', { ...defaultOptions, timeZone: timezone }).format(date);
+      return new Intl.DateTimeFormat('en-US', { ...defaultOptions, timeZone: timezone }).format(d);
     } catch (e) {
       // Fallback for invalid timezone or other errors
-      return date.toLocaleDateString();
+      return d.toLocaleDateString();
     }
   }, [timezone]);
 

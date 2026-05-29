@@ -6,8 +6,18 @@ import { useAuthStore } from '@/store/auth.store';
 import type { UserRole } from '@/types/contracts';
 import { refresh as authRefresh, decodeJwt } from '@/lib/authClient';
 import { setTokens as setApiAccessToken } from '@/lib/apiClient';
+import { getPortalProfile } from '@/services/adapters/server/auth.server';
 
 const BASE_URL = process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+
+// Org owners are top-level admins in the portal RBAC.
+const normRole = (raw: string): UserRole => {
+  const u = (raw || '').toUpperCase();
+  if (u === 'OWNER') return 'SUPER_ADMIN';
+  if (u === 'MANAGER') return 'ADMIN';
+  if (u === 'MEMBER' || u === 'VIEWER') return 'CANDIDATE';
+  return (u || 'CANDIDATE') as UserRole;
+};
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { setTokens, clearAuth, setIsLoading } = useAuthStore();
@@ -34,33 +44,31 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         fullName:  String(payload.email ?? ''),
         email:     String(payload.email ?? ''),
         avatarUrl: '',
-        role:      String(roles[0] ?? 'candidate').toUpperCase() as UserRole,
+        role:      normRole(String(roles[0] ?? 'candidate')),
         isActive:  true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      // Optimistic restore — then enrich from the server.
+      // Optimistic restore — then enrich with the real portal identity (role + candidateId)
+      // from the jobs-service (auth tokens only ever say "owner").
       setTokens(restoredUser, token);
 
-      const meUrl = BASE_URL.replace('/auth', '/users/me');
       try {
-        const res = await fetch(meUrl, { credentials: 'include', headers: { Authorization: `Bearer ${token}` } });
-        const data = res.ok ? await res.json() : null;
-        if (!data || cancelled) return;
-        const u = data?.data ?? data;
+        const profile = await getPortalProfile();
+        if (!profile || cancelled) return;
         setTokens({
           ...restoredUser,
-          id:        String(u.id ?? restoredUser.id),
-          name:      String(u.name ?? u.fullName ?? restoredUser.name),
-          fullName:  String(u.name ?? u.fullName ?? restoredUser.fullName),
-          email:     String(u.email ?? restoredUser.email),
-          avatarUrl: String(u.avatarUrl ?? ''),
-          role:      String(u.role ?? restoredUser.role).toUpperCase() as UserRole,
-          isActive:  u.status === 'active' || u.isActive === true,
+          id:        String(profile.userId ?? restoredUser.id),
+          name:      String(profile.name ?? restoredUser.name),
+          fullName:  String(profile.name ?? restoredUser.fullName),
+          email:     String(profile.email ?? restoredUser.email),
+          role:      normRole(String(profile.role ?? restoredUser.role)),
+          candidateId: profile.candidateId ?? null,
+          isActive:  true,
         }, token);
       } catch {
-        /* server down — keep optimistic state */
+        /* jobs-service down — keep optimistic state */
       }
     })();
 

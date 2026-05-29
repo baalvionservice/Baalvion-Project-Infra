@@ -40,9 +40,10 @@ export const TenantProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     if (user && !isAuthLoading) {
       setIsTenantLoading(true);
-      organizationService.getUserOrganizations(user.id).then(orgs => {
+      organizationService.getUserOrganizations(user.id).then(raw => {
+        const orgs = Array.isArray(raw) ? raw : [];
         setOrganizations(orgs);
-        
+
         const storedOrgId = localStorage.getItem(TENANT_STORAGE_KEY);
         const lastOrg = orgs.find(o => o.id === storedOrgId);
         const firstOrg = orgs.length > 0 ? orgs[0] : null;

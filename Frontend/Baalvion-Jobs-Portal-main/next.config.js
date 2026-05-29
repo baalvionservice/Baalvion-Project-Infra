@@ -33,7 +33,7 @@ const nextConfig = {
   // Env-driven base — defaulting here neutralises per-route `|| 'http://localhost:3002/api/v1'`
   // fallbacks (jobs-service via gateway). Auth stays on Keycloak (Phase 4 — not migrated yet).
   env: {
-    NEXT_PUBLIC_JOBS_SERVICE_URL: process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || 'https://api.baalvion.com/api/v1/ecosystem/jobs/api/v1',
+    NEXT_PUBLIC_JOBS_SERVICE_URL: process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || 'http://localhost:3002/api/v1',
   },
   reactStrictMode: true,
   compress: true,

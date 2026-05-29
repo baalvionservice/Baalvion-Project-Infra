@@ -78,12 +78,14 @@ async function doRequest<T>(
       if (refreshed) {
         return doRequest<T>(baseUrl, method, path, body, true);
       }
-      handleUnauthorized();
+      // Only force a login redirect when a real session existed (it expired). Anonymous
+      // visitors on public pages must NOT be bounced to /login by a stray authed call.
+      if (token) handleUnauthorized();
       return { success: false, data: null, error: 'Session expired. Please log in again.' };
     }
 
     if (res.status === 401 && isRetry) {
-      handleUnauthorized();
+      if (token) handleUnauthorized();
       return { success: false, data: null, error: 'Session expired. Please log in again.' };
     }
 

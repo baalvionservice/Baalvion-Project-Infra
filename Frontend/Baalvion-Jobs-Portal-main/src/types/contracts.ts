@@ -36,6 +36,8 @@ export interface User {
   createdAt: string;
   updatedAt: string;
   reputationSummary?: ReputationSummary;
+  /** jobs-service candidate row id for the logged-in candidate (portal identity). */
+  candidateId?: string | null;
 }
 
 export interface Role {

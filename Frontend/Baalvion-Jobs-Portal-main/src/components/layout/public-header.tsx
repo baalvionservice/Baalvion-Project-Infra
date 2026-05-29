@@ -144,7 +144,7 @@ export function PublicHeader() {
 
                         <div className="hidden md:flex items-center gap-2">
                             <Button variant="outline" asChild>
-                                <Link href="/login">Admin Panel</Link>
+                                <Link href="/login">Sign In</Link>
                             </Button>
                         </div>
 
@@ -221,7 +221,7 @@ export function PublicHeader() {
                                         </SheetClose>
                                         <SheetClose asChild>
                                             <Button variant="outline" asChild className="w-full mt-4">
-                                                <Link href="/login">Admin Panel</Link>
+                                                <Link href="/login">Sign In</Link>
                                             </Button>
                                         </SheetClose>
                                     </nav>

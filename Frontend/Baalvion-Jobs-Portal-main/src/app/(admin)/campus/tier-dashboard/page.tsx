@@ -5,7 +5,6 @@ import { studentService } from "@/services/student.service";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { BarChart, PieChart, Pie, Cell, Legend, Bar, XAxis, YAxis, Tooltip } from "recharts";
 import { ChartContainer } from "@/components/ui/chart";
-import { mockStudents } from "@/mocks/students.mock";
 import { Loader2, Trophy } from "lucide-react";
 import useSWR from "swr";
 

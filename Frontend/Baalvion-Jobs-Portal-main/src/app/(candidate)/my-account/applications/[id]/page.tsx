@@ -12,22 +12,26 @@ import { applicationService } from "@/services/application.service";
 import { ApplicationDetails } from '@/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
+import { useAuth } from '@/hooks/useAuth';
 
 
 export default function ApplicationDetailPage() {
     const params = useParams();
     const id = params.id as string;
-    
+    const { user, isLoading: isAuthLoading } = useAuth();
+
     const [details, setDetails] = useState<ApplicationDetails | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (!id) return;
-        
+        // Wait until the session is established (access token in memory) before fetching —
+        // otherwise a direct load / refresh races the auth bootstrap and 401s.
+        if (!id || isAuthLoading || !user) return;
+
         const fetchDetails = async () => {
             setIsLoading(true);
             try {
-                const data = await applicationService.getApplicationDetails(id);
+                const data = await applicationService.getMyApplicationDetail(id);
                 setDetails(data);
             } catch (error) {
                 console.error("Failed to fetch application details:", error);
@@ -37,7 +41,7 @@ export default function ApplicationDetailPage() {
             }
         };
         fetchDetails();
-    }, [id]);
+    }, [id, user, isAuthLoading]);
 
     if (isLoading) {
         return (

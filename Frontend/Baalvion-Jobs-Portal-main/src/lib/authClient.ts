@@ -47,14 +47,35 @@ export async function login(email: string, password: string): Promise<{ access_t
   return { access_token: access, user: userFromToken(access) };
 }
 
-/** Refresh using the httpOnly cookie only — there is no JS-readable refresh token. */
+/** Candidate self-registration against auth-service. Returns an access token (auto-login). */
+export async function register(email: string, password: string, fullName?: string): Promise<{ access_token: string; user: ReturnType<typeof userFromToken> }> {
+  const data = await postJson('/register', { email, password, full_name: fullName });
+  const access = data.accessToken ?? data.access_token;
+  return { access_token: access, user: userFromToken(access) };
+}
+
+/**
+ * Refresh using the httpOnly cookie only — there is no JS-readable refresh token.
+ * Single-flight: the auth-service ROTATES the refresh token on every call, so two
+ * concurrent refreshes would invalidate each other (the 2nd uses a consumed token →
+ * 401). AuthProvider and apiClient both refresh, so we dedupe through one in-flight
+ * promise to avoid the rotation race.
+ */
+let _refreshInFlight: Promise<string | null> | null = null;
 export async function refresh(): Promise<string | null> {
-  try {
-    const data = await postJson('/refresh');
-    return data.accessToken ?? data.access_token ?? null;
-  } catch {
-    return null;
-  }
+  if (_refreshInFlight) return _refreshInFlight;
+  _refreshInFlight = (async () => {
+    try {
+      const data = await postJson('/refresh');
+      return data.accessToken ?? data.access_token ?? null;
+    } catch {
+      return null;
+    } finally {
+      // brief settle so a burst of callers shares this result before re-arming
+      setTimeout(() => { _refreshInFlight = null; }, 0);
+    }
+  })();
+  return _refreshInFlight;
 }
 
 export async function logout(): Promise<void> {

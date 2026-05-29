@@ -15,6 +15,7 @@ import { LoginFormData, LoginSchema } from "@/types/auth.types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import Link from "next/link";
 
 export default function LoginPage() {
     const { login, isLoading } = useAuth();
@@ -30,14 +31,13 @@ export default function LoginPage() {
         login(data.email, data.password);
     };
 
+    // Real demo accounts (auth-service). Password for all: Passw0rd!23
     const mockUsers = [
-        { role: 'Super Admin', email: 'admin@baalvion.com' },
-        { role: 'Recruiter', email: 'recruiter@baalvion.com' },
-        { role: 'Admin / Manager', email: 'manager@baalvion.com' },
-        { role: 'Interviewer', email: 'elon@tesla.com' },
-        { role: 'Finance', email: 'finance@acme.inc' },
-        { role: 'Candidate', email: 'elena.rodriguez@example.com' },
+        { role: 'Admin', email: 'jobs-admin@baalvion.test' },
+        { role: 'Recruiter', email: 'jobs-recruiter@baalvion.test' },
+        { role: 'Candidate', email: 'jobs-candidate@baalvion.test' },
     ];
+    const DEMO_PASSWORD = 'Passw0rd!23';
 
     return (
         <div className="flex h-screen items-center justify-center bg-muted p-4">
@@ -60,7 +60,6 @@ export default function LoginPage() {
                                 <FormItem>
                                     <FormLabel>Password</FormLabel>
                                     <FormControl><Input type="password" placeholder="••••••••" {...field} /></FormControl>
-                                    <FormDescription>Any password will work for mock users.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )} />
@@ -72,7 +71,11 @@ export default function LoginPage() {
                     </Form>
                 </CardContent>
                 <CardFooter className="flex flex-col items-start text-sm text-muted-foreground pt-4 border-t">
-                    <h3 className="font-semibold mb-2 text-foreground">Quick Logins</h3>
+                    <p className="mb-3 w-full text-center">
+                        New candidate?{" "}
+                        <Link href="/register" className="font-medium text-primary hover:underline">Create an account</Link>
+                    </p>
+                    <h3 className="font-semibold mb-2 text-foreground">Demo Logins (password: Passw0rd!23)</h3>
                     <ul className="space-y-1 w-full">
                         {mockUsers.map(user => (
                             <li key={user.email} className="flex justify-between items-center">
@@ -83,6 +86,7 @@ export default function LoginPage() {
                                     onClick={(e) => {
                                         e.preventDefault();
                                         form.setValue('email', user.email);
+                                        form.setValue('password', DEMO_PASSWORD);
                                     }}
                                 >
                                     {user.email}

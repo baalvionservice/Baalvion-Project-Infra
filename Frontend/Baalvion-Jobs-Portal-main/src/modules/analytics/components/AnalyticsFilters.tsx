@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DateRange } from 'react-day-picker';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -11,8 +11,7 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { AnalyticsFilters as IAnalyticsFilters } from '../domain/analytics.entity';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { mockCountries } from '@/mocks/talent-platform/countries.mock';
-import { mockDepartments } from '@/mocks/talent-platform/departments.mock';
+import { talentService } from '@/services/talent.service';
 
 interface AnalyticsFiltersProps {
     filters: IAnalyticsFilters;
@@ -21,6 +20,13 @@ interface AnalyticsFiltersProps {
 
 export function AnalyticsFilters({ filters, setFilters }: AnalyticsFiltersProps) {
     const [date, setDate] = useState<DateRange | undefined>(filters.dateRange as DateRange | undefined);
+    // Real reference data from the backend (was mock countries/departments).
+    const [countries, setCountries] = useState<{ id: string; name: string }[]>([]);
+    const [departments, setDepartments] = useState<{ id: string; name: string }[]>([]);
+    useEffect(() => {
+        talentService.getCountries({ isActive: true }).then((c: any[]) => setCountries(c || [])).catch(() => {});
+        talentService.getDepartments({ isActive: true }).then((d: any[]) => setDepartments(d || [])).catch(() => {});
+    }, []);
 
     const handleApply = () => {
         setFilters(prev => ({ ...prev, dateRange: date }));
@@ -83,7 +89,7 @@ export function AnalyticsFilters({ filters, setFilters }: AnalyticsFiltersProps)
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Countries</SelectItem>
-                        {mockCountries.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                        {countries.map((c, i) => <SelectItem key={`${c.id}-${i}`} value={c.id}>{c.name}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </div>
@@ -95,7 +101,7 @@ export function AnalyticsFilters({ filters, setFilters }: AnalyticsFiltersProps)
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Departments</SelectItem>
-                        {mockDepartments.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
+                        {departments.map((d, i) => <SelectItem key={`${d.id}-${i}`} value={d.id}>{d.name}</SelectItem>)}
                     </SelectContent>
                 </Select>
             </div>

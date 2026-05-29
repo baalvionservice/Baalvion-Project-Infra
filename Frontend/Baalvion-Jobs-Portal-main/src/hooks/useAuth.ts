@@ -4,12 +4,13 @@
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
 import { UserRole } from '@/types/contracts';
-import { authServerService } from '@/services/adapters/server/auth.server';
+import { authServerService, getPortalProfile } from '@/services/adapters/server/auth.server';
 
 // Map backend role strings to portal UserRole enum
 function normalizeRole(raw: string): UserRole {
   const upper = raw.toUpperCase();
   const roleMap: Record<string, UserRole> = {
+    OWNER:       'SUPER_ADMIN',
     SUPER_ADMIN: 'SUPER_ADMIN',
     ADMIN:       'ADMIN',
     MANAGER:     'ADMIN',
@@ -38,23 +39,54 @@ export const useAuth = () => {
         throw new Error(res.error ?? 'Login failed');
       }
 
-      // Backend shape: { token, user: { id, name, email, role, status, ... } }
+      // Backend shape: { token, user: { id, name, email, ... } }
       const raw = res.data as Record<string, unknown>;
       const token = (raw.token ?? raw.accessToken ?? '') as string;
       const backendUser = (raw.user ?? raw.data ?? raw) as Record<string, unknown>;
 
+      // The real portal role + candidateId come from the jobs-service (auth only says "owner").
+      const profile = await getPortalProfile();
+
       const portalUser = {
-        id:        String(backendUser.id ?? ''),
-        name:      (backendUser.name ?? backendUser.fullName ?? email) as string,
-        fullName:  (backendUser.name ?? backendUser.fullName ?? email) as string,
-        email:     (backendUser.email ?? email) as string,
+        id:        String(profile?.userId ?? backendUser.id ?? ''),
+        name:      (profile?.name ?? backendUser.name ?? backendUser.fullName ?? email) as string,
+        fullName:  (profile?.name ?? backendUser.name ?? backendUser.fullName ?? email) as string,
+        email:     (profile?.email ?? backendUser.email ?? email) as string,
         avatarUrl: (backendUser.avatarUrl ?? '') as string,
-        role:      normalizeRole(String(backendUser.role ?? 'CANDIDATE')),
-        isActive:  backendUser.status === 'active' || backendUser.isActive === true,
+        role:      normalizeRole(String(profile?.role ?? backendUser.role ?? 'CANDIDATE')),
+        candidateId: profile?.candidateId ?? null,
+        isActive:  true,
         createdAt: (backendUser.createdAt ?? new Date().toISOString()) as string,
         updatedAt: (backendUser.updatedAt ?? new Date().toISOString()) as string,
       };
 
+      setTokens(portalUser, token);
+      router.push(portalUser.role === 'CANDIDATE' ? '/my-account' : '/dashboard');
+    } catch (err) {
+      setIsLoading(false);
+      throw err;
+    }
+  };
+
+  const register = async (email: string, password: string, fullName?: string) => {
+    setIsLoading(true);
+    try {
+      const res = await authServerService.register(email, password, fullName);
+      if (!res.success || !res.data) throw new Error(res.error ?? 'Registration failed');
+      const token = (res.data as Record<string, unknown>).token as string;
+      const profile = await getPortalProfile();
+      const portalUser = {
+        id:        String(profile?.userId ?? ''),
+        name:      (profile?.name ?? fullName ?? email) as string,
+        fullName:  (profile?.name ?? fullName ?? email) as string,
+        email:     (profile?.email ?? email) as string,
+        avatarUrl: '',
+        role:      normalizeRole(String(profile?.role ?? 'CANDIDATE')),
+        candidateId: profile?.candidateId ?? null,
+        isActive:  true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
       setTokens(portalUser, token);
       router.push(portalUser.role === 'CANDIDATE' ? '/my-account' : '/dashboard');
     } catch (err) {
@@ -75,6 +107,7 @@ export const useAuth = () => {
     user,
     isLoading,
     login,
+    register,
     logout,
     setRole,
     isAuthenticated: !!user,

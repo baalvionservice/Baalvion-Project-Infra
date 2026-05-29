@@ -1,7 +1,7 @@
 
 'use client';
 import * as React from 'react';
-import { Pie, PieChart } from 'recharts';
+import { Pie, PieChart, Cell } from 'recharts';
 
 import {
   Card,
@@ -57,6 +57,9 @@ export function StatusDistributionChart({ data }: StatusDistributionChartProps) 
               innerRadius={60}
               strokeWidth={5}
             >
+              {data.map((entry, i) => (
+                <Cell key={`cell-${entry.name}-${i}`} fill={entry.fill} />
+              ))}
             </Pie>
              <ChartLegend
                 content={<ChartLegendContent nameKey="name" />}

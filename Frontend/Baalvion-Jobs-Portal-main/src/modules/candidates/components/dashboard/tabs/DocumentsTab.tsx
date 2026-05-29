@@ -34,10 +34,13 @@ export function DocumentsTab({ user }: DocumentsTabProps) {
     const [isLoading, setIsLoading] = useState(true);
     const [isUploadOpen, setIsUploadOpen] = useState(false);
 
+    // Portal identity: the jobs candidate row id (NOT the auth user id).
+    const candidateId = (user as any).candidateId as string | null | undefined;
+
     const fetchDocs = async () => {
         setIsLoading(true);
         try {
-            const data = await documentService.getDocumentsForCandidate(user.id);
+            const data = candidateId ? await documentService.getDocumentsForCandidate(candidateId) : [];
             setDocuments(data);
         } catch (err) {
             console.error("Failed to fetch documents", err);
@@ -47,10 +50,8 @@ export function DocumentsTab({ user }: DocumentsTabProps) {
     };
 
     useEffect(() => {
-        if (user.id) {
-            fetchDocs();
-        }
-    }, [user.id]);
+        fetchDocs();
+    }, [candidateId]);
     
     const handleRequestDeletion = async (docId: string) => {
         showToast({
@@ -149,7 +150,7 @@ export function DocumentsTab({ user }: DocumentsTabProps) {
                     isOpen={isUploadOpen}
                     onClose={() => setIsUploadOpen(false)}
                     onUploadSuccess={handleUploadSuccess}
-                    candidateId={user.id}
+                    candidateId={candidateId ?? ''}
                 />
             )}
         </>
