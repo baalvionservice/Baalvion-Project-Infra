@@ -1,13 +1,14 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { AlertTriangle } from 'lucide-react';
+'use client';
 import { Badge } from '@/components/ui/badge';
-import aiPredictionsData from '@/lib/data/ai-predictions.json';
+import { useAi } from '@/hooks/use-ai';
 import { cn } from '@/lib/utils';
 
-const alerts = aiPredictionsData.riskAlerts;
-
 export default function RiskAlerts() {
+    const { predictions } = useAi();
+    const alerts = predictions.riskAlerts;
     return (
         <Card>
             <CardHeader>

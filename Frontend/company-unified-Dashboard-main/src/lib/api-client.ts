@@ -221,6 +221,7 @@ export const dashboardApi = {
   marketplace: () => get('/marketplace'),
   billing: () => get('/billing'),
   sync: () => get('/sync'),
+  ai: () => get('/ai'),
   permissionMatrix: () => get('/permissions/matrix'),
   markNotificationRead: (id: string) => post(`/notifications/${id}/read`),
   auditLogs: (params?: { page?: number; limit?: number }) => {

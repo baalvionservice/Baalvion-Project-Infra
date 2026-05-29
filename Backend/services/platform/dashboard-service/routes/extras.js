@@ -142,6 +142,34 @@ router.get('/gdpr', authMiddleware, (req, res) =>
     }),
 );
 
+// AI — revenue predictions, growth opportunities, risk alerts + strategic scenarios (reference data).
+router.get('/ai', authMiddleware, (req, res) =>
+    sendSuccess(req, res, {
+        predictions: {
+            confidenceScore: 78,
+            revenuePredictions: [
+                { businessId: '2', currentMrr: 1850000, forecasts: { threeMonth: 2050000, sixMonth: 2300000, twelveMonth: 2800000 }, confidence: 82 },
+                { businessId: '3', currentMrr: 2100000, forecasts: { threeMonth: 2250000, sixMonth: 2500000, twelveMonth: 3050000 }, confidence: 75 },
+                { businessId: '4', currentMrr: 1890000, forecasts: { threeMonth: 1950000, sixMonth: 2100000, twelveMonth: 2400000 }, confidence: 71 },
+            ],
+            growthOpportunities: [
+                { id: 'opp_1', title: 'Launch premium tier in UK', description: 'Strong market fit for a premium offering in the UK segment.', estimatedImpact: '+$120K/yr', confidence: 76 },
+                { id: 'opp_2', title: 'Cross-sell logistics to trade clients', description: 'Bundle fulfilment with the trade desk.', estimatedImpact: '+$90K/yr', confidence: 68 },
+            ],
+            riskAlerts: [
+                { id: 'risk_1', business: 'Baalvion Trade House', description: 'High dependency on 2 clients (68% of revenue).', level: 'HIGH' },
+                { id: 'risk_2', business: 'Amarisé Maison Avenue', description: 'FX exposure on EUR-denominated costs.', level: 'MEDIUM' },
+            ],
+        },
+        strategy: {
+            expand: { cost: '1.5M', timeToRevenue: '9-12 months', riskLevel: 'Medium-High', confidence: 78, requirements: ['Incorporate a local subsidiary.', 'Obtain the relevant operating license.', 'Comply with local data laws.', 'Establish banking relationships.'], competitors: ['Regional Leader A', 'Regional Leader B'], summary: 'Expansion is viable with a 9-12 month runway and medium-high risk.' },
+            acquire: { roi: '3.2x', integrationCost: '800K', synergySavings: '1.1M/yr', offerRange: '10M - 14M', confidence: 74, summary: 'Acquisition delivers strong synergies; offer within 10-14M.' },
+            merge: { combinedRevenue: '6.0M', costSavings: '1.4M/yr', redundantHeadcount: 12, newEntityValue: '32M', confidence: 70, summary: 'Merger creates a $32M entity with $1.4M annual savings.' },
+            windDown: { outstandingLiabilities: '450K', employeeSeverance: '320K', assetLiquidationValue: '1.2M', netPosition: '430K', confidence: 81, summary: 'Orderly wind-down nets a positive $430K after liabilities.' },
+        },
+    }),
+);
+
 // Sync — online/offline sales snapshots + data conflicts (no sync table yet; reference data).
 router.get('/sync', authMiddleware, (req, res) => {
     const week = (base) => ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day, i) => ({ day, revenue: Math.round(base * (0.8 + (i % 4) * 0.12)) }));

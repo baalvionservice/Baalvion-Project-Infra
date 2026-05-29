@@ -26,14 +26,16 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import businessesData from "@/lib/data/businesses";
-import strategyData from "@/lib/data/strategy.json";
+import { useAi, type AiStrategy } from "@/hooks/use-ai";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 
-type AnalysisResult = typeof strategyData.windDown;
+type AnalysisResult = AiStrategy['windDown'];
 
 export default function WindDownPlanner() {
+  const { strategy } = useAi();
+  const { businesses: businessesData } = useDashboardRefs();
   const [business, setBusiness] = useState("");
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<AnalysisResult | null>(null);
@@ -51,7 +53,7 @@ export default function WindDownPlanner() {
     setLoading(true);
     setResults(null);
     setTimeout(() => {
-      setResults(strategyData.windDown);
+      setResults(strategy.windDown);
       setLoading(false);
     }, 1500);
   };

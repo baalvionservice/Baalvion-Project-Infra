@@ -1,3 +1,4 @@
+"use client";
 import {
   Table,
   TableBody,
@@ -16,15 +17,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
-import aiPredictionsData from "@/lib/data/ai-predictions.json";
-import businessesData from "@/lib/data/businesses";
-import fxRatesData from "@/lib/data/fx-rates.json";
+import { useAi } from "@/hooks/use-ai";
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import type { Business, FxRate } from "@/lib/types";
-
-const predictions = aiPredictionsData.revenuePredictions;
-const businesses = businessesData as Business[];
-const fxRates = fxRatesData as FxRate;
 
 function formatCurrency(amount: number, currency: string) {
   if (currency === "INR") {
@@ -38,6 +33,9 @@ function calculatePercentage(current: number, future: number) {
 }
 
 export default function RevenuePredictionsTable() {
+  const { predictions: aiPred } = useAi();
+  const { businesses, fxRates } = useGlobalFinancials();
+  const predictions = aiPred.revenuePredictions;
   return (
     <Card>
       <CardHeader>

@@ -4,11 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { CircularProgress } from '@/components/ui/circular-progress';
 import { Wand2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import aiPredictionsData from '@/lib/data/ai-predictions.json';
+import { useAi } from '@/hooks/use-ai';
 
 
 export default function PredictionsHeader() {
-    const score = aiPredictionsData.confidenceScore;
+    const { predictions } = useAi();
+    const score = predictions.confidenceScore;
     const [progress, setProgress] = useState(0);
 
     useEffect(() => {

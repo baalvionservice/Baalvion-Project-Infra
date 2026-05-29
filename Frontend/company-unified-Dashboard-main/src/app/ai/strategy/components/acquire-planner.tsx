@@ -7,12 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Zap, TrendingUp, ShieldCheck, Scale, HandCoins } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import strategyData from '@/lib/data/strategy.json';
+import { useAi, type AiStrategy } from '@/hooks/use-ai';
 import { useToast } from '@/hooks/use-toast';
 
-type AnalysisResult = typeof strategyData.acquire;
+type AnalysisResult = AiStrategy['acquire'];
 
 export default function AcquirePlanner() {
+  const { strategy } = useAi();
   const [targetName, setTargetName] = useState('');
   const [valuation, setValuation] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +32,7 @@ export default function AcquirePlanner() {
     setLoading(true);
     setResults(null);
     setTimeout(() => {
-      setResults(strategyData.acquire);
+      setResults(strategy.acquire);
       setLoading(false);
     }, 1500);
   };

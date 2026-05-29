@@ -1,12 +1,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+'use client';
 import { Lightbulb, TrendingUp, Zap } from 'lucide-react';
-import aiPredictionsData from '@/lib/data/ai-predictions.json';
-
-const opportunities = aiPredictionsData.growthOpportunities;
+import { useAi } from '@/hooks/use-ai';
 
 export default function GrowthOpportunities() {
+    const { predictions } = useAi();
+    const opportunities = predictions.growthOpportunities;
     return (
         <Card>
             <CardHeader>

@@ -8,15 +8,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Zap, FileText, Users, AlertTriangle, Building, DollarSign } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import countriesData from '@/lib/data/countries.json';
-import strategyData from '@/lib/data/strategy.json';
+import { useAi, type AiStrategy } from '@/hooks/use-ai';
+import { useGlobalFinancials } from '@/hooks/use-global-financials';
 import { useToast } from '@/hooks/use-toast';
 
 const industries = ["Fintech", "E-commerce", "Media", "SaaS", "Logistics"];
 
-type AnalysisResult = typeof strategyData.expand;
+type AnalysisResult = AiStrategy['expand'];
 
 export default function ExpandPlanner() {
+  const { strategy } = useAi();
+  const { countries: countriesData } = useGlobalFinancials();
   const [country, setCountry] = useState('');
   const [industry, setIndustry] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,7 +37,7 @@ export default function ExpandPlanner() {
     setLoading(true);
     setResults(null);
     setTimeout(() => {
-      setResults(strategyData.expand);
+      setResults(strategy.expand);
       setLoading(false);
     }, 1500);
   };

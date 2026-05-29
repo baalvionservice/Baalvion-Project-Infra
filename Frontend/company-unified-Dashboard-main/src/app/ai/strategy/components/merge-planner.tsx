@@ -26,13 +26,15 @@ import {
   Scale,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import businessesData from "@/lib/data/businesses";
-import strategyData from "@/lib/data/strategy.json";
+import { useAi, type AiStrategy } from "@/hooks/use-ai";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { useToast } from "@/hooks/use-toast";
 
-type AnalysisResult = typeof strategyData.merge;
+type AnalysisResult = AiStrategy['merge'];
 
 export default function MergePlanner() {
+  const { strategy } = useAi();
+  const { businesses: businessesData } = useDashboardRefs();
   const [business1, setBusiness1] = useState("");
   const [business2, setBusiness2] = useState("");
   const [loading, setLoading] = useState(false);
@@ -51,7 +53,7 @@ export default function MergePlanner() {
     setLoading(true);
     setResults(null);
     setTimeout(() => {
-      setResults(strategyData.merge);
+      setResults(strategy.merge);
       setLoading(false);
     }, 1500);
   };
