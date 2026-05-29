@@ -18,7 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { KpiData } from "@/lib/types";
-import businesses from "@/lib/data/businesses";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { ArrowUp, ArrowDown, ArrowRight } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -30,6 +30,8 @@ interface KpiTableProps {
 
 export default function KpiTable({ kpiData }: KpiTableProps) {
   const isMobile = useIsMobile();
+  const { businesses } = useDashboardRefs();
+  const businessName = (id: string) => businesses.find((b) => b.id === id)?.name ?? "Company-wide";
 
   const getAchievementColor = (achievement: number) => {
     if (achievement > 90)
@@ -51,12 +53,9 @@ export default function KpiTable({ kpiData }: KpiTableProps) {
     return (
       <div className="space-y-4">
         {kpiData.map((kpi) => {
-          const business = businesses.find((b) => b.id === kpi.businessId);
-          if (!business) return null;
-          const achievement = (kpi.revenue.actual / kpi.revenue.target) * 100;
-          const image = PlaceHolderImages.find(
-            (i) => i.id === business.imageId
-          );
+          const name = businessName(kpi.businessId);
+          const achievement = kpi.revenue.target ? (kpi.revenue.actual / kpi.revenue.target) * 100 : 0;
+          const image = PlaceHolderImages.find((i) => i.id === "business-default");
 
           return (
             <Card key={kpi.businessId}>
@@ -64,9 +63,9 @@ export default function KpiTable({ kpiData }: KpiTableProps) {
                 <div className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
                     {image && <AvatarImage src={image.imageUrl} />}
-                    <AvatarFallback>{business.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                   </Avatar>
-                  <CardTitle className="text-base">{business.name}</CardTitle>
+                  <CardTitle className="text-base">{name}</CardTitle>
                 </div>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
@@ -138,17 +137,15 @@ export default function KpiTable({ kpiData }: KpiTableProps) {
             </TableHeader>
             <TableBody>
               {kpiData.map((kpi) => {
-                const business = businesses.find(
-                  (b) => b.id === kpi.businessId
-                );
-                if (!business) return null;
-                const achievement =
-                  (kpi.revenue.actual / kpi.revenue.target) * 100;
+                const name = businessName(kpi.businessId);
+                const achievement = kpi.revenue.target
+                  ? (kpi.revenue.actual / kpi.revenue.target) * 100
+                  : 0;
 
                 return (
                   <TableRow key={kpi.businessId}>
                     <TableCell className="font-medium">
-                      {business.name}
+                      {name}
                     </TableCell>
                     <TableCell className="text-right">
                       ${kpi.revenue.target.toLocaleString()}

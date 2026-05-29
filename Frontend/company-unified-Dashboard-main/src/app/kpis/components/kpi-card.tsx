@@ -9,7 +9,7 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { ArrowDown, ArrowUp, Smile, Frown, Meh, Users } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import businesses from "@/lib/data/businesses";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import type { KpiData } from "@/lib/types";
 
@@ -18,10 +18,11 @@ interface KpiCardProps {
 }
 
 export default function KpiCard({ kpi }: KpiCardProps) {
-  const business = businesses.find((b) => b.id === kpi.businessId);
-  if (!business) return null;
+  const { businesses } = useDashboardRefs();
+  const found = businesses.find((b) => b.id === kpi.businessId);
+  const business = { name: found?.name ?? "Company-wide", country: "" };
 
-  const image = PlaceHolderImages.find((img) => img.id === business.imageId);
+  const image = PlaceHolderImages.find((img) => img.id === "business-default");
   const revenueAchievement = (kpi.revenue.actual / kpi.revenue.target) * 100;
 
   const getReturnRateColor = (rate: number) => {

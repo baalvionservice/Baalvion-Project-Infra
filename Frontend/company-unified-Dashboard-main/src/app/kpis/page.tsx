@@ -1,30 +1,47 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import KpiCard from "./components/kpi-card";
 import KpiTable from "./components/kpi-table";
 import KpiAlerts from "./components/kpi-alerts";
-import kpiData from "@/lib/data/kpis.json";
+import { dashboardApi } from "@/lib/api-client";
 import type { KpiPeriod, AllKpis, KpiData } from "@/lib/types";
-import { Target } from "lucide-react";
 
-const allKpis: AllKpis = Object.fromEntries(
-  Object.entries(kpiData).map(([period, data]) => [
-    period,
-    (data as any[]).map((item: any) => ({
-      ...item,
-      profitMargin: {
-        ...item.profitMargin,
-        trend: item.profitMargin.trend as "up" | "down" | "flat",
-      },
-    })),
-  ])
-) as AllKpis;
 const periods: KpiPeriod[] = ["Day", "Week", "Month", "Quarter", "Year"];
+
+// Map a live dashboard-service kpi row to the page's KpiData shape.
+function toKpi(r: Record<string, unknown>): KpiData {
+  const trend = String(r.profit_trend ?? "flat");
+  return {
+    businessId: String(r.business_id ?? r.id ?? ""),
+    revenue: { target: Number(r.revenue_target ?? 0), actual: Number(r.revenue_actual ?? 0) },
+    profitMargin: { value: Number(r.profit_margin ?? 0), trend: (["up", "down", "flat"].includes(trend) ? trend : "flat") as "up" | "down" | "flat" },
+    customers: { total: Number(r.customers_total ?? 0), change: Number(r.customers_change ?? 0) },
+    returnRate: Number(r.return_rate ?? 0),
+    nps: Number(r.nps ?? 0),
+  };
+}
 
 export default function KpiTrackerPage() {
   const [period, setPeriod] = useState<KpiPeriod>("Month");
+  const [allKpis, setAllKpis] = useState<AllKpis>(
+    Object.fromEntries(periods.map((p) => [p, []])) as AllKpis,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.kpis();
+        const arr = ((d as { data?: unknown[] })?.data ?? (Array.isArray(d) ? d : [])) as Record<string, unknown>[];
+        const mapped = arr.map(toKpi);
+        // The backend isn't period-segmented yet, so each period shows the same live KPIs.
+        if (!cancelled) setAllKpis(Object.fromEntries(periods.map((p) => [p, mapped])) as AllKpis);
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handlePeriodChange = (value: string) => {
     setPeriod(value as KpiPeriod);
