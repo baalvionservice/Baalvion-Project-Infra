@@ -22,7 +22,7 @@ importers:
         version: 8.2.2
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@22.19.19)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@22.19.19)(typescript@5.9.3))
+        version: 29.7.0(@types/node@20.19.41)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@20.19.41)(typescript@5.9.3))
       prettier:
         specifier: ^3.4.2
         version: 3.8.3
@@ -31,7 +31,7 @@ importers:
         version: 6.1.3
       ts-jest:
         specifier: ^29.2.0
-        version: 29.4.11(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@29.7.0(@types/node@22.19.19)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@22.19.19)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.11(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@29.7.0(@types/node@20.19.41)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@20.19.41)(typescript@5.9.3)))(typescript@5.9.3)
       turbo:
         specifier: ^2.3.0
         version: 2.9.14
@@ -307,10 +307,10 @@ importers:
         version: 29.5.14
       jest:
         specifier: ^29.7.0
-        version: 29.7.0(@types/node@20.19.41)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@20.19.41)(typescript@5.9.3))
+        version: 29.7.0(@types/node@22.19.19)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@22.19.19)(typescript@5.9.3))
       ts-jest:
         specifier: ^29.2.0
-        version: 29.4.11(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@29.7.0(@types/node@20.19.41)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@20.19.41)(typescript@5.9.3)))(typescript@5.9.3)
+        version: 29.4.11(@babel/core@7.29.7)(@jest/transform@30.4.1)(@jest/types@30.4.1)(babel-jest@30.4.1(@babel/core@7.29.7))(jest-util@30.4.1)(jest@29.7.0(@types/node@22.19.19)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@22.19.19)(typescript@5.9.3)))(typescript@5.9.3)
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
@@ -737,6 +737,61 @@ importers:
         specifier: ^6.6.2
         version: 6.6.5
 
+  Backend/services/commerce/ledger-service:
+    dependencies:
+      bullmq:
+        specifier: ^4.17.2
+        version: 4.18.3
+      cookie-parser:
+        specifier: ^1.4.6
+        version: 1.4.7
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.6
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
+      express:
+        specifier: ^4.18.2
+        version: 4.22.2
+      helmet:
+        specifier: ^7.1.0
+        version: 7.2.0
+      kafkajs:
+        specifier: ^2.2.4
+        version: 2.2.4
+      pg:
+        specifier: ^8.11.3
+        version: 8.21.0
+      pg-hstore:
+        specifier: ^2.3.4
+        version: 2.3.4
+      prom-client:
+        specifier: ^15.1.0
+        version: 15.1.3
+      redis:
+        specifier: ^4.6.13
+        version: 4.7.1
+      sequelize:
+        specifier: ^6.35.2
+        version: 6.37.8(pg-hstore@2.3.4)(pg@8.21.0)
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
+      winston:
+        specifier: ^3.14.2
+        version: 3.19.0
+    devDependencies:
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@22.19.19)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@22.19.19)(typescript@5.9.3))
+      nodemon:
+        specifier: ^3.1.0
+        version: 3.1.14
+      supertest:
+        specifier: ^6.3.4
+        version: 6.3.4
+
   Backend/services/commerce/market-service:
     dependencies:
       '@baalvion/auth-node':
@@ -834,6 +889,64 @@ importers:
       sequelize-cli:
         specifier: ^6.6.2
         version: 6.6.5
+
+  Backend/services/commerce/payment-service:
+    dependencies:
+      bullmq:
+        specifier: ^4.17.2
+        version: 4.18.3
+      cookie-parser:
+        specifier: ^1.4.6
+        version: 1.4.7
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.6
+      decimal.js:
+        specifier: ^10.4.3
+        version: 10.6.0
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
+      express:
+        specifier: ^4.18.2
+        version: 4.22.2
+      helmet:
+        specifier: ^7.1.0
+        version: 7.2.0
+      kafkajs:
+        specifier: ^2.2.4
+        version: 2.2.4
+      pg:
+        specifier: ^8.11.3
+        version: 8.21.0
+      pg-hstore:
+        specifier: ^2.3.4
+        version: 2.3.4
+      prom-client:
+        specifier: ^15.1.0
+        version: 15.1.3
+      redis:
+        specifier: ^4.6.13
+        version: 4.7.1
+      sequelize:
+        specifier: ^6.35.2
+        version: 6.37.8(pg-hstore@2.3.4)(pg@8.21.0)
+      uuid:
+        specifier: ^9.0.1
+        version: 9.0.1
+      winston:
+        specifier: ^3.14.2
+        version: 3.19.0
+    devDependencies:
+      jest:
+        specifier: ^29.7.0
+        version: 29.7.0(@types/node@22.19.19)(ts-node@10.9.2(@swc/core@1.15.40)(@types/node@22.19.19)(typescript@5.9.3))
+      nodemon:
+        specifier: ^3.1.0
+        version: 3.1.14
+      supertest:
+        specifier: ^6.3.4
+        version: 6.3.4
 
   Backend/services/commerce/trade-service:
     dependencies:
@@ -1026,9 +1139,15 @@ importers:
       prom-client:
         specifier: ^15.1.3
         version: 15.1.3
+      razorpay:
+        specifier: ^2.9.4
+        version: 2.9.6
       sequelize:
         specifier: ^6.37.8
         version: 6.37.8(pg-hstore@2.3.4)(pg@8.21.0)
+      stripe:
+        specifier: ^17.5.0
+        version: 17.7.0
       swagger-jsdoc:
         specifier: ^6.3.0
         version: 6.3.0(openapi-types@12.1.3)
@@ -1369,6 +1488,33 @@ importers:
       nodemon:
         specifier: ^3.1.14
         version: 3.1.14
+
+  Backend/services/identity/auth-gateway:
+    dependencies:
+      '@baalvion/auth-node':
+        specifier: workspace:*
+        version: link:../../../packages/auth-node
+      cookie-parser:
+        specifier: ^1.4.7
+        version: 1.4.7
+      cors:
+        specifier: ^2.8.5
+        version: 2.8.6
+      dotenv:
+        specifier: ^16.4.7
+        version: 16.6.1
+      express:
+        specifier: ^4.21.2
+        version: 4.22.2
+      helmet:
+        specifier: ^8.0.0
+        version: 8.2.0
+      http-proxy-middleware:
+        specifier: ^3.0.3
+        version: 3.0.5
+      ioredis:
+        specifier: ^5.4.1
+        version: 5.10.1
 
   Backend/services/identity/auth-service:
     dependencies:
@@ -1828,12 +1974,6 @@ importers:
       '@baalvion/auth-node':
         specifier: workspace:*
         version: link:../../../packages/auth-node
-      bcrypt:
-        specifier: ^5.1.1
-        version: 5.1.1
-      bcryptjs:
-        specifier: ^3.0.3
-        version: 3.0.3
       cookie-parser:
         specifier: ^1.4.7
         version: 1.4.7
@@ -1849,9 +1989,6 @@ importers:
       helmet:
         specifier: ^8.1.0
         version: 8.2.0
-      jsonwebtoken:
-        specifier: ^9.0.3
-        version: 9.0.3
       pg:
         specifier: ^8.20.0
         version: 8.21.0
@@ -1975,6 +2112,9 @@ importers:
 
   Frontend/AmariseMaisonAvenue-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.28.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0))
@@ -2144,6 +2284,9 @@ importers:
 
   Frontend/Baalvion-Jobs-Portal-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@dnd-kit/core':
         specifier: ^6.1.0
         version: 6.3.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -2328,6 +2471,9 @@ importers:
 
   Frontend/For Invstors and Founders:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.76.1(react@18.3.1))
@@ -2536,6 +2682,9 @@ importers:
 
   Frontend/Global-Trade-Infrastructure-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.0.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0))
@@ -2684,6 +2833,9 @@ importers:
 
   Frontend/IR-Baalvion-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.28.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0))
@@ -2832,6 +2984,9 @@ importers:
 
   Frontend/Imperialpedia-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.28.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0))
@@ -3046,6 +3201,9 @@ importers:
 
   Frontend/Law-Elite-Network-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.28.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0))
@@ -3200,6 +3358,9 @@ importers:
 
   Frontend/Mining.Baalvion-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.28.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0))
@@ -3369,6 +3530,9 @@ importers:
 
   Frontend/Proxy-BaalvionStack:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.76.1(react@18.3.1))
@@ -3577,6 +3741,9 @@ importers:
 
   Frontend/about-baalvion-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.28.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0))
@@ -3725,6 +3892,9 @@ importers:
 
   Frontend/admin-platform:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@hookform/resolvers':
         specifier: ^3.9.1
         version: 3.10.0(react-hook-form@7.76.1(react@19.2.6))
@@ -3876,6 +4046,9 @@ importers:
 
   Frontend/baalvion-elite-circle-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@hookform/resolvers':
         specifier: ^3.10.0
         version: 3.10.0(react-hook-form@7.76.1(react@18.3.1))
@@ -4084,6 +4257,9 @@ importers:
 
   Frontend/brand-connector-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.28.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0))
@@ -4289,6 +4465,9 @@ importers:
 
   Frontend/company-unified-Dashboard-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.28.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0))
@@ -4455,6 +4634,9 @@ importers:
 
   Frontend/controlthemarket-main:
     dependencies:
+      '@baalvion/auth-sdk':
+        specifier: workspace:*
+        version: link:../../Backend/packages/auth-sdk
       '@genkit-ai/google-genai':
         specifier: ^1.28.0
         version: 1.35.0(genkit@1.35.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0))
@@ -4597,6 +4779,9 @@ importers:
       genkit-cli:
         specifier: ^1.28.0
         version: 1.35.0(@cfworker/json-schema@4.1.1)(@types/node@20.19.41)(zod@3.25.76)
+      playwright:
+        specifier: ^1.60.0
+        version: 1.60.0
       postcss:
         specifier: ^8
         version: 8.5.15
@@ -10745,6 +10930,9 @@ packages:
   '@types/http-errors@2.0.5':
     resolution: {integrity: sha512-r8Tayk8HJnX0FztbZN7oVqGccWgw98T/0neJphO91KkmOzug1KkofZURD4UaD5uH8AqcFLfdPErnBod0u71/qg==}
 
+  '@types/http-proxy@1.17.17':
+    resolution: {integrity: sha512-ED6LB+Z1AVylNTu7hdzuBqOgMnvG/ld6wGCG8wFnAzKX5uyW2K3WD52v0gnLCTK/VLpXtKckgWuyScYK6cSPaw==}
+
   '@types/istanbul-lib-coverage@2.0.6':
     resolution: {integrity: sha512-2QF/t/auWm0lsy8XtKVPG19v3sSOQlJe/YHZgfjb/KBBHOGSV+J2q/S671rcq9uTBrLAXmZpqJiaQbMT+zNU1w==}
 
@@ -11699,10 +11887,6 @@ packages:
   bcryptjs@2.4.3:
     resolution: {integrity: sha512-V/Hy/X9Vt7f3BbPJEi8BdVFMByHi+jNXrYkW3huaybV/kQ0KJg0Y6PkEMbn+zeT+i+SiKZ/HMqJGIIt4LZDqNQ==}
 
-  bcryptjs@3.0.3:
-    resolution: {integrity: sha512-GlF5wPWnSa/X5LKM1o0wz0suXIINz1iHRLvTS+sLyi7XPbe5ycmYI3DlZqVGZZtDgl4DmasFg7gOB3JYbphV5g==}
-    hasBin: true
-
   bidi-js@1.0.3:
     resolution: {integrity: sha512-RKshQI1R3YQ+n9YJz2QQ147P66ELpa1FQEg20Dk8oW9t2KgLbpDLLp9aGZ7y8WHSshDknG0bknqGw5/tyCs5tw==}
 
@@ -11789,6 +11973,9 @@ packages:
   bufrw@1.4.0:
     resolution: {integrity: sha512-sWm8iPbqvL9+5SiYxXH73UOkyEbGQg7kyHQmReF89WJHQJw2eV4P/yZ0E+b71cczJ4pPobVhXxgQcmfSTgGHxQ==}
     engines: {node: '>= 0.10.x'}
+
+  bullmq@4.18.3:
+    resolution: {integrity: sha512-H8t9vhfHEbJDaXp7aalSTe+Do+tR1nvr+lsT+jQxLhy+FFfFj/0p4aYJzADTNLdEqltuxneLVxCGVg92GkQx4w==}
 
   bullmq@5.77.3:
     resolution: {integrity: sha512-ccGjnRF5Bbu21CfzDG7toIewoAj5W9DUHjqhFnppt8YBtoQplynzBGuSzn7yYQobpyYeHEqrYhiJ1NZInrKbyA==}
@@ -13333,6 +13520,9 @@ packages:
     resolution: {integrity: sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==}
     engines: {node: '>=12.20.0'}
 
+  formidable@2.1.5:
+    resolution: {integrity: sha512-Oz5Hwvwak/DCaXVVUtPn4oLMLLy1CdclLKO1LFgU7XzDpVMUU5UjlSLpGMocyQNNk8F6IJW9M/YdooSn2MRI+Q==}
+
   formidable@3.5.4:
     resolution: {integrity: sha512-YikH+7CUTOtP44ZTnUhR7Ic2UASBPOqmaRkRKxRbywPTe5VxF7RRCck4af9wutiZ/QKM5nME9Bie2fFaPz5Gug==}
     engines: {node: '>=14.0.0'}
@@ -13555,6 +13745,11 @@ packages:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
     deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
+  glob@8.1.0:
+    resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
+    engines: {node: '>=12'}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
     engines: {node: '>=18'}
@@ -13679,6 +13874,10 @@ packages:
   hast-util-whitespace@3.0.0:
     resolution: {integrity: sha512-88JUN06ipLwsnv+dVn+OIYOvAuvBMy/Qoi6O7mQHxdPXpjy+Cd6xRkWwux7DKO+4sYILtLBRIKgsdpS2gQc7qw==}
 
+  helmet@7.2.0:
+    resolution: {integrity: sha512-ZRiwvN089JfMXokizgqEPXsl2Guk094yExfoDXR0cBYWxtBbaSww/w+vT4WEJsBW2iTUi1GgZ6swmoug3Oy4Xw==}
+    engines: {node: '>=16.0.0'}
+
   helmet@8.2.0:
     resolution: {integrity: sha512-DRgTIUgnWcJ62KyarxxziuqYxKGnR6Rgg19BlbucN/dpmJbl1XOit6qvoOX0ZT+HhWe5OUVhU/a1zpGyc1xA0Q==}
     engines: {node: '>=18.0.0'}
@@ -13749,6 +13948,14 @@ packages:
   http-proxy-agent@7.0.2:
     resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
     engines: {node: '>= 14'}
+
+  http-proxy-middleware@3.0.5:
+    resolution: {integrity: sha512-GLZZm1X38BPY4lkXA01jhwxvDoOkkXqjgVyUzVxiEK4iuRu03PZoYHhHRwxnfhQMDuaxi3vVri0YgSro/1oWqg==}
+    engines: {node: ^14.15.0 || ^16.10.0 || >=18.0.0}
+
+  http-proxy@1.18.1:
+    resolution: {integrity: sha512-7mz/721AbnJwIVbnaSv1Cz3Am0ZLT/UBwkC92VlxhXv/k/BBQfM2fXElQNC27BVGr0uwUpplYPQM9LnaBMR5NQ==}
+    engines: {node: '>=8.0.0'}
 
   https-proxy-agent@5.0.1:
     resolution: {integrity: sha512-dFcAjpTQFgoLMzC2VwU+C/CbS7uRL0lWmxDITmqm7C+7F0Odmj6s9l6alZc6AELXhrnggM2CeWSXHGOdX2YtwA==}
@@ -14023,6 +14230,10 @@ packages:
   is-plain-obj@4.1.0:
     resolution: {integrity: sha512-+Pgi+vMuUNkJyExiMBt5IlFoMyKnr5zhJ4Uspz58WOhBF5QoIZkFyNHIbBAtHwzVAgk5RtndVNsDRN61/mmDqg==}
     engines: {node: '>=12'}
+
+  is-plain-object@5.0.0:
+    resolution: {integrity: sha512-VRSzKkbMm5jMDoKLbltAkFQ5Qr7VDiTFGXxYFXXowVj387GeGNOCsOH6Msy00SGZ3Fp84b1Naa1psqgcCIEP5Q==}
+    engines: {node: '>=0.10.0'}
 
   is-promise@2.2.2:
     resolution: {integrity: sha512-+lP4/6lKUBfQjZ2pdxThZvLUAafmZb8OAxFb8XXtiQmS35INgr85hdOGoEs124ez1FCnZJt6jau/T+alh58QFQ==}
@@ -15101,6 +15312,10 @@ packages:
   minimatch@3.1.5:
     resolution: {integrity: sha512-VgjWUsnnT6n+NUk6eZq77zeFdpW2LWDzP6zFGrCbHXiYNul5Dzqk2HHQ5uFH2DNW5Xbp8+jVzaeNt94ssEEl4w==}
 
+  minimatch@5.1.9:
+    resolution: {integrity: sha512-7o1wEA2RyMP7Iu7GNba9vc0RWWGACJOCZBJX2GJWip0ikV+wcOsgVuY9uE8CPiyQhkGFSlhuSkZPavN7u1c2Fw==}
+    engines: {node: '>=10'}
+
   minimatch@9.0.9:
     resolution: {integrity: sha512-OBwBN9AL4dqmETlpS2zasx+vTeWclWzkblfZk7KTA5j3jeOONz/tRCnZomUyvNg83wL5Zv9Ss6HMJXAgL8R2Yg==}
     engines: {node: '>=16 || 14 >=14.17'}
@@ -15169,6 +15384,9 @@ packages:
   msgpackr-extract@3.0.4:
     resolution: {integrity: sha512-4kmO/MdyUIkLIvTPr8VHLil4AtoKIoniWPIEk5+CDy0xnWC84azhSFmuJ7PxZdsYtiP5kEeQsORAVIeMgxT+Hw==}
     hasBin: true
+
+  msgpackr@1.11.12:
+    resolution: {integrity: sha512-RBdJ1Un7yGlXWajrkxcSa93nvQ0w4zBf60c0yYv7YtBelP8H2FA7XsfBbMHtXKXUMUxH7zV3Zuozh+kUQWhHvg==}
 
   msgpackr@2.0.1:
     resolution: {integrity: sha512-9J+tqTEsbHqY8YohazYgty7LgerFIWxvMLpUjqETSmjHojtJm2WnX2kK/2a1fLI7CO7ERP1YSEUXMucz4j+yBA==}
@@ -16410,6 +16628,9 @@ packages:
   require-main-filename@2.0.0:
     resolution: {integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==}
 
+  requires-port@1.0.0:
+    resolution: {integrity: sha512-KigOCHcocU3XODJxsu8i/j8T9tzT4adHiecwORRQ0ZZFcp7ahwXuRU1m+yuO90C5ZUyGeGfocHDI14M3L3yDAQ==}
+
   resend@4.8.0:
     resolution: {integrity: sha512-R8eBOFQDO6dzRTDmaMEdpqrkmgSjPpVXt4nGfWsZdYOet0kqra0xgbvTES6HmCriZEXbmGk3e0DiGIaLFTFSHA==}
     engines: {node: '>=18'}
@@ -17002,6 +17223,10 @@ packages:
   strip-literal@3.1.0:
     resolution: {integrity: sha512-8r3mkIM/2+PpjHoOtiAW8Rg3jJLHaV7xPwG+YRGrv6FP0wwk/toTpATxWYOW0BKdWwl82VT2tFYi5DlROa0Mxg==}
 
+  stripe@17.7.0:
+    resolution: {integrity: sha512-aT2BU9KkizY9SATf14WhhYVv2uOapBWX0OFWF4xvcj1mPaNotlSc2CsxpS4DS46ZueSppmCF5BX1sNYBtwBvfw==}
+    engines: {node: '>=12.*'}
+
   stripe@18.5.0:
     resolution: {integrity: sha512-Hp+wFiEQtCB0LlNgcFh5uVyKznpDjzyUZ+CNVEf+I3fhlYvh7rZruIg+jOwzJRCpy0ZTPMjlzm7J2/M2N6d+DA==}
     engines: {node: '>=12.*'}
@@ -17061,6 +17286,16 @@ packages:
   superagent@10.3.0:
     resolution: {integrity: sha512-B+4Ik7ROgVKrQsXTV0Jwp2u+PXYLSlqtDAhYnkkD+zn3yg8s/zjA2MeGayPoY/KICrbitwneDHrjSotxKL+0XQ==}
     engines: {node: '>=14.18.0'}
+
+  superagent@8.1.2:
+    resolution: {integrity: sha512-6WTxW1EB6yCxV5VFOIPQruWGHqc3yI7hEmZK6h+pyk69Lk/Ut7rLUY6W/ONF2MjBuGjvmMiIpsrVJ2vjrHlslA==}
+    engines: {node: '>=6.4.0 <13 || >=14'}
+    deprecated: Please upgrade to superagent v10.2.2+, see release notes at https://github.com/forwardemail/superagent/releases/tag/v10.2.2 - maintenance is supported by Forward Email @ https://forwardemail.net
+
+  supertest@6.3.4:
+    resolution: {integrity: sha512-erY3HFDG0dPnhw4U+udPfrzXa4xhSG+n4rxfRuZWCUvjFWwKl+OxWf/7zk50s84/fAAs7vf5QAb9uRa0cCykxw==}
+    engines: {node: '>=6.4.0'}
+    deprecated: Please upgrade to supertest v7.1.3+, see release notes at https://github.com/forwardemail/supertest/releases/tag/v7.1.3 - maintenance is supported by Forward Email @ https://forwardemail.net
 
   supertest@7.2.2:
     resolution: {integrity: sha512-oK8WG9diS3DlhdUkcFn4tkNIiIbBx9lI2ClF8K+b2/m8Eyv47LSawxUzZQSNKUrVb2KsqeTDCcjAAVPYaSLVTA==}
@@ -26788,6 +27023,10 @@ snapshots:
 
   '@types/http-errors@2.0.5': {}
 
+  '@types/http-proxy@1.17.17':
+    dependencies:
+      '@types/node': 20.19.41
+
   '@types/istanbul-lib-coverage@2.0.6': {}
 
   '@types/istanbul-lib-report@3.0.3':
@@ -27692,7 +27931,7 @@ snapshots:
 
   axios@1.16.1:
     dependencies:
-      follow-redirects: 1.16.0
+      follow-redirects: 1.16.0(debug@4.4.3)
       form-data: 4.0.5
       https-proxy-agent: 5.0.1
       proxy-from-env: 2.1.0
@@ -27858,8 +28097,6 @@ snapshots:
 
   bcryptjs@2.4.3: {}
 
-  bcryptjs@3.0.3: {}
-
   bidi-js@1.0.3:
     dependencies:
       require-from-string: 2.0.2
@@ -27987,6 +28224,20 @@ snapshots:
       error: 7.0.2
       hexer: 1.5.0
       xtend: 4.0.2
+
+  bullmq@4.18.3:
+    dependencies:
+      cron-parser: 4.9.0
+      glob: 8.1.0
+      ioredis: 5.10.1
+      lodash: 4.18.1
+      msgpackr: 1.11.12
+      node-abort-controller: 3.1.1
+      semver: 7.8.1
+      tslib: 2.8.1
+      uuid: 9.0.1
+    transitivePeerDependencies:
+      - supports-color
 
   bullmq@5.77.3:
     dependencies:
@@ -29987,7 +30238,9 @@ snapshots:
 
   fn.name@1.1.0: {}
 
-  follow-redirects@1.16.0: {}
+  follow-redirects@1.16.0(debug@4.4.3):
+    optionalDependencies:
+      debug: 4.4.3(supports-color@5.5.0)
 
   for-each@0.3.5:
     dependencies:
@@ -30035,6 +30288,13 @@ snapshots:
   formdata-polyfill@4.0.10:
     dependencies:
       fetch-blob: 3.2.0
+
+  formidable@2.1.5:
+    dependencies:
+      '@paralleldrive/cuid2': 2.3.1
+      dezalgo: 1.0.4
+      once: 1.4.0
+      qs: 6.15.2
 
   formidable@3.5.4:
     dependencies:
@@ -30350,6 +30610,14 @@ snapshots:
       once: 1.4.0
       path-is-absolute: 1.0.1
 
+  glob@8.1.0:
+    dependencies:
+      fs.realpath: 1.0.0
+      inflight: 1.0.6
+      inherits: 2.0.4
+      minimatch: 5.1.9
+      once: 1.4.0
+
   globals@14.0.0: {}
 
   globals@15.15.0: {}
@@ -30541,6 +30809,8 @@ snapshots:
     dependencies:
       '@types/hast': 3.0.4
 
+  helmet@7.2.0: {}
+
   helmet@8.2.0: {}
 
   help-me@5.0.0: {}
@@ -30622,6 +30892,25 @@ snapshots:
       debug: 4.4.3(supports-color@5.5.0)
     transitivePeerDependencies:
       - supports-color
+
+  http-proxy-middleware@3.0.5:
+    dependencies:
+      '@types/http-proxy': 1.17.17
+      debug: 4.4.3(supports-color@5.5.0)
+      http-proxy: 1.18.1(debug@4.4.3)
+      is-glob: 4.0.3
+      is-plain-object: 5.0.0
+      micromatch: 4.0.8
+    transitivePeerDependencies:
+      - supports-color
+
+  http-proxy@1.18.1(debug@4.4.3):
+    dependencies:
+      eventemitter3: 4.0.7
+      follow-redirects: 1.16.0(debug@4.4.3)
+      requires-port: 1.0.0
+    transitivePeerDependencies:
+      - debug
 
   https-proxy-agent@5.0.1:
     dependencies:
@@ -30936,6 +31225,8 @@ snapshots:
   is-obj@2.0.0: {}
 
   is-plain-obj@4.1.0: {}
+
+  is-plain-object@5.0.0: {}
 
   is-promise@2.2.2: {}
 
@@ -32708,6 +32999,10 @@ snapshots:
     dependencies:
       brace-expansion: 1.1.15
 
+  minimatch@5.1.9:
+    dependencies:
+      brace-expansion: 2.1.1
+
   minimatch@9.0.9:
     dependencies:
       brace-expansion: 2.1.1
@@ -32777,6 +33072,10 @@ snapshots:
       '@msgpackr-extract/msgpackr-extract-linux-x64': 3.0.4
       '@msgpackr-extract/msgpackr-extract-win32-x64': 3.0.4
     optional: true
+
+  msgpackr@1.11.12:
+    optionalDependencies:
+      msgpackr-extract: 3.0.4
 
   msgpackr@2.0.1:
     optionalDependencies:
@@ -34343,6 +34642,8 @@ snapshots:
 
   require-main-filename@2.0.0: {}
 
+  requires-port@1.0.0: {}
+
   resend@4.8.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
     dependencies:
       '@react-email/render': 1.1.2(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -35104,6 +35405,11 @@ snapshots:
     dependencies:
       js-tokens: 9.0.1
 
+  stripe@17.7.0:
+    dependencies:
+      '@types/node': 20.19.41
+      qs: 6.15.2
+
   stripe@18.5.0(@types/node@22.19.19):
     dependencies:
       qs: 6.15.2
@@ -35175,6 +35481,28 @@ snapshots:
       methods: 1.1.2
       mime: 2.6.0
       qs: 6.15.2
+    transitivePeerDependencies:
+      - supports-color
+
+  superagent@8.1.2:
+    dependencies:
+      component-emitter: 1.3.1
+      cookiejar: 2.1.4
+      debug: 4.4.3(supports-color@5.5.0)
+      fast-safe-stringify: 2.1.1
+      form-data: 4.0.5
+      formidable: 2.1.5
+      methods: 1.1.2
+      mime: 2.6.0
+      qs: 6.15.2
+      semver: 7.8.1
+    transitivePeerDependencies:
+      - supports-color
+
+  supertest@6.3.4:
+    dependencies:
+      methods: 1.1.2
+      superagent: 8.1.2
     transitivePeerDependencies:
       - supports-color
 

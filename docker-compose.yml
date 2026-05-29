@@ -255,6 +255,12 @@ services:
       - JWT_AUDIENCE=baalvion-platform
       - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      # Email → Mailpit dev SMTP catcher (no real auth; dummy creds satisfy the gate). Inbox: :8025
+      - EMAIL_FROM=noreply@baalvion.com
+      - SMTP_HOST=baalvion-mailpit
+      - SMTP_PORT=1025
+      - SMTP_USER=dev
+      - SMTP_PASS=dev
     depends_on:
       postgres:
         condition: service_healthy
@@ -1256,6 +1262,88 @@ services:
       - baalvion-net
     profiles:
       - backend
+
+  # ── Financial Services: Ledger (port 3014) ──────────────────────────────
+  ledger-service:
+    build:
+      context: ./Backend/services/commerce/ledger-service
+    container_name: baalvion-ledger-service
+    restart: unless-stopped
+    ports:
+      - "3014:3014"
+    environment:
+      - NODE_ENV=development
+      - PORT=3014
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=baalvion_db
+      - DB_USER=baalvion
+      - DB_PASSWORD=baalvion_dev_pass
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_ENABLED=true
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3025,http://localhost:8080
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - default
+      - baalvion-net
+    profiles:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3014/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Financial Services: Payment (port 3015) ──────────────────────────────
+  payment-service:
+    build:
+      context: ./Backend/services/commerce/payment-service
+    container_name: baalvion-payment-service
+    restart: unless-stopped
+    ports:
+      - "3015:3015"
+    environment:
+      - NODE_ENV=development
+      - PORT=3015
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=baalvion_db
+      - DB_USER=baalvion
+      - DB_PASSWORD=baalvion_dev_pass
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=1
+      - KAFKA_BROKERS=kafka:9092
+      - KAFKA_ENABLED=true
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:3025,http://localhost:8080
+      - DAILY_LIMIT=1000000
+      - TX_MAX_LIMIT=500000
+      - TX_MIN_LIMIT=100
+      - FEE_PERCENTAGE=0.01
+      - FEE_FLAT=50
+      - VAT_RATE=0.05
+      - IDEMPOTENCY_TTL=86400
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - default
+      - baalvion-net
+    profiles:
+      - backend
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3015/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   # ── Migration Runner (one-shot job) ──────────────────────────────────────
   migrate:
