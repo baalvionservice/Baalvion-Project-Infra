@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Check } from "lucide-react";
-import businessesData from "@/lib/data/businesses";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { Alert } from "@/components/ui/alert";
 
 interface CreatePortalModalProps {
@@ -35,6 +35,7 @@ export default function CreatePortalModal({
   onOpenChange,
 }: CreatePortalModalProps) {
   const { toast } = useToast();
+  const { businesses: businessesData } = useDashboardRefs();
   const [generatedUrl, setGeneratedUrl] = useState("");
   const [hasCopied, setHasCopied] = useState(false);
 

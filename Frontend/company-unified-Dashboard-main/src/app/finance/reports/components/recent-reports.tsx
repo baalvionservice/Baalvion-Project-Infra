@@ -1,10 +1,26 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+'use client';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import reportsData from '@/lib/data/reports.json';
+import { useEffect, useState } from 'react';
+import { dashboardApi } from '@/lib/api-client';
+
+interface Report { id: string; name: string; type: string; period: string; generated: string; size: string }
 
 export default function RecentReports() {
+  const [reportsData, setReportsData] = useState<Report[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.financeReports();
+        const arr = (Array.isArray(d) ? d : (d as { data?: unknown[] })?.data ?? []) as Report[];
+        if (!cancelled) setReportsData(arr);
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
   return (
     <Card>
       <CardHeader>

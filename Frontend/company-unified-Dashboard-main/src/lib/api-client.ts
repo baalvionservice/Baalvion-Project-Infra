@@ -212,6 +212,7 @@ export const dashboardApi = {
   attendance: () => get('/employees/attendance'),
   tasks: () => get('/tasks'),
   departments: () => get('/employees/departments'),
+  financeReports: () => get('/finance-reports'),
   permissionMatrix: () => get('/permissions/matrix'),
   markNotificationRead: (id: string) => post(`/notifications/${id}/read`),
   auditLogs: (params?: { page?: number; limit?: number }) => {

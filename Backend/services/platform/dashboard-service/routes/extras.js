@@ -67,4 +67,14 @@ router.get('/fx-rates', authMiddleware, (req, res) =>
     }),
 );
 
+// Finance reports — recently generated downloadable reports (no file store yet; reference list).
+router.get('/finance-reports', authMiddleware, (req, res) =>
+    sendSuccess(req, res, [
+        { id: 'rep_1', name: 'Q1 2026 Consolidated P&L', type: 'P&L Statement', period: 'Q1 2026', generated: '2026-04-02', size: '248 KB' },
+        { id: 'rep_2', name: 'March 2026 Cash Flow', type: 'Cash Flow', period: 'Mar 2026', generated: '2026-04-01', size: '180 KB' },
+        { id: 'rep_3', name: 'Q1 2026 Balance Sheet', type: 'Balance Sheet', period: 'Q1 2026', generated: '2026-04-02', size: '210 KB' },
+        { id: 'rep_4', name: 'FY2025 Annual Report', type: 'Annual Report', period: 'FY 2025', generated: '2026-01-31', size: '1.4 MB' },
+    ]),
+);
+
 module.exports = router;
