@@ -10,11 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import ratesData from '@/lib/data/fx-rates-detailed.json';
-
+import { useFxRates } from '@/hooks/use-fx-rates';
 
 export default function FxRatesTable() {
-  
+  const { rates: ratesData } = useFxRates();
   return (
     <Card>
       <CardHeader>

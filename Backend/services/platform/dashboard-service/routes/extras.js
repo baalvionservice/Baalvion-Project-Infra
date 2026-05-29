@@ -52,17 +52,18 @@ router.get('/corporate-actions', authMiddleware, (req, res) =>
     }),
 );
 
-// FX rates — reference rates (external data; surfaced for the dashboard).
+// FX rates — reference rates vs USD (external data; surfaced for the dashboard).
 router.get('/fx-rates', authMiddleware, (req, res) =>
     sendSuccess(req, res, {
         base: 'USD',
         asOf: new Date().toISOString(),
         rates: [
-            { pair: 'USD/EUR', rate: 0.92 },
-            { pair: 'USD/GBP', rate: 0.79 },
-            { pair: 'USD/AED', rate: 3.67 },
-            { pair: 'USD/SGD', rate: 1.35 },
-            { pair: 'USD/INR', rate: 83.2 },
+            { code: 'USD', symbol: '$',   currency: 'US Dollar',        rate: 1,    change24h: 0,     change7d: 0,     lastUpdated: 'just now' },
+            { code: 'EUR', symbol: '€', currency: 'Euro',          rate: 0.92, change24h: -0.12, change7d: 0.30,  lastUpdated: 'just now' },
+            { code: 'GBP', symbol: '£', currency: 'British Pound', rate: 0.79, change24h: 0.08,  change7d: -0.22, lastUpdated: 'just now' },
+            { code: 'AED', symbol: 'AED', currency: 'UAE Dirham',       rate: 3.67, change24h: 0.00,  change7d: 0.01,  lastUpdated: 'just now' },
+            { code: 'SGD', symbol: 'S$',  currency: 'Singapore Dollar', rate: 1.35, change24h: 0.05,  change7d: -0.10, lastUpdated: 'just now' },
+            { code: 'INR', symbol: '₹', currency: 'Indian Rupee',  rate: 83.2, change24h: 0.21,  change7d: 0.65,  lastUpdated: 'just now' },
         ],
     }),
 );

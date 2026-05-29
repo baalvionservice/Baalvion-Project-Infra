@@ -1,3 +1,4 @@
+"use client";
 import {
   Table,
   TableBody,
@@ -14,15 +15,13 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import businesses from "@/lib/data/businesses";
-import fxRates from "@/lib/data/fx-rates.json";
-import type { Business, FxRate } from "@/lib/types";
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
+import { useFxRates } from "@/hooks/use-fx-rates";
 import { format } from "date-fns";
 
-const allBusinesses: Business[] = businesses;
-const rates: FxRate = fxRates;
-
 export default function ConsolidatedRevenueTable() {
+  const { businesses: allBusinesses } = useGlobalFinancials();
+  const { map: rates } = useFxRates();
   const businessRevenues = allBusinesses.map((biz) => {
     const fxRate = rates[biz.currency] || 1;
     const usdEquivalent = biz.currentMetrics.revenue / fxRate;

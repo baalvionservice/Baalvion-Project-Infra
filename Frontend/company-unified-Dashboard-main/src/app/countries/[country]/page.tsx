@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -26,24 +27,20 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-import businessesData from "@/lib/data/businesses";
-import countriesData from "@/lib/data/countries.json";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
-import type { Business } from "@/lib/types";
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
 import CountryPerformanceChart from "@/components/charts/country-performance-chart";
 import { cn } from "@/lib/utils";
+import { useParams } from "next/navigation";
 
-const businesses: Business[] = businessesData;
-
-export default async function CountryDetailPage({
-  params,
-}: {
-  params: Promise<{ country: string }>;
-}) {
-  const { country: countryId } = await params;
+export default function CountryDetailPage() {
+  const params = useParams();
+  const countryId = String(params?.country ?? "");
+  const { businesses, countries: countriesData, serverCosts } = useGlobalFinancials();
   const country = countriesData.find((c) => c.id === countryId);
+  const serverCost = serverCosts.find((s) => s.country === country?.name)?.cost ?? 0;
 
-  if (!country) {
+  if (countriesData.length > 0 && !country) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-center">
         <h1 className="text-4xl font-bold">404 - Country Not Found</h1>
@@ -58,6 +55,8 @@ export default async function CountryDetailPage({
       </div>
     );
   }
+
+  if (!country) return null; // still loading
 
   const countryBusinesses = businesses.filter(
     (b) => b.country === country.name
@@ -185,7 +184,7 @@ export default async function CountryDetailPage({
                   </span>
                 </div>
                 <span className="font-bold">
-                  ${country.serverCosts.toLocaleString()}/mo
+                  ${serverCost.toLocaleString()}/mo
                 </span>
               </div>
             </CardContent>

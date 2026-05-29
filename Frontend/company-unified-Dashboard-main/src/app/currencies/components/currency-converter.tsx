@@ -19,13 +19,12 @@ import {
 import { Button } from '@/components/ui/button';
 import { ArrowRightLeft } from 'lucide-react';
 import type { Currency } from '@/lib/types';
-import fxRates from '@/lib/data/fx-rates.json';
+import { useFxRates } from '@/hooks/use-fx-rates';
 
 const currencies: Currency[] = ["USD", "INR", "GBP", "AED", "SGD"];
-const rates: Record<string, number> = fxRates;
-
 
 export default function CurrencyConverter() {
+  const { map: rates } = useFxRates();
   const [amount, setAmount] = useState<number | string>(100);
   const [fromCurrency, setFromCurrency] = useState<Currency>('USD');
   const [toCurrency, setToCurrency] = useState<Currency>('INR');
@@ -53,7 +52,7 @@ export default function CurrencyConverter() {
   };
   
   let result: number | null = null;
-  if (typeof amount === 'number' && amount >= 0) {
+  if (typeof amount === 'number' && amount >= 0 && rates[fromCurrency] && rates[toCurrency]) {
     const amountInUsd = amount / rates[fromCurrency];
     result = amountInUsd * rates[toCurrency];
   }

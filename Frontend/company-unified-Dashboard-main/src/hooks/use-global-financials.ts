@@ -42,11 +42,11 @@ export function useGlobalFinancials() {
           dashboardApi.countries(), dashboardApi.fxRates(),
         ]);
         const biz = arr(bizRes), fin = arr(finRes), emps = arr(empRes), ctys = arr(ctyRes);
-        const fxObj = ((fxRes as { data?: unknown })?.data ?? fxRes) as { rates?: { pair: string; rate: number }[] };
+        const fxObj = ((fxRes as { data?: unknown })?.data ?? fxRes) as { rates?: { code: string; rate: number }[] };
 
-        // fx map: currency -> rate vs USD (pair format "USD/XXX")
+        // fx map: currency code -> rate vs USD
         const fx: Record<string, number> = { USD: 1 };
-        for (const r of fxObj?.rates ?? []) { const cur = String(r.pair).split("/")[1]; if (cur) fx[cur] = Number(r.rate) || 1; }
+        for (const r of fxObj?.rates ?? []) { if (r.code) fx[r.code] = Number(r.rate) || 1; }
 
         // per-business revenue/costs from financial_entries
         const finByBiz: Record<string, { revenue: number; costs: number }> = {};
