@@ -1,14 +1,14 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry:       ['src/index.ts'],
+  entry:       ['src/index.ts', 'src/react/index.tsx'],
   format:      ['cjs', 'esm'],
   dts:         true,
   clean:       true,
   sourcemap:   true,
   splitting:   false,
   treeshake:   true,
-  target:      'node20',
+  target:      'es2020',
   outDir:      'dist',
-  external:    [],
+  external:    ['react', 'react-dom'],
 });

@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { AppError } = require('../utils/errors');
 const { sendSuccess, sendPaginated } = require('../utils/response');
+const events = require('../service/events');
 
 function page(req) {
     return { offset: (Number(req.query.page || 1) - 1) * Number(req.query.limit || 20), limit: Number(req.query.limit || 20) };
@@ -33,9 +34,18 @@ exports.createCompany = async (req, res, next) => {
     try {
         const userId = req.auth?.userId;
         if (!userId) throw new AppError('UNAUTHORIZED', 'Authentication required', 401);
-        const { name, description, website, logo_url, tier } = req.body;
+        const { id, name, description, website, logo_url, tier } = req.body;
         if (!name) throw new AppError('VALIDATION_ERROR', 'name is required', 400);
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-' + Date.now();
+        // Optional explicit id lets a signup align company.id with the caller's orgId
+        // (so the frontend's companyId === orgId resolves the company). Idempotent on re-signup.
+        if (id) {
+            const [company] = await db.companies.findOrCreate({
+                where: { id },
+                defaults: { id, owner_user_id: userId, name, description, website, logo_url, tier: tier || 'free', slug },
+            });
+            return sendSuccess(res, company, 201);
+        }
         const company = await db.companies.create({ owner_user_id: userId, name, description, website, logo_url, tier: tier || 'free', slug });
         sendSuccess(res, company, 201);
     } catch (err) { next(err); }
@@ -103,6 +113,7 @@ exports.publishTask = async (req, res, next) => {
         if (!task) throw new AppError('NOT_FOUND', 'Task not found', 404);
         task.status = 'open';
         await task.save();
+        events.emit('task.published', { id: task.id, title: task.title, company_id: task.company_id }, { companyId: task.company_id, related: { type: 'Task', id: task.id, name: task.title } });
         sendSuccess(res, task);
     } catch (err) { next(err); }
 };
@@ -148,6 +159,7 @@ exports.createSubmission = async (req, res, next) => {
         const task = await db.tasks.findByPk(task_id);
         if (!task || task.status !== 'open') throw new AppError('FORBIDDEN', 'Task is not accepting submissions', 403);
         const submission = await db.submissions.create({ task_id, user_id: userId, code_url, demo_url, description, notes });
+        events.emit('submission.created', { id: submission.id, task_id, user_id: String(userId), company_id: task.company_id }, { companyId: task.company_id, related: { type: 'Submission', id: submission.id } });
         sendSuccess(res, submission, 201);
     } catch (err) { next(err); }
 };
@@ -197,15 +209,41 @@ exports.createEvaluation = async (req, res, next) => {
         if (is_final) {
             await db.submissions.update({ score, feedback, status: 'under_review' }, { where: { id: submission_id } });
         }
+        const sub = await db.submissions.findByPk(submission_id, { include: [{ association: 'task', attributes: ['company_id'] }] });
+        events.emit('submission.evaluated', { id: evaluation.id, submission_id, score, user_id: sub ? String(sub.user_id) : undefined }, { companyId: sub?.task?.company_id, related: { type: 'Submission', id: submission_id } });
         sendSuccess(res, evaluation, 201);
     } catch (err) { next(err); }
 };
 
 exports.getEvaluationSchemas = async (req, res, next) => {
     try {
+        // Rich EvaluationSchema[] shape (criteria as weighted objects) matching the frontend
+        // EvaluationSchema/EvaluationCriterion contract so the evaluation form renders directly.
         const schemas = [
-            { id: 'default', name: 'Default Evaluation', criteria: ['code_quality', 'functionality', 'documentation', 'innovation'] },
-            { id: 'technical', name: 'Technical Review', criteria: ['architecture', 'performance', 'security', 'test_coverage'] },
+            {
+                id: 'schema-standard',
+                name: 'Standard Technical Evaluation',
+                description: 'A balanced schema for evaluating core technical roles.',
+                isActive: true,
+                criteria: [
+                    { id: 'crit-tech', name: 'Technical Skills', description: 'Mastery of required technologies and tools.', maxPoints: 10, weight: 0.3 },
+                    { id: 'crit-problem', name: 'Problem Solving', description: 'Ability to analyze problems and devise effective solutions.', maxPoints: 10, weight: 0.3 },
+                    { id: 'crit-quality', name: 'Code Quality', description: 'Readability, structure, and best practices.', maxPoints: 10, weight: 0.2 },
+                    { id: 'crit-comm', name: 'Communication', description: 'Clarity of explanations and thought process.', maxPoints: 10, weight: 0.2 },
+                ],
+            },
+            {
+                id: 'schema-frontend',
+                name: 'Frontend Specialist Evaluation',
+                description: 'Focused on frontend skills and user experience.',
+                isActive: true,
+                criteria: [
+                    { id: 'crit-react', name: 'Framework Proficiency', description: 'Correct use of components, hooks, and state management.', maxPoints: 10, weight: 0.4 },
+                    { id: 'crit-uiux', name: 'UI/UX Implementation', description: 'Attention to detail implementing the design.', maxPoints: 10, weight: 0.3 },
+                    { id: 'crit-responsive', name: 'Responsiveness', description: 'Adapts well across screen sizes.', maxPoints: 10, weight: 0.2 },
+                    { id: 'crit-perf', name: 'Performance', description: 'Rendering efficiency and awareness.', maxPoints: 10, weight: 0.1 },
+                ],
+            },
         ];
         sendSuccess(res, schemas);
     } catch (err) { next(err); }

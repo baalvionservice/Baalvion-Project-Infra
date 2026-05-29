@@ -3,7 +3,8 @@ const { Worker } = require('bullmq');
 const nodemailer  = require('nodemailer');
 const redisConnection = require('../config/redis');
 
-const SMTP_CONFIGURED = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+// SMTP auth is optional — dev catchers (Mailpit/MailHog) accept mail with no credentials.
+const SMTP_CONFIGURED = !!process.env.SMTP_HOST;
 
 let transporter;
 if (SMTP_CONFIGURED) {
@@ -11,10 +12,12 @@ if (SMTP_CONFIGURED) {
         host: process.env.SMTP_HOST,
         port: parseInt(process.env.SMTP_PORT || '587'),
         secure: process.env.SMTP_PORT === '465',
-        auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+        ...(process.env.SMTP_USER && process.env.SMTP_PASS
+            ? { auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS } }
+            : {}),
     });
 } else {
-    // Dev: log emails to console
+    // No SMTP host: log emails to console.
     transporter = nodemailer.createTransport({ jsonTransport: true });
 }
 

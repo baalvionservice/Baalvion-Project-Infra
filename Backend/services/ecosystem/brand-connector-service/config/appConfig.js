@@ -26,6 +26,9 @@ module.exports = {
         password: process.env.DB_PASSWORD || '',
     },
     security: {
-        ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 120),
+        // Per-client requests/minute. This service sits behind the same-origin BFF, so it is not
+        // internet-facing; the limiter is a safety net against runaway loops, not the edge. A
+        // call-heavy dashboard fires several requests per page load, so the ceiling is generous.
+        ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 600),
     },
 };

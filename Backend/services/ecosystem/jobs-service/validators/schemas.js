@@ -71,6 +71,10 @@ const createCandidateSchema = z.object({
     source: z.enum(['referral', 'linkedin', 'job_board', 'direct']).optional(),
     notes: z.string().optional(),
     tags: z.array(z.string()).default([]),
+    headline: z.string().max(255).optional(),
+    location: z.string().max(255).optional(),
+    years_of_experience: z.coerce.number().min(0).max(60).optional(),
+    skills: z.array(z.string()).optional(),
 });
 
 const updateCandidateSchema = z.object({
@@ -84,14 +88,18 @@ const updateCandidateSchema = z.object({
     source: z.enum(['referral', 'linkedin', 'job_board', 'direct']).optional(),
     notes: z.string().optional(),
     tags: z.array(z.string()).optional(),
+    headline: z.string().max(255).optional(),
+    location: z.string().max(255).optional(),
+    years_of_experience: z.coerce.number().min(0).max(60).optional(),
+    skills: z.array(z.string()).optional(),
 });
 
 // Interview schemas
 const createInterviewSchema = z.object({
-    application_id: z.number().int().positive(),
-    interviewer_id: z.number().int().positive(),
+    application_id: z.coerce.number().int().positive(),
+    interviewer_id: z.coerce.number().int().positive().optional(), // defaults to the scheduling user
     scheduled_at: z.string().datetime(),
-    duration_minutes: z.number().int().positive().default(60),
+    duration_minutes: z.coerce.number().int().positive().default(60),
     type: z.enum(['video', 'phone', 'in_person', 'technical']).default('video'),
     location: z.string().optional(),
 });
@@ -106,8 +114,8 @@ const updateInterviewSchema = z.object({
 
 const interviewFeedbackSchema = z.object({
     feedback: z.string().min(1),
-    rating: z.number().int().min(1).max(5),
-    recommendation: z.enum(['strong_yes', 'yes', 'neutral', 'no', 'strong_no']),
+    rating: z.coerce.number().int().min(1).max(5),
+    recommendation: z.enum(['strong_yes', 'yes', 'neutral', 'no', 'strong_no']).optional(),
 });
 
 // Pagination

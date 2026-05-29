@@ -24,6 +24,18 @@ db.College = require('./colleges')(sequelize);
 db.Student = require('./students')(sequelize);
 db.Placement = require('./placements')(sequelize);
 
+// Workspace / ATS-extras domains
+db.Offer = require('./offers')(sequelize);
+db.SystemUser = require('./system_users')(sequelize);
+db.Organization = require('./organizations')(sequelize);
+db.Payment = require('./payments')(sequelize);
+db.Notification = require('./notifications')(sequelize);
+db.Document = require('./documents')(sequelize);
+db.Note = require('./notes')(sequelize);
+db.AuditLog = require('./audit_logs')(sequelize);
+db.Project = require('./projects')(sequelize);
+db.Milestone = require('./milestones')(sequelize);
+
 // Associations
 db.JobListing.belongsToMany(db.Skill, {
     through: db.JobSkill,
@@ -55,5 +67,19 @@ db.Placement.belongsTo(db.Student, { foreignKey: 'student_id', as: 'student' });
 
 db.College.hasMany(db.Placement, { foreignKey: 'college_id', as: 'placements' });
 db.Placement.belongsTo(db.College, { foreignKey: 'college_id', as: 'college' });
+
+// Offers ↔ Applications/Candidates
+db.Application.hasMany(db.Offer, { foreignKey: 'application_id', as: 'offers' });
+db.Offer.belongsTo(db.Application, { foreignKey: 'application_id', as: 'application' });
+
+// Notes / Documents ↔ Candidates
+db.Candidate.hasMany(db.Note, { foreignKey: 'candidate_id', as: 'candidateNotes' });
+db.Note.belongsTo(db.Candidate, { foreignKey: 'candidate_id', as: 'candidate' });
+db.Candidate.hasMany(db.Document, { foreignKey: 'candidate_id', as: 'documents' });
+db.Document.belongsTo(db.Candidate, { foreignKey: 'candidate_id', as: 'candidate' });
+
+// Projects ↔ Milestones
+db.Project.hasMany(db.Milestone, { foreignKey: 'project_id', as: 'milestones' });
+db.Milestone.belongsTo(db.Project, { foreignKey: 'project_id', as: 'project' });
 
 module.exports = db;

@@ -58,6 +58,45 @@ router.post('/login', async (req, res) => {
   return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null }, csrfToken });
 });
 
+// POST /auth/register → auth-service register (registers + auto-logs-in) → cookies + SAFE profile + csrf.
+// Mirrors /login exactly; the access token is NEVER returned in the body.
+router.post('/register', async (req, res) => {
+  const { status, json } = await authService('/register', {
+    email:    req.body && req.body.email,
+    password: req.body && req.body.password,
+    fullName: req.body && req.body.fullName,
+    orgName:  req.body && req.body.orgName,
+  });
+  if ((status !== 200 && status !== 201) || !json || !json.success || !json.data || !json.data.accessToken) {
+    return res.status(status || 400).json({ error: (json && json.error) || { code: 'REGISTER_FAILED', message: 'Registration failed' } });
+  }
+  const { accessToken, refreshToken, user } = json.data;
+  const { c, csrfToken } = await establish(req, res, accessToken, refreshToken);
+  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null }, csrfToken });
+});
+
+// POST /auth/invite → invite a member to the caller's org. Requires a valid session; forwards the
+// session's access token to auth-service's team API (POST /v1/orgs/:orgId/invite). Body: { email, role }.
+router.post('/invite', requireSession(), async (req, res) => {
+  const orgId = req._claims && req._claims.org_id;
+  const accessToken = req.cookies && req.cookies[config.cookie.accessName];
+  if (!orgId || !accessToken) {
+    return res.status(401).json({ error: { code: 'NO_ORG_CONTEXT', message: 'No org context in session' } });
+  }
+  const { email, role } = req.body || {};
+  try {
+    const r = await fetch(`${config.authServiceUrl}/orgs/${encodeURIComponent(orgId)}/invite`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ email, role }),
+    });
+    let json = null; try { json = await r.json(); } catch { /* no body */ }
+    return res.status(r.status).json(json || { ok: r.ok });
+  } catch {
+    return res.status(502).json({ error: { code: 'INVITE_SERVICE_ERROR', message: 'Invite service unavailable' } });
+  }
+});
+
 // GET /auth/me → verify cookie + session; canonical user (NO token).
 router.get('/me', async (req, res) => {
   try {

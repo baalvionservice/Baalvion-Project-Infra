@@ -18,7 +18,8 @@ const app = express();
 app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
-app.use(express.json({ limit: '2mb' }));
+// Capture the raw body so payment-provider webhooks can verify HMAC signatures.
+app.use(express.json({ limit: '2mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(requestContext);
@@ -50,6 +51,8 @@ const start = async () => {
     app.listen(config.port, () =>
         console.log(`Baalvion CTM Service running on port ${config.port}`)
     );
+    // Begin periodic real-metric snapshots (telemetry; unref'd so it never blocks exit).
+    try { require('./service/observability').startCollector(60000); } catch (e) { console.warn('[obs] collector not started:', e.message); }
 };
 
 start();

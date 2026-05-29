@@ -54,7 +54,11 @@ router.post('/admin/reindex', authMiddleware, ctrl.reindexJobs);
 // ─── Uploads ─────────────────────────────────────────────────────────────────
 // Returns a presigned URL so the client uploads directly to S3
 router.post('/uploads/presign', authMiddleware, ctrl.presignUpload);
-// Direct upload (multipart, for server-side processing before S3 push)
-router.post('/uploads/resume', authMiddleware, ctrl.uploadResume);
+// Authenticated direct upload (multipart) → S3/MinIO (documents, avatars, etc.)
+router.post('/uploads/resume', authMiddleware, ctrl.uploadFile);
+router.post('/uploads/file', authMiddleware, ctrl.uploadFile);
+// PUBLIC direct upload — the careers apply flow (anonymous candidates) needs to attach a
+// resume/certificate. Same mime/size guards apply in the upload service.
+router.post('/uploads/public', ctrl.uploadFile);
 
 module.exports = router;

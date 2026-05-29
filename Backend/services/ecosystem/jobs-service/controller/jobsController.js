@@ -196,6 +196,7 @@ const getInterview = async (req, res, next) => {
 const scheduleInterview = async (req, res, next) => {
     try {
         const data = validate(createInterviewSchema, req.body);
+        if (!data.interviewer_id) data.interviewer_id = req.auth.userId; // default to the scheduling user
         const interview = await jobsService.scheduleInterview(req.auth.orgId, data);
         return sendSuccess(req, res, interview, 201);
     } catch (err) { return next(err); }
@@ -248,7 +249,7 @@ const listSkills = async (req, res, next) => {
 const searchJobs = async (req, res, next) => {
     try {
         const result = await searchService.searchJobs(req.query);
-        return res.json({ success: true, ...result });
+        return sendPaginated(req, res, result);
     } catch (err) { return next(err); }
 };
 
@@ -270,22 +271,25 @@ const presignUpload = async (req, res, next) => {
         const { folder = 'resumes', filename, contentType, fileSizeBytes } = req.body;
         if (!filename || !contentType) throw new AppError('VALIDATION_ERROR', 'filename and contentType required', 422);
         const result = await uploadService.getPresignedUploadUrl({ folder, filename, contentType, fileSizeBytes });
-        return sendSuccess(res, result);
+        return sendSuccess(req, res, result);
     } catch (err) { return next(err); }
 };
 
-const uploadResume = [
+// Generic multipart upload → MinIO/S3. Folder restricted to a safe allowlist.
+const ALLOWED_FOLDERS = new Set(['resumes', 'documents', 'applications', 'avatars', 'misc']);
+const uploadFile = [
     multerMemory.single('file'),
     async (req, res, next) => {
         try {
             if (!req.file) throw new AppError('VALIDATION_ERROR', 'No file uploaded', 422);
+            const folder = ALLOWED_FOLDERS.has(req.body.folder) ? req.body.folder : 'misc';
             const { key, publicUrl } = await uploadService.uploadBuffer({
-                folder: 'resumes',
+                folder,
                 filename: req.file.originalname,
                 contentType: req.file.mimetype,
                 buffer: req.file.buffer,
             });
-            return sendSuccess(res, { url: publicUrl, key }, 201);
+            return sendSuccess(req, res, { url: publicUrl, key }, 201);
         } catch (err) { return next(err); }
     },
 ];
@@ -297,6 +301,6 @@ module.exports = {
     listInterviews, getInterview, scheduleInterview, updateInterview, cancelInterview, submitFeedback,
     getHiringAnalytics,
     listSkills,
-    presignUpload, uploadResume,
+    presignUpload, uploadResume: uploadFile, uploadFile,
     searchJobs, reindexJobs,
 };

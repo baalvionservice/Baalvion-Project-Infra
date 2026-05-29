@@ -32,6 +32,14 @@ module.exports = (sequelize) => {
             type: DataTypes.STRING(255),
             allowNull: true,
         },
+        country_id: {
+            type: DataTypes.STRING(20),
+            allowNull: true,
+        },
+        department_id: {
+            type: DataTypes.STRING(40),
+            allowNull: true,
+        },
         job_type: {
             type: DataTypes.STRING(50),
             defaultValue: 'full_time',

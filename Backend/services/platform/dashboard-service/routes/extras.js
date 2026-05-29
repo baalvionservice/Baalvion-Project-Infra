@@ -251,11 +251,18 @@ router.get('/billing', authMiddleware, (req, res) =>
 router.get('/marketplace', authMiddleware, (req, res) => {
     const mkApp = (slug, name, category, description, rating, installs, developer, pricing, featured) => ({
         slug, name, category, description, rating, installs, developer, version: '1.2.0', lastUpdated: '2026-05-20',
-        featured, icon: `/icons/${slug}.png`,
+        // Use generated placeholder images (no per-app asset files exist yet) so icons/screenshots
+        // always resolve instead of 404→400 through next/image.
+        // The /png path segment forces a PNG (placehold.co serves SVG by default, which next/image
+        // refuses to optimize → 400). Keep it so icons/screenshots resolve through next/image.
+        featured, icon: `https://placehold.co/48x48/1A3C6E/ffffff/png?text=${encodeURIComponent(name.charAt(0))}`,
         permissions: ['Read Finance Data', 'Write Invoices', 'Access Business Settings'],
         pricing,
         features: [`${name} core automation`, 'Real-time sync', 'Audit logging', 'Role-based access'],
-        screenshots: [`/screens/${slug}-1.png`, `/screens/${slug}-2.png`],
+        screenshots: [
+            `https://placehold.co/1200x800/e2e8f0/64748b/png?text=${encodeURIComponent(name + ' — Overview')}`,
+            `https://placehold.co/1200x800/e2e8f0/64748b/png?text=${encodeURIComponent(name + ' — Details')}`,
+        ],
         reviews: [
             { user: 'Aisha R.', rating: 5, comment: 'Saves us hours every week.' },
             { user: 'Marcus C.', rating: 4, comment: 'Solid, a few rough edges.' },

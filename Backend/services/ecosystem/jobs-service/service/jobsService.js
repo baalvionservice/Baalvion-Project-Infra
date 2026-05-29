@@ -169,13 +169,16 @@ const createApplication = async (orgId, data) => {
     if (!job) throw new AppError('NOT_FOUND', 'Job listing not found', 404);
     if (job.status !== 'published') throw new AppError('VALIDATION_ERROR', 'Cannot apply to a non-published job', 422);
 
+    // Public applications have no auth context — inherit the job's org so the row is tenant-scoped.
+    const effectiveOrgId = orgId || job.org_id;
+
     let candidateId = candidate_id;
 
     if (!candidateId) {
         // Find or create candidate by email
         let [candidate] = await db.Candidate.findOrCreate({
             where: { email },
-            defaults: { email, full_name, phone, org_id: orgId },
+            defaults: { email, full_name, phone, org_id: effectiveOrgId },
         });
         candidateId = candidate.id;
     }
@@ -189,13 +192,13 @@ const createApplication = async (orgId, data) => {
     const application = await db.Application.create({
         ...appData,
         candidate_id: candidateId,
-        org_id: orgId,
+        org_id: effectiveOrgId,
     });
 
     // Increment applications count
     await job.increment('applications_count');
 
-    const created = await getApplicationById(application.id, orgId);
+    const created = await getApplicationById(application.id, effectiveOrgId);
     const cand = created.candidate;
 
     enqueue(() => {
@@ -414,15 +417,24 @@ const submitInterviewFeedback = async (id, orgId, data) => {
 const getHiringAnalytics = async (orgId) => {
     const stages = ['applied', 'screening', 'interview', 'offer', 'hired', 'rejected', 'withdrawn'];
 
-    const [stageCounts, activeJobs, totalCandidates] = await Promise.all([
+    const [stageCounts, jobStatusCounts, activeJobs, totalCandidates, appRows, hiredApps] = await Promise.all([
         db.Application.findAll({
             where: { org_id: orgId },
             attributes: ['status', [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'count']],
-            group: ['status'],
-            raw: true,
+            group: ['status'], raw: true,
+        }),
+        db.JobListing.findAll({
+            where: { org_id: orgId },
+            attributes: ['status', [db.sequelize.fn('COUNT', db.sequelize.col('id')), 'count']],
+            group: ['status'], raw: true,
         }),
         db.JobListing.count({ where: { org_id: orgId, status: 'published' } }),
         db.Candidate.count({ where: { org_id: orgId } }),
+        db.Application.findAll({ where: { org_id: orgId }, attributes: ['created_at'], raw: true }),
+        db.Application.findAll({
+            where: { org_id: orgId, status: 'hired' },
+            include: [{ model: db.JobListing, as: 'job', attributes: ['department_id', 'title'] }],
+        }),
     ]);
 
     const funnelMap = {};
@@ -430,16 +442,54 @@ const getHiringAnalytics = async (orgId) => {
     for (const row of stageCounts) funnelMap[row.status] = Number(row.count);
 
     const totalApplications = Object.values(funnelMap).reduce((a, b) => a + b, 0);
-    const conversionRate = totalApplications > 0
-        ? ((funnelMap.hired / totalApplications) * 100).toFixed(2)
-        : 0;
+    const conversionRate = totalApplications > 0 ? Number(((funnelMap.hired / totalApplications) * 100).toFixed(2)) : 0;
+
+    // statusDistribution — job statuses with chart colors
+    const colors = { draft: 'hsl(var(--chart-1))', published: 'hsl(var(--chart-2))', closed: 'hsl(var(--chart-3))', archived: 'hsl(var(--chart-4))' };
+    const statusDistribution = jobStatusCounts.map((s) => ({ name: s.status, value: Number(s.count), fill: colors[s.status] || 'hsl(var(--chart-5))' }));
+
+    // applicationsTrend — last 6 months
+    const months = [];
+    const now = new Date();
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        months.push({ key: d.toLocaleString('en-US', { month: 'short', year: 'numeric' }), y: d.getFullYear(), m: d.getMonth(), applications: 0 });
+    }
+    for (const a of appRows) {
+        const dt = new Date(a.created_at);
+        const bucket = months.find((mm) => mm.y === dt.getFullYear() && mm.m === dt.getMonth());
+        if (bucket) bucket.applications += 1;
+    }
+    const applicationsTrend = months.map(({ key, applications }) => ({ date: key, applications }));
+
+    // departmentHiring — hires grouped by department/title
+    const deptMap = {};
+    const DEPT_LABEL = { dept_eng_it: 'Engineering / IT', general: 'General' };
+    for (const h of hiredApps) {
+        const dep = h.job?.department_id || 'general';
+        const label = DEPT_LABEL[dep] || dep;
+        deptMap[label] = (deptMap[label] || 0) + 1;
+    }
+    const departmentHiring = Object.entries(deptMap).map(([department, hires]) => ({ department, hires }));
+
+    const kpis = {
+        totalActiveJobs: { value: activeJobs, change: 0 },
+        totalApplications: { value: totalApplications, change: 0 },
+        avgTimeToFill: { value: 0, change: 0 },
+        overallConversionRate: { value: conversionRate, change: 0 },
+    };
 
     return {
         funnel: funnelMap,
         totalApplications,
         activeJobs,
         totalCandidates,
-        conversionRate: Number(conversionRate),
+        conversionRate,
+        kpis,
+        statusDistribution,
+        applicationsTrend,
+        departmentHiring,
+        placementSuccessRate: conversionRate,
     };
 };
 
