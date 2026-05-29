@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo, type DragEvent } from "react";
+import { useState, useMemo, useEffect, type DragEvent } from "react";
 import {
   Select,
   SelectContent,
@@ -19,10 +19,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import tasksData from "@/lib/data/tasks.json";
-import employeesData from "@/lib/data/employees.json";
-import businessesData from "@/lib/data/businesses";
-import departmentsData from "@/lib/data/departments.json";
+import { dashboardApi } from "@/lib/api-client";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import type { Employee, Task, Business } from "@/lib/types";
 import AddTaskModal from "./add-task-modal";
@@ -39,8 +36,49 @@ const priorityColors: Record<string, string> = {
   Low: "bg-green-500",
 };
 
+// dashboard-service stores lowercase statuses (todo/in_progress/done/blocked); map to the board's
+// display columns (blocked -> Review).
+const DB_TO_DISPLAY: Record<string, Status> = {
+  todo: "To Do", in_progress: "In Progress", blocked: "Review", done: "Done",
+};
+const DISPLAY_TO_DB: Record<Status, string> = {
+  "To Do": "todo", "In Progress": "in_progress", Review: "blocked", Done: "done",
+};
+
+interface NameRef { id: string; name: string; }
+
 export default function TaskBoard() {
-  const [allTasks, setAllTasks] = useState(tasksData as Task[]);
+  const [allTasks, setAllTasks] = useState<Task[]>([]);
+  const [employeesData, setEmployeesData] = useState<Employee[]>([]);
+  const [businessesData, setBusinessesData] = useState<Business[]>([]);
+  const [departmentsData, setDepartmentsData] = useState<NameRef[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [tk, em, bz, dp] = await Promise.all([
+          dashboardApi.tasks(), dashboardApi.employees(), dashboardApi.businesses(), dashboardApi.departments(),
+        ]);
+        const tarr = ((tk as { data?: unknown[] })?.data ?? (Array.isArray(tk) ? tk : [])) as Record<string, unknown>[];
+        const earr = ((em as { data?: unknown[] })?.data ?? (Array.isArray(em) ? em : [])) as Record<string, unknown>[];
+        const barr = ((bz as { data?: unknown[] })?.data ?? (Array.isArray(bz) ? bz : [])) as Record<string, unknown>[];
+        const darr = (Array.isArray(dp) ? dp : (dp as { data?: unknown[] })?.data ?? []) as Record<string, unknown>[];
+        if (cancelled) return;
+        setAllTasks(tarr.map((t) => ({
+          id: String(t.id), title: String(t.title ?? ""), description: String(t.description ?? ""),
+          status: DB_TO_DISPLAY[String(t.status ?? "todo")] ?? "To Do",
+          assigneeId: String(t.assignee_id ?? ""), businessId: String(t.business_id ?? ""),
+          priority: String(t.priority ?? "Medium"), dueDate: String(t.due_date ?? t.dueDate ?? new Date().toISOString()),
+        })) as unknown as Task[]);
+        setEmployeesData(earr.map((e) => ({ ...e, id: String(e.id), name: String(e.name ?? ""), imageId: `user-${e.id}` })) as unknown as Employee[]);
+        setBusinessesData(barr.map((b) => ({ ...b, id: String(b.id), name: String(b.name ?? "") })) as unknown as Business[]);
+        setDepartmentsData(darr.map((d) => ({ id: String(d.id ?? d.name ?? ""), name: String(d.name ?? "") })));
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   const [filters, setFilters] = useState({
     search: "",
     business: "all",
@@ -207,10 +245,10 @@ export default function TaskBoard() {
               {tasksByStatus[status].map((task) => {
                 const assignee = employeesData.find(
                   (e) => e.id === task.assigneeId
-                ) as Employee;
+                );
                 const business = businessesData.find(
                   (b) => b.id === task.businessId
-                ) as Business;
+                );
                 const assigneeImage = assignee
                   ? PlaceHolderImages.find((p) => p.id === assignee.imageId)
                   : null;
@@ -243,7 +281,7 @@ export default function TaskBoard() {
                         </TooltipProvider>
                       </div>
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
-                        <Badge variant="outline">{business.name}</Badge>
+                        <Badge variant="outline">{business?.name ?? "—"}</Badge>
                         <div className="flex items-center gap-2">
                           <span>{format(new Date(task.dueDate), "MMM d")}</span>
                           <Avatar className="h-6 w-6">
@@ -251,7 +289,7 @@ export default function TaskBoard() {
                               <AvatarImage src={assigneeImage.imageUrl} />
                             )}
                             <AvatarFallback>
-                              {assignee.name.charAt(0)}
+                              {assignee?.name?.charAt(0) ?? "?"}
                             </AvatarFallback>
                           </Avatar>
                         </div>

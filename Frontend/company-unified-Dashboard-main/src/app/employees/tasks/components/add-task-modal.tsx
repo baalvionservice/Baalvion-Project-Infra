@@ -28,10 +28,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import businessesData from "@/lib/data/businesses";
-import employeesData from "@/lib/data/employees.json";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 
 interface AddTaskModalProps {
   isOpen: boolean;
@@ -44,6 +43,7 @@ export default function AddTaskModal({
 }: AddTaskModalProps) {
   const { toast } = useToast();
   const [date, setDate] = useState<Date>();
+  const { businesses: businessesData, employees: employeesData } = useDashboardRefs();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

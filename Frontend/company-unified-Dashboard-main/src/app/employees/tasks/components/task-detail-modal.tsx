@@ -11,9 +11,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import type { Task, Employee, Business } from "@/lib/types";
-import businessesData from "@/lib/data/businesses";
-import employeesData from "@/lib/data/employees.json";
+import type { Task } from "@/lib/types";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { format, formatDistanceToNow } from "date-fns";
 import { Calendar, User, Briefcase, Tag } from "lucide-react";
@@ -30,17 +29,16 @@ export default function TaskDetailModal({
   isOpen,
   onOpenChange,
 }: TaskDetailModalProps) {
+  const { businesses: businessesData, employees: employeesData } = useDashboardRefs();
+
   if (!task) return null;
 
-  const assignee = employeesData.find(
-    (e) => e.id === task.assigneeId
-  ) as Employee;
-  const business = businessesData.find(
-    (b) => b.id === task.businessId
-  ) as Business;
+  const assignee = employeesData.find((e) => e.id === task.assigneeId);
+  const business = businessesData.find((b) => b.id === task.businessId);
   const assigneeImage = assignee
     ? PlaceHolderImages.find((p) => p.id === assignee.imageId)
     : null;
+  const comments = (task as Task & { comments?: { id: string; authorId: string; text: string; timestamp: string }[] }).comments ?? [];
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
@@ -57,10 +55,10 @@ export default function TaskDetailModal({
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <User /> {assignee.name}
+                <User /> {assignee?.name ?? "Unassigned"}
               </div>
               <div className="flex items-center gap-2">
-                <Briefcase /> {business.name}
+                <Briefcase /> {business?.name ?? "—"}
               </div>
               <div className="flex items-center gap-2">
                 <Calendar /> Due: {format(new Date(task.dueDate), "PP")}
@@ -81,7 +79,7 @@ export default function TaskDetailModal({
           <div>
             <h4 className="font-semibold mb-4">Comments</h4>
             <div className="space-y-4">
-              {task.comments.map((comment) => {
+              {comments.map((comment) => {
                 const author = employeesData.find(
                   (e) => e.id === comment.authorId
                 );
@@ -94,7 +92,7 @@ export default function TaskDetailModal({
                       {authorImage && (
                         <AvatarImage src={authorImage.imageUrl} />
                       )}
-                      <AvatarFallback>{author?.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{author?.name?.charAt(0) ?? "?"}</AvatarFallback>
                     </Avatar>
                     <div className="w-full rounded-md bg-muted/50 p-3">
                       <div className="flex items-baseline justify-between text-xs">
