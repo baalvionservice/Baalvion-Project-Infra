@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -52,10 +52,11 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import employeesData from "@/lib/data/employees.json";
-import businessesData from "@/lib/data/businesses";
-import countriesData from "@/lib/data/countries.json";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { dashboardApi } from "@/lib/api-client";
+
+interface EmpRow { id: string; name: string; email: string; role: string; businessId: string; country: string; status: string; joinDate: string; imageId: string; department: string; }
+interface NameRef { id: string; name: string; }
 
 const PAGE_SIZE = 10;
 
@@ -70,17 +71,22 @@ type EmployeeTableProps = {
   };
 };
 
-const departments = [...new Set(employeesData.map((e) => e.department))];
-const statuses = [...new Set(employeesData.map((e) => e.status))];
-
 function Filters({
   searchParams,
   onFilterChange,
   onSearchChange,
+  businesses,
+  countries,
+  departments,
+  statuses,
 }: {
   searchParams: EmployeeTableProps["searchParams"];
   onFilterChange: (name: string) => (value: string) => void;
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  businesses: NameRef[];
+  countries: NameRef[];
+  departments: string[];
+  statuses: string[];
 }) {
   return (
     <div className="flex flex-col gap-4">
@@ -102,7 +108,7 @@ function Filters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Businesses</SelectItem>
-          {businessesData.map((b) => (
+          {businesses.map((b) => (
             <SelectItem key={b.id} value={b.id}>
               {b.name}
             </SelectItem>
@@ -118,7 +124,7 @@ function Filters({
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">All Countries</SelectItem>
-          {countriesData.map((c) => (
+          {countries.map((c) => (
             <SelectItem key={c.id} value={c.name}>
               {c.name}
             </SelectItem>
@@ -166,11 +172,42 @@ export default function EmployeeTable({ searchParams }: EmployeeTableProps) {
   const pathname = usePathname();
   const currentSearchParams = useSearchParams();
 
+  const [employees, setEmployees] = useState<EmpRow[]>([]);
+  const [businesses, setBusinesses] = useState<NameRef[]>([]);
+  const [countries, setCountries] = useState<NameRef[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [empRes, bizRes, ctyRes] = await Promise.all([
+          dashboardApi.employees(), dashboardApi.businesses(), dashboardApi.countries(),
+        ]);
+        const empArr = ((empRes as { data?: unknown[] })?.data ?? (Array.isArray(empRes) ? empRes : [])) as Record<string, unknown>[];
+        const bizArr = ((bizRes as { data?: unknown[] })?.data ?? (Array.isArray(bizRes) ? bizRes : [])) as Record<string, unknown>[];
+        const ctyArr = (Array.isArray(ctyRes) ? ctyRes : (ctyRes as { data?: unknown[] })?.data ?? []) as Record<string, unknown>[];
+        if (cancelled) return;
+        setEmployees(empArr.map((e) => ({
+          id: String(e.id), name: String(e.name ?? ""), email: String(e.email ?? ""),
+          role: String(e.role ?? ""), businessId: String(e.business_id ?? ""), country: String(e.country ?? ""),
+          status: String(e.status ?? ""), joinDate: String(e.join_date ?? e.joinDate ?? new Date().toISOString()),
+          imageId: `user-${e.id}`, department: String(e.department ?? ""),
+        })));
+        setBusinesses(bizArr.map((b) => ({ id: String(b.id), name: String(b.name ?? "") })));
+        setCountries(ctyArr.map((c) => ({ id: String(c.code ?? c.name ?? ""), name: String(c.name ?? "") })));
+      } catch { /* leave empty on error */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const departments = useMemo(() => [...new Set(employees.map((e) => e.department).filter(Boolean))], [employees]);
+  const statuses = useMemo(() => [...new Set(employees.map((e) => e.status).filter(Boolean))], [employees]);
+
   const getBusinessName = (businessId: string) =>
-    businessesData.find((b) => b.id === businessId)?.name || businessId;
+    businesses.find((b) => b.id === businessId)?.name || businessId || "—";
 
   const filteredEmployees = useMemo(() => {
-    return employeesData.filter((employee) => {
+    return employees.filter((employee) => {
       const query = searchParams?.q?.toLowerCase() || "";
       const business = searchParams?.business;
       const country = searchParams?.country;
@@ -193,7 +230,7 @@ export default function EmployeeTable({ searchParams }: EmployeeTableProps) {
 
       return true;
     });
-  }, [searchParams]);
+  }, [searchParams, employees]);
 
   const currentPage = Number(searchParams?.page || "1");
   const totalEmployees = filteredEmployees.length;
@@ -255,6 +292,10 @@ export default function EmployeeTable({ searchParams }: EmployeeTableProps) {
                   searchParams={searchParams}
                   onFilterChange={handleFilterChange}
                   onSearchChange={handleSearchChange}
+                  businesses={businesses}
+                  countries={countries}
+                  departments={departments}
+                  statuses={statuses}
                 />
               </div>
             </SheetContent>
@@ -266,6 +307,10 @@ export default function EmployeeTable({ searchParams }: EmployeeTableProps) {
             searchParams={searchParams}
             onFilterChange={handleFilterChange}
             onSearchChange={handleSearchChange}
+            businesses={businesses}
+            countries={countries}
+            departments={departments}
+            statuses={statuses}
           />
         </div>
 
