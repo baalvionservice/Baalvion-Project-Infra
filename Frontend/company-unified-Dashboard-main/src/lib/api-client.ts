@@ -216,6 +216,7 @@ export const dashboardApi = {
   domainAnalytics: () => get('/domain-analytics'),
   operationsAlerts: () => get('/operations/alerts'),
   gdpr: () => get('/gdpr'),
+  portals: () => get('/portals'),
   permissionMatrix: () => get('/permissions/matrix'),
   markNotificationRead: (id: string) => post(`/notifications/${id}/read`),
   auditLogs: (params?: { page?: number; limit?: number }) => {

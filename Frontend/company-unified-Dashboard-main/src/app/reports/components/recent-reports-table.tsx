@@ -24,9 +24,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal, Download, Share2, View } from 'lucide-react';
-import reportsData from '@/lib/data/reports.json';
+import { useEffect, useState } from 'react';
+import { dashboardApi } from '@/lib/api-client';
+
+interface Report { id: string; name: string; type: string; period: string; generated: string; size: string }
 
 export default function RecentReportsTable() {
+  const [reportsData, setReportsData] = useState<Report[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.financeReports();
+        const arr = (Array.isArray(d) ? d : (d as { data?: unknown[] })?.data ?? []) as Report[];
+        if (!cancelled) setReportsData(arr);
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
   return (
     <Card>
       <CardHeader>

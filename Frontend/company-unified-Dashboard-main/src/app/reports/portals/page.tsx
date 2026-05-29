@@ -29,12 +29,28 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, Settings, PlusCircle } from "lucide-react";
-import portalsData from "@/lib/data/portals.json";
-import businessesData from "@/lib/data/businesses";
+import { useEffect } from "react";
+import { dashboardApi } from "@/lib/api-client";
+import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { format } from "date-fns";
+
+interface Portal { id: string; name: string; url: string; pin: string; includedBusinesses: string[]; expires: string; investorName: string }
 
 export default function PortalGeneratorPage() {
   const { toast } = useToast();
+  const { businesses: businessesData } = useDashboardRefs();
+  const [portalsData, setPortalsData] = useState<Portal[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.portals();
+        const arr = (Array.isArray(d) ? d : (d as { data?: unknown[] })?.data ?? []) as Portal[];
+        if (!cancelled) setPortalsData(arr);
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   const handleCopy = (url: string) => {
     navigator.clipboard.writeText(`${window.location.origin}${url}`);

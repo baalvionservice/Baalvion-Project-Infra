@@ -142,4 +142,13 @@ router.get('/gdpr', authMiddleware, (req, res) =>
     }),
 );
 
+// Investor portals — shareable report portals (no portal-registry surfaced yet; reference list).
+router.get('/portals', authMiddleware, (req, res) =>
+    sendSuccess(req, res, [
+        { id: 'portal_abc123', name: 'Q1 2026 General Update', url: '/portal/portal_abc123', pin: '1234', includedBusinesses: ['2', '3', '4'], expires: '2026-10-31', investorName: 'General Partners' },
+        { id: 'portal_gulf01', name: 'Gulf Capital — Mining Brief', url: '/portal/portal_gulf01', pin: '5678', includedBusinesses: ['2'], expires: '2026-09-15', investorName: 'Gulf Capital Partners' },
+        { id: 'portal_angel7', name: 'Angel Syndicate — Portfolio', url: '/portal/portal_angel7', pin: '4321', includedBusinesses: ['3', '4'], expires: '2026-12-01', investorName: 'Angel Syndicate' },
+    ]),
+);
+
 module.exports = router;

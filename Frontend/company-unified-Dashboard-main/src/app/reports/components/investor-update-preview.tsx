@@ -26,8 +26,8 @@ import {
   CheckCircle,
 } from "lucide-react";
 
-import businessesData from "@/lib/data/businesses";
-import equityData from "@/lib/data/equity.json";
+import { useGlobalFinancials } from "@/hooks/use-global-financials";
+import { useEquity } from "@/hooks/use-equity";
 import { format } from "date-fns";
 import CreatePortalModal from "@/app/finance/reports/components/share-modal";
 import { useToast } from "@/hooks/use-toast";
@@ -44,7 +44,10 @@ export default function InvestorUpdatePreview({
   const [pdfReady, setPdfReady] = useState(false);
   const { toast } = useToast();
 
-  const businessPerformance = businessesData.map((biz) => ({
+  const { businesses } = useGlobalFinancials();
+  const { equity } = useEquity();
+
+  const businessPerformance = businesses.map((biz) => ({
     name: biz.name,
     revenue: biz.currentMetrics.revenue,
     profit: biz.currentMetrics.profit,
@@ -52,10 +55,9 @@ export default function InvestorUpdatePreview({
     status: biz.status,
   }));
 
-  const investors = equityData[3].stakeholders.filter((s) =>
-    s.role.includes("Investor")
-  );
-  const valuation = equityData[3].valuation;
+  const capTable = equity[0] as unknown as { stakeholders: { name: string; role: string; equity: number; usdValue: number }[]; valuation: number } | undefined;
+  const investors = (capTable?.stakeholders ?? []).filter((s) => s.role.includes("Investor"));
+  const valuation = capTable?.valuation ?? 0;
 
   const handleExportPdf = () => {
     setExportingPdf(true);
@@ -140,7 +142,7 @@ export default function InvestorUpdatePreview({
               <CardContent>
                 <p className="text-4xl font-bold tracking-tight">$60.2M</p>
                 <p className="text-muted-foreground">
-                  Across {businessesData.length} businesses
+                  Across {businesses.length} businesses
                 </p>
               </CardContent>
             </Card>
