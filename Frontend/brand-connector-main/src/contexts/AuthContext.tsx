@@ -2,16 +2,16 @@
 
 import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import { User, UserRole } from '@/types';
-import { clearAuthCookies, setAuthCookies } from '@/lib/auth-cookies';
 import { brandTokenStore, AUTH_URL } from '@/lib/api-client';
 
 /**
- * @fileOverview Baalvion Auth Context
+ * Baalvion Connect Auth Context.
  *
- * Production: uses Firebase auth + JWT from proxy-backend (:4000).
- * Development (NODE_ENV !== 'production'): also exposes signInAs() for role switching.
+ * SINGLE production auth path: email/password against the identity gateway (auth-service via the
+ * same-origin `/auth-bff` proxy). Access token in memory (brandTokenStore); refresh token in the
+ * httpOnly `baalvion_refresh` cookie. The previous Firebase transitional code, the `signInAs`
+ * mock role-switcher, and the forgeable client role cookies have all been REMOVED.
  */
-
 interface AuthState {
   currentUser: User | null;
   loading: boolean;
@@ -19,57 +19,36 @@ interface AuthState {
 }
 
 interface AuthContextType extends AuthState {
-  /** Development/testing only — sign in as a mock role. */
-  signInAs: (role: UserRole) => void;
   signOut: () => Promise<void>;
   refreshUser: () => Promise<void>;
-  /** Production login: Firebase email/password + JWT exchange. */
   loginWithEmail: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, fullName?: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-/**
- * Dev-mock auth is OFF by default everywhere. It only activates when explicitly
- * opted in via NEXT_PUBLIC_BAALVION_DEV_MOCK=1 AND outside production. This
- * prevents the mock role-switcher from ever being reachable in a real build.
- */
-const MOCK_ENABLED =
-  process.env.NEXT_PUBLIC_BAALVION_DEV_MOCK === '1' && process.env.NODE_ENV !== 'production';
-
-function getMockProfile(role: UserRole): User {
-  return {
-    id: role === 'ADMIN' ? 'admin_root' : role === 'BRAND' ? 'brand_user_1' : 'creator_user_1',
-    email: `${role.toLowerCase()}@baalvion.com`,
-    role,
-    displayName: `${role.charAt(0) + role.slice(1).toLowerCase()} User`,
-    status: 'ACTIVE',
-    isVerified: true,
-    tourCompleted: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-}
-
-async function fetchBackendJwt(
-  firebaseToken: string,
-): Promise<{ accessToken: string; refreshToken: string } | null> {
+function decodeJwt(token: string): Record<string, unknown> | null {
   try {
-    const res = await fetch(`${AUTH_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ firebaseToken }),
-    });
-    if (!res.ok) return null;
-    const json = await res.json();
-    const raw = json.data ?? json;
-    return {
-      accessToken: raw.accessToken ?? raw.token ?? '',
-      refreshToken: raw.refreshToken ?? '',
-    };
+    return JSON.parse(atob((token.split('.')[1] ?? '').replace(/-/g, '+').replace(/_/g, '/')));
   } catch {
     return null;
   }
+}
+
+function userFromToken(token: string): User | null {
+  const c = decodeJwt(token);
+  if (!c) return null;
+  return {
+    id: String(c.sub ?? c.id ?? ''),
+    email: (c.email as string) ?? '',
+    role: ((c.role as UserRole) ?? 'BRAND') as UserRole,
+    displayName: (c.name as string) ?? (c.email as string) ?? '',
+    status: 'ACTIVE',
+    isVerified: Boolean(c.email_verified ?? c.emailVerified ?? false),
+    tourCompleted: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -77,103 +56,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Initialise session ──────────────────────────────────────────────────────
+  // Silent session restore via the httpOnly refresh cookie (no storage reads, no mock).
   useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-
-    async function init() {
-      const isProd = process.env.NODE_ENV === 'production';
-      const hasFirebaseConfig =
-        !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
-        !!process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
-
-      if (isProd && hasFirebaseConfig) {
-        // Production: wire up Firebase auth state listener
-        try {
-          const { getAuth, onAuthStateChanged } = await import('firebase/auth');
-          const { initializeFirebase } = await import('@/firebase');
-          const { auth } = initializeFirebase();
-          if (auth) {
-            unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-              if (firebaseUser) {
-                const firebaseToken = await firebaseUser.getIdToken();
-                const jwt = await fetchBackendJwt(firebaseToken);
-                if (jwt) {
-                  brandTokenStore.set(jwt.accessToken, jwt.refreshToken);
-                }
-                setCurrentUser({
-                  id: firebaseUser.uid,
-                  email: firebaseUser.email ?? '',
-                  role: 'BRAND',
-                  displayName: firebaseUser.displayName ?? firebaseUser.email ?? '',
-                  status: 'ACTIVE',
-                  isVerified: firebaseUser.emailVerified,
-                  tourCompleted: false,
-                  createdAt: firebaseUser.metadata.creationTime ?? new Date().toISOString(),
-                  updatedAt: new Date().toISOString(),
-                });
-                setAuthCookies({ role: 'BRAND', verified: firebaseUser.emailVerified, onboarded: true });
-              } else {
-                setCurrentUser(null);
-                brandTokenStore.clear();
-                clearAuthCookies();
-              }
-              setLoading(false);
-            });
-            return; // early return — listener handles loading
-          }
-        } catch (err) {
-          console.error('[AuthContext] Firebase init error:', err);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${AUTH_URL}/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (cancelled || !res.ok) return;
+        const json = await res.json().catch(() => ({}));
+        const data = json.data ?? json;
+        const at: string | undefined = data.accessToken ?? data.token;
+        if (at) {
+          brandTokenStore.set(at);
+          setCurrentUser(userFromToken(at));
         }
+      } catch {
+        /* not authenticated */
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-
-      // Development / no Firebase: restore from localStorage (mock auth — gated OFF by default)
-      if (MOCK_ENABLED && typeof window !== 'undefined') {
-        const savedRole = localStorage.getItem('mock_role') as UserRole | null;
-        if (savedRole) {
-          setCurrentUser(getMockProfile(savedRole));
-          setAuthCookies({ role: savedRole, onboarded: true });
-        }
-      }
-      setLoading(false);
-    }
-
-    init();
-    return () => unsubscribe?.();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  // ── loginWithEmail ──────────────────────────────────────────────────────────
   const loginWithEmail = useCallback(async (email: string, password: string) => {
     setError(null);
     setLoading(true);
     try {
-      const { getAuth, signInWithEmailAndPassword } = await import('firebase/auth');
-      const { initializeFirebase } = await import('@/firebase');
-      const { auth } = initializeFirebase();
-      if (!auth) throw new Error('Firebase auth not available');
-
-      const credential = await signInWithEmailAndPassword(auth, email, password);
-      const firebaseToken = await credential.user.getIdToken();
-
-      // Exchange Firebase token for a backend JWT
-      const jwt = await fetchBackendJwt(firebaseToken);
-      if (jwt) {
-        brandTokenStore.set(jwt.accessToken, jwt.refreshToken);
+      const res = await fetch(`${AUTH_URL}/login`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.success === false) {
+        throw new Error(json?.error?.message || 'Invalid credentials.');
       }
-
-      const user: User = {
-        id: credential.user.uid,
-        email: credential.user.email ?? '',
-        role: 'BRAND',
-        displayName: credential.user.displayName ?? credential.user.email ?? '',
-        status: 'ACTIVE',
-        isVerified: credential.user.emailVerified,
-        tourCompleted: false,
-        createdAt: credential.user.metadata.creationTime ?? new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      setCurrentUser(user);
-      setAuthCookies({ role: 'BRAND', verified: credential.user.emailVerified, onboarded: true });
+      const data = json.data ?? json;
+      const at: string | undefined = data.accessToken ?? data.token;
+      if (!at) throw new Error('Login failed.');
+      brandTokenStore.set(at);
+      setCurrentUser(userFromToken(at));
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Login failed';
       setError(message);
@@ -183,55 +113,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // ── signInAs (dev/test only) ────────────────────────────────────────────────
-  const signInAs = useCallback((role: UserRole) => {
-    if (!MOCK_ENABLED) {
-      console.warn('[AuthContext] signInAs() mock auth is disabled — set NEXT_PUBLIC_BAALVION_DEV_MOCK=1 (non-production) to enable.');
-      return;
+  const register = useCallback(async (email: string, password: string, fullName?: string) => {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch(`${AUTH_URL}/register`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, fullName }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || json.success === false) {
+        throw new Error(json?.error?.message || 'Registration failed.');
+      }
+      const data = json.data ?? json;
+      const at: string | undefined = data.accessToken ?? data.token;
+      if (!at) throw new Error('Registration failed.');
+      brandTokenStore.set(at);
+      setCurrentUser(userFromToken(at));
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Registration failed';
+      setError(message);
+      throw err;
+    } finally {
+      setLoading(false);
     }
-    const profile = getMockProfile(role);
-    setCurrentUser(profile);
-    if (typeof window !== 'undefined') localStorage.setItem('mock_role', role);
-    setAuthCookies({ role, onboarded: true });
   }, []);
 
-  // ── signOut ─────────────────────────────────────────────────────────────────
-  const signOutAction = useCallback(async () => {
+  const signOut = useCallback(async () => {
     try {
-      const isProd = process.env.NODE_ENV === 'production';
-      const hasFirebaseConfig = !!process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
-      if (isProd && hasFirebaseConfig) {
-        const { getAuth, signOut: firebaseSignOut } = await import('firebase/auth');
-        const { initializeFirebase } = await import('@/firebase');
-        const { auth } = initializeFirebase();
-        if (auth) await firebaseSignOut(auth);
-      }
+      await fetch(`${AUTH_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+      });
     } catch {
-      // ignore sign-out errors
+      /* best-effort; cookie cleared server-side */
     }
     brandTokenStore.clear();
-    clearAuthCookies();
-    if (typeof window !== 'undefined') localStorage.removeItem('mock_role');
     setCurrentUser(null);
-    window.location.href = '/auth/login';
+    if (typeof window !== 'undefined') window.location.href = '/auth/login';
   }, []);
 
   const refreshUser = useCallback(async () => {
-    // Optionally re-fetch user profile from brand-service here
+    const token = brandTokenStore.getAccess();
+    if (token) setCurrentUser(userFromToken(token));
   }, []);
 
   return (
-    <AuthContext.Provider
-      value={{
-        currentUser,
-        loading,
-        error,
-        signInAs,
-        signOut: signOutAction,
-        refreshUser,
-        loginWithEmail,
-      }}
-    >
+    <AuthContext.Provider value={{ currentUser, loading, error, signOut, refreshUser, loginWithEmail, register }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,39 +1,23 @@
-
 /**
- * Utility to manage client-side cookies for Middleware consumption.
- * Since we don't have JS-Cookie, we use native document.cookie.
+ * Onboarding-completion UX flag only.
+ *
+ * SECURITY (P0): the forgeable client role/session cookies (`baalvion_role`, `baalvion_session`,
+ * `baalvion_verified`) have been REMOVED — the frontend never trusts a client-written role.
+ * Roles come only from the verified access token. `baalvion_onboarded` is a non-credential UX hint
+ * (it grants no access; route protection is the httpOnly refresh cookie + server-side authz).
  */
-
-export const setAuthCookies = (data: {
-  session?: string;
-  role?: string;
-  verified?: boolean;
-  onboarded?: boolean;
-}) => {
+export const setAuthCookies = (data: { onboarded?: boolean }) => {
   if (typeof document === 'undefined') return;
-
-  const expiry = 60 * 60 * 24 * 7; // 7 days
-  const baseOptions = `path=/; max-age=${expiry}; SameSite=Lax`;
-
-  if (data.session !== undefined) {
-    document.cookie = `baalvion_session=${data.session}; ${baseOptions}`;
-  }
-  if (data.role !== undefined) {
-    document.cookie = `baalvion_role=${data.role}; ${baseOptions}`;
-  }
-  if (data.verified !== undefined) {
-    document.cookie = `baalvion_verified=${data.verified}; ${baseOptions}`;
-  }
   if (data.onboarded !== undefined) {
-    document.cookie = `baalvion_onboarded=${data.onboarded}; ${baseOptions}`;
+    document.cookie = `baalvion_onboarded=${data.onboarded}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`;
   }
 };
 
 export const clearAuthCookies = () => {
   if (typeof document === 'undefined') return;
   const past = 'Expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/';
-  document.cookie = `baalvion_session=; ${past}`;
-  document.cookie = `baalvion_role=; ${past}`;
-  document.cookie = `baalvion_verified=; ${past}`;
-  document.cookie = `baalvion_onboarded=; ${past}`;
+  // Clear the current flag + purge any legacy forgeable role/session cookies from old builds.
+  ['baalvion_onboarded', 'baalvion_role', 'baalvion_session', 'baalvion_verified'].forEach((n) => {
+    document.cookie = `${n}=; ${past}`;
+  });
 };

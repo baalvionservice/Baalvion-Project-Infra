@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { authClient, AuthUser, AuthTokens } from "@/lib/authClient";
+import { tokenStore } from "@/lib/tokenStore";
 
-const ACCESS_KEY = "baalvion_access_token";
-const REFRESH_KEY = "baalvion_refresh_token";
-const USER_KEY = "baalvion_auth_user";
-
+/**
+ * SECURITY MODEL (P0 remediation): the access token + user are held in memory (React state) ONLY.
+ * NO localStorage/sessionStorage. The refresh token is the httpOnly cookie set by auth-service.
+ * On app start we silently restore the session via a cookie refresh (no storage reads).
+ */
 interface AuthContextType {
   user: AuthUser | null;
   accessToken: string | null;
@@ -23,55 +25,61 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // Silent session restore via the httpOnly refresh cookie (no localStorage).
   useEffect(() => {
-    const token = localStorage.getItem(ACCESS_KEY);
-    const stored = localStorage.getItem(USER_KEY);
-    if (token && stored) {
+    let cancelled = false;
+    (async () => {
       try {
-        setAccessToken(token);
-        setUser(JSON.parse(stored));
+        const { accessToken: at } = await authClient.refresh();
+        if (cancelled || !at) return;
+        setAccessToken(at);
+        tokenStore.set(at);
+        try {
+          const u = await authClient.me(at);
+          if (!cancelled) {
+            setUser(u);
+            tokenStore.set(at, u);
+          }
+        } catch {
+          /* token valid; profile fetch best-effort */
+        }
       } catch {
-        localStorage.removeItem(ACCESS_KEY);
-        localStorage.removeItem(REFRESH_KEY);
-        localStorage.removeItem(USER_KEY);
+        /* no valid refresh cookie → remain unauthenticated */
+      } finally {
+        if (!cancelled) setIsInitialized(true);
       }
-    }
-    setIsInitialized(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const persist = useCallback((tokens: AuthTokens) => {
-    localStorage.setItem(ACCESS_KEY, tokens.accessToken);
-    localStorage.setItem(REFRESH_KEY, tokens.refreshToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(tokens.user));
+  const apply = useCallback((tokens: AuthTokens) => {
     setAccessToken(tokens.accessToken);
     setUser(tokens.user);
+    tokenStore.set(tokens.accessToken, tokens.user);
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    const result = await authClient.login(email, password);
-    persist(result);
-  }, [persist]);
+    apply(await authClient.login(email, password));
+  }, [apply]);
 
   const register = useCallback(async (email: string, password: string, fullName: string) => {
-    const result = await authClient.register(email, password, fullName);
-    persist(result);
-  }, [persist]);
+    apply(await authClient.register(email, password, fullName));
+  }, [apply]);
 
   const logout = useCallback(async () => {
-    const token = localStorage.getItem(ACCESS_KEY);
-    if (token) {
-      try { await authClient.logout(token); } catch { /* ignore */ }
+    if (accessToken) {
+      try { await authClient.logout(accessToken); } catch { /* ignore */ }
     }
-    localStorage.removeItem(ACCESS_KEY);
-    localStorage.removeItem(REFRESH_KEY);
-    localStorage.removeItem(USER_KEY);
     setAccessToken(null);
     setUser(null);
-  }, []);
+    tokenStore.clear();
+  }, [accessToken]);
 
   const loginWithTokens = useCallback((tokens: AuthTokens) => {
-    persist(tokens);
-  }, [persist]);
+    apply(tokens);
+  }, [apply]);
 
   return (
     <AuthContext.Provider value={{

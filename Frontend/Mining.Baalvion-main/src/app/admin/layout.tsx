@@ -8,6 +8,7 @@ import { Search, Bell, ShieldCheck, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import Link from "next/link";
+import { authApi } from "@/lib/api-client";
 
 export default function AdminLayout({
   children,
@@ -19,13 +20,25 @@ export default function AdminLayout({
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    const savedRole = localStorage.getItem("adminRole");
-    if (!savedRole) {
-      router.push("/admin-demo-access");
-    } else {
-      setRole(savedRole.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()));
+    let cancelled = false;
+    (async () => {
+      // Real session check: triggers a cookie refresh and loads the profile. No localStorage role.
+      const result = await authApi.me();
+      if (cancelled) return;
+      const ADMIN_ROLES = ['admin', 'super_admin', 'compliance', 'finance', 'support', 'logistics'];
+      if (!result.ok || !result.data) {
+        router.replace('/login');
+        return;
+      }
+      const userRole = String(result.data.role || '').toLowerCase();
+      if (!ADMIN_ROLES.includes(userRole)) {
+        router.replace('/'); // authenticated but not an admin
+        return;
+      }
+      setRole(userRole.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase()));
       setIsReady(true);
-    }
+    })();
+    return () => { cancelled = true; };
   }, [router]);
 
   if (!isReady) return null;

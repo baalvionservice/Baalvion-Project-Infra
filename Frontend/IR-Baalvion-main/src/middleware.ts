@@ -1,55 +1,41 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { getSessionFromCookie } from '@/lib/auth/session';
 import { getRequiredPermissionForRoute } from '@/lib/rbac/routeRegistry';
-import { checkPermission } from '@/lib/rbac/checkPermission';
 
 /**
  * Institutional Edge Gatekeeper
- * Enforces RBAC policy before the request reaches any application logic.
  *
- * Cookie resolution priority:
- *  1. `ir_baalvion_access_token` — real JWT set by auth-client.ts after login
- *  2. `baalvion_session_mock` — legacy role cookie (kept for transition period)
- *
- * Both cookies are passed through getSessionFromCookie() which handles JWT
- * decoding as well as the legacy plain-role and JSON formats.
+ * SECURITY MODEL (P0 remediation):
+ *  - The access token is in memory and is NOT visible to the edge, so per-permission RBAC can no
+ *    longer be evaluated here. Middleware is a COARSE gate: any route that requires a permission
+ *    requires an authenticated session, proven by the un-forgeable httpOnly `baalvion_refresh`
+ *    cookie set by auth-service.
+ *  - Per-permission authorization is enforced client-side (lib/rbac/checkPermission) and, decisively,
+ *    at the API boundary (every data call needs a valid Bearer access token).
+ *  - The old forgeable `baalvion_session_mock` role cookie is NO LONGER read or trusted.
  */
+const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // 1. Resolve Required Permission for current route
   const requiredPermission = getRequiredPermissionForRoute(pathname);
-
-  // If route is public, proceed without auth check
   if (!requiredPermission) {
     return NextResponse.next();
   }
 
-  // 2. Resolve session — prefer real JWT, fall back to legacy mock cookie
-  const jwtCookie = request.cookies.get('ir_baalvion_access_token')?.value;
-  const mockCookie = request.cookies.get('baalvion_session_mock')?.value;
-  const sessionSource = jwtCookie || mockCookie;
-  const session = getSessionFromCookie(sessionSource);
-
-  // 3. Evaluate RBAC Policy
-  const isAuthorized = checkPermission(session.role, requiredPermission);
-
-  if (!isAuthorized) {
-    console.warn(
-      `[RBAC] Access Denied: ${pathname} requires ${requiredPermission}. Current role: ${session.role}`
-    );
+  const hasSession = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
+  if (!hasSession) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
+    url.searchParams.set('login', '1');
+    url.searchParams.set('next', pathname);
     return NextResponse.redirect(url);
   }
 
   return NextResponse.next();
 }
 
-/**
- * Matcher configuration for institutional routes
- */
 export const config = {
   matcher: [
     '/dashboard/:path*',

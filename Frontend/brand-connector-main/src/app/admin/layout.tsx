@@ -11,7 +11,8 @@ import {
   ChevronDown,
   LogOut,
   Settings,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,7 +33,7 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const { currentUser, signOut } = useAuth();
+  const { currentUser, signOut, loading } = useAuth();
 
   const { data: notifications } = useNotifications(currentUser?.id);
   const unreadCount = (notifications || []).filter(n => !n.read).length;
@@ -40,6 +41,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const handleLogout = async () => {
     await signOut();
   };
+
+  // Auth gate: wait for the silent refresh, then require an authenticated admin before mounting
+  // the data-driven admin pages (prevents the token-bootstrap race + enforces the admin boundary).
+  const isAdmin = !!currentUser && ['ADMIN', 'SUPER_ADMIN', 'OWNER'].includes(String(currentUser.role).toUpperCase());
+  useEffect(() => {
+    if (loading) return;
+    if (!currentUser) router.replace('/auth/login');
+    else if (!isAdmin) router.replace('/dashboard/brand');
+  }, [loading, currentUser, isAdmin, router]);
+
+  if (loading || !currentUser || !isAdmin) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-slate-50">
+        <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">

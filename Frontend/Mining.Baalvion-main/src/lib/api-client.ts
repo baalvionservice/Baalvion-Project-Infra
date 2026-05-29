@@ -6,7 +6,9 @@
 
 // ── Base URLs ──────────────────────────────────────────────────────────────
 const MINING_URL = process.env.NEXT_PUBLIC_MINING_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/mining';
-const AUTH_URL   = process.env.NEXT_PUBLIC_AUTH_URL       || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+// Auth via the SAME-ORIGIN proxy (next.config rewrite → gateway) so the httpOnly
+// `baalvion_refresh` cookie flows in dev and prod. NEVER an absolute cross-origin URL.
+const AUTH_URL   = '/auth-bff';
 
 // ── Shared Response Types ──────────────────────────────────────────────────
 
@@ -28,51 +30,49 @@ export interface PaginatedResponse<T> {
   totalPages: number;
 }
 
-// ── Token Management ───────────────────────────────────────────────────────
+// ── Token Management (in-memory access token; refresh via httpOnly cookie) ──
+// SECURITY (P0): NO localStorage/sessionStorage. The access token lives only in this
+// module's memory; the refresh token is the httpOnly `baalvion_refresh` cookie.
 
+let _accessToken: string | null = null;
+let _user: UserProfile | null = null;
 let _refreshPromise: Promise<string | null> | null = null;
 
 function getAccessToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  const cookieMatch = document.cookie.match(/(?:^|;\s*)accessToken=([^;]+)/);
-  if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
-  return localStorage.getItem('accessToken');
+  return _accessToken;
 }
 
-function getRefreshToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  const cookieMatch = document.cookie.match(/(?:^|;\s*)refreshToken=([^;]+)/);
-  if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
-  return localStorage.getItem('refreshToken');
+export function setAccessToken(token: string | null): void {
+  _accessToken = token;
 }
 
-function storeTokens(access: string, refresh?: string): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('accessToken', access);
-  if (refresh) localStorage.setItem('refreshToken', refresh);
+/** Current authenticated user (in-memory), populated by authApi.login()/me(). */
+export function getCurrentUser(): UserProfile | null {
+  return _user;
 }
 
 async function doRefresh(): Promise<string | null> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return null;
-
   try {
+    // No body: the refresh token rides the httpOnly cookie. Backend rotates it.
     const res = await fetch(`${AUTH_URL}/refresh`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
     });
     if (!res.ok) return null;
-    const body: { accessToken: string; refreshToken?: string } = await res.json();
-    storeTokens(body.accessToken, body.refreshToken);
-    return body.accessToken;
+    const body = await res.json().catch(() => ({}));
+    const raw = body.data ?? body;
+    const access: string = raw.accessToken ?? raw.token ?? '';
+    if (!access) return null;
+    _accessToken = access;
+    return access;
   } catch {
     return null;
   }
 }
 
 async function refreshAccessToken(): Promise<string | null> {
-  // Deduplicate concurrent refresh attempts
+  // Deduplicate concurrent refresh attempts (single-flight)
   if (!_refreshPromise) {
     _refreshPromise = doRefresh().finally(() => { _refreshPromise = null; });
   }
@@ -85,6 +85,7 @@ async function apiFetch<T>(
   url: string,
   options: RequestInit = {},
   retry = true,
+  withCredentials = false,
 ): Promise<ApiResult<T>> {
   const token = getAccessToken();
   const headers: Record<string, string> = {
@@ -94,12 +95,14 @@ async function apiFetch<T>(
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   try {
-    const res = await fetch(url, { ...options, headers });
+    // credentials:'include' only for same-origin auth calls (so the httpOnly cookie flows);
+    // cross-origin data calls stay credential-less to avoid CORS-credentials requirements.
+    const res = await fetch(url, { ...options, headers, ...(withCredentials ? { credentials: 'include' as RequestCredentials } : {}) });
 
     if (res.status === 401 && retry) {
       const newToken = await refreshAccessToken();
       if (newToken) {
-        return apiFetch<T>(url, options, false);
+        return apiFetch<T>(url, options, false, withCredentials);
       }
       return { ok: false, error: { message: 'Unauthorized', code: 401 } };
     }
@@ -452,30 +455,35 @@ export interface UserProfile {
 // ── authApi ────────────────────────────────────────────────────────────────
 
 export const authApi = {
-  login(payload: LoginPayload): Promise<ApiResult<AuthTokens & { user: UserProfile }>> {
-    return apiFetch<AuthTokens & { user: UserProfile }>(`${AUTH_URL}/login`, {
+  async login(payload: LoginPayload): Promise<ApiResult<AuthTokens & { user: UserProfile }>> {
+    const result = await apiFetch<AuthTokens & { user: UserProfile }>(`${AUTH_URL}/login`, {
       method: 'POST',
       body: JSON.stringify(payload),
-    });
-  },
-
-  logout(): Promise<ApiResult<{ success: boolean }>> {
-    const result = apiFetch<{ success: boolean }>(`${AUTH_URL}/logout`, { method: 'POST' });
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+    }, true, true);
+    if (result.ok) {
+      const d = result.data as unknown as { accessToken?: string; token?: string; user?: UserProfile };
+      _accessToken = d.accessToken ?? d.token ?? _accessToken;
+      if (d.user) _user = d.user;
     }
     return result;
   },
 
-  refresh(refreshToken: string): Promise<ApiResult<AuthTokens>> {
-    return apiFetch<AuthTokens>(`${AUTH_URL}/refresh`, {
-      method: 'POST',
-      body: JSON.stringify({ refreshToken }),
-    });
+  async logout(): Promise<ApiResult<{ success: boolean }>> {
+    const result = await apiFetch<{ success: boolean }>(`${AUTH_URL}/logout`, { method: 'POST' }, true, true);
+    _accessToken = null; // clear in-memory token (no web storage to purge)
+    _user = null;
+    return result;
   },
 
-  me(): Promise<ApiResult<UserProfile>> {
-    return apiFetch<UserProfile>(`${AUTH_URL}/me`);
+  // Refresh rides the httpOnly cookie; the legacy refreshToken arg is ignored.
+  refresh(_refreshToken?: string): Promise<ApiResult<AuthTokens>> {
+    return apiFetch<AuthTokens>(`${AUTH_URL}/refresh`, { method: 'POST' }, true, true);
+  },
+
+  // Resolves the current user; triggers a cookie refresh if the in-memory token is absent/expired.
+  async me(): Promise<ApiResult<UserProfile>> {
+    const result = await apiFetch<UserProfile>(`${AUTH_URL}/me`, {}, true, true);
+    if (result.ok) _user = result.data;
+    return result;
   },
 };

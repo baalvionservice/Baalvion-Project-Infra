@@ -1,20 +1,20 @@
 /**
  * IR-Baalvion Auth Client
- * Real JWT authentication against proxy-backend at :4000/v1/auth.
- * Designed to slot in alongside the existing RBAC layer — the RBAC engine
- * continues to work; we simply derive the role from the JWT payload instead
- * of a mock cookie string.
+ *
+ * SECURITY MODEL (P0 remediation):
+ *  - Access token: in-memory only. NEVER localStorage/sessionStorage.
+ *  - Refresh token: httpOnly `baalvion_refresh` cookie set by auth-service. Never JS-readable.
+ *  - Auth calls go to the SAME-ORIGIN `/auth-bff` path (rewritten to the gateway in next.config)
+ *    so the cookie flows in dev and prod with `credentials: 'include'`.
+ *  - The legacy forgeable `baalvion_session_mock` role cookie has been REMOVED — the frontend
+ *    never trusts a client-written role. Role is derived from the verified access-token claims.
  */
 
 import type { AppRole } from '@/lib/rbac/roles';
 
-const AUTH_URL =
-  process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+const AUTH_URL = '/auth-bff';
 const IR_URL =
   process.env.NEXT_PUBLIC_IR_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ir';
-
-const TOKEN_KEY = 'ir_baalvion_access_token';
-const REFRESH_KEY = 'ir_baalvion_refresh_token';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -22,25 +22,18 @@ export interface IRAuthUser {
   id: string;
   email: string;
   name?: string;
-  /** Maps to the existing AppRole taxonomy in src/lib/rbac/roles.ts */
   role: AppRole;
 }
 
 export interface IRLoginResponse {
   accessToken: string;
-  refreshToken: string;
   user: IRAuthUser;
 }
 
-// ─── Token refresh queue ──────────────────────────────────────────────────────
+// ─── In-memory access token (single-flight refresh) ─────────────────────────────
 
-let isRefreshing = false;
-let refreshQueue: Array<(token: string | null) => void> = [];
-
-function processQueue(token: string | null): void {
-  refreshQueue.forEach((resolve) => resolve(token));
-  refreshQueue = [];
-}
+let _accessToken: string | null = null;
+let _refreshPromise: Promise<string | null> | null = null;
 
 // ─── JWT helpers ──────────────────────────────────────────────────────────────
 
@@ -67,116 +60,85 @@ function isTokenExpired(token: string): boolean {
   return payload.exp * 1000 < Date.now() + 30_000;
 }
 
-// ─── Storage helpers (SSR-safe) ───────────────────────────────────────────────
-
-function getStoredToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-function getStoredRefreshToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(REFRESH_KEY);
-}
-
-function storeTokens(accessToken: string, refreshToken: string): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(TOKEN_KEY, accessToken);
-  localStorage.setItem(REFRESH_KEY, refreshToken);
-  // Also write role to the legacy mock cookie so existing middleware still works
-  // during the transition period (middleware is updated separately).
-  try {
-    const payload = decodeJwtPayload(accessToken);
-    if (payload?.role) {
-      document.cookie = `baalvion_session_mock=${payload.role}; path=/; max-age=3600; samesite=lax`;
-    }
-  } catch {
-    // Non-fatal
-  }
-}
-
-function clearTokens(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_KEY);
-  document.cookie = 'baalvion_session_mock=; path=/; max-age=0';
-  document.cookie = 'ir_baalvion_token=; path=/; max-age=0';
-}
-
 // ─── Auth client ──────────────────────────────────────────────────────────────
 
 export const irAuthClient = {
-  /**
-   * POST /login — exchange credentials for tokens.
-   */
+  /** POST /login — exchange credentials for an access token (refresh rides the httpOnly cookie). */
   async login(email: string, password: string): Promise<IRAuthUser> {
     const res = await fetch(`${AUTH_URL}/login`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) {
       const error = await res.json().catch(() => ({ message: 'Login failed' }));
-      throw new Error(error.message || 'Login failed');
+      throw new Error(error?.error?.message || error.message || 'Login failed');
     }
 
-    const data: IRLoginResponse = await res.json();
-    storeTokens(data.accessToken, data.refreshToken);
-    return data.user;
-  },
-
-  /**
-   * POST /logout — invalidate session, clear tokens.
-   */
-  async logout(): Promise<void> {
-    const token = getStoredToken();
-    try {
-      if (token) {
-        await fetch(`${AUTH_URL}/logout`, {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-        });
+    const json = await res.json();
+    const data = json.data ?? json;
+    _accessToken = data.accessToken ?? data.token ?? null;
+    const claims = _accessToken ? decodeJwtPayload(_accessToken) : null;
+    return (
+      data.user ?? {
+        id: String(claims?.sub ?? ''),
+        email: String(claims?.email ?? email),
+        name: claims?.name as string | undefined,
+        role: (claims?.role as AppRole) ?? 'public',
       }
+    );
+  },
+
+  /** POST /logout — invalidate the server session and clear the in-memory token. */
+  async logout(): Promise<void> {
+    try {
+      await fetch(`${AUTH_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: _accessToken ? { Authorization: `Bearer ${_accessToken}` } : {},
+      });
     } catch {
-      // Always clear locally
+      /* always clear locally */
     } finally {
-      clearTokens();
+      _accessToken = null;
     }
   },
 
-  /**
-   * POST /refresh — get a fresh access token.
-   */
+  /** POST /refresh — rotate via the httpOnly cookie (single-flight). */
   async refreshToken(): Promise<string | null> {
-    const currentRefresh = getStoredRefreshToken();
-    if (!currentRefresh) return null;
-
-    const res = await fetch(`${AUTH_URL}/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: currentRefresh }),
-    });
-
-    if (!res.ok) {
-      clearTokens();
-      return null;
+    if (!_refreshPromise) {
+      _refreshPromise = (async () => {
+        try {
+          const res = await fetch(`${AUTH_URL}/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          if (!res.ok) {
+            _accessToken = null;
+            return null;
+          }
+          const json = await res.json().catch(() => ({}));
+          const data = json.data ?? json;
+          _accessToken = data.accessToken ?? data.token ?? null;
+          return _accessToken;
+        } catch {
+          return null;
+        } finally {
+          _refreshPromise = null;
+        }
+      })();
     }
-
-    const data: { accessToken: string; refreshToken?: string } = await res.json();
-    storeTokens(data.accessToken, data.refreshToken || currentRefresh);
-    return data.accessToken;
+    return _refreshPromise;
   },
 
-  /**
-   * Returns the authenticated user from the JWT payload (no round-trip needed).
-   * Falls back to a remote /users/me call if the payload lacks a role.
-   */
+  /** Returns the authenticated user from the in-memory access-token claims (or /users/me). */
   async getCurrentUser(): Promise<IRAuthUser | null> {
     const token = await irAuthClient.getValidToken();
     if (!token) return null;
 
-    // Attempt to read role directly from the JWT payload to avoid a round-trip
     const payload = decodeJwtPayload(token);
     if (payload?.sub && payload?.role) {
       return {
@@ -187,43 +149,29 @@ export const irAuthClient = {
       };
     }
 
-    // Fallback: fetch from auth service
     const res = await fetch(`${AUTH_URL}/users/me`, {
+      credentials: 'include',
       headers: { Authorization: `Bearer ${token}` },
     });
     if (!res.ok) return null;
-    return res.json();
+    const json = await res.json();
+    return (json.data ?? json) as IRAuthUser;
   },
 
   isAuthenticated(): boolean {
-    const token = getStoredToken();
-    if (!token) return false;
-    return !isTokenExpired(token);
+    return !!_accessToken && !isTokenExpired(_accessToken);
   },
 
   getToken(): string | null {
-    return getStoredToken();
+    return _accessToken;
   },
 
+  /** Returns a valid access token, transparently refreshing via the cookie if expired. */
   async getValidToken(): Promise<string | null> {
-    const token = getStoredToken();
-    if (token && !isTokenExpired(token)) return token;
-
-    if (isRefreshing) {
-      return new Promise<string | null>((resolve) => {
-        refreshQueue.push(resolve);
-      });
-    }
-
-    isRefreshing = true;
-    try {
-      const newToken = await irAuthClient.refreshToken();
-      processQueue(newToken);
-      return newToken;
-    } finally {
-      isRefreshing = false;
-    }
+    if (_accessToken && !isTokenExpired(_accessToken)) return _accessToken;
+    return irAuthClient.refreshToken();
   },
 };
 
+export { IR_URL };
 export default irAuthClient;

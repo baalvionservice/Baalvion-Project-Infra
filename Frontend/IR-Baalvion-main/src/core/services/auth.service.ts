@@ -5,39 +5,27 @@ import irAuthClient from "@/lib/auth-client";
 
 /**
  * Institutional Auth Service
- * Wraps the real JWT auth client (irAuthClient) while keeping the same exported
- * function signatures so all existing middleware and components continue to work.
+ * Thin wrapper over the real JWT auth client (irAuthClient) with stable signatures.
  *
- * Migration notes:
- *  - getCurrentUser() now reads from a validated JWT first, falls back to cookie.
- *  - login() / logout() call the real proxy-backend.
- *  - setRole() is retained for demo/testing but is NOT the primary auth flow.
- *  - hasAccess() is unchanged — still the canonical RBAC utility.
+ * SECURITY (P0 remediation): the forgeable `baalvion_session_mock` cookie and the
+ * `baalvion_user_role` localStorage mirror have been REMOVED. Role is derived only from
+ * the verified, in-memory access token. The frontend never trusts a client-written role.
  */
 export const authService = {
-  /**
-   * Real primary auth — calls proxy-backend :4000/v1/auth/login.
-   */
+  /** Real primary auth — calls auth-service via the same-origin /auth-bff proxy. */
   login: async (email: string, password: string): Promise<{ role: UserRole }> => {
     const user = await irAuthClient.login(email, password);
-    // Mirror the role into the legacy cookie so the existing middleware still works
-    // during the JWT middleware transition period.
     if (typeof window !== "undefined") {
-      document.cookie = `baalvion_session_mock=${user.role}; path=/; max-age=3600; samesite=lax`;
-      localStorage.setItem("baalvion_user_role", user.role);
-      window.dispatchEvent(new Event("storage"));
+      // In-memory notification only — NOT persisted.
       window.dispatchEvent(new CustomEvent("auth-updated", { detail: { role: user.role } }));
     }
     return { role: user.role as UserRole };
   },
 
-  /**
-   * Real logout — calls proxy-backend and clears all tokens.
-   */
+  /** Real logout — clears the server session (httpOnly cookie) and the in-memory token. */
   logout: async (): Promise<void> => {
     await irAuthClient.logout();
     if (typeof window !== "undefined") {
-      localStorage.removeItem("baalvion_user_role");
       window.location.href = "/";
     }
   },
@@ -45,41 +33,26 @@ export const authService = {
   getCurrentUser: async (): Promise<{ role: UserRole }> => {
     if (typeof window === "undefined") return { role: "public" as UserRole };
 
-    // 1. Try the real JWT first
     if (irAuthClient.isAuthenticated()) {
       try {
         const user = await irAuthClient.getCurrentUser();
         if (user?.role) return { role: user.role as UserRole };
       } catch {
-        // Fall through to cookie fallback
+        /* fall through to guest */
       }
     }
-
-    // 2. Legacy cookie fallback (keeps middleware working during transition)
-    const cookieRole = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("baalvion_session_mock="))
-      ?.split("=")[1] as UserRole;
-
-    const role =
-      cookieRole ||
-      (localStorage.getItem("baalvion_user_role") as UserRole) ||
-      "public";
-    return { role };
+    return { role: "public" as UserRole };
   },
 
   /**
-   * @deprecated For demo/testing only. Use login() for real authentication.
-   * Sets a role directly without backend validation — useful for local UI testing.
+   * @deprecated Demo/testing only. No longer persists a role (no cookie, no localStorage).
+   * Dispatches an in-memory event so live UI can react within the session.
    */
   setRole: (role: UserRole) => {
+    // Demo/testing only and DISABLED in production — no client-side role injection in prod builds.
+    if (process.env.NODE_ENV === 'production') return;
     if (typeof window !== "undefined") {
-      localStorage.setItem("baalvion_user_role", role);
-      document.cookie = `baalvion_session_mock=${role}; path=/; max-age=3600; samesite=lax`;
-      window.dispatchEvent(new Event("storage"));
-      window.dispatchEvent(
-        new CustomEvent("auth-updated", { detail: { role } })
-      );
+      window.dispatchEvent(new CustomEvent("auth-updated", { detail: { role } }));
     }
   },
 
@@ -93,8 +66,7 @@ export const authService = {
   /** @deprecated Use logout() instead. Kept for backwards compatibility. */
   signOut: () => {
     authService.logout().catch(() => {
-      authService.setRole("public");
-      window.location.href = "/";
+      if (typeof window !== "undefined") window.location.href = "/";
     });
   },
 };

@@ -3,27 +3,24 @@
 /**
  * @fileOverview REST Authentication utilities for the Law Elite Network.
  * Replaces the previous Firebase Auth implementation.
+ *
+ * SECURITY (P0 remediation): the access token is held in memory via lib/api/client
+ * (setToken/clearToken) — never localStorage/sessionStorage.
  */
 
-import { apiClient } from '@/lib/api/client';
-
-const TOKEN_KEY = 'baalvion_law_token';
+import { apiClient, setToken, clearToken } from '@/lib/api/client';
 
 export const loginUser = async (email: string, password: string) => {
   const res = await apiClient.post('/auth/login', { email, password });
   const token: string | undefined = res.data?.data?.accessToken;
-  if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
-  }
+  if (token) setToken(token);
   return res.data?.data;
 };
 
 export const signupUser = async (email: string, password: string) => {
   const res = await apiClient.post('/auth/register', { email, password });
   const token: string | undefined = res.data?.data?.accessToken;
-  if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
-  }
+  if (token) setToken(token);
   return res.data?.data;
 };
 
@@ -33,7 +30,7 @@ export const logoutUser = async () => {
   } catch {
     // ignore logout errors
   } finally {
-    localStorage.removeItem(TOKEN_KEY);
+    clearToken();
   }
 };
 

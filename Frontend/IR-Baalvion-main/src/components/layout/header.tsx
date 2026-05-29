@@ -338,14 +338,15 @@ function AuthButtons({ userRole, isMobile, onAction }: any) {
           Start Onboarding
         </Link>
       </Button>
+      {process.env.NODE_ENV !== 'production' && (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             size="sm"
             className="shadow-md w-full font-bold"
-            aria-label="Institutional login simulator"
+            aria-label="Institutional login simulator (dev only)"
           >
-            Simulation Login
+            Simulation Login (dev)
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-64">
@@ -426,6 +427,7 @@ function AuthButtons({ userRole, isMobile, onAction }: any) {
           </div>
         </DropdownMenuContent>
       </DropdownMenu>
+      )}
     </div>
   );
 }

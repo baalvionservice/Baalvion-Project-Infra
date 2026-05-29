@@ -24,15 +24,8 @@ import {
   IndianRupee,
   Rocket
 } from 'lucide-react';
-import { 
-  createUserWithEmailAndPassword,
-  updateProfile,
-  sendEmailVerification
-} from '@/lib/fb-compat/auth';
-import { doc, setDoc } from '@/lib/fb-compat/firestore';
-import { useAuth, useFirestore } from '@/firebase';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
+import { useAuth } from '@/contexts/AuthContext';
+import { onboardingApi } from '@/lib/api-client';
 import { creatorSignupSchema } from '@/lib/validations';
 
 import { Button } from '@/components/ui/button';
@@ -70,8 +63,7 @@ export default function CreatorSignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const auth = useAuth();
-  const db = useFirestore();
+  const { register } = useAuth();
 
   const form = useForm<CreatorSignupValues>({
     resolver: zodResolver(creatorSignupSchema),
@@ -102,63 +94,24 @@ export default function CreatorSignupPage() {
   async function onSubmit(values: CreatorSignupValues) {
     setIsLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth!, values.email, values.password);
-      const user = userCredential.user;
+      // Real account + session via the identity gateway (no Firebase).
+      await register(values.email, values.password, values.fullName);
 
-      await updateProfile(user, { displayName: values.fullName });
-      
-      // Send verification email
-      await sendEmailVerification(user);
+      // Persist the creator profile to brand-service (best-effort; completable later via onboarding).
+      await onboardingApi
+        .completeOnboarding({
+          role: 'CREATOR',
+          displayName: values.fullName,
+          username: values.username,
+          bio: values.bio,
+          niches: values.niches,
+          baseRates: values.rates,
+          socials: values.socials,
+        })
+        .catch(() => { /* non-fatal; profile can be completed in onboarding */ });
 
-      const userProfileData = {
-        id: user.uid,
-        email: values.email,
-        role: 'CREATOR',
-        displayName: values.fullName,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      setDoc(doc(db!, 'users', user.uid), userProfileData).catch(async (err) => {
-        errorEmitter.emitPermissionError(new FirestorePermissionError({
-          path: `/users/${user.uid}`,
-          operation: 'create',
-          requestResourceData: userProfileData
-        }));
-      });
-
-      const creatorData = {
-        id: `creator_${user.uid}`,
-        userId: user.uid,
-        username: values.username,
-        bio: values.bio,
-        niches: values.niches,
-        photoURL: `https://picsum.photos/seed/${values.username}/200/200`,
-        baseRates: values.rates,
-        socialStats: {
-          instagram: values.socials.instagram ? { connected: true } : { connected: false },
-          youtube: values.socials.youtube ? { connected: true } : { connected: false },
-          tiktok: values.socials.tiktok ? { connected: true } : { connected: false },
-        },
-        rating: 5.0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      setDoc(doc(db!, 'creators', creatorData.id), creatorData).catch(async (err) => {
-        errorEmitter.emitPermissionError(new FirestorePermissionError({
-          path: `/creators/${creatorData.id}`,
-          operation: 'create',
-          requestResourceData: creatorData
-        }));
-      });
-
-      toast({
-        title: "Profile Created!",
-        description: "Please verify your email to access the marketplace.",
-      });
-
-      router.push('/auth/verify-email');
+      toast({ title: 'Account created', description: 'Welcome to Baalvion Connect.' });
+      router.push('/dashboard/creator');
     } catch (err: any) {
       console.error(err);
       toast({

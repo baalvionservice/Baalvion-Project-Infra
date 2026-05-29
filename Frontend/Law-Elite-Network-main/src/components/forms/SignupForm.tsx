@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { signupSchema } from "@/lib/validation/authSchema";
-import { signupMock } from "@/lib/mock/mockAuth";
+import { authLawApi, setToken } from "@/lib/api/client";
 import { updateUserProfile } from "@/services/userService";
 import { applyReferral } from "@/services/referralService";
 import { useAuthStore } from "@/store/authStore";
@@ -35,11 +35,27 @@ export default function SignupForm() {
 
   const referralCode = watch("referralCode");
 
+  const parseJwt = (t: string): Record<string, any> | null => {
+    try { return JSON.parse(atob(t.split('.')[1])); } catch { return null; }
+  };
+
   const onSubmit = async (data: any) => {
     try {
       setLoading(true);
-      
-      const user = await signupMock(data.email, data.fullName);
+
+      // Real registration against law-service (no mock). Sets the in-memory access token.
+      const res = await authLawApi.register(data.email, data.password, data.fullName);
+      const payload = res.data?.data || res.data;
+      const accessToken: string = payload.accessToken;
+      if (!accessToken) throw new Error(payload?.message || 'Registration failed.');
+      setToken(accessToken);
+      const claims = parseJwt(accessToken) || {};
+      const user = {
+        id: String(claims.id ?? payload.userId ?? payload.user?.id ?? ''),
+        email: data.email,
+        fullName: data.fullName,
+        role: (claims.role ?? payload.role) as string,
+      };
 
       // 1. Apply referral protocol if code exists
       if (data.referralCode) {
@@ -62,7 +78,7 @@ export default function SignupForm() {
         title: "Membership Provisioned",
         description: data.referralCode 
           ? "Professional profile initialized. Referral bonus pending verification."
-          : "Your professional mock profile is being initialized.",
+          : "Your professional profile is being initialized.",
       });
       router.push('/dashboard');
     } catch (error: any) {

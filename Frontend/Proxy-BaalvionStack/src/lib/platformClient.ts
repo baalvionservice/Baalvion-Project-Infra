@@ -1,15 +1,13 @@
+import { tokenStore } from "@/lib/tokenStore";
+
 const BASE = import.meta.env.VITE_API_PLATFORM_BASE_URL || 'https://api.baalvion.com/api/v1/infrastructure/proxy/v1';
 
-const getToken = () => localStorage.getItem("baalvion_access_token");
+// Access token lives in memory (P0); shared with AuthContext via tokenStore.
+const getToken = () => tokenStore.getAccess();
 
 const getOrgId = (): string => {
-  try {
-    const stored = localStorage.getItem("baalvion_auth_user");
-    if (stored) {
-      const user = JSON.parse(stored);
-      if (user?.orgId) return user.orgId;
-    }
-  } catch { /* ignore */ }
+  const user = tokenStore.getUser();
+  if (user?.orgId) return user.orgId;
   return "a0000000-0000-0000-0000-000000000001";
 };
 

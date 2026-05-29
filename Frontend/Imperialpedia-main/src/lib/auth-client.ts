@@ -1,11 +1,14 @@
 /**
- * Imperialpedia Auth Client
- * Authenticates against the SINGLE identity authority (auth-service) via the gateway.
+ * Imperialpedia Auth Client — SINGLE identity authority (auth-service) via the same-origin proxy.
+ *
+ * SECURITY MODEL (P0 remediation):
+ *  - Access token: in-memory only. NEVER localStorage/sessionStorage.
+ *  - Refresh token: httpOnly `baalvion_refresh` cookie set by auth-service. Never JS-readable.
+ *  - Auth calls go to the SAME-ORIGIN `/auth-bff` path (rewritten to the gateway in next.config)
+ *    so the cookie flows in dev and prod with `credentials: 'include'`.
  */
 
-const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
-const TOKEN_KEY = 'imperialpedia_access_token';
-const REFRESH_KEY = 'imperialpedia_refresh_token';
+const AUTH_URL = '/auth-bff';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -19,7 +22,6 @@ export interface AuthUser {
 
 export interface LoginResponse {
   accessToken: string;
-  refreshToken: string;
   user: AuthUser;
 }
 
@@ -28,15 +30,10 @@ export interface AuthError {
   statusCode?: number;
 }
 
-// ─── Token refresh queue (prevents concurrent 401 storms) ────────────────────
+// ─── In-memory access token (single-flight refresh) ─────────────────────────────
 
-let isRefreshing = false;
-let refreshQueue: Array<(token: string | null) => void> = [];
-
-function processQueue(token: string | null): void {
-  refreshQueue.forEach((resolve) => resolve(token));
-  refreshQueue = [];
-}
+let _accessToken: string | null = null;
+let _refreshPromise: Promise<string | null> | null = null;
 
 // ─── JWT helpers ─────────────────────────────────────────────────────────────
 
@@ -60,159 +57,111 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 function isTokenExpired(token: string): boolean {
   const payload = decodeJwtPayload(token);
   if (!payload || typeof payload.exp !== 'number') return true;
-  // Add 30s buffer so we refresh before the token actually expires
   return payload.exp * 1000 < Date.now() + 30_000;
-}
-
-// ─── Storage helpers (SSR safe) ───────────────────────────────────────────────
-
-function getStoredToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(TOKEN_KEY);
-}
-
-function getStoredRefreshToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(REFRESH_KEY);
-}
-
-function storeTokens(accessToken: string, refreshToken: string): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(TOKEN_KEY, accessToken);
-  localStorage.setItem(REFRESH_KEY, refreshToken);
-}
-
-function clearTokens(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_KEY);
 }
 
 // ─── Auth client ──────────────────────────────────────────────────────────────
 
 export const authClient = {
-  /**
-   * POST /login — exchange credentials for tokens, store them, return user.
-   */
+  /** POST /login — exchange credentials for an access token (refresh rides the httpOnly cookie). */
   async login(email: string, password: string): Promise<AuthUser> {
     const res = await fetch(`${AUTH_URL}/login`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
 
     if (!res.ok) {
       const error: AuthError = await res.json().catch(() => ({ message: 'Login failed' }));
-      throw new Error(error.message || 'Login failed');
+      throw new Error((error as { error?: { message?: string } })?.error?.message || error.message || 'Login failed');
     }
 
-    const data: LoginResponse = await res.json();
-    storeTokens(data.accessToken, data.refreshToken);
-    return data.user;
-  },
-
-  /**
-   * POST /logout — invalidate server session, clear local tokens.
-   */
-  async logout(): Promise<void> {
-    const token = getStoredToken();
-    try {
-      if (token) {
-        await fetch(`${AUTH_URL}/logout`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
+    const json = await res.json();
+    const data = json.data ?? json;
+    _accessToken = data.accessToken ?? data.token ?? null;
+    const claims = _accessToken ? decodeJwtPayload(_accessToken) : null;
+    return (
+      data.user ?? {
+        id: String(claims?.sub ?? ''),
+        email: String(claims?.email ?? email),
+        name: claims?.name as string | undefined,
+        role: claims?.role as string | undefined,
       }
+    );
+  },
+
+  /** POST /logout — invalidate the server session, clear the in-memory token. */
+  async logout(): Promise<void> {
+    try {
+      await fetch(`${AUTH_URL}/logout`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: _accessToken
+          ? { 'Content-Type': 'application/json', Authorization: `Bearer ${_accessToken}` }
+          : { 'Content-Type': 'application/json' },
+      });
     } catch {
-      // Always clear tokens even if the server request fails
+      /* always clear locally */
     } finally {
-      clearTokens();
+      _accessToken = null;
     }
   },
 
-  /**
-   * POST /refresh — exchange refresh token for a new access token.
-   * Returns null if the refresh token is missing or invalid.
-   */
+  /** POST /refresh — rotate via the httpOnly cookie (single-flight). Returns null if no session. */
   async refreshToken(): Promise<string | null> {
-    const currentRefresh = getStoredRefreshToken();
-    if (!currentRefresh) return null;
-
-    const res = await fetch(`${AUTH_URL}/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken: currentRefresh }),
-    });
-
-    if (!res.ok) {
-      clearTokens();
-      return null;
+    if (!_refreshPromise) {
+      _refreshPromise = (async () => {
+        try {
+          const res = await fetch(`${AUTH_URL}/refresh`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+          });
+          if (!res.ok) {
+            _accessToken = null;
+            return null;
+          }
+          const json = await res.json().catch(() => ({}));
+          const data = json.data ?? json;
+          _accessToken = data.accessToken ?? data.token ?? null;
+          return _accessToken;
+        } catch {
+          return null;
+        } finally {
+          _refreshPromise = null;
+        }
+      })();
     }
-
-    const data: { accessToken: string; refreshToken?: string } = await res.json();
-    const newRefresh = data.refreshToken || currentRefresh;
-    storeTokens(data.accessToken, newRefresh);
-    return data.accessToken;
+    return _refreshPromise;
   },
 
-  /**
-   * GET /users/me — fetch the authenticated user profile.
-   */
+  /** GET /users/me — fetch the authenticated user profile (Bearer from memory). */
   async getCurrentUser(): Promise<AuthUser | null> {
     const token = await authClient.getValidToken();
     if (!token) return null;
 
     const res = await fetch(`${AUTH_URL}/users/me`, {
+      credentials: 'include',
       headers: { Authorization: `Bearer ${token}` },
     });
-
     if (!res.ok) return null;
-    return res.json();
+    const json = await res.json();
+    return (json.data ?? json) as AuthUser;
   },
 
-  /**
-   * Returns true when a non-expired access token is present in localStorage.
-   */
   isAuthenticated(): boolean {
-    const token = getStoredToken();
-    if (!token) return false;
-    return !isTokenExpired(token);
+    return !!_accessToken && !isTokenExpired(_accessToken);
   },
 
-  /**
-   * Returns the raw stored access token (may be expired — use getValidToken
-   * when you need a guaranteed-fresh token before an API call).
-   */
   getToken(): string | null {
-    return getStoredToken();
+    return _accessToken;
   },
 
-  /**
-   * Returns a valid access token, transparently refreshing if expired.
-   * Queues concurrent refresh requests so only one refresh call is made.
-   */
+  /** Returns a valid access token, transparently refreshing via the cookie if expired. */
   async getValidToken(): Promise<string | null> {
-    const token = getStoredToken();
-
-    if (token && !isTokenExpired(token)) return token;
-
-    if (isRefreshing) {
-      return new Promise<string | null>((resolve) => {
-        refreshQueue.push(resolve);
-      });
-    }
-
-    isRefreshing = true;
-    try {
-      const newToken = await authClient.refreshToken();
-      processQueue(newToken);
-      return newToken;
-    } finally {
-      isRefreshing = false;
-    }
+    if (_accessToken && !isTokenExpired(_accessToken)) return _accessToken;
+    return authClient.refreshToken();
   },
 };
 

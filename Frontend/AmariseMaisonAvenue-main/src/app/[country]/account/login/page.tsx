@@ -3,42 +3,38 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { ChevronRight, Facebook } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ADMIN_ACCOUNTS } from '@/lib/mock-data';
+import { authClient } from '@/lib/auth';
 
 /**
- * LoginPage: Replicated "Account" Login Portal.
- * Designed to match the provided high-fidelity reference image.
+ * Account login — REAL authentication against the Baalvion identity gateway.
+ * (Replaces the prior mock that matched emails against ADMIN_ACCOUNTS with no password check
+ * and routed by a frontend-only role.)
  */
 export default function LoginPage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  function checkRole(email: string) {
-    const user = ADMIN_ACCOUNTS.find(acc => acc.email === email);
-    return user ? user.role : null;
-  }
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const role = checkRole(formData.email);
-    if (!role) {
-      alert('Invalid credentials. Please try again.');
-      return;
-    } else {
-      localStorage.setItem('userRole', role);
-      router.push(`/${countryCode}/${role}/dashboard`);
+    setError(null);
+    setSubmitting(true);
+    try {
+      await authClient.login(formData.email, formData.password);
+      router.push(`/${countryCode}/account`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Unable to sign in. Please try again.');
+    } finally {
+      setSubmitting(false);
     }
-    // Simulate login
-    console.log('Login submitted for:', formData.email);
   };
 
   return (
@@ -51,12 +47,10 @@ export default function LoginPage() {
       </nav>
 
       <main className="container mx-auto px-6 max-w-6xl">
-        {/* Main Heading */}
         <h1 className="text-5xl font-headline font-medium text-gray-900 mb-16 tracking-tight">
           Account
         </h1>
 
-        {/* Section Headers Bar */}
         <div className="flex border-b border-gray-100 bg-[#fcfcfc] mb-12">
           <div className="flex-1 py-4 text-center">
             <span className="text-[11px] font-bold tracking-[0.2em] text-gray-400 uppercase">Returning Customer</span>
@@ -67,9 +61,8 @@ export default function LoginPage() {
           </div>
         </div>
 
-        {/* Content Container */}
         <div className="flex flex-col md:flex-row relative">
-          {/* Left Column: Returning Customer */}
+          {/* Returning Customer — real login */}
           <div className="flex-1 pr-0 md:pr-20 space-y-10">
             <form onSubmit={handleSubmit} className="space-y-8 max-w-[400px]">
               <div className="space-y-6">
@@ -79,6 +72,7 @@ export default function LoginPage() {
                   </Label>
                   <Input
                     type="email"
+                    autoComplete="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="h-12 rounded-none border-gray-200 bg-white text-sm font-light focus:ring-0 focus:border-black transition-all"
@@ -92,6 +86,7 @@ export default function LoginPage() {
                   </Label>
                   <Input
                     type="password"
+                    autoComplete="current-password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     className="h-12 rounded-none border-gray-200 bg-white text-sm font-light focus:ring-0 focus:border-black transition-all"
@@ -100,50 +95,24 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {error && (
+                <p className="text-[12px] font-medium text-red-600" role="alert">{error}</p>
+              )}
+
               <Button
                 type="submit"
                 variant="outline"
-                className="w-full max-w-[200px] h-12 border-black text-black hover:bg-black hover:text-white rounded-none text-[10px] font-bold tracking-[0.25em] uppercase transition-all shadow-sm"
+                disabled={submitting}
+                className="w-full max-w-[200px] h-12 border-black text-black hover:bg-black hover:text-white rounded-none text-[10px] font-bold tracking-[0.25em] uppercase transition-all shadow-sm disabled:opacity-60"
               >
-                LOGIN
+                {submitting ? 'Signing in…' : 'Login'}
               </Button>
             </form>
 
-            <div className="space-y-6 pt-2">
-              <div className="flex items-center space-x-2 text-[11px] text-gray-500 font-light italic">
-                <Link href="#" className="hover:text-black transition-colors underline underline-offset-4">Forgot your password?</Link>
-                <span>or</span>
-                <Link href={`/${countryCode}`} className="hover:text-black transition-colors underline underline-offset-4">Return to Store</Link>
-              </div>
-
-              {/* Social Authentication */}
-              <div className="space-y-3 pt-2">
-                <button className="w-full max-w-[280px] h-11 bg-[#3b5998] text-white flex items-center rounded-none shadow-sm hover:opacity-90 transition-all overflow-hidden group">
-                  <div className="w-11 h-full flex items-center justify-center bg-[#2d4373] border-r border-white/5">
-                    <Facebook className="w-4 h-4 fill-white" />
-                  </div>
-                  <span className="flex-1 text-[10px] font-bold uppercase tracking-wider text-center pr-11">Sign in with Facebook</span>
-                </button>
-
-                <button className="w-full max-w-[280px] h-11 bg-[#dd4b39] text-white flex items-center rounded-none shadow-sm hover:opacity-90 transition-all overflow-hidden group">
-                  <div className="w-11 h-full flex items-center justify-center bg-[#c23321] border-r border-white/5">
-                    <span className="font-bold text-base font-headline">G</span>
-                  </div>
-                  <span className="flex-1 text-[10px] font-bold uppercase tracking-wider text-center pr-11">Sign in with Google</span>
-                </button>
-              </div>
-
-              <div className="space-y-4 pt-6">
-                {
-                  ADMIN_ACCOUNTS.map((acc) => (
-                    <Link href={`/${countryCode}/${acc.role}/dashboard`} className="w-full max-w-[280px] h-11 bg-gray-100 text-gray-900 flex items-center rounded-none shadow-sm hover:bg-gray-200 transition-all overflow-hidden group">
-                      <span className="flex-1 text-[10px] font-bold uppercase tracking-wider text-center pr-11">{`Login as ${acc.role} of ${acc.name}`}</span>
-                    </Link>))
-                }
-                <div>
-
-                </div>
-              </div>
+            <div className="flex items-center space-x-2 text-[11px] text-gray-500 font-light italic">
+              <Link href={`/${countryCode}/account/reset-password`} className="hover:text-black transition-colors underline underline-offset-4">Forgot your password?</Link>
+              <span>or</span>
+              <Link href={`/${countryCode}`} className="hover:text-black transition-colors underline underline-offset-4">Return to Store</Link>
             </div>
 
             {/* Divider */}
@@ -155,7 +124,7 @@ export default function LoginPage() {
               <div className="w-px flex-1 bg-gray-100" />
             </div>
 
-            {/* Right Column: New Customer */}
+            {/* New Customer */}
             <div className="flex-1 pl-0 md:pl-20 py-12 md:py-0 flex flex-col items-center justify-start text-center space-y-10">
               <div className="space-y-4 max-w-[300px]">
                 <p className="text-[13px] text-gray-500 font-light italic leading-relaxed">
@@ -172,7 +141,7 @@ export default function LoginPage() {
               </Link>
             </div>
           </div>
-          </div>
+        </div>
       </main>
     </div>
   );

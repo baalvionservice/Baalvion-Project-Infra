@@ -2,11 +2,12 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { ChevronRight, Facebook } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
+import { ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { authClient } from '@/lib/auth';
 
 /**
  * RegisterPage: Replicated "Create An Account" Portal.
@@ -15,17 +16,29 @@ import { Label } from '@/components/ui/label';
 export default function RegisterPage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
+  const router = useRouter();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     password: ''
   });
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Logic for registration would go here
-    console.log('Registration submitted for:', formData.email);
+    setError(null);
+    setSubmitting(true);
+    try {
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      await authClient.register(formData.email, formData.password, fullName || undefined);
+      router.push(`/${countryCode}/account`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -98,31 +111,24 @@ export default function RegisterPage() {
               </div>
             </div>
             
-            <Button 
+            {error && (
+              <p className="text-[12px] font-medium text-red-600" role="alert">{error}</p>
+            )}
+
+            <Button
               type="submit"
               variant="outline"
-              className="w-full max-w-[240px] h-12 border-black text-black hover:bg-black hover:text-white rounded-none text-[10px] font-bold tracking-[0.25em] uppercase transition-all shadow-sm"
+              disabled={submitting}
+              className="w-full max-w-[240px] h-12 border-black text-black hover:bg-black hover:text-white rounded-none text-[10px] font-bold tracking-[0.25em] uppercase transition-all shadow-sm disabled:opacity-60"
             >
-              CREATE AN ACCOUNT
+              {submitting ? 'Creating…' : 'CREATE AN ACCOUNT'}
             </Button>
           </form>
 
-          {/* Social Authentication */}
-          <div className="space-y-3 pt-4">
-            <button className="w-full max-w-[320px] h-12 bg-[#3b5998] text-white flex items-center rounded-none shadow-sm hover:opacity-90 transition-all overflow-hidden group">
-              <div className="w-12 h-full flex items-center justify-center bg-[#2d4373] border-r border-white/5">
-                <Facebook className="w-5 h-5 fill-white" />
-              </div>
-              <span className="flex-1 text-[11px] font-bold uppercase tracking-wider text-center pr-12">Sign in with Facebook</span>
-            </button>
-
-            <button className="w-full max-w-[320px] h-12 bg-[#dd4b39] text-white flex items-center rounded-none shadow-sm hover:opacity-90 transition-all overflow-hidden group">
-              <div className="w-12 h-full flex items-center justify-center bg-[#c23321] border-r border-white/5">
-                <span className="font-bold text-lg font-headline">G</span>
-              </div>
-              <span className="flex-1 text-[11px] font-bold uppercase tracking-wider text-center pr-12">Sign in with Google</span>
-            </button>
-          </div>
+          <p className="text-[11px] text-gray-500 font-light italic">
+            Already have an account?{' '}
+            <Link href={`/${countryCode}/account/login`} className="text-black underline underline-offset-4">Sign in</Link>
+          </p>
         </div>
       </main>
     </div>

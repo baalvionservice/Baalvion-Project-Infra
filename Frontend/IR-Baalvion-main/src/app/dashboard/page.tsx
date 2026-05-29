@@ -53,10 +53,11 @@ export default async function DashboardPage() {
   try {
     const cookieStore = await cookies();
 
-    // Prefer real JWT token; fall back to legacy mock cookie for transition period
+    // Access token is in-memory (client) and NOT in a cookie, so the server shell renders a
+    // neutral session; DashboardClient resolves the real role from irAuthClient after hydration.
+    // The forgeable `baalvion_session_mock` cookie is no longer read.
     const jwtToken = cookieStore.get("ir_baalvion_access_token")?.value;
-    const mockCookie = cookieStore.get("baalvion_session_mock")?.value;
-    const session = getSessionFromCookie(jwtToken || mockCookie);
+    const session = getSessionFromCookie(jwtToken);
 
     // Add error boundary for data fetching
     let data;

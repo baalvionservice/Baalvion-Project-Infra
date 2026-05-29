@@ -22,15 +22,8 @@ import {
   Briefcase,
   Star
 } from 'lucide-react';
-import { 
-  createUserWithEmailAndPassword,
-  updateProfile,
-  sendEmailVerification
-} from '@/lib/fb-compat/auth';
-import { doc, setDoc } from '@/lib/fb-compat/firestore';
-import { useAuth, useFirestore } from '@/firebase';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
+import { useAuth } from '@/contexts/AuthContext';
+import { onboardingApi } from '@/lib/api-client';
 import { brandSignupSchema } from '@/lib/validations';
 
 import { Button } from '@/components/ui/button';
@@ -97,8 +90,7 @@ export default function BrandSignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-  const auth = useAuth();
-  const db = useFirestore();
+  const { register } = useAuth();
 
   const form = useForm<BrandSignupValues>({
     resolver: zodResolver(brandSignupSchema),
@@ -129,61 +121,25 @@ export default function BrandSignupPage() {
   async function onSubmit(values: BrandSignupValues) {
     setIsLoading(true);
     try {
-      // 1. Create Firebase Auth User
-      const userCredential = await createUserWithEmailAndPassword(auth!, values.email, values.password);
-      const user = userCredential.user;
+      // Real account + session via the identity gateway (no Firebase).
+      await register(values.email, values.password, values.fullName);
 
-      await updateProfile(user, { displayName: values.fullName });
-      
-      // Send verification email
-      await sendEmailVerification(user);
+      // Persist the brand profile to brand-service (best-effort; completable later via onboarding).
+      await onboardingApi
+        .completeOnboarding({
+          role: 'BRAND',
+          displayName: values.fullName,
+          phone: values.phone,
+          companyName: values.companyName,
+          industry: values.industry,
+          website: values.website,
+          teamSize: values.teamSize,
+          plan: values.plan,
+        })
+        .catch(() => { /* non-fatal; profile can be completed in onboarding */ });
 
-      // 2. Create User Document
-      const userProfileData = {
-        id: user.uid,
-        email: values.email,
-        role: 'BRAND',
-        displayName: values.fullName,
-        phone: values.phone,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      setDoc(doc(db!, 'users', user.uid), userProfileData).catch(async (err) => {
-        errorEmitter.emitPermissionError(new FirestorePermissionError({
-          path: `/users/${user.uid}`,
-          operation: 'create',
-          requestResourceData: userProfileData
-        }));
-      });
-
-      // 3. Create Brand Document
-      const brandData = {
-        id: `brand_${user.uid}`,
-        userId: user.uid,
-        companyName: values.companyName,
-        industry: values.industry,
-        website: values.website,
-        teamSize: values.teamSize,
-        plan: values.plan,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-
-      setDoc(doc(db!, 'brands', brandData.id), brandData).catch(async (err) => {
-        errorEmitter.emitPermissionError(new FirestorePermissionError({
-          path: `/brands/${brandData.id}`,
-          operation: 'create',
-          requestResourceData: brandData
-        }));
-      });
-
-      toast({
-        title: "Account Created!",
-        description: "Please verify your email to continue.",
-      });
-
-      router.push('/auth/verify-email');
+      toast({ title: 'Account created', description: 'Welcome to Baalvion Connect.' });
+      router.push('/dashboard/brand');
     } catch (err: any) {
       console.error(err);
       toast({

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { authApi, getCurrentUser } from "@/lib/api-client";
 import { 
   ShieldAlert, 
   Users, 
@@ -73,16 +74,13 @@ export function AdminSidebar({ className, isMobile }: AdminSidebarProps) {
   const [role, setRole] = useState("Super Admin");
 
   useEffect(() => {
-    const savedRole = localStorage.getItem("adminRole");
-    if (savedRole) {
-      setRole(savedRole.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()));
-    }
+    const r = getCurrentUser()?.role;
+    if (r) setRole(r.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase()));
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminRole");
-    localStorage.removeItem("adminEmail");
-    router.push("/admin-demo-access");
+  const handleLogout = async () => {
+    await authApi.logout().catch(() => {});
+    router.push("/login");
   };
 
   return (

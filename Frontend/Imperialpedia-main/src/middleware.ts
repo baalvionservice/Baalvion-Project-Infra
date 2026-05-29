@@ -2,74 +2,41 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 /**
- * Imperialpedia Route Gatekeeper
- * Checks for a valid access token before allowing access to protected routes.
- * Token validation is lightweight (presence + non-expiry via exp claim).
- * Full signature verification happens server-side in API routes.
+ * Imperialpedia middleware — single source of truth (the duplicate root middleware.ts was removed).
+ * Responsibilities:
+ *  1. Legacy /terms/[slug] → /terms/[letter]/[slug] redirect (merged from the old root middleware).
+ *  2. Coarse auth gate on protected areas.
+ *
+ * SECURITY MODEL (P0 remediation): the access token is in memory and not visible to the edge, so
+ * this gates on the un-forgeable httpOnly `baalvion_refresh` cookie set by auth-service. Per-role
+ * authorization is enforced in the API + client guards.
  */
-
-const PROTECTED_PREFIXES = [
-  '/admin',
-  '/creator/dashboard',
-  '/editor',
-  '/writer',
-  '/premium',
-];
-
-const PUBLIC_PREFIXES = [
-  '/auth',
-  '/articles',
-  '/news',
-  '/search',
-  '/about',
-  '/_next',
-  '/favicon',
-  '/api',
-];
-
-function isProtectedPath(pathname: string): boolean {
-  return PROTECTED_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-}
-
-function isPublicPath(pathname: string): boolean {
-  if (pathname === '/') return true;
-  return PUBLIC_PREFIXES.some((prefix) => pathname.startsWith(prefix));
-}
-
-function isTokenExpired(token: string): boolean {
-  try {
-    const base64Url = token.split('.')[1];
-    if (!base64Url) return true;
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const payload = JSON.parse(Buffer.from(base64, 'base64').toString('utf8'));
-    if (typeof payload.exp !== 'number') return true;
-    return payload.exp * 1000 < Date.now() + 30_000;
-  } catch {
-    return true;
-  }
-}
+const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
+const PROTECTED_PREFIXES = ['/admin', '/creator/dashboard', '/editor', '/writer', '/premium'];
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Public paths never need a token
-  if (isPublicPath(pathname)) return NextResponse.next();
+  // 1) Legacy terms URL structure redirect
+  if (pathname.startsWith('/terms/') && pathname.split('/').length === 3) {
+    const slug = pathname.split('/')[2];
+    if (slug.length === 1 || slug === 'num') {
+      return NextResponse.next();
+    }
+    const firstChar = slug.charAt(0).toLowerCase();
+    const letter = /^[0-9]/.test(firstChar) ? 'num' : firstChar;
+    return NextResponse.redirect(new URL(`/terms/${letter}/${slug}`, request.url), 301);
+  }
 
-  // Only enforce auth on explicitly protected paths
-  if (!isProtectedPath(pathname)) return NextResponse.next();
-
-  // Check for token in cookie (preferred for SSR) or Authorization header
-  const cookieToken = request.cookies.get('imperialpedia_access_token')?.value;
-  const headerToken = request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
-  const token = cookieToken || headerToken;
-
-  const isAuthenticated = token && !isTokenExpired(token);
-
-  if (!isAuthenticated) {
-    const signInUrl = request.nextUrl.clone();
-    signInUrl.pathname = '/auth/sign-in';
-    signInUrl.searchParams.set('redirect', pathname);
-    return NextResponse.redirect(signInUrl);
+  // 2) Coarse auth gate on protected areas
+  if (PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))) {
+    const hasSession = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
+    if (!hasSession) {
+      const signInUrl = request.nextUrl.clone();
+      signInUrl.pathname = '/auth/sign-in';
+      signInUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(signInUrl);
+    }
   }
 
   return NextResponse.next();
@@ -77,6 +44,7 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/terms/:path*',
     '/admin/:path*',
     '/creator/dashboard/:path*',
     '/editor/:path*',

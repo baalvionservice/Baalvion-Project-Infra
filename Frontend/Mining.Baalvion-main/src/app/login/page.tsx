@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { trackEvent } from "@/lib/monitoring";
+import { authApi } from "@/lib/api-client";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid business email"),
@@ -33,14 +34,20 @@ export default function LoginPage() {
 
   const onSubmit = async (data: z.infer<typeof loginSchema>) => {
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise(r => setTimeout(r, 1500));
-    
-    // Tracking login event
-    trackEvent('login', { method: 'password' });
-
+    // Real authentication against the identity gateway (auth-service via /auth-bff).
+    const result = await authApi.login({ email: data.email, password: data.password });
     setIsSubmitting(false);
-    
+
+    if (!result.ok) {
+      toast({
+        title: "Login failed",
+        description: result.error.message || "Invalid email or password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    trackEvent('login', { method: 'password' });
     toast({
       title: "Session Initialized",
       description: "Welcome back to GeoTrade Nexus.",

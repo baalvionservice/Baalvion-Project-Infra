@@ -1,5 +1,9 @@
 import type { NextConfig } from 'next';
 
+// Next.js dev (webpack HMR + react-refresh) runs on eval() and a localhost websocket; a CSP without
+// 'unsafe-eval'/ws breaks the client bundle in dev (nothing hydrates). Relax in dev only; prod stays strict.
+const isDev = process.env.NODE_ENV !== 'production';
+
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
@@ -15,11 +19,11 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com",
+      `script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com${isDev ? " 'unsafe-eval'" : ''}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos https://firebasestorage.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://api.baalvion.com https://*.googleapis.com https://*.firebaseio.com https://*.algolianet.com https://*.algolia.net wss://*.firebaseio.com",
+      `connect-src 'self' https://api.baalvion.com https://*.googleapis.com https://*.firebaseio.com https://*.algolianet.com https://*.algolia.net wss://*.firebaseio.com${isDev ? ' ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*' : ''}`,
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",

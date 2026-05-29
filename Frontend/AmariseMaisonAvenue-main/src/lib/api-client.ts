@@ -16,6 +16,7 @@
 
 import { getStoreId } from './store-context';
 import { unwrapResponse, ApiEnvelopeError } from './unwrap';
+import { getAccessToken, authClient } from './auth';
 
 // ── Base URLs (gateway namespaces; each service mounts /api/v1) ──────────────
 const COMMERCE_URL  = process.env.NEXT_PUBLIC_COMMERCE_URL  || 'https://api.baalvion.com/api/v1/commerce/commerce/api/v1';
@@ -62,11 +63,9 @@ function missingStore<T>(): Promise<ApiResult<T>> {
 
 // ── Auth Helper ──────────────────────────────────────────────────────────────
 
+// SECURITY (P0): the access token is held in memory by lib/auth (never localStorage/cookie).
 function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  const cookieMatch = document.cookie.match(/(?:^|;\s*)authToken=([^;]+)/);
-  if (cookieMatch) return decodeURIComponent(cookieMatch[1]);
-  return localStorage.getItem('authToken');
+  return getAccessToken();
 }
 
 function authHeaders(): HeadersInit {
@@ -78,12 +77,18 @@ function authHeaders(): HeadersInit {
 
 // ── Core Fetch Wrapper ─────────────────────────────────────────────────────
 
-async function apiFetch<T>(url: string, options: RequestInit = {}): Promise<ApiResult<T>> {
+async function apiFetch<T>(url: string, options: RequestInit = {}, retry = true): Promise<ApiResult<T>> {
   try {
     const res = await fetch(url, {
       ...options,
       headers: { ...authHeaders(), ...(options.headers ?? {}) },
     });
+
+    // Expired access token → one silent cookie refresh, then retry once.
+    if (res.status === 401 && retry) {
+      const restored = await authClient.bootstrap();
+      if (restored) return apiFetch<T>(url, options, false);
+    }
 
     if (!res.ok) {
       let errorBody: ApiError = { message: res.statusText, code: res.status };

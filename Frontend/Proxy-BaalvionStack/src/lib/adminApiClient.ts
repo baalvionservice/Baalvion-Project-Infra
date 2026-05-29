@@ -1,6 +1,9 @@
+import { tokenStore } from "@/lib/tokenStore";
+
 const BASE = import.meta.env.VITE_API_PLATFORM_BASE_URL || "https://api.baalvion.com/api/v1/infrastructure/proxy/v1";
 
-const getToken = () => localStorage.getItem("baalvion_access_token");
+// Access token lives in memory (P0); shared with AuthContext via tokenStore.
+const getToken = () => tokenStore.getAccess();
 
 async function request<T>(
   method: string,

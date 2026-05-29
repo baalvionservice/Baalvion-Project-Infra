@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { authApi, getCurrentUser } from "@/lib/api-client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
   TrendingUp, 
@@ -60,14 +61,13 @@ export default function AdminDashboard() {
   const [role, setRole] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedRole = localStorage.getItem("adminRole");
-    if (!savedRole) router.push("/admin-demo-access");
-    else setRole(savedRole);
-  }, [router]);
+    // Session is enforced by the admin layout + middleware; reflect the in-memory role for display.
+    setRole(getCurrentUser()?.role ?? null);
+  }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("adminRole");
-    router.push("/admin-demo-access");
+  const handleLogout = async () => {
+    await authApi.logout().catch(() => {});
+    router.push("/login");
   };
 
   const kpis = [

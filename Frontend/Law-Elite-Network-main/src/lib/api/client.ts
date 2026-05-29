@@ -1,21 +1,25 @@
 import axios from 'axios';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.baalvion.com/api/v1/knowledge/law/v1';
-export const TOKEN_KEY = 'baalvion_law_token';
+export const TOKEN_KEY = 'baalvion_law_token'; // retained export for back-compat (NOT a storage key)
+
+// SECURITY (P0): access token in memory ONLY — never localStorage/sessionStorage.
+// NOTE: law-service is an HS256 island that does not (yet) issue an httpOnly refresh cookie, so
+// there is no silent refresh — the session lives for the tab's lifetime and a full page reload
+// requires re-authentication. httpOnly-cookie refresh for law-service is a Phase 1b backend
+// dependency (tracked alongside the elite-circle island).
+let _accessToken: string | null = null;
 
 export function getToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem(TOKEN_KEY);
+  return _accessToken;
 }
 
 export function setToken(token: string): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem(TOKEN_KEY, token);
+  _accessToken = token || null;
 }
 
 export function clearToken(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem(TOKEN_KEY);
+  _accessToken = null;
 }
 
 // Public client — no auth, for public content (articles, categories, etc.)

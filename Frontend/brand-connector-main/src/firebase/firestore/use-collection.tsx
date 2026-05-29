@@ -11,6 +11,12 @@ export function useCollection<T>(query: Query | null) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
+  // Call sites pass an inline `query(collection(db,'x'), …)`, which is a NEW object every render.
+  // Keying the effect on the object identity would re-subscribe every render → immediate fetch →
+  // setState → re-render → infinite request storm (and rate-limit 429s). Depend on a stable
+  // serialization of the query shape so we only re-subscribe when the query actually changes.
+  const queryKey = query ? JSON.stringify(query) : null;
+
   useEffect(() => {
     if (!query) {
       setLoading(false);
@@ -41,7 +47,8 @@ export function useCollection<T>(query: Query | null) {
     );
 
     return unsubscribe;
-  }, [query]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryKey]);
 
   return { data, loading, error };
 }

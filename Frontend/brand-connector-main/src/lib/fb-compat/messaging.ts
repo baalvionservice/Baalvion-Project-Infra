@@ -10,6 +10,6 @@ export async function isSupported(): Promise<boolean> {
 export async function getToken(_messaging?: any, _opts?: any): Promise<string | null> {
   return null;
 }
-export function onMessage(_messaging: any, _next: any) {
+export function onMessage(_messaging: any, _next: (payload: any) => void) {
   return () => {};
 }

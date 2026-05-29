@@ -25,8 +25,16 @@ async function presignPut(filename: string, contentType: string) {
   return data?.data ?? data;
 }
 
+export interface UploadSnapshot { ref: StorageReference; bytesTransferred: number; totalBytes: number; state: string }
+export interface UploadTask {
+  snapshot: UploadSnapshot;
+  on: (evt: string, next?: (s: UploadSnapshot) => void, error?: (e: any) => void, complete?: () => void) => () => void;
+  then: (res: (s: UploadSnapshot) => any, rej?: (e: any) => any) => Promise<any>;
+  catch: (rej: (e: any) => any) => Promise<any>;
+}
+
 /** Minimal re-implementation of the resumable-upload task surface the app uses. */
-export function uploadBytesResumable(r: StorageReference, file: any, _meta?: any) {
+export function uploadBytesResumable(r: StorageReference, file: any, _meta?: any): UploadTask {
   const listeners: any = {};
   let started = false;
   let promise: Promise<any>;
@@ -60,7 +68,7 @@ export function uploadBytesResumable(r: StorageReference, file: any, _meta?: any
   };
   task.then = (res: any, rej: any) => run().then(res, rej);
   task.catch = (rej: any) => run().catch(rej);
-  return task;
+  return task as UploadTask;
 }
 
 export async function uploadBytes(r: StorageReference, file: any) {

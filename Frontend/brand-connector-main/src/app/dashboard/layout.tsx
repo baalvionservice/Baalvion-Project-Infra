@@ -22,7 +22,8 @@ import {
   FileText,
   ShieldAlert,
   CheckCircle2,
-  Info
+  Info,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -46,12 +47,13 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { currentUser, signOut } = useAuth();
+  const { currentUser, signOut, loading } = useAuth();
   const { notifications, fetchNotifications, unreadCount, markRead } = useNotificationStore();
 
+  // Only fetch once the session is restored, otherwise the call races ahead of the access token.
   useEffect(() => {
-    fetchNotifications();
-  }, []);
+    if (currentUser) fetchNotifications();
+  }, [currentUser]);
 
   const [role, setRole] = useState<'BRAND' | 'CREATOR' | 'ADMIN'>('BRAND');
 
@@ -60,6 +62,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       setRole(currentUser.role as any);
     }
   }, [currentUser]);
+
+  // Auth gate: wait for the silent refresh to restore the session before mounting data-driven
+  // children — otherwise their fetches fire before the access token exists and 401.
+  useEffect(() => {
+    if (!loading && !currentUser) router.replace('/auth/login');
+  }, [loading, currentUser, router]);
+
+  if (loading || !currentUser) {
+    return (
+      <div className="min-h-screen grid place-items-center bg-slate-50">
+        <Loader2 className="h-8 w-8 animate-spin text-primary/40" />
+      </div>
+    );
+  }
 
   const toggleRole = () => {
     const nextRole = role === 'BRAND' ? 'CREATOR' : 'BRAND';

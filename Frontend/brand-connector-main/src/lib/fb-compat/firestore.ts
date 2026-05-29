@@ -37,18 +37,18 @@ export function getFirestore(_app?: any): Firestore {
   return { __db: true };
 }
 
-export function collection(_db: any, path: string): CollectionReference {
-  return { __k: 'collection', path };
+// Variadic: collection(db, 'a') or subcollection collection(db, 'a', 'id', 'b').
+export function collection(_db: any, ...segments: string[]): CollectionReference {
+  return { __k: 'collection', path: segments.join('/') };
 }
 
-export function doc(a: any, b?: string, c?: string): DocumentReference {
-  if (a && a.__k === 'collection') return { __k: 'doc', path: a.path, id: b };
-  if (typeof b === 'string' && typeof c === 'string') return { __k: 'doc', path: b, id: c };
-  if (typeof b === 'string' && b.includes('/')) {
-    const [p, id] = b.split('/');
-    return { __k: 'doc', path: p, id };
-  }
-  return { __k: 'doc', path: b, id: undefined };
+// Variadic: doc(collectionRef, id) | doc(db, 'seg', 'seg', ..., id) — last string segment is the id.
+export function doc(a: any, ...rest: string[]): DocumentReference {
+  const segs: string[] = (a && a.__k === 'collection' ? [a.path, ...rest] : rest)
+    .filter((s) => typeof s === 'string')
+    .flatMap((s) => s.split('/'));
+  const id = segs.pop();
+  return { __k: 'doc', path: segs.join('/'), id };
 }
 
 export function query(ref: any, ...constraints: any[]): Query {
@@ -59,6 +59,29 @@ export const orderBy = (field: string, dir = 'asc') => ({ __c: 'orderBy', field,
 export const limit = (n: number) => ({ __c: 'limit', n });
 export const startAfter = (..._a: any[]) => ({ __c: 'startAfter' });
 export const serverTimestamp = () => new Date().toISOString();
+
+// Field-value helpers (server applies semantics; client just carries the intent).
+export const arrayUnion = (...items: any[]) => ({ __op: 'arrayUnion', items });
+export const arrayRemove = (...items: any[]) => ({ __op: 'arrayRemove', items });
+export const increment = (n = 1) => ({ __op: 'increment', n });
+export const deleteField = () => ({ __op: 'deleteField' });
+export type WithFieldValue<T> = T;
+export type FieldValue = any;
+// Loose snapshot shape so call-site callbacks (snap.docs.map(doc => …), snap.data()) type cleanly.
+export interface Snapshot {
+  docs: any[];
+  empty: boolean;
+  size: number;
+  forEach: (cb: (d: any) => void) => void;
+  data: () => any;
+  exists: () => boolean;
+  id: string;
+  get: (field: string) => any;
+  metadata?: any;
+}
+export type QuerySnapshot = Snapshot;
+export type DocumentSnapshot = Snapshot;
+export type QueryDocumentSnapshot = Snapshot;
 
 function toSnapshot(items: any[]) {
   const docs = items.map((it: any) => ({
@@ -100,12 +123,12 @@ export async function addDoc(ref: any, payload: any) {
   return { id: it?.id, path: `${ref.path}/${it?.id}` };
 }
 
-export async function setDoc(ref: any, payload: any) {
+export async function setDoc(ref: any, payload: any, _opts?: any) {
   if (ref.id) await baalvion.patch(`${endpoint(ref.path)}/${ref.id}`, payload);
   else await baalvion.post(endpoint(ref.path), payload);
 }
 
-export async function updateDoc(ref: any, payload: any) {
+export async function updateDoc(ref: any, payload: any, _opts?: any) {
   await baalvion.patch(`${endpoint(ref.path)}/${ref.id}`, payload);
 }
 
@@ -113,15 +136,26 @@ export async function deleteDoc(ref: any) {
   await baalvion.delete(`${endpoint(ref.path)}/${ref.id}`);
 }
 
-/** Polling replacement for realtime listeners (the WS gateway is the future path). */
-export function onSnapshot(ref: any, onNext: any, _onError?: any) {
+/**
+ * Polling replacement for realtime listeners (the WS gateway is the future path).
+ * Accepts the firebase overloads: (ref, onNext, onError?, onComplete?) and
+ * (ref, options, onNext, onError?, onComplete?). The first function arg is treated as onNext.
+ */
+export function onSnapshot(
+  ref: any,
+  a2?: (snap: Snapshot) => void,
+  a3?: (err: any) => void,
+  _a4?: (snap: Snapshot) => void,
+  _a5?: (err: any) => void,
+) {
+  const onNext = ([a2, a3, _a4, _a5].find((x) => typeof x === 'function') ?? (() => {})) as (snap: Snapshot) => void;
   let active = true;
   const isDoc = ref?.__k === 'doc';
   const tick = async () => {
     if (!active) return;
     try {
-      const snap = isDoc ? await getDoc(ref) : toSnapshot(await fetchList(ref));
-      if (active) onNext(snap);
+      const snap: any = isDoc ? await getDoc(ref) : toSnapshot(await fetchList(ref));
+      if (active) onNext(snap as Snapshot);
     } catch {
       /* swallow — keep UI alive */
     }

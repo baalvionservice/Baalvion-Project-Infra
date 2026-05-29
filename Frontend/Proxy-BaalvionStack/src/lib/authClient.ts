@@ -1,4 +1,6 @@
-const BASE = import.meta.env.VITE_API_AUTH_BASE_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+// Same-origin proxy (vite server.proxy in dev / reverse proxy in prod) so the httpOnly refresh
+// cookie flows in dev and prod. NEVER an absolute cross-origin URL.
+const BASE = '/auth-bff';
 
 export interface AuthUser {
   id: string;
@@ -35,6 +37,7 @@ async function post<T>(path: string, body: object, token?: string): Promise<T> {
 
   const res = await fetch(`${BASE}${path}`, {
     method: 'POST',
+    credentials: 'include', // receive/send the httpOnly refresh cookie
     headers,
     body: JSON.stringify(body),
   });
@@ -99,9 +102,21 @@ export const authClient = {
 
   logout: (token: string) => post<void>('/logout', {}, token),
 
-  refresh: async (refreshToken: string): Promise<AuthTokens> => {
-    const data = await post<Record<string, unknown>>('/refresh', { refreshToken });
-    return normalizeTokens(data);
+  // Cookie-based refresh (no body): the httpOnly refresh cookie is presented automatically.
+  refresh: async (): Promise<{ accessToken: string }> => {
+    const data = await post<Record<string, unknown>>('/refresh', {});
+    return { accessToken: String(data.accessToken ?? data.token ?? '') };
+  },
+
+  // GET /users/me — resolve the profile for the in-memory access token (used on session restore).
+  me: async (token: string): Promise<AuthUser> => {
+    const res = await fetch(`${BASE}/users/me`, {
+      credentials: 'include',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) throw new Error(json?.error?.message || 'Failed to load profile');
+    return normalizeTokens({ user: json.data }).user;
   },
 
   validateInvite: async (token: string): Promise<InviteDetails> => {

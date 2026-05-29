@@ -30,16 +30,6 @@ const AuthContext = createContext<AuthContextValue>({
   logout: () => {},
 });
 
-function setSessionCookie(role: string | null): void {
-  if (typeof document === 'undefined') return;
-  if (role) {
-    const value = btoa(JSON.stringify({ role }));
-    document.cookie = `law_elite_session=${value}; Path=/; Max-Age=86400; SameSite=Lax`;
-  } else {
-    document.cookie = 'law_elite_session=; Path=/; Max-Age=0; SameSite=Lax';
-  }
-}
-
 function parseJwt(token: string): { id: string; email: string; role: string } | null {
   try {
     const payload = token.split('.')[1];
@@ -54,19 +44,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
 
+  // The access token is in memory; on a fresh load there is nothing to restore (no refresh cookie
+  // on law-service yet — see lib/api/client.ts). If a token survives in memory (same-session
+  // remount), repopulate from its claims.
   useEffect(() => {
     const token = getToken();
     if (token) {
       const claims = parseJwt(token);
       if (claims) {
-        const authUser: AuthUser = {
-          userId: String(claims.id),
-          email: claims.email,
-          role: claims.role as UserRole,
-        };
-        setUser(authUser);
+        setUser({ userId: String(claims.id), email: claims.email, role: claims.role as UserRole });
         setRole(claims.role as UserRole);
-        setSessionCookie(claims.role);
       }
     }
     setLoading(false);
@@ -78,10 +65,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(accessToken);
     const claims = parseJwt(accessToken);
     if (claims) {
-      const authUser: AuthUser = { userId: String(claims.id), email: claims.email, role: userRole };
-      setUser(authUser);
+      setUser({ userId: String(claims.id), email: claims.email, role: userRole });
       setRole(userRole as UserRole);
-      setSessionCookie(userRole);
     }
   };
 
@@ -91,10 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(accessToken);
     const claims = parseJwt(accessToken);
     if (claims) {
-      const authUser: AuthUser = { userId: String(claims.id), email: claims.email, name, role: newRole };
-      setUser(authUser);
+      setUser({ userId: String(claims.id), email: claims.email, name, role: newRole });
       setRole(newRole as UserRole);
-      setSessionCookie(newRole);
     }
   };
 
@@ -102,7 +85,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     clearToken();
     setUser(null);
     setRole(null);
-    setSessionCookie(null);
   };
 
   return (

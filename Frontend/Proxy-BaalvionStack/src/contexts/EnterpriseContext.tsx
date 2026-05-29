@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { tokenStore } from "@/lib/tokenStore";
 
 // User Roles — extended for RBAC
 export type UserRole = "owner" | "admin" | "support" | "finance" | "viewer" | "restricted";
@@ -87,8 +88,12 @@ const planLimits: Record<PlanType, { bandwidth: number; subUsers: number; proxie
 
 export function EnterpriseProvider({ children }: { children: ReactNode }) {
   const [currentRole, setCurrentRole] = useState<UserRole>(() => {
-    const saved = localStorage.getItem("baalvion_user_role");
-    return (saved as UserRole) || "owner";
+    // P0: role comes from the VERIFIED session (JWT claim), NEVER localStorage. Least-privilege
+    // default until the backend membership role is known. API authorization remains authoritative;
+    // this role only drives UX gating.
+    const valid: UserRole[] = ["owner", "admin", "support", "finance", "viewer", "restricted"];
+    const sessionRole = tokenStore.getUser()?.role as UserRole | undefined;
+    return sessionRole && valid.includes(sessionRole) ? sessionRole : "viewer";
   });
 
   const [currentPlan, setCurrentPlan] = useState<PlanType>(() => {
@@ -121,7 +126,7 @@ export function EnterpriseProvider({ children }: { children: ReactNode }) {
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
 
-  useEffect(() => { localStorage.setItem("baalvion_user_role", currentRole); }, [currentRole]);
+  // (Removed: the role is never persisted to localStorage — it is derived from the verified session.)
   useEffect(() => {
     localStorage.setItem("baalvion_user_plan", currentPlan);
     const limits = planLimits[currentPlan];

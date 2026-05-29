@@ -11,6 +11,7 @@ import { Subscription, UsageRecord, Invoice } from "@/contracts/v1/billing";
 import { Proxy, Preset, Provider } from "@/contracts/v1/proxy";
 import { AuditEvent, Alert } from "@/contracts/v1/events";
 import { authClient } from "@/lib/authClient";
+import { tokenStore } from "@/lib/tokenStore";
 
 // ============================================
 // RESPONSE HELPERS
@@ -36,32 +37,23 @@ function success<T>(data: T): ApiResponse<T> {
 export const authApi = {
   async login(email: string, password: string): Promise<ApiResponse<{ token: string; user: User }>> {
     const tokens = await authClient.login(email, password);
-    // Persist tokens for subsequent API calls
-    localStorage.setItem("baalvion_access_token", tokens.accessToken);
-    if (tokens.refreshToken) {
-      localStorage.setItem("baalvion_refresh_token", tokens.refreshToken);
-    }
-    localStorage.setItem("baalvion_auth_user", JSON.stringify(tokens.user));
+    // Access token + user held in memory (P0); refresh token is the httpOnly cookie.
+    tokenStore.set(tokens.accessToken, tokens.user);
     return success({ token: tokens.accessToken, user: tokens.user as unknown as User });
   },
 
   async logout(): Promise<ApiResponse<void>> {
-    const token = localStorage.getItem("baalvion_access_token") ?? "";
+    const token = tokenStore.getAccess() ?? "";
     await authClient.logout(token).catch(() => {/* best-effort */});
-    localStorage.removeItem("baalvion_access_token");
-    localStorage.removeItem("baalvion_refresh_token");
-    localStorage.removeItem("baalvion_auth_user");
+    tokenStore.clear();
     return success(undefined);
   },
 
   async refreshToken(): Promise<ApiResponse<{ token: string; expiresAt: string }>> {
-    const refreshToken = localStorage.getItem("baalvion_refresh_token") ?? "";
-    const tokens = await authClient.refresh(refreshToken);
-    localStorage.setItem("baalvion_access_token", tokens.accessToken);
-    if (tokens.refreshToken) {
-      localStorage.setItem("baalvion_refresh_token", tokens.refreshToken);
-    }
-    return success({ token: tokens.accessToken, expiresAt: tokens.expiresAt ?? "" });
+    // No refresh token argument — it rides the httpOnly cookie.
+    const { accessToken } = await authClient.refresh();
+    tokenStore.set(accessToken);
+    return success({ token: accessToken, expiresAt: "" });
   },
 };
 

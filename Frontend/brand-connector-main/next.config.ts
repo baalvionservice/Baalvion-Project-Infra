@@ -1,5 +1,9 @@
 import type { NextConfig } from 'next';
 
+// Next.js dev (webpack HMR + react-refresh) runs on eval() and a localhost websocket; a CSP without
+// 'unsafe-eval'/ws breaks the client bundle in dev (nothing hydrates). Relax in dev only; prod stays strict.
+const isDev = process.env.NODE_ENV !== 'production';
+
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
@@ -18,11 +22,11 @@ const securityHeaders = [
     key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://apis.google.com",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos",
-      "font-src 'self' data:",
-      "connect-src 'self' https://api.baalvion.com wss://api.baalvion.com https://*.firebaseio.com https://*.googleapis.com",
+      `script-src 'self' 'unsafe-inline' https://apis.google.com${isDev ? " 'unsafe-eval'" : ''}`,
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos https://fastly.picsum.photos",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      `connect-src 'self' https://api.baalvion.com wss://api.baalvion.com https://*.firebaseio.com https://*.googleapis.com${isDev ? ' ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*' : ''}`,
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",
@@ -44,6 +48,20 @@ const nextConfig: NextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: false,
+  },
+  async rewrites() {
+    const authTarget =
+      process.env.AUTH_PROXY_TARGET ||
+      'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+    const brandTarget =
+      process.env.BRAND_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/brand-connector';
+    return [
+      // Same-origin auth proxy so the httpOnly refresh cookie flows in dev and prod.
+      { source: '/auth-bff/:path*', destination: `${authTarget}/:path*` },
+      // Same-origin proxy for the fb-compat REST shim (bare resource names) → backend `/api/v1` mount.
+      // Keeps the strict production CSP (`connect-src 'self'`) satisfied; forwards the Bearer header.
+      { source: '/brand-bff/:path*', destination: `${brandTarget}/api/v1/:path*` },
+    ];
   },
   async headers() {
     return [

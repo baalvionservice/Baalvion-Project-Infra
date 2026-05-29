@@ -1,20 +1,20 @@
 "use client";
 
-import { apiClient } from '@/lib/api/client';
+import { apiClient, getToken } from '@/lib/api/client';
 import { useAuthStore } from "@/store/authStore";
 
 /**
  * @fileOverview REST AuthStateListener
  * Replaces the Firebase onAuthStateChanged listener.
- * Reads the stored JWT and fetches the current user profile from /auth/me.
+ * Reads the in-memory JWT (P0: never localStorage) and fetches /auth/me.
+ * NOTE: on a full reload the in-memory token is gone (law-service has no httpOnly refresh cookie
+ * yet — Phase 1b), so this resolves to signed-out until re-login.
  */
 export const initAuthListener = async () => {
   const { setUser, setLoading } = useAuthStore.getState();
   setLoading(true);
 
-  const token = typeof window !== 'undefined'
-    ? localStorage.getItem('baalvion_law_token')
-    : null;
+  const token = getToken();
 
   if (!token) {
     setUser(null);

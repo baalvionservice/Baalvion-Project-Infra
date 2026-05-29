@@ -9,11 +9,16 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    const authTarget =
+      process.env.AUTH_PROXY_TARGET ||
+      'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
     return [
       {
         source: '/api/proxy/:path*',
         destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
       },
+      // Same-origin auth proxy so the httpOnly refresh cookie flows in dev and prod.
+      { source: '/auth-bff/:path*', destination: `${authTarget}/:path*` },
     ];
   },
   async headers() {

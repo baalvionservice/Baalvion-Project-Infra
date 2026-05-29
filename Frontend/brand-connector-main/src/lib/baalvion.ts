@@ -8,9 +8,10 @@
  */
 import axios from 'axios';
 
-// brand-connector-service via the gateway (port 4100 was a phantom "unified backend" — never existed).
-const BASE_URL =
-  process.env.NEXT_PUBLIC_BAALVION_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/brand-connector/api/v1';
+// Same-origin by default: the fb-compat REST shim calls bare resource names (/campaigns, /leads,
+// /files/presign, …). These are proxied to the backend's `/api/v1` mount via the `/brand-bff`
+// rewrite in next.config (server-side, forwards the Bearer header), keeping the strict prod CSP happy.
+const BASE_URL = process.env.NEXT_PUBLIC_BAALVION_API_URL || '/brand-bff';
 
 export const baalvion = axios.create({
   baseURL: BASE_URL,
@@ -31,11 +32,51 @@ baalvion.interceptors.request.use((config) => {
   return config;
 });
 
+// Self-healing 401: the access token is short-lived (15 min). On expiry, rotate it once via the
+// httpOnly refresh cookie (same-origin /auth-bff/refresh) and retry the original request — mirroring
+// the typed api-client so the fb-compat REST shim survives token expiry without forcing a re-login.
+let baalvionRefreshing: Promise<string | null> | null = null;
+async function refreshAccessToken(): Promise<string | null> {
+  if (!baalvionRefreshing) {
+    baalvionRefreshing = (async () => {
+      try {
+        const res = await fetch('/auth-bff/refresh', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+        });
+        if (!res.ok) return null;
+        const json = await res.json().catch(() => ({}));
+        const raw = json.data ?? json;
+        const next: string | null = raw.accessToken ?? raw.token ?? null;
+        if (next) setAccessToken(next);
+        return next;
+      } catch {
+        return null;
+      } finally {
+        // release the singleton after this tick so concurrent 401s share one refresh
+        setTimeout(() => { baalvionRefreshing = null; }, 0);
+      }
+    })();
+  }
+  return baalvionRefreshing;
+}
+
 baalvion.interceptors.response.use(
   (r) => r,
-  (error) => {
+  async (error) => {
+    const original = error.config || {};
+    const status = error.response?.status;
+    if (status === 401 && accessToken && !original.__retried) {
+      original.__retried = true;
+      const next = await refreshAccessToken();
+      if (next) {
+        original.headers = { ...(original.headers || {}), Authorization: `Bearer ${next}` };
+        return baalvion(original);
+      }
+    }
     const message = error.response?.data?.message || error.message || 'Request failed';
-    console.error('[baalvion]', error.config?.method, error.config?.url, '->', message);
+    console.error('[baalvion]', original.method, original.url, '->', message);
     return Promise.reject(error);
   },
 );

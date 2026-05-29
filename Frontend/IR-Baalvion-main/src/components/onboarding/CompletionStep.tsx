@@ -16,9 +16,8 @@ export function CompletionStep({ data }: { data: any }) {
     // Simulate high-security automated analysis
     const t1 = setTimeout(() => setStatus('finalizing'), 2000);
     const t2 = setTimeout(() => {
-      // PHASE 6 RBAC ESCALATION
-      // Here we elevate the user from 'public' to 'p1_institutional' in the mock session
-      document.cookie = `baalvion_session_mock=p1_institutional; path=/; max-age=3600`;
+      // Role is granted server-side on KYC approval and carried in the verified access token.
+      // (Removed the client-side `baalvion_session_mock` self-grant — a privilege-escalation vector.)
       setStatus('success');
     }, 4500);
 

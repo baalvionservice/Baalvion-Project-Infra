@@ -184,28 +184,27 @@ export const sessionSelectors = {
 // SESSION PERSISTENCE
 // ============================================
 
-const SESSION_STORAGE_KEY = "baalvion_session";
+// P0: only NON-credential UI selection is persisted (org / workspace / role-view). Auth state
+// (token, session blob, permissions, expiry) is NEVER written to web storage — it is restored from
+// the httpOnly refresh cookie via AuthContext on app start.
+const SELECTION_STORAGE_KEY = "baalvion_workspace_selection";
 
 export function persistSession(state: SessionState): void {
   try {
     const serialized = JSON.stringify({
-      isAuthenticated: state.isAuthenticated,
-      session: state.session,
       currentOrgId: state.currentOrgId,
       currentWorkspaceId: state.currentWorkspaceId,
       currentRoleType: state.currentRoleType,
-      permissions: state.permissions,
-      expiresAt: state.expiresAt,
     });
-    sessionStorage.setItem(SESSION_STORAGE_KEY, serialized);
+    sessionStorage.setItem(SELECTION_STORAGE_KEY, serialized);
   } catch (e) {
-    console.error("Failed to persist session state", e);
+    console.error("Failed to persist workspace selection", e);
   }
 }
 
 export function loadSession(): Partial<SessionState> | null {
   try {
-    const serialized = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    const serialized = sessionStorage.getItem(SELECTION_STORAGE_KEY);
     if (!serialized) return null;
     return JSON.parse(serialized);
   } catch (e) {

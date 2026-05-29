@@ -4,28 +4,31 @@
  * Auth tokens are retrieved from the AuthContext (Firebase + JWT fallback).
  */
 
-const BRAND_URL =
-  process.env.NEXT_PUBLIC_BRAND_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/brand-connector';
-const AUTH_URL =
-  process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+import { setAccessToken as setBaalvionToken } from '@/lib/baalvion';
+
+// Same-origin by default: the typed endpoints resolve to the Next BFF route handlers
+// under src/app/api/* (which forward the Bearer token and proxy to BRAND_API_URL server-side).
+// Staying same-origin keeps the strict production CSP (`connect-src 'self'`) satisfied.
+const BRAND_URL = process.env.NEXT_PUBLIC_BRAND_API_URL || '';
+// Same-origin proxy (next.config rewrite → gateway) so the httpOnly refresh cookie flows.
+const AUTH_URL = '/auth-bff';
 
 // ─── Token helpers ─────────────────────────────────────────────────────────────
-const TOKEN_KEY = 'baalvion_brand_token';
-const REFRESH_KEY = 'baalvion_brand_refresh';
+// SECURITY (P0): access token in memory ONLY. Refresh token = httpOnly cookie set by auth-service.
+let _accessToken: string | null = null;
 
 export const brandTokenStore = {
-  getAccess: (): string | null =>
-    typeof window !== 'undefined' ? localStorage.getItem(TOKEN_KEY) : null,
-  getRefresh: (): string | null =>
-    typeof window !== 'undefined' ? localStorage.getItem(REFRESH_KEY) : null,
-  set: (access: string, refresh?: string) => {
-    if (typeof window === 'undefined') return;
-    localStorage.setItem(TOKEN_KEY, access);
-    if (refresh) localStorage.setItem(REFRESH_KEY, refresh);
+  getAccess: (): string | null => _accessToken,
+  getRefresh: (): string | null => null, // refresh token is the httpOnly cookie — not JS-readable
+  set: (access: string, _refresh?: string) => {
+    _accessToken = access || null;
+    // Keep the baalvion axios client (used by the fb-compat REST shim → 64 pages) in sync,
+    // otherwise those pages would call the backend unauthenticated.
+    setBaalvionToken(_accessToken);
   },
   clear: () => {
-    if (typeof window === 'undefined') return;
-    [TOKEN_KEY, REFRESH_KEY].forEach((k) => localStorage.removeItem(k));
+    _accessToken = null;
+    setBaalvionToken(null);
   },
 };
 
@@ -34,20 +37,19 @@ let isRefreshing = false;
 let refreshQueue: Array<(token: string | null) => void> = [];
 
 async function refreshJwt(): Promise<string | null> {
-  const refreshToken = brandTokenStore.getRefresh();
-  if (!refreshToken) return null;
   try {
+    // No body: the refresh token rides the httpOnly cookie. Backend rotates it.
     const res = await fetch(`${AUTH_URL}/refresh`, {
       method: 'POST',
+      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
     });
     if (!res.ok) return null;
     const json = await res.json();
     const raw = json.data ?? json;
     const newAccess: string = raw.accessToken ?? raw.token ?? '';
-    const newRefresh: string = raw.refreshToken ?? refreshToken;
-    brandTokenStore.set(newAccess, newRefresh);
+    if (!newAccess) return null;
+    brandTokenStore.set(newAccess);
     return newAccess;
   } catch {
     return null;

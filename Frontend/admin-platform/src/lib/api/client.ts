@@ -6,7 +6,9 @@ import axios, {
 import { useAuthStore } from '@/lib/store/authStore';
 
 const BASE_URL      = process.env.NEXT_PUBLIC_API_URL        || 'https://api.baalvion.com/api/v1/infrastructure/proxy/v1';
-const AUTH_URL      = process.env.NEXT_PUBLIC_AUTH_URL       || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+// Auth goes through the SAME-ORIGIN proxy (next.config rewrite → gateway) so the httpOnly
+// `baalvion_refresh` cookie is stored against this origin and flows on every refresh.
+const AUTH_URL      = '/auth-bff';
 const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL  || 'https://api.baalvion.com/api/v1/platform/admin/v1';
 const SESSION_URL   = process.env.NEXT_PUBLIC_SESSION_API_URL || 'https://api.baalvion.com/api/v1/identity/session/v1';
 const OAUTH_URL     = process.env.NEXT_PUBLIC_OAUTH_URL       || 'https://api.baalvion.com/api/v1/identity/oauth';
