@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import {
   Card,
@@ -25,17 +26,41 @@ import {
   TrendingUp,
   Search,
 } from "lucide-react";
-import domainsData from "@/lib/data/domains.json";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { dashboardApi } from "@/lib/api-client";
 import TrafficTrendChart from "@/components/charts/traffic-trend-chart";
 import TrafficSourcesChart from "@/components/charts/traffic-sources-chart";
 
-export default async function DomainDetailPage({
-  params,
-}: {
-  params: Promise<{ domain: string }>;
-}) {
-  const { domain } = await params;
-  const domainData = domainsData.find((d) => d.id === domain);
+interface DomainDetail {
+  id: string; domain: string; businessName: string;
+  trafficTrend: { date: string; visitors: number }[];
+  topPages: { url: string; views: number; avgTime: string; bounceRate: number }[];
+  trafficSources: { name: string; value: number }[];
+  seo: { da: number; backlinks: number; keywords: number };
+  geoVisitors: { country: string; flag: string; visitors: number; percentage: number }[];
+  revenueAttribution: { orders: number; totalValue: number };
+}
+
+export default function DomainDetailPage() {
+  const params = useParams();
+  const domain = String(params?.domain ?? "");
+  const [domainData, setDomainData] = useState<DomainDetail | null>(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.domainAnalytics();
+        const arr = (Array.isArray(d) ? d : (d as { data?: unknown[] })?.data ?? []) as DomainDetail[];
+        if (!cancelled) { setDomainData(arr.find((x) => x.id === domain) ?? null); setLoaded(true); }
+      } catch { if (!cancelled) setLoaded(true); }
+    })();
+    return () => { cancelled = true; };
+  }, [domain]);
+
+  if (!loaded) return null;
 
   if (!domainData) {
     return (

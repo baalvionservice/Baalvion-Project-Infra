@@ -78,4 +78,40 @@ router.get('/finance-reports', authMiddleware, (req, res) =>
     ]),
 );
 
+// Domain (web) analytics — per-site web metrics (no web-analytics table yet; reference data).
+router.get('/domain-analytics', authMiddleware, (req, res) =>
+    sendSuccess(req, res, [
+        {
+            id: 'dom_1', domain: 'baalvionmining.com', businessName: 'Baalvion Mining Co', sslStatus: 'valid',
+            monthlyVisitors: 84200, pageViews: 312500, avgSessionDuration: '3m 12s', webRevenue: 128000, uptime: 99.98, hostingCost: 420,
+            trafficTrend: [{ date: 'Jan', visitors: 61000 }, { date: 'Feb', visitors: 66500 }, { date: 'Mar', visitors: 72000 }, { date: 'Apr', visitors: 78000 }, { date: 'May', visitors: 84200 }],
+            topPages: [{ url: '/', views: 120000, avgTime: '2m 40s', bounceRate: 38 }, { url: '/products', views: 64000, avgTime: '3m 05s', bounceRate: 31 }, { url: '/contact', views: 22000, avgTime: '1m 50s', bounceRate: 52 }],
+            trafficSources: [{ name: 'Organic', value: 48 }, { name: 'Direct', value: 27 }, { name: 'Referral', value: 15 }, { name: 'Social', value: 10 }],
+            seo: { da: 62, backlinks: 18400, keywords: 5200 },
+            geoVisitors: [{ country: 'UAE', flag: '🇦🇪', visitors: 38000, percentage: 45 }, { country: 'India', flag: '🇮🇳', visitors: 21000, percentage: 25 }, { country: 'UK', flag: '🇬🇧', visitors: 13000, percentage: 15 }],
+            revenueAttribution: { orders: 1240, totalValue: 128000 },
+        },
+        {
+            id: 'dom_2', domain: 'baalviontrade.com', businessName: 'Baalvion Trade House', sslStatus: 'valid',
+            monthlyVisitors: 51800, pageViews: 198000, avgSessionDuration: '2m 48s', webRevenue: 96000, uptime: 99.95, hostingCost: 360,
+            trafficTrend: [{ date: 'Jan', visitors: 40000 }, { date: 'Feb', visitors: 43000 }, { date: 'Mar', visitors: 46500 }, { date: 'Apr', visitors: 49000 }, { date: 'May', visitors: 51800 }],
+            topPages: [{ url: '/', views: 78000, avgTime: '2m 20s', bounceRate: 41 }, { url: '/marketplace', views: 52000, avgTime: '3m 30s', bounceRate: 28 }],
+            trafficSources: [{ name: 'Organic', value: 40 }, { name: 'Direct', value: 35 }, { name: 'Referral', value: 18 }, { name: 'Social', value: 7 }],
+            seo: { da: 55, backlinks: 12100, keywords: 3800 },
+            geoVisitors: [{ country: 'Singapore', flag: '🇸🇬', visitors: 26000, percentage: 50 }, { country: 'India', flag: '🇮🇳', visitors: 14000, percentage: 27 }],
+            revenueAttribution: { orders: 890, totalValue: 96000 },
+        },
+        {
+            id: 'dom_3', domain: 'amarisemaison.com', businessName: 'Amarisé Maison Avenue', sslStatus: 'valid',
+            monthlyVisitors: 132400, pageViews: 540000, avgSessionDuration: '4m 02s', webRevenue: 312000, uptime: 99.99, hostingCost: 680,
+            trafficTrend: [{ date: 'Jan', visitors: 98000 }, { date: 'Feb', visitors: 108000 }, { date: 'Mar', visitors: 118000 }, { date: 'Apr', visitors: 125000 }, { date: 'May', visitors: 132400 }],
+            topPages: [{ url: '/', views: 210000, avgTime: '3m 10s', bounceRate: 34 }, { url: '/collections', views: 140000, avgTime: '4m 40s', bounceRate: 22 }, { url: '/heritage', views: 60000, avgTime: '5m 10s', bounceRate: 19 }],
+            trafficSources: [{ name: 'Organic', value: 52 }, { name: 'Social', value: 24 }, { name: 'Direct', value: 16 }, { name: 'Referral', value: 8 }],
+            seo: { da: 71, backlinks: 32500, keywords: 8900 },
+            geoVisitors: [{ country: 'France', flag: '🇫🇷', visitors: 58000, percentage: 44 }, { country: 'UK', flag: '🇬🇧', visitors: 34000, percentage: 26 }, { country: 'UAE', flag: '🇦🇪', visitors: 20000, percentage: 15 }],
+            revenueAttribution: { orders: 3120, totalValue: 312000 },
+        },
+    ]),
+);
+
 module.exports = router;

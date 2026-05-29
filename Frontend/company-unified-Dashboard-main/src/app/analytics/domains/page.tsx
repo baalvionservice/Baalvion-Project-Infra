@@ -1,4 +1,4 @@
-
+"use client";
 import Link from 'next/link';
 import {
   Card,
@@ -11,9 +11,24 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Globe, Lock, Users, BarChart, Clock, ShieldCheck, Server, CircleDollarSign } from 'lucide-react';
-import domainsData from '@/lib/data/domains.json';
+import { useEffect, useState } from 'react';
+import { dashboardApi } from '@/lib/api-client';
+
+interface DomainRow { id: string; domain: string; businessName: string; sslStatus: string; monthlyVisitors: number; pageViews: number; avgSessionDuration: string; webRevenue: number; uptime: number; hostingCost: number }
 
 export default function DomainAnalyticsPage() {
+  const [domainsData, setDomainsData] = useState<DomainRow[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.domainAnalytics();
+        const arr = (Array.isArray(d) ? d : (d as { data?: unknown[] })?.data ?? []) as DomainRow[];
+        if (!cancelled) setDomainsData(arr);
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
   return (
     <div className="space-y-8">
       <div>
