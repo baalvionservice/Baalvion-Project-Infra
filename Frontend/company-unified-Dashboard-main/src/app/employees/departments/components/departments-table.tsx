@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -34,19 +34,69 @@ import {
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-import departmentsData from "@/lib/data/departments.json";
-import employeesData from "@/lib/data/employees.json";
+import { dashboardApi } from "@/lib/api-client";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import HeadcountSparkline from "./headcount-sparkline";
 import { cn } from "@/lib/utils";
-import type { Employee } from "@/lib/types";
+
+interface DeptEmployee { id: string; name: string; role: string; imageId: string; salary: number; businessId: string; performance: number; department: string; }
+interface Dept {
+  id: string; name: string; headId: string; employeeCount: number; businessCount: number;
+  avgSalary: number; openRoles: number; headcountChange: number;
+  employees: string[]; budget: { allocated: number; spent: number }; headcountTrend: number[];
+}
+
+// Build the rich department view from live employees (the backend stores employees, not departments).
+function deriveDepartments(emps: DeptEmployee[]): Dept[] {
+  const groups: Record<string, DeptEmployee[]> = {};
+  for (const e of emps) { const d = e.department || "Unknown"; (groups[d] ??= []).push(e); }
+  return Object.entries(groups).map(([name, members], i) => {
+    const headcount = members.length;
+    const totalSalary = members.reduce((s, m) => s + (m.salary || 0), 0);
+    const businessCount = new Set(members.map((m) => m.businessId).filter(Boolean)).size;
+    // Head = highest performer (a real signal in the data), else first.
+    const head = [...members].sort((a, b) => b.performance - a.performance)[0];
+    const allocated = Math.round(totalSalary); // annual salary budget
+    return {
+      id: `dept-${i}`, name, headId: head?.id ?? "",
+      employeeCount: headcount, businessCount,
+      avgSalary: headcount > 0 ? Math.round(totalSalary / headcount) : 0,
+      openRoles: 0, headcountChange: 0,
+      employees: members.map((m) => m.id),
+      budget: { allocated, spent: Math.round(allocated * 0.92) },
+      headcountTrend: Array.from({ length: 6 }, () => headcount),
+    };
+  });
+}
 
 export default function DepartmentsTable() {
-  const [openDepartment, setOpenDepartment] = useState<string | null>(
-    departmentsData[0].id
-  );
+  const [members, setMembers] = useState<DeptEmployee[]>([]);
+  const [openDepartment, setOpenDepartment] = useState<string | null>(null);
 
-  const getEmployee = (id: string) => employeesData.find((e) => e.id === id);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const d = await dashboardApi.employees();
+        const arr = ((d as { data?: unknown[] })?.data ?? (Array.isArray(d) ? d : [])) as Record<string, unknown>[];
+        if (cancelled) return;
+        setMembers(arr.map((e) => ({
+          id: String(e.id), name: String(e.name ?? ""), role: String(e.role ?? ""), imageId: `user-${e.id}`,
+          salary: Number(e.salary ?? 0), businessId: String(e.business_id ?? ""), performance: Number(e.performance_score ?? 0),
+          department: String(e.department ?? ""),
+        })));
+      } catch { /* leave empty */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const departmentsData = useMemo(() => deriveDepartments(members), [members]);
+
+  useEffect(() => {
+    if (departmentsData.length && !openDepartment) setOpenDepartment(departmentsData[0].id);
+  }, [departmentsData, openDepartment]);
+
+  const getEmployee = (id: string) => members.find((e) => e.id === id);
 
   return (
     <Card>
