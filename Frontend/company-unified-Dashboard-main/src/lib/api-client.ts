@@ -12,7 +12,9 @@
  */
 
 const AUTH_URL = '/auth-bff';
-const API_URL  = '/api-bff';
+// Data goes to the `dashboard` service via the gateway: /api-bff/* -> gateway /api/* routes by the
+// first path segment, so `dashboard` selects dashboard-service and `/v1` is its route base.
+const API_URL  = '/api-bff/dashboard/v1';
 
 export interface DashAuthUser {
   id: string;
@@ -194,12 +196,12 @@ const post = <T>(path: string, body?: object) =>
   });
 
 export const dashboardApi = {
-  summary: () => get('/dashboard/summary'),
-  businesses: () => get('/businesses'),
+  summary: () => get('/summary'),
+  businesses: () => get('/domains'),        // dashboard-service models "businesses" as domains
   employees: () => get('/employees'),
   kpis: () => get('/kpis'),
-  payments: () => get('/payments'),
-  finance: () => get('/finance/overview'),
+  payments: () => get('/transactions'),     // payments are transactions in dashboard-service
+  finance: () => get('/financials'),
   financials: () => get('/financials'),
   countries: () => get('/countries'),
   equity: () => get('/equity'),
@@ -213,7 +215,7 @@ export const dashboardApi = {
         .filter(([, v]) => v !== undefined)
         .map(([k, v]) => [k, String(v)]),
     ).toString();
-    return get(`/audit-logs${qs ? `?${qs}` : ''}`);
+    return get(`/audit${qs ? `?${qs}` : ''}`);
   },
   analytics: {
     businesses: () => get('/analytics/businesses'),

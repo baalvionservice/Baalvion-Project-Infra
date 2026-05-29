@@ -8,6 +8,7 @@ const {
 } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
 const { AppError } = require('../utils/errors');
+const gatewayTrust = require('./gatewayTrust');
 
 const _canonical = createAuthMiddleware({
     jwksUri:         config.jwt.jwksUri || undefined,
@@ -16,18 +17,33 @@ const _canonical = createAuthMiddleware({
     staticPublicKey: config.jwt.publicKey,
 });
 
+// BFF gateway path: in strict mode the gateway fronts us and sends HMAC-signed identity headers
+// instead of a Bearer. Verify + trust them when present (required:false so direct Bearer callers
+// still fall through to the canonical RS256 verifier). No-op if no signing secret is configured.
+const _gatewayTrust = process.env.GATEWAY_SIGNING_SECRET
+    ? gatewayTrust({ secret: process.env.GATEWAY_SIGNING_SECRET, required: false })
+    : (req, res, next) => next();
+
 const toAppError = (err) => new AppError((err.code || 'unauthorized').toUpperCase(), err.message, err.status || 401);
 
-// Canonical req.auth; back-compat req.user {id, orgId, roles}. `role` is the PRIMARY role
-// string written into audit-log records ONLY (dashboard uses it for audit metadata, not
-// authorization) — NOT a scalar-role auth gate.
-const authMiddleware = (req, res, next) => _canonical(req, res, (err) => {
-    if (err) return next(toAppError(err));
+const setBackCompatUser = (req) => {
+    if (!req.auth.permissions) req.auth.permissions = [];
     req.user = {
         id: req.auth.userId, orgId: req.auth.orgId,
-        roles: req.auth.roles, role: req.auth.roles[0] ?? null,
+        roles: req.auth.roles, role: (req.auth.roles || [])[0] ?? null,
     };
-    return next();
+};
+
+// Canonical req.auth; back-compat req.user {id, orgId, roles}. Tries the trusted gateway identity
+// first, then a direct Bearer. `role` is PRIMARY role for audit metadata only — not an auth gate.
+const authMiddleware = (req, res, next) => _gatewayTrust(req, res, (gErr) => {
+    if (gErr) return next(gErr);
+    if (req.auth && req.auth.source === 'gateway') { setBackCompatUser(req); return next(); }
+    return _canonical(req, res, (err) => {
+        if (err) return next(toAppError(err));
+        setBackCompatUser(req);
+        return next();
+    });
 });
 
 const wrap = (mw) => (req, res, next) => mw(req, res, (err) => (err ? next(toAppError(err)) : next()));
