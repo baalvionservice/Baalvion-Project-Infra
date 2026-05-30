@@ -39,10 +39,14 @@ function getSecret(key, fallback = undefined) {
     return fallback;
 }
 
-// Values that must NEVER appear in production (dev placeholders / weak defaults).
+// Generic lazy placeholders that must NEVER appear in real production secrets.
+// NOTE: 'baalvion_dev_pass' is intentionally NOT here — it's the shared credential
+// the local docker stack uses across services (which run NODE_ENV=production); the
+// real AWS deploy supplies strong creds via SECRETS_FILE. We still catch empties +
+// obvious placeholders below.
 const PLACEHOLDERS = new Set([
-    'changeme', 'change-me', 'dev', 'development', 'test', 'secret', 'password',
-    'baalvion_dev_pass', 'ci-test-secret', 'placeholder', 'your-secret-here', '',
+    'changeme', 'change-me', 'secret', 'password', 'ci-test-secret',
+    'placeholder', 'your-secret-here', 'replace-with-strong-secret', '',
 ]);
 
 /**

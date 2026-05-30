@@ -13,7 +13,8 @@
 // Best-effort + self-healing: heartbeat ping/pong drops dead sockets; a missing
 // hub (WS disabled) makes pushToUser a no-op so REST still works.
 // ─────────────────────────────────────────────────────────────────────────────
-const { WebSocketServer } = require('ws');
+const WebSocket = require('ws');
+const WebSocketServer = WebSocket.Server; // ws v7 exposes .Server (v8 adds the named export)
 const { URL } = require('url');
 const { createJwksVerifier } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
@@ -54,7 +55,7 @@ function pushToUser(userId, payload) {
     const data = JSON.stringify(payload);
     let n = 0;
     for (const ws of set) {
-        if (ws.readyState === ws.OPEN) { try { ws.send(data); n++; } catch (_) { /* ignore */ } }
+        if (ws.readyState === WebSocket.OPEN) { try { ws.send(data); n++; } catch (_) { /* ignore */ } }
     }
     return n;
 }

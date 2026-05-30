@@ -28,7 +28,21 @@ Plus shared infra: **Postgres**, **Redis**, **MinIO** (object storage), and the 
 | `MINIO_BUCKET` | rec | default `law-documents` |
 | `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` | **deploy-time** | set to enable real charges; **empty = simulated settlement** |
 | `RAZORPAY_WEBHOOK_SECRET` | deploy-time | verifies the Razorpay webhook |
+| `PLATFORM_FEE_PERCENT` | rec | marketplace commission withheld from each settled payment (default `15`) |
+| `APP_PUBLIC_URL` | rec | public web origin used in transactional email links |
+| `MAIL_ENABLED` | rec | `true` + SMTP_* → real email; otherwise emails are **logged, not sent** |
+| `SMTP_HOST/PORT/SECURE/USER/PASS`, `MAIL_FROM` | deploy-time | SMTP (dev → Mailpit `:1025`; prod → SES/SendGrid) |
+| `VIDEO_PROVIDER` + `DAILY_API_KEY` / `DAILY_DOMAIN` | deploy-time | `daily` for Daily.co rooms; **empty → Jitsi public rooms (works, no keys)** |
+| `BILLING_WORKER_ENABLED` / `BILLING_INTERVAL_MINUTES` | rec | recurring-subscription billing worker (default on, every 60 min) |
+| `SECRETS_FILE` | prod | path to a mounted JSON secret (AWS SM CSI / K8s secret / Vault) — overrides env |
 
+> **Secrets**: in production prefer `SECRETS_FILE` over plaintext env. On boot the service
+> **refuses to start** if a required secret (`JWT_PUBLIC_KEY`) is missing or a known placeholder.
+>
+> **Migrations**: schema changes are versioned SQL in `db/migrations/` and applied automatically on
+> boot (and via `npm run migrate`). `npm run migrate:status` lists applied/pending. They are immutable
+> once applied (checksum drift guard) — add a new file rather than editing an applied one.
+>
 > S3 note: `@aws-sdk/client-s3` is S3-compatible — point `MINIO_*` at AWS S3 instead of MinIO by
 > setting the S3 endpoint/region/creds and a bucket. Presigned URLs then come from S3 directly.
 

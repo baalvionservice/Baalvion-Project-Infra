@@ -1015,9 +1015,25 @@ services:
       - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-}
       - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-}
       - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET:-}
-      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
-      - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
-      - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}
+      # Public web origin (used in transactional email links).
+      - APP_PUBLIC_URL=${LAW_APP_PUBLIC_URL:-http://localhost:9002}
+      # Marketplace: platform commission withheld from each settled payment.
+      - PLATFORM_FEE_PERCENT=${LAW_PLATFORM_FEE_PERCENT:-15}
+      # Transactional email (SMTP). MAIL_ENABLED=false -> emails are logged, not sent.
+      - MAIL_ENABLED=${LAW_MAIL_ENABLED:-false}
+      - SMTP_HOST=${LAW_SMTP_HOST:-mailpit}
+      - SMTP_PORT=${LAW_SMTP_PORT:-1025}
+      - SMTP_SECURE=${LAW_SMTP_SECURE:-false}
+      - SMTP_USER=${LAW_SMTP_USER:-}
+      - SMTP_PASS=${LAW_SMTP_PASS:-}
+      - MAIL_FROM=${LAW_MAIL_FROM:-Law Elite Network <no-reply@lawelitenetwork.com>}
+      # Video consultations. Empty provider -> Jitsi public rooms (no keys needed).
+      - VIDEO_PROVIDER=${LAW_VIDEO_PROVIDER:-}
+      - DAILY_API_KEY=${LAW_DAILY_API_KEY:-}
+      - DAILY_DOMAIN=${LAW_DAILY_DOMAIN:-}
+      # Recurring-subscription billing worker.
+      - BILLING_WORKER_ENABLED=${LAW_BILLING_WORKER_ENABLED:-true}
+      - BILLING_INTERVAL_MINUTES=${LAW_BILLING_INTERVAL_MINUTES:-60}
     deploy:
       resources:
         limits:
