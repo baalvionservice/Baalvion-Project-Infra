@@ -36,6 +36,9 @@ const JWT_ALLOWLIST = [
   ['Backend/services/identity/oauth-service/', 'OAuth2 provider — issues its own access/refresh/id tokens'],
   ['Backend/services/platform/admin-service/service/adminService.js', 'admin impersonation-token issuer (RS256 sign)'],
   ['Backend/services/ecosystem/law-elite/', 'acquired sub-stack, separately governed — migration tracked'],
+  ['Backend/services/ecosystem/jobs-service/middleware/authMiddleware.js', 'jwt.decode() only to read the email claim — verification is via @baalvion/auth-node createAuthMiddleware'],
+  ['Backend/services/platform/realtime-service/index.js', 'WebSocket upgrade auth — RS256 jwt.verify at the handshake; Express auth-node middleware does not apply to WS upgrades'],
+  ['Backend/services/knowledge/cms-service/scripts/', 'dev seed scripts mint a local token for seeding — not a request-path auth surface'],
 ];
 // C2: sub-stacks that are their own bounded monorepo (internal cross-imports are fine).
 const CROSS_SERVICE_EXEMPT_PREFIXES = ['Backend/services/ecosystem/law-elite/'];
