@@ -108,7 +108,8 @@ export default function BankingAdminPage() {
                                         <TableCell className="font-medium">{payment.candidateName}</TableCell>
                                         <TableCell>{formatCurrency(payment.amount, payment.currency)}</TableCell>
                                         <TableCell className="flex items-center gap-2">
-                                            {paymentMethodIcons[payment.method as PaymentMethodType]}
+                                            {/* cast: dedupe-skew between two @types/react copies (ReactNode bigint union) */}
+                                            {paymentMethodIcons[payment.method as PaymentMethodType] as any}
                                             {payment.method}
                                         </TableCell>
                                         <TableCell>{payment.date}</TableCell>

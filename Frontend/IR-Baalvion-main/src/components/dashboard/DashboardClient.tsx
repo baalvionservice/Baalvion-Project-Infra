@@ -7,6 +7,7 @@ import NavChart from "@/components/dashboard/NavChart";
 import DocumentPreview from "@/components/dashboard/DocumentPreview";
 import ActiveVoting from "@/components/dashboard/ActiveVoting";
 import { EventPackageDownload } from "@/components/dashboard/EventPackageDownload";
+import type { AppRole } from "@/lib/rbac/roles";
 
 interface DashboardData {
   summary: any;
@@ -64,7 +65,7 @@ export default function DashboardClient({
         {/* Sidebar Info Area */}
         <div className="lg:col-span-4 space-y-8">
           <ActiveVoting votes={data.votes} />
-          <DocumentPreview documents={data.documents} role={userRole} />
+          <DocumentPreview documents={data.documents} role={userRole as AppRole} />
         </div>
       </div>
     </div>

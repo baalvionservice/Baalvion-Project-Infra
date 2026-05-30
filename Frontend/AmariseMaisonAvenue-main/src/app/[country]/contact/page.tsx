@@ -15,13 +15,13 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 type ContactPageProps = {
-  params: {
+  params: Promise<{
     country: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: ContactPageProps): Promise<Metadata> {
-  const countryCode = (params.country as string) || 'us';
+  const countryCode = ((await params).country as string) || 'us';
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
   return {
     title: `Contact AMARISÉ MAISON | Concierge Services in ${currentCountry.office?.city}`,
@@ -29,8 +29,8 @@ export async function generateMetadata({ params }: ContactPageProps): Promise<Me
   };
 }
 
-export default function ContactPage({ params }: ContactPageProps) {
-  const countryCode = (params.country as string) || 'us';
+export default async function ContactPage({ params }: ContactPageProps) {
+  const countryCode = ((await params).country as string) || 'us';
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
 
   return (

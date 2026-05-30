@@ -16,8 +16,19 @@ import { getRequiredPermissionForRoute } from '@/lib/rbac/routeRegistry';
  */
 const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
 
+// IR editorial content is now managed centrally in the Baalvion CMS
+// (admin-platform console). The site's former local /admin panel is retired:
+// every /admin request is redirected to the central console for this website.
+const CENTRAL_CONSOLE_URL =
+  process.env.NEXT_PUBLIC_CMS_CONSOLE_URL ||
+  'http://localhost:3030/cms/websites/7bced69e-a861-4530-9660-e0ddb955d72b';
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return NextResponse.redirect(CENTRAL_CONSOLE_URL);
+  }
 
   const requiredPermission = getRequiredPermissionForRoute(pathname);
   if (!requiredPermission) {

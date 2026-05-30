@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users, UserPlus, UserCheck, UserX, Activity, Search, Filter, Eye, Ban, MoreHorizontal, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
 const userGrowth = [
@@ -53,10 +54,19 @@ const recentActivity = [
 ];
 
 const AdminUsers = () => {
+  const [users, setUsers] = useState<any[]>([]);
+  useEffect(() => {
+    Promise.all([protocolApi.students.list(), protocolApi.experts.list()]).then(([students, experts]) => {
+      setUsers([
+        ...students.map((s: any) => ({ id: s.id, name: s.name, email: s.email, role: "student", status: s.status === "online" ? "active" : "inactive", lastActive: s.lastActive, joined: s.joined, sessions: 0 })),
+        ...experts.map((e: any) => ({ id: e.id, name: e.name, email: e.email, role: "expert", status: e.status, lastActive: "—", joined: e.joinedAt, sessions: e.students })),
+      ]);
+    });
+  }, []);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedUser, setSelectedUser] = useState<typeof mockUsers[0] | null>(null);
+  const [selectedUser, setSelectedUser] = useState<any | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
   const stats = [
@@ -66,7 +76,7 @@ const AdminUsers = () => {
     { title: "Churned", value: "156", change: "-3%", icon: UserX },
   ];
 
-  const filteredUsers = mockUsers.filter(user => {
+  const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRole = roleFilter === "all" || user.role === roleFilter;

@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { ChevronRight, ShieldCheck, Fingerprint, FileText, Microscope } from 'lucide-react';
 import { COUNTRIES } from '@/lib/mock-data';
 
-type PageProps = { params: { country: string } };
+type PageProps = { params: Promise<{ country: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const country = COUNTRIES[params.country] || COUNTRIES.us;
+  const country = COUNTRIES[(await params).country] || COUNTRIES.us;
   return {
     title: `Authenticity Guarantee | AMARISÉ MAISON ${country.name}`,
     description: `Every AMARISÉ MAISON acquisition is authenticated by in-house experts and ships with a numbered Certificate of Authenticity. Learn about our guarantee.`,
@@ -21,8 +21,8 @@ const STEPS = [
   { icon: ShieldCheck, title: 'Lifetime Guarantee', body: 'Our Authenticity Guarantee stands for the life of the piece. A verified inauthenticity claim is met with a full refund and complimentary return.' },
 ];
 
-export default function AuthenticityPage({ params }: PageProps) {
-  const countryCode = params.country || 'us';
+export default async function AuthenticityPage({ params }: PageProps) {
+  const countryCode = (await params).country || 'us';
 
   return (
     <div className="animate-fade-in bg-gradient-to-br from-ivory via-white to-ivory min-h-screen">

@@ -15,12 +15,7 @@ import { CapitalCallGenerator } from "@/components/capital-ops/CapitalCallGenera
 import { AllocationEngine } from "@/components/capital-ops/AllocationEngine";
 import { InvestorPanel } from "@/components/capital-ops/InvestorPanel";
 import { CapitalFlowVisualization } from "@/components/capital-ops/CapitalFlowVisualization";
-import { 
-  SPV_PERFORMANCE, 
-  CAPITAL_TIMELINE,
-  PERFORMANCE_DOCUMENTS 
-} from "@/lib/performance/data";
-import { 
+import {
   Select, 
   SelectContent, 
   SelectItem, 
@@ -40,7 +35,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
  */
 export default function PerformanceDashboardPage() {
   const { role, changeRole, isAdmin } = useAuth();
-  const { navHistory, metrics, currentNav, isLoading: metricsLoading } = useNavMetrics();
+  const { navHistory, metrics, currentNav, spvPerformance, capitalTimeline, documents, isLoading: metricsLoading } = useNavMetrics();
   const { investors, spvs, issueCapitalCall, updateWireStatus } = useCapitalTransactions();
   
   const [locale, setLocale] = useState<Locale>('en');
@@ -73,9 +68,9 @@ export default function PerformanceDashboardPage() {
   };
 
   const filteredSpvs = useMemo(() => {
-    if (assetFilter === 'all') return SPV_PERFORMANCE;
-    return SPV_PERFORMANCE.filter(s => s.id === assetFilter);
-  }, [assetFilter]);
+    if (assetFilter === 'all') return spvPerformance;
+    return spvPerformance.filter(s => s.id === assetFilter);
+  }, [assetFilter, spvPerformance]);
 
   if (metricsLoading) return <div className="py-40 text-center animate-pulse text-muted-foreground">Synchronizing institutional ledger...</div>;
 
@@ -144,7 +139,7 @@ export default function PerformanceDashboardPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Consolidated View</SelectItem>
-                  {SPV_PERFORMANCE.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                  {spvPerformance.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -162,13 +157,13 @@ export default function PerformanceDashboardPage() {
               </TabsList>
 
               <TabsContent value="performance" className="space-y-8 animate-in fade-in duration-500">
-                <PerformanceCharts navData={navHistory} timelineData={CAPITAL_TIMELINE} />
+                <PerformanceCharts navData={navHistory} timelineData={capitalTimeline} />
                 <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
                   <div className="xl:col-span-2">
                     <SpvPerformanceTable data={filteredSpvs} />
                   </div>
                   <div className="space-y-8">
-                    <DocumentFeed documents={PERFORMANCE_DOCUMENTS} currentRole={role} />
+                    <DocumentFeed documents={documents} currentRole={role} />
                     <div className="p-6 bg-primary/5 border border-primary/20 rounded-xl">
                       <h3 className="text-sm font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
                         <Landmark className="h-4 w-4 text-primary" /> Regulatory Snapshot

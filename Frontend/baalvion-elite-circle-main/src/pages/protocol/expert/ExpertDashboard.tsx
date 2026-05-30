@@ -4,45 +4,65 @@
  * TODO: Implement real-time student count via WebSocket
  * TODO: Connect to payment API for actual earnings
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Users, UserCheck, UserX, DollarSign, TrendingUp, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
-import { mockRevenueData, mockActivityData } from "@/data/mockData";
+import { protocolApi } from "@/lib/protocol-api";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from "recharts";
 
-// Using centralized mock data from src/data/mockData.ts
+// Headline stats are live (from protocolApi); the trend charts below are illustrative until
+// time-series telemetry is captured.
+const mockRevenueData = { monthly: [
+  { month: "Jan", revenue: 45000, users: 1200 }, { month: "Feb", revenue: 52000, users: 1450 },
+  { month: "Mar", revenue: 48000, users: 1380 }, { month: "Apr", revenue: 61000, users: 1620 },
+  { month: "May", revenue: 72000, users: 1890 }, { month: "Jun", revenue: 85000, users: 2150 },
+] };
+const mockActivityData = [
+  { day: "Mon", calls: 12, posts: 8, signups: 45 }, { day: "Tue", calls: 15, posts: 12, signups: 52 },
+  { day: "Wed", calls: 8, posts: 6, signups: 38 }, { day: "Thu", calls: 20, posts: 15, signups: 67 },
+  { day: "Fri", calls: 18, posts: 10, signups: 54 }, { day: "Sat", calls: 5, posts: 4, signups: 23 },
+  { day: "Sun", calls: 3, posts: 2, signups: 18 },
+];
 
 const ExpertDashboard = () => {
   const navigate = useNavigate();
+  const [live, setLive] = useState({ total: 0, online: 0, offline: 0, earnings: 0 });
+  useEffect(() => {
+    Promise.all([protocolApi.students.list(), protocolApi.experts.list()]).then(([students, experts]) => {
+      const online = students.filter((s: any) => s.status === "online").length;
+      const earnings = experts.reduce((a: number, e: any) => a + (e.revenue || 0), 0);
+      setLive({ total: students.length, online, offline: students.length - online, earnings });
+    });
+  }, []);
 
   const stats = [
     { 
-      title: "Total Students", 
-      value: "1,284", 
+      title: "Total Students",
+      value: String(live.total),
       icon: Users, 
       change: "+12%",
       route: "/protocol/expert/students"
     },
     { 
-      title: "Online Now", 
-      value: "347", 
+      title: "Online Now",
+      value: String(live.online),
       icon: UserCheck, 
       change: "+5%",
       status: "online",
       route: "/protocol/expert/students"
     },
     { 
-      title: "Offline", 
-      value: "937", 
+      title: "Offline",
+      value: String(live.offline),
       icon: UserX, 
       change: "-3%",
       route: "/protocol/expert/students"
     },
     { 
-      title: "Total Earnings", 
-      value: "$42,850", 
+      title: "Total Earnings",
+      value: `$${live.earnings.toLocaleString()}`,
       icon: DollarSign, 
       change: "+18%",
       route: "/protocol/expert/earnings"

@@ -513,13 +513,34 @@ export interface SearchPayload {
   pageSize?: number;
 }
 
-// ── searchApi — NOT IMPLEMENTED in any backend service ───────────────────────
+// ── searchApi — backed by commerce-service product listing (?search= ILIKE on name/sku) ──────
 export const searchApi = {
-  semantic(_payload: SearchPayload): Promise<ApiResult<SearchResult>> {
-    return notImplemented<SearchResult>('store-scoped product search');
+  async semantic(payload: SearchPayload): Promise<ApiResult<SearchResult>> {
+    const filters = {
+      ...(payload.filters || {}),
+      search: payload.query,
+      status: 'published',
+      ...(payload.page ? { page: payload.page } : {}),
+      ...(payload.pageSize ? { limit: payload.pageSize } : {}),
+    } as unknown as ProductFilters;
+    const res = await productApi.list(filters);
+    if (!res.ok) return res as ApiResult<SearchResult>;
+    const products = res.data.items || [];
+    return {
+      ok: true,
+      data: {
+        products,
+        total: res.data.total ?? products.length,
+        query: payload.query,
+        suggestions: products.slice(0, 5).map((p) => p.name).filter(Boolean),
+      },
+    };
   },
-  autocomplete(_query: string): Promise<ApiResult<string[]>> {
-    return notImplemented<string[]>('search autocomplete');
+  async autocomplete(query: string): Promise<ApiResult<string[]>> {
+    if (!query.trim()) return { ok: true, data: [] };
+    const res = await productApi.list({ search: query, status: 'published', limit: 8 } as unknown as ProductFilters);
+    if (!res.ok) return res as ApiResult<string[]>;
+    return { ok: true, data: (res.data.items || []).map((p) => p.name).filter(Boolean).slice(0, 8) };
   },
 };
 
@@ -549,21 +570,38 @@ export interface AnalyticsFilters {
   brandId?: string;
 }
 
-// ── analyticsApi — NOT IMPLEMENTED (no store-scoped analytics in backend) ─────
+// ── analyticsApi — backed by order-service store-scoped analytics (/analytics/*) ──────────────
+const analyticsQs = (filters: AnalyticsFilters, extra: Record<string, string | number | undefined> = {}) => {
+  const p = new URLSearchParams();
+  if (filters.from) p.set('from', filters.from);
+  if (filters.to) p.set('to', filters.to);
+  if (filters.country) p.set('country', filters.country);
+  Object.entries(extra).forEach(([k, v]) => { if (v !== undefined) p.set(k, String(v)); });
+  const s = p.toString();
+  return s ? `?${s}` : '';
+};
 export const analyticsApi = {
-  summary(_filters: AnalyticsFilters): Promise<ApiResult<AnalyticsSummary>> {
-    return notImplemented<AnalyticsSummary>('commerce analytics summary');
+  summary(filters: AnalyticsFilters): Promise<ApiResult<AnalyticsSummary>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<AnalyticsSummary>();
+    return apiFetch<AnalyticsSummary>(`${ORDER_URL}/orders/stores/${storeId}/analytics/summary${analyticsQs(filters)}`);
   },
-  topProducts(_filters: AnalyticsFilters, _limit = 10): Promise<ApiResult<TopProduct[]>> {
-    return notImplemented<TopProduct[]>('commerce analytics top-products');
+  topProducts(filters: AnalyticsFilters, limit = 10): Promise<ApiResult<TopProduct[]>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<TopProduct[]>();
+    return apiFetch<TopProduct[]>(`${ORDER_URL}/orders/stores/${storeId}/analytics/top-products${analyticsQs(filters, { limit })}`);
   },
-  salesByCountry(_filters: AnalyticsFilters): Promise<ApiResult<Record<string, number>>> {
-    return notImplemented<Record<string, number>>('commerce analytics by-country');
+  salesByCountry(filters: AnalyticsFilters): Promise<ApiResult<Record<string, number>>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<Record<string, number>>();
+    return apiFetch<Record<string, number>>(`${ORDER_URL}/orders/stores/${storeId}/analytics/by-country${analyticsQs(filters)}`);
   },
   revenueTimeSeries(
-    _filters: AnalyticsFilters,
-    _granularity: 'day' | 'week' | 'month' = 'day',
+    filters: AnalyticsFilters,
+    granularity: 'day' | 'week' | 'month' = 'day',
   ): Promise<ApiResult<{ date: string; revenue: number }[]>> {
-    return notImplemented<{ date: string; revenue: number }[]>('commerce analytics revenue time-series');
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<{ date: string; revenue: number }[]>();
+    return apiFetch<{ date: string; revenue: number }[]>(`${ORDER_URL}/orders/stores/${storeId}/analytics/revenue${analyticsQs(filters, { granularity })}`);
   },
 };

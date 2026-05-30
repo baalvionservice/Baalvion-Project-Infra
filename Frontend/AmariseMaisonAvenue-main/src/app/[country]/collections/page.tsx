@@ -6,9 +6,9 @@ import { ChevronRight, Ban, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 type CollectionsPageProps = {
-  params: {
+  params: Promise<{
     country: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: CollectionsPageProps): Promise<Metadata> {
@@ -21,8 +21,8 @@ export async function generateMetadata({ params }: CollectionsPageProps): Promis
 /**
  * CollectionsPage: Refined for a more compact and elegant presentation.
  */
-export default function CollectionsPage({ params }: CollectionsPageProps) {
-  const countryCode = (params.country as string) || 'us';
+export default async function CollectionsPage({ params }: CollectionsPageProps) {
+  const countryCode = ((await params).country as string) || 'us';
   const { collections } = useAppStore();
 
   return (

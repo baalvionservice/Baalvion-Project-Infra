@@ -25,7 +25,7 @@ export function CompletionStep({ data }: { data: any }) {
   }, []);
 
   const handleEnterPortal = () => {
-    authService.setRole('P1Investor');
+    authService.setRole('p1_institutional');
     router.push('/dashboard');
   };
 

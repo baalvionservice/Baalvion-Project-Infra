@@ -7,5 +7,13 @@ router.use('/documents', require('./documents'));
 router.use('/earnings', require('./earnings'));
 router.use('/shareholders', require('./shareholders'));
 router.use('/contacts', require('./contacts'));
+router.use('/notifications', require('./notifications'));
+router.use('/subscriptions', require('./subscriptions'));
+router.use('/votes', require('./votes'));
+router.use('/settings', require('./settings'));
+router.use('/alerts', require('./alerts'));
+router.use('/board-materials', require('./boardMaterials'));
+router.use('/generated-reports', require('./generatedReports'));
+router.use('/performance', require('./performance'));
 
 module.exports = router;

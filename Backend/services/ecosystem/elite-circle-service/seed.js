@@ -366,6 +366,71 @@ async function seed() {
         await db.Notification.create({ user_id: USERS[0].id, type: 'deal_interest', title: 'New investor interest', message: 'Sarah Williams is interested in "NeuralEdge"', link: '/deals' });
     }
 
+    // ── Protocol platform (migration 008) ────────────────────────────────────────
+    if (await db.ProtocolExpert.count() === 0) {
+        const experts = await db.ProtocolExpert.bulkCreate([
+            { name: 'Dr. Sarah Chen', title: 'AI & Machine Learning', email: 'sarah.chen@protocol.io', country: 'United States', avatar: 'SC', status: 'active', rating: 4.9, students: 156, revenue: 45200 },
+            { name: 'Marcus Webb', title: 'Blockchain Development', email: 'marcus.webb@protocol.io', country: 'United Kingdom', avatar: 'MW', status: 'active', rating: 4.8, students: 234, revenue: 67800 },
+            { name: 'Priya Sharma', title: 'Data Science', email: 'priya.sharma@protocol.io', country: 'India', avatar: 'PS', status: 'active', rating: 4.9, students: 312, revenue: 52100 },
+            { name: 'Ahmed Hassan', title: 'Cybersecurity', email: 'ahmed.hassan@protocol.io', country: 'UAE', avatar: 'AH', status: 'pending', rating: 0, students: 0, revenue: 0 },
+            { name: 'Elena Rodriguez', title: 'Cloud Architecture', email: 'elena.rodriguez@protocol.io', country: 'Spain', avatar: 'ER', status: 'active', rating: 4.7, students: 178, revenue: 41600 },
+            { name: 'John Doe', title: 'Web Development', email: 'john.doe@protocol.io', country: 'Canada', avatar: 'JD', status: 'suspended', rating: 4.2, students: 45, revenue: 12300 },
+        ], { returning: true });
+        const byName = Object.fromEntries(experts.map((e) => [e.name, e.id]));
+
+        const studentNames = [
+            ['Alex Morgan', 'alex@protocol.io', 'AM', 'online'], ['Sarah Chen', 'sarahc@protocol.io', 'SC', 'online'],
+            ['James Wilson', 'james@protocol.io', 'JW', 'offline'], ['Emma Davis', 'emma@protocol.io', 'ED', 'online'],
+            ['Michael Brown', 'michael@protocol.io', 'MB', 'offline'], ['Lisa Johnson', 'lisa@protocol.io', 'LJ', 'offline'],
+            ['David Lee', 'davidl@protocol.io', 'DL', 'online'], ['Anna Martinez', 'anna@protocol.io', 'AM', 'offline'],
+        ];
+        await db.ProtocolStudent.bulkCreate(studentNames.map(([name, email, avatar, status], i) => ({
+            name, email, avatar, status, expert_id: experts[i % 3].id,
+            joined_at: new Date(Date.now() - (i + 1) * 6 * 864e5), last_active_at: new Date(Date.now() - i * 36e5),
+        })));
+
+        await db.ProtocolFeedPost.bulkCreate([
+            { expert_id: byName['Dr. Sarah Chen'], author_name: 'Dr. Sarah Chen', avatar: 'SC', type: 'text', content: 'Just finished a deep dive into advanced market analysis. Patience and pattern recognition are your best friends.', likes: 234, comments: 45, is_pinned: true },
+            { expert_id: byName['Dr. Sarah Chen'], author_name: 'Dr. Sarah Chen', avatar: 'SC', type: 'audio', content: 'New audio breakdown of this week’s setups.', duration: '5:32', likes: 189, comments: 23 },
+            { expert_id: byName['Marcus Webb'], author_name: 'Marcus Webb', avatar: 'MW', type: 'video', content: 'Weekly market recap and predictions for the coming week.', duration: '12:45', likes: 567, comments: 89 },
+        ]);
+
+        await db.ProtocolCall.bulkCreate([
+            { expert_id: byName['Dr. Sarah Chen'], title: 'Weekly Strategy Session', type: 'video', status: 'live', attendees: 347, duration: '1 hour', scheduled_at: new Date() },
+            { expert_id: byName['Marcus Webb'], title: 'Q&A with Premium Members', type: 'video', status: 'upcoming', attendees: 156, duration: '2 hours', scheduled_at: new Date(Date.now() + 864e5) },
+            { expert_id: byName['Priya Sharma'], title: 'Quick Check-in', type: 'audio', status: 'upcoming', attendees: 45, duration: '30 min', scheduled_at: new Date(Date.now() + 3 * 864e5) },
+        ]);
+
+        await db.ProtocolInvite.bulkCreate([
+            { expert_id: byName['Dr. Sarah Chen'], code: 'ELITE2024', link: 'protocol.io/join/ELITE2024', expiry: '7 days', max_users: 50, used_by: 23, price: 'Free', status: 'active' },
+            { expert_id: byName['Marcus Webb'], code: 'PREMIUM99', link: 'protocol.io/join/PREMIUM99', expiry: '30 days', max_users: 100, used_by: 67, price: '$99', status: 'active' },
+            { expert_id: byName['Priya Sharma'], code: 'VIP500', link: 'protocol.io/join/VIP500', expiry: 'Unlimited', max_users: 10, used_by: 8, price: '$500', status: 'active' },
+            { expert_id: byName['John Doe'], code: 'FLASH24H', link: 'protocol.io/join/FLASH24H', expiry: 'Expired', max_users: 25, used_by: 25, price: '$49', status: 'expired' },
+        ]);
+
+        await db.ProtocolProduct.bulkCreate([
+            { expert_id: byName['Dr. Sarah Chen'], type: 'message', title: 'Weekly Insider Tips', description: 'Exclusive market insights delivered weekly.', price: 9.99, original_price: 19.99, sales: 145, featured: true },
+            { expert_id: byName['Marcus Webb'], type: 'document', title: 'Complete Trading Guide', description: '200+ pages of comprehensive trading strategies.', price: 49.99, original_price: 99.99, sales: 89, featured: true },
+            { expert_id: byName['Priya Sharma'], type: 'prompt', title: 'Market Analysis Template', description: 'Professional templates for technical analysis.', price: 14.99, sales: 234 },
+            { expert_id: byName['Elena Rodriguez'], type: 'ai', title: 'AI Trading Assistant', description: 'Personalized AI-powered trading recommendations.', price: 29.99, original_price: 59.99, sales: 67, featured: true },
+        ]);
+
+        await db.ProtocolCountry.bulkCreate([
+            { name: 'United States', code: 'US', flag: '🇺🇸', experts: 45, students: 3420, revenue: 245000 },
+            { name: 'United Kingdom', code: 'UK', flag: '🇬🇧', experts: 28, students: 1890, revenue: 156000 },
+            { name: 'India', code: 'IN', flag: '🇮🇳', experts: 34, students: 4560, revenue: 189000 },
+            { name: 'Germany', code: 'DE', flag: '🇩🇪', experts: 19, students: 1230, revenue: 98000 },
+            { name: 'Canada', code: 'CA', flag: '🇨🇦', experts: 22, students: 1670, revenue: 134000 },
+            { name: 'Australia', code: 'AU', flag: '🇦🇺', experts: 15, students: 980, revenue: 87000 },
+        ]);
+
+        await db.ProtocolNotification.bulkCreate([
+            { user_id: USERS[0].id, type: 'signup', message: 'New expert application received', read: false },
+            { user_id: USERS[0].id, type: 'revenue', message: 'Revenue milestone: $100k this month', read: false },
+            { user_id: USERS[0].id, type: 'alert', message: 'System maintenance scheduled', read: true },
+        ]);
+    }
+
     const counts = {
         users: await db.User.count(), products: await db.Product.count(), threads: await db.ForumThread.count(),
         posts: await db.ForumPost.count(), deals: await db.Deal.count(), leaderboard: await db.EliteLeaderboard.count(),
@@ -375,6 +440,10 @@ async function seed() {
         memberships: await db.Membership.count(), member_connections: await db.MemberConnection.count(),
         traction: await db.TractionMetric.count(), team: await db.CompanyMember.count(),
         verifications: await db.Verification.count(), pipeline: await db.InvestorPipeline.count(),
+        protocol_experts: await db.ProtocolExpert.count(), protocol_students: await db.ProtocolStudent.count(),
+        protocol_feed: await db.ProtocolFeedPost.count(), protocol_calls: await db.ProtocolCall.count(),
+        protocol_invites: await db.ProtocolInvite.count(), protocol_products: await db.ProtocolProduct.count(),
+        protocol_countries: await db.ProtocolCountry.count(),
     };
     console.log('[seed] done:', JSON.stringify(counts));
 }

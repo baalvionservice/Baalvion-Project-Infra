@@ -16,9 +16,9 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 type BuyingGuidePageProps = {
-  params: {
+  params: Promise<{
     country: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: BuyingGuidePageProps): Promise<Metadata> {
@@ -31,8 +31,8 @@ export async function generateMetadata({ params }: BuyingGuidePageProps): Promis
 /**
  * BuyingGuideListingPage: The curated directory of Maison intelligence.
  */
-export default function BuyingGuideListingPage({ params }: BuyingGuidePageProps) {
-  const countryCode = (params.country as string) || 'us';
+export default async function BuyingGuideListingPage({ params }: BuyingGuidePageProps) {
+  const countryCode = ((await params).country as string) || 'us';
   const { buyingGuides, socialMetrics } = useAppStore();
 
   const filteredGuides = buyingGuides.filter(g => g.country === countryCode || g.country === 'us');

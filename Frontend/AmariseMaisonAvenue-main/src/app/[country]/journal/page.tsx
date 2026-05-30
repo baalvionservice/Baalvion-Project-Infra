@@ -4,9 +4,9 @@ import { Metadata } from 'next';
 import JournalComponent from './components/JournalComponent';
 
 type JournalPageProps = {
-  params: {
+  params: Promise<{
     country: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: JournalPageProps): Promise<Metadata> {
@@ -16,9 +16,9 @@ export async function generateMetadata({ params }: JournalPageProps): Promise<Me
   };
 }
 
-export default function JournalPage({ params }: JournalPageProps) {
+export default async function JournalPage({ params }: JournalPageProps) {
 
-const countryCode = (params.country as string) || 'us';
+const countryCode = ((await params).country as string) || 'us';
   return (
     <JournalComponent countryCode={countryCode}  />
   );

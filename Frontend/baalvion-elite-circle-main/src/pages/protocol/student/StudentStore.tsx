@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageSquare, FileText, Sparkles, Bot, ShoppingCart, Check, CreditCard, X } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
 const mockProducts = [
@@ -83,11 +84,18 @@ const mockProducts = [
   },
 ];
 
+const ICON_BY_TYPE: Record<string, any> = { message: MessageSquare, document: FileText, prompt: Sparkles, ai: Bot };
+const COLOR_BY_TYPE: Record<string, string> = { message: "amber", document: "blue", prompt: "purple", ai: "green" };
+
 const StudentStore = () => {
+  const [products, setProducts] = useState<any[]>([]);
+  useEffect(() => {
+    protocolApi.products.list().then((rows) => setProducts(rows.map((p: any) => ({ ...p, icon: ICON_BY_TYPE[p.type] || MessageSquare, color: COLOR_BY_TYPE[p.type] || "amber" }))));
+  }, []);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<typeof mockProducts[0] | null>(null);
-  const [cart, setCart] = useState<typeof mockProducts>([]);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
+  const [cart, setCart] = useState<any[]>([]);
 
   const getColorClasses = (color: string) => {
     const colors: Record<string, { bg: string; border: string; text: string }> = {
@@ -99,12 +107,13 @@ const StudentStore = () => {
     return colors[color] || colors.amber;
   };
 
-  const handleBuy = (product: typeof mockProducts[0]) => {
+  const handleBuy = (product: any) => {
     setSelectedProduct(product);
     setShowCheckoutModal(true);
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
+    if (selectedProduct) await protocolApi.orders.create({ product_id: selectedProduct.id, amount: selectedProduct.price });
     setShowCheckoutModal(false);
     setShowSuccessModal(true);
   };
@@ -136,7 +145,7 @@ const StudentStore = () => {
             Featured
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockProducts.filter(p => p.featured).map((product) => {
+            {products.filter(p => p.featured).map((product) => {
               const colors = getColorClasses(product.color);
               return (
                 <Card 
@@ -179,7 +188,7 @@ const StudentStore = () => {
         <div>
           <h2 className="text-xl font-light text-white mb-4">All Products</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {mockProducts.filter(p => !p.featured).map((product) => {
+            {products.filter(p => !p.featured).map((product) => {
               const colors = getColorClasses(product.color);
               return (
                 <Card 

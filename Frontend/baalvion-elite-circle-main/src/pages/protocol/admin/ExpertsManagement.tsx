@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { 
+import { useState, useEffect } from "react";
+import {
   Shield, Search, Filter, MoreVertical, Eye, Ban, CheckCircle,
   ChevronLeft, ChevronRight, Mail, Globe, Users
 } from "lucide-react";
@@ -20,9 +20,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
-// Mock experts data
+// Shape reference for the detail modal type (data is loaded live from protocolApi).
 const mockExperts = [
   { 
     id: 1, 
@@ -99,7 +100,9 @@ const mockExperts = [
 ];
 
 const ExpertsManagement = () => {
-  const [experts, setExperts] = useState(mockExperts);
+  const [experts, setExperts] = useState<any[]>([]);
+  const loadExperts = () => protocolApi.experts.list().then(setExperts);
+  useEffect(() => { loadExperts(); }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedExpert, setSelectedExpert] = useState<typeof mockExperts[0] | null>(null);
@@ -117,10 +120,9 @@ const ExpertsManagement = () => {
   const totalPages = Math.ceil(filteredExperts.length / perPage);
   const paginatedExperts = filteredExperts.slice((currentPage - 1) * perPage, currentPage * perPage);
 
-  const handleStatusChange = (expertId: number, newStatus: string) => {
-    setExperts(experts.map(exp => 
-      exp.id === expertId ? { ...exp, status: newStatus } : exp
-    ));
+  const handleStatusChange = async (expertId: string, newStatus: string) => {
+    await protocolApi.experts.setStatus(expertId, newStatus);
+    await loadExperts();
     toast.success(`Expert status updated to ${newStatus}`);
   };
 

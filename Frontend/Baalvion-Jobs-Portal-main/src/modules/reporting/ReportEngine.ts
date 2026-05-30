@@ -3,7 +3,7 @@ import { ReportBuilder } from './ReportBuilder';
 import { ReportExporter } from './ReportExporter';
 import { ReportLogger } from './ReportLogger';
 import { ReportFilters } from './ReportFilters';
-import { mockJobs, mockApplications } from './mockReportData';
+import { adapter } from '@/services/adapter';
 import { canPerformAction } from '@/lib/access/permission.evaluator';
 import { UserRole } from '@/lib/access/access.types';
 
@@ -26,8 +26,22 @@ export class ReportEngine {
 
         console.log(`Generating report for ${request.requestedBy} with role ${request.userRole}`);
 
-        // 2. Apply scoping and filters
-        const { filteredJobs, filteredApplications } = this.filterer.apply(mockJobs, mockApplications, request.filters, request.countryScope);
+        // 2. Pull the live dataset from jobs-service (no mock data) — wide page so the
+        //    report covers the full corpus, then scope/filter in-process.
+        const [jobsRes, appsRes] = await Promise.all([
+            adapter.getTalentJobs({ limit: 1000 } as any),
+            adapter.getApplications({ page: 1, limit: 1000 } as any),
+        ]);
+        const allJobs = ((jobsRes as any)?.data ?? []) as any[];
+        const allApplications = ((appsRes as any)?.data ?? []) as any[];
+
+        // 3. Apply scoping and filters
+        const { filteredJobs, filteredApplications } = this.filterer.apply(
+            allJobs as any,
+            allApplications as any,
+            request.filters,
+            request.countryScope,
+        );
 
         // 3. Build structured data
         const reportData = await this.builder.build(request.type, filteredJobs, filteredApplications);

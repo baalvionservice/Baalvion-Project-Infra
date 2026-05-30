@@ -1,110 +1,67 @@
 'use client';
 
-import { Report, ReportType, ReportStatus, ExportFormat, ModuleName } from "../content/schemas";
+import { Report, ExportFormat } from "../content/schemas";
 import { authService } from "./auth.service";
 import { auditService } from "./audit.service";
 import { votingService } from "./voting.service";
 import { notificationService } from "./notification.service";
 import { boardMaterialsService } from "./board-materials.service";
 import { pageService } from "./page.service";
+import { generatedReportsApi } from "@/lib/ir-engagement";
 
-let reportsState: Report[] = [
-  {
-    id: 'rep-001',
-    title: 'FY2025 Annual Governance Review',
-    reportType: 'Governance',
-    dateRange: { start: '2025-01-01', end: '2025-12-31' },
-    includedModules: ['Governance', 'AuditLogs'],
-    generatedByRole: 'ComplianceOfficer',
-    status: 'Generated',
-    generatedAt: '2026-01-05T10:00:00Z',
-    exportFormat: 'PDF',
-    dataSnapshot: { summary: 'Historical baseline for 2025 compliance.' },
-    versionHistory: []
-  }
-];
-
+// Live, backed by ir-service /api/v1/generated-reports. Report generation aggregates a snapshot
+// from the (now real) voting/board/page/notification services, then persists it. No in-memory mock.
 export const reportingService = {
   getAllReports: async (): Promise<Report[]> => {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return [...reportsState].sort((a, b) => {
-      const dateA = new Date(a.generatedAt || 0).getTime();
-      const dateB = new Date(b.generatedAt || 0).getTime();
-      return dateB - dateA;
-    });
+    const list = (await generatedReportsApi.list()) as Report[];
+    return list.sort((a, b) => new Date(b.generatedAt || 0).getTime() - new Date(a.generatedAt || 0).getTime());
   },
 
   getReportById: async (id: string): Promise<Report | null> => {
-    return reportsState.find(r => r.id === id) || null;
+    return (await generatedReportsApi.get(id)) as Report | null;
   },
 
   createReport: async (report: Omit<Report, 'id' | 'status' | 'versionHistory' | 'generatedAt' | 'dataSnapshot'>): Promise<string> => {
     const { role } = await authService.getCurrentUser();
-    await new Promise(resolve => setTimeout(resolve, 200));
-
-    const newReport: Report = {
+    const created: any = await generatedReportsApi.create({
       ...report,
-      id: `rep-${Math.random().toString(36).substr(2, 9)}`,
       status: 'Draft',
-      versionHistory: [{ version: 1, author: role, timestamp: new Date().toISOString() }]
-    };
-
-    reportsState.push(newReport);
-    await auditService.log({
-      userRole: role,
-      module: 'Reporting',
-      action: 'create',
-      entityId: newReport.id,
-      newState: newReport
+      versionHistory: [{ version: 1, author: role, timestamp: new Date().toISOString() }],
     });
-
-    window.dispatchEvent(new Event('report-updated'));
-    return newReport.id;
+    await auditService.log({ userRole: role, module: 'Reporting', action: 'create', entityId: String(created.id), newState: created });
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('report-updated'));
+    return String(created.id);
   },
 
   generateReport: async (id: string): Promise<void> => {
     const { role } = await authService.getCurrentUser();
-    const report = reportsState.find(r => r.id === id);
+    const report = await generatedReportsApi.get(id);
     if (!report || report.status === 'Generated') return;
 
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate intensive data aggregation
-
-    // Aggregate snapshots from other services
+    // Aggregate a snapshot from the live services
     const snapshots: any = {};
-    
     if (report.reportType === 'Voting') {
       snapshots.votes = await votingService.getVotes();
     } else if (report.reportType === 'Governance') {
       snapshots.auditLogs = await auditService.getLogs({ limit: 100 });
       snapshots.boardMaterials = await boardMaterialsService.getMaterials();
     } else if (report.reportType === 'System') {
-      snapshots.pages = await pageService.getAllPages();
+      const pagesRes = await pageService.getAllPages();
+      snapshots.pages = pagesRes.data || [];
       snapshots.notifications = await notificationService.getAllNotifications();
     }
 
-    report.status = 'Generated';
-    report.generatedAt = new Date().toISOString();
-    report.dataSnapshot = snapshots;
-
-    await auditService.log({
-      userRole: role,
-      module: 'Reporting',
-      action: 'generate',
-      entityId: id,
-      newState: { status: 'Generated', snapshotKeys: Object.keys(snapshots) }
-    });
-
-    window.dispatchEvent(new Event('report-updated'));
+    await generatedReportsApi.update(id, { status: 'Generated', generatedAt: new Date().toISOString(), dataSnapshot: snapshots });
+    await auditService.log({ userRole: role, module: 'Reporting', action: 'generate', entityId: id, newState: { status: 'Generated', snapshotKeys: Object.keys(snapshots) } });
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('report-updated'));
   },
 
   exportReport: async (id: string, format: ExportFormat): Promise<void> => {
     const { role } = await authService.getCurrentUser();
-    const report = reportsState.find(r => r.id === id);
+    const report = await generatedReportsApi.get(id);
     if (!report || report.status !== 'Generated') throw new Error("Report must be generated before export.");
 
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Mock file download
+    // Client-side file download of the persisted snapshot
     const content = JSON.stringify(report.dataSnapshot, null, 2);
     const blob = new Blob([content], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -115,28 +72,13 @@ export const reportingService = {
     a.click();
     document.body.removeChild(a);
 
-    await auditService.log({
-      userRole: role,
-      module: 'Reporting',
-      action: 'export',
-      entityId: id,
-      newState: { format }
-    });
+    await auditService.log({ userRole: role, module: 'Reporting', action: 'export', entityId: id, newState: { format } });
   },
 
   archiveReport: async (id: string): Promise<void> => {
     const { role } = await authService.getCurrentUser();
-    const report = reportsState.find(r => r.id === id);
-    if (!report) return;
-
-    report.status = 'Archived';
-    await auditService.log({
-      userRole: role,
-      module: 'Reporting',
-      action: 'delete',
-      entityId: id,
-      newState: { status: 'Archived' }
-    });
-    window.dispatchEvent(new Event('report-updated'));
-  }
+    await generatedReportsApi.update(id, { status: 'Archived' });
+    await auditService.log({ userRole: role, module: 'Reporting', action: 'delete', entityId: id, newState: { status: 'Archived' } });
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('report-updated'));
+  },
 };

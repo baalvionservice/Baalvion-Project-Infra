@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { pressReleases } from '@/lib/data';
+import { cmsGetPressReleases } from '@/lib/cms';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { FileText, Download, Share2, Search } from 'lucide-react';
@@ -11,7 +11,9 @@ export const metadata: Metadata = {
   description: 'The latest official announcements, corporate news, and regulatory filings from Baalvion.',
 };
 
-export default function PressReleasesPage() {
+export default async function PressReleasesPage() {
+  // Editorial content is managed centrally in the Baalvion CMS (admin-platform console).
+  const pressReleases = await cmsGetPressReleases();
   return (
     <div className="animate-in fade-in duration-700">
       <section className="bg-black text-white py-16 md:py-24">

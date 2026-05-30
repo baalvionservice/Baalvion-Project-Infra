@@ -1,37 +1,22 @@
+'use client';
+
 import { PlatformSettings } from "../content/schemas";
+import { settingsApi } from "@/lib/ir-engagement";
 
-let currentSettings: PlatformSettings = {
-  branding: {
-    companyName: 'Baalvion',
-    logoUrl: '/logo.png'
-  },
-  seo: {
-    defaultTitle: 'Baalvion | Institutional Investor Relations',
-    defaultDescription: 'The next generation of B2B trade infrastructure.'
-  },
-  features: {
-    enableRegistration: true,
-    enableDataRoomWatermark: true,
-    maintenanceMode: false,
-    freezePublishing: false
-  },
-  environment: 'mock'
-};
-
+// Live, backed by ir-service /api/v1/settings (singleton per org). No in-memory mock.
 export const settingsService = {
   getSettings: async (): Promise<PlatformSettings> => {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return { ...currentSettings };
+    const s: any = await settingsApi.get();
+    return {
+      branding: s.branding,
+      seo: s.seo,
+      features: s.features,
+      environment: s.environment,
+    } as PlatformSettings;
   },
 
   updateSettings: async (updates: Partial<PlatformSettings>): Promise<void> => {
-    await new Promise(resolve => setTimeout(resolve, 300));
-    currentSettings = { ...currentSettings, ...updates };
-    window.dispatchEvent(new Event('settings-updated'));
+    await settingsApi.update(updates);
+    if (typeof window !== 'undefined') window.dispatchEvent(new Event('settings-updated'));
   },
-
-  resetSettings: () => {
-    localStorage.removeItem('platform_settings');
-    window.location.reload();
-  }
 };

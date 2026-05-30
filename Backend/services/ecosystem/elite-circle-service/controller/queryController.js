@@ -63,6 +63,17 @@ const POLICIES = {
     saved_startups:       { read: 'owner',  write: 'owner', owner: 'investor_user_id' },
     investor_pipeline:    { read: 'owner',  write: 'owner', owner: 'investor_user_id' },
     payments:             { read: 'owner',  write: 'admin', owner: 'user_id' },
+    // ── Protocol platform (migration 008) ──────────────────────────────────────
+    protocol_experts:      { read: 'public', write: 'admin' },
+    protocol_students:     { read: 'auth',   write: 'admin' },
+    protocol_feed_posts:   { read: 'auth',   write: 'owner', owner: 'author_user_id', mod: true, adminWrite: true },
+    protocol_post_likes:   { read: 'auth',   write: 'owner', owner: 'user_id' },
+    protocol_calls:        { read: 'auth',   write: 'owner', owner: 'host_user_id', adminWrite: true },
+    protocol_invites:      { read: 'auth',   write: 'owner', owner: 'owner_user_id', adminWrite: true },
+    protocol_products:     { read: 'public', write: 'owner', owner: 'owner_user_id', adminWrite: true },
+    protocol_orders:       { read: 'owner',  write: 'owner', owner: 'buyer_user_id' },
+    protocol_countries:    { read: 'public', write: 'admin' },
+    protocol_notifications:{ read: 'owner',  write: 'admin', owner: 'user_id' },
 };
 
 // Belongs-to foreign keys for embedded selects: localTable -> { targetTable: localFkColumn }
@@ -76,6 +87,10 @@ const EMBED_FK = {
     saved_startups:      { profiles: 'founder_id' },
     investor_pipeline:   { profiles: 'founder_id' },
     data_room_access:    { profiles: 'founder_id' },
+    protocol_students:   { protocol_experts: 'expert_id' },
+    protocol_feed_posts: { protocol_experts: 'expert_id' },
+    protocol_calls:      { protocol_experts: 'expert_id' },
+    protocol_orders:     { protocol_products: 'product_id' },
 };
 
 const OPS = {

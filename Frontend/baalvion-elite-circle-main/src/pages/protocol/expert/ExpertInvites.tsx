@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link2, Copy, Clock, Users, DollarSign, Plus, Trash2, ExternalLink, Check } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
 const mockInvites = [
@@ -53,9 +54,11 @@ const mockInvites = [
 ];
 
 const ExpertInvites = () => {
-  const [invites, setInvites] = useState(mockInvites);
+  const [invites, setInvites] = useState<any[]>([]);
+  const loadInvites = () => protocolApi.invites.list().then(setInvites);
+  useEffect(() => { loadInvites(); }, []);
   const [showGenerateModal, setShowGenerateModal] = useState(false);
-  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [newInvite, setNewInvite] = useState({
     expiry: "",
     maxUsers: "",
@@ -71,19 +74,18 @@ const ExpertInvites = () => {
     return code;
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     const code = generateCode();
-    const newInviteData = {
-      id: invites.length + 1,
+    const { error } = await protocolApi.invites.create({
       code,
       link: `protocol.io/join/${code}`,
       expiry: newInvite.expiry || "7 days",
-      maxUsers: parseInt(newInvite.maxUsers) || 50,
-      usedBy: 0,
+      max_users: parseInt(newInvite.maxUsers) || 50,
       price: newInvite.price ? `$${newInvite.price}` : "Free",
-      status: "active"
-    };
-    setInvites([newInviteData, ...invites]);
+      status: "active",
+    });
+    if (error) { toast.error(error.message || "Could not generate link"); return; }
+    await loadInvites();
     setShowGenerateModal(false);
     setNewInvite({ expiry: "", maxUsers: "", price: "" });
     toast.success("Invite link generated successfully");
@@ -96,8 +98,9 @@ const ExpertInvites = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const handleDelete = (id: number) => {
-    setInvites(invites.filter(i => i.id !== id));
+  const handleDelete = async (id: string) => {
+    await protocolApi.invites.remove(id);
+    await loadInvites();
     toast.success("Invite link deleted");
   };
 

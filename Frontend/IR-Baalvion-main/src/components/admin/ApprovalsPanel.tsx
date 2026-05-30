@@ -62,7 +62,7 @@ export function ApprovalsPanel({ role }: { role: UserRole }) {
   const { toast } = useToast();
 
   const handleAction = async (id: string, action: "Approved" | "Rejected") => {
-    if (role !== "admin" && role !== "compliance" && role !== "admin") {
+    if (role !== "IRManager" && role !== "ComplianceOfficer") {
       toast({
         variant: "destructive",
         title: "Access Denied",

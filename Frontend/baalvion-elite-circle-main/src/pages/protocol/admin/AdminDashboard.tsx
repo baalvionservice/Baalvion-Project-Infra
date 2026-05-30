@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-  Users, DollarSign, Globe, TrendingUp, 
+import {
+  Users, DollarSign, Globe, TrendingUp,
   Shield, Eye, BarChart3, Activity,
   ChevronRight, ArrowUpRight, ArrowDownRight
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
+import { protocolApi } from "@/lib/protocol-api";
 import { 
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   BarChart, Bar, PieChart, Pie, Cell
@@ -77,6 +78,23 @@ const recentActivity = [
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [live, setLive] = useState({ experts: 0, users: 0, revenue: 0, countries: 0 });
+  useEffect(() => {
+    Promise.all([protocolApi.experts.list(), protocolApi.students.list(), protocolApi.countries.list()]).then(([experts, students, countries]) => {
+      setLive({
+        experts: experts.length,
+        users: students.length + experts.length,
+        revenue: experts.reduce((a: number, e: any) => a + (e.revenue || 0), 0),
+        countries: countries.length,
+      });
+    });
+  }, []);
+  const stats = [
+    { title: "Total Experts", value: String(live.experts), change: "+12%", trend: "up", icon: Shield, route: "/protocol/admin/experts" },
+    { title: "Total Users", value: String(live.users), change: "+23%", trend: "up", icon: Users, route: "/protocol/admin/users" },
+    { title: "Platform Revenue", value: `$${live.revenue.toLocaleString()}`, change: "+18%", trend: "up", icon: DollarSign, route: "/protocol/admin/revenue" },
+    { title: "Active Countries", value: String(live.countries), change: "+3", trend: "up", icon: Globe, route: "/protocol/admin/countries" },
+  ];
 
   return (
     <ProtocolLayout role="admin" breadcrumbs={[{ label: "Command Center", href: "/protocol/admin" }]}>

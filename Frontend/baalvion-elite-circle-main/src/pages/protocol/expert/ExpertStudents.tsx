@@ -4,7 +4,7 @@
  * TODO: Implement real-time online status via WebSocket
  * TODO: Add bulk actions for student management
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Filter, Eye, Ban, Trash2, MoreHorizontal, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -14,25 +14,16 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
 import StatusDot from "@/components/protocol/StatusDot";
 import EmptyState from "@/components/protocol/EmptyState";
-import { mockUsers } from "@/data/mockData";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
-const mockStudents = [
-  { id: 1, name: "Alex Morgan", email: "alex@protocol.io", status: "online", lastActive: "Just now", joined: "2024-01-15", avatar: "AM" },
-  { id: 2, name: "Sarah Chen", email: "sarah@protocol.io", status: "online", lastActive: "2 min ago", joined: "2024-02-20", avatar: "SC" },
-  { id: 3, name: "James Wilson", email: "james@protocol.io", status: "offline", lastActive: "1 hour ago", joined: "2024-01-28", avatar: "JW" },
-  { id: 4, name: "Emma Davis", email: "emma@protocol.io", status: "online", lastActive: "Just now", joined: "2024-03-05", avatar: "ED" },
-  { id: 5, name: "Michael Brown", email: "michael@protocol.io", status: "offline", lastActive: "3 hours ago", joined: "2024-02-14", avatar: "MB" },
-  { id: 6, name: "Lisa Johnson", email: "lisa@protocol.io", status: "offline", lastActive: "Yesterday", joined: "2024-01-10", avatar: "LJ" },
-  { id: 7, name: "David Lee", email: "david@protocol.io", status: "online", lastActive: "5 min ago", joined: "2024-03-12", avatar: "DL" },
-  { id: 8, name: "Anna Martinez", email: "anna@protocol.io", status: "offline", lastActive: "2 days ago", joined: "2024-02-28", avatar: "AM" },
-];
-
 const ExpertStudents = () => {
-  const [students, setStudents] = useState(mockStudents);
+  const [students, setStudents] = useState<any[]>([]);
+  const loadStudents = () => protocolApi.students.list().then(setStudents);
+  useEffect(() => { loadStudents(); }, []);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "online" | "offline">("all");
-  const [selectedStudent, setSelectedStudent] = useState<typeof mockStudents[0] | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<any | null>(null);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showBlockModal, setShowBlockModal] = useState(false);
   const [showRemoveModal, setShowRemoveModal] = useState(false);
@@ -51,9 +42,10 @@ const ExpertStudents = () => {
     }
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
     if (selectedStudent) {
-      setStudents(students.filter(s => s.id !== selectedStudent.id));
+      await protocolApi.students.remove(selectedStudent.id);
+      await loadStudents();
       toast.success(`${selectedStudent.name} has been removed`);
       setShowRemoveModal(false);
     }

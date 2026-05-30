@@ -1,16 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { INITIAL_ALERTS } from '@/lib/alerts-mock';
-import { alertApi, InvestorAlert as ApiInvestorAlert } from '@/lib/api-client';
+import { alertApi } from '@/lib/api-client';
 import { InvestorAlert } from '@/types/alerts';
 import { authService } from '@/core/services/auth.service';
 
 /**
  * Event & Alert Hub Hook
- * Fetches live alerts from ir-service via alertApi.
- * Falls back to the static INITIAL_ALERTS mock when the service is unreachable.
- * Prepared for WebSocket/Push API integration.
+ * Fetches live alerts from ir-service via alertApi. No static fallback — on error the feed is
+ * empty rather than serving mock data. Prepared for WebSocket/Push API integration.
  */
 export function useNotifications() {
   const [alerts, setAlerts] = useState<InvestorAlert[]>([]);
@@ -22,38 +20,17 @@ export function useNotifications() {
     try {
       const { role } = await authService.getCurrentUser();
       const res = await alertApi.list();
-
-      if (res.data) {
-        // Cast the API type to the local InvestorAlert shape (compatible)
-        const liveAlerts = res.data as unknown as InvestorAlert[];
-        // Filter by role on the client side as a safety net
-        const filtered = liveAlerts.filter(
-          (a) => !a.targetRoles || a.targetRoles.includes(role) || role === 'admin'
-        );
-        setAlerts(filtered);
-        setUnreadCount(filtered.filter((a) => !a.read).length);
-      } else {
-        // Fallback to static mock when service returns no data
-        const { role } = await authService.getCurrentUser();
-        const filtered = INITIAL_ALERTS.filter(
-          (a) => a.targetRoles.includes(role) || role === 'admin'
-        );
-        setAlerts(filtered);
-        setUnreadCount(filtered.filter((a) => !a.read).length);
-      }
+      const liveAlerts = (res.data || []) as unknown as InvestorAlert[];
+      // Role-filter client-side as a safety net (the backend is single-tenant org-scoped).
+      const filtered = liveAlerts.filter(
+        (a) => !a.targetRoles || a.targetRoles.includes(role) || role === 'admin'
+      );
+      setAlerts(filtered);
+      setUnreadCount(filtered.filter((a) => !a.read).length);
     } catch {
-      // Service unreachable — fall back to static mock data
-      try {
-        const { role } = await authService.getCurrentUser();
-        const filtered = INITIAL_ALERTS.filter(
-          (a) => a.targetRoles.includes(role) || role === 'admin'
-        );
-        setAlerts(filtered);
-        setUnreadCount(filtered.filter((a) => !a.read).length);
-      } catch {
-        setAlerts([]);
-        setUnreadCount(0);
-      }
+      // Service unreachable — show an empty feed, never mock content.
+      setAlerts([]);
+      setUnreadCount(0);
     } finally {
       setIsLoading(false);
     }

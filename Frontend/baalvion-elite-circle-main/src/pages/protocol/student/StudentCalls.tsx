@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Video, Phone, Calendar, Clock, Users, Play, X, Mic, MicOff, VideoOff } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
 const mockUpcomingCalls = [
@@ -37,12 +38,14 @@ const mockUpcomingCalls = [
 ];
 
 const StudentCalls = () => {
+  const [calls, setCalls] = useState<any[]>([]);
+  useEffect(() => { protocolApi.calls.list().then(setCalls); }, []);
   const [showCallModal, setShowCallModal] = useState(false);
-  const [currentCall, setCurrentCall] = useState<typeof mockUpcomingCalls[0] | null>(null);
+  const [currentCall, setCurrentCall] = useState<any | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
 
-  const handleJoinCall = (call: typeof mockUpcomingCalls[0]) => {
+  const handleJoinCall = (call: any) => {
     setCurrentCall(call);
     setShowCallModal(true);
     toast.success(`Joining ${call.title}`);
@@ -96,7 +99,7 @@ const StudentCalls = () => {
 
         {/* Upcoming Calls */}
         <div className="space-y-4">
-          {mockUpcomingCalls.map((call) => (
+          {calls.map((call) => (
             <Card 
               key={call.id} 
               className={`bg-white/5 border-amber-500/10 hover:border-amber-500/30 transition-all ${

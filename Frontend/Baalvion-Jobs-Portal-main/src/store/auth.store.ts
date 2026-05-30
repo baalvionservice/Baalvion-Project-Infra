@@ -10,6 +10,8 @@ interface AuthState {
   setUser: (user: User | null) => void;
   setIsLoading: (isLoading: boolean) => void;
   setRole: (role: UserRole) => void;
+  // refreshToken is accepted for call-site compatibility but is never stored client-side —
+  // the refresh token is an httpOnly cookie set by auth-service.
   setTokens: (user: User, accessToken: string, refreshToken?: string) => void;
   clearAuth: () => void;
 }
@@ -21,8 +23,8 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) => set({ user, isLoading: false }),
   setIsLoading: (isLoading) => set({ isLoading }),
   setRole: (role) => set(state => state.user ? ({ user: { ...state.user, role } }) : state),
-  setTokens: (user, accessToken, refreshToken) => {
-    setTokens(accessToken, refreshToken);
+  setTokens: (user, accessToken) => {
+    setTokens(accessToken);
     set({ user, accessToken, isLoading: false });
   },
   clearAuth: () => {

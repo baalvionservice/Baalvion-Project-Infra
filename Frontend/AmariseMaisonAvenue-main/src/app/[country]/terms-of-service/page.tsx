@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { COUNTRIES } from '@/lib/mock-data';
 
-type PageProps = { params: { country: string } };
+type PageProps = { params: Promise<{ country: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const country = COUNTRIES[params.country] || COUNTRIES.us;
+  const country = COUNTRIES[(await params).country] || COUNTRIES.us;
   return {
     title: `Terms of Service | AMARISÉ MAISON ${country.name}`,
     description: `The terms governing acquisitions, pricing, authenticity, and use of the AMARISÉ MAISON platform in ${country.name}.`,
@@ -46,8 +46,8 @@ const SECTIONS: { title: string; body: string[] }[] = [
   ] },
 ];
 
-export default function TermsOfServicePage({ params }: PageProps) {
-  const countryCode = params.country || 'us';
+export default async function TermsOfServicePage({ params }: PageProps) {
+  const countryCode = (await params).country || 'us';
   const country = COUNTRIES[countryCode] || COUNTRIES.us;
 
   return (

@@ -16,9 +16,9 @@ import { ProductCard } from '@/components/product/ProductCard';
 import Link from 'next/link';
 
 type GiftRegistryPageProps = {
-  params: {
+  params: Promise<{
     country: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: GiftRegistryPageProps): Promise<Metadata> {
@@ -28,8 +28,8 @@ export async function generateMetadata({ params }: GiftRegistryPageProps): Promi
   };
 }
 
-export default function GiftRegistryPage({ params }: GiftRegistryPageProps) {
-  const countryCode = (params.country as string) || 'us';
+export default async function GiftRegistryPage({ params }: GiftRegistryPageProps) {
+  const countryCode = ((await params).country as string) || 'us';
   const { wishlist } = useAppStore();
 
   return (

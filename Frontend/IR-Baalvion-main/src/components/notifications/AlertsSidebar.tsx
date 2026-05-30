@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { InvestorAlert } from "@/types/alerts";
-import { INITIAL_ALERTS } from "@/lib/alerts-mock";
+import { alertApi } from "@/lib/api-client";
 import { authService } from "@/core/services/auth.service";
 import { UserRole } from "@/core/content/schemas";
 import { Badge } from "@/components/ui/badge";
@@ -26,12 +26,15 @@ export function AlertsSidebar({ open, onOpenChange }: AlertsSidebarProps) {
     const loadAlerts = async () => {
       const { role: userRole } = await authService.getCurrentUser();
       setRole(userRole);
-      
-      // Filter alerts based on role
-      const filtered = INITIAL_ALERTS.filter(a => 
-        a.targetRoles.includes(userRole) || userRole === 'admin'
-      );
-      setAlerts(filtered);
+
+      // Live alerts from ir-service; role-filtered client-side. No static fallback.
+      try {
+        const res = await alertApi.list();
+        const live = (res.data || []) as unknown as InvestorAlert[];
+        setAlerts(live.filter(a => !a.targetRoles || a.targetRoles.includes(userRole) || userRole === 'admin'));
+      } catch {
+        setAlerts([]);
+      }
     };
 
     if (open) loadAlerts();

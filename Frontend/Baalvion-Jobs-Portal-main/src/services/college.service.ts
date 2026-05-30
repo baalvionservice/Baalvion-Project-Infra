@@ -1,6 +1,6 @@
 
 import { adapter } from './adapter';
-import { College, mockColleges } from '@/mocks/colleges.mock';
+import { College } from '@/mocks/colleges.mock';
 import { PaginatedResponse, TableQuery } from '@/components/system/DataTable';
 
 interface CollegeWithType extends College {
@@ -8,14 +8,17 @@ interface CollegeWithType extends College {
   type: "1" | "2" | "3";
 }
 
+// Live: pulls every college from jobs-service (/campus/colleges) via the adapter.
+// `type` is a UI grouping bucket — derived from the college's real tier/category when the
+// backend provides one, otherwise defaulted to "1" (no fabricated per-index data).
 const getAllColleges = async (): Promise<CollegeWithType[]> => {
-    // In a real app, this would be a different endpoint. Here, we can just return the mock data.
-    await new Promise(resolve => setTimeout(resolve, 100));
-    return mockColleges.map((c, i) => ({
-      ...c,
-      id: c.collegeId,
-      type: ( (i % 3) + 1).toString() as "1" | "2" | "3", // Add mock type based on index
-    }));
+  const rows = (await adapter.getAllColleges()) as unknown as (College & Record<string, unknown>)[];
+  const list = Array.isArray(rows) ? rows : ((rows as any)?.data ?? []);
+  return list.map((c: College & Record<string, unknown>) => {
+    const tier = String(c.type ?? c.tier ?? c.category ?? '1');
+    const type = (['1', '2', '3'].includes(tier) ? tier : '1') as "1" | "2" | "3";
+    return { ...c, id: String((c as any).id ?? c.collegeId), type };
+  });
 };
 
 export const collegeService = {

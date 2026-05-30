@@ -1,58 +1,49 @@
 'use client';
 
 import { PageDefinition } from "../content/schemas";
-import { StorageAdapter } from "../adapters/storage.adapter";
 import { ApiResponse } from "@/types/api.types";
-import { MOCK_PAGES } from "../providers/mock/mock-data";
+
+/**
+ * Page registry — live, backed by the central Baalvion CMS (cms-service) via the same-origin
+ * BFF route /api/cms/pages. Replaces the former in-memory StorageAdapter/MOCK_PAGES.
+ * Authoritative page editing happens in the admin-platform CMS console, so writes here are
+ * intentionally disabled (the local admin surfaces deep-link to the console).
+ */
+async function fetchPages(): Promise<ApiResponse<PageDefinition[]>> {
+  try {
+    const res = await fetch('/api/cms/pages', { cache: 'no-store' });
+    const json = await res.json();
+    if (!res.ok || !json?.success) {
+      return { success: false, data: [], error: json?.error || { code: 'CMS_UNAVAILABLE', message: 'Unable to reach the content registry.' } } as any;
+    }
+    return { success: true, data: (json.data || []) as PageDefinition[] } as ApiResponse<PageDefinition[]>;
+  } catch (e) {
+    const message = e instanceof Error ? e.message : 'Unable to reach the content registry.';
+    return { success: false, data: [], error: { code: 'CMS_UNAVAILABLE', message } } as any;
+  }
+}
 
 export class PageRepository {
-  private adapter: StorageAdapter;
-  private initialized: boolean = false;
-
-  constructor() {
-    this.adapter = new StorageAdapter("pages");
-  }
-
-  private async ensureInitialized() {
-    if (this.initialized) return;
-    await this.adapter.initialize(MOCK_PAGES);
-    this.initialized = true;
-  }
-
   async findBySlug(slug: string): Promise<ApiResponse<PageDefinition | null>> {
-    await this.ensureInitialized();
-    const response = await this.adapter.getAll<PageDefinition>();
+    const response = await fetchPages();
     if (!response.success) return response as any;
-    
-    const page = response.data?.find(p => p.slug === slug) || null;
-    return { ...response, data: page };
+    const page = (response.data || []).find(p => p.slug === slug) || null;
+    return { success: true, data: page } as ApiResponse<PageDefinition | null>;
   }
 
   async findAll(): Promise<ApiResponse<PageDefinition[]>> {
-    await this.ensureInitialized();
-    return this.adapter.getAll<PageDefinition>();
+    return fetchPages();
   }
 
-  async update(id: string, updates: Partial<PageDefinition>): Promise<ApiResponse<PageDefinition>> {
-    await this.ensureInitialized();
-    const response = await this.adapter.getAll<PageDefinition>();
-    if (!response.success) return response as any;
-
-    const data = response.data || [];
-    const index = data.findIndex(p => p.id === id);
-    if (index === -1) {
-      return { 
-        ...response, 
-        success: false, 
-        error: { code: 'ENTITY_NOT_FOUND', message: 'Page entry not located in registry.' } 
-      } as any;
-    }
-
-    const updatedPage = { ...data[index], ...updates };
-    data[index] = updatedPage;
-    
-    await this.adapter.saveAll(data);
-    return { ...response, data: updatedPage };
+  async update(_id: string, _updates: Partial<PageDefinition>): Promise<ApiResponse<PageDefinition>> {
+    return {
+      success: false,
+      data: null,
+      error: {
+        code: 'MANAGED_EXTERNALLY',
+        message: 'Page content is managed centrally in the Baalvion CMS console (admin-platform). Edit it there.',
+      },
+    } as any;
   }
 }
 

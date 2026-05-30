@@ -2,7 +2,7 @@ import { AppRole } from './roles';
 
 export interface RestrictedDocument {
   id: string | number;
-  name: string;
+  name?: string;
   restrictedTo?: AppRole[];
 }
 

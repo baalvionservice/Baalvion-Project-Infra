@@ -4,10 +4,10 @@ import Link from 'next/link';
 import { ChevronRight, HelpCircle } from 'lucide-react';
 import { COUNTRIES } from '@/lib/mock-data';
 
-type PageProps = { params: { country: string } };
+type PageProps = { params: Promise<{ country: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const country = COUNTRIES[params.country] || COUNTRIES.us;
+  const country = COUNTRIES[(await params).country] || COUNTRIES.us;
   return {
     title: `Frequently Asked Questions | AMARISÉ MAISON ${country.name}`,
     description: `Answers on authentication, sourcing, dispatch, returns, payment and private client services for AMARISÉ MAISON in ${country.name}.`,
@@ -45,8 +45,8 @@ const SECTIONS: { heading: string; items: { q: string; a: string }[] }[] = [
   },
 ];
 
-export default function FaqPage({ params }: PageProps) {
-  const countryCode = params.country || 'us';
+export default async function FaqPage({ params }: PageProps) {
+  const countryCode = (await params).country || 'us';
 
   return (
     <div className="animate-fade-in bg-gradient-to-br from-ivory via-white to-ivory min-h-screen">

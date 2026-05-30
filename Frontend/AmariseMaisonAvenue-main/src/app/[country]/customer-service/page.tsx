@@ -20,13 +20,13 @@ import {
 import { CUSTOMER_SERVICE, COUNTRIES } from '@/lib/mock-data';
 
 type CustomerServicePageProps = {
-  params: {
+  params: Promise<{
     country: string;
-  };
+  }>;
 };
 
 export async function generateMetadata({ params }: CustomerServicePageProps): Promise<Metadata> {
-  const countryCode = (params.country as string) || 'us';
+  const countryCode = ((await params).country as string) || 'us';
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
 
   return {
@@ -35,8 +35,8 @@ export async function generateMetadata({ params }: CustomerServicePageProps): Pr
   };
 }
 
-export default function CustomerServicePage({ params }: CustomerServicePageProps) {
-  const countryCode = (params.country as string) || 'us';
+export default async function CustomerServicePage({ params }: CustomerServicePageProps) {
+  const countryCode = ((await params).country as string) || 'us';
   const info = CUSTOMER_SERVICE[countryCode] || CUSTOMER_SERVICE.us;
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
 

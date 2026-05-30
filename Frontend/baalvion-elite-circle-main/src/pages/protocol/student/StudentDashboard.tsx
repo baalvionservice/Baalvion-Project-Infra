@@ -4,13 +4,14 @@
  * TODO: Implement real-time session status
  * TODO: Connect to payment API for purchases
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Video, Newspaper, ShoppingBag, Crown, Star, Calendar, Clock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
 import StatusDot from "@/components/protocol/StatusDot";
+import { protocolApi } from "@/lib/protocol-api";
 
 const mockExpert = {
   name: "Master Trader",
@@ -28,6 +29,22 @@ const mockExpert = {
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
+  const [expertData, setExpertData] = useState<any>(null);
+  useEffect(() => {
+    protocolApi.experts.list().then((rows) => {
+      const top = rows.find((e: any) => e.status === "active") || rows[0];
+      if (top) setExpertData(top);
+    });
+  }, []);
+  const mockExpert = {
+    name: expertData?.name || "Your Expert",
+    title: expertData?.title || "Elite Expert",
+    avatar: expertData?.avatar || "EX",
+    bio: "Specialist mentor on the Baalvion Protocol network.",
+    stats: { students: String(expertData?.students ?? 0), rating: String(expertData?.rating ?? "—"), sessions: "—" },
+    nextSession: "TBA",
+    tier: "Premium",
+  };
 
   const actions = [
     {

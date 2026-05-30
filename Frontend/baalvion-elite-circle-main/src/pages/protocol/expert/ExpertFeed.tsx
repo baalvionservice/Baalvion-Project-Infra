@@ -4,7 +4,7 @@
  * TODO: Add file upload for audio/video content
  * TODO: Connect to analytics API for engagement data
  */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Pin, BarChart3, MessageSquare, Headphones, Video, Heart, MessageCircle, Share2, MoreHorizontal, Image } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,86 +13,37 @@ import { Textarea } from "@/components/ui/textarea";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
 import EmptyState from "@/components/protocol/EmptyState";
-import { mockFeedPosts, emptyStateMessages } from "@/data/mockData";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
-const mockPosts = [
-  {
-    id: 1,
-    type: "text",
-    content: "Just finished a deep dive into advanced market analysis techniques. The key insight? Patience and pattern recognition are your best friends. Stay tuned for the full breakdown in tomorrow's premium session.",
-    author: "Expert",
-    time: "2 hours ago",
-    likes: 234,
-    comments: 45,
-    isPinned: true
-  },
-  {
-    id: 2,
-    type: "audio",
-    content: "New audio message available",
-    duration: "5:32",
-    author: "Expert",
-    time: "5 hours ago",
-    likes: 189,
-    comments: 23,
-    isPinned: false
-  },
-  {
-    id: 3,
-    type: "video",
-    content: "Weekly market recap and predictions for the coming week",
-    duration: "12:45",
-    thumbnail: "Market Analysis",
-    author: "Expert",
-    time: "1 day ago",
-    likes: 567,
-    comments: 89,
-    isPinned: false
-  },
-  {
-    id: 4,
-    type: "text",
-    content: "Quick tip: Always have a clear exit strategy before entering any position. The markets reward preparation and punish impulsiveness. 📈",
-    author: "Expert",
-    time: "2 days ago",
-    likes: 412,
-    comments: 67,
-    isPinned: false
-  },
-];
-
 const ExpertFeed = () => {
-  const [posts, setPosts] = useState(mockPosts);
+  const [posts, setPosts] = useState<any[]>([]);
+  const loadPosts = () => protocolApi.feed.list().then(setPosts);
+  useEffect(() => { loadPosts(); }, []);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAnalyticsModal, setShowAnalyticsModal] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<typeof mockPosts[0] | null>(null);
+  const [selectedPost, setSelectedPost] = useState<any | null>(null);
   const [newPostContent, setNewPostContent] = useState("");
   const [postType, setPostType] = useState<"text" | "audio" | "video">("text");
 
-  const handleCreatePost = () => {
-    const newPost = {
-      id: posts.length + 1,
+  const handleCreatePost = async () => {
+    const { error } = await protocolApi.feed.create({
       type: postType,
       content: newPostContent || (postType === "audio" ? "New audio message" : "New video content"),
       duration: postType !== "text" ? "0:00" : undefined,
-      author: "Expert",
-      time: "Just now",
-      likes: 0,
-      comments: 0,
-      isPinned: false
-    };
-    setPosts([newPost, ...posts]);
+      author_name: "Expert",
+      avatar: "EX",
+    });
+    if (error) { toast.error(error.message || "Could not create post"); return; }
+    await loadPosts();
     setNewPostContent("");
     setShowCreateModal(false);
     toast.success("Post created successfully");
   };
 
-  const handlePinPost = (postId: number) => {
-    setPosts(posts.map(p => ({
-      ...p,
-      isPinned: p.id === postId ? !p.isPinned : p.isPinned
-    })));
+  const handlePinPost = async (postId: string, isPinned: boolean) => {
+    await protocolApi.feed.setPinned(postId, !isPinned);
+    await loadPosts();
     toast.success("Post pin status updated");
   };
 
@@ -158,7 +109,7 @@ const ExpertFeed = () => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent className="bg-[#1a1a2e] border-amber-500/20">
                       <DropdownMenuItem 
-                        onClick={() => handlePinPost(post.id)}
+                        onClick={() => handlePinPost(post.id, post.isPinned)}
                         className="text-white hover:bg-amber-500/10"
                       >
                         <Pin className="w-4 h-4 mr-2" />

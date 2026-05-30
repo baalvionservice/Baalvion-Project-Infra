@@ -3,8 +3,8 @@ import { pageService } from "./page.service";
 
 export const validationService = {
   validateSlug: async (slug: string, excludeId?: string): Promise<{ valid: boolean; message?: string }> => {
-    const pages = await pageService.getAllPages();
-    const duplicate = pages.find(p => p.slug === slug && p.id !== excludeId);
+    const res = await pageService.getAllPages();
+    const duplicate = (res.data || []).find((p: { slug: string; id: string }) => p.slug === slug && p.id !== excludeId);
     if (duplicate) {
       return { valid: false, message: 'Slug already in use by another page.' };
     }
