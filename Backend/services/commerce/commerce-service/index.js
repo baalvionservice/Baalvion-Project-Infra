@@ -15,6 +15,11 @@ const { startProductWorker } = require('./queues/productQueue');
 const app = express();
 
 app.use(helmet());
+
+// Public storefront API (anonymous, read-only, published+public catalog). Permissive CORS so
+// any storefront origin can browse — mounted BEFORE the restricted global CORS / authed router.
+app.use('/api/v1/commerce/storefront/:storeId', cors(), storefrontRoutes);
+
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
@@ -22,10 +27,6 @@ app.use(requestContext);
 app.use(createIpRateLimit());
 
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'commerce-service', port: config.port }));
-
-// Public storefront API (anonymous, read-only, published+public catalog). Mounted outside
-// the authed /api/v1 router so storefronts can browse without a JWT. Writes/admin stay authed.
-app.use('/api/v1/commerce/storefront/:storeId', storefrontRoutes);
 
 app.use('/api/v1', v1Router);
 

@@ -4,7 +4,8 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
-import { formatPrice, PRODUCTS } from "@/lib/mock-data";
+import { formatPrice } from "@/lib/mock-data";
+import { useProducts } from "@/lib/useCatalog";
 import { Product } from "@/lib/types";
 import Link from "next/link";
 
@@ -109,7 +110,8 @@ function MobileProductCard({ product }: { product: Product }) {
 // ─── Main Carousel ────────────────────────────────────────────────────────────
 export default function YouMayAlsoLike() {
   // Limit products for the carousel
-  const carouselProducts = PRODUCTS.slice(0, 12);
+  const { products } = useProducts({ limit: 12 });
+  const carouselProducts = products.slice(0, 12);
 
   // ── Desktop state ──
   const scrollRef = useRef<HTMLDivElement>(null);

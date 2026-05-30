@@ -5,7 +5,7 @@ import { useFilter } from "@/hooks/useFilter";
 import { FilterSheet } from "@/components/category/FilterSheet";
 import { CategorySidebar } from "@/components/category/CatergorySidebar";
 import { CollectionToolbar } from "@/components/category/CollectionToolbar";
-import { PRODUCTS } from "@/lib/mock-data";
+import { useProducts } from "@/lib/useCatalog";
 import { ProductGrid } from "@/components/category/ProductGrid";
 import { ShopByCategory } from "@/components/category/ShopByCategory";
 import { getCategorySidebar } from "@/lib/mock-category-data";
@@ -27,6 +27,7 @@ export default function CategoryPageClient({
 }: CategoryPageClientProps) {
     const [filterOpen, setFilterOpen] = useState(false);
     const filter = useFilter();
+    const { products, total } = useProducts({ categoryId: id, limit: 50 });
 
     // Find if the current ID matches a section/item/subItem in the resolved sidebar
     const findMatchingData = () => {
@@ -107,7 +108,7 @@ export default function CategoryPageClient({
 
                             {/* Toolbar: product count + filter + sort + chips */}
                             <CollectionToolbar
-                                totalProducts={PRODUCTS.length}
+                                totalProducts={total}
                                 filter={filter}
                                 onFilterOpen={() => setFilterOpen(true)}
                             />
@@ -115,7 +116,7 @@ export default function CategoryPageClient({
 
                         {/* Product grid */}
                         <ProductGrid
-                            products={PRODUCTS.slice(0, 50)}
+                            products={products}
                             countryCode={country}
                         />
                     </main>
