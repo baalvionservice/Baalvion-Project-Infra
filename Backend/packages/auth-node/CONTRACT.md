@@ -169,7 +169,7 @@ canonical mode. Errors propagate via `next(err)` with `err.status=401` and `err.
 
 - On logout / password reset / "log out everywhere", auth-service blacklists the access
   token's `jti` (Redis) until natural expiry.
-- The canonical verifier rejects a blacklisted `jti` with `code: 'revoked'`.
+- The canonical verifier rejects a blacklisted `jti` with `code: 'blacklisted'`.
 - Blacklist lookup is injected (`isBlacklisted`) so `@baalvion/auth-node` stays
   storage-agnostic; a backend outage results in `blacklist_unavailable` (fail-closed).
 

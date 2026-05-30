@@ -120,7 +120,7 @@ test('11. malformed permissions (non-array) rejected', async () => {
 test('12. revoked jti rejected', async () => {
   await assert.rejects(
     () => verifier().verify(sign(k1, canonicalClaims({ jti: 'jti-revoked' }))),
-    (e) => e.code === 'revoked',
+    (e) => e.code === 'blacklisted',
   );
 });
 
