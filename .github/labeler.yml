@@ -1,0 +1,46 @@
+# Auto-labels pull requests by changed path. Consumed by actions/labeler@v5.
+
+"domain:identity":
+  - changed-files:
+      - any-glob-to-any-file: "Backend/services/identity/**"
+"domain:platform":
+  - changed-files:
+      - any-glob-to-any-file: "Backend/services/platform/**"
+"domain:commerce":
+  - changed-files:
+      - any-glob-to-any-file: "Backend/services/commerce/**"
+"domain:knowledge":
+  - changed-files:
+      - any-glob-to-any-file: "Backend/services/knowledge/**"
+"domain:ecosystem":
+  - changed-files:
+      - any-glob-to-any-file: "Backend/services/ecosystem/**"
+"domain:infrastructure":
+  - changed-files:
+      - any-glob-to-any-file: "Backend/services/infrastructure/**"
+
+"area:packages":
+  - changed-files:
+      - any-glob-to-any-file: "Backend/packages/**"
+"area:frontend":
+  - changed-files:
+      - any-glob-to-any-file: "Frontend/**"
+"area:gateway":
+  - changed-files:
+      - any-glob-to-any-file: "Backend/gateway/**"
+"area:infra":
+  - changed-files:
+      - any-glob-to-any-file: ["Backend/infra/**", "docker/**", "docker-compose*.yml", "observability/**"]
+
+"ci":
+  - changed-files:
+      - any-glob-to-any-file: ".github/**"
+"documentation":
+  - changed-files:
+      - any-glob-to-any-file: ["docs/**", "**/*.md"]
+"dependencies":
+  - changed-files:
+      - any-glob-to-any-file: ["**/package.json", "pnpm-lock.yaml", "**/pom.xml"]
+"architecture":
+  - changed-files:
+      - any-glob-to-any-file: ["Backend/catalog/**", "Backend/ARCHITECTURE.md", "docs/adr/**"]
