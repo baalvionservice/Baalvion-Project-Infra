@@ -3,54 +3,69 @@
 # A change to another context's contract REQUIRES that context's team approval —
 # this is how bounded-context boundaries are enforced in code review.
 # Teams are defined in the GitHub org; mirror them in catalog/services/*.yaml `owner`.
+#
+# Paths follow the federated layout: Backend/services/<domain>/<service>.
 
 # ── Default ──────────────────────────────────────────────────────────────────
-*                                       @baalvion/platform-core
+*                                               @baalvion/platform-core
 
 # ── Shared platform packages (changes ripple everywhere — extra scrutiny) ──────
 /Backend/packages/                              @baalvion/platform-core
 /Backend/packages/contracts/                    @baalvion/platform-core @baalvion/architecture
 /Backend/packages/events/                       @baalvion/platform-core @baalvion/architecture
+/Backend/packages/auth-node/                    @baalvion/platform-core @baalvion/security-team
 /Backend/packages/auth-sdk/                     @baalvion/platform-core
-/Backend/packages/rbac/                         @baalvion/platform-core
+/Backend/packages/rbac/                         @baalvion/platform-core @baalvion/security-team
+/Backend/packages/security/                     @baalvion/security-team
+/Backend/packages/crypto/                       @baalvion/security-team
 /Backend/packages/telemetry/                    @baalvion/observability
 
 # ── Contracts are co-owned by producer + architecture (breaking-change gate) ───
 /Backend/packages/contracts/proto/baalvion/identity/   @baalvion/platform-core @baalvion/architecture
-/Backend/packages/contracts/proto/baalvion/billing/    @baalvion/platform-core @baalvion/architecture
+/Backend/packages/contracts/proto/baalvion/billing/    @baalvion/commerce-division @baalvion/architecture
 /Backend/packages/contracts/proto/baalvion/proxy/      @baalvion/proxy-division @baalvion/architecture
 
-# ── Proxy infrastructure division ──────────────────────────────────────────────
-/Backend/backend-Proxy-BaalvionStack/   @baalvion/proxy-division
-/Backend/gateway/                       @baalvion/proxy-division
-/Backend/ml-service/                    @baalvion/data-platform @baalvion/proxy-division
-/Frontend/Proxy-BaalvionStack/          @baalvion/proxy-division
+# ── Identity domain (auth foundation) ──────────────────────────────────────────
+/Backend/services/identity/                     @baalvion/platform-core @baalvion/security-team
 
-# ── Platform core / identity ───────────────────────────────────────────────────
-/Backend/auth-service/                  @baalvion/platform-core
-/Backend/admin-service/                 @baalvion/platform-core
-/Backend/session-service/               @baalvion/platform-core
-/Backend/oauth-service/                 @baalvion/platform-core
-/Backend/notification-service/          @baalvion/platform-core
+# ── Platform domain (admin / dashboard / realtime) ─────────────────────────────
+/Backend/services/platform/                     @baalvion/platform-core
 
-# ── Other business divisions ───────────────────────────────────────────────────
-/Backend/commerce-service/              @baalvion/commerce-division
-/Backend/order-service/                 @baalvion/commerce-division
-/Backend/fulfillment-service/           @baalvion/commerce-division
-/Backend/inventory-service/             @baalvion/commerce-division
-/Backend/mining-service/                @baalvion/mining-division
-/Backend/law-service/                   @baalvion/legal-division
-/Backend/real-estate-service/           @baalvion/real-estate-division
-/Backend/jobs-service/                  @baalvion/jobs-division
-/Backend/market-service/                @baalvion/commerce-division
-/Backend/trade-service/                 @baalvion/commerce-division
-/Backend/ir-service/                    @baalvion/platform-core
-/Backend/ctm-service/                   @baalvion/platform-core
+# ── Commerce domain ─────────────────────────────────────────────────────────
+/Backend/services/commerce/                     @baalvion/commerce-division
+/Backend/services/commerce/financial-services-java/  @baalvion/commerce-division @baalvion/architecture
 
-# ── Governance + infra (platform engineering + SRE) ────────────────────────────
+# ── Knowledge domain (cms / imperialpedia / law / ml) ──────────────────────────
+/Backend/services/knowledge/                    @baalvion/knowledge-division
+/Backend/services/knowledge/ml-service/         @baalvion/data-platform @baalvion/knowledge-division
+
+# ── Ecosystem domain (vertical apps' backends) ─────────────────────────────────
+/Backend/services/ecosystem/                    @baalvion/ecosystem-division
+/Backend/services/ecosystem/law-elite/          @baalvion/legal-division
+/Backend/services/ecosystem/real-estate-service/ @baalvion/real-estate-division
+/Backend/services/ecosystem/mining-service/     @baalvion/mining-division
+/Backend/services/ecosystem/jobs-service/       @baalvion/jobs-division
+
+# ── Infrastructure domain (proxy / notifications / realtime) ───────────────────
+/Backend/services/infrastructure/               @baalvion/sre @baalvion/platform-core
+/Backend/services/infrastructure/proxy-service/ @baalvion/proxy-division
+
+# ── Cross-cutting infrastructure ───────────────────────────────────────────────
+/Backend/gateway/                               @baalvion/proxy-division @baalvion/platform-core
+/Backend/database/                              @baalvion/platform-core @baalvion/sre
+/Backend/infra/                                 @baalvion/sre
 /Backend/catalog/                               @baalvion/architecture
-/infra/                                 @baalvion/sre @baalvion/platform-core
-/docs/architecture/                     @baalvion/architecture
-/docs/adr/                              @baalvion/architecture
-/platform/cli/                          @baalvion/platform-core
-/CODEOWNERS                             @baalvion/architecture
+/Backend/platform/cli/                          @baalvion/platform-core
+
+# ── Frontend applications ──────────────────────────────────────────────────────
+/Frontend/                                      @baalvion/frontend-guild
+/Frontend/admin-platform/                       @baalvion/frontend-guild @baalvion/platform-core
+/Frontend/Proxy-BaalvionStack/                  @baalvion/proxy-division @baalvion/frontend-guild
+
+# ── Governance, CI, docs ───────────────────────────────────────────────────────
+/.github/                                       @baalvion/platform-core @baalvion/sre
+/docs/architecture/                             @baalvion/architecture
+/docs/adr/                                       @baalvion/architecture
+/CODEOWNERS                                      @baalvion/architecture
+/LICENSE                                         @baalvion/architecture
+/SECURITY.md                                     @baalvion/security-team

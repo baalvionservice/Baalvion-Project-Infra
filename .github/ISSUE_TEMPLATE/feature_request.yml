@@ -1,0 +1,35 @@
+name: "✨ Feature request"
+description: Propose a new capability or enhancement.
+title: "[feat]: "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem are you trying to solve? Who is affected?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the capability you'd like and how it should behave.
+    validations:
+      required: true
+  - type: input
+    id: area
+    attributes:
+      label: Target area
+      description: Which service / package / app would this live in?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Mockups, links, related issues, contract/API impact.

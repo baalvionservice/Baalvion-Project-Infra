@@ -1,0 +1,59 @@
+version: 2
+updates:
+  # ── JavaScript / TypeScript workspace (pnpm monorepo root) ──────────────────
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    versioning-strategy: increase
+    labels: ["dependencies", "javascript"]
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      production-minor-patch:
+        applies-to: version-updates
+        dependency-type: production
+        update-types: ["minor", "patch"]
+      development-minor-patch:
+        applies-to: version-updates
+        dependency-type: development
+        update-types: ["minor", "patch"]
+
+  # ── GitHub Actions ──────────────────────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels: ["dependencies", "ci"]
+    commit-message:
+      prefix: "ci(deps)"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # ── Docker base images ────────────────────────────────────────────────────
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "docker"]
+    commit-message:
+      prefix: "build(deps)"
+
+  # ── Java / Spring Boot (financial services) ─────────────────────────────────
+  - package-ecosystem: "maven"
+    directory: "/Backend/services/commerce/financial-services-java"
+    schedule:
+      interval: "weekly"
+    labels: ["dependencies", "java"]
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      maven-minor-patch:
+        update-types: ["minor", "patch"]

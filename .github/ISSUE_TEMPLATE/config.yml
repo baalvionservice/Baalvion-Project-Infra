@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Report a security vulnerability
+    url: https://github.com/baalvionservice/Baalvion-Project-Infra/security/policy
+    about: Please report vulnerabilities privately — never via public issues.
+  - name: 💬 Questions & discussion
+    url: https://github.com/baalvionservice/Baalvion-Project-Infra/discussions
+    about: Ask questions and discuss ideas with the team.
+  - name: 📖 Documentation
+    url: https://github.com/baalvionservice/Baalvion-Project-Infra/tree/main/docs
+    about: Architecture, ADRs, and runbooks.

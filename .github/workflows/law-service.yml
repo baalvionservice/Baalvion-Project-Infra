@@ -2,14 +2,14 @@ name: Law Elite CI/CD
 
 on:
   push:
-    branches: [main, develop, hardening-phase-1, release/auth-foundation-v1]
+    branches: [main, develop]
     paths:
       - 'Backend/services/knowledge/law-service/**'
       - 'Backend/packages/auth-node/**'
       - 'Frontend/Law-Elite-Network-main/**'
       - '.github/workflows/law-service.yml'
   pull_request:
-    branches: [main, hardening-phase-1]
+    branches: [main, develop]
     paths:
       - 'Backend/services/knowledge/law-service/**'
       - 'Frontend/Law-Elite-Network-main/**'

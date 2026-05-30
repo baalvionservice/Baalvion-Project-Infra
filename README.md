@@ -1,286 +1,170 @@
-[README.md](https://github.com/user-attachments/files/28348478/README.md)
-# BAALVION
+<div align="center">
 
-> Enterprise-grade multi-platform infrastructure ecosystem with centralized authentication, gateway federation, and modular service architecture.
+# Baalvion Platform
+
+**Enterprise multi-platform infrastructure ecosystem — centralized identity, gateway federation, and a federated monorepo of domain services and applications.**
+
+[![CI](https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/ci.yml/badge.svg)](https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/codeql.yml/badge.svg)](https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/codeql.yml)
+[![Node](https://img.shields.io/badge/node-%3E%3D20-43853d.svg)](.nvmrc)
+[![pnpm](https://img.shields.io/badge/pnpm-%3E%3D9-f69220.svg)](https://pnpm.io)
+[![License](https://img.shields.io/badge/license-Proprietary-blue.svg)](LICENSE)
+
+</div>
 
 ---
 
 ## Overview
 
-BAALVION is a scalable enterprise infrastructure platform built around a centralized authentication foundation, multi-service backend architecture, and a growing suite of specialized frontend applications. The platform is designed for production-style deployment with security, observability, and multi-tenant isolation as first-class concerns.
+Baalvion is a scalable enterprise platform built around a centralized
+authentication foundation, a multi-service backend organized by bounded
+context, and a suite of specialized frontend applications spanning finance,
+real estate, community, media, and commerce. Security, observability, and
+multi-tenant isolation are first-class concerns.
 
----
+The codebase is a **pnpm + Turborepo monorepo** with an enforced service-catalog
+architecture contract that keeps domain boundaries clean as the platform grows.
 
-## Current Milestone — Auth Foundation v1 ✅
+## Repository Layout
 
-The first major backend infrastructure milestone is complete. The platform now ships with a full enterprise authentication and security architecture:
-
-- **RS256 asymmetric JWT** signing and verification
-- **Redis-backed session** infrastructure
-- **PostgreSQL multi-schema** database architecture
-- **HTTPS reverse proxy** routing
-- **Secure refresh token rotation**
-- **Auth gateway federation**
-- **Enterprise security middleware**
-- **Queue-based async infrastructure**
-- **RBAC foundation**
-
----
+```
+Backend/
+  services/<domain>/<service>/     # bounded-context services
+    identity/        auth-service · auth-gateway · oauth-service · session-service
+    platform/        admin-service · dashboard-service · realtime-service
+    commerce/        commerce · order · payment · ledger · inventory ·
+                     fulfillment · market · trade · financial-services-java
+    knowledge/       cms-service · imperialpedia-service · law-service · ml-service
+    ecosystem/       about · brand-connector · ctm · elite-circle · insiders ·
+                     ir · jobs · law-elite · mining · real-estate
+    infrastructure/  notification-service · proxy-service · realtime-service
+  packages/                        # shared libraries (@baalvion/*)
+                     auth-node · auth-sdk · rbac · contracts · events ·
+                     telemetry · logger · errors · security · validation · …
+  catalog/                         # service catalog + architecture contract
+  gateway/  database/  infra/      # cross-cutting infrastructure
+Frontend/<app>/                    # Next.js / Vite applications
+docs/                              # architecture, ADRs, runbooks
+.github/                           # CI/CD, CodeQL, issue/PR templates, Dependabot
+```
 
 ## Architecture
 
 ```
-Frontend Applications
-        ↓
-HTTPS Reverse Proxy / Gateway  (:80 / :443)
-        ↓
-Auth Gateway (:3099)
-        ↓
-Auth Service (:3001)
-        ↓
-PostgreSQL (:5432) + Redis (:6379)
+                 Frontend Applications (Next.js / Vite)
+                              │
+              HTTPS Reverse Proxy / Edge Gateway  (:80 / :443)
+                              │
+                    Auth Gateway (BFF)  (:3099)
+                              │
+        ┌─────────────────────┼─────────────────────┐
+   Identity stack        Domain services        Shared packages
+  auth · oauth ·     commerce · knowledge ·     @baalvion/auth-node
+  session            ecosystem · platform ·     rbac · contracts ·
+                     infrastructure              events · telemetry
+                              │
+              PostgreSQL (multi-schema)  +  Redis  +  MinIO
 ```
 
----
+**Authentication** is centralized: RS256 asymmetric JWTs issued by the identity
+stack, validated at the gateway, with httpOnly refresh-token rotation and
+Redis-backed sessions. Authorization is enforced through a shared hierarchical
+RBAC package. Each domain owns an isolated PostgreSQL schema.
 
 ## Platform Applications
 
-| Application        | Port   | Status              |
-|--------------------|--------|---------------------|
-| Mining             | 3028   | ✅ Live              |
-| Company Dashboard  | 3024   | ✅ Live              |
-| Elite Circle       | 8081   | ✅ Live              |
-| GTI / Trade        | 9003   | ✅ Live              |
-| Admin Platform     | 3030   | ✅ Live              |
-| Imperialpedia      | 3029   | ✅ Live              |
-| IR Baalvion        | 3027   | ✅ Live              |
-| Jobs Portal        | 3026   | ✅ Live              |
-| ControlTheMarket   | 3034   | ✅ Live              |
-| About Baalvion     | 3020   | ✅ Live              |
-| Amarise            | 3033   | ✅ Live              |
-| Brand Connector    | 3035   | 🔧 In Progress       |
-| Law Elite          | 9002   | 🔧 In Progress       |
-| Proxy / Gateway    | 8080   | ✅ Live              |
+| Application        | Port | Domain        |
+|--------------------|------|---------------|
+| Admin Platform     | 3030 | platform      |
+| Imperialpedia      | 3029 | knowledge     |
+| Mining             | 3028 | ecosystem     |
+| IR Baalvion        | 3027 | ecosystem     |
+| Jobs Portal        | 3026 | ecosystem     |
+| Company Dashboard  | 3024 | platform      |
+| About Baalvion     | 3020 | ecosystem     |
+| ControlTheMarket   | 3034 | ecosystem     |
+| Amarise            | 3033 | ecosystem     |
+| Brand Connector    | 3035 | ecosystem     |
+| Law Elite          | 9002 | knowledge     |
+| Global Trade (GTI) | 9003 | commerce      |
+| Proxy / Gateway    | 8080 | infrastructure|
+| Elite Circle       | 8081 | ecosystem     |
 
----
+## Technology Stack
 
-## Docker Infrastructure
+**Backend** — Node.js (≥20), TypeScript, Express, PostgreSQL 15 (multi-schema),
+Redis 7, RS256 JWT auth, MinIO object storage; Java / Spring Boot for the
+financial services suite.
 
-| Container              | Image                          | Port(s)           | Status                  |
-|------------------------|--------------------------------|-------------------|-------------------------|
-| baalvion-keycloak      | keycloak:26.0                  | 8088→8080         | ✅ Running               |
-| baalvion-auth          | baalvionprojects-auth-service  | 3001              | ⚠️ Restarting (crash loop)|
-| baalvion-orders        | baalvionprojects-order-service | 3013              | ⚠️ Restarting (crash loop)|
-| baalvion-postgres      | postgres:15-alpine             | 5432              | ✅ Healthy               |
-| baalvion-redis         | redis:7-alpine                 | 6379              | ✅ Healthy               |
-| baalvion-minio         | minio/minio:latest             | 9000–9001         | ✅ Healthy               |
-| baalvion-minio-init    | minio/mc:latest                | —                 | ✅ Exited (0) — completed|
-| desktop-control-plane  | kindest/node:v1.34.3           | 6443              | ✅ Running (K8s)         |
+**Frontend** — Next.js (App Router) and Vite, React, TypeScript, server-side
+rendering and SEO-first architecture.
 
----
+**Platform** — pnpm workspaces + Turborepo, Docker / Docker Compose, Kubernetes,
+PM2 for local process management, an observability stack, and a service catalog
+that enforces the architecture contract in CI.
 
-## Infrastructure Status
-
-| Component             | Status  | Notes                              |
-|-----------------------|---------|------------------------------------|
-| Auth Gateway          | ✅       |                                    |
-| Auth Service          | ⚠️       | Crash loop — needs investigation   |
-| Orders Service        | ⚠️       | Crash loop — needs investigation   |
-| Redis                 | ✅       | ⚠️ No auth password set            |
-| PostgreSQL            | ✅       |                                    |
-| HTTPS Reverse Proxy   | ✅       |                                    |
-| JWT RS256             | ✅       |                                    |
-| Refresh Tokens        | ✅       |                                    |
-| Secure Cookies        | ✅       |                                    |
-| Security Headers      | ✅       |                                    |
-| Queue Infrastructure  | ✅       |                                    |
-| Multi-schema DB       | ✅       |                                    |
-| Docker Infrastructure | ✅       |                                    |
-| Keycloak IAM          | ✅       | Running on :8088                   |
-| MinIO Object Storage  | ✅       | Running on :9000–9001              |
-| Kubernetes (Kind)     | ✅       | Local cluster running              |
-
----
-
-## Authentication Flow
-
-```
-User Login
-    ↓
-Gateway Validation
-    ↓
-Credential Verification
-    ↓
-RS256 JWT Issued
-    ↓
-Refresh Cookie Issued
-    ↓
-Redis Session Stored
-    ↓
-Protected API Access
-```
-
----
-
-## Database Schemas
-
-The PostgreSQL instance uses isolated schemas per domain:
-
-| Schema          | Domain                                  |
-|-----------------|-----------------------------------------|
-| `auth`          | Users, sessions, organizations, roles   |
-| `about`         | Company and profile content             |
-| `brand`         | Brand connector data                    |
-| `commerce`      | Orders, payments, invoices              |
-| `analytics`     | Event tracking and reporting            |
-| `notifications` | Alerts and messaging                    |
-| `jobs`          | Job listings and applications           |
-| `insiders`      | Forum threads, community features       |
-| `real_estate`   | Property listings and documents         |
-| `orders`        | Order management service schema         |
-| `imperialpedia` | Asset summaries and financial data      |
-
----
-
-## Known Issues (Active)
-
-> These issues are logged and actively being resolved.
-
-### 🔴 Service Crash Loops
-- `baalvion-auth` — Auth service restarting continuously. Likely caused by migration failures or missing env vars on startup.
-- `baalvion-orders` — Orders service restarting. `orders.orders_orders` relation does not exist — schema not yet migrated.
-
-### 🟠 Database Migration Errors
-- `column "is_featured" does not exist` — `real_estate.properties` index migration ran before column was added.
-- `column "org_id" does not exist` — `real_estate.property_documents` index migration ran out of order.
-- `column "symbol" does not exist` — `imperialpedia.asset_summaries` index migration ran before column was added.
-- `relation "orders.orders_orders" does not exist` — Orders schema tables have not been migrated yet.
-- `null value in column "id" of relation "organizations"` — `auth.organizations` table missing `DEFAULT gen_random_uuid()` on `id` column.
-- `increment_thread_views` function uses unqualified table name — needs `insiders.forum_threads` prefix.
-
-### 🟠 Application Bugs
-- `invalid input syntax for type uuid: "undefined"` — JavaScript `undefined` is being passed to DB queries in the Insiders forum module. Needs null/undefined guards before DB calls.
-
-### 🔴 Security — Redis Exposed
-- Redis is bound to `0.0.0.0:6379` with no password. Should have `requirepass` set and binding restricted to Docker internal network only.
-- Two cross-protocol scripting attack attempts detected in logs (from `172.19.0.1` — Docker host gateway).
-
----
-
-## Tech Stack
-
-### Backend
-- **Runtime:** Node.js 22
-- **Framework:** Express / Custom Gateway Architecture
-- **Database:** PostgreSQL 15 (multi-schema)
-- **Cache / Sessions:** Redis 7
-- **Auth:** JWT (RS256), HTTP-only cookies, refresh token rotation
-- **IAM:** Keycloak 26.0
-- **Object Storage:** MinIO
-- **Process Manager:** PM2
-
-### Infrastructure
-- **Containers:** Docker / Docker Compose
-- **Reverse Proxy:** HTTPS local gateway (Envoy)
-- **Queue:** Async worker infrastructure
-- **Orchestration:** Kubernetes (Kind — local cluster)
-- **Monorepo:** pnpm workspaces + Turborepo
-
----
-
-## Local Development
+## Getting Started
 
 ### Prerequisites
-- Docker Desktop
-- Node.js 22+
-- pnpm
 
-### Start Infrastructure
+- [Node.js](https://nodejs.org) `>= 20` (`nvm use` reads [`.nvmrc`](.nvmrc))
+- [pnpm](https://pnpm.io) `>= 9` (`corepack enable`)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
 
-```bash
-docker compose up -d
-```
-
-### Verify Services
+### Install & run
 
 ```bash
-# Auth Gateway
-curl http://localhost:3099/health
+pnpm install                 # install the entire workspace
+cp .env.example .env         # local config (never committed)
 
-# Redis
-docker exec -it baalvion-redis redis-cli ping
+pnpm run infra:up            # Postgres + Redis (+ pgAdmin)
+pnpm run migrate:auth        # run identity migrations
+pnpm run generate:keys       # generate local RS256 keypair
 
-# PostgreSQL
-docker exec -it baalvion-postgres psql -U baalvion -d baalvion_db
-
-# Check all containers
-docker ps
+pnpm run dev:identity        # identity stack + admin platform
+# or target everything:
+pnpm run dev
 ```
 
-### Start App Services (PM2)
+On Windows, `./start.ps1` and `./stop.ps1` manage the local PM2 fleet.
 
-```bash
-# Start all services
-.\start.ps1
+## Development
 
-# Stop all services
-.\stop.ps1
-```
+| Command                          | Purpose                                  |
+|----------------------------------|------------------------------------------|
+| `pnpm run dev`                   | Run all backends + frontends (Turbo)     |
+| `pnpm run dev:backends`          | Backends only                            |
+| `pnpm run dev:frontends`         | Frontends only                           |
+| `pnpm run build`                 | Build the whole workspace                |
+| `pnpm run lint`                  | Lint all workspaces                      |
+| `pnpm run type-check`            | Type-check all workspaces                |
+| `pnpm test`                      | Unit tests (Jest)                        |
+| `pnpm run test:e2e`              | End-to-end tests (Playwright)            |
+| `pnpm run architecture:check`    | Validate + enforce the service catalog   |
+| `pnpm run ci:auth:guards`        | Static auth-safety guards                |
 
----
+## Quality Gates
 
-## Branch Strategy
-
-```
-main
- └── release/auth-foundation-v1
-        ├── feature/frontend-auth-integration
-        ├── feature/rbac-system
-        ├── feature/api-gateway
-        ├── feature/observability
-        └── feature/production-deployment
-```
-
----
-
-## Roadmap
-
-### In Progress
-- [ ] Fix auth-service and orders-service crash loops
-- [ ] Resolve outstanding database migration errors
-- [ ] Frontend auth integration across all platform apps
-- [ ] RBAC enforcement on protected routes
-- [ ] Protected frontend routing
-- [ ] Redis security hardening (requirepass + network isolation)
-
-### Upcoming
-- [ ] API federation
-- [ ] Observability stack (Prometheus, Grafana, distributed tracing)
-- [ ] CI/CD pipeline
-- [ ] Production deployment pipeline
-- [ ] Kubernetes orchestration (full cluster)
-- [ ] Multi-tenant isolation
-- [ ] Secrets management (Vault or cloud-native)
-
----
+Every pull request runs CI ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)):
+architecture-contract validation, package build + type-check, per-service test
+and Docker build smoke tests, and a required `ci-success` summary check. CodeQL
+([`.github/workflows/codeql.yml`](.github/workflows/codeql.yml)) scans
+JavaScript/TypeScript and Java weekly and on every PR.
 
 ## Security
 
-This repository does not include:
+This repository contains **no secrets**. `.env` files, private keys,
+certificates, and database dumps are `.gitignore`d and injected at deploy time.
+To report a vulnerability, see [SECURITY.md](SECURITY.md) — never open a public
+issue for security findings.
 
-- `.env` files or secrets
-- TLS certificates or private keys
-- `node_modules`
-- Local logs or database dumps
+## Contributing
 
-All secrets are managed via environment variables. See `.env.example` for required configuration.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the branching model, Conventional
+Commit conventions, and the PR process. All changes are reviewed by the owning
+team per [CODEOWNERS](CODEOWNERS). Please also read our
+[Code of Conduct](CODE_OF_CONDUCT.md).
 
----
+## License
 
-## Vision
-
-BAALVION is being built as a scalable enterprise-grade multi-platform infrastructure ecosystem — centralized authentication, gateway federation, modular services, and a growing suite of specialized applications serving distinct verticals across finance, real estate, community, media, and commerce.
-
----
-
-*Auth Foundation v1 — Backend infrastructure milestone complete.*
+Proprietary — © 2026 Baalvion. All Rights Reserved. See [LICENSE](LICENSE).

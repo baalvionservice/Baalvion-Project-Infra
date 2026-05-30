@@ -1,0 +1,33 @@
+Baalvion Proprietary License
+Copyright (c) 2026 Baalvion. All Rights Reserved.
+
+This software, including all source code, documentation, configuration, and
+associated materials in this repository (collectively, the "Software"), is the
+confidential and proprietary property of Baalvion (the "Company"). The Software
+is protected by copyright, trade secret, and other intellectual property laws
+and international treaties.
+
+NO LICENSE IS GRANTED BY THIS DOCUMENT. Unless you hold a separate written
+agreement signed by an authorized representative of the Company, you are NOT
+permitted to use, copy, reproduce, modify, merge, publish, distribute, host,
+sublicense, sell, lease, transmit, reverse engineer, decompile, disassemble, or
+create derivative works from the Software, in whole or in part, by any means.
+
+Access to this repository is restricted to authorized employees, contractors,
+and partners of the Company and is governed by the confidentiality and
+intellectual-property terms of their engagement. Any unauthorized access, use,
+reproduction, or disclosure is strictly prohibited and may result in civil
+liability and criminal prosecution.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE COMPANY OR
+ITS CONTRIBUTORS BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+Third-party components incorporated into the Software remain subject to their
+respective open-source licenses; see the dependency manifests and NOTICE files
+of the individual packages for details.
+
+For licensing inquiries, contact: legal@baalvion.com
