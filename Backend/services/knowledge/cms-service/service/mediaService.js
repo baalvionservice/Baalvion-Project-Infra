@@ -12,7 +12,11 @@ const crypto = require('crypto');
 const { QueryTypes } = require('sequelize');
 const { sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
+const s3 = require('../utils/s3Client');
 
+// Storage driver: 'minio' (S3 object storage) or 'local' (filesystem, dev fallback).
+const DRIVER      = (process.env.MEDIA_DRIVER || 'local').toLowerCase();
+const BUCKET      = process.env.S3_BUCKET || 'cms-media';
 const UPLOAD_DIR  = path.resolve(__dirname, '..', 'uploads');
 const PUBLIC_BASE = (process.env.CMS_PUBLIC_URL || 'http://localhost:3018').replace(/\/$/, '');
 const MAX_BYTES   = Number(process.env.MEDIA_MAX_BYTES || 50 * 1024 * 1024);
@@ -41,13 +45,20 @@ async function saveUpload({ filePart, folderId = null, orgId, uploadedBy }) {
     if (!filePart.data || !filePart.data.length) throw new AppError('VALIDATION_ERROR', 'Uploaded file is empty', 400);
     if (filePart.data.length > MAX_BYTES) throw new AppError('PAYLOAD_TOO_LARGE', 'File exceeds size limit', 413);
 
-    ensureDir();
     const mime = filePart.contentType || 'application/octet-stream';
     const ext  = path.extname(filePart.filename) || EXT_BY_MIME[mime] || '';
     const key  = `${crypto.randomUUID()}${ext}`;
-    fs.writeFileSync(path.join(UPLOAD_DIR, key), filePart.data);
 
-    const url = `${PUBLIC_BASE}/uploads/${key}`;
+    let url;
+    if (DRIVER === 'minio') {
+        await s3.ensureBucket(BUCKET);
+        await s3.putObject(BUCKET, key, filePart.data, mime);
+        url = s3.publicUrl(BUCKET, key);
+    } else {
+        ensureDir();
+        fs.writeFileSync(path.join(UPLOAD_DIR, key), filePart.data);
+        url = `${PUBLIC_BASE}/uploads/${key}`;
+    }
     const [row] = await sel(`
         INSERT INTO cms.cms_media_assets
             (org_id, folder_id, storage_key, filename, original_name, mime_type, size, url, uploaded_by)
@@ -91,7 +102,8 @@ async function deleteFile(orgId, id) {
     const [row] = await sel(`SELECT storage_key FROM cms.cms_media_assets WHERE id = :id AND (:orgId::uuid IS NULL OR org_id = :orgId)`, { id, orgId: orgId || null });
     if (!row) throw new AppError('NOT_FOUND', 'Media file not found', 404);
     await sel(`DELETE FROM cms.cms_media_assets WHERE id = :id`, { id });
-    try { fs.unlinkSync(path.join(UPLOAD_DIR, row.storage_key)); } catch { /* already gone */ }
+    if (DRIVER === 'minio') { try { await s3.deleteObject(BUCKET, row.storage_key); } catch { /* already gone */ } }
+    else { try { fs.unlinkSync(path.join(UPLOAD_DIR, row.storage_key)); } catch { /* already gone */ } }
     return { id };
 }
 
@@ -104,10 +116,14 @@ async function bulkDelete(orgId, ids = []) {
 }
 
 async function signedUrl(orgId, id) {
-    const file = await getFile(orgId, id);
-    // Local filesystem serving is already public; "signing" returns the URL with a
-    // short logical expiry so the client contract matches a future S3/MinIO backend.
-    return { url: file.url, expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString() };
+    const file = await getFile(orgId, id); // 404s if not in org
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+    if (DRIVER === 'minio') {
+        const [row] = await sel(`SELECT storage_key FROM cms.cms_media_assets WHERE id = :id`, { id });
+        return { url: s3.presignedGetUrl(BUCKET, row.storage_key, 3600), expiresAt };
+    }
+    // Local filesystem serving is already public; return the stable URL.
+    return { url: file.url, expiresAt };
 }
 
 // ── Folders ──────────────────────────────────────────────────────────────────

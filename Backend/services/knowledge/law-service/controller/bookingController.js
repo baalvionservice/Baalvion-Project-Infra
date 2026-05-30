@@ -4,6 +4,8 @@ const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { ensureClient } = require('../utils/provision');
+const mailer = require('../service/mailer');
+const video = require('../service/video');
 
 const listBookings = async (req, res, next) => {
     try {
@@ -75,6 +77,12 @@ const createBooking = async (req, res, next) => {
             total_amount: totalAmount,
             status: 'pending',
         });
+        // Confirmation email to the client (non-blocking, best-effort).
+        mailer.sendTemplate('bookingConfirmation', client.email, {
+            clientName: client.name, lawyerName: lawyer.name,
+            scheduledAt: scheduled_at ? new Date(scheduled_at).toLocaleString() : 'To be scheduled',
+            type, amount: totalAmount, currency: 'USD',
+        }).catch(() => {});
         return sendSuccess(req, res, booking, 201);
     } catch (err) { return next(err); }
 };
@@ -101,4 +109,28 @@ const cancelBooking = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listBookings, getBooking, createBooking, updateBookingStatus, cancelBooking };
+// GET /bookings/:id/video — a join link for the consultation room. Only the
+// booking's client or lawyer (or an admin) may obtain it.
+const getVideoRoom = async (req, res, next) => {
+    try {
+        const booking = await db.Booking.findByPk(req.params.id, {
+            include: [
+                { model: db.Client, as: 'client', attributes: ['id', 'name', 'user_id'] },
+                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'user_id'] },
+            ],
+        });
+        if (!booking) return next(new AppError('NOT_FOUND', 'Booking not found', 404));
+
+        const uid = String(req.user.id);
+        const isClient = booking.client && String(booking.client.user_id) === uid;
+        const isLawyer = booking.lawyer && String(booking.lawyer.user_id) === uid;
+        if (!isClient && !isLawyer && !req.user.isAdmin) {
+            return next(new AppError('FORBIDDEN', 'Not a participant of this consultation', 403));
+        }
+        const userName = isLawyer ? (booking.lawyer?.name || 'Counsel') : (booking.client?.name || 'Client');
+        const room = await video.getRoomForBooking(booking.id, { userName, isOwner: isLawyer });
+        return sendSuccess(req, res, { bookingId: booking.id, ...room });
+    } catch (err) { return next(err); }
+};
+
+module.exports = { listBookings, getBooking, createBooking, updateBookingStatus, cancelBooking, getVideoRoom };

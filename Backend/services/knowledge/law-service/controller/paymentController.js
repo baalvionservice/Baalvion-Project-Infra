@@ -5,11 +5,30 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { ensureClient } = require('../utils/provision');
 const razorpay = require('../service/razorpay');
+const mailer = require('../service/mailer');
+const ledger = require('../service/ledger');
 
+// Single "payment settled" side-effect hook (called from create/verify/webhook):
+// confirm the booking, credit the lawyer's earnings ledger, email a receipt.
+// All side-effects are best-effort and must never fail the payment itself.
 const settleBooking = async (payment) => {
-    if (payment.status === 'succeeded' && payment.booking_id) {
+    if (payment.status !== 'succeeded') return;
+    if (payment.booking_id) {
         await db.Booking.update({ status: 'confirmed' }, { where: { id: payment.booking_id } });
     }
+    // Credit lawyer earnings (net of platform fee). Idempotent per payment.
+    await ledger.creditFromPayment(payment).catch(() => {});
+    // Email receipt to the client.
+    try {
+        const client = await db.Client.findByPk(payment.client_id, { attributes: ['name', 'email'] });
+        if (client && client.email) {
+            mailer.sendTemplate('paymentReceipt', client.email, {
+                name: client.name, amount: payment.amount, currency: payment.currency,
+                reference: payment.provider_tx_id || `PAY-${payment.id}`,
+                description: payment.booking_id ? `Booking #${payment.booking_id}` : 'Legal services',
+            }).catch(() => {});
+        }
+    } catch (_) { /* receipt is best-effort */ }
 };
 
 const listPayments = async (req, res, next) => {

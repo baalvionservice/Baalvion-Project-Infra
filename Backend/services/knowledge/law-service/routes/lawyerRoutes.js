@@ -6,6 +6,7 @@ const ctrl = require('../controller/lawyerController');
 router.get('/',              ctrl.listLawyers);
 router.get('/countries',     ctrl.countriesSummary);
 router.get('/search',        ctrl.searchLawyers);
+router.get('/autocomplete',  ctrl.autocomplete);
 router.get('/me',            authMiddleware, ctrl.getMyProfile);
 router.post('/',             authMiddleware, ctrl.createLawyer);
 router.get('/:id',           ctrl.getLawyer);

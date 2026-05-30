@@ -12,6 +12,7 @@ router.use('/cases',          require('./caseRoutes'));
 router.use('/messages',       require('./messageRoutes'));
 router.use('/documents',      require('./documentRoutes'));
 router.use('/payments',       require('./paymentRoutes'));
+router.use('/payouts',        require('./payoutRoutes'));
 router.use('/subscriptions',  require('./subscriptionRoutes'));
 router.use('/reviews',        require('./reviewRoutes'));
 router.use('/notifications',  require('./notificationRoutes'));

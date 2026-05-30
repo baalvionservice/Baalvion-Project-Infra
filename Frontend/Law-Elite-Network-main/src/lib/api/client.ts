@@ -131,6 +131,9 @@ export const authLawApi = {
   refresh: () => authBffClient.post('/api/auth/refresh'),
   logout: () => authBffClient.post('/api/auth/logout'),
   me: () => apiClient.get('/auth/me'),
+  forgotPassword: (email: string) => authBffClient.post('/api/auth/forgot-password', { email }),
+  resetPassword: (token: string, newPassword: string) =>
+    authBffClient.post('/api/auth/reset-password', { token, newPassword, password: newPassword }),
 };
 
 export const articlesPublicApi = {
@@ -152,6 +155,8 @@ export const lawyerApi = {
   get: (id: string) => apiClient.get(`/lawyers/${id}`),
   search: (q: string, filters?: Record<string, unknown>) =>
     publicClient.get('/lawyers/search', { params: { q, ...filters } }),
+  // Typeahead suggestions (trigram + full-text, public, fast).
+  autocomplete: (q: string) => publicClient.get('/lawyers/autocomplete', { params: { q } }),
   updateProfile: (id: string, data: unknown) => apiClient.patch(`/lawyers/${id}`, data),
 };
 
@@ -162,6 +167,7 @@ export const bookingApi = {
   updateStatus: (id: string, status: string) =>
     apiClient.patch(`/bookings/${id}/status`, { status }),
   cancel: (id: string) => apiClient.patch(`/bookings/${id}/status`, { status: 'cancelled' }),
+  videoRoom: (id: string) => apiClient.get(`/bookings/${id}/video`),
 };
 
 export const caseApi = {
@@ -193,6 +199,12 @@ export const subscriptionApi = {
   get: () => apiClient.get('/subscriptions'),
   create: (data: unknown) => apiClient.post('/subscriptions', data),
   cancel: () => apiClient.post('/subscriptions/cancel'),
+};
+
+export const payoutApi = {
+  balance: () => apiClient.get('/payouts/balance'),
+  list: () => apiClient.get('/payouts'),
+  request: (amount?: number, method?: string) => apiClient.post('/payouts', { amount, method }),
 };
 
 export const reviewApi = {

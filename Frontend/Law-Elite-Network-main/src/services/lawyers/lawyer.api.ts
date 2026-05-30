@@ -11,6 +11,23 @@ const unwrapList = (res: any): any[] => {
   return d?.items || [];
 };
 
+// Multi-currency: each lawyer's rate displays in their local currency, derived
+// from country of practice (mirrors the backend utils/money currency map).
+const COUNTRY_CURRENCY: Record<string, string> = {
+  US: 'USD', GB: 'GBP', IN: 'INR', AE: 'AED', SG: 'SGD', DE: 'EUR',
+  FR: 'EUR', ES: 'EUR', IT: 'EUR', BR: 'BRL', JP: 'JPY',
+};
+const CURRENCY_SYMBOL: Record<string, string> = {
+  USD: '$', EUR: '€', GBP: '£', INR: '₹', AED: 'AED ', SGD: 'S$', BRL: 'R$', JPY: '¥',
+};
+export function currencyForCountry(code?: string | null): string {
+  return COUNTRY_CURRENCY[String(code || '').toUpperCase()] || 'USD';
+}
+export function formatRate(amount: number, currency = 'USD'): string {
+  const decimals = currency === 'JPY' ? 0 : 0; // hourly rates shown without cents
+  return `${CURRENCY_SYMBOL[currency] || '$'}${Number(amount || 0).toLocaleString(undefined, { maximumFractionDigits: decimals })}`;
+}
+
 /** Backend `legal.lawyers` row → UI lawyer model (drop-in for the old mock shape). */
 export function adaptLawyer(l: any) {
   if (!l) return null;
@@ -26,6 +43,8 @@ export function adaptLawyer(l: any) {
     totalReviews: l.total_reviews ?? 0,
     hourlyRate: Number(l.hourly_rate ?? 0),
     consultationFee: Number(l.hourly_rate ?? 0),
+    currency: currencyForCountry(l.country_code),
+    displayRate: formatRate(Number(l.hourly_rate ?? 0), currencyForCountry(l.country_code)),
     country: l.country || null,
     countryCode: l.country_code || null,
     city: l.city || null,

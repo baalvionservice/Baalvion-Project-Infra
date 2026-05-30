@@ -17,6 +17,7 @@ import SearchBar from '../search/SearchBar';
 import { cn } from '@/lib/utils';
 import seedData from '../../../docs/seed-data.json';
 import { useAuth } from '@/hooks/useAuth';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 export function PublicNavbar() {
   const { isAuthenticated, role } = useAuth();
@@ -107,6 +108,8 @@ export function PublicNavbar() {
           <div className="hidden md:block w-48">
             <SearchBar variant="navbar" />
           </div>
+
+          <LanguageSwitcher />
 
           <div className="hidden sm:flex items-center gap-3">
             {isAuthenticated ? (

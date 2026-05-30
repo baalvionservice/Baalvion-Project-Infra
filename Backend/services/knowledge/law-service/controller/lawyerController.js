@@ -3,14 +3,18 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { toPrefixTsQuery } = require('../utils/search');
+const mailer = require('../service/mailer');
 
 const listLawyers = async (req, res, next) => {
     try {
         const {
             page = 1, limit = 20,
             specialization, jurisdiction, minRate, maxRate,
-            minRating, verified, language, search, country, countryCode, city,
+            minRating, verified, language, country, countryCode, city,
         } = req.query;
+        // Accept both ?search= and ?q= (Express 5's req.query is a getter — never mutate it).
+        const search = req.query.search || req.query.q;
         const where = { status: 'active' };
         if (specialization) where.specializations = { [Op.contains]: [specialization] };
         if (jurisdiction) where.jurisdictions = { [Op.contains]: [jurisdiction] };
@@ -22,14 +26,29 @@ const listLawyers = async (req, res, next) => {
         if (minRate) where.hourly_rate = { ...where.hourly_rate, [Op.gte]: Number(minRate) };
         if (maxRate) where.hourly_rate = { ...where.hourly_rate, [Op.lte]: Number(maxRate) };
         if (minRating) where.rating = { [Op.gte]: Number(minRating) };
-        if (search) where[Op.or] = [
-            { name: { [Op.iLike]: `%${search}%` } },
-            { bio: { [Op.iLike]: `%${search}%` } },
-        ];
+
+        // ── Full-text relevance search ───────────────────────────────────────
+        // Weighted tsvector (name>specializations>location>bio), prefix-aware so
+        // "ame" matches "Amelia". Falls back to rating order when no query.
+        const tsq = toPrefixTsQuery(search);
+        let order = [['rating', 'DESC'], ['total_reviews', 'DESC']];
+        if (tsq) {
+            const safe = db.sequelize.escape(tsq);
+            where[Op.and] = [
+                ...(where[Op.and] || []),
+                db.sequelize.literal(`"Lawyer"."search_vector" @@ to_tsquery('simple', unaccent(${safe}))`),
+            ];
+            // Rank by text relevance first, then quality signals.
+            order = [
+                [db.sequelize.literal(`ts_rank("Lawyer"."search_vector", to_tsquery('simple', unaccent(${safe})))`), 'DESC'],
+                ['rating', 'DESC'], ['total_reviews', 'DESC'],
+            ];
+        }
+
         const offset = (Number(page) - 1) * Number(limit);
         const { count, rows } = await db.Lawyer.findAndCountAll({
             where,
-            order: [['rating', 'DESC'], ['total_reviews', 'DESC']],
+            order,
             limit: Number(limit),
             offset,
         });
@@ -37,6 +56,32 @@ const listLawyers = async (req, res, next) => {
             items: rows,
             pagination: { total: count, page: Number(page), limit: Number(limit), totalPages: Math.ceil(count / Number(limit)) },
         });
+    } catch (err) { return next(err); }
+};
+
+// Typeahead suggestions — trigram-based, typo-tolerant, fast (uses gin_trgm idx).
+// Returns lightweight {id,name,specializations,city,country,profile_photo} only.
+const autocomplete = async (req, res, next) => {
+    try {
+        const q = String(req.query.q || '').trim();
+        if (q.length < 2) return sendSuccess(req, res, []);
+        const safe = db.sequelize.escape(`%${q}%`);
+        const tsq = toPrefixTsQuery(q);
+        const conds = [`"name" ILIKE ${safe}`, `"city" ILIKE ${safe}`];
+        if (tsq) conds.push(`"search_vector" @@ to_tsquery('simple', unaccent(${db.sequelize.escape(tsq)}))`);
+        const rows = await db.Lawyer.findAll({
+            attributes: ['id', 'name', 'specializations', 'city', 'country', 'country_code', 'profile_photo', 'rating'],
+            where: {
+                status: 'active',
+                [Op.and]: [db.sequelize.literal(`(${conds.join(' OR ')})`)],
+            },
+            order: [
+                [db.sequelize.literal(`similarity("name", ${db.sequelize.escape(q)})`), 'DESC'],
+                ['rating', 'DESC'],
+            ],
+            limit: 8,
+        });
+        return sendSuccess(req, res, rows);
     } catch (err) { return next(err); }
 };
 
@@ -54,12 +99,9 @@ const countriesSummary = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-// Public search — the frontend calls /lawyers/search?q=... ; map q -> the
-// `search` filter and reuse the list logic so filters keep working.
-const searchLawyers = (req, res, next) => {
-    if (req.query.q && !req.query.search) req.query.search = req.query.q;
-    return listLawyers(req, res, next);
-};
+// Public search — the frontend calls /lawyers/search?q=... ; listLawyers reads
+// both ?q= and ?search= directly (req.query is immutable in Express 5).
+const searchLawyers = (req, res, next) => listLawyers(req, res, next);
 
 const getLawyer = async (req, res, next) => {
     try {
@@ -78,6 +120,7 @@ const createLawyer = async (req, res, next) => {
         const lawyer = await db.Lawyer.create({ ...safe, user_id: String(req.user.id), status: 'pending', verified: false });
         // Promote the local identity to a lawyer-role user (still pending verification for the directory).
         if (req.user.id) await db.User.update({ role: 'lawyer' }, { where: { id: req.user.id } });
+        if (lawyer.email) mailer.sendTemplate('welcome', lawyer.email, { name: lawyer.name }).catch(() => {});
         return sendSuccess(req, res, lawyer, 201);
     } catch (err) { return next(err); }
 };
@@ -134,6 +177,7 @@ const verifyLawyer = async (req, res, next) => {
         const lawyer = await db.Lawyer.findByPk(req.params.id);
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found', 404));
         await lawyer.update({ verified: true, status: 'active' });
+        if (lawyer.email) mailer.sendTemplate('lawyerVerified', lawyer.email, { name: lawyer.name }).catch(() => {});
         return sendSuccess(req, res, lawyer);
     } catch (err) { return next(err); }
 };
@@ -146,4 +190,4 @@ const getMyProfile = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listLawyers, countriesSummary, searchLawyers, getLawyer, createLawyer, updateLawyer, deleteLawyer, getAvailability, updateAvailability, verifyLawyer, getMyProfile };
+module.exports = { listLawyers, countriesSummary, searchLawyers, autocomplete, getLawyer, createLawyer, updateLawyer, deleteLawyer, getAvailability, updateAvailability, verifyLawyer, getMyProfile };

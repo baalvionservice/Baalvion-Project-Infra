@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const realtime = require('../service/realtime');
 
 const listMessages = async (req, res, next) => {
     try {
@@ -69,6 +70,11 @@ const sendMessage = async (req, res, next) => {
             case_id: case_id ? Number(case_id) : null,
             booking_id: booking_id ? Number(booking_id) : null,
         });
+        // Real-time delivery: push to the receiver's live sockets + echo to the
+        // sender's other tabs. Best-effort (no-op when nobody is connected).
+        const payload = { type: 'message', message: message.toJSON() };
+        realtime.pushToUser(String(receiver_id), payload);
+        realtime.pushToUser(String(req.user.id), payload);
         return sendSuccess(req, res, message, 201);
     } catch (err) { return next(err); }
 };

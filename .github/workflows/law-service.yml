@@ -1,0 +1,137 @@
+name: Law Elite CI/CD
+
+on:
+  push:
+    branches: [main, develop, hardening-phase-1, release/auth-foundation-v1]
+    paths:
+      - 'Backend/services/knowledge/law-service/**'
+      - 'Backend/packages/auth-node/**'
+      - 'Frontend/Law-Elite-Network-main/**'
+      - '.github/workflows/law-service.yml'
+  pull_request:
+    branches: [main, hardening-phase-1]
+    paths:
+      - 'Backend/services/knowledge/law-service/**'
+      - 'Frontend/Law-Elite-Network-main/**'
+
+jobs:
+  # ── Backend: unit tests + migrations against a real Postgres ────────────────
+  backend:
+    name: law-service — test & migrate
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_DB: baalvion_test
+          POSTGRES_USER: baalvion
+          POSTGRES_PASSWORD: test_pass
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+    env:
+      NODE_ENV: test
+      PORT: 3015
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: baalvion_test
+      DB_USER: baalvion
+      DB_PASSWORD: test_pass
+      REDIS_URL: redis://localhost:6379
+      # RS256 verify key — a throwaway public key is fine for boot/migrate checks.
+      JWT_PUBLIC_KEY: ${{ secrets.CI_JWT_PUBLIC_KEY }}
+      MAIL_ENABLED: 'false'
+      BILLING_WORKER_ENABLED: 'false'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install workspace deps (law-service + linked packages)
+        run: pnpm install --frozen-lockfile --filter law-service...
+
+      - name: Unit tests (node:test, no DB)
+        working-directory: Backend/services/knowledge/law-service
+        run: pnpm test
+
+      - name: Run migrations against Postgres
+        if: ${{ env.JWT_PUBLIC_KEY != '' }}
+        working-directory: Backend/services/knowledge/law-service
+        run: pnpm migrate
+
+      - name: Migration status (drift check)
+        if: ${{ env.JWT_PUBLIC_KEY != '' }}
+        working-directory: Backend/services/knowledge/law-service
+        run: pnpm migrate:status
+
+  # ── Frontend: production build ──────────────────────────────────────────────
+  frontend:
+    name: Law-Elite — build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile --filter law-elite-network...
+        continue-on-error: true
+
+      - name: Build (standalone)
+        working-directory: Frontend/Law-Elite-Network-main
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+          npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: https://api.baalvion.com/api/v1/knowledge/law/v1
+          NEXT_TELEMETRY_DISABLED: '1'
+
+  # ── Docker image (main only) ────────────────────────────────────────────────
+  docker:
+    name: Build & push law-service image
+    runs-on: ubuntu-latest
+    needs: backend
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/baalvion-law-service
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+      - uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: Backend/services/knowledge/law-service/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

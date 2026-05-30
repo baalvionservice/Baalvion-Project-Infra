@@ -26,4 +26,7 @@ router.delete('/sessions/:sessionId', ctrl.revokeSession);
 // Audit logs
 router.get('/audit-logs', ctrl.getAuditLogs);
 
+// Billing / payments
+router.use('/payments', require('./paymentsRoutes'));
+
 module.exports = router;

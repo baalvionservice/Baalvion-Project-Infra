@@ -33,6 +33,8 @@ db.Review       = require('./reviews')(sequelize, Sequelize.DataTypes);
 db.Notification = require('./notifications')(sequelize, Sequelize.DataTypes);
 db.Referral     = require('./referrals')(sequelize, Sequelize.DataTypes);
 db.AuditLog     = require('./auditLogs')(sequelize, Sequelize.DataTypes);
+db.LawyerLedger = require('./lawyerLedger')(sequelize, Sequelize.DataTypes);
+db.Payout       = require('./payouts')(sequelize, Sequelize.DataTypes);
 
 Object.values(db).forEach(model => {
     if (model && model.associate) model.associate(db);

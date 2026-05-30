@@ -2,6 +2,7 @@
 const db = require('../models');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { planFor } = require('../config/plans');
 
 const getSubscription = async (req, res, next) => {
     try {
@@ -30,12 +31,23 @@ const createSubscription = async (req, res, next) => {
             { where: { client_id: client.id, status: 'active' } }
         );
 
+        // Stamp price + billing period from the plan catalog so the recurring
+        // billing worker can renew (or expire) this subscription automatically.
+        const plan = planFor(tier);
+        const periodEnd = expires_at
+            ? new Date(expires_at)
+            : new Date(Date.now() + plan.interval_days * 24 * 60 * 60 * 1000);
+
         const subscription = await db.Subscription.create({
             client_id: client.id,
             tier,
             status: 'active',
             started_at: new Date(),
-            expires_at: expires_at ? new Date(expires_at) : null,
+            expires_at: periodEnd,
+            price: plan.price,
+            currency: plan.currency,
+            interval_days: plan.interval_days,
+            last_payment_at: new Date(),
         });
 
         // Update client's subscription tier

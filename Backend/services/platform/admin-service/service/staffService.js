@@ -235,6 +235,15 @@ async function sendInvitation(orgId, { email, role = 'member', departmentId = nu
         { orgId, email });
     if (dupe.length) throw new AppError('CONFLICT', 'A pending invitation already exists for this email', 409);
 
+    // Resolve a human inviter name. req.auth carries only the userId, so look up
+    // the inviter's name/email from auth.users when the controller couldn't supply it.
+    let inviterName = invitedBy.name || invitedBy.email;
+    if (!inviterName && invitedBy.id) {
+        const [u] = await sel(`SELECT full_name, email FROM auth.users WHERE id = :id`, { id: invitedBy.id });
+        if (u) inviterName = u.full_name || u.email;
+    }
+    inviterName = inviterName || 'An administrator';
+
     const token = crypto.randomBytes(32).toString('hex');
     const [row] = await sel(`
         INSERT INTO staff.invitations (org_id, email, role, department_id, team_id, token, invited_by, invited_by_name, expires_at)
@@ -242,7 +251,7 @@ async function sendInvitation(orgId, { email, role = 'member', departmentId = nu
         RETURNING id`,
         {
             orgId, email, role, departmentId, teamId, token,
-            invitedBy: invitedBy.id || null, invitedByName: invitedBy.name || invitedBy.email || 'An administrator',
+            invitedBy: invitedBy.id || null, invitedByName: inviterName,
         });
 
     const acceptUrl = `${APP_URL}/accept-invite?token=${token}`;
@@ -251,7 +260,7 @@ async function sendInvitation(orgId, { email, role = 'member', departmentId = nu
         subject: `You're invited to join Baalvion`,
         html: `<div style="font-family:system-ui,sans-serif;max-width:520px">
             <h2>You've been invited to Baalvion</h2>
-            <p>${invitedBy.name || 'An administrator'} has invited you to join as <b>${role}</b>.</p>
+            <p>${inviterName} has invited you to join as <b>${role}</b>.</p>
             <p><a href="${acceptUrl}" style="background:#111;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none">Accept invitation</a></p>
             <p style="color:#666;font-size:13px">Or use this link: ${acceptUrl}<br/>This invite expires in 7 days.</p>
         </div>`,

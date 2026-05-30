@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+scrape_configs:
+  # The realtime-service aggregates platform-wide metrics (service health, OS,
+  # Redis/Postgres, queue depths, auth stats) and exposes them at /metrics.
+  - job_name: 'baalvion-platform'
+    static_configs:
+      - targets: ['host.docker.internal:3026']
+        labels:
+          source: 'realtime-service'
+
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

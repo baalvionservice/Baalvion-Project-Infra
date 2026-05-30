@@ -11,7 +11,12 @@ function originOf(url?: string): string {
 }
 const apiOrigin = originOf(process.env.NEXT_PUBLIC_API_BASE_URL);
 const gatewayOrigin = originOf(process.env.NEXT_PUBLIC_GATEWAY_URL);
-const extraConnect = [apiOrigin, gatewayOrigin].filter(Boolean).join(' ');
+// Real-time chat WebSocket origin (explicit override, else derived from the API
+// origin by swapping http→ws / https→wss). Needed in connect-src for the WS.
+const wsExplicit = originOf(process.env.NEXT_PUBLIC_WS_URL);
+const wsDerived = apiOrigin ? apiOrigin.replace(/^http/, 'ws') : '';
+const wsOrigin = wsExplicit ? wsExplicit.replace(/^http/, 'ws') : wsDerived;
+const extraConnect = [apiOrigin, gatewayOrigin, wsOrigin].filter(Boolean).join(' ');
 
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },

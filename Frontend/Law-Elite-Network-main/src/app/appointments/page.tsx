@@ -5,6 +5,7 @@ import { DashboardShell } from '@/components/layout/DashboardShell';
 import { useAuthStore } from '@/store/authStore';
 import { useAppointments } from '@/hooks/useAppointments';
 import ProtectedRoute from '@/components/auth/ProtectedRoute';
+import JoinVideoButton from '@/components/booking/JoinVideoButton';
 import { 
   CalendarClock, 
   Loader2, 
@@ -115,9 +116,13 @@ function AppointmentsContent() {
                       {apt.status} Engagement
                     </Badge>
 
+                    {apt.status === 'confirmed' && (
+                      <JoinVideoButton bookingId={apt.id || apt.appointmentId || ''} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white text-[9px] font-bold uppercase tracking-widest h-9 rounded-xl px-4" />
+                    )}
+
                     {(apt.status === 'pending' || apt.status === 'confirmed') && (
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => {
                           if (window.confirm("Confirm termination of this consultation engagement?")) {

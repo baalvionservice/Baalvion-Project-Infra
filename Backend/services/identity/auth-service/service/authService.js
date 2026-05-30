@@ -35,17 +35,41 @@ function presentUser(user, extras = {}) {
  * Builds the standard JWT payload shared by access and refresh tokens.
  * Fetches the caller's active org membership to embed role + permissions.
  */
+// Role → permission grants embedded in the access token. Hierarchical roles still
+// drive most checks, but populating permissions[] makes fine-grained
+// requirePermission() gates meaningful (the claim used to ship empty).
+const ROLE_PERMISSIONS = {
+    super_admin: ['users:read', 'users:write', 'users:delete', 'orgs:read', 'orgs:write', 'billing:manage',
+                  'staff:read', 'staff:write', 'staff:manage', 'cms:read', 'cms:write', 'cms:manage',
+                  'content:read', 'content:write', 'content:publish', 'media:read', 'media:write',
+                  'settings:manage', 'analytics:read', 'audit:read'],
+    owner:       ['users:read', 'users:write', 'orgs:read', 'orgs:write', 'billing:manage',
+                  'staff:read', 'staff:write', 'staff:manage', 'cms:read', 'cms:write', 'cms:manage',
+                  'content:read', 'content:write', 'content:publish', 'media:read', 'media:write',
+                  'settings:manage', 'analytics:read'],
+    admin:       ['users:read', 'users:write', 'staff:read', 'cms:read', 'cms:write', 'cms:manage',
+                  'content:read', 'content:write', 'content:publish', 'media:read', 'media:write', 'analytics:read'],
+    editor:      ['cms:read', 'content:read', 'content:write', 'content:publish', 'media:read', 'media:write'],
+    member:      ['cms:read', 'content:read', 'media:read'],
+    viewer:      ['cms:read', 'content:read'],
+};
+
 async function resolveTokenPayload(user, orgId) {
-    let role = 'member', permissions = [], serviceRoles = {};
+    let role = 'member', serviceRoles = {};
 
     if (orgId) {
         const m = await orgRepo.getActiveMember(orgId, user.id);
         if (m) {
             role         = m.role;
             serviceRoles = m.service_roles || {};
-            permissions  = Object.keys(serviceRoles);
         }
     }
+
+    // Permissions = role grants ∪ any explicit per-service grants on the membership.
+    const permissions = Array.from(new Set([
+        ...(ROLE_PERMISSIONS[role] || ROLE_PERMISSIONS.member),
+        ...Object.keys(serviceRoles),
+    ]));
 
     return { userId: user.id, email: user.email, orgId, role, permissions, serviceRoles };
 }

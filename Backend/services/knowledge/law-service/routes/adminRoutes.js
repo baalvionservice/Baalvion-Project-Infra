@@ -21,6 +21,7 @@ router.post ('/payments/:id/refund',         ctrl.refundPayment);
 router.post ('/articles/:id/publish',        ctrl.publishArticle);
 router.post ('/articles/:id/archive',        ctrl.archiveArticle);
 router.patch('/subscriptions/:id/cancel',    ctrl.cancelSubscription);
+router.post ('/payouts/:id/process',         ctrl.processPayout);
 router.post ('/notifications/broadcast',     ctrl.broadcast);
 router.get  ('/impersonate/:userId',         ctrl.impersonate);
 

@@ -11,6 +11,9 @@ const rateLimit = require('./middleware/rateLimit');
 const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
+const { runMigrations } = require('./db/migrate');
+const { startBillingWorker } = require('./service/billingWorker');
+const realtime = require('./service/realtime');
 const { metricsMiddleware, metricsHandler } = require('./middleware/metrics');
 
 const app = express();
@@ -43,13 +46,19 @@ const start = async () => {
     try {
         await db.sequelize.authenticate();
         await db.sequelize.query('CREATE SCHEMA IF NOT EXISTS legal');
+        // sync() creates any missing model-defined tables (dev convenience); versioned
+        // migrations then apply everything sync cannot (tsvector/GIN/triggers/back-fills)
+        // and are the source of truth for production schema changes.
         await db.sequelize.sync({ alter: false });
-        console.log('[law-service] DB connected and synced');
+        await runMigrations(db.sequelize, console.log);
+        console.log('[law-service] DB connected, synced and migrated');
     } catch (err) {
         console.error('[law-service] DB connection failed:', err.message);
         process.exit(1);
     }
+    realtime.attach(server);
     server.listen(config.port, () => console.log(`[law-service] running on port ${config.port}`));
+    startBillingWorker();
 };
 
 start();

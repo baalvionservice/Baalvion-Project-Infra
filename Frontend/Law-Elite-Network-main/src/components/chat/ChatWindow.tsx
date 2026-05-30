@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Send, ShieldCheck, Lock, MessageSquare, Loader2 } from 'lucide-react';
 import { subscribeToMessages, sendMessage, markAsRead } from '@/services/chat/chatService';
+import { realtime } from '@/lib/realtime';
 import { format } from 'date-fns';
 
 interface ChatWindowProps {
@@ -42,6 +43,29 @@ export default function ChatWindow({ caseId, userId, receiverId }: ChatWindowPro
     return () => {
       if (unsubscribe) unsubscribe();
     };
+  }, [caseId, userId]);
+
+  // Real-time delivery: append messages for this thread the instant they arrive
+  // (no waiting for the next poll). De-duped by id against current state.
+  useEffect(() => {
+    const off = realtime().on('message', (payload: any) => {
+      const m = payload?.message;
+      if (!m) return;
+      if (caseId && String(m.case_id) !== String(caseId)) return; // other thread
+      setMessages((prev) => {
+        if (prev.some((x) => String(x.id) === String(m.id))) return prev;
+        return [...prev, {
+          id: m.id,
+          senderId: m.sender_id,
+          receiverId: m.receiver_id,
+          text: m.content,
+          createdAt: m.created_at || new Date().toISOString(),
+          isRead: false,
+        }];
+      });
+      if (String(m.receiver_id) === String(userId)) markAsRead(m.id);
+    });
+    return () => { off(); };
   }, [caseId, userId]);
 
   useEffect(() => {

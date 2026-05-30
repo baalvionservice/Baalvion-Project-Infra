@@ -134,10 +134,8 @@ const POD_STATUS_COLOR: Record<string, string> = {
 // ── Observability links ───────────────────────────────────────────────────────
 
 const OBSERVABILITY_LINKS = [
-  { label: 'Grafana',    href: 'http://localhost:3100',  desc: 'Dashboards & metrics',    icon: BarChart3 },
-  { label: 'Jaeger',     href: 'http://localhost:16686', desc: 'Distributed tracing',     icon: GitBranch },
-  { label: 'Prometheus', href: 'http://localhost:9090',  desc: 'Raw metrics & alerts',    icon: Activity  },
-  { label: 'Loki',       href: 'http://localhost:3200',  desc: 'Log aggregation',         icon: Layers    },
+  { label: 'Grafana',    href: 'http://localhost:3100',  desc: 'Dashboards & metrics (live)',  icon: BarChart3 },
+  { label: 'Prometheus', href: 'http://localhost:9090',  desc: 'Raw metrics & alerts (live)',  icon: Activity  },
 ];
 
 // ── Main page ─────────────────────────────────────────────────────────────────

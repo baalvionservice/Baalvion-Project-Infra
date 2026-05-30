@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { adminApiClient } from './client';
 import type {
   Transaction,
   Subscription,
@@ -11,31 +11,31 @@ import type { ApiResponse, PaginatedResponse, PaginationParams } from '@/lib/typ
 export const paymentsApi = {
   transactions: {
     list: (params?: PaginationParams & { provider?: string; status?: string }) =>
-      apiClient.get<PaginatedResponse<Transaction>>('/admin/payments/transactions', { params }),
-    get: (id: string) => apiClient.get<ApiResponse<Transaction>>(`/admin/payments/transactions/${id}`),
+      adminApiClient.get<PaginatedResponse<Transaction>>('/admin/payments/transactions', { params }),
+    get: (id: string) => adminApiClient.get<ApiResponse<Transaction>>(`/admin/payments/transactions/${id}`),
   },
 
   subscriptions: {
     list: (params?: PaginationParams & { provider?: string; status?: string }) =>
-      apiClient.get<PaginatedResponse<Subscription>>('/admin/payments/subscriptions', { params }),
-    get: (id: string) => apiClient.get<ApiResponse<Subscription>>(`/admin/payments/subscriptions/${id}`),
+      adminApiClient.get<PaginatedResponse<Subscription>>('/admin/payments/subscriptions', { params }),
+    get: (id: string) => adminApiClient.get<ApiResponse<Subscription>>(`/admin/payments/subscriptions/${id}`),
     cancel: (id: string, cancelAtCycleEnd?: boolean) =>
-      apiClient.post<ApiResponse<Subscription>>(`/payment/razorpay/subscription/${id}`, {
+      adminApiClient.post<ApiResponse<Subscription>>(`/admin/payments/subscriptions/${id}/cancel`, {
         cancelAtCycleEnd,
       }),
   },
 
   invoices: {
     list: (params?: PaginationParams & { status?: string }) =>
-      apiClient.get<PaginatedResponse<Invoice>>('/admin/payments/invoices', { params }),
-    get: (id: string) => apiClient.get<ApiResponse<Invoice>>(`/admin/payments/invoices/${id}`),
+      adminApiClient.get<PaginatedResponse<Invoice>>('/admin/payments/invoices', { params }),
+    get: (id: string) => adminApiClient.get<ApiResponse<Invoice>>(`/admin/payments/invoices/${id}`),
   },
 
   refunds: {
     list: (params?: PaginationParams) =>
-      apiClient.get<PaginatedResponse<Refund>>('/admin/payments/refunds', { params }),
+      adminApiClient.get<PaginatedResponse<Refund>>('/admin/payments/refunds', { params }),
     create: (transactionId: string, amount: number, reason: string) =>
-      apiClient.post<ApiResponse<Refund>>('/payment/razorpay/refund', {
+      adminApiClient.post<ApiResponse<Refund>>('/admin/payments/refunds', {
         transactionId,
         amount,
         reason,
@@ -44,13 +44,13 @@ export const paymentsApi = {
 
   webhooks: {
     list: (params?: PaginationParams & { provider?: string; status?: string }) =>
-      apiClient.get<PaginatedResponse<WebhookLog>>('/admin/payments/webhooks', { params }),
+      adminApiClient.get<PaginatedResponse<WebhookLog>>('/admin/payments/webhooks', { params }),
     retry: (id: string) =>
-      apiClient.post<ApiResponse<WebhookLog>>(`/admin/payments/webhooks/${id}/retry`),
+      adminApiClient.post<ApiResponse<WebhookLog>>(`/admin/payments/webhooks/${id}/retry`),
   },
 
   summary: () =>
-    apiClient.get<
+    adminApiClient.get<
       ApiResponse<{
         totalRevenue: number;
         activeSubscriptions: number;

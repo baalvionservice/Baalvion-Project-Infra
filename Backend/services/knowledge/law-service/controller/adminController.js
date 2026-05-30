@@ -7,6 +7,8 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const mailer = require('../service/mailer');
+const ledger = require('../service/ledger');
 
 // ── Resource registry ────────────────────────────────────────────────────────
 // model     : key in db
@@ -33,6 +35,8 @@ const RESOURCES = {
     subcategories: { model: 'Subcategory',  search: ['name', 'slug'], filters: ['is_active', 'category_id'], include: [CAT('category')], order: [['name', 'ASC']] },
     notifications: { model: 'Notification', search: ['title', 'message'], filters: ['type', 'read', 'user_id'], order: [['created_at', 'DESC']] },
     referrals:     { model: 'Referral',     search: ['code'], filters: ['status'], order: [['created_at', 'DESC']] },
+    payouts:       { model: 'Payout',       search: ['reference', 'status'], filters: ['status', 'lawyer_id'], include: [L('lawyer')], order: [['created_at', 'DESC']] },
+    ledger:        { model: 'LawyerLedger', search: ['description'], filters: ['entry_type', 'lawyer_id'], include: [L('lawyer')], order: [['created_at', 'DESC']], readonly: true },
     messages:      { model: 'Message',      search: ['content'], filters: ['type', 'case_id', 'booking_id'], order: [['created_at', 'DESC']] },
     documents:     { model: 'Document',     search: ['name', 'type'], filters: ['category', 'case_id'], order: [['created_at', 'DESC']] },
     audit:         { model: 'AuditLog',     search: ['actor_email', 'resource', 'action'], filters: ['action', 'resource'], order: [['created_at', 'DESC']], readonly: true },
@@ -213,6 +217,9 @@ const setLawyerState = (patch, action) => async (req, res, next) => {
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found', 404));
         await lawyer.update(patch);
         await audit(req, action, 'lawyers', lawyer.id, patch);
+        if (action === 'verify' && lawyer.email) {
+            mailer.sendTemplate('lawyerVerified', lawyer.email, { name: lawyer.name }).catch(() => {});
+        }
         return sendSuccess(req, res, lawyer);
     } catch (err) { return next(err); }
 };
@@ -277,6 +284,19 @@ const broadcast = async (req, res, next) => {
 
 // Start "View as" impersonation: validate the target (a non-admin user) and audit it.
 // The frontend then sends X-Impersonate-User-Id to scope subsequent requests to this user.
+// Admin settles a lawyer payout (simulated until Razorpay Payouts in production).
+const processPayout = async (req, res, next) => {
+    try {
+        const { status = 'paid', reference, notes } = req.body || {};
+        const payout = await ledger.processPayout(Number(req.params.id), { status, reference, notes });
+        await audit(req, 'payout_process', 'payouts', payout.id, { status, reference });
+        return sendSuccess(req, res, payout);
+    } catch (err) {
+        if (err.code === 'NOT_FOUND') return next(new AppError('NOT_FOUND', err.message, 404));
+        return next(err);
+    }
+};
+
 const impersonate = async (req, res, next) => {
     try {
         const target = await db.User.findByPk(req.params.userId);
@@ -296,6 +316,7 @@ module.exports = {
     refundPayment,
     publishArticle, archiveArticle,
     cancelSubscription,
+    processPayout,
     broadcast,
     impersonate,
 };

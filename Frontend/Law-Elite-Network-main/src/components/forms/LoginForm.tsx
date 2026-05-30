@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 /**
  * @fileOverview Executive Login Form with unified Authentication protocol.
@@ -86,6 +87,11 @@ export default function LoginForm() {
           />
         </div>
         {errors.password && <p className="text-[10px] text-red-400 font-bold uppercase tracking-widest mt-1">{errors.password.message as string}</p>}
+        <div className="text-right pt-1">
+          <Link href="/forgot-password" className="text-[10px] font-bold uppercase tracking-widest text-accent/80 hover:text-accent transition-colors">
+            Forgot password?
+          </Link>
+        </div>
       </div>
 
       <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90 h-12 font-bold shadow-lg shadow-accent/20 rounded-xl" disabled={loading}>

@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import LawyerCard from '@/components/cards/LawyerCard';
 import { searchLawyers, getAllLawyers, getCountries } from '@/services/lawyers/lawyerService';
+import LawyerAutocomplete from '@/components/search/LawyerAutocomplete';
 import { getCaseById } from '@/services/cases/caseService';
 import { rankLawyersForCase } from '@/services/matching/matchingService';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -141,16 +142,11 @@ function LawyerMarketplaceContent() {
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-blue-600 to-transparent opacity-20" />
           
           <div className="flex flex-col lg:flex-row gap-4">
-            <div className="relative flex-1 group">
-              <Search className="absolute left-4 top-3 h-5 w-5 text-blue-600 opacity-50 group-focus-within:opacity-100 transition-opacity" />
-              <Input 
-                placeholder="Search by practitioner name or expertise..." 
-                className="pl-12 h-12 border-slate-200 text-lg bg-slate-50 focus:bg-white transition-all"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && fetchLawyers()}
-              />
-            </div>
+            <LawyerAutocomplete
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={() => fetchLawyers()}
+            />
             <Button 
               onClick={fetchLawyers} 
               className="bg-[#0B1F3A] text-white hover:bg-slate-800 h-12 px-8 rounded-xl font-bold shadow-lg shadow-blue-900/10 transition-all active:scale-[0.98]"

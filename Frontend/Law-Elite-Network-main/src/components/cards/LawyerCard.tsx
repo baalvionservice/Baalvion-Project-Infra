@@ -15,6 +15,8 @@ interface LawyerCardProps {
     specialization: string | string[];
     experience: number;
     consultationFee: number;
+    displayRate?: string;
+    currency?: string;
     available?: boolean;
     rating: number;
     city?: string;
@@ -114,8 +116,7 @@ function LawyerCardComponent({ lawyer }: LawyerCardProps) {
             <div className="space-y-0.5">
               <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Consultation Fee</p>
               <div className="flex items-center text-slate-900">
-                <IndianRupee className="w-3.5 h-3.5 mr-1 text-emerald-600" />
-                <span className="font-headline text-xl italic">{(lawyer.consultationFee || 5000).toLocaleString()}</span>
+                <span className="font-headline text-xl italic">{lawyer.displayRate || `$${(lawyer.consultationFee || 0).toLocaleString()}`}</span>
                 <span className="text-[9px] text-slate-400 ml-1 uppercase tracking-tighter">/ hr</span>
               </div>
             </div>

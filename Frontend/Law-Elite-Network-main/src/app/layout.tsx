@@ -2,6 +2,7 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { AuthProvider } from '@/context/AuthContext';
+import { I18nProvider } from '@/i18n/I18nProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { Navbar } from '@/components/navbar';
 import NotificationToastListener from '@/components/notifications/NotificationToastListener';
@@ -119,6 +120,7 @@ export default function RootLayout({
         </a>
 
         <AuthProvider>
+          <I18nProvider>
             <div className="flex flex-col min-h-screen relative">
               <Navbar />
 
@@ -134,6 +136,7 @@ export default function RootLayout({
               <ImpersonationBanner />
             </div>
             <Toaster />
+          </I18nProvider>
         </AuthProvider>
       </body>
     </html>

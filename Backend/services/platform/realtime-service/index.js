@@ -72,6 +72,10 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
         return res.end(JSON.stringify({ success: true, data: snapshot }));
     }
+    if (req.url === '/metrics') {
+        res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4' });
+        return res.end(prometheusText());
+    }
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ success: false, error: { code: 'NOT_FOUND' } }));
 });
@@ -89,6 +93,46 @@ const wss = attachWebSocket(server, {
         if (msg && msg.type === 'ping') client.send({ type: 'pong', ts: Date.now() });
     },
 });
+
+// ── Prometheus exposition (scraped by Prometheus → visualised in Grafana) ────
+function prometheusText() {
+    const L = [];
+    const g = (name, help, value, labels = '') => {
+        L.push(`# HELP ${name} ${help}`); L.push(`# TYPE ${name} gauge`);
+        L.push(`${name}${labels} ${value}`);
+    };
+    const lines = (name, help) => { L.push(`# HELP ${name} ${help}`); L.push(`# TYPE ${name} gauge`); };
+    const s = snapshot;
+
+    lines('baalvion_service_up', 'Service health (1=up, 0=down)');
+    for (const svc of s.services) L.push(`baalvion_service_up{service="${svc.name}"} ${svc.status === 'down' ? 0 : 1}`);
+    lines('baalvion_service_latency_ms', 'Service health-probe latency (ms)');
+    for (const svc of s.services) if (svc.latencyMs != null) L.push(`baalvion_service_latency_ms{service="${svc.name}"} ${svc.latencyMs}`);
+
+    if (s.infra) {
+        g('baalvion_cpu_percent', 'Host CPU usage %', s.infra.cpu);
+        g('baalvion_memory_percent', 'Host memory usage %', s.infra.memory);
+        g('baalvion_disk_percent', 'Host disk usage %', s.infra.disk);
+        g('baalvion_redis_keys', 'Redis key count', s.infra.redis.keyCount);
+        g('baalvion_redis_clients', 'Redis connected clients', s.infra.redis.connectedClients);
+        g('baalvion_redis_hit_rate', 'Redis cache hit rate %', s.infra.redis.hitRate);
+        g('baalvion_postgres_connections', 'Postgres connections', s.infra.postgres.connections);
+        g('baalvion_postgres_active_queries', 'Postgres active queries', s.infra.postgres.activeQueries);
+    }
+    if (s.stats) {
+        g('baalvion_active_users', 'Active users', s.stats.activeUsers);
+        g('baalvion_active_sessions', 'Active sessions', s.stats.activeSessions);
+        g('baalvion_logins_24h', 'Logins in last 24h', s.stats.logins24h);
+        g('baalvion_failed_logins_24h', 'Failed logins in last 24h', s.stats.failedLogins24h);
+        g('baalvion_orgs', 'Organizations', s.stats.orgs);
+    }
+    lines('baalvion_queue_waiting', 'Queue jobs waiting');
+    for (const q of s.queues) L.push(`baalvion_queue_waiting{queue="${q.name}"} ${q.waiting}`);
+    lines('baalvion_queue_failed', 'Queue jobs failed');
+    for (const q of s.queues) L.push(`baalvion_queue_failed{queue="${q.name}"} ${q.failed}`);
+    g('baalvion_ws_clients', 'Connected realtime WebSocket clients', wss.count);
+    return L.join('\n') + '\n';
+}
 
 // ── Collection loop ──────────────────────────────────────────────────────────
 async function tick() {
