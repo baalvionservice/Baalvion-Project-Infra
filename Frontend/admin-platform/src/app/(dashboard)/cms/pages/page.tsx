@@ -18,10 +18,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCmsPages, usePublishPage } from '@/lib/queries/cms.queries';
+import { useCmsPages, usePublishPage, type AggregatedContent } from '@/lib/queries/cms.queries';
 import { useUIStore } from '@/lib/store/uiStore';
 import { formatDate } from '@/lib/utils/format';
-import type { CmsPage } from '@/lib/types/cms.types';
 
 export default function CmsPagesPage() {
   const router = useRouter();
@@ -36,7 +35,7 @@ export default function CmsPagesPage() {
     setBreadcrumbs([{ label: 'CMS', href: '/cms/pages' }, { label: 'Pages' }]);
   }, [setBreadcrumbs]);
 
-  const columns: ColumnDef<CmsPage>[] = [
+  const columns: ColumnDef<AggregatedContent>[] = [
     {
       accessorKey: 'title',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
@@ -49,6 +48,11 @@ export default function CmsPagesPage() {
           </div>
         </div>
       ),
+    },
+    {
+      accessorKey: 'websiteName',
+      header: 'Website',
+      cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.websiteName}</span>,
     },
     {
       accessorKey: 'status',
@@ -79,11 +83,11 @@ export default function CmsPagesPage() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => router.push(`/cms/pages/${p.id}`)}>
-                Edit
+              <DropdownMenuItem onClick={() => router.push(`/cms/websites/${p.websiteId}/content`)}>
+                Open in site
               </DropdownMenuItem>
               {p.status !== 'published' && (
-                <DropdownMenuItem onClick={() => publish(p.id)}>
+                <DropdownMenuItem onClick={() => publish({ websiteId: p.websiteId, id: p.id })}>
                   <Globe className="mr-2 h-4 w-4" />
                   Publish
                 </DropdownMenuItem>
@@ -103,7 +107,7 @@ export default function CmsPagesPage() {
         title="Pages"
         description="Manage CMS pages"
         actions={
-          <Button size="sm" onClick={() => router.push('/cms/pages/new')}>
+          <Button size="sm" onClick={() => router.push('/cms/websites')}>
             <Plus className="mr-2 h-4 w-4" />
             New Page
           </Button>
@@ -119,12 +123,12 @@ export default function CmsPagesPage() {
         page={page}
         onPageChange={setPage}
         filters={
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter || 'all'} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}>
             <SelectTrigger className="h-8 w-32">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>
               <SelectItem value="published">Published</SelectItem>
               <SelectItem value="archived">Archived</SelectItem>

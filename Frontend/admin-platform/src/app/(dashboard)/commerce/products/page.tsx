@@ -111,23 +111,23 @@ export default function ProductsPage() {
             className="pl-9 h-9"
           />
         </div>
-        <Select value={status} onValueChange={setStatus}>
+        <Select value={status || 'all'} onValueChange={(v) => setStatus(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-36 h-9">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="draft">Draft</SelectItem>
             <SelectItem value="active">Active</SelectItem>
             <SelectItem value="archived">Archived</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={categoryId} onValueChange={setCategoryId}>
+        <Select value={categoryId || 'all'} onValueChange={(v) => setCategoryId(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-40 h-9">
             <SelectValue placeholder="All Categories" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Categories</SelectItem>
+            <SelectItem value="all">All Categories</SelectItem>
             {categories.map((c) => (
               <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
             ))}

@@ -264,14 +264,14 @@ export default function ProductEditorPage() {
                   <div className="space-y-1.5">
                     <Label>Category</Label>
                     <Select
-                      value={form.categoryId}
-                      onValueChange={(v) => setForm((f) => ({ ...f, categoryId: v }))}
+                      value={form.categoryId || 'none'}
+                      onValueChange={(v) => setForm((f) => ({ ...f, categoryId: v === 'none' ? '' : v }))}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">None</SelectItem>
+                        <SelectItem value="none">None</SelectItem>
                         {(categories ?? []).map((c) => (
                           <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
                         ))}

@@ -121,23 +121,23 @@ export default function InventoryPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search SKU..." className="pl-9 h-9" readOnly />
         </div>
-        <Select value={warehouseFilter} onValueChange={setWarehouseFilter}>
+        <Select value={warehouseFilter || 'all'} onValueChange={(v) => setWarehouseFilter(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-44 h-9">
             <SelectValue placeholder="All Warehouses" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Warehouses</SelectItem>
+            <SelectItem value="all">All Warehouses</SelectItem>
             {warehouses.map((w) => (
               <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter || 'all'} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-40 h-9">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="in_stock">In Stock</SelectItem>
             <SelectItem value="low_stock">Low Stock</SelectItem>
             <SelectItem value="out_of_stock">Out of Stock</SelectItem>

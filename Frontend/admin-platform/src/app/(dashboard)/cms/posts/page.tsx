@@ -9,7 +9,6 @@ import StatusBadge from '@/components/common/StatusBadge';
 import DataTable from '@/components/data-table/DataTable';
 import DataTableColumnHeader from '@/components/data-table/DataTableColumnHeader';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,10 +17,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCmsPosts } from '@/lib/queries/cms.queries';
+import { useCmsPosts, usePublishPage, type AggregatedContent } from '@/lib/queries/cms.queries';
 import { useUIStore } from '@/lib/store/uiStore';
 import { formatDate } from '@/lib/utils/format';
-import type { CmsPost } from '@/lib/types/cms.types';
 
 export default function CmsPostsPage() {
   const router = useRouter();
@@ -30,12 +28,13 @@ export default function CmsPostsPage() {
   const [statusFilter, setStatusFilter] = useState('');
 
   const { data, isLoading } = useCmsPosts({ page, limit: 20, status: statusFilter || undefined });
+  const { mutate: publish } = usePublishPage();
 
   useEffect(() => {
     setBreadcrumbs([{ label: 'CMS', href: '/cms/pages' }, { label: 'Posts' }]);
   }, [setBreadcrumbs]);
 
-  const columns: ColumnDef<CmsPost>[] = [
+  const columns: ColumnDef<AggregatedContent>[] = [
     {
       accessorKey: 'title',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
@@ -49,15 +48,9 @@ export default function CmsPostsPage() {
       ),
     },
     {
-      accessorKey: 'categories',
-      header: 'Categories',
-      cell: ({ row }) => (
-        <div className="flex gap-1 flex-wrap">
-          {row.original.categories.slice(0, 2).map((c) => (
-            <Badge key={c.id} variant="outline" className="text-xs">{c.name}</Badge>
-          ))}
-        </div>
-      ),
+      accessorKey: 'websiteName',
+      header: 'Website',
+      cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.websiteName}</span>,
     },
     {
       accessorKey: 'status',
@@ -91,11 +84,11 @@ export default function CmsPostsPage() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => router.push(`/cms/posts/${row.original.id}`)}>
-              Edit
+            <DropdownMenuItem onClick={() => router.push(`/cms/websites/${row.original.websiteId}/content`)}>
+              Open in site
             </DropdownMenuItem>
             {row.original.status !== 'published' && (
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => publish({ websiteId: row.original.websiteId, id: row.original.id })}>
                 <Globe className="mr-2 h-4 w-4" />
                 Publish
               </DropdownMenuItem>
@@ -114,7 +107,7 @@ export default function CmsPostsPage() {
         title="Posts"
         description="Manage blog posts and articles"
         actions={
-          <Button size="sm" onClick={() => router.push('/cms/posts/new')}>
+          <Button size="sm" onClick={() => router.push('/cms/websites')}>
             <Plus className="mr-2 h-4 w-4" />
             New Post
           </Button>
@@ -130,10 +123,10 @@ export default function CmsPostsPage() {
         page={page}
         onPageChange={setPage}
         filters={
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter || 'all'} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}>
             <SelectTrigger className="h-8 w-32"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="draft">Draft</SelectItem>
               <SelectItem value="published">Published</SelectItem>
               <SelectItem value="archived">Archived</SelectItem>

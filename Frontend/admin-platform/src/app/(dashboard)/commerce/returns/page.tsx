@@ -64,12 +64,12 @@ export default function ReturnsPage() {
       />
 
       <div className="flex gap-3">
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
+        <Select value={statusFilter || 'all'} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-40 h-9">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="requested">Requested</SelectItem>
             <SelectItem value="approved">Approved</SelectItem>
             <SelectItem value="rejected">Rejected</SelectItem>

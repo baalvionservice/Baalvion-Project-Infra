@@ -79,12 +79,12 @@ export default function OrdersPage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input placeholder="Search orders..." className="pl-9 h-9" readOnly />
         </div>
-        <Select value={status} onValueChange={setStatus}>
+        <Select value={status || 'all'} onValueChange={(v) => setStatus(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-40 h-9">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Status</SelectItem>
+            <SelectItem value="all">All Status</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="confirmed">Confirmed</SelectItem>
             <SelectItem value="processing">Processing</SelectItem>
@@ -94,12 +94,12 @@ export default function OrdersPage() {
             <SelectItem value="refunded">Refunded</SelectItem>
           </SelectContent>
         </Select>
-        <Select value={paymentStatus} onValueChange={setPaymentStatus}>
+        <Select value={paymentStatus || 'all'} onValueChange={(v) => setPaymentStatus(v === 'all' ? '' : v)}>
           <SelectTrigger className="w-40 h-9">
             <SelectValue placeholder="Payment Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Payments</SelectItem>
+            <SelectItem value="all">All Payments</SelectItem>
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="paid">Paid</SelectItem>
             <SelectItem value="partially_paid">Partially Paid</SelectItem>

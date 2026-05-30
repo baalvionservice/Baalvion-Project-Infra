@@ -171,8 +171,8 @@ export default function GlobalWorkflowsPage() {
         onPageChange={setPage}
         filters={
           <Select
-            value={statusFilter}
-            onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}
+            value={statusFilter || 'all'}
+            onValueChange={(v) => setStatusFilter((v === 'all' ? '' : v) as typeof statusFilter)}
           >
             <SelectTrigger className="h-8 w-32">
               <SelectValue placeholder="Status" />
@@ -181,7 +181,7 @@ export default function GlobalWorkflowsPage() {
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="approved">Approved</SelectItem>
               <SelectItem value="rejected">Rejected</SelectItem>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value="all">All</SelectItem>
             </SelectContent>
           </Select>
         }
