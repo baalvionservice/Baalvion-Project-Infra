@@ -28,7 +28,9 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { apiEndpoints } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import { publicApi } from "@/lib/platformClient";
+import { apiEndpoints as fallbackApiEndpoints } from "@/data/mockData";
 
 const mockApiKeys = [
   { id: 1, name: "Production Key", key: "bv_live_a8f7b2c4d9e1f3a5b7c9d2e4f6a8b0c2", created: "Jan 15, 2024", lastUsed: "2 hours ago", status: "active" },
@@ -155,6 +157,11 @@ async function useProxy(proxy) {
 
 export default function DocsPage() {
   const { toast } = useToast();
+  const { data: apiEndpoints = fallbackApiEndpoints } = useQuery({
+    queryKey: ["public", "api-reference"],
+    queryFn: () => publicApi.apiReference(),
+    staleTime: 10 * 60 * 1000,
+  });
   const [showKeys, setShowKeys] = useState<Record<number, boolean>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [newKeyName, setNewKeyName] = useState("");

@@ -21,7 +21,9 @@ import {
   Info
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { pricingPlans } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import { publicApi } from "@/lib/platformClient";
+import { pricingPlans as fallbackPlans } from "@/data/mockData";
 import {
   Tooltip,
   TooltipContent,
@@ -44,6 +46,11 @@ const proxyTypes = [
 ];
 
 export default function CalculatorPage() {
+  const { data: pricingPlans = fallbackPlans } = useQuery({
+    queryKey: ["public", "plans"],
+    queryFn: () => publicApi.plans(),
+    staleTime: 5 * 60 * 1000,
+  });
   const [useCase, setUseCase] = useState("scraping");
   const [proxyType, setProxyType] = useState("residential");
   const [requestsPerDay, setRequestsPerDay] = useState(50000);

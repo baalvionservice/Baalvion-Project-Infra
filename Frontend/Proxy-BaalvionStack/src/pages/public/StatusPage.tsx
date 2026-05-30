@@ -2,7 +2,9 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, AlertCircle, Clock, Activity, ChevronRight } from "lucide-react";
-import { statusHistory } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import { publicApi } from "@/lib/platformClient";
+import { statusHistory as fallbackStatusHistory } from "@/data/mockData";
 import { IncidentDetailModal } from "@/components/status/IncidentDetailModal";
 import { IncidentDetail } from "@/types/admin";
 
@@ -44,9 +46,25 @@ const incidentDetails: IncidentDetail[] = [
   },
 ];
 
+const fallbackServices = [
+  { name: "Residential Proxy Network", status: "operational", uptime: "99.99%" },
+  { name: "Mobile Proxy Network", status: "operational", uptime: "99.95%" },
+  { name: "Datacenter Proxy Network", status: "operational", uptime: "100%" },
+  { name: "API Gateway", status: "operational", uptime: "99.99%" },
+  { name: "Dashboard & Control Panel", status: "operational", uptime: "99.99%" },
+  { name: "Authentication Services", status: "operational", uptime: "100%" },
+];
+
 export default function StatusPage() {
   const [selectedIncident, setSelectedIncident] = useState<IncidentDetail | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const { data: statusData } = useQuery({
+    queryKey: ["public", "status"],
+    queryFn: () => publicApi.status(),
+    staleTime: 60 * 1000,
+  });
+  const services = statusData?.services ?? fallbackServices;
+  const statusHistory = statusData?.history ?? fallbackStatusHistory;
 
   const handleIncidentClick = (entry: typeof statusHistory[0]) => {
     // Find corresponding incident detail
@@ -76,14 +94,7 @@ export default function StatusPage() {
 
       {/* Service Status */}
       <div className="max-w-3xl mx-auto space-y-4 mb-16">
-        {[
-          { name: "Residential Proxy Network", status: "operational", uptime: "99.99%" },
-          { name: "Mobile Proxy Network", status: "operational", uptime: "99.95%" },
-          { name: "Datacenter Proxy Network", status: "operational", uptime: "100%" },
-          { name: "API Gateway", status: "operational", uptime: "99.99%" },
-          { name: "Dashboard & Control Panel", status: "operational", uptime: "99.99%" },
-          { name: "Authentication Services", status: "operational", uptime: "100%" },
-        ].map((service) => (
+        {services.map((service) => (
           <Card key={service.name} variant="glass">
             <CardContent className="p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">

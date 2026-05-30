@@ -14,7 +14,9 @@ import {
   CheckCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import { caseStudies } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import { publicApi } from "@/lib/platformClient";
+import { caseStudies as fallbackCaseStudies } from "@/data/mockData";
 
 const detailedCaseStudies = [
   {
@@ -117,6 +119,11 @@ const industryLogos = [
 ];
 
 export default function CaseStudiesPage() {
+  const { data: caseStudies = fallbackCaseStudies } = useQuery({
+    queryKey: ["public", "case-studies"],
+    queryFn: () => publicApi.caseStudies(),
+    staleTime: 10 * 60 * 1000,
+  });
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
