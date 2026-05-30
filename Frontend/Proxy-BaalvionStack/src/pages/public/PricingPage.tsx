@@ -4,7 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2 } from "lucide-react";
-import { pricingPlans } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import { publicApi } from "@/lib/platformClient";
+import { pricingPlans as fallbackPlans } from "@/data/mockData";
 
 const additionalPlans = [
   {
@@ -18,6 +20,11 @@ const additionalPlans = [
 ];
 
 export default function PricingPage() {
+  const { data: pricingPlans = fallbackPlans } = useQuery({
+    queryKey: ["public", "plans"],
+    queryFn: () => publicApi.plans(),
+    staleTime: 5 * 60 * 1000,
+  });
   return (
     <div className="container mx-auto px-4 py-24">
       <SEOHead 

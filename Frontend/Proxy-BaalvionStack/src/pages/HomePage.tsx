@@ -18,7 +18,9 @@ import {
   Star,
   Quote
 } from "lucide-react";
-import { pricingPlans } from "@/data/mockData";
+import { useQuery } from "@tanstack/react-query";
+import { publicApi } from "@/lib/platformClient";
+import { pricingPlans as fallbackPlans } from "@/data/mockData";
 
 const features = [
   {
@@ -137,6 +139,11 @@ function AnimatedCounter({ target, suffix, duration = 2000 }: { target: number; 
 }
 
 export default function HomePage() {
+  const { data: pricingPlans = fallbackPlans } = useQuery({
+    queryKey: ["public", "plans"],
+    queryFn: () => publicApi.plans(),
+    staleTime: 5 * 60 * 1000,
+  });
   return (
     <div className="relative">
       <SEOHead 

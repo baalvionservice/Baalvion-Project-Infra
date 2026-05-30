@@ -160,6 +160,22 @@ export const apiKeyApi = {
   delete: (id: string) => del<void>(`/api-keys/${id}`),
 };
 
+// ─── Public marketing data (no auth required) ──────────────────────────────────
+export interface PublicPlan { slug: string; name: string; price: number; bandwidth: string; bandwidthGb: number; features: string[]; popular: boolean; }
+export interface PublicStatusService { name: string; status: string; uptime: string; }
+export interface PublicStatusDay { date: string; status: string; uptime: number; incident?: string; }
+export interface PublicStatus { overall: string; services: PublicStatusService[]; history: PublicStatusDay[]; }
+export interface PublicStats { activeProxies: number; countriesCovered: number; providers: number; customers: number; successRate: number; uptime: number; }
+export interface PublicCaseStudy { id: number; title: string; company: string; improvement: string; metric: string; description: string; }
+export interface PublicApiEndpoint { method: string; endpoint: string; description: string; }
+export const publicApi = {
+  plans: () => get<PublicPlan[]>("/public/plans"),
+  status: () => get<PublicStatus>("/public/status"),
+  stats: () => get<PublicStats>("/public/stats"),
+  caseStudies: () => get<PublicCaseStudy[]>("/public/case-studies"),
+  apiReference: () => get<PublicApiEndpoint[]>("/public/api-reference"),
+};
+
 // ─── Exports (inline-content downloads) ────────────────────────────────────────
 export interface InlineExport { filename: string; contentType: string; content: string; }
 function saveInline(exp: InlineExport) {
