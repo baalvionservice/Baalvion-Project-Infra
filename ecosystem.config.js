@@ -24,8 +24,10 @@ module.exports = {
       env: { NODE_ENV: 'development', NODE_PATH: `${BACKEND}/identity/session-service/node_modules` },
     },
     {
+      // Production build (next build) → next start: pre-compiled, no dev recompiles,
+      // stable + fast. Rebuild with `npm run build` after frontend changes.
       ...base, name: 'admin-platform', cwd: 'D:/Baalvion Projects/Frontend/admin-platform',
-      script: './node_modules/next/dist/bin/next', args: 'dev --port 3030', max_memory_restart: '1500M',
+      script: './node_modules/next/dist/bin/next', args: 'start --port 3030', max_memory_restart: '1500M',
     },
   ],
 };

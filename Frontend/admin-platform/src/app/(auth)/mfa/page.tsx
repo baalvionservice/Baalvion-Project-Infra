@@ -1,5 +1,6 @@
 'use client';
 
+import { Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,7 +18,7 @@ const mfaSchema = z.object({
 
 type MfaForm = z.infer<typeof mfaSchema>;
 
-export default function MfaPage() {
+function MfaForm() {
   const params = useSearchParams();
   const tempToken = params.get('token') ?? '';
   const { verifyMfa, isVerifyingMfa } = useAuth();
@@ -69,5 +70,14 @@ export default function MfaPage() {
         </form>
       </CardContent>
     </Card>
+  );
+}
+
+// useSearchParams() must sit under a Suspense boundary for the production build.
+export default function MfaPage() {
+  return (
+    <Suspense fallback={null}>
+      <MfaForm />
+    </Suspense>
   );
 }
