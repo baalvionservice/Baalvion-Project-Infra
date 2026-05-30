@@ -6,7 +6,7 @@
  */
 import { useEffect, useState } from 'react';
 import {
-  getProducts, getDepartments, getCategories, getCollections,
+  getProducts, getProductById, getDepartments, getCategories, getCollections,
   type ProductsPage, type ProductQuery,
 } from './catalog';
 import type { Product, Department, Category, Collection } from './types';
@@ -25,6 +25,19 @@ export function useProducts(query: ProductQuery = {}) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
   return { products: page.items, total: page.total, loading };
+}
+
+export function useProduct(idOrSlug?: string) {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let active = true;
+    if (!idOrSlug) { setLoading(false); return; }
+    setLoading(true);
+    getProductById(idOrSlug).then((p) => { if (active) { setProduct(p); setLoading(false); } });
+    return () => { active = false; };
+  }, [idOrSlug]);
+  return { product, loading };
 }
 
 function useList<T>(fetcher: () => Promise<T[]>) {
