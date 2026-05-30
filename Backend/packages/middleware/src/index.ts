@@ -147,7 +147,8 @@ export function createRateLimiter(
       if (!client) { next(); return; }
 
       const key = `${opts.prefix}:${opts.keyFn(req)}`;
-      const [[, count]] = await client.pipeline().incr(key).expire(key, opts.window).exec() as [null, number][];
+      const pipelineResult = (await client.pipeline().incr(key).expire(key, opts.window).exec()) as Array<[Error | null, number]>;
+      const count = pipelineResult[0]?.[1] ?? 0;
 
       res.setHeader('X-RateLimit-Limit',     String(opts.max));
       res.setHeader('X-RateLimit-Remaining', String(Math.max(0, opts.max - count)));

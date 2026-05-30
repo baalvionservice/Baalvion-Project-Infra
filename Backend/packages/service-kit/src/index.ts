@@ -85,7 +85,7 @@ export async function createService(config: ServiceConfig): Promise<ServiceConte
   });
   app.get('/metrics', async (_req: any, res: any) => {
     res.set('Content-Type', 'text/plain');
-    res.end(await serviceMetrics.register.metrics?.() ?? '');
+    res.end((await (serviceMetrics as { register?: { metrics?: () => Promise<string> | string } }).register?.metrics?.()) ?? '');
   });
 
   // 5. Identity middleware (verify JWT against the central JWKS).
