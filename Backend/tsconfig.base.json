@@ -1,0 +1,5 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "//": "Shim: packages extend ../../tsconfig.base.json (resolves here). Re-exports the repo-root base config so Backend/packages/* build under the federated layout.",
+  "extends": "../tsconfig.base.json"
+}
