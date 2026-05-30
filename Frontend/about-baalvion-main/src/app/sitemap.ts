@@ -1,14 +1,15 @@
-
 import { MetadataRoute } from 'next';
-import { db } from '@/lib/db';
+import { cmsGetPages, cmsGetProjects, cmsGetArticles, cmsGetUpdates } from '@/lib/cms';
 
 const BASE_URL = 'https://about.baalvion.com';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const pages = db.pages.getAll();
-  const projects = db.projects.getAll();
-  const articles = db.articles.getAll();
-  const updates = db.operationalUpdates.getAll();
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [pages, projects, articles, updates] = await Promise.all([
+    cmsGetPages(),
+    cmsGetProjects(),
+    cmsGetArticles(),
+    cmsGetUpdates(),
+  ]);
 
   const staticRoutes: MetadataRoute.Sitemap = pages.map((page) => ({
     url: `${BASE_URL}/${page.slug === 'home' ? '' : page.slug}`,
@@ -26,13 +27,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({
     url: `${BASE_URL}/news/${article.category}/${article.slug}`,
-    lastModified: new Date(), // articles don't have updatedAt currently
+    lastModified: new Date(),
     changeFrequency: 'daily',
     priority: 0.6,
   }));
 
   const updateRoutes: MetadataRoute.Sitemap = updates.map((update) => ({
-    url: `${BASE_URL}/updates`, // links to general updates page
+    url: `${BASE_URL}/updates`,
     lastModified: new Date(update.updatedAt),
     changeFrequency: 'daily',
     priority: 0.5,
@@ -54,6 +55,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'yearly',
       priority: 0.5,
-    }
+    },
   ];
 }

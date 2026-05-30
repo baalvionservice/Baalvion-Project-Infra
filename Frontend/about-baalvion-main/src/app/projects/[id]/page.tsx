@@ -1,10 +1,10 @@
-import { db } from "@/lib/db";
+import { cmsGetProject } from "@/lib/cms";
 import { Metadata } from "next";
 import ProjectDetailClient from "./project-detail-client";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  const project = db.projects.getById(id);
+  const project = await cmsGetProject(id);
   
   const title = project ? `${project.name} | Baalvion Project` : "Project Brief";
   const description = project?.description || "Explore strategic infrastructure initiatives within the Baalvion Nexus.";

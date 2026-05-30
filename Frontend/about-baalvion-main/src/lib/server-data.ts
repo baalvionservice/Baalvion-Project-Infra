@@ -1,74 +1,42 @@
-import { db, Project, EcosystemItem, Page } from "./db";
+import type { Project, EcosystemItem } from './db';
+import {
+  cmsGetPage,
+  cmsGetProjects,
+  cmsGetProject,
+  cmsGetEcosystem,
+  type PopulatedPage,
+} from './cms';
 
 /**
- * Server-side data fetching utilities for SSR pages
- * These functions run on the server and provide data for static generation
+ * Server-side data fetching utilities for SSR pages.
+ *
+ * These now read from the live Baalvion CMS (cms-service) via `@/lib/cms`
+ * instead of the former in-memory mock. Content is managed centrally in the
+ * admin-platform console.
  */
+export type { PopulatedPage };
 
-export interface PopulatedPage extends Page {
-  sectionData: any[];
-}
-
-/**
- * Fetch home page data with populated sections
- */
+/** Home page with populated page-builder sections. */
 export async function getHomePageData(): Promise<PopulatedPage | null> {
-  try {
-    const page = db.pages.getBySlug("home", true);
-    return page as PopulatedPage;
-  } catch (error) {
-    console.error("Error fetching home page data:", error);
-    return null;
-  }
+  return cmsGetPage('home');
 }
 
-/**
- * Fetch all projects for server-side rendering
- */
+/** All projects for server-side rendering. */
 export async function getProjects(): Promise<Project[]> {
-  try {
-    return db.projects.getAll();
-  } catch (error) {
-    console.error("Error fetching projects:", error);
-    return [];
-  }
+  return cmsGetProjects();
 }
 
-/**
- * Fetch ecosystem items for server-side rendering
- */
+/** Ecosystem layers for server-side rendering. */
 export async function getEcosystemItems(): Promise<EcosystemItem[]> {
-  try {
-    return db.ecosystem.getAll();
-  } catch (error) {
-    console.error("Error fetching ecosystem items:", error);
-    return [];
-  }
+  return cmsGetEcosystem();
 }
 
-/**
- * Fetch project by ID for server-side rendering
- */
+/** A single project by slug (used as the route id). */
 export async function getProjectById(id: string): Promise<Project | null> {
-  try {
-    return db.projects.getById(id) || null;
-  } catch (error) {
-    console.error("Error fetching project by ID:", error);
-    return null;
-  }
+  return cmsGetProject(id);
 }
 
-/**
- * Fetch page data by slug with populated sections
- */
-export async function getPageBySlug(
-  slug: string
-): Promise<PopulatedPage | null> {
-  try {
-    const page = db.pages.getBySlug(slug, true);
-    return page as PopulatedPage;
-  } catch (error) {
-    console.error("Error fetching page by slug:", error);
-    return null;
-  }
+/** A page by slug with populated sections. */
+export async function getPageBySlug(slug: string): Promise<PopulatedPage | null> {
+  return cmsGetPage(slug);
 }

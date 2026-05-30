@@ -1,36 +1,22 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { cmsGetEcosystem } from '@/lib/cms';
 
-const ADMIN_KEY = "secure-admin-key";
-
-function isAuthorized(req: Request) {
-  const key = req.headers.get('x-admin-key');
-  return key === ADMIN_KEY;
-}
+// Content is now managed centrally in the Baalvion CMS (admin-platform console).
+const MANAGED_ELSEWHERE = {
+  error: 'Content is managed centrally in the Baalvion CMS admin console.',
+  console: process.env.NEXT_PUBLIC_CMS_CONSOLE_URL || 'http://localhost:3030/cms',
+};
 
 export async function GET() {
-  return NextResponse.json(db.ecosystem.getAll());
+  return NextResponse.json(await cmsGetEcosystem());
 }
 
-export async function POST(req: Request) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  const data = await req.json();
-  const newItem = db.ecosystem.add(data);
-  return NextResponse.json(newItem);
+export async function POST() {
+  return NextResponse.json(MANAGED_ELSEWHERE, { status: 410 });
 }
-
-export async function PUT(req: Request) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  const data = await req.json();
-  const { id, ...updates } = data;
-  const updated = db.ecosystem.update(id, updates);
-  return NextResponse.json(updated);
+export async function PUT() {
+  return NextResponse.json(MANAGED_ELSEWHERE, { status: 410 });
 }
-
-export async function DELETE(req: Request) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
-  if (id) db.ecosystem.delete(id);
-  return NextResponse.json({ success: true });
+export async function DELETE() {
+  return NextResponse.json(MANAGED_ELSEWHERE, { status: 410 });
 }

@@ -1,46 +1,33 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { cmsGetProjects, cmsGetProject } from '@/lib/cms';
 
-const ADMIN_KEY = "secure-admin-key";
-
-function isAuthorized(req: Request) {
-  const key = req.headers.get('x-admin-key');
-  return key === ADMIN_KEY;
-}
+// Content is now managed centrally in the Baalvion CMS (admin-platform console).
+// This route is read-only; create/update/delete happen in the central console.
+const MANAGED_ELSEWHERE = {
+  error: 'Content is managed centrally in the Baalvion CMS admin console.',
+  console: process.env.NEXT_PUBLIC_CMS_CONSOLE_URL || 'http://localhost:3030/cms',
+};
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
 
   if (id) {
-    const project = db.projects.getById(id);
-    return project 
-      ? NextResponse.json(project) 
+    const project = await cmsGetProject(id);
+    return project
+      ? NextResponse.json(project)
       : NextResponse.json({ error: 'Project not found' }, { status: 404 });
   }
 
-  return NextResponse.json(db.projects.getAll());
+  return NextResponse.json(await cmsGetProjects());
 }
 
-export async function POST(req: Request) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  const data = await req.json();
-  const newProject = db.projects.add(data);
-  return NextResponse.json(newProject);
+export async function POST() {
+  return NextResponse.json(MANAGED_ELSEWHERE, { status: 410 });
 }
-
-export async function PUT(req: Request) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  const data = await req.json();
-  const { id, ...updates } = data;
-  const updated = db.projects.update(id, updates);
-  return NextResponse.json(updated);
+export async function PUT() {
+  return NextResponse.json(MANAGED_ELSEWHERE, { status: 410 });
 }
-
-export async function DELETE(req: Request) {
-  if (!isAuthorized(req)) return NextResponse.json({ error: 'Access denied' }, { status: 403 });
-  const { searchParams } = new URL(req.url);
-  const id = searchParams.get('id');
-  if (id) db.projects.delete(id);
-  return NextResponse.json({ success: true });
+export async function DELETE() {
+  return NextResponse.json(MANAGED_ELSEWHERE, { status: 410 });
 }
