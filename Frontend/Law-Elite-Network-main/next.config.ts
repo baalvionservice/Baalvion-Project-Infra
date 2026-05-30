@@ -4,6 +4,15 @@ import type { NextConfig } from 'next';
 // 'unsafe-eval'/ws breaks the client bundle in dev (nothing hydrates). Relax in dev only; prod stays strict.
 const isDev = process.env.NODE_ENV !== 'production';
 
+// Allow the actual backend API origin the app is configured to call (so CSP works in
+// any environment — localhost, staging, prod — not just api.baalvion.com).
+function originOf(url?: string): string {
+  try { return url ? new URL(url).origin : ''; } catch { return ''; }
+}
+const apiOrigin = originOf(process.env.NEXT_PUBLIC_API_BASE_URL);
+const gatewayOrigin = originOf(process.env.NEXT_PUBLIC_GATEWAY_URL);
+const extraConnect = [apiOrigin, gatewayOrigin].filter(Boolean).join(' ');
+
 const securityHeaders = [
   { key: 'X-DNS-Prefetch-Control', value: 'on' },
   { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
@@ -23,7 +32,7 @@ const securityHeaders = [
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos https://fastly.picsum.photos https://firebasestorage.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
-      `connect-src 'self' https://api.baalvion.com https://*.googleapis.com https://*.firebaseio.com https://*.algolianet.com https://*.algolia.net wss://*.firebaseio.com${isDev ? ' ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*' : ''}`,
+      `connect-src 'self' ${extraConnect} https://api.baalvion.com https://*.googleapis.com https://*.algolianet.com https://*.algolia.net${isDev ? ' ws://localhost:* ws://127.0.0.1:* http://localhost:* http://127.0.0.1:*' : ''}`,
       "frame-ancestors 'none'",
       "form-action 'self'",
       "base-uri 'self'",

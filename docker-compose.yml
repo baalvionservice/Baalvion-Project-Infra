@@ -989,6 +989,7 @@ services:
     environment:
       - PORT=3015
       - NODE_ENV=production
+      - CORS_ORIGINS=${LAW_CORS_ORIGINS:-http://localhost:9002,http://localhost:3000,https://lawelitenetwork.com}
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=baalvion_db
