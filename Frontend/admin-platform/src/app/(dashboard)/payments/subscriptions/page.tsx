@@ -99,19 +99,19 @@ export default function SubscriptionsPage() {
           <Link href="/payments"><ArrowLeft className="mr-1 h-4 w-4" />Back</Link>
         </Button>
       </div>
-      <PageHeader title="Subscriptions" description={`${data?.pagination.total ?? 0} subscriptions`} />
+      <PageHeader title="Subscriptions" description={`${data?.pagination?.total ?? 0} subscriptions`} />
       <DataTable
         columns={columns}
         data={data?.data ?? []}
         isLoading={isLoading}
-        totalCount={data?.pagination.total}
+        totalCount={data?.pagination?.total}
         page={page}
         onPageChange={setPage}
         filters={
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter || 'all'} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}>
             <SelectTrigger className="h-8 w-32"><SelectValue placeholder="Status" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
               <SelectItem value="expired">Expired</SelectItem>

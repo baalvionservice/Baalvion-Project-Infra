@@ -99,25 +99,25 @@ export default function PaymentsPage() {
         columns={columns}
         data={data?.data ?? []}
         isLoading={isLoading}
-        searchColumn="orderId"
+        searchColumn="id"
         searchPlaceholder="Search by order ID..."
-        totalCount={data?.pagination.total}
+        totalCount={data?.pagination?.total}
         page={page}
         onPageChange={setPage}
         filters={
           <div className="flex gap-2">
-            <Select value={providerFilter} onValueChange={setProviderFilter}>
+            <Select value={providerFilter || 'all'} onValueChange={(v) => setProviderFilter(v === 'all' ? '' : v)}>
               <SelectTrigger className="h-8 w-32"><SelectValue placeholder="Provider" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="razorpay">Razorpay</SelectItem>
                 <SelectItem value="payu">PayU</SelectItem>
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={statusFilter || 'all'} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}>
               <SelectTrigger className="h-8 w-32"><SelectValue placeholder="Status" /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="captured">Captured</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="failed">Failed</SelectItem>
