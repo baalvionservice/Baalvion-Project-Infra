@@ -30,7 +30,7 @@
     <dependency>
       <groupId>com.hierynomus</groupId>
       <artifactId>sshj</artifactId>
-      <version>0.38.0</version>
+      <version>0.40.0</version>
     </dependency>
   </dependencies>
 
