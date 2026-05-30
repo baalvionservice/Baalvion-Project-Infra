@@ -43,6 +43,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Lean, self-contained server output for Docker/AWS deploys (.next/standalone).
+  output: 'standalone',
   typescript: {
     // Production builds don't block on legacy type noise in inherited components; type
     // checking runs out-of-band (tsc/CI). App code compiles and runs clean.
