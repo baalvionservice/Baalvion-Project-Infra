@@ -14,8 +14,8 @@
     "test": "node --test"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1053.0",
-    "@aws-sdk/s3-request-presigner": "^3.1053.0",
+    "@aws-sdk/client-s3": "^3.1057.0",
+    "@aws-sdk/s3-request-presigner": "^3.1057.0",
     "@baalvion/auth-node": "workspace:*",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
