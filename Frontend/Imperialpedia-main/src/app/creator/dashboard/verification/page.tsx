@@ -5,6 +5,9 @@ import { VerificationClient } from './VerificationClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
+// Reads live verification status from imperialpedia-service (no-store) — render on demand.
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = buildMetadata({
   title: 'Expert Authentication Hub | Imperialpedia',
   description: 'Manage your verified expert status and credentials for the Intelligence Index.',

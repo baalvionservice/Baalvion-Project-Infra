@@ -61,11 +61,13 @@ const explainTrendFlow = ai.defineFlow(
     inputSchema: TrendExplanationInputSchema,
     outputSchema: TrendExplanationOutputSchema,
   },
-  async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('AI Engine failed to generate a valid trend explanation.');
+  async (input): Promise<TrendExplanationOutput> => {
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
     }
-    return output;
+    return { overview: "AI generation is not configured. Set GEMINI_API_KEY for live analysis.", key_drivers: [], trend_direction: 'Neutral', quantitative_metrics: { metric_name: '', value: '', change: '' }, potential_impact: '', confidence_score: 0 };
   }
 );

@@ -11,12 +11,23 @@ export interface PaginationMeta {
   hasPreviousPage: boolean;
 }
 
+/**
+ * Canonical response envelope. `data` is the only guaranteed field. Two conventions coexist
+ * across the codebase and both satisfy this shape:
+ *   - lightweight (services / mock-api / data layer):  { data, status?, error? }
+ *   - full gateway envelope (api-client / backends):   { success, statusCode, message, timestamp }
+ * Keeping the extra fields optional unifies them under one type without rewriting call sites.
+ */
 export interface ApiResponse<T> {
-  success: boolean;
-  statusCode: number;
-  message: string;
   data: T;
-  timestamp: string;
+  // lightweight convention
+  status?: number;
+  error?: string;
+  // full envelope convention
+  success?: boolean;
+  statusCode?: number;
+  message?: string;
+  timestamp?: string;
   path?: string; // Only present in error responses
 }
 

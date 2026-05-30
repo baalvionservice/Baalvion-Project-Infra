@@ -13,9 +13,9 @@ const categoryMap: Record<string, string> = {
 };
 
 interface CategoryPageProps {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 }
 
 export function generateStaticParams() {
@@ -24,8 +24,8 @@ export function generateStaticParams() {
   }));
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
-  const category = categoryMap[params.slug];
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const category = categoryMap[(await params).slug];
 
   if (!category) {
     notFound();
@@ -34,8 +34,8 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   return <NewsLayout initialCategory={category} />;
 }
 
-export function generateMetadata({ params }: CategoryPageProps) {
-  const category = categoryMap[params.slug];
+export async function generateMetadata({ params }: CategoryPageProps) {
+  const category = categoryMap[(await params).slug];
 
   if (!category) {
     return {

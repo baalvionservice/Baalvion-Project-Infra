@@ -6,7 +6,7 @@ import { EntityHeader } from '@/components/knowledge/EntityHeader';
 import { EntityOverview } from '@/components/knowledge/EntityOverview';
 import { DataTable } from '@/components/knowledge/DataTable';
 import { RelatedEntities } from '@/components/knowledge/RelatedEntities';
-import { getCompanyBySlug } from '@/lib/data/loaders';
+import { getCompanyBySlug, getRelatedEntities } from '@/lib/data/loaders';
 import { generateEntityMetadata } from '@/lib/utils/seo';
 import { structuredData } from '@/lib/seo/structuredData';
 import { JsonLd } from '@/modules/seo-engine/components/JsonLd';
@@ -34,6 +34,8 @@ export default async function Page({ params }: PageProps) {
   if (!company) {
     notFound();
   }
+
+  const related = await getRelatedEntities(company as unknown as Parameters<typeof getRelatedEntities>[0]);
 
   const technicalData = [
     ['Founded', company.founded_year],
@@ -67,7 +69,7 @@ export default async function Page({ params }: PageProps) {
 
             <EntityAnalytics type="company" slug={company.slug} />
             
-            <RelatedEntities entities={[]} />
+            <RelatedEntities entities={related} />
           </div>
 
           <aside className="lg:col-span-4 space-y-10">

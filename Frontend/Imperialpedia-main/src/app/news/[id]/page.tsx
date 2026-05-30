@@ -9,13 +9,13 @@ import {
 } from "@heroicons/react/24/outline";
 
 interface NewsDetailPageProps {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default function NewsDetailPage({ params }: NewsDetailPageProps) {
-  const article = getMockNewsById(params.id);
+export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
+  const article = getMockNewsById((await params).id);
 
   if (!article) {
     notFound();
@@ -172,8 +172,8 @@ export default function NewsDetailPage({ params }: NewsDetailPageProps) {
   );
 }
 
-export function generateMetadata({ params }: NewsDetailPageProps) {
-  const article = getMockNewsById(params.id);
+export async function generateMetadata({ params }: NewsDetailPageProps) {
+  const article = getMockNewsById((await params).id);
 
   if (!article) {
     return {

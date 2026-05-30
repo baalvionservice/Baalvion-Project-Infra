@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
@@ -11,7 +11,11 @@ import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
 import authClient from "@/lib/auth-client";
 
-export default function SignInPage() {
+// Auth page is interactive (reads ?redirect via useSearchParams) — render dynamically rather
+// than statically prerender (avoids the Next-15 CSR-bailout / Suspense requirement).
+export const dynamic = "force-dynamic";
+
+function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/dashboard";
@@ -262,5 +266,13 @@ export default function SignInPage() {
         </div>
       </Container>
     </main>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen" />}>
+      <SignInForm />
+    </Suspense>
   );
 }
