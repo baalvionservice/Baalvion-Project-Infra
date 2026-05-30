@@ -70,8 +70,16 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  /* Headings use the same Geist family but tighter, more deliberate tracking — reads premium. */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans tracking-tight;
+    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
   }
 }
 
