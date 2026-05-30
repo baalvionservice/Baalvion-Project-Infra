@@ -4,7 +4,7 @@ import React, { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, Briefcase, IndianRupee, MapPin, ShieldCheck, ChevronRight, CheckCircle2, Zap } from 'lucide-react';
+import { Star, Briefcase, MapPin, ShieldCheck, ChevronRight, CheckCircle2, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
