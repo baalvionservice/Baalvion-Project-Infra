@@ -100,7 +100,7 @@
     <dependency>
       <groupId>net.logstash.logback</groupId>
       <artifactId>logstash-logback-encoder</artifactId>
-      <version>7.4</version>
+      <version>9.0</version>
     </dependency>
     <!-- Distributed tracing / OpenTelemetry (design §10.4); sampling defaults to 0 (off) -->
     <dependency>
