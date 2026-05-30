@@ -3,7 +3,8 @@
 
 import React, { useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { PRODUCTS, DEPARTMENTS, CATEGORIES, formatPrice } from '@/lib/mock-data';
+import { formatPrice } from '@/lib/mock-data';
+import { useProducts, useDepartments, useCategories } from '@/lib/useCatalog';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ChevronRight, Filter, Sparkles } from 'lucide-react';
 import Link from 'next/link';
@@ -13,16 +14,17 @@ export default function SubcategoryPage() {
   const { country, department, category, subcategory } = useParams();
   const countryCode = (country as string) || 'us';
   
-  const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter(p => 
-      p.departmentId === department && 
-      p.categoryId === category && 
-      p.subcategoryId === subcategory
-    );
-  }, [department, category, subcategory]);
+  const { products } = useProducts({ categoryId: category as string, limit: 100 });
+  const { departments } = useDepartments();
+  const { categories } = useCategories();
 
-  const deptObj = DEPARTMENTS.find(d => d.id === department);
-  const catObj = CATEGORIES.find(c => c.id === category);
+  const filteredProducts = useMemo(
+    () => products.filter(p => p.subcategoryId === subcategory),
+    [products, subcategory]
+  );
+
+  const deptObj = departments.find(d => d.id === department);
+  const catObj = categories.find(c => c.id === category);
 
   return (
     <div className="bg-ivory min-h-screen pb-40">

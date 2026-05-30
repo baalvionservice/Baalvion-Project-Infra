@@ -4,7 +4,8 @@
 import React, { useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Image from 'next/image';
-import { PRODUCTS, formatPrice, COUNTRIES } from '@/lib/mock-data';
+import { formatPrice, COUNTRIES } from '@/lib/mock-data';
+import { useProduct } from '@/lib/useCatalog';
 import { Button } from '@/components/ui/button';
 import { Star, ChevronRight, Sparkles } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
@@ -23,10 +24,13 @@ export default function SpecialArchivePage() {
   const { addToCart, toggleWishlist, wishlist } = useAppStore();
   const { toast } = useToast();
   
-  const product = useMemo(() => PRODUCTS.find(p => p.id === id), [id]);
+  const { product, loading } = useProduct(id as string);
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
   const isWishlisted = wishlist.some(i => i.id === product?.id);
 
+  if (loading) {
+    return <div className="py-40 text-center font-headline text-3xl">Loading…</div>;
+  }
   if (!product) {
     return <div className="py-40 text-center font-headline text-3xl">Artifact not found.</div>;
   }

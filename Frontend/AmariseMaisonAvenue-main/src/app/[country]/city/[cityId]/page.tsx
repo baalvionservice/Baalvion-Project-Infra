@@ -4,7 +4,8 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { CITIES, COUNTRIES, PRODUCTS, COLLECTIONS } from "@/lib/mock-data";
+import { CITIES, COUNTRIES } from "@/lib/mock-data";
+import { useProducts, useCollections } from "@/lib/useCatalog";
 import { generateCityNarrative } from "@/ai/flows/generate-city-narrative";
 import { ProductCard } from "@/components/product/ProductCard";
 import {
@@ -35,12 +36,8 @@ export default function CityPage() {
   const [narrative, setNarrative] = useState<string | null>(null);
   const [loadingNarrative, setLoadingNarrative] = useState(true);
 
-  const featuredProducts = PRODUCTS.filter((p) =>
-    city?.featuredProducts.includes(p.id)
-  );
-  const featuredCollections = COLLECTIONS.filter((c) =>
-    city?.featuredCollections.includes(c.id)
-  );
+  const { products: featuredProducts } = useProducts({ isFeatured: true, limit: 8 });
+  const { collections: featuredCollections } = useCollections();
 
   useEffect(() => {
     if (!city) return;

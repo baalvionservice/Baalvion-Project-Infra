@@ -1,21 +1,26 @@
 import { MetadataRoute } from "next";
 import {
-  PRODUCTS,
-  CATEGORIES,
   CITIES,
   BUYING_GUIDES,
   EDITOR_INITIAL,
   COUNTRIES,
 } from "@/lib/mock-data";
+import { getProducts, getCategories } from "@/lib/catalog";
 
 /**
  * Institutional Sitemap Generator
  * Automates discovery for thousands of artifacts across 5 jurisdictions.
  * Enhanced with Multi-Language Hreflang logic for SEO authority.
  */
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = "https://www.amarisemaisonavenue.com/";
   const countryCodes = Object.keys(COUNTRIES);
+
+  // Live catalog from commerce-service (was mock PRODUCTS/CATEGORIES).
+  const [{ items: products }, categories] = await Promise.all([
+    getProducts({ limit: 200 }),
+    getCategories(),
+  ]);
 
   const routes: MetadataRoute.Sitemap = [];
 
@@ -39,7 +44,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     });
 
     // 3. Programmatic Category Nodes
-    CATEGORIES.forEach((cat) => {
+    categories.forEach((cat) => {
       routes.push({
         url: `${baseUrl}/${code}/category/${cat.id}`,
         lastModified: new Date(),
@@ -68,9 +73,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
       });
     });
 
-    // 6. Artifact Registry (Individual Products)
-    // Limiting to first 5000 for crawl efficiency
-    PRODUCTS.slice(0, 5000).forEach((prod) => {
+    // 6. Artifact Registry (Individual Products) — live catalog
+    products.forEach((prod) => {
       routes.push({
         url: `${baseUrl}/${code}/product/${prod.id}`,
         lastModified: new Date(),

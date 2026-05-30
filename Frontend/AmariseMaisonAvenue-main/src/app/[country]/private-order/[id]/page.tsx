@@ -3,7 +3,8 @@
 import React, { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { PRODUCTS, formatPrice, COUNTRIES } from '@/lib/mock-data';
+import { formatPrice, COUNTRIES } from '@/lib/mock-data';
+import { useProduct } from '@/lib/useCatalog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -31,7 +32,7 @@ import Link from 'next/link';
 export default function PrivateOrderPage() {
   const { id, country } = useParams();
   const countryCode = (country as string) || 'us';
-  const product = useMemo(() => PRODUCTS.find(p => p.id === id), [id]);
+  const { product } = useProduct(id as string);
   const { createInitialInquiry } = useSalesSystem();
   const { toast } = useToast();
   const router = useRouter();
