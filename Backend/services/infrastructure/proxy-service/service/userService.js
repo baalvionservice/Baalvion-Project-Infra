@@ -43,6 +43,18 @@ const getUserProfile = async (userId) => {
     return authService.sanitizeUser(user);
 };
 
+const updateProfile = async (auth, payload) => {
+    const update = {};
+    if (payload.name !== undefined) update.fullName = payload.name;
+    if (payload.company !== undefined) update.company = payload.company;
+    if (payload.timezone !== undefined) update.timezone = payload.timezone;
+    const user = await store.update('users', auth.userId, update, auth.orgId);
+    if (!user) {
+        throw new AppError('USER_NOT_FOUND', 'User not found', 404);
+    }
+    return authService.sanitizeUser(user);
+};
+
 const changePassword = async (userId, oldPassword, newPassword) => {
     const user = await store.getById('users', userId);
     if (!user) {
@@ -112,6 +124,7 @@ module.exports = {
     loginUser,
     refreshAccessToken,
     getUserProfile,
+    updateProfile,
     changePassword,
     listUsers,
     inviteUser,

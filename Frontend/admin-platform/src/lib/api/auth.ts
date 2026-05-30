@@ -1,5 +1,4 @@
 import { authClient } from './client';
-import apiClient from './client';
 import type {
   LoginPayload,
   LoginResponse,
@@ -18,7 +17,10 @@ interface BackendUser {
   id: string | number;
   orgId: string | null;
   email: string;
-  name: string;
+  // auth-service returns `fullName`; tolerate legacy `name` too.
+  fullName?: string;
+  name?: string;
+  avatarUrl?: string | null;
   role: string;
   status: string;
   mfaEnabled: boolean;
@@ -26,7 +28,9 @@ interface BackendUser {
 }
 
 interface BackendLoginData {
-  token: string;
+  // auth-service returns `accessToken`; tolerate legacy `token` too.
+  accessToken?: string;
+  token?: string;
   refreshToken?: string;
   user: BackendUser;
   expiresAt?: string;
@@ -35,8 +39,8 @@ interface BackendLoginData {
 const toAuthUser = (raw: BackendUser): AuthUser => ({
   id: Number(raw.id),
   email: raw.email,
-  fullName: raw.name,
-  avatarUrl: null,
+  fullName: raw.fullName ?? raw.name ?? '',
+  avatarUrl: raw.avatarUrl ?? null,
   status: raw.status as AuthUser['status'],
   emailVerifiedAt: raw.emailVerified ? new Date().toISOString() : null,
   mfaEnabled: raw.mfaEnabled,
@@ -58,7 +62,7 @@ export const authApi = {
     const raw = res.data.data;
     const normalized: LoginResponse = {
       user: toAuthUser(raw.user),
-      accessToken: raw.token,
+      accessToken: raw.accessToken ?? raw.token ?? '',
       expiresIn: toExpiresIn(raw.expiresAt),
       org: null,
     };
@@ -73,7 +77,7 @@ export const authApi = {
     const res = await authClient.post<ApiResponse<BackendLoginData>>('/refresh');
     const raw = res.data.data;
     const normalized: RefreshResponse = {
-      accessToken: raw.token,
+      accessToken: raw.accessToken ?? raw.token ?? '',
       expiresIn: toExpiresIn(raw.expiresAt),
     };
     return { ...res, data: { ...res.data, data: normalized } } as typeof res & {
@@ -82,7 +86,7 @@ export const authApi = {
   },
 
   me: async () => {
-    const res = await apiClient.get<ApiResponse<BackendUser>>('/users/me');
+    const res = await authClient.get<ApiResponse<BackendUser>>('/me');
     const normalized = toAuthUser(res.data.data);
     return { ...res, data: { ...res.data, data: normalized } } as typeof res & {
       data: ApiResponse<AuthUser>;

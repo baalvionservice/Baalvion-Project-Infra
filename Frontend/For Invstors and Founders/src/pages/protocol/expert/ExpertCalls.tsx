@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Video, Phone, Calendar, Clock, Users, Play, Plus, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
 const mockVideoCalls = [
@@ -21,6 +22,11 @@ const mockAudioCalls = [
 ];
 
 const ExpertCalls = () => {
+  const [calls, setCalls] = useState<any[]>([]);
+  const loadCalls = () => protocolApi.calls.list().then(setCalls);
+  useEffect(() => { loadCalls(); }, []);
+  const videoCalls = calls.filter((c) => c.type === "video");
+  const audioCalls = calls.filter((c) => c.type === "audio");
   const [showStartModal, setShowStartModal] = useState(false);
   const [showScheduleModal, setShowScheduleModal] = useState(false);
   const [showCallModal, setShowCallModal] = useState(false);
@@ -33,7 +39,11 @@ const ExpertCalls = () => {
     toast.success(`${callType === 'video' ? 'Video' : 'Audio'} call started`);
   };
 
-  const handleScheduleCall = () => {
+  const handleScheduleCall = async () => {
+    const scheduled_at = newCall.date ? new Date(`${newCall.date}T${newCall.time || "12:00"}`).toISOString() : undefined;
+    const { error } = await protocolApi.calls.create({ title: newCall.title || "Untitled session", type: callType, status: "upcoming", duration: newCall.duration, scheduled_at });
+    if (error) { toast.error(error.message || "Could not schedule call"); return; }
+    await loadCalls();
     toast.success("Call scheduled successfully");
     setShowScheduleModal(false);
     setNewCall({ title: "", date: "", time: "", duration: "" });
@@ -84,7 +94,7 @@ const ExpertCalls = () => {
           </TabsList>
 
           <TabsContent value="video" className="space-y-4">
-            {mockVideoCalls.map((call) => (
+            {videoCalls.map((call) => (
               <Card key={call.id} className="bg-white/5 border-amber-500/10 hover:border-amber-500/30 transition-all">
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -130,7 +140,7 @@ const ExpertCalls = () => {
           </TabsContent>
 
           <TabsContent value="audio" className="space-y-4">
-            {mockAudioCalls.map((call) => (
+            {audioCalls.map((call) => (
               <Card key={call.id} className="bg-white/5 border-amber-500/10 hover:border-amber-500/30 transition-all">
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

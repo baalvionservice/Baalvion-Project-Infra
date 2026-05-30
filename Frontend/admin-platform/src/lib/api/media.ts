@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { cmsApiClient } from './client';
 import type { ApiResponse, PaginatedResponse, PaginationParams } from '@/lib/types/common.types';
 
 export interface MediaFile {
@@ -29,10 +29,10 @@ export interface MediaFolder {
 export const mediaApi = {
   files: {
     list: (params?: PaginationParams & { folderId?: string; mimeType?: string }) =>
-      apiClient.get<PaginatedResponse<MediaFile>>('/admin/media/files', { params }),
-    get: (id: string) => apiClient.get<ApiResponse<MediaFile>>(`/admin/media/files/${id}`),
+      cmsApiClient.get<PaginatedResponse<MediaFile>>('/cms/media/files', { params }),
+    get: (id: string) => cmsApiClient.get<ApiResponse<MediaFile>>(`/cms/media/files/${id}`),
     upload: (formData: FormData, onProgress?: (pct: number) => void) =>
-      apiClient.post<ApiResponse<MediaFile>>('/admin/media/upload', formData, {
+      cmsApiClient.post<ApiResponse<MediaFile>>('/cms/media/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (e) => {
           if (onProgress && e.total) {
@@ -41,18 +41,18 @@ export const mediaApi = {
         },
       }),
     update: (id: string, payload: { altText?: string; filename?: string }) =>
-      apiClient.patch<ApiResponse<MediaFile>>(`/admin/media/files/${id}`, payload),
-    delete: (id: string) => apiClient.delete<ApiResponse<void>>(`/admin/media/files/${id}`),
+      cmsApiClient.patch<ApiResponse<MediaFile>>(`/cms/media/files/${id}`, payload),
+    delete: (id: string) => cmsApiClient.delete<ApiResponse<void>>(`/cms/media/files/${id}`),
     bulkDelete: (ids: string[]) =>
-      apiClient.post<ApiResponse<void>>('/admin/media/files/bulk-delete', { ids }),
+      cmsApiClient.post<ApiResponse<void>>('/cms/media/files/bulk-delete', { ids }),
     signedUrl: (id: string) =>
-      apiClient.get<ApiResponse<{ url: string; expiresAt: string }>>(`/admin/media/files/${id}/signed-url`),
+      cmsApiClient.get<ApiResponse<{ url: string; expiresAt: string }>>(`/cms/media/files/${id}/signed-url`),
   },
 
   folders: {
-    list: () => apiClient.get<ApiResponse<MediaFolder[]>>('/admin/media/folders'),
+    list: () => cmsApiClient.get<ApiResponse<MediaFolder[]>>('/cms/media/folders'),
     create: (payload: { name: string; parentId?: string }) =>
-      apiClient.post<ApiResponse<MediaFolder>>('/admin/media/folders', payload),
-    delete: (id: string) => apiClient.delete<ApiResponse<void>>(`/admin/media/folders/${id}`),
+      cmsApiClient.post<ApiResponse<MediaFolder>>('/cms/media/folders', payload),
+    delete: (id: string) => cmsApiClient.delete<ApiResponse<void>>(`/cms/media/folders/${id}`),
   },
 };

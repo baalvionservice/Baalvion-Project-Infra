@@ -19,7 +19,11 @@ export default function ContentEditorPage({
   const { websiteId, contentId } = use(params);
   const { setBreadcrumbs } = useUIStore();
   const setActiveContent = useCmsStore((s) => s.setActiveContent);
+  const setActiveWebsiteId = useCmsStore((s) => s.setActiveWebsiteId);
   const clearDraft = useCmsStore((s) => s.clearDraft);
+
+  // Set the active website BEFORE content queries fire so id-only API calls resolve it.
+  useEffect(() => { setActiveWebsiteId(websiteId); }, [websiteId, setActiveWebsiteId]);
 
   const { data: website } = useWebsite(websiteId);
   const { data: content, isLoading } = useContentItem(contentId);

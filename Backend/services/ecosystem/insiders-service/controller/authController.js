@@ -127,6 +127,25 @@ const me = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// Canonical identity probe for gateway-authenticated callers. Returns the LOCAL users.id
+// (uuid the island keys all ownership by — see middleware/gatewayIdentity.js), the central
+// gateway id, merged roles, and the shaped profile. The frontend uses `userId` as its
+// `user.id` so client-side ownership filters (.eq('id', user.id)) line up with the backend.
+const whoami = async (req, res, next) => {
+    try {
+        const user = await db.User.findByPk(req.auth.userId, { attributes: { exclude: ['password_hash', 'verify_token', 'reset_token'] } });
+        const profile = await db.Profile.findByPk(req.auth.userId);
+        const roles = req.auth.roles || [];
+        return sendSuccess(req, res, {
+            userId: req.auth.userId,
+            gatewayUserId: req.auth.gatewayUserId || null,
+            email: user ? user.email : null,
+            roles,
+            user: user ? await shapeUser(user, profile, roles) : null,
+        });
+    } catch (err) { return next(err); }
+};
+
 const refresh = async (req, res, next) => {
     try {
         const raw = req.body?.refresh_token;
@@ -193,4 +212,4 @@ const updatePassword = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { register, login, me, refresh, logout, forgotPassword, resetPassword, updatePassword };
+module.exports = { register, login, me, whoami, refresh, logout, forgotPassword, resetPassword, updatePassword };

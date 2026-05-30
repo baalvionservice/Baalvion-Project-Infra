@@ -5,8 +5,20 @@ const query = require('../controller/queryController');
 const rpc = require('../controller/rpcController');
 const storage = require('../controller/storageController');
 const fns = require('../controller/functionsController');
+const authCtrl = require('../controller/authController');
 
 router.use('/auth', require('./authRoutes'));
+
+// Canonical identity probe — returns the LOCAL users.id for a gateway-authenticated caller
+// (+ roles + profile). The frontend reads this so its user.id matches backend ownership keys.
+router.get('/whoami', authMiddleware, authCtrl.whoami);
+
+// Public, unauthenticated, SEO-safe reads for the Next.js public site (curated subset only).
+const pub = require('../controller/publicController');
+router.get('/public/founders', pub.listFounders);
+router.get('/public/founders/:id', pub.getFounder);
+router.get('/public/investors', pub.listInvestors);
+router.get('/public/investors/:id', pub.getInvestor);
 
 // Generic data layer (replaces PostgREST). Auth is optional at the edge; the
 // engine enforces per-table authorization that replaces RLS.

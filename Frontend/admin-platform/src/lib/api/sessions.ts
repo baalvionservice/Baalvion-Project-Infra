@@ -1,4 +1,4 @@
-import { sessionApiClient } from './client';
+import { sessionApiClient, adminApiClient } from './client';
 import type { ApiResponse } from '@/lib/types/common.types';
 
 export interface SessionDetail {
@@ -45,12 +45,15 @@ export const sessionsApi = {
   revokeAllOthers: () =>
     sessionApiClient.delete<ApiResponse<{ message: string }>>('/sessions'),
 
+  // Admin-wide session views are served by admin-service (:3021), which queries
+  // auth.sessions directly. (session-service :3022 owns the per-user "my sessions"
+  // methods above; it is optional for the core identity slice.)
   adminListAll: (params?: { page?: number; limit?: number; userId?: string; orgId?: string; riskLevel?: string }) =>
-    sessionApiClient.get<ApiResponse<{ items: SessionDetail[]; total: number }>>('/sessions/admin/all', { params }),
+    adminApiClient.get<ApiResponse<{ items: SessionDetail[]; total: number }>>('/admin/sessions', { params }),
 
   adminGetUserSessions: (userId: string, params?: { page?: number; limit?: number; includeRevoked?: boolean }) =>
-    sessionApiClient.get<ApiResponse<{ items: SessionDetail[]; total: number }>>(`/sessions/admin/users/${userId}`, { params }),
+    adminApiClient.get<ApiResponse<{ items: SessionDetail[]; total: number }>>('/admin/sessions', { params: { ...params, userId } }),
 
   adminRevokeOne: (sessionId: string) =>
-    sessionApiClient.delete<ApiResponse<{ message: string }>>(`/sessions/admin/${sessionId}`),
+    adminApiClient.delete<ApiResponse<{ message: string }>>(`/admin/sessions/${sessionId}`),
 };

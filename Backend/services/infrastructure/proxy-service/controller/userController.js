@@ -41,6 +41,14 @@ const getProfile = async (req, res, next) => {
     }
 };
 
+const updateProfile = async (req, res, next) => {
+    try {
+        return sendSuccess(req, res, await userService.updateProfile(req.auth, req.body));
+    } catch (error) {
+        return next(error);
+    }
+};
+
 const changePassword = async (req, res, next) => {
     try {
         const userId = req.user.id;
@@ -117,6 +125,7 @@ module.exports = {
     login,
     refreshToken,
     getProfile,
+    updateProfile,
     changePassword,
     listUsers,
     inviteUser,

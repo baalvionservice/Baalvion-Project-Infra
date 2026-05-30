@@ -1,8 +1,8 @@
 module.exports = function (sequelize, DataTypes) {
     return sequelize.define('cms_website_members', {
         id: { type: DataTypes.BIGINT, autoIncrement: true, primaryKey: true },
-        website_id: { type: DataTypes.UUID, allowNull: false },
-        user_id: { type: DataTypes.BIGINT, allowNull: false },
+        websiteId: { type: DataTypes.UUID, allowNull: false },
+        userId: { type: DataTypes.BIGINT, allowNull: false },
         role: {
             type: DataTypes.ENUM(
                 'cms_admin', 'cms_editor', 'cms_publisher', 'cms_reviewer',
@@ -11,8 +11,8 @@ module.exports = function (sequelize, DataTypes) {
             allowNull: false,
             defaultValue: 'cms_author',
         },
-        invited_by: { type: DataTypes.BIGINT, allowNull: true },
-        joined_at: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
+        invitedBy: { type: DataTypes.BIGINT, allowNull: true },
+        joinedAt: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
     }, {
         sequelize,
         tableName: 'cms_website_members',

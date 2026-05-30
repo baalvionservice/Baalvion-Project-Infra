@@ -89,9 +89,21 @@ const testProxy = async (auth, payload) => {
     };
 };
 
-const exportProxies = async () => ({
-    downloadUrl: '/downloads/proxies-export.csv',
-});
+const csvCell = (v) => {
+    if (v === null || v === undefined) return '';
+    const s = String(v);
+    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+};
+
+const exportProxies = async (auth) => {
+    const rows = auth ? await store.getCollection('proxies', auth.orgId) : [];
+    const header = ['id', 'name', 'host', 'port', 'protocol', 'country', 'type', 'status', 'bandwidthUsedGb', 'createdAt'];
+    const csv = [
+        header.join(','),
+        ...rows.map((p) => [p.id, p.name, p.host, p.port, p.protocol, p.country, p.type, p.status, p.bandwidthUsedGb, p.createdAt].map(csvCell).join(',')),
+    ].join('\n');
+    return { filename: `proxies-${auth ? auth.orgId : 'export'}.csv`, contentType: 'text/csv', content: csv };
+};
 
 const listPresets = async (auth) => store.getCollection('presets', auth.orgId);
 

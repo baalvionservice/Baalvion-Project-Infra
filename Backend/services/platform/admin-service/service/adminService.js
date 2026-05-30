@@ -171,11 +171,13 @@ async function listOrgs({ page = 1, limit = 50, search, plan }) {
     const [orgs, [{ count }]] = await Promise.all([
         db.sequelize.query(
             `SELECT o.id, o.name, o.slug, o.plan, o.owner_id, o.created_at,
-                    COUNT(m.id)::int AS member_count
+                    COUNT(m.id)::int AS member_count,
+                    ou.email AS owner_email, ou.full_name AS owner_name, ou.avatar_url AS owner_avatar
              FROM auth.organizations o
              LEFT JOIN auth.team_members m ON m.org_id = o.id AND m.status = 'active'
+             LEFT JOIN auth.users ou ON ou.id = o.owner_id
              WHERE ${where.join(' AND ')}
-             GROUP BY o.id
+             GROUP BY o.id, ou.email, ou.full_name, ou.avatar_url
              ORDER BY o.created_at DESC
              LIMIT $${bind.length + 1} OFFSET $${bind.length + 2}`,
             { type: db.Sequelize.QueryTypes.SELECT, bind: [...bind, limit, offset] }
@@ -338,36 +340,103 @@ async function revokeSessionAdmin(sessionId, adminUserId) {
 
 // ── Audit log query ───────────────────────────────────────────────────────────
 
-async function getAuditLogs({ page = 1, limit = 50, orgId, userId, action, severity, from, to }) {
+async function getAuditLogs({ page = 1, limit = 50, orgId, userId, action, from, to }) {
     const db     = getDb();
     const offset = (page - 1) * limit;
     const where  = ['1=1'];
     const bind   = [];
 
-    if (orgId)    { where.push(`org_id  = $${bind.length + 1}`); bind.push(orgId); }
-    if (userId)   { where.push(`user_id = $${bind.length + 1}`); bind.push(userId); }
-    if (action)   { where.push(`action  = $${bind.length + 1}`); bind.push(action); }
-    if (severity) { where.push(`severity = $${bind.length + 1}`); bind.push(severity); }
-    if (from)     { where.push(`created_at >= $${bind.length + 1}`); bind.push(from); }
-    if (to)       { where.push(`created_at <= $${bind.length + 1}`); bind.push(to); }
+    if (orgId)  { where.push(`a.org_id  = $${bind.length + 1}`); bind.push(orgId); }
+    if (userId) { where.push(`a.user_id = $${bind.length + 1}`); bind.push(userId); }
+    if (action) {
+        // The console may pass a comma-separated list of actions (e.g. the Security
+        // page) — match any of them. A single value falls back to equality.
+        const actions = String(action).split(',').map((s) => s.trim()).filter(Boolean);
+        if (actions.length > 1) { where.push(`a.action = ANY($${bind.length + 1})`); bind.push(actions); }
+        else if (actions.length === 1) { where.push(`a.action = $${bind.length + 1}`); bind.push(actions[0]); }
+    }
+    if (from) { where.push(`a.created_at >= $${bind.length + 1}`); bind.push(from); }
+    if (to)   { where.push(`a.created_at <= $${bind.length + 1}`); bind.push(to); }
 
+    const whereSql = where.join(' AND ');
+
+    // NOTE: auth.audit_logs has no user_agent/severity columns — emit NULLs so the
+    // console's AdminAuditLog shape is preserved. Join the actor (user) so the console's
+    // "Actor" column can show a real name/email/avatar instead of just a numeric id.
     const [logs, [{ count }]] = await Promise.all([
         db.sequelize.query(
-            `SELECT id, user_id, org_id, action, resource_type, resource_id,
-                    metadata, ip_address, user_agent, severity, created_at
-             FROM auth.audit_logs
-             WHERE ${where.join(' AND ')}
-             ORDER BY created_at DESC
+            `SELECT a.id, a.user_id, a.org_id, a.action, a.resource_type, a.resource_id,
+                    a.metadata, a.ip_address,
+                    NULL::text AS user_agent,
+                    NULL::text AS severity,
+                    a.created_at,
+                    u.email AS user_email, u.full_name AS user_name, u.avatar_url AS user_avatar
+             FROM auth.audit_logs a
+             LEFT JOIN auth.users u ON u.id = a.user_id
+             WHERE ${whereSql}
+             ORDER BY a.created_at DESC
              LIMIT $${bind.length + 1} OFFSET $${bind.length + 2}`,
             { type: db.Sequelize.QueryTypes.SELECT, bind: [...bind, limit, offset] }
         ),
         db.sequelize.query(
-            `SELECT COUNT(*)::int AS count FROM auth.audit_logs WHERE ${where.join(' AND ')}`,
+            `SELECT COUNT(*)::int AS count FROM auth.audit_logs a WHERE ${whereSql}`,
             { type: db.Sequelize.QueryTypes.SELECT, bind }
         ),
     ]);
 
     return { items: logs, total: count, page, limit, hasMore: offset + limit < count };
+}
+
+// ── Risk events (derived from the audit log) ────────────────────────────────────
+// admin-service has no dedicated risk engine; the Security console's risk feed is
+// synthesized from security-relevant audit actions so it shows real signal.
+const RISK_ACTION_MAP = {
+    'user.login_failed':                { type: 'brute_force',  severity: 'medium'   },
+    'security.refresh_reuse_detected':  { type: 'token_reuse',  severity: 'critical' },
+    'admin.impersonation_started':      { type: 'device_new',   severity: 'high'     },
+    'session.revoked':                  { type: 'geo_anomaly',  severity: 'low'      },
+};
+
+async function listRiskEvents({ page = 1, limit = 20 }) {
+    const db     = getDb();
+    const offset = (page - 1) * limit;
+    const actions = Object.keys(RISK_ACTION_MAP);
+
+    const [rows, [{ count }]] = await Promise.all([
+        db.sequelize.query(
+            `SELECT a.id, a.user_id, a.action, a.ip_address, a.metadata, a.created_at,
+                    u.email AS user_email
+             FROM auth.audit_logs a
+             LEFT JOIN auth.users u ON u.id = a.user_id
+             WHERE a.action = ANY($1)
+             ORDER BY a.created_at DESC
+             LIMIT $2 OFFSET $3`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind: [actions, limit, offset] }
+        ),
+        db.sequelize.query(
+            `SELECT COUNT(*)::int AS count FROM auth.audit_logs a WHERE a.action = ANY($1)`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind: [actions] }
+        ),
+    ]);
+
+    const items = rows.map((r) => {
+        const map = RISK_ACTION_MAP[r.action] || { type: 'geo_anomaly', severity: 'low' };
+        return {
+            id:         String(r.id),
+            userId:     r.user_id ? String(r.user_id) : '',
+            userEmail:  r.user_email || (r.metadata && r.metadata.email) || 'unknown',
+            type:       map.type,
+            severity:   map.severity,
+            ip:         r.ip_address || '',
+            country:    '',
+            city:       '',
+            details:    r.metadata || {},
+            resolvedAt: null,
+            createdAt:  r.created_at,
+        };
+    });
+
+    return { success: true, data: items, pagination: { page, limit, total: count, totalPages: limit ? Math.ceil(count / limit) : 1, hasNext: page * limit < count, hasPrev: page > 1 } };
 }
 
 module.exports = {
@@ -377,4 +446,5 @@ module.exports = {
     createImpersonationToken,
     listAllSessions, revokeSessionAdmin,
     getAuditLogs,
+    listRiskEvents,
 };

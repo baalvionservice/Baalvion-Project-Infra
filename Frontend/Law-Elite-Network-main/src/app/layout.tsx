@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Navbar } from '@/components/navbar';
 import NotificationToastListener from '@/components/notifications/NotificationToastListener';
 import { AIChatAssistantWrapper } from '@/components/ai/AIChatAssistantWrapper';
+import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
 import './globals.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -130,6 +131,7 @@ export default function RootLayout({
               </Suspense>
 
               <NotificationToastListener />
+              <ImpersonationBanner />
             </div>
             <Toaster />
         </AuthProvider>

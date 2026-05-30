@@ -32,6 +32,7 @@ import { Label } from '@/components/ui/label';
 import { useContentList, useCreateContent, useDeleteContent, useDuplicateContent } from '@/lib/queries/cms-content.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useUIStore } from '@/lib/store/uiStore';
+import { useCmsStore } from '@/lib/store/cmsStore';
 import { formatDate } from '@/lib/utils/format';
 import type { ContentItem, ContentItemType, ContentWorkflowStatus } from '@/lib/types/cms-content.types';
 
@@ -43,6 +44,8 @@ export default function WebsiteContentPage({
   const { websiteId } = use(params);
   const router = useRouter();
   const { setBreadcrumbs } = useUIStore();
+  const setActiveWebsiteId = useCmsStore((s) => s.setActiveWebsiteId);
+  useEffect(() => { setActiveWebsiteId(websiteId); }, [websiteId, setActiveWebsiteId]);
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState<ContentItemType | ''>('');
   const [statusFilter, setStatusFilter] = useState<ContentWorkflowStatus | ''>('');
@@ -213,14 +216,14 @@ export default function WebsiteContentPage({
         filters={
           <div className="flex gap-2">
             <Select
-              value={typeFilter}
-              onValueChange={(v) => setTypeFilter(v as ContentItemType | '')}
+              value={typeFilter || '__all__'}
+              onValueChange={(v) => setTypeFilter(v === '__all__' ? '' : (v as ContentItemType))}
             >
               <SelectTrigger className="h-8 w-32">
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Types</SelectItem>
+                <SelectItem value="__all__">All Types</SelectItem>
                 {enabledTypes.map((t) => (
                   <SelectItem key={t} value={t} className="capitalize">
                     {t.replace(/_/g, ' ')}
@@ -229,14 +232,14 @@ export default function WebsiteContentPage({
               </SelectContent>
             </Select>
             <Select
-              value={statusFilter}
-              onValueChange={(v) => setStatusFilter(v as ContentWorkflowStatus | '')}
+              value={statusFilter || '__all__'}
+              onValueChange={(v) => setStatusFilter(v === '__all__' ? '' : (v as ContentWorkflowStatus))}
             >
               <SelectTrigger className="h-8 w-36">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Statuses</SelectItem>
+                <SelectItem value="__all__">All Statuses</SelectItem>
                 <SelectItem value="draft">Draft</SelectItem>
                 <SelectItem value="pending_review">Pending Review</SelectItem>
                 <SelectItem value="changes_requested">Changes Requested</SelectItem>

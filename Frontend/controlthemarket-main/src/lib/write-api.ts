@@ -96,7 +96,9 @@ export async function createSubmission(data: {
         taskId: created.task_id,
         userId: String(created.user_id),
         companyId: created.task?.company_id ?? '',
-        status: 'pending',
+        // Freshly started (no work submitted yet) → 'in-progress' so the submission form
+        // is editable. The backend row exists as 'pending'; "Submit Work" finalises it.
+        status: 'in-progress',
         assignedAt: created.submitted_at ?? new Date().toISOString(),
         submittedAt: created.submitted_at,
         lastUpdated: created.updated_at ?? new Date().toISOString(),
@@ -130,6 +132,12 @@ export async function updateSubmission(
   if ((updates as any).description !== undefined) payload.description = (updates as any).description;
   if ((updates as any).notes !== undefined)       payload.notes       = (updates as any).notes;
   if ((updates as any).status !== undefined)      payload.status      = (updates as any).status;
+  // The submission form sends content {type, value}; map the URL to the backend column.
+  const content = (updates as any).content;
+  if (content && content.value) {
+    if (content.type === 'link') payload.code_url = content.value;
+    else payload.demo_url = content.value;
+  }
 
   if (Object.keys(payload).length > 0) {
     await ctmClient.patch(`/submissions/${submissionId}`, payload);

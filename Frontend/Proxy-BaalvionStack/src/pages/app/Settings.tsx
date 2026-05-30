@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { SEOHead } from "@/components/SEOHead";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -27,11 +27,56 @@ import {
   EyeOff
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { accountApi } from "@/lib/platformClient";
 
 export default function Settings() {
   const { toast } = useToast();
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  // Load the real profile.
+  useEffect(() => {
+    accountApi.getProfile().then((p) => setProfile({
+      name: p.name ?? "",
+      email: p.email ?? "",
+      company: p.company ?? "",
+      timezone: p.timezone || "America/New_York",
+    })).catch(() => { /* keep defaults */ });
+  }, []);
+
+  const handleSaveProfile = async () => {
+    setSavingProfile(true);
+    try {
+      await accountApi.updateProfile({ name: profile.name, company: profile.company, timezone: profile.timezone });
+      toast({ title: "Profile updated", description: "Your changes have been saved." });
+    } catch (e) {
+      toast({ title: "Couldn't save profile", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (currentPassword.length < 8 || newPassword.length < 8) {
+      toast({ title: "Invalid password", description: "Both passwords must be at least 8 characters.", variant: "destructive" });
+      return;
+    }
+    setChangingPassword(true);
+    try {
+      await accountApi.changePassword(currentPassword, newPassword);
+      setCurrentPassword(""); setNewPassword("");
+      toast({ title: "Password updated", description: "Your password has been changed successfully." });
+    } catch (e) {
+      toast({ title: "Couldn't update password", description: e instanceof Error ? e.message : "Try again.", variant: "destructive" });
+    } finally {
+      setChangingPassword(false);
+    }
+  };
 
   const [profile, setProfile] = useState({
     name: "John Doe",
@@ -99,12 +144,13 @@ export default function Settings() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input 
-                    id="email" 
+                  <Input
+                    id="email"
                     type="email"
                     value={profile.email}
-                    onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                    className="bg-secondary/50 border-border/50"
+                    readOnly
+                    title="Contact support to change your account email"
+                    className="bg-secondary/50 border-border/50 opacity-70 cursor-not-allowed"
                   />
                 </div>
                 <div className="space-y-2">
@@ -136,9 +182,9 @@ export default function Settings() {
                 </div>
               </div>
               <div className="flex justify-end">
-                <Button onClick={() => handleSave("Profile")}>
+                <Button onClick={handleSaveProfile} disabled={savingProfile}>
                   <Save className="w-4 h-4 mr-2" />
-                  Save Changes
+                  {savingProfile ? "Saving…" : "Save Changes"}
                 </Button>
               </div>
             </CardContent>
@@ -165,10 +211,12 @@ export default function Settings() {
                   <div className="space-y-2">
                     <Label htmlFor="current-password">Current Password</Label>
                     <div className="relative">
-                      <Input 
-                        id="current-password" 
+                      <Input
+                        id="current-password"
                         type={showCurrentPassword ? "text" : "password"}
                         placeholder="Enter current password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
                         className="bg-secondary/50 border-border/50 pr-10"
                       />
                       <Button
@@ -185,10 +233,12 @@ export default function Settings() {
                   <div className="space-y-2">
                     <Label htmlFor="new-password">New Password</Label>
                     <div className="relative">
-                      <Input 
-                        id="new-password" 
+                      <Input
+                        id="new-password"
                         type={showNewPassword ? "text" : "password"}
                         placeholder="Enter new password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
                         className="bg-secondary/50 border-border/50 pr-10"
                       />
                       <Button
@@ -202,9 +252,9 @@ export default function Settings() {
                       </Button>
                     </div>
                   </div>
-                  <Button variant="outline" onClick={() => handleSave("Password")}>
+                  <Button variant="outline" onClick={handleChangePassword} disabled={changingPassword}>
                     <Key className="w-4 h-4 mr-2" />
-                    Update Password
+                    {changingPassword ? "Updating…" : "Update Password"}
                   </Button>
                 </div>
               </div>

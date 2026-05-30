@@ -1,27 +1,56 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Download, Database, Shield, FileText, Trash2, AlertTriangle } from "lucide-react";
 import { SEOHead } from "@/components/SEOHead";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { exportApi, privacyApi } from "@/lib/platformClient";
 
 const exportItems = [
-  { label: "Usage Logs", desc: "Download proxy usage history", icon: FileText, format: "CSV" },
-  { label: "API Logs", desc: "Download API request logs", icon: Database, format: "JSON" },
-  { label: "Account Data", desc: "Export all account data (GDPR)", icon: Download, format: "ZIP" },
-];
-
-const complianceItems = [
-  { label: "GDPR Data Request", desc: "Request a copy of all personal data", action: "Request" },
-  { label: "Data Deletion", desc: "Request deletion of all personal data", action: "Request Deletion", destructive: true },
-  { label: "Cookie Preferences", desc: "Manage cookie consent settings", action: "Manage" },
-  { label: "Data Processing", desc: "View data processing agreements", action: "View DPA" },
-];
+  { key: "usage", label: "Usage Logs", desc: "Download proxy usage history", icon: FileText, format: "CSV", run: () => exportApi.usageLogs() },
+  { key: "api", label: "API Logs", desc: "Download API key inventory", icon: Database, format: "CSV", run: () => exportApi.apiLogs() },
+  { key: "account", label: "Account Data", desc: "Export all account data (GDPR)", icon: Download, format: "JSON", run: () => exportApi.accountData() },
+] as const;
 
 export default function DataCenter() {
-  const triggerExport = (label: string) => {
-    toast.success(`${label} export started. You'll receive a download link shortly.`);
+  const navigate = useNavigate();
+  const [busy, setBusy] = useState<string | null>(null);
+
+  const runExport = async (key: string, label: string, fn: () => Promise<void>) => {
+    setBusy(key);
+    try { await fn(); toast.success(`${label} downloaded`); }
+    catch (e) { toast.error(e instanceof Error ? e.message : `Failed to export ${label}`); }
+    finally { setBusy(null); }
   };
+
+  const requestGdprExport = async () => {
+    setBusy("gdpr");
+    try {
+      const res = await privacyApi.requestExport();
+      toast.success("Data export requested. It will be available for download shortly.");
+      if (res?.downloadUrl) window.open(res.downloadUrl, "_blank");
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed to request export"); }
+    finally { setBusy(null); }
+  };
+
+  const requestDeletion = async () => {
+    if (!window.confirm("Request deletion of all personal data? This is irreversible and will anonymise your records.")) return;
+    setBusy("delete");
+    try {
+      const res = await privacyApi.requestDelete("me");
+      toast.success(`Deletion request submitted${res?.anonymized ? ` — ${res.anonymized} records anonymised` : ""}.`);
+    } catch (e) { toast.error(e instanceof Error ? e.message : "Failed to submit request"); }
+    finally { setBusy(null); }
+  };
+
+  const complianceItems = [
+    { label: "GDPR Data Request", desc: "Request a copy of all personal data", action: "Request", onClick: requestGdprExport, busyKey: "gdpr" },
+    { label: "Data Deletion", desc: "Request deletion of all personal data", action: "Request Deletion", destructive: true, onClick: requestDeletion, busyKey: "delete" },
+    { label: "Cookie Preferences", desc: "Manage cookie consent settings", action: "Manage", onClick: () => navigate("/app/privacy") },
+    { label: "Data Processing", desc: "View data processing agreements", action: "View DPA", onClick: () => window.open("/compliance-info", "_blank") },
+  ];
 
   return (
     <div className="space-y-6">
@@ -46,8 +75,8 @@ export default function DataCenter() {
                     <p className="text-xs text-muted-foreground">{item.desc}</p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="w-full" onClick={() => triggerExport(item.label)}>
-                  <Download className="w-4 h-4 mr-1" />Export {item.format}
+                <Button variant="outline" size="sm" className="w-full" disabled={busy === item.key} onClick={() => runExport(item.key, item.label, item.run)}>
+                  <Download className="w-4 h-4 mr-1" />{busy === item.key ? "Preparing…" : `Export ${item.format}`}
                 </Button>
               </CardContent>
             </Card>
@@ -68,7 +97,7 @@ export default function DataCenter() {
                     <p className="text-sm text-muted-foreground">{item.desc}</p>
                   </div>
                 </div>
-                <Button variant={item.destructive ? "destructive" : "outline"} size="sm" onClick={() => toast.success(`${item.label} processed`)}>
+                <Button variant={item.destructive ? "destructive" : "outline"} size="sm" disabled={item.busyKey ? busy === item.busyKey : false} onClick={item.onClick}>
                   {item.destructive && <Trash2 className="w-4 h-4 mr-1" />}
                   {item.action}
                 </Button>

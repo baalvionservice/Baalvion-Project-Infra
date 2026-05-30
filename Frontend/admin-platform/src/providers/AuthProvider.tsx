@@ -4,6 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/lib/store/authStore';
 import { authApi } from '@/lib/api/auth';
+import { refreshAccessToken } from '@/lib/api/client';
 
 const PUBLIC_PATHS = ['/login', '/mfa', '/forgot-password', '/reset-password'];
 
@@ -28,13 +29,13 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
       try {
-        const refreshed = await authApi.refresh();
-        const { accessToken, expiresIn } = refreshed.data.data;
+        // Shared single-flight refresh — coalesces with any interceptor-driven refresh
+        // so a rotated refresh token is never reused (which would revoke the session).
+        const accessToken = await refreshAccessToken();
         if (cancelled || !accessToken) {
           if (!cancelled) setHydrated(true);
           return;
         }
-        setTokens(accessToken, expiresIn);
         try {
           const me = await authApi.me();
           if (!cancelled) setUser(me.data.data);

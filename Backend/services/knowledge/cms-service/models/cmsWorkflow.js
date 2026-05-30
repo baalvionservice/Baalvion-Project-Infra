@@ -1,8 +1,8 @@
 module.exports = function (sequelize, DataTypes) {
     return sequelize.define('cms_workflows', {
         id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-        content_id: { type: DataTypes.UUID, allowNull: false, unique: true },
-        current_state: {
+        contentId: { type: DataTypes.UUID, allowNull: false, unique: true },
+        currentState: {
             type: DataTypes.ENUM(
                 'draft', 'pending_review', 'changes_requested',
                 'approved', 'scheduled', 'published', 'archived'
@@ -10,18 +10,18 @@ module.exports = function (sequelize, DataTypes) {
             allowNull: false,
             defaultValue: 'draft',
         },
-        submitted_by: { type: DataTypes.BIGINT, allowNull: true },
-        reviewed_by: { type: DataTypes.BIGINT, allowNull: true },
-        approved_by: { type: DataTypes.BIGINT, allowNull: true },
-        published_by: { type: DataTypes.BIGINT, allowNull: true },
-        submitted_at: { type: DataTypes.DATE, allowNull: true },
-        reviewed_at: { type: DataTypes.DATE, allowNull: true },
-        approved_at: { type: DataTypes.DATE, allowNull: true },
-        published_at: { type: DataTypes.DATE, allowNull: true },
+        submittedBy: { type: DataTypes.BIGINT, allowNull: true },
+        reviewedBy: { type: DataTypes.BIGINT, allowNull: true },
+        approvedBy: { type: DataTypes.BIGINT, allowNull: true },
+        publishedBy: { type: DataTypes.BIGINT, allowNull: true },
+        submittedAt: { type: DataTypes.DATE, allowNull: true },
+        reviewedAt: { type: DataTypes.DATE, allowNull: true },
+        approvedAt: { type: DataTypes.DATE, allowNull: true },
+        publishedAt: { type: DataTypes.DATE, allowNull: true },
         comments: { type: DataTypes.TEXT, allowNull: true },
-        scheduled_publish_at: { type: DataTypes.DATE, allowNull: true },
+        scheduledPublishAt: { type: DataTypes.DATE, allowNull: true },
         // BullMQ job id for scheduled publish
-        schedule_job_id: { type: DataTypes.STRING(100), allowNull: true },
+        scheduleJobId: { type: DataTypes.STRING(100), allowNull: true },
     }, {
         sequelize,
         tableName: 'cms_workflows',

@@ -68,6 +68,24 @@ const authMiddleware = async (req, res, next) => {
     } catch (_) { /* provisioning failure -> null; law-specific endpoints handle absence */ }
     const isAdmin = legalRole === 'admin' || emailIsBootstrapAdmin;
     req.user = { id: legalId, role: legalRole, isAdmin, orgId: req.auth.orgId, roles: req.auth.roles, email: req.auth.email };
+
+    // Admin impersonation ("View as"): an ADMIN may scope a request to another user via the
+    // X-Impersonate-User-Id header (the target's legal.users id). The request then runs AS that
+    // user (no admin powers), so dashboards/data reflect the target. Admins cannot be impersonated.
+    const impId = req.headers['x-impersonate-user-id'];
+    if (impId && req.user.isAdmin) {
+        try {
+            const target = await db.User.findByPk(Number(impId));
+            if (target && target.role !== 'admin') {
+                req.impersonatorId = req.user.id;
+                req.user = {
+                    id: target.id, role: target.role, isAdmin: false,
+                    orgId: req.auth.orgId, roles: req.auth.roles, email: target.email,
+                    impersonatedBy: req.impersonatorId,
+                };
+            }
+        } catch (_) { /* fall back to admin identity */ }
+    }
     return next();
 };
 

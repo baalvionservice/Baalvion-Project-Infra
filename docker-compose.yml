@@ -1213,6 +1213,9 @@ services:
       - JWT_AUDIENCE=baalvion-platform
       - JWT_ALLOW_HS256_FALLBACK=false
       - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      # Gateway trust boundary: verify the auth-gateway's signed identity headers (must match the gateway).
+      - GATEWAY_SIGNING_SECRET=${GATEWAY_SIGNING_SECRET}
+      - ISLAND_AUTH_MODE=strict
     depends_on:
       postgres:
         condition: service_healthy

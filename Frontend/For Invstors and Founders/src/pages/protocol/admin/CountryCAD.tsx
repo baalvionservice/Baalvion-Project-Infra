@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Globe, Users, DollarSign, TrendingUp, ChevronRight, Search,
@@ -8,8 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
+import { protocolApi } from "@/lib/protocol-api";
 
-// Mock country data
+// Shape reference (data is loaded live from protocolApi.countries / .experts).
 const countriesData = [
   { 
     code: "IN", 
@@ -112,15 +113,21 @@ const expertsByCountry: Record<string, any[]> = {
 
 const CountryCAD = () => {
   const navigate = useNavigate();
+  const [countries, setCountries] = useState<any[]>([]);
+  const [allExperts, setAllExperts] = useState<any[]>([]);
+  useEffect(() => {
+    protocolApi.countries.list().then((rows) => setCountries(rows.map((r: any) => ({ ...r, growth: "" }))));
+    protocolApi.experts.list().then(setAllExperts);
+  }, []);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<string | null>(null);
 
-  const filteredCountries = countriesData.filter(country =>
+  const filteredCountries = countries.filter(country =>
     country.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const selectedCountryData = countriesData.find(c => c.code === selectedCountry);
-  const selectedExperts = selectedCountry ? (expertsByCountry[selectedCountry] || []) : [];
+  const selectedCountryData = countries.find(c => c.code === selectedCountry);
+  const selectedExperts = selectedCountryData ? allExperts.filter((e) => e.country === selectedCountryData.name) : [];
 
   return (
     <ProtocolLayout role="admin" breadcrumbs={[{ label: "Admin", href: "/protocol/admin" }, { label: "Countries", href: "/protocol/admin/countries" }]}>

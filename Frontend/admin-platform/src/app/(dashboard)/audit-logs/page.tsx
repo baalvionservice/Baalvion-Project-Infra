@@ -39,8 +39,27 @@ export default function AuditLogsPage() {
     enabled: source === 'legacy',
   });
 
+  // admin-service returns snake_case AdminAuditLog rows (with the actor joined as
+  // user_email/user_name/user_avatar). Map them to the camelCase AuditLog shape the
+  // table columns render.
+  const mappedIdentity = (identityData?.items ?? []).map((l) => {
+    const r = l as AdminAuditLog & { user_email?: string | null; user_name?: string | null; user_avatar?: string | null };
+    return {
+      id: String(r.id),
+      user: r.user_id
+        ? { id: Number(r.user_id), fullName: r.user_name ?? r.user_email ?? `User #${r.user_id}`, email: r.user_email ?? '', avatarUrl: r.user_avatar ?? null }
+        : null,
+      action: r.action,
+      resourceType: r.resource_type ?? '—',
+      resourceId: r.resource_id ?? null,
+      ipAddress: r.ip_address ?? '',
+      createdAt: r.created_at,
+      metadata: r.metadata,
+    };
+  }) as unknown as AuditLog[];
+
   const data = source === 'identity'
-    ? { data: identityData?.items ?? [], pagination: { total: identityData?.total ?? 0 } }
+    ? { data: mappedIdentity, pagination: { total: identityData?.total ?? 0 } }
     : legacyData;
   const isLoading = source === 'identity' ? identityLoading : legacyLoading;
 
@@ -120,10 +139,10 @@ export default function AuditLogsPage() {
         page={page}
         onPageChange={setPage}
         filters={
-          <Select value={resourceFilter} onValueChange={setResourceFilter}>
+          <Select value={resourceFilter || '__all__'} onValueChange={(v) => setResourceFilter(v === '__all__' ? '' : v)}>
             <SelectTrigger className="h-8 w-36"><SelectValue placeholder="Resource" /></SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All resources</SelectItem>
+              <SelectItem value="__all__">All resources</SelectItem>
               <SelectItem value="users">Users</SelectItem>
               <SelectItem value="organizations">Organizations</SelectItem>
               <SelectItem value="payments">Payments</SelectItem>

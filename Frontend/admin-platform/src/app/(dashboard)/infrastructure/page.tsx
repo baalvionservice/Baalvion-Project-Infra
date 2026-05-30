@@ -122,20 +122,7 @@ function QueueRow({ q }: { q: { name: string; displayName: string; waiting: numb
   );
 }
 
-// ── Mock K8s pod data ─────────────────────────────────────────────────────────
-
-const MOCK_PODS = [
-  { name: 'auth-service-7d4b9c-xkv2p',       status: 'Running',   restarts: 0,  cpu: '12m',  memory: '128Mi',  age: '8d'  },
-  { name: 'auth-service-7d4b9c-m2bsp',       status: 'Running',   restarts: 0,  cpu: '9m',   memory: '118Mi',  age: '8d'  },
-  { name: 'session-service-6c9f-48vzt',       status: 'Running',   restarts: 1,  cpu: '8m',   memory: '96Mi',   age: '5d'  },
-  { name: 'notification-svc-9b7f8d-vr4lq',   status: 'Running',   restarts: 0,  cpu: '6m',   memory: '80Mi',   age: '12d' },
-  { name: 'oauth-service-5d8c-pqrtx',         status: 'Running',   restarts: 0,  cpu: '5m',   memory: '72Mi',   age: '12d' },
-  { name: 'realtime-service-4e6b-lkmwj',      status: 'Running',   restarts: 2,  cpu: '22m',  memory: '192Mi',  age: '2d'  },
-  { name: 'admin-service-8f3a2c-nvzqt',       status: 'Running',   restarts: 0,  cpu: '4m',   memory: '64Mi',   age: '3d'  },
-  { name: 'cms-service-3b7d1e-xpqrt',         status: 'Pending',   restarts: 0,  cpu: '0m',   memory: '0',      age: '4m'  },
-  { name: 'jobs-service-2c4a6f-mnvqz',        status: 'CrashLoop', restarts: 14, cpu: '0m',   memory: '0',      age: '1h'  },
-  { name: 'kong-gateway-8d2b5f-trxzp',        status: 'Running',   restarts: 0,  cpu: '45m',  memory: '256Mi',  age: '30d' },
-];
+// ── Process status colours (real services, derived from live health) ──────────
 
 const POD_STATUS_COLOR: Record<string, string> = {
   Running:   'text-green-500 bg-green-500/10 border-green-500/30',
@@ -160,30 +147,46 @@ export default function InfrastructurePage() {
   const [tab, setTab] = useState('services');
   const infra  = useRealtimeStore((s) => s.infra);
   const queues = useRealtimeStore((s) => s.queues);
+  const liveServices = useRealtimeStore((s) => s.services);
+  const wsState = useRealtimeStore((s) => s.wsState);
 
   useEffect(() => { setBreadcrumbs([{ label: 'Infrastructure' }]); }, [setBreadcrumbs]);
 
-  const { data: services, isLoading, dataUpdatedAt } = useQuery({
+  // Polled REST health is the fallback; the realtime WS feed takes over once connected.
+  const { data: polledServices, isLoading, dataUpdatedAt } = useQuery({
     queryKey: ['service-health'],
     queryFn: fetchServiceHealth,
     refetchInterval: 30_000,
     retry: false,
   });
 
-  const upCount   = services?.filter((s) => s.status === 'up').length   ?? 0;
-  const downCount = services?.filter((s) => s.status === 'down').length ?? 0;
-  const runningPods   = MOCK_PODS.filter((p) => p.status === 'Running').length;
-  const problemPods   = MOCK_PODS.filter((p) => p.status !== 'Running').length;
+  const services = ((liveServices.length ? liveServices : polledServices) ?? []) as unknown as ServiceStatus[];
+
+  // Real running processes derived from live service health (replaces mock K8s pods).
+  const pods = services.map((s) => ({
+    name: s.name,
+    status: s.status === 'up' ? 'Running' : s.status === 'down' ? 'Failed' : 'Pending',
+    restarts: 0,
+    cpu: s.latencyMs != null ? `${s.latencyMs}ms` : '—',
+    memory: s.url ? s.url.replace(/^https?:\/\//, '') : '—',
+    age: 'live',
+  }));
+
+  const upCount   = services.filter((s) => s.status === 'up').length;
+  const downCount = services.filter((s) => s.status === 'down').length;
+  const runningPods   = pods.filter((p) => p.status === 'Running').length;
+  const problemPods   = pods.filter((p) => p.status !== 'Running').length;
   const queueFailures = queues.reduce((acc, q) => acc + q.failed, 0);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Infrastructure Control Plane"
-        description="Service health, Kubernetes pods, queues, metrics, and observability"
+        description="Live service health, processes, queues, metrics, and observability"
         actions={
-          <Badge variant="outline" className="gap-1">
-            <Activity className="h-3 w-3" /> Refreshes every 30s
+          <Badge variant="outline" className={cn('gap-1', wsState === 'connected' ? 'text-green-600 border-green-500' : 'text-muted-foreground')}>
+            <Activity className="h-3 w-3" />
+            {wsState === 'connected' ? 'Live · streaming' : wsState === 'connecting' ? 'Connecting…' : 'Offline (polling)'}
           </Badge>
         }
       />
@@ -211,10 +214,10 @@ export default function InfrastructurePage() {
         <Card>
           <CardContent className="pt-5">
             <div className="flex items-center justify-between mb-1">
-              <p className="text-xs text-muted-foreground">K8s Pods Running</p>
+              <p className="text-xs text-muted-foreground">Processes Running</p>
               <Container className={cn('h-4 w-4', problemPods > 0 ? 'text-yellow-500' : 'text-green-500')} />
             </div>
-            <p className="text-2xl font-bold">{runningPods}<span className="text-sm text-muted-foreground">/{MOCK_PODS.length}</span></p>
+            <p className="text-2xl font-bold">{runningPods}<span className="text-sm text-muted-foreground">/{pods.length}</span></p>
           </CardContent>
         </Card>
         <Card>
@@ -232,7 +235,7 @@ export default function InfrastructurePage() {
         <TabsList className="mb-4 flex-wrap h-auto gap-1">
           <TabsTrigger value="services">Backend Services</TabsTrigger>
           <TabsTrigger value="k8s">
-            Kubernetes
+            Processes
             {problemPods > 0 && <Badge variant="destructive" className="ml-1.5 text-[10px] h-4 px-1">{problemPods}</Badge>}
           </TabsTrigger>
           <TabsTrigger value="metrics">System Metrics</TabsTrigger>
@@ -275,12 +278,12 @@ export default function InfrastructurePage() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Container className="h-4 w-4" /> Pod Explorer
+                    <Container className="h-4 w-4" /> Service Processes
                   </CardTitle>
-                  <CardDescription>Namespace: baalvion-production</CardDescription>
+                  <CardDescription>Live runtime — real health from the realtime feed</CardDescription>
                 </div>
                 <Badge variant="outline" className="text-xs">
-                  {runningPods}/{MOCK_PODS.length} running
+                  {runningPods}/{pods.length} running
                 </Badge>
               </div>
             </CardHeader>
@@ -289,13 +292,13 @@ export default function InfrastructurePage() {
                 <table className="w-full text-xs">
                   <thead>
                     <tr className="border-b">
-                      {['Pod Name', 'Status', 'CPU', 'Memory', 'Restarts', 'Age'].map((h) => (
+                      {['Service', 'Status', 'Latency', 'Endpoint', 'Restarts', 'Source'].map((h) => (
                         <th key={h} className="text-left pb-2 pr-4 font-medium text-muted-foreground">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
-                    {MOCK_PODS.map((pod) => (
+                    {pods.map((pod) => (
                       <tr key={pod.name} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
                         <td className="py-2.5 pr-4 font-mono text-[11px] text-muted-foreground truncate max-w-[200px]">{pod.name}</td>
                         <td className="py-2.5 pr-4">

@@ -1,73 +1,30 @@
-# Welcome to your Lovable project
+# Baalvion Insiders — Founder ↔ Investor Platform
 
-## Project info
+The members app where **founders find investors who recently funded businesses like theirs** and raise
+their round faster. Part of the Baalvion platform. © Baalvion. All rights reserved.
 
-**URL**: https://lovable.dev/projects/c705caa1-fdea-4bd2-9e0d-c2eed281ff97
+## Stack
+- **Frontend:** Vite + React + TypeScript (this app) — the authenticated members surface
+  (dashboards, forums, deals, investors, founders, the Protocol sub-app).
+- **Backend:** `Backend/services/ecosystem/insiders-service` (Node.js + Express + Sequelize + PostgreSQL).
+- **Auth:** canonical **auth-gateway BFF** (HttpOnly cookies + CSRF, RS256 via auth-service). No tokens in JS.
+- **Public SEO surface:** a separate server-rendered **Next.js** app indexes founder/investor profiles
+  (see `Frontend/insiders-seo`).
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/c705caa1-fdea-4bd2-9e0d-c2eed281ff97) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## Run (dev)
+```bash
+npm install
+npm run dev      # http://localhost:8080
 ```
+Requires the backend (`insiders-service` on :3050), the auth-gateway (:3099), Postgres and Redis running.
+Dev proxies (`/auth-bff` → gateway, `/insiders-api` → insiders-service) keep the browser same-origin so the
+gateway cookies work without CORS.
 
-**Edit a file directly in GitHub**
+## Scripts
+- `npm run dev` — start the dev server
+- `npm run build` — production build
+- `npm run preview` — preview the build
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/c705caa1-fdea-4bd2-9e0d-c2eed281ff97) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## Environment
+- `VITE_GATEWAY_URL` (default `/auth-bff`) — auth + authenticated data via the gateway.
+- `VITE_INSIDERS_URL` (default `/insiders-api`) — anonymous/public reads + storage.

@@ -31,36 +31,36 @@ db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
 // ── Associations ─────────────────────────────────────────────────────────────
 
 // Website → Categories, Tags, Content, Members, Redirects
-db.CmsWebsite.hasMany(db.CmsCategory,      { foreignKey: 'website_id', as: 'categories' });
-db.CmsWebsite.hasMany(db.CmsTag,           { foreignKey: 'website_id', as: 'tags' });
-db.CmsWebsite.hasMany(db.CmsContent,       { foreignKey: 'website_id', as: 'contents' });
-db.CmsWebsite.hasMany(db.CmsWebsiteMember, { foreignKey: 'website_id', as: 'members' });
-db.CmsWebsite.hasMany(db.CmsSeoRedirect,   { foreignKey: 'website_id', as: 'redirects' });
+db.CmsWebsite.hasMany(db.CmsCategory,      { foreignKey: 'websiteId', as: 'categories' });
+db.CmsWebsite.hasMany(db.CmsTag,           { foreignKey: 'websiteId', as: 'tags' });
+db.CmsWebsite.hasMany(db.CmsContent,       { foreignKey: 'websiteId', as: 'contents' });
+db.CmsWebsite.hasMany(db.CmsWebsiteMember, { foreignKey: 'websiteId', as: 'members' });
+db.CmsWebsite.hasMany(db.CmsSeoRedirect,   { foreignKey: 'websiteId', as: 'redirects' });
 
-db.CmsCategory.belongsTo(db.CmsWebsite, { foreignKey: 'website_id', as: 'website' });
-db.CmsTag.belongsTo(db.CmsWebsite,      { foreignKey: 'website_id', as: 'website' });
-db.CmsContent.belongsTo(db.CmsWebsite,  { foreignKey: 'website_id', as: 'website' });
+db.CmsCategory.belongsTo(db.CmsWebsite, { foreignKey: 'websiteId', as: 'website' });
+db.CmsTag.belongsTo(db.CmsWebsite,      { foreignKey: 'websiteId', as: 'website' });
+db.CmsContent.belongsTo(db.CmsWebsite,  { foreignKey: 'websiteId', as: 'website' });
 
 // Self-referential: Category parent/children
-db.CmsCategory.belongsTo(db.CmsCategory,   { foreignKey: 'parent_id', as: 'parent' });
-db.CmsCategory.hasMany(db.CmsCategory,     { foreignKey: 'parent_id', as: 'children' });
+db.CmsCategory.belongsTo(db.CmsCategory,   { foreignKey: 'parentId', as: 'parent' });
+db.CmsCategory.hasMany(db.CmsCategory,     { foreignKey: 'parentId', as: 'children' });
 
 // Content → Category, Revisions, Workflow, Media refs
-db.CmsContent.belongsTo(db.CmsCategory,       { foreignKey: 'category_id', as: 'category' });
-db.CmsContent.hasMany(db.CmsContentRevision,  { foreignKey: 'content_id', as: 'revisions' });
-db.CmsContent.hasOne(db.CmsWorkflow,          { foreignKey: 'content_id', as: 'workflow' });
-db.CmsContent.hasMany(db.CmsMediaReference,   { foreignKey: 'content_id', as: 'mediaRefs' });
+db.CmsContent.belongsTo(db.CmsCategory,       { foreignKey: 'categoryId', as: 'category' });
+db.CmsContent.hasMany(db.CmsContentRevision,  { foreignKey: 'contentId', as: 'revisions' });
+db.CmsContent.hasOne(db.CmsWorkflow,          { foreignKey: 'contentId', as: 'workflow' });
+db.CmsContent.hasMany(db.CmsMediaReference,   { foreignKey: 'contentId', as: 'mediaRefs' });
 
 // Workflow → ApprovalLogs
-db.CmsWorkflow.belongsTo(db.CmsContent,   { foreignKey: 'content_id', as: 'content' });
-db.CmsWorkflow.hasMany(db.CmsApprovalLog, { foreignKey: 'workflow_id', as: 'logs' });
-db.CmsApprovalLog.belongsTo(db.CmsWorkflow, { foreignKey: 'workflow_id', as: 'workflow' });
+db.CmsWorkflow.belongsTo(db.CmsContent,   { foreignKey: 'contentId', as: 'content' });
+db.CmsWorkflow.hasMany(db.CmsApprovalLog, { foreignKey: 'workflowId', as: 'logs' });
+db.CmsApprovalLog.belongsTo(db.CmsWorkflow, { foreignKey: 'workflowId', as: 'workflow' });
 
 // Revisions → Content
-db.CmsContentRevision.belongsTo(db.CmsContent, { foreignKey: 'content_id', as: 'content' });
+db.CmsContentRevision.belongsTo(db.CmsContent, { foreignKey: 'contentId', as: 'content' });
 
 // Website Members
-db.CmsWebsiteMember.belongsTo(db.CmsWebsite, { foreignKey: 'website_id', as: 'website' });
+db.CmsWebsiteMember.belongsTo(db.CmsWebsite, { foreignKey: 'websiteId', as: 'website' });
 
 // Convenience exports for services
 db.Op = Sequelize.Op;

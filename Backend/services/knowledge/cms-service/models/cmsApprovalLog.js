@@ -1,9 +1,9 @@
 module.exports = function (sequelize, DataTypes) {
     return sequelize.define('cms_approval_logs', {
         id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-        workflow_id: { type: DataTypes.UUID, allowNull: false },
-        content_id: { type: DataTypes.UUID, allowNull: false },
-        actor_id: { type: DataTypes.BIGINT, allowNull: false },
+        workflowId: { type: DataTypes.UUID, allowNull: false },
+        contentId: { type: DataTypes.UUID, allowNull: false },
+        actorId: { type: DataTypes.BIGINT, allowNull: false },
         action: {
             type: DataTypes.ENUM(
                 'submit_for_review', 'approve', 'request_changes',
@@ -12,8 +12,8 @@ module.exports = function (sequelize, DataTypes) {
             ),
             allowNull: false,
         },
-        from_state: { type: DataTypes.STRING(32), allowNull: false },
-        to_state: { type: DataTypes.STRING(32), allowNull: false },
+        fromState: { type: DataTypes.STRING(32), allowNull: false },
+        toState: { type: DataTypes.STRING(32), allowNull: false },
         notes: { type: DataTypes.TEXT, allowNull: true },
         metadata: { type: DataTypes.JSONB, allowNull: true, defaultValue: {} },
     }, {

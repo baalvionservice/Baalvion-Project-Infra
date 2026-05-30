@@ -22,6 +22,23 @@ export function clearToken(): void {
   _accessToken = null;
 }
 
+// Admin "View as" impersonation: when set (to a target legal.users id), the authenticated
+// apiClient sends X-Impersonate-User-Id so law-service scopes requests to that user.
+// Persisted in sessionStorage so it survives reloads within the tab.
+let _impersonateId: string | null = null;
+export function setImpersonation(id: string | null): void {
+  _impersonateId = id || null;
+  if (typeof window !== 'undefined') {
+    if (id) sessionStorage.setItem('law_impersonate', id);
+    else sessionStorage.removeItem('law_impersonate');
+  }
+}
+export function getImpersonation(): string | null {
+  if (_impersonateId) return _impersonateId;
+  if (typeof window !== 'undefined') _impersonateId = sessionStorage.getItem('law_impersonate');
+  return _impersonateId;
+}
+
 // Public client — no auth, for public content (articles, categories, etc.)
 export const publicClient = axios.create({
   baseURL: BASE_URL,
@@ -56,6 +73,8 @@ apiClient.interceptors.request.use(async (config) => {
     token = await refreshOnce();
   }
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  const imp = getImpersonation();
+  if (imp) config.headers['X-Impersonate-User-Id'] = imp;
   return config;
 });
 

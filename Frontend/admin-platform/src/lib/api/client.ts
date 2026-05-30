@@ -12,6 +12,8 @@ const AUTH_URL      = '/auth-bff';
 const ADMIN_API_URL = process.env.NEXT_PUBLIC_ADMIN_API_URL  || 'https://api.baalvion.com/api/v1/platform/admin/v1';
 const SESSION_URL   = process.env.NEXT_PUBLIC_SESSION_API_URL || 'https://api.baalvion.com/api/v1/identity/session/v1';
 const OAUTH_URL     = process.env.NEXT_PUBLIC_OAUTH_URL       || 'https://api.baalvion.com/api/v1/identity/oauth';
+// CMS engine (cms-service). Multi-site content/taxonomy/media/workflow API.
+const CMS_API_URL   = process.env.NEXT_PUBLIC_CMS_API_URL     || 'https://api.baalvion.com/api/v1/knowledge/cms/api/v1';
 
 // ─── Main API client ──────────────────────────────────────────────────────────
 export const apiClient = axios.create({
@@ -41,69 +43,63 @@ const attachToken = (config: InternalAxiosRequestConfig): InternalAxiosRequestCo
 apiClient.interceptors.request.use(attachToken, Promise.reject);
 authClient.interceptors.request.use(attachToken, Promise.reject);
 
-// ─── Response interceptor: handle 401 → refresh → retry ──────────────────────
-let isRefreshing = false;
-let pendingQueue: Array<{
-  resolve: (value: unknown) => void;
-  reject: (reason?: unknown) => void;
-}> = [];
+// ─── Shared single-flight refresh ─────────────────────────────────────────────
+// The access token is in-memory only; on a 401 (or on app bootstrap) we exchange the
+// httpOnly `baalvion_refresh` cookie for a fresh access token. Refresh tokens are
+// ROTATED and reuse is FATAL (auth-service revokes the whole session on reuse), so
+// every refresh — interceptor-driven OR the AuthProvider bootstrap — MUST coalesce
+// into a single in-flight request. This module-level singleton guarantees that.
+let refreshPromise: Promise<string> | null = null;
 
-const processPendingQueue = (error: unknown, token: string | null = null) => {
-  pendingQueue.forEach(({ resolve, reject }) => {
-    if (error) reject(error);
-    else resolve(token);
-  });
-  pendingQueue = [];
+export const refreshAccessToken = (): Promise<string> => {
+  if (!refreshPromise) {
+    refreshPromise = authClient
+      .post<{ data: { token?: string; accessToken?: string; expiresAt?: string; expiresIn?: number } }>('/refresh')
+      .then(({ data }) => {
+        const raw = data.data;
+        const accessToken = raw.accessToken ?? raw.token ?? '';
+        if (!accessToken) throw new Error('refresh: no access token returned');
+        const expiresIn = raw.expiresIn ?? (raw.expiresAt
+          ? Math.max(60, Math.floor((new Date(raw.expiresAt).getTime() - Date.now()) / 1000))
+          : 900);
+        useAuthStore.getState().setTokens(accessToken, expiresIn);
+        return accessToken;
+      })
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
 };
 
-apiClient.interceptors.response.use(
-  (response) => response,
+// ─── Response interceptor: 401 → coalesced refresh → retry on the SAME client ──
+// Shared by every axios instance (main, admin, session, oauth, per-service) so any
+// 401 recovers via one refresh. Applied via attachAuthRetry() below.
+const makeAuthRetryInterceptor =
+  (client: typeof apiClient) =>
   async (error: AxiosError) => {
-    const original = error.config as AxiosRequestConfig & { _retry?: boolean };
-
-    if (error.response?.status !== 401 || original._retry) {
+    const original = error.config as (AxiosRequestConfig & { _retry?: boolean }) | undefined;
+    if (!original || error.response?.status !== 401 || original._retry) {
       return Promise.reject(normalizeError(error));
     }
-
-    if (isRefreshing) {
-      return new Promise((resolve, reject) => {
-        pendingQueue.push({ resolve, reject });
-      }).then((token) => {
-        original.headers = original.headers ?? {};
-        original.headers['Authorization'] = `Bearer ${token}`;
-        return apiClient(original);
-      });
-    }
-
     original._retry = true;
-    isRefreshing = true;
-
     try {
-      const { data } = await authClient.post<{
-        data: { token?: string; accessToken?: string; expiresAt?: string; expiresIn?: number };
-      }>('/refresh');
-      const raw = data.data;
-      const accessToken = raw.accessToken ?? raw.token ?? '';
-      const expiresIn = raw.expiresIn ?? (raw.expiresAt
-        ? Math.max(60, Math.floor((new Date(raw.expiresAt).getTime() - Date.now()) / 1000))
-        : 900);
-      useAuthStore.getState().setTokens(accessToken, expiresIn);
-      processPendingQueue(null, accessToken);
-      original.headers = original.headers ?? {};
-      original.headers['Authorization'] = `Bearer ${accessToken}`;
-      return apiClient(original);
-    } catch (refreshError) {
-      processPendingQueue(refreshError);
+      const token = await refreshAccessToken();
+      original.headers = { ...(original.headers ?? {}), Authorization: `Bearer ${token}` };
+      return client(original);
+    } catch {
       useAuthStore.getState().logout();
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/login')) {
         window.location.href = '/login';
       }
-      return Promise.reject(refreshError);
-    } finally {
-      isRefreshing = false;
+      return Promise.reject(normalizeError(error));
     }
-  },
-);
+  };
+
+const attachAuthRetry = (client: typeof apiClient) =>
+  client.interceptors.response.use((r) => r, makeAuthRetryInterceptor(client));
+
+attachAuthRetry(apiClient);
 
 // ─── Error normalizer ─────────────────────────────────────────────────────────
 export interface NormalizedError {
@@ -149,9 +145,17 @@ export const oauthApiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-[adminApiClient, sessionApiClient, oauthApiClient].forEach((c) =>
-  c.interceptors.request.use(attachToken, Promise.reject),
-);
+export const cmsApiClient = axios.create({
+  baseURL: CMS_API_URL,
+  withCredentials: true,
+  timeout: 30_000,
+  headers: { 'Content-Type': 'application/json' },
+});
+
+[adminApiClient, sessionApiClient, oauthApiClient, cmsApiClient].forEach((c) => {
+  c.interceptors.request.use(attachToken, Promise.reject);
+  attachAuthRetry(c);
+});
 
 // ─── Per-service API clients ──────────────────────────────────────────────────
 const makeServiceClient = (port: number, path = '/api/v1') =>
@@ -181,6 +185,7 @@ const serviceClients = {
 
 Object.values(serviceClients).forEach((client) => {
   client.interceptors.request.use(attachToken, Promise.reject);
+  attachAuthRetry(client);
 });
 
 export { serviceClients };

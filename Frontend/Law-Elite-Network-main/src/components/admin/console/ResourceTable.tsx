@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { adminApi } from "@/lib/api/admin";
 import { ResourceConfig, Field } from "./registry";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,13 +15,15 @@ import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, RefreshCw, AlertCircle } from "lucide-react";
+import { Loader2, Plus, Pencil, Trash2, Search, ChevronLeft, ChevronRight, RefreshCw, AlertCircle, Eye } from "lucide-react";
 
 const ALL = "__all__";
 const LIMIT = 20;
 
 export default function ResourceTable({ config }: { config: ResourceConfig }) {
   const { toast } = useToast();
+  const router = useRouter();
+  const { startImpersonation } = useAuth();
   const [items, setItems] = useState<any[]>([]);
   const [pagination, setPagination] = useState({ total: 0, page: 1, limit: LIMIT, totalPages: 0 });
   const [loading, setLoading] = useState(true);
@@ -120,7 +124,25 @@ export default function ResourceTable({ config }: { config: ResourceConfig }) {
     }
   };
 
-  const hasRowActions = (config.actions && config.actions.length) || config.canEdit || config.canDelete;
+  // Admin "View as": impersonate the row's user and jump into their dashboard.
+  const viewAs = async (row: any) => {
+    const target = config.impersonate?.(row);
+    if (!target) return;
+    setBusyId(`${row.id}:viewas`);
+    try {
+      const imp = await startImpersonation(target);
+      if (!imp) { toast({ title: "Could not start View as", variant: "destructive" }); return; }
+      toast({ title: `Viewing as ${imp.name || target.name || imp.role}` });
+      router.push(imp.role === "lawyer" ? "/lawyer/dashboard" : "/dashboard");
+    } catch (e: any) {
+      toast({ title: "View as failed", description: e?.message, variant: "destructive" });
+    } finally {
+      setBusyId(null);
+    }
+  };
+
+  const canImpersonateRow = (row: any) => !!config.impersonate && !!config.impersonate(row);
+  const hasRowActions = (config.actions && config.actions.length) || config.canEdit || config.canDelete || !!config.impersonate;
 
   return (
     <div className="space-y-4">
@@ -186,6 +208,11 @@ export default function ResourceTable({ config }: { config: ResourceConfig }) {
                     {hasRowActions && (
                       <TableCell className="text-right whitespace-nowrap">
                         <div className="inline-flex gap-1.5 justify-end">
+                          {canImpersonateRow(row) && (
+                            <Button size="sm" variant="outline" disabled={busyId === `${row.id}:viewas`} onClick={() => viewAs(row)} title="Open this user's dashboard as them">
+                              {busyId === `${row.id}:viewas` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <><Eye className="w-3.5 h-3.5 mr-1" /> View as</>}
+                            </Button>
+                          )}
                           {(config.actions || []).filter((a) => !a.visible || a.visible(row)).map((a) => (
                             <Button key={a.key} size="sm" variant={a.variant || "secondary"} disabled={busyId === `${row.id}:${a.key}`} onClick={() => runAction(row, a)}>
                               {busyId === `${row.id}:${a.key}` ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : a.label}

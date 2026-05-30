@@ -55,6 +55,9 @@ export type ResourceConfig = {
   fields?: Field[];
   canCreate?: boolean; canEdit?: boolean; canDelete?: boolean;
   actions?: Action[];
+  // When set, the row exposes a "View as" button. Returns the target legal.users id
+  // (and a display name) to impersonate, or null when the row isn't impersonable.
+  impersonate?: (row: any) => { id: string; name?: string } | null;
 };
 
 const sel = (...vals: string[]) => vals.map((v) => ({ label: v.replace(/_/g, " "), value: v }));
@@ -92,6 +95,7 @@ export const REGISTRY: Record<string, ResourceConfig> = {
       { key: "suspend", label: "Suspend", variant: "destructive", confirm: "Suspend this lawyer?", visible: (r) => r.status !== "suspended", run: (r) => adminApi.suspendLawyer(r.id) },
       { key: "activate", label: "Activate", variant: "secondary", visible: (r) => r.status === "suspended", run: (r) => adminApi.activateLawyer(r.id) },
     ],
+    impersonate: (r) => (r.user_id ? { id: String(r.user_id), name: r.name } : null),
   },
 
   clients: {
@@ -114,6 +118,7 @@ export const REGISTRY: Record<string, ResourceConfig> = {
       { key: "location", label: "Location" },
       { key: "subscription_tier", label: "Tier", type: "select", options: sel("BASIC", "PROFESSIONAL", "ENTERPRISE") },
     ],
+    impersonate: (r) => (r.user_id ? { id: String(r.user_id), name: r.name } : null),
   },
 
   users: {
@@ -141,6 +146,7 @@ export const REGISTRY: Record<string, ResourceConfig> = {
       { key: "suspend", label: "Suspend", variant: "destructive", confirm: "Suspend this user?", visible: (r) => r.is_active, run: (r) => adminApi.setUserStatus(r.id, "suspended") },
       { key: "activate", label: "Activate", variant: "secondary", visible: (r) => !r.is_active, run: (r) => adminApi.setUserStatus(r.id, "active") },
     ],
+    impersonate: (r) => (r.role !== "admin" && r.id ? { id: String(r.id), name: r.full_name } : null),
   },
 
   cases: {

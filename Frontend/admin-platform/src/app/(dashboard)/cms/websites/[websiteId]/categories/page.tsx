@@ -37,6 +37,7 @@ import {
 } from '@/lib/queries/cms-taxonomy.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useUIStore } from '@/lib/store/uiStore';
+import { useCmsStore } from '@/lib/store/cmsStore';
 import type { WebsiteCategory, CategoryTree as CategoryTreeType } from '@/lib/types/cms-taxonomy.types';
 
 interface CategoryForm {
@@ -55,6 +56,8 @@ export default function WebsiteCategoriesPage({
 }) {
   const { websiteId } = use(params);
   const { setBreadcrumbs } = useUIStore();
+  const setActiveWebsiteId = useCmsStore((s) => s.setActiveWebsiteId);
+  useEffect(() => { setActiveWebsiteId(websiteId); }, [websiteId, setActiveWebsiteId]);
 
   const { data: website } = useWebsite(websiteId);
   const { data: tree, isLoading: loadingTree } = useWebsiteCategoryTree(websiteId);
@@ -267,14 +270,14 @@ export default function WebsiteCategoriesPage({
             <div className="space-y-1.5">
               <Label className="text-xs">Parent Category</Label>
               <Select
-                value={form.parentId}
-                onValueChange={(v) => setForm((f) => ({ ...f, parentId: v }))}
+                value={form.parentId || '__none__'}
+                onValueChange={(v) => setForm((f) => ({ ...f, parentId: v === '__none__' ? '' : v }))}
               >
                 <SelectTrigger className="h-8 text-xs">
                   <SelectValue placeholder="None (top level)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">None (top level)</SelectItem>
+                  <SelectItem value="__none__">None (top level)</SelectItem>
                   {(flatCategories ?? [])
                     .filter((c) => c.id !== catDialog.editing?.id)
                     .map((c) => (

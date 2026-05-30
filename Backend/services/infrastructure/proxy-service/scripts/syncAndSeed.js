@@ -30,6 +30,8 @@ async function main() {
       ALTER TABLE abuse_logs ADD COLUMN IF NOT EXISTS resolved BOOLEAN DEFAULT FALSE;
       ALTER TABLE abuse_logs ADD COLUMN IF NOT EXISTS severity TEXT DEFAULT 'medium';
       ALTER TABLE abuse_logs ADD COLUMN IF NOT EXISTS reason TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS company TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS timezone TEXT;
       CREATE TABLE IF NOT EXISTS presets (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         org_id UUID NOT NULL REFERENCES organizations(id),

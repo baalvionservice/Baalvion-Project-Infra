@@ -139,12 +139,12 @@ export default function SessionsPage() {
         page={page}
         onPageChange={setPage}
         filters={
-          <Select value={riskFilter} onValueChange={setRiskFilter}>
+          <Select value={riskFilter || '__all__'} onValueChange={(v) => setRiskFilter(v === '__all__' ? '' : v)}>
             <SelectTrigger className="h-8 w-36">
               <SelectValue placeholder="Risk level" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All risks</SelectItem>
+              <SelectItem value="__all__">All risks</SelectItem>
               <SelectItem value="high">High risk</SelectItem>
               <SelectItem value="medium">Medium risk</SelectItem>
               <SelectItem value="low">Low risk</SelectItem>

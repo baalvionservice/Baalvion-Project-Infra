@@ -1,7 +1,7 @@
 module.exports = function (sequelize, DataTypes) {
     return sequelize.define('cms_websites', {
         id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
-        organization_id: { type: DataTypes.UUID, allowNull: false },
+        organizationId: { type: DataTypes.UUID, allowNull: false },
         name: { type: DataTypes.STRING(200), allowNull: false },
         slug: { type: DataTypes.STRING(100), allowNull: false, unique: 'unique_org_slug' },
         domain: { type: DataTypes.STRING(255), allowNull: false },
@@ -19,7 +19,7 @@ module.exports = function (sequelize, DataTypes) {
         modules: { type: DataTypes.JSONB, allowNull: false, defaultValue: ['pages', 'blog'] },
         config: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
         branding: { type: DataTypes.JSONB, allowNull: true },
-        created_by: { type: DataTypes.BIGINT, allowNull: false },
+        createdBy: { type: DataTypes.BIGINT, allowNull: false },
     }, {
         sequelize,
         tableName: 'cms_websites',

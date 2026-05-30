@@ -56,7 +56,7 @@ export default function OrganizationRoles() {
                     <th className="text-left py-3 pr-4 font-medium text-muted-foreground w-48">Permission</th>
                     {roles.map(r => (
                       <th key={r.id} className="text-center py-3 px-3">
-                        <Badge variant="outline" className={`text-xs ${ROLE_COLORS[r.name.toLowerCase()] ?? ""}`}>
+                        <Badge variant="outline" className={`text-xs ${ROLE_COLORS[(r.name ?? "").toLowerCase()] ?? ""}`}>
                           {r.name}
                         </Badge>
                       </th>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MessageSquare, FileText, Sparkles, Bot, DollarSign, Plus, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
 const contentTypes = [
@@ -56,6 +57,9 @@ const mockContent = [
 ];
 
 const ExpertContent = () => {
+  const [items, setItems] = useState<any[]>([]);
+  const loadItems = () => protocolApi.products.list().then(setItems);
+  useEffect(() => { loadItems(); }, []);
   const [showPricingModal, setShowPricingModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [selectedType, setSelectedType] = useState<typeof contentTypes[0] | null>(null);
@@ -65,7 +69,15 @@ const ExpertContent = () => {
     price: ""
   });
 
-  const handleCreateContent = () => {
+  const handleCreateContent = async () => {
+    if (selectedType) {
+      const { error } = await protocolApi.products.create({
+        type: selectedType.id, title: newContent.title || selectedType.title,
+        description: newContent.description, price: parseFloat(newContent.price) || 0,
+      });
+      if (error) { toast.error(error.message || "Could not create content"); return; }
+      await loadItems();
+    }
     toast.success(`${selectedType?.title} created successfully`);
     setShowCreateModal(false);
     setNewContent({ title: "", description: "", price: "" });
@@ -153,7 +165,7 @@ const ExpertContent = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockContent.map((content) => {
+                  {items.map((content) => {
                     const type = contentTypes.find(t => t.id === content.type);
                     const colors = type ? getColorClasses(type.color) : getColorClasses("amber");
                     return (

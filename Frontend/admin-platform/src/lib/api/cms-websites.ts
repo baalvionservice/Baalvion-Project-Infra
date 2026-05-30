@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { cmsApiClient } from './client';
 import type {
   Website,
   WebsiteStats,
@@ -9,43 +9,108 @@ import type {
 } from '@/lib/types/cms-website.types';
 import type { ApiResponse, PaginatedResponse } from '@/lib/types/common.types';
 
-export const websitesApi = {
-  list: (params?: { page?: number; limit?: number; status?: string; search?: string }) =>
-    apiClient.get<PaginatedResponse<Website>>('/admin/cms/websites', { params }),
+// cms-service (:3018 /api/v1) returns camelCase rows. It does not (yet) embed
+// content/member counts or a createdBy user object, so we backfill those to the
+// Website shape the console renders.
+interface RawWebsite {
+  id: string;
+  organizationId: string;
+  name: string;
+  slug: string;
+  domain: string;
+  description?: string | null;
+  status: Website['status'];
+  plan: Website['plan'];
+  modules: Website['modules'];
+  config?: Partial<Website['config']>;
+  branding?: Record<string, unknown> | null;
+  contentCount?: number;
+  memberCount?: number;
+  createdBy?: number | { id: number; fullName: string; avatarUrl: string | null };
+  createdAt: string;
+  updatedAt: string;
+}
 
-  get: (id: string) =>
-    apiClient.get<ApiResponse<Website>>(`/admin/cms/websites/${id}`),
+const DEFAULT_CONFIG: Website['config'] = {
+  defaultLanguage: 'en',
+  timezone: 'UTC',
+  dateFormat: 'MMM d, yyyy',
+  postsPerPage: 10,
+  enableComments: false,
+  enableAnalytics: true,
+  seoDefaults: {},
+};
+
+const toWebsite = (w: RawWebsite): Website => ({
+  id: w.id,
+  orgId: w.organizationId,
+  name: w.name,
+  slug: w.slug,
+  domain: w.domain,
+  status: w.status,
+  plan: w.plan,
+  modules: (w.modules ?? []) as Website['modules'],
+  config: { ...DEFAULT_CONFIG, ...(w.config ?? {}) } as Website['config'],
+  contentCount: w.contentCount ?? 0,
+  memberCount: w.memberCount ?? 0,
+  createdAt: w.createdAt,
+  updatedAt: w.updatedAt,
+  createdBy:
+    typeof w.createdBy === 'object' && w.createdBy
+      ? w.createdBy
+      : { id: Number(w.createdBy ?? 0), fullName: '', avatarUrl: null },
+});
+
+export const websitesApi = {
+  list: async (params?: { page?: number; limit?: number; status?: string; search?: string }) => {
+    const res = await cmsApiClient.get<PaginatedResponse<RawWebsite>>('/cms/websites', { params });
+    const items = (res.data.data ?? []).map(toWebsite);
+    return { ...res, data: { ...res.data, data: items } as PaginatedResponse<Website> };
+  },
+
+  get: async (id: string) => {
+    const res = await cmsApiClient.get<ApiResponse<RawWebsite>>(`/cms/websites/${id}`);
+    return { ...res, data: { ...res.data, data: toWebsite(res.data.data) } };
+  },
 
   stats: (id: string) =>
-    apiClient.get<ApiResponse<WebsiteStats>>(`/admin/cms/websites/${id}/stats`),
+    cmsApiClient.get<ApiResponse<WebsiteStats>>(`/cms/websites/${id}/stats`),
 
-  create: (payload: CreateWebsitePayload) =>
-    apiClient.post<ApiResponse<Website>>('/admin/cms/websites', payload),
+  create: async (payload: CreateWebsitePayload) => {
+    const res = await cmsApiClient.post<ApiResponse<RawWebsite>>('/cms/websites', payload);
+    return { ...res, data: { ...res.data, data: toWebsite(res.data.data) } };
+  },
 
-  update: (id: string, payload: UpdateWebsitePayload) =>
-    apiClient.patch<ApiResponse<Website>>(`/admin/cms/websites/${id}`, payload),
+  update: async (id: string, payload: UpdateWebsitePayload) => {
+    const res = await cmsApiClient.patch<ApiResponse<RawWebsite>>(`/cms/websites/${id}`, payload);
+    return { ...res, data: { ...res.data, data: toWebsite(res.data.data) } };
+  },
 
   delete: (id: string) =>
-    apiClient.delete<ApiResponse<void>>(`/admin/cms/websites/${id}`),
+    cmsApiClient.delete<ApiResponse<void>>(`/cms/websites/${id}`),
 
-  activate: (id: string) =>
-    apiClient.post<ApiResponse<Website>>(`/admin/cms/websites/${id}/activate`),
+  activate: async (id: string) => {
+    const res = await cmsApiClient.patch<ApiResponse<RawWebsite>>(`/cms/websites/${id}`, { status: 'active' });
+    return { ...res, data: { ...res.data, data: toWebsite(res.data.data) } };
+  },
 
-  suspend: (id: string) =>
-    apiClient.post<ApiResponse<Website>>(`/admin/cms/websites/${id}/suspend`),
+  suspend: async (id: string) => {
+    const res = await cmsApiClient.patch<ApiResponse<RawWebsite>>(`/cms/websites/${id}`, { status: 'inactive' });
+    return { ...res, data: { ...res.data, data: toWebsite(res.data.data) } };
+  },
 
   // Members
   members: {
     list: (websiteId: string) =>
-      apiClient.get<ApiResponse<WebsiteMember[]>>(`/admin/cms/websites/${websiteId}/members`),
+      cmsApiClient.get<ApiResponse<WebsiteMember[]>>(`/cms/websites/${websiteId}/members`),
 
     add: (websiteId: string, payload: AddWebsiteMemberPayload) =>
-      apiClient.post<ApiResponse<WebsiteMember>>(`/admin/cms/websites/${websiteId}/members`, payload),
+      cmsApiClient.post<ApiResponse<WebsiteMember>>(`/cms/websites/${websiteId}/members`, payload),
 
     updateRole: (websiteId: string, userId: number, cmsRole: string) =>
-      apiClient.patch<ApiResponse<WebsiteMember>>(`/admin/cms/websites/${websiteId}/members/${userId}`, { cmsRole }),
+      cmsApiClient.patch<ApiResponse<WebsiteMember>>(`/cms/websites/${websiteId}/members/${userId}`, { role: cmsRole }),
 
     remove: (websiteId: string, userId: number) =>
-      apiClient.delete<ApiResponse<void>>(`/admin/cms/websites/${websiteId}/members/${userId}`),
+      cmsApiClient.delete<ApiResponse<void>>(`/cms/websites/${websiteId}/members/${userId}`),
   },
 };

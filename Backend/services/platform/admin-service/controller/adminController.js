@@ -91,6 +91,26 @@ exports.revokeSession = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+exports.getRiskEvents = async (req, res, next) => {
+    try {
+        const { page = 1, limit = 20 } = req.query;
+        const result = await adminService.listRiskEvents({
+            page:  Math.max(1, parseInt(page, 10)),
+            limit: Math.min(100, Math.max(1, parseInt(limit, 10))),
+        });
+        // Frontend expects ApiResponse<PaginatedResponse<RiskEvent>> → wrap the
+        // {success,data,pagination} object as the data payload.
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+// Resolving a synthesized (audit-derived) risk event is a no-op ack for now.
+exports.resolveRiskEvent = async (req, res, next) => {
+    try {
+        sendSuccess(req, res, { id: req.params.id, resolvedAt: new Date().toISOString() });
+    } catch (err) { next(err); }
+};
+
 exports.getAuditLogs = async (req, res, next) => {
     try {
         const { page = 1, limit = 50, orgId, userId, action, severity, from, to } = req.query;

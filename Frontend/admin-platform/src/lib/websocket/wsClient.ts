@@ -1,4 +1,5 @@
 import { useRealtimeStore } from '@/lib/store/realtimeStore';
+import { useAuthStore } from '@/lib/store/authStore';
 import type { LiveEvent } from '@/lib/types/realtime.types';
 
 const WS_URL          = process.env.NEXT_PUBLIC_WS_URL || 'wss://api.baalvion.com/api/v1/infrastructure/realtime';
@@ -11,12 +12,9 @@ let reconTimer: ReturnType<typeof setTimeout>  | null = null;
 let stopped = false;
 
 function getToken(): string | null {
-  try {
-    const raw = localStorage.getItem('baalvion-auth');
-    if (!raw) return null;
-    const { state } = JSON.parse(raw);
-    return state?.accessToken ?? null;
-  } catch { return null; }
+  // The access token is in-memory only (the persist middleware was removed), so
+  // read it straight from the auth store — same source the axios clients use.
+  return useAuthStore.getState().accessToken ?? null;
 }
 
 function clearTimers() {
@@ -26,13 +24,25 @@ function clearTimers() {
 }
 
 export function connectWs() {
-  if (stopped) return;
   if (typeof window === 'undefined') return;
+  // An explicit connect intent clears any prior stop flag (e.g. a React strict-mode
+  // remount after disconnectWs ran during the throwaway first mount).
+  stopped = false;
+  if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
 
   const store = useRealtimeStore.getState();
   store.setWsState('connecting');
 
-  const url   = getToken() ? `${WS_URL}?token=${getToken()}` : WS_URL;
+  const token = getToken();
+  if (!token) {
+    // Auth bootstrap (token refresh) hasn't completed yet — retry shortly rather
+    // than opening a socket the server will reject for missing credentials.
+    clearTimers();
+    reconTimer = setTimeout(connectWs, RECONNECT_DELAY);
+    return;
+  }
+
+  const url = `${WS_URL}?token=${token}`;
   ws = new WebSocket(url);
 
   ws.onopen = () => {

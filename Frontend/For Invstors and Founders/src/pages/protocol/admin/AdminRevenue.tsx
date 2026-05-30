@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DollarSign, TrendingUp, TrendingDown, ArrowUpRight, Calendar, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell, LineChart, Line } from "recharts";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
 const monthlyRevenue = [
@@ -47,6 +48,10 @@ const transactions = [
 
 const AdminRevenue = () => {
   const [timeRange, setTimeRange] = useState("year");
+  const [topExperts, setTopExperts] = useState<any[]>([]);
+  useEffect(() => {
+    protocolApi.experts.list().then((rows) => setTopExperts(rows.slice(0, 5).map((e: any) => ({ name: e.name, revenue: `$${(e.revenue || 0).toLocaleString()}`, students: e.students, growth: "" }))));
+  }, []);
 
   const stats = [
     { title: "Total Revenue", value: "$993,000", change: "+24%", trend: "up", icon: DollarSign },

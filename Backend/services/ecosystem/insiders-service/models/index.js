@@ -483,6 +483,117 @@ db.Payment = def('Payment', 'payments', {
     meta: { type: DataTypes.JSONB, defaultValue: {} },
 }, bothTs);
 
+// ── Protocol platform (migration 008) ─────────────────────────────────────────
+db.ProtocolExpert = def('ProtocolExpert', 'protocol_experts', {
+    id: uuidPk,
+    user_id: DataTypes.UUID,
+    name: { type: DataTypes.TEXT, allowNull: false },
+    title: DataTypes.TEXT,
+    email: DataTypes.TEXT,
+    country: DataTypes.STRING,
+    avatar: DataTypes.STRING,
+    status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'pending' },
+    rating: num('rating'),
+    students: { type: DataTypes.INTEGER, defaultValue: 0 },
+    revenue: num('revenue'),
+}, bothTs);
+
+db.ProtocolStudent = def('ProtocolStudent', 'protocol_students', {
+    id: uuidPk,
+    user_id: DataTypes.UUID,
+    expert_id: DataTypes.UUID,
+    name: { type: DataTypes.TEXT, allowNull: false },
+    email: DataTypes.TEXT,
+    avatar: DataTypes.STRING,
+    status: { type: DataTypes.STRING, defaultValue: 'offline' },
+    joined_at: DataTypes.DATE,
+    last_active_at: DataTypes.DATE,
+}, createdOnly);
+
+db.ProtocolFeedPost = def('ProtocolFeedPost', 'protocol_feed_posts', {
+    id: uuidPk,
+    expert_id: DataTypes.UUID,
+    author_user_id: DataTypes.UUID,
+    author_name: DataTypes.TEXT,
+    avatar: DataTypes.STRING,
+    type: { type: DataTypes.STRING, allowNull: false, defaultValue: 'text' },
+    content: DataTypes.TEXT,
+    duration: DataTypes.STRING,
+    likes: { type: DataTypes.INTEGER, defaultValue: 0 },
+    comments: { type: DataTypes.INTEGER, defaultValue: 0 },
+    is_pinned: { type: DataTypes.BOOLEAN, defaultValue: false },
+}, createdOnly);
+
+db.ProtocolPostLike = def('ProtocolPostLike', 'protocol_post_likes', {
+    id: uuidPk,
+    post_id: { type: DataTypes.UUID, allowNull: false },
+    user_id: { type: DataTypes.UUID, allowNull: false },
+}, createdOnly);
+
+db.ProtocolCall = def('ProtocolCall', 'protocol_calls', {
+    id: uuidPk,
+    expert_id: DataTypes.UUID,
+    host_user_id: DataTypes.UUID,
+    title: { type: DataTypes.TEXT, allowNull: false },
+    type: { type: DataTypes.STRING, allowNull: false, defaultValue: 'video' },
+    scheduled_at: DataTypes.DATE,
+    status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'upcoming' },
+    attendees: { type: DataTypes.INTEGER, defaultValue: 0 },
+    duration: DataTypes.STRING,
+}, createdOnly);
+
+db.ProtocolInvite = def('ProtocolInvite', 'protocol_invites', {
+    id: uuidPk,
+    expert_id: DataTypes.UUID,
+    owner_user_id: DataTypes.UUID,
+    code: { type: DataTypes.TEXT, allowNull: false, unique: true },
+    link: DataTypes.TEXT,
+    expiry: DataTypes.STRING,
+    max_users: { type: DataTypes.INTEGER, defaultValue: 50 },
+    used_by: { type: DataTypes.INTEGER, defaultValue: 0 },
+    price: { type: DataTypes.STRING, defaultValue: 'Free' },
+    status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'active' },
+}, createdOnly);
+
+db.ProtocolProduct = def('ProtocolProduct', 'protocol_products', {
+    id: uuidPk,
+    expert_id: DataTypes.UUID,
+    owner_user_id: DataTypes.UUID,
+    type: { type: DataTypes.STRING, allowNull: false, defaultValue: 'document' },
+    title: { type: DataTypes.TEXT, allowNull: false },
+    description: DataTypes.TEXT,
+    price: num('price'),
+    original_price: num('original_price'),
+    sales: { type: DataTypes.INTEGER, defaultValue: 0 },
+    featured: { type: DataTypes.BOOLEAN, defaultValue: false },
+}, createdOnly);
+
+db.ProtocolOrder = def('ProtocolOrder', 'protocol_orders', {
+    id: uuidPk,
+    product_id: DataTypes.UUID,
+    buyer_user_id: { type: DataTypes.UUID, allowNull: false },
+    amount: num('amount'),
+    status: { type: DataTypes.STRING, allowNull: false, defaultValue: 'paid' },
+}, createdOnly);
+
+db.ProtocolCountry = def('ProtocolCountry', 'protocol_countries', {
+    id: uuidPk,
+    name: { type: DataTypes.TEXT, allowNull: false },
+    code: DataTypes.STRING,
+    flag: DataTypes.STRING,
+    experts: { type: DataTypes.INTEGER, defaultValue: 0 },
+    students: { type: DataTypes.INTEGER, defaultValue: 0 },
+    revenue: num('revenue'),
+}, createdOnly);
+
+db.ProtocolNotification = def('ProtocolNotification', 'protocol_notifications', {
+    id: uuidPk,
+    user_id: DataTypes.UUID,
+    type: { type: DataTypes.STRING, allowNull: false, defaultValue: 'system' },
+    message: { type: DataTypes.TEXT, allowNull: false },
+    read: { type: DataTypes.BOOLEAN, defaultValue: false },
+}, createdOnly);
+
 // Registry: table name -> model (used by the generic query engine).
 db.byTable = {};
 Object.values(db).forEach((m) => {

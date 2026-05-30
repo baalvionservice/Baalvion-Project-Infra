@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Paintbrush, Globe, Upload, Mail, Save, Eye, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { SEOHead } from "@/components/SEOHead";
+import { enterpriseApi } from "@/lib/platformClient";
 
 export default function AdminWhiteLabel() {
   const [config, setConfig] = useState({
@@ -20,10 +21,40 @@ export default function AdminWhiteLabel() {
   });
 
   const [previewMode, setPreviewMode] = useState(false);
+  const [saving, setSaving] = useState(false);
 
-  const save = () => {
-    localStorage.setItem("whitelabel_config", JSON.stringify(config));
-    toast.success("White-label configuration saved");
+  // Hydrate from the persisted org white-label config.
+  useEffect(() => {
+    enterpriseApi.getWhiteLabel().then((wl) => {
+      if (!wl) return;
+      setConfig((c) => ({
+        ...c,
+        companyName: wl.brand_name ?? c.companyName,
+        primaryColor: wl.primary_color ?? c.primaryColor,
+        domain: wl.domain ?? c.domain,
+        logoUrl: wl.logo_url ?? c.logoUrl,
+        supportEmail: wl.support_email ?? c.supportEmail,
+      }));
+    }).catch(() => { /* none configured yet */ });
+  }, []);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      await enterpriseApi.upsertWhiteLabel({
+        brandName: config.companyName,
+        primaryColor: config.primaryColor,
+        logoUrl: config.logoUrl,
+        supportEmail: config.supportEmail,
+        domain: config.domain,
+        enabled: true,
+      });
+      toast.success("White-label configuration saved");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save configuration");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -36,7 +67,7 @@ export default function AdminWhiteLabel() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => setPreviewMode(!previewMode)}><Eye className="w-4 h-4 mr-1" />{previewMode ? "Edit" : "Preview"}</Button>
-          <Button variant="hero" onClick={save}><Save className="w-4 h-4 mr-1" />Save Configuration</Button>
+          <Button variant="hero" onClick={save} disabled={saving}><Save className="w-4 h-4 mr-1" />{saving ? "Saving…" : "Save Configuration"}</Button>
         </div>
       </div>
 

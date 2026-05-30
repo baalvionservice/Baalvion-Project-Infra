@@ -22,16 +22,32 @@ const wrap = (mw) => (req, res, next) => mw(req, res, (err) => (err ? next(toApp
 
 const setUser = (req) => { req.user = { id: req.auth.userId, orgId: req.auth.orgId, roles: req.auth.roles }; };
 
-// Hard gate: rejects when no valid bearer token is present.
-const authMiddleware = (req, res, next) => _canonical(req, res, (err) => {
-    if (err) return next(toAppError(err));
-    setUser(req);
-    return next();
-});
+// BFF cookie support: the auth-gateway stores the RS256 access JWT in the httpOnly
+// `baalvion_access` cookie (host-scoped, so the browser sends it cross-port to this
+// service with credentials:include). When no Authorization header is present, promote
+// the cookie to a Bearer header so the canonical verifier authenticates it unchanged.
+const COOKIE_ACCESS_NAME = process.env.COOKIE_ACCESS_NAME || 'baalvion_access';
+const injectCookieToken = (req) => {
+    if (!(req.headers && req.headers.authorization) && req.cookies && req.cookies[COOKIE_ACCESS_NAME]) {
+        req.headers = req.headers || {};
+        req.headers.authorization = 'Bearer ' + req.cookies[COOKIE_ACCESS_NAME];
+    }
+};
+
+// Hard gate: rejects when no valid bearer token is present (header or BFF cookie).
+const authMiddleware = (req, res, next) => {
+    injectCookieToken(req);
+    return _canonical(req, res, (err) => {
+        if (err) return next(toAppError(err));
+        setUser(req);
+        return next();
+    });
+};
 
 // Soft gate: populate canonical req.auth when a VALID canonical token is present;
 // never rejects. Used on read routes that are anonymous but tenant/owner-scoped when signed in.
 const optionalAuth = async (req, res, next) => {
+    injectCookieToken(req);
     const header = (req.headers && req.headers.authorization) || '';
     if (!header.startsWith('Bearer ')) return next();
     try {

@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, MessageCircle, Share2, Headphones, Video, Lock, Pin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
+import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 
 const mockPosts = [
@@ -72,9 +73,10 @@ const mockPosts = [
 ];
 
 const StudentFeed = () => {
-  const [posts, setPosts] = useState(mockPosts);
+  const [posts, setPosts] = useState<any[]>([]);
+  useEffect(() => { protocolApi.feed.list().then((rows) => setPosts(rows.map((r: any) => ({ ...r, isLiked: false })))); }, []);
 
-  const handleLike = (postId: number) => {
+  const handleLike = (postId: string) => {
     setPosts(posts.map(p => {
       if (p.id === postId) {
         return {

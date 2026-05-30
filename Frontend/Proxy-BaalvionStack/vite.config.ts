@@ -8,6 +8,15 @@ import { componentTagger } from "lovable-tagger";
 const AUTH_PROXY = process.env.VITE_AUTH_PROXY_TARGET || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
 const authUrl = new URL(AUTH_PROXY);
 
+// CSP connect-src must list the API ORIGIN (not a path-scoped URL, which browsers
+// match by exact path). Derive the origin from the configured base URLs so local dev
+// (http://localhost:4000) and prod both work without hand-editing the policy.
+const toOrigin = (value: string | undefined, fallback: string) => {
+  try { return new URL(value || fallback).origin; } catch { return fallback; }
+};
+const PLATFORM_ORIGIN = toOrigin(process.env.VITE_API_PLATFORM_BASE_URL, 'https://api.baalvion.com');
+const AUTH_ORIGIN = toOrigin(process.env.VITE_API_AUTH_BASE_URL, 'https://api.baalvion.com');
+
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -35,7 +44,7 @@ export default defineConfig(({ mode }) => ({
         "style-src 'self' 'unsafe-inline'",
         "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com",
         "font-src 'self' data:",
-        `connect-src 'self' ${process.env.VITE_API_AUTH_BASE_URL || 'https://api.baalvion.com'} ${process.env.VITE_API_PLATFORM_BASE_URL || 'https://api.baalvion.com'}`,
+        `connect-src 'self' ${AUTH_ORIGIN} ${PLATFORM_ORIGIN}`,
         "frame-ancestors 'none'",
         "form-action 'self'",
         "base-uri 'self'",

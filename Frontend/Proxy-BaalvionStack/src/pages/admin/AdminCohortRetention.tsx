@@ -1,17 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from "recharts";
-
-const retentionMatrix = [
-  { cohort: "Sep '24", m0: 100, m1: 88, m2: 82, m3: 78, m4: 75, m5: 72 },
-  { cohort: "Oct '24", m0: 100, m1: 91, m2: 85, m3: 80, m4: 77, m5: null },
-  { cohort: "Nov '24", m0: 100, m1: 89, m2: 84, m3: 81, m4: null, m5: null },
-  { cohort: "Dec '24", m0: 100, m1: 92, m2: 87, m3: null, m4: null, m5: null },
-  { cohort: "Jan '25", m0: 100, m1: 90, m2: null, m3: null, m4: null, m5: null },
-  { cohort: "Feb '25", m0: 100, m1: null, m2: null, m3: null, m4: null, m5: null },
-];
+import { useQuery } from "@tanstack/react-query";
+import { adminRevenueApi } from "@/lib/adminApiClient";
 
 const expansionRevenue = [
   { month: "Sep", newMRR: 18200, expansionMRR: 4800, churnedMRR: -6200, netNew: 16800 },
@@ -40,6 +32,14 @@ const cellColor = (val: number | null) => {
 };
 
 export default function AdminCohortRetention() {
+  const { data: cohortData } = useQuery({
+    queryKey: ["admin", "cohort-retention"],
+    queryFn: () => adminRevenueApi.getCohortRetention(),
+  });
+  const cohorts = cohortData?.cohorts ?? [];
+  const maxMonths = cohorts.reduce((m, c) => Math.max(m, c.retention?.length ?? 0), 0);
+  const monthCols = Array.from({ length: Math.max(maxMonths, 1) }, (_, i) => i);
+
   return (
     <div className="space-y-6 animate-fade-in">
       <div>
@@ -47,39 +47,41 @@ export default function AdminCohortRetention() {
         <p className="text-muted-foreground mt-1">Retention heatmap, expansion revenue & plan migration</p>
       </div>
 
-      {/* Retention Heatmap */}
+      {/* Retention Heatmap (live) */}
       <Card className="glass-card">
         <CardHeader><CardTitle className="text-base">Cohort Retention Heatmap (%)</CardTitle></CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left p-3 font-medium">Cohort</th>
-                  <th className="text-center p-3 font-medium">M0</th>
-                  <th className="text-center p-3 font-medium">M1</th>
-                  <th className="text-center p-3 font-medium">M2</th>
-                  <th className="text-center p-3 font-medium">M3</th>
-                  <th className="text-center p-3 font-medium">M4</th>
-                  <th className="text-center p-3 font-medium">M5</th>
-                </tr>
-              </thead>
-              <tbody>
-                {retentionMatrix.map((row) => (
-                  <tr key={row.cohort} className="border-b border-border/50">
-                    <td className="p-3 font-medium">{row.cohort}</td>
-                    {[row.m0, row.m1, row.m2, row.m3, row.m4, row.m5].map((val, i) => (
-                      <td key={i} className="p-1 text-center">
-                        <div className={`rounded-lg p-2 font-mono text-sm font-bold ${cellColor(val)}`}>
-                          {val !== null ? `${val}%` : "—"}
-                        </div>
-                      </td>
-                    ))}
+          {cohorts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No cohort data yet — retention builds up as customers age into their second month.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border">
+                    <th className="text-left p-3 font-medium">Cohort</th>
+                    {monthCols.map((i) => <th key={i} className="text-center p-3 font-medium">M{i}</th>)}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {cohorts.map((row) => (
+                    <tr key={row.month} className="border-b border-border/50">
+                      <td className="p-3 font-medium">{row.month}</td>
+                      {monthCols.map((i) => {
+                        const val = row.retention?.[i] ?? null;
+                        return (
+                          <td key={i} className="p-1 text-center">
+                            <div className={`rounded-lg p-2 font-mono text-sm font-bold ${cellColor(val)}`}>
+                              {val !== null && val !== undefined ? `${Math.round(val)}%` : "—"}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -1,0 +1,16 @@
+{
+    "name": "@baalvion/realtime-service",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Realtime metrics + event fan-out over WebSocket for the admin console (hand-rolled RFC6455, no ws dependency).",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "dotenv": "*",
+        "pg": "*",
+        "ioredis": "*",
+        "jsonwebtoken": "*"
+    }
+}

@@ -22,6 +22,12 @@ router.route('/marketplace/catalog').get(marketplace.catalog);
 router.route('/marketplace/price').get(marketplace.priceSku);
 // Public white-label branding lookup by domain (powers the branded login page).
 router.route('/white-label/resolve').get(enterprise.resolveBranding);
+// Public marketing data (pricing page, status page, case studies, API reference docs).
+router.route('/public/plans').get(controller.publicPlans);
+router.route('/public/status').get(controller.publicStatus);
+router.route('/public/stats').get(controller.publicStats);
+router.route('/public/case-studies').get(controller.publicCaseStudies);
+router.route('/public/api-reference').get(controller.publicApiReference);
 
 // ─── Tenant guard ──────────────────────────────────────────────────────────────
 // Every route below requires an authenticated user with a validated, ACTIVE

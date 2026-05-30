@@ -109,7 +109,23 @@ export const billingApi = {
   getPaymentMethods: () => get<PaymentMethod[]>("/billing/payment-methods"),
   addPaymentMethod: (data: Partial<PaymentMethod>) => post<PaymentMethod>("/billing/payment-methods", data),
   deletePaymentMethod: (id: string) => del<void>(`/billing/payment-methods/${id}`),
-  getUsageForecast: () => get<UsageForecast>("/billing/usage-forecast"),
+  // Backend currently returns { predicted, limit, trend }; older/full shape uses
+  // { projectedGb, daysRemaining, willExceed, overageGb }. Normalize so the UI never
+  // receives undefined numeric fields (these were white-screening Billing pages).
+  getUsageForecast: async (): Promise<UsageForecast> => {
+    const raw = (await get<Record<string, unknown>>("/billing/usage-forecast")) || {};
+    const projectedGb = Number(raw.projectedGb ?? raw.predicted ?? 0);
+    const limit = Number(raw.limit ?? raw.bandwidthLimitGb ?? 0);
+    const overageGb = raw.overageGb != null ? Number(raw.overageGb) : Math.max(0, projectedGb - limit);
+    const willExceed = raw.willExceed != null ? Boolean(raw.willExceed) : limit > 0 && projectedGb > limit;
+    let daysRemaining = raw.daysRemaining != null ? Number(raw.daysRemaining) : NaN;
+    if (Number.isNaN(daysRemaining)) {
+      const now = new Date();
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+      daysRemaining = Math.max(0, Math.ceil((end.getTime() - now.getTime()) / 86_400_000));
+    }
+    return { projectedGb, daysRemaining, willExceed, overageGb };
+  },
 };
 
 // ─── Organisation ─────────────────────────────────────────────────────────────
@@ -120,7 +136,17 @@ export const orgApi = {
   inviteMember: (data: { email: string; role: string }) => post<OrgMember>("/org/members/invite", data),
   updateMemberRole: (id: string, role: string) => put<OrgMember>(`/org/members/${id}/role`, { role }),
   removeMember: (id: string) => del<void>(`/org/members/${id}`),
-  listRoles: () => get<RoleDefinition[]>("/org/roles"),
+  // Backend returns role rows keyed { key, label, description, permissions }; the UI
+  // model is { id, name, permissions, isSystem }. Normalize so name is never undefined.
+  listRoles: async (): Promise<RoleDefinition[]> => {
+    const rows = (await get<Array<Record<string, unknown>>>("/org/roles")) || [];
+    return rows.map((r) => ({
+      id: String(r.id ?? r.key ?? r.name ?? ""),
+      name: String(r.name ?? r.label ?? r.key ?? "role"),
+      permissions: Array.isArray(r.permissions) ? (r.permissions as string[]) : [],
+      isSystem: Boolean(r.isSystem ?? r.is_system ?? true),
+    }));
+  },
   getActivity: (params?: { page?: number }) =>
     get<Paginated<ActivityEntry>>("/org/activity", params as Record<string, number | undefined>),
 };
@@ -132,6 +158,55 @@ export const apiKeyApi = {
     post<ApiKeyCreated>("/api-keys", data),
   revoke: (id: string) => post<void>(`/api-keys/${id}/revoke`),
   delete: (id: string) => del<void>(`/api-keys/${id}`),
+};
+
+// ─── Exports (inline-content downloads) ────────────────────────────────────────
+export interface InlineExport { filename: string; contentType: string; content: string; }
+function saveInline(exp: InlineExport) {
+  const blob = new Blob([exp.content ?? ""], { type: exp.contentType || "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = exp.filename || "export";
+  document.body.appendChild(a); a.click(); a.remove();
+  URL.revokeObjectURL(url);
+}
+export const exportApi = {
+  auditLogs: async () => saveInline(await get<InlineExport>("/audit-logs/export")),
+  analytics: async () => saveInline(await get<InlineExport>("/analytics/export")),
+  usageLogs: async () => saveInline(await post<InlineExport>("/exports/usage-logs")),
+  apiLogs: async () => saveInline(await post<InlineExport>("/exports/api-logs")),
+  accountData: async () => saveInline(await post<InlineExport>("/exports/account-data")),
+  proxies: async () => saveInline(await post<InlineExport>("/proxies/export", { format: "csv" })),
+};
+
+// ─── Account (self-service) ────────────────────────────────────────────────────
+export interface MyProfile { id: string; email: string; name?: string; fullName?: string; company?: string; timezone?: string; role?: string; }
+export const accountApi = {
+  getProfile: () => get<MyProfile>("/users/me"),
+  updateProfile: (data: { name?: string; company?: string; timezone?: string }) =>
+    put<MyProfile>("/users/me", data),
+  changePassword: (oldPassword: string, newPassword: string) =>
+    post<{ ok: boolean }>("/users/change-password", { oldPassword, newPassword }),
+};
+
+// ─── Security (sessions, IP allowlist, login history, MFA) ─────────────────────
+export interface SecuritySession {
+  id: string; ipAddress?: string; userAgent?: string; expiresAt?: string; current?: boolean;
+}
+export interface LoginHistoryEntry {
+  id: string; ipAddress?: string; userAgent?: string; success?: boolean; createdAt: string;
+}
+export const securityApi = {
+  getIpAllowlist: () => get<string[]>("/security/ip-allowlist"),
+  addIp: (ip: string) => post<string[]>("/security/ip-allowlist", { ip }),
+  removeIp: (ip: string) => del<string[]>(`/security/ip-allowlist/${encodeURIComponent(ip)}`),
+  listSessions: () => get<SecuritySession[]>("/security/sessions"),
+  revokeSession: (id: string) => del<void>(`/security/sessions/${id}`),
+  getLoginHistory: () => get<LoginHistoryEntry[]>("/security/login-history"),
+  enableMfa: () => post<{ qrCodeUrl: string; secret?: string }>("/auth/mfa/enable"),
+  verifyMfa: (code: string) => post<{ enabled: boolean }>("/auth/mfa/verify", { code }),
+  disableMfa: () => post<{ disabled: boolean }>("/auth/mfa/disable"),
 };
 
 // ─── Developer / Proxy gateway API (/v1/developer) ─────────────────────────────

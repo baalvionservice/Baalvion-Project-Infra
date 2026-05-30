@@ -50,7 +50,7 @@ const loadCmsRole = async (req, res, next) => {
         if (!websiteId) return next(new AppError('BAD_REQUEST', 'websiteId is required', 400));
 
         const member = await db.CmsWebsiteMember.findOne({
-            where: { website_id: websiteId, user_id: req.auth.userId },
+            where: { websiteId, userId: req.auth.userId },
         });
 
         if (!member) {

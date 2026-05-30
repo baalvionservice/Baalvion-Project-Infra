@@ -51,8 +51,9 @@ export default function TaskDetailPage() {
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
-  const { findSubmissionByTask, updateSubmission } = useSubmissions();
+  const { findSubmissionByTask, updateSubmission, assignTaskToUser } = useSubmissions();
   const router = useRouter();
+  const [starting, setStarting] = useState(false);
 
   useEffect(() => {
     if (taskId) {
@@ -77,9 +78,18 @@ export default function TaskDetailPage() {
     return findSubmissionByTask(task.id, user.id);
   }, [task, user, findSubmissionByTask]);
 
-  const handleStartTask = () => {
-    if (submission && submission.status === 'assigned') {
-      updateSubmission(submission.id, { status: 'in-progress' });
+  const handleStartTask = async () => {
+    if (!user || !task) return;
+    setStarting(true);
+    try {
+      if (!submission) {
+        // Self-service start on an open task: create the candidate's submission row.
+        await assignTaskToUser({ taskId: task.id, userId: user.id });
+      } else if (submission.status === 'assigned') {
+        await updateSubmission(submission.id, { status: 'in-progress' });
+      }
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -245,7 +255,8 @@ export default function TaskDetailPage() {
                     <SubmissionForm task={task} />
                 ) : (
                     <div className="text-center">
-                        <Button size="lg" onClick={handleStartTask}>
+                        <Button size="lg" onClick={handleStartTask} disabled={starting}>
+                            {starting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Start Task
                             <ArrowRight className="ml-2 h-4 w-4" />
                         </Button>

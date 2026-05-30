@@ -63,7 +63,7 @@ export default function Enterprise() {
           <Card>
             <CardHeader><CardTitle>Single Sign-On</CardTitle><CardDescription>SAML 2.0 / OIDC with Okta, Entra ID, Google, OneLogin.</CardDescription></CardHeader>
             <CardContent className="space-y-4">
-              {sso.data && <Badge variant={sso.data.enabled ? "success" : "secondary"}>{sso.data.type.toUpperCase()} {sso.data.enabled ? "enabled" : "disabled"}</Badge>}
+              {sso.data?.type && <Badge variant={sso.data.enabled ? "success" : "secondary"}>{sso.data.type.toUpperCase()} {sso.data.enabled ? "enabled" : "disabled"}</Badge>}
               <div className="grid gap-3 md:grid-cols-2">
                 <div className="space-y-1"><Label>Protocol</Label>
                   <Select value={ssoForm.type} onValueChange={(v) => setSsoForm({ ...ssoForm, type: v as "saml" | "oidc" })}>

@@ -36,6 +36,14 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    company: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    timezone: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
     mfa_enabled: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

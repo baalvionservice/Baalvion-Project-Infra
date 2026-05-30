@@ -147,12 +147,12 @@ export default function OrganizationsPage() {
         page={page}
         onPageChange={setPage}
         filters={
-          <Select value={planFilter} onValueChange={setPlanFilter}>
+          <Select value={planFilter || '__all__'} onValueChange={(v) => setPlanFilter(v === '__all__' ? '' : v)}>
             <SelectTrigger className="h-8 w-32">
               <SelectValue placeholder="Plan" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All plans</SelectItem>
+              <SelectItem value="__all__">All plans</SelectItem>
               <SelectItem value="free">Free</SelectItem>
               <SelectItem value="starter">Starter</SelectItem>
               <SelectItem value="pro">Pro</SelectItem>

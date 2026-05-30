@@ -4,6 +4,7 @@
 // All authentication flows through auth-gateway (RS256 BFF). No env var override.
 // Rollback requires deployment revert (git revert / image rollback).
 const { bffBridge } = require('./bffBridge');
+const { ensureLocalIdentity } = require('./gatewayIdentity');
 const { AppError } = require('../utils/errors');
 
 const toAuth = (v) => ({
@@ -35,6 +36,7 @@ const authMiddleware = async (req, res, next) => {
         const auth = await decode(req);
         if (!auth) return next(new AppError('GATEWAY_REQUIRED', 'Authentication via auth-gateway required; direct bearer tokens not accepted', 401));
         req.auth = auth;
+        await ensureLocalIdentity(req); // map central gateway identity → local users.id (+ JIT provision)
         return next();
     } catch (e) {
         if (e._gateway) return next(new AppError('UNAUTHORIZED', 'Untrusted gateway identity', 401));
@@ -46,7 +48,7 @@ const authMiddleware = async (req, res, next) => {
 const optionalAuth = async (req, res, next) => {
     try {
         const auth = await decode(req);
-        if (auth) req.auth = auth;
+        if (auth) { req.auth = auth; await ensureLocalIdentity(req); }
     } catch { /* anonymous on error */ }
     return next();
 };

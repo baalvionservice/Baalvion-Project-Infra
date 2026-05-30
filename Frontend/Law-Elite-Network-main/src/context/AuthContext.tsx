@@ -1,8 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { authLawApi, setToken, clearToken, getToken, TOKEN_KEY, silentRefresh } from '@/lib/api/client';
+import { authLawApi, setToken, clearToken, getToken, TOKEN_KEY, silentRefresh, apiClient, setImpersonation, getImpersonation } from '@/lib/api/client';
 import { useAuthStore } from '@/store/authStore';
+
+export interface Impersonation { id: string; name?: string; role: UserRole; email?: string }
 
 export type UserRole = 'admin' | 'lawyer' | 'client' | null;
 
@@ -20,6 +22,9 @@ interface AuthContextValue {
   login: (email: string, password: string) => Promise<AuthUser | null>;
   register: (email: string, password: string, name: string, role?: string) => Promise<void>;
   logout: () => void;
+  impersonating: Impersonation | null;
+  startImpersonation: (target: { id: string; name?: string }) => Promise<Impersonation | null>;
+  stopImpersonation: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -29,6 +34,9 @@ const AuthContext = createContext<AuthContextValue>({
   login: async () => null,
   register: async () => {},
   logout: () => {},
+  impersonating: null,
+  startImpersonation: async () => null,
+  stopImpersonation: async () => {},
 });
 
 function parseJwt(token: string): { id: string; email: string; role: string } | null {
@@ -57,6 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [role, setRole] = useState<UserRole>(null);
   const [loading, setLoading] = useState(true);
+  const [impersonating, setImpersonatingState] = useState<Impersonation | null>(null);
 
   const hydrateFromToken = async (token: string) => {
     const claims = parseJwt(token) as any;
@@ -97,7 +106,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         token = await silentRefresh();
       }
       if (token && alive) {
-        await hydrateFromToken(token);
+        const u = await hydrateFromToken(token);
+        // If an impersonation was active before reload, hydrate restored the TARGET's
+        // identity (the header is sent on /auth/me) — reflect that in the banner state.
+        if (getImpersonation() && u) {
+          setImpersonatingState({ id: getImpersonation() as string, name: u.name, role: u.role, email: u.email });
+        }
       } else if (alive) {
         // No active session — clear any stale persisted zustand user.
         try { useAuthStore.getState().logout(); } catch { /* noop */ }
@@ -127,13 +141,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     authLawApi.logout().catch(() => {});
     clearToken();
+    setImpersonation(null);
+    setImpersonatingState(null);
     setUser(null);
     setRole(null);
     try { useAuthStore.getState().logout(); } catch { /* noop */ }
   };
 
+  // ── Admin "View as" impersonation ──────────────────────────────────────────
+  // Verify (admin token) that the target is impersonable, then arm the apiClient header
+  // and re-hydrate the session AS the target so every page renders the target's data.
+  const startImpersonation = async (target: { id: string; name?: string }): Promise<Impersonation | null> => {
+    if (!user || role !== 'admin') return null;
+    // Validate + audit server-side (runs with the admin's real token, no header yet).
+    const res = await apiClient.get(`/admin/impersonate/${target.id}`);
+    const payload = (res.data?.data ?? res.data) as { id: string | number; role: UserRole; email?: string; name?: string };
+    const id = String(payload?.id ?? target.id);
+    setImpersonation(id);
+    const u = await hydrateFromToken(getToken() as string);
+    const imp: Impersonation = {
+      id,
+      role: (payload?.role ?? u?.role ?? 'client') as UserRole,
+      name: payload?.name ?? target.name ?? u?.name,
+      email: payload?.email ?? u?.email,
+    };
+    setImpersonatingState(imp);
+    return imp;
+  };
+
+  // Drop the impersonation header and re-hydrate as the real (admin) identity.
+  const stopImpersonation = async (): Promise<void> => {
+    setImpersonation(null);
+    setImpersonatingState(null);
+    const token = getToken();
+    if (token) await hydrateFromToken(token);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, role, loading, login, register, logout }}>
+    <AuthContext.Provider
+      value={{ user, role, loading, login, register, logout, impersonating, startImpersonation, stopImpersonation }}
+    >
       {children}
     </AuthContext.Provider>
   );

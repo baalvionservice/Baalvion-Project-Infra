@@ -23,7 +23,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 export default function CmsDashboardPage() {
   const { setBreadcrumbs } = useUIStore();
-  const { data: websitesData, isLoading: loadingWebsites } = useWebsites({ limit: 6 });
+  const { data: websitesData, isLoading: loadingWebsites } = useWebsites({ limit: 50 });
   const { data: pendingApprovals, isLoading: loadingApprovals } = useMyPendingApprovals();
 
   useEffect(() => {

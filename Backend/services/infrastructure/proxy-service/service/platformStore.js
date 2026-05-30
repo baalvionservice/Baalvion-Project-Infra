@@ -94,6 +94,7 @@ const convertRecord = (name, inst) => {
     case 'users': return {
       id: String(r.id), orgId: r.org_id, email: r.email,
       name: r.full_name || r.email.split('@')[0],
+      company: r.company || null, timezone: r.timezone || null,
       role: r.role, status: r.status,
       passwordHash: r.password_hash,
       mfaEnabled: !!r.mfa_enabled, mfaSecret: r.mfa_secret,

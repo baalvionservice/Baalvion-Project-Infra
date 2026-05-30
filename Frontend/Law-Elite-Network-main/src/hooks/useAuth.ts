@@ -8,14 +8,17 @@ import { useAuthContext } from '@/context/AuthContext';
  * Streamlined access to the platform's authentication and role-based intelligence.
  */
 export function useAuth() {
-  const { 
-    user, 
-    role, 
-    loading, 
-    profile, 
-    profileStatus, 
+  const {
+    user,
+    role,
+    loading,
+    profile,
+    profileStatus,
     subscriptionTier,
-    logout 
+    logout,
+    impersonating,
+    startImpersonation,
+    stopImpersonation,
   } = useAuthContext();
 
   return {
@@ -29,6 +32,10 @@ export function useAuth() {
     isAdmin: role === 'admin',
     isLawyer: role === 'lawyer',
     isClient: role === 'client',
-    logout
+    logout,
+    impersonating,
+    startImpersonation,
+    stopImpersonation,
+    isImpersonating: !!impersonating,
   };
 }

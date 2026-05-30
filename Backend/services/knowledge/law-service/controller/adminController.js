@@ -275,6 +275,18 @@ const broadcast = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// Start "View as" impersonation: validate the target (a non-admin user) and audit it.
+// The frontend then sends X-Impersonate-User-Id to scope subsequent requests to this user.
+const impersonate = async (req, res, next) => {
+    try {
+        const target = await db.User.findByPk(req.params.userId);
+        if (!target) return next(new AppError('NOT_FOUND', 'User not found', 404));
+        if (target.role === 'admin') return next(new AppError('FORBIDDEN', 'Cannot impersonate an admin', 403));
+        await audit(req, 'impersonate', 'users', target.id, { email: target.email, role: target.role });
+        return sendSuccess(req, res, { id: target.id, role: target.role, email: target.email, name: target.full_name });
+    } catch (err) { return next(err); }
+};
+
 module.exports = {
     RESOURCES,
     listResource, getResource, createResource, updateResource, deleteResource,
@@ -285,4 +297,5 @@ module.exports = {
     publishArticle, archiveArticle,
     cancelSubscription,
     broadcast,
+    impersonate,
 };

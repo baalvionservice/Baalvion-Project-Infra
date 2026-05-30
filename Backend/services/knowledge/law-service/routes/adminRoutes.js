@@ -22,6 +22,7 @@ router.post ('/articles/:id/publish',        ctrl.publishArticle);
 router.post ('/articles/:id/archive',        ctrl.archiveArticle);
 router.patch('/subscriptions/:id/cancel',    ctrl.cancelSubscription);
 router.post ('/notifications/broadcast',     ctrl.broadcast);
+router.get  ('/impersonate/:userId',         ctrl.impersonate);
 
 // ── Generic resource CRUD ("admin to everything") ───────────────────────────
 router.get   ('/:resource',      ctrl.listResource);

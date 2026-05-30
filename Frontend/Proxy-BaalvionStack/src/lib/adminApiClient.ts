@@ -107,7 +107,25 @@ export const adminAbuseApi = {
   listLogs: (params?: { page?: number; pageSize?: number }) =>
     get<Paginated<AdminAbuseLog>>("/admin/abuse/logs", params as Record<string, number | undefined>),
   resolveLog: (id: string) => put<void>(`/admin/abuse/logs/${id}/resolve`),
-  getRateLimits: () => get<AdminRateLimit[]>("/admin/abuse/rate-limits"),
+  // Backend returns { id, key, windowMs, max }; the UI model is
+  // { id, name, requestsPerMinute, requestsPerHour, burstLimit, enabled }. Normalize so
+  // numeric fields are never undefined (these were white-screening the Abuse page).
+  getRateLimits: async (): Promise<AdminRateLimit[]> => {
+    const rows = (await get<Array<Record<string, unknown>>>("/admin/abuse/rate-limits")) || [];
+    return rows.map((r) => {
+      const windowMs = Number(r.windowMs ?? 60_000);
+      const max = Number(r.max ?? r.requestsPerMinute ?? 0);
+      const perMin = windowMs > 0 ? Math.round((max * 60_000) / windowMs) : max;
+      return {
+        id: String(r.id ?? r.key ?? ""),
+        name: String(r.name ?? r.key ?? "rule"),
+        requestsPerMinute: Number(r.requestsPerMinute ?? perMin),
+        requestsPerHour: Number(r.requestsPerHour ?? -1),
+        burstLimit: Number(r.burstLimit ?? max),
+        enabled: r.enabled != null ? Boolean(r.enabled) : true,
+      };
+    });
+  },
   updateRateLimit: (id: string, data: Partial<AdminRateLimit>) =>
     put<AdminRateLimit>(`/admin/abuse/rate-limits/${id}`, data),
 };

@@ -8,9 +8,9 @@ export const BackendHealthBanner = () => {
   const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    const apiBase: string =
-      (import.meta as any).env?.VITE_API_URL || "http://localhost:3050/v1";
-    const healthUrl = apiBase.replace(/\/v1\/?$/, "") + "/health";
+    const insidersBase: string =
+      (import.meta as any).env?.VITE_INSIDERS_URL || "/insiders-api";
+    const healthUrl = `${insidersBase}/health`;
     let cancelled = false;
     fetch(healthUrl)
       .then((r) => { if (!cancelled && !r.ok) setUnreachable(true); })

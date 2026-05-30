@@ -172,11 +172,13 @@ export interface LeaderboardRanking {
 }
 
 export async function getLeaderboard(): Promise<LeaderboardRanking[]> {
-  const allUsers = await getHybridUsers();
-  const allSubmissions = await getHybridSubmissions();
-  const allEvaluations = await getHybridEvaluations();
-  const allTasks = await getHybridTasks();
-  const allSchemas = await api.getEvaluationSchemas(); // This one doesn't have a hybrid layer yet.
+  // Live-first: api.* read from ctm-service (with a mock fallback baked in) so the
+  // public leaderboard reflects real seeded candidates/submissions/evaluations.
+  const allUsers = await api.getUsers();
+  const allSubmissions = await api.getSubmissions();
+  const allEvaluations = await api.getAllEvaluations();
+  const allTasks = await api.getTasks();
+  const allSchemas = await api.getEvaluationSchemas();
 
   const candidates = allUsers.filter((u) => u.role === "candidate");
 

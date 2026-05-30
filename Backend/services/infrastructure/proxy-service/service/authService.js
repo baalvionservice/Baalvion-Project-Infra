@@ -17,6 +17,8 @@ const sanitizeUser = (user) => ({
     orgId: user.orgId,
     email: user.email,
     name: user.name,
+    company: user.company ?? null,
+    timezone: user.timezone ?? null,
     role: user.role,
     status: user.status,
     mfaEnabled: user.mfaEnabled,

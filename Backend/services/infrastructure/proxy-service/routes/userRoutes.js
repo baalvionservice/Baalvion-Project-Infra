@@ -7,7 +7,7 @@ const { requirePermission } = require('../middleware/permissionMiddleware');
 const validate = require('../middleware/validate');
 const schemas = require('../validators/schemas');
 
-router.route('/me').get(authMiddleware, userController.getProfile);
+router.route('/me').get(authMiddleware, userController.getProfile).put(authMiddleware, userController.updateProfile);
 router.route('/change-password').post(authMiddleware, validate(schemas.changePasswordSchema), userController.changePassword);
 
 router.route('/')

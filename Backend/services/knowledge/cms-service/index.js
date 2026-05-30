@@ -1,5 +1,6 @@
 'use strict';
 const express = require('express');
+const path = require('path');
 const helmet = require('helmet');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -16,6 +17,16 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
+
+// Static media — served before the JSON parser & rate limiter. Override helmet's
+// same-origin CORP so uploaded images can be embedded by the admin console (:3030).
+app.use('/uploads', express.static(path.resolve(__dirname, 'uploads'), {
+    setHeaders: (res) => {
+        res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+        res.set('Access-Control-Allow-Origin', '*');
+    },
+}));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use(requestContext);
