@@ -100,4 +100,90 @@ const getCreatorArticles = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listCreators, getCreator, updateCreator, getCreatorArticles };
+// ── Creator verification (admin workflow) ─────────────────────────────────────
+// Verification state lives in creator_profiles.meta.verification (no schema change).
+const ADMIN_ROLES = ['admin', 'owner', 'super_admin'];
+const isAdmin = (req) => (req.auth?.roles || []).some((r) => ADMIN_ROLES.includes(r));
+
+const toVerification = (c) => {
+    const v = (c.meta && c.meta.verification) || {};
+    return {
+        creatorId: String(c.user_id),
+        creatorName: c.display_name || `Creator ${c.user_id}`,
+        creatorAvatar: c.avatar_url || '',
+        verified: !!c.is_verified,
+        requestedAt: v.requestedAt,
+        approvedAt: v.approvedAt,
+        approverId: v.approverId,
+        status: c.is_verified ? 'verified' : (v.status || 'unverified'),
+        documentsProvided: v.documentsProvided || [],
+        rejectionReason: v.rejectionReason,
+    };
+};
+
+// GET /creators/verifications/pending — admin: creators awaiting verification
+const listPendingVerifications = async (req, res, next) => {
+    try {
+        if (!isAdmin(req)) return next(new AppError('FORBIDDEN', 'Admin access required', 403));
+        const rows = await db.CreatorProfile.findAll({
+            where: db.sequelize.literal("meta->'verification'->>'status' = 'pending'"),
+            order: [['updated_at', 'ASC']],
+        });
+        return sendSuccess(req, res, rows.map(toVerification));
+    } catch (err) { return next(err); }
+};
+
+// GET /creators/:userId/verification — verification status for a creator
+const getVerificationStatus = async (req, res, next) => {
+    try {
+        const creator = await db.CreatorProfile.findOne({ where: { user_id: parseInt(req.params.userId) } });
+        if (!creator) return next(new AppError('NOT_FOUND', 'Creator profile not found', 404));
+        return sendSuccess(req, res, toVerification(creator));
+    } catch (err) { return next(err); }
+};
+
+// POST /creators/me/verification/request — auth: the creator applies for verification
+const requestVerification = async (req, res, next) => {
+    try {
+        const creator = await db.CreatorProfile.findOne({ where: { user_id: req.user.id } });
+        if (!creator) return next(new AppError('NOT_FOUND', 'Creator profile not found', 404));
+        const meta = { ...(creator.meta || {}) };
+        meta.verification = {
+            ...(meta.verification || {}),
+            status: 'pending',
+            requestedAt: new Date().toISOString(),
+            documentsProvided: Array.isArray(req.body.documentsProvided) ? req.body.documentsProvided : [],
+        };
+        await creator.update({ meta });
+        return sendSuccess(req, res, toVerification(creator));
+    } catch (err) { return next(err); }
+};
+
+// POST /creators/:userId/verification/decide — admin: approve/reject
+const decideVerification = async (req, res, next) => {
+    try {
+        if (!isAdmin(req)) return next(new AppError('FORBIDDEN', 'Admin access required', 403));
+        const creator = await db.CreatorProfile.findOne({ where: { user_id: parseInt(req.params.userId) } });
+        if (!creator) return next(new AppError('NOT_FOUND', 'Creator profile not found', 404));
+        const decision = String(req.body.decision || '').toLowerCase();
+        const meta = { ...(creator.meta || {}) };
+        const v = { ...(meta.verification || {}) };
+        if (decision === 'approve') {
+            v.status = 'verified'; v.approvedAt = new Date().toISOString(); v.approverId = String(req.user.id);
+            meta.verification = v;
+            await creator.update({ is_verified: true, meta });
+        } else if (decision === 'reject') {
+            v.status = 'rejected'; v.rejectionReason = req.body.rejectionReason || 'Not approved';
+            meta.verification = v;
+            await creator.update({ is_verified: false, meta });
+        } else {
+            return next(new AppError('VALIDATION_ERROR', "decision must be 'approve' or 'reject'", 400));
+        }
+        return sendSuccess(req, res, toVerification(creator));
+    } catch (err) { return next(err); }
+};
+
+module.exports = {
+    listCreators, getCreator, updateCreator, getCreatorArticles,
+    listPendingVerifications, getVerificationStatus, requestVerification, decideVerification,
+};

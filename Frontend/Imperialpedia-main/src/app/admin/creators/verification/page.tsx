@@ -30,7 +30,7 @@ import {
   Search,
   ExternalLink,
 } from "lucide-react";
-import { getPendingVerifications } from "@/services/mock-api/creators";
+import { getPendingVerifications, decideVerification } from "@/services/data/creators-service";
 import { CreatorVerification } from "@/types";
 import { format } from "date-fns";
 import { toast } from "@/hooks/use-toast";
@@ -59,10 +59,15 @@ export default function CreatorVerificationPage() {
     loadRequests();
   }, []);
 
-  const handleAction = (creatorId: string, action: "approve" | "reject") => {
+  const handleAction = async (creatorId: string, action: "approve" | "reject") => {
     const creator = requests.find((r) => r.creatorId === creatorId);
+    const res = await decideVerification(creatorId, action);
+    if (res.error) {
+      toast({ title: "Action failed", description: res.error, variant: "destructive" });
+      return;
+    }
+    // Persisted on imperialpedia-service — drop it from the pending queue.
     setRequests((prev) => prev.filter((r) => r.creatorId !== creatorId));
-
     toast({
       title:
         action === "approve" ? "Creator Verified" : "Verification Rejected",

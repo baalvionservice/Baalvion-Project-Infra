@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container } from '@/design-system/layout/container';
-import { getCreatorVerificationStatus } from '@/services/mock-api/creators';
+import { getCreatorVerificationStatus } from '@/services/data/creators-service';
 import { VerificationClient } from './VerificationClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
