@@ -956,6 +956,9 @@ importers:
       bcrypt:
         specifier: ^5.1.1
         version: 5.1.1
+      bcryptjs:
+        specifier: 2.4.3
+        version: 2.4.3
       bullmq:
         specifier: ^5.77.3
         version: 5.77.3
@@ -1971,6 +1974,12 @@ importers:
 
   Backend/services/knowledge/law-service:
     dependencies:
+      '@aws-sdk/client-s3':
+        specifier: ^3.1053.0
+        version: 3.1053.0
+      '@aws-sdk/s3-request-presigner':
+        specifier: ^3.1053.0
+        version: 3.1053.0
       '@baalvion/auth-node':
         specifier: workspace:*
         version: link:../../../packages/auth-node
@@ -1989,6 +1998,9 @@ importers:
       helmet:
         specifier: ^8.1.0
         version: 8.2.0
+      multer:
+        specifier: ^2.1.1
+        version: 2.1.1
       pg:
         specifier: ^8.20.0
         version: 8.21.0
@@ -2661,9 +2673,6 @@ importers:
       globals:
         specifier: ^15.15.0
         version: 15.15.0
-      lovable-tagger:
-        specifier: ^1.1.10
-        version: 1.3.0(tsx@4.22.3)(vite@5.4.21(@types/node@22.19.19)(lightningcss@1.32.0)(terser@5.48.0))(yaml@2.9.0)
       postcss:
         specifier: ^8.5.6
         version: 8.5.15
@@ -4779,9 +4788,6 @@ importers:
       genkit-cli:
         specifier: ^1.28.0
         version: 1.35.0(@cfworker/json-schema@4.1.1)(@types/node@20.19.41)(zod@3.25.76)
-      playwright:
-        specifier: ^1.60.0
-        version: 1.60.0
       postcss:
         specifier: ^8
         version: 8.5.15
@@ -4790,6 +4796,31 @@ importers:
         version: 3.4.19(tsx@4.22.3)(yaml@2.9.0)
       typescript:
         specifier: ^5
+        version: 5.9.3
+
+  Frontend/insiders-seo:
+    dependencies:
+      next:
+        specifier: ^14.2.35
+        version: 14.2.35(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.60.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react:
+        specifier: ^18.3.1
+        version: 18.3.1
+      react-dom:
+        specifier: ^18.3.1
+        version: 18.3.1(react@18.3.1)
+    devDependencies:
+      '@types/node':
+        specifier: ^20.14.0
+        version: 20.19.41
+      '@types/react':
+        specifier: ^18.3.3
+        version: 18.3.29
+      '@types/react-dom':
+        specifier: ^18.3.0
+        version: 18.3.7(@types/react@18.3.29)
+      typescript:
+        specifier: ^5.5.3
         version: 5.9.3
 
 packages:
@@ -27158,7 +27189,7 @@ snapshots:
 
   '@types/react-dom@18.3.1':
     dependencies:
-      '@types/react': 19.2.15
+      '@types/react': 18.3.29
 
   '@types/react-dom@18.3.7(@types/react@18.3.29)':
     dependencies:
@@ -27177,7 +27208,7 @@ snapshots:
       '@types/d3-geo': 2.0.7
       '@types/d3-zoom': 2.0.7
       '@types/geojson': 7946.0.16
-      '@types/react': 19.2.15
+      '@types/react': 18.3.29
 
   '@types/react@18.3.1':
     dependencies:

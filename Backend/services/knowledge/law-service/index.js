@@ -19,6 +19,10 @@ const server = http.createServer(app);
 app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
+// Razorpay webhook needs the raw body for signature verification — register it BEFORE the
+// JSON parser so its bytes aren't consumed/re-encoded.
+const paymentController = require('./controller/paymentController');
+app.post(['/v1/payments/webhook', '/api/v1/payments/webhook'], express.raw({ type: '*/*' }), paymentController.webhookHandler);
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());

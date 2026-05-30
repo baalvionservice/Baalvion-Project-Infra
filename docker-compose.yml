@@ -1003,6 +1003,18 @@ services:
       - JWT_ALLOW_HS256_FALLBACK=false
       - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
       - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      # Object storage (MinIO) for the document vault — internal endpoint for uploads,
+      # public endpoint for browser-reachable presigned downloads.
+      - MINIO_ENDPOINT=http://minio:9000
+      - MINIO_PUBLIC_ENDPOINT=${LAW_MINIO_PUBLIC_ENDPOINT:-http://localhost:9000}
+      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-baalvion}
+      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-baalvion_dev_pass}
+      - MINIO_BUCKET=${LAW_MINIO_BUCKET:-law-documents}
+      # Razorpay payment gateway — set keys to enable real charges (cards/UPI/netbanking/
+      # wallets/bank). Empty = simulated settlement (fully testable without keys).
+      - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-}
+      - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-}
+      - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET:-}
       - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
       - FIREBASE_CLIENT_EMAIL=${FIREBASE_CLIENT_EMAIL}
       - FIREBASE_PRIVATE_KEY=${FIREBASE_PRIVATE_KEY}

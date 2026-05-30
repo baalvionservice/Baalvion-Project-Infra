@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { getBookingById } from "@/services/bookingService";
-import { createPayment } from "@/services/payments/paymentService";
+import { createPayment, openRazorpayCheckout, verifyPayment } from "@/services/payments/paymentService";
 import PaymentMethods from "@/components/payment/PaymentMethods";
 import PaymentSummary from "@/components/payment/PaymentSummary";
 import { useAuthStore } from "@/store/authStore";
@@ -67,29 +67,47 @@ function CheckoutContent() {
 
     setIsProcessing(true);
     try {
-      await createPayment({
+      const created = await createPayment({
         bookingId: bookingId as string,
-        userId: user.id,
-        amount: booking.amount || 5000,
+        amount: booking.amount || booking.total_amount || 0,
         method,
-        userRole: user.role
+        currency: booking.currency || "INR",
+        lawyerId: booking.lawyerId,
       });
 
+      // Real gateway: open Razorpay Checkout (cards / UPI / netbanking / wallets / bank), then verify.
+      if (created?.gateway === "razorpay" && created?.razorpay) {
+        const rzp = await openRazorpayCheckout({
+          keyId: created.razorpay.keyId,
+          orderId: created.razorpay.orderId,
+          amount: created.razorpay.amount,
+          currency: created.razorpay.currency,
+          description: `Consultation${booking.lawyerName ? ` with ${booking.lawyerName}` : ""}`,
+          prefill: { name: (user as any)?.name, email: (user as any)?.email },
+        });
+        await verifyPayment(created.id as any, rzp);
+      }
+      // (no gateway configured -> payment already settled server-side)
+
       setIsSuccess(true);
-      toast({ 
-        title: "Transaction Successful", 
-        description: "Your session fee has been secured. Engagement is now active." 
+      toast({
+        title: "Transaction Successful",
+        description: "Your session fee has been secured. Engagement is now active.",
       });
 
       setTimeout(() => {
         router.push("/dashboard");
       }, 2000);
-    } catch (error) {
-      toast({ 
-        variant: "destructive",
-        title: "Settlement Failure", 
-        description: "Unable to process payment. Please verify your credentials." 
-      });
+    } catch (error: any) {
+      if (error?.message === "Payment cancelled") {
+        toast({ title: "Payment cancelled", description: "You can complete the payment anytime from your dashboard." });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Settlement Failure",
+          description: error?.message || "Unable to process payment. Please try again.",
+        });
+      }
     } finally {
       setIsProcessing(false);
     }

@@ -3,6 +3,14 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { ensureClient } = require('../utils/provision');
+const razorpay = require('../service/razorpay');
+
+const settleBooking = async (payment) => {
+    if (payment.status === 'succeeded' && payment.booking_id) {
+        await db.Booking.update({ status: 'confirmed' }, { where: { id: payment.booking_id } });
+    }
+};
 
 const listPayments = async (req, res, next) => {
     try {
@@ -39,41 +47,113 @@ const listPayments = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// Step 1: create the payment + (if Razorpay configured) a Razorpay Order to open Checkout.
 const createPayment = async (req, res, next) => {
     try {
-        const { booking_id, lawyer_id, amount, currency = 'USD', provider, provider_tx_id } = req.body;
-        const client = await db.Client.findOne({ where: { user_id: String(req.user.id) } });
-        if (!client) return next(new AppError('NOT_FOUND', 'Client profile not found', 404));
+        const { booking_id, lawyer_id, amount, currency = 'INR', provider } = req.body;
+        const client = await ensureClient(req);
+        if (!client) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
+
+        let resolvedLawyer = lawyer_id ? Number(lawyer_id) : null;
+        if (!resolvedLawyer && booking_id) {
+            const bk = await db.Booking.findByPk(Number(booking_id), { attributes: ['lawyer_id'] });
+            if (bk) resolvedLawyer = bk.lawyer_id;
+        }
+
         const payment = await db.Payment.create({
             booking_id: booking_id ? Number(booking_id) : null,
             client_id: client.id,
-            lawyer_id: lawyer_id ? Number(lawyer_id) : null,
+            lawyer_id: resolvedLawyer,
             amount: Number(amount),
             currency,
             status: 'pending',
-            provider: provider || null,
-            provider_tx_id: provider_tx_id || null,
+            provider: provider || 'card',
         });
-        return sendSuccess(req, res, payment, 201);
+
+        if (razorpay.isConfigured()) {
+            // Real gateway: open Razorpay Checkout on the client with this order (all payment
+            // modes — cards, UPI, netbanking, wallets, bank transfer). Settled on verify/webhook.
+            const order = await razorpay.createOrder({
+                amount: payment.amount,
+                currency: payment.currency,
+                receipt: `pay_${payment.id}`,
+                notes: { payment_id: String(payment.id), booking_id: String(booking_id || '') },
+            });
+            await payment.update({ provider: 'razorpay', provider_tx_id: order.id });
+            return sendSuccess(req, res, {
+                ...payment.toJSON(),
+                gateway: 'razorpay',
+                razorpay: { orderId: order.id, keyId: razorpay.keyId(), amount: order.amount, currency: order.currency },
+            }, 201);
+        }
+
+        // No gateway configured -> simulated settlement so the full flow is testable now.
+        await payment.update({ status: 'succeeded' });
+        await settleBooking(payment);
+        return sendSuccess(req, res, { ...payment.toJSON(), gateway: 'simulated' }, 201);
     } catch (err) { return next(err); }
 };
 
-const webhookHandler = async (req, res, next) => {
+// Step 2: verify the Razorpay Checkout callback signature and settle (or simulated settle).
+const verifyPayment = async (req, res, next) => {
     try {
-        // Webhook handler for payment provider callbacks
-        // In production, verify webhook signature from req.headers before processing
-        const { provider_tx_id, status, amount } = req.body;
-        if (!provider_tx_id) return next(new AppError('BAD_REQUEST', 'provider_tx_id required', 400));
-        const payment = await db.Payment.findOne({ where: { provider_tx_id } });
-        if (!payment) return next(new AppError('NOT_FOUND', 'Payment not found for this transaction ID', 404));
-        await payment.update({ status: status || 'succeeded' });
-
-        // If succeeded, confirm the related booking
-        if (payment.status === 'succeeded' && payment.booking_id) {
-            await db.Booking.update({ status: 'confirmed' }, { where: { id: payment.booking_id } });
+        const payment = await db.Payment.findByPk(req.params.id);
+        if (!payment) return next(new AppError('NOT_FOUND', 'Payment not found', 404));
+        if (!req.user.isAdmin) {
+            const client = await db.Client.findOne({ where: { user_id: String(req.user.id) } });
+            if (!client || payment.client_id !== client.id) return next(new AppError('FORBIDDEN', 'Not authorised', 403));
         }
-        return sendSuccess(req, res, { received: true, paymentId: payment.id, status: payment.status });
+
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
+        if (razorpay.isConfigured() && razorpay_signature) {
+            const ok = razorpay.verifyPaymentSignature({
+                orderId: razorpay_order_id || payment.provider_tx_id,
+                paymentId: razorpay_payment_id,
+                signature: razorpay_signature,
+            });
+            if (!ok) {
+                await payment.update({ status: 'failed' });
+                return next(new AppError('PAYMENT_VERIFICATION_FAILED', 'Payment signature verification failed', 400));
+            }
+            await payment.update({ status: 'succeeded', provider_tx_id: razorpay_payment_id || payment.provider_tx_id });
+        } else {
+            // Simulated path (no keys) — settle.
+            await payment.update({ status: 'succeeded' });
+        }
+        await settleBooking(payment);
+        return sendSuccess(req, res, payment);
     } catch (err) { return next(err); }
+};
+
+// Razorpay webhook (raw body registered in index.js before the JSON parser).
+const webhookHandler = async (req, res) => {
+    try {
+        const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body || {}));
+        const signature = req.headers['x-razorpay-signature'];
+        if (razorpay.isConfigured() && process.env.RAZORPAY_WEBHOOK_SECRET) {
+            if (!razorpay.verifyWebhookSignature(raw, signature)) {
+                return res.status(400).json({ error: 'invalid signature' });
+            }
+        }
+        const event = JSON.parse(raw.toString('utf8') || '{}');
+        const type = event.event;
+        const entity = event.payload && (event.payload.payment ? event.payload.payment.entity : (event.payload.order ? event.payload.order.entity : null));
+
+        if (type === 'payment.captured' || type === 'order.paid') {
+            const pid = entity && entity.notes && entity.notes.payment_id;
+            const orderId = entity && (entity.order_id || entity.id);
+            const payment = pid
+                ? await db.Payment.findByPk(Number(pid))
+                : (orderId ? await db.Payment.findOne({ where: { provider_tx_id: orderId } }) : null);
+            if (payment) { await payment.update({ status: 'succeeded' }); await settleBooking(payment); }
+        } else if (type === 'payment.failed') {
+            const orderId = entity && entity.order_id;
+            if (orderId) await db.Payment.update({ status: 'failed' }, { where: { provider_tx_id: orderId } });
+        }
+        return res.json({ received: true });
+    } catch (e) {
+        return res.status(400).send(`Webhook Error: ${e.message}`);
+    }
 };
 
 const getPayment = async (req, res, next) => {
@@ -89,4 +169,4 @@ const getPayment = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listPayments, createPayment, webhookHandler, getPayment };
+module.exports = { listPayments, createPayment, verifyPayment, webhookHandler, getPayment };

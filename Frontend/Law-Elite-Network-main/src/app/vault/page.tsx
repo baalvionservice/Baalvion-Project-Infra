@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/DashboardShell";
-import { getAllUserDocuments, deleteDocument } from "@/services/documents/documentService";
+import { getAllUserDocuments, deleteDocument, uploadDocument, getDocumentDownloadUrl } from "@/services/documents/documentService";
 import { useAuthStore } from "@/store/authStore";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { 
@@ -10,10 +10,11 @@ import {
   FileText, 
   Loader2, 
   Search, 
-  Eye, 
-  Trash2, 
+  Eye,
+  Trash2,
   Sparkles,
-  ArrowUpDown
+  ArrowUpDown,
+  Upload
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,8 @@ function VaultContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDoc, setSelectedDoc] = useState<any>(null);
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = React.useRef<HTMLInputElement>(null);
 
   const loadData = async () => {
     if (!user) return;
@@ -63,6 +66,28 @@ function VaultContent() {
   useEffect(() => {
     loadData();
   }, [user]);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      await uploadDocument(file, '');
+      toast({ title: "Document uploaded", description: `${file.name} is now secured in your vault.` });
+      await loadData();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "Upload failed", description: err?.message || "Please try again." });
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
+  };
+
+  const handleView = async (doc: any) => {
+    const url = await getDocumentDownloadUrl(doc.id);
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    else toast({ variant: "destructive", title: "File unavailable", description: "No stored file for this record." });
+  };
 
   const handleDelete = async (docId: string, fileUrl: string) => {
     if (!confirm("Confirm permanent redaction of this document? This action is irreversible.")) return;
@@ -109,6 +134,14 @@ function VaultContent() {
           <Button variant="outline" className="border-slate-200 text-xs font-bold uppercase tracking-widest h-11 px-6">
             <ArrowUpDown className="w-4 h-4 mr-2" /> Filter Registry
           </Button>
+          <input ref={fileRef} type="file" className="hidden" onChange={handleUpload} />
+          <Button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="bg-[#0B1F3A] text-white hover:bg-slate-800 text-xs font-bold uppercase tracking-widest h-11 px-6"
+          >
+            {uploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Upload className="w-4 h-4 mr-2" />} Upload
+          </Button>
         </div>
 
         <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
@@ -147,7 +180,7 @@ function VaultContent() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase">Case: {doc.caseId.slice(-6)}</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">{doc.caseId ? `Case: ${doc.caseId.slice(-6)}` : 'General'}</span>
                     </TableCell>
                     <TableCell>
                       <span className="text-xs font-medium text-slate-500">
@@ -166,8 +199,8 @@ function VaultContent() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600" asChild>
-                          <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer"><Eye className="w-4 h-4" /></a>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600" onClick={() => handleView(doc)}>
+                          <Eye className="w-4 h-4" />
                         </Button>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-red-600" onClick={() => handleDelete(doc.id, doc.fileUrl)}>
                           <Trash2 className="w-4 h-4" />
