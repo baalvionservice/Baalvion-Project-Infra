@@ -1,4 +1,5 @@
 import { newsArticles, NewsBodyBlock, NewsArticle } from "@/lib/data.news";
+import { getPublishedNewsBySlug } from "@/services/data/cms-public";
 import { stocksPageData, StocksArticle } from "@/lib/data/data.stocks";
 import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/services/format-date";
@@ -6,36 +7,12 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { brokerGuides } from "../brokers/Components/data.brokers";
 import { ArticleCard } from "../news/NewsArticleCard";
-import { ReviewArticle } from "@/types/Review";
-import { bestCryptoExchangesReview } from "@/data/reviews/data.reviews.crypto.exchange";
-import { bestOnlineBrokersReview } from "@/data/reviews/data.reviews.online.brokers";
 import { ReviewLayout } from "@/components/layout/ReviewLayout";
-import { bestCdRatesReview } from "@/data/reviews/data.reviews.cd.rates";
-import { bestPersonalLoans } from "@/data/reviews/data.personals.loans";
-import { bestRoboAdvisers } from "@/data/reviews/data.best.robo.advisers";
-import { bestMortgageRates } from "@/data/reviews/data.best.mortgage.rates";
-import { bestLifeInsurance } from "@/data/reviews/data.best.live.insurance";
-import { bestSavingsRates } from "@/data/reviews/data.best.savings.rate";
-import { bestReliefCompanies } from "@/data/reviews/data.best.relief.companies";
-import { getTermsByLetter, getTermUrl } from "@/lib/data/utils";
+import { fetchReviewBySlug } from "@/lib/data/review-live";
+import { getTermUrl } from "@/lib/data/utils";
+import { fetchTermsByLetter } from "@/lib/data/term-live";
 import { Term } from "@/lib/data/terms";
 import Link from "next/link";
-
-// ── Review imports ────────────────────────────────────────────────────────────
-
-// ── Registry: add every new review page here ──────────────────────────────────
-// Key = the slug that appears in the URL (e.g. imperialpedia.com/best-cd-rates)
-const reviewRegistry: Record<string, ReviewArticle> = {
-  "best-cd-rates": bestCdRatesReview,
-  "best-crypto-exchanges": bestCryptoExchangesReview,
-  "best-online-brokers": bestOnlineBrokersReview,
-  "best-personal-loans": bestPersonalLoans,
-  "best-robo-advisers": bestRoboAdvisers,
-  "best-mortgage-rates": bestMortgageRates,
-  "best-life-insurance": bestLifeInsurance,
-  "best-savings-rates": bestSavingsRates,
-  "best-debt-relief-companies": bestReliefCompanies,
-};
 
 // Union type to handle different article types
 type ArticleType = NewsArticle | StocksArticle;
@@ -52,7 +29,7 @@ export async function generateMetadata({
   // Check if this is a terms-beginning-with pattern
   if (slug.startsWith("terms-beginning-with-")) {
     const letter = slug.replace("terms-beginning-with-", "");
-    const terms: Term[] = getTermsByLetter(letter);
+    const terms: Term[] = await fetchTermsByLetter(letter);
     if (terms && terms.length > 0) {
       return buildMetadata({
         title: `Financial Terms Starting with "${letter.toUpperCase()}" | Imperial Finance Glossary`,
@@ -63,8 +40,8 @@ export async function generateMetadata({
     }
   }
 
-  // Review pages get their own metadata
-  const review = reviewRegistry[slug];
+  // Review pages get their own metadata (live from imperialpedia-service, static fallback)
+  const review = await fetchReviewBySlug(slug);
   if (review) {
     return buildMetadata({
       title: review.title,
@@ -74,8 +51,9 @@ export async function generateMetadata({
     });
   }
 
-  // Standard article metadata (unchanged)
-  const article = newsArticles.find((a) => a.slug === slug);
+  // Standard article metadata — static set first, then live CMS news.
+  const article =
+    newsArticles.find((a) => a.slug === slug) ?? (await getPublishedNewsBySlug(slug));
   if (!article) return {};
   return buildMetadata({
     title: article.title,
@@ -185,7 +163,7 @@ export default async function SingleNewsPage({
   // ── 1. Check if this is a terms-beginning-with pattern ──────────────────
   if (slug.startsWith("terms-beginning-with-")) {
     const letter = slug.replace("terms-beginning-with-", "");
-    const terms = getTermsByLetter(letter);
+    const terms = await fetchTermsByLetter(letter);
 
     if (!terms || terms.length === 0) {
       notFound();
@@ -212,8 +190,8 @@ export default async function SingleNewsPage({
     );
   }
 
-  // ── 2. Check review registry ──────────────────────────────────────────
-  const review = reviewRegistry[slug];
+  // ── 2. Check review guides (live from imperialpedia-service, static fallback) ──
+  const review = await fetchReviewBySlug(slug);
   if (review) {
     return <ReviewLayout review={review} />;
   }
@@ -229,6 +207,10 @@ export default async function SingleNewsPage({
         : null) ||
       brokerGuides.find((a) => a.slug === slug) ||
       stocksPageData.latest.find((a) => a.slug === slug);
+  }
+  // Last resort: live editorial news published from the CMS.
+  if (!article) {
+    article = (await getPublishedNewsBySlug(slug)) ?? undefined;
   }
   if (!article) notFound();
 

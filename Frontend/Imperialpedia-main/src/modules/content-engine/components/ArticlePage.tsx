@@ -116,7 +116,16 @@ export const ArticlePage = ({
               </Card>
             </div>
 
-            <ArticleBody sections={[]} />
+            {article.body ? (
+              <div
+                className="article-body prose prose-lg dark:prose-invert max-w-none mb-12"
+                // Body is rendered from CMS content blocks (cms-public.blocksToHtml).
+                // Source is internal, editor-authored content published via the CMS.
+                dangerouslySetInnerHTML={{ __html: article.body }}
+              />
+            ) : (
+              <ArticleBody sections={[]} />
+            )}
 
             <CommunitySection />
 

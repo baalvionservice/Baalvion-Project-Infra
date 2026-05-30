@@ -61,10 +61,12 @@ const generateBullCaseFlow = ai.defineFlow(
     outputSchema: BullCaseOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('AI Engine failed to generate a valid bull case scenario.');
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
     }
-    return output;
+    return { overview: "AI generation is not configured. Set GEMINI_API_KEY for live analysis.", catalysts: [], expected_price_range: { short_term: '', medium_term: '' }, confidence_score: 0, supporting_metrics: { social_sentiment: '', volume_trend: '', key_kpis: [] } };
   }
 );

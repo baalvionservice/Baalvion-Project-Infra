@@ -14,6 +14,7 @@ import { I18nProvider } from "@/components/i18n/I18nProvider";
 import { cn } from "@/lib/utils";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "@/services/query-client";
+import { AuthProvider } from "@/providers/AuthProvider";
 import { usePathname } from "next/navigation";
 
 type RootLayoutClientProps = Readonly<{ children: React.ReactNode }>;
@@ -29,6 +30,7 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
     return (
         <>
             <QueryClientProvider client={queryClient}>
+                <AuthProvider>
                 <I18nProvider>
                     <GlobalStoreProvider>
                         <ThemeProvider>
@@ -51,6 +53,7 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
                         </ThemeProvider>
                     </GlobalStoreProvider>
                 </I18nProvider>
+                </AuthProvider>
             </QueryClientProvider>
         </>
     );

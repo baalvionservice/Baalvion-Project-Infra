@@ -2,18 +2,30 @@ import { MetadataRoute } from 'next';
 import { env } from '@/config/env';
 
 const BASE = env.siteUrl || 'https://imperialpedia.com';
-const API = env.apiBaseUrl;
+const IMP = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || 'http://localhost:3004/api/v1';
+const CMS = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || 'http://localhost:3018/api/v1/public';
+const SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
-async function safeFetch<T>(url: string): Promise<T[]> {
-  if (!API) return [];
+type Slugged = { slug: string; name?: string; updatedAt?: string; publishedAt?: string };
+
+async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
   try {
     const res = await fetch(url, { next: { revalidate: 3600 } });
-    if (!res.ok) return [];
-    const json = await res.json();
-    return Array.isArray(json) ? json : (json.data ?? json.items ?? json.results ?? []);
+    if (!res.ok) return null;
+    return (await res.json()) as Record<string, unknown>;
   } catch {
-    return [];
+    return null;
   }
+}
+// Structured entities (company/country/industry/technology/term/review) — imperialpedia-service.
+async function entityItems(type: string): Promise<Slugged[]> {
+  const j = await fetchJson(`${IMP}/entities?type=${type}&limit=1000`);
+  return ((j?.data as { items?: Slugged[] })?.items ?? []) as Slugged[];
+}
+// Published editorial content (article/news) — cms-service public delivery API.
+async function cmsItems(contentType: string): Promise<Slugged[]> {
+  const j = await fetchJson(`${CMS}/${SITE}/content?contentType=${contentType}&limit=1000`);
+  return ((j?.data as Slugged[]) ?? []) as Slugged[];
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -98,74 +110,63 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/terms-of-service`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
-  const [articles, categories, tags, glossaryTerms, companies, countries, industries] =
+  const [companies, countries, industries, technologies, terms, reviews, articles, news] =
     await Promise.all([
-      safeFetch<{ slug: string; updatedAt?: string }>(`${API}/articles?fields=slug,updatedAt&limit=5000&status=published`),
-      safeFetch<{ slug: string; updatedAt?: string }>(`${API}/categories?fields=slug,updatedAt&limit=1000`),
-      safeFetch<{ slug: string; updatedAt?: string }>(`${API}/tags?fields=slug,updatedAt&limit=2000`),
-      safeFetch<{ letter: string; slug: string; updatedAt?: string }>(`${API}/glossary/terms?fields=letter,slug,updatedAt&limit=10000`),
-      safeFetch<{ slug: string; updatedAt?: string }>(`${API}/companies?fields=slug,updatedAt&limit=5000&status=active`),
-      safeFetch<{ slug: string; updatedAt?: string }>(`${API}/countries?fields=slug,updatedAt&limit=300`),
-      safeFetch<{ slug: string; updatedAt?: string }>(`${API}/industries?fields=slug,updatedAt&limit=500`),
+      entityItems('company'),
+      entityItems('country'),
+      entityItems('industry'),
+      entityItems('technology'),
+      entityItems('term'),
+      entityItems('review'),
+      cmsItems('article'),
+      cmsItems('news'),
     ]);
 
-  const articleRoutes: MetadataRoute.Sitemap = articles.map((a) => ({
-    url: `${BASE}/articles/${a.slug}`,
-    lastModified: a.updatedAt ? new Date(a.updatedAt) : now,
-    changeFrequency: 'weekly',
-    priority: 0.7,
-  }));
+  const entRoutes = (items: Slugged[], prefix: string, priority = 0.6): MetadataRoute.Sitemap =>
+    items
+      .filter((e) => e?.slug)
+      .map((e) => ({
+        url: `${BASE}${prefix}/${e.slug}`,
+        lastModified: e.updatedAt ? new Date(e.updatedAt) : now,
+        changeFrequency: 'weekly',
+        priority,
+      }));
 
-  const categoryRoutes: MetadataRoute.Sitemap = categories.map((c) => ({
-    url: `${BASE}/categories/${c.slug}`,
-    lastModified: c.updatedAt ? new Date(c.updatedAt) : now,
-    changeFrequency: 'weekly',
-    priority: 0.6,
-  }));
+  // Glossary terms live at /terms/{letter}/{slug} (letter from the term title).
+  const termRoutes: MetadataRoute.Sitemap = terms
+    .filter((t) => t?.slug)
+    .map((t) => {
+      const c = (t.name || t.slug).charAt(0).toLowerCase();
+      const letter = /^[0-9]/.test(c) ? 'num' : c;
+      return { url: `${BASE}/terms/${letter}/${t.slug}`, lastModified: now, changeFrequency: 'monthly', priority: 0.6 };
+    });
 
-  const tagRoutes: MetadataRoute.Sitemap = tags.map((t) => ({
-    url: `${BASE}/tags/${t.slug}`,
-    lastModified: t.updatedAt ? new Date(t.updatedAt) : now,
-    changeFrequency: 'weekly',
-    priority: 0.5,
-  }));
+  // Review guides + published news live at the root slug (/best-online-brokers, /{news-slug}).
+  const reviewRoutes: MetadataRoute.Sitemap = reviews
+    .filter((r) => r?.slug)
+    .map((r) => ({ url: `${BASE}/${r.slug}`, lastModified: now, changeFrequency: 'weekly', priority: 0.7 }));
 
-  const glossaryRoutes: MetadataRoute.Sitemap = glossaryTerms.map((t) => ({
-    url: `${BASE}/terms/${t.letter}/${t.slug}`,
-    lastModified: t.updatedAt ? new Date(t.updatedAt) : now,
-    changeFrequency: 'monthly',
-    priority: 0.6,
-  }));
+  const articleRoutes: MetadataRoute.Sitemap = articles
+    .filter((a) => a?.slug)
+    .map((a) => ({ url: `${BASE}/articles/${a.slug}`, lastModified: a.publishedAt ? new Date(a.publishedAt) : now, changeFrequency: 'weekly', priority: 0.7 }));
 
-  const companyRoutes: MetadataRoute.Sitemap = companies.map((c) => ({
-    url: `${BASE}/companies/${c.slug}`,
-    lastModified: c.updatedAt ? new Date(c.updatedAt) : now,
-    changeFrequency: 'weekly',
-    priority: 0.6,
-  }));
+  const newsRoutes: MetadataRoute.Sitemap = news
+    .filter((n) => n?.slug)
+    .map((n) => ({ url: `${BASE}/${n.slug}`, lastModified: n.publishedAt ? new Date(n.publishedAt) : now, changeFrequency: 'daily', priority: 0.8 }));
 
-  const countryRoutes: MetadataRoute.Sitemap = countries.map((c) => ({
-    url: `${BASE}/countries/${c.slug}`,
-    lastModified: c.updatedAt ? new Date(c.updatedAt) : now,
-    changeFrequency: 'weekly',
-    priority: 0.6,
-  }));
-
-  const industryRoutes: MetadataRoute.Sitemap = industries.map((i) => ({
-    url: `${BASE}/industries/${i.slug}`,
-    lastModified: i.updatedAt ? new Date(i.updatedAt) : now,
-    changeFrequency: 'weekly',
-    priority: 0.6,
-  }));
-
-  return [
+  const all: MetadataRoute.Sitemap = [
     ...staticRoutes,
+    ...entRoutes(companies, '/companies', 0.7),
+    ...entRoutes(countries, '/countries'),
+    ...entRoutes(industries, '/industries'),
+    ...entRoutes(technologies, '/technologies'),
+    ...termRoutes,
+    ...reviewRoutes,
     ...articleRoutes,
-    ...categoryRoutes,
-    ...tagRoutes,
-    ...glossaryRoutes,
-    ...companyRoutes,
-    ...countryRoutes,
-    ...industryRoutes,
+    ...newsRoutes,
   ];
+
+  // Dedupe by URL.
+  const seen = new Set<string>();
+  return all.filter((r) => (seen.has(r.url) ? false : (seen.add(r.url), true)));
 }

@@ -26,11 +26,19 @@ async function getRevision(websiteId, contentId, revisionId) {
     return revision.toJSON();
 }
 
-async function createRevision(contentId, userId, changeNote = null) {
-    const content = await CmsContent.findOne({ where: { id: contentId } });
+async function createRevision(contentId, userId, changeNote = null, transaction = null) {
+    // When called from inside a workflow transaction, EVERY query here must run on that
+    // same transaction. Otherwise content.increment() below opens a second connection and
+    // UPDATEs the content row that the outer (uncommitted) transaction already locked →
+    // self-deadlock → pool timeout → the whole transition rolls back.
+    const content = await CmsContent.findOne({ where: { id: contentId }, transaction });
     if (!content) return;
 
-    const nextNumber = content.revisionCount + 1;
+    // Derive the next revision number from the actual max on record rather than the
+    // denormalized revisionCount — the counter can drift from seeds/partial failures
+    // and a stale value collides with the (content_id, revision_number) unique index.
+    const lastNumber = (await CmsContentRevision.max('revisionNumber', { where: { contentId }, transaction })) || 0;
+    const nextNumber = Number(lastNumber) + 1;
     await CmsContentRevision.create({
         contentId,
         revisionNumber: nextNumber,
@@ -47,9 +55,9 @@ async function createRevision(contentId, userId, changeNote = null) {
         },
         createdBy: userId,
         changeNote,
-    });
+    }, { transaction });
 
-    await content.increment('revisionCount');
+    await content.increment('revisionCount', { transaction });
 }
 
 async function restoreRevision(websiteId, contentId, revisionId, userId) {

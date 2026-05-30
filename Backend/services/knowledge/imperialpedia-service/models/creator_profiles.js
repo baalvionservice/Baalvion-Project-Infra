@@ -12,6 +12,9 @@ module.exports = function (sequelize, DataTypes) {
         reputation_score: { type: DataTypes.DECIMAL(6, 2), defaultValue: 0 },
         is_verified: { type: DataTypes.BOOLEAN, defaultValue: false },
         social_links: { type: DataTypes.JSONB, defaultValue: {} },
+        // Full rich public profile (frontend CreatorProfile shape) — lets the lean base
+        // columns stay queryable (leaderboard joins) while the UI gets a faithful object.
+        meta: { type: DataTypes.JSONB, defaultValue: {} },
     }, {
         tableName: 'creator_profiles',
         schema: 'imperialpedia',

@@ -44,15 +44,24 @@ import { toast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 
 interface VerificationClientProps {
-  initialStatus: CreatorVerification;
+  initialStatus: CreatorVerification | null;
 }
+
+const UNVERIFIED: CreatorVerification = {
+  creatorId: "",
+  creatorName: "",
+  creatorAvatar: "",
+  verified: false,
+  status: "unverified",
+  documentsProvided: [],
+};
 
 /**
  * Expert Verification Client Hub.
  * Manages the multi-state verification lifecycle for creators.
  */
 export function VerificationClient({ initialStatus }: VerificationClientProps) {
-  const [status, setStatus] = useState<CreatorVerification>(initialStatus);
+  const [status, setStatus] = useState<CreatorVerification>(initialStatus ?? UNVERIFIED);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsSubmittingModalOpen] = useState(false);
 

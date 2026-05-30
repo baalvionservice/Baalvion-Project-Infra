@@ -13,7 +13,7 @@ const TRANSITIONS = {
     submit_for_review:  { from: ['draft', 'changes_requested'],          to: 'pending_review',      requiredLevel: 20 },
     approve:            { from: ['pending_review'],                       to: 'approved',             requiredLevel: 60 },
     request_changes:    { from: ['pending_review', 'approved'],           to: 'changes_requested',    requiredLevel: 60, requiresNote: true },
-    publish:            { from: ['approved'],                             to: 'published',            requiredLevel: 70 },
+    publish:            { from: ['approved', 'draft'],                    to: 'published',            requiredLevel: 70 },
     schedule:           { from: ['approved'],                             to: 'scheduled',            requiredLevel: 70, requiresScheduledAt: true },
     unpublish:          { from: ['published'],                            to: 'draft',                requiredLevel: 70 },
     archive:            { from: ['published', 'draft', 'changes_requested', 'approved', 'scheduled'], to: 'archived', requiredLevel: 80 },
@@ -70,12 +70,16 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
         await workflow.update(wfUpdate, { transaction: t });
         await content.update({ ...contentUpdate, lastEditedBy: userId }, { transaction: t });
 
-        // Snapshot revision on meaningful state changes
+        // Snapshot revision on meaningful state changes — MUST run on the same
+        // transaction `t`, or its content.increment() deadlocks against this txn's
+        // own row lock on the content (pool timeout → rollback).
         if (['submit_for_review', 'approve', 'publish'].includes(action)) {
-            await revisionService.createRevision(contentId, userId, `State changed to ${toState}`);
+            await revisionService.createRevision(contentId, userId, `State changed to ${toState}`, t);
         }
 
-        await auditService.logWorkflowAction({ workflowId: workflow.id, contentId, actorId: userId, action, fromState, toState, notes });
+        // Audit log INSERT does an FK check on the locked cms_workflows row — same
+        // transaction required to avoid self-deadlock / pool timeout.
+        await auditService.logWorkflowAction({ workflowId: workflow.id, contentId, actorId: userId, action, fromState, toState, notes }, t);
 
         await cache.del(cache.keys.content(contentId));
 

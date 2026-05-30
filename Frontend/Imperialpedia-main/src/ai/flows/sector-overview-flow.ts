@@ -60,10 +60,12 @@ const generateSectorOverviewFlow = ai.defineFlow(
     outputSchema: SectorOverviewOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('AI Engine failed to generate a valid sector assessment.');
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
     }
-    return output;
+    return { overview: "AI generation is not configured. Set GEMINI_API_KEY for live analysis.", key_players: [], performance_metrics: { sector_index: '', growth_rate: '', recent_trends: [] }, opportunities: [], risks: [], confidence_score: 0 };
   }
 );

@@ -1,7 +1,6 @@
 import React from 'react';
 import { Container } from '@/design-system/layout/container';
-import { getMockUserPortfolio } from '@/services/mock-api/user-dashboard';
-import { PortfolioTrackerClient } from './PortfolioTrackerClient';
+import { PortfolioLive } from './PortfolioLive';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 import { Briefcase } from 'lucide-react';
@@ -16,10 +15,7 @@ export const metadata: Metadata = buildMetadata({
  * Portfolio and Watchlist Management Hub (Server Entry).
  * Fetches user-specific asset data and hands off to the interactive tracker client.
  */
-export default async function PortfolioDashboardPage() {
-  const response = await getMockUserPortfolio();
-  const portfolioData = response.data;
-
+export default function PortfolioDashboardPage() {
   return (
     <main className="min-h-screen bg-background pt-12">
       <Container>
@@ -36,7 +32,7 @@ export default async function PortfolioDashboardPage() {
           </Text>
         </header>
 
-        <PortfolioTrackerClient data={portfolioData} />
+        <PortfolioLive />
       </Container>
     </main>
   );

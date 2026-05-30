@@ -21,6 +21,7 @@ import {
   Layout
 } from 'lucide-react';
 import Link from 'next/link';
+import { MarketMovers } from './MarketMovers';
 
 /**
  * Integrated Market Intelligence Hub.
@@ -77,6 +78,8 @@ export default function MarketHubPage() {
             Unrestricted access to the global financial index. Monitor sectors, audit asset nodes, and stay ahead of the curve with our institutional telemetry suite.
           </Text>
         </header>
+
+        <MarketMovers />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {hubs.map((hub) => (

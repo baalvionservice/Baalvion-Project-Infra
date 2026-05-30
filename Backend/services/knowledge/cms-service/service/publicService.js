@@ -59,7 +59,10 @@ async function listPublicContent(websiteSlug, query = {}) {
     const { rows, count } = await CmsContent.findAndCountAll({
         where, include: includes,
         order: [['publishedAt', 'DESC']],
-        attributes: { exclude: ['contentBlocks', 'customFields'] },
+        // Expose customFields so headless frontends can render list/card views
+        // (status badges, layers, priorities, etc.). contentBlocks stays excluded
+        // for list performance — fetch a single item for the full body.
+        attributes: { exclude: ['contentBlocks'] },
         limit, offset,
     });
 

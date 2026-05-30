@@ -62,10 +62,12 @@ const generateWeeklyDigestFlow = ai.defineFlow(
     outputSchema: WeeklyDigestOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('AI Engine failed to generate a valid weekly digest.');
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
     }
-    return output;
+    return { overview: "AI generation is not configured. Set GEMINI_API_KEY for live analysis.", top_performing_assets: [], worst_performing_assets: [], key_news_events: [], social_sentiment_trends: [], ai_insights_recommendations: [], confidence_score: 0 };
   }
 );

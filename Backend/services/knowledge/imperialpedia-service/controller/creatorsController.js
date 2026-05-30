@@ -136,8 +136,20 @@ const listPendingVerifications = async (req, res, next) => {
 // GET /creators/:userId/verification — verification status for a creator
 const getVerificationStatus = async (req, res, next) => {
     try {
-        const creator = await db.CreatorProfile.findOne({ where: { user_id: parseInt(req.params.userId) } });
-        if (!creator) return next(new AppError('NOT_FOUND', 'Creator profile not found', 404));
+        const uid = parseInt(req.params.userId);
+        const creator = Number.isNaN(uid) ? null : await db.CreatorProfile.findOne({ where: { user_id: uid } });
+        // A user without a creator profile (or unknown id) is simply 'unverified' — return a
+        // valid object (200), never 404, so the verification UI always has something to render.
+        if (!creator) {
+            return sendSuccess(req, res, {
+                creatorId: String(req.params.userId),
+                creatorName: '',
+                creatorAvatar: '',
+                verified: false,
+                status: 'unverified',
+                documentsProvided: [],
+            });
+        }
         return sendSuccess(req, res, toVerification(creator));
     } catch (err) { return next(err); }
 };

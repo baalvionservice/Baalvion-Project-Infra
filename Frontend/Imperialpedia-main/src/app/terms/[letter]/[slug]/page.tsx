@@ -1,5 +1,6 @@
 import BodyBlock from "@/components/ui/body-block";
-import { getTermBySlug, getRelatedTerms } from "@/lib/data/utils";
+import { getRelatedTerms } from "@/lib/data/utils";
+import { fetchTermBySlug } from "@/lib/data/term-live";
 import { buildMetadata } from "@/lib/seo";
 import { terms } from "@/lib/data/terms";
 import TableOfContents from "./components/TableOfContents";
@@ -23,7 +24,7 @@ export async function generateMetadata({
   params: Promise<{ letter: string; slug: string }>;
 }) {
   const { slug } = await params;
-  const term = getTermBySlug(slug);
+  const term = await fetchTermBySlug(slug);
   if (!term) return {};
   return buildMetadata({
     title: term.title,
@@ -37,7 +38,7 @@ export default async function Page({
   params: Promise<{ letter: string; slug: string }>;
 }) {
   const { slug } = await params;
-  const term = getTermBySlug(slug);
+  const term = await fetchTermBySlug(slug);
 
   if (!term) return <div>Not found</div>;
 

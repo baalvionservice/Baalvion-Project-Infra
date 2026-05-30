@@ -13,15 +13,56 @@ import authClient from "@/lib/auth-client";
 const IMP_API =
   process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || "http://localhost:3004/api/v1";
 
-type Row = { meta?: CreatorProfile };
+type Row = {
+  meta?: Partial<CreatorProfile>;
+  user_id?: number;
+  display_name?: string | null;
+  bio?: string | null;
+  avatar_url?: string | null;
+  specialization?: string[];
+  article_count?: number;
+  followers_count?: number;
+  total_views?: number;
+  is_verified?: boolean;
+  created_at?: string;
+};
+
+// Build a complete, render-safe CreatorProfile from a row. Profiles created via the rich
+// seed carry the full object in `meta`; profiles created via updateCreator only have base
+// columns (meta = {}), so we synthesize the required fields from them. Never returns a
+// profile with undefined displayName/bio/specialties/stats (the discovery UI assumes them).
+function rowToProfile(r: Row): CreatorProfile | null {
+  if (r.meta && r.meta.displayName) return r.meta as CreatorProfile;
+  if (!r.user_id && !r.display_name) return null;
+  return {
+    id: String(r.user_id ?? ""),
+    username: String(r.user_id ?? ""),
+    displayName: r.display_name || `Creator ${r.user_id ?? ""}`,
+    title: "Contributor",
+    bio: r.bio || "",
+    avatar: r.avatar_url || `https://picsum.photos/seed/creator-${r.user_id}/200/200`,
+    joinedDate: r.created_at || new Date().toISOString(),
+    specialties: Array.isArray(r.specialization) ? r.specialization : [],
+    category: "General",
+    region: "Global",
+    verified: !!r.is_verified,
+    stats: {
+      followersCount: r.followers_count || 0,
+      followingCount: 0,
+      articlesCount: r.article_count || 0,
+      totalViews: r.total_views || 0,
+    },
+    content: { recentArticles: [] },
+    socialLinks: [],
+  };
+}
 
 async function fetchCreatorProfiles(): Promise<CreatorProfile[]> {
   const res = await fetch(`${IMP_API}/creators?limit=100`, { cache: "no-store" });
   if (!res.ok) throw new Error(String(res.status));
   const json = await res.json();
   const items: Row[] = json?.data?.items ?? [];
-  // Each row's `meta` is the full CreatorProfile; ignore rows without it.
-  return items.map((r) => r.meta).filter(Boolean) as CreatorProfile[];
+  return items.map(rowToProfile).filter(Boolean) as CreatorProfile[];
 }
 
 const toTopCreator = (p: CreatorProfile): TopCreator => ({

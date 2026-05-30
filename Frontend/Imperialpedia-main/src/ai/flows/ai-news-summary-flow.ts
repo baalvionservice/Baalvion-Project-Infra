@@ -58,10 +58,12 @@ const generateNewsSummaryFlow = ai.defineFlow(
     outputSchema: NewsSummaryOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('AI Engine failed to generate a valid news intelligence report.');
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
     }
-    return output;
+    return { overview: "AI generation is not configured. Set GEMINI_API_KEY for live analysis.", top_headlines: [], confidence_score: 0 };
   }
 );

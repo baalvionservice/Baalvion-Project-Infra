@@ -51,7 +51,12 @@ const aiContentOutlineToolFlow = ai.defineFlow(
     outputSchema: AIContentOutlineToolOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
-    return output!;
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
+    }
+    return { articleTitle: 'AI generation is not configured. Set GEMINI_API_KEY for live analysis.', outline: [], keyTopics: [] };
   }
 );

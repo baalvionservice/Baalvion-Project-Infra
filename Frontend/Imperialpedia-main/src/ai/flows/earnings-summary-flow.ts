@@ -61,10 +61,12 @@ const generateEarningsSummaryFlow = ai.defineFlow(
     outputSchema: EarningsSummaryOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('AI Engine failed to generate a valid earnings summary.');
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
     }
-    return output;
+    return { overview: "AI generation is not configured. Set GEMINI_API_KEY for live analysis.", earnings_highlights: { revenue: '', net_income: '', EPS: '', YoY_change: '' }, performance_vs_estimates: '', key_drivers: [], forward_guidance: '', confidence_score: 0 };
   }
 );

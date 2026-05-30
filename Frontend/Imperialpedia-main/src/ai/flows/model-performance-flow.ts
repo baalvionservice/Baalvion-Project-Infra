@@ -76,10 +76,12 @@ const reportModelPerformanceFlow = ai.defineFlow(
     outputSchema: ModelPerformanceOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('AI Integrity Engine failed to synthesize the performance matrix.');
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
     }
-    return output;
+    return { overview: "AI generation is not configured. Set GEMINI_API_KEY for live analysis.", accuracy_metrics: { prediction_accuracy: '', sentiment_accuracy: '', error_rate: '' }, recent_predictions_performance: [], trend_detection_performance: { correct_trends: '', incorrect_trends: '' }, recommendations_accuracy: [], alerts_flags: [], confidence_score: 0 };
   }
 );

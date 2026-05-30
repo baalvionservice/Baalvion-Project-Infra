@@ -1,4 +1,5 @@
 import { newsArticles } from "@/lib/data.news";
+import { getPublishedNews } from "@/services/data/cms-public";
 import { buildMetadata } from "@/lib/seo";
 import { ExploreNewsSection } from "../news/ExploreNewsSection";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
@@ -13,10 +14,22 @@ export const metadata = buildMetadata({
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-export default function ReviewsPage() {
-  const featured = newsArticles.find((a) => a.featured)!;
-  const sidebarArticles = newsArticles.filter((a) => !a.featured).slice(0, 3);
-  const gridArticles = newsArticles.filter((a) => !a.featured).slice(3);
+export default async function ReviewsPage() {
+  const liveNews = await getPublishedNews();
+  const list = liveNews.length > 0 ? liveNews : newsArticles;
+  const featured = list.find((a) => a.featured) ?? list[0];
+  const rest = list.filter((a) => a.slug !== featured?.slug);
+  const sidebarArticles = rest.slice(0, 3);
+  const gridArticles = rest.slice(3);
+
+  if (!featured) {
+    return (
+      <div className="min-h-screen pt-20 text-center px-4">
+        <h1 className="text-3xl font-bold">Reviews</h1>
+        <p className="mt-3 text-muted-foreground">No content published yet.</p>
+      </div>
+    );
+  }
 
   return (
     <div className=" min-h-screen">

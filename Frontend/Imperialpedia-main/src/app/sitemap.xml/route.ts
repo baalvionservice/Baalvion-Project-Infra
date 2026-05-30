@@ -1,6 +1,11 @@
 import { sitemapService } from "@/modules/seo/services/sitemap-service";
 import { NextResponse } from "next/server";
 
+// Regenerate per request (revalidated hourly) so the sitemap reflects live published content
+// (articles/news/entities) rather than a stale build-time snapshot.
+export const dynamic = "force-dynamic";
+export const revalidate = 3600;
+
 /**
  * Dynamic Route handler for sitemap.xml (Main Index).
  * Points crawlers to the individual segment sitemaps for at-scale indexing.

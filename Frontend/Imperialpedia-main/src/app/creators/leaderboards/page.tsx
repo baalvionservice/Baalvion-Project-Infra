@@ -2,7 +2,7 @@ import React from 'react';
 import { Container } from '@/design-system/layout/container';
 import { Section } from '@/design-system/layout/section';
 import { Text } from '@/design-system/typography/text';
-import { getLeaderboardData } from '@/services/mock-api/creators';
+import { getLeaderboardData } from '@/services/data';
 import { LeaderboardClient } from './LeaderboardClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';

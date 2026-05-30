@@ -5,6 +5,9 @@ import {
 } from "@/services/data";
 import { getTags } from "@/modules/content-engine/services/tag-service";
 import { getCategories } from "@/modules/content-engine/services/category-service";
+import { loadCompanies, loadCountries, loadIndustries, loadTechnologies } from "@/lib/data/loaders";
+import { reviewSlugs } from "@/lib/data/review-live";
+import { getPublishedNews } from "@/services/data/cms-public";
 import { env } from "@/config/env";
 import { logger } from "@/lib/errors/logger";
 
@@ -39,26 +42,14 @@ export const sitemapService = {
     const entries: SitemapEntry[] = [];
 
     try {
-      // 1. Static Core Pages
-      const corePages = [
-        "",
-        "/about",
-        "/contact",
-        "/budgeting",
-        "/articles",
-        "/glossary",
-        "/topics",
-        "/financial-tools",
-        "/creators",
-        "/market",
-        "/community",
-      ];
+      // 1. Static Public Pages (every indexable, crawlable route)
+      const corePages = ["", "/glossary", "/about","/advisor-reviews","/ai-analyst","/ai-analyst/asset-summary","/ai-analyst/automated-recap","/ai-analyst/bear-case","/ai-analyst/bull-case","/ai-analyst/catalyst-detection","/ai-analyst/compare","/ai-analyst/daily-briefing","/ai-analyst/earnings-summary","/ai-analyst/event-intelligence","/ai-analyst/macro-summary","/ai-analyst/model-performance","/ai-analyst/multi-compare","/ai-analyst/news-summary","/ai-analyst/risk-detection","/ai-analyst/scenario-modeling","/ai-analyst/sector-overview","/ai-analyst/social-sentiment","/ai-analyst/trend-explanation","/ai-analyst/weekly-digest","/app-reviews","/articles","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/community","/community/contests","/community/debates","/community/discussions","/community/leaderboard","/community/rankings","/community/reputation","/community/sentiment","/companies","/company-news","/contact","/countries","/creators","/creators/leaderboards","/creators/profile","/creators/trust","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/datasets","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/fiscal-policy","/gdp","/global","/government","/imperialpedia-review-board","/income","/indicators","/industries","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/pricing","/privacy-policy","/real-estate","/research-ai","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms-of-service","/topics","/transparency","/unemployment","/world"];
       corePages.forEach((path) => {
         entries.push({
           loc: `${baseUrl}${path}`,
           lastmod: new Date().toISOString().split("T")[0],
-          changefreq: "daily",
-          priority: 1.0,
+          changefreq: path === "" ? "daily" : "weekly",
+          priority: path === "" ? 1.0 : 0.7,
         });
       });
 
@@ -132,11 +123,49 @@ export const sitemapService = {
         });
       });
 
-      const xml = this.buildXml(entries);
+      // 7. Structured entities + review guides + news (live from imperialpedia-service / CMS).
+      //    Resilient: a backend hiccup must not break the whole sitemap.
+      try {
+        const [companies, countries, industries, technologies, news] = await Promise.all([
+          loadCompanies(),
+          loadCountries(),
+          loadIndustries(),
+          loadTechnologies(),
+          getPublishedNews(1000),
+        ]);
+        const pushEntities = (
+          items: Array<{ slug?: string }>,
+          prefix: string,
+          priority = 0.7
+        ) =>
+          (items || []).forEach((e) => {
+            if (e?.slug) entries.push({ loc: `${baseUrl}${prefix}/${e.slug}`, changefreq: "weekly", priority });
+          });
+        pushEntities(companies, "/companies", 0.8);
+        pushEntities(countries, "/countries");
+        pushEntities(industries, "/industries");
+        pushEntities(technologies, "/technologies");
+        // Review guides live at the root slug (e.g. /best-online-brokers)
+        reviewSlugs.forEach((slug) =>
+          entries.push({ loc: `${baseUrl}/${slug}`, changefreq: "weekly", priority: 0.8 })
+        );
+        // Published news also live at the root slug
+        (news || []).forEach((n) => {
+          if (n?.slug) entries.push({ loc: `${baseUrl}/${n.slug}`, lastmod: n.publishedAt?.split("T")[0], changefreq: "daily", priority: 0.8 });
+        });
+      } catch {
+        /* backend unavailable — static + article/glossary entries still ship */
+      }
+
+      // Dedupe by URL (sections can overlap, e.g. a slug listed in two sources).
+      const seenLoc = new Set<string>();
+      const uniqueEntries = entries.filter((e) => (seenLoc.has(e.loc) ? false : (seenLoc.add(e.loc), true)));
+
+      const xml = this.buildXml(uniqueEntries);
       const duration = Date.now() - start;
 
       logger.info(
-        `Sitemap index regenerated in ${duration}ms. Nodes indexed: ${entries.length}`
+        `Sitemap index regenerated in ${duration}ms. Nodes indexed: ${uniqueEntries.length}`
       );
 
       return xml;

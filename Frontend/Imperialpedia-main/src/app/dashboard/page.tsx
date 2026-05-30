@@ -1,7 +1,6 @@
 import React from 'react';
 import { Container } from '@/design-system/layout/container';
-import { getMockUserDashboard } from '@/services/mock-api/user-dashboard';
-import { DashboardClient } from './DashboardClient';
+import { DashboardLive } from './DashboardLive';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
@@ -14,14 +13,11 @@ export const metadata: Metadata = buildMetadata({
  * User Personal Dashboard (Server Entry).
  * Fetches personalized intelligence data and hands off to the interactive client.
  */
-export default async function UserDashboardPage() {
-  const response = await getMockUserDashboard();
-  const dashboardData = response.data;
-
+export default function UserDashboardPage() {
   return (
     <main className="min-h-screen bg-background pt-8">
       <Container>
-        <DashboardClient data={dashboardData} />
+        <DashboardLive />
       </Container>
     </main>
   );

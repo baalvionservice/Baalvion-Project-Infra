@@ -20,6 +20,11 @@ db.Vote = require('./votes')(sequelize, DataTypes);
 db.CreatorProfile = require('./creator_profiles')(sequelize, DataTypes);
 db.LeaderboardEntry = require('./leaderboard_entries')(sequelize, DataTypes);
 db.CalculatorResult = require('./calculator_results')(sequelize, DataTypes);
+db.Entity = require('./entities')(sequelize, DataTypes);
+db.CommunityDebate = require('./community_debates')(sequelize, DataTypes);
+db.AssetSentiment = require('./asset_sentiments')(sequelize, DataTypes);
+db.WatchlistItem = require('./watchlist_items')(sequelize, DataTypes);
+db.PortfolioHolding = require('./portfolio_holdings')(sequelize, DataTypes);
 
 // Associations
 // Article -> CreatorProfile (author)

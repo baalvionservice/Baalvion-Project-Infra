@@ -72,10 +72,12 @@ const compareAssetsFlow = ai.defineFlow(
     outputSchema: AssetComparisonOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('AI Engine failed to generate a valid comparison matrix.');
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
     }
-    return output;
+    return { overview: "AI generation is not configured. Set GEMINI_API_KEY for live analysis.", key_metrics_comparison: [], strengths_weaknesses: [], ai_recommendation: '', confidence_score: 0 };
   }
 );

@@ -1,10 +1,14 @@
 'use strict';
 const router = require('express').Router();
 router.use('/articles', require('./articlesRoutes'));
+router.use('/entities', require('./entitiesRoutes'));
+router.use('/search', require('./searchRoutes'));
 router.use('/assets', require('./assetsRoutes'));
 router.use('/community', require('./communityRoutes'));
 router.use('/creators', require('./creatorsRoutes'));
 router.use('/leaderboard', require('./leaderboardRoutes'));
 router.use('/calculators', require('./calculatorRoutes'));
 router.use('/analytics', require('./analyticsRoutes'));
+router.use('/ai', require('./aiRoutes'));
+router.use('/portfolio', require('./portfolioRoutes'));
 module.exports = router;

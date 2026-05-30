@@ -56,10 +56,12 @@ const generateSocialSentimentFlow = ai.defineFlow(
     outputSchema: SocialSentimentOutputSchema,
   },
   async input => {
-    const { output } = await prompt(input);
-    if (!output) {
-      throw new Error('AI Engine failed to generate a valid social sentiment assessment.');
+    try {
+      const { output } = await prompt(input);
+      if (output) return output;
+    } catch (e) {
+      console.warn('[AI] fallback (genkit unavailable):', (e as Error)?.message);
     }
-    return output;
+    return { overview: "AI generation is not configured. Set GEMINI_API_KEY for live analysis.", positive_sentiment: [], negative_sentiment: [], neutral_sentiment: [], overall_sentiment_score: 0, confidence_score: 0 };
   }
 );
