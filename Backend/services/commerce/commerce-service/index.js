@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const config = require('./config/appConfig');
 const { connectDB, sequelize } = require('./models');
 const v1Router = require('./routes/v1');
+const storefrontRoutes = require('./routes/storefrontRoutes');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
@@ -21,6 +22,10 @@ app.use(requestContext);
 app.use(createIpRateLimit());
 
 app.get('/health', (req, res) => res.json({ status: 'ok', service: 'commerce-service', port: config.port }));
+
+// Public storefront API (anonymous, read-only, published+public catalog). Mounted outside
+// the authed /api/v1 router so storefronts can browse without a JWT. Writes/admin stay authed.
+app.use('/api/v1/commerce/storefront/:storeId', storefrontRoutes);
 
 app.use('/api/v1', v1Router);
 
