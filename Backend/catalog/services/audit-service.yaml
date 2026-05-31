@@ -1,0 +1,24 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: audit-service
+  description: Immutable append-only, hash-chained audit log aggregated platform-wide from the event bus + direct writes. Tamper-evident (WORM + SHA-256 chain).
+  domain: infrastructure
+  division: platform-core
+  context: audit
+  owner: "@baalvion/platform-core"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/services/infrastructure/audit-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service]
+  # Consumes the RAW event-bus stream (every event) for audit capture, not specific
+  # contract-typed events — so none are declared here.
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/audit"]
+  slo: { availability: 0.99, latencyP95Ms: 300 }
+  deploy: { chart: baalvion-service, namespace: baalvion-infra, minReplicas: 2, maxReplicas: 8 }
