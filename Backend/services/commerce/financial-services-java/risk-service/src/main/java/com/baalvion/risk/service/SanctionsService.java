@@ -3,16 +3,21 @@ package com.baalvion.risk.service;
 import com.baalvion.risk.config.SanctionsProperties;
 import com.baalvion.risk.domain.SanctionedEntity;
 import com.baalvion.risk.domain.SanctionedEntity.EntityType;
+import com.baalvion.risk.domain.SanctionsAliasIndex;
 import com.baalvion.risk.domain.SanctionsScreening;
 import com.baalvion.risk.domain.SanctionsScreening.Status;
+import com.baalvion.risk.domain.SanctionsSourceMap;
 import com.baalvion.risk.dto.AdjudicateRequest;
 import com.baalvion.risk.dto.ScreenRequest;
 import com.baalvion.risk.dto.ScreeningHit;
 import com.baalvion.risk.dto.ScreeningResponse;
+import com.baalvion.risk.normalization.SanctionsNormalizer;
 import com.baalvion.risk.provider.SanctionsListProvider;
 import com.baalvion.risk.provider.SanctionsListRecord;
 import com.baalvion.risk.repository.SanctionedEntityRepository;
+import com.baalvion.risk.repository.SanctionsAliasIndexRepository;
 import com.baalvion.risk.repository.SanctionsScreeningRepository;
+import com.baalvion.risk.repository.SanctionsSourceMapRepository;
 import com.baalvion.risk.screening.NameMatcher;
 import com.baalvion.risk.screening.NameNormalizer;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -55,6 +60,8 @@ public class SanctionsService {
 
   private final SanctionedEntityRepository entityRepository;
   private final SanctionsScreeningRepository screeningRepository;
+  private final SanctionsSourceMapRepository sourceMapRepository;
+  private final SanctionsAliasIndexRepository aliasIndexRepository;
   private final NameMatcher matcher;
   private final SanctionsProperties props;
   private final List<SanctionsListProvider> providers;
@@ -69,6 +76,8 @@ public class SanctionsService {
 
   public SanctionsService(SanctionedEntityRepository entityRepository,
                           SanctionsScreeningRepository screeningRepository,
+                          SanctionsSourceMapRepository sourceMapRepository,
+                          SanctionsAliasIndexRepository aliasIndexRepository,
                           NameMatcher matcher,
                           SanctionsProperties props,
                           List<SanctionsListProvider> providers,
@@ -76,6 +85,8 @@ public class SanctionsService {
                           ObjectMapper objectMapper) {
     this.entityRepository = entityRepository;
     this.screeningRepository = screeningRepository;
+    this.sourceMapRepository = sourceMapRepository;
+    this.aliasIndexRepository = aliasIndexRepository;
     this.matcher = matcher;
     this.props = props;
     this.providers = providers;
@@ -85,46 +96,125 @@ public class SanctionsService {
 
   // --------------------------------------------------------------------------- list ingestion
 
-  /** Upsert the active provider's watchlist into {@code sanctioned_entities}. Returns rows touched. */
+  /**
+   * Ingest from ALL enabled providers into the unified index. Each provider runs independently: a
+   * provider failure (e.g. its external feed is down) is logged and skipped — its previously-ingested
+   * rows remain (last-known-good), and the other providers still ingest. Returns total rows upserted.
+   */
   public int ingest() {
-    SanctionsListProvider provider = activeProvider();
-    List<SanctionsListRecord> records = provider.fetch();
+    int total = 0;
+    for (SanctionsListProvider provider : providers) {
+      total += ingestOne(provider);
+    }
+    this.activeSnapshot = null;  // evict the screening cache once after the full refresh
+    return total;
+  }
+
+  /** Refresh a single named provider (used by the per-provider scheduled jobs). Fail-isolated. */
+  public int ingestProvider(String name) {
+    SanctionsListProvider provider = providers.stream()
+      .filter(p -> p.name().equalsIgnoreCase(name)).findFirst().orElse(null);
+    if (provider == null) {
+      log.debug("Sanctions provider '{}' not enabled; skipping scheduled refresh", name);
+      return 0;
+    }
+    int n = ingestOne(provider);
+    this.activeSnapshot = null;
+    return n;
+  }
+
+  /** Fetch + normalize + upsert one provider. Never throws — fail-independent (last-known-good kept). */
+  private int ingestOne(SanctionsListProvider provider) {
+    List<SanctionsListRecord> records;
+    try {
+      records = provider.fetch();
+    } catch (Exception e) {
+      log.error("Sanctions provider '{}' fetch FAILED — keeping last-known-good data: {}",
+        provider.name(), e.getMessage());
+      return 0;
+    }
     int count = 0;
     int skipped = 0;
     for (SanctionsListRecord rec : records) {
-      String normName = NameNormalizer.normalize(rec.getPrimaryName());
-      boolean anyAliasMatchable = rec.getAliases() != null && rec.getAliases().stream()
-        .anyMatch(a -> !NameNormalizer.normalize(a).isEmpty());
-      if (normName.isEmpty() && !anyAliasMatchable) {
-        // Fail loudly rather than store an entity with an empty matching key (which would silently
-        // never produce a hit). Typically a fully non-Latin name the provider did not romanize.
-        log.warn("Skipping un-screenable watchlist entity (name & all aliases normalize to empty): "
-          + "source={}, externalId={}", rec.getListSource(), rec.getExternalId());
+      try {
+        if (upsertRecord(rec)) {
+          count++;
+        } else {
+          skipped++;
+        }
+      } catch (Exception e) {
         skipped++;
-        continue;
+        log.warn("Sanctions upsert failed for source={} externalId={}: {}",
+          rec.getListSource(), rec.getExternalId(), e.getMessage());
       }
-      SanctionedEntity e = entityRepository
-        .findByListSourceAndExternalId(rec.getListSource(), rec.getExternalId())
-        .orElseGet(SanctionedEntity::new);
-      e.setListSource(rec.getListSource());
-      e.setExternalId(rec.getExternalId());
-      e.setEntityType(rec.getEntityType());
-      e.setPrimaryName(rec.getPrimaryName());
-      e.setNormalizedName(normName);
-      e.setAliases(writeAliases(rec.getAliases()));
-      e.setPrograms(writeJson(rec.getPrograms()));
-      e.setCountries(writeJson(rec.getCountries()));
-      e.setDateOfBirth(rec.getDateOfBirth());
-      e.setRemarks(rec.getRemarks());
-      e.setActive(true);
-      e.setSourcePublishedAt(rec.getSourcePublishedAt());
-      entityRepository.save(e);
-      count++;
     }
-    this.activeSnapshot = null;  // evict the screening cache so the next screen reflects the refresh
-    log.info("Sanctions ingest from provider '{}': {} entities upserted, {} skipped (un-screenable)",
+    log.info("Sanctions ingest from provider '{}': {} entities upserted, {} skipped",
       provider.name(), count, skipped);
     return count;
+  }
+
+  /**
+   * Canonical normalization + upsert of one raw record into the entity index, source map, and alias
+   * index. Returns false (skipped) if the record has no matchable name in any language.
+   */
+  private boolean upsertRecord(SanctionsListRecord rec) {
+    String normName = NameNormalizer.normalize(rec.getPrimaryName());
+    boolean anyAliasMatchable = rec.getAliases() != null && rec.getAliases().stream()
+      .anyMatch(a -> !NameNormalizer.normalize(a).isEmpty());
+    if (normName.isEmpty() && !anyAliasMatchable) {
+      log.warn("Skipping un-screenable watchlist entity (name & all aliases normalize to empty): "
+        + "source={}, externalId={}", rec.getListSource(), rec.getExternalId());
+      return false;
+    }
+
+    // Canonical normalization layer (source-agnostic): ISO countries + cross-source merge key.
+    List<String> iso = SanctionsNormalizer.isoCountries(rec.getCountries());
+    String mergeKey = SanctionsNormalizer.mergeKey(normName, iso, rec.getEntityType());
+
+    SanctionedEntity e = entityRepository
+      .findByListSourceAndExternalId(rec.getListSource(), rec.getExternalId())
+      .orElseGet(SanctionedEntity::new);
+    e.setListSource(rec.getListSource());
+    e.setExternalId(rec.getExternalId());
+    e.setEntityType(rec.getEntityType());
+    e.setPrimaryName(rec.getPrimaryName());
+    e.setNormalizedName(normName);
+    e.setMergeKey(mergeKey);
+    e.setAliases(writeAliases(rec.getAliases()));
+    e.setPrograms(writeJson(rec.getPrograms()));
+    e.setCountries(writeJson(iso));
+    e.setAddresses(writeJson(rec.getAddresses() != null ? rec.getAddresses() : List.of()));
+    e.setDateOfBirth(rec.getDateOfBirth());
+    e.setRemarks(rec.getRemarks());
+    e.setActive(true);
+    e.setSourcePublishedAt(rec.getSourcePublishedAt());
+    SanctionedEntity saved = entityRepository.save(e);
+
+    // Cross-source map (traceability + sourceIds): upsert by (source, externalId).
+    SanctionsSourceMap map = sourceMapRepository
+      .findByListSourceAndExternalId(rec.getListSource().name(), rec.getExternalId())
+      .orElseGet(SanctionsSourceMap::new);
+    map.setMergeKey(mergeKey);
+    map.setListSource(rec.getListSource().name());
+    map.setExternalId(rec.getExternalId());
+    map.setEntityId(saved.getId());
+    sourceMapRepository.save(map);
+
+    // Alias index: rebuild this entity's rows (primary + each alias, normalized, distinct).
+    aliasIndexRepository.deleteByEntityId(saved.getId());
+    java.util.Set<String> indexed = new java.util.LinkedHashSet<>();
+    if (!normName.isEmpty()) indexed.add(normName);
+    if (rec.getAliases() != null) {
+      for (String a : rec.getAliases()) {
+        String n = NameNormalizer.normalize(a);
+        if (!n.isEmpty()) indexed.add(n);
+      }
+    }
+    for (String an : indexed) {
+      aliasIndexRepository.save(SanctionsAliasIndex.builder()
+        .entityId(saved.getId()).listSource(rec.getListSource().name()).aliasNormalized(an).build());
+    }
+    return true;
   }
 
   /** Cached active-watchlist snapshot (TTL'd; evicted on ingest). Called within screen()'s transaction. */
@@ -159,27 +249,37 @@ public class SanctionsService {
     // Compliance screening matches across ALL active entities (type is informational) so a missing or
     // wrong subject type never silently hides a hit. The seed list is small; for full OFAC scale add a
     // pg_trgm candidate prefilter (see V002 migration note).
+    List<SanctionedEntity> snapshot = activeEntities();
     List<ScreeningHit> hits = new ArrayList<>();
     double rawTop = 0.0;  // unrounded — drives the verdict so a 0.9499 cannot round up into an auto-block
-    for (SanctionedEntity entity : activeEntities()) {
+    for (SanctionedEntity entity : snapshot) {
       Scored best = bestScore(normalized, entity);
       if (best.score >= matchThreshold) {
         rawTop = Math.max(rawTop, best.score);
+        String code = entity.getListSource().code();
         hits.add(ScreeningHit.builder()
           .entityId(entity.getId())
           .listSource(entity.getListSource().name())
+          .source(code)
           .entityType(entity.getEntityType().name())
           .matchedName(best.matchedName)
           .score(round(best.score))
+          // Per-source reliability-weighted confidence (additive; does NOT change the verdict).
+          .sourceConfidence(round(best.score * sourceWeight(code)))
+          .mergeKey(entity.getMergeKey())
           .programs(readList(entity.getPrograms()))
           .countries(readList(entity.getCountries()))
           .build());
       }
     }
     hits.sort(Comparator.comparing(ScreeningHit::getScore).reversed());
+    hits = dedupBySourceAndEntity(hits);  // cross-source dedup: best hit per (logical entity, source)
     if (hits.size() > props.getMaxHits()) {
       hits = new ArrayList<>(hits.subList(0, props.getMaxHits()));
     }
+    // Sources actually present in the index and screened against this request.
+    List<String> sourcesChecked = snapshot.stream()
+      .map(e -> e.getListSource().code()).distinct().sorted().toList();
 
     BigDecimal topScore = round(rawTop);  // rounded for storage/display; verdict below uses rawTop
     Status status;
@@ -207,8 +307,9 @@ public class SanctionsService {
     SanctionsScreening saved = screeningRepository.save(screening);
 
     // Do not log the raw subject name (PII); the persisted screening row carries it under tenant scope.
-    log.info("Sanctions screening: id={}, tenant={}, status={}, topScore={}, hits={}",
-      saved.getId(), tenantId, status, topScore, hits.size());
+    // Observability: per-source match breakdown for this request.
+    log.info("Sanctions screening: id={}, tenant={}, status={}, topScore={}, hits={}, sources={}, breakdown={}",
+      saved.getId(), tenantId, status, topScore, hits.size(), sourcesChecked, sourceBreakdown(hits));
 
     Map<String, Object> event = new HashMap<>();
     event.put("screeningId", saved.getId());
@@ -224,7 +325,27 @@ public class SanctionsService {
       publish("sanctions.match.detected", saved.getId().toString(), event);
     }
 
-    return mapToResponse(saved, hits);
+    return mapToResponse(saved, hits, sourcesChecked);
+  }
+
+  /** Cross-source dedup: hits are pre-sorted by score desc; keep the first (best) per (entity, source). */
+  private List<ScreeningHit> dedupBySourceAndEntity(List<ScreeningHit> sortedHits) {
+    Map<String, ScreeningHit> bestByKey = new java.util.LinkedHashMap<>();
+    for (ScreeningHit h : sortedHits) {
+      String entityKey = (h.getMergeKey() != null && !h.getMergeKey().isBlank())
+        ? h.getMergeKey() : String.valueOf(h.getEntityId());
+      bestByKey.putIfAbsent(entityKey + "||" + h.getSource(), h);
+    }
+    return new ArrayList<>(bestByKey.values());
+  }
+
+  /** Per-source hit count for observability. */
+  private Map<String, Long> sourceBreakdown(List<ScreeningHit> hits) {
+    Map<String, Long> m = new java.util.LinkedHashMap<>();
+    for (ScreeningHit h : hits) {
+      m.merge(h.getSource(), 1L, Long::sum);
+    }
+    return m;
   }
 
   /** Best score of the subject against an entity's primary name and all aliases. */
@@ -263,14 +384,14 @@ public class SanctionsService {
     event.put("tenantId", tenantId);
     event.put("status", saved.getStatus().name());
     publish("sanctions.screening.adjudicated", saved.getId().toString(), event);
-    return mapToResponse(saved, readHits(saved.getHits()));
+    return mapToResponse(saved, readHits(saved.getHits()), List.of());
   }
 
   @Transactional(readOnly = true)
   public ScreeningResponse get(UUID tenantId, UUID id) {
     SanctionsScreening s = screeningRepository.findByIdAndTenantId(id, tenantId)
       .orElseThrow(() -> new IllegalArgumentException("Screening not found: " + id));
-    return mapToResponse(s, readHits(s.getHits()));
+    return mapToResponse(s, readHits(s.getHits()), List.of());
   }
 
   @Transactional(readOnly = true)
@@ -279,18 +400,13 @@ public class SanctionsService {
     Page<SanctionsScreening> result = status != null
       ? screeningRepository.findByTenantIdAndStatus(tenantId, Status.valueOf(status.toUpperCase()), pageable)
       : screeningRepository.findByTenantId(tenantId, pageable);
-    return result.map(s -> mapToResponse(s, readHits(s.getHits())));
+    return result.map(s -> mapToResponse(s, readHits(s.getHits()), List.of()));
   }
 
   // --------------------------------------------------------------------------- helpers
 
-  private SanctionsListProvider activeProvider() {
-    return providers.stream()
-      .filter(p -> p.name().equalsIgnoreCase(props.getProvider()))
-      .findFirst()
-      .orElseThrow(() -> new IllegalStateException(
-        "No sanctions list provider named '" + props.getProvider() + "'. Available: "
-          + providers.stream().map(SanctionsListProvider::name).toList()));
+  private double sourceWeight(String sourceCode) {
+    return props.getSourceWeights().getOrDefault(sourceCode, props.getDefaultSourceWeight());
   }
 
   private EntityType parseType(String type) {
@@ -369,7 +485,7 @@ public class SanctionsService {
     }
   }
 
-  private ScreeningResponse mapToResponse(SanctionsScreening s, List<ScreeningHit> hits) {
+  private ScreeningResponse mapToResponse(SanctionsScreening s, List<ScreeningHit> hits, List<String> sourcesChecked) {
     return ScreeningResponse.builder()
       .id(s.getId())
       .tenantId(s.getTenantId())
@@ -382,6 +498,7 @@ public class SanctionsService {
       .topScore(s.getTopScore())
       .hitCount(s.getHitCount())
       .hits(hits)
+      .sourcesChecked(sourcesChecked == null ? List.of() : sourcesChecked)
       .adjudicatedBy(s.getAdjudicatedBy())
       .adjudicationNote(s.getAdjudicationNote())
       .adjudicatedAt(s.getAdjudicatedAt())

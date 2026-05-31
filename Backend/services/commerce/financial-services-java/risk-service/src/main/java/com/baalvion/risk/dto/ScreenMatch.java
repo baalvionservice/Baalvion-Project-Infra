@@ -16,8 +16,10 @@ import lombok.NoArgsConstructor;
 public class ScreenMatch {
   /** The watchlist name (primary or alias) that produced the match. */
   private String name;
-  /** The source list (e.g. OFAC_SDN, UN_CONSOLIDATED). */
+  /** The source jurisdiction (OFAC | EU | UN | UK | AU). */
   private String source;
   /** Sanctions program(s), if any (joined). May be null. */
   private String program;
+  /** Source-reliability-weighted confidence for this match, in [0,1]. */
+  private java.math.BigDecimal sourceConfidence;
 }

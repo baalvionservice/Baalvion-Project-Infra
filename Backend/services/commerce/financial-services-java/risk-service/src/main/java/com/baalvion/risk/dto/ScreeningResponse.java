@@ -27,6 +27,8 @@ public class ScreeningResponse {
   private BigDecimal topScore;
   private int hitCount;
   private List<ScreeningHit> hits;
+  /** Short codes of the jurisdictions screened against (e.g. ["EU","OFAC","UN"]). */
+  private List<String> sourcesChecked;
   private String adjudicatedBy;
   private String adjudicationNote;
   private LocalDateTime adjudicatedAt;

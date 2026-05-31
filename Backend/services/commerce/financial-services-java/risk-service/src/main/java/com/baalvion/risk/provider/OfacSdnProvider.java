@@ -31,7 +31,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@ConditionalOnProperty(name = "app.sanctions.provider", havingValue = "ofac")
+@ConditionalOnProperty(name = "app.sanctions.ofac.enabled", havingValue = "true")
 public class OfacSdnProvider implements SanctionsListProvider {
 
   private final SanctionsProperties props;
@@ -130,12 +130,26 @@ public class OfacSdnProvider implements SanctionsListProvider {
       }
     }
     Map<String, LinkedHashSet<String>> countries = new LinkedHashMap<>();
+    Map<String, List<String>> addresses = new LinkedHashMap<>();
     for (List<String> r : SanctionsCsv.parse(addCsv)) {
       // add.csv: ent_num, add_num, address, city/state/postal, country, remarks
       String ent = at(r, 0);
       String country = at(r, 4);
-      if (ent != null && country != null) {
+      if (ent == null) {
+        continue;
+      }
+      if (country != null) {
         countries.computeIfAbsent(ent, k -> new LinkedHashSet<>()).add(country);
+      }
+      StringBuilder line = new StringBuilder();
+      for (String part : new String[]{at(r, 2), at(r, 3), country}) {
+        if (part != null && !part.isBlank()) {
+          if (line.length() > 0) line.append(" ");
+          line.append(part);
+        }
+      }
+      if (line.length() > 0) {
+        addresses.computeIfAbsent(ent, k -> new ArrayList<>()).add(line.toString());
       }
     }
 
@@ -155,6 +169,7 @@ public class OfacSdnProvider implements SanctionsListProvider {
         .aliases(aliases.getOrDefault(ent, List.of()))
         .programs(splitProgram(at(r, 3)))
         .countries(countries.containsKey(ent) ? new ArrayList<>(countries.get(ent)) : List.of())
+        .addresses(addresses.getOrDefault(ent, List.of()))
         .remarks(at(r, 11))
         .build());
     }

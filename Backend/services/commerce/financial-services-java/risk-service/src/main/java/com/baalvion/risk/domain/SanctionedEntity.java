@@ -53,9 +53,17 @@ public class SanctionedEntity {
   @Column(name = "normalized_name", length = 512, nullable = false)
   private String normalizedName;
 
+  /** Cross-source dedup key: normalize(name)|primaryIsoCountry|type. Same key across OFAC/EU/UN = same entity. */
+  @Column(name = "merge_key", length = 600)
+  private String mergeKey;
+
   /** JSON array of {name, normalized}. */
   @Column(columnDefinition = "jsonb", nullable = false)
   private String aliases;
+
+  /** JSON array of address strings (EU/UN carry full addresses; OFAC carries city/state). */
+  @Column(columnDefinition = "jsonb", nullable = false)
+  private String addresses;
 
   /** JSON array of program codes. */
   @Column(columnDefinition = "jsonb", nullable = false)
@@ -86,11 +94,22 @@ public class SanctionedEntity {
   private LocalDateTime updatedAt;
 
   public enum ListSource {
-    OFAC_SDN,
-    UN_CONSOLIDATED,
-    EU_CFSP,
-    UK_HMT,
-    AU_DFAT
+    OFAC_SDN("OFAC"),
+    UN_CONSOLIDATED("UN"),
+    EU_CFSP("EU"),
+    UK_HMT("UK"),
+    AU_DFAT("AU");
+
+    private final String code;
+
+    ListSource(String code) {
+      this.code = code;
+    }
+
+    /** Short jurisdiction code for the external API contract (OFAC | EU | UN | UK | AU). */
+    public String code() {
+      return code;
+    }
   }
 
   public enum EntityType {
@@ -109,5 +128,6 @@ public class SanctionedEntity {
     if (aliases == null) aliases = "[]";
     if (programs == null) programs = "[]";
     if (countries == null) countries = "[]";
+    if (addresses == null) addresses = "[]";
   }
 }

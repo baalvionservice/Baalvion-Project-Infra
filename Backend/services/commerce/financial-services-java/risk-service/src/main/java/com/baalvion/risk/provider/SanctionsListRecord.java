@@ -25,6 +25,8 @@ public class SanctionsListRecord {
   private List<String> programs = List.of();
   @Builder.Default
   private List<String> countries = List.of();
+  @Builder.Default
+  private List<String> addresses = List.of();
   private String dateOfBirth;
   private String remarks;
   private LocalDateTime sourcePublishedAt;

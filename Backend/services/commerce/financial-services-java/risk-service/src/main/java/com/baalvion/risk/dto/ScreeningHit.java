@@ -16,11 +16,19 @@ import java.util.UUID;
 @AllArgsConstructor
 public class ScreeningHit {
   private UUID entityId;
+  /** Internal list source enum name (e.g. OFAC_SDN, UN_CONSOLIDATED). */
   private String listSource;
+  /** Short jurisdiction code for the external contract (OFAC | EU | UN | UK | AU). */
+  private String source;
   private String entityType;
   /** The specific name (primary or alias) that produced the score. */
   private String matchedName;
+  /** Raw name-match score in [0,1] (drives the verdict). */
   private BigDecimal score;
+  /** Raw score weighted by the source's reliability (additive; does not change the verdict). */
+  private BigDecimal sourceConfidence;
+  /** Cross-source dedup key (links the same logical entity across OFAC/EU/UN). */
+  private String mergeKey;
   private List<String> programs;
   private List<String> countries;
 }

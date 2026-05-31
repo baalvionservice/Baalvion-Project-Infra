@@ -6,10 +6,16 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Periodic watchlist refresh — re-ingests from the active {@link com.baalvion.risk.provider.SanctionsListProvider}
- * (the live OFAC feed when {@code app.sanctions.provider=ofac}) on the configured cron so the local
- * cache stays current. Default cron is daily 03:00 (so it never fires during a test run); the OFAC
- * provider's own rate-limit guard prevents over-fetching. Failures are logged and never propagate.
+ * Per-provider scheduled watchlist refresh. Each jurisdiction is refreshed on its own cron and is
+ * fail-isolated ({@link SanctionsService#ingestProvider} swallows + logs failures and keeps the
+ * last-known-good data), so one feed being down never affects the others or the screening path.
+ * A provider that is not enabled is a no-op. Default crons never fire during a test run.
+ *
+ * <ul>
+ *   <li>OFAC — daily (publishes ~daily)</li>
+ *   <li>EU   — daily</li>
+ *   <li>UN   — every 4h (within the 2–6h target; the provider's own rate-limit guard caps actual fetches)</li>
+ * </ul>
  */
 @Slf4j
 @Component
@@ -22,14 +28,25 @@ public class SanctionsRefreshJob {
     this.sanctionsService = sanctionsService;
   }
 
-  @Scheduled(cron = "${app.sanctions.refresh.cron:0 0 3 * * *}")
-  public void refresh() {
-    try {
-      int n = sanctionsService.ingest();
-      log.info("Scheduled sanctions watchlist refresh complete: {} active entities", n);
-    } catch (Exception e) {
-      // Never let a refresh failure (e.g. the external feed being down) escalate.
-      log.error("Scheduled sanctions watchlist refresh failed: {}", e.getMessage());
+  @Scheduled(cron = "${app.sanctions.ofac.cron:0 0 3 * * *}")
+  public void refreshOfac() {
+    refresh("ofac");
+  }
+
+  @Scheduled(cron = "${app.sanctions.eu.cron:0 30 3 * * *}")
+  public void refreshEu() {
+    refresh("eu");
+  }
+
+  @Scheduled(cron = "${app.sanctions.un.cron:0 0 */4 * * *}")
+  public void refreshUn() {
+    refresh("un");
+  }
+
+  private void refresh(String provider) {
+    int n = sanctionsService.ingestProvider(provider);
+    if (n > 0) {
+      log.info("Scheduled '{}' sanctions refresh complete: {} entities", provider, n);
     }
   }
 }
