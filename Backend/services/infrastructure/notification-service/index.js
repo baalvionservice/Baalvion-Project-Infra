@@ -10,6 +10,9 @@ const logger     = require('./utils/logger');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const { startEmailWorker }   = require('./workers/emailWorker');
 const { startWebhookWorker } = require('./workers/webhookWorker');
+const { startSmsWorker }     = require('./workers/smsWorker');
+const { startPushWorker }    = require('./workers/pushWorker');
+const { startNotificationWorker } = require('./workers/notificationWorker');
 const { startEventConsumer, stopEventConsumer } = require('./workers/eventConsumer');
 
 const app = express();
@@ -29,11 +32,18 @@ app.get('/health', async (_req, res) => {
         await emailQueue.getWaitingCount();
         queueStatus = 'ok';
     } catch { /* */ }
+    const pushService = require('./service/pushService');
     res.json({
         status:  'ok',
         service: 'notification-service',
         redis:   redis.isAvailable() ? 'ok' : 'unavailable',
         queues:  queueStatus,
+        channels: {
+            email: config.email.resendApiKey ? 'resend' : (config.email.smtp.host ? 'smtp' : 'log'),
+            sms:   config.sms.provider,
+            push:  pushService.resolveProvider(),
+            inapp: 'redis-pubsub',
+        },
     });
 });
 
@@ -48,6 +58,9 @@ async function start() {
     // Start BullMQ workers in-process
     startEmailWorker();
     startWebhookWorker();
+    startSmsWorker();
+    startPushWorker();
+    startNotificationWorker();
 
     // Start Redis Streams consumer in background
     startEventConsumer().catch((err) => logger.error({ err }, 'Event consumer crashed'));
