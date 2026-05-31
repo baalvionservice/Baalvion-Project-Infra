@@ -17,6 +17,11 @@ ENV SERVICE=${SERVICE}
 WORKDIR /app
 COPY --from=build /workspace/${SERVICE}/target/${SERVICE}-*.jar /app/app.jar
 
+# Drop the unused Canonical 'pebble' service-manager binary that the Ubuntu-based eclipse-temurin
+# image ships in /usr/bin — it is never executed (the entrypoint runs java directly) but its
+# bundled Go stdlib trips the image vuln scan. Removing it is a genuine attack-surface reduction.
+RUN rm -f /usr/bin/pebble
+
 # Run as a non-root user (UID/GID match the k8s securityContext.runAsUser/runAsGroup).
 # The jar is world-readable and the JVM only writes to /tmp, so no chown is required.
 RUN groupadd -g 10001 app && useradd -u 10001 -g app -M -s /usr/sbin/nologin app
