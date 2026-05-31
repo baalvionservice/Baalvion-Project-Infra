@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import type { PublicCandidateRanking } from './page';
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { mockBadges } from '@/lib/mock-data';
+import { badges as mockBadges } from '@/lib/badges';
 import { Trophy, ShieldCheck, Rocket, Award, BrainCircuit } from 'lucide-react';
 
 const badgeIcons: { [key: string]: React.ElementType } = {
