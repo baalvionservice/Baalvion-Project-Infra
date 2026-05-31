@@ -10,7 +10,7 @@ import { PlusCircle } from 'lucide-react';
 import { Student } from '@/modules/students/domain/student.entity';
 import { studentService } from '@/modules/students/services/student.service';
 import { collegeService } from '@/services/college.service';
-import { College } from '@/mocks/colleges.mock';
+import { College } from '@/types/campus';
 import { studentColumns } from '@/modules/students/components/StudentColumns';
 
 export default function StudentDashboardPage() {
