@@ -47,7 +47,7 @@ import type {
   User,
   Badge as BadgeType,
 } from "@/lib/types";
-import { mockBadges } from "@/lib/mock-data";
+import { badges as mockBadges } from '@/lib/badges';
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";

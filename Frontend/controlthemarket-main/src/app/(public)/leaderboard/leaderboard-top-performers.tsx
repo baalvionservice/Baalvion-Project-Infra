@@ -9,7 +9,7 @@ import { Crown, Medal, Trophy, ShieldCheck, Rocket, Award, BrainCircuit } from "
 import type { PublicCandidateRanking } from "./page";
 import Link from 'next/link';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { mockBadges } from "@/lib/mock-data";
+import { badges as mockBadges } from '@/lib/badges';
 
 
 const rankIcons = [
