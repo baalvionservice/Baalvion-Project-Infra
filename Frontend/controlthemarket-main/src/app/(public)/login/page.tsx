@@ -13,16 +13,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Loader2, User, Briefcase, Shield, Mail, Lock } from 'lucide-react';
+import { Loader2, Mail, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { mockUsers } from '@/lib/mock-data';
 
 export default function LoginPage() {
   const { login } = useAuth();
   const { toast } = useToast();
-  const [isSubmitting, setIsSubmitting] = useState<string | null>(null);
 
-  // Primary email + password auth (wired to the real auth context).
+  // Email + password auth — wired to the real auth context (→ auth-gateway → auth-service).
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isEmailSubmitting, setIsEmailSubmitting] = useState(false);
@@ -43,42 +41,14 @@ export default function LoginPage() {
     setIsEmailSubmitting(false);
   };
 
-  const handleLogin = async (role: 'candidate' | 'company' | 'admin') => {
-    setIsSubmitting(role);
-    const userToLogin = mockUsers.find((u) => u.role === role);
-
-    if (userToLogin) {
-      // In a real app, you'd send email/password. Here we just find the first user of that role.
-      const result = await login({ email: userToLogin.email, password: 'password' });
-      if (!result.success) {
-        toast({
-          title: 'Login Failed',
-          description: result.message,
-          variant: 'destructive',
-        });
-      }
-      // On success, auth context handles redirection
-    } else {
-      toast({
-        title: 'Login Failed',
-        description: `No mock user found for role: ${role}.`,
-        variant: 'destructive',
-      });
-    }
-    setIsSubmitting(null);
-  };
-
   return (
     <div className="container flex h-[calc(100vh-8rem)] items-center justify-center">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-headline">Welcome Back</CardTitle>
-          <CardDescription>
-            Sign in to your account to continue.
-          </CardDescription>
+          <CardDescription>Sign in to your account to continue.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {/* Email + password — primary auth path */}
           <form onSubmit={handleEmailLogin} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -117,56 +87,6 @@ export default function LoginPage() {
               Sign In
             </Button>
           </form>
-
-          {/* Quick demo login — preserves the original role-based mock entry points */}
-          <div className="relative py-2">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or quick demo login</span>
-            </div>
-          </div>
-
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={() => handleLogin('candidate')}
-            disabled={!!isSubmitting}
-          >
-            {isSubmitting === 'candidate' ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <User className="mr-2 h-4 w-4" />
-            )}
-            Log in as Candidate
-          </Button>
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={() => handleLogin('company')}
-            disabled={!!isSubmitting}
-          >
-            {isSubmitting === 'company' ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Briefcase className="mr-2 h-4 w-4" />
-            )}
-            Log in as Company
-          </Button>
-          <Button
-            variant="secondary"
-            className="w-full"
-            onClick={() => handleLogin('admin')}
-            disabled={!!isSubmitting}
-          >
-            {isSubmitting === 'admin' ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Shield className="mr-2 h-4 w-4" />
-            )}
-            Log in as Admin
-          </Button>
         </CardContent>
         <div className="p-6 pt-0 text-center text-sm">
           Don&apos;t have an account?{' '}
