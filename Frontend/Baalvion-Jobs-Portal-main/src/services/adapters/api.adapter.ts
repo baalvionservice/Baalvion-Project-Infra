@@ -51,7 +51,7 @@ import {
   ComplianceProfile,
 } from '@/lib/talent-acquisition';
 import { AuditLogFiltersState } from '@/app/(admin)/audit-logs/page';
-import { College } from '@/mocks/colleges.mock';
+import { College } from '@/types/campus';
 import { Student } from '@/modules/students/domain/student.entity';
 import { ApplicationMatch } from '@/modules/campus/types/campus.types';
 import { Placement } from '@/types/placement.types';

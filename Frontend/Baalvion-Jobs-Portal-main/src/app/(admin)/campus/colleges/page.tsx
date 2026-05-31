@@ -3,7 +3,7 @@
 
 import { useDataTable } from '@/hooks/useDataTable';
 import { DataTable } from '@/components/system/DataTable';
-import { College } from '@/mocks/colleges.mock';
+import { College } from '@/types/campus';
 import { DataColumn } from '@/components/system/DataTable';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/system/Toast/useToast';
