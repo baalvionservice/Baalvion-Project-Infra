@@ -1,0 +1,11 @@
+# Trivy ignore file — security-reviewed, justified suppressions only.
+# Format: one advisory ID per line; keep the rationale comment above each.
+
+# CVE-2026-22733 — Spring Boot Actuator authentication bypass under the CloudFoundry actuator
+# endpoints (/cloudfoundryapplication). Fixed only in Spring Boot >= 3.5.12 / 4.0.4; the
+# financial-services-java reactor deliberately pins Spring Boot 3.2 (see its pom.xml <parent>
+# and the PR #16 reviewer note: "close Dependabot PRs that bump Spring Boot 3.2"). The
+# CloudFoundry actuator auto-configures ONLY when VCAP_APPLICATION is present (running on
+# CloudFoundry); these services deploy to Kubernetes, where that integration is inert and the
+# vulnerable endpoints are never registered. Remove this entry when the suite moves off 3.2.
+CVE-2026-22733

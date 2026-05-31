@@ -54,6 +54,10 @@
     <!-- Testcontainers (test scope only). 1.20.x bundles a docker-java that negotiates the
          modern Docker Engine API; 1.19.x fails against Docker Engine 25+/Desktop with HTTP 400. -->
     <testcontainers.version>1.20.4</testcontainers.version>
+    <!-- Override the Spring Boot 3.2 BOM's pgjdbc 42.6.0 (which carries CVE-2024-1597 SQLi via
+         PreferQueryMode=SIMPLE and CVE-2026-42198 SCRAM DoS). 42.7.11 patches both. Property is
+         BOM-managed, so this overrides every module's postgresql dependency. -->
+    <postgresql.version>42.7.11</postgresql.version>
   </properties>
 
   <dependencies>

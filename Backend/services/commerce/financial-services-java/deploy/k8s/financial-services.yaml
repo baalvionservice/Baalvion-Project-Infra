@@ -46,8 +46,25 @@ spec:
   template:
     metadata: { labels: { app: account-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: account-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/account-service:latest
           ports: [{ containerPort: 3016 }]
           envFrom:
@@ -84,8 +101,25 @@ spec:
   template:
     metadata: { labels: { app: ledger-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: ledger-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/ledger-service:latest
           ports: [{ containerPort: 3014 }]
           envFrom:
@@ -122,8 +156,25 @@ spec:
   template:
     metadata: { labels: { app: payment-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: payment-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/payment-service:latest
           ports: [{ containerPort: 3015 }]
           envFrom:
@@ -160,8 +211,25 @@ spec:
   template:
     metadata: { labels: { app: escrow-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: escrow-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/escrow-service:latest
           ports: [{ containerPort: 3017 }]
           envFrom:
@@ -198,8 +266,25 @@ spec:
   template:
     metadata: { labels: { app: settlement-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: settlement-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/settlement-service:latest
           ports: [{ containerPort: 3018 }]
           envFrom:
@@ -236,8 +321,25 @@ spec:
   template:
     metadata: { labels: { app: reconciliation-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: reconciliation-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/reconciliation-service:latest
           ports: [{ containerPort: 3019 }]
           envFrom:
@@ -274,8 +376,25 @@ spec:
   template:
     metadata: { labels: { app: audit-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: audit-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/audit-service:latest
           ports: [{ containerPort: 3020 }]
           envFrom:
@@ -303,8 +422,25 @@ spec:
   template:
     metadata: { labels: { app: reporting-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: reporting-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/reporting-service:latest
           ports: [{ containerPort: 3024 }]
           envFrom:
@@ -332,8 +468,25 @@ spec:
   template:
     metadata: { labels: { app: risk-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: risk-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/risk-service:latest
           ports: [{ containerPort: 3035 }]
           envFrom:
@@ -361,8 +514,25 @@ spec:
   template:
     metadata: { labels: { app: trade-finance-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: trade-finance-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/trade-finance-service:latest
           ports: [{ containerPort: 3036 }]
           envFrom:
@@ -399,8 +569,25 @@ spec:
   template:
     metadata: { labels: { app: credit-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: credit-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/credit-service:latest
           ports: [{ containerPort: 3037 }]
           envFrom:
@@ -437,8 +624,25 @@ spec:
   template:
     metadata: { labels: { app: fx-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: fx-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/fx-service:latest
           ports: [{ containerPort: 3038 }]
           envFrom:
@@ -475,8 +679,25 @@ spec:
   template:
     metadata: { labels: { app: wallet-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: wallet-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/wallet-service:latest
           ports: [{ containerPort: 3039 }]
           envFrom:

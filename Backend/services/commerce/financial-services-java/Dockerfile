@@ -17,6 +17,11 @@ ENV SERVICE=${SERVICE}
 WORKDIR /app
 COPY --from=build /workspace/${SERVICE}/target/${SERVICE}-*.jar /app/app.jar
 
+# Run as a non-root user (UID/GID match the k8s securityContext.runAsUser/runAsGroup).
+# The jar is world-readable and the JVM only writes to /tmp, so no chown is required.
+RUN groupadd -g 10001 app && useradd -u 10001 -g app -M -s /usr/sbin/nologin app
+USER app
+
 # Container-friendly JVM defaults; override JAVA_OPTS as needed.
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
 EXPOSE 3014 3015 3016 3017 3018 3019 3020 3024 3035 3036 3037 3038 3039
