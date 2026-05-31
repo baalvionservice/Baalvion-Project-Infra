@@ -9,7 +9,7 @@ CREATE TABLE escrow.escrows (
   source_account_id uuid NOT NULL,
   beneficiary_account_id uuid NOT NULL,
   amount numeric(19, 4) NOT NULL,
-  currency char(3) NOT NULL,
+  currency varchar(3) NOT NULL,
   status varchar(32) NOT NULL,            -- HELD, RELEASED, REFUNDED, DISPUTED, EXPIRED
   release_condition varchar(32) NOT NULL, -- TIME_BASED, EVENT_BASED, MANUAL
   release_at timestamp,

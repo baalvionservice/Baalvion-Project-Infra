@@ -23,7 +23,7 @@ financial-services-java/
 ├── reconciliation-service/ # 3019   matching, exceptions, inbound advice ingestion
 ├── audit-service/          # 3020   append-only audit, Kafka aggregator, DLT, webhooks
 ├── reporting-service/      # 3024   async CSV/JSON/XLSX exports
-├── risk-service/           # 3025   transaction risk scoring
+├── risk-service/           # 3035   transaction risk scoring
 ├── deploy/                 # helm, k8s, ci, observability
 └── docs/                   # this set + ADRs + runbooks
 ```

@@ -1,0 +1,97 @@
+spring:
+  application:
+    name: wallet-service
+    version: 1.0.0
+
+  jpa:
+    hibernate:
+      # Flyway is the single schema authority; Hibernate neither creates nor validates DDL.
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+          fetch_size: 50
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      # Send String params with an unspecified OID so Postgres casts them to the target
+      # column type (notably String fields mapped onto jsonb columns). URL-independent, so it
+      # also applies to the Testcontainers-provided JDBC URL in integration tests.
+      data-source-properties:
+        stringtype: unspecified
+      maximum-pool-size: 20
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 10000
+      max-lifetime: 1800000
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      compression-type: snappy
+    consumer:
+      group-id: wallet-service-group
+      auto-offset-reset: earliest
+      max-poll-records: 500
+
+  flyway:
+    enabled: true
+    table: flyway_history_wallet
+
+server:
+  port: ${PORT:3039}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    min-response-size: 1024
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.baalvion: DEBUG
+    org.springframework.web: INFO
+
+app:
+  name: Baalvion Wallet Service
+  version: 1.0.0
+  description: Multi-currency wallet for Global Trade Infrastructure
+  outbox:
+    poll-ms: 2000
+    batch-size: 100
+    max-attempts: 10
+  wallet:
+    # Whether a debit may overdraw the available balance (always false in production).
+    allow-overdraft: false
+    # Default hold validity in minutes before a scheduled sweep auto-releases it.
+    hold-ttl-minutes: 1440

@@ -76,6 +76,10 @@ jobs:
           - audit-service
           - reporting-service
           - risk-service
+          - trade-finance-service
+          - credit-service
+          - fx-service
+          - wallet-service
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx

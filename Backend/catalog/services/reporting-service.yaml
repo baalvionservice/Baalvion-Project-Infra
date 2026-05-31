@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: reporting-service
+  description: Async financial report jobs (PENDING→PROCESSING→COMPLETED) rendering CSV / JSON / XLSX (Apache POI) artifacts for download. Part of financial-services-java (port 3024, schema `reporting`).
+  domain: commerce
+  division: commerce
+  context: financial-reporting
+  owner: "@baalvion/commerce"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/reporting-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/reports"]
+  slo: { availability: 0.99, latencyP95Ms: 800 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 1, maxReplicas: 4 }

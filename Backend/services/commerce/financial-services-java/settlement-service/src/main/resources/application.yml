@@ -8,7 +8,7 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           batch_size: 25
           fetch_size: 50
@@ -22,6 +22,11 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     hikari:
+      # Send String params with an unspecified OID so Postgres casts them to the target
+      # column type (notably String fields mapped onto jsonb columns). URL-independent, so it
+      # also applies to the Testcontainers-provided JDBC URL in integration tests.
+      data-source-properties:
+        stringtype: unspecified
       maximum-pool-size: 20
       minimum-idle: 2
       connection-timeout: 30000

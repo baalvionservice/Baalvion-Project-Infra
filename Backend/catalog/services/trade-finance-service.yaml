@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: trade-finance-service
+  description: Documentary credits (UCP 600 Letters of Credit) and independent bank guarantees (URDG 758) — issuance, amendment, document presentation, demand/claim, and ledger settlement of contingent liabilities. Part of financial-services-java (port 3036, schema `trade_finance`).
+  domain: commerce
+  division: commerce
+  context: trade-finance
+  owner: "@baalvion/commerce"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/trade-finance-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, kafka]
+  dependsOn: [auth-service, ledger-service, account-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/letters-of-credit", "/api/v1/bank-guarantees"]
+  slo: { availability: 0.999, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 8 }

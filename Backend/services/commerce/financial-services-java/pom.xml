@@ -24,6 +24,10 @@
     <module>audit-service</module>
     <module>reporting-service</module>
     <module>risk-service</module>
+    <module>trade-finance-service</module>
+    <module>credit-service</module>
+    <module>fx-service</module>
+    <module>wallet-service</module>
   </modules>
 
   <parent>
@@ -40,6 +44,9 @@
     <maven.compiler.target>17</maven.compiler.target>
     <spring-cloud.version>2023.0.0</spring-cloud.version>
     <resilience4j.version>2.1.0</resilience4j.version>
+    <!-- Testcontainers (test scope only). 1.20.x bundles a docker-java that negotiates the
+         modern Docker Engine API; 1.19.x fails against Docker Engine 25+/Desktop with HTTP 400. -->
+    <testcontainers.version>1.20.4</testcontainers.version>
   </properties>
 
   <dependencies>
@@ -80,10 +87,10 @@
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-core</artifactId>
     </dependency>
-    <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-postgresql</artifactId>
-    </dependency>
+    <!-- Flyway 9.x (managed by Spring Boot 3.2) bundles PostgreSQL support in flyway-core.
+         The separate flyway-database-postgresql module only exists from Flyway 10+, and the
+         old 'flyway-postgresql' artifact is not BOM-managed — so no extra dependency is needed. -->
+
 
     <!-- Kafka -->
     <dependency>
@@ -154,13 +161,21 @@
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>testcontainers</artifactId>
-      <version>1.19.3</version>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
-      <version>1.19.3</version>
+      <version>${testcontainers.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <!-- JUnit 5 integration (@Testcontainers / @Container) — used by the *IntegrationTest classes.
+         Must match the testcontainers-core version above. -->
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <version>${testcontainers.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>

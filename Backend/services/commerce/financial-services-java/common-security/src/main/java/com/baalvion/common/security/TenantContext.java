@@ -1,5 +1,7 @@
 package com.baalvion.common.security;
 
+import org.springframework.security.access.AccessDeniedException;
+
 import java.util.UUID;
 
 /**
@@ -23,8 +25,15 @@ public final class TenantContext {
    * @return the authoritative tenant id for this request
    */
   public static UUID resolve(String headerTenant) {
-    // Authenticated: tenant comes only from the token. Header is not trusted.
-    return AuthContext.currentTenantId().orElseGet(() -> fromHeaderOrSystem(headerTenant));
+    if (AuthContext.isAuthenticated()) {
+      // Authenticated: the tenant comes EXCLUSIVELY from the validated token. A token that carries no
+      // usable tenant claim must NOT fall back to the client-supplied header — doing so would let an
+      // authenticated caller act on an arbitrary tenant by spoofing X-Tenant-ID. Fail closed instead.
+      return AuthContext.currentTenantId().orElseThrow(() -> new AccessDeniedException(
+        "Authenticated request carries no tenant claim; refusing to resolve tenant from X-Tenant-ID"));
+    }
+    // Unauthenticated (security disabled / local dev): the header is the only available signal.
+    return fromHeaderOrSystem(headerTenant);
   }
 
   private static UUID fromHeaderOrSystem(String headerTenant) {

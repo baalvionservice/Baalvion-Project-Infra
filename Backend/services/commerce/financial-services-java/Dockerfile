@@ -19,5 +19,5 @@ COPY --from=build /workspace/${SERVICE}/target/${SERVICE}-*.jar /app/app.jar
 
 # Container-friendly JVM defaults; override JAVA_OPTS as needed.
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 -XX:+UseG1GC"
-EXPOSE 3014 3015 3016 3017 3018 3019 3020 3024 3025
+EXPOSE 3014 3015 3016 3017 3018 3019 3020 3024 3035 3036 3037 3038 3039
 ENTRYPOINT ["sh", "-c", "exec java $JAVA_OPTS -jar /app/app.jar"]

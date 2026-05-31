@@ -1,22 +1,31 @@
 {
-  "generatedAt": "2026-05-27T06:16:20.926Z",
+  "generatedAt": "2026-05-31T16:42:37.197Z",
   "services": [
     "about-service",
     "abuse-platform",
+    "account-service",
     "admin-service",
+    "agent-service",
     "analytics-platform",
     "audit-platform",
+    "audit-service",
     "auth-node",
     "auth-service",
     "baalvion-os",
     "billing-platform",
     "brand-connector-service",
+    "cache",
     "cms-service",
     "commerce-service",
+    "credit-service",
     "ctm-service",
     "dashboard-service",
+    "developer-service",
     "elite-circle-service",
+    "escrow-service",
+    "finance-audit-service",
     "fulfillment-service",
+    "fx-service",
     "gateway",
     "identity-platform",
     "imperialpedia-service",
@@ -26,6 +35,7 @@
     "jobs-service",
     "law-elite",
     "law-service",
+    "ledger-service",
     "market-service",
     "mining-service",
     "ml-service",
@@ -34,12 +44,24 @@
     "oauth-service",
     "order-service",
     "organization-platform",
+    "payment-service",
     "proxy-gateway",
     "proxy-platform",
+    "rbac-service",
     "real-estate-service",
     "realtime-service",
+    "reconciliation-service",
+    "report-service",
+    "reporting-service",
+    "risk-service",
+    "search-service",
     "session-service",
-    "trade-service"
+    "settlement-service",
+    "tenancy",
+    "tenant-service",
+    "trade-finance-service",
+    "trade-service",
+    "wallet-service"
   ],
   "graph": {
     "about-service": [
@@ -48,11 +70,20 @@
     "abuse-platform": [
       "identity-platform"
     ],
+    "account-service": [
+      "auth-service"
+    ],
     "admin-service": [
       "identity-platform"
     ],
+    "agent-service": [
+      "auth-service"
+    ],
     "analytics-platform": [],
     "audit-platform": [],
+    "audit-service": [
+      "auth-service"
+    ],
     "auth-node": [],
     "auth-service": [],
     "baalvion-os": [],
@@ -62,11 +93,17 @@
     "brand-connector-service": [
       "identity-platform"
     ],
+    "cache": [],
     "cms-service": [
       "identity-platform"
     ],
     "commerce-service": [
       "identity-platform"
+    ],
+    "credit-service": [
+      "auth-service",
+      "ledger-service",
+      "account-service"
     ],
     "ctm-service": [
       "identity-platform"
@@ -74,11 +111,25 @@
     "dashboard-service": [
       "identity-platform"
     ],
+    "developer-service": [
+      "auth-service"
+    ],
     "elite-circle-service": [
       "identity-platform"
     ],
+    "escrow-service": [
+      "auth-service"
+    ],
+    "finance-audit-service": [
+      "auth-service"
+    ],
     "fulfillment-service": [
       "identity-platform"
+    ],
+    "fx-service": [
+      "auth-service",
+      "wallet-service",
+      "ledger-service"
     ],
     "gateway": [],
     "identity-platform": [],
@@ -102,6 +153,9 @@
     ],
     "law-service": [
       "identity-platform"
+    ],
+    "ledger-service": [
+      "auth-service"
     ],
     "market-service": [
       "identity-platform"
@@ -127,6 +181,9 @@
     "organization-platform": [
       "identity-platform"
     ],
+    "payment-service": [
+      "auth-service"
+    ],
     "proxy-gateway": [
       "proxy-platform"
     ],
@@ -134,17 +191,51 @@
       "identity-platform",
       "billing-platform"
     ],
+    "rbac-service": [
+      "auth-service"
+    ],
     "real-estate-service": [
       "identity-platform"
     ],
     "realtime-service": [
       "identity-platform"
     ],
+    "reconciliation-service": [
+      "auth-service"
+    ],
+    "report-service": [
+      "auth-service"
+    ],
+    "reporting-service": [
+      "auth-service"
+    ],
+    "risk-service": [
+      "auth-service"
+    ],
+    "search-service": [
+      "auth-service"
+    ],
     "session-service": [
       "auth-service"
     ],
+    "settlement-service": [
+      "auth-service"
+    ],
+    "tenancy": [],
+    "tenant-service": [
+      "auth-service"
+    ],
+    "trade-finance-service": [
+      "auth-service",
+      "ledger-service",
+      "account-service"
+    ],
     "trade-service": [
       "identity-platform"
+    ],
+    "wallet-service": [
+      "auth-service",
+      "ledger-service"
     ]
   },
   "eventConsumers": {

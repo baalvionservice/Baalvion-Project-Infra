@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: payment-service
+  description: Multi-scheme payment orchestration (Payment↔Ledger↔Account saga, transactional outbox, idempotency, ISO 8583 + payment-rail adapters). Part of financial-services-java (port 3015, schema `payments`).
+  domain: commerce
+  division: commerce
+  context: payments
+  owner: "@baalvion/commerce"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/payment-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, redis, kafka]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/payments"]
+  slo: { availability: 0.999, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 8 }

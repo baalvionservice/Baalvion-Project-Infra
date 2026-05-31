@@ -8,7 +8,7 @@ spring:
       ddl-auto: validate
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           batch_size: 25
           fetch_size: 50
@@ -21,6 +21,11 @@ spring:
     username: ${DB_USER:postgres}
     password: ${DB_PASSWORD:postgres}
     hikari:
+      # Send String params with an unspecified OID so Postgres casts them to the target
+      # column type (notably String fields mapped onto jsonb columns). URL-independent, so it
+      # also applies to the Testcontainers-provided JDBC URL in integration tests.
+      data-source-properties:
+        stringtype: unspecified
       maximum-pool-size: 20
       minimum-idle: 2
       connection-timeout: 30000
@@ -45,7 +50,7 @@ spring:
     table: flyway_history_risk
 
 server:
-  port: ${PORT:3025}
+  port: ${PORT:3035}
   servlet:
     context-path: /
   compression:
@@ -88,3 +93,14 @@ app:
     velocity-window-minutes: 60
     review-score: 40
     decline-score: 70
+  sanctions:
+    # Watchlist source: "seed" (curated, self-contained, default) | "ofac"/"un"/"eu" (live downloaders).
+    provider: ${SANCTIONS_PROVIDER:seed}
+    # Name similarity (0-1) at/above which a watchlist entity is recorded as a hit (POTENTIAL_MATCH).
+    match-threshold: 0.85
+    # Similarity at/above which a hit is auto-escalated to CONFIRMED_MATCH (block without manual review).
+    auto-block-threshold: 0.95
+    # Max (top-scoring) hits retained per screening.
+    max-hits: 10
+    # Load the provider's list on startup if the watchlist table is empty.
+    auto-seed-on-startup: true

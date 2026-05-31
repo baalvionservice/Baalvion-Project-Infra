@@ -9,7 +9,7 @@ CREATE TABLE settlement.settlement_batches (
   scheme varchar(32) NOT NULL,            -- NIP, VISA, MASTERCARD, INTERSWITCH, WALLET
   settlement_type varchar(8) NOT NULL,    -- T0, T1
   settlement_date date NOT NULL,
-  currency char(3) NOT NULL,
+  currency varchar(3) NOT NULL,
   total_amount numeric(19, 4) NOT NULL DEFAULT 0,
   total_fees numeric(19, 4) NOT NULL DEFAULT 0,
   net_amount numeric(19, 4) NOT NULL DEFAULT 0,

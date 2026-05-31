@@ -8,7 +8,7 @@ CREATE TABLE accounts.accounts (
   account_number varchar(20) NOT NULL,
   account_name varchar(140),
   account_type varchar(32) NOT NULL,      -- INDIVIDUAL, BUSINESS, ESCROW, SETTLEMENT, FEE
-  currency char(3) NOT NULL,
+  currency varchar(3) NOT NULL,
   balance numeric(19, 4) NOT NULL DEFAULT 0,
   ledger_balance numeric(19, 4) NOT NULL DEFAULT 0,
   kyc_status varchar(32) NOT NULL,        -- PENDING, APPROVED, REJECTED, SUSPENDED

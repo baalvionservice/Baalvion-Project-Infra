@@ -10,7 +10,7 @@ CREATE TABLE ledger.journal_entries (
   debit_account_id uuid NOT NULL,
   credit_account_id uuid NOT NULL,
   amount numeric(19, 4) NOT NULL,
-  currency char(3) NOT NULL,
+  currency varchar(3) NOT NULL,
   entry_type varchar(32) NOT NULL,
   status varchar(32) NOT NULL,
   description text,

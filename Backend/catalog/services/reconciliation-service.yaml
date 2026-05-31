@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: reconciliation-service
+  description: Internal-vs-external matching by transaction ref (MATCHED/EXCEPTION/UNMATCHED) + resolve workflow + inbound advice-file ingestion. Part of financial-services-java (port 3019, schema `reconciliation`).
+  domain: commerce
+  division: commerce
+  context: reconciliation
+  owner: "@baalvion/commerce"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/reconciliation-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, kafka]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/reconciliation"]
+  slo: { availability: 0.99, latencyP95Ms: 500 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 1, maxReplicas: 4 }
