@@ -104,3 +104,20 @@ app:
     max-hits: 10
     # Load the provider's list on startup if the watchlist table is empty.
     auto-seed-on-startup: true
+    # In-memory active-watchlist snapshot TTL (the DB is the durable cache; evicted on ingest).
+    cache-ttl-seconds: 300
+    refresh:
+      # Periodically re-ingest from the active provider (keeps the live OFAC list current).
+      enabled: ${SANCTIONS_REFRESH_ENABLED:true}
+      cron: ${SANCTIONS_REFRESH_CRON:0 0 3 * * *}   # daily 03:00
+    ofac:
+      # Official OFAC SDN CSV feeds (override to the sanctionslistservice.ofac.treas.gov exports if needed).
+      sdn-url: ${OFAC_SDN_URL:https://www.treasury.gov/ofac/downloads/sdn.csv}
+      alt-url: ${OFAC_ALT_URL:https://www.treasury.gov/ofac/downloads/alt.csv}
+      add-url: ${OFAC_ADD_URL:https://www.treasury.gov/ofac/downloads/add.csv}
+      connect-timeout-ms: 10000
+      read-timeout-ms: 60000
+      max-retries: 3
+      retry-backoff-ms: 2000
+      # External-provider rate-limit guard: never hit the OFAC feeds more often than this.
+      min-refresh-interval-minutes: 60

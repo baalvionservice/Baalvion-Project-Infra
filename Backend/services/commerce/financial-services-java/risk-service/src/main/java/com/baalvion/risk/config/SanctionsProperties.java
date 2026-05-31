@@ -42,4 +42,43 @@ public class SanctionsProperties {
 
   /** Load the seed/provider list automatically on startup if the table is empty. */
   private boolean autoSeedOnStartup = true;
+
+  /** TTL (seconds) of the in-memory active-watchlist snapshot used by screening (the DB is the durable cache). */
+  @Min(value = 1, message = "cache-ttl-seconds must be >= 1")
+  private long cacheTtlSeconds = 300;
+
+  /** Periodic watchlist refresh from the active provider. */
+  private Refresh refresh = new Refresh();
+
+  /** Live OFAC SDN provider settings (used when provider=ofac). */
+  private Ofac ofac = new Ofac();
+
+  @Data
+  public static class Refresh {
+    /** Enable the scheduled refresh job. */
+    private boolean enabled = true;
+    /** Spring cron for the refresh (default daily 03:00). */
+    private String cron = "0 0 3 * * *";
+  }
+
+  @Data
+  public static class Ofac {
+    /** OFAC SDN primary-name + program + type feed (CSV). */
+    private String sdnUrl = "https://www.treasury.gov/ofac/downloads/sdn.csv";
+    /** OFAC alternate-name (alias / a.k.a.) feed (CSV). */
+    private String altUrl = "https://www.treasury.gov/ofac/downloads/alt.csv";
+    /** OFAC address feed (CSV) — used to derive country. */
+    private String addUrl = "https://www.treasury.gov/ofac/downloads/add.csv";
+    @Min(1)
+    private int connectTimeoutMs = 10_000;
+    @Min(1)
+    private int readTimeoutMs = 60_000;
+    @Min(1)
+    private int maxRetries = 3;
+    @Min(0)
+    private long retryBackoffMs = 2_000;
+    /** External-provider rate-limit guard: do not re-fetch the feeds more often than this. */
+    @Min(0)
+    private long minRefreshIntervalMinutes = 60;
+  }
 }

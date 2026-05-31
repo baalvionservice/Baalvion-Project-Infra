@@ -61,6 +61,12 @@ public class SanctionsService {
   private final KafkaTemplate<String, String> kafkaTemplate;
   private final ObjectMapper objectMapper;
 
+  // In-memory active-watchlist snapshot (the DB is the durable cache). Evicted on ingest, else
+  // reloaded when older than app.sanctions.cache-ttl-seconds — so a full OFAC list (~17k rows) is not
+  // re-queried from Postgres on every screen request.
+  private volatile List<SanctionedEntity> activeSnapshot;
+  private volatile long activeSnapshotLoadedMs;
+
   public SanctionsService(SanctionedEntityRepository entityRepository,
                           SanctionsScreeningRepository screeningRepository,
                           NameMatcher matcher,
@@ -115,9 +121,23 @@ public class SanctionsService {
       entityRepository.save(e);
       count++;
     }
+    this.activeSnapshot = null;  // evict the screening cache so the next screen reflects the refresh
     log.info("Sanctions ingest from provider '{}': {} entities upserted, {} skipped (un-screenable)",
       provider.name(), count, skipped);
     return count;
+  }
+
+  /** Cached active-watchlist snapshot (TTL'd; evicted on ingest). Called within screen()'s transaction. */
+  private List<SanctionedEntity> activeEntities() {
+    List<SanctionedEntity> snap = this.activeSnapshot;
+    long ageMs = System.currentTimeMillis() - this.activeSnapshotLoadedMs;
+    if (snap != null && ageMs < props.getCacheTtlSeconds() * 1000L) {
+      return snap;
+    }
+    List<SanctionedEntity> loaded = entityRepository.findByActiveTrue();
+    this.activeSnapshot = loaded;
+    this.activeSnapshotLoadedMs = System.currentTimeMillis();
+    return loaded;
   }
 
   public long entityCount() {
@@ -141,7 +161,7 @@ public class SanctionsService {
     // pg_trgm candidate prefilter (see V002 migration note).
     List<ScreeningHit> hits = new ArrayList<>();
     double rawTop = 0.0;  // unrounded — drives the verdict so a 0.9499 cannot round up into an auto-block
-    for (SanctionedEntity entity : entityRepository.findByActiveTrue()) {
+    for (SanctionedEntity entity : activeEntities()) {
       Scored best = bestScore(normalized, entity);
       if (best.score >= matchThreshold) {
         rawTop = Math.max(rawTop, best.score);

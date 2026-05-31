@@ -4,6 +4,7 @@ import com.baalvion.common.security.AuthContext;
 import com.baalvion.common.security.TenantContext;
 import com.baalvion.risk.dto.AdjudicateRequest;
 import com.baalvion.risk.dto.ScreenRequest;
+import com.baalvion.risk.dto.ScreenResult;
 import com.baalvion.risk.dto.ScreeningResponse;
 import com.baalvion.risk.service.SanctionsService;
 import jakarta.validation.Valid;
@@ -33,14 +34,22 @@ public class SanctionsController {
     this.sanctionsService = sanctionsService;
   }
 
-  /** Screen a subject (name + optional type/country) against the consolidated watchlist. */
+  /**
+   * Screen a subject against the consolidated watchlist (live provider data once
+   * {@code app.sanctions.provider=ofac}). Strict contract:
+   * <pre>in  { name, country? }
+   * out { status, confidence, matches: [{ name, source, program? }] }</pre>
+   * Every call persists a tenant-scoped {@code sanctions_screenings} audit row and emits
+   * {@code sanctions.screening.completed} (the per-request audit log entry).
+   */
   @PostMapping("/screen")
-  public ResponseEntity<ScreeningResponse> screen(
+  public ResponseEntity<ScreenResult> screen(
     @RequestHeader(value = "X-Tenant-ID", required = false) String tenantIdHeader,
     @Valid @RequestBody ScreenRequest request
   ) {
     UUID tenantId = TenantContext.resolve(tenantIdHeader);
-    return ResponseEntity.ok(sanctionsService.screen(tenantId, request));
+    ScreeningResponse internal = sanctionsService.screen(tenantId, request);
+    return ResponseEntity.ok(ScreenResult.from(internal));
   }
 
   @GetMapping("/screenings")

@@ -3,6 +3,7 @@ package com.baalvion.risk;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.kafka.annotation.EnableKafka;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Risk Service: transaction monitoring and fraud detection for Global Trade Infrastructure
@@ -13,6 +14,7 @@ import org.springframework.kafka.annotation.EnableKafka;
  */
 @SpringBootApplication
 @EnableKafka
+@EnableScheduling
 public class RiskServiceApplication {
 
   public static void main(String[] args) {
