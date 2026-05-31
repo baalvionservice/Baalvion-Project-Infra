@@ -29,7 +29,18 @@ export type GenerateProductDescriptionOutput = z.infer<typeof GenerateProductDes
 export async function generateProductDescription(
   input: GenerateProductDescriptionInput
 ): Promise<GenerateProductDescriptionOutput> {
-  return generateProductDescriptionFlow(input);
+  try {
+    return await generateProductDescriptionFlow(input);
+  } catch (e) {
+    // Demo fallback: no GEMINI_API_KEY (or quota) → return a standardized description so
+    // the feature is demonstrable without a key. Set GEMINI_API_KEY to flip to live AI.
+    console.warn('[AI] product-description fallback (genkit unavailable — set GEMINI_API_KEY for live AI):', (e as Error)?.message);
+    const certs = input.certifications?.length ? ` Certified to ${input.certifications.join(', ')}.` : '';
+    const extra = input.additionalDetails ? ` ${input.additionalDetails}` : '';
+    return {
+      description: `${input.mineralType} (${input.grade}, ${input.purity}) sourced from ${input.origin}. Available quantity: ${input.quantity}. This consignment meets standard B2B commercial specifications with consistent grade and verified provenance, suited for industrial offtake and long-term supply agreements.${certs}${extra} (Demo description — configure GEMINI_API_KEY for live AI.)`,
+    };
+  }
 }
 
 const generateProductDescriptionPrompt = ai.definePrompt({

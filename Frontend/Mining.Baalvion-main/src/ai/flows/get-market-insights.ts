@@ -28,7 +28,23 @@ const GetMarketInsightsOutputSchema = z.object({
 export type GetMarketInsightsOutput = z.infer<typeof GetMarketInsightsOutputSchema>;
 
 export async function getMarketInsights(input: GetMarketInsightsInput): Promise<GetMarketInsightsOutput> {
-  return getMarketInsightsFlow(input);
+  try {
+    return await getMarketInsightsFlow(input);
+  } catch (e) {
+    // Demo fallback: no GEMINI_API_KEY (or quota) → return curated market intelligence so
+    // the feature is demonstrable without a key. Set GEMINI_API_KEY to flip to live AI.
+    console.warn('[AI] market-insights fallback (genkit unavailable — set GEMINI_API_KEY for live AI):', (e as Error)?.message);
+    const m = input.mineralType || 'the mineral';
+    const region = input.region || 'global';
+    const tf = input.timeframe || 'current trends';
+    return {
+      summary: `${m} markets across the ${region} region remain structurally tight under ${tf}, with supply discipline and steady industrial demand keeping the outlook constructive.`,
+      trends: `Electrification and infrastructure spending continue to anchor ${m} demand. Supply growth is constrained by permitting timelines and grade decline at mature assets, supporting a firm price floor while inventories stay below the five-year average.`,
+      pricingAnalysis: `Prices for ${m} have traded in a defined range, with volatility driven by energy costs, freight, and currency moves. Key upside catalysts: stimulus and supply disruptions; downside risks: demand softening and faster-than-expected new capacity.`,
+      demandForecast: `Demand for ${m} is forecast to grow at a mid-single-digit pace over the relevant horizon, led by energy-transition and manufacturing end-uses, partially offset by substitution and efficiency gains.`,
+      recommendations: `Buyers: secure forward coverage and diversify origin to manage logistics risk. Sellers: lock margins on strength and prioritise certified, traceable supply to capture a quality premium. (Demo insight — configure GEMINI_API_KEY for live AI.)`,
+    };
+  }
 }
 
 const prompt = ai.definePrompt({

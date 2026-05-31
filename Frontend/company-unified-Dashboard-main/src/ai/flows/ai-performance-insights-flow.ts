@@ -37,7 +37,20 @@ export type AiPerformanceInsightsOutput = z.infer<typeof AiPerformanceInsightsOu
 export async function generatePerformanceInsights(
   input: AiPerformanceInsightsInput
 ): Promise<AiPerformanceInsightsOutput> {
-  return aiPerformanceInsightsFlow(input);
+  try {
+    return await aiPerformanceInsightsFlow(input);
+  } catch (e) {
+    // Demo fallback: no GEMINI_API_KEY (or quota) → return a heuristic summary so the
+    // feature is demonstrable without a key. Set GEMINI_API_KEY to flip to live AI.
+    console.warn('[AI] performance-insights fallback (genkit unavailable — set GEMINI_API_KEY for live AI):', (e as Error)?.message);
+    const m = input.currentMetrics;
+    const margin = m && m.revenue ? Math.round((m.profit / m.revenue) * 100) : 0;
+    const health = margin >= 20 ? 'healthy' : margin >= 5 ? 'stable' : 'under pressure';
+    const events = input.notableEvents?.length ? ` Recent activity includes: ${input.notableEvents.slice(0, 3).join('; ')}.` : '';
+    return {
+      summary: `${input.businessName} (${input.country}) is currently ${health}, with revenue of ${input.currency} ${m?.revenue?.toLocaleString?.() ?? m?.revenue} and a profit margin of roughly ${margin}% across ${m?.employees} employees and ${m?.domainsCount} domains. Watch the margin trend and cost base as you scale.${events} (Demo summary — configure GEMINI_API_KEY for live AI analysis.)`,
+    };
+  }
 }
 
 const aiPerformanceInsightsPrompt = ai.definePrompt({
