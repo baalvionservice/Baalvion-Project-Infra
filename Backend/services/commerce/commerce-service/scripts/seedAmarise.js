@@ -16,8 +16,10 @@ const {
 } = db;
 
 const STORE_ID = 'a0a00000-0000-4000-8000-000000000001';
-const ORG_ID = 'a0a00000-0000-4000-8000-0000000000aa';
-const SYSTEM_USER = 1;
+// Owned by the platform organization so the central admin-platform commerce console manages it.
+// Override per environment via AMARISE_ORG_ID / AMARISE_OWNER_ID (default = local super-admin org).
+const ORG_ID = process.env.AMARISE_ORG_ID || '52c76e5c-0668-4492-ba20-23e7ee16f49b';
+const SYSTEM_USER = Number(process.env.AMARISE_OWNER_ID || 67);
 const REGIONS = ['us', 'uk', 'ae', 'in', 'sg', 'ca'];
 
 const slugify = (s) => String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
