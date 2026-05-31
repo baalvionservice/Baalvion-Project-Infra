@@ -1,0 +1,36 @@
+{
+  "name": "rbac-service",
+  "version": "1.0.0",
+  "description": "Baalvion RBAC Core — multi-tenant, hierarchical role service (super_admin > country_admin > organization_admin > end_user). Phase 1 of the RBAC platform (roles + hierarchy + assignment); permission engine and policy engine layer on top without conflict.",
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "migrate": "psql $DATABASE_URL -f migrations/001_rbac_schema.sql",
+    "seed": "node scripts/seed.js"
+  },
+  "dependencies": {
+    "@baalvion/auth-node": "workspace:*",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "pg": "^8.20.0",
+    "pg-hstore": "^2.3.4",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "sequelize": "^6.37.8",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "supertest": "^7.2.2",
+    "vitest": "^2.1.9"
+  }
+}
