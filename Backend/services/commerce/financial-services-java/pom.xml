@@ -65,6 +65,30 @@
     <netty.version>4.1.133.Final</netty.version>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+      <!-- Force BouncyCastle up to 1.84. It is pulled transitively at 1.75 by
+           com.hierynomus:sshj 0.38.0 (the reconciliation/settlement SFTP path) and is not
+           BOM-managed; 1.84 patches CVE-2026-5598 (HIGH: private-key leakage via non-constant-time
+           comparison). The three bc-jdk18on artifacts must stay version-aligned. -->
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcprov-jdk18on</artifactId>
+        <version>1.84</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcpkix-jdk18on</artifactId>
+        <version>1.84</version>
+      </dependency>
+      <dependency>
+        <groupId>org.bouncycastle</groupId>
+        <artifactId>bcutil-jdk18on</artifactId>
+        <version>1.84</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <!-- Spring Boot Starters -->
     <dependency>
