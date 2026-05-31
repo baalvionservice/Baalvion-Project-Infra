@@ -3,16 +3,16 @@
  * Orchestrates the tracking of professional signals to power personalization.
  */
 
-import { getBehaviorMock, saveBehaviorMock } from "@/lib/mock/userBehaviorMock";
+import { getBehavior, saveBehavior } from "@/lib/behaviorStore";
 
 /**
  * Logs a search query to understand user intent.
  */
 export const trackSearch = async (query: string): Promise<void> => {
   if (!query.trim()) return;
-  const data = getBehaviorMock();
+  const data = getBehavior();
   data.searches = [...(data.searches || []), query.toLowerCase()].slice(-20); // Keep last 20
-  saveBehaviorMock(data);
+  saveBehavior(data);
 };
 
 /**
@@ -20,7 +20,7 @@ export const trackSearch = async (query: string): Promise<void> => {
  */
 export const trackViewLawyer = async (lawyer: any): Promise<void> => {
   if (!lawyer || !lawyer.specialization) return;
-  const data = getBehaviorMock();
+  const data = getBehavior();
   
   // Handle both single string and array specializations
   const specs = Array.isArray(lawyer.specialization) 
@@ -28,14 +28,14 @@ export const trackViewLawyer = async (lawyer: any): Promise<void> => {
     : [lawyer.specialization];
 
   data.viewedSpecializations = [...(data.viewedSpecializations || []), ...specs].slice(-50);
-  saveBehaviorMock(data);
+  saveBehavior(data);
 };
 
 /**
  * Extracts a weighted preference profile from historical behavior.
  */
 export const getUserPreferences = (): Record<string, number> => {
-  const data = getBehaviorMock();
+  const data = getBehavior();
   const prefs: Record<string, number> = {};
 
   (data.viewedSpecializations || []).forEach((spec: string) => {
