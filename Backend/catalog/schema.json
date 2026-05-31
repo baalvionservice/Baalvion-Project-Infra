@@ -31,7 +31,7 @@
       "additionalProperties": false,
       "properties": {
         "lifecycle": { "enum": ["production", "beta", "experimental", "deprecated"] },
-        "language": { "enum": ["node", "go", "python", "react"] },
+        "language": { "enum": ["node", "go", "python", "react", "java"] },
         "ingress": { "enum": ["public", "internal"], "description": "Platform API ingress. Exactly one descriptor (the gateway) may be 'public' — enforced by catalog/enforce.mjs C4. Default (omitted) = internal." },
         "datastores": { "type": "array", "items": { "enum": ["postgres", "timescaledb", "clickhouse", "redis", "kafka", "nats", "s3"] } },
         "dependsOn": { "type": "array", "items": { "type": "string" }, "description": "other service names (sync gRPC deps)" },

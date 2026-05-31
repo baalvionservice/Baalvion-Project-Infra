@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/agent.payout.v1.json",
+  "title": "AgentPayout",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "agent.payout" },
+    "payload": {
+      "type": "object",
+      "required": ["agentId", "amount", "payoutRef"],
+      "additionalProperties": true,
+      "properties": {
+        "agentId": { "type": "string" },
+        "orgId": { "type": ["string", "null"] },
+        "amount": { "type": "number" },
+        "count": { "type": "integer" },
+        "payoutRef": { "type": "string" },
+        "period": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

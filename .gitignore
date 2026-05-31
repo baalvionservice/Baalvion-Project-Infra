@@ -103,3 +103,10 @@ make_keys.cjs
 /_echo.js
 /_lawyer_dash*.png
 *.tmp
+
+# ── Local IDE / harness / transient dumps — never commit ──
+.vs/
+.claude/
+.dep-err.txt
+.dependabot-alerts.json
+REPOSITORY_INVENTORY.md

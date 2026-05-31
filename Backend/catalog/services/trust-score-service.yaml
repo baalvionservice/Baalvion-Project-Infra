@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: trust-score-service
+  description: Composite 0-1000 counterparty trust score — a pluggable weighted-factor engine combines KYC verification, payment reliability, dispute rate, trading activity, account tenure and sanctions/compliance into a banded score, keeps the current score per subject plus an append-only history of every recompute (with delta and reason), and emits trustscore.updated for downstream risk/credit/pricing decisions. Part of financial-services-java (port 3046, schema `trust_score`).
+  domain: commerce
+  division: commerce
+  context: trust-score
+  owner: "@baalvion/commerce"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/trust-score-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, kafka]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/trust-scores"]
+  slo: { availability: 0.99, latencyP95Ms: 300 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 8 }

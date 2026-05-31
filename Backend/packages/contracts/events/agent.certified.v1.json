@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/agent.certified.v1.json",
+  "title": "AgentCertified",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "agent.certified" },
+    "payload": {
+      "type": "object",
+      "required": ["agentId", "courseId", "certificateId"],
+      "additionalProperties": true,
+      "properties": {
+        "agentId": { "type": "string" },
+        "courseId": { "type": "string" },
+        "courseTitle": { "type": "string" },
+        "score": { "type": "integer" },
+        "certificateId": { "type": "string" }
+      }
+    }
+  }
+}

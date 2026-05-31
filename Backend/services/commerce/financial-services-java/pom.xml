@@ -32,6 +32,9 @@
     <module>smart-contract-service</module>
     <module>payment-rails-service</module>
     <module>trade-intelligence-service</module>
+    <module>dispute-service</module>
+    <module>aml-service</module>
+    <module>trust-score-service</module>
   </modules>
 
   <parent>

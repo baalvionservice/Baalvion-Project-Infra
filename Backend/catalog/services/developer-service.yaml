@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: developer-service
+  description: Developer Platform — API key issuance/verification (hashed, scoped, live/test), signed webhook subscriptions with retry delivery + event-bus fan-out, an OpenAPI spec catalog, and a test-mode sandbox. Generalizes the proxy's API-key/webhook bits (Cluster 9, port 3042, schema `developer`).
+  domain: infrastructure
+  division: shared-developer-platform
+  context: developer-platform
+  owner: "@baalvion/infrastructure"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/infrastructure/developer-service
+spec:
+  lifecycle: beta
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/keys", "/v1/webhooks", "/v1/specs", "/v1/sandbox"]
+  slo: { availability: 0.995, latencyP95Ms: 300 }
+  deploy: { chart: baalvion-service, namespace: baalvion-infrastructure, minReplicas: 2, maxReplicas: 8 }

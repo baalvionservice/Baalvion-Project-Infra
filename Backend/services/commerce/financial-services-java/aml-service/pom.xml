@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.baalvion</groupId>
+    <artifactId>baalvion-financial-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>aml-service</artifactId>
+  <name>AML Service</name>
+  <description>Anti-money-laundering transaction monitoring: a pluggable rules engine screens
+    transactions (structuring, high-value, velocity, round-amount, high-risk FATF jurisdiction),
+    scores them and raises alerts with a FATF-aligned risk grade, with an investigate → clear /
+    escalate / file-SAR case workflow. Emits aml.alert.raised / aml.case.escalated.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.baalvion</groupId>
+      <artifactId>common-security</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

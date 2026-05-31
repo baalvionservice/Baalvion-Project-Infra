@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/commission.accrued.v1.json",
+  "title": "CommissionAccrued",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "commission.accrued" },
+    "payload": {
+      "type": "object",
+      "required": ["saleId", "agentId", "amount"],
+      "additionalProperties": true,
+      "properties": {
+        "saleId": { "type": "string" },
+        "agentId": { "type": "string" },
+        "orgId": { "type": ["string", "null"] },
+        "amount": { "type": "number" },
+        "commissions": { "type": "integer" },
+        "period": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,11 +1,12 @@
 {
-  "generatedAt": "2026-05-31T16:42:37.197Z",
+  "generatedAt": "2026-05-31T18:53:58.977Z",
   "services": [
     "about-service",
     "abuse-platform",
     "account-service",
     "admin-service",
     "agent-service",
+    "aml-service",
     "analytics-platform",
     "audit-platform",
     "audit-service",
@@ -20,7 +21,9 @@
     "credit-service",
     "ctm-service",
     "dashboard-service",
+    "deal-room-service",
     "developer-service",
+    "dispute-service",
     "elite-circle-service",
     "escrow-service",
     "finance-audit-service",
@@ -44,6 +47,7 @@
     "oauth-service",
     "order-service",
     "organization-platform",
+    "payment-rails-service",
     "payment-service",
     "proxy-gateway",
     "proxy-platform",
@@ -57,10 +61,13 @@
     "search-service",
     "session-service",
     "settlement-service",
+    "smart-contract-service",
     "tenancy",
     "tenant-service",
     "trade-finance-service",
+    "trade-intelligence-service",
     "trade-service",
+    "trust-score-service",
     "wallet-service"
   ],
   "graph": {
@@ -77,6 +84,9 @@
       "identity-platform"
     ],
     "agent-service": [
+      "auth-service"
+    ],
+    "aml-service": [
       "auth-service"
     ],
     "analytics-platform": [],
@@ -111,7 +121,13 @@
     "dashboard-service": [
       "identity-platform"
     ],
+    "deal-room-service": [
+      "auth-service"
+    ],
     "developer-service": [
+      "auth-service"
+    ],
+    "dispute-service": [
       "auth-service"
     ],
     "elite-circle-service": [
@@ -181,6 +197,11 @@
     "organization-platform": [
       "identity-platform"
     ],
+    "payment-rails-service": [
+      "auth-service",
+      "ledger-service",
+      "settlement-service"
+    ],
     "payment-service": [
       "auth-service"
     ],
@@ -221,6 +242,9 @@
     "settlement-service": [
       "auth-service"
     ],
+    "smart-contract-service": [
+      "auth-service"
+    ],
     "tenancy": [],
     "tenant-service": [
       "auth-service"
@@ -230,8 +254,15 @@
       "ledger-service",
       "account-service"
     ],
+    "trade-intelligence-service": [
+      "auth-service",
+      "ml-service"
+    ],
     "trade-service": [
       "identity-platform"
+    ],
+    "trust-score-service": [
+      "auth-service"
     ],
     "wallet-service": [
       "auth-service",

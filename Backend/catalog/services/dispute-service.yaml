@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: dispute-service
+  description: Three-tier trade dispute resolution — Tier 1 AI triage (advisory recommendation), Tier 2 mediation (mediator-proposed settlement), Tier 3 binding arbitration (award), with SLA-driven auto-escalation and a full action timeline. Emits dispute.opened / dispute.escalated / dispute.resolved so escrow/order services can release or claw back funds. Part of financial-services-java (port 3044, schema `dispute`).
+  domain: commerce
+  division: commerce
+  context: dispute
+  owner: "@baalvion/commerce"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/dispute-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, kafka]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/disputes"]
+  slo: { availability: 0.99, latencyP95Ms: 300 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 8 }

@@ -6,8 +6,12 @@ const categoryRoutes = require('./categoryRoutes');
 const productRoutes = require('./productRoutes');
 const collectionRoutes = require('./collectionRoutes');
 const discountRoutes = require('./discountRoutes');
+const storefrontRoutes = require('./storefrontRoutes');
 
 const router = Router();
+
+// Public storefront API (anonymous, read-only, published+public catalog). No authMiddleware.
+router.use('/commerce/storefront/:storeId', storefrontRoutes);
 
 router.use('/commerce/stores', authMiddleware, storeRoutes);
 router.use('/commerce/stores/:storeId/categories', authMiddleware, categoryRoutes);
