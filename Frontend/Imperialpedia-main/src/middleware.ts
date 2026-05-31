@@ -17,6 +17,11 @@ const PROTECTED_PREFIXES = ['/admin', '/creator/dashboard', '/editor', '/writer'
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Per-app admin RETIRED → central admin-platform console (before the auth gate).
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return NextResponse.redirect(new URL(process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL || 'http://localhost:3030/imperialpedia'));
+  }
+
   // 1) Legacy terms URL structure redirect
   if (pathname.startsWith('/terms/') && pathname.split('/').length === 3) {
     const slug = pathname.split('/')[2];

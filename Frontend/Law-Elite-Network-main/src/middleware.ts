@@ -16,6 +16,12 @@ import { NextRequest, NextResponse } from 'next/server';
  * island backend work), an edge presence-gate on that cookie can be reinstated here.
  */
 export async function middleware(request: NextRequest): Promise<NextResponse> {
+  // Per-app admin RETIRED → central admin-platform console.
+  const { pathname } = request.nextUrl;
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return NextResponse.redirect(new URL(process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL || 'http://localhost:3030/law'));
+  }
+
   const response = NextResponse.next();
   response.headers.set('X-Frame-Options', 'SAMEORIGIN');
   response.headers.set('X-Content-Type-Options', 'nosniff');
