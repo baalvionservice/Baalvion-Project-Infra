@@ -135,6 +135,19 @@ export const NAVIGATION: NavGroup[] = [
     ],
   },
   {
+    label: 'Talent',
+    items: [
+      {
+        title: 'Jobs',
+        href: '/jobs',
+        iconName: 'Briefcase',
+        children: [
+          { title: 'Overview', href: '/jobs', iconName: 'LayoutDashboard' },
+        ],
+      },
+    ],
+  },
+  {
     label: 'Operations',
     items: [
       {
