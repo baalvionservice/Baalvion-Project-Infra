@@ -22,7 +22,8 @@ function getSmtp() {
             host:   config.email.smtp.host,
             port:   config.email.smtp.port,
             secure: config.email.smtp.port === 465,
-            auth:   { user: config.email.smtp.user, pass: config.email.smtp.pass },
+            // Auth only when credentials are provided — local/relay SMTP (e.g. Mailpit) needs none.
+            ...(config.email.smtp.user ? { auth: { user: config.email.smtp.user, pass: config.email.smtp.pass } } : {}),
         });
     }
     return _smtpTransport;
