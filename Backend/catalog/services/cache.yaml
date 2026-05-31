@@ -1,0 +1,19 @@
+apiVersion: baalvion.io/v1
+kind: Library
+metadata:
+  name: cache
+  description: Shared Redis cache abstraction — read-through/write-through getOrSet with single-flight stampede protection, consistent TTL profiles (FX 30s), prefix invalidation, tenant-scoped keys, and fail-open behavior. Upstash-compatible.
+  domain: platform
+  division: platform-core
+  context: cache
+  owner: "@baalvion/platform-core"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/packages/cache
+spec:
+  lifecycle: production
+  language: node
+  datastores: [redis]
+  dependsOn: []
+  consumesEvents: []
+  producesEvents: []
