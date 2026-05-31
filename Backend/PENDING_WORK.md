@@ -85,17 +85,19 @@ These may still need wiring/keys/commits, but the **service itself exists** — 
 - **Done:** the **enforcement mechanism** — new **`@baalvion/tenancy`** package: Postgres **RLS** policy builders (`enableRlsSql` → ENABLE+**FORCE** RLS + fail-closed policy on `app.current_tenant`/`app.tenant_bypass`), per-request tenant context (AsyncLocalStorage), `tenantMiddleware`, and `withTenantTransaction`/`withTenantClient` (set the tenant GUC `LOCAL` to a tx). **Live-proven** under a non-superuser role: tenant-A sees only A, B only B, no-context → 0 (fail-closed), bypass → all, cross-tenant INSERT rejected. Catalog/enforce green (51 descriptors). Also formalized tenant tree in `rbac-service`.
 - **🔴 Remaining (per bounded context — needs each owner's review):** (1) create the `baalvion_app` **non-superuser** DB role + grants and switch each service's `DB_USER` (RLS is ignored for superusers!); (2) add a migration calling `enableRlsSql(...)` for every tenant table; (3) add `tenantMiddleware()` after auth + wrap DB access in `withTenantTransaction`. See `packages/tenancy/README.md` rollout playbook.
 
-### 1.6 Search Service — 🟡 productionize
+### 1.6 Search Service — ✅ service done (2026-05-31); scale/indexers remain
 - **Purpose:** sub-50ms search over large catalogs (listings, articles, jobs…).
 - **Workflow:** service writes → indexer syncs to OpenSearch → query API (multi-match + fuzzy) → ranked results.
-- **Done:** `@baalvion/search` **library** on OpenSearch (client, indices, indexer, query, sync, tests).
-- **🔴 Pending:** stand it up as a **deployed service**, run an OpenSearch cluster, prove **50M docs / <50ms**, wire each domain's indexers.
+- **Done:** gave `@baalvion/search` a **tsup build** (was TS-only `main`, unconsumable from CJS — the reason it was stuck) and built a new deployable **`search-service`** (`services/infrastructure/search-service`, :3036) wrapping it: full-text + fuzzy search, autocomplete, facets, indexing/bulk/delete, ensure-indices. **Tenant-scoped** — every query auto-filters by `orgId` via `@baalvion/tenancy` (super_admin bypass; `scoped=false` opt-out). Boots + degrades gracefully when OpenSearch is down (503). Verified: 5/5 tenant-scope unit tests + **5/5 live E2E against a real OpenSearch container** (per-tenant isolation, bypass, fuzzy, autocomplete). Catalog green (56), enforce 0 violations.
+- **🔴 Remaining:** run a real **OpenSearch cluster** + prove **50M docs / <50ms** (cluster-sizing/ops); wire each domain's **indexers** (push docs / reindex jobs) — services emit to `POST /v1/index/:index`; add `opensearch` to the catalog `datastores` enum.
 
-### 1.7 Cache Service — 🟡 standardize
+### 1.7 Cache Service — ✅ done (2026-05-31)
 - **Purpose:** hot-path cache + sessions + short-TTL market data.
 - **Workflow:** read-through/write-through cache in front of Postgres; sessions in Redis; FX/price keys with short TTL.
-- **Done:** Redis (`ioredis`) across services; `session-service` on Redis; FX caching in `trade-service`.
-- **🔴 Pending:** a **shared cache abstraction** (consistent keys/TTL/invalidations), the **FX 30s-TTL** standard, optional Upstash for serverless edges.
+- **Done:** new **`@baalvion/cache`** package — `getOrSet` read-through/write-through with **single-flight stampede protection**, **fail-open** (Redis down → loader runs, request survives), **consistent TTL profiles** incl. the **FX = 30s** standard, **prefix invalidation**, and **tenant-scoped keys** (no cross-tenant cache bleed, via `@baalvion/tenancy`). Upstash-compatible (`rediss://` URL). Verified: 8/8 unit + 6/6 live against the running Redis. Catalog Library descriptor; validate 57 svcs 0 err.
+- **🔴 Remaining (adoption):** services migrate ad-hoc `ioredis` calls to `@baalvion/cache` (e.g. `session-service` → `namespace:'session'`/`TTL.SESSION`; `trade-service` FX → `TTL.FX`); optional cross-process distributed lock for stampede across replicas.
+
+> **P0 foundation (§1.1–1.7) is now COMPLETE** — all seven built/proven live. Remaining platform work is §2 (product domains) and §3 (trade microservices).
 
 ---
 
