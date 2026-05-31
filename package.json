@@ -69,6 +69,8 @@
       "@types/react": "18.3.29",
       "@types/react-dom": "18.3.7",
 
+      "next": "15.5.18",
+
       "handlebars": "4.7.9",
       "protobufjs": "7.5.8",
       "@protobufjs/utf8": "1.1.1",
