@@ -28,6 +28,10 @@
     <module>credit-service</module>
     <module>fx-service</module>
     <module>wallet-service</module>
+    <module>deal-room-service</module>
+    <module>smart-contract-service</module>
+    <module>payment-rails-service</module>
+    <module>trade-intelligence-service</module>
   </modules>
 
   <parent>

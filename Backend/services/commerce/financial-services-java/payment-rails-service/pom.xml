@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.baalvion</groupId>
+    <artifactId>baalvion-financial-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>payment-rails-service</artifactId>
+  <name>Payment Rails Service</name>
+  <description>Multi-rail payment routing and settlement: selects the optimal clearing rail
+    (SWIFT, SEPA / SEPA Instant, ACH, FedWire, UPI, Pix, M-Pesa, SPEI, PayNow, FPS) for an outbound
+    payment by currency/country/amount/urgency, submits via a pluggable rail provider, and tracks
+    settlement — emitting paymentrails.payment.settled for the ledger and settlement services.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.baalvion</groupId>
+      <artifactId>common-security</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

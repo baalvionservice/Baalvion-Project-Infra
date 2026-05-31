@@ -175,5 +175,37 @@ services:
       postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
+  deal-room-service:
+    build: { context: ., args: { SERVICE: deal-room-service } }
+    environment: { <<: *service-env, PORT: "3040" }
+    ports: ["3040:3040"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  smart-contract-service:
+    build: { context: ., args: { SERVICE: smart-contract-service } }
+    environment: { <<: *service-env, PORT: "3041" }
+    ports: ["3041:3041"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  payment-rails-service:
+    build: { context: ., args: { SERVICE: payment-rails-service } }
+    environment: { <<: *service-env, PORT: "3042" }
+    ports: ["3042:3042"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  # Read/compute service (no money movement) — depends on Postgres only, no Kafka.
+  trade-intelligence-service:
+    build: { context: ., args: { SERVICE: trade-intelligence-service } }
+    environment: { <<: *service-env, PORT: "3043" }
+    ports: ["3043:3043"]
+    depends_on:
+      postgres: { condition: service_healthy }
+
 volumes:
   pgdata:
