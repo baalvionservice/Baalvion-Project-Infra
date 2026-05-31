@@ -10,15 +10,21 @@
 name: baalvion-financial
 
 x-service-env: &service-env
-  DB_HOST: postgres
-  DB_PORT: "5432"
-  DB_NAME: baalvion
-  DB_USER: postgres
-  DB_PASSWORD: postgres
-  KAFKA_BROKERS: kafka:9092
+  # Self-contained by default (the `postgres`/`redis` services below). To CONSOLIDATE onto the
+  # platform's shared instance instead, override these to the root docker-compose's baalvion-postgres
+  # and attach this stack to the external `baalvion-net` network (see RUN_LOCAL.md):
+  #   DB_HOST=baalvion-postgres  DB_NAME=baalvion_db  DB_USER=baalvion  DB_PASSWORD=baalvion_dev_pass
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME:-baalvion}
+  DB_USER: ${DB_USER:-postgres}
+  DB_PASSWORD: ${DB_PASSWORD:-postgres}
+  KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
   # Local dev has no IdP — run permissive. In real environments set APP_SECURITY_ENABLED=true
-  # and OAUTH_ISSUER_URI / OAUTH_JWK_SET_URI to point at the platform's RS256 JWKS.
-  APP_SECURITY_ENABLED: "false"
+  # and OAUTH_ISSUER_URI / OAUTH_JWK_SET_URI to point at the platform's RS256 JWKS (auth-service).
+  APP_SECURITY_ENABLED: ${APP_SECURITY_ENABLED:-false}
 
 services:
   postgres:
@@ -27,7 +33,9 @@ services:
       POSTGRES_DB: baalvion
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-    ports: ["5432:5432"]
+    # Host port 5433 (not 5432) so this self-contained DB never fights the platform's
+    # shared baalvion-postgres (root docker-compose, host 5432). Container port stays 5432.
+    ports: ["5433:5432"]
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -57,7 +65,9 @@ services:
 
   redis:
     image: redis:7
-    ports: ["6379:6379"]
+    # Host port 6380 (not 6379) so this self-contained Redis never fights the platform's
+    # shared baalvion-redis (root docker-compose, host 6379). Container port stays 6379.
+    ports: ["6380:6379"]
 
   account-service:
     build: { context: ., args: { SERVICE: account-service } }
@@ -125,8 +135,42 @@ services:
 
   risk-service:
     build: { context: ., args: { SERVICE: risk-service } }
-    environment: { <<: *service-env, PORT: "3025" }
-    ports: ["3025:3025"]
+    environment: { <<: *service-env, PORT: "3035" }
+    ports: ["3035:3035"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  trade-finance-service:
+    build: { context: ., args: { SERVICE: trade-finance-service } }
+    environment: { <<: *service-env, PORT: "3036" }
+    ports: ["3036:3036"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  credit-service:
+    build: { context: ., args: { SERVICE: credit-service } }
+    # Host port remapped 3037→13037 for local dev (a stray node process holds 3037 on this host);
+    # the container still listens on 3037. Override CREDIT_HOST_PORT to change.
+    environment: { <<: *service-env, PORT: "3037" }
+    ports: ["${CREDIT_HOST_PORT:-13037}:3037"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  fx-service:
+    build: { context: ., args: { SERVICE: fx-service } }
+    environment: { <<: *service-env, PORT: "3038" }
+    ports: ["3038:3038"]
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+
+  wallet-service:
+    build: { context: ., args: { SERVICE: wallet-service } }
+    environment: { <<: *service-env, PORT: "3039" }
+    ports: ["3039:3039"]
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_started }

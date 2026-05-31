@@ -1,0 +1,105 @@
+spring:
+  application:
+    name: credit-service
+    version: 1.0.0
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+          fetch_size: 50
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      # Send String params with an unspecified OID so Postgres casts them to the target
+      # column type (notably String fields mapped onto jsonb columns). URL-independent, so it
+      # also applies to the Testcontainers-provided JDBC URL in integration tests.
+      data-source-properties:
+        stringtype: unspecified
+      maximum-pool-size: 20
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 10000
+      max-lifetime: 1800000
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      compression-type: snappy
+    consumer:
+      group-id: credit-service-group
+      auto-offset-reset: earliest
+      max-poll-records: 500
+
+  flyway:
+    enabled: true
+    table: flyway_history_credit
+
+server:
+  port: ${PORT:3037}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    min-response-size: 1024
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.baalvion: DEBUG
+    org.springframework.web: INFO
+
+app:
+  name: Baalvion Credit Service
+  version: 1.0.0
+  description: Invoice finance and trade BNPL for Global Trade Infrastructure
+  outbox:
+    poll-ms: 2000
+    batch-size: 100
+    max-attempts: 10
+  credit:
+    # Invoice finance: default advance fraction of face value (80%) and the maximum we will fund.
+    invoice-default-advance-rate: 0.80
+    invoice-max-advance-rate: 0.90
+    # Annualised discount/finance fee applied pro-rata to the financing tenor.
+    invoice-annual-fee-rate: 0.18
+    # BNPL: annualised finance charge and the late fee applied per overdue installment.
+    bnpl-annual-interest-rate: 0.24
+    bnpl-late-fee-rate: 0.02
+    # Days an installment/invoice may be overdue before it is marked DEFAULTED / written off.
+    default-after-days: 90
+    # Provider seam for an external credit bureau (risk inputs). "internal" uses the built-in
+    # rules engine only; "bureau" augments it with an external score (requires creds).
+    credit-bureau-provider: ${CREDIT_BUREAU_PROVIDER:internal}

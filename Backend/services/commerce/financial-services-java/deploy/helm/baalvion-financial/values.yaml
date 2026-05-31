@@ -57,4 +57,12 @@ services:
   - name: reporting-service
     port: 3024
   - name: risk-service
-    port: 3025
+    port: 3035
+  - name: trade-finance-service
+    port: 3036
+  - name: credit-service
+    port: 3037
+  - name: fx-service
+    port: 3038
+  - name: wallet-service
+    port: 3039

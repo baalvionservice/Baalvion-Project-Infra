@@ -51,8 +51,11 @@ public class KycDocument {
   @Column(length = 100, nullable = false)
   private String contentType;
 
-  /** AES-256-GCM ciphertext of the document bytes. */
-  @Lob
+  /**
+   * AES-256-GCM ciphertext of the document bytes. Mapped to Postgres {@code bytea} (matching the
+   * migration); no {@code @Lob}, which under Hibernate 6 would map {@code byte[]} to a Large Object
+   * ({@code oid}) and fail schema validation against the {@code bytea} column.
+   */
   @Column(name = "ciphertext", nullable = false)
   private byte[] ciphertext;
 

@@ -1,0 +1,106 @@
+spring:
+  application:
+    name: trade-finance-service
+    version: 1.0.0
+
+  jpa:
+    hibernate:
+      # Flyway is the single schema authority; Hibernate neither creates nor validates DDL.
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+          fetch_size: 50
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      # Send String params with an unspecified OID so Postgres casts them to the target
+      # column type (notably String fields mapped onto jsonb columns). URL-independent, so it
+      # also applies to the Testcontainers-provided JDBC URL in integration tests.
+      data-source-properties:
+        stringtype: unspecified
+      maximum-pool-size: 20
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 10000
+      max-lifetime: 1800000
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      compression-type: snappy
+      properties:
+        linger.ms: 10
+        batch.size: 32768
+    consumer:
+      group-id: trade-finance-service-group
+      auto-offset-reset: earliest
+      max-poll-records: 500
+
+  # Per-service Flyway history table — services share one DB, so isolate migration state.
+  flyway:
+    enabled: true
+    table: flyway_history_trade_finance
+
+server:
+  port: ${PORT:3036}
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    min-response-size: 1024
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+      show-components: when-authorized
+      probes:
+        enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.baalvion: DEBUG
+    org.springframework.web: INFO
+
+app:
+  name: Baalvion Trade Finance Service
+  version: 1.0.0
+  description: Letters of Credit (UCP 600) and Bank Guarantees (URDG 758) for Global Trade Infrastructure
+  outbox:
+    poll-ms: 2000
+    batch-size: 100
+    max-attempts: 10
+  trade-finance:
+    # Default issuance commission charged on the instrument face value, in basis points (1.25%).
+    issuance-commission-bps: 125
+    # Default cash-margin / collateral the applicant must block as a fraction of face value (10%).
+    default-margin-rate: 0.10
+    # UCP 600 art. 14(b): banks have a maximum of 5 banking days to examine a presentation.
+    document-examination-days: 5
+    # Provider used for the external issuing-bank / SWIFT MT700/MT760 boundary.
+    # "simulated" (default, self-contained) | "swift" (real MT adapter, requires creds).
+    issuing-bank-provider: ${ISSUING_BANK_PROVIDER:simulated}

@@ -20,7 +20,11 @@ each (`flyway_history_<svc>`).
 | reconciliation-service | 3019 | `reconciliation` | `com.baalvion.reconciliation` | `reconciliation-service-group` |
 | audit-service | 3020 | `audit` | `com.baalvion.audit` | (aggregator + DLT groups) |
 | reporting-service | 3024 | `reporting` | `com.baalvion.reporting` | — |
-| risk-service | 3025 | `risk` | `com.baalvion.risk` | `risk-service-group` |
+| risk-service | 3035 | `risk` | `com.baalvion.risk` | `risk-service-group` |
+| trade-finance-service | 3036 | `trade_finance` | `com.baalvion.tradefinance` | `trade-finance-service-group` |
+| credit-service | 3037 | `credit` | `com.baalvion.credit` | `credit-service-group` |
+| fx-service | 3038 | `fx` | `com.baalvion.fx` | `fx-service-group` |
+| wallet-service | 3039 | `wallet` | `com.baalvion.wallet` | `wallet-service-group` |
 | common-security | _(library)_ | — | `com.baalvion.common.security` | — |
 
 ## Event topology (Kafka)

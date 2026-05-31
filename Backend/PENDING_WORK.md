@@ -10,11 +10,19 @@
 
 **Legend:** ✅ Done (skip) · 🟡 Running / partial (finish it) · 🔴 Pending (build it)
 
+> **Update 2026-05-31:** the **Java finance suite (B1) is now build/test/package-verified** — it was
+> the gate for the whole trade-finance/payments/settlement/wallet/escrow/KYC/AML band. `mvn clean verify`
+> = BUILD SUCCESS, 46 tests, 0 fail/err, 13 jars (built via a Dockerized Maven/JDK17 toolchain; the
+> sandbox has Docker but no local JDK17/Maven). See [`GAP_ANALYSIS.md`](./GAP_ANALYSIS.md) §4,
+> [`TASKS.md`](./TASKS.md) §"Update — 2026-05-31 (b)", and the suite `CHANGELOG.md`. Still genuinely
+> open in this band: **Sanctions Screening (G3, net-new)**, AML FATF-grading depth (G2), FX
+> rate-lock/forwards + live feed (F5), KYC liveness/IDV (needs external provider), Payment Rails (I1).
+
 ## Present stack (actual — this is authoritative; ignore the decks where they differ)
 
 | Concern | We use | Decks said | Note |
 |---|---|---|---|
-| Runtime | **Node.js + Express 5** (services); NestJS (`baalvion-os` kernel); Python FastAPI (`ml-service`); Java/Spring (`financial-services-java`, uncompiled) | NestJS | polyglot by domain |
+| Runtime | **Node.js + Express 5** (services); NestJS (`baalvion-os` kernel); Python FastAPI (`ml-service`); Java/Spring (`financial-services-java`, **build/test-verified 2026-05-31** — `mvn clean verify` green) | NestJS | polyglot by domain |
 | Database | **PostgreSQL**, one schema per service | PostgreSQL (RDS) | ✓ |
 | Cache / sessions | **Redis (ioredis)** | Redis | ✓ |
 | Queue / events | **BullMQ** (Redis) + `@baalvion/events` | Kafka + BullMQ | Kafka not in use |
@@ -192,14 +200,16 @@ Java `financial-services-java` suite (9 services **built but never compiled** �
 ### Cluster 8 — AI & Intelligence (mostly 🔴; `ml-service` is the home)
 - **Credit Scoring** (Trade Score 0–1000), **Demand Forecasting** (90-day), **Supplier Risk** (30-day early warning), **NL Trade Assistant** (Gemini → search/match), **Trade Intelligence API (BTI)** (anonymised data product). `ml-service` exists as the host; the models/pipelines are pending.
 
-### Cluster 9 — Platform & Admin
-| Service | Status | Pending |
+### Cluster 9 — Platform & Admin — ✅ BUILT (2026-05-31, live-verified)
+| Service | Status | Notes |
 |---|---|---|
 | Admin Control | ✅ | (kill-switch/user/fee/moderation in `admin-service` + proxy) |
-| Reporting | 🟡 | builder + PDF/CSV/Excel export (Java `reporting` scaffolded) |
-| Developer Platform | 🟡 | OpenAPI/sandbox/webhooks/SDKs (proxy has API keys + webhooks) — package it |
-| White-Label Tenant | 🟡 | proxy has reseller/white-label (P17); generalize |
-| Agent Management | 🔴 | commission tracker + leaderboard + training |
+| Reporting | ✅ | NEW **`report-service`** (`infrastructure`, :3041, schema `reports`): report builder — parameterized **read-only** queries (single SELECT/WITH, bound params, READ ONLY txn + row cap) rendered to **CSV / Excel(xlsx) / PDF / JSON / HTML**, run history, schedules + event delivery. Smoke 13/13 (xlsx `PK..` + pdf `%PDF-` real binaries). Java `reporting-service` (:3024) stays the finance-specific scaffold. |
+| Developer Platform | ✅ | NEW **`developer-service`** (`infrastructure`, :3042, schema `developer`): **API keys** (issue/verify/rotate/revoke, hashed + constant-time, live/test), **webhooks** (Stripe-style signed delivery + retry worker + `baalvion:events` fan-out), **OpenAPI spec catalog** (public raw serve), **sandbox**. Generalizes the proxy API-key/webhook bits. Smoke 18/18 (signature verified end-to-end). |
+| White-Label Tenant | ✅ | NEW **`tenant-service`** (`platform`, :3043, schema `tenant`): multi-tenant registry, **per-app branding**, custom-domain **DNS-TXT verification**, feature **entitlements/quotas**, public **resolve-by-domain**. Generalizes the proxy white-label config platform-wide. Smoke 13/13. |
+| Agent Management | ✅ | NEW **`agent-service`** (`ecosystem`, :3044, schema `agent`): agents + hierarchy, commission plans (flat/percent/tiered + recurring + **overrides up the chain**), **commission tracker** (accrue→approve→pay + payouts), **leaderboard**, **training/certification**. Smoke 19/19. |
+
+> All four: Node/Express/Sequelize mirroring `audit-service`; RS256 verify-only via `@baalvion/auth-node` (no 2nd issuer); catalog descriptors added + 9 event contracts; `architecture:check` green (61 svcs, 0 violations). Pending: git commit; gateway route wiring; admin-platform console pages.
 
 ---
 
@@ -238,3 +248,36 @@ Java `financial-services-java` suite (9 services **built but never compiled** �
 - **Isolation:** one service = one schema; communicate via gateway/contracts, **never** cross-service DB access.
 - **Governance:** add a `catalog/services/<name>.yaml` descriptor and keep `pnpm run architecture:check` green.
 - **Conventions:** Node + Express + Sequelize, port in the identity/infra range, mirror an existing service's layout.
+
+---
+
+## Reconciliation — 2026-05-31
+
+> Appended by the documentation dependency-chain reconciliation pass. This section
+> does **not** rewrite the backlog above; it records what changed on disk since this
+> file was last written and points to the new chain documents. Companion docs:
+> [`SYSTEM_MAP.md`](./SYSTEM_MAP.md) · [`ARCHITECTURE_FINDINGS.md`](./ARCHITECTURE_FINDINGS.md) ·
+> [`GAP_ANALYSIS.md`](./GAP_ANALYSIS.md) · [`PENDING_WORK_SUMMARY.md`](./PENDING_WORK_SUMMARY.md) ·
+> [`TASKS.md`](./TASKS.md) · [`ROADMAP.md`](./ROADMAP.md) · [`EXECUTION_BACKLOG.md`](./EXECUTION_BACKLOG.md).
+
+### Status drift corrected (disk now ahead of this doc)
+- **Deal Room** — was 🔴 build; now **🟡 Java scaffold** (`financial-services-java/deal-room-service`, uncompiled/unwired).
+- **Smart Contract** — was 🔴 build; now **🟡 Java scaffold** (`financial-services-java/smart-contract-service`, uncompiled/unwired).
+- **Java finance suite** — header still says "9 services"; **15 exist on disk** (added credit, fx, wallet, trade-finance, deal-room, smart-contract). Treat all 15 as 🟡 *scaffolded → compile + wire*.
+- **Logistics (Cluster 6)** — was all 🔴; `trade-service` actually has **real CRUD** for freight/shipment/customs/B-L/CoO. Re-classed 🟡 *(CRUD real; carrier/customs/chamber integrations + AI HS classifier missing)*.
+
+### New structural items found (not previously tracked)
+- ⚠️ **Duplicate `realtime-service`** — exists under both `services/platform/` and `services/infrastructure/`. **Dedupe to `infrastructure/`** (per `ARCHITECTURE.md` §2) and reconcile the single catalog descriptor.
+- 🧹 **Stray `financial-services-java;C`** empty directory (shell artifact) — remove.
+- 🔁 **Uncommitted work** — the foundation packages, the 4 new platform services (report/developer/tenant/agent), and the Java finance suite are all uncommitted; land in reviewed conventional-commit batches.
+- 🔌 **Gateway I1 gap** — REST goes through the gateway but **WebSocket bypasses it**; add unified WS pass-through (tracked with the GraphQL item in §1.2).
+
+### Reconciled status counts (95 tracked items — see `GAP_ANALYSIS.md`)
+| ✅ Completed | 🔵 In Progress | 🟡 Partially Implemented | ⛔ Blocked | 🔴 Missing | 🔭 Future Enhancement |
+|---|---|---|---|---|---|
+| 26 | 7 | 24 | 6 | 28 | 4 |
+
+### Single highest-leverage unblock
+**Compile + run the Java finance suite** (no JDK 17 + Maven here today). Clearing it
+moves ~11 items (F1–F6, I2–I3, E3, and unblocks G1–G3) off the Partially-Implemented/Blocked
+lists. See `EXECUTION_BACKLOG.md` item #1.

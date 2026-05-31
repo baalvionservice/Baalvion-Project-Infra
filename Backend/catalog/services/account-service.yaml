@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: account-service
+  description: Account lifecycle + balances + KYC state machine and encrypted KYC document vault (AES-256-GCM). Part of financial-services-java (port 3016, schema `accounts`).
+  domain: commerce
+  division: commerce
+  context: accounts
+  owner: "@baalvion/commerce"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/account-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, kafka]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/accounts"]
+  slo: { availability: 0.999, latencyP95Ms: 300 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 6 }
