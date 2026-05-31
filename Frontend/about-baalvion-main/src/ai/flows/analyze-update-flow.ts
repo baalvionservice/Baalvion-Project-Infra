@@ -21,7 +21,23 @@ const AnalyzeUpdateOutputSchema = z.object({
 });
 
 export async function analyzeUpdate(input: z.infer<typeof AnalyzeUpdateInputSchema>) {
-  return analyzeUpdateFlow(input);
+  try {
+    return await analyzeUpdateFlow(input);
+  } catch (e) {
+    // Demo fallback: no GEMINI_API_KEY (or quota) → return a heuristic analysis so the
+    // feature is demonstrable without a key. Set GEMINI_API_KEY to flip to live AI.
+    console.warn('[AI] analyze-update fallback (genkit unavailable — set GEMINI_API_KEY for live AI):', (e as Error)?.message);
+    const cat = (input.category || 'general').toLowerCase();
+    const level: 'Low' | 'Medium' | 'High' =
+      /trade|finance|launch|integration|security/.test(cat) ? 'High'
+      : /partner|feature|operation|product/.test(cat) ? 'Medium'
+      : 'Low';
+    return {
+      suggestedImpactLevel: level,
+      suggestedTags: Array.from(new Set([input.category || 'update', 'operations', 'baalvion'])),
+      suggestedUpdateId: 'U' + String(Math.floor(100 + Math.random() * 900)),
+    };
+  }
 }
 
 const analyzeUpdateFlow = ai.defineFlow(

@@ -31,7 +31,23 @@ const ContentIdeasOutputSchema = z.object({
 export type ContentIdeasOutput = z.infer<typeof ContentIdeasOutputSchema>;
 
 export async function generateContentIdeas(input: ContentIdeasInput): Promise<ContentIdeasOutput> {
-  return generateContentIdeasFlow(input);
+  try {
+    return await generateContentIdeasFlow(input);
+  } catch (e) {
+    // Demo fallback: no GEMINI_API_KEY (or quota) → return curated ideas so the feature
+    // is demonstrable without a key. Set GEMINI_API_KEY to flip to live AI.
+    console.warn('[AI] content-ideas fallback (genkit unavailable — set GEMINI_API_KEY for live AI):', (e as Error)?.message);
+    const niche = input.creatorNiche || 'lifestyle';
+    return {
+      ideas: [
+        { title: `${input.campaignTitle}: First Impressions`, format: 'Reel', hook: 'You asked, so I finally tried it…', keyMessage: `Why this is made for the ${niche} audience`, engagementTip: 'Ask viewers to comment their #1 question.' },
+        { title: 'A Day In My Life, Featuring…', format: 'Story Series', hook: 'POV: the upgrade nobody told you about', keyMessage: 'Natural, authentic brand integration', engagementTip: 'Use a poll sticker for instant interaction.' },
+        { title: 'The Honest Review', format: 'Long-form Video', hook: 'I was skeptical. Here is the truth.', keyMessage: 'Build trust through transparency', engagementTip: 'Pin a comment inviting follow-up questions.' },
+        { title: 'Before & After', format: 'Carousel', hook: 'Swipe to see the difference', keyMessage: 'Tangible, visual results', engagementTip: 'End on a "save this for later" prompt.' },
+        { title: `3 Things You Didn't Know About ${niche}`, format: 'Reel', hook: 'Number 2 surprised me', keyMessage: 'Educational value plus brand fit', engagementTip: 'Ask "which one shocked you?" in the caption.' },
+      ],
+    };
+  }
 }
 
 const prompt = ai.definePrompt({

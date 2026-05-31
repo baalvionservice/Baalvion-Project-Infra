@@ -23,7 +23,19 @@ const DraftContentOutputSchema = z.object({
 export type DraftContentOutput = z.infer<typeof DraftContentOutputSchema>;
 
 export async function draftContent(input: DraftContentInput): Promise<DraftContentOutput> {
-  return draftContentFlow(input);
+  try {
+    return await draftContentFlow(input);
+  } catch (e) {
+    // Demo fallback: no GEMINI_API_KEY (or quota) → return a curated draft so the CMS
+    // assistant is demonstrable without a key. Set GEMINI_API_KEY to flip to live AI.
+    console.warn('[AI] draft fallback (genkit unavailable — set GEMINI_API_KEY for live AI):', (e as Error)?.message);
+    const ct = input.contentType || 'page';
+    const kw = input.keywords?.length ? ` Key themes: ${input.keywords.join(', ')}.` : '';
+    const ol = input.outline ? `\n\n${input.outline}` : '';
+    return {
+      draft: `Baalvion Industries is building the global trade infrastructure that connects businesses, finance, compliance, and intelligence systems into a single, trusted network. This ${ct} introduces how our platform turns cross-border complexity into a seamless, secure experience for partners, investors, and enterprises worldwide.${kw}${ol}\n\nFrom integrated payments and risk to real-time market intelligence, every layer is engineered for scale, transparency, and the highest standard of operational excellence. (Demo draft — configure GEMINI_API_KEY for live AI generation.)`,
+    };
+  }
 }
 
 const prompt = ai.definePrompt({

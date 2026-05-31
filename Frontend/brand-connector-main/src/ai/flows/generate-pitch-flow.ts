@@ -25,7 +25,22 @@ const GeneratePitchOutputSchema = z.object({
 export type GeneratePitchOutput = z.infer<typeof GeneratePitchOutputSchema>;
 
 export async function generatePitch(input: GeneratePitchInput): Promise<GeneratePitchOutput> {
-  return generatePitchFlow(input);
+  try {
+    return await generatePitchFlow(input);
+  } catch (e) {
+    // Demo fallback: no GEMINI_API_KEY (or quota) → return a curated pitch so the
+    // feature is demonstrable without a key. Set GEMINI_API_KEY to flip to live AI.
+    console.warn('[AI] pitch fallback (genkit unavailable — set GEMINI_API_KEY for live AI):', (e as Error)?.message);
+    const niche = input.creatorNiche || 'your';
+    return {
+      pitch: `Hi! As a creator focused on ${niche}, I'm genuinely excited about "${input.campaignTitle}". ${input.campaignBrief ? `Your brief — ${input.campaignBrief} — ` : 'Your campaign '}aligns perfectly with my audience, who trust me for authentic ${niche} recommendations. My vision is a story-driven series that frames your brand as the natural centerpiece of a real ${niche} moment, paired with a clear, high-converting call-to-action. I'd love to collaborate and bring a fresh, high-impact creative angle to this partnership.`,
+      suggestedHooks: [
+        `The one ${niche} upgrade I wish I'd made sooner…`,
+        `I tested this for 30 days — here's what actually happened.`,
+        `If you're into ${niche}, stop scrolling for a second.`,
+      ],
+    };
+  }
 }
 
 const prompt = ai.definePrompt({
