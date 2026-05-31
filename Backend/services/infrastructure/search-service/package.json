@@ -1,0 +1,30 @@
+{
+  "name": "search-service",
+  "version": "1.0.0",
+  "description": "Baalvion Search Service — deployable HTTP wrapper over @baalvion/search (OpenSearch): tenant-scoped full-text search, autocomplete, facets, and indexing for every domain.",
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "node --test test/*.test.js",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@baalvion/auth-node": "workspace:*",
+    "@baalvion/search": "workspace:*",
+    "@baalvion/tenancy": "workspace:*",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

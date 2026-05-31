@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: search-service
+  description: Deployable HTTP search service over @baalvion/search (OpenSearch) — tenant-scoped full-text/fuzzy search, autocomplete, facets, and indexing for every domain. Primary store is OpenSearch (not in the datastores enum yet).
+  domain: infrastructure
+  division: platform-core
+  context: search
+  owner: "@baalvion/platform-core"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/infrastructure/search-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: []
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/search", "/v1/index"]
+  slo: { availability: 0.99, latencyP95Ms: 50 }
+  deploy: { chart: baalvion-service, namespace: baalvion-infra, minReplicas: 2, maxReplicas: 12 }
