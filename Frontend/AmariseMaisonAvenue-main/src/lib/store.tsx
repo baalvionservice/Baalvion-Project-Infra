@@ -60,7 +60,6 @@ import {
   AutomationRule,
 } from "./types";
 import {
-  PRODUCTS as INITIAL_PRODUCTS,
   COUNTRIES as INITIAL_COUNTRIES,
   VIP_CLIENTS as INITIAL_VIP_CLIENTS,
   SUPPORT_TICKETS as INITIAL_TICKETS,
@@ -71,12 +70,9 @@ import {
   RETURNS as INITIAL_RETURNS,
   EDITOR_INITIAL,
   BUYING_GUIDES,
-  COLLECTIONS as INITIAL_COLLECTIONS,
   INDEXING_STATUS as INITIAL_INDEXING,
   SUPPORT_STATS as INITIAL_SUPPORT_STATS,
   VENDORS,
-  DEPARTMENTS,
-  CATEGORIES,
   PAYMENT_PLANS,
   SUBSCRIPTIONS,
   FX_RATES,
@@ -285,20 +281,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeBrandId, setActiveBrandId] = useState("amarise-luxe");
   const [isShowcaseMode, setShowcaseMode] = useState(true);
 
-  const [products, setProducts] = useState<Product[]>(
-    INITIAL_PRODUCTS.map(
-      (p) =>
-        ({
-          ...p,
-          isGlobal: true,
-          regions: ["us", "uk", "ae", "in", "sg"],
-          status: "published",
-        } as Product)
-    )
-  );
+  // Catalog state is backend-driven (loaded from commerce-service in the effect below);
+  // initial state is empty — no mock seed.
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const [collections, setCollections] =
-    useState<Collection[]>(INITIAL_COLLECTIONS);
+  const [collections, setCollections] = useState<Collection[]>([]);
   // 'backend' ONLY when real backend products are loaded; 'fallback' = offline mock catalog.
   // Checkout is permitted only when 'backend' (see checkout) — never mix mock products with real orders.
   const [catalogSource, setCatalogSource] =
