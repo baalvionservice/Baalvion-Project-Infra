@@ -1,0 +1,32 @@
+{
+  "name": "audit-service",
+  "version": "1.0.0",
+  "description": "Baalvion Audit Log Service — immutable, append-only, hash-chained audit trail aggregated platform-wide from the event bus + direct writes.",
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "migrate": "psql $DATABASE_URL -f migrations/001_audit_schema.sql",
+    "smoke": "node scripts/smoke.js"
+  },
+  "dependencies": {
+    "@baalvion/auth-node": "workspace:*",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.6.1",
+    "pg": "^8.20.0",
+    "pg-hstore": "^2.3.4",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "sequelize": "^6.37.8",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
