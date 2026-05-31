@@ -1,0 +1,19 @@
+apiVersion: baalvion.io/v1
+kind: Library
+metadata:
+  name: tenancy
+  description: Platform-wide multi-tenant isolation via Postgres RLS — policy builders, per-request tenant context (AsyncLocalStorage), and Sequelize/pg transaction helpers that set the tenant GUC so RLS auto-filters every query.
+  domain: platform
+  division: platform-core
+  context: tenancy
+  owner: "@baalvion/platform-core"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/packages/tenancy
+spec:
+  lifecycle: production
+  language: node
+  datastores: []
+  dependsOn: []
+  consumesEvents: []
+  producesEvents: []

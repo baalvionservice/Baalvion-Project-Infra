@@ -1,0 +1,11 @@
+{
+  "name": "@baalvion/tenancy",
+  "version": "1.0.0",
+  "description": "Platform-wide multi-tenant isolation via Postgres Row-Level Security: RLS policy builders, per-request tenant context, and Sequelize/pg transaction helpers.",
+  "private": true,
+  "main": "index.js",
+  "files": ["index.js", "sql.js", "context.js", "middleware.js", "sequelize.js", "pg.js"],
+  "scripts": {
+    "test": "node --test test.smoke.js"
+  }
+}
