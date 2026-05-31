@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge as UiBadge } from '@/components/ui/badge';
-import { mockBadges }from '@/lib/mock-data';
+import { badges as mockBadges } from '@/lib/badges';
 import type { Badge } from '@/lib/types';
 import { Trophy, ShieldCheck, Rocket, Award, BrainCircuit } from 'lucide-react';
 import { cn } from '@/lib/utils';
