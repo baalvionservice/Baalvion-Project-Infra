@@ -142,6 +142,14 @@ Most domains have a backing service (see §0). Remaining gaps:
 Backed by `trade-service` (Marketplace + RFQ are **real**; the rest is mock) and the
 Java `financial-services-java` suite (9 services **built but never compiled** — Java 1.7, no Maven here). Treat Java pieces as 🟡 "scaffolded, needs compile + wiring."
 
+> **UPDATE 2026-05-31 — 4 NEW Java/Spring-Boot services added to `financial-services-java`** (registered in the parent pom, docker-compose, and catalog; build green, 0 violations; ~109 files, 94 Java, all brace/package-balanced; **not compiled here** — Maven CI compiles, same as the whole suite):
+> - ✅ **`deal-room-service`** (:3040, `deal_room`) — real-time negotiation, counter-offer engine, term-sheet signing, **WebSocket** push, outbox `dealroom.deal.agreed`/`termsheet.executed`.
+> - ✅ **`smart-contract-service`** (:3041, `smart_contract`) — Incoterms 2020 + UCP 600 clause builder, e-signature via pluggable provider (DocuSeal/simulated), outbox `contract.executed`.
+> - ✅ **`payment-rails-service`** (:3042, `payment_rails`) — multi-rail routing engine (SWIFT/SEPA/ACH/FedWire/UPI/Pix/M-Pesa/SPEI/PayNow/FPS) + pluggable rail provider, outbox `payment.settled`.
+> - ✅ **`trade-intelligence-service`** (:3043, `trade_intelligence`) — demand forecasting, supplier-risk early warning, NL assistant, BTI benchmarks; pluggable provider (Python `ml-service`/simulated heuristics).
+>
+> All follow the suite's conventions (per-service schema + Flyway, `TenantContext`/`AuthContext` security, outbox→Kafka, provider seams, standard error envelope). **Remaining:** compile via Maven CI + wire into the gateway/trade-service; the AI service's real ml-service adapter; replace simulated provider seams with live (SWIFT/DocuSeal/Vertex) at deploy time.
+
 ### Cluster 2 — Marketplace Engine
 | Service | Status | Purpose → Workflow | Pending |
 |---|---|---|---|
