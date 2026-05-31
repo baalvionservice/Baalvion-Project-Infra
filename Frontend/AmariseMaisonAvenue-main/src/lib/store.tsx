@@ -8,8 +8,7 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-import { productApi, collectionsApi } from "./api-client";
-import { toProducts, toCollections } from "./product-adapter";
+import { getProducts, getCollections } from "./catalog";
 import {
   Product,
   CountryCode,
@@ -297,29 +296,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [prodRes, collRes] = await Promise.all([
-        productApi.list({ status: "published", pageSize: 100 }),
-        collectionsApi.list(),
+      // Load the storefront catalog from the PUBLIC storefront API (anonymous-friendly) so
+      // catalogSource becomes 'backend' and checkout is enabled for guest shoppers.
+      const [prodPage, colls] = await Promise.all([
+        getProducts({ limit: 100 }),
+        getCollections(),
       ]);
       if (cancelled) return;
-      if (prodRes.ok && prodRes.data.items.length) {
-        setProducts(toProducts(prodRes.data.items));
+      if (prodPage.items.length) {
+        setProducts(prodPage.items as Product[]);
         setCatalogSource("backend");
       } else {
         setCatalogSource("fallback");
-        console.warn(
-          "[store] backend catalog unavailable or empty; offline fallback active (checkout disabled):",
-          prodRes.ok ? "empty result" : prodRes.error.message
-        );
+        console.warn("[store] backend catalog empty; offline fallback active (checkout disabled)");
       }
-      if (collRes.ok) {
-        if (collRes.data.items.length) setCollections(toCollections(collRes.data.items));
-      } else {
-        console.warn(
-          "[store] backend collections unavailable; using offline fallback:",
-          collRes.error.message
-        );
-      }
+      if (colls.length) setCollections(colls as Collection[]);
     })();
     return () => {
       cancelled = true;
