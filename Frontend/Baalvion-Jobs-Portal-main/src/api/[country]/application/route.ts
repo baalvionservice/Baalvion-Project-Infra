@@ -7,10 +7,8 @@ import { Notification } from "@/features/notifications";
 // in-memory mock. POST /applications is a public endpoint on jobs-service.
 const JOBS_URL = process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || "http://localhost:3002/api/v1";
 
-export async function POST(
-    request: NextRequest,
-    { params }: { params: { country: string } }
-) {
+export async function POST(request: NextRequest, props: { params: Promise<{ country: string }> }) {
+    const params = await props.params;
     const countrySlug = params.country;
 
     try {

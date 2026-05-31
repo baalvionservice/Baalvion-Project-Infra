@@ -15,8 +15,8 @@
 const { NodeSDK }                          = require('@opentelemetry/sdk-node');
 const { getNodeAutoInstrumentations }      = require('@opentelemetry/auto-instrumentations-node');
 const { OTLPTraceExporter }               = require('@opentelemetry/exporter-trace-otlp-http');
-const { Resource }                         = require('@opentelemetry/resources');
-const { SEMRESATTRS_SERVICE_NAME }         = require('@opentelemetry/semantic-conventions');
+const { resourceFromAttributes }           = require('@opentelemetry/resources');
+const { ATTR_SERVICE_NAME }                = require('@opentelemetry/semantic-conventions');
 const { trace }                            = require('@opentelemetry/api');
 
 const OTLP_ENDPOINT  = process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318';
@@ -37,8 +37,8 @@ function startTracing() {
     });
 
     sdk = new NodeSDK({
-        resource: new Resource({
-            [SEMRESATTRS_SERVICE_NAME]: SERVICE_NAME,
+        resource: resourceFromAttributes({
+            [ATTR_SERVICE_NAME]: SERVICE_NAME,
         }),
         traceExporter: exporter,
         instrumentations: [

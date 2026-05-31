@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getInvestors, getInvestor, findInvestorBySlug, SITE_URL, REVALIDATE } from "@/lib/api";
+import { getInvestors, getInvestor, findInvestorBySlug, SITE_URL } from "@/lib/api";
 import { investorTitle, investorDesc, usd, sectorSlug, titleCase } from "@/lib/seo";
 import { JsonLd, Avatar, Badge } from "@/components/ui";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300; // seconds — must be a static literal (Next segment config)
 export const dynamicParams = true; // new investors render on-demand, then cache (quick indexing)
 
 export async function generateStaticParams() {
   return (await getInvestors()).map((i) => ({ slug: i.slug }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const base = await findInvestorBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const base = await findInvestorBySlug(slug);
   if (!base) return { title: "Investor not found" };
   return {
     title: investorTitle(base),
@@ -23,8 +24,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function InvestorProfile({ params }: { params: { slug: string } }) {
-  const base = await findInvestorBySlug(params.slug);
+export default async function InvestorProfile({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const base = await findInvestorBySlug(slug);
   if (!base) notFound();
   const i = (await getInvestor(base.id)) || base;
   const investments = i.recent_investments || [];
