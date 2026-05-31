@@ -6,10 +6,12 @@ const logger = require('../utils/logger');
 
 let emailQueue;
 let webhookQueue;
+let smsQueue;
+let pushQueue;
 let notificationQueue;
 
 function getQueues() {
-    if (emailQueue) return { emailQueue, webhookQueue, notificationQueue };
+    if (emailQueue) return { emailQueue, webhookQueue, smsQueue, pushQueue, notificationQueue };
 
     const connection = redis.newConnection();
 
@@ -33,6 +35,26 @@ function getQueues() {
         },
     });
 
+    smsQueue = new Queue(config.queues.sms, {
+        connection,
+        defaultJobOptions: {
+            attempts: config.retry.sms.attempts,
+            backoff:  config.retry.sms.backoff,
+            removeOnComplete: { count: 300, age: 86400 },
+            removeOnFail:     { count: 150, age: 604800 },
+        },
+    });
+
+    pushQueue = new Queue(config.queues.push, {
+        connection,
+        defaultJobOptions: {
+            attempts: config.retry.push.attempts,
+            backoff:  config.retry.push.backoff,
+            removeOnComplete: { count: 500, age: 86400 },
+            removeOnFail:     { count: 200, age: 604800 },
+        },
+    });
+
     notificationQueue = new Queue(config.queues.notification, {
         connection,
         defaultJobOptions: {
@@ -49,7 +71,7 @@ function getQueues() {
         logger.error({ jobId, reason: failedReason }, 'Email job failed');
     });
 
-    return { emailQueue, webhookQueue, notificationQueue };
+    return { emailQueue, webhookQueue, smsQueue, pushQueue, notificationQueue };
 }
 
 module.exports = { getQueues };

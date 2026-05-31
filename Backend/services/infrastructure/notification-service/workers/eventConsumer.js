@@ -10,6 +10,15 @@ const redis  = require('../config/redis');
 const config = require('../config/appConfig');
 const logger = require('../utils/logger');
 const { getQueues } = require('../queue/queues');
+const inappService = require('../service/inappService');
+
+// Best-effort in-app push — never let a realtime failure block the email path or
+// the event ACK (which would otherwise trigger a redelivery).
+async function tryInApp(userId, payload) {
+    if (!userId) return;
+    try { await inappService.sendInApp({ ...payload, userId }); }
+    catch (err) { logger.warn({ err: err.message, userId }, 'in-app fan-out failed (non-fatal)'); }
+}
 
 const {
     stream,
@@ -78,6 +87,11 @@ async function dispatch(eventType, payload) {
                     secureUrl: `${config.appUrl}/settings/security`,
                 },
             });
+            await tryInApp(payload.userId, {
+                type: 'security', title: 'High-risk sign-in detected',
+                body: `A risky sign-in was detected from ${payload.location || payload.ipAddress || 'an unknown location'}.`,
+                data: { sessionId: payload.sessionId, riskScore: payload.riskScore },
+            });
             break;
 
         case 'auth.new_device_login':
@@ -92,6 +106,11 @@ async function dispatch(eventType, payload) {
                     ip:        payload.ipAddress,
                     secureUrl: `${config.appUrl}/settings/security`,
                 },
+            });
+            await tryInApp(payload.userId, {
+                type: 'security', title: 'New device sign-in',
+                body: `New sign-in from ${payload.device || 'a new device'} (${payload.location || 'unknown location'}).`,
+                data: { sessionId: payload.sessionId },
             });
             break;
 
@@ -214,12 +233,15 @@ async function startEventConsumer() {
 
     while (_running) {
         try {
+            // NOTE: NOACK is a no-argument flag — passing `'NOACK', false` sends the
+            // literal "false" to Redis → "ERR syntax error". We use explicit ACK
+            // (xack below), so NOACK is simply omitted.
+            // XREADGROUP syntax is `GROUP <group> <consumer>` — there is NO 'CONSUMER'
+            // keyword; including it made Redis read the consumer as "CONSUMER" and fail.
             const results = await _conn.xreadgroup(
-                'GROUP',    consumerGroup,
-                'CONSUMER', consumerName,
+                'GROUP',    consumerGroup, consumerName,
                 'COUNT',    batchSize,
                 'BLOCK',    blockMs,
-                'NOACK',    false,
                 'STREAMS',  stream,
                 '>',
             );
