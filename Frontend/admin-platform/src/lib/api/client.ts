@@ -175,12 +175,12 @@ const serviceClients = {
   market: makeServiceClient(3007),
   ir: makeServiceClient(3008),
   dashboard: makeServiceClient(3009),
-  about: makeServiceClient(3010),
-  ctm: makeServiceClient(3011),
+  about: makeServiceClient(3020),
+  ctm: makeServiceClient(3017),
   commerce: makeServiceClient(3012),
   orders: makeServiceClient(3013),
   inventory: makeServiceClient(3014),
-  fulfillment: makeServiceClient(3015),
+  law: makeServiceClient(3015, '/v1'), // law-service mounts at /v1 (not /api/v1)
 };
 
 Object.values(serviceClients).forEach((client) => {

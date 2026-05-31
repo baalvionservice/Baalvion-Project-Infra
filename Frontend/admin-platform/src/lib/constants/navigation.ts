@@ -148,6 +148,14 @@ export const NAVIGATION: NavGroup[] = [
     ],
   },
   {
+    label: 'Ecosystem',
+    items: [
+      { title: 'Law Elite',         href: '/law',           iconName: 'Scale'   },
+      { title: 'ControlTheMarket',  href: '/ctm',           iconName: 'Trophy'  },
+      { title: 'Imperialpedia',     href: '/imperialpedia', iconName: 'BookOpen' },
+    ],
+  },
+  {
     label: 'Operations',
     items: [
       {
