@@ -1,5 +1,16 @@
 # ============================================================
 #  Baalvion Platform -- Master Startup Script
+#
+#  ⚠ DEPRECATED for the Limited-Beta commerce vertical.
+#    This script predates the monorepo migration: its service paths
+#    (Backend\auth-service, Backend\commerce-service, ...) are the OLD flat
+#    layout and no longer exist (services moved to Backend\services\<domain>\<svc>),
+#    and it starts services as host pm2/terminal processes rather than containers.
+#
+#    For the reproducible, compose-only beta use:   .\bootstrap.ps1   (or ./bootstrap.sh)
+#    See DEPLOYMENT_GUIDE.md. This script is retained only for the legacy
+#    full-platform host-process dev workflow and is not part of the beta release.
+#
 #  Run from:  d:\Baalvion Projects\
 #  Usage:     .\start.ps1            (backends only)
 #             .\start.ps1 -All       (backends + frontends)

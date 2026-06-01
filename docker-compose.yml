@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
 
   # ── PostgreSQL (shared database for all services) ─────────────────────────
@@ -1354,7 +1352,8 @@ services:
   # ── Financial Services: Ledger (port 3014) ──────────────────────────────
   ledger-service:
     build:
-      context: ./Backend/services/commerce/ledger-service
+      context: .
+      dockerfile: Backend/services/commerce/ledger-service/Dockerfile
     container_name: baalvion-ledger-service
     restart: unless-stopped
     ports:

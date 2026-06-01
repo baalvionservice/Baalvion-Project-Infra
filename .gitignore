@@ -111,6 +111,9 @@ make_keys.cjs
 .dependabot-alerts.json
 REPOSITORY_INVENTORY.md
 
+# Local screenshot dumps + capture scripts (binary/local artifacts — never commit)
+assets/.*
+
 # Database backups (may contain PII / real data — never commit)
 backups/
 *.dump
