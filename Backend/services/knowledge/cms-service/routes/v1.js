@@ -1,11 +1,14 @@
 'use strict';
 const { Router } = require('express');
 const { authMiddleware } = require('../middleware/authMiddleware');
+const internalAuth = require('../middleware/internalAuth');
 const websiteRoutes = require('./websiteRoutes');
 const taxonomyRoutes = require('./taxonomyRoutes');
 const contentRoutes = require('./contentRoutes');
 const mediaRoutes = require('./mediaRoutes');
 const publicRoutes = require('./publicRoutes');
+const integrationRoutes = require('./integrationRoutes');
+const integrationController = require('../controller/integrationController');
 
 const router = Router();
 
@@ -15,14 +18,21 @@ router.get('/health', (req, res) => res.json({ status: 'ok', service: 'cms-servi
 // Public (unauthenticated) content delivery
 router.use('/public', publicRoutes);
 
+// INTERNAL resolver — services fetch a website's live (decrypted) keys here.
+router.get('/internal/integrations/:websiteSlug', internalAuth, integrationController.resolve);
+
+// Org-wide integration summary for the dashboard "Website Connections" widget.
+router.get('/cms/integrations/summary', authMiddleware, integrationController.summary);
+
 // All CMS management APIs require auth
 router.use('/cms/websites', authMiddleware, websiteRoutes);
 
 // Media library (org-scoped, global across the org's websites)
 router.use('/cms/media', authMiddleware, mediaRoutes);
 
-// Website-scoped taxonomy and content routes
+// Website-scoped taxonomy, content, and integration/key routes
 router.use('/cms/websites/:websiteId', authMiddleware, taxonomyRoutes);
 router.use('/cms/websites/:websiteId/content', authMiddleware, contentRoutes);
+router.use('/cms/websites/:websiteId/integrations', authMiddleware, integrationRoutes);
 
 module.exports = router;

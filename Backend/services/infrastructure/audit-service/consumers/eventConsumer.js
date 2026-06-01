@@ -27,7 +27,10 @@ function toAuditEvent(eventType, payload, meta) {
         userAgent:      payload.userAgent ?? null,
         resourceType:   payload.resourceType ?? payload.resource_type ?? null,
         resourceId:     payload.resourceId ?? payload.resource_id ?? null,
-        tenantId:       payload.tenantId ?? null,
+        // Fall back to the stream-level _orgId (tenant) the SDK transport stamps,
+        // consistent with correlationId below — so tenant attribution is populated
+        // even when the domain payload doesn't redundantly carry tenantId.
+        tenantId:       payload.tenantId ?? meta._orgId ?? null,
         outcome, severity,
         sourceService:  payload._source ?? meta._source ?? 'event-bus',
         correlationId:  meta._correlationId ?? payload.traceId ?? null,

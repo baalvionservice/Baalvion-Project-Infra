@@ -1,6 +1,7 @@
 'use strict';
 const { Queue, Worker } = require('bullmq');
 const config = require('../config/appConfig');
+const { logger } = require('../platform/logger');
 
 const connection = {
     host: config.redis.host,
@@ -15,10 +16,10 @@ function startNotificationWorker() {
         const { type, payload } = job.data;
         // Notification delivery is handled by a separate notification service.
         // This worker logs the event; the notification service consumes it.
-        console.log(`[Notifications] CMS event: ${type}`, JSON.stringify(payload));
+        logger('notifications').info({ type, payload }, 'cms notification event');
     }, { connection });
 
-    worker.on('failed', (job, err) => console.error(`[Notifications] Job ${job?.id} failed:`, err.message));
+    worker.on('failed', (job, err) => logger('notifications').error({ jobId: job && job.id, err: err && err.message }, 'notification job failed'));
 }
 
 async function notifyWorkflowTransition({ contentId, websiteId, action, fromState, toState, actorId }) {

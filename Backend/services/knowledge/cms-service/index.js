@@ -9,6 +9,9 @@ const { connectDB, sequelize } = require('./models');
 const v1Router = require('./routes/v1');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const requestContext = require('./middleware/requestContext');
+const traceMiddleware = require('./platform/trace');
+const { bootstrapPlatform } = require('./platform/bootstrap');
+const { logger } = require('./platform/logger');
 const createIpRateLimit = require('./middleware/rateLimit');
 const { startSchedulerWorker } = require('./queues/schedulerQueue');
 const { startNotificationWorker } = require('./queues/notificationQueue');
@@ -30,6 +33,9 @@ app.use('/uploads', express.static(path.resolve(__dirname, 'uploads'), {
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use(requestContext);
+// SDK trace context: binds a traceId (+ tenant) to the request before any route,
+// so all logging / events / outbound HTTP downstream are correlated.
+app.use(traceMiddleware);
 app.use(createIpRateLimit());
 
 app.use('/api/v1', v1Router);
@@ -46,14 +52,19 @@ async function start() {
         // Ensure schema exists (idempotent)
         await sequelize.query(`CREATE SCHEMA IF NOT EXISTS cms;`);
 
+        // Initialise the platform SDK (logging / tracing / events / internal-auth /
+        // resilient HTTP) BEFORE the listener accepts traffic, so the trace
+        // middleware and every handler are SDK-native from the first request.
+        await bootstrapPlatform(app);
+
         startSchedulerWorker();
         startNotificationWorker();
 
         app.listen(config.port, () => {
-            console.log(`[CMS Service] Running on port ${config.port} (${config.env})`);
+            logger('boot').info({ port: config.port, env: config.env }, 'cms-service listening');
         });
     } catch (err) {
-        console.error('[CMS Service] Startup failed:', err.message);
+        logger('boot').error({ err: err && err.message }, 'cms-service startup failed');
         process.exit(1);
     }
 }

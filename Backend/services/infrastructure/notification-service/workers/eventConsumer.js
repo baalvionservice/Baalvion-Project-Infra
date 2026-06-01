@@ -6,34 +6,27 @@
  * Uses XREADGROUP with consumer groups for at-least-once delivery.
  * Pending entries (ACK not received) are reclaimed after 30 s.
  */
-const redis  = require('../config/redis');
 const config = require('../config/appConfig');
 const logger = require('../utils/logger');
 const { getQueues } = require('../queue/queues');
 const inappService = require('../service/inappService');
+const redis  = require('../config/redis');
+const { initSdk, getSdk } = require('../platform/sdk');
+const { NotificationEvents, emit } = require('../platform/events');
 
-// Best-effort in-app push — never let a realtime failure block the email path or
-// the event ACK (which would otherwise trigger a redelivery).
+// Best-effort in-app push — never let a realtime failure block the dispatch path
+// or the event handler (a throw would leave the entry pending for redelivery).
 async function tryInApp(userId, payload) {
     if (!userId) return;
     try { await inappService.sendInApp({ ...payload, userId }); }
     catch (err) { logger.warn({ err: err.message, userId }, 'in-app fan-out failed (non-fatal)'); }
 }
 
-const {
-    stream,
-    consumerGroup,
-    consumerName,
-    batchSize,
-    blockMs,
-} = config.eventBus;
-
-let _running = false;
-let _conn    = null;
+let _subscription = null;
 
 // ── Event → notification handler dispatch ────────────────────────────────────
 
-async function dispatch(eventType, payload) {
+async function dispatch(eventType, payload, meta = {}) {
     const { emailQueue } = getQueues();
 
     switch (eventType) {
@@ -153,9 +146,46 @@ async function dispatch(eventType, payload) {
             });
             break;
 
+        // ── Platform domain events (CMS + commerce/payments) — SDK adoption ──
+        case 'cms.content.published':
+        case 'cms.content.unpublished':
+        case 'cms.integration.updated':
+        case 'cms.integration.removed':
+        case 'cms.member.invited':
+        case 'payment.created':
+        case 'payment.authorized':
+        case 'payment.captured':
+        case 'payment.failed':
+        case 'payment.refunded':
+        case 'payment.ledger.recorded':
+            await handleDomainEvent(eventType, payload, meta);
+            break;
+
         default:
             logger.debug({ eventType }, 'No notification handler for event type');
     }
+}
+
+// Process a platform domain event: fan to the EXISTING in-app channel when a user
+// is targeted (no new templates/features), then emit the notification lifecycle
+// event onto the bus. tenantId + traceId flow from the surrounding sdk.trace scope.
+async function handleDomainEvent(eventType, payload, meta) {
+    const userId = payload.userId ?? meta.userId ?? null;
+    if (userId) {
+        await tryInApp(userId, {
+            type: 'system',
+            title: eventType,
+            body: `Update: ${eventType}`,
+            data: { eventType, tenantId: meta.tenantId ?? null },
+        });
+    }
+    await emit(NotificationEvents.DISPATCHED, {
+        sourceEvent: eventType,
+        tenantId:    meta.tenantId ?? null,
+        channels:    userId ? ['inapp'] : [],
+        delivered:   Boolean(userId),
+    }, { tenantId: meta.tenantId ?? null });
+    logger.info({ eventType, tenantId: meta.tenantId ?? null, delivered: Boolean(userId) }, 'domain event processed');
 }
 
 function formatRiskSignals(signals = []) {
@@ -169,101 +199,59 @@ function formatRiskSignals(signals = []) {
     return signals.map(s => descriptions[s.type] || s.type).join('; ');
 }
 
-// ── Consumer loop ─────────────────────────────────────────────────────────────
-
-async function ensureConsumerGroup(r) {
-    try {
-        // Ensure the stream exists with at least one entry
-        await r.xadd(stream, 'MAXLEN', '~', '10000', '*', '_type', 'init');
-        await r.xgroup('CREATE', stream, consumerGroup, '$', 'MKSTREAM');
-    } catch (err) {
-        // BUSYGROUP = group already exists — that's fine
-        if (!err.message?.includes('BUSYGROUP')) throw err;
-    }
+// ── Idempotency: dedup by event id (mark DONE only after success) ─────────────
+// At-least-once delivery (XREADGROUP + XAUTOCLAIM reclaim) can redeliver; the
+// done-marker makes processing idempotent. BullMQ jobIds dedup the actual sends.
+async function isProcessed(eventId) {
+    if (!eventId) return false;
+    try { const r = redis.getClient(); return r ? (await r.exists(`notif:processed:${eventId}`)) === 1 : false; }
+    catch { return false; }
+}
+async function markProcessed(eventId) {
+    if (!eventId) return;
+    try { const r = redis.getClient(); if (r) await r.set(`notif:processed:${eventId}`, '1', 'EX', 86_400); }
+    catch { /* non-fatal — at worst a duplicate, which BullMQ jobIds absorb */ }
 }
 
-async function reclaimPending(r) {
-    // Reclaim messages pending for > 30 s (e.g. crashed before ACK)
-    try {
-        const pending = await r.xautoclaim(stream, consumerGroup, consumerName, 30_000, '0-0', 'COUNT', 10);
-        if (pending && pending[1]?.length > 0) {
-            logger.info({ count: pending[1].length }, 'Reclaimed pending events');
-            for (const msg of pending[1]) {
-                await processMessage(r, msg);
-            }
-        }
-    } catch (err) {
-        logger.warn({ err }, 'Failed to reclaim pending events');
+// ── SDK event handler: idempotent + trace-scoped ──────────────────────────────
+// Receives an SdkEvent { id, eventType, tenantId, userId, traceId, payload }.
+// On success the entry is ACKed by the SDK transport; a THROW leaves it pending
+// for XAUTOCLAIM redelivery (at-least-once). traceId + tenantId are bound for the
+// whole dispatch via sdk.trace.runWith so logs/emitted events stay correlated.
+async function handle(event) {
+    if (await isProcessed(event.id)) {
+        logger.debug({ eventId: event.id, type: event.eventType }, 'event already processed — skipped (idempotent)');
+        return; // returns cleanly → SDK transport ACKs (removed from PEL)
     }
-}
-
-async function processMessage(r, msg) {
-    const [msgId, fields] = msg;
-    const eventData = {};
-    for (let i = 0; i < fields.length; i += 2) {
-        eventData[fields[i]] = fields[i + 1];
-    }
-
-    const eventType = eventData._type;
-    let payload;
-    try {
-        payload = JSON.parse(eventData._payload || '{}');
-    } catch {
-        payload = {};
-    }
-
-    try {
-        await dispatch(eventType, { ...payload, _correlationId: eventData._correlationId });
-        await r.xack(stream, consumerGroup, msgId);
-    } catch (err) {
-        logger.error({ msgId, eventType, err }, 'Failed to dispatch event — will be reclaimed');
-        // Don't ACK — will be reclaimed after 30s
-    }
-}
-
-async function startEventConsumer() {
-    _conn    = redis.newConnection();
-    _running = true;
-
-    await ensureConsumerGroup(_conn);
-    logger.info({ stream, consumerGroup, consumerName }, 'Event consumer started');
-
-    // Reclaim any pending messages from a previous run
-    await reclaimPending(_conn);
-
-    while (_running) {
-        try {
-            // NOTE: NOACK is a no-argument flag — passing `'NOACK', false` sends the
-            // literal "false" to Redis → "ERR syntax error". We use explicit ACK
-            // (xack below), so NOACK is simply omitted.
-            // XREADGROUP syntax is `GROUP <group> <consumer>` — there is NO 'CONSUMER'
-            // keyword; including it made Redis read the consumer as "CONSUMER" and fail.
-            const results = await _conn.xreadgroup(
-                'GROUP',    consumerGroup, consumerName,
-                'COUNT',    batchSize,
-                'BLOCK',    blockMs,
-                'STREAMS',  stream,
-                '>',
+    await getSdk().trace.runWith(
+        { traceId: event.traceId, tenantId: event.tenantId, userId: event.userId },
+        async () => {
+            await dispatch(
+                event.eventType,
+                { ...(event.payload || {}), _correlationId: event.traceId },
+                { tenantId: event.tenantId, userId: event.userId, traceId: event.traceId },
             );
+        },
+    );
+    await markProcessed(event.id);
+}
 
-            if (!results) continue;
-
-            for (const [, messages] of results) {
-                for (const msg of messages) {
-                    await processMessage(_conn, msg);
-                }
-            }
-        } catch (err) {
-            if (!_running) break;
-            logger.error({ err }, 'Event consumer error — retrying in 5s');
-            await new Promise(r => setTimeout(r, 5_000));
-        }
-    }
+// ── Consumer lifecycle (SDK-native: sdk.events.subscribe) ─────────────────────
+// ONE durable group ('notification-service') with pattern '>' = ALL event types,
+// preserving the prior single-group / all-events delivery semantics. The SDK
+// Redis Streams transport owns XREADGROUP + XAUTOCLAIM PEL reclaim on (re)start.
+async function startEventConsumer() {
+    const sdk = await initSdk();
+    _subscription = await sdk.events.subscribe('>', config.eventBus.consumerGroup, handle);
+    logger.info(
+        { group: config.eventBus.consumerGroup, stream: config.eventBus.stream, transport: 'redis' },
+        'event consumer started (sdk.events.subscribe)',
+    );
+    return _subscription;
 }
 
 async function stopEventConsumer() {
-    _running = false;
-    if (_conn) { _conn.disconnect(); _conn = null; }
+    if (_subscription) { await _subscription.unsubscribe(); _subscription = null; }
 }
 
-module.exports = { startEventConsumer, stopEventConsumer };
+module.exports = { startEventConsumer, stopEventConsumer, dispatch, handle };

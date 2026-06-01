@@ -1,13 +1,14 @@
 'use strict';
 const Redis = require('ioredis');
 const config = require('../config/appConfig');
+const { logger } = require('../platform/logger');
 
 let client = null;
 
 function getClient() {
     if (!client) {
         client = new Redis({ host: config.redis.host, port: config.redis.port, password: config.redis.password || undefined, lazyConnect: true });
-        client.on('error', (err) => console.error('[Cache] Redis error:', err.message));
+        client.on('error', (err) => logger('cache').error({ err: err && err.message }, 'redis error'));
     }
     return client;
 }
@@ -16,7 +17,10 @@ async function get(key) {
     try {
         const val = await getClient().get(key);
         return val ? JSON.parse(val) : null;
-    } catch {
+    } catch (err) {
+        // Fail open (fall through to DB), but make the failure observable — a
+        // silent JSON.parse error here would otherwise hide cache corruption.
+        logger('cache').warn({ key, err: err && err.message }, 'cache get failed');
         return null;
     }
 }

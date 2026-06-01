@@ -1,10 +1,12 @@
 'use strict';
 const { Op } = require('sequelize');
-const { CmsContent, CmsWorkflow, CmsApprovalLog, sequelize } = require('../models');
+const { CmsContent, CmsWorkflow, CmsApprovalLog, CmsWebsite, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const auditService = require('./auditService');
 const revisionService = require('./revisionService');
+const { emitSafe, CmsEvents } = require('../platform/events');
+const { logger } = require('../platform/logger');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 
 // Valid state transitions: action → { from, to, requiredLevel }
@@ -38,7 +40,7 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
 
     if (def.requiresScheduledAt && !scheduledAt) throw new AppError('VALIDATION_ERROR', 'scheduledAt is required for schedule action', 400);
 
-    return sequelize.transaction(async (t) => {
+    const result = await sequelize.transaction(async (t) => {
         const workflow = await CmsWorkflow.findOne({ where: { contentId }, transaction: t, lock: t.LOCK.UPDATE });
         if (!workflow) throw new AppError('NOT_FOUND', 'Workflow not found for this content', 404);
 
@@ -85,6 +87,33 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
 
         return { workflow: workflow.toJSON(), content: content.toJSON() };
     });
+
+    // Post-commit domain events. Fully fire-and-forget (the slug lookup included),
+    // so neither the lookup nor the publish adds latency to the transition response,
+    // and a failure here can never affect the committed state machine.
+    if (action === 'publish' || action === 'unpublish' || action === 'archive') {
+        const eventType = action === 'publish' ? CmsEvents.CONTENT_PUBLISHED : CmsEvents.CONTENT_UNPUBLISHED;
+        const content = result.content;
+        void (async () => {
+            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug'] });
+            const websiteSlug = website ? website.slug : null;
+            emitSafe(eventType, {
+                websiteId,
+                websiteSlug,
+                contentId,
+                slug: content.slug,
+                contentType: content.contentType ?? null,
+                state: result.workflow.currentState,
+                action,
+            }, { tenantId: websiteSlug });
+        })().catch((err) => {
+            // Event emission must never affect the request, but a dropped event
+            // (e.g. the slug lookup hit a DB error) should still be observable.
+            try { logger('workflow').warn({ err: err && err.message, contentId, action }, 'post-commit event emission failed'); } catch { /* logging must never throw */ }
+        });
+    }
+
+    return result;
 }
 
 async function getWorkflow(websiteId, contentId) {

@@ -6,6 +6,7 @@ const crypto = require('crypto');
 const { createAuthMiddleware } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
 const { AppError } = require('../utils/errors');
+const { tryGetSdk } = require('../platform/sdk');
 
 let _publicKey = null;
 function getPublicKey() {
@@ -32,21 +33,24 @@ const authMiddleware = (req, res, next) =>
     _canonical(req, res, (err) =>
         err ? next(new AppError((err.code || 'unauthorized').toUpperCase(), err.message, err.status || 401)) : next());
 
-// HMAC service-to-service auth (unchanged)
+// Service-to-service auth — standardized on sdk.internalAuth (the platform's One
+// internal-auth scheme; timing-safe). Verification logic lives in the SDK; this
+// thin adapter maps the result onto the service AppError envelope (preserves 401).
+// The direct-equality fallback covers the (practically unreachable) pre-init window.
 function internalAuth(req, _res, next) {
-    if (!config.internalSecret) {
-        if (process.env.NODE_ENV !== 'production') return next();
-        return next(new AppError('CONFIGURATION_ERROR', 'Internal secret not set', 500));
-    }
-    const sig = req.headers['x-service-signature'];
-    const ts  = req.headers['x-service-timestamp'];
-    if (!sig || !ts) return next(new AppError('UNAUTHORIZED', 'Missing service auth', 401));
-    if (Date.now() - parseInt(ts, 10) > 30_000) return next(new AppError('UNAUTHORIZED', 'Timestamp expired', 401));
-    const expected = crypto.createHmac('sha256', config.internalSecret).update(`${ts}:${req.method}:${req.path}`).digest('hex');
-    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) {
-        return next(new AppError('UNAUTHORIZED', 'Invalid service signature', 401));
-    }
+    const sdk = tryGetSdk();
+    const ok = sdk
+        ? sdk.internalAuth.verify(req.headers)
+        : timingSafeEqual(req.headers['x-internal-secret'], config.internalSecret);
+    if (!ok) return next(new AppError('UNAUTHORIZED', 'Invalid or missing internal service credentials', 401));
     next();
+}
+
+function timingSafeEqual(provided, expected) {
+    if (!provided || !expected) return false;
+    const a = Buffer.from(provided);
+    const b = Buffer.from(expected);
+    return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
 module.exports = { authMiddleware, internalAuth };

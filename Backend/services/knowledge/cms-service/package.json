@@ -10,10 +10,13 @@
     "migrate:undo": "sequelize-cli db:migrate:undo",
     "migrate:undo:all": "sequelize-cli db:migrate:undo:all",
     "seed": "sequelize-cli db:seed:all",
-    "seed:undo": "sequelize-cli db:seed:undo:all"
+    "seed:undo": "sequelize-cli db:seed:undo:all",
+    "build:ts": "tsc -p tsconfig.json",
+    "type-check": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@baalvion/auth-node": "workspace:*",
+    "@baalvion/sdk": "workspace:*",
     "bullmq": "^5.52.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -30,6 +33,10 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.14",
-    "sequelize-cli": "^6.6.2"
+    "sequelize-cli": "^6.6.2",
+    "typescript": "^5.7.2",
+    "tsx": "^4.19.2",
+    "@types/node": "^22.10.0",
+    "@types/express": "^5.0.0"
   }
 }

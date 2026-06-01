@@ -1,6 +1,8 @@
 'use strict';
 const { Queue, Worker } = require('bullmq');
 const config = require('../config/appConfig');
+const { logger } = require('../platform/logger');
+const { emitSafe, CmsEvents } = require('../platform/events');
 
 const connection = {
     host: config.redis.host,
@@ -16,7 +18,7 @@ let worker = null;
 function startSchedulerWorker() {
     worker = new Worker('cms-scheduler', async (job) => {
         // Lazy-require to avoid circular dependencies at module load time
-        const { CmsContent, CmsWorkflow } = require('../models');
+        const { CmsContent, CmsWorkflow, CmsWebsite } = require('../models');
         const cache = require('./cacheService');
         const auditService = require('./auditService');
 
@@ -40,11 +42,21 @@ function startSchedulerWorker() {
             notes: 'Auto-published by scheduler',
         });
 
-        console.log(`[Scheduler] Published content ${contentId}`);
+        // Domain event: same cms.content.published the manual publish path emits,
+        // so analytics / cache-bust consumers react identically to scheduled posts.
+        const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug'] });
+        const websiteSlug = website ? website.slug : null;
+        emitSafe(CmsEvents.CONTENT_PUBLISHED, {
+            websiteId, websiteSlug, contentId,
+            slug: content.slug, contentType: content.contentType ?? null,
+            trigger: 'scheduler',
+        }, { tenantId: websiteSlug });
+
+        logger('scheduler').info({ contentId, websiteSlug }, 'auto-published scheduled content');
     }, { connection });
 
-    worker.on('failed', (job, err) => console.error(`[Scheduler] Job ${job?.id} failed:`, err.message));
-    worker.on('completed', (job) => console.log(`[Scheduler] Job ${job.id} completed`));
+    worker.on('failed', (job, err) => logger('scheduler').error({ jobId: job && job.id, err: err && err.message }, 'scheduler job failed'));
+    worker.on('completed', (job) => logger('scheduler').debug({ jobId: job.id }, 'scheduler job completed'));
 }
 
 async function scheduleContentPublish(contentId, websiteId, scheduledAt) {

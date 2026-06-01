@@ -6,9 +6,12 @@ const parseList = (value, fallback = []) => {
     return value.split(',').map(s => s.trim()).filter(Boolean);
 };
 
+const port = Number(process.env.PORT || 3018);
+
 module.exports = {
     env: process.env.NODE_ENV || 'development',
-    port: Number(process.env.PORT || 3011),
+    version: process.env.SERVICE_VERSION || '1.0.0',
+    port,
     apiVersion: 'v1',
     corsOrigins: parseList(process.env.CORS_ORIGINS, [
         'http://localhost:3000',
@@ -48,4 +51,27 @@ module.exports = {
     notifications: {
         serviceUrl: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3013',
     },
+    // ── @baalvion/sdk / platform wiring (INFRA config only — never secrets) ──
+    // The shared service-to-service secret + event transport + log level the SDK
+    // standardizes. CMS holds tenant secrets in its OWN encrypted vault (the
+    // integrations store); it never reads provider keys from env here.
+    internalSecret: process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret',
+    // Self-referential CMS hub base. Used only if CMS ever resolves ANOTHER
+    // tenant's cross-service config through sdk.config — never for its own reads.
+    selfCmsApiBaseUrl: process.env.CMS_BASE_URL || `http://localhost:${port}/api/v1`,
+    eventTransport: process.env.EVENT_TRANSPORT || 'noop',
+    logLevel: process.env.LOG_LEVEL || 'info',
 };
+
+// Fail fast in non-development if the internal service secret — which guards the
+// decrypted-keys resolver (GET /internal/integrations/:slug) — was left at the
+// insecure development default. Prevents a misconfigured staging/prod from
+// exposing the secret vault to anyone who knows the well-known dev string.
+if (
+    module.exports.env !== 'development' &&
+    (!process.env.INTERNAL_SERVICE_SECRET || module.exports.internalSecret === 'baalvion-internal-dev-secret')
+) {
+    throw new Error(
+        '[cms-service] INTERNAL_SERVICE_SECRET must be set in non-development environments — refusing to start with the dev default',
+    );
+}

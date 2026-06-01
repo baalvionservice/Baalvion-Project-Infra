@@ -1,5 +1,6 @@
 'use strict';
 const { CmsApprovalLog } = require('../models');
+const { logger } = require('../platform/logger');
 
 async function logWorkflowAction({ workflowId, contentId, actorId, action, fromState, toState, notes = null, metadata = {} }, transaction = null) {
     // When called from inside a workflow transaction, pass that transaction. The
@@ -9,7 +10,7 @@ async function logWorkflowAction({ workflowId, contentId, actorId, action, fromS
     try {
         await CmsApprovalLog.create({ workflowId, contentId, actorId, action, fromState, toState, notes, metadata }, { transaction });
     } catch (err) {
-        console.error('[Audit] Failed to write approval log:', err.message);
+        logger('audit').error({ err: err && err.message, contentId, action }, 'failed to write approval log');
     }
 }
 

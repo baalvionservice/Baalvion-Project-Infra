@@ -181,7 +181,21 @@ export type AuditAction =
   | 'admin.impersonation_ended'
   | 'flag.created'
   | 'flag.updated'
-  | 'flag.deleted';
+  | 'flag.deleted'
+  // ── CMS / Knowledge ──
+  | 'cms.content.published'
+  | 'cms.content.unpublished'
+  | 'cms.integration.updated'
+  | 'cms.integration.removed'
+  | 'cms.member.invited'
+  // ── Payments / Commerce ──
+  | 'payment.intent.created'
+  | 'payment.captured'
+  | 'payment.failed'
+  | 'payment.refunded'
+  | 'commerce.store.role_assigned'
+  // ── Notifications ──
+  | 'notification.dispatched';
 
 export interface AuditEntry {
   id:           string;
@@ -214,6 +228,48 @@ export interface FlagTargeting {
   userIds?:    string[];
   orgIds?:     string[];
   attributes?: Record<string, string | string[]>;
+}
+
+// ─── Integrations & Keys (CMS vault contracts) ────────────────────────────────
+// The CMS is the platform's SOLE secret vault. These contracts describe a tenant's
+// external-provider integrations. The console/management shape exposes masked
+// hints only; the *resolved* shape (internal resolver / sdk.config) adds decrypted
+// secrets and is NEVER returned to a browser. AES encryption lives only in the CMS.
+
+export type IntegrationCategory = 'api' | 'payment' | 'sms' | 'ai' | 'webhook' | 'other';
+export type IntegrationStatus   = 'configured' | 'unconfigured' | 'error';
+
+/** Management/console view of an integration — masked, no plaintext secrets. */
+export interface IntegrationDefinition {
+  provider:    string;                          // 'razorpay' | 'stripe' | 'twilio' | 'gemini' | …
+  category:    IntegrationCategory;
+  label:       string;
+  enabled:     boolean;
+  status:      IntegrationStatus;
+  config:      Record<string, string>;          // non-secret config (baseUrl, mode, publishableKey…)
+  secretHints: Record<string, string | null>;   // masked (••••1234)
+  updatedAt?:  string;
+}
+
+/** Internal-resolver view (sdk.config) — includes DECRYPTED secret values. */
+export interface ResolvedIntegration {
+  provider: string;
+  category: IntegrationCategory;
+  enabled:  boolean;
+  status:   IntegrationStatus;
+  config:   Record<string, string>;
+  secrets:  Record<string, string>;             // plaintext — service-to-service only
+}
+
+// ─── Tenancy ──────────────────────────────────────────────────────────────────
+// Platform invariant: a tenant == an organisation == a CMS website. The canonical
+// tenant key across config, events, and audit is the website **slug**.
+
+export interface TenantRef {
+  /** Canonical tenant key — the CMS website slug (e.g. "baalvion-mining"). */
+  tenantSlug: string;
+  /** The owning organisation id (UUID), when known. */
+  orgId?:     string | null;
 }
 
 // ─── Platform Events ──────────────────────────────────────────────────────────
@@ -254,7 +310,22 @@ export type EventType =
   | 'billing.payment.succeeded'
   | 'billing.payment.failed'
   | 'provider.health.changed'
-  | 'abuse.action.triggered';
+  | 'abuse.action.triggered'
+  // ── Knowledge / CMS domain (SDK adoption — Phase 2) ──
+  | 'cms.content.published'
+  | 'cms.content.unpublished'
+  | 'cms.integration.updated'
+  | 'cms.integration.removed'
+  | 'cms.member.invited'
+  // ── Commerce / Payments domain (gateway checkout — Phase 3) ──
+  | 'payment.created'
+  | 'payment.authorized'
+  | 'payment.captured'
+  | 'payment.failed'
+  | 'payment.refunded'
+  | 'payment.ledger.recorded'
+  // ── Notifications ──
+  | 'notification.dispatched';
 
 // ─── Pagination & Responses ───────────────────────────────────────────────────
 

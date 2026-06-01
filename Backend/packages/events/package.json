@@ -25,11 +25,13 @@
   },
   "peerDependencies": {
     "nats":    "^2.28.0",
-    "kafkajs": "^2.2.4"
+    "kafkajs": "^2.2.4",
+    "ioredis": "^5.10.1"
   },
   "peerDependenciesMeta": {
     "nats":    { "optional": true },
-    "kafkajs": { "optional": true }
+    "kafkajs": { "optional": true },
+    "ioredis": { "optional": true }
   },
   "devDependencies": {
     "tsup":       "^8.3.0",

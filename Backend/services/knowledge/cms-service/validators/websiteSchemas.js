@@ -45,10 +45,16 @@ const updateWebsiteSchema = z.object({
 
 const cmsRoleEnum = z.enum(['cms_admin', 'cms_editor', 'cms_author', 'cms_contributor', 'cms_reviewer', 'cms_publisher', 'cms_seo_manager', 'cms_viewer']);
 
-const addMemberSchema = z.object({
-    userId: z.number().int().positive(),
-    role: cmsRoleEnum.default('cms_author'),
-});
+const addMemberSchema = z
+    .object({
+        userId: z.number().int().positive().optional(),
+        email: z.string().email().optional(),
+        role: cmsRoleEnum.default('cms_author'),
+    })
+    .refine((d) => d.userId != null || (d.email != null && d.email !== ''), {
+        message: 'Provide an email (or userId) of the person to invite',
+        path: ['email'],
+    });
 
 const updateMemberRoleSchema = z.object({
     role: cmsRoleEnum,

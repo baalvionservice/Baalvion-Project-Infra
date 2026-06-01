@@ -1,6 +1,7 @@
 'use strict';
 const { Sequelize, DataTypes } = require('sequelize');
 const config = require('../config/appConfig');
+const { logger } = require('../platform/logger');
 
 const sequelize = new Sequelize(
     config.db.name,
@@ -10,7 +11,7 @@ const sequelize = new Sequelize(
         host: config.db.host,
         port: config.db.port,
         dialect: 'postgres',
-        logging: config.env === 'development' ? (sql) => console.log('[CMS SQL]', sql) : false,
+        logging: config.env === 'development' ? (sql) => logger('sql').debug({ sql }, 'query') : false,
         define: { underscored: true, timestamps: true },
     }
 );
@@ -25,6 +26,7 @@ db.CmsContentRevision = require('./cmsContentRevision')(sequelize, DataTypes);
 db.CmsWorkflow        = require('./cmsWorkflow')(sequelize, DataTypes);
 db.CmsApprovalLog     = require('./cmsApprovalLog')(sequelize, DataTypes);
 db.CmsWebsiteMember   = require('./cmsWebsiteMember')(sequelize, DataTypes);
+db.CmsWebsiteIntegration = require('./cmsWebsiteIntegration')(sequelize, DataTypes);
 db.CmsMediaReference  = require('./cmsMediaReference')(sequelize, DataTypes);
 db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
 
@@ -67,7 +69,7 @@ db.Op = Sequelize.Op;
 
 db.connectDB = async () => {
     await sequelize.authenticate();
-    console.log('[CMS] Database connection established');
+    logger('db').info({ host: config.db.host, name: config.db.name, schema: config.db.schema }, 'database connection established');
 };
 
 module.exports = db;

@@ -8,6 +8,8 @@ const config     = require('./config/appConfig');
 const redis      = require('./config/redis');
 const logger     = require('./utils/logger');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
+const { initSdk } = require('./platform/sdk');
+const traceMiddleware = require('./platform/trace');
 const { startEmailWorker }   = require('./workers/emailWorker');
 const { startWebhookWorker } = require('./workers/webhookWorker');
 const { startSmsWorker }     = require('./workers/smsWorker');
@@ -23,6 +25,8 @@ app.use(express.json({ limit: '512kb' }));
 app.use(express.urlencoded({ extended: false }));
 
 app.use((req, _res, next) => { req.requestId = crypto.randomUUID(); next(); });
+// SDK trace context for the HTTP layer (correlates logs during request handling).
+app.use(traceMiddleware);
 
 app.get('/health', async (_req, res) => {
     const { getQueues } = require('./queue/queues');
@@ -54,6 +58,10 @@ app.use(errorHandler);
 
 async function start() {
     await redis.connect();
+
+    // Initialise the platform SDK (events/logging/tracing/internal-auth) BEFORE the
+    // event consumer subscribes and before the HTTP listener accepts traffic.
+    await initSdk();
 
     // Start BullMQ workers in-process
     startEmailWorker();
