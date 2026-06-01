@@ -4,9 +4,10 @@
  * Drives the LIVE order-service (:3013) which now consults the LIVE rbac-service (:3055) PDP.
  */
 const { mintToken, STORE, http } = require('./mint.cjs');
-const PORT = Number(process.env.OS_PORT) || 3113;
-const PRODUCT = 'ec572c4a-4745-4679-8edd-493ee557a2c5';
-const CUSTOMER = 'c0000000-0000-4000-8000-000000000001'; // owned by user 9000001
+const fx = require('./fixtures.cjs');
+const PORT = Number(process.env.OS_PORT) || 3013;
+const PRODUCT = fx.product;
+const CUSTOMER = fx.customer; // owned by user 9000001
 const api = (m, p, tok, body) => http(m, `/api/v1${p}`, tok, body, PORT);
 const short = (o) => JSON.stringify(o).slice(0, 240);
 

@@ -7,46 +7,18 @@
  * Flow: createOrder -> payment intent -> confirm -> verify PAID  [-> refund if --refund]
  * Evidence: prints HTTP status + body for every step. No fabrication.
  */
-const crypto = require('crypto');
-const fs = require('fs');
 const http = require('http');
-const path = require('path');
-
-const ROOT = 'd:/Baalvion Projects';
-const PRIV = fs.readFileSync(path.join(ROOT, 'docker/secrets/jwt_private_key.pem'), 'utf8');
+const { mintToken: portableMint } = require('../Backend/scripts/mint-token.cjs');
+const fx = require('./fixtures.cjs');
 
 const HOST = '127.0.0.1';
-const PORT = 3013;
-const STORE = 'a0a00000-0000-4000-8000-000000000001';
-const PRODUCT = 'ec572c4a-4745-4679-8edd-493ee557a2c5';
-const CUSTOMER = 'c0000000-0000-4000-8000-000000000001';
-const CUSTOMER_USER_ID = '9000001';
+const PORT = Number(process.env.OS_PORT) || 3013;
+const STORE = fx.store;
+const PRODUCT = fx.product;
+const CUSTOMER = fx.customer;
+const CUSTOMER_USER_ID = fx.customerUserId;
 
-// ── key pairing sanity check (private key must pair with order-service's configured public key) ──
-function envVal(file, key) {
-  const line = fs.readFileSync(file, 'utf8').split(/\r?\n/).find((l) => l.startsWith(key + '='));
-  return line ? line.slice(key.length + 1).trim() : null;
-}
-function modOf(pem) { try { return crypto.createPublicKey(pem).export({ format: 'jwk' }).n; } catch { return null; } }
-const osPub = (envVal(path.join(ROOT, 'Backend/services/commerce/order-service/.env'), 'JWT_PUBLIC_KEY') || '').replace(/\\n/g, '\n');
-const derivedPub = crypto.createPublicKey(PRIV).export({ type: 'spki', format: 'pem' });
-console.log('[keycheck] order-service public key pairs with private key:', !!osPub && modOf(osPub) === modOf(derivedPub));
-
-const b64url = (buf) => Buffer.from(buf).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-function mintToken({ sub, roles }) {
-  const now = Math.floor(Date.now() / 1000);
-  const header = { alg: 'RS256', typ: 'JWT', kid: 'baalvion-key-1' };
-  const payload = {
-    sub: String(sub), email: `user${sub}@baalvion.test`,
-    org_id: STORE, sid: 'sess-' + crypto.randomUUID(),
-    roles, role: roles[0] || null, permissions: [],
-    jti: crypto.randomUUID(), iss: 'baalvion-auth', aud: 'baalvion-platform',
-    iat: now, exp: now + 3600,
-  };
-  const input = b64url(JSON.stringify(header)) + '.' + b64url(JSON.stringify(payload));
-  const sig = crypto.sign('RSA-SHA256', Buffer.from(input), PRIV);
-  return input + '.' + b64url(sig);
-}
+const mintToken = ({ sub, roles }) => portableMint({ sub, roles, org: STORE });
 
 function call(method, urlPath, token, body) {
   return new Promise((resolve) => {

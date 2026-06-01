@@ -8,7 +8,9 @@
  * cross-tenant refund IDOR.
  */
 const http = require('http');
-const razorpay = require('d:/Baalvion Projects/Backend/services/commerce/payment-service/gateway/adapters/razorpay');
+const path = require('path');
+const fx = require('./fixtures.cjs');
+const razorpay = require(path.join(__dirname, '..', 'Backend', 'services', 'commerce', 'payment-service', 'gateway', 'adapters', 'razorpay'));
 
 const PORT = Number(process.env.PAY_PORT) || 3019;
 const SECRET = process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret';
@@ -28,7 +30,7 @@ const internal = (extra = {}) => ({ 'x-internal-secret': SECRET, ...extra });
 const pass = (c) => (c ? 'PASS ✅' : 'FAIL ❌');
 
 (async () => {
-  const site = 'baalvion-mining', amount = 50000, currency = 'INR', webhookSecret = 'rzp_whsec_mining_e2e';
+  const site = fx.paymentSite, amount = 50000, currency = 'INR', webhookSecret = fx.paymentWebhookSecret;
   const idem = `refund-e2e-${RUN}`;
   console.log(`=== gateway payment E2E: ${site} (razorpay, mock mode) ===`);
 
@@ -62,7 +64,7 @@ const pass = (c) => (c ? 'PASS ✅' : 'FAIL ❌');
   const rf2 = await send({ method: 'POST', path: `/v1/gateway/payments/${paymentId}/refund?site=${site}`, headers: internal(), json: { reason: 'again' } });
   console.log('  [6] second refund (idempotent) ->', rf2.status, '| alreadyRefunded=', rf2.data?.data?.alreadyRefunded, pass(rf2.status === 200 && (rf2.data?.data?.alreadyRefunded || rf2.data?.data?.duplicate)));
 
-  const idor = await send({ method: 'POST', path: `/v1/gateway/payments/${paymentId}/refund?site=baalvionstack-shop`, headers: internal(), json: {} });
+  const idor = await send({ method: 'POST', path: `/v1/gateway/payments/${paymentId}/refund?site=${fx.crossTenantSite}`, headers: internal(), json: {} });
   console.log('  [7] cross-tenant refund (wrong site) ->', idor.status, pass(idor.status === 404));
 
   console.log('\n=== DONE ===');

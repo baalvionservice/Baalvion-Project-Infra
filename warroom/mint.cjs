@@ -1,22 +1,17 @@
 'use strict';
-// Shared RS256 token minter for war-room live tests (signs with the platform private key).
-const crypto = require('crypto');
-const fs = require('fs');
-const PRIV = fs.readFileSync('d:/Baalvion Projects/docker/secrets/jwt_private_key.pem', 'utf8');
-const STORE = 'a0a00000-0000-4000-8000-000000000001';
-const b64url = (b) => Buffer.from(b).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+// Shared RS256 token minter for war-room live tests.
+// Delegates to the portable, repo-relative minter (Backend/scripts/mint-token.cjs) so it
+// works on any machine — the previous version hard-coded an absolute D:\ key path.
+const { mintToken: portableMint } = require('../Backend/scripts/mint-token.cjs');
+const fixtures = require('./fixtures.cjs');
+
+const STORE = fixtures.store;
+
+// Backward-compatible signature: ({ sub, roles, org }) -> token. org defaults to the store.
 function mintToken({ sub, roles, org = STORE }) {
-  const now = Math.floor(Date.now() / 1000);
-  const header = { alg: 'RS256', typ: 'JWT', kid: 'baalvion-key-1' };
-  const payload = {
-    sub: String(sub), email: `user${sub}@baalvion.test`, org_id: org, sid: 'sess-' + crypto.randomUUID(),
-    roles, role: roles[0] || null, permissions: [], jti: crypto.randomUUID(),
-    iss: 'baalvion-auth', aud: 'baalvion-platform', iat: now, exp: now + 3600,
-  };
-  const input = b64url(JSON.stringify(header)) + '.' + b64url(JSON.stringify(payload));
-  const sig = crypto.sign('RSA-SHA256', Buffer.from(input), PRIV);
-  return input + '.' + b64url(sig);
+  return portableMint({ sub, roles, org });
 }
+
 function http(method, urlPath, token, body, port = 3055) {
   const lib = require('http');
   return new Promise((resolve) => {
