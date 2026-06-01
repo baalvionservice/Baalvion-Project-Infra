@@ -1,7 +1,3 @@
-
-"use client"
-
-import { useParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,65 +7,70 @@ import { Calendar, User, Clock, ArrowLeft, ArrowRight, Share2 } from "lucide-rea
 import Image from "next/image";
 import Link from "next/link";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { cmsGetPost, type MiningPost } from "@/lib/cms";
 
-// Mock helper to simulate blog post fetching
-const getPostData = (slug: string) => {
+// Reflect the latest published content from the central CMS on every request.
+export const dynamic = 'force-dynamic';
+
+// Fallback when the central CMS has no matching post (or is offline): synthesize
+// a readable article from the slug so any URL still renders, preserving prior behavior.
+function fallbackPost(slug: string): MiningPost {
+  const title = slug
+    .replace(/-/g, ' ')
+    .split(' ')
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(' ');
+  const topic = slug.replace(/-/g, ' ');
   return {
     slug,
-    title: slug.replace(/-/g, ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+    title,
     category: "Market Insights",
-    author: "Dr. Sarah Chen",
+    author: "Baalvion Mining Desk",
     date: "May 20, 2024",
     readTime: "8 min read",
-    content: `
-      <p className="text-lg leading-relaxed mb-6">The global mineral trade is currently undergoing a massive transformation driven by the demand for critical energy transition materials. In this deep dive, we explore how ${slug.replace(/-/g, ' ')} is impacting the industrial supply chain and what exporters need to prepare for in the next quarter.</p>
-      <h2 className="text-2xl font-bold text-primary mb-4">Market Dynamics & Trends</h2>
-      <p className="mb-6">Current data suggests that pricing volatility is stabilizing, providing a unique window for bulk procurement contracts. We've seen a 12% increase in regional demand for high-purity concentrates across the Asia Pacific corridor.</p>
-      <h2 className="text-2xl font-bold text-primary mb-4">Strategic Recommendations</h2>
-      <p className="mb-6">For mining companies, the focus should remain on technical grade consistency and automated compliance verification to minimize port-side delays. Buyers should look towards establishing long-term supply agreements to hedge against projected scarcity.</p>
+    excerpt: "",
+    image: `https://picsum.photos/seed/${slug}/1200/600`,
+    contentHtml: `
+      <p>The global mineral trade is undergoing a major transformation driven by demand for critical energy-transition materials. In this deep dive we explore how ${topic} is impacting the industrial supply chain and what exporters need to prepare for in the next quarter.</p>
+      <h2>Market Dynamics &amp; Trends</h2>
+      <p>Current data suggests pricing volatility is stabilizing, providing a window for bulk procurement contracts. Regional demand for high-purity concentrates across the Asia Pacific corridor is up double digits.</p>
+      <h2>Strategic Recommendations</h2>
+      <p>For mining companies, the focus should remain on technical-grade consistency and automated compliance verification to minimize port-side delays. Buyers should establish long-term supply agreements to hedge against projected scarcity.</p>
     `,
-    imageUrl: `https://picsum.photos/seed/${slug}/1200/600`
   };
-};
+}
 
-export default function BlogPostPage() {
-  const { slug: slugParam } = useParams();
-  const slug = Array.isArray(slugParam) ? slugParam[0] : slugParam || "article";
-  const post = getPostData(slug);
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug: rawSlug } = await params;
+  const slug = rawSlug || "article";
+  const post = (await cmsGetPost(slug)) ?? fallbackPost(slug);
 
   const blogSchema = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
     "headline": post.title,
-    "image": post.imageUrl,
-    "author": {
-      "@type": "Person",
-      "name": post.author
-    },
+    "image": post.image,
+    "author": { "@type": "Person", "name": post.author },
     "publisher": {
       "@type": "Organization",
       "name": "GeoTrade Nexus",
-      "logo": {
-        "@type": "ImageObject",
-        "url": "https://mining.baalvion.com/logo.png"
-      }
+      "logo": { "@type": "ImageObject", "url": "https://mining.baalvion.com/logo.png" },
     },
-    "datePublished": "2024-05-20",
-    "dateModified": "2024-05-20"
+    "datePublished": post.date,
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <JsonLd data={blogSchema} />
       <Navbar />
-      
+
       <div className="bg-white border-b py-6">
         <div className="container px-4 md:px-8 max-w-4xl mx-auto">
-          <Breadcrumbs 
+          <Breadcrumbs
             items={[
               { label: "Insights", href: "/blog" },
               { label: post.title, href: `/blog/${slug}` }
-            ]} 
+            ]}
           />
         </div>
       </div>
@@ -91,17 +92,18 @@ export default function BlogPostPage() {
           </header>
 
           <div className="relative aspect-video rounded-3xl overflow-hidden shadow-xl border">
-            <Image 
-              src={post.imageUrl} 
-              alt={post.title} 
-              fill 
+            <Image
+              src={post.image}
+              alt={post.title}
+              fill
               priority
               className="object-cover"
             />
           </div>
 
           <div className="prose prose-slate max-w-none prose-headings:text-primary prose-headings:font-headline">
-            <div dangerouslySetInnerHTML={{ __html: post.content }} />
+            {/* Body is admin-authored in the central Baalvion CMS (trusted source). */}
+            <div dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
           </div>
 
           <footer className="pt-12 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6">
@@ -120,7 +122,7 @@ export default function BlogPostPage() {
           </footer>
         </article>
 
-        {/* Dynamic Related Insights Section */}
+        {/* Related Insights */}
         <section className="mt-16 space-y-8">
           <h3 className="text-2xl font-headline font-bold text-slate-900 uppercase italic tracking-tighter">Related <span className="text-primary">Analysis</span></h3>
           <div className="grid sm:grid-cols-2 gap-8">
@@ -133,7 +135,7 @@ export default function BlogPostPage() {
                   <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-widest">Industry Update</Badge>
                   <h4 className="font-bold text-lg leading-tight group-hover:text-primary transition-colors">Digital Transformation in Global Mining Operations</h4>
                   <p className="text-xs text-slate-500 line-clamp-2">How automated compliance and real-time tracking are reducing trade friction.</p>
-                  <Link href="/blog/digital-transformation" className="inline-flex items-center gap-2 text-xs font-bold text-primary pt-2">
+                  <Link href="/blog/digital-transformation-in-global-mining-operations" className="inline-flex items-center gap-2 text-xs font-bold text-primary pt-2">
                     Read Analysis <ArrowRight className="h-3.5 w-3.5" />
                   </Link>
                 </CardContent>
