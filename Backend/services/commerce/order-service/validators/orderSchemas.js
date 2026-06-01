@@ -56,6 +56,12 @@ exports.recordPaymentSchema = z.object({
     paidAt: z.string().datetime().optional().nullable(),
 });
 
+// Refund a paid order (admin/ops). Omit amount for a full refund of the captured amount.
+exports.refundPaymentSchema = z.object({
+    amount: z.number().positive().optional(),
+    reason: z.string().max(500).optional(),
+});
+
 exports.createReturnSchema = z.object({
     orderId: z.string().uuid(),
     reason: z.string().min(1).max(200),

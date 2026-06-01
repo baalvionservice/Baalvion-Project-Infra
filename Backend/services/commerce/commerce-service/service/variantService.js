@@ -42,6 +42,10 @@ async function deleteVariant(storeId, productId, variantId) {
 }
 
 async function upsertPricing(storeId, productId, variantId, body) {
+    // Explicit cross-store isolation boundary (mirrors listVariants/createVariant): never
+    // create or mutate pricing for a product that does not belong to the addressed store.
+    const product = await CommerceProduct.findOne({ where: { id: productId, storeId } });
+    if (!product) throw new AppError('NOT_FOUND', 'Product not found', 404);
     const [pricing, created] = await CommerceProductPricing.findOrCreate({
         where: { productId, variantId: variantId || null, storeId },
         defaults: { ...body, productId, variantId: variantId || null, storeId },

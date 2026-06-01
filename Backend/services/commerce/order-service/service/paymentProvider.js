@@ -44,6 +44,10 @@ const mockProvider = {
     if (intent) intent.status = 'voided';
     return { status: 'voided' };
   },
+  async refundPayment({ amount }) {
+    // Simulated refund — always succeeds (NON-PRODUCTION). Real adapters call the gateway.
+    return { status: 'refunded', refundId: `rf_mock_${crypto.randomUUID()}`, amount };
+  },
 };
 
 // Future real adapters — interface-compatible, intentionally unimplemented until configured.
@@ -54,6 +58,7 @@ const unconfigured = (name) => ({
   async confirmPayment() { throw new Error(`payment provider '${name}' is not configured`); },
   async failPayment() { throw new Error(`payment provider '${name}' is not configured`); },
   async cancelPayment() { throw new Error(`payment provider '${name}' is not configured`); },
+  async refundPayment() { throw new Error(`payment provider '${name}' is not configured`); },
 });
 
 function getProvider() {

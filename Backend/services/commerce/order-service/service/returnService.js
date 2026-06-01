@@ -1,9 +1,16 @@
 'use strict';
 const { Op } = require('sequelize');
-const { OrdersReturn, OrdersReturnItem, OrdersOrder, sequelize } = require('../models');
+const { OrdersReturn, OrdersReturnItem, OrdersOrder, OrdersCustomer, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 const cache = require('./cacheService');
+const ownership = require('./ownership');
+
+async function orderOwnerUserId(customerId) {
+    if (!customerId) return null;
+    const c = await OrdersCustomer.findByPk(customerId, { attributes: ['userId'] });
+    return c ? c.userId : null;
+}
 
 function generateReturnNumber() {
     const ts = Date.now().toString(36).toUpperCase();
@@ -19,10 +26,12 @@ async function listReturns(storeId, query = {}) {
     return buildPaginated(rows, count, { page, limit });
 }
 
-async function createReturn(storeId, body) {
+async function createReturn(storeId, body, actor) {
     const { orderId, reason, notes, items } = body;
     const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
+    // Ownership: a caller may only request a return on an order they own (staff may on any).
+    await ownership.enforce(actor, await orderOwnerUserId(order.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'return.create' });
     if (!['delivered', 'shipped'].includes(order.status)) throw new AppError('CONFLICT', 'Returns can only be requested for delivered or shipped orders', 409);
 
     const returnRecord = await sequelize.transaction(async (t) => {

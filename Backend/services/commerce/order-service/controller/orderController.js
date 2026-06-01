@@ -1,6 +1,7 @@
 'use strict';
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const orderService = require('../service/orderService');
+const { actorOf } = require('../utils/actor');
 
 const listOrders = async (req, res, next) => {
     try { return sendPaginated(req, res, await orderService.listOrders(req.params.storeId, req.query)); }
@@ -8,12 +9,12 @@ const listOrders = async (req, res, next) => {
 };
 
 const getOrder = async (req, res, next) => {
-    try { return sendSuccess(req, res, await orderService.getOrder(req.params.storeId, req.params.orderId)); }
+    try { return sendSuccess(req, res, await orderService.getOrder(req.params.storeId, req.params.orderId, actorOf(req))); }
     catch (err) { return next(err); }
 };
 
 const createOrder = async (req, res, next) => {
-    try { return sendSuccess(req, res, await orderService.createOrder(req.params.storeId, req.validated), 201); }
+    try { return sendSuccess(req, res, await orderService.createOrder(req.params.storeId, req.validated, actorOf(req)), 201); }
     catch (err) { return next(err); }
 };
 
@@ -32,14 +33,19 @@ const recordPayment = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
+const refundPayment = async (req, res, next) => {
+    try { return sendSuccess(req, res, await orderService.refundPayment(req.params.storeId, req.params.orderId, req.validated), 201); }
+    catch (err) { return next(err); }
+};
+
 const createPaymentIntent = async (req, res, next) => {
-    try { return sendSuccess(req, res, await orderService.createPaymentIntent(req.params.storeId, req.params.orderId), 201); }
+    try { return sendSuccess(req, res, await orderService.createPaymentIntent(req.params.storeId, req.params.orderId, actorOf(req)), 201); }
     catch (err) { return next(err); }
 };
 
 const confirmPayment = async (req, res, next) => {
-    try { return sendSuccess(req, res, await orderService.confirmPayment(req.params.storeId, req.params.orderId, req.body && req.body.intentId)); }
+    try { return sendSuccess(req, res, await orderService.confirmPayment(req.params.storeId, req.params.orderId, req.body && req.body.intentId, actorOf(req))); }
     catch (err) { return next(err); }
 };
 
-module.exports = { listOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, createPaymentIntent, confirmPayment };
+module.exports = { listOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment };

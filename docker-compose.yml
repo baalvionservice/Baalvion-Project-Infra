@@ -136,11 +136,21 @@ services:
     networks:
       - default
       - baalvion-net
+    # rbac-service runs on the host during the war-room restore (not yet containerised);
+    # host.docker.internal lets the container reach the host-published PDP on :3055.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "3013:3013"
     environment:
       - PORT=3013
       - NODE_ENV=production
+      # Local/integration stack exercises prod code paths (RS256 enforcement) while using the
+      # backend-authoritative MOCK payment provider. A real deploy sets PAYMENT_PROVIDER + keys
+      # instead; this flag is the explicit, audited opt-in the provider guard requires.
+      - ALLOW_MOCK_PAYMENTS=true
+      # Commerce RBAC PDP (store-team roles / refund authorization). Host during war-room restore.
+      - RBAC_BASE_URL=http://host.docker.internal:3055
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=baalvion_db
@@ -1339,7 +1349,9 @@ services:
     container_name: baalvion-payment-service
     restart: unless-stopped
     ports:
-      - "3015:3015"
+      # Host 3015 is owned by law-service; payment-service publishes on host 3019 to avoid the
+      # collision. Internal callers use payment-service:3015 (container port) over baalvion-net.
+      - "3019:3015"
     environment:
       - NODE_ENV=development
       - PORT=3015

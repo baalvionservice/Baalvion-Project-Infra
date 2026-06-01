@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@baalvion/auth-node": "workspace:*",
+    "@baalvion/commerce-rbac": "workspace:*",
     "bullmq": "^5.52.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

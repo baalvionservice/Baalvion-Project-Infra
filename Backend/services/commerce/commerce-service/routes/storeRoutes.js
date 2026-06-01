@@ -2,12 +2,13 @@
 const { Router } = require('express');
 const ctrl = require('../controller/storeController');
 const { validate } = require('../middleware/validate');
-const { loadStoreRole, requireStoreRole } = require('../middleware/commerceAccess');
+const { loadStoreRole, loadAccessScope, requireStoreRole } = require('../middleware/commerceAccess');
 const { createStoreSchema, updateStoreSchema, addMemberSchema, updateMemberRoleSchema } = require('../validators/storeSchemas');
 
 const router = Router();
 
-router.get('/', ctrl.listStores);
+// Cross-store list — RBAC scope (country + store grants) is enforced at the query level.
+router.get('/', loadAccessScope, ctrl.listStores);
 router.post('/', validate(createStoreSchema), ctrl.createStore);
 
 router.get('/:storeId', loadStoreRole, ctrl.getStore);

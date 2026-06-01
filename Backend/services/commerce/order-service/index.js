@@ -9,6 +9,7 @@ const v1Router = require('./routes/v1');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
+const { startReconciliationWorker } = require('./queues/reconciliationQueue');
 
 const app = express();
 
@@ -19,7 +20,22 @@ app.use(cookieParser());
 app.use(requestContext);
 app.use(createIpRateLimit());
 
-app.get('/health', (req, res) => res.json({ status: 'ok', service: 'order-service', port: config.port }));
+// Liveness (cheap) + readiness (DB check). Paths match the Helm probes (/healthz, /readyz).
+app.get(['/health', '/healthz'], (req, res) => res.json({ status: 'ok', service: 'order-service', port: config.port }));
+app.get('/readyz', async (req, res) => {
+    try { await sequelize.authenticate(); return res.json({ status: 'ready', db: 'connected' }); }
+    catch (err) { return res.status(503).json({ status: 'not_ready', db: 'unavailable', error: err.message }); }
+});
+// Minimal Prometheus exposition (dependency-free) so the platform scrape has a live target.
+app.get('/metrics', (req, res) => {
+    const m = process.memoryUsage();
+    res.set('Content-Type', 'text/plain; version=0.0.4').send(
+        `# TYPE baalvion_service_up gauge\nbaalvion_service_up{service="order-service"} 1\n` +
+        `# TYPE baalvion_process_uptime_seconds gauge\nbaalvion_process_uptime_seconds ${process.uptime()}\n` +
+        `# TYPE baalvion_process_resident_memory_bytes gauge\nbaalvion_process_resident_memory_bytes ${m.rss}\n` +
+        `# TYPE baalvion_process_heap_used_bytes gauge\nbaalvion_process_heap_used_bytes ${m.heapUsed}\n`,
+    );
+});
 
 app.use('/api/v1', v1Router);
 
@@ -31,6 +47,8 @@ async function start() {
     try {
         await connectDB();
         await sequelize.query('CREATE SCHEMA IF NOT EXISTS orders;');
+        // Scheduled financial reconciliation sweep (no-op if disabled / ledger unconfigured).
+        await startReconciliationWorker().catch((e) => console.error('[Reconcile] worker failed to start:', e.message));
         app.listen(config.port, () => {
             console.log(`[Order Service] Running on port ${config.port} (${config.env})`);
         });

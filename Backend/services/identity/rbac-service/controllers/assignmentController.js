@@ -8,7 +8,7 @@ const create = async (req, res) => {
 };
 
 const revoke = async (req, res) => {
-    const out = await assignmentService.revokeAssignment(req.params.id);
+    const out = await assignmentService.revokeAssignment(req.params.id, req.auth?.userId);
     sendSuccess(req, res, out);
 };
 

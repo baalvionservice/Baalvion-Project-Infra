@@ -13,5 +13,18 @@ module.exports = {
     },
     db: { host: process.env.DB_HOST || 'localhost', port: Number(process.env.DB_PORT || 5432), name: process.env.DB_NAME || 'baalvion_db', user: process.env.DB_USER || 'baalvion', password: process.env.DB_PASSWORD || '', schema: 'inventory' },
     redis: { host: process.env.REDIS_HOST || 'localhost', port: Number(process.env.REDIS_PORT || 6379), password: process.env.REDIS_PASSWORD || undefined },
+    cache: {
+        rbacEffectiveTtl: Number(process.env.CACHE_RBAC_EFFECTIVE_TTL || 30),
+        rbacScopeTtl: Number(process.env.CACHE_RBAC_SCOPE_TTL || 300),
+    },
     security: { ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 200) },
+    // RBAC is the single source of truth; this service is a PEP via @baalvion/commerce-rbac.
+    rbac: {
+        baseUrl:       process.env.RBAC_BASE_URL || 'http://localhost:3055',
+        apiPrefix:     process.env.RBAC_API_PREFIX || '/v1',
+        timeoutMs:     Number(process.env.RBAC_TIMEOUT_MS || 4000),
+        failMode:      (process.env.RBAC_FAIL_MODE || 'closed').toLowerCase(),
+        breakglassSuperAdmin: process.env.RBAC_BREAKGLASS_SUPERADMIN !== 'false',
+        internalApiKey: process.env.RBAC_INTERNAL_API_KEY || '',
+    },
 };

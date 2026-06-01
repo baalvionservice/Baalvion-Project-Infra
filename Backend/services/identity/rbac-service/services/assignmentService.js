@@ -5,6 +5,13 @@ const { Errors } = require('../utils/errors');
 const { SCOPE, SCOPES } = require('../config/systemRoles');
 const roleService = require('./roleService');
 const permissionService = require('./permissionService');
+const logger = require('../utils/logger');
+
+// Structured audit for every role change (the source of truth for "who can do what, where").
+// Emitted as a single audit log line; log aggregation / audit-service can ingest it.
+function auditRoleChange(action, fields) {
+    logger.warn({ audit: true, event: 'rbac.role_change', action, ...fields, timestamp: new Date().toISOString() }, `rbac role ${action}`);
+}
 
 function serialize(a, role) {
     if (!a) return null;
@@ -54,14 +61,22 @@ async function assignRole({ userId, roleId, scopeId, expiresAt, attributes }, ac
         a.granted_by = actorId || a.granted_by;
         await a.save();
     }
+    auditRoleChange(created ? 'assign' : 'reassign', {
+        userId: String(userId), roleId, roleKey: role.key,
+        scopeType, scopeId: resolvedScope, grantedBy: actorId != null ? String(actorId) : null,
+    });
     return serialize(a, role);
 }
 
-async function revokeAssignment(id) {
+async function revokeAssignment(id, actorId) {
     const a = await db.RoleAssignment.findByPk(id);
     if (!a) throw Errors.notFound('Assignment not found');
     a.status = 'revoked';
     await a.save();
+    auditRoleChange('revoke', {
+        assignmentId: id, userId: a.user_id, roleId: a.role_id,
+        scopeType: a.scope_type, scopeId: a.scope_id, revokedBy: actorId != null ? String(actorId) : null,
+    });
     return { id, revoked: true };
 }
 

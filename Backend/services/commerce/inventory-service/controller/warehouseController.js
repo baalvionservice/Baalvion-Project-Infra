@@ -14,5 +14,6 @@ const adjustStock = async (req, res, next) => { try { return sendSuccess(req, re
 
 const listAllStock = async (req, res, next) => { try { return sendPaginated(req, res, await stockService.listStock(req.params.storeId, req.query)); } catch (err) { return next(err); } };
 const listMovements = async (req, res, next) => { try { return sendPaginated(req, res, await stockService.listMovements(req.params.storeId, req.query)); } catch (err) { return next(err); } };
+const lowStockAlerts = async (req, res, next) => { try { return sendPaginated(req, res, await stockService.lowStockAlerts(req.params.storeId, req.query)); } catch (err) { return next(err); } };
 
-module.exports = { listWarehouses, getWarehouse, createWarehouse, updateWarehouse, deleteWarehouse, listStock, adjustStock, listAllStock, listMovements };
+module.exports = { listWarehouses, getWarehouse, createWarehouse, updateWarehouse, deleteWarehouse, listStock, adjustStock, listAllStock, listMovements, lowStockAlerts };

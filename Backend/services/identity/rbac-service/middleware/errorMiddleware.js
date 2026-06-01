@@ -20,6 +20,14 @@ const errorHandler = (error, req, res, next) => {
         return sendError(req, res, new AppError(error.code || 'UNAUTHORIZED', error.message, error.status || 401));
     }
 
+    // Express body-parser failures (malformed JSON, oversized body) → correct 4xx, not 500.
+    if (error && error.type === 'entity.parse.failed') {
+        return sendError(req, res, new AppError('BAD_REQUEST', 'Malformed JSON in request body', 400));
+    }
+    if (error && error.type === 'entity.too.large') {
+        return sendError(req, res, new AppError('PAYLOAD_TOO_LARGE', 'Request body too large', 413));
+    }
+
     const normalized = error instanceof AppError
         ? error
         : new AppError('INTERNAL_SERVER_ERROR', error.message || 'Unexpected server error', 500);
