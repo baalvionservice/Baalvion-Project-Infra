@@ -51,6 +51,25 @@ const FINANCE = {
   bnpl:                process.env.SVC_CREDIT        || 'http://localhost:3037',
   fx:                  process.env.SVC_FX            || 'http://localhost:3038',
   wallets:             process.env.SVC_WALLET        || 'http://localhost:3039',
+  // §3 trade microservices (financial-services-java, built+committed by a parallel session).
+  // Gateway segment === the Java @RequestMapping root (verified from source) so the FINANCE
+  // rule (`/api/v1` + path) hits the controller exactly. Confirmed roots:
+  //   deal-room-service        /api/v1/deal-rooms     :3040
+  //   smart-contract-service   /api/v1/contracts      :3041
+  //   trade-intelligence-svc   /api/v1/intelligence   :3043
+  //   dispute-service          /api/v1/disputes       :3044
+  //   aml-service              /api/v1/aml            :3045
+  //   trust-score-service      /api/v1/trust-scores   :3046
+  'deal-rooms':   process.env.SVC_DEAL_ROOM     || 'http://localhost:3040',
+  contracts:      process.env.SVC_SMART_CONTRACT || 'http://localhost:3041',
+  intelligence:   process.env.SVC_TRADE_INTEL   || 'http://localhost:3043',
+  disputes:       process.env.SVC_DISPUTE       || 'http://localhost:3044',
+  aml:            process.env.SVC_AML           || 'http://localhost:3045',
+  'trust-scores': process.env.SVC_TRUST_SCORE   || 'http://localhost:3046',
+  // DEFERRED: payment-rails-service (:3042) — its controller root is /api/v1/payments, which the
+  // generic `/api/v1`+segment rule can't produce from a `payment-rails` segment, and a `payments`
+  // segment is confusingly close to the legacy `payment` (:3015). Needs either a custom rewrite or
+  // a Java @RequestMapping rename to /api/v1/payment-rails. Wire once that decision is made.
 };
 
 const svcOf = (url) => (url.split('?')[0].split('/')[1] || '');

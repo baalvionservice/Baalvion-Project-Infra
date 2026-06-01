@@ -24,11 +24,16 @@ app.use(express.json({ limit: '1mb' }));
 app.use(requestContext);
 
 app.get('/', (req, res) => res.json({ service: 'Baalvion Audit Service', version: config.apiVersion, model: 'immutable append-only hash-chain' }));
-app.get('/health', (req, res) => res.json({
+app.get(['/health', '/healthz'], (req, res) => res.json({
     status: 'ok', service: 'audit-service', timestamp: new Date().toISOString(),
     rs256: jwt.isRs256Enabled(), redis: redis.isAvailable() ? 'ok' : 'unavailable',
     eventConsumer: config.eventBus.enabled ? 'on' : 'off',
 }));
+// Readiness (DB check). Path matches the Helm readiness probe (/readyz).
+app.get('/readyz', async (req, res) => {
+    try { await db.sequelize.authenticate(); return res.json({ status: 'ready', db: 'connected' }); }
+    catch (err) { return res.status(503).json({ status: 'not_ready', db: 'unavailable', error: err.message }); }
+});
 
 app.use('/v1', v1Routes);
 app.use('/api/v1', v1Routes);
