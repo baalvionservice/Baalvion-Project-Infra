@@ -9,6 +9,10 @@ const authCtrl = require('../controller/authController');
 
 router.use('/auth', require('./authRoutes'));
 
+// BFF → SDK-native payment-service (Elite Circle gateway checkout). Supersedes the
+// legacy /functions/payment-* handlers (which read provider keys from env).
+router.use('/billing', require('./billingRoutes'));
+
 // Canonical identity probe — returns the LOCAL users.id for a gateway-authenticated caller
 // (+ roles + profile). The frontend reads this so its user.id matches backend ownership keys.
 router.get('/whoami', authMiddleware, authCtrl.whoami);

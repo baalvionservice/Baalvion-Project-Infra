@@ -8,12 +8,14 @@ const adminRoutes = require('./admin/platformAdminRoutes');
 const uploadRoutes = require('./uploadRoutes');
 const developerRoutes = require('./apiRoutes');
 const ssoRoutes = require('./ssoRoutes');
+const billingRoutes = require('./billingRoutes');
 
 const router = express.Router();
 
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/payment', paymentRoutes);
+router.use('/billing', billingRoutes);   // BFF → SDK-native payment-service
 router.use('/upload', uploadRoutes);
 router.use('/developer', developerRoutes);
 router.use('/sso', ssoRoutes);          // public enterprise SSO (SAML/OIDC)

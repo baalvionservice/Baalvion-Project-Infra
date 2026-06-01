@@ -24,8 +24,6 @@
     "uuid": "^11.1.0",
     "kafkajs": "^2.2.4",
     "prom-client": "^15.1.0",
-    "winston": "^3.14.2",
-    "bullmq": "^4.17.2",
     "redis": "^4.6.13",
     "decimal.js": "^10.4.3",
     "dotenv": "^16.4.5",

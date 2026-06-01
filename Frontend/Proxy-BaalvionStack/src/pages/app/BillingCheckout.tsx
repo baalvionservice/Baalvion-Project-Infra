@@ -13,8 +13,9 @@ import {
   CreditCard, ShieldCheck, CheckCircle2, ArrowRight, ArrowLeft,
   Loader2, Ban, Lock, AlertTriangle, Tag, Globe, Smartphone, Server,
 } from "lucide-react";
-import { usePlans, useChangePlan } from "@/hooks/usePlatform";
+import { usePlans } from "@/hooks/usePlatform";
 import { Plan } from "@/lib/platformClient";
+import { startGatewayCheckout } from "@/lib/gatewayCheckout";
 import { cn } from "@/lib/utils";
 
 const steps = ["Select Plan", "Payment Details", "Confirm & Pay"];
@@ -33,18 +34,15 @@ export default function BillingCheckout() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
   const [paymentTab, setPaymentTab] = useState("card");
-  const [cardNumber, setCardNumber] = useState("");
-  const [cardExpiry, setCardExpiry] = useState("");
-  const [cardCvv, setCardCvv] = useState("");
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [companyName, setCompanyName] = useState("");
   const [vatNumber, setVatNumber] = useState("");
   const [result, setResult] = useState<ResultType | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
+  const [processing, setProcessing] = useState(false);
 
   const { data: plans, isLoading: loadingPlans } = usePlans();
-  const changePlan = useChangePlan();
 
   const basePrice = selectedPlan ? (interval === "yearly" ? selectedPlan.monthlyPrice * 10 : selectedPlan.monthlyPrice) : 0;
   const discount = couponApplied ? basePrice * 0.1 : 0;
@@ -54,13 +52,26 @@ export default function BillingCheckout() {
 
   const handlePay = async () => {
     if (!selectedPlan) return;
+    setProcessing(true);
     try {
-      await changePlan.mutateAsync(selectedPlan.slug);
-      setResult("success");
+      // Hand off to the provider's hosted checkout via payment-service. The
+      // AUTHORITATIVE result arrives through the provider webhook → payment-service
+      // ledger (which activates the plan); this UI state is provisional only.
+      const res = await startGatewayCheckout({
+        amount: Math.round(total * 100), // minor units
+        currency: "USD",
+        idempotencyKey: `${selectedPlan.slug}-${interval}-${Date.now()}`,
+        receipt: orderId,
+        customer: companyName ? { name: companyName } : undefined,
+      });
+      if (res.status === "success") setResult("success");
+      else if (res.status === "failed") { setErrorMessage(res.message); setResult("failure"); }
+      // "cancelled" → stay on the confirm step so the user can retry
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Payment processing failed";
-      setErrorMessage(msg);
+      setErrorMessage(e instanceof Error ? e.message : "Could not start checkout");
       setResult("failure");
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -246,18 +257,11 @@ Thank you for your business!
                     <TabsTrigger value="wire" className="flex-1">Wire</TabsTrigger>
                   </TabsList>
                   <TabsContent value="card" className="space-y-4 pt-4">
-                    <div className="space-y-2">
-                      <Label>Card Number</Label>
-                      <Input placeholder="4242 4242 4242 4242" value={cardNumber} onChange={e => setCardNumber(e.target.value)} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Expiry</Label>
-                        <Input placeholder="MM/YY" value={cardExpiry} onChange={e => setCardExpiry(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>CVV</Label>
-                        <Input placeholder="123" value={cardCvv} onChange={e => setCardCvv(e.target.value)} type="password" />
+                    <div className="rounded-lg border border-border bg-muted/30 p-4 flex items-start gap-3">
+                      <Lock className="w-5 h-5 text-success mt-0.5 shrink-0" />
+                      <div className="text-sm">
+                        <p className="font-medium">Secure checkout</p>
+                        <p className="text-muted-foreground">Card details are entered on the payment provider's PCI-compliant page — this site never sees or stores your card. You'll complete payment in the next step.</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -304,7 +308,7 @@ Thank you for your business!
                   <div className="flex justify-between text-sm"><span className="text-muted-foreground">Plan</span><span className="font-medium">{selectedPlan?.name}</span></div>
                   <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bandwidth</span><span>{selectedPlan?.bandwidthLimitGb} GB</span></div>
                   <div className="flex justify-between text-sm"><span className="text-muted-foreground">Billing</span><span className="capitalize">{interval}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Payment</span><span>{paymentTab === "card" ? `Card ****${cardNumber.slice(-4) || "4242"}` : paymentTab}</span></div>
+                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Payment</span><span className="capitalize">{paymentTab === "card" ? "Card (secure checkout)" : paymentTab}</span></div>
                 </div>
                 <div className="flex gap-2">
                   <Input placeholder="Promo code" value={coupon} onChange={e => setCoupon(e.target.value)} className="flex-1" />
@@ -322,7 +326,7 @@ Thank you for your business!
 
           {/* Navigation */}
           <div className="flex justify-between">
-            <Button variant="outline" onClick={() => step > 0 ? setStep(step - 1) : navigate("/app/billing")} disabled={changePlan.isPending}>
+            <Button variant="outline" onClick={() => step > 0 ? setStep(step - 1) : navigate("/app/billing")} disabled={processing}>
               <ArrowLeft className="w-4 h-4 mr-1" /> {step === 0 ? "Back to Billing" : "Back"}
             </Button>
             {step < 2 ? (
@@ -330,8 +334,8 @@ Thank you for your business!
                 Next <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             ) : (
-              <Button variant="hero" onClick={handlePay} disabled={changePlan.isPending}>
-                {changePlan.isPending
+              <Button variant="hero" onClick={handlePay} disabled={processing}>
+                {processing
                   ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
                   : <>Pay ${total.toFixed(2)} <ArrowRight className="w-4 h-4 ml-1" /></>}
               </Button>
