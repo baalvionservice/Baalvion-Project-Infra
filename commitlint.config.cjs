@@ -9,6 +9,9 @@ module.exports = {
     // Scope is free-form (service or package name, e.g. auth-service, pkg/auth-node).
     "scope-enum": [0],
     "scope-case": [0],
+    // Subjects routinely lead with acronyms / proper nouns (SDK-native, RBAC-enforced,
+    // CMS-driven, Limited-Beta) — don't force lower-case on the subject.
+    "subject-case": [0],
     // Allow longer bodies (e.g. trailers such as Co-Authored-By).
     "body-max-line-length": [0],
     "footer-max-line-length": [0],
