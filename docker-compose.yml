@@ -71,7 +71,9 @@ services:
       - "3011:3011"
     environment:
       - PORT=3011
-      - NODE_ENV=production
+      # development → use the dev vault key (matches the already-encrypted payment integrations)
+      # + dev inter-service secret. Real deploy: NODE_ENV=production + CMS_SECRETS_KEY + INTERNAL_SERVICE_SECRET.
+      - NODE_ENV=development
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=baalvion_db
@@ -1389,7 +1391,10 @@ services:
   # ── Financial Services: Payment (port 3015) ──────────────────────────────
   payment-service:
     build:
-      context: ./Backend/services/commerce/payment-service
+      # Monorepo build (context = repo root) so the workspace deps @baalvion/sdk + @baalvion/auth-node
+      # are bundled into the image (they were a dev node_modules junction, unbuildable in Docker).
+      context: .
+      dockerfile: Backend/services/commerce/payment-service/Dockerfile
     container_name: baalvion-payment-service
     restart: unless-stopped
     ports:
@@ -1408,7 +1413,10 @@ services:
       - REDIS_PORT=6379
       - REDIS_DB=1
       - KAFKA_BROKERS=kafka:9092
-      - KAFKA_ENABLED=true
+      # No Kafka in the Limited-Beta stack; the gateway vertical uses Redis + the CMS vault.
+      - KAFKA_ENABLED=false
+      # Provider + decrypted keys are resolved per-tenant from the CMS vault (the only secret source).
+      - CMS_BASE_URL=http://cms-service:3011/api/v1
       - CORS_ORIGINS=http://localhost:3000,http://localhost:3025,http://localhost:8080
       - DAILY_LIMIT=1000000
       - TX_MAX_LIMIT=500000
@@ -1422,6 +1430,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+      cms-service:
+        condition: service_started
     networks:
       - default
       - baalvion-net

@@ -77,4 +77,21 @@ async function handleWebhook(req, res) {
     }
 }
 
-module.exports = { createPayment, getPayment, handleWebhook };
+async function refundPayment(req, res) {
+    try {
+        // Tenant-scoped, internal-auth'd merchant action (mounted behind internalAuthGuard).
+        const websiteSlug = req.query.site || req.query.websiteSlug || req.body.websiteSlug;
+        if (!websiteSlug) return send(res, 400, { success: false, error: { code: 'VALIDATION', message: 'site (websiteSlug) is required' } });
+        const out = await svc.refundPayment({
+            websiteSlug,
+            paymentId: req.params.id,
+            amount: req.body.amount,
+            reason: req.body.reason,
+        });
+        return send(res, 200, { success: true, data: out });
+    } catch (err) {
+        return fail(res, err, 'gateway');
+    }
+}
+
+module.exports = { createPayment, getPayment, handleWebhook, refundPayment };

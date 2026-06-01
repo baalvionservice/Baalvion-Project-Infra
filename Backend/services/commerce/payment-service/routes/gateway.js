@@ -6,5 +6,6 @@ const ctrl = require('../controllers/gatewayController');
 const router = Router();
 router.post('/payments', ctrl.createPayment);
 router.get('/payments/:id', ctrl.getPayment);
+router.post('/payments/:id/refund', ctrl.refundPayment);
 
 module.exports = router;

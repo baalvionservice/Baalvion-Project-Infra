@@ -90,6 +90,29 @@ function parseWebhook({ body }) {
     };
 }
 
+/**
+ * Issue a refund. mode='live' → Stripe Refunds API (refunds reference the
+ * PaymentIntent we stored as providerOrderId); mock → deterministic refund id.
+ */
+async function refund({ providerOrderId, providerPaymentId, amount, secrets, mode }) {
+    if (mode !== 'live') {
+        const providerRefundId = 're_mock_' + hmacSha256Hex(`${providerOrderId || providerPaymentId}:${amount}`, secrets.secretKey || 'mock').slice(0, 14);
+        return { providerRefundId, status: 'refunded', raw: { mocked: true, paymentIntent: providerOrderId, amount } };
+    }
+    const intent = providerOrderId || providerPaymentId;
+    if (!intent) { const e = new Error('stripe refund requires a PaymentIntent id'); e.code = 'NO_PROVIDER_PAYMENT'; throw e; }
+    const form = new URLSearchParams({ payment_intent: String(intent), amount: String(amount) });
+    const res = await fetch(`${API}/refunds`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded', authorization: `Bearer ${secrets.secretKey}` },
+        body: form.toString(),
+    });
+    const text = await res.text();
+    let data; try { data = JSON.parse(text); } catch { data = {}; }
+    if (!res.ok) { const e = new Error(`stripe refund failed (HTTP ${res.status})`); e.providerStatus = res.status; throw e; }
+    return { providerRefundId: data.id, status: 'refunded', raw: data };
+}
+
 /** Test/helper: a valid `stripe-signature` header value for a raw body. */
 function signWebhook({ rawBody, secrets, timestamp }) {
     const t = timestamp || nowSeconds();
@@ -97,4 +120,4 @@ function signWebhook({ rawBody, secrets, timestamp }) {
     return `t=${t},v1=${hmacSha256Hex(`${t}.${body}`, secrets.webhookSecret)}`;
 }
 
-module.exports = { name: 'stripe', createOrder, verifyWebhook, parseWebhook, signWebhook };
+module.exports = { name: 'stripe', createOrder, verifyWebhook, parseWebhook, signWebhook, refund };

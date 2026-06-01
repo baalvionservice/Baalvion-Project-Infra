@@ -97,10 +97,33 @@ function parseWebhook({ body }) {
     };
 }
 
+/**
+ * Issue a refund. mode='live' → Razorpay Refunds API (POST /payments/:id/refund);
+ * mock → deterministic refund id (no merchant account). Returns the canonical
+ * { providerRefundId, status:'refunded' } the gateway records as a debit ledger entry.
+ */
+async function refund({ providerPaymentId, amount, secrets, mode }) {
+    if (mode !== 'live') {
+        const providerRefundId = 'rfnd_mock_' + hmacSha256Hex(`${providerPaymentId}:${amount}`, secrets.keySecret || 'mock').slice(0, 14);
+        return { providerRefundId, status: 'refunded', raw: { mocked: true, providerPaymentId, amount } };
+    }
+    if (!providerPaymentId) { const e = new Error('razorpay refund requires a captured providerPaymentId'); e.code = 'NO_PROVIDER_PAYMENT'; throw e; }
+    const auth = 'Basic ' + Buffer.from(`${secrets.keyId}:${secrets.keySecret}`).toString('base64');
+    const res = await fetch(`${API}/payments/${providerPaymentId}/refund`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', authorization: auth },
+        body: JSON.stringify({ amount }),
+    });
+    const text = await res.text();
+    let data; try { data = JSON.parse(text); } catch { data = {}; }
+    if (!res.ok) { const e = new Error(`razorpay refund failed (HTTP ${res.status})`); e.providerStatus = res.status; throw e; }
+    return { providerRefundId: data.id, status: 'refunded', raw: data };
+}
+
 /** Test/helper: a valid x-razorpay-signature for a raw body. */
 function signWebhook({ rawBody, secrets }) {
     const body = typeof rawBody === 'string' ? rawBody : rawBody.toString('utf8');
     return hmacSha256Hex(body, secrets.webhookSecret);
 }
 
-module.exports = { name: 'razorpay', createOrder, verifyWebhook, parseWebhook, signWebhook };
+module.exports = { name: 'razorpay', createOrder, verifyWebhook, parseWebhook, signWebhook, refund };

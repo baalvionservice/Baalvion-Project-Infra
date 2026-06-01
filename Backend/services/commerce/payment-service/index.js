@@ -83,6 +83,12 @@ app.get('/health/ready', async (req, res) => {
     });
   }
 });
+// Helm-probe aliases (/healthz liveness, /readyz readiness with DB check).
+app.get('/healthz', (req, res) => res.json({ status: 'alive', service: 'payment-service' }));
+app.get('/readyz', async (req, res) => {
+  try { await db.sequelize.authenticate(); return res.json({ status: 'ready', db: 'connected' }); }
+  catch (err) { return res.status(503).json({ status: 'not_ready', db: 'unavailable', error: err.message }); }
+});
 app.get('/metrics', metricsHandler);
 
 // Protected routes

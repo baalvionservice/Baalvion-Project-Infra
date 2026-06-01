@@ -1016,6 +1016,12 @@ importers:
 
   Backend/services/commerce/payment-service:
     dependencies:
+      '@baalvion/auth-node':
+        specifier: workspace:*
+        version: link:../../../packages/auth-node
+      '@baalvion/sdk':
+        specifier: workspace:*
+        version: link:../../../packages/sdk
       bullmq:
         specifier: ^4.17.2
         version: 4.18.3

@@ -198,4 +198,96 @@ async function handleWebhook({ provider, websiteSlug, rawBody, body, headers }) 
     return { processed: true, duplicate: false, normalized };
 }
 
-module.exports = { createIntent, handleWebhook };
+/**
+ * Merchant-initiated FULL refund. Resolves the tenant's provider from the CMS vault and
+ * issues the refund, then records a DEBIT ledger entry + transitions captured -> refunded.
+ *
+ * Money-safety (review Finding 1): the provider refund call is GATED BEHIND a committed DB
+ * claim. We INSERT a `refund_pending` ledger row keyed `refund:<paymentId>` BEFORE calling
+ * the provider — the UNIQUE(website_slug, provider, provider_event_id) constraint serializes
+ * concurrent/retried refunds, so a DB failure or a retry can never trigger a SECOND provider
+ * refund (no double-refund split-brain). On provider failure the claim is released so a retry
+ * can proceed; a crash mid-flight leaves a `refund_pending` row for the reconciliation sweep.
+ * Tenant-scoped (no cross-tenant IDOR). Full refund only — the FSM treats refunded as terminal.
+ */
+async function refundPayment({ websiteSlug, paymentId, amount, reason }) {
+    if (!websiteSlug) throw new GatewayError('VALIDATION', 'websiteSlug is required', 400);
+    if (!paymentId) throw new GatewayError('VALIDATION', 'paymentId is required', 400);
+
+    const gp = await GatewayPayment.findOne({ where: { id: paymentId, websiteSlug } });
+    if (!gp) throw new GatewayError('PAYMENT_NOT_FOUND', `Payment not found for tenant "${websiteSlug}"`, 404);
+    if (gp.status === 'refunded') {
+        return { payment: gp.toJSON(), refunded: true, alreadyRefunded: true };
+    }
+    if (gp.status !== 'captured') {
+        throw new GatewayError('NOT_REFUNDABLE', `Only a captured payment can be refunded (status='${gp.status}')`, 409);
+    }
+    // Full refund only (amounts are integer minor units; the FSM makes refunded terminal,
+    // so a partial refund would wrongly close the payment — reject it explicitly).
+    const refundAmount = Number(gp.amount);
+    if (amount != null && Number(amount) !== refundAmount) {
+        throw new GatewayError('PARTIAL_UNSUPPORTED', `Partial refunds are not supported; refund the full captured amount (${refundAmount})`, 400);
+    }
+
+    const { provider, adapter, secrets, config, mode } = await resolveProviderByName(websiteSlug, gp.provider);
+    if (typeof adapter.refund !== 'function') {
+        throw new GatewayError('UNSUPPORTED', `Provider '${provider}' does not support refunds`, 501);
+    }
+
+    // ── 1) CLAIM in the DB before any external call. One refund per payment → key on gp.id. ──
+    const providerEventId = `refund:${gp.id}`;
+    let ledgerRow;
+    try {
+        ledgerRow = await PaymentLedgerEntry.create({
+            websiteSlug, gatewayPaymentId: gp.id, provider, providerEventId,
+            eventType: PaymentEvents.REFUNDED, direction: 'debit',
+            amount: refundAmount, currency: gp.currency, status: 'refund_pending',
+            traceId: currentTraceId(), payload: { reason: reason || null },
+        });
+    } catch (e) {
+        if (isUniqueViolation(e)) {
+            // A refund for this payment is already in-flight or done → idempotent, never re-call provider.
+            auditSecurity('payment.duplicate_refund', 'deny', { tenantId: websiteSlug, provider, providerEventId, reason: 'duplicate_refund' });
+            const fresh = await GatewayPayment.findByPk(gp.id);
+            return { payment: fresh.toJSON(), refunded: true, duplicate: true };
+        }
+        throw e;
+    }
+
+    // ── 2) Provider call (gated behind the committed claim). Release the claim on failure. ──
+    let result;
+    try {
+        result = await adapter.refund({
+            providerPaymentId: gp.providerPaymentId, providerOrderId: gp.providerOrderId,
+            amount: refundAmount, currency: gp.currency, secrets, config, mode,
+        });
+        if (!result || !result.providerRefundId) throw new GatewayError('REFUND_FAILED', 'Provider refund did not return a refund id', 502);
+    } catch (e) {
+        await ledgerRow.destroy().catch(() => {}); // release claim so a retry can proceed
+        throw e;
+    }
+
+    // ── 3) Finalize: stamp the provider refund id + flip status forward-only (captured -> refunded). ──
+    await sequelize.transaction(async (t) => {
+        await ledgerRow.update(
+            { status: 'refunded', payload: { reason: reason || null, providerRefundId: result.providerRefundId, ...(result.raw || {}) } },
+            { transaction: t },
+        );
+        const locked = await GatewayPayment.findOne({ where: { id: gp.id }, lock: t.LOCK.UPDATE, transaction: t });
+        if (locked && canTransition(locked.status, 'refunded')) {
+            await locked.update({ status: 'refunded' }, { transaction: t });
+        }
+    });
+
+    await emit(
+        PaymentEvents.REFUNDED,
+        { eventType: PaymentEvents.REFUNDED, tenantId: websiteSlug, transactionId: gp.id, provider, amount: refundAmount, currency: gp.currency, status: 'refunded', providerRefundId: result.providerRefundId, traceId: currentTraceId() },
+        { tenantId: websiteSlug },
+    );
+    logger('gateway').info({ tenantId: websiteSlug, provider, transactionId: gp.id, providerRefundId: result.providerRefundId, amount: refundAmount }, 'payment refunded');
+
+    const out = await GatewayPayment.findOne({ where: { id: gp.id }, include: [{ model: PaymentLedgerEntry, as: 'ledgerEntries' }] });
+    return { payment: out.toJSON(), refunded: true, duplicate: false, providerRefundId: result.providerRefundId };
+}
+
+module.exports = { createIntent, handleWebhook, refundPayment };
