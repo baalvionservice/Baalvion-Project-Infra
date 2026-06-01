@@ -13,6 +13,7 @@ one centralized identity authority surrounded by autonomous domain services.
 | [`logo.svg`](logo.svg) | Square app mark (512×512) — docs, avatars, favicon source |
 | [`social-preview.svg`](social-preview.svg) | Source for the GitHub social card (1280×640) |
 | [`social-preview.png`](social-preview.png) | Upload at **Settings → General → Social preview** |
+| [`screenshots/`](screenshots/) | Live product captures used in the root README (1440×900 @1.5×) |
 
 ## Palette
 

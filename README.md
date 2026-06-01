@@ -50,6 +50,53 @@ multi-tenant isolation are first-class concerns.
 The codebase is a **pnpm + Turborepo monorepo** with an enforced service-catalog
 architecture contract that keeps domain boundaries clean as the platform grows.
 
+## Platform Preview
+
+<div align="center">
+
+**Admin Console — Command Center**
+
+<img src="assets/screenshots/console-command-center.png" alt="Baalvion Admin Console — Command Center: identity metrics, auth-traffic trends, service health, queue depth and a live event feed" width="100%">
+
+<sub>One operations console across every domain — identity metrics, auth-traffic trends, live service health, queue depth, and a real-time event feed.</sub>
+
+</div>
+
+### The Ecosystem
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-global-trade.png" alt="Global Trade Infrastructure">
+      <p align="center"><b>Global Trade Infrastructure</b><br/><sub>Physical movement · digital finality · trade settlement</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-mining.png" alt="Baalvion Mining">
+      <p align="center"><b>Mining</b><br/><sub>B2B mineral trading · compliance · global logistics</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-imperialpedia.png" alt="Imperialpedia">
+      <p align="center"><b>Imperialpedia</b><br/><sub>AI-powered knowledge infrastructure</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-brand-connector.png" alt="Brand Connector">
+      <p align="center"><b>Brand Connector</b><br/><sub>Brand ↔ creator marketplace</sub></p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-controlthemarket.png" alt="ControlTheMarket">
+      <p align="center"><b>ControlTheMarket</b><br/><sub>Skill-based hiring &amp; talent challenges</sub></p>
+    </td>
+    <td width="50%" valign="top">
+      <img src="assets/screenshots/app-law-elite.png" alt="Law Elite Network">
+      <p align="center"><b>Law Elite Network</b><br/><sub>Global legal knowledge network</sub></p>
+    </td>
+  </tr>
+</table>
+
 ## Repository Layout
 
 ```
