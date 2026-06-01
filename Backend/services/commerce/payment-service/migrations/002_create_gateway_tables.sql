@@ -48,9 +48,11 @@ CREATE TABLE IF NOT EXISTS payments.payment_ledger_entries (
     updated_at         TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- THE dedup guarantee: one ledger row per provider event, forever.
-CREATE UNIQUE INDEX IF NOT EXISTS uq_ledger_provider_event
-    ON payments.payment_ledger_entries (provider, provider_event_id);
+-- THE dedup guarantee: one ledger row per provider event, PER TENANT (website_slug
+-- in the key prevents cross-tenant provider-event-id collisions silently dropping
+-- a real payment).
+CREATE UNIQUE INDEX IF NOT EXISTS uq_ledger_tenant_provider_event
+    ON payments.payment_ledger_entries (website_slug, provider, provider_event_id);
 CREATE INDEX IF NOT EXISTS idx_ledger_payment
     ON payments.payment_ledger_entries (gateway_payment_id);
 CREATE INDEX IF NOT EXISTS idx_ledger_tenant_date

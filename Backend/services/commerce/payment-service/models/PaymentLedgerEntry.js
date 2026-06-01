@@ -34,8 +34,11 @@ module.exports = (sequelize) =>
             timestamps: true,
             underscored: true,
             indexes: [
-                // THE dedup guarantee — one ledger row per provider event, forever.
-                { unique: true, fields: ['provider', 'provider_event_id'], name: 'uq_ledger_provider_event' },
+                // THE dedup guarantee — one ledger row per provider event, PER TENANT.
+                // website_slug is in the key so two tenants on the same provider can't
+                // collide on a shared provider event id (which would silently drop one
+                // tenant's real payment as a "duplicate").
+                { unique: true, fields: ['website_slug', 'provider', 'provider_event_id'], name: 'uq_ledger_tenant_provider_event' },
                 { fields: ['gateway_payment_id'], name: 'idx_ledger_payment' },
                 { fields: ['website_slug', 'created_at'], name: 'idx_ledger_tenant_date' },
             ],

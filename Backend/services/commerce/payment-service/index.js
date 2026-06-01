@@ -49,8 +49,6 @@ app.use('/api/v1/gateway/webhooks', webhookRateLimit, gatewayWebhookRoutes);
 app.use('/v1/gateway', gatewayApiRateLimit, internalAuthGuard, gatewayRoutes);
 app.use('/api/v1/gateway', gatewayApiRateLimit, internalAuthGuard, gatewayRoutes);
 
-// Legacy interbank-transfer stack below still requires explicit tenant context.
-app.use(tenantContext);
 app.use(metricsMiddleware);
 
 // Health checks
@@ -88,8 +86,10 @@ app.get('/health/ready', async (req, res) => {
 app.get('/metrics', metricsHandler);
 
 // Protected routes
-app.use('/v1', authMiddleware, v1Routes);
-app.use('/api/v1', authMiddleware, v1Routes);
+// authMiddleware (verified RS256) runs BEFORE tenantContext so the tenant is
+// derived from the verified JWT org claim, not an untrusted header.
+app.use('/v1', authMiddleware, tenantContext, v1Routes);
+app.use('/api/v1', authMiddleware, tenantContext, v1Routes);
 
 // Error handling
 app.use(notFoundHandler);

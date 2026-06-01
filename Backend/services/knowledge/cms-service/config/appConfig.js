@@ -75,3 +75,12 @@ if (
         '[cms-service] INTERNAL_SERVICE_SECRET must be set in non-development environments — refusing to start with the dev default',
     );
 }
+
+// The AES vault key encrypts ALL tenant provider credentials at rest. A missing key
+// silently falls back to a well-known dev default (secretCrypto.getKey) — fatal in
+// non-dev, where the entire vault would be readable by anyone who knows that string.
+if (module.exports.env !== 'development' && !process.env.CMS_SECRETS_KEY) {
+    throw new Error(
+        '[cms-service] CMS_SECRETS_KEY must be set in non-development environments — refusing to encrypt the vault with the dev default key',
+    );
+}

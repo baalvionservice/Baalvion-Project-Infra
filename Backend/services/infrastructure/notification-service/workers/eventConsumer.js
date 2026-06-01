@@ -27,7 +27,12 @@ let _subscription = null;
 // ── Event → notification handler dispatch ────────────────────────────────────
 
 async function dispatch(eventType, payload, meta = {}) {
-    const { emailQueue } = getQueues();
+    const { emailQueue: _emailQueue } = getQueues();
+    // Wrap add() to pass the per-job idempotencyKey as the BullMQ jobId — BullMQ then
+    // rejects a duplicate job, so a redelivered event (XAUTOCLAIM after a crash between
+    // dispatch and markProcessed) never double-sends. (Previously the key lived only in
+    // job DATA and was never used for dedup, so the idempotency claim was non-functional.)
+    const emailQueue = { add: (name, data, opts = {}) => _emailQueue.add(name, data, (data && data.idempotencyKey) ? { jobId: data.idempotencyKey, ...opts } : opts) };
 
     switch (eventType) {
         // Auth events → emails
