@@ -6,6 +6,7 @@ import type {
   CreateWebsitePayload,
   UpdateWebsitePayload,
   AddWebsiteMemberPayload,
+  CmsRole,
 } from '@/lib/types/cms-website.types';
 
 export const websiteKeys = {
@@ -92,6 +93,19 @@ export const useAddWebsiteMember = (websiteId: string) => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: websiteKeys.members(websiteId) });
       toast.success('Member added');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useUpdateWebsiteMemberRole = (websiteId: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ userId, role }: { userId: number; role: CmsRole }) =>
+      websitesApi.members.updateRole(websiteId, userId, role),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: websiteKeys.members(websiteId) });
+      toast.success('Role updated');
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });

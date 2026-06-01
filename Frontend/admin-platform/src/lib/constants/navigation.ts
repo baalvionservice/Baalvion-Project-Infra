@@ -87,6 +87,18 @@ export const NAVIGATION: NavGroup[] = [
         iconName: 'ScrollText',
         roles: ['super_admin', 'owner', 'admin'],
       },
+      {
+        title: 'Audit Center',
+        href: '/audit-center',
+        iconName: 'ShieldCheck',
+        roles: ['super_admin', 'owner', 'admin'],
+        children: [
+          { title: 'All Events',      href: '/audit-center',               iconName: 'ScrollText'    },
+          { title: 'RBAC Activity',   href: '/audit-center?tab=rbac',      iconName: 'UsersRound'    },
+          { title: 'Payment Events',  href: '/audit-center?tab=payments',  iconName: 'CreditCard'    },
+          { title: 'Security Events', href: '/audit-center?tab=security',  iconName: 'AlertTriangle' },
+        ],
+      },
     ],
   },
   {
@@ -112,6 +124,15 @@ export const NAVIGATION: NavGroup[] = [
   {
     label: 'Commerce',
     items: [
+      {
+        title: 'Team Management',
+        href: '/rbac',
+        iconName: 'UsersRound',
+        roles: ['super_admin'],
+        children: [
+          { title: 'Countries & Stores', href: '/rbac', iconName: 'Globe2' },
+        ],
+      },
       {
         title: 'Commerce',
         href: '/commerce',
@@ -260,6 +281,17 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'System Metrics', href: '/infrastructure?tab=metrics',          iconName: 'Cpu'       },
           { title: 'Queues',         href: '/infrastructure?tab=queues',           iconName: 'Zap'       },
           { title: 'Observability',  href: '/infrastructure?tab=observability',    iconName: 'Activity'  },
+        ],
+      },
+      {
+        title: 'Operations',
+        href: '/operations',
+        iconName: 'Gauge',
+        roles: ['super_admin', 'owner', 'admin'],
+        children: [
+          { title: 'Service Health',  href: '/operations',                    iconName: 'Activity' },
+          { title: 'Queues',          href: '/operations?tab=queues',         iconName: 'Zap'      },
+          { title: 'Reconciliation',  href: '/operations?tab=reconciliation', iconName: 'Scale'    },
         ],
       },
       {

@@ -2,10 +2,12 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import {
   Users, Building2, Activity, Zap, Shield, TrendingUp,
   CheckCircle2, XCircle, AlertCircle, Clock, RefreshCw,
   Database, Server, Cpu, MemoryStick, ArrowUpRight, ArrowDownRight,
+  Plug, CreditCard, KeyRound,
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, XAxis, YAxis,
@@ -21,6 +23,7 @@ import LiveEventFeed from '@/components/realtime/LiveEventFeed';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useRealtimeStore } from '@/lib/store/realtimeStore';
 import { identityAdminApi } from '@/lib/api/identity-admin';
+import { useIntegrationsSummary } from '@/lib/queries/cms-integrations.queries';
 import { cn } from '@/lib/utils/cn';
 
 // ── Live clock ────────────────────────────────────────────────────────────────
@@ -137,12 +140,24 @@ function MetricBar({ label, value, max = 100, color = 'bg-primary', unit = '%' }
   );
 }
 
+// Compact count formatter: 45200 -> "45.2k", 1200000 -> "1.2M".
+function formatCount(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const { setBreadcrumbs } = useUIStore();
   const wsState   = useRealtimeStore((s) => s.wsState);
   const services  = useRealtimeStore((s) => s.services);
   const rtStats   = useRealtimeStore((s) => s.stats);
+  const infra     = useRealtimeStore((s) => s.infra);
+  const queues    = useRealtimeStore((s) => s.queues);
+
+  const { data: integrationSummary } = useIntegrationsSummary();
+  const connected = (integrationSummary ?? []).filter((w) => w.configured > 0);
 
   const [refetchKey, setRefetchKey] = useState(0);
 
@@ -288,14 +303,17 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3">
-            {[
-              { name: 'Email Queue',   displayName: 'email',   waiting: 3, active: 1, failed: 0 },
-              { name: 'Webhook Queue', displayName: 'webhook', waiting: 8, active: 2, failed: 0 },
-              { name: 'DLQ',           displayName: 'dlq',     waiting: 0, active: 0, failed: 0 },
-            ].map((q) => (
+            {(queues.length > 0
+              ? queues.slice(0, 6)
+              : [
+                  { name: 'email',   displayName: 'Email Queue',       waiting: 0, active: 0, failed: 0 },
+                  { name: 'webhook', displayName: 'Webhook Queue',     waiting: 0, active: 0, failed: 0 },
+                  { name: 'dlq',     displayName: 'Dead Letter Queue', waiting: 0, active: 0, failed: 0 },
+                ]
+            ).map((q) => (
               <div key={q.name} className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium">{q.name}</span>
+                  <span className="text-xs font-medium">{q.displayName || q.name}</span>
                   {q.failed > 0 ? (
                     <Badge variant="destructive" className="text-[10px] h-4 px-1">{q.failed} failed</Badge>
                   ) : (
@@ -308,8 +326,12 @@ export default function DashboardPage() {
                 </div>
               </div>
             ))}
-            <Separator />
-            <p className="text-xs text-muted-foreground text-center">Connect BullMQ to populate live data</p>
+            {queues.length === 0 && (
+              <>
+                <Separator />
+                <p className="text-xs text-muted-foreground text-center">Waiting for live queue data…</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -322,28 +344,31 @@ export default function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="px-4 pb-4 space-y-3.5">
-            <MetricBar label="CPU Usage"    value={42} color="bg-blue-500" />
-            <MetricBar label="Memory"       value={67} color="bg-purple-500" />
-            <MetricBar label="Disk"         value={23} color="bg-cyan-500" />
+            <MetricBar label="CPU Usage" value={infra ? Math.round(infra.cpu) : 0} color="bg-blue-500" />
+            <MetricBar label="Memory"    value={infra ? Math.round(infra.memory) : 0} color="bg-purple-500" />
+            <MetricBar label="Disk"      value={infra ? Math.round(infra.disk) : 0} color="bg-cyan-500" />
             <Separator />
             <div className="grid grid-cols-2 gap-2 text-xs">
               <div>
                 <p className="text-muted-foreground">Redis Keys</p>
-                <p className="font-mono font-semibold">45.2k</p>
+                <p className="font-mono font-semibold">{infra ? formatCount(infra.redis.keyCount) : '—'}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">Hit Rate</p>
-                <p className="font-mono font-semibold text-green-500">94%</p>
+                <p className="font-mono font-semibold text-green-500">{infra ? `${Math.round(infra.redis.hitRate)}%` : '—'}</p>
               </div>
               <div>
                 <p className="text-muted-foreground">DB Conns</p>
-                <p className="font-mono font-semibold">18/100</p>
+                <p className="font-mono font-semibold">{infra ? `${infra.postgres.connections}/${infra.postgres.maxConnections}` : '—'}</p>
               </div>
               <div>
-                <p className="text-muted-foreground">Query P95</p>
-                <p className="font-mono font-semibold">12ms</p>
+                <p className="text-muted-foreground">Active Queries</p>
+                <p className="font-mono font-semibold">{infra ? infra.postgres.activeQueries : '—'}</p>
               </div>
             </div>
+            {!infra && (
+              <p className="text-[11px] text-muted-foreground text-center pt-1">Waiting for realtime metrics…</p>
+            )}
           </CardContent>
         </Card>
 
@@ -379,6 +404,61 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* ── Row 5: Website Connections (per-website API & payment keys) ── */}
+      <Card>
+        <CardHeader className="pb-2 pt-4 px-4">
+          <CardTitle className="text-sm font-medium flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Plug className="h-4 w-4 text-orange-500" />
+              Website Connections
+            </span>
+            {integrationSummary && (
+              <span className="text-xs font-normal text-muted-foreground">
+                {connected.length}/{integrationSummary.length} configured
+              </span>
+            )}
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="px-4 pb-4">
+          <p className="mb-3 text-xs text-muted-foreground">
+            Per-website API endpoints &amp; payment keys. Add a key on any site and the platform uses it live.
+          </p>
+          <div className="grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+            {(integrationSummary ?? []).map((w) => (
+              <Link
+                key={w.websiteId}
+                href={`/cms/websites/${w.websiteId}/integrations`}
+                className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-xs transition-colors hover:bg-muted/50"
+              >
+                <span className="truncate font-medium">{w.name}</span>
+                <span className="flex shrink-0 items-center gap-1">
+                  <KeyRound
+                    className={cn('h-3.5 w-3.5', w.hasApi ? 'text-green-500' : 'text-muted-foreground/40')}
+                  />
+                  <CreditCard
+                    className={cn('h-3.5 w-3.5', w.hasPayment ? 'text-green-500' : 'text-muted-foreground/40')}
+                  />
+                  {w.configured > 0 ? (
+                    <Badge variant="outline" className="h-4 border-green-500/40 px-1 text-[9px] text-green-600">
+                      {w.configured}
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline" className="h-4 px-1 text-[9px] text-muted-foreground">
+                      set up
+                    </Badge>
+                  )}
+                </span>
+              </Link>
+            ))}
+            {!integrationSummary?.length && (
+              <p className="col-span-full py-4 text-center text-xs text-muted-foreground">
+                Loading website connections…
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

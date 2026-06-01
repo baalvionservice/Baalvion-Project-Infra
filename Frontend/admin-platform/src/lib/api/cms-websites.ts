@@ -3,11 +3,33 @@ import type {
   Website,
   WebsiteStats,
   WebsiteMember,
+  CmsRole,
   CreateWebsitePayload,
   UpdateWebsitePayload,
   AddWebsiteMemberPayload,
+  UserSearchResult,
 } from '@/lib/types/cms-website.types';
 import type { ApiResponse, PaginatedResponse } from '@/lib/types/common.types';
+
+// cms-service stores the CMS role as `role`; the console renders it as `cmsRole`.
+interface RawMember {
+  id: number;
+  websiteId: string;
+  userId: number;
+  role: CmsRole;
+  invitedBy?: number | null;
+  joinedAt: string;
+  user: { id: number; fullName: string; email: string; avatarUrl: string | null };
+}
+
+const toMember = (m: RawMember): WebsiteMember => ({
+  id: m.id,
+  websiteId: m.websiteId,
+  userId: m.userId,
+  cmsRole: m.role,
+  user: m.user,
+  joinedAt: m.joinedAt,
+});
 
 // cms-service (:3018 /api/v1) returns camelCase rows. It does not (yet) embed
 // content/member counts or a createdBy user object, so we backfill those to the
@@ -101,16 +123,26 @@ export const websitesApi = {
 
   // Members
   members: {
-    list: (websiteId: string) =>
-      cmsApiClient.get<ApiResponse<WebsiteMember[]>>(`/cms/websites/${websiteId}/members`),
+    list: async (websiteId: string) => {
+      const res = await cmsApiClient.get<ApiResponse<RawMember[]>>(`/cms/websites/${websiteId}/members`);
+      const items = (res.data.data ?? []).map(toMember);
+      return { ...res, data: { ...res.data, data: items } as ApiResponse<WebsiteMember[]> };
+    },
 
-    add: (websiteId: string, payload: AddWebsiteMemberPayload) =>
-      cmsApiClient.post<ApiResponse<WebsiteMember>>(`/cms/websites/${websiteId}/members`, payload),
+    add: async (websiteId: string, payload: AddWebsiteMemberPayload) => {
+      const res = await cmsApiClient.post<ApiResponse<RawMember>>(`/cms/websites/${websiteId}/members`, payload);
+      return { ...res, data: { ...res.data, data: toMember(res.data.data) } };
+    },
 
-    updateRole: (websiteId: string, userId: number, cmsRole: string) =>
-      cmsApiClient.patch<ApiResponse<WebsiteMember>>(`/cms/websites/${websiteId}/members/${userId}`, { role: cmsRole }),
+    updateRole: async (websiteId: string, userId: number, cmsRole: CmsRole) => {
+      const res = await cmsApiClient.patch<ApiResponse<RawMember>>(`/cms/websites/${websiteId}/members/${userId}`, { role: cmsRole });
+      return { ...res, data: { ...res.data, data: toMember(res.data.data) } };
+    },
 
     remove: (websiteId: string, userId: number) =>
       cmsApiClient.delete<ApiResponse<void>>(`/cms/websites/${websiteId}/members/${userId}`),
+
+    searchUsers: (websiteId: string, q: string) =>
+      cmsApiClient.get<ApiResponse<UserSearchResult[]>>(`/cms/websites/${websiteId}/members/user-search`, { params: { q } }),
   },
 };
