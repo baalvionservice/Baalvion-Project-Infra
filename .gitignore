@@ -110,3 +110,8 @@ make_keys.cjs
 .dep-err.txt
 .dependabot-alerts.json
 REPOSITORY_INVENTORY.md
+
+# Database backups (may contain PII / real data — never commit)
+backups/
+*.dump
+*.sql.gz
