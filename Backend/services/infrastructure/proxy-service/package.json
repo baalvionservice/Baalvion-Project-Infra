@@ -14,15 +14,15 @@
     "keys:generate": "node scripts/generateKeys.js"
   },
   "devDependencies": {
-    "@opentelemetry/auto-instrumentations-node": "^0.46.1",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
-    "@opentelemetry/sdk-node": "^0.52.1",
+    "@opentelemetry/auto-instrumentations-node": "^0.76.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.218.0",
+    "@opentelemetry/sdk-node": "^0.218.0",
     "opossum": "^8.1.4"
   },
   "dependencies": {
     "@baalvion/auth-node": "workspace:*",
-    "@aws-sdk/client-s3": "^3.1053.0",
-    "@aws-sdk/s3-request-presigner": "^3.1053.0",
+    "@aws-sdk/client-s3": "^3.1058.0",
+    "@aws-sdk/s3-request-presigner": "^3.1058.0",
     "@node-saml/node-saml": "^5.0.0",
     "bcrypt": "^6.0.0",
     "bullmq": "^5.56.1",
