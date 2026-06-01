@@ -1,14 +1,39 @@
 <div align="center">
 
-# Baalvion Platform
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/banner-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/banner-light.svg">
+  <img alt="Baalvion — Enterprise Platform Infrastructure" src="assets/banner-dark.svg" width="100%">
+</picture>
+
+<br/>
+<br/>
 
 **Enterprise multi-platform infrastructure ecosystem — centralized identity, gateway federation, and a federated monorepo of domain services and applications.**
 
-[![CI](https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/ci.yml/badge.svg)](https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/codeql.yml/badge.svg)](https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/codeql.yml)
-[![Node](https://img.shields.io/badge/node-%3E%3D20-43853d.svg)](.nvmrc)
-[![pnpm](https://img.shields.io/badge/pnpm-%3E%3D9-f69220.svg)](https://pnpm.io)
-[![License](https://img.shields.io/badge/license-Proprietary-blue.svg)](LICENSE)
+<p>
+  <a href="https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/codeql.yml/badge.svg"></a>
+  <a href="https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/scorecard.yml"><img alt="OpenSSF Scorecard" src="https://github.com/baalvionservice/Baalvion-Project-Infra/actions/workflows/scorecard.yml/badge.svg"></a>
+  <a href="https://www.conventionalcommits.org"><img alt="Conventional Commits" src="https://img.shields.io/badge/commits-conventional-FE5196?logo=conventionalcommits&logoColor=white"></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-Proprietary-4F46E5"></a>
+</p>
+
+<p>
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+  <img alt="Node.js" src="https://img.shields.io/badge/Node.js%20%E2%89%A520-339933?style=for-the-badge&logo=nodedotjs&logoColor=white">
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">
+  <img alt="React" src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB">
+  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white">
+  <img alt="Redis" src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white">
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white">
+  <img alt="Kubernetes" src="https://img.shields.io/badge/Kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white">
+  <img alt="Turborepo" src="https://img.shields.io/badge/Turborepo-EF4444?style=for-the-badge&logo=turborepo&logoColor=white">
+  <img alt="pnpm" src="https://img.shields.io/badge/pnpm%20%E2%89%A59-F69220?style=for-the-badge&logo=pnpm&logoColor=white">
+  <img alt="Spring Boot" src="https://img.shields.io/badge/Spring_Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">
+</p>
+
+<sub><a href="#getting-started">Getting started</a> · <a href="#architecture">Architecture</a> · <a href="#platform-applications">Applications</a> · <a href="#technology-stack">Stack</a> · <a href="#security">Security</a> · <a href="CONTRIBUTING.md">Contributing</a></sub>
 
 </div>
 
@@ -50,20 +75,47 @@ docs/                              # architecture, ADRs, runbooks
 
 ## Architecture
 
-```
-                 Frontend Applications (Next.js / Vite)
-                              │
-              HTTPS Reverse Proxy / Edge Gateway  (:80 / :443)
-                              │
-                    Auth Gateway (BFF)  (:3099)
-                              │
-        ┌─────────────────────┼─────────────────────┐
-   Identity stack        Domain services        Shared packages
-  auth · oauth ·     commerce · knowledge ·     @baalvion/auth-node
-  session            ecosystem · platform ·     rbac · contracts ·
-                     infrastructure              events · telemetry
-                              │
-              PostgreSQL (multi-schema)  +  Redis  +  MinIO
+```mermaid
+flowchart TB
+    subgraph client["Client Layer"]
+        FE["Frontend Applications<br/><i>Next.js · Vite · React</i>"]
+    end
+
+    EDGE["Edge / Reverse Proxy<br/><i>HTTPS · :80 / :443</i>"]
+    BFF["Auth Gateway · BFF<br/><i>RS256 · httpOnly rotation · :3099</i>"]
+
+    subgraph domains["Federated Domain Services"]
+        direction LR
+        ID["Identity<br/><i>auth · oauth · session · rbac</i>"]
+        CM["Commerce<br/><i>orders · payments · ledger · trade</i>"]
+        KN["Knowledge<br/><i>cms · law · imperialpedia · ml</i>"]
+        EC["Ecosystem<br/><i>jobs · mining · ir · community</i>"]
+        PL["Platform<br/><i>admin · dashboard · realtime</i>"]
+        IN["Infrastructure<br/><i>notifications · proxy · audit</i>"]
+    end
+
+    PKG["Shared Packages · @baalvion/*<br/><i>auth-node · rbac · contracts · events · telemetry · cache · tenancy</i>"]
+
+    subgraph data["Stateful Backbone"]
+        direction LR
+        PG[("PostgreSQL<br/>multi-schema · RLS")]
+        RD[("Redis<br/>sessions · streams")]
+        OB[("MinIO<br/>object storage")]
+    end
+
+    FE --> EDGE --> BFF
+    BFF --> ID & CM & KN & EC & PL & IN
+    ID & CM & KN & EC & PL & IN -.->|"compose"| PKG
+    ID & CM & KN & EC & PL & IN --> PG
+    ID & CM & KN & EC & PL & IN --> RD
+    CM & KN --> OB
+
+    classDef gw fill:#4F46E5,stroke:#312E81,stroke-width:1px,color:#ffffff;
+    classDef store fill:#0891B2,stroke:#155E75,stroke-width:1px,color:#ffffff;
+    classDef pkg fill:#7C3AED,stroke:#5B21B6,stroke-width:1px,color:#ffffff;
+    class EDGE,BFF gw;
+    class PG,RD,OB store;
+    class PKG pkg;
 ```
 
 **Authentication** is centralized: RS256 asymmetric JWTs issued by the identity

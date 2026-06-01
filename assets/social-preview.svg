@@ -1,0 +1,77 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Baalvion — Enterprise Platform Infrastructure">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="640" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0A0E1A"/>
+      <stop offset="0.55" stop-color="#0C1228"/>
+      <stop offset="1" stop-color="#0A1530"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.32" r="0.55" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.26"/>
+      <stop offset="0.5" stop-color="#4F46E5" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#0A0E1A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <radialGradient id="coreg" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#A5F3FC"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#FFFFFF" stroke-opacity="0.035" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  <rect width="1280" height="640" fill="url(#glow)"/>
+
+  <!-- ambient rings behind logo -->
+  <g transform="translate(640,251)">
+    <circle r="210" fill="none" stroke="#22D3EE" stroke-opacity="0.08" stroke-width="1"/>
+    <circle r="300" fill="none" stroke="#6366F1" stroke-opacity="0.06" stroke-width="1"/>
+  </g>
+
+  <!-- eyebrow -->
+  <text x="640" y="150" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="20" font-weight="600" letter-spacing="7" fill="#7DD3FC">ENTERPRISE&#160;&#160;PLATFORM&#160;&#160;INFRASTRUCTURE</text>
+
+  <!-- logo tile -->
+  <g transform="translate(574,185)">
+    <rect width="132" height="132" rx="34" fill="url(#tile)"/>
+    <rect x="1" y="1" width="130" height="130" rx="33" fill="none" stroke="#FFFFFF" stroke-opacity="0.25" stroke-width="2"/>
+    <g transform="translate(66,66)">
+      <circle r="38" fill="none" stroke="#FFFFFF" stroke-opacity="0.40" stroke-width="2.5"/>
+      <g stroke="#FFFFFF" stroke-opacity="0.9" stroke-width="3" stroke-linecap="round">
+        <line x1="0" y1="0" x2="0" y2="-38"/>
+        <line x1="0" y1="0" x2="34" y2="11"/>
+        <line x1="0" y1="0" x2="21" y2="29"/>
+        <line x1="0" y1="0" x2="-21" y2="29"/>
+        <line x1="0" y1="0" x2="-34" y2="11"/>
+      </g>
+      <g fill="#FFFFFF">
+        <circle cx="0" cy="-38" r="7"/>
+        <circle cx="34" cy="11" r="7"/>
+        <circle cx="21" cy="29" r="7"/>
+        <circle cx="-21" cy="29" r="7"/>
+        <circle cx="-34" cy="11" r="7"/>
+      </g>
+      <circle r="16" fill="#FFFFFF" fill-opacity="0.2"/>
+      <circle r="11" fill="url(#coreg)"/>
+    </g>
+  </g>
+
+  <!-- wordmark -->
+  <text x="646" y="430" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="104" font-weight="800" letter-spacing="2" fill="#FFFFFF">BAALVION</text>
+  <rect x="520" y="452" width="240" height="6" rx="3" fill="url(#accent)"/>
+
+  <!-- tagline -->
+  <text x="640" y="512" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="26" font-weight="600" fill="#E2E8F0">Centralized identity · Gateway federation · Domain-driven monorepo</text>
+
+  <!-- footer -->
+  <text x="640" y="556" text-anchor="middle" font-family="'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="17" font-weight="400" fill="#8B95B2">35+ services · 16 applications · multi-tenant · security &amp; observability first-class</text>
+</svg>

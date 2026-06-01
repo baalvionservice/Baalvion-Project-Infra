@@ -1,0 +1,44 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Baalvion logo">
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4F46E5"/>
+      <stop offset="0.55" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#22D3EE"/>
+    </linearGradient>
+    <radialGradient id="coreg" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#A5F3FC"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="32" y="32" width="448" height="448" rx="112" fill="url(#tile)"/>
+  <rect x="34" y="34" width="444" height="444" rx="110" fill="none" stroke="#FFFFFF" stroke-opacity="0.22" stroke-width="4"/>
+
+  <g transform="translate(256,256)">
+    <!-- orbit rings -->
+    <circle r="150" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="3"/>
+    <circle r="104" fill="none" stroke="#FFFFFF" stroke-opacity="0.40" stroke-width="3"/>
+
+    <!-- edges core -> satellites -->
+    <g stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="6" stroke-linecap="round">
+      <line x1="0" y1="0" x2="0" y2="-104"/>
+      <line x1="0" y1="0" x2="99" y2="32"/>
+      <line x1="0" y1="0" x2="61" y2="84"/>
+      <line x1="0" y1="0" x2="-61" y2="84"/>
+      <line x1="0" y1="0" x2="-99" y2="32"/>
+    </g>
+
+    <!-- satellite nodes -->
+    <g fill="#FFFFFF">
+      <circle cx="0" cy="-104" r="20"/>
+      <circle cx="99" cy="32" r="20"/>
+      <circle cx="61" cy="84" r="20"/>
+      <circle cx="-61" cy="84" r="20"/>
+      <circle cx="-99" cy="32" r="20"/>
+    </g>
+
+    <!-- central core -->
+    <circle r="46" fill="#FFFFFF" fill-opacity="0.18"/>
+    <circle r="30" fill="url(#coreg)"/>
+  </g>
+</svg>
