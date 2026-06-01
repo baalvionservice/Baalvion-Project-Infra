@@ -136,10 +136,6 @@ services:
     networks:
       - default
       - baalvion-net
-    # rbac-service runs on the host during the war-room restore (not yet containerised);
-    # host.docker.internal lets the container reach the host-published PDP on :3055.
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
     ports:
       - "3013:3013"
     environment:
@@ -149,8 +145,8 @@ services:
       # backend-authoritative MOCK payment provider. A real deploy sets PAYMENT_PROVIDER + keys
       # instead; this flag is the explicit, audited opt-in the provider guard requires.
       - ALLOW_MOCK_PAYMENTS=true
-      # Commerce RBAC PDP (store-team roles / refund authorization). Host during war-room restore.
-      - RBAC_BASE_URL=http://host.docker.internal:3055
+      # Commerce RBAC PDP (store-team roles / refund authorization) — containerized on baalvion-net.
+      - RBAC_BASE_URL=http://rbac-service:3055
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_NAME=baalvion_db
@@ -167,6 +163,8 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+      rbac-service:
         condition: service_healthy
     profiles:
       - backend
@@ -375,6 +373,52 @@ services:
       postgres:
         condition: service_healthy
       redis:
+        condition: service_healthy
+    profiles:
+      - identity
+      - backend
+
+  # ── RBAC Service / Policy Decision Point (port 3055) ──────────────────────────
+  # Verify-only RS256 PDP for commerce store-team roles + ABAC. Containerized so the
+  # whole stack boots from `docker compose` with no host node process.
+  rbac-service:
+    build:
+      context: .
+      dockerfile: Backend/services/identity/rbac-service/Dockerfile
+    container_name: baalvion-rbac
+    restart: unless-stopped
+    # Shared gateway network so sibling containers resolve http://rbac-service:3055.
+    networks:
+      - default
+      - baalvion-net
+    ports:
+      - "3055:3055"
+    environment:
+      - PORT=3055
+      - NODE_ENV=production
+      - API_BASE_URL=http://rbac-service:3055
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=baalvion_db
+      - DB_USER=baalvion
+      - DB_PASSWORD=baalvion_dev_pass
+      - DB_SCHEMA=rbac
+      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
+      - JWT_ISSUER=baalvion-auth
+      - JWT_AUDIENCE=baalvion-platform
+      - JWT_ALLOW_HS256_FALLBACK=false
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      # Service-to-service PDP calls (commerce/order PEP -> /v1/authorize). User-token
+      # forwarding is the default path; this enables system-context calls when needed.
+      - INTERNAL_API_KEY=${INTERNAL_API_KEY}
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3055/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    depends_on:
+      postgres:
         condition: service_healthy
     profiles:
       - identity
