@@ -21,6 +21,9 @@ jobs:
           comment-summary-in-pr: on-failure
           # Block GPL/AGPL-style copyleft from entering a proprietary codebase.
           deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0, LGPL-3.0
+          # jszip is dual-licensed "GPL-3.0-only OR MIT" — usable under MIT, but the action
+          # flags it because GPL-3.0 appears in the SPDX OR-expression. Exempt it explicitly.
+          allow-dependencies-licenses: pkg:npm/jszip
           # Acknowledged transitive build-time advisories on node-tar 6.2.1, pulled ONLY by
           # @mapbox/node-pre-gyp@1.0.11 (install-time prebuilt-binary fetch, not runtime code).
           # Still tracked by Dependabot. Remediate by upgrading node-pre-gyp to v2 (uses tar@7),
