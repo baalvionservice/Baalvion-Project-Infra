@@ -45,7 +45,6 @@ export default async function SingleLeaderPage({ params }: SingleLeaderPageParam
   const { slug } = await params;
   const leader = findLeaderBySlug(slug);
   if (!leader) return notFound();
-  console.log(leader)
 
   const imageId = 'imageId' in leader ? leader.imageId : undefined;
   const image =

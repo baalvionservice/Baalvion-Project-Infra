@@ -99,7 +99,7 @@ export default function ProductTour({ onComplete }: ProductTourProps) {
             <CardHeader>
                 <div className="flex justify-between items-center">
                     <CardTitle className="text-base">{currentStep.title}</CardTitle>
-                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleFinish}><X className="h-4 w-4" /></Button>
+                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleFinish} aria-label="Close tour"><X className="h-4 w-4" /></Button>
                 </div>
             </CardHeader>
             <CardContent>

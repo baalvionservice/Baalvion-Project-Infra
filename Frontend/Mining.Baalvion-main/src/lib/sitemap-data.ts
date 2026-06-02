@@ -1,5 +1,5 @@
 /**
- * @fileOverview Centralized registry for all indexable content in GeoTrade Nexus.
+ * @fileOverview Centralized registry for all indexable content in Baalvion Mining Inc.
  * This file serves as the source of truth for the Sitemap and SEO systems.
  */
 

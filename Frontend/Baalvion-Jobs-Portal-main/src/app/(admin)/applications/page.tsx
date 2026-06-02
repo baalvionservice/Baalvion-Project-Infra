@@ -83,13 +83,10 @@ export default function ApplicationsPage() {
       ),
     ].join('\n');
 
-    console.log('--- CSV EXPORT ---');
-    console.log(csvContent);
-
     showToast({
       type: 'success',
       title: 'Export Started',
-      description: `${selectedIds.length} applications are being exported. See console for CSV content.`,
+      description: `${selectedIds.length} applications are being exported.`,
     });
     clearSelection();
   };

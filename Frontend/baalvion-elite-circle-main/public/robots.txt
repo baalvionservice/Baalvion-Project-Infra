@@ -1,4 +1,23 @@
 User-agent: *
 Allow: /
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /elite/apply
+Disallow: /elite/status
+Disallow: /elite/premium
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /deals
+Disallow: /investors
+Disallow: /founders
+Disallow: /connections
+Disallow: /pipeline
+Disallow: /membership
+Disallow: /onboarding
+Disallow: /protocol/admin
+Disallow: /protocol/expert
+Disallow: /protocol/student
 
-Sitemap: https://www.marketunderworld.com/sitemap.xml
+Sitemap: https://elite.baalvion.com/sitemap.xml

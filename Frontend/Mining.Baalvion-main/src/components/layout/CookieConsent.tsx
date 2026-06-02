@@ -37,7 +37,7 @@ export function CookieConsent() {
               </button>
             </div>
             <p className="text-xs text-slate-500 leading-relaxed">
-              GeoTrade Nexus uses cookies to provide a secure industrial trading environment and to analyze platform traffic for optimization. By continuing, you agree to our <a href="/terms" className="text-primary font-bold hover:underline">Terms</a> and <a href="/privacy" className="text-primary font-bold hover:underline">Privacy Policy</a>.
+              Baalvion Mining Inc. uses cookies to provide a secure industrial trading environment and to analyze platform traffic for optimization. By continuing, you agree to our <a href="/terms" className="text-primary font-bold hover:underline">Terms</a> and <a href="/privacy" className="text-primary font-bold hover:underline">Privacy Policy</a>.
             </p>
             <div className="flex gap-3 pt-2">
               <Button size="sm" onClick={handleAccept} className="bg-primary text-white font-bold px-6">

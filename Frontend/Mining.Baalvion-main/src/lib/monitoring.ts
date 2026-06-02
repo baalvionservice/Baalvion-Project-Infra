@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * @fileOverview Centralized Monitoring & Analytics Utility for GeoTrade Nexus.
+ * @fileOverview Centralized Monitoring & Analytics Utility for Baalvion Mining Inc.
  * Provides abstractions for event tracking and error reporting with GA4 integration and PII filtering.
  */
 

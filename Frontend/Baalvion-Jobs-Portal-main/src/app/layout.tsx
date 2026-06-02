@@ -23,23 +23,53 @@ export const metadata: Metadata = {
     description: 'The Operating System for Modern Recruitment.',
     type: 'website',
     url: AppConfig.baseUrl,
-    images: [`/og-image.png`],
+    siteName: 'TalentOS by Baalvion',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'TalentOS by Baalvion' }],
   },
   twitter: {
     card: 'summary_large_image',
+    site: '@baalvion',
     title: 'TalentOS by Baalvion',
     description: 'The Operating System for Modern Recruitment.',
     images: [`/og-image.png`],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-snippet': -1,
+      'max-image-preview': 'large',
+      'max-video-preview': -1,
+    },
   },
 };
 
 const organizationSchema = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
-  name: 'TalentOS by Baalvion',
+  name: 'Baalvion Industries Pvt Ltd',
   url: AppConfig.baseUrl,
   logo: `${AppConfig.baseUrl}/logo.png`,
-  sameAs: [],
+  sameAs: [
+    'https://www.baalvion.com',
+  ],
+};
+
+const webSiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'TalentOS by Baalvion',
+  url: AppConfig.baseUrl,
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${AppConfig.baseUrl}/careers/open-positions?q={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
 };
 
 export default function RootLayout({
@@ -53,6 +83,10 @@ export default function RootLayout({
         <script
           type='application/ld+json'
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type='application/ld+json'
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
         />
         <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />
       </head>

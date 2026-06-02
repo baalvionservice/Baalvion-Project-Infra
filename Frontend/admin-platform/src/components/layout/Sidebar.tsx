@@ -40,6 +40,8 @@ function SidebarLink({ item, collapsed, depth = 0 }: SidebarLinkProps) {
       <div>
         <button
           onClick={() => setOpen((o) => !o)}
+          aria-label={collapsed ? item.title : undefined}
+          aria-expanded={open}
           className={cn(
             'flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors',
             'text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',

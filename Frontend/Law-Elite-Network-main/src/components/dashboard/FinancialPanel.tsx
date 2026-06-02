@@ -28,11 +28,11 @@ export default function FinancialPanel() {
 
   const totalPaid = payments
     .filter(p => p.status === 'paid')
-    .reduce((sum, p) => sum + p.amount, 0);
-    
+    .reduce((sum, p) => sum + (p.amount ?? 0), 0);
+
   const totalPending = payments
     .filter(p => p.status === 'pending')
-    .reduce((sum, p) => sum + p.amount, 0);
+    .reduce((sum, p) => sum + (p.amount ?? 0), 0);
 
   return (
     <Card className="border-slate-200 bg-white shadow-sm overflow-hidden h-full">

@@ -40,9 +40,9 @@ export const mockGenerateCaseInsights = async (caseData: any) => {
   // Get recommended lawyers based on category
   const allLawyers = await getAllLawyers();
   const recommendedLawyers = allLawyers
-    .filter(l => 
-      l.specialization.some(s => s.toLowerCase().includes(category)) ||
-      l.specialization.some(s => category.includes(s.toLowerCase()))
+    .filter((l) => l != null && Array.isArray(l.specialization) &&
+      (l.specialization.some((s: string) => s.toLowerCase().includes(category)) ||
+       l.specialization.some((s: string) => category.includes(s.toLowerCase())))
     )
     .slice(0, 3);
 

@@ -146,8 +146,8 @@ function LawyerMarketplaceContent() {
               onChange={setSearchQuery}
               onSubmit={() => fetchLawyers()}
             />
-            <Button 
-              onClick={fetchLawyers} 
+            <Button
+              onClick={() => fetchLawyers()}
               className="bg-[#0B1F3A] text-white hover:bg-slate-800 h-12 px-8 rounded-xl font-bold shadow-lg shadow-blue-900/10 transition-all active:scale-[0.98]"
             >
               Update Discovery

@@ -1,6 +1,12 @@
 "use client";
 
+import type { Metadata } from 'next';
 import { useState } from 'react';
+
+export const metadata: Metadata = {
+  title: 'Board of Directors | Baalvion Governance',
+  description: 'Meet the Baalvion Board of Directors — experienced leaders overseeing corporate governance, strategy, and shareholder value.',
+};
 import Link from 'next/link';
 import { boardOfDirectors } from '@/lib/data';
 import BoardMemberBioDialog from '@/components/shared/BoardMemberBioDialog';
@@ -38,6 +44,10 @@ export default function BoardOfDirectorsPage() {
                                     key={member.name}
                                     className="text-center flex flex-col items-center cursor-pointer group"
                                     onClick={() => setSelectedMember(member)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(e) => e.key === 'Enter' || e.key === ' ' ? setSelectedMember(member) : undefined}
+                                    aria-label={`View bio for ${member.name}`}
                                 >
                                     {memberImage && (
                                         <Image

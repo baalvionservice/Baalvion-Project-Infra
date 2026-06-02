@@ -180,8 +180,8 @@ export default async function CandidateProfilePage({
         <Image
           src={`https://picsum.photos/seed/${candidate.id}/1200/300`}
           alt={`${candidate.name}'s banner`}
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: 'cover' }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
       </div>
@@ -217,8 +217,8 @@ export default async function CandidateProfilePage({
                 <div className="mt-4 flex justify-center gap-2">
                   {candidate.profile?.githubUrl && (
                     <Button asChild variant="outline" size="icon">
-                      <Link href={candidate.profile.githubUrl} target="_blank">
-                        <Github className="h-5 w-5" />
+                      <Link href={candidate.profile.githubUrl} target="_blank" rel="noopener noreferrer">
+                        <Github className="h-5 w-5" aria-label="GitHub profile" />
                       </Link>
                     </Button>
                   )}
@@ -227,8 +227,9 @@ export default async function CandidateProfilePage({
                       <Link
                         href={candidate.profile.linkedinUrl}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        <Linkedin className="h-5 w-5" />
+                        <Linkedin className="h-5 w-5" aria-label="LinkedIn profile" />
                       </Link>
                     </Button>
                   )}
@@ -237,12 +238,13 @@ export default async function CandidateProfilePage({
                       <Link
                         href={candidate.profile.portfolioLinks[0]}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        <Globe className="h-5 w-5" />
+                        <Globe className="h-5 w-5" aria-label="Portfolio website" />
                       </Link>
                     </Button>
                   )}
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" aria-label="Share profile">
                     <Share2 className="h-5 w-5" />
                   </Button>
                 </div>

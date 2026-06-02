@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   title: 'Part-Time Roles | Baalvion Careers',
   description:
     'Explore flexible, part-time roles at Baalvion and contribute to our mission on your schedule.',
+  alternates: {
+    canonical: '/careers/part-time',
+  },
+  openGraph: {
+    title: 'Part-Time Roles | TalentOS by Baalvion',
+    description: 'Explore flexible, part-time roles at Baalvion and contribute to our mission on your schedule.',
+    url: '/careers/part-time',
+  },
 };
 
 export default async function PartTimeRolesPage() {

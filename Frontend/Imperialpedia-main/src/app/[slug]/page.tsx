@@ -13,6 +13,7 @@ import { getTermUrl } from "@/lib/data/utils";
 import { fetchTermsByLetter } from "@/lib/data/term-live";
 import { Term } from "@/lib/data/terms";
 import Link from "next/link";
+import { env } from "@/config/env";
 
 // Union type to handle different article types
 type ArticleType = NewsArticle | StocksArticle;
@@ -218,8 +219,39 @@ export default async function SingleNewsPage({
     (a) => a.category === article.category && a.slug !== slug
   );
 
+  const baseUrl = (env.siteUrl || 'https://imperialpedia.com').replace(/\/$/, '');
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.title,
+    description: article.excerpt || '',
+    image: article.imageUrl ? [article.imageUrl] : [],
+    author: { '@type': 'Person', name: article.author?.name || 'Imperialpedia' },
+    publisher: { '@type': 'Organization', name: 'Imperialpedia', url: baseUrl },
+    datePublished: article.publishedAt || '',
+    dateModified: article.updatedAt || article.publishedAt || '',
+    url: `${baseUrl}/${slug}`,
+  };
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
+      { '@type': 'ListItem', position: 2, name: 'News', item: `${baseUrl}/news` },
+      { '@type': 'ListItem', position: 3, name: article.title, item: `${baseUrl}/${slug}` },
+    ],
+  };
+
   return (
     <div className="bg-background min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="max-w-7xl mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-12 xl:gap-16">
           {/* ══ LEFT: Article ══════════════════════════════════════════════ */}

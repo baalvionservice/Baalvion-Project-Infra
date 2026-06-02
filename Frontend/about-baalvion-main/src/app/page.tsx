@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   title: "Baalvion — Global Trade Infrastructure Platform",
   description:
     "Baalvion builds global trade infrastructure connecting businesses, finance, compliance, and intelligence into one unified platform.",
+  alternates: { canonical: "https://about.baalvion.com" },
   openGraph: {
     title: "Baalvion — Global Trade Infrastructure Platform",
     description:

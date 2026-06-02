@@ -15,7 +15,7 @@ export const useAuth = () => {
       setUser(session?.user ?? null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); };
   }, []);
 
   const signOut = async () => {

@@ -9,6 +9,14 @@ export const metadata: Metadata = {
   title: 'Full-Time Roles | Baalvion Careers',
   description:
     'Explore full-time career opportunities at Baalvion and join our mission to build the future of global hiring.',
+  alternates: {
+    canonical: '/careers/full-time',
+  },
+  openGraph: {
+    title: 'Full-Time Roles | TalentOS by Baalvion',
+    description: 'Explore full-time career opportunities at Baalvion and join our mission to build the future of global hiring.',
+    url: '/careers/full-time',
+  },
 };
 
 export default async function FullTimeRolesPage() {

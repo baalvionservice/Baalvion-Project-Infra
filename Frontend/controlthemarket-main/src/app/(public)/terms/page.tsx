@@ -1,3 +1,13 @@
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service',
+  description:
+    'Review the Terms of Service for ControlTheMarket. By using our platform you agree to these terms governing candidate submissions and company hiring.',
+  alternates: {
+    canonical: 'https://controlthemarket.com/terms',
+  },
+};
 
 export default function TermsOfServicePage() {
   const sections = [

@@ -10,6 +10,7 @@ import { RoleProvider } from '@/hooks/use-view-role';
 export const metadata: Metadata = {
   title: 'Baalvion',
   description: 'The Global Business Operating System',
+  robots: { index: false, follow: false },
 };
 
 export default function RootLayout({

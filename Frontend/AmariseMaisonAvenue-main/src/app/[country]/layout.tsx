@@ -31,7 +31,6 @@ export default function CountryLayout({
   const isCollectionPage = pathname?.includes("/category/") || pathname?.includes("/account/live");
   const isProductPage = pathname?.includes("/product/");
 
-  console.log(isCollectionPage, isProductPage)
   function checkMobile() {
     if (typeof window !== "undefined") {
       setIsMobile(window.innerWidth < 768);

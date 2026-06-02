@@ -165,7 +165,7 @@ export default function BusinessManagement() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" aria-label="Business options">
                         <MoreHorizontal />
                       </Button>
                     </DropdownMenuTrigger>

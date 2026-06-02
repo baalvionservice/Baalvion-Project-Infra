@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Trust & Security | Baalvion Operating System",
   description:
     "Security, transparency, and international law are at the core of the Baalvion Operating System (BOS) infrastructure. We architect for the highest global standards.",
+  alternates: { canonical: "https://about.baalvion.com/trust" },
   openGraph: {
     title: "Trust & Security | Baalvion Operating System",
     description:

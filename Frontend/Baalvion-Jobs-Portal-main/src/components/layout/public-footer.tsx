@@ -39,7 +39,8 @@ export function PublicFooter() {
                 <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Subscribe to our newsletter</h3>
                 <p className="text-sm text-muted-foreground mt-1">Get the latest news on open roles and company updates.</p>
                 <form className="mt-4 flex w-full max-w-sm items-center space-x-2">
-                    <Input type="email" placeholder="Email" />
+                    <label htmlFor="newsletter-email" className="sr-only">Email address</label>
+                    <Input id="newsletter-email" type="email" placeholder="Email" aria-label="Email address" />
                     <Button type="submit">Subscribe</Button>
                 </form>
             </div>

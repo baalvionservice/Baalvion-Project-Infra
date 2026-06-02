@@ -138,6 +138,7 @@ export default function ApprovedArticlesPage() {
                     <Link
                       href={`/articles/${article.slug}`}
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="text-primary hover:underline text-xs inline-flex items-center"
                     >
                       View Live <ExternalLink className="ml-1.5 h-3 w-3" />

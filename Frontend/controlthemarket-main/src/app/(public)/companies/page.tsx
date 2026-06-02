@@ -1,6 +1,20 @@
-
-
+import type { Metadata } from 'next';
 import { getCompanies } from '@/lib/api';
+
+export const metadata: Metadata = {
+  title: 'Companies Hiring',
+  description:
+    'Explore innovative companies on ControlTheMarket that find top talent based on proven skills — not resumes. Browse open opportunities today.',
+  alternates: {
+    canonical: 'https://controlthemarket.com/companies',
+  },
+  openGraph: {
+    url: 'https://controlthemarket.com/companies',
+    title: 'Companies Hiring | ControlTheMarket',
+    description:
+      'Explore innovative companies finding top talent based on proven skills — not resumes.',
+  },
+};
 import {
   Card,
   CardContent,

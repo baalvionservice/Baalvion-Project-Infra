@@ -80,17 +80,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
+  const orgJsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'FinancialService',
-    name: 'Baalvion Investor Relations',
+    '@type': ['Organization', 'FinancialService'],
+    '@id': `${AppConfig.baseUrl}/#organization`,
+    name: 'Baalvion',
+    alternateName: 'Baalvion Industries Pvt Ltd',
     url: AppConfig.baseUrl,
-    logo: 'https://baalvion.com/logo.png',
-    description: 'Institutional-grade investment and infrastructure management.',
-    parentOrganization: {
-      '@type': 'Organization',
-      name: 'Baalvion Group',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://baalvion.com/logo.png',
     },
+    description: 'The global operating system for B2B trade infrastructure. Institutional-grade investment and infrastructure management.',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Yeshwant Avenue Building, NX',
@@ -105,6 +106,19 @@ export default function RootLayout({
       contactType: 'Investor Relations',
       email: 'invrel@baalvion.com',
     },
+    sameAs: [
+      'https://www.linkedin.com/company/baalvion',
+      'https://twitter.com/baalvion',
+    ],
+  };
+
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${AppConfig.baseUrl}/#website`,
+    url: AppConfig.baseUrl,
+    name: 'Baalvion Investor Relations',
+    publisher: { '@id': `${AppConfig.baseUrl}/#organization` },
   };
 
   return (
@@ -117,9 +131,14 @@ export default function RootLayout({
           Skip to main content
         </a>
         <Script
-          id="structured-data"
+          id="structured-data-org"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+        <Script
+          id="structured-data-website"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <Header />
         <div id="main-content" className="flex min-h-screen  flex-col" role="main">

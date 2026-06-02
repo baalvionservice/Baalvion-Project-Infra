@@ -6,7 +6,7 @@
 import { mockUsers } from "./mockUsers";
 
 export const getAllUsersMock = () => {
-  if (typeof window === 'undefined') return mockUsers;
+  if (typeof window === 'undefined') return [...mockUsers];
   
   // Combine static mock users with any dynamically registered ones
   const dynamicUser = localStorage.getItem("law_elite_user");

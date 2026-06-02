@@ -5,10 +5,14 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
     title: "Diversity & Inclusion | TalentOS",
     description: "Learn about Baalvion's commitment to building a diverse and inclusive workplace that reflects the world's talent.",
+    alternates: {
+        canonical: '/about/diversity',
+    },
     openGraph: {
-        title: "Diversity & Inclusion | TalentOS",
+        title: "Diversity & Inclusion | TalentOS by Baalvion",
         description: "Learn about Baalvion's commitment to building a diverse and inclusive workplace.",
-    }
+        url: '/about/diversity',
+    },
 };
 
 export default function DiversityPage() {

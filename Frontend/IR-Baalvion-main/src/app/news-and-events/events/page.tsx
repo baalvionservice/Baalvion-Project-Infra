@@ -1,6 +1,12 @@
 "use client";
 
+import type { Metadata } from 'next';
 import * as React from "react";
+
+export const metadata: Metadata = {
+  title: 'Events & Presentations | News and Events',
+  description: 'Upcoming and archived Baalvion investor events, earnings calls, conferences, and presentations.',
+};
 import { Card } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import Link from 'next/link';

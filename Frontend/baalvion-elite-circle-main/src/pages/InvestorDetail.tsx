@@ -112,7 +112,7 @@ export default function InvestorDetail() {
       <div className="flex items-center gap-3 py-2 border-b border-border/40 last:border-0">
         <Icon className="w-4 h-4 text-primary shrink-0" />
         <span className="text-xs text-muted-foreground w-20 shrink-0">{label}</span>
-        {href ? <a href={href} target="_blank" rel="noreferrer" className="text-sm text-primary hover:underline truncate">{value}</a> : <span className="text-sm truncate">{inner}</span>}
+        {href ? <a href={href} target="_blank" rel="noopener noreferrer" className="text-sm text-primary hover:underline truncate">{value}</a> : <span className="text-sm truncate">{inner}</span>}
       </div>
     );
   };
@@ -126,7 +126,7 @@ export default function InvestorDetail() {
         <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-8 mb-6">
           <div className="flex flex-col sm:flex-row items-start gap-6">
             {inv.avatar_url
-              ? <img src={inv.avatar_url} alt={inv.name} className="w-24 h-24 rounded-2xl object-cover ring-2 ring-primary/30" />
+              ? <img src={inv.avatar_url} alt={inv.name} loading="lazy" decoding="async" className="w-24 h-24 rounded-2xl object-cover ring-2 ring-primary/30" />
               : <div className="w-24 h-24 rounded-2xl bg-primary/15 text-primary text-2xl font-bold flex items-center justify-center">{initials(inv.name)}</div>}
             <div className="flex-1">
               <div className="flex items-center gap-2 flex-wrap">
@@ -152,8 +152,8 @@ export default function InvestorDetail() {
                 ) : (
                   <Button variant="premium" onClick={() => setDlgOpen(true)}><Mail className="w-4 h-4 mr-2" />Request intro</Button>
                 )}
-                {inv.website && <Button variant="outline" asChild><a href={inv.website} target="_blank" rel="noreferrer"><Globe className="w-4 h-4 mr-2" />Website</a></Button>}
-                {inv.linkedin_url && <Button variant="outline" asChild><a href={inv.linkedin_url} target="_blank" rel="noreferrer"><Linkedin className="w-4 h-4 mr-2" />LinkedIn</a></Button>}
+                {inv.website && <Button variant="outline" asChild><a href={inv.website} target="_blank" rel="noopener noreferrer"><Globe className="w-4 h-4 mr-2" />Website</a></Button>}
+                {inv.linkedin_url && <Button variant="outline" asChild><a href={inv.linkedin_url} target="_blank" rel="noopener noreferrer"><Linkedin className="w-4 h-4 mr-2" />LinkedIn</a></Button>}
               </div>
             </div>
           </div>
@@ -223,7 +223,7 @@ export default function InvestorDetail() {
                   <div className="mt-4 flex flex-wrap gap-2">
                     {socials.map((s) => {
                       const Icon = PLATFORM_ICON[s.platform] || Link2;
-                      return <a key={s.id} href={s.url} target="_blank" rel="noreferrer" className="w-9 h-9 rounded-lg bg-secondary hover:bg-primary/20 flex items-center justify-center transition-colors" title={s.handle || s.platform}><Icon className="w-4 h-4" /></a>;
+                      return <a key={s.id} href={s.url} target="_blank" rel="noopener noreferrer" className="w-9 h-9 rounded-lg bg-secondary hover:bg-primary/20 flex items-center justify-center transition-colors" title={s.handle || s.platform}><Icon className="w-4 h-4" /></a>;
                     })}
                   </div>
                 </CardContent></Card>
@@ -248,7 +248,7 @@ export default function InvestorDetail() {
                           <td className="py-3 px-3"><Badge variant="outline" className="border-primary/40 text-primary">{iv.round || "—"}</Badge></td>
                           <td className="py-3 px-3 font-semibold text-primary">{money(iv.amount_usd)}</td>
                           <td className="py-3 px-3 text-muted-foreground">{fmtDate(iv.invested_on)}</td>
-                          <td className="py-3 px-3">{iv.source_url ? <a href={iv.source_url} target="_blank" rel="noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">{iv.source_name}<ExternalLink className="w-3 h-3" /></a> : <span className="text-muted-foreground">{iv.source_name || "—"}</span>}</td>
+                          <td className="py-3 px-3">{iv.source_url ? <a href={iv.source_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">{iv.source_name}<ExternalLink className="w-3 h-3" /></a> : <span className="text-muted-foreground">{iv.source_name || "—"}</span>}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -276,7 +276,7 @@ export default function InvestorDetail() {
                         <span className="text-xs text-muted-foreground">· {fmtDate(n.published_at)}</span>
                         {n.sentiment && <Badge variant="outline" className={`text-[10px] ${SENTIMENT[n.sentiment] || ""}`}>{n.sentiment}</Badge>}
                       </div>
-                      <h3 className="font-semibold leading-snug">{n.url ? <a href={n.url} target="_blank" rel="noreferrer" className="hover:text-primary">{n.headline}</a> : n.headline}</h3>
+                      <h3 className="font-semibold leading-snug">{n.url ? <a href={n.url} target="_blank" rel="noopener noreferrer" className="hover:text-primary">{n.headline}</a> : n.headline}</h3>
                       {n.summary && <p className="text-sm text-muted-foreground mt-1">{n.summary}</p>}
                     </div>
                   </div>
@@ -291,7 +291,7 @@ export default function InvestorDetail() {
                 : socials.map((s) => {
                   const Icon = PLATFORM_ICON[s.platform] || Link2;
                   return (
-                    <a key={s.id} href={s.url} target="_blank" rel="noreferrer">
+                    <a key={s.id} href={s.url} target="_blank" rel="noopener noreferrer">
                       <Card className="border-border hover:border-primary/40 transition-colors"><CardContent className="p-4 flex items-center gap-3">
                         <div className="w-11 h-11 rounded-lg bg-primary/15 flex items-center justify-center shrink-0"><Icon className="w-5 h-5 text-primary" /></div>
                         <div className="flex-1 min-w-0">

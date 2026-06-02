@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: investorTitle(base),
     description: investorDesc(base),
     alternates: { canonical: `/investors/${base.slug}` },
-    openGraph: { title: investorTitle(base), description: investorDesc(base), url: `${SITE_URL}/investors/${base.slug}`, type: "profile" },
+    openGraph: { title: investorTitle(base), description: investorDesc(base), url: `${SITE_URL}/investors/${base.slug}`, type: "profile", siteName: "Baalvion Insiders" },
   };
 }
 
@@ -45,10 +45,21 @@ export default async function InvestorProfile({ params }: { params: Promise<{ sl
           knowsAbout: i.focus_sectors || undefined,
         }}
       />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+            { "@type": "ListItem", position: 2, name: "Investors", item: `${SITE_URL}/investors` },
+            { "@type": "ListItem", position: 3, name: i.firm || i.name, item: `${SITE_URL}/investors/${i.slug}` },
+          ],
+        }}
+      />
       <div className="crumbs"><Link href="/">Home</Link> / <Link href="/investors">Investors</Link> / {i.firm || i.name}</div>
 
       <div className="profile-head">
-        <Avatar src={i.avatar_url} alt={i.firm || i.name || "Investor"} />
+        <Avatar src={i.avatar_url} alt={i.firm || i.name || "Investor"} eager />
         <div>
           <h1>{i.firm || i.name} {i.is_verified ? "✓" : ""}</h1>
           <div className="muted">{[i.title, i.firm_type, i.location || i.region].filter(Boolean).join(" · ")}</div>
@@ -74,12 +85,12 @@ export default async function InvestorProfile({ params }: { params: Promise<{ sl
             <thead><tr><th>Company</th><th>Round</th><th>Amount</th><th>Date</th><th>Source</th></tr></thead>
             <tbody>
               {investments.map((inv, idx) => (
-                <tr key={idx}>
+                <tr key={`${inv.target_company}-${idx}`}>
                   <td>{inv.target_company}</td>
                   <td className="muted">{inv.round || "—"}</td>
                   <td className="muted">{usd(inv.amount_usd) || "—"}</td>
                   <td className="muted">{inv.invested_on || "—"}</td>
-                  <td className="muted">{inv.source_url ? <a href={inv.source_url} rel="nofollow noopener" target="_blank">{inv.source_name || "link"}</a> : inv.source_name || "—"}</td>
+                  <td className="muted">{inv.source_url ? <a href={inv.source_url} rel="nofollow noopener noreferrer" target="_blank">{inv.source_name || "link"}</a> : inv.source_name || "—"}</td>
                 </tr>
               ))}
             </tbody>

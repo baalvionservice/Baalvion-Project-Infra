@@ -38,7 +38,7 @@ const getProductData = (slug: string) => {
     minOrder: "5,000 MT",
     price: "105.40",
     currency: "USD",
-    supplier: "GeoTrade Verified Partner",
+    supplier: "Baalvion Verified Partner",
     supplierRating: 4.8,
     description: `Premium industrial material optimized for global manufacturing. This batch of ${slug.replace(/-/g, ' ')} features exceptional consistency and minimal impurities. Verified for immediate export with all international documentation ready for transit.`,
     imageUrl: `https://picsum.photos/seed/${slug}/800/600`

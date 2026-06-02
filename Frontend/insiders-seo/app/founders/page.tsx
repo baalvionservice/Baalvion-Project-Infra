@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   description:
     "Discover founders and startups raising on Baalvion, by sector and stage. Investors: find your next deal.",
   alternates: { canonical: "/founders" },
+  openGraph: {
+    title: "Founders Raising Now — Discover Startups",
+    description: "Discover founders and startups raising on Baalvion, by sector and stage. Investors: find your next deal.",
+    url: "/founders",
+    type: "website",
+    siteName: "Baalvion Insiders",
+  },
 };
 
 export default async function FoundersDirectory() {

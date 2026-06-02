@@ -52,7 +52,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); };
   }, []);
 
   const loadProfile = async (userId: string) => {
@@ -151,12 +151,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
               </div>
 
               {/* AI Assistant Button */}
-              <Button variant="ghost" size="icon" className="hidden sm:flex">
+              <Button variant="ghost" size="icon" className="hidden sm:flex" aria-label="Open AI assistant">
                 <Sparkles className="w-5 h-5 text-primary" />
               </Button>
 
               {/* Theme Toggle */}
-              <Button variant="ghost" size="icon" onClick={toggleDarkMode}>
+              <Button variant="ghost" size="icon" onClick={toggleDarkMode} aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}>
                 {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </Button>
 
@@ -235,6 +235,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 variant="ghost"
                 size="icon"
                 className="md:hidden"
+                aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}

@@ -166,7 +166,7 @@ export default function ContractsPage() {
           <div className="space-y-4 max-w-xl">
             <h3 className="text-2xl font-bold">Legal & Compliance Shield</h3>
             <p className="text-primary-foreground/80 leading-relaxed">
-              Every contract on GeoTrade Nexus is legally binding and governed by international trade laws. Our platform provides smart-contract enforcement for penalty clauses and automated milestone payments.
+              Every contract on Baalvion Mining Inc. is legally binding and governed by international trade laws. Our platform provides smart-contract enforcement for penalty clauses and automated milestone payments.
             </p>
             <div className="flex flex-wrap gap-4">
               <div className="flex items-center gap-2 text-xs font-bold">

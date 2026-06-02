@@ -7,17 +7,18 @@ import { getAllOpenCases, assignLawyerToCase } from "@/services/cases/caseServic
 import { useAuthStore } from "@/store/authStore";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import RoleGuard from "@/components/auth/RoleGuard";
-import { 
-  Inbox, 
-  Briefcase, 
-  Loader2, 
-  Search, 
-  CheckCircle2, 
+import {
+  Inbox,
+  Briefcase,
+  Loader2,
+  Search,
+  CheckCircle2,
   XCircle,
   FileText,
   Clock,
   ChevronRight,
-  MessageSquare
+  MessageSquare,
+  Users
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

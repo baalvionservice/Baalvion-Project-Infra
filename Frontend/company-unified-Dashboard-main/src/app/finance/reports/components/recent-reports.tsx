@@ -49,7 +49,7 @@ export default function RecentReports() {
                   <TableCell>{report.generated}</TableCell>
                   <TableCell>{report.size}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost" size="icon" aria-label="Download report">
                       <Download className="h-4 w-4" />
                     </Button>
                   </TableCell>

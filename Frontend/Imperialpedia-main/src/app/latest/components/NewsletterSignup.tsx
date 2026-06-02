@@ -9,7 +9,6 @@ export function NewsletterSignup() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Mock newsletter signup
-    console.log("Newsletter signup:", email);
     setIsSubmitted(true);
     setTimeout(() => {
       setIsSubmitted(false);

@@ -760,7 +760,7 @@ export default function AdminPanel() {
         .single();
 
       if (error) {
-        console.log("No schedule setting found, using defaults");
+        // No schedule setting found; use component defaults
         return;
       }
 

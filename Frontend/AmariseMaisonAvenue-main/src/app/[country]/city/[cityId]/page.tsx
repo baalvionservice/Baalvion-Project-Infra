@@ -279,6 +279,7 @@ export default function CityPage() {
               <Link
                 href={city.office.mapUrl}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="flex-1"
               >
                 <Button

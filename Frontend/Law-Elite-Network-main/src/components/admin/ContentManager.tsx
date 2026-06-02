@@ -38,7 +38,9 @@ export default function ContentManager() {
   const [selectedArticle, setSelectedArticle] = useState<any>(null);
 
   const { toast } = useToast();
-  const { adminController } = useAuthContext();
+  useAuthContext(); // auth context subscription
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const adminController: any = null; // not yet wired to AuthContext
 
   const loadArticles = async () => {
     setLoading(true);
@@ -134,9 +136,9 @@ export default function ContentManager() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
-                      <Link href={`/article/${art.slug}`} target="_blank">
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600">
-                          <ExternalLink className="w-3.5 h-3.5" />
+                      <Link href={`/article/${art.slug}`} target="_blank" rel="noopener noreferrer" aria-label={`Open article: ${art.title || art.slug}`}>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600" aria-hidden="true" tabIndex={-1}>
+                          <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
                         </Button>
                       </Link>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-blue-600" onClick={() => { setSelectedArticle(art); setIsModalOpen(true); }}>

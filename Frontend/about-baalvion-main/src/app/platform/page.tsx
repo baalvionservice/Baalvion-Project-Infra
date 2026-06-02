@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Platform | Baalvion Operating System Core Architecture",
   description:
     "Architecting the foundational layer for global trade with enterprise-grade reliability and modular scalability.",
+  alternates: { canonical: "https://about.baalvion.com/platform" },
   openGraph: {
     title: "Platform | Baalvion Operating System Core Architecture",
     description:

@@ -12,9 +12,6 @@ export function useAuth() {
     user,
     role,
     loading,
-    profile,
-    profileStatus,
-    subscriptionTier,
     logout,
     impersonating,
     startImpersonation,
@@ -25,9 +22,9 @@ export function useAuth() {
     user,
     role,
     loading,
-    profile,
-    profileStatus,
-    subscriptionTier,
+    profile: null,       // not yet wired to AuthContext
+    profileStatus: null, // not yet wired to AuthContext
+    subscriptionTier: null, // not yet wired to AuthContext
     isAuthenticated: !!user,
     isAdmin: role === 'admin',
     isLawyer: role === 'lawyer',

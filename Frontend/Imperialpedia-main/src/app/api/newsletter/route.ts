@@ -16,8 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Mock successful handshake
-    console.log(`[NEWSLETTER] New subscriber registered: ${name || 'Anonymous'} <${email}>`);
+    // TODO: Connect to email service provider
 
     return NextResponse.json({
       success: true,

@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "What We Do | Baalvion Industries",
   description:
     "We are architecting the foundational layer for the next century of international commerce, bridging the gap between legacy systems and future automation.",
+  alternates: { canonical: "https://about.baalvion.com/company" },
   openGraph: {
     title: "What We Do | Baalvion Industries",
     description:

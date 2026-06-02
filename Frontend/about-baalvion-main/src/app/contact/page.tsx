@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Contact Us | Baalvion Industries",
   description:
     "Initiate a strategic partnership or project briefing. Our global trade specialists are ready to architect your integration.",
+  alternates: { canonical: "https://about.baalvion.com/contact" },
   openGraph: {
     title: "Contact Us | Baalvion Industries",
     description:

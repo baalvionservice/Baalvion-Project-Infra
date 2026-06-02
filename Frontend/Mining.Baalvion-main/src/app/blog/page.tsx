@@ -8,7 +8,7 @@ import { JsonLd } from "@/components/seo/JsonLd";
 import { cmsGetPosts, type MiningPost } from "@/lib/cms";
 
 export const metadata: Metadata = {
-  title: 'Trade Insights | GeoTrade Nexus Blog',
+  title: 'Trade Insights | Baalvion Mining Inc. Blog',
   description: 'Expert analysis on global mineral markets, mining compliance trends, and industrial supply chain innovation.',
 };
 
@@ -32,7 +32,7 @@ export default async function BlogPage() {
   const blogSchema = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": "GeoTrade Nexus Insights",
+    "name": "Baalvion Mining Inc. Insights",
     "description": "Mining industry analysis and trade insights.",
     "blogPost": posts.map(p => ({
       "@type": "BlogPosting",

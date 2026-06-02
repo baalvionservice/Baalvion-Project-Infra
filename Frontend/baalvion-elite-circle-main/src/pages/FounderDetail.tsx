@@ -108,7 +108,7 @@ export default function FounderDetail() {
 
         <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-primary/10 via-card to-card p-8 mb-6">
           <div className="flex flex-col sm:flex-row items-start gap-6">
-            {f.avatar_url ? <img src={f.avatar_url} alt={f.full_name} className="w-24 h-24 rounded-2xl object-cover ring-2 ring-primary/30" />
+            {f.avatar_url ? <img src={f.avatar_url} alt={f.full_name} loading="lazy" decoding="async" className="w-24 h-24 rounded-2xl object-cover ring-2 ring-primary/30" />
               : <div className="w-24 h-24 rounded-2xl bg-primary/15 text-primary text-2xl font-bold flex items-center justify-center">{initials(f.full_name || f.username)}</div>}
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
@@ -214,7 +214,7 @@ export default function FounderDetail() {
                 <div className="space-y-2 text-sm">
                   {f.contact_email && <a href={`mailto:${f.contact_email}`} className="flex items-center gap-2 text-primary hover:underline"><Mail className="w-4 h-4" />{f.contact_email}</a>}
                   {f.contact_phone && <a href={`tel:${f.contact_phone}`} className="flex items-center gap-2 text-primary hover:underline"><Phone className="w-4 h-4" />{f.contact_phone}</a>}
-                  {f.website && <a href={f.website} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-primary hover:underline"><Globe className="w-4 h-4" />Website</a>}
+                  {f.website && <a href={f.website} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-primary hover:underline"><Globe className="w-4 h-4" />Website</a>}
                 </div>
               ) : <div className="flex items-start gap-2 text-sm text-muted-foreground"><Lock className="w-4 h-4 text-primary shrink-0 mt-0.5" /><span>Connect to view contact details.</span></div>}
             </CardContent></Card>

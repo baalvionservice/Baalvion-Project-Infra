@@ -5,6 +5,14 @@ import { Separator } from '@/components/ui/separator';
 export const metadata: Metadata = {
     title: "Life at Baalvion | Baalvion Careers",
     description: "Discover the culture, values, and what it's like to work at Baalvion.",
+    alternates: {
+        canonical: '/careers/life-at-baalvion',
+    },
+    openGraph: {
+        title: "Life at Baalvion | TalentOS by Baalvion",
+        description: "Discover the culture, values, and what it's like to work at Baalvion.",
+        url: '/careers/life-at-baalvion',
+    },
 };
 
 export default function LifeAtBaalvionPage() {

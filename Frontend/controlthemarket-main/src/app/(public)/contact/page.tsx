@@ -26,8 +26,7 @@ export default function ContactPage() {
         defaultValues: { name: '', email: '', subject: '', message: '' },
     });
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
+    function onSubmit(_values: z.infer<typeof formSchema>) {
         toast({ title: 'Message Sent!', description: 'Thanks for reaching out. We will get back to you shortly.' });
         form.reset();
     }

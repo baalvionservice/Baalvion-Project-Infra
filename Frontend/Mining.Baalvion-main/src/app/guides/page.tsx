@@ -10,7 +10,7 @@ import { BookOpen, ArrowRight, FileText, Globe, ShieldCheck } from "lucide-react
 import { guides } from "@/lib/sitemap-data";
 
 export const metadata: Metadata = {
-  title: 'Industrial Knowledge Hub | GeoTrade Nexus Guides',
+  title: 'Industrial Knowledge Hub | Baalvion Mining Inc. Guides',
   description: 'Expert guides on mineral export compliance, purity standards, and global trade logistics. Stay informed with technical industry knowledge.',
 };
 
@@ -24,7 +24,7 @@ export default function GuidesPage() {
   const hubSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "GeoTrade Nexus Knowledge Hub",
+    "name": "Baalvion Mining Inc. Knowledge Hub",
     "description": "A collection of industrial guides and market reports for the mining sector.",
     "mainEntity": {
       "@type": "ItemList",

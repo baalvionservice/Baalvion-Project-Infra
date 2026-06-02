@@ -110,7 +110,7 @@ export default function AlertRulesPage() {
                       <Switch defaultChecked={rule.active} />
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" aria-label="Delete rule">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </TableCell>

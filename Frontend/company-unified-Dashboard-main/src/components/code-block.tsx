@@ -33,6 +33,7 @@ export default function CodeBlock({ code }: CodeBlockProps) {
         size="icon"
         className="absolute top-2 right-2 h-7 w-7 text-gray-400 hover:text-white hover:bg-gray-700"
         onClick={handleCopy}
+        aria-label={hasCopied ? 'Copied' : 'Copy code'}
       >
         {hasCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
       </Button>

@@ -6,7 +6,23 @@ import { SubPageHero, SubPageContent } from "@/components/sub-page-hero";
 
 export const metadata: Metadata = {
   title: "Investor Relations | Baalvion",
-  description: "Strategic updates and shareholder communications.",
+  description: "Strategic updates and shareholder communications from Baalvion Industries, the global trade infrastructure platform.",
+  alternates: { canonical: "https://about.baalvion.com/investors" },
+  openGraph: {
+    title: "Investor Relations | Baalvion",
+    description: "Strategic updates and shareholder communications from Baalvion Industries, the global trade infrastructure platform.",
+    url: "https://about.baalvion.com/investors",
+    siteName: "Baalvion Operating System (BOS)",
+    images: [{ url: "https://picsum.photos/seed/baalvion-investors/1200/630", width: 1200, height: 630, alt: "Baalvion Investor Relations" }],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Investor Relations | Baalvion",
+    description: "Strategic updates and shareholder communications from Baalvion Industries, the global trade infrastructure platform.",
+    images: ["https://picsum.photos/seed/baalvion-investors/1200/630"],
+  },
 };
 
 export default function InvestorsPage() {

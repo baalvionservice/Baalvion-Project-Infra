@@ -303,7 +303,6 @@ function NavChild({
 }
 
 function AuthButtons({ userRole, isMobile, onAction }: any) {
-  console.log("userRole is ", userRole);
   if (userRole !== "public") {
     return (
       <div

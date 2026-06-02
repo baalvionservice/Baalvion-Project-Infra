@@ -8,16 +8,17 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   
   const title = project ? `${project.name} | Baalvion Project` : "Project Brief";
   const description = project?.description || "Explore strategic infrastructure initiatives within the Baalvion Nexus.";
-  const url = `https://baalvion.nexus/projects/${id}`;
+  const url = `https://about.baalvion.com/projects/${id}`;
 
   return {
     title,
     description,
+    alternates: { canonical: url },
     openGraph: {
       title,
       description,
       url,
-      siteName: 'Baalvion Nexus',
+      siteName: 'Baalvion Operating System (BOS)',
       images: [
         {
           url: `https://picsum.photos/seed/${id}/1200/630`,

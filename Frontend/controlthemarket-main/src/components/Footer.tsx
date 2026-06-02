@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link
-              href="#"
+              href="/"
               className="text-white font-black text-[17px] flex items-center gap-1.5 no-underline mb-2.5"
             >
               <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-sm font-black">
@@ -29,13 +29,18 @@ export default function Footer() {
               Platform
             </div>
             <ul className="flex flex-col gap-1.5 list-none p-0">
-              {["Leaderboard", "Companies", "Candidates", "Pricing"].map((item) => (
-                <li key={item}>
+              {[
+                { label: "Leaderboard", href: "/leaderboard" },
+                { label: "Companies", href: "/companies" },
+                { label: "Candidates", href: "/leaderboard" },
+                { label: "Pricing", href: "/pricing" },
+              ].map((item) => (
+                <li key={item.label}>
                   <Link
-                    href="#"
+                    href={item.href}
                     className="text-[13px] text-white/45 no-underline hover:text-white transition-colors"
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -48,13 +53,18 @@ export default function Footer() {
               Company
             </div>
             <ul className="flex flex-col gap-1.5 list-none p-0">
-              {["About us", "Blog", "Careers", "Contact"].map((item) => (
-                <li key={item}>
+              {[
+                { label: "About us", href: "/about" },
+                { label: "Blog", href: "/blog" },
+                { label: "Careers", href: "/contact" },
+                { label: "Contact", href: "/contact" },
+              ].map((item) => (
+                <li key={item.label}>
                   <Link
-                    href="#"
+                    href={item.href}
                     className="text-[13px] text-white/45 no-underline hover:text-white transition-colors"
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -67,13 +77,17 @@ export default function Footer() {
               Legal
             </div>
             <ul className="flex flex-col gap-1.5 list-none p-0">
-              {["Privacy policy", "Terms of service", "Cookie policy"].map((item) => (
-                <li key={item}>
+              {[
+                { label: "Privacy policy", href: "/privacy" },
+                { label: "Terms of service", href: "/terms" },
+                { label: "Cookie policy", href: "/privacy" },
+              ].map((item) => (
+                <li key={item.label}>
                   <Link
-                    href="#"
+                    href={item.href}
                     className="text-[13px] text-white/45 no-underline hover:text-white transition-colors"
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -90,11 +104,15 @@ export default function Footer() {
             </Link>
           </span>
           <span className="flex gap-2 items-center">
-            {["Privacy", "Terms", "Sitemap"].map((item, i) => (
-              <span key={item} className="flex items-center gap-2">
+            {[
+              { label: "Privacy", href: "/privacy" },
+              { label: "Terms", href: "/terms" },
+              { label: "Sitemap", href: "/sitemap.xml" },
+            ].map((item, i) => (
+              <span key={item.label} className="flex items-center gap-2">
                 {i > 0 && <span>·</span>}
-                <Link href="#" className="text-white/35 hover:text-white transition-colors no-underline">
-                  {item}
+                <Link href={item.href} className="text-white/35 hover:text-white transition-colors no-underline">
+                  {item.label}
                 </Link>
               </span>
             ))}

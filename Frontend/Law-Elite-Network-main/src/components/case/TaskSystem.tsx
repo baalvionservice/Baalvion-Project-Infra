@@ -4,7 +4,8 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { CheckSquare, Plus, Clock, Loader2, CheckCircle2, Circle } from 'lucide-react';
+import { CheckSquare, Plus, Clock, Loader2, CheckCircle2, Circle, MoreVertical } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { mockAddTask, updateCase } from '@/services/cases/case.mock';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';

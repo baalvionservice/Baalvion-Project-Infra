@@ -80,7 +80,7 @@ export default function CreatePortalModal({
               <Label htmlFor="share-link">Shareable Link</Label>
               <div className="flex items-center gap-2">
                 <Input id="share-link" value={generatedUrl} readOnly />
-                <Button variant="outline" size="icon" onClick={handleCopy}>
+                <Button variant="outline" size="icon" onClick={handleCopy} aria-label={hasCopied ? 'Copied' : 'Copy link'}>
                   {hasCopied ? (
                     <Check className="h-4 w-4" />
                   ) : (

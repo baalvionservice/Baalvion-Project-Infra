@@ -1,5 +1,20 @@
-
+import type { Metadata } from 'next';
 import { getLeaderboard } from '@/lib/ranking-engine';
+
+export const metadata: Metadata = {
+  title: 'Skill Leaderboard',
+  description:
+    'See the top-ranked candidates on ControlTheMarket ranked by verified real-world skill performance. Discover who is leading the market.',
+  alternates: {
+    canonical: 'https://controlthemarket.com/leaderboard',
+  },
+  openGraph: {
+    url: 'https://controlthemarket.com/leaderboard',
+    title: 'Skill Leaderboard | ControlTheMarket',
+    description:
+      'See the top-ranked candidates ranked by verified real-world skill performance.',
+  },
+};
 import type { User, RoleCategory } from '@/lib/types';
 import { LeaderboardClientPage } from './leaderboard-client-page';
 

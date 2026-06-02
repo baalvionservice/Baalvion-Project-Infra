@@ -49,8 +49,8 @@ export default function GuideDetailPage() {
     "@type": "TechArticle",
     "headline": guide.title,
     "image": guide.imageUrl,
-    "author": { "@type": "Organization", "name": "GeoTrade Nexus" },
-    "publisher": { "@type": "Organization", "name": "GeoTrade Nexus" },
+    "author": { "@type": "Organization", "name": "Baalvion Mining Inc." },
+    "publisher": { "@type": "Organization", "name": "Baalvion Mining Inc." },
     "datePublished": "2024-05-21",
     "about": "Industrial mineral trade and export compliance"
   };

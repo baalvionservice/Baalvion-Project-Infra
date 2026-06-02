@@ -1,5 +1,6 @@
+'use client';
+
 import React from 'react';
-import { Metadata } from 'next';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,22 +15,11 @@ import {
 import { useAppStore } from '@/lib/store';
 import { ProductCard } from '@/components/product/ProductCard';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
-type GiftRegistryPageProps = {
-  params: Promise<{
-    country: string;
-  }>;
-};
-
-export async function generateMetadata({ params }: GiftRegistryPageProps): Promise<Metadata> {
-  return {
-    title: 'Private Gift Registry | AMARISÉ MAISON - Create Your Wishlist',
-    description: 'Create and share your luxury gift registry with friends and family. Curate your collection of fine artifacts for special occasions.',
-  };
-}
-
-export default async function GiftRegistryPage({ params }: GiftRegistryPageProps) {
-  const countryCode = ((await params).country as string) || 'us';
+export default function GiftRegistryPage() {
+  const params = useParams();
+  const countryCode = (params?.country as string) || 'us';
   const { wishlist } = useAppStore();
 
   return (

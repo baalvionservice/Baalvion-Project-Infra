@@ -23,9 +23,6 @@ export const metadata: Metadata = {
   authors: [{ name: 'Baalvion Mining Inc. Team' }],
   creator: 'Baalvion Mining Inc.',
   publisher: 'Baalvion Industries Private Limited',
-  verification: {
-    google: 'google-site-verification-placeholder',
-  },
   formatDetection: {
     email: false,
     address: false,

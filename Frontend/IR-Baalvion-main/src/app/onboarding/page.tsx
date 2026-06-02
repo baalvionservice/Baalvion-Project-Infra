@@ -1,7 +1,14 @@
 
 'use client';
 
+import type { Metadata } from 'next';
 import { OnboardingFunnel } from '@/components/onboarding/OnboardingFunnel';
+
+export const metadata: Metadata = {
+  title: 'Institutional Onboarding | Baalvion',
+  description: 'Complete your institutional onboarding to access Baalvion investor relations content, capital operations, and governance materials.',
+  robots: { index: false, follow: false },
+};
 import Link from 'next/link';
 
 export default function OnboardingPage() {

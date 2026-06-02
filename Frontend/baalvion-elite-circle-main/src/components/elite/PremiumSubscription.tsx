@@ -19,7 +19,7 @@ export const PremiumSubscription = ({ tiers }: PremiumSubscriptionProps) => {
 
   const handleSubscribe = (tierName: string) => {
     // Will integrate with Stripe later
-    console.log("Subscribe to:", tierName);
+    navigate(`/membership?tier=${encodeURIComponent(tierName)}`);
   };
 
   return (

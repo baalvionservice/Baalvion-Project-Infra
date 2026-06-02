@@ -1,5 +1,5 @@
-# Firebase Studio
+# Baalvion Company Dashboard
 
-This is a NextJS starter in Firebase Studio.
+Internal company operating system dashboard. Built with Next.js App Router.
 
 To get started, take a look at src/app/page.tsx.

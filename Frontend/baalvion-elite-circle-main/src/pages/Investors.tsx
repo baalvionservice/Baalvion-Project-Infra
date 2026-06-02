@@ -33,6 +33,7 @@ export type Investor = {
   aum_usd: number | null;
   email: string | null;
   phone: string | null;
+  enrichment_confidence: string | null;
 };
 
 export const money = (n: number | null) => {
@@ -50,7 +51,7 @@ const checkMatch = (i: Investor, v: string) => { const b = CHECK_BANDS[v]; if (!
 
 const Avatar = ({ inv, cls = "w-11 h-11" }: { inv: Investor; cls?: string }) => (
   inv.avatar_url
-    ? <img src={inv.avatar_url} alt={inv.name} className={`${cls} rounded-full object-cover ring-2 ring-primary/20 shrink-0`} />
+    ? <img src={inv.avatar_url} alt={inv.name} loading="lazy" decoding="async" className={`${cls} rounded-full object-cover ring-2 ring-primary/20 shrink-0`} />
     : <div className={`${cls} rounded-full bg-primary/15 text-primary font-semibold flex items-center justify-center shrink-0`}>{initials(inv.name)}</div>
 );
 

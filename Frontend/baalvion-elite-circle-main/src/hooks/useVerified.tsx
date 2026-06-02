@@ -15,7 +15,7 @@ export const useVerified = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
       setUser(session?.user ?? null);
     });
-    return () => subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); };
   }, []);
 
   return { user, verified: isUserVerified(user), loading };

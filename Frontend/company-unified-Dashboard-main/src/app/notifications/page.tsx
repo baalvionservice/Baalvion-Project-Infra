@@ -199,6 +199,7 @@ export default function NotificationsPage() {
                     size="icon"
                     className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 sm:opacity-100"
                     onClick={() => handleDismiss(notification.id)}
+                    aria-label="Dismiss notification"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

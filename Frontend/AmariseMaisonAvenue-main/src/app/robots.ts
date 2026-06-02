@@ -24,6 +24,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin/"],
       },
     ],
-    sitemap: "https://www.amarisemaisonavenue.com//sitemap.xml",
+    sitemap: "https://www.amarisemaisonavenue.com/sitemap.xml",
   };
 }

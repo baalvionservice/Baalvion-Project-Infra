@@ -89,7 +89,7 @@ export default function Founders() {
                   <CardContent className="p-5">
                     <div className="flex items-start gap-4">
                       {f.avatar_url
-                        ? <img src={f.avatar_url} alt={f.full_name || ""} className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/20 shrink-0" />
+                        ? <img src={f.avatar_url} alt={f.full_name || ""} loading="lazy" decoding="async" className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/20 shrink-0" />
                         : <div className="w-14 h-14 rounded-full bg-primary/15 text-primary font-semibold flex items-center justify-center shrink-0">{initials(f.full_name || f.username)}</div>}
                       <div className="flex-1 min-w-0">
                         <h3 className="text-lg font-semibold truncate group-hover:text-primary transition-colors">{f.full_name || f.username}</h3>

@@ -93,6 +93,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           size="icon"
           className="absolute top-3 right-3 rounded-full"
           onClick={handleWishlist}
+          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
         >
           <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-primary text-primary' : ''}`} />
         </Button>

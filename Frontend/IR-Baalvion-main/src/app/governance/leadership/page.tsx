@@ -6,8 +6,15 @@ import Image from 'next/image';
 import { slugify } from '@/utils/slug-generator';
 
 export const metadata: Metadata = {
-  title: 'Global Leadership | Executive Committee',
-  description: 'Meet the executive leadership team driving Baalvion’s vision for the future of global B2B trade infrastructure.',
+  title: 'Global Leadership | Baalvion Executive Committee',
+  description: 'Meet the executive leadership team driving Baalvion\'s vision for the future of global B2B trade infrastructure.',
+  alternates: { canonical: '/governance/leadership' },
+  openGraph: {
+    title: 'Baalvion Global Executive Committee',
+    description: 'Meet the executive leadership team driving Baalvion\'s vision for the future of global B2B trade infrastructure.',
+    url: 'https://ir.baalvion.com/governance/leadership',
+    type: 'website',
+  },
 };
 
 export default function LeadershipPage() {

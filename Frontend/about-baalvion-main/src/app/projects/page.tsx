@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Projects | Strategic BOS Initiatives",
   description:
     "A curated landscape of high-impact infrastructure projects architected to resolve terminal fragmentation in global commerce and financial clearing.",
+  alternates: { canonical: "https://about.baalvion.com/projects" },
   openGraph: {
     title: "Projects | Strategic BOS Initiatives",
     description:

@@ -270,7 +270,7 @@ export default function UserDisputesPage() {
               <div>
                 <p className="text-sm font-bold text-slate-900">Neutral Mediation</p>
                 <p className="text-xs text-slate-500 leading-relaxed mt-1">
-                  GeoTrade Nexus admins act as impartial trade mediators. Decisions are based strictly on contract terms, verified lab reports, and platform policies.
+                  Baalvion Mining Inc. admins act as impartial trade mediators. Decisions are based strictly on contract terms, verified lab reports, and platform policies.
                 </p>
               </div>
             </div>

@@ -14,6 +14,14 @@ export const metadata: Metadata = {
   title: 'Meet the Team | Baalvion',
   description:
     'The creators, innovators, and problem-solvers shaping our mission to build the intelligent infrastructure for global talent.',
+  alternates: {
+    canonical: '/about/team',
+  },
+  openGraph: {
+    title: 'Meet the Team | TalentOS by Baalvion',
+    description: 'The creators, innovators, and problem-solvers shaping our mission to build the intelligent infrastructure for global talent.',
+    url: '/about/team',
+  },
 };
 
 const principles = [

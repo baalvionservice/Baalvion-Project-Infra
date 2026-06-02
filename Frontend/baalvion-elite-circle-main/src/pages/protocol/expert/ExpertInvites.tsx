@@ -93,7 +93,7 @@ const ExpertInvites = () => {
 
   const handleCopy = (invite: typeof mockInvites[0]) => {
     navigator.clipboard.writeText(`https://${invite.link}`);
-    setCopiedId(invite.id);
+    setCopiedId(String(invite.id));
     toast.success("Link copied to clipboard");
     setTimeout(() => setCopiedId(null), 2000);
   };

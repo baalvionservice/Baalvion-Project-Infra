@@ -37,7 +37,7 @@ function PlansContent() {
     if (!user) return;
     setLoading(true);
     try {
-      const sub = await getUserSubscription(user.id);
+      const sub = await getUserSubscription(user.userId);
       setCurrentSub(sub);
     } finally {
       setLoading(false);
@@ -52,7 +52,7 @@ function PlansContent() {
     if (!user) return;
     setUpgrading(true);
     try {
-      await createSubscription(user.id, planId, role || 'client');
+      await createSubscription(user.userId, planId, role || 'client');
       toast({
         title: "Standing Synchronized",
         description: "Your membership upgrade has been secured and activated.",

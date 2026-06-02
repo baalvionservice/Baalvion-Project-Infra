@@ -43,7 +43,7 @@ export default function Auth() {
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => { subscription.unsubscribe(); };
   }, [navigate]);
 
   const handleSignIn = async (e: React.FormEvent) => {

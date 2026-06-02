@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -51,7 +50,7 @@ export default function PlacementPage() {
             studentService.getAllStudents(),
             collegeService.getAllColleges()
         ]);
-        
+
         const studentsMap = new Map(allStudents.map((s) => [s.id, s]));
         const collegesMap = new Map(allColleges.map((c: any) => [c.id, c]));
 
@@ -150,8 +149,8 @@ export default function PlacementPage() {
                             <TableCell>{p.role}</TableCell>
                             <TableCell>Type {p.collegeType}</TableCell>
                             <TableCell>
-                                {p.documents?.offerLetterUrl && <Link href={p.documents.offerLetterUrl} target="_blank" className="text-primary hover:underline text-sm mr-2">Offer Letter</Link>}
-                                {p.documents?.idProofUrl && <Link href={p.documents.idProofUrl} target="_blank" className="text-primary hover:underline text-sm">ID Proof</Link>}
+                                {p.documents?.offerLetterUrl && <Link href={p.documents.offerLetterUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm mr-2">Offer Letter</Link>}
+                                {p.documents?.idProofUrl && <Link href={p.documents.idProofUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-sm">ID Proof</Link>}
                             </TableCell>
                         </TableRow>
                     ))

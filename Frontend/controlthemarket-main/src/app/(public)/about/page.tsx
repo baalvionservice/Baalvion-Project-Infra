@@ -1,5 +1,20 @@
-
+import type { Metadata } from 'next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+export const metadata: Metadata = {
+  title: 'About Us',
+  description:
+    'ControlTheMarket was founded on a simple premise: the best way to know if someone can do a job is to see them do the work. Learn about our mission to create a more equitable hiring landscape.',
+  alternates: {
+    canonical: 'https://controlthemarket.com/about',
+  },
+  openGraph: {
+    url: 'https://controlthemarket.com/about',
+    title: 'About Us | ControlTheMarket',
+    description:
+      'ControlTheMarket was founded on a simple premise: the best way to know if someone can do a job is to see them do the work.',
+  },
+};
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Image from 'next/image';
 
@@ -27,7 +42,7 @@ export default function AboutPage() {
         {/* Mission & Vision Section */}
         <div className="mt-20 grid grid-cols-1 md:grid-cols-2 gap-12">
             <div className="relative aspect-video">
-                <Image src="https://picsum.photos/seed/about1/600/400" alt="Team collaborating" layout="fill" objectFit="cover" className="rounded-lg" />
+                <Image src="https://picsum.photos/seed/about1/600/400" alt="Team collaborating" fill style={{ objectFit: 'cover' }} className="rounded-lg" />
             </div>
             <div className="flex flex-col justify-center">
                 <h2 className="font-headline text-3xl font-bold">Our Mission</h2>

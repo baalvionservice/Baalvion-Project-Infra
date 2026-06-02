@@ -116,7 +116,7 @@ export default function CreatorPortfolioPage() {
         </div>
         <div className="flex items-center gap-3">
           <Button variant="outline" className="rounded-xl font-bold bg-white" asChild>
-            <a href={`/creator/${currentUser?.displayName?.toLowerCase().replace(' ', '_')}`} target="_blank">
+            <a href={`/creator/${currentUser?.displayName?.toLowerCase().replace(' ', '_')}`} target="_blank" rel="noopener noreferrer">
               <Eye className="mr-2 h-4 w-4" /> View Public Profile
             </a>
           </Button>

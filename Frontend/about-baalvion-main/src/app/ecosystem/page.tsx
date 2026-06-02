@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Ecosystem | Baalvion Operating System Architecture",
   description:
     "A standardized blueprint of the Baalvion Operating System (BOS), architected for transparency, scalability, and modular integration across global markets.",
+  alternates: { canonical: "https://about.baalvion.com/ecosystem" },
   openGraph: {
     title: "Ecosystem | Baalvion Operating System Architecture",
     description:

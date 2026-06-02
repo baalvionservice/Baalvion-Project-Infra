@@ -3,7 +3,7 @@ import { products, suppliers, blogPosts, guides, tradePages, SITEMAP_BASE_URL } 
 import { pseoPages, isValidPseoPage } from '@/lib/pseo-data';
 
 /**
- * @fileOverview Automatic Sitemap Generator for GeoTrade Nexus.
+ * @fileOverview Automatic Sitemap Generator for Baalvion Mining Inc.
  * Filters low-quality programmatic pages to optimize crawl budget.
  */
 

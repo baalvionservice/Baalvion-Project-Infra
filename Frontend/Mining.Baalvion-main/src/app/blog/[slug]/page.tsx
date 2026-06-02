@@ -53,7 +53,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     "author": { "@type": "Person", "name": post.author },
     "publisher": {
       "@type": "Organization",
-      "name": "GeoTrade Nexus",
+      "name": "Baalvion Mining Inc.",
       "logo": { "@type": "ImageObject", "url": "https://mining.baalvion.com/logo.png" },
     },
     "datePublished": post.date,

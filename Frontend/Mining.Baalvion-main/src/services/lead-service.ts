@@ -1,5 +1,5 @@
 /**
- * @fileOverview Lead Service for GeoTrade Nexus.
+ * @fileOverview Lead Service for Baalvion Mining Inc.
  * Handles all business logic and data fetching for partnership leads and survey submissions.
  */
 

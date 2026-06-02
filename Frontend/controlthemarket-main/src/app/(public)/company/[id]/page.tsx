@@ -54,8 +54,8 @@ export default async function CompanyProfilePage({
         <Image
           src={`https://picsum.photos/seed/${company.id}/1200/300`}
           alt={`${company.name} banner`}
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: 'cover' }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
       </div>

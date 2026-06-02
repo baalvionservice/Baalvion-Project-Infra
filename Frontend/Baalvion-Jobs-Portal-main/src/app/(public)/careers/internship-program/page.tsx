@@ -8,6 +8,14 @@ import Link from 'next/link';
 export const metadata: Metadata = {
     title: "Performance-Based Internship Program (India) | Baalvion Careers",
     description: "Join Baalvion's merit-driven, performance-focused internship program in India. A direct pathway to a full-time role for top performers.",
+    alternates: {
+        canonical: '/careers/internship-program',
+    },
+    openGraph: {
+        title: "Internship Program (India) | TalentOS by Baalvion",
+        description: "Join Baalvion's merit-driven internship program in India. A direct pathway to a full-time role for top performers.",
+        url: '/careers/internship-program',
+    },
 };
 
 const specializations = [
