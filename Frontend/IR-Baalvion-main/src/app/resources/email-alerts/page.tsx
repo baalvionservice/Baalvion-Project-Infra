@@ -1,12 +1,6 @@
 "use client";
 
-import type { Metadata } from 'next';
 import { useEffect, useState } from "react";
-
-export const metadata: Metadata = {
-  title: 'Investor Email Alerts | Resources',
-  description: 'Subscribe to Baalvion investor email alerts for financial reporting, board resolutions, and data room activity updates.',
-};
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";

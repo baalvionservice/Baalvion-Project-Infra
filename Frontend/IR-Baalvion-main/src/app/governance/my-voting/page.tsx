@@ -1,12 +1,6 @@
 "use client";
 
-import type { Metadata } from 'next';
 import { useEffect, useState } from "react";
-
-export const metadata: Metadata = {
-  title: 'Institutional Voting Center | Governance',
-  description: 'Review and cast your votes on key corporate resolutions and board appointments as a Baalvion institutional investor.',
-};
 import { votingService } from "@/core/services/voting.service";
 import { Vote, VoteChoice } from "@/core/content/schemas";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
