@@ -27,6 +27,8 @@ const server = http.createServer(app);
 
 app.set('trust proxy', 1);
 app.use(helmet());
+// Global IP rate limiter for ALL routes (the /gateway routes below add tighter per-route limits).
+app.use(createRateLimit({ windowMs: 60_000, max: Number(process.env.IP_RATE_LIMIT_MAX) || 1000, key: 'global' }));
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 // Capture the raw request body so provider webhook signatures can be verified
 // against the exact bytes (Razorpay/Stripe sign the raw payload).

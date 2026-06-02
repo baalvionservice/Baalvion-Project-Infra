@@ -12,6 +12,7 @@
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
+    "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",

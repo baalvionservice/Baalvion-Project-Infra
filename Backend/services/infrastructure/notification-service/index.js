@@ -1,6 +1,7 @@
 'use strict';
 require('dotenv').config();
 const express    = require('express');
+const rateLimit = require('express-rate-limit');
 const helmet     = require('helmet');
 const cors       = require('cors');
 const crypto     = require('crypto');
@@ -20,6 +21,8 @@ const { startEventConsumer, stopEventConsumer } = require('./workers/eventConsum
 const app = express();
 
 app.use(helmet());
+// Global IP rate limiter (express-rate-limit, CodeQL-recognized) — generous DoS ceiling.
+app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.IP_RATE_LIMIT_MAX) || 1000, standardHeaders: true, legacyHeaders: false, message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } } }));
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(express.json({ limit: '512kb' }));
 app.use(express.urlencoded({ extended: false }));
