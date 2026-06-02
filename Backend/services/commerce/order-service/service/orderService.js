@@ -198,6 +198,12 @@ async function createOrder(storeId, body, actor) {
         if (existing) {
             console.info(JSON.stringify({ evt: 'order.idempotent_replay', storeId, orderId: existing.id }));
             const found = await OrdersOrder.findByPk(existing.id);
+            // Guard against a race where the metadata row exists but the order was already deleted.
+            if (!found) throw new AppError('NOT_FOUND', 'Order not found', 404);
+            // Ownership check on replay: the replaying caller must be the original order's owner
+            // (or store staff). Prevents a different user from fetching another's order by
+            // guessing or colliding on an idempotencyKey.
+            await ownership.enforce(actor, await orderOwnerUserId(found.customerId), { resourceType: 'order', resourceId: existing.id, storeId, action: 'order.create' });
             return found.toJSON();
         }
     }

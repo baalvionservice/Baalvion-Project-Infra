@@ -1,6 +1,7 @@
 'use strict';
 const http                           = require('http');
 const https                          = require('https');
+const crypto                         = require('crypto');
 const express                        = require('express');
 const { Server }                     = require('socket.io');
 const { createClient }               = require('redis');
@@ -397,7 +398,7 @@ setInterval(async () => {
 
 // ── HTTP routes ───────────────────────────────────────────────────────────────
 
-// Health check (used by docker-compose healthcheck)
+// Health check (used by docker-compose healthcheck) — intentionally public
 app.get('/health', (_req, res) => {
   res.json({
     status:    'ok',
@@ -408,8 +409,43 @@ app.get('/health', (_req, res) => {
   });
 });
 
-// Metrics endpoint (J)
-app.get('/metrics', (_req, res) => {
+// ── Internal metrics guard ────────────────────────────────────────────────────
+// /metrics exposes tenant presence data (orgId enumeration) and socket topology.
+// Gate: localhost/private-network source IP  OR  valid INTERNAL_SERVICE_SECRET
+// bearer token.  Public callers receive 403.
+const INTERNAL_SECRET = config.internalServiceSecret || null;
+
+// RFC-1918 + loopback ranges (IPv4 and IPv4-mapped-IPv6)
+const PRIVATE_IP_RE = /^(127\.|10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.|::1$|::ffff:127\.|::ffff:10\.|::ffff:172\.(1[6-9]|2\d|3[01])\.|::ffff:192\.168\.)/;
+
+function isInternalRequest(req) {
+  // Express places the real remote address in req.socket.remoteAddress;
+  // req.ip honours trust-proxy but we do NOT enable trust-proxy here to
+  // prevent IP spoofing via X-Forwarded-For.
+  const addr = req.socket.remoteAddress || '';
+  if (PRIVATE_IP_RE.test(addr)) return true;
+
+  // Bearer token path (for same-network internal services on non-localhost IPs).
+  // Use timing-safe comparison to prevent timing-oracle attacks on the secret.
+  if (INTERNAL_SECRET) {
+    const auth = req.headers.authorization || '';
+    const token = auth.startsWith('Bearer ') ? auth.slice(7).trim() : '';
+    if (token && token.length === INTERNAL_SECRET.length) {
+      const tokenBuf  = Buffer.from(token);
+      const secretBuf = Buffer.from(INTERNAL_SECRET);
+      if (crypto.timingSafeEqual(tokenBuf, secretBuf)) return true;
+    }
+  }
+
+  return false;
+}
+
+// Metrics endpoint — internal/IP-gated (contains tenant presence data)
+app.get('/metrics', (req, res) => {
+  if (!isInternalRequest(req)) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
   const namespaceCounts = {};
   ['/dashboard', '/ir', '/jobs', '/admin', '/ctm'].forEach((ns) => {
     namespaceCounts[ns] = io.of(ns).sockets.size;

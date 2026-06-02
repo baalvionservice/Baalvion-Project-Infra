@@ -24,6 +24,23 @@ const PUBLIC_KEY = (() => {
     return null;
 })();
 
+// CORS: narrow to configured admin origin(s). Multiple origins can be
+// supplied as a comma-separated list in ADMIN_ORIGIN env var.
+// Falls back to localhost for local dev; never falls back to *.
+const ALLOWED_ORIGINS = (() => {
+    const raw = process.env.ADMIN_ORIGIN || 'http://localhost:3030';
+    return new Set(raw.split(',').map((s) => s.trim()).filter(Boolean));
+})();
+
+function getAllowOriginHeader(reqOrigin) {
+    if (!reqOrigin) return null;
+    if (ALLOWED_ORIGINS.has(reqOrigin)) return reqOrigin;
+    return null;
+}
+
+// Roles that may access infra telemetry.
+const INFRA_ROLES = new Set(['super_admin', 'admin']);
+
 const HEALTH_TARGETS = [
     { name: 'auth-service',      url: 'http://localhost:3001/health' },
     { name: 'admin-service',     url: 'http://localhost:3021/health' },
@@ -58,26 +75,79 @@ const eventState = { lastEventId: 0 };
 let snapshot = { services: [], stats: null, queues: [], infra: null, ts: Date.now() };
 
 // ── Auth for the WS upgrade (?token=...) ─────────────────────────────────────
+// Fix: only super_admin / admin roles may stream infra metrics + audit events.
 function verifyUpgrade(req) {
     try {
         const u = new URL(req.url, `http://localhost:${PORT}`);
         const token = u.searchParams.get('token');
         if (!token || !PUBLIC_KEY) return null;
         const payload = jwt.verify(token, PUBLIC_KEY, { algorithms: ['RS256'], issuer: ISSUER, audience: AUDIENCE });
-        return { userId: payload.sub, roles: payload.roles || [] };
+        const roles = payload.roles || [];
+        if (!roles.some((r) => INFRA_ROLES.has(r))) return null; // role gate
+        return { userId: payload.sub, roles };
+    } catch { return null; }
+}
+
+// ── Auth for REST requests (Bearer token or ?token= query param) ──────────────
+function verifyRestToken(req) {
+    try {
+        if (!PUBLIC_KEY) return null;
+        let token = null;
+        const auth = req.headers['authorization'] || '';
+        if (auth.startsWith('Bearer ')) {
+            token = auth.slice(7).trim();
+        } else {
+            const u = new URL(req.url, `http://localhost:${PORT}`);
+            token = u.searchParams.get('token');
+        }
+        if (!token) return null;
+        const payload = jwt.verify(token, PUBLIC_KEY, { algorithms: ['RS256'], issuer: ISSUER, audience: AUDIENCE });
+        const roles = payload.roles || [];
+        if (!roles.some((r) => INFRA_ROLES.has(r))) return null; // role gate
+        return { userId: payload.sub, roles };
     } catch { return null; }
 }
 
 // ── HTTP server (health + REST snapshot) ─────────────────────────────────────
 const server = http.createServer((req, res) => {
+    // Health check: no auth required (used by load-balancer and service catalog).
     if (req.url === '/health') {
         res.writeHead(200, { 'Content-Type': 'application/json' });
         return res.end(JSON.stringify({ status: 'ok', service: 'realtime-service', clients: wss.count, ts: new Date().toISOString() }));
     }
+
     if (req.url.startsWith('/api/v1/infrastructure/snapshot')) {
-        res.writeHead(200, { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' });
+        const origin = req.headers['origin'];
+        const allowOrigin = getAllowOriginHeader(origin);
+
+        // Preflight (OPTIONS) — respond quickly so browsers can proceed.
+        if (req.method === 'OPTIONS') {
+            const headers = {
+                'Access-Control-Allow-Methods': 'GET, OPTIONS',
+                'Access-Control-Allow-Headers': 'Authorization, Content-Type',
+                'Access-Control-Max-Age': '600',
+                'Vary': 'Origin',
+            };
+            if (allowOrigin) headers['Access-Control-Allow-Origin'] = allowOrigin;
+            res.writeHead(204, headers);
+            return res.end();
+        }
+
+        // Auth gate: require super_admin or admin JWT.
+        const auth = verifyRestToken(req);
+        if (!auth) {
+            const headers = { 'Content-Type': 'application/json', 'Vary': 'Origin' };
+            if (allowOrigin) headers['Access-Control-Allow-Origin'] = allowOrigin;
+            res.writeHead(401, headers);
+            return res.end(JSON.stringify({ success: false, error: { code: 'UNAUTHORIZED' } }));
+        }
+
+        const headers = { 'Content-Type': 'application/json', 'Vary': 'Origin' };
+        if (allowOrigin) headers['Access-Control-Allow-Origin'] = allowOrigin;
+        res.writeHead(200, headers);
         return res.end(JSON.stringify({ success: true, data: snapshot }));
     }
+
     if (req.url === '/metrics') {
         res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4' });
         return res.end(prometheusText());
@@ -159,7 +229,7 @@ async function tick() {
         wss.broadcast({ type: 'queue_stats', data: queues });
         wss.broadcast({ type: 'infra_metrics', data: infra });
     } catch (e) {
-        console.error('[realtime] tick error:', e.message);
+        process.stderr.write(`[realtime] tick error: ${e.message}\n`);
     }
 }
 
@@ -169,14 +239,14 @@ async function eventTick() {
     for (const ev of events) wss.broadcast({ type: 'event', data: ev });
 }
 
-subscriber.subscribe('realtime:events').catch((e) => console.error('[realtime] subscribe failed:', e.message));
+subscriber.subscribe('realtime:events').catch((e) => process.stderr.write(`[realtime] subscribe failed: ${e.message}\n`));
 subscriber.on('message', (_channel, payload) => {
     try { wss.broadcast({ type: 'event', data: JSON.parse(payload) }); } catch { /* bad payload */ }
 });
 
 server.listen(PORT, async () => {
-    console.log(`[realtime-service] listening on :${PORT} (ws + REST) — tick ${TICK_MS}ms`);
-    if (!PUBLIC_KEY) console.warn('[realtime-service] WARNING: no JWT public key — WS auth will reject all clients');
+    process.stdout.write(`[realtime-service] listening on :${PORT} (ws + REST) — tick ${TICK_MS}ms\n`);
+    if (!PUBLIC_KEY) process.stderr.write('[realtime-service] WARNING: no JWT public key — WS auth will reject all clients\n');
     // Seed lastEventId to "now" so we stream only events from startup forward.
     try { const r = await pgQuery('SELECT COALESCE(MAX(id),0) AS max FROM auth.audit_logs'); eventState.lastEventId = Number(r.rows[0].max); } catch {}
     await tick();

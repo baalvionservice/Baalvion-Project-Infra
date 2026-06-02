@@ -40,8 +40,14 @@ function getRedis() {
   let M;
   try { M = require('ioredis'); }
   catch {
-    try { M = require(process.env.IOREDIS_PATH || 'd:/Baalvion Projects/Backend/services/identity/auth-service/node_modules/ioredis'); }
-    catch { _redis = null; return _redis; }
+    // IOREDIS_PATH may point to an alternate installation path for environments where ioredis is
+    // not installed under this service. The hardcoded absolute d:/ path has been removed — set
+    // IOREDIS_PATH in the environment if a non-standard location is needed.
+    if (process.env.IOREDIS_PATH) {
+      try { M = require(process.env.IOREDIS_PATH); } catch { _redis = null; return _redis; }
+    } else {
+      _redis = null; return _redis;
+    }
   }
   try {
     const Redis = M.default || M;

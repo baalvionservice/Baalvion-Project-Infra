@@ -1,5 +1,6 @@
 'use strict';
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const ctrl = require('../controllers/tenantController');
 const asyncHandler = require('../utils/asyncHandler');
 const { internalOrUser } = require('../middleware/authMiddleware');
@@ -7,8 +8,18 @@ const { requireTenantAdmin } = require('../middleware/guards');
 
 const router = express.Router();
 
+// Rate-limit the unauthenticated /resolve endpoint: 120 req / min per IP.
+// Generous enough for real login-page loads; blocks scraping / DNS-enumeration.
+const resolveRateLimit = rateLimit({
+    windowMs: 60_000,
+    max: Number(process.env.RESOLVE_RATE_LIMIT_MAX) || 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } },
+});
+
 // ── public: resolve branding by domain (no auth — every login page calls this) ──
-router.get('/resolve', asyncHandler(ctrl.resolve));
+router.get('/resolve', resolveRateLimit, asyncHandler(ctrl.resolve));
 
 // ── everything below requires a tenant-admin role (or X-Internal-Key) ──
 router.use(internalOrUser, requireTenantAdmin);

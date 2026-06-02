@@ -20,21 +20,41 @@ const buildPagination = (total, page, limit) => ({
     totalPages: Math.ceil(total / limit),
 });
 
+// Statuses that require an authenticated, authorized caller to access.
+const PRIVILEGED_STATUSES = new Set(['draft', 'archived', 'removed', 'pending', 'review']);
+
 // GET /articles — public, filter by category/status/tags
 const listArticles = async (req, res, next) => {
     try {
         const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+        // Cap at 50 to prevent OOM on large result sets.
+        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
         const offset = (page - 1) * limit;
         const where = {};
 
         if (req.query.category) where.category = req.query.category;
+
         if (req.query.status) {
-            where.status = req.query.status;
+            const requestedStatus = String(req.query.status);
+            if (PRIVILEGED_STATUSES.has(requestedStatus)) {
+                // Only allow authenticated admins/owners to filter by non-public statuses.
+                const roles = (req.auth && req.auth.roles) || [];
+                const isPrivileged = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
+                if (!isPrivileged) {
+                    // Silently fall back to published — do not 403 (backward-compatible).
+                    where.status = 'published';
+                } else {
+                    where.status = requestedStatus;
+                }
+            } else {
+                // 'published' or any future public status — allow through.
+                where.status = requestedStatus;
+            }
         } else {
-            // Public: only published by default unless authenticated and requesting own
+            // No filter: default to published for all callers.
             where.status = 'published';
         }
+
         if (req.query.tags) {
             const tags = Array.isArray(req.query.tags) ? req.query.tags : [req.query.tags];
             where.tags = { [Op.contains]: tags };
@@ -83,6 +103,8 @@ const createArticle = async (req, res, next) => {
 };
 
 // GET /articles/:id — public, by slug or id
+// Unauthenticated callers may only view published articles.
+// Authenticated admins/authors may view any status.
 const getArticle = async (req, res, next) => {
     try {
         const { id } = req.params;
@@ -102,8 +124,21 @@ const getArticle = async (req, res, next) => {
 
         if (!article) return next(new AppError('NOT_FOUND', 'Article not found', 404));
 
-        // Increment views
-        await article.increment('views_count');
+        // Gate non-published articles: only the author or an admin may see them.
+        if (article.status !== 'published') {
+            const roles = (req.auth && req.auth.roles) || [];
+            const isPrivileged = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
+            const isAuthor = req.auth && req.auth.userId && article.author_id === req.auth.userId;
+            if (!isPrivileged && !isAuthor) {
+                // Surface as 404 so callers cannot enumerate non-public articles.
+                return next(new AppError('NOT_FOUND', 'Article not found', 404));
+            }
+        }
+
+        // Increment views only for published articles.
+        if (article.status === 'published') {
+            await article.increment('views_count');
+        }
 
         return sendSuccess(req, res, article);
     } catch (err) { return next(err); }

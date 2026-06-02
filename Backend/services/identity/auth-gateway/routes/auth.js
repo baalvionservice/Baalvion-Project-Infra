@@ -126,9 +126,18 @@ router.post('/refresh', async (req, res) => {
 });
 
 // POST /auth/logout → revoke (blacklist jti + delete session) + clear cookies.
+// SECURITY: revocation uses claims from the VERIFIED token only. If verification fails the token is
+// already expired/invalid/tampered — we skip revocation (nothing to revoke) but still clear cookies.
 router.post('/logout', async (req, res) => {
   const token = req.cookies && req.cookies[config.cookie.accessName];
-  if (token) { const c = decode(token); await revoke(c.sid, c.jti, c.exp); }
+  if (token) {
+    try {
+      const c = await verifier.verify(token);
+      if (c && c.sid) await revoke(c.sid, c.jti, c.exp);
+    } catch {
+      // Token invalid, expired, or tampered — skip revocation (no trusted claims to act on).
+    }
+  }
   clearCookies(res);
   try { await authService('/logout', {}, req.headers.cookie); } catch { /* best-effort */ }
   return res.json({ ok: true });

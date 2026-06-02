@@ -49,8 +49,12 @@ function verify(token) {
     const wantIss = process.env.JWT_ISSUER;
     if (wantIss && payload.iss !== wantIss) throw authError('INVALID_TOKEN', 'Invalid token issuer');
     const wantAud = process.env.JWT_AUDIENCE;
-    if (wantAud && payload.aud != null && ![].concat(payload.aud).includes(wantAud)) {
-        throw authError('INVALID_TOKEN', 'Invalid token audience');
+    if (wantAud) {
+        // When an audience is configured it MUST be present and match. A token with no
+        // aud claim is also rejected — omitting aud is not a bypass (RFC 7519 §4.1.3).
+        if (payload.aud == null || ![].concat(payload.aud).includes(wantAud)) {
+            throw authError('INVALID_TOKEN', 'Invalid token audience');
+        }
     }
     return payload;
 }

@@ -262,7 +262,7 @@ function buildDiscoveryDocument() {
         scopes_supported:                      config.oauth.supportedScopes,
         token_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post', 'none'],
         claims_supported:                      ['sub', 'email', 'email_verified', 'name', 'picture'],
-        code_challenge_methods_supported:      ['S256', 'plain'],
+        code_challenge_methods_supported:      ['S256'],
     };
 }
 

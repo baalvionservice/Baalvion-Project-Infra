@@ -12,7 +12,8 @@ const buildPagination = (total, page, limit) => ({
 const listPosts = async (req, res, next) => {
     try {
         const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
+        // Cap at 50 to prevent OOM on large result sets.
+        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
         const offset = (page - 1) * limit;
         const where = { status: 'active' };
 
@@ -62,8 +63,20 @@ const getPost = async (req, res, next) => {
                     as: 'comments',
                     where: { parent_id: null, status: 'active' },
                     required: false,
+                    // Cap inline comments to prevent OOM on posts with thousands of comments.
                     limit: 20,
                     order: [['created_at', 'ASC']],
+                    include: [
+                        {
+                            model: db.Comment,
+                            as: 'replies',
+                            where: { status: 'active' },
+                            required: false,
+                            // Cap nested replies per comment to prevent unbounded N+1 loads.
+                            limit: 10,
+                            order: [['created_at', 'ASC']],
+                        },
+                    ],
                 },
             ],
         });
@@ -174,7 +187,8 @@ const listComments = async (req, res, next) => {
     try {
         const postId = parseInt(req.params.id);
         const page = Math.max(1, parseInt(req.query.page) || 1);
-        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 50));
+        // Cap at 50 (down from 100) to prevent OOM on large comment threads.
+        const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
         const offset = (page - 1) * limit;
 
         const { count, rows } = await db.Comment.findAndCountAll({
@@ -188,6 +202,8 @@ const listComments = async (req, res, next) => {
                     as: 'replies',
                     where: { status: 'active' },
                     required: false,
+                    // Cap nested replies per comment to prevent unbounded N+1 loads.
+                    limit: 10,
                     order: [['created_at', 'ASC']],
                 },
             ],

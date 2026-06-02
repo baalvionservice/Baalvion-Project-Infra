@@ -62,7 +62,9 @@ module.exports = {
     try {
       const raw = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : JSON.stringify(req.body);
       const digest = req.headers['x-payload-digest'];
-      if (!kyc.verifyWebhook(raw, digest)) {
+      // Pass the Sumsub delivery timestamp for replay-window enforcement.
+      const webhookTimestamp = req.headers['x-payload-timestamp'];
+      if (!kyc.verifyWebhook(raw, digest, webhookTimestamp)) {
         return res.status(401).json({ success: false, error: { code: 'BAD_SIGNATURE' } });
       }
       const event = JSON.parse(raw);

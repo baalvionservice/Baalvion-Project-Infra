@@ -11,15 +11,29 @@ const parseSort = (s) => (!s ? undefined : String(s).split(',').map((p) => {
 const asBool = (v) => v === true || v === 'true' || v === '1';
 const asInt = (v, d) => (Number.isFinite(Number(v)) ? Number(v) : d);
 
+/**
+ * Returns whether the caller is allowed to disable tenant scoping.
+ * Only super_admin role or verified internal service callers may opt out.
+ * Regular tenant users always get scoped=true regardless of what they send.
+ */
+const isScopeBypassAllowed = (req) =>
+    req.internal === true ||
+    (Array.isArray(req.auth && req.auth.roles) && req.auth.roles.includes('super_admin'));
+
 // ─── Search ──────────────────────────────────────────────────────────────────
 exports.search = async (req, res) => {
+    // Gate scoped=false: only super_admin or internal callers may bypass tenant scoping.
+    const requestedUnscoped = req.query.scoped === 'false';
+    if (requestedUnscoped && !isScopeBypassAllowed(req)) {
+        throw new AppError('FORBIDDEN', 'Tenant scope bypass requires super_admin or internal caller', 403);
+    }
     const r = await svc.searchIndex(req.params.index, {
         q:      req.query.q || '',
         from:   asInt(req.query.from, 0),
         size:   asInt(req.query.size, 20),
         fuzzy:  asBool(req.query.fuzzy),
         sort:   parseSort(req.query.sort),
-        scoped: req.query.scoped === 'false' ? false : true,
+        scoped: requestedUnscoped ? false : true,
     });
     sendSuccess(req, res, r);
 };
@@ -37,6 +51,10 @@ const searchBody = z.object({
 exports.searchPost = async (req, res) => {
     const p = searchBody.safeParse(req.body);
     if (!p.success) throw new AppError('VALIDATION_ERROR', 'Invalid search body', 422, p.error.flatten());
+    // Gate scoped=false: only super_admin or internal callers may bypass tenant scoping.
+    if (p.data.scoped === false && !isScopeBypassAllowed(req)) {
+        throw new AppError('FORBIDDEN', 'Tenant scope bypass requires super_admin or internal caller', 403);
+    }
     const r = await svc.searchIndex(req.params.index, { q: p.data.query || '', ...p.data });
     sendSuccess(req, res, r);
 };
@@ -59,6 +77,10 @@ const facetsBody = z.object({
 exports.facets = async (req, res) => {
     const p = facetsBody.safeParse(req.body);
     if (!p.success) throw new AppError('VALIDATION_ERROR', 'Invalid facets body', 422, p.error.flatten());
+    // Gate scoped=false: only super_admin or internal callers may bypass tenant scoping.
+    if (p.data.scoped === false && !isScopeBypassAllowed(req)) {
+        throw new AppError('FORBIDDEN', 'Tenant scope bypass requires super_admin or internal caller', 403);
+    }
     const r = await svc.facets(req.params.index, p.data.query, p.data.facetFields, p.data);
     sendSuccess(req, res, r);
 };

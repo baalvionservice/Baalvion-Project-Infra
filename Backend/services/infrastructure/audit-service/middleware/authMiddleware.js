@@ -1,4 +1,5 @@
 'use strict';
+const crypto = require('crypto');
 const jwt = require('../config/jwt');
 const config = require('../config/appConfig');
 const { Errors } = require('../utils/errors');
@@ -25,11 +26,27 @@ const authenticate = (req, res, next) => {
     }
 };
 
+/**
+ * Constant-time comparison for the X-Internal-Key header.
+ * A plain === comparison leaks the secret length via timing differences, and
+ * short-circuits on the first differing byte. timingSafeEqual requires equal-
+ * length buffers, so we check byte-length first (which is itself safe: knowing
+ * the secret's byte-length is a negligible hint given a proper random secret).
+ */
+function internalKeyMatches(provided) {
+    const expected = config.internalApiKey;
+    if (!expected || !provided) return false;
+    const a = Buffer.from(provided, 'utf8');
+    const b = Buffer.from(expected, 'utf8');
+    if (a.byteLength !== b.byteLength) return false;
+    return crypto.timingSafeEqual(a, b);
+}
+
 // Service-to-service write auth: a trusted PEP presents X-Internal-Key. Falls back
 // to user auth when no internal key is configured/sent.
 const internalOrUser = (req, res, next) => {
     const key = req.headers['x-internal-key'];
-    if (config.internalApiKey && key && key === config.internalApiKey) {
+    if (internalKeyMatches(key)) {
         req.internal = true;
         req.auth = req.auth || { userId: 'service', roles: ['service'], permissions: [], orgId: null };
         return next();

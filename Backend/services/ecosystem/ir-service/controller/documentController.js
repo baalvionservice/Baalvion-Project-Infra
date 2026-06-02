@@ -4,13 +4,17 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { createDocumentSchema, updateDocumentSchema, paginationSchema } = require('../validators/schemas');
 
+// Single-tenant IR service: unauthenticated public reads are always scoped to the
+// company's own org. Never accept org_id from the client — derive exclusively from
+// the verified token or fall back to the configured default.
+const DEFAULT_ORG_ID = process.env.IR_DEFAULT_ORG_ID || '11111111-1111-1111-1111-111111111111';
+
 const listDocuments = async (req, res, next) => {
     try {
         const parsed = paginationSchema.safeParse(req.query);
         if (!parsed.success) return next(new AppError('VALIDATION_ERROR', 'Validation failed', 400, parsed.error.flatten()));
         const isAuth = !!req.user;
-        const orgId = req.user?.orgId || req.query.org_id;
-        if (!orgId) return next(new AppError('BAD_REQUEST', 'org_id required', 400));
+        const orgId = req.user?.orgId || DEFAULT_ORG_ID;
         const data = await documentService.listDocuments(orgId, isAuth, parsed.data);
         return sendPaginated(req, res, data);
     } catch (err) { return next(err); }
@@ -27,8 +31,7 @@ const createDocument = async (req, res, next) => {
 
 const getDocument = async (req, res, next) => {
     try {
-        const orgId = req.user?.orgId || req.query.org_id;
-        if (!orgId) return next(new AppError('BAD_REQUEST', 'org_id required', 400));
+        const orgId = req.user?.orgId || DEFAULT_ORG_ID;
         const data = await documentService.getDocument(req.params.id, orgId);
         return sendSuccess(req, res, data);
     } catch (err) { return next(err); }

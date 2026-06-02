@@ -1,4 +1,5 @@
 'use strict';
+const crypto = require('crypto');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const helmet = require('helmet');
@@ -11,6 +12,42 @@ const authTrace = require('./observability/authTrace');
 const burnIn    = require('./observability/burnIn');
 const { requireSession, attachUser, requireCsrf } = require('./middleware/session');
 const { geoFence } = require('./middleware/geoFence');
+
+// Internal-only endpoints: callers must present the INTERNAL_SERVICE_SECRET header value
+// (constant-time comparison) or originate from a trusted loopback/private IP.
+// In production this key MUST be set; in dev it defaults to a known value so local boot works.
+const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || (config.env !== 'production' ? 'dev-internal-secret' : '');
+if (config.env === 'production' && (!INTERNAL_SECRET || INTERNAL_SECRET === 'dev-internal-secret')) {
+  console.error('[auth-gateway] FATAL: INTERNAL_SERVICE_SECRET must be set in production');
+  process.exit(1);
+}
+
+// Trusted loopback / private-network CIDR prefixes (IPv4 and IPv6).
+const TRUSTED_INTERNAL_PREFIXES = ['127.', '::1', '10.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.', '192.168.'];
+const isInternalIp = (ip) => TRUSTED_INTERNAL_PREFIXES.some((pfx) => (ip || '').startsWith(pfx));
+
+function requireInternalKey(req, res, next) {
+  const clientIp = ((req.headers['x-forwarded-for'] || '').split(',')[0].trim()) || (req.socket && req.socket.remoteAddress) || '';
+  // Allow trusted internal network callers without a key (e.g. health-check scripts on the same host).
+  if (isInternalIp(clientIp)) return next();
+  // Otherwise require the shared secret in the Authorization header: "Bearer <secret>" or "ApiKey <secret>".
+  const authHeader = req.headers['authorization'] || '';
+  const presented = authHeader.startsWith('Bearer ') ? authHeader.slice(7)
+    : authHeader.startsWith('ApiKey ') ? authHeader.slice(7)
+    : (req.headers['x-internal-key'] || '');
+  if (!presented) {
+    return res.status(401).json({ error: { code: 'INTERNAL_AUTH_REQUIRED', message: 'Internal key required' } });
+  }
+  // Constant-time comparison to prevent timing attacks.
+  try {
+    const a = Buffer.from(presented); const b = Buffer.from(INTERNAL_SECRET);
+    const match = a.length === b.length && crypto.timingSafeEqual(a, b);
+    if (!match) return res.status(403).json({ error: { code: 'INTERNAL_AUTH_INVALID', message: 'Invalid internal key' } });
+  } catch {
+    return res.status(403).json({ error: { code: 'INTERNAL_AUTH_INVALID', message: 'Invalid internal key' } });
+  }
+  return next();
+}
 // /api proxy needs http-proxy-middleware; load lazily so the gateway still serves /auth if it's absent.
 let apiProxy;
 try {
@@ -40,9 +77,10 @@ app.get('/health', async (_req, res) => {
 });
 
 // Phase 6E-6.5 STEP 6 — frontend readiness probe. Returns live PRODUCTION-ONLY metrics.
+// SECURITY: gated behind requireInternalKey — only trusted internal callers (loopback/VPC or INTERNAL_SERVICE_SECRET).
 // migration_ready is hard-false until all islands are live and an operator flips it.
 // localStorage_present is a client-only fact; the frontend passes it as ?localStorage=.
-app.get('/auth-capability-check', async (req, res) => {
+app.get('/auth-capability-check', requireInternalKey, async (req, res) => {
   let redisOk = false;
   try { redisOk = (await redis.ping()) === 'PONG'; } catch { /* redis down */ }
   const ls = req.query.localStorage;

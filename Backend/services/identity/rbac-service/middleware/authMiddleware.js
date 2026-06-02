@@ -1,4 +1,5 @@
 'use strict';
+const crypto = require('crypto');
 const jwt = require('../config/jwt');
 const config = require('../config/appConfig');
 const { Errors } = require('../utils/errors');
@@ -42,10 +43,23 @@ const authenticate = (req, res, next) => {
  */
 const internalOrUser = (req, res, next) => {
     const key = req.headers['x-internal-key'];
-    if (config.internalApiKey && key && key === config.internalApiKey) {
-        req.internal = true;
-        req.auth = req.auth || { userId: 'service', roles: ['service'], permissions: [], orgId: null };
-        return next();
+    const expected = config.internalApiKey;
+    if (expected && key) {
+        // Use timingSafeEqual to prevent timing-based side-channel attacks.
+        // timingSafeEqual requires equal-length buffers; the length check must
+        // come first so we never call it with mismatched lengths (which would
+        // throw). `safe` is false for any length mismatch.
+        const keyBuf      = Buffer.from(String(key));
+        const expectedBuf = Buffer.from(String(expected));
+        const safe        = keyBuf.length === expectedBuf.length &&
+                            crypto.timingSafeEqual(keyBuf, expectedBuf);
+        if (safe) {
+            req.internal = true;
+            req.auth = req.auth || { userId: 'service', roles: ['service'], permissions: [], orgId: null };
+            return next();
+        }
+        // Wrong key — fall through to user-token auth (do NOT 401 here;
+        // a caller may have intended to use a user token without the header).
     }
     return authenticate(req, res, next);
 };

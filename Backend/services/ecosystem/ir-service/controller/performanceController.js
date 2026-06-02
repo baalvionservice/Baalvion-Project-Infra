@@ -2,8 +2,9 @@
 const { sendSuccess } = require('../utils/response');
 const db = require('../models');
 
+// orgId is derived exclusively from the verified token; never from the request (IDOR prevention).
 const DEFAULT_ORG_ID = process.env.IR_DEFAULT_ORG_ID || '11111111-1111-1111-1111-111111111111';
-const orgOf = (req) => req.user?.orgId || req.query.org_id || DEFAULT_ORG_ID;
+const orgOf = (req) => req.user?.orgId || DEFAULT_ORG_ID;
 
 // GET /performance/metrics — institutional performance snapshot (UI-shaped).
 const metrics = async (req, res, next) => {

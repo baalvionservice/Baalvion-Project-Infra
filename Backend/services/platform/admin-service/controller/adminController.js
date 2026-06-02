@@ -34,14 +34,14 @@ exports.suspendUser = async (req, res, next) => {
     try {
         const { userId } = req.params;
         if (userId === req.auth.userId) throw new AppError('INVALID_REQUEST', 'Cannot suspend yourself', 400);
-        await adminService.suspendUser(userId, req.auth.userId);
+        await adminService.suspendUser(userId, req.auth.userId, req.ip);
         sendSuccess(req, res, { message: 'User suspended' });
     } catch (err) { next(err); }
 };
 
 exports.unsuspendUser = async (req, res, next) => {
     try {
-        await adminService.unsuspendUser(req.params.userId, req.auth.userId);
+        await adminService.unsuspendUser(req.params.userId, req.auth.userId, req.ip);
         sendSuccess(req, res, { message: 'User unsuspended' });
     } catch (err) { next(err); }
 };
@@ -62,7 +62,7 @@ exports.listOrgs = async (req, res, next) => {
 exports.impersonate = async (req, res, next) => {
     try {
         const { userId: targetUserId } = req.params;
-        const result = await adminService.createImpersonationToken(req.auth.userId, targetUserId);
+        const result = await adminService.createImpersonationToken(req.auth.userId, targetUserId, req.ip);
         // Phase 9: frontend impersonation visibility. Non-httpOnly flag cookie + header so the
         // global banner can detect it; lifetime mirrors the (<=15m) impersonation token.
         res.cookie('baalvion_impersonation', '1', { httpOnly: false, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: (result.expiresIn || 900) * 1000 });
@@ -86,7 +86,7 @@ exports.listAllSessions = async (req, res, next) => {
 
 exports.revokeSession = async (req, res, next) => {
     try {
-        await adminService.revokeSessionAdmin(req.params.sessionId, req.auth.userId);
+        await adminService.revokeSessionAdmin(req.params.sessionId, req.auth.userId, req.ip);
         sendSuccess(req, res, { message: 'Session revoked' });
     } catch (err) { next(err); }
 };

@@ -33,12 +33,13 @@ const start = async () => {
         await db.sequelize.authenticate();
         await db.sequelize.query('CREATE SCHEMA IF NOT EXISTS dashboard');
         await db.sequelize.sync({ alter: false });
-        console.log('[DB] Connected and synced');
+        // DB connected and synced
     } catch (err) {
-        console.error('[DB]', err.message);
+        // eslint-disable-next-line no-console
+        process.stderr.write(`[DB] ${err.message}\n`);
         process.exit(1);
     }
-    app.listen(config.port, () => console.log(`dashboard-service on port ${config.port}`));
+    app.listen(config.port, () => { /* dashboard-service listening */ });
 };
 
 start();

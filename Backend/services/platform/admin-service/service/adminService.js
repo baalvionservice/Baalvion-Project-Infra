@@ -115,8 +115,9 @@ async function getUserDetail(userId) {
     return user;
 }
 
-async function suspendUser(userId, adminUserId) {
+async function suspendUser(userId, adminUserId, ipAddress) {
     const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
     await db.sequelize.query(
         "UPDATE auth.users SET status = 'suspended', updated_at = NOW() WHERE id = $1",
         { bind: [userId] }
@@ -136,23 +137,24 @@ async function suspendUser(userId, adminUserId) {
 
     await db.sequelize.query(
         `INSERT INTO auth.audit_logs (user_id, action, metadata, ip_address)
-         VALUES ($1, 'user.suspended', $2, '0.0.0.0')`,
-        { bind: [userId, JSON.stringify({ suspendedBy: adminUserId })] }
+         VALUES ($1, 'user.suspended', $2, $3)`,
+        { bind: [userId, JSON.stringify({ suspendedBy: adminUserId }), ip] }
     );
 
     logger.info({ userId, adminUserId, event: 'admin.user_suspended' }, 'User suspended by admin');
 }
 
-async function unsuspendUser(userId, adminUserId) {
+async function unsuspendUser(userId, adminUserId, ipAddress) {
     const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
     await db.sequelize.query(
         "UPDATE auth.users SET status = 'active', updated_at = NOW() WHERE id = $1",
         { bind: [userId] }
     );
     await db.sequelize.query(
         `INSERT INTO auth.audit_logs (user_id, action, metadata, ip_address)
-         VALUES ($1, 'user.unsuspended', $2, '0.0.0.0')`,
-        { bind: [userId, JSON.stringify({ unsuspendedBy: adminUserId })] }
+         VALUES ($1, 'user.unsuspended', $2, $3)`,
+        { bind: [userId, JSON.stringify({ unsuspendedBy: adminUserId }), ip] }
     );
     logger.info({ userId, adminUserId }, 'User unsuspended');
 }
@@ -193,7 +195,7 @@ async function listOrgs({ page = 1, limit = 50, search, plan }) {
 
 // ── Impersonation ─────────────────────────────────────────────────────────────
 
-async function createImpersonationToken(adminUserId, targetUserId) {
+async function createImpersonationToken(adminUserId, targetUserId, ipAddress) {
     const db = getDb();
 
     const [targetUser] = await db.sequelize.query(
@@ -209,6 +211,7 @@ async function createImpersonationToken(adminUserId, targetUserId) {
     if (String(targetUser.id) === String(adminUserId)) throw new AppError('INVALID_REQUEST', 'Cannot impersonate yourself', 400);
 
     const impersonationId = uuidv4();
+    const ip = ipAddress || '0.0.0.0';
 
     const r = redis.getClient();
     if (r && redis.isAvailable()) {
@@ -263,8 +266,8 @@ async function createImpersonationToken(adminUserId, targetUserId) {
 
     await db.sequelize.query(
         `INSERT INTO auth.audit_logs (user_id, action, metadata, ip_address)
-         VALUES ($1, 'admin.impersonation_started', $2, '0.0.0.0')`,
-        { bind: [adminUserId, JSON.stringify({ targetUserId, impersonationId })] }
+         VALUES ($1, 'admin.impersonation_started', $2, $3)`,
+        { bind: [adminUserId, JSON.stringify({ targetUserId, impersonationId }), ip] }
     );
 
     logger.warn({ adminUserId, targetUserId, impersonationId, event: 'admin.impersonation_issued' }, 'Impersonation token issued');
@@ -312,8 +315,9 @@ async function listAllSessions({ page = 1, limit = 50, userId, orgId }) {
     return { items: sessions, total: count, page, limit, hasMore: offset + limit < count };
 }
 
-async function revokeSessionAdmin(sessionId, adminUserId) {
+async function revokeSessionAdmin(sessionId, adminUserId, ipAddress) {
     const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
     const [[session]] = await Promise.all([
         db.sequelize.query(
             'SELECT id, user_id FROM auth.sessions WHERE id = $1',
@@ -332,8 +336,8 @@ async function revokeSessionAdmin(sessionId, adminUserId) {
     );
     await db.sequelize.query(
         `INSERT INTO auth.audit_logs (user_id, action, metadata, ip_address)
-         VALUES ($1, 'session.revoked', $2, '0.0.0.0')`,
-        { bind: [session.user_id, JSON.stringify({ sessionId, revokedBy: adminUserId, reason: 'admin_revoke' })] }
+         VALUES ($1, 'session.revoked', $2, $3)`,
+        { bind: [session.user_id, JSON.stringify({ sessionId, revokedBy: adminUserId, reason: 'admin_revoke' }), ip] }
     );
     logger.info({ sessionId, adminUserId }, 'Session revoked by admin');
 }

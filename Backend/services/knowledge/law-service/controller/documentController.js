@@ -6,20 +6,22 @@ const storage = require('../service/storage');
 
 const listDocuments = async (req, res, next) => {
     try {
-        const { page = 1, limit = 20, case_id, category } = req.query;
+        const { page = 1, case_id, category } = req.query;
+        // Cap pagination limit to prevent large data dumps.
+        const limit = Math.min(Number(req.query.limit) || 20, 100);
         const where = { owner_id: String(req.user.id) };
         if (case_id) where.case_id = Number(case_id);
         if (category) where.category = category;
-        const offset = (Number(page) - 1) * Number(limit);
+        const offset = (Number(page) - 1) * limit;
         const { count, rows } = await db.Document.findAndCountAll({
             where,
             order: [['created_at', 'DESC']],
-            limit: Number(limit),
+            limit,
             offset,
         });
         return sendPaginated(req, res, {
             items: rows,
-            pagination: { total: count, page: Number(page), limit: Number(limit), totalPages: Math.ceil(count / Number(limit)) },
+            pagination: { total: count, page: Number(page), limit, totalPages: Math.ceil(count / limit) },
         });
     } catch (err) { return next(err); }
 };
@@ -35,10 +37,26 @@ const getDocument = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// Reject URLs with dangerous or internal-only schemes.
+// Only https:// and http:// external URLs (and relative storage keys with no scheme) are accepted.
+const BLOCKED_URL_SCHEMES = /^(javascript|data|vbscript|file|ftp|blob):/i;
+const INTERNAL_HOSTS = /^https?:\/\/(localhost|127\.\d+\.\d+\.\d+|10\.\d+\.\d+\.\d+|172\.(1[6-9]|2\d|3[01])\.\d+\.\d+|192\.168\.\d+\.\d+)(:\d+)?/i;
+
+const validateDocumentUrl = (url) => {
+    if (!url) return true; // presence validated separately
+    if (BLOCKED_URL_SCHEMES.test(url)) return false;
+    if (INTERNAL_HOSTS.test(url)) return false;
+    return true;
+};
+
 const uploadDocument = async (req, res, next) => {
     try {
         const { name, type, url, size, category, case_id } = req.body;
         if (!name || !url) return next(new AppError('BAD_REQUEST', 'name and url are required', 400));
+        // Validate URL scheme — reject javascript:, data:, internal network addresses, etc.
+        if (!validateDocumentUrl(url)) {
+            return next(new AppError('BAD_REQUEST', 'Invalid document URL scheme', 400));
+        }
         const doc = await db.Document.create({
             owner_id: String(req.user.id),
             case_id: case_id ? Number(case_id) : null,

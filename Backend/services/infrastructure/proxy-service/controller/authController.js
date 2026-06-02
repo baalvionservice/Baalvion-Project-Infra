@@ -5,6 +5,8 @@ const inviteStore = require('../utils/inviteStore');
 const config = require('../config/appConfig');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const rateLimiter = require('../service/rateLimiter');
+const db = require('../models');
 
 const setRefreshCookie = (res, refreshToken) => {
     res.cookie(config.refreshCookieName, refreshToken, {
@@ -29,13 +31,30 @@ const register = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
+    const ip = req.ip;
+    const lockKey = `login:${ip}`;
     try {
+        // Brute-force lockout: same pattern as proxyAuthMiddleware.
+        if (await rateLimiter.isLockedOut(lockKey)) {
+            db.failed_auth_attempts.create({
+                identifier: lockKey,
+                auth_type: 'login',
+                reason: 'locked_out',
+                ip_address: ip,
+            }).catch(() => {});
+            return next(new AppError('RATE_LIMITED', 'Too many failed login attempts. Please try again later.', 429));
+        }
+
         const result = await authService.login({
             email: req.body.email,
             password: req.body.password,
-            ipAddress: req.ip,
+            ipAddress: ip,
             userAgent: req.headers['user-agent'],
         });
+
+        // Clear any accumulated failure count on successful login.
+        await rateLimiter.clearFailures(lockKey);
+
         setRefreshCookie(res, result.refreshToken);
         return sendSuccess(req, res, {
             token: result.token,
@@ -43,6 +62,22 @@ const login = async (req, res, next) => {
             user: result.user,
         });
     } catch (error) {
+        // Record failure for any authentication-related error (credentials, account disabled, etc.).
+        if (error && (error.statusCode === 401 || error.statusCode === 403 || error.code === 'INVALID_CREDENTIALS' || error.code === 'ACCOUNT_DISABLED')) {
+            await rateLimiter.recordFailure(lockKey);
+            db.failed_auth_attempts.create({
+                identifier: lockKey,
+                auth_type: 'login',
+                reason: error.code || 'credential_failure',
+                ip_address: ip,
+            }).catch(() => {});
+            db.auth_audit_logs.create({
+                auth_type: 'login',
+                outcome: 'failure',
+                reason: error.code || 'credential_failure',
+                ip_address: ip,
+            }).catch(() => {});
+        }
         return next(error);
     }
 };

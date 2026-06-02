@@ -27,11 +27,13 @@ app.use(requestContext);
 app.get('/', (req, res) => res.json({ service: 'Baalvion Search Service', version: config.apiVersion, engine: 'opensearch' }));
 app.get('/health', async (req, res) => {
     const os = await searchService.health();
+    // NOTE: config.opensearch.url is intentionally excluded — internal cluster URLs
+    // must not be exposed in unauthenticated responses (information disclosure).
     res.status(os.reachable ? 200 : 503).json({
         status: os.reachable ? 'ok' : 'degraded',
         service: 'search-service',
         rs256: jwt.isRs256Enabled(),
-        opensearch: { url: config.opensearch.url, ...os },
+        opensearch: { reachable: os.reachable, status: os.status },
     });
 });
 

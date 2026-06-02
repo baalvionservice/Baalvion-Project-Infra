@@ -4,6 +4,21 @@ const auditService = require('../services/auditService');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 
+/**
+ * Build a caller context object from the verified request state.
+ * Identity is derived ONLY from the verified token (req.auth) or the trusted
+ * internal flag (req.internal) — never from client-supplied body/query fields.
+ */
+function buildCaller(req) {
+    const auth = req.auth || {};
+    const roles = Array.isArray(auth.roles) ? auth.roles : [];
+    return {
+        orgId:        auth.orgId || null,
+        isSuperAdmin: roles.includes('super_admin'),
+        isInternal:   req.internal === true,
+    };
+}
+
 const writeSchema = z.object({
     action:        z.string().min(1).max(160),
     actorId:       z.string().max(64).optional(),
@@ -44,23 +59,30 @@ exports.writeBatch = async (req, res, next) => {
 };
 
 exports.list = async (req, res, next) => {
-    try { sendSuccess(req, res, await auditService.query(req.query)); }
-    catch (err) { next(err); }
+    try {
+        const caller = buildCaller(req);
+        sendSuccess(req, res, await auditService.query(req.query, caller));
+    } catch (err) { next(err); }
 };
 
 exports.getOne = async (req, res, next) => {
-    try { sendSuccess(req, res, await auditService.getBySeq(req.params.seq)); }
-    catch (err) { next(err); }
+    try {
+        const caller = buildCaller(req);
+        sendSuccess(req, res, await auditService.getBySeq(req.params.seq, caller));
+    } catch (err) { next(err); }
 };
 
 exports.verify = async (req, res, next) => {
-    try { sendSuccess(req, res, await auditService.verify({ fromSeq: req.query.fromSeq, toSeq: req.query.toSeq })); }
-    catch (err) { next(err); }
+    try {
+        const caller = buildCaller(req);
+        sendSuccess(req, res, await auditService.verify({ fromSeq: req.query.fromSeq, toSeq: req.query.toSeq }, caller));
+    } catch (err) { next(err); }
 };
 
 exports.exportCsv = async (req, res, next) => {
     try {
-        const csv = await auditService.exportEvents(req.query);
+        const caller = buildCaller(req);
+        const csv = await auditService.exportEvents(req.query, caller);
         res.setHeader('Content-Type', 'text/csv');
         res.setHeader('Content-Disposition', 'attachment; filename="audit-export.csv"');
         res.status(200).send(csv);

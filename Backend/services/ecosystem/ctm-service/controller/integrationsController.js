@@ -6,6 +6,7 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const events = require('../service/events');
 const github = require('../service/github');
 const sandbox = require('../service/sandbox');
+const { assertSafeUrl } = require('../utils/safeUrl');
 
 const maskKey = (k) => (k ? `••••••••${String(k).slice(-4)}` : '');
 
@@ -150,9 +151,15 @@ exports.testApiIntegration = async (req, res, next) => {
         let ok = false, detail = 'No endpoint configured';
         if (i.endpoint_url) {
             try {
+                // SSRF guard: validate the stored endpoint_url before making the outbound
+                // request. Rejects private/loopback/link-local addresses and non-http(s) schemes.
+                // The stored api_key is intentionally NOT forwarded — sending secrets to an
+                // arbitrary URL is a credential-exfiltration risk.
+                await assertSafeUrl(i.endpoint_url);
                 const controller = new AbortController();
                 const timer = setTimeout(() => controller.abort(), 4000);
-                const r = await fetch(i.endpoint_url, { headers: i.api_key ? { Authorization: `Bearer ${i.api_key}` } : {}, signal: controller.signal });
+                // Ping without Authorization to avoid credential forwarding to unknown hosts.
+                const r = await fetch(i.endpoint_url, { signal: controller.signal });
                 clearTimeout(timer);
                 ok = r.status < 500; detail = `HTTP ${r.status}`;
             } catch (e) { detail = String(e.message); }

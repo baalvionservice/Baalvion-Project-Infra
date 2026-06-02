@@ -191,7 +191,15 @@ exports.getRevenueSources = async (req, res, next) => {
 
 exports.getPlanUsage = async (req, res, next) => {
     try {
-        const companyId = req.query.company_id;
+        // IDOR guard: non-admins are locked to their own org; query param is ignored.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        let companyId;
+        if (isAdmin) {
+            companyId = req.query.company_id || null;
+        } else {
+            companyId = req.auth?.orgId || null;
+        }
         const where = companyId ? { company_id: companyId } : {};
         const [taskCount, subCount] = await Promise.all([
             db.tasks.count({ where }),

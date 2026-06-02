@@ -4,7 +4,7 @@ const ctrl = require('../controllers/agentController');
 const training = require('../controllers/trainingController');
 const asyncHandler = require('../utils/asyncHandler');
 const { internalOrUser } = require('../middleware/authMiddleware');
-const { requireAgentAdmin } = require('../middleware/guards');
+const { requireAgentAdmin, requireAgentWrite } = require('../middleware/guards');
 
 const router = express.Router();
 router.use(internalOrUser, requireAgentAdmin);
@@ -21,7 +21,7 @@ router.post('/sales', asyncHandler(ctrl.recordSale));
 router.get('/sales',  asyncHandler(ctrl.listSales));
 router.get('/commissions/summary',    asyncHandler(ctrl.commissionSummary));
 router.get('/commissions',            asyncHandler(ctrl.listCommissions));
-router.post('/commissions/transition', asyncHandler(ctrl.transition));
+router.post('/commissions/transition', requireAgentWrite, asyncHandler(ctrl.transition));
 
 // ── training: courses ──
 router.post('/courses', asyncHandler(training.createCourse));
@@ -39,7 +39,7 @@ router.get('/agents',  asyncHandler(ctrl.listAgents));
 router.get('/agents/:id', asyncHandler(ctrl.getAgent));
 router.patch('/agents/:id', asyncHandler(ctrl.updateAgent));
 router.get('/agents/:id/rank',     asyncHandler(ctrl.agentRank));
-router.post('/agents/:id/payout',  asyncHandler(ctrl.payout));
+router.post('/agents/:id/payout',  requireAgentWrite, asyncHandler(ctrl.payout));
 router.get('/agents/:agentId/certifications', asyncHandler(training.agentCerts));
 
 module.exports = router;

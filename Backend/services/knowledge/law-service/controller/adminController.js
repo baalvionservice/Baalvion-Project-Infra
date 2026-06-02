@@ -21,6 +21,39 @@ const C = (as) => ({ model: 'Client', as, attributes: ['id', 'name', 'email'] })
 const L = (as) => ({ model: 'Lawyer', as, attributes: ['id', 'name', 'email'] });
 const CAT = (as) => ({ model: 'Category', as, attributes: ['id', 'name', 'slug'] });
 
+// Mass-assignment allowlists for admin create/update operations.
+// Fields not listed here are silently dropped before hitting the ORM.
+// Sensitive columns (id, created_at, updated_at, password_hash, etc.) are excluded.
+const ADMIN_FIELDS = {
+    lawyers:       ['name', 'email', 'phone', 'bio', 'specializations', 'bar_number', 'hourly_rate', 'location', 'languages', 'status', 'verified', 'avatar_url', 'experience_years', 'user_id'],
+    clients:       ['name', 'email', 'phone', 'location', 'avatar_url', 'subscription_tier', 'user_id'],
+    users:         ['email', 'full_name', 'role', 'is_active', 'avatar_url'],
+    cases:         ['title', 'description', 'category', 'priority', 'status', 'outcome', 'notes', 'client_id', 'lawyer_id', 'closed_at'],
+    bookings:      ['lawyer_id', 'client_id', 'case_id', 'type', 'scheduled_at', 'duration', 'notes', 'status', 'total_amount', 'video_room_id'],
+    payments:      ['status', 'provider', 'provider_tx_id', 'notes'],
+    subscriptions: ['tier', 'status', 'started_at', 'expires_at', 'client_id'],
+    reviews:       ['rating', 'comment', 'status', 'lawyer_id', 'client_id'],
+    articles:      ['title', 'slug', 'excerpt', 'content', 'status', 'category_id', 'subcategory_id', 'author_id', 'published_at', 'featured_image', 'tags'],
+    categories:    ['name', 'slug', 'description', 'is_active', 'icon', 'order'],
+    subcategories: ['name', 'slug', 'description', 'is_active', 'category_id', 'icon', 'order'],
+    notifications: ['user_id', 'type', 'title', 'message', 'read', 'data'],
+    referrals:     ['code', 'status', 'referrer_id', 'referee_id', 'reward'],
+    payouts:       ['lawyer_id', 'amount', 'currency', 'status', 'reference', 'notes', 'processed_at'],
+    messages:      ['content', 'type', 'case_id', 'booking_id', 'sender_id', 'recipient_id', 'metadata'],
+    documents:     ['name', 'type', 'url', 'size', 'category', 'case_id', 'owner_id'],
+};
+
+// Extract only the allowed fields from a body object for a given resource.
+const pickAllowed = (resource, body) => {
+    const allowed = ADMIN_FIELDS[resource];
+    if (!allowed) return body; // unknown resource — let model-level validation catch it
+    const out = {};
+    for (const key of allowed) {
+        if (Object.prototype.hasOwnProperty.call(body, key)) out[key] = body[key];
+    }
+    return out;
+};
+
 const RESOURCES = {
     lawyers:       { model: 'Lawyer',       search: ['name', 'email', 'bar_number', 'bio'], filters: ['status', 'verified'], order: [['created_at', 'DESC']] },
     clients:       { model: 'Client',       search: ['name', 'email', 'phone', 'location'], filters: ['subscription_tier'], order: [['created_at', 'DESC']] },
@@ -103,8 +136,10 @@ const createResource = async (req, res, next) => {
         const cfg = resolve(req.params.resource);
         if (!cfg) return next(new AppError('NOT_FOUND', `Unknown resource '${req.params.resource}'`, 404));
         if (cfg.readonly) return next(new AppError('FORBIDDEN', `${req.params.resource} is read-only`, 403));
-        const row = await cfg.Model.create(req.body);
-        await audit(req, 'create', req.params.resource, row.id, req.body);
+        // Mass-assignment guard: strip any fields not in the resource's allowlist.
+        const data = pickAllowed(req.params.resource, req.body);
+        const row = await cfg.Model.create(data);
+        await audit(req, 'create', req.params.resource, row.id, data);
         return sendSuccess(req, res, row, 201);
     } catch (err) { return next(err); }
 };
@@ -116,8 +151,10 @@ const updateResource = async (req, res, next) => {
         if (cfg.readonly) return next(new AppError('FORBIDDEN', `${req.params.resource} is read-only`, 403));
         const row = await cfg.Model.findByPk(req.params.id);
         if (!row) return next(new AppError('NOT_FOUND', `${cfg.model} not found`, 404));
-        await row.update(req.body);
-        await audit(req, 'update', req.params.resource, row.id, req.body);
+        // Mass-assignment guard: strip any fields not in the resource's allowlist.
+        const data = pickAllowed(req.params.resource, req.body);
+        await row.update(data);
+        await audit(req, 'update', req.params.resource, row.id, data);
         return sendSuccess(req, res, row);
     } catch (err) { return next(err); }
 };

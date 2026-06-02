@@ -9,7 +9,9 @@ const video = require('../service/video');
 
 const listBookings = async (req, res, next) => {
     try {
-        const { page = 1, limit = 20, status, role } = req.query;
+        const { page = 1, status, role } = req.query;
+        // Cap pagination limit to prevent large data dumps.
+        const limit = Math.min(Number(req.query.limit) || 20, 100);
         const where = {};
         if (status) where.status = status;
 
@@ -20,12 +22,12 @@ const listBookings = async (req, res, next) => {
             const conditions = [];
             if (client) conditions.push({ client_id: client.id });
             if (lawyer) conditions.push({ lawyer_id: lawyer.id });
-            if (conditions.length === 0) return sendPaginated(req, res, { items: [], pagination: { total: 0, page: 1, limit: Number(limit), totalPages: 0 } });
+            if (conditions.length === 0) return sendPaginated(req, res, { items: [], pagination: { total: 0, page: 1, limit, totalPages: 0 } });
             if (conditions.length === 1) Object.assign(where, conditions[0]);
             else where[Op.or] = conditions;
         }
 
-        const offset = (Number(page) - 1) * Number(limit);
+        const offset = (Number(page) - 1) * limit;
         const { count, rows } = await db.Booking.findAndCountAll({
             where,
             include: [
@@ -33,12 +35,12 @@ const listBookings = async (req, res, next) => {
                 { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'email', 'specializations'] },
             ],
             order: [['scheduled_at', 'DESC']],
-            limit: Number(limit),
+            limit,
             offset,
         });
         return sendPaginated(req, res, {
             items: rows,
-            pagination: { total: count, page: Number(page), limit: Number(limit), totalPages: Math.ceil(count / Number(limit)) },
+            pagination: { total: count, page: Number(page), limit, totalPages: Math.ceil(count / limit) },
         });
     } catch (err) { return next(err); }
 };
@@ -47,12 +49,20 @@ const getBooking = async (req, res, next) => {
     try {
         const booking = await db.Booking.findByPk(req.params.id, {
             include: [
-                { model: db.Client, as: 'client', attributes: ['id', 'name', 'email', 'phone'] },
-                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'email', 'specializations', 'hourly_rate'] },
+                { model: db.Client, as: 'client', attributes: ['id', 'name', 'email', 'phone', 'user_id'] },
+                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'email', 'specializations', 'hourly_rate', 'user_id'] },
                 { model: db.Case, as: 'case', attributes: ['id', 'title', 'status'] },
             ],
         });
         if (!booking) return next(new AppError('NOT_FOUND', 'Booking not found', 404));
+        // IDOR: non-admin callers may only view bookings where they are the client or the lawyer.
+        if (!req.user.isAdmin) {
+            const uid = String(req.user.id);
+            const isParticipant =
+                (booking.client && String(booking.client.user_id) === uid) ||
+                (booking.lawyer && String(booking.lawyer.user_id) === uid);
+            if (!isParticipant) return next(new AppError('FORBIDDEN', 'Not authorised to view this booking', 403));
+        }
         return sendSuccess(req, res, booking);
     } catch (err) { return next(err); }
 };
@@ -92,8 +102,21 @@ const updateBookingStatus = async (req, res, next) => {
         const { status } = req.body;
         const allowed = ['pending', 'confirmed', 'completed', 'cancelled'];
         if (!allowed.includes(status)) return next(new AppError('BAD_REQUEST', 'Invalid status value', 400));
-        const booking = await db.Booking.findByPk(req.params.id);
+        const booking = await db.Booking.findByPk(req.params.id, {
+            include: [
+                { model: db.Client, as: 'client', attributes: ['id', 'user_id'] },
+                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'user_id'] },
+            ],
+        });
         if (!booking) return next(new AppError('NOT_FOUND', 'Booking not found', 404));
+        // IDOR: only the booking's client or lawyer (or an admin) may change the status.
+        if (!req.user.isAdmin) {
+            const uid = String(req.user.id);
+            const isParticipant =
+                (booking.client && String(booking.client.user_id) === uid) ||
+                (booking.lawyer && String(booking.lawyer.user_id) === uid);
+            if (!isParticipant) return next(new AppError('FORBIDDEN', 'Not authorised to update this booking', 403));
+        }
         await booking.update({ status });
         return sendSuccess(req, res, booking);
     } catch (err) { return next(err); }
@@ -101,8 +124,21 @@ const updateBookingStatus = async (req, res, next) => {
 
 const cancelBooking = async (req, res, next) => {
     try {
-        const booking = await db.Booking.findByPk(req.params.id);
+        const booking = await db.Booking.findByPk(req.params.id, {
+            include: [
+                { model: db.Client, as: 'client', attributes: ['id', 'user_id'] },
+                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'user_id'] },
+            ],
+        });
         if (!booking) return next(new AppError('NOT_FOUND', 'Booking not found', 404));
+        // IDOR: only the booking's client or lawyer (or an admin) may cancel.
+        if (!req.user.isAdmin) {
+            const uid = String(req.user.id);
+            const isParticipant =
+                (booking.client && String(booking.client.user_id) === uid) ||
+                (booking.lawyer && String(booking.lawyer.user_id) === uid);
+            if (!isParticipant) return next(new AppError('FORBIDDEN', 'Not authorised to cancel this booking', 403));
+        }
         if (booking.status === 'completed') return next(new AppError('BAD_REQUEST', 'Cannot cancel a completed booking', 400));
         await booking.update({ status: 'cancelled' });
         return sendSuccess(req, res, booking);

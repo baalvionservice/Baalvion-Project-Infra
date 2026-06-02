@@ -5,7 +5,7 @@ const ex = require('../controller/extrasController');
 const obs = require('../controller/obsController');
 const integ = require('../controller/integrationsController');
 const payments = require('../controller/paymentsController');
-const { authMiddleware, optionalAuth } = require('../middleware/authMiddleware');
+const { authMiddleware, optionalAuth, requireRole } = require('../middleware/authMiddleware');
 
 // Authenticated + mirror the acting identity user into CTM (user_profiles).
 const authed = [authMiddleware, ex.ensureUserProfile];
@@ -70,7 +70,9 @@ router.delete('/templates/:id', authMiddleware, ex.deleteTemplate);
 
 // ── Plans & Subscriptions ─────────────────────────────────────────────────────
 router.get('/plans',                 optionalAuth,   ctrl.listPlans);
-router.get('/subscriptions',         optionalAuth,   ctrl.listSubscriptions);
+// Subscription data is sensitive (billing, plan tier). Require auth; the handler
+// scopes by req.auth.orgId so each caller only sees their own subscriptions.
+router.get('/subscriptions',         authMiddleware, ctrl.listSubscriptions);
 router.post('/subscriptions',        authed,         ctrl.createSubscription);
 router.patch('/subscriptions/:id',   authMiddleware, ctrl.updateSubscription);
 
@@ -86,20 +88,24 @@ router.get('/activities',  optionalAuth, ctrl.listActivities);
 router.get('/analytics',  optionalAuth, ctrl.getAnalytics);
 
 // ── Observability (admin) — real metrics from prom-client/process/DB ────────────
-router.get('/observability/metrics',    optionalAuth, obs.getSystemMetrics);
-router.get('/observability/services',   optionalAuth, obs.getServiceStatus);
-router.get('/observability/load',       optionalAuth, obs.getServiceLoad);
-router.get('/observability/scaling',    optionalAuth, obs.getScalingEvents);
-router.get('/observability/incidents',  optionalAuth, obs.getSystemIncidents);
-router.get('/observability/logs',       optionalAuth, obs.getSystemLogs);
-router.get('/observability/errors',     optionalAuth, obs.getSystemErrors);
+// These endpoints expose internal infrastructure data; restrict to admin/super_admin.
+const adminOnly = [authMiddleware, requireRole('admin', 'super_admin')];
+router.get('/observability/metrics',    adminOnly, obs.getSystemMetrics);
+router.get('/observability/services',   adminOnly, obs.getServiceStatus);
+router.get('/observability/load',       adminOnly, obs.getServiceLoad);
+router.get('/observability/scaling',    adminOnly, obs.getScalingEvents);
+router.get('/observability/incidents',  adminOnly, obs.getSystemIncidents);
+router.get('/observability/logs',       adminOnly, obs.getSystemLogs);
+router.get('/observability/errors',     adminOnly, obs.getSystemErrors);
 
 // ── Revenue & usage analytics — computed from real subscriptions/plans/tasks ────
-router.get('/revenue/metrics',       optionalAuth, obs.getRevenueMetrics);
-router.get('/revenue/plan-distribution', optionalAuth, obs.getPlanDistribution);
-router.get('/revenue/sources',       optionalAuth, obs.getRevenueSources);
-router.get('/usage/plan',            optionalAuth, obs.getPlanUsage);
-router.get('/usage/metrics',         optionalAuth, obs.getUsageMetrics);
+// Revenue data is commercially sensitive; restrict to admin/super_admin.
+// /usage/* endpoints are per-company and require a valid session for scoping.
+router.get('/revenue/metrics',       adminOnly, obs.getRevenueMetrics);
+router.get('/revenue/plan-distribution', adminOnly, obs.getPlanDistribution);
+router.get('/revenue/sources',       adminOnly, obs.getRevenueSources);
+router.get('/usage/plan',            authMiddleware, obs.getPlanUsage);
+router.get('/usage/metrics',         authMiddleware, obs.getUsageMetrics);
 
 // ── Webhooks (outbound, HMAC-signed) — FULLY LIVE ───────────────────────────────
 router.get('/webhooks',             optionalAuth,   integ.listWebhooks);
@@ -127,8 +133,9 @@ router.post('/submissions/:id/test-cases',    authMiddleware, integ.createTestCa
 router.post('/submissions/:id/test-cases/run', authMiddleware, integ.runTestCases);
 
 // ── Payments (provider-agnostic: Stripe/Razorpay env-gated) ─────────────────────
-router.get('/payments',          optionalAuth,   payments.listPayments);
-router.get('/payments/provider', optionalAuth,   payments.providerStatus);
+// Payment records contain financial PII; require auth and scope by caller's org.
+router.get('/payments',          authMiddleware,  payments.listPayments);
+router.get('/payments/provider', optionalAuth,    payments.providerStatus);
 router.post('/payments/checkout', authMiddleware, payments.createCheckout);
 router.post('/payments/webhook', payments.handleWebhook); // no auth — verified by provider signature
 

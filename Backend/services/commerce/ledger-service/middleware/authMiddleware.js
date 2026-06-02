@@ -46,9 +46,22 @@ async function authMiddleware(req, res, next) {
 
     try {
         const claims = verify(authHeader.slice('Bearer '.length));
+
+        // Tenant MUST come from the verified token claims — never from a client-supplied
+        // header. If the caller also sends x-tenant-id we allow it only when it matches
+        // the verified claim exactly; a mismatch is rejected to prevent tenant-hopping.
+        const claimTenant = claims.orgId || claims.tenantId || null;
+        const headerTenant = req.headers['x-tenant-id'];
+        if (headerTenant && claimTenant && headerTenant !== claimTenant) {
+            return res.status(403).json({
+                error: 'TENANT_MISMATCH',
+                message: 'x-tenant-id header does not match token claims',
+            });
+        }
+
         req.user = {
             sub: claims.sub,
-            tenantId: req.headers['x-tenant-id'] || claims.orgId || claims.tenantId,
+            tenantId: claimTenant,   // authoritative: from verified token only
             roles: claims.roles || [],
             claims,
         };

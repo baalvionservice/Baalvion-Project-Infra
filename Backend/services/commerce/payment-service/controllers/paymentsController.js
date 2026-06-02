@@ -8,6 +8,8 @@ const idempotencyService = require('../services/idempotencyService');
 const kafkaService = require('../services/kafkaService');
 const config = require('../config/appConfig');
 
+const { sequelize } = db;
+
 /**
  * POST /v1/payments/initiate
  * Initiate a new payment (debit source, credit destination)
@@ -184,6 +186,11 @@ async function listPayments(req, res, next) {
 /**
  * POST /v1/payments/:id/reverse
  * Reverse a payment (refund)
+ *
+ * Fix: wrap the read-check-update in a serialised transaction with a
+ * SELECT … FOR UPDATE row-level lock so two concurrent reversal requests
+ * cannot both pass the REVERSED guard and both write REVERSED (double-reversal).
+ * Matching pattern from gatewayPaymentService.js refundPayment().
  */
 async function reversePayment(req, res, next) {
   try {
@@ -191,8 +198,30 @@ async function reversePayment(req, res, next) {
     const { id } = req.params;
     const { reason } = req.body;
 
-    const transaction = await db.Transaction.findOne({
-      where: { id, tenantId },
+    let transaction;
+    let alreadyReversed = false;
+
+    await sequelize.transaction(async (t) => {
+      // Acquire a row-level UPDATE lock before reading status.
+      // Concurrent reversals block here; the second one to acquire the lock
+      // will see status=REVERSED and bail out without double-writing.
+      transaction = await db.Transaction.findOne({
+        where: { id, tenantId },
+        lock: t.LOCK.UPDATE,
+        transaction: t,
+      });
+
+      if (!transaction) return; // handled outside
+
+      if (transaction.status === 'REVERSED') {
+        alreadyReversed = true;
+        return;
+      }
+
+      await transaction.update(
+        { status: 'REVERSED', reversedAt: new Date() },
+        { transaction: t },
+      );
     });
 
     if (!transaction) {
@@ -202,20 +231,14 @@ async function reversePayment(req, res, next) {
       });
     }
 
-    if (transaction.status === 'REVERSED') {
+    if (alreadyReversed) {
       return res.status(409).json({
         error: 'ALREADY_REVERSED',
         message: 'This payment has already been reversed',
       });
     }
 
-    // Mark as reversed
-    await transaction.update({
-      status: 'REVERSED',
-      reversedAt: new Date(),
-    });
-
-    // Publish reversal event
+    // Publish reversal event (outside the DB transaction — fail-open)
     if (config.features.kafkaEvents) {
       await kafkaService.publishPaymentFailed({
         ...transaction.toJSON(),
@@ -271,19 +294,46 @@ async function bulkPayments(req, res, next) {
       } = payment;
 
       try {
-        const tx = await db.Transaction.create({
-          id: uuidv4(),
-          tenantId,
-          idempotencyKey,
-          sourceAccountId,
-          destinationAccountId,
-          amount: new Decimal(amount).toFixed(4),
-          currency,
-          paymentScheme: 'INTERNAL',
-          status: 'PROCESSING',
-          description,
-          initiatedAt: new Date(),
+        // Mirror initiatePayment: check idempotency before touching the DB.
+        // Returns the cached result if this key was already processed (dedup).
+        if (idempotencyKey) {
+          const existing = await idempotencyService.checkIdempotency(tenantId, idempotencyKey);
+          if (existing.isDuplicate) {
+            results.push({ success: true, id: existing.result.id, duplicate: true });
+            continue;
+          }
+        }
+
+        // Wrap each item in its own transaction so a failure is isolated and
+        // the idempotency store + DB row are either both written or both rolled back.
+        let tx;
+        await sequelize.transaction(async (t) => {
+          tx = await db.Transaction.create(
+            {
+              id: uuidv4(),
+              tenantId,
+              idempotencyKey,
+              sourceAccountId,
+              destinationAccountId,
+              amount: new Decimal(amount).toFixed(4),
+              currency,
+              paymentScheme: 'INTERNAL',
+              status: 'PROCESSING',
+              description,
+              initiatedAt: new Date(),
+            },
+            { transaction: t },
+          );
         });
+
+        // Persist idempotency result after the DB row is committed.
+        if (idempotencyKey) {
+          await idempotencyService.storeResult(tenantId, idempotencyKey, {
+            id: tx.id,
+            status: tx.status,
+            amount: tx.amount,
+          });
+        }
 
         results.push({ success: true, id: tx.id });
       } catch (err) {
@@ -309,6 +359,11 @@ async function bulkPayments(req, res, next) {
 /**
  * GET /v1/payments/:id/fee-breakdown
  * Get fee calculation
+ *
+ * Fix: validate that amount is a finite positive number before constructing
+ * new Decimal(). Passing non-numeric strings (e.g. "abc", "Infinity", "NaN")
+ * previously threw an uncaught InvalidOperation inside Decimal, surfacing as an
+ * unhandled 500. Return 400 with a clear message instead.
  */
 async function getFeeBreakdown(req, res, next) {
   try {
@@ -318,6 +373,15 @@ async function getFeeBreakdown(req, res, next) {
       return res.status(400).json({
         error: 'INVALID_REQUEST',
         message: 'Amount query parameter required',
+      });
+    }
+
+    // Validate: must be a finite, non-negative number (string coerced).
+    const parsedAmount = Number(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount < 0) {
+      return res.status(400).json({
+        error: 'INVALID_AMOUNT',
+        message: 'Amount must be a valid finite non-negative number',
       });
     }
 

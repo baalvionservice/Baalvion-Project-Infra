@@ -4,14 +4,24 @@ dotenv.config();
 
 const parseList = (v, fb = []) => (!v ? fb : v.split(',').map((s) => s.trim()).filter(Boolean));
 
+// Prod fail-fast: refuse to boot with a known-insecure dev secret or missing key.
+const DEV_INSECURE_SECRET = 'dev-insecure-tenant-secret';
+const _jwtAccessSecret = process.env.JWT_ACCESS_SECRET || DEV_INSECURE_SECRET;
+const _nodeEnv = process.env.NODE_ENV || 'development';
+if (_nodeEnv === 'production' && (!process.env.JWT_PUBLIC_KEY && _jwtAccessSecret === DEV_INSECURE_SECRET)) {
+    // eslint-disable-next-line no-console
+    console.error('[tenant-service] FATAL: JWT_ACCESS_SECRET / JWT_PUBLIC_KEY must be set in production');
+    process.exit(1);
+}
+
 module.exports = {
-    env:         process.env.NODE_ENV || 'development',
+    env:         _nodeEnv,
     port:        Number(process.env.PORT || 3043),
     apiVersion:  'v1',
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000', 'http://localhost:3030', 'http://localhost:8080']),
 
     jwt: {
-        accessSecret: process.env.JWT_ACCESS_SECRET || 'dev-insecure-tenant-secret',
+        accessSecret: _jwtAccessSecret,
         issuer:       process.env.JWT_ISSUER   || 'baalvion-auth',
         audience:     process.env.JWT_AUDIENCE || 'baalvion-platform',
     },

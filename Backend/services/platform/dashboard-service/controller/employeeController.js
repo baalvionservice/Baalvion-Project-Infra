@@ -85,7 +85,8 @@ exports.updateEmployee = async (req, res, next) => {
     try {
         const employee = await db.Employee.findOne({ where: { id: req.params.id, org_id: req.user.orgId } });
         if (!employee) return next(new AppError('NOT_FOUND', 'Employee not found', 404));
-        await employee.update(req.body);
+        const { name, email, role, department, business_id, country, status, employment_type, join_date, salary, manager_id, performance_score, tasks_completed, attendance_rate } = req.body;
+        await employee.update({ name, email, role, department, business_id, country, status, employment_type, join_date, salary, manager_id, performance_score, tasks_completed, attendance_rate });
         await _createAuditLog(req, 'UPDATE_EMPLOYEE', 'employee', String(employee.id));
         return sendSuccess(req, res, employee);
     } catch (err) { return next(err); }
