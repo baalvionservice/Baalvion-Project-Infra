@@ -190,8 +190,9 @@ const buildWhere = (filters = []) => {
         const op = OPS[f.op];
         if (!op) continue;
         const col = f.col;
-        // f.col is user-controlled; reject prototype-polluting keys and non-string keys.
-        if (typeof col !== 'string' || isUnsafeKey(col)) continue;
+        // f.col is user-controlled: must be a plain column/relation name. Reject non-strings,
+        // prototype-polluting keys, and anything outside the safe column-name charset.
+        if (typeof col !== 'string' || isUnsafeKey(col) || !/^[A-Za-z0-9_.]+$/.test(col)) continue;
         const cond = { [op]: f.val };
         where[col] = where[col] ? Object.assign({}, where[col], cond) : cond;
     }

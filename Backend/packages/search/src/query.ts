@@ -129,6 +129,11 @@ export async function autocomplete<T = Record<string, unknown>>(
   prefix: string,
   size = 10,
 ): Promise<SearchResult<T>> {
+  // `field` is interpolated as an object key in the query body — restrict it to a safe
+  // field-name charset so a caller cannot inject arbitrary query structure (CWE-915).
+  if (!/^[A-Za-z0-9_.]+$/.test(field)) {
+    throw new Error('Invalid search field name');
+  }
   const response = await searchClient.search({
     index,
     body: {

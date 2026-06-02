@@ -280,6 +280,8 @@ const prepareInsert = (name, payload) => {
     if (FORBIDDEN_KEYS.has(k)) continue;
     const col = toSnake(k);
     if (FORBIDDEN_KEYS.has(col)) continue;
+    // col is user-controlled: only allow plain snake_case column names (no arbitrary property write).
+    if (!/^[a-z0-9_]+$/.test(col)) continue;
     p[col] = v;
   }
   if (name === 'proxies') {

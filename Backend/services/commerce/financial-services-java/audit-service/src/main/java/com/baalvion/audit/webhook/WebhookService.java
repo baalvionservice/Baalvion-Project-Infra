@@ -107,6 +107,11 @@ public class WebhookService {
   }
 
   private void validatePattern(String pattern) {
+    // The event pattern is user-supplied and used as a regex; cap its length to bound the
+    // backtracking surface (mitigates regex-injection / ReDoS) before compiling.
+    if (pattern.length() > 200) {
+      throw new IllegalArgumentException("eventPattern too long (max 200 characters)");
+    }
     try {
       Pattern.compile(pattern);
     } catch (PatternSyntaxException e) {

@@ -4,7 +4,9 @@ const { Errors } = require('../utils/errors');
 const { SCOPES } = require('../config/systemRoles');
 const tenantService = require('./tenantService');
 
-const keyify = (s) => String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 64);
+// Bound the input length BEFORE the regexes so a very long string can't drive super-linear
+// backtracking (ReDoS); the final slice keeps the stored key short.
+const keyify = (s) => String(s).slice(0, 128).toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 64);
 
 function serialize(r) {
     if (!r) return null;

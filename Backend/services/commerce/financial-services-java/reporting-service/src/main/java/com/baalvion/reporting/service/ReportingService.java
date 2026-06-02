@@ -147,7 +147,6 @@ public class ReportingService {
 
   // Neutralizes CR/LF/tab in user-derived values before logging (prevents log injection).
   private static String sanitizeForLog(String value) {
-    return value == null ? null : value.replaceAll("[
-	]", "_");
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 }

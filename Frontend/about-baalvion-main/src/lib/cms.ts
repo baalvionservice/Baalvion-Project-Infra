@@ -99,7 +99,14 @@ function blocksToText(blocks?: Block[]): string {
     .sort((a, b) => (a.order || 0) - (b.order || 0))
     .map((b) => {
       const c = b.content || {};
-      if (b.type === 'html') return String(c.html || '').replace(/<[^>]+>/g, '');
+      if (b.type === 'html') {
+        // Strip tags repeatedly until stable so overlapping/nested constructs (e.g. "<<x>>")
+        // cannot reconstitute a tag after a single pass (incomplete-multi-character-sanitization).
+        let s = String(c.html || '');
+        let prev;
+        do { prev = s; s = s.replace(/<[^>]+>/g, ''); } while (s !== prev);
+        return s;
+      }
       return String(c.text ?? '');
     })
     .filter(Boolean)
