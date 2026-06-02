@@ -53,7 +53,7 @@ public class ApprovalController {
   ) {
     UUID tenantId = com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
     String checker = actor(actorHeader);
-    log.info("POST /payments/approvals/{}/approve by {}", id, checker);
+    log.info("POST /payments/approvals/{}/approve by {}", id, sanitizeForLog(checker));
     return ResponseEntity.ok(approvalService.approve(tenantId, id, checker));
   }
 
@@ -66,11 +66,16 @@ public class ApprovalController {
   ) {
     UUID tenantId = com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
     String checker = actor(actorHeader);
-    log.info("POST /payments/approvals/{}/reject by {}", id, checker);
+    log.info("POST /payments/approvals/{}/reject by {}", id, sanitizeForLog(checker));
     return ResponseEntity.ok(approvalService.reject(tenantId, id, checker, reason));
   }
 
   private String actor(String actorHeader) {
     return AuthContext.currentUserId().orElse(actorHeader != null && !actorHeader.isBlank() ? actorHeader : "anonymous");
+  }
+
+  /** Strips CR/LF/tab from user-derived values before logging to prevent log injection. */
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 }

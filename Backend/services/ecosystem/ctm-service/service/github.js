@@ -9,12 +9,24 @@ const API = 'https://api.github.com';
 // breaks the SSRF taint flow (request URL must not depend on unvalidated input).
 const SEGMENT = /^[A-Za-z0-9._-]+$/;
 
+// Bound the input length before matching so the regex cannot be driven into
+// super-linear backtracking by a very long attacker-supplied string (ReDoS).
+const MAX_URL_LENGTH = 2048;
+
 function parseRepo(url) {
     if (!url) return null;
-    const m = String(url).match(/github\.com[/:]([^/]+)\/([^/#?.]+)(?:\.git)?/i);
+    const str = String(url);
+    if (str.length > MAX_URL_LENGTH) return null;
+    // Capture groups use the same allowlist character set as SEGMENT, so the matched
+    // segments cannot contain path separators or other URL-escaping characters. Using
+    // bounded, linear-time classes (no overlap with the optional `.git` suffix) avoids
+    // polynomial backtracking.
+    const m = str.match(/github\.com[/:]([A-Za-z0-9._-]+)\/([A-Za-z0-9_-]+)(?:\.git)?/i);
     if (!m) return null;
     const owner = m[1];
-    const repo = m[2].replace(/\.git$/, '');
+    const repo = m[2];
+    // Re-validate against the allowlist; only these vetted values flow into the
+    // request URL, breaking the request-forgery taint path.
     if (!SEGMENT.test(owner) || !SEGMENT.test(repo)) return null;
     return { owner, repo };
 }

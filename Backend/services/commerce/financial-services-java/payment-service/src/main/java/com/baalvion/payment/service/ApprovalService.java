@@ -55,7 +55,7 @@ public class ApprovalService {
       .makerId(makerId != null ? makerId : "unknown")
       .build();
     var saved = repository.save(request);
-    log.info("Maker-checker: reversal approval {} raised by {} for txn {}", saved.getId(), makerId, transactionId);
+    log.info("Maker-checker: reversal approval {} raised by {} for txn {}", saved.getId(), sanitizeForLog(makerId), transactionId);
     return mapToResponse(saved);
   }
 
@@ -75,7 +75,7 @@ public class ApprovalService {
     approval.setCheckerId(checkerId);
     approval.setDecidedAt(LocalDateTime.now());
     var saved = repository.save(approval);
-    log.info("Maker-checker: approval {} approved by {} (op={})", approvalId, checkerId, approval.getOperation());
+    log.info("Maker-checker: approval {} approved by {} (op={})", approvalId, sanitizeForLog(checkerId), approval.getOperation());
     return mapToResponse(saved);
   }
 
@@ -89,7 +89,7 @@ public class ApprovalService {
     approval.setDecisionReason(reason);
     approval.setDecidedAt(LocalDateTime.now());
     var saved = repository.save(approval);
-    log.info("Maker-checker: approval {} rejected by {}", approvalId, checkerId);
+    log.info("Maker-checker: approval {} rejected by {}", approvalId, sanitizeForLog(checkerId));
     return mapToResponse(saved);
   }
 
@@ -123,6 +123,11 @@ public class ApprovalService {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  /** Neutralize CR/LF/tab so user-derived values cannot forge or split log lines (log injection). */
+  private String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 
   private ApprovalRequest load(UUID tenantId, UUID id) {

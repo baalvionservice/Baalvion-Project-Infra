@@ -113,7 +113,7 @@ public class SettlementService {
   public BatchResponse createBatch(UUID tenantId, CreateBatchRequest request) {
     var existing = batchRepository.findByTenantAndRef(tenantId, request.getBatchRef());
     if (existing.isPresent()) {
-      log.info("Idempotent request: batchRef={} already exists for tenant={}", request.getBatchRef(), tenantId);
+      log.info("Idempotent request: batchRef={} already exists for tenant={}", sanitizeForLog(request.getBatchRef()), tenantId);
       return mapToResponse(existing.get());
     }
 
@@ -156,7 +156,7 @@ public class SettlementService {
     }
 
     log.info("Settlement batch created: id={}, tenant={}, ref={}, scheme={}, records={}, net={}",
-      savedBatch.getId(), tenantId, savedBatch.getBatchRef(), scheme, savedBatch.getRecordCount(), savedBatch.getNetAmount());
+      savedBatch.getId(), tenantId, sanitizeForLog(savedBatch.getBatchRef()), scheme, savedBatch.getRecordCount(), savedBatch.getNetAmount());
 
     return mapToResponse(savedBatch);
   }
@@ -245,6 +245,11 @@ public class SettlementService {
       batches = batchRepository.findByTenant(tenantId, pageable);
     }
     return batches.map(this::mapToResponse);
+  }
+
+  /** Strip CR/LF/tab from user-derived values before logging to prevent log injection. */
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 
   private SettlementBatch loadBatch(UUID tenantId, UUID batchId) {

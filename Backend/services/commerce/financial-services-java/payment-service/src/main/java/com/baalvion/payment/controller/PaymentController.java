@@ -56,7 +56,7 @@ public class PaymentController {
     if (idempotencyKeyHeader != null && !idempotencyKeyHeader.isBlank()) {
       request.setIdempotencyKey(idempotencyKeyHeader);
     }
-    log.info("POST /initiate: tenant={}, key={}, amount={}", tenantId, request.getIdempotencyKey(), request.getAmount());
+    log.info("POST /initiate: tenant={}, key={}, amount={}", tenantId, sanitizeForLog(request.getIdempotencyKey()), request.getAmount());
 
     TransactionResponse response = paymentService.initiatePayment(tenantId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -97,7 +97,7 @@ public class PaymentController {
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
     log.info("GET /: tenant={}, sourceAccountId={}, scheme={}, status={}, page={}, size={}",
-      tenantId, sourceAccountId, scheme, status, page, size);
+      tenantId, sanitizeForLog(sourceAccountId), sanitizeForLog(scheme), sanitizeForLog(status), page, size);
 
     Page<TransactionResponse> responses = paymentService.listPayments(tenantId, sourceAccountId, scheme, status, page, size);
     return ResponseEntity.ok(responses);
@@ -122,7 +122,7 @@ public class PaymentController {
     @RequestParam String reason
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("POST /{}/fail: tenant={}, reason={}", id, tenantId, reason);
+    log.info("POST /{}/fail: tenant={}, reason={}", id, tenantId, sanitizeForLog(reason));
 
     TransactionResponse response = paymentService.failPayment(tenantId, id, reason);
     return ResponseEntity.ok(response);
@@ -144,12 +144,12 @@ public class PaymentController {
     // Maker-checker (§7.1): high-value reversals are parked for a second pair of eyes.
     if (txn.getAmount() != null && txn.getAmount().compareTo(reversalApprovalThreshold) >= 0) {
       String maker = AuthContext.currentUserId().orElse(actorHeader != null && !actorHeader.isBlank() ? actorHeader : "anonymous");
-      log.info("POST /{}/reverse: high-value (amount={}) → maker-checker approval, maker={}", id, txn.getAmount(), maker);
+      log.info("POST /{}/reverse: high-value (amount={}) → maker-checker approval, maker={}", id, txn.getAmount(), sanitizeForLog(maker));
       ApprovalResponse approval = approvalService.requestReversal(tenantId, id, reasonCode, maker);
       return ResponseEntity.status(HttpStatus.ACCEPTED).body(approval);
     }
 
-    log.info("POST /{}/reverse: tenant={}, reasonCode={}", id, tenantId, reasonCode);
+    log.info("POST /{}/reverse: tenant={}, reasonCode={}", id, tenantId, sanitizeForLog(reasonCode));
     return ResponseEntity.ok(paymentService.reversePayment(tenantId, id, reasonCode));
   }
 
@@ -159,7 +159,7 @@ public class PaymentController {
     @RequestParam BigDecimal amount,
     @RequestParam String scheme
   ) {
-    log.info("GET /{}/fee-breakdown: amount={}, scheme={}", id, amount, scheme);
+    log.info("GET /{}/fee-breakdown: amount={}, scheme={}", id, amount, sanitizeForLog(scheme));
 
     FeeBreakdown breakdown = paymentService.getFeeBreakdown(amount, scheme);
     return ResponseEntity.ok(breakdown);
@@ -169,5 +169,10 @@ public class PaymentController {
     // Authenticated requests derive the tenant from the validated JWT; the header is ignored
     // when authenticated (no IDOR). Used only as a dev fallback when security is disabled.
     return com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
+  }
+
+  /** Strip CR/LF/tab from user-derived values before logging to prevent log injection. */
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 }

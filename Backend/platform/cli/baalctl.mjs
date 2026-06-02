@@ -65,9 +65,11 @@ function newService() {
   if (!DOMAINS.includes(domain)) die(`--domain must be one of: ${DOMAINS.join(', ')}`);
 
   const descriptorPath = join(SERVICES, `${name}.yaml`);
-  if (existsSync(descriptorPath)) die(`${name} already exists in the catalog`);
 
-  writeFileSync(descriptorPath, `apiVersion: baalvion.io/v1
+  // Write the descriptor with the exclusive 'wx' flag so the existence check and
+  // the write are a single atomic operation (no TOCTOU race window).
+  try {
+    writeFileSync(descriptorPath, `apiVersion: baalvion.io/v1
 kind: Service
 metadata:
   name: ${name}
@@ -89,7 +91,11 @@ spec:
   apis: ["/v1/${context}"]
   slo: { availability: 0.99, latencyP95Ms: 500 }
   deploy: { chart: baalvion-service, namespace: ${ns}, minReplicas: 2, maxReplicas: 10 }
-`);
+`, { flag: 'wx' });
+  } catch (err) {
+    if (err && err.code === 'EEXIST') die(`${name} already exists in the catalog`);
+    throw err;
+  }
 
   writeFileSync(join(VALUES_DIR, `values-${name}.yaml`), `nameOverride: ${name}
 namespace: ${ns}
@@ -107,7 +113,8 @@ replicas: { min: 2, max: 10, targetCPUUtilization: 70 }
   const codeDir = join(REPO, 'Backend', 'services', domain, name);
   if (!existsSync(codeDir)) mkdirSync(codeDir, { recursive: true });
   const pkgPath = join(codeDir, 'package.json');
-  if (!existsSync(pkgPath)) {
+  // Exclusive 'wx' write: atomically create only if absent (no TOCTOU race).
+  try {
     writeFileSync(pkgPath, JSON.stringify({
       name: `@baalvion/${name}`,
       version: '0.0.0',
@@ -115,7 +122,9 @@ replicas: { min: 2, max: 10, targetCPUUtilization: 70 }
       description: `${context} (${domain} domain)`,
       main: 'server.js',
       scripts: { start: 'node server.js' },
-    }, null, 2) + '\n');
+    }, null, 2) + '\n', { flag: 'wx' });
+  } catch (err) {
+    if (!err || err.code !== 'EEXIST') throw err;
   }
   if (!existsSync(join(codeDir, 'README.md'))) {
     writeFileSync(join(codeDir, 'README.md'), `# ${name}\n\nDomain: **${domain}** · Context: **${context}** · Owner: ${owner}\n\nScaffold the service with \`@baalvion/service-kit\`'s \`createService()\`. Verify identity\nvia \`@baalvion/auth-node\` (never import \`jsonwebtoken\` directly — rule A1). Expose its\npublic surface through \`@baalvion/contracts\`. See \`Backend/ARCHITECTURE.md\`.\n`);

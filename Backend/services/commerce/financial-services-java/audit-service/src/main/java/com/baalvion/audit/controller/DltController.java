@@ -43,7 +43,8 @@ public class DltController {
     @PathVariable UUID id,
     @RequestHeader(value = "X-Actor", required = false) String actor
   ) {
-    log.info("POST /audit/dlt/{}/replay by {}", id, actor);
+    String safeActor = actor == null ? null : actor.replaceAll("[\r\n\t]", "_");
+    log.info("POST /audit/dlt/{}/replay by {}", id, safeActor);
     return ResponseEntity.ok(dltService.replay(id, actor));
   }
 
@@ -52,7 +53,8 @@ public class DltController {
     @PathVariable UUID id,
     @RequestHeader(value = "X-Actor", required = false) String actor
   ) {
-    log.info("POST /audit/dlt/{}/discard by {}", id, actor);
+    String safeActor = actor == null ? null : actor.replaceAll("[\r\n\t]", "_");
+    log.info("POST /audit/dlt/{}/discard by {}", id, safeActor);
     return ResponseEntity.ok(dltService.discard(id, actor));
   }
 }

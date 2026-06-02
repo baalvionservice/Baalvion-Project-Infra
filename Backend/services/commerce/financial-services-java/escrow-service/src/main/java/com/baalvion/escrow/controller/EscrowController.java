@@ -30,7 +30,8 @@ public class EscrowController {
     @Valid @RequestBody CreateEscrowRequest request
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("POST /escrow: tenant={}, ref={}, amount={}", tenantId, request.getEscrowRef(), request.getAmount());
+    String safeRef = sanitizeForLog(request.getEscrowRef());
+    log.info("POST /escrow: tenant={}, ref={}, amount={}", tenantId, safeRef, request.getAmount());
 
     EscrowResponse response = escrowService.createHold(tenantId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);

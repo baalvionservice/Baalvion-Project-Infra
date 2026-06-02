@@ -54,7 +54,8 @@ public class ReconciliationService {
   public RunResponse reconcile(UUID tenantId, ReconcileRequest request) {
     var existing = runRepository.findByTenantAndRef(tenantId, request.getRunRef());
     if (existing.isPresent()) {
-      log.info("Idempotent request: runRef={} already exists for tenant={}", request.getRunRef(), tenantId);
+      String safeRunRef = sanitizeForLog(request.getRunRef());
+      log.info("Idempotent request: runRef={} already exists for tenant={}", safeRunRef, tenantId);
       return mapRun(existing.get());
     }
 
@@ -133,7 +134,7 @@ public class ReconciliationService {
     var finalRun = runRepository.save(savedRun);
 
     log.info("Reconciliation run completed: id={}, tenant={}, ref={}, total={}, matched={}, exceptions={}, unmatched={}",
-      finalRun.getId(), tenantId, finalRun.getRunRef(), items.size(), matched, exceptions, unmatched);
+      finalRun.getId(), tenantId, sanitizeForLog(finalRun.getRunRef()), items.size(), matched, exceptions, unmatched);
 
     Map<String, Object> event = new HashMap<>();
     event.put("runId", finalRun.getId());
@@ -189,8 +190,19 @@ public class ReconciliationService {
       item.setExceptionReason(item.getExceptionReason() + " | RESOLVED: " + request.getResolutionNote());
     }
     var saved = itemRepository.save(item);
-    log.info("Reconciliation item resolved: id={}, tenant={}, by={}", itemId, tenantId, item.getResolvedBy());
+    log.info("Reconciliation item resolved: id={}, tenant={}, by={}", itemId, tenantId, sanitizeForLog(item.getResolvedBy()));
     return mapItem(saved);
+  }
+
+  /**
+   * Strip CR/LF/tab from user-derived values before logging to prevent log
+   * injection (forged log entries / log-line splitting).
+   */
+  private static String sanitizeForLog(String value) {
+    if (value == null) {
+      return null;
+    }
+    return value.replaceAll("[\r\n\t]", "_");
   }
 
   private ReconciliationRun loadRun(UUID tenantId, UUID runId) {

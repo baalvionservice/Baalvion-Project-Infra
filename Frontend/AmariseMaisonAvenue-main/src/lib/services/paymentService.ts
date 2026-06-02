@@ -6,6 +6,20 @@
 
 import { PaymentGateway, PaymentStatus, Payment } from '../types';
 
+/**
+ * Generates a cryptographically secure base36 token of the given length.
+ * Uses crypto.getRandomValues instead of Math.random for unpredictable ids/secrets.
+ */
+function secureToken(length: number): string {
+  const bytes = new Uint8Array(length);
+  crypto.getRandomValues(bytes);
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += (bytes[i] % 36).toString(36);
+  }
+  return result;
+}
+
 export interface PaymentIntentResponse {
   success: boolean;
   payment_id: string;
@@ -46,7 +60,7 @@ export class MockPaymentService {
     // 2. Multi-Tenant Verification
     console.log(`%c[SECURITY] Validating Tenant context: ${tenantId} for Global Settlement.`, "color: #3B82F6;");
 
-    const paymentId = `pay_${Math.random().toString(36).substr(2, 9)}`;
+    const paymentId = `pay_${secureToken(9)}`;
 
     // 3. Simulate Gateway Latency (Production Simulation)
     await new Promise(resolve => setTimeout(resolve, 1200));
@@ -59,7 +73,7 @@ export class MockPaymentService {
         return {
           success: true,
           payment_id: paymentId,
-          client_secret: `pi_${paymentId}_secret_${Math.random().toString(36).substr(2, 5)}`,
+          client_secret: `pi_${paymentId}_secret_${secureToken(5)}`,
           message: "Stripe PaymentIntent established. Awaiting successful authorization."
         };
       case 'RAZORPAY':

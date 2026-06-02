@@ -30,7 +30,7 @@ public class AuditController {
     @Valid @RequestBody RecordEventRequest request
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("POST /audit/events: tenant={}, eventType={}", tenantId, request.getEventType());
+    log.info("POST /audit/events: tenant={}, eventType={}", tenantId, sanitizeForLog(request.getEventType()));
 
     AuditEventResponse response = auditService.record(tenantId, traceId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -55,7 +55,7 @@ public class AuditController {
     @RequestParam(defaultValue = "20") int size
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("GET /audit/events: tenant={}, eventType={}, aggregateId={}, actor={}", tenantId, eventType, aggregateId, actor);
+    log.info("GET /audit/events: tenant={}, eventType={}, aggregateId={}, actor={}", tenantId, sanitizeForLog(eventType), sanitizeForLog(aggregateId), sanitizeForLog(actor));
     return ResponseEntity.ok(auditService.listEvents(tenantId, eventType, aggregateId, actor, page, size));
   }
 

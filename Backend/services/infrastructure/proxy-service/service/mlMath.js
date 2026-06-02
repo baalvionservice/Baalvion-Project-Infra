@@ -201,6 +201,16 @@ function severityFromZ(z) {
 }
 
 // ── forecasting ────────────────────────────────────────────────────────────────
+/** Upper bound on forecast horizon to prevent unbounded allocation from caller-supplied input. */
+const MAX_FORECAST_HORIZON = 3650;
+
+/** Clamp a caller-supplied horizon to a finite integer in [1, MAX_FORECAST_HORIZON]. */
+function boundHorizon(horizon) {
+  const h = Math.floor(Number(horizon));
+  if (!Number.isFinite(h) || h < 1) return 1;
+  return Math.min(h, MAX_FORECAST_HORIZON);
+}
+
 /** Ordinary least squares over (0..n-1) → ys. */
 function linearRegression(ys) {
   const n = ys.length;
@@ -228,10 +238,11 @@ function linearRegression(ys) {
 }
 
 function forecastLinear(ys, horizon) {
+  const boundedHorizon = boundHorizon(horizon);
   const { slope, intercept } = linearRegression(ys);
   const n = ys.length;
   const out = [];
-  for (let h = 1; h <= horizon; h++) out.push(Math.max(0, intercept + slope * (n - 1 + h)));
+  for (let h = 1; h <= boundedHorizon; h++) out.push(Math.max(0, intercept + slope * (n - 1 + h)));
   return out;
 }
 
@@ -244,7 +255,7 @@ function forecastLinear(ys, horizon) {
  * @returns {{forecast:number[], lower:number[], upper:number[], level:number, trend:number, seasonal:boolean}}
  */
 function holtWinters(series, opts = {}) {
-  const horizon = opts.horizon ?? 7;
+  const horizon = boundHorizon(opts.horizon ?? 7);
   const alpha = opts.alpha ?? 0.4;
   const beta = opts.beta ?? 0.1;
   const gamma = opts.gamma ?? 0.2;

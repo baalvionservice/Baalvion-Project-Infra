@@ -53,7 +53,7 @@ public class PaymentService {
   public TransactionResponse initiatePayment(UUID tenantId, InitiatePaymentRequest request) {
     var existing = repository.findByTenantAndIdempotencyKey(tenantId, request.getIdempotencyKey());
     if (existing.isPresent()) {
-      log.info("Idempotent request: key={} already exists for tenant={}", request.getIdempotencyKey(), tenantId);
+      log.info("Idempotent request: key={} already exists for tenant={}", sanitizeForLog(request.getIdempotencyKey()), tenantId);
       return mapToResponse(existing.get());
     }
 
@@ -90,7 +90,7 @@ public class PaymentService {
 
     var saved = repository.save(transaction);
     log.info("Payment initiated: id={}, tenant={}, key={}, amount={}, scheme={}",
-      saved.getId(), tenantId, request.getIdempotencyKey(), request.getAmount(), scheme);
+      saved.getId(), tenantId, sanitizeForLog(request.getIdempotencyKey()), request.getAmount(), scheme);
 
     outboxService.enqueue(saved.getTenantId(), "payments.transaction.initiated", saved.getId().toString(), mapToResponse(saved));
 
@@ -152,7 +152,7 @@ public class PaymentService {
     transaction.setUpdatedAt(LocalDateTime.now());
     var saved = repository.save(transaction);
 
-    log.info("Payment failed: id={}, tenant={}, reason={}", transactionId, tenantId, reason);
+    log.info("Payment failed: id={}, tenant={}, reason={}", transactionId, tenantId, sanitizeForLog(reason));
     outboxService.enqueue(saved.getTenantId(), "payments.transaction.failed", saved.getId().toString(), mapToResponse(saved));
 
     return mapToResponse(saved);
@@ -177,7 +177,7 @@ public class PaymentService {
     transaction.setUpdatedAt(LocalDateTime.now());
     var saved = repository.save(transaction);
 
-    log.info("Payment reversed: id={}, tenant={}, reason={}", transactionId, tenantId, reasonCode);
+    log.info("Payment reversed: id={}, tenant={}, reason={}", transactionId, tenantId, sanitizeForLog(reasonCode));
     outboxService.enqueue(saved.getTenantId(), "payments.transaction.reversed", saved.getId().toString(), mapToResponse(saved));
 
     return mapToResponse(saved);
@@ -185,6 +185,11 @@ public class PaymentService {
 
   public FeeBreakdown getFeeBreakdown(BigDecimal amount, String scheme) {
     return feeEngine.calculateFees(amount, PaymentScheme.valueOf(scheme));
+  }
+
+  /** Strip CR/LF/tab from user-derived values before logging to prevent log injection (CRLF forging). */
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 
   private TransactionResponse mapToResponse(Transaction transaction) {

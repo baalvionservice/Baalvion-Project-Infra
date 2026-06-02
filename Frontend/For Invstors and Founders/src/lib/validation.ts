@@ -155,15 +155,32 @@ export function validateContentSafety(text: string): {
 // SANITIZATION HELPERS
 // =====================================================
 
+// Dangerous URL schemes that must never survive sanitization
+const DANGEROUS_SCHEME_REGEX = /(?:javascript|vbscript|data|file):/gi;
+// Inline event-handler attributes (e.g. onclick=)
+const EVENT_HANDLER_REGEX = /on\w+\s*=/gi;
+// Angle brackets used to open/close HTML tags
+const ANGLE_BRACKET_REGEX = /[<>]/g;
+
 /**
- * Sanitize user input by removing potentially harmful characters
+ * Sanitize user input by removing potentially harmful characters.
+ *
+ * Each replace runs in a fixed-point loop so that overlapping or nested
+ * patterns (e.g. "java<script>script:") cannot be reconstructed by a single
+ * pass, and the scheme check rejects every dangerous protocol, not just
+ * "javascript:".
  */
 export function sanitizeInput(input: string): string {
-  return input
-    .trim()
-    .replace(/[<>]/g, "") // Remove basic HTML tags
-    .replace(/javascript:/gi, "") // Remove javascript: protocol
-    .replace(/on\w+=/gi, ""); // Remove event handlers
+  let sanitized = input.trim();
+  let previous: string;
+  do {
+    previous = sanitized;
+    sanitized = sanitized
+      .replace(ANGLE_BRACKET_REGEX, "") // Remove basic HTML tags
+      .replace(DANGEROUS_SCHEME_REGEX, "") // Remove dangerous URL schemes
+      .replace(EVENT_HANDLER_REGEX, ""); // Remove event handlers
+  } while (sanitized !== previous);
+  return sanitized;
 }
 
 /**

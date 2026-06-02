@@ -9,6 +9,11 @@
 const { detectGeo, geoMatch } = require('../lib/geoDetect');
 const config = require('../config/appConfig');
 
+// Strip CR/LF/tab from user-derived values before logging (prevents log injection).
+function sanitizeLog(v) {
+  return String(v).replace(/[\r\n\t]/g, ' ');
+}
+
 function geoFence() {
   return (req, res, next) => {
     try {
@@ -20,7 +25,7 @@ function geoFence() {
       if (session && session.geo && session.geo.country) {
         const result = geoMatch(session.geo.country, country);
         if (result.match === false) {
-          const msg = `[geo-fence] country mismatch sid=${session.sessionId} session=${result.sessionGeo} request=${result.requestGeo} mode=${mode}`;
+          const msg = `[geo-fence] country mismatch sid=${sanitizeLog(session.sessionId)} session=${sanitizeLog(result.sessionGeo)} request=${sanitizeLog(result.requestGeo)} mode=${mode}`;
           if (mode === 'enforce') {
             console.warn(msg);
             return res.status(403).json({ error: { code: 'GEO_MISMATCH', message: 'Geographic location change detected; please re-authenticate' } });

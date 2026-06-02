@@ -39,15 +39,19 @@ exports.authorize = async (req, res, next) => {
 
         const allowedUris = typeof client.redirect_uris === 'string'
             ? JSON.parse(client.redirect_uris) : client.redirect_uris;
-        if (!allowedUris.includes(redirect_uri)) {
+        // Resolve to the exact server-registered URI rather than echoing the client-supplied
+        // value. After this membership check the redirect target originates solely from the
+        // trusted allowlist (RFC 6749 §4.1.2.1), which closes the open-redirect data flow.
+        const validRedirectUri = allowedUris.find(uri => uri === redirect_uri);
+        if (!validRedirectUri) {
             return next(new AppError('INVALID_REQUEST', 'Redirect URI not allowed for this client', 400));
         }
 
-        // redirect_uri is now validated against the client allowlist (RFC 6749 §4.1.2.1):
-        // only after this check is it safe to bounce error responses back to it, otherwise
-        // an attacker could supply an arbitrary redirect_uri and get an open redirect.
+        // validRedirectUri is now a trusted allowlist entry (RFC 6749 §4.1.2.1): only this
+        // server-derived value is used as a redirect target, so an attacker cannot coerce an
+        // open redirect by supplying an arbitrary redirect_uri.
         if (response_type !== 'code') {
-            return res.redirect(`${redirect_uri}?error=unsupported_response_type&state=${state || ''}`);
+            return res.redirect(`${validRedirectUri}?error=unsupported_response_type&state=${encodeURIComponent(state || '')}`);
         }
 
         const scopes = scope.split(' ').filter(s => config.oauth.supportedScopes.includes(s));
@@ -65,7 +69,7 @@ exports.authorize = async (req, res, next) => {
                 clientId:      client_id,
                 userId:        req.auth.userId,
                 orgId:         req.auth.orgId,
-                redirectUri:   redirect_uri,
+                redirectUri:   validRedirectUri,
                 scopes,
                 pkceChallenge: code_challenge     || null,
                 pkceMethod:    code_challenge_method || 'S256',
@@ -75,14 +79,14 @@ exports.authorize = async (req, res, next) => {
             // logout to it. Best-effort (no-op without Redis); never blocks issuing the code.
             await ssoRegistry.recordClientForSession(req.auth.sessionId, client_id, config.oauth.refreshTokenTtl);
             const params = new URLSearchParams({ code, ...(state && { state }) });
-            return res.redirect(`${redirect_uri}?${params}`);
+            return res.redirect(`${validRedirectUri}?${params}`);
         }
 
         // Not authenticated. OIDC silent auth (prompt=none) MUST NOT render a login UI — return the
         // login_required error to the (already redirect_uri-validated) RP so it can fall back.
         if (prompt === 'none') {
             const params = new URLSearchParams({ error: 'login_required', ...(state && { state }) });
-            return res.redirect(`${redirect_uri}?${params}`);
+            return res.redirect(`${validRedirectUri}?${params}`);
         }
 
         // Interactive auth: redirect to the central login UI, which returns here after login.
@@ -239,10 +243,14 @@ exports.endSession = async (req, res, next) => {
         }
 
         // Redirect to a client-registered post_logout_redirect_uri if supplied + allowlisted.
+        // Resolve to the exact server-registered URI so the redirect target originates from the
+        // trusted allowlist, not from the client-supplied value (closes the open-redirect flow).
         if (post_logout_redirect_uri && client_id) {
             const cfg = await clientService.getClientLogoutConfig(client_id);
-            if (cfg.postLogoutRedirectUris.includes(post_logout_redirect_uri)) {
-                const u = new URL(post_logout_redirect_uri);
+            const validPostLogoutUri = (cfg.postLogoutRedirectUris || [])
+                .find(uri => uri === post_logout_redirect_uri);
+            if (validPostLogoutUri) {
+                const u = new URL(validPostLogoutUri);
                 if (state) u.searchParams.set('state', state);
                 return res.redirect(u.toString());
             }

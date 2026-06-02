@@ -50,7 +50,8 @@ public class WebhookService {
       .eventPattern(eventPattern)
       .active(true)
       .build());
-    log.info("Webhook subscription registered: id={}, tenant={}, url={}, pattern={}", sub.getId(), tenantId, url, eventPattern);
+    log.info("Webhook subscription registered: id={}, tenant={}, url={}, pattern={}",
+      sub.getId(), tenantId, sanitizeForLog(url), sanitizeForLog(eventPattern));
     // Secret returned exactly once, on creation.
     return mapSub(sub, effectiveSecret);
   }

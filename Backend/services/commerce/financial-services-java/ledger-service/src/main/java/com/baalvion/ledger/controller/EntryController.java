@@ -31,7 +31,7 @@ public class EntryController {
     @Valid @RequestBody PostEntryRequest request
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("POST /entries: tenant={}, ref={}", tenantId, request.getTransactionRef());
+    log.info("POST /entries: tenant={}, ref={}", tenantId, sanitizeForLog(request.getTransactionRef()));
 
     EntryResponse response = ledgerService.postEntry(tenantId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -60,7 +60,7 @@ public class EntryController {
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
     log.info("GET /entries: tenant={}, accountId={}, entryType={}, status={}, page={}, size={}",
-      tenantId, accountId, entryType, status, page, size);
+      tenantId, sanitizeForLog(accountId), sanitizeForLog(entryType), sanitizeForLog(status), page, size);
 
     Page<EntryResponse> responses = ledgerService.listEntries(tenantId, accountId, entryType, status, page, size);
     return ResponseEntity.ok(responses);
@@ -107,5 +107,10 @@ public class EntryController {
     // Authenticated requests derive the tenant from the validated JWT; the header is ignored
     // when authenticated (no IDOR). Used only as a dev fallback when security is disabled.
     return com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
+  }
+
+  // Strip CR/LF/tab from user-derived values before logging to prevent log injection (CRLF).
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 }

@@ -8,6 +8,10 @@ try { db = require('../models'); } catch (_) {}
 const nowIso = () => new Date().toISOString();
 const dateStr = (v) => !v ? null : (v instanceof Date ? v.toISOString() : v);
 const toSnake = (s) => s.replace(/([A-Z])/g, (c) => `_${c.toLowerCase()}`);
+// Strip CR/LF/tab from user-derived values before logging (log-injection guard)
+const logSafe = (v) => String(v).replace(/[\r\n\t]/g, ' ');
+// Keys that must never index a plain object (prototype-pollution guard)
+const FORBIDDEN_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 const isMemory = (name) => !MODEL_MAP[name];
 const makeId = (prefix) => `${prefix}_${generateToken(6)}`;
 
@@ -273,7 +277,10 @@ const prepareInsert = (name, payload) => {
   const p = {};
   for (const [k, v] of Object.entries(payload)) {
     if (v === undefined) continue;
-    p[toSnake(k)] = v;
+    if (FORBIDDEN_KEYS.has(k)) continue;
+    const col = toSnake(k);
+    if (FORBIDDEN_KEYS.has(col)) continue;
+    p[col] = v;
   }
   if (name === 'proxies') {
     if (p.host !== undefined) { p.ip = p.host; delete p.host; }
@@ -390,7 +397,7 @@ const getById = async (name, id, orgId = null) => {
     const row = await Model.findOne({ where });
     return convertRecord(name, row);
   } catch (err) {
-    console.error(`getById(${name}, ${id}) error:`, err.message);
+    console.error('getById(%s, %s) error:', logSafe(name), logSafe(id), err.message);
     return null;
   }
 };
@@ -441,7 +448,7 @@ const update = async (name, id, updater, orgId = null) => {
     await Model.update(data, { where });
     return await getById(name, id, orgId);
   } catch (err) {
-    console.error(`update(${name}, ${id}) error:`, err.message);
+    console.error('update(%s, %s) error:', logSafe(name), logSafe(id), err.message);
     return null;
   }
 };
@@ -467,7 +474,7 @@ const remove = async (name, id, orgId = null) => {
     const count = await Model.destroy({ where });
     return count > 0;
   } catch (err) {
-    console.error(`remove(${name}, ${id}) error:`, err.message);
+    console.error('remove(%s, %s) error:', logSafe(name), logSafe(id), err.message);
     return false;
   }
 };
