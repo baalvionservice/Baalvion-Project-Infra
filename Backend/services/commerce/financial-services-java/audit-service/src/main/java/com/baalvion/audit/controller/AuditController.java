@@ -64,4 +64,9 @@ public class AuditController {
     // when authenticated (no IDOR). Used only as a dev fallback when security is disabled.
     return com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
   }
+
+  // Neutralizes CR/LF/tab in user-derived values before logging to prevent log injection.
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
+  }
 }

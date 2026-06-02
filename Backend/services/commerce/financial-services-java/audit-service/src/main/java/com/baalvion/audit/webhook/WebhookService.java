@@ -120,6 +120,11 @@ public class WebhookService {
     return HexFormat.of().formatHex(bytes);
   }
 
+  // Neutralizes CR/LF/tab in user-derived values before logging to prevent log injection.
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
+  }
+
   private WebhookSubscriptionResponse mapSub(WebhookSubscription s, String secretOrNull) {
     return WebhookSubscriptionResponse.builder()
       .id(s.getId())
