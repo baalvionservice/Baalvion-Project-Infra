@@ -21,7 +21,7 @@ app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 
 // KYC webhook needs the RAW body for HMAC verification — mount before json parser.
-app.post('/v1/webhooks/kyc', express.raw({ type: '*/*' }), require('./controller/privacyController').kycWebhook);
+app.post('/v1/webhooks/kyc', rateLimit(), express.raw({ type: '*/*' }), require('./controller/privacyController').kycWebhook);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '1mb' }));
