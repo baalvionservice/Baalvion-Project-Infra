@@ -15,6 +15,7 @@
     "type-check": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/sdk": "workspace:*",
     "bullmq": "^5.52.3",

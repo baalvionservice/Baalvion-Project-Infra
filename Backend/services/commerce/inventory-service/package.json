@@ -12,6 +12,7 @@
     "seed": "sequelize-cli db:seed:all"
   },
   "dependencies": {
+    "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/commerce-rbac": "workspace:*",
     "cookie-parser": "^1.4.7",

@@ -13,6 +13,7 @@
     "seed:undo": "sequelize-cli db:seed:undo:all"
   },
   "dependencies": {
+    "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/commerce-rbac": "workspace:*",
     "bullmq": "^5.52.3",

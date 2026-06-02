@@ -23,6 +23,7 @@
     "opossum": "^8.1.4"
   },
   "dependencies": {
+    "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "@aws-sdk/client-s3": "^3.1053.0",
     "@aws-sdk/s3-request-presigner": "^3.1053.0",
