@@ -4,10 +4,19 @@
 const TOKEN = process.env.GITHUB_TOKEN || '';
 const API = 'https://api.github.com';
 
+// GitHub owners/repos only ever contain these characters. Validating against this
+// allowlist keeps user-supplied values from escaping the api.github.com path and
+// breaks the SSRF taint flow (request URL must not depend on unvalidated input).
+const SEGMENT = /^[A-Za-z0-9._-]+$/;
+
 function parseRepo(url) {
     if (!url) return null;
     const m = String(url).match(/github\.com[/:]([^/]+)\/([^/#?.]+)(?:\.git)?/i);
-    return m ? { owner: m[1], repo: m[2].replace(/\.git$/, '') } : null;
+    if (!m) return null;
+    const owner = m[1];
+    const repo = m[2].replace(/\.git$/, '');
+    if (!SEGMENT.test(owner) || !SEGMENT.test(repo)) return null;
+    return { owner, repo };
 }
 
 async function gh(path) {

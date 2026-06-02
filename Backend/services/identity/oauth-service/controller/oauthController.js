@@ -28,9 +28,6 @@ exports.authorize = async (req, res, next) => {
         const { response_type, client_id, redirect_uri, scope = 'openid', state,
                 code_challenge, code_challenge_method, nonce, prompt } = req.query;
 
-        if (response_type !== 'code') {
-            return res.redirect(`${redirect_uri}?error=unsupported_response_type&state=${state || ''}`);
-        }
         if (!client_id || !redirect_uri) {
             return next(new AppError('VALIDATION_ERROR', 'client_id and redirect_uri are required', 400));
         }
@@ -44,6 +41,13 @@ exports.authorize = async (req, res, next) => {
             ? JSON.parse(client.redirect_uris) : client.redirect_uris;
         if (!allowedUris.includes(redirect_uri)) {
             return next(new AppError('INVALID_REQUEST', 'Redirect URI not allowed for this client', 400));
+        }
+
+        // redirect_uri is now validated against the client allowlist (RFC 6749 §4.1.2.1):
+        // only after this check is it safe to bounce error responses back to it, otherwise
+        // an attacker could supply an arbitrary redirect_uri and get an open redirect.
+        if (response_type !== 'code') {
+            return res.redirect(`${redirect_uri}?error=unsupported_response_type&state=${state || ''}`);
         }
 
         const scopes = scope.split(' ').filter(s => config.oauth.supportedScopes.includes(s));
