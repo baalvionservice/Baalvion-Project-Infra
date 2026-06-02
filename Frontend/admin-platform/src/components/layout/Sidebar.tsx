@@ -97,6 +97,7 @@ function SidebarLink({ item, collapsed, depth = 0 }: SidebarLinkProps) {
 
 export default function Sidebar() {
   const { sidebarCollapsed } = useUIStore();
+  const user = useAuthStore((s) => s.user);
 
   return (
     <aside
@@ -123,20 +124,27 @@ export default function Sidebar() {
       {/* Navigation */}
       <ScrollArea className="flex-1 py-4">
         <nav className="px-2 space-y-6">
-          {NAVIGATION.map((group) => (
-            <div key={group.label}>
-              {!sidebarCollapsed && (
-                <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/40">
-                  {group.label}
-                </p>
-              )}
-              <div className="space-y-0.5">
-                {group.items.map((item) => (
-                  <SidebarLink key={item.href} item={item} collapsed={sidebarCollapsed} />
-                ))}
+          {NAVIGATION.map((group) => {
+            // Skip a whole group when the current role can't access any of its items,
+            // so we never render a bare section header with no links beneath it.
+            const visibleItems = group.items.filter((item) => hasAccess(item, user?.role));
+            if (visibleItems.length === 0) return null;
+
+            return (
+              <div key={group.label}>
+                {!sidebarCollapsed && (
+                  <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/40">
+                    {group.label}
+                  </p>
+                )}
+                <div className="space-y-0.5">
+                  {visibleItems.map((item) => (
+                    <SidebarLink key={item.href} item={item} collapsed={sidebarCollapsed} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </nav>
       </ScrollArea>
     </aside>
