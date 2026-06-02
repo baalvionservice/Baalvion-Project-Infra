@@ -32,7 +32,7 @@ public class AccountController {
     @Valid @RequestBody CreateAccountRequest request
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("POST /accounts: tenant={}, type={}", tenantId, sanitizeForLog(request.getAccountType()));
+    log.info("POST /accounts: tenant={}, type={}", sanitizeForLog(String.valueOf(tenantId)), sanitizeForLog(request.getAccountType()));
 
     AccountResponse response = accountService.createAccount(tenantId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);

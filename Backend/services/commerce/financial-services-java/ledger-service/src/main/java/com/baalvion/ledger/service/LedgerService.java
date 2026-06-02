@@ -38,6 +38,10 @@ public class LedgerService {
     this.objectMapper = objectMapper;
   }
 
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
+  }
+
   private void publish(String topic, String key, Object payload) {
     try {
       kafkaTemplate.send(topic, key, objectMapper.writeValueAsString(payload));
@@ -48,13 +52,11 @@ public class LedgerService {
 
   public EntryResponse postEntry(UUID tenantId, PostEntryRequest request) {
     // Strip CR/LF/tab from the user-supplied transactionRef before logging to prevent log injection.
-    String safeTransactionRef = request.getTransactionRef() == null
-      ? null
-      : request.getTransactionRef().replaceAll("[\r\n\t]", "_");
+    String safeTransactionRef = sanitizeForLog(request.getTransactionRef());
 
     var existing = repository.findByTenantAndTransactionRef(tenantId, request.getTransactionRef());
     if (existing.isPresent()) {
-      log.info("Idempotent request: transactionRef={} already exists for tenant={}", safeTransactionRef, tenantId);
+      log.info("Idempotent request: transactionRef={} already exists for tenant={}", safeTransactionRef, sanitizeForLog(String.valueOf(tenantId)));
       return mapToResponse(existing.get());
     }
 

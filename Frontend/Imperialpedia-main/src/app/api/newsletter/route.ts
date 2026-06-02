@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+const sanitizeForLog = (v: unknown) => (v === undefined || v === null ? v : String(v).replace(/[\r\n\t]/g, ' '));
+
 /**
  * @fileOverview Placeholder API endpoint for newsletter subscriptions.
  * In production, this would connect to an email service provider or CRM.
@@ -17,7 +19,7 @@ export async function POST(request: Request) {
     }
 
     // Mock successful handshake
-    console.log(`[NEWSLETTER] New subscriber registered: ${name || 'Anonymous'} <${email}>`);
+    console.log(`[NEWSLETTER] New subscriber registered: ${sanitizeForLog(name) || 'Anonymous'} <${sanitizeForLog(email)}>`);
 
     return NextResponse.json({
       success: true,

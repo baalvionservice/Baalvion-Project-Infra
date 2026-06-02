@@ -122,7 +122,7 @@ public class AccountService {
     account.setKycStatus(target);
     var saved = repository.save(account);
     String updatedBySafe = sanitizeForLog(request.getUpdatedBy());
-    log.info("KYC updated: account={}, tenant={}, {} -> {}, by={}", accountId, tenantId, current, target, updatedBySafe);
+    log.info("KYC updated: account={}, tenant={}, {} -> {}, by={}", sanitizeForLog(String.valueOf(accountId)), sanitizeForLog(String.valueOf(tenantId)), current, target, updatedBySafe);
 
     Map<String, Object> event = new HashMap<>();
     event.put("accountId", accountId);
@@ -160,7 +160,7 @@ public class AccountService {
     account.setLedgerBalance(account.getLedgerBalance().add(amount));
     var saved = repository.save(account);
     String referenceSafe = sanitizeForLog(reference);
-    log.info("Account credited: account={}, tenant={}, amount={}, ref={}, balance={}", accountId, tenantId, amount, referenceSafe, saved.getBalance());
+    log.info("Account credited: account={}, tenant={}, amount={}, ref={}, balance={}", sanitizeForLog(String.valueOf(accountId)), sanitizeForLog(String.valueOf(tenantId)), amount, referenceSafe, saved.getBalance());
     return mapToResponse(saved);
   }
 
@@ -179,7 +179,7 @@ public class AccountService {
     account.setLedgerBalance(account.getLedgerBalance().subtract(amount));
     var saved = repository.save(account);
     String referenceSafe = sanitizeForLog(reference);
-    log.info("Account debited: account={}, tenant={}, amount={}, ref={}, balance={}", accountId, tenantId, amount, referenceSafe, saved.getBalance());
+    log.info("Account debited: account={}, tenant={}, amount={}, ref={}, balance={}", sanitizeForLog(String.valueOf(accountId)), sanitizeForLog(String.valueOf(tenantId)), amount, referenceSafe, saved.getBalance());
     return mapToResponse(saved);
   }
 

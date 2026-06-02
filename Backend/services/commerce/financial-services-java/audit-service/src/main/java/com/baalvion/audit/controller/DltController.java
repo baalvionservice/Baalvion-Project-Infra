@@ -44,7 +44,7 @@ public class DltController {
     @RequestHeader(value = "X-Actor", required = false) String actor
   ) {
     String safeActor = actor == null ? null : actor.replaceAll("[\r\n\t]", "_");
-    log.info("POST /audit/dlt/{}/replay by {}", id, safeActor);
+    log.info("POST /audit/dlt/{}/replay by {}", sanitizeForLog(String.valueOf(id)), safeActor);
     return ResponseEntity.ok(dltService.replay(id, actor));
   }
 
@@ -56,5 +56,11 @@ public class DltController {
     String safeActor = actor == null ? null : actor.replaceAll("[\r\n\t]", "_");
     log.info("POST /audit/dlt/{}/discard by {}", id, safeActor);
     return ResponseEntity.ok(dltService.discard(id, actor));
+  }
+
+  // Neutralizes CR/LF/tab in user-derived values before logging (prevents log injection).
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[
+	]", "_");
   }
 }

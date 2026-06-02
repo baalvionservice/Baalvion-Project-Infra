@@ -397,7 +397,7 @@ const getById = async (name, id, orgId = null) => {
     const row = await Model.findOne({ where });
     return convertRecord(name, row);
   } catch (err) {
-    console.error('getById(%s, %s) error:', logSafe(name), logSafe(id), err.message);
+    console.error('getById(%s, %s) error:', logSafe(name), logSafe(id), logSafe(err.message));
     return null;
   }
 };
