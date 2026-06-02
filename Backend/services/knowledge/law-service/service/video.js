@@ -13,8 +13,17 @@ const crypto = require('crypto');
 const { getSecret } = require('../config/secrets');
 
 const PROVIDER = String(process.env.VIDEO_PROVIDER || '').toLowerCase();
-const DAILY_KEY = getSecret('DAILY_API_KEY');
 const DAILY_DOMAIN = process.env.DAILY_DOMAIN; // e.g. yourco.daily.co
+
+// API credentials may be sourced from a mounted secrets file. Constrain the
+// value to the safe character set of a bearer token (alphanumerics + a few
+// token-safe separators) before it is ever placed in an HTTP header, so no
+// stray CR/LF/whitespace or other file content can leak into the request.
+function safeBearerKey(raw) {
+    const key = String(raw == null ? '' : raw).trim();
+    return /^[A-Za-z0-9._~+/=-]+$/.test(key) ? key : '';
+}
+const DAILY_KEY = safeBearerKey(getSecret('DAILY_API_KEY'));
 
 // Stable, unguessable room name for a booking (so a leaked id isn't a room name).
 function roomName(bookingId) {

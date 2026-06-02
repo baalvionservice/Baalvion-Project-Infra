@@ -30,7 +30,7 @@ public class AuditController {
     @Valid @RequestBody RecordEventRequest request
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("POST /audit/events: tenant={}, eventType={}", tenantId, request.getEventType());
+    log.info("POST /audit/events: tenant={}, eventType={}", tenantId, sanitizeForLog(request.getEventType()));
 
     AuditEventResponse response = auditService.record(tenantId, traceId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -55,7 +55,7 @@ public class AuditController {
     @RequestParam(defaultValue = "20") int size
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("GET /audit/events: tenant={}, eventType={}, aggregateId={}, actor={}", tenantId, eventType, aggregateId, actor);
+    log.info("GET /audit/events: tenant={}, eventType={}, aggregateId={}, actor={}", tenantId, sanitizeForLog(eventType), sanitizeForLog(aggregateId), sanitizeForLog(actor));
     return ResponseEntity.ok(auditService.listEvents(tenantId, eventType, aggregateId, actor, page, size));
   }
 
@@ -63,5 +63,10 @@ public class AuditController {
     // Authenticated requests derive the tenant from the validated JWT; the header is ignored
     // when authenticated (no IDOR). Used only as a dev fallback when security is disabled.
     return com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
+  }
+
+  // Neutralizes CR/LF/tab in user-derived values before logging to prevent log injection.
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 }

@@ -41,7 +41,7 @@ public class ReportingService {
   public ReportResponse submit(UUID tenantId, CreateReportRequest request) {
     var existing = repository.findByTenantAndRef(tenantId, request.getReportRef());
     if (existing.isPresent()) {
-      log.info("Idempotent request: reportRef={} already exists for tenant={}", request.getReportRef(), tenantId);
+      log.info("Idempotent request: reportRef={} already exists for tenant={}", sanitizeForLog(request.getReportRef()), tenantId);
       return mapToResponse(existing.get());
     }
 
@@ -60,7 +60,7 @@ public class ReportingService {
       .build();
 
     var saved = repository.save(job);
-    log.info("Report job queued: id={}, tenant={}, ref={}, format={}", saved.getId(), tenantId, saved.getReportRef(), format);
+    log.info("Report job queued: id={}, tenant={}, ref={}, format={}", saved.getId(), tenantId, sanitizeForLog(saved.getReportRef()), format);
 
     // Kick off generation only once the PENDING row is durably committed, so the
     // async worker is guaranteed to see it.
@@ -106,6 +106,13 @@ public class ReportingService {
   private ReportJob loadJob(UUID tenantId, UUID id) {
     return repository.findByIdAndTenant(id, tenantId)
       .orElseThrow(() -> new IllegalArgumentException("Report job not found: " + id));
+  }
+
+  private String sanitizeForLog(String value) {
+    if (value == null) {
+      return null;
+    }
+    return value.replaceAll("[\r\n\t]", "_");
   }
 
   private String serializeParameters(Map<String, Object> parameters) {

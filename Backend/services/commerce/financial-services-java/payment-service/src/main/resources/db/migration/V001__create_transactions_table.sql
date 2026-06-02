@@ -12,7 +12,7 @@ CREATE TABLE payments.transactions (
   amount numeric(19, 2) NOT NULL,
   fee numeric(19, 4) NOT NULL DEFAULT 0,
   vat numeric(19, 4) NOT NULL DEFAULT 0,
-  currency char(3) NOT NULL,
+  currency varchar(3) NOT NULL,
   payment_scheme varchar(32) NOT NULL,
   status varchar(32) NOT NULL,
   ledger_journal_id uuid,

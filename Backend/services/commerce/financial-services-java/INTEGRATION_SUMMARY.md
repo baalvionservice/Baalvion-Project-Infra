@@ -485,7 +485,7 @@ with `app.security.enabled=true` + `spring.security.oauth2.resourceserver.jwt.is
 `/api/**` requires a valid JWT and `roles`/`permissions` claims map to authorities (RBAC);
 default is permit-all (gateway-trusted) so nothing breaks until an issuer is configured.
 
-**Risk service (port 3025, schema `risk`).** Consumes `payments.transaction.initiated`, scores
+**Risk service (port 3035, schema `risk`).** Consumes `payments.transaction.initiated`, scores
 value + velocity rules → `APPROVE / REVIEW / DECLINE`, records `risk.risk_assessments`
 (idempotent per txn), publishes `risk.assessment.completed`. Advisory/monitoring (not a blocking
 gate yet). Endpoints: `GET /api/v1/risk/assessments`, `.../assessments/{id}`,

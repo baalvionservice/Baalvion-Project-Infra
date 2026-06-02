@@ -98,6 +98,13 @@ const OPS = {
     like: Op.like, ilike: Op.iLike, in: Op.in, is: Op.is,
 };
 
+// Allowlist of supported actions. The action is user-controlled (spec.action) and
+// selects an authorization branch below, so it must be validated before use.
+const ALLOWED_ACTIONS = new Set(['select', 'insert', 'upsert', 'update', 'delete']);
+
+// Reject keys that could pollute the prototype chain when used to index an object.
+const isUnsafeKey = (k) => k === '__proto__' || k === 'constructor' || k === 'prototype';
+
 const ctxFrom = (req) => {
     const roles = req.auth?.roles || [];
     return { userId: req.auth?.userId || null, roles, isAdmin: roles.includes('admin'), isMod: roles.includes('moderator') || roles.includes('admin') };
@@ -178,12 +185,15 @@ async function stitch(rows, localTable, embeds) {
 }
 
 const buildWhere = (filters = []) => {
-    const where = {};
+    const where = Object.create(null);
     for (const f of filters) {
         const op = OPS[f.op];
         if (!op) continue;
+        const col = f.col;
+        // f.col is user-controlled; reject prototype-polluting keys and non-string keys.
+        if (typeof col !== 'string' || isUnsafeKey(col)) continue;
         const cond = { [op]: f.val };
-        where[f.col] = where[f.col] ? Object.assign({}, where[f.col], cond) : cond;
+        where[col] = where[col] ? Object.assign({}, where[col], cond) : cond;
     }
     return where;
 };
@@ -290,6 +300,11 @@ async function handleQuery(req, res, next) {
         if (!policy || !model) throw new AppError('NOT_FOUND', `Unknown table '${table}'`, 404);
         const ctx = ctxFrom(req);
         const action = spec.action || 'select';
+        // action is user-controlled and selects an authorization branch below;
+        // validate it against the server-side allowlist before any branching.
+        if (!ALLOWED_ACTIONS.has(action)) {
+            throw new AppError('BAD_REQUEST', `Unsupported action '${action}'`, 400);
+        }
         const parsed = parseSelect(spec.columns || '*');
 
         if (action === 'select') {

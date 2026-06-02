@@ -1,6 +1,7 @@
 'use strict';
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const returnService = require('../service/returnService');
+const { actorOf } = require('../utils/actor');
 
 const listReturns = async (req, res, next) => {
     try { return sendPaginated(req, res, await returnService.listReturns(req.params.storeId, req.query)); }
@@ -8,7 +9,7 @@ const listReturns = async (req, res, next) => {
 };
 
 const createReturn = async (req, res, next) => {
-    try { return sendSuccess(req, res, await returnService.createReturn(req.params.storeId, req.validated), 201); }
+    try { return sendSuccess(req, res, await returnService.createReturn(req.params.storeId, req.validated, actorOf(req)), 201); }
     catch (err) { return next(err); }
 };
 

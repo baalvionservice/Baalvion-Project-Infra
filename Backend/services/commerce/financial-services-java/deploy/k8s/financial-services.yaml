@@ -46,8 +46,25 @@ spec:
   template:
     metadata: { labels: { app: account-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: account-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/account-service:latest
           ports: [{ containerPort: 3016 }]
           envFrom:
@@ -84,8 +101,25 @@ spec:
   template:
     metadata: { labels: { app: ledger-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: ledger-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/ledger-service:latest
           ports: [{ containerPort: 3014 }]
           envFrom:
@@ -122,8 +156,25 @@ spec:
   template:
     metadata: { labels: { app: payment-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: payment-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/payment-service:latest
           ports: [{ containerPort: 3015 }]
           envFrom:
@@ -160,8 +211,25 @@ spec:
   template:
     metadata: { labels: { app: escrow-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: escrow-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/escrow-service:latest
           ports: [{ containerPort: 3017 }]
           envFrom:
@@ -198,8 +266,25 @@ spec:
   template:
     metadata: { labels: { app: settlement-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: settlement-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/settlement-service:latest
           ports: [{ containerPort: 3018 }]
           envFrom:
@@ -236,8 +321,25 @@ spec:
   template:
     metadata: { labels: { app: reconciliation-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: reconciliation-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/reconciliation-service:latest
           ports: [{ containerPort: 3019 }]
           envFrom:
@@ -274,8 +376,25 @@ spec:
   template:
     metadata: { labels: { app: audit-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: audit-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/audit-service:latest
           ports: [{ containerPort: 3020 }]
           envFrom:
@@ -303,8 +422,25 @@ spec:
   template:
     metadata: { labels: { app: reporting-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: reporting-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/reporting-service:latest
           ports: [{ containerPort: 3024 }]
           envFrom:
@@ -322,7 +458,7 @@ spec:
   selector: { app: reporting-service }
   ports: [{ port: 3024, targetPort: 3024 }]
 ---
-# ---------- risk-service (3025) ----------
+# ---------- risk-service (3035) ----------
 apiVersion: apps/v1
 kind: Deployment
 metadata: { name: risk-service, namespace: financial }
@@ -332,16 +468,33 @@ spec:
   template:
     metadata: { labels: { app: risk-service } }
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
       containers:
         - name: risk-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           image: baalvion/risk-service:latest
-          ports: [{ containerPort: 3025 }]
+          ports: [{ containerPort: 3035 }]
           envFrom:
             - configMapRef: { name: financial-config }
             - secretRef: { name: financial-secrets }
-          env: [{ name: PORT, value: "3025" }]
-          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3025 }, initialDelaySeconds: 30, periodSeconds: 10 }
-          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3025 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          env: [{ name: PORT, value: "3035" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3035 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3035 }, initialDelaySeconds: 45, periodSeconds: 15 }
           resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
 ---
 apiVersion: v1
@@ -349,4 +502,224 @@ kind: Service
 metadata: { name: risk-service, namespace: financial }
 spec:
   selector: { app: risk-service }
-  ports: [{ port: 3025, targetPort: 3025 }]
+  ports: [{ port: 3035, targetPort: 3035 }]
+---
+# ---------- trade-finance-service (3036) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: trade-finance-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: trade-finance-service } }
+  template:
+    metadata: { labels: { app: trade-finance-service } }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: trade-finance-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          image: baalvion/trade-finance-service:latest
+          ports: [{ containerPort: 3036 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3036" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3036 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3036 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: trade-finance-service, namespace: financial }
+spec:
+  selector: { app: trade-finance-service }
+  ports: [{ port: 3036, targetPort: 3036 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: trade-finance-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: trade-finance-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+# ---------- credit-service (3037) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: credit-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: credit-service } }
+  template:
+    metadata: { labels: { app: credit-service } }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: credit-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          image: baalvion/credit-service:latest
+          ports: [{ containerPort: 3037 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3037" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3037 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3037 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: credit-service, namespace: financial }
+spec:
+  selector: { app: credit-service }
+  ports: [{ port: 3037, targetPort: 3037 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: credit-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: credit-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+# ---------- fx-service (3038) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: fx-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: fx-service } }
+  template:
+    metadata: { labels: { app: fx-service } }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: fx-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          image: baalvion/fx-service:latest
+          ports: [{ containerPort: 3038 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3038" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3038 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3038 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: fx-service, namespace: financial }
+spec:
+  selector: { app: fx-service }
+  ports: [{ port: 3038, targetPort: 3038 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: fx-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: fx-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]
+---
+# ---------- wallet-service (3039) ----------
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: wallet-service, namespace: financial }
+spec:
+  replicas: 2
+  selector: { matchLabels: { app: wallet-service } }
+  template:
+    metadata: { labels: { app: wallet-service } }
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile: { type: RuntimeDefault }
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      containers:
+        - name: wallet-service
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+            seccompProfile: { type: RuntimeDefault }
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          image: baalvion/wallet-service:latest
+          ports: [{ containerPort: 3039 }]
+          envFrom:
+            - configMapRef: { name: financial-config }
+            - secretRef: { name: financial-secrets }
+          env: [{ name: PORT, value: "3039" }]
+          readinessProbe: { httpGet: { path: /actuator/health/readiness, port: 3039 }, initialDelaySeconds: 30, periodSeconds: 10 }
+          livenessProbe:  { httpGet: { path: /actuator/health/liveness,  port: 3039 }, initialDelaySeconds: 45, periodSeconds: 15 }
+          resources: { requests: { cpu: "250m", memory: "512Mi" }, limits: { cpu: "1", memory: "1Gi" } }
+---
+apiVersion: v1
+kind: Service
+metadata: { name: wallet-service, namespace: financial }
+spec:
+  selector: { app: wallet-service }
+  ports: [{ port: 3039, targetPort: 3039 }]
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: wallet-service, namespace: financial }
+spec:
+  scaleTargetRef: { apiVersion: apps/v1, kind: Deployment, name: wallet-service }
+  minReplicas: 2
+  maxReplicas: 10
+  metrics: [{ type: Resource, resource: { name: cpu, target: { type: Utilization, averageUtilization: 70 } } }]

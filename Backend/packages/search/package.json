@@ -2,24 +2,30 @@
   "name": "@baalvion/search",
   "version": "1.0.0",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./client": "./src/client.ts",
-    "./indices": "./src/indices.ts",
-    "./indexer": "./src/indexer.ts",
-    "./query": "./src/query.ts",
-    "./sync": "./src/sync.ts"
+    ".": {
+      "types":   "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import":  "./dist/index.mjs"
+    }
   },
+  "files": ["dist"],
   "scripts": {
+    "build":      "tsup",
+    "dev":        "tsup --watch",
     "type-check": "tsc --noEmit",
-    "test": "jest --passWithNoTests"
+    "clean":      "rimraf dist",
+    "test":       "jest --passWithNoTests"
   },
   "dependencies": {
     "@opensearch-project/opensearch": "^2"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
+    "typescript": "^5.7.2",
+    "tsup": "^8.3.0",
+    "rimraf": "^6.0.1",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.0",
     "@types/jest": "^29.5.0"

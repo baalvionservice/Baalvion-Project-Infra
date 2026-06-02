@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: settlement-service
+  description: T0/T1 settlement batching + scheme file generation (Visa EP745 / MC T112 / Interswitch ISO8583), SFTP transport. Part of financial-services-java (port 3018, schema `settlement`).
+  domain: commerce
+  division: commerce
+  context: settlement
+  owner: "@baalvion/commerce"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/settlement-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, kafka]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/settlement"]
+  slo: { availability: 0.99, latencyP95Ms: 500 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 6 }

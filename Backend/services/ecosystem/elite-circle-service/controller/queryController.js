@@ -98,6 +98,11 @@ const OPS = {
     like: Op.like, ilike: Op.iLike, in: Op.in, is: Op.is,
 };
 
+// Allowlist of supported actions. The request action is validated against this
+// set before it is used to route to any authorization-bearing branch, so a
+// user-supplied value can never select an unintended code path.
+const ALLOWED_ACTIONS = ['select', 'insert', 'upsert', 'update', 'delete'];
+
 const ctxFrom = (req) => {
     const roles = req.auth?.roles || [];
     return { userId: req.auth?.userId || null, roles, isAdmin: roles.includes('admin'), isMod: roles.includes('moderator') || roles.includes('admin') };
@@ -177,11 +182,16 @@ async function stitch(rows, localTable, embeds) {
     }
 }
 
+// Reject keys that could pollute the prototype chain when used as object keys.
+const isUnsafeKey = (key) => key === '__proto__' || key === 'constructor' || key === 'prototype';
+
 const buildWhere = (filters = []) => {
-    const where = {};
+    const where = Object.create(null);
     for (const f of filters) {
         const op = OPS[f.op];
         if (!op) continue;
+        // f.col is user-controlled; never let it index into the prototype chain.
+        if (typeof f.col !== 'string' || isUnsafeKey(f.col)) continue;
         const cond = { [op]: f.val };
         where[f.col] = where[f.col] ? Object.assign({}, where[f.col], cond) : cond;
     }
@@ -289,7 +299,11 @@ async function handleQuery(req, res, next) {
         const model = db.byTable[table];
         if (!policy || !model) throw new AppError('NOT_FOUND', `Unknown table '${table}'`, 404);
         const ctx = ctxFrom(req);
-        const action = spec.action || 'select';
+        const requestedAction = spec.action || 'select';
+        if (!ALLOWED_ACTIONS.includes(requestedAction)) {
+            throw new AppError('BAD_REQUEST', `Unsupported action '${requestedAction}'`, 400);
+        }
+        const action = requestedAction;
         const parsed = parseSelect(spec.columns || '*');
 
         if (action === 'select') {

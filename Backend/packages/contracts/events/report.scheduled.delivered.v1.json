@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/report.scheduled.delivered.v1.json",
+  "title": "ReportScheduledDelivered",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "report.scheduled.delivered" },
+    "payload": {
+      "type": "object",
+      "required": ["scheduleId", "reportId"],
+      "additionalProperties": true,
+      "properties": {
+        "scheduleId": { "type": "string" },
+        "reportId": { "type": "string" },
+        "runId": { "type": ["string", "null"] },
+        "delivery": { "type": "object" },
+        "format": { "type": "string" },
+        "rowCount": { "type": "integer" }
+      }
+    }
+  }
+}

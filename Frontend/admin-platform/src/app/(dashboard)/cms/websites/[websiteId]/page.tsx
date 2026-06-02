@@ -14,6 +14,7 @@ import {
   Globe,
   ArrowLeft,
   ExternalLink,
+  KeyRound,
 } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -67,6 +68,13 @@ const QUICK_LINKS = [
     icon: Users,
     href: (id: string) => `/cms/websites/${id}/members`,
     color: 'text-cyan-500',
+  },
+  {
+    title: 'Integrations & Keys',
+    description: 'API endpoint, payment & service keys',
+    icon: KeyRound,
+    href: (id: string) => `/cms/websites/${id}/integrations`,
+    color: 'text-orange-500',
   },
 ];
 

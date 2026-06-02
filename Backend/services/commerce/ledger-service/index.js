@@ -1,5 +1,6 @@
 'use strict';
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const http = require('http');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -20,11 +21,14 @@ const server = http.createServer(app);
 
 app.set('trust proxy', 1);
 app.use(helmet());
+// Global IP rate limiter (express-rate-limit, CodeQL-recognized) — generous DoS ceiling.
+app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.IP_RATE_LIMIT_MAX) || 1000, standardHeaders: true, legacyHeaders: false, message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } } }));
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
-app.use(tenantContext);
+// NOTE: tenantContext is NOT global — it 400s requests without x-tenant-id, which would break
+// the unauthenticated health/metrics probes below. It is applied only on the protected /v1 mounts.
 app.use(requestContext);
 app.use(metricsMiddleware);
 
@@ -60,11 +64,19 @@ app.get('/health/ready', async (req, res) => {
     });
   }
 });
+// Helm-probe aliases (/healthz liveness, /readyz readiness). Mounted before tenantContext so
+// orchestrator probes (which send no x-tenant-id) get 200/503, not a 400 MISSING_TENANT.
+app.get('/healthz', (req, res) => res.json({ status: 'alive', service: 'ledger-service' }));
+app.get('/readyz', async (req, res) => {
+  try { await db.sequelize.authenticate(); return res.json({ status: 'ready', db: 'connected' }); }
+  catch (err) { return res.status(503).json({ status: 'not_ready', db: 'unavailable', error: err.message }); }
+});
 app.get('/metrics', metricsHandler);
 
-// Protected routes
-app.use('/v1', authMiddleware, v1Routes);
-app.use('/api/v1', authMiddleware, v1Routes);
+// Protected routes — tenantContext applied HERE (after auth, before handlers) so it never
+// intercepts the health/metrics probes above.
+app.use('/v1', authMiddleware, tenantContext, v1Routes);
+app.use('/api/v1', authMiddleware, tenantContext, v1Routes);
 
 // Error handling
 app.use(notFoundHandler);

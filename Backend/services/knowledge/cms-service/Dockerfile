@@ -15,6 +15,12 @@ COPY --from=pruner /repo/out/json/ ./
 COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --frozen-lockfile --filter cms-service...
 COPY --from=pruner /repo/out/full/ ./
+# Build the TS workspace deps (e.g. @baalvion/sdk -> dist) BEFORE deploy: dist is git- and
+# docker-ignored, so it cannot be copied from the host — it must be compiled inside the image.
+# The shared tsconfig chain (root base + Backend shim) is not part of the pruned output → copy it.
+COPY tsconfig.base.json ./tsconfig.base.json
+COPY Backend/tsconfig.base.json ./Backend/tsconfig.base.json
+RUN pnpm dlx turbo@2.9.14 run build --filter=cms-service...
 RUN pnpm deploy --filter=cms-service --prod /out
 
 FROM node:20-alpine AS final

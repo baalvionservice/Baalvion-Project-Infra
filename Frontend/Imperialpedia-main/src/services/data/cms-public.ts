@@ -119,7 +119,9 @@ const esc = (s: unknown): string =>
   String(s ?? '')
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 
 function blockToHtml(b: CmsBlock): string {
   const c = b.content || {};

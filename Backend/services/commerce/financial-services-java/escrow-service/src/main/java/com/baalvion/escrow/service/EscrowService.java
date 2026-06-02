@@ -36,7 +36,7 @@ public class EscrowService {
   public EscrowResponse createHold(UUID tenantId, CreateEscrowRequest request) {
     var existing = repository.findByTenantAndRef(tenantId, request.getEscrowRef());
     if (existing.isPresent()) {
-      log.info("Idempotent request: escrowRef={} already exists for tenant={}", request.getEscrowRef(), tenantId);
+      log.info("Idempotent request: escrowRef={} already exists for tenant={}", sanitizeForLog(request.getEscrowRef()), tenantId);
       return mapToResponse(existing.get());
     }
 
@@ -61,7 +61,7 @@ public class EscrowService {
 
     var saved = repository.save(escrow);
     log.info("Escrow hold created: id={}, tenant={}, ref={}, amount={}, condition={}",
-      saved.getId(), tenantId, saved.getEscrowRef(), saved.getAmount(), condition);
+      saved.getId(), tenantId, sanitizeForLog(saved.getEscrowRef()), saved.getAmount(), condition);
 
     kafkaTemplate.send("escrow.hold.created", saved.getId().toString(), saved);
     return mapToResponse(saved);
@@ -99,7 +99,7 @@ public class EscrowService {
     escrow.setStatus(EscrowStatus.DISPUTED);
     escrow.setDisputeReason(action != null ? action.getReason() : "Dispute raised");
     var saved = repository.save(escrow);
-    log.info("Escrow disputed: id={}, tenant={}, reason={}", escrowId, tenantId, saved.getDisputeReason());
+    log.info("Escrow disputed: id={}, tenant={}, reason={}", escrowId, tenantId, sanitizeForLog(saved.getDisputeReason()));
     kafkaTemplate.send("escrow.hold.disputed", saved.getId().toString(), saved);
     return mapToResponse(saved);
   }
@@ -138,7 +138,7 @@ public class EscrowService {
     escrow.setReleasedAt(LocalDateTime.now());
     var saved = repository.save(escrow);
     log.info("Escrow released: id={}, tenant={}, beneficiary={}, actor={}, expiry={}",
-      saved.getId(), saved.getTenantId(), saved.getBeneficiaryAccountId(), actor, expiry);
+      saved.getId(), saved.getTenantId(), saved.getBeneficiaryAccountId(), sanitizeForLog(actor), expiry);
     kafkaTemplate.send("escrow.hold.released", saved.getId().toString(), saved);
     return mapToResponse(saved);
   }
@@ -154,7 +154,7 @@ public class EscrowService {
     }
     var saved = repository.save(escrow);
     log.info("Escrow refunded: id={}, tenant={}, source={}, actor={}, expiry={}",
-      saved.getId(), saved.getTenantId(), saved.getSourceAccountId(), actor, expiry);
+      saved.getId(), saved.getTenantId(), saved.getSourceAccountId(), sanitizeForLog(actor), expiry);
     kafkaTemplate.send("escrow.hold.refunded", saved.getId().toString(), saved);
     return mapToResponse(saved);
   }
@@ -162,6 +162,14 @@ public class EscrowService {
   private Escrow loadEscrow(UUID tenantId, UUID escrowId) {
     return repository.findByIdAndTenant(escrowId, tenantId)
       .orElseThrow(() -> new IllegalArgumentException("Escrow not found: " + escrowId));
+  }
+
+  /**
+   * Strips CR/LF/tab from user-derived values before they reach the logs to
+   * prevent log-injection / log-forging (CWE-117).
+   */
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 
   private EscrowResponse mapToResponse(Escrow escrow) {

@@ -1,0 +1,79 @@
+spring:
+  application:
+    name: payment-rails-service
+    version: 1.0.0
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      # Send String params with an unspecified OID so Postgres casts them to the target
+      # column type (notably String fields mapped onto jsonb columns).
+      data-source-properties:
+        stringtype: unspecified
+      maximum-pool-size: 20
+      minimum-idle: 2
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      compression-type: snappy
+
+  flyway:
+    enabled: true
+    table: flyway_history_payment_rails
+
+server:
+  port: ${PORT:3042}
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.baalvion: DEBUG
+
+app:
+  name: Baalvion Payment Rails Service
+  version: 1.0.0
+  description: Multi-rail payment routing and settlement
+  outbox:
+    poll-ms: 2000
+    batch-size: 100
+    max-attempts: 10
+  payment-rails:
+    # Default urgency when the caller sets none: STANDARD | INSTANT | PRIORITY.
+    default-urgency: STANDARD
+    # Above this amount (in the payment currency) a wholesale/wire rail is preferred over instant rails.
+    high-value-threshold: 100000
+    # UPI per-transaction ceiling (INR); above it, fall back to SWIFT/wire.
+    upi-max-amount: 100000
+    # Active rail provider: "simulated" (default, self-contained) | "psp" (real adapters, needs creds).
+    rail-provider: ${RAIL_PROVIDER:simulated}

@@ -1,0 +1,81 @@
+spring:
+  application:
+    name: aml-service
+    version: 1.0.0
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      data-source-properties:
+        stringtype: unspecified
+      maximum-pool-size: 20
+      minimum-idle: 2
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      compression-type: snappy
+
+  flyway:
+    enabled: true
+    table: flyway_history_aml
+
+server:
+  port: ${PORT:3045}
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.baalvion: DEBUG
+
+app:
+  name: Baalvion AML Service
+  version: 1.0.0
+  description: AML transaction monitoring with FATF-aligned risk grading
+  outbox:
+    poll-ms: 2000
+    batch-size: 100
+    max-attempts: 10
+  aml:
+    # Currency-agnostic reporting threshold (e.g. CTR-style); high-value at/above this.
+    reporting-threshold: 10000
+    # Structuring band: amounts within this fraction BELOW the threshold look like smurfing.
+    structuring-band: 0.10
+    # A round amount at/above this is suspicious (divisible by the round-unit).
+    round-amount-unit: 10000
+    # FATF "call for action" (high-risk) jurisdictions — ISO 3166-1 alpha-2.
+    high-risk-countries: ["IR", "KP", "MM"]
+    # FATF "increased monitoring" (grey) jurisdictions (representative; refresh from FATF plenary).
+    grey-list-countries: ["SY", "YE", "SS", "HT", "CD", "ML", "MZ"]
+    # Active screening provider: "simulated" (default, built-in rules) | "vendor".
+    provider: ${AML_PROVIDER:simulated}

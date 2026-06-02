@@ -6,21 +6,49 @@ const cookieParser = require('cookie-parser');
 const config = require('./config/appConfig');
 const { connectDB, sequelize } = require('./models');
 const v1Router = require('./routes/v1');
+const storefrontRoutes = require('./routes/storefrontRoutes');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
 const { startProductWorker } = require('./queues/productQueue');
+const { UPLOAD_DIR } = require('./service/productMediaService');
 
 const app = express();
 
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+
+// Locally-stored product media (MEDIA_DRIVER=local). Served publicly with permissive CORS so
+// storefront/admin origins can render images. No-op when MEDIA_DRIVER=minio/s3 (objects served
+// directly by the object store). Mounted before auth so assets are anonymously fetchable.
+app.use('/uploads', cors(), express.static(UPLOAD_DIR, { fallthrough: true, maxAge: '7d' }));
+
+// Public storefront API (anonymous, read-only, published+public catalog). Permissive CORS so
+// any storefront origin can browse — mounted BEFORE the restricted global CORS / authed router.
+app.use('/api/v1/commerce/storefront/:storeId', cors(), storefrontRoutes);
+
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use(requestContext);
 app.use(createIpRateLimit());
 
-app.get('/health', (req, res) => res.json({ status: 'ok', service: 'commerce-service', port: config.port }));
+// Liveness (cheap) + readiness (DB check). Paths match the Helm probes (/healthz, /readyz);
+// /health kept for backward compatibility.
+app.get(['/health', '/healthz'], (req, res) => res.json({ status: 'ok', service: 'commerce-service', port: config.port }));
+app.get('/readyz', async (req, res) => {
+    try { await sequelize.authenticate(); return res.json({ status: 'ready', db: 'connected' }); }
+    catch (err) { return res.status(503).json({ status: 'not_ready', db: 'unavailable', error: err.message }); }
+});
+// Minimal Prometheus exposition (dependency-free) so the platform scrape has a live target.
+app.get('/metrics', (req, res) => {
+    const m = process.memoryUsage();
+    res.set('Content-Type', 'text/plain; version=0.0.4').send(
+        `# TYPE baalvion_service_up gauge\nbaalvion_service_up{service="commerce-service"} 1\n` +
+        `# TYPE baalvion_process_uptime_seconds gauge\nbaalvion_process_uptime_seconds ${process.uptime()}\n` +
+        `# TYPE baalvion_process_resident_memory_bytes gauge\nbaalvion_process_resident_memory_bytes ${m.rss}\n` +
+        `# TYPE baalvion_process_heap_used_bytes gauge\nbaalvion_process_heap_used_bytes ${m.heapUsed}\n`,
+    );
+});
 
 app.use('/api/v1', v1Router);
 

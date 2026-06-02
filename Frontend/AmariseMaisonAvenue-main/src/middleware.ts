@@ -20,6 +20,12 @@ function applyHeaders(res: NextResponse): NextResponse {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Per-app admin RETIRED → bounce /admin straight to the central admin-platform console
+  // (before any auth gate, so no app-login detour).
+  if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+    return NextResponse.redirect(new URL(process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL || 'http://localhost:3030/commerce'));
+  }
+
   // Root redirect to default market hub
   if (pathname === '/') {
     return NextResponse.redirect(new URL('/us', request.url));

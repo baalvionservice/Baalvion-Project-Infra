@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getFounders, findFounderBySlug, SITE_URL, REVALIDATE } from "@/lib/api";
+import { getFounders, findFounderBySlug, SITE_URL } from "@/lib/api";
 import { founderTitle, founderDesc } from "@/lib/seo";
 import { JsonLd, Avatar, Badge } from "@/components/ui";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300; // seconds — must be a static literal (Next segment config)
 export const dynamicParams = true; // new founders render on-demand, then cache (quick indexing)
 
 export async function generateStaticParams() {
   return (await getFounders()).map((f) => ({ slug: f.slug }));
 }
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const f = await findFounderBySlug(params.slug);
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const f = await findFounderBySlug(slug);
   if (!f) return { title: "Founder not found" };
   return {
     title: founderTitle(f),
@@ -23,8 +24,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function FounderProfile({ params }: { params: { slug: string } }) {
-  const f = await findFounderBySlug(params.slug);
+export default async function FounderProfile({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const f = await findFounderBySlug(slug);
   if (!f) notFound();
 
   return (

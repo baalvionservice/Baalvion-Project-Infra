@@ -33,6 +33,52 @@ module.exports = {
         orderTtl: Number(process.env.CACHE_ORDER_TTL || 120),
         customerTtl: Number(process.env.CACHE_CUSTOMER_TTL || 300),
         cartTtl: Number(process.env.CACHE_CART_TTL || 1800),
+        rbacEffectiveTtl: Number(process.env.CACHE_RBAC_EFFECTIVE_TTL || 30),
+        rbacScopeTtl: Number(process.env.CACHE_RBAC_SCOPE_TTL || 300),
     },
     security: { ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 200) },
+    // Guest-cart session signing. Anonymous carts are bound to a server-generated session id,
+    // handed to the client as an HMAC-signed token. Empty secret = guest carts disabled (fail-closed).
+    session: { signingSecret: process.env.CART_SESSION_SECRET || '' },
+    // RBAC is the single source of truth; this service is a Policy Enforcement Point via
+    // @baalvion/commerce-rbac. Store→country is resolved from the RBAC tenant tree (no commerce DB).
+    rbac: {
+        baseUrl:       process.env.RBAC_BASE_URL || 'http://localhost:3055',
+        apiPrefix:     process.env.RBAC_API_PREFIX || '/v1',
+        timeoutMs:     Number(process.env.RBAC_TIMEOUT_MS || 4000),
+        failMode:      (process.env.RBAC_FAIL_MODE || 'closed').toLowerCase(),
+        breakglassSuperAdmin: process.env.RBAC_BREAKGLASS_SUPERADMIN !== 'false',
+        internalApiKey: process.env.RBAC_INTERNAL_API_KEY || '',
+    },
+    // Double-entry financial ledger (ledger-service). Captured payments and refunds are mirrored
+    // as journal entries for reconciliation. Posting is ENABLED only when an internal key is
+    // configured (shared with ledger-service's LEDGER_INTERNAL_KEY); otherwise it is skipped
+    // fail-open so checkout never breaks on a ledger outage — the reconciliation report surfaces
+    // any resulting gap. transactionRef gives idempotency, so a later backfill is always safe.
+    ledger: {
+        baseUrl:     process.env.LEDGER_BASE_URL || 'http://localhost:3014',
+        apiPrefix:   process.env.LEDGER_API_PREFIX || '/v1',
+        internalKey: process.env.LEDGER_INTERNAL_KEY || '',
+        timeoutMs:   Number(process.env.LEDGER_TIMEOUT_MS || 4000),
+        get enabled() { return !!this.internalKey; },
+    },
+    // Outbound operational alerts (reconciliation drift, ledger unreachable) → notification-service.
+    // Fire-and-forget, fail-open: an alert delivery failure must never affect order processing.
+    notifications: {
+        baseUrl:     process.env.NOTIFICATION_BASE_URL || 'http://localhost:3031',
+        apiPrefix:   process.env.NOTIFICATION_API_PREFIX || '/v1',
+        internalKey: process.env.INTERNAL_SERVICE_SECRET || process.env.NOTIFICATION_INTERNAL_KEY || '',
+        opsUserId:   process.env.OPS_ALERT_USER_ID || '',
+        opsEmail:    process.env.OPS_ALERT_EMAIL || '',
+        timeoutMs:   Number(process.env.NOTIFICATION_TIMEOUT_MS || 4000),
+        get enabled() { return !!this.internalKey && (!!this.opsUserId || !!this.opsEmail); },
+    },
+    // Scheduled reconciliation sweep (BullMQ repeatable). Sweeps active stores, compares order
+    // payments/refunds to the ledger, alerts on drift, and (optionally) auto-backfills missing entries.
+    reconcile: {
+        enabled:      process.env.RECONCILE_ENABLED !== 'false',
+        cron:         process.env.RECONCILE_CRON || '0 * * * *', // hourly
+        autoBackfill: process.env.RECONCILE_AUTO_BACKFILL === 'true',
+        lookbackDays: Number(process.env.RECONCILE_LOOKBACK_DAYS || 7),
+    },
 };

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/sanctions.screening.completed.v1.json",
+  "title": "SanctionsScreeningCompleted",
+  "description": "Emitted by risk-service for every sanctions screening, regardless of outcome.",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "sanctions.screening.completed" },
+    "payload": {
+      "type": "object",
+      "required": ["screeningId", "tenantId", "status", "topScore", "hitCount"],
+      "additionalProperties": true,
+      "properties": {
+        "screeningId": { "type": "string", "format": "uuid" },
+        "tenantId": { "type": "string", "format": "uuid" },
+        "subjectName": { "type": "string" },
+        "status": { "type": "string", "enum": ["CLEAR", "POTENTIAL_MATCH", "CONFIRMED_MATCH", "FALSE_POSITIVE", "BLOCKED"] },
+        "topScore": { "type": "number" },
+        "hitCount": { "type": "integer" },
+        "referenceType": { "type": ["string", "null"] },
+        "referenceId": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -46,6 +47,12 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Map<String, Object>> handleDataIntegrity(DataIntegrityViolationException ex) {
     log.error("Constraint violation: {}", ex.getMessage());
     return envelope(HttpStatus.CONFLICT, "CONSTRAINT_VIOLATION", "Resource already exists or violates a constraint", null);
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
+    log.warn("Access denied: {}", ex.getMessage());
+    return envelope(HttpStatus.FORBIDDEN, "FORBIDDEN", "Access denied", null);
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)

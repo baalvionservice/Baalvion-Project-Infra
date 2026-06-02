@@ -1,6 +1,7 @@
 'use strict';
 require('dotenv').config();
 const express      = require('express');
+const rateLimit = require('express-rate-limit');
 const helmet       = require('helmet');
 const cors         = require('cors');
 const cookieParser = require('cookie-parser');
@@ -15,6 +16,8 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware'
 const app = express();
 
 app.use(helmet({ contentSecurityPolicy: false }));
+// Global IP rate limiter (express-rate-limit, CodeQL-recognized) — generous DoS ceiling.
+app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.IP_RATE_LIMIT_MAX) || 1000, standardHeaders: true, legacyHeaders: false, message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } } }));
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 
 // Raw body needed before JSON parse so token endpoint can read application/x-www-form-urlencoded

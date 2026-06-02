@@ -158,29 +158,50 @@ export const cmsApiClient = axios.create({
 });
 
 // ─── Per-service API clients ──────────────────────────────────────────────────
-const makeServiceClient = (port: number, path = '/api/v1') =>
+// Base-URL resolution: dev → http://localhost:<port>. Production (browser can't reach localhost)
+// overrides WITHOUT code changes via env:
+//   NEXT_PUBLIC_SERVICE_URLS  — JSON map name→full base URL (gateway routes), e.g.
+//     {"commerce":"https://api.example.com/commerce/api/v1","audit":"https://api.example.com/audit/v1"}
+//   NEXT_PUBLIC_SERVICES_HOST — override just the host (default http://localhost), keeping :port + path.
+let SERVICE_URL_MAP: Record<string, string> = {};
+try {
+  SERVICE_URL_MAP = JSON.parse(process.env.NEXT_PUBLIC_SERVICE_URLS || '{}');
+} catch {
+  SERVICE_URL_MAP = {};
+}
+const SERVICES_HOST = process.env.NEXT_PUBLIC_SERVICES_HOST || 'http://localhost';
+
+const makeServiceClient = (name: string, port: number, path = '/api/v1') =>
   axios.create({
-    baseURL: `http://localhost:${port}${path}`,
+    baseURL: SERVICE_URL_MAP[name] || `${SERVICES_HOST}:${port}${path}`,
     withCredentials: true,
     timeout: 30_000,
     headers: { 'Content-Type': 'application/json' },
   });
 
 const serviceClients = {
-  jobs: makeServiceClient(3002),
-  mining: makeServiceClient(3003),
-  imperialpedia: makeServiceClient(3004),
-  realEstate: makeServiceClient(3005),
-  brand: makeServiceClient(3006),
-  market: makeServiceClient(3007),
-  ir: makeServiceClient(3008),
-  dashboard: makeServiceClient(3009),
-  about: makeServiceClient(3010),
-  ctm: makeServiceClient(3011),
-  commerce: makeServiceClient(3012),
-  orders: makeServiceClient(3013),
-  inventory: makeServiceClient(3014),
-  fulfillment: makeServiceClient(3015),
+  jobs: makeServiceClient('jobs', 3002),
+  mining: makeServiceClient('mining', 3003),
+  imperialpedia: makeServiceClient('imperialpedia', 3004),
+  realEstate: makeServiceClient('realEstate', 3005),
+  brand: makeServiceClient('brand', 3006),
+  market: makeServiceClient('market', 3007),
+  ir: makeServiceClient('ir', 3008),
+  dashboard: makeServiceClient('dashboard', 3009),
+  about: makeServiceClient('about', 3020),
+  ctm: makeServiceClient('ctm', 3017),
+  commerce: makeServiceClient('commerce', 3012),
+  orders: makeServiceClient('orders', 3013),
+  inventory: makeServiceClient('inventory', 3014),
+  fulfillment: makeServiceClient('fulfillment', 3016), // fulfillment-service: shipping zones, couriers, shipments
+  law: makeServiceClient('law', 3015, '/v1'), // law-service mounts at /v1 (not /api/v1)
+  // rbac-service is the single source of truth for the admin hierarchy + store-team roles.
+  // It mounts at both /v1 and /api/v1; the caller's bearer token is forwarded by the shared
+  // attachToken interceptor so RBAC enforces requireScopeAdmin on every mutation.
+  rbac: makeServiceClient('rbac', 3055),
+  // audit-service is the immutable hash-chain audit log (WORM). It mounts at /v1 and powers the
+  // Audit Center (RBAC / payment / security event viewers, verify, CSV export).
+  audit: makeServiceClient('audit', 3032, '/v1'),
 };
 
 Object.values(serviceClients).forEach((client) => {

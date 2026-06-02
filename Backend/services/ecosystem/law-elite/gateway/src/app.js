@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const morgan = require('morgan');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const authMiddleware = require('./middleware/auth.middleware');
@@ -6,6 +7,8 @@ const authMiddleware = require('./middleware/auth.middleware');
 const app = express();
 
 app.use(morgan('dev'));
+// Global IP rate limiter (express-rate-limit, CodeQL-recognized) — generous DoS ceiling.
+app.use(rateLimit({ windowMs: 60_000, max: Number(process.env.IP_RATE_LIMIT_MAX) || 1000, standardHeaders: true, legacyHeaders: false }));
 app.use(express.json());
 
 // Routes mapping

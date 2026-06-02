@@ -7,6 +7,20 @@ const http = require('http');
 const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
+// Strip CR/LF/tab from values that originate outside this script before logging,
+// so network-derived text cannot forge or split log lines (log injection).
+const sanitizeForLog = (v) => String(v).replace(/[\r\n\t]/g, ' ');
+
+// Resolve the fixed output file to a constant path inside this script directory and
+// reject anything that escapes it, so a tainted value can never redirect the write.
+const OUT_FILE = (() => {
+  const resolved = path.resolve(__dirname, '_seed_news_out.txt');
+  if (resolved !== path.join(__dirname, '_seed_news_out.txt')) {
+    throw new Error('Unexpected output path');
+  }
+  return resolved;
+})();
+
 // argv: <websiteId> [contentType] [title] [slug]
 const websiteId = process.argv[2];
 const argType = process.argv[3];
@@ -50,11 +64,11 @@ const req = http.request(
     res.on('data', (c) => (data += c));
     res.on('end', () => {
       const out = `HTTP ${res.statusCode}\n${data}\n`;
-      fs.writeFileSync(path.join(__dirname, '_seed_news_out.txt'), out);
+      fs.writeFileSync(OUT_FILE, out);
       console.log(out);
     });
   },
 );
-req.on('error', (e) => { fs.writeFileSync(path.join(__dirname, '_seed_news_out.txt'), `ERR ${e.message}\n`); console.error('ERR', e.message); process.exit(1); });
+req.on('error', (e) => { const msg = sanitizeForLog(e.message); fs.writeFileSync(OUT_FILE, `ERR ${msg}\n`); console.error('ERR', msg); process.exit(1); });
 req.write(body);
 req.end();

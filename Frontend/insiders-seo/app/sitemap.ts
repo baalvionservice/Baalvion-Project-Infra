@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
-import { getInvestors, getFounders, SITE_URL, REVALIDATE } from "@/lib/api";
+import { getInvestors, getFounders, SITE_URL } from "@/lib/api";
 import { sectorsFrom } from "@/lib/seo";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300; // seconds — must be a static literal (Next segment config)
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [investors, founders] = await Promise.all([getInvestors(), getFounders()]);

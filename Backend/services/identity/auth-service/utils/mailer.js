@@ -5,15 +5,16 @@ let transporter = null;
 
 function getTransporter() {
     if (transporter) return transporter;
-    if (!config.email.host || !config.email.user) {
-        // Dev fallback: log to console
+    if (!config.email.host) {
+        // Dev fallback: log to console (no SMTP host configured).
         return null;
     }
     transporter = nodemailer.createTransport({
         host: config.email.host,
         port: config.email.port,
         secure: config.email.port === 465,
-        auth: { user: config.email.user, pass: config.email.pass },
+        // Auth only when credentials are provided — local/relay SMTP (e.g. Mailpit) needs none.
+        ...(config.email.user ? { auth: { user: config.email.user, pass: config.email.pass } } : {}),
     });
     return transporter;
 }

@@ -1,5 +1,6 @@
 import React from "react";
-import { PRODUCTS, COUNTRIES } from "@/lib/mock-data";
+import { COUNTRIES } from "@/lib/mock-data";
+import { getProductById } from "@/lib/catalog";
 import { ChevronRight } from "lucide-react";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import Link from "next/link";
@@ -19,7 +20,7 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { id, country } = await params;
-  const product = PRODUCTS.find((p) => p.id === id);
+  const product = await getProductById(id);
   const countryData = COUNTRIES[country] || COUNTRIES.us;
 
   if (!product) {
@@ -68,7 +69,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const { id, country } = await params;
   const countryCode = country || "us";
 
-  const product = PRODUCTS.find((p) => p.id === id);
+  const product = await getProductById(id);
 
   if (!product)
     return (

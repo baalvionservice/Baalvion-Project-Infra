@@ -4,6 +4,17 @@ module.exports = {
   env: process.env.NODE_ENV || 'development',
   port: parseInt(process.env.PORT || '3015', 10),
   apiVersion: '1.0.0',
+  version: process.env.SERVICE_VERSION || '1.0.0',
+
+  // ── @baalvion/sdk platform wiring (the ONLY integration layer) ──
+  // payment-service is a CONSUMER of the CMS vault: provider + keys are resolved
+  // per-tenant through sdk.config (→ CMS internal resolver). NO provider keys in
+  // env here — only the inter-service secret + the hub URL.
+  service: 'payment-service',
+  internalSecret: process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret',
+  cmsBaseUrl: process.env.CMS_BASE_URL || 'http://localhost:3018/api/v1',
+  eventTransport: process.env.EVENT_TRANSPORT || 'noop',
+  logLevel: process.env.LOG_LEVEL || 'info',
 
   // Database
   db: {
@@ -73,3 +84,13 @@ module.exports = {
     ttl: parseInt(process.env.IDEMPOTENCY_TTL || '86400', 10), // 24 hours in seconds
   },
 };
+
+// Fail fast in production if the shared inter-service secret (used by sdk.internalAuth
+// to guard the gateway create/read API and to authenticate to the CMS vault) was
+// left at the insecure development default.
+if (
+  module.exports.env === 'production' &&
+  (!process.env.INTERNAL_SERVICE_SECRET || module.exports.internalSecret === 'baalvion-internal-dev-secret')
+) {
+  throw new Error('[payment-service] INTERNAL_SERVICE_SECRET must be set in production — refusing to start with the dev default');
+}

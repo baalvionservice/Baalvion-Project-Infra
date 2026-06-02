@@ -46,8 +46,15 @@ const listMembers = async (req, res, next) => {
 
 const addMember = async (req, res, next) => {
     try {
-        const member = await websiteService.addMember(req.params.websiteId, req.user.orgId, req.validated);
+        const member = await websiteService.addMember(req.params.websiteId, req.user.orgId, req.validated, req.user.id);
         return sendSuccess(req, res, member, 201);
+    } catch (err) { return next(err); }
+};
+
+const searchUsers = async (req, res, next) => {
+    try {
+        const users = await websiteService.searchUsers(req.params.websiteId, req.user.orgId, req.query.q);
+        return sendSuccess(req, res, users);
     } catch (err) { return next(err); }
 };
 
@@ -65,4 +72,4 @@ const removeMember = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { list, create, getOne, update, remove, listMembers, addMember, updateMemberRole, removeMember };
+module.exports = { list, create, getOne, update, remove, listMembers, addMember, updateMemberRole, removeMember, searchUsers };

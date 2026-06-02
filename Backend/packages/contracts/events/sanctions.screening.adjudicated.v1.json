@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/sanctions.screening.adjudicated.v1.json",
+  "title": "SanctionsScreeningAdjudicated",
+  "description": "Emitted by risk-service when a compliance officer resolves a screening (FALSE_POSITIVE = cleared, or BLOCKED = confirmed true hit).",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "sanctions.screening.adjudicated" },
+    "payload": {
+      "type": "object",
+      "required": ["screeningId", "tenantId", "status"],
+      "additionalProperties": true,
+      "properties": {
+        "screeningId": { "type": "string", "format": "uuid" },
+        "tenantId": { "type": "string", "format": "uuid" },
+        "status": { "type": "string", "enum": ["FALSE_POSITIVE", "BLOCKED"] }
+      }
+    }
+  }
+}

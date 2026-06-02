@@ -60,7 +60,31 @@ export type SubmissionFeedbackOutput = z.infer<
 export async function aiSubmissionFeedback(
   input: SubmissionFeedbackInput
 ): Promise<SubmissionFeedbackOutput> {
-  return aiSubmissionFeedbackFlow(input);
+  try {
+    return await aiSubmissionFeedbackFlow(input);
+  } catch (e) {
+    // Demo fallback: no GEMINI_API_KEY (or quota) → return illustrative feedback so the
+    // feature is demonstrable without a key. Set GEMINI_API_KEY to flip to live AI.
+    console.warn('[AI] submission-feedback fallback (genkit unavailable — set GEMINI_API_KEY for live AI):', (e as Error)?.message);
+    return {
+      strengths: [
+        'Addresses the core requirements of the task',
+        'Submission is structured and readable',
+      ],
+      weaknesses: [
+        'Edge cases and error handling could be more thorough',
+        'Could include more explanation of the approach taken',
+      ],
+      suggestions: [
+        'Add tests or examples that cover boundary conditions',
+        'Document key decisions and trade-offs',
+        'Tighten naming and formatting for clarity',
+      ],
+      overallScore: 70,
+      overallFeedback:
+        'A solid submission that meets the main objectives, with room to strengthen robustness and documentation. (Demo feedback — configure GEMINI_API_KEY for live, evidence-based AI evaluation.)',
+    };
+  }
 }
 
 const submissionFeedbackPrompt = ai.definePrompt({

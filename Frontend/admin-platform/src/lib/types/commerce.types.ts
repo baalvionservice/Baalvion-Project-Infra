@@ -92,6 +92,22 @@ export interface Product {
   updatedAt: string;
 }
 
+export type ProductMediaType = 'image' | 'video' | 'document';
+
+export interface ProductMediaItem {
+  id: string;
+  productId: string;
+  variantId: string | null;
+  mediaType: ProductMediaType;
+  url: string;
+  thumbnailUrl: string | null;
+  altText: string | null;
+  sortOrder: number;
+  isFeatured: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface CommerceDiscount {
   id: string;
   storeId: string;

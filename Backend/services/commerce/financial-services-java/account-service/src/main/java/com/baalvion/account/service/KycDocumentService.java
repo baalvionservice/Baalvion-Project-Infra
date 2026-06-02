@@ -76,7 +76,7 @@ public class KycDocumentService {
 
     var saved = repository.save(doc);
     log.info("KYC document stored: id={}, tenant={}, account={}, type={}, bytes={}",
-      saved.getId(), tenantId, accountId, saved.getDocumentType(), saved.getSizeBytes());
+      saved.getId(), tenantId, accountId, sanitizeForLog(saved.getDocumentType()), saved.getSizeBytes());
     return metadata(saved);
   }
 
@@ -104,7 +104,7 @@ public class KycDocumentService {
     KycDocument doc = load(tenantId, id);
     doc.setStatus(KycDocumentStatus.valueOf(status));
     var saved = repository.save(doc);
-    log.info("KYC document {} status -> {} by {}", id, status, reviewedBy);
+    log.info("KYC document {} status -> {} by {}", id, sanitizeForLog(status), sanitizeForLog(reviewedBy));
     return metadata(saved);
   }
 
@@ -126,6 +126,11 @@ public class KycDocumentService {
   private KycDocument load(UUID tenantId, UUID id) {
     return repository.findByIdAndTenant(id, tenantId)
       .orElseThrow(() -> new IllegalArgumentException("KYC document not found: " + id));
+  }
+
+  /** Strips CR/LF/TAB from user-derived values before logging (log-injection guard). */
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 
   private String sha256(byte[] data) {

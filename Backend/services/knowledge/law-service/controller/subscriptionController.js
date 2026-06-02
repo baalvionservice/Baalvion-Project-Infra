@@ -2,7 +2,17 @@
 const db = require('../models');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
-const { planFor } = require('../config/plans');
+const { planFor, PLANS_LIST } = require('../config/plans');
+
+// Public — the plan catalog for storefront display (id/name/price/features/recommended).
+const getPlans = async (req, res, next) => {
+    try {
+        return sendSuccess(req, res, PLANS_LIST.map((p) => ({
+            id: p.id, name: p.name, price: p.price, currency: p.currency,
+            features: p.features, recommended: !!p.recommended,
+        })));
+    } catch (err) { return next(err); }
+};
 
 const getSubscription = async (req, res, next) => {
     try {
@@ -71,4 +81,4 @@ const cancelSubscription = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { getSubscription, createSubscription, cancelSubscription };
+module.exports = { getPlans, getSubscription, createSubscription, cancelSubscription };

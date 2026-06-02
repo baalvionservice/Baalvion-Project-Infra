@@ -1,29 +1,31 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getInvestors, SITE_URL, REVALIDATE } from "@/lib/api";
+import { getInvestors, SITE_URL } from "@/lib/api";
 import { sectorsFrom, investorsInSector, titleCase } from "@/lib/seo";
 import { Badge } from "@/components/ui";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300; // seconds — must be a static literal (Next segment config)
 export const dynamicParams = true;
 
 export async function generateStaticParams() {
   return sectorsFrom(await getInvestors()).map((s) => ({ sector: s.slug }));
 }
 
-export async function generateMetadata({ params }: { params: { sector: string } }): Promise<Metadata> {
-  const name = titleCase(params.sector);
+export async function generateMetadata({ params }: { params: Promise<{ sector: string }> }): Promise<Metadata> {
+  const { sector } = await params;
+  const name = titleCase(sector);
   const title = `${name} Investors — Active Backers in ${name}`;
   const description = `Investors actively funding ${name} startups. See who recently invested in ${name} and connect on Baalvion to raise your round.`;
-  return { title, description, alternates: { canonical: `/investors/sector/${params.sector}` }, openGraph: { title, description, url: `${SITE_URL}/investors/sector/${params.sector}` } };
+  return { title, description, alternates: { canonical: `/investors/sector/${sector}` }, openGraph: { title, description, url: `${SITE_URL}/investors/sector/${sector}` } };
 }
 
-export default async function SectorHub({ params }: { params: { sector: string } }) {
+export default async function SectorHub({ params }: { params: Promise<{ sector: string }> }) {
+  const { sector } = await params;
   const investors = await getInvestors();
-  const list = investorsInSector(investors, params.sector);
+  const list = investorsInSector(investors, sector);
   if (list.length === 0) notFound();
-  const name = titleCase(params.sector);
+  const name = titleCase(sector);
 
   return (
     <div className="container">

@@ -1,0 +1,33 @@
+{
+  "name": "developer-service",
+  "version": "1.0.0",
+  "description": "Baalvion Developer Platform — API key issuance/verification, signed webhook subscriptions with retry delivery, an OpenAPI spec catalog, and a test-mode sandbox.",
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "migrate": "psql $DATABASE_URL -f migrations/001_developer_schema.sql",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "express-rate-limit": "^7.5.0",
+    "@baalvion/auth-node": "workspace:*",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.6.1",
+    "pg": "^8.20.0",
+    "pg-hstore": "^2.3.4",
+    "pino": "^10.3.1",
+    "pino-http": "^11.0.0",
+    "sequelize": "^6.37.8",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

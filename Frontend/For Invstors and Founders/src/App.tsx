@@ -26,6 +26,7 @@ const Elite = lazy(() => import("./pages/Elite"));
 const EliteApply = lazy(() => import("./pages/EliteApply"));
 const EliteStatus = lazy(() => import("./pages/EliteStatus"));
 const ElitePremium = lazy(() => import("./pages/ElitePremium"));
+const Checkout = lazy(() => import("./pages/Checkout"));
 const Leaderboard = lazy(() => import("./pages/Leaderboard"));
 const AdminPanel = lazy(() => import("./pages/AdminPanel"));
 const AdminAnalytics = lazy(() => import("./pages/AdminAnalytics"));
@@ -102,6 +103,7 @@ const App = () => (
             <Route path="/elite/apply" element={<ProtectedRoute><EliteApply /></ProtectedRoute>} />
             <Route path="/elite/status" element={<ProtectedRoute><EliteStatus /></ProtectedRoute>} />
             <Route path="/elite/premium" element={<ProtectedRoute><ElitePremium /></ProtectedRoute>} />
+            <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
             <Route path="/admin/analytics" element={<ProtectedRoute><AdminAnalytics /></ProtectedRoute>} />

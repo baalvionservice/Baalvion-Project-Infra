@@ -67,7 +67,43 @@
   "pnpm": {
     "overrides": {
       "@types/react": "18.3.29",
-      "@types/react-dom": "18.3.7"
+      "@types/react-dom": "18.3.7",
+
+      "next": "15.5.18",
+
+      "handlebars": "4.7.9",
+      "protobufjs": "7.5.8",
+      "@protobufjs/utf8": "1.1.1",
+      "fast-uri": "3.1.2",
+      "follow-redirects": "1.16.0",
+      "node-forge": "1.4.0",
+      "lodash": "4.18.0",
+      "axios": "1.16.0",
+      "postcss": "8.5.10",
+      "qs": "6.15.2",
+      "tmp": "0.2.6",
+      "js-yaml": "4.1.1",
+      "yaml": "2.8.3",
+      "prismjs": "1.30.0",
+      "d3-color": "3.1.0",
+      "@tootallnate/once": "2.0.1",
+      "webpack": "5.104.1",
+      "fast-xml-builder": "1.1.7",
+      "fast-xml-parser@4": "4.5.5",
+      "brace-expansion@1": "1.1.12",
+      "brace-expansion@2": "2.0.2",
+      "minimatch@3": "3.1.4",
+      "minimatch@9": "9.0.7",
+      "picomatch@2": "2.3.2",
+      "picomatch@4": "4.0.4",
+      "path-to-regexp@<0.1.13": "0.1.13",
+      "ajv@8": "8.18.0",
+      "nodemailer": "8.0.5",
+      "dompurify@3": "3.4.0",
+      "tar@7": "7.5.11",
+      "glob@10": "10.5.0",
+      "file-type@21": "21.3.2",
+      "@modelcontextprotocol/sdk": "1.26.0"
     }
   }
 }

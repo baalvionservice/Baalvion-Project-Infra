@@ -50,7 +50,8 @@ public class WebhookService {
       .eventPattern(eventPattern)
       .active(true)
       .build());
-    log.info("Webhook subscription registered: id={}, tenant={}, url={}, pattern={}", sub.getId(), tenantId, url, eventPattern);
+    log.info("Webhook subscription registered: id={}, tenant={}, url={}, pattern={}",
+      sub.getId(), tenantId, sanitizeForLog(url), sanitizeForLog(eventPattern));
     // Secret returned exactly once, on creation.
     return mapSub(sub, effectiveSecret);
   }
@@ -117,6 +118,11 @@ public class WebhookService {
     byte[] bytes = new byte[32];
     random.nextBytes(bytes);
     return HexFormat.of().formatHex(bytes);
+  }
+
+  // Neutralizes CR/LF/tab in user-derived values before logging to prevent log injection.
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 
   private WebhookSubscriptionResponse mapSub(WebhookSubscription s, String secretOrNull) {

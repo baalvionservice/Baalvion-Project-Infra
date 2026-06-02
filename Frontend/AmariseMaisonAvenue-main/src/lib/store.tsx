@@ -8,8 +8,7 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
-import { productApi, collectionsApi } from "./api-client";
-import { toProducts, toCollections } from "./product-adapter";
+import { getProducts, getCollections } from "./catalog";
 import {
   Product,
   CountryCode,
@@ -60,7 +59,6 @@ import {
   AutomationRule,
 } from "./types";
 import {
-  PRODUCTS as INITIAL_PRODUCTS,
   COUNTRIES as INITIAL_COUNTRIES,
   VIP_CLIENTS as INITIAL_VIP_CLIENTS,
   SUPPORT_TICKETS as INITIAL_TICKETS,
@@ -71,12 +69,9 @@ import {
   RETURNS as INITIAL_RETURNS,
   EDITOR_INITIAL,
   BUYING_GUIDES,
-  COLLECTIONS as INITIAL_COLLECTIONS,
   INDEXING_STATUS as INITIAL_INDEXING,
   SUPPORT_STATS as INITIAL_SUPPORT_STATS,
   VENDORS,
-  DEPARTMENTS,
-  CATEGORIES,
   PAYMENT_PLANS,
   SUBSCRIPTIONS,
   FX_RATES,
@@ -285,20 +280,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [activeBrandId, setActiveBrandId] = useState("amarise-luxe");
   const [isShowcaseMode, setShowcaseMode] = useState(true);
 
-  const [products, setProducts] = useState<Product[]>(
-    INITIAL_PRODUCTS.map(
-      (p) =>
-        ({
-          ...p,
-          isGlobal: true,
-          regions: ["us", "uk", "ae", "in", "sg"],
-          status: "published",
-        } as Product)
-    )
-  );
+  // Catalog state is backend-driven (loaded from commerce-service in the effect below);
+  // initial state is empty — no mock seed.
+  const [products, setProducts] = useState<Product[]>([]);
 
-  const [collections, setCollections] =
-    useState<Collection[]>(INITIAL_COLLECTIONS);
+  const [collections, setCollections] = useState<Collection[]>([]);
   // 'backend' ONLY when real backend products are loaded; 'fallback' = offline mock catalog.
   // Checkout is permitted only when 'backend' (see checkout) — never mix mock products with real orders.
   const [catalogSource, setCatalogSource] =
@@ -310,29 +296,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [prodRes, collRes] = await Promise.all([
-        productApi.list({ status: "published", pageSize: 100 }),
-        collectionsApi.list(),
+      // Load the storefront catalog from the PUBLIC storefront API (anonymous-friendly) so
+      // catalogSource becomes 'backend' and checkout is enabled for guest shoppers.
+      const [prodPage, colls] = await Promise.all([
+        getProducts({ limit: 100 }),
+        getCollections(),
       ]);
       if (cancelled) return;
-      if (prodRes.ok && prodRes.data.items.length) {
-        setProducts(toProducts(prodRes.data.items));
+      if (prodPage.items.length) {
+        setProducts(prodPage.items as Product[]);
         setCatalogSource("backend");
       } else {
         setCatalogSource("fallback");
-        console.warn(
-          "[store] backend catalog unavailable or empty; offline fallback active (checkout disabled):",
-          prodRes.ok ? "empty result" : prodRes.error.message
-        );
+        console.warn("[store] backend catalog empty; offline fallback active (checkout disabled)");
       }
-      if (collRes.ok) {
-        if (collRes.data.items.length) setCollections(toCollections(collRes.data.items));
-      } else {
-        console.warn(
-          "[store] backend collections unavailable; using offline fallback:",
-          collRes.error.message
-        );
-      }
+      if (colls.length) setCollections(colls as Collection[]);
     })();
     return () => {
       cancelled = true;

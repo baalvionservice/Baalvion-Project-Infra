@@ -1,0 +1,8 @@
+# Maven build output — never commit compiled artifacts.
+target/
+**/target/
+
+# Local env / secrets (injected at deploy time).
+.env
+.env.*
+!.env.example

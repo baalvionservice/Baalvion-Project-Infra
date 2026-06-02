@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { COLLECTIONS, PRODUCTS } from "@/lib/mock-data";
+import { useCollections, useProducts } from "@/lib/useCatalog";
 import { ProductCard } from "@/components/product/ProductCard";
 import { generateCollectionNarrative } from "@/ai/flows/generate-collection-narrative";
 import { ChevronRight, Filter, Sparkles } from "lucide-react";
@@ -12,12 +12,13 @@ import { Button } from "@/components/ui/button";
 export default function CollectionPage() {
   const { id, country } = useParams();
   const countryCode = (country as string) || "us";
-  const collection = COLLECTIONS.find((c) => c.id === id);
+  const { collections } = useCollections();
+  const collection = collections.find((c) => c.id === id);
 
   const [narrative, setNarrative] = useState<string | null>(null);
   const [loadingNarrative, setLoadingNarrative] = useState(true);
 
-  const collectionProducts = PRODUCTS.filter((p) => p.collectionId === id);
+  const { products: collectionProducts } = useProducts({ collectionId: id as string });
 
   useEffect(() => {
     if (!collection) return;

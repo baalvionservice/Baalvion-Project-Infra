@@ -1,0 +1,76 @@
+spring:
+  application:
+    name: dispute-service
+    version: 1.0.0
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      # String params with unspecified OID so Postgres casts String fields onto jsonb columns.
+      data-source-properties:
+        stringtype: unspecified
+      maximum-pool-size: 20
+      minimum-idle: 2
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
+    producer:
+      acks: all
+      retries: 3
+      compression-type: snappy
+
+  flyway:
+    enabled: true
+    table: flyway_history_dispute
+
+server:
+  port: ${PORT:3044}
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.baalvion: DEBUG
+
+app:
+  name: Baalvion Dispute Service
+  version: 1.0.0
+  description: Three-tier trade dispute resolution (AI triage / mediation / ICC arbitration)
+  outbox:
+    poll-ms: 2000
+    batch-size: 100
+    max-attempts: 10
+  dispute:
+    # Days a respondent has to answer before the dispute auto-escalates.
+    response-window-days: 7
+    # Days a mediation stays open before it auto-escalates to arbitration.
+    mediation-window-days: 14
+    # AI-triage provider: "simulated" (default, self-contained heuristics) | "ml-service".
+    ai-provider: ${DISPUTE_AI_PROVIDER:simulated}

@@ -25,12 +25,18 @@ const PUBLIC_KEY = (() => {
 })();
 
 const HEALTH_TARGETS = [
-    { name: 'auth-service',     url: 'http://localhost:3001/health' },
-    { name: 'admin-service',    url: 'http://localhost:3021/health' },
-    { name: 'cms-service',      url: 'http://localhost:3018/api/v1/health' },
-    { name: 'session-service',  url: 'http://localhost:3022/health' },
-    { name: 'oauth-service',    url: 'http://localhost:3023/health' },
-    { name: 'realtime-service', url: `http://localhost:${PORT}/health` },
+    { name: 'auth-service',      url: 'http://localhost:3001/health' },
+    { name: 'admin-service',     url: 'http://localhost:3021/health' },
+    { name: 'cms-service',       url: 'http://localhost:3018/api/v1/health' },
+    { name: 'session-service',   url: 'http://localhost:3022/health' },
+    { name: 'oauth-service',     url: 'http://localhost:3023/health' },
+    { name: 'realtime-service',  url: `http://localhost:${PORT}/health` },
+    // Commerce vertical — surfaced on the admin Infrastructure dashboard so a store
+    // operator/SRE sees catalog, checkout, stock, payments and the ledger at a glance.
+    { name: 'commerce-service',  url: `http://localhost:${process.env.COMMERCE_HEALTH_PORT || 3012}/health` },
+    { name: 'order-service',     url: `http://localhost:${process.env.ORDER_HEALTH_PORT || 3013}/health` },
+    { name: 'inventory-service', url: `http://localhost:${process.env.INVENTORY_HEALTH_PORT || 3016}/health` },
+    { name: 'ledger-service',    url: `http://localhost:${process.env.LEDGER_HEALTH_PORT || 3014}/health` },
 ];
 
 const pool = new Pool({

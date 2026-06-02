@@ -124,8 +124,11 @@ const verifyPayment = async (req, res, next) => {
         }
 
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
-        if (razorpay.isConfigured() && razorpay_signature) {
-            const ok = razorpay.verifyPaymentSignature({
+        // When the gateway is configured, signature verification is mandatory — the branch is
+        // chosen by the server-side gateway state, NOT by whether the client supplied a signature.
+        // A missing/empty client signature must fail verification, never fall through to settlement.
+        if (razorpay.isConfigured()) {
+            const ok = razorpay_signature && razorpay.verifyPaymentSignature({
                 orderId: razorpay_order_id || payment.provider_tx_id,
                 paymentId: razorpay_payment_id,
                 signature: razorpay_signature,
@@ -171,7 +174,8 @@ const webhookHandler = async (req, res) => {
         }
         return res.json({ received: true });
     } catch (e) {
-        return res.status(400).send(`Webhook Error: ${e.message}`);
+        // Never reflect the raw exception message back to the caller (avoids XSS / info leak).
+        return res.status(400).json({ error: 'webhook processing failed' });
     }
 };
 

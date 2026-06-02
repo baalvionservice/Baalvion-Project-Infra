@@ -5,6 +5,9 @@ const payuService = require('../service/providers/payuService');
 const razorpayXService = require('../service/razorpayXService');
 const models = require('../models');
 
+// Strip CR/LF/tab from user-derived values before logging (prevents log injection).
+const sanitizeForLog = (v) => String(v).replace(/[\r\n\t]/g, ' ');
+
 // ─── Existing: Orders / Verify / Transactions ─────────────────────────────────
 
 const createOrder = async (req, res) => {
@@ -238,7 +241,7 @@ const payuWebhook = async (req, res) => {
     try {
         const result = await payuService.verifyWebhook(req.body);
         if (!result.valid) {
-            console.warn('[Webhook] PayU verification failed:', result.reason);
+            console.warn('[Webhook] PayU verification failed:', sanitizeForLog(result.reason));
             return res.status(400).json({ success: false, message: result.reason });
         }
         return res.status(200).json({ success: true });

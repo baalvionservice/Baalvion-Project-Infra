@@ -47,7 +47,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Trivy FS (vuln + secret + misconfig)
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: fs
           scan-ref: ${{ env.MODULE_DIR }}
@@ -76,6 +76,10 @@ jobs:
           - audit-service
           - reporting-service
           - risk-service
+          - trade-finance-service
+          - credit-service
+          - fx-service
+          - wallet-service
     steps:
       - uses: actions/checkout@v4
       - name: Set up Docker Buildx
@@ -89,7 +93,7 @@ jobs:
           load: true
           tags: ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
       - name: Trivy image scan (${{ matrix.service }})
-        uses: aquasecurity/trivy-action@0.24.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
           severity: HIGH,CRITICAL

@@ -19,6 +19,13 @@ const db = {
   sequelize,
   Sequelize,
   Transaction: require('./Transaction')(sequelize),
+  // Gateway-checkout vertical (Razorpay/Stripe/PayU), keyed by website slug.
+  GatewayPayment: require('./GatewayPayment')(sequelize),
+  PaymentLedgerEntry: require('./PaymentLedgerEntry')(sequelize),
 };
+
+// A payment has many ledger entries (one per provider event).
+db.GatewayPayment.hasMany(db.PaymentLedgerEntry, { foreignKey: 'gateway_payment_id', as: 'ledgerEntries' });
+db.PaymentLedgerEntry.belongsTo(db.GatewayPayment, { foreignKey: 'gateway_payment_id', as: 'payment' });
 
 module.exports = db;

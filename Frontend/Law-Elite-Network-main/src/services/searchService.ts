@@ -5,7 +5,7 @@
 
 import { getAllLawyers } from "@/services/lawyerService";
 import { getSuggestions } from "@/lib/ai/searchSuggestions";
-import { getBehaviorMock } from "@/lib/mock/userBehaviorMock";
+import { getBehavior } from "@/lib/behaviorStore";
 import { rankWithFilters } from "@/lib/ai/rankingEngine";
 
 /**
@@ -16,7 +16,7 @@ export const fetchSuggestions = async (query: string): Promise<string[]> => {
   
   try {
     const lawyers = await getAllLawyers();
-    const behavior = getBehaviorMock();
+    const behavior = getBehavior();
     const history = behavior.searches || [];
 
     return getSuggestions(query, lawyers, history);

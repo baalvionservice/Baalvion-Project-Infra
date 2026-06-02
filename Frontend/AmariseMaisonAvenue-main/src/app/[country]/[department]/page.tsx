@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { DEPARTMENTS, CATEGORIES, PRODUCTS } from '@/lib/mock-data';
+import { useDepartments, useCategories, useProducts } from '@/lib/useCatalog';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ChevronRight, ArrowRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
@@ -10,11 +10,15 @@ import Link from 'next/link';
 export default function DepartmentPage() {
   const { country, department } = useParams();
   const countryCode = (country as string) || 'us';
-  const deptObj = DEPARTMENTS.find(d => d.id === department);
+  const { departments, loading: deptLoading } = useDepartments();
+  const { categories } = useCategories();
+  const { products } = useProducts();
 
-  const deptCategories = CATEGORIES.filter(c => c.departmentId === department);
-  const featuredProducts = PRODUCTS.filter(p => p.departmentId === department).slice(0, 8);
+  const deptObj = departments.find(d => d.id === department);
+  const deptCategories = categories.filter(c => c.departmentId === department);
+  const featuredProducts = products.filter(p => p.departmentId === department).slice(0, 8);
 
+  if (deptLoading) return <div className="py-40 text-center">Loading…</div>;
   if (!deptObj) return <div className="py-40 text-center">Department not found.</div>;
 
   return (

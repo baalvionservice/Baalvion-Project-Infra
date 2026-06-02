@@ -44,7 +44,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
     if (backend.tryAcquire(key)) {
       chain.doFilter(request, response);
     } else {
-      log.warn("Rate limit exceeded for {} on {}", key, request.getRequestURI());
+      log.warn(
+        "Rate limit exceeded for {} on {}",
+        sanitizeForLog(key),
+        sanitizeForLog(request.getRequestURI()));
       response.setStatus(429);
       response.setHeader("Retry-After", String.valueOf(config.getRefillPeriodSeconds()));
       response.setContentType("application/json");
@@ -54,6 +57,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
   private String clientKey(HttpServletRequest request) {
     return AuthContext.currentUserId().orElseGet(() -> "ip:" + clientIp(request));
+  }
+
+  /** Strip CR/LF/tab from user-derived values to prevent log-injection (CRLF) attacks. */
+  private static String sanitizeForLog(String value) {
+    if (value == null) {
+      return null;
+    }
+    return value.replaceAll("[\r\n\t]", "_");
   }
 
   private String clientIp(HttpServletRequest request) {

@@ -32,7 +32,7 @@ public class AccountController {
     @Valid @RequestBody CreateAccountRequest request
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("POST /accounts: tenant={}, type={}", tenantId, request.getAccountType());
+    log.info("POST /accounts: tenant={}, type={}", tenantId, sanitizeForLog(request.getAccountType()));
 
     AccountResponse response = accountService.createAccount(tenantId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -58,7 +58,7 @@ public class AccountController {
     @RequestParam(defaultValue = "20") int size
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("GET /accounts: tenant={}, type={}, kycStatus={}, page={}, size={}", tenantId, type, kycStatus, page, size);
+    log.info("GET /accounts: tenant={}, type={}, kycStatus={}, page={}, size={}", tenantId, sanitizeForLog(type), sanitizeForLog(kycStatus), page, size);
 
     return ResponseEntity.ok(accountService.listAccounts(tenantId, type, kycStatus, page, size));
   }
@@ -70,7 +70,7 @@ public class AccountController {
     @Valid @RequestBody UpdateKycRequest request
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("PATCH /accounts/{}/kyc: tenant={}, target={}", id, tenantId, request.getKycStatus());
+    log.info("PATCH /accounts/{}/kyc: tenant={}, target={}", id, tenantId, sanitizeForLog(request.getKycStatus()));
 
     return ResponseEntity.ok(accountService.updateKyc(tenantId, id, request));
   }
@@ -114,5 +114,13 @@ public class AccountController {
     // Authenticated requests derive the tenant from the validated JWT; the header is ignored
     // when authenticated (no IDOR). Used only as a dev fallback when security is disabled.
     return com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
+  }
+
+  // Neutralizes CR/LF/tab in user-derived values before logging to prevent log injection.
+  private static String sanitizeForLog(String value) {
+    if (value == null) {
+      return null;
+    }
+    return value.replaceAll("[\r\n\t]", "_");
   }
 }

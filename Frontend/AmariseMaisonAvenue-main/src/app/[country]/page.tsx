@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import placeholderData from "@/app/lib/placeholder-images.json";
 import { VipEmailSignup } from "@/components/home/VipEmailSingup";
-import { PRODUCTS } from "@/lib/mock-data";
+import { useProducts } from "@/lib/useCatalog";
 import { Product } from "@/lib/types";
 import { useParams } from "next/navigation";
 
@@ -55,6 +55,7 @@ export default function HomePage() {
   const countryCode = (country as string) || "us";
 
   const [activeTab, setActiveTab] = useState("Hermès");
+  const { products } = useProducts();
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [scrolled, setScrolled] = useState(false);
 
@@ -119,8 +120,15 @@ export default function HomePage() {
       )?.imageUrl || "https://picsum.photos/seed/mac-info-showroom/500/500",
   };
 
+  const TAB_BRAND: Record<string, string | undefined> = {
+    "Hermès": "hermes",
+    Chanel: "chanel",
+    "Other Brands": "other-brands",
+  };
   const visibleProducts =
-    activeTab === "View All" ? PRODUCTS : PRODUCTS.slice(0, 4);
+    activeTab === "View All"
+      ? products
+      : products.filter((p) => p.departmentId === TAB_BRAND[activeTab]).slice(0, 8);
 
   return (
     <div className="bg-white min-h-screen font-sans">

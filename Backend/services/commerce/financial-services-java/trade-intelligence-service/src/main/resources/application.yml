@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: trade-intelligence-service
+    version: 1.0.0
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+    show-sql: false
+    open-in-view: false
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    hikari:
+      # Send String params with an unspecified OID so Postgres casts them to the target
+      # column type (notably String fields mapped onto jsonb columns).
+      data-source-properties:
+        stringtype: unspecified
+      maximum-pool-size: 20
+      minimum-idle: 2
+
+  flyway:
+    enabled: true
+    table: flyway_history_trade_intelligence
+
+server:
+  port: ${PORT:3043}
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    com.baalvion: DEBUG
+
+app:
+  name: Baalvion Trade Intelligence Service
+  version: 1.0.0
+  description: Demand forecasting, supplier risk, NL trade assistant and BTI benchmarks
+  trade-intelligence:
+    # Active inference provider: "simulated" (default, self-contained heuristics) | "ml-service".
+    provider: ${INTELLIGENCE_PROVIDER:simulated}
+    # Base URL of the Python ml-service when provider=ml-service.
+    ml-service-url: ${ML_SERVICE_URL:http://localhost:3033}
+    # Default forecast horizon (days) and supplier-risk early-warning threshold (0-100).
+    default-horizon-days: 90
+    early-warning-threshold: 70

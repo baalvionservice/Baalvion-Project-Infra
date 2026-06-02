@@ -65,4 +65,28 @@ async function listMovements(storeId, query = {}) {
     return buildPaginated(rows, count, { page, limit });
 }
 
-module.exports = { listStock, getStockForProduct, adjustStock, listMovements };
+/**
+ * Low-stock alert feed: stock rows at or below their threshold (low_stock) or empty
+ * (out_of_stock), worst-first. Returns a paginated list PLUS store-wide summary counts
+ * (independent of pagination) so the admin dashboard can show a badge without a second call.
+ */
+async function lowStockAlerts(storeId, query = {}) {
+    const { page, limit, offset } = parsePagination(query);
+    const statuses = query.status === 'out_of_stock' || query.status === 'low_stock'
+        ? [query.status]
+        : ['low_stock', 'out_of_stock'];
+    const where = { storeId, status: { [Op.in]: statuses } };
+    if (query.warehouseId) where.warehouseId = query.warehouseId;
+    const { rows, count } = await InventoryStock.findAndCountAll({
+        where, limit, offset,
+        order: [['quantity', 'ASC'], ['updatedAt', 'DESC']],
+        include: [{ model: InventoryWarehouse, as: 'warehouse', attributes: ['id', 'name', 'code'] }],
+    });
+    const [lowStock, outOfStock] = await Promise.all([
+        InventoryStock.count({ where: { storeId, status: 'low_stock' } }),
+        InventoryStock.count({ where: { storeId, status: 'out_of_stock' } }),
+    ]);
+    return { ...buildPaginated(rows, count, { page, limit }), summary: { lowStock, outOfStock, total: lowStock + outOfStock } };
+}
+
+module.exports = { listStock, getStockForProduct, adjustStock, listMovements, lowStockAlerts };

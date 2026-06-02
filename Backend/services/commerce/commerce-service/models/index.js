@@ -11,7 +11,9 @@ const sequelize = new Sequelize(config.db.name, config.db.user, config.db.passwo
 const db = { sequelize, Sequelize, Op: Sequelize.Op };
 
 db.CommerceStore          = require('./commerceStore')(sequelize, DataTypes);
-db.CommerceStoreMember    = require('./commerceStoreMember')(sequelize, DataTypes);
+// commerce_store_members RETIRED: store/team roles are owned entirely by RBAC (rbac-service)
+// via @baalvion/commerce-rbac. The model/association are removed so no local role state can be
+// read or written. The table is dropped by migration 20260114-drop-commerce-store-members.
 db.CommerceCategory       = require('./commerceCategory')(sequelize, DataTypes);
 db.CommerceAttributeGroup = require('./commerceAttributeGroup')(sequelize, DataTypes);
 db.CommerceAttribute      = require('./commerceAttribute')(sequelize, DataTypes);
@@ -25,7 +27,6 @@ db.CommerceDiscount       = require('./commerceDiscount')(sequelize, DataTypes);
 db.CommerceReview         = require('./commerceReview')(sequelize, DataTypes);
 
 // Associations
-db.CommerceStore.hasMany(db.CommerceStoreMember,  { foreignKey: 'storeId', as: 'members' });
 db.CommerceStore.hasMany(db.CommerceCategory,     { foreignKey: 'storeId', as: 'categories' });
 db.CommerceStore.hasMany(db.CommerceProduct,      { foreignKey: 'storeId', as: 'products' });
 db.CommerceStore.hasMany(db.CommerceCollection,   { foreignKey: 'storeId', as: 'collections' });

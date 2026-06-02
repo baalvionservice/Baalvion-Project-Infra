@@ -27,14 +27,8 @@ module.exports = {
             { id: storeEU,  organization_id: DEMO_ORG_ID, name: 'Amarise Europe', code: 'EUR', country_code: 'DE', currency_code: 'EUR', timezone: 'Europe/Berlin', status: 'active', settings: '{}', tax_settings: '{}', payment_settings: '{}', shipping_settings: '{}', seo_settings: '{}', created_by: DEMO_USER_ID, created_at: now, updated_at: now },
         ]);
 
-        // Store members — owner for each store
-        await queryInterface.bulkInsert({ tableName: 'commerce_store_members', schema: 'commerce' }, [
-            { id: uuidv4(), store_id: storeUAE, user_id: DEMO_USER_ID, role: 'store_admin', joined_at: now, created_at: now, updated_at: now },
-            { id: uuidv4(), store_id: storeIN,  user_id: DEMO_USER_ID, role: 'store_admin', joined_at: now, created_at: now, updated_at: now },
-            { id: uuidv4(), store_id: storeUS,  user_id: DEMO_USER_ID, role: 'store_admin', joined_at: now, created_at: now, updated_at: now },
-            { id: uuidv4(), store_id: storeUK,  user_id: DEMO_USER_ID, role: 'store_admin', joined_at: now, created_at: now, updated_at: now },
-            { id: uuidv4(), store_id: storeEU,  user_id: DEMO_USER_ID, role: 'store_admin', joined_at: now, created_at: now, updated_at: now },
-        ]);
+        // Store team roles are owned by RBAC now (rbac-service) — assign store_admin via the
+        // provisioning script / Team Management UI, not a local commerce_store_members row.
 
         // UAE category
         await queryInterface.bulkInsert({ tableName: 'commerce_categories', schema: 'commerce' }, [
@@ -78,7 +72,6 @@ module.exports = {
         await queryInterface.bulkDelete({ tableName: 'commerce_product_variants', schema: 'commerce' }, { id: variantId });
         await queryInterface.bulkDelete({ tableName: 'commerce_products', schema: 'commerce' }, { id: productId });
         await queryInterface.bulkDelete({ tableName: 'commerce_categories', schema: 'commerce' }, { id: categoryId });
-        await queryInterface.bulkDelete({ tableName: 'commerce_store_members', schema: 'commerce' }, { store_id: { in: [storeUAE, storeIN, storeUS, storeUK, storeEU] } });
         await queryInterface.bulkDelete({ tableName: 'commerce_stores', schema: 'commerce' }, { id: { in: [storeUAE, storeIN, storeUS, storeUK, storeEU] } });
     },
 };

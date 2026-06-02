@@ -1,6 +1,6 @@
 
 import { adapter } from './adapter';
-import { College } from '@/mocks/colleges.mock';
+import { College } from '@/types/campus';
 import { PaginatedResponse, TableQuery } from '@/components/system/DataTable';
 
 interface CollegeWithType extends College {

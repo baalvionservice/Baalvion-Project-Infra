@@ -123,6 +123,17 @@ export interface UpdateWebsitePayload {
 }
 
 export interface AddWebsiteMemberPayload {
-  userId: number;
-  cmsRole: CmsRole;
+  /** Invite by email (resolved to a platform user server-side) — the primary path. */
+  email?: string;
+  /** Or invite by an already-known numeric user id. */
+  userId?: number;
+  role: CmsRole;
+}
+
+export interface UserSearchResult {
+  id: number;
+  fullName: string;
+  email: string;
+  avatarUrl: string | null;
+  isMember: boolean;
 }

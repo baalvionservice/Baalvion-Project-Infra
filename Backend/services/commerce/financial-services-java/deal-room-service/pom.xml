@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.baalvion</groupId>
+    <artifactId>baalvion-financial-parent</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>deal-room-service</artifactId>
+  <name>Deal Room Service</name>
+  <description>Real-time bilateral trade negotiation: a deal room per buyer/seller pair with a
+    counter-offer engine (price/quantity/Incoterm rounds), live updates over WebSocket, and a
+    term-sheet that both parties sign to reach an executed agreement — emitting dealroom.deal.agreed
+    / termsheet.executed for the smart-contract, order and trade-finance services.</description>
+
+  <dependencies>
+    <dependency>
+      <groupId>com.baalvion</groupId>
+      <artifactId>common-security</artifactId>
+      <version>1.0.0-SNAPSHOT</version>
+    </dependency>
+    <!-- Real-time push of negotiation events to participants. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-websocket</artifactId>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

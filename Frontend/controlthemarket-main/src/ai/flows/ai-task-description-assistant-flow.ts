@@ -29,7 +29,17 @@ export type AiTaskDescriptionAssistantOutput = z.infer<typeof AiTaskDescriptionA
 
 // Wrapper function
 export async function aiTaskDescriptionAssistant(input: AiTaskDescriptionAssistantInput): Promise<AiTaskDescriptionAssistantOutput> {
-  return aiTaskDescriptionAssistantFlow(input);
+  try {
+    return await aiTaskDescriptionAssistantFlow(input);
+  } catch (e) {
+    // Demo fallback: no GEMINI_API_KEY (or quota) → return a structured description so the
+    // assistant is demonstrable without a key. Set GEMINI_API_KEY to flip to live AI.
+    console.warn('[AI] task-description fallback (genkit unavailable — set GEMINI_API_KEY for live AI):', (e as Error)?.message);
+    const skills = input.skillsRequired?.length ? input.skillsRequired.map((s) => `- ${s}`).join('\n') : '- Core role competencies';
+    return {
+      generatedDescription: `## ${input.taskTitle}\n\n**Objective**\n${input.descriptionRequirements || 'Complete the assignment to the standard described below, demonstrating the required skills.'}\n\n**Deliverables**\n- A complete, working submission that addresses every requirement\n- Clear documentation of your approach and key decisions\n\n**Skills Assessed**\n${skills}\n\n**Difficulty:** ${input.difficulty}  •  **Estimated Duration:** ${input.durationEstimate}\n\n_(Demo description — configure GEMINI_API_KEY for live AI generation.)_`,
+    };
+  }
 }
 
 // Prompt definition

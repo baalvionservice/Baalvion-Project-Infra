@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: risk-service
+  description: "Transaction risk + AML/sanctions. Scores value+velocity rules → APPROVE/REVIEW/DECLINE; and screens names against a consolidated watchlist (OFAC/UN/EU/UK/AU) with Jaro–Winkler fuzzy matching → CLEAR/POTENTIAL_MATCH/CONFIRMED_MATCH + officer adjudication. Part of financial-services-java (port 3035, schema `risk`)."
+  domain: commerce
+  division: commerce
+  context: risk
+  owner: "@baalvion/commerce"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/risk-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, kafka]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: ["sanctions.screening.completed", "sanctions.match.detected", "sanctions.screening.adjudicated"]
+  apis: ["/api/v1/risk", "/api/v1/sanctions"]
+  slo: { availability: 0.999, latencyP95Ms: 200 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 6 }

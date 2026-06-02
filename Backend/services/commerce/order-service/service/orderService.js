@@ -1,4 +1,5 @@
 'use strict';
+const crypto = require('crypto');
 const { Op, QueryTypes } = require('sequelize');
 const { OrdersOrder, OrdersOrderItem, OrdersOrderPayment, OrdersInvoice, OrdersCustomer, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
@@ -6,11 +7,30 @@ const cache = require('./cacheService');
 const { getProvider } = require('./paymentProvider');
 const config = require('../config/appConfig');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
+const ownership = require('./ownership');
+const securityAudit = require('./securityAudit');
+const ledgerClient = require('./ledgerClient');
+const discountService = require('./discountService');
+
+// Mirror a money movement into the double-entry ledger without ever letting a ledger
+// problem break the payment path (the client already fails-open + logs internally).
+async function safeLedger(fn, ctx) {
+    try { await fn(); }
+    catch (e) { console.error(JSON.stringify({ evt: 'ledger.mirror_error', ...ctx, error: e.message })); }
+}
 
 function generateOrderNumber(storeCode = 'ORD') {
     const ts = Date.now().toString(36).toUpperCase();
     const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
     return `${storeCode}-${ts}-${rand}`;
+}
+
+// An order is owned by the user behind its customer record (order.customerId → customer.userId).
+// Guest orders (no customerId) have no resolvable owner → only store staff may access them.
+async function orderOwnerUserId(customerId) {
+    if (!customerId) return null;
+    const c = await OrdersCustomer.findByPk(customerId, { attributes: ['userId'] });
+    return c ? c.userId : null;
 }
 
 async function listOrders(storeId, query = {}) {
@@ -28,20 +48,23 @@ async function listOrders(storeId, query = {}) {
     return buildPaginated(rows, count, { page, limit });
 }
 
-async function getOrder(storeId, orderId) {
-    const cached = await cache.get(cache.keys.order(orderId));
-    if (cached && cached.storeId === storeId) return cached;
-    const order = await OrdersOrder.findOne({
-        where: { id: orderId, storeId },
-        include: [
-            { model: OrdersOrderItem, as: 'items' },
-            { model: OrdersOrderPayment, as: 'payments' },
-            { model: OrdersInvoice, as: 'invoice' },
-        ],
-    });
-    if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
-    const data = order.toJSON();
-    await cache.set(cache.keys.order(orderId), data, config.cache.orderTtl);
+async function getOrder(storeId, orderId, actor) {
+    let data = await cache.get(cache.keys.order(orderId));
+    if (!(data && data.storeId === storeId)) {
+        const order = await OrdersOrder.findOne({
+            where: { id: orderId, storeId },
+            include: [
+                { model: OrdersOrderItem, as: 'items' },
+                { model: OrdersOrderPayment, as: 'payments' },
+                { model: OrdersInvoice, as: 'invoice' },
+            ],
+        });
+        if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
+        data = order.toJSON();
+        await cache.set(cache.keys.order(orderId), data, config.cache.orderTtl);
+    }
+    // Customer-ownership enforcement (owner OR store staff). Applies on cache hit and miss.
+    await ownership.enforce(actor, await orderOwnerUserId(data.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'order.read' });
     return data;
 }
 
@@ -152,10 +175,18 @@ async function reserveInventory(t, storeId, items) {
     }
 }
 
-async function createOrder(storeId, body) {
+async function createOrder(storeId, body, actor) {
     const { customerId, currencyCode = 'USD', shippingAmount = 0, discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
 
     if (!body.items || !body.items.length) throw new AppError('VALIDATION_ERROR', 'Order must have at least one item', 400);
+
+    // Ownership: a caller may only place an order AS a customer they own. (Staff may place on
+    // behalf of any customer.) Prevents attributing an order to someone else's customer record.
+    if (customerId) {
+        const cust = await OrdersCustomer.findOne({ where: { id: customerId, storeId }, attributes: ['id', 'userId'] });
+        if (!cust) throw new AppError('VALIDATION_ERROR', 'customerId not found in this store', 400);
+        await ownership.enforce(actor, cust.userId, { resourceType: 'customer', resourceId: customerId, storeId, action: 'order.create' });
+    }
 
     // ── Idempotency / replay safety (Phase 4) ───────────────────────────────────
     // A repeated submit with the same key returns the original order instead of duplicating.
@@ -183,17 +214,19 @@ async function createOrder(storeId, body) {
 
     const subtotal = Number(items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2));
     const taxAmount = Number(items.reduce((s, i) => s + i.taxAmount, 0).toFixed(2));
-    // Discount/promo authority is not implemented — client discount is ignored (documented gap).
-    const discount = 0;
-    const totalAmount = Number((subtotal + shipping + taxAmount - discount).toFixed(2));
     const orderNumber = generateOrderNumber();
 
     const order = await sequelize.transaction(async (t) => {
+        // Server-authoritative discount: the code is validated + computed from commerce data and a
+        // usage slot is atomically claimed within this txn (rolls back with the order on failure).
+        const promo = await discountService.applyDiscount(t, storeId, discountCode, subtotal, shipping);
+        const totalAmount = Number((subtotal + shipping + taxAmount - promo.discountAmount).toFixed(2));
+
         const o = await OrdersOrder.create({
             storeId, customerId, orderNumber, currencyCode,
-            subtotal, discountAmount: discount, shippingAmount: shipping, taxAmount, totalAmount,
-            discountCode, notes,
-            metadata: { ...metadata, ...(idempotencyKey ? { idempotencyKey: String(idempotencyKey) } : {}) },
+            subtotal, discountAmount: promo.discountAmount, shippingAmount: shipping, taxAmount, totalAmount,
+            discountCode: promo.code || discountCode || null, notes,
+            metadata: { ...metadata, ...(promo.discountId ? { discountId: promo.discountId } : {}), ...(idempotencyKey ? { idempotencyKey: String(idempotencyKey) } : {}) },
             billingAddress, shippingAddress,
             // Never auto-paid — payment is confirmed only by the backend recordPayment path.
             status: 'pending', fulfillmentStatus: 'unfulfilled', paymentStatus: 'pending',
@@ -224,7 +257,7 @@ async function createOrder(storeId, body) {
     });
 
     // Phase 6: structured audit log (orderNumber is the cross-service correlation handle).
-    console.info(JSON.stringify({ evt: 'order.created', storeId, orderId: order.id, orderNumber, totalAmount, currencyCode, lineCount: items.length }));
+    console.info(JSON.stringify({ evt: 'order.created', storeId, orderId: order.id, orderNumber, totalAmount: Number(order.totalAmount), discountAmount: Number(order.discountAmount), currencyCode, lineCount: items.length }));
     return order.toJSON();
 }
 
@@ -299,50 +332,149 @@ async function recordPayment(storeId, orderId, body) {
     if (body.transactionId) {
         const dupe = await OrdersOrderPayment.findOne({ where: { orderId, transactionId: body.transactionId } });
         if (dupe) {
-            console.info(JSON.stringify({ evt: 'payment.duplicate_ignored', storeId, orderId, transactionId: body.transactionId }));
+            securityAudit.payment('duplicate', 'deny', { storeId, resource: { type: 'order', id: orderId }, reason: 'duplicate_transaction', metadata: { transactionId: body.transactionId } });
             return dupe.toJSON();
         }
     }
-    const payment = await OrdersOrderPayment.create({ orderId, ...body });
+    let payment;
+    try {
+        payment = await OrdersOrderPayment.create({ orderId, ...body });
+    } catch (e) {
+        // Lost the race against a concurrent identical record → UNIQUE(order_id, transaction_id).
+        if (e && (e.name === 'SequelizeUniqueConstraintError' || (e.original && e.original.code === '23505'))) {
+            securityAudit.payment('duplicate', 'deny', { storeId, resource: { type: 'order', id: orderId }, reason: 'duplicate_transaction_race', metadata: { transactionId: body.transactionId } });
+            const existing = await OrdersOrderPayment.findOne({ where: { orderId, transactionId: body.transactionId } });
+            return existing ? existing.toJSON() : (() => { throw e; })();
+        }
+        throw e;
+    }
     if (['captured', 'authorized'].includes(body.status)) {
         await order.update({ paymentStatus: 'paid', status: order.status === 'pending' ? 'confirmed' : order.status });
     }
     await cache.del(cache.keys.order(orderId));
-    console.info(JSON.stringify({ evt: 'payment.recorded', storeId, orderId, provider: body.provider, status: body.status }));
+    securityAudit.payment('recorded', 'allow', { storeId, resource: { type: 'order', id: orderId }, metadata: { provider: body.provider, status: body.status, transactionId: body.transactionId } });
+
+    // Only a real capture moves money → mirror it to the ledger (idempotent, fail-open).
+    if (body.status === 'captured') {
+        await safeLedger(() => ledgerClient.recordPaymentCapture(storeId, {
+            paymentId: payment.id, orderId, orderNumber: order.orderNumber,
+            amount: body.amount, currencyCode: body.currencyCode || order.currencyCode,
+            provider: body.provider, transactionId: body.transactionId,
+        }), { storeId, orderId, phase: 'record_capture' });
+    }
     return payment.toJSON();
+}
+
+/**
+ * Issue a refund against a paid order (admin/ops). Full or partial. Records a refund
+ * payment row, advances order state, and mirrors a REFUND journal entry to the ledger.
+ * The provider refund is backend-authoritative (mock simulates; real adapters throw until
+ * configured). Idempotency: a duplicate refund transactionId is ignored.
+ */
+async function refundPayment(storeId, orderId, body = {}) {
+    const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
+    if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
+    if (!['paid', 'partially_paid'].includes(order.paymentStatus)) {
+        throw new AppError('CONFLICT', `Cannot refund an order with payment status '${order.paymentStatus}'`, 409);
+    }
+
+    // The captured payment we are refunding against (most recent capture).
+    const captured = await OrdersOrderPayment.findOne({ where: { orderId, status: 'captured' }, order: [['createdAt', 'DESC']] });
+    const captureAmount = captured ? Number(captured.amount) : Number(order.totalAmount);
+    const amount = body.amount != null ? Number(body.amount) : captureAmount;
+    if (!Number.isFinite(amount) || amount <= 0) throw new AppError('VALIDATION_ERROR', 'Refund amount must be a positive number', 400);
+    if (amount > captureAmount + 1e-9) throw new AppError('VALIDATION_ERROR', `Refund amount exceeds captured amount (${captureAmount})`, 400);
+
+    const provider = getProvider();
+    if (typeof provider.refundPayment !== 'function') {
+        throw new AppError('NOT_IMPLEMENTED', `Payment provider '${provider.name}' does not support refunds`, 501);
+    }
+    const result = await provider.refundPayment({ orderId, transactionId: captured && captured.transactionId, amount, reason: body.reason });
+    if (!result || result.status !== 'refunded') throw new AppError('REFUND_FAILED', `Refund failed: ${(result && result.reason) || 'declined'}`, 402);
+
+    const refundTxnId = result.refundId || `rf_${crypto.randomUUID()}`;
+    // Idempotency: a repeated refund with the same provider id is a no-op.
+    const dupe = await OrdersOrderPayment.findOne({ where: { orderId, transactionId: refundTxnId } });
+    if (dupe) {
+        securityAudit.payment('refund_duplicate', 'deny', { storeId, resource: { type: 'order', id: orderId }, reason: 'duplicate_refund', metadata: { transactionId: refundTxnId } });
+        return dupe.toJSON();
+    }
+
+    const isFull = amount >= captureAmount - 1e-9;
+    const refundRow = await sequelize.transaction(async (t) => {
+        const row = await OrdersOrderPayment.create({
+            orderId, provider: provider.name, transactionId: refundTxnId,
+            amount, currencyCode: order.currencyCode, status: 'refunded',
+            paidAt: new Date(), metadata: { refund: true, reason: body.reason || null, ofPaymentId: captured && captured.id },
+        }, { transaction: t });
+        await order.update({
+            paymentStatus: isFull ? 'refunded' : 'partially_paid',
+            status: isFull ? 'refunded' : order.status,
+        }, { transaction: t });
+        return row;
+    });
+    await cache.del(cache.keys.order(orderId));
+    securityAudit.payment('refunded', 'allow', { storeId, resource: { type: 'order', id: orderId }, metadata: { amount, full: isFull, transactionId: refundTxnId } });
+
+    await safeLedger(() => ledgerClient.recordRefund(storeId, {
+        refundId: refundRow.id, orderId, orderNumber: order.orderNumber,
+        amount, currencyCode: order.currencyCode, provider: provider.name,
+        transactionId: refundTxnId, reason: body.reason,
+    }), { storeId, orderId, phase: 'refund' });
+
+    return refundRow.toJSON();
 }
 
 // ── Provider-authoritative payment flow (Phase 2) ───────────────────────────────
 // Orders are paid ONLY via backend provider confirmation — a client cannot self-mark paid.
-async function createPaymentIntent(storeId, orderId) {
+async function createPaymentIntent(storeId, orderId, actor) {
     const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
+    await ownership.enforce(actor, await orderOwnerUserId(order.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'payment.intent' });
     if (order.paymentStatus === 'paid') throw new AppError('CONFLICT', 'Order is already paid', 409);
     const provider = getProvider();
     const intent = await provider.createPaymentIntent({ orderId, amount: Number(order.totalAmount), currencyCode: order.currencyCode });
+    // Atomic via UNIQUE(order_id, transaction_id) — concurrent intents never duplicate a row.
     await OrdersOrderPayment.findOrCreate({
         where: { orderId, transactionId: intent.intentId },
         defaults: { orderId, provider: provider.name, transactionId: intent.intentId, amount: order.totalAmount, currencyCode: order.currencyCode, status: 'pending', metadata: { intentId: intent.intentId } },
     });
-    console.info(JSON.stringify({ evt: 'payment.intent_created', storeId, orderId, provider: provider.name, intentId: intent.intentId }));
+    securityAudit.payment('intent_created', 'allow', { userId: actor && actor.userId, storeId, resource: { type: 'order', id: orderId }, requestId: actor && actor.requestId, metadata: { provider: provider.name, intentId: intent.intentId } });
     return { intentId: intent.intentId, status: intent.status };
 }
 
-async function confirmPayment(storeId, orderId, intentId) {
+async function confirmPayment(storeId, orderId, intentId, actor) {
     if (!intentId) throw new AppError('VALIDATION_ERROR', 'intentId is required', 400);
-    const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
-    if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
-    if (order.paymentStatus === 'paid') { // idempotent replay — never double-capture
-        console.info(JSON.stringify({ evt: 'payment.confirm_replay', storeId, orderId, intentId }));
-        return order.toJSON();
+    const order0 = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
+    if (!order0) throw new AppError('NOT_FOUND', 'Order not found', 404);
+    await ownership.enforce(actor, await orderOwnerUserId(order0.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'payment.confirm' });
+
+    // Replay/forgery guard: the intentId MUST correspond to a payment intent we created for
+    // THIS order. Reject an unknown/foreign intent before touching the provider or order state.
+    const intentPayment = await OrdersOrderPayment.findOne({ where: { orderId, transactionId: intentId } });
+    if (!intentPayment) {
+        securityAudit.payment('replay_blocked', 'deny', { userId: actor && actor.userId, storeId, action: 'payment.confirm', resource: { type: 'order', id: orderId }, reason: 'unknown_intent', requestId: actor && actor.requestId, metadata: { intentId } });
+        throw new AppError('CONFLICT', 'No matching payment intent for this order', 409);
     }
+
+    if (order0.paymentStatus === 'paid') { // fast-path idempotent replay (never double-capture)
+        securityAudit.payment('confirm_replay', 'allow', { userId: actor && actor.userId, storeId, resource: { type: 'order', id: orderId }, reason: 'already_paid', requestId: actor && actor.requestId, metadata: { intentId } });
+        return order0.toJSON();
+    }
+
     const result = await getProvider().confirmPayment({ intentId, orderId }); // BACKEND-AUTHORITATIVE
+
     const out = await sequelize.transaction(async (t) => {
+        // Lock the order row: a concurrent confirm waits here, then sees paymentStatus='paid'
+        // and exits — DETERMINISTIC single capture, no double-fulfill / double-ledger.
+        const order = await OrdersOrder.findOne({ where: { id: orderId, storeId }, lock: t.LOCK.UPDATE, transaction: t });
+        if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
+        if (order.paymentStatus === 'paid') return { ok: true, replay: true };
         const payment = await OrdersOrderPayment.findOne({ where: { orderId, transactionId: intentId }, transaction: t });
         if (result.status === 'captured') {
             if (payment) await payment.update({ status: 'captured', paidAt: new Date(), metadata: { ...(payment.metadata || {}), transactionId: result.transactionId } }, { transaction: t });
             await order.update({ paymentStatus: 'paid', status: order.status === 'pending' ? 'confirmed' : order.status }, { transaction: t });
-            await unwindReservation(t, storeId, orderId, 'fulfill'); // Phase 3: reserved → deducted on capture
+            await unwindReservation(t, storeId, orderId, 'fulfill'); // reserved → deducted on capture
             return { ok: true };
         }
         if (payment) await payment.update({ status: 'failed', metadata: { ...(payment.metadata || {}), reason: result.reason } }, { transaction: t });
@@ -351,11 +483,21 @@ async function confirmPayment(storeId, orderId, intentId) {
     });
     await cache.del(cache.keys.order(orderId));
     if (!out.ok) {
-        console.warn(JSON.stringify({ evt: 'payment.failed', storeId, orderId, intentId, reason: out.reason }));
+        securityAudit.payment('failed', 'deny', { userId: actor && actor.userId, storeId, resource: { type: 'order', id: orderId }, reason: out.reason || 'declined', requestId: actor && actor.requestId, metadata: { intentId } });
         throw new AppError('PAYMENT_FAILED', `Payment failed: ${out.reason || 'declined'}`, 402);
     }
-    console.info(JSON.stringify({ evt: 'payment.captured', storeId, orderId, intentId }));
-    return order.toJSON();
+    securityAudit.payment('captured', 'allow', { userId: actor && actor.userId, storeId, resource: { type: 'order', id: orderId }, requestId: actor && actor.requestId, metadata: { intentId, replay: !!out.replay } });
+    const fresh = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
+
+    // Mirror the captured payment into the double-entry ledger (idempotent, fail-open, post-commit).
+    if (!out.replay) {
+        await safeLedger(() => ledgerClient.recordPaymentCapture(storeId, {
+            paymentId: intentPayment.id, orderId, orderNumber: fresh.orderNumber,
+            amount: fresh.totalAmount, currencyCode: fresh.currencyCode,
+            provider: intentPayment.provider, transactionId: result.transactionId,
+        }), { storeId, orderId, phase: 'confirm_capture' });
+    }
+    return fresh.toJSON();
 }
 
 async function failPayment(storeId, orderId, intentId, reason) {
@@ -387,4 +529,4 @@ async function cancelPayment(storeId, orderId, intentId) {
     return order.toJSON();
 }
 
-module.exports = { listOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, createPaymentIntent, confirmPayment, failPayment, cancelPayment };
+module.exports = { listOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, failPayment, cancelPayment };

@@ -14,7 +14,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.DeadLetterPublishingRecoverer;
 import org.springframework.kafka.listener.DefaultErrorHandler;
-import org.springframework.util.backoff.ExponentialBackOffWithMaxRetries;
+import com.baalvion.common.kafka.ExponentialBackOffWithMaxRetries;
 
 import java.util.HashMap;
 import java.util.Map;

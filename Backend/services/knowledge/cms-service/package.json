@@ -10,10 +10,14 @@
     "migrate:undo": "sequelize-cli db:migrate:undo",
     "migrate:undo:all": "sequelize-cli db:migrate:undo:all",
     "seed": "sequelize-cli db:seed:all",
-    "seed:undo": "sequelize-cli db:seed:undo:all"
+    "seed:undo": "sequelize-cli db:seed:undo:all",
+    "build:ts": "tsc -p tsconfig.json",
+    "type-check": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
+    "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
+    "@baalvion/sdk": "workspace:*",
     "bullmq": "^5.52.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -21,7 +25,6 @@
     "express": "^5.2.1",
     "helmet": "^8.1.0",
     "ioredis": "^5.6.1",
-    "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
     "pg-hstore": "^2.3.4",
     "sequelize": "^6.37.8",
@@ -29,7 +32,12 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "jsonwebtoken": "^9.0.3",
     "nodemon": "^3.1.14",
-    "sequelize-cli": "^6.6.2"
+    "sequelize-cli": "^6.6.2",
+    "typescript": "^5.7.2",
+    "tsx": "^4.19.2",
+    "@types/node": "^22.10.0",
+    "@types/express": "^5.0.0"
   }
 }

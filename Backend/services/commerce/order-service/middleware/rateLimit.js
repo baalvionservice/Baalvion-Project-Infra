@@ -1,15 +1,13 @@
 'use strict';
-const { AppError } = require('../utils/errors');
+// IP rate limiter backed by express-rate-limit (a CodeQL-recognized limiter). Applied
+// globally via app.use(createIpRateLimit()) before the routers, so every route inherits it.
+const rateLimit = require('express-rate-limit');
 const config = require('../config/appConfig');
-const store = new Map();
-const createIpRateLimit = (max = config.security.ipRateLimit, windowMs = 60000) => (req, res, next) => {
-    const key = req.ip;
-    const now = Date.now();
-    const entry = store.get(key) || { count: 0, resetAt: now + windowMs };
-    if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + windowMs; }
-    entry.count += 1;
-    store.set(key, entry);
-    if (entry.count > max) return next(new AppError('RATE_LIMITED', 'Too many requests', 429));
-    return next();
-};
-module.exports = createIpRateLimit;
+
+module.exports = () => rateLimit({
+    windowMs: 60_000,
+    max: (config.security && config.security.ipRateLimit) || 120,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many requests' } },
+});

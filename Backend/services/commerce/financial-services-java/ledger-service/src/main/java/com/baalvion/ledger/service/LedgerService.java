@@ -47,9 +47,14 @@ public class LedgerService {
   }
 
   public EntryResponse postEntry(UUID tenantId, PostEntryRequest request) {
+    // Strip CR/LF/tab from the user-supplied transactionRef before logging to prevent log injection.
+    String safeTransactionRef = request.getTransactionRef() == null
+      ? null
+      : request.getTransactionRef().replaceAll("[\r\n\t]", "_");
+
     var existing = repository.findByTenantAndTransactionRef(tenantId, request.getTransactionRef());
     if (existing.isPresent()) {
-      log.info("Idempotent request: transactionRef={} already exists for tenant={}", request.getTransactionRef(), tenantId);
+      log.info("Idempotent request: transactionRef={} already exists for tenant={}", safeTransactionRef, tenantId);
       return mapToResponse(existing.get());
     }
 
@@ -71,7 +76,7 @@ public class LedgerService {
       .build();
 
     var saved = repository.save(entry);
-    log.info("Journal entry posted: id={}, tenant={}, ref={}, amount={}", saved.getId(), tenantId, request.getTransactionRef(), request.getAmount());
+    log.info("Journal entry posted: id={}, tenant={}, ref={}, amount={}", saved.getId(), tenantId, safeTransactionRef, request.getAmount());
 
     publish("ledger.entry.posted", saved.getId().toString(), mapToResponse(saved));
 

@@ -14,7 +14,7 @@ engineers. Architecture context is in [../adr/](../adr/) and `INTEGRATION_SUMMAR
 ### Service map (ports / schemas)
 account 3016 `accounts` · ledger 3014 `ledger` · payment 3015 `payments` · escrow 3017 `escrow` ·
 settlement 3018 `settlement` · reconciliation 3019 `reconciliation` · audit 3020 `audit` ·
-reporting 3024 `reporting` · risk 3025 `risk`. All share one PostgreSQL database (`baalvion`),
+reporting 3024 `reporting` · risk 3035 `risk`. All share one PostgreSQL database (`baalvion`),
 isolated by schema + RLS, each with its own Flyway history table `flyway_history_<svc>`.
 
 ### Health & metrics

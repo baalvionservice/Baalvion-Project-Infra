@@ -12,7 +12,7 @@ import { TrackViewedJob } from '@/modules/jobs/components/TrackViewedJob';
 import { generateJobPostingStructuredData } from '@/lib/structured-data';
 
 type Props = {
-  params: { slug: string; jobId: string };
+  params: Promise<{ slug: string; jobId: string }>;
 };
 
 export async function generateStaticParams() {
@@ -39,7 +39,8 @@ export async function generateStaticParams() {
   }
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata(props: Props): Promise<Metadata> {
+  const params = await props.params;
   const { slug, jobId } = params;
   const job = await talentService.getJobById(jobId);
   const country = await talentService.getCountryBySlug(slug);
@@ -68,7 +69,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function JobDetailPage({ params }: Props) {
+export default async function JobDetailPage(props: Props) {
+  const params = await props.params;
   const { slug, jobId } = params;
   const job = await talentService.getJobById(jobId);
   const country = await talentService.getCountryBySlug(slug);

@@ -244,15 +244,20 @@ async function ctmProxyClientCtmProfile(userId: string): Promise<any> {
 // next/headers cookies(). Not secrets — just ids for scoping the demo.
 function setCtmScopeCookies(u: User | null) {
   if (typeof document === 'undefined') return;
+  // Add Secure on HTTPS so the cookies are not sent over clear-text; omit it on
+  // local http dev where Secure would silently drop the cookie. SameSite stays
+  // on both the set and clear paths.
+  const secure = typeof location !== 'undefined' && location.protocol === 'https:' ? '; secure' : '';
   if (u) {
-    const opts = '; path=/; max-age=2592000; samesite=lax';
+    const opts = `; path=/; max-age=2592000; samesite=lax${secure}`;
     document.cookie = `ctm_user_id=${encodeURIComponent(u.id)}${opts}`;
     document.cookie = `ctm_company_id=${encodeURIComponent(u.companyId || '')}${opts}`;
     document.cookie = `ctm_role=${encodeURIComponent(u.role)}${opts}`;
   } else {
-    document.cookie = 'ctm_user_id=; path=/; max-age=0';
-    document.cookie = 'ctm_company_id=; path=/; max-age=0';
-    document.cookie = 'ctm_role=; path=/; max-age=0';
+    const clear = `; path=/; max-age=0; samesite=lax${secure}`;
+    document.cookie = `ctm_user_id=${clear}`;
+    document.cookie = `ctm_company_id=${clear}`;
+    document.cookie = `ctm_role=${clear}`;
   }
 }
 

@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getFounders, REVALIDATE } from "@/lib/api";
+import { getFounders } from "@/lib/api";
 import { Badge } from "@/components/ui";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300; // seconds — must be a static literal (Next segment config)
 
 export const metadata: Metadata = {
   title: "Founders Raising Now — Discover Startups",

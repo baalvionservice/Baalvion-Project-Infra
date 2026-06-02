@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: deal-room-service
+  description: Real-time bilateral trade negotiation — deal room per buyer/seller pair, counter-offer engine, live WebSocket updates, and a term sheet both parties sign to reach an executed agreement. Part of financial-services-java (port 3040, schema `deal_room`).
+  domain: commerce
+  division: commerce
+  context: deal-room
+  owner: "@baalvion/commerce"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/deal-room-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, kafka]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/deal-rooms"]
+  slo: { availability: 0.99, latencyP95Ms: 300 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 8 }

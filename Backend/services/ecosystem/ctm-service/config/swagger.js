@@ -40,4 +40,15 @@ const options = {
     apis: ['./routes/*.js', './controller/*.js'],
 };
 
-module.exports = swaggerJsdoc(options);
+let swaggerSpec;
+try {
+    swaggerSpec = swaggerJsdoc(options);
+} catch (err) {
+    // swagger-jsdoc can throw on a yaml v1/v2 mismatch (keepCstNodes) while
+    // parsing @swagger JSDoc blocks. Docs are non-essential — degrade gracefully
+    // so the service still boots.
+    console.warn('[swagger] spec build failed, serving minimal spec:', err.message);
+    swaggerSpec = { openapi: '3.0.0', info: (options.definition && options.definition.info) || { title: 'API', version: '1.0.0' }, paths: {} };
+}
+
+module.exports = swaggerSpec;

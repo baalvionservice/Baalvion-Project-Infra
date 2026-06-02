@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import ProductMediaTab from '@/components/commerce/ProductMediaTab';
 import {
   useProduct,
   useUpdateProduct,
@@ -169,6 +170,7 @@ export default function ProductEditorPage() {
       <Tabs defaultValue="details">
         <TabsList>
           <TabsTrigger value="details">Details</TabsTrigger>
+          <TabsTrigger value="media" disabled={isNew}>Media</TabsTrigger>
           <TabsTrigger value="variants">Variants {variants ? `(${variants.length})` : ''}</TabsTrigger>
           <TabsTrigger value="seo">SEO</TabsTrigger>
         </TabsList>
@@ -291,6 +293,10 @@ export default function ProductEditorPage() {
               </Card>
             </div>
           </div>
+        </TabsContent>
+
+        <TabsContent value="media" className="mt-4">
+          {!isNew && <ProductMediaTab storeId={storeId} productId={params.id} />}
         </TabsContent>
 
         <TabsContent value="variants" className="mt-4">

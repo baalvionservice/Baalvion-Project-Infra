@@ -11,6 +11,14 @@ interface IndexingResult {
 }
 
 /**
+ * Strip CR/LF/tab characters from user-derived values before logging
+ * to prevent log-injection / log-forging.
+ */
+function sanitizeForLog(value: string): string {
+  return String(value).replace(/[\r\n\t]/g, ' ');
+}
+
+/**
  * Server-only utility for Google Indexing API
  * Authenticates using service account and notifies Google of URL changes
  */
@@ -57,7 +65,7 @@ export class GoogleIndexingService {
         },
       });
 
-      console.log(`Google Indexing API notification sent for ${url}:`, {
+      console.log('Google Indexing API notification sent for %s:', sanitizeForLog(url), {
         type,
         status: response.status,
         data: response.data,

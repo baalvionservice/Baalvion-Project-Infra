@@ -15,6 +15,7 @@
     "migrate": "psql $DATABASE_URL -f migrations/001_auth_schema.sql && psql $DATABASE_URL -f migrations/002_add_family_id.sql"
   },
   "dependencies": {
+    "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",

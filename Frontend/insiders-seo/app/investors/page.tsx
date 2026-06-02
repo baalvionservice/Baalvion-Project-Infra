@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getInvestors, REVALIDATE } from "@/lib/api";
+import { getInvestors } from "@/lib/api";
 import { sectorsFrom, titleCase } from "@/lib/seo";
 import { Badge } from "@/components/ui";
 
-export const revalidate = REVALIDATE;
+export const revalidate = 300; // seconds — must be a static literal (Next segment config)
 
 export const metadata: Metadata = {
   title: "Active Investors — Browse by Sector & Stage",

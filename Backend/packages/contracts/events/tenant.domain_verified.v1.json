@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/tenant.domain_verified.v1.json",
+  "title": "TenantDomainVerified",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "tenant.domain_verified" },
+    "payload": {
+      "type": "object",
+      "required": ["tenantId", "domain"],
+      "additionalProperties": true,
+      "properties": {
+        "tenantId": { "type": "string" },
+        "domain": { "type": "string" }
+      }
+    }
+  }
+}

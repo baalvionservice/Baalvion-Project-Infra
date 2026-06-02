@@ -39,8 +39,27 @@ module.exports = {
         productTtl: Number(process.env.CACHE_PRODUCT_TTL || 300),    // 5 min
         categoryTtl: Number(process.env.CACHE_CATEGORY_TTL || 1800), // 30 min
         collectionTtl: Number(process.env.CACHE_COLLECTION_TTL || 600), // 10 min
+        rbacEffectiveTtl: Number(process.env.CACHE_RBAC_EFFECTIVE_TTL || 30), // 30s — short, role grants change
+        rbacScopeTtl: Number(process.env.CACHE_RBAC_SCOPE_TTL || 300),        // 5 min — store→country context
     },
     security: {
         ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 200),
+    },
+    // RBAC service is the SINGLE SOURCE OF TRUTH for admin hierarchy + store-team roles.
+    // Commerce is a Policy Enforcement Point: it forwards the caller's bearer token to
+    // resolve their effective grants, and owns the country→store scope-chain resolution
+    // (the RBAC PDP itself is store-unaware and matches scope by exact string).
+    rbac: {
+        baseUrl:       process.env.RBAC_BASE_URL || 'http://localhost:3055',
+        apiPrefix:     process.env.RBAC_API_PREFIX || '/v1',
+        timeoutMs:     Number(process.env.RBAC_TIMEOUT_MS || 4000),
+        // 'closed' (default, secure): deny when RBAC is unreachable. 'open': last-resort degrade.
+        failMode:      (process.env.RBAC_FAIL_MODE || 'closed').toLowerCase(),
+        // Break-glass: honor a super_admin claim in the (RBAC-issued) JWT even if RBAC is
+        // unreachable, so platform owners are never locked out. Narrow + auditable.
+        breakglassSuperAdmin: process.env.RBAC_BREAKGLASS_SUPERADMIN !== 'false',
+        // Optional system-context service key (header X-Internal-Key). Only used when no
+        // caller token is available (background jobs). Empty = disabled.
+        internalApiKey: process.env.RBAC_INTERNAL_API_KEY || '',
     },
 };

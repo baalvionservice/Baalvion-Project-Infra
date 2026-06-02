@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: report-service
+  description: Platform report builder — parameterized, read-only report definitions rendered to CSV / Excel (xlsx) / PDF / JSON / HTML, on demand or on a schedule, with run history and event-bus delivery. Live Node implementation of Cluster 9 Reporting (port 3041, schema `reports`).
+  domain: infrastructure
+  division: shared-developer-platform
+  context: reporting
+  owner: "@baalvion/infrastructure"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/infrastructure/report-service
+spec:
+  lifecycle: beta
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: [report.completed, report.failed, report.scheduled.delivered]
+  apis: ["/v1/reports", "/v1/runs", "/v1/schedules"]
+  slo: { availability: 0.99, latencyP95Ms: 500 }
+  deploy: { chart: baalvion-service, namespace: baalvion-infrastructure, minReplicas: 2, maxReplicas: 6 }

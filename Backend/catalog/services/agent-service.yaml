@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: agent-service
+  description: Agent Management — sales/partner agents, commission plans (flat/percent/tiered + recurring + hierarchy overrides), a commission accrual tracker with payouts, leaderboards, and training/certification (Cluster 9, port 3044, schema `agent`).
+  domain: ecosystem
+  division: commerce
+  context: agent-management
+  owner: "@baalvion/ecosystem"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/ecosystem/agent-service
+spec:
+  lifecycle: beta
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: [commission.accrued, agent.payout, agent.certified]
+  apis: ["/v1/agents", "/v1/commissions", "/v1/leaderboard", "/v1/courses"]
+  slo: { availability: 0.99, latencyP95Ms: 350 }
+  deploy: { chart: baalvion-service, namespace: baalvion-ecosystem, minReplicas: 2, maxReplicas: 6 }

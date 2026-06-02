@@ -38,7 +38,8 @@ public class IpAllowlistFilter extends OncePerRequestFilter {
   protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
     throws ServletException, IOException {
     if (!matchers.isEmpty() && isProtected(request.getRequestURI()) && !isAllowed(clientIp(request))) {
-      log.warn("IP {} blocked from protected path {}", clientIp(request), request.getRequestURI());
+      log.warn("IP {} blocked from protected path {}", sanitizeForLog(clientIp(request)),
+        sanitizeForLog(request.getRequestURI()));
       response.setStatus(403);
       response.setContentType("application/json");
       response.getWriter().write("{\"code\":\"IP_NOT_ALLOWED\",\"message\":\"Source IP is not permitted for this endpoint\"}");
@@ -53,6 +54,10 @@ public class IpAllowlistFilter extends OncePerRequestFilter {
 
   private boolean isAllowed(String ip) {
     return matchers.stream().anyMatch(m -> m.matches(ip));
+  }
+
+  private static String sanitizeForLog(String value) {
+    return value == null ? "" : value.replaceAll("[\r\n\t]", "_");
   }
 
   private String clientIp(HttpServletRequest request) {

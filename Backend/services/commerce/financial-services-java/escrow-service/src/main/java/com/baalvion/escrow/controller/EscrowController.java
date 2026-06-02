@@ -30,7 +30,8 @@ public class EscrowController {
     @Valid @RequestBody CreateEscrowRequest request
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("POST /escrow: tenant={}, ref={}, amount={}", tenantId, request.getEscrowRef(), request.getAmount());
+    String safeRef = sanitizeForLog(request.getEscrowRef());
+    log.info("POST /escrow: tenant={}, ref={}, amount={}", tenantId, safeRef, request.getAmount());
 
     EscrowResponse response = escrowService.createHold(tenantId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -100,5 +101,10 @@ public class EscrowController {
     // Authenticated requests derive the tenant from the validated JWT; the header is ignored
     // when authenticated (no IDOR). Used only as a dev fallback when security is disabled.
     return com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
+  }
+
+  // Neutralizes CR/LF/tab in user-derived values before logging to prevent log injection.
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 }

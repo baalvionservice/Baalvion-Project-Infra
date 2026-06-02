@@ -17,13 +17,13 @@
     "coverageProvider": "v8"
   },
   "dependencies": {
+    "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "@aws-sdk/client-s3": "^3.1053.0",
     "@aws-sdk/s3-request-presigner": "^3.1053.0",
     "@bull-board/api": "^7.1.5",
     "@bull-board/express": "^7.1.5",
     "@elastic/elasticsearch": "^9.4.1",
-    "bcrypt": "^6.0.0",
     "bullmq": "^5.77.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

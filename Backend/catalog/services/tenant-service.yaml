@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: tenant-service
+  description: White-Label / Tenant platform — multi-tenant registry (slug/plan/hierarchy), per-app branding, custom-domain DNS-TXT verification, and feature entitlements/quotas, with a public resolve-by-domain endpoint for any frontend. Generalizes the proxy white-label config (Cluster 9, port 3043, schema `tenant`).
+  domain: platform
+  division: platform-core
+  context: white-label-tenant
+  owner: "@baalvion/platform-core"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/platform/tenant-service
+spec:
+  lifecycle: beta
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: [tenant.provisioned, tenant.suspended, tenant.domain_verified]
+  apis: ["/v1/tenants", "/v1/resolve"]
+  slo: { availability: 0.995, latencyP95Ms: 250 }
+  deploy: { chart: baalvion-service, namespace: baalvion-platform, minReplicas: 2, maxReplicas: 6 }

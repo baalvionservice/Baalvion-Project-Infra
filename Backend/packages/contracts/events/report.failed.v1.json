@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "baalvion://events/report.failed.v1.json",
+  "title": "ReportFailed",
+  "allOf": [{ "$ref": "baalvion://events/_envelope.json" }],
+  "properties": {
+    "type": { "const": "report.failed" },
+    "payload": {
+      "type": "object",
+      "required": ["reportId", "runId", "error"],
+      "additionalProperties": true,
+      "properties": {
+        "reportId": { "type": "string" },
+        "runId": { "type": "string" },
+        "name": { "type": "string" },
+        "error": { "type": "string" }
+      }
+    }
+  }
+}

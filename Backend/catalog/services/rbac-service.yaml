@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: rbac-service
+  description: Authorization core — multi-tenant hierarchical RBAC (super_admin > country_admin > organization_admin > end_user) plus an ABAC policy decision point.
+  domain: identity
+  division: platform-core
+  context: authorization
+  owner: "@baalvion/platform-core"
+  tier: tier-0
+  repo: baalvion-platform
+  path: Backend/services/identity/rbac-service
+spec:
+  lifecycle: production
+  language: node
+  datastores: [postgres]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/roles", "/v1/permissions", "/v1/assignments", "/v1/policies", "/v1/tenants", "/v1/authorize"]
+  slo: { availability: 0.99, latencyP95Ms: 200 }
+  deploy: { chart: baalvion-service, namespace: baalvion-identity, minReplicas: 2, maxReplicas: 10 }

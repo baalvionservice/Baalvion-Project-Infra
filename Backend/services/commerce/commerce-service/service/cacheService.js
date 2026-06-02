@@ -19,4 +19,4 @@ const keys = {
     collectionList: (storeId) => `commerce:collections:${storeId}`,
     discountList: (storeId) => `commerce:discounts:${storeId}`,
 };
-module.exports = { get, set, del, delPattern, keys };
+module.exports = { get, set, del, delPattern, keys, getClient };

@@ -72,7 +72,7 @@ module.exports = (sequelize) => {
         defaultValue: 'PENDING',
       },
       failureCode: {
-        type: DataTypes.VARCHAR(10),
+        type: DataTypes.STRING(10),
         allowNull: true,
         comment: 'ISO 8583 response code on failure',
       },
@@ -81,7 +81,7 @@ module.exports = (sequelize) => {
         allowNull: true,
       },
       schemeRef: {
-        type: DataTypes.VARCHAR(64),
+        type: DataTypes.STRING(64),
         allowNull: true,
         comment: 'External scheme reference',
       },

@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: aml-service
+  description: Anti-money-laundering transaction monitoring — a pluggable rules engine screens transactions for typologies (structuring/smurfing, high-value, velocity, round-amount, FATF high-risk/grey-list jurisdictions), scores them and raises alerts with a FATF-aligned risk grade, with an investigate → clear / escalate / file-SAR case workflow. Emits aml.alert.raised / aml.case.escalated / aml.sar.filed. Part of financial-services-java (port 3045, schema `aml`).
+  domain: commerce
+  division: commerce
+  context: aml
+  owner: "@baalvion/commerce"
+  tier: tier-1
+  repo: baalvion-platform
+  path: Backend/services/commerce/financial-services-java/aml-service
+spec:
+  lifecycle: beta
+  language: java
+  datastores: [postgres, kafka]
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/api/v1/aml"]
+  slo: { availability: 0.99, latencyP95Ms: 300 }
+  deploy: { chart: baalvion-financial, namespace: financial, minReplicas: 2, maxReplicas: 8 }

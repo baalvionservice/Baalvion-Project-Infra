@@ -8,7 +8,7 @@ CREATE TABLE risk.risk_assessments (
   transaction_id uuid NOT NULL,
   source_account_id uuid NOT NULL,
   amount numeric(19, 4) NOT NULL,
-  currency char(3) NOT NULL,
+  currency varchar(3) NOT NULL,
   scheme varchar(32),
   score integer NOT NULL DEFAULT 0,
   decision varchar(16) NOT NULL,          -- APPROVE, REVIEW, DECLINE
