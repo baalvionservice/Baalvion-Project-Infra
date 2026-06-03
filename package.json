@@ -91,7 +91,7 @@
       "fast-xml-builder": "1.1.7",
       "fast-xml-parser@4": "4.5.5",
       "brace-expansion@1": "1.1.12",
-      "brace-expansion@2": "2.0.2",
+      "brace-expansion@2": "2.0.3",
       "minimatch@3": "3.1.4",
       "minimatch@9": "9.0.7",
       "picomatch@2": "2.3.2",
@@ -103,7 +103,10 @@
       "tar@7": "7.5.11",
       "glob@10": "10.5.0",
       "file-type@21": "21.3.2",
-      "@modelcontextprotocol/sdk": "1.26.0"
+      "@modelcontextprotocol/sdk": "1.26.0",
+      "ip-address": "10.1.1",
+      "uuid@11": "11.1.1",
+      "esbuild": "0.25.0"
     }
   }
 }
