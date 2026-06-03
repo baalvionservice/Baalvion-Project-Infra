@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SEOHead } from "@/components/SEOHead";
 import {
   Search, CreditCard, AlertTriangle, RefreshCw, Ban, DollarSign,
-  ArrowUpRight, Clock, Code, ChevronDown, ChevronUp
+  ArrowUpRight, Clock, Code, ChevronDown, ChevronUp, Landmark, Building2, CheckCircle2
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAdminUsers, useAdminRevenueSummary } from "@/hooks/useAdmin";
+import { useAdminUsers, useAdminRevenueSummary, useAdminPendingOrders, useMarkOrderPaid } from "@/hooks/useAdmin";
 
 interface CustomerRow { id: string; name: string; email: string; gateway: string; plan: string; mrr: number; status: string; riskScore: number; country: string; chargebackCount: number; failedPayments: number; }
 interface WebhookRow { id: string; eventType: string; gateway: string; status: string; timestamp: string; httpStatus: number; retryCount: number; payload: Record<string, unknown>; }
@@ -35,6 +35,8 @@ export default function AdminPayments() {
 
   const { data: usersPage } = useAdminUsers({ page: 1, pageSize: 100 });
   const { data: rev } = useAdminRevenueSummary();
+  const { data: pendingOrders } = useAdminPendingOrders();
+  const markPaid = useMarkOrderPaid();
 
   const customers: CustomerRow[] = (usersPage?.data ?? []).map((u, i) => ({
     id: u.id,
@@ -84,6 +86,7 @@ export default function AdminPayments() {
       <Tabs defaultValue="customers">
         <TabsList>
           <TabsTrigger value="customers">Customers</TabsTrigger>
+          <TabsTrigger value="orders">Pending Orders{pendingOrders?.length ? ` (${pendingOrders.length})` : ""}</TabsTrigger>
           <TabsTrigger value="webhooks">Webhook Logs</TabsTrigger>
           <TabsTrigger value="contracts">Enterprise Contracts</TabsTrigger>
         </TabsList>
@@ -206,6 +209,56 @@ export default function AdminPayments() {
                   ))}
                 </tbody>
               </table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Pending bank/wire orders → mark received to activate the subscription */}
+        <TabsContent value="orders" className="space-y-4 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2"><Landmark className="w-5 h-5 text-primary" /> Pending Bank / Wire Orders</CardTitle>
+              <CardDescription>Offline-settled orders awaiting payment. Mark an order received to activate the customer's subscription.</CardDescription>
+            </CardHeader>
+            <CardContent className="p-0 overflow-x-auto">
+              {(pendingOrders ?? []).length === 0 ? (
+                <p className="p-6 text-sm text-muted-foreground">No pending orders. Bank and wire checkouts will appear here for settlement.</p>
+              ) : (
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border text-muted-foreground">
+                      <th className="text-left p-4 font-medium">Organization</th>
+                      <th className="text-left p-4 font-medium">Plan</th>
+                      <th className="text-left p-4 font-medium">Method</th>
+                      <th className="text-left p-4 font-medium">Amount</th>
+                      <th className="text-left p-4 font-medium">Issued</th>
+                      <th className="text-left p-4 font-medium">Due</th>
+                      <th className="text-left p-4 font-medium">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(pendingOrders ?? []).map(o => (
+                      <tr key={o.invoiceId} className="border-b border-border hover:bg-secondary/30 transition-colors">
+                        <td className="p-4"><p className="font-medium">{o.orgName}</p><p className="text-xs text-muted-foreground font-mono">INV-{o.invoiceId}</p></td>
+                        <td className="p-4 capitalize">{o.planSlug || "—"}</td>
+                        <td className="p-4">
+                          <Badge variant="secondary" className="capitalize gap-1">
+                            {o.method === "wire" ? <Building2 className="w-3 h-3" /> : <Landmark className="w-3 h-3" />}{o.method}
+                          </Badge>
+                        </td>
+                        <td className="p-4 font-medium">${Number(o.total ?? o.amount ?? 0).toFixed(2)}</td>
+                        <td className="p-4 text-muted-foreground">{(o.issuedAt || "").slice(0, 10)}</td>
+                        <td className="p-4 text-muted-foreground">{(o.dueAt || "").slice(0, 10)}</td>
+                        <td className="p-4">
+                          <Button size="sm" disabled={markPaid.isPending} onClick={() => markPaid.mutate(o.invoiceId)}>
+                            <CheckCircle2 className="w-4 h-4 mr-1" /> Mark Received
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

@@ -119,8 +119,10 @@ router.route('/billing/subscription').get(requirePermission('billing:view'), con
 router.route('/billing/plans').get(requirePermission('billing:view'), controller.getPlans);
 router.route('/billing/invoices').get(requirePermission('billing:view'), controller.getInvoices);
 router.route('/billing/invoices/:id').get(requirePermission('billing:view'), controller.getInvoice);
+router.route('/billing/invoices/:id/document').get(requirePermission('billing:view'), controller.getInvoiceDocument);
 router.route('/billing/change-plan').post(requirePermission('billing:update'), validate(schemas.planChangeSchema), controller.changePlan);
-router.route('/billing/activate').post(requirePermission('billing:update'), validate(schemas.planChangeSchema), controller.activatePlan);
+router.route('/billing/activate').post(requirePermission('billing:update'), validate(schemas.activateSchema), controller.activatePlan);
+router.route('/billing/orders').post(requirePermission('billing:update'), validate(schemas.orderSchema), controller.createOrder);
 router.route('/billing/credit')
     .get(requirePermission('billing:view'), controller.getCredit)
     .post(requirePermission('billing:update'), validate(schemas.creditPurchaseSchema), controller.buyCredit);

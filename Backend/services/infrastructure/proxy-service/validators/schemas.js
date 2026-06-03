@@ -40,6 +40,19 @@ const proxySchema = z.object({
 const presetSchema = z.object({ name: z.string().min(2), country: z.string().min(2).max(2), type: z.string(), protocol: z.string() }).passthrough();
 const planChangeSchema = z.object({ planSlug: z.string().min(2) });
 const creditPurchaseSchema = z.object({ amountUsd: z.coerce.number().positive().max(10000) });
+// Activation may carry the exact charged total + interval so the invoice reflects the real amount.
+const activateSchema = z.object({
+    planSlug: z.string().min(2),
+    amount: z.coerce.number().nonnegative().max(1000000).optional(),
+    interval: z.enum(['monthly', 'yearly']).optional(),
+});
+// Bank/wire create a PENDING order (settled offline) — recorded as a pending invoice.
+const orderSchema = z.object({
+    planSlug: z.string().min(2),
+    method: z.enum(['bank', 'wire']),
+    interval: z.enum(['monthly', 'yearly']).optional(),
+    amount: z.coerce.number().nonnegative().max(1000000).optional(),
+});
 const paymentMethodSchema = z.object({ type: z.string(), brand: z.string(), last4: z.string().min(4).max(4), expiry: z.string(), isDefault: z.boolean().optional() }).passthrough();
 const orgUpdateSchema = z.object({ name: z.string().optional(), slug: z.string().optional(), status: z.string().optional() }).passthrough();
 const inviteUserSchema = z.object({ email: z.string().email(), name: z.string().min(2).optional(), role: z.string() }).passthrough();
@@ -68,6 +81,8 @@ module.exports = {
     presetSchema,
     planChangeSchema,
     creditPurchaseSchema,
+    activateSchema,
+    orderSchema,
     paymentMethodSchema,
     orgUpdateSchema,
     inviteUserSchema,

@@ -77,6 +77,7 @@ export default function BillingCheckout() {
   const [result, setResult] = useState<ResultType | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [processing, setProcessing] = useState(false);
+  const [invoiceId, setInvoiceId] = useState<string | null>(null);
 
   const { data: plans, isLoading: loadingPlans } = usePlans();
 
@@ -106,6 +107,19 @@ export default function BillingCheckout() {
   const payErrors = useMemo(() => validatePayment(payment), [payment]);
   const payValid = Object.keys(payErrors).length === 0;
 
+  // Capture the newest invoice (created by activation / the pending order) so the
+  // "Download Invoice" button fetches the REAL server-generated document instead of a
+  // client-built summary.
+  const captureLatestInvoice = async () => {
+    try {
+      const res = await billingApi.getInvoices({ page: 1 });
+      const list: Array<{ id: string }> = Array.isArray(res)
+        ? res
+        : ((res as { data?: Array<{ id: string }> })?.data ?? []);
+      if (list[0]?.id) setInvoiceId(String(list[0].id));
+    } catch { /* download will fall back to the client-side summary */ }
+  };
+
   // Activate the subscription server-side (trial → active) and refresh entitlements.
   // We only show "Payment Successful" when the backend confirms an ACTIVE
   // subscription — never on a swallowed error (a customer must not see success
@@ -125,9 +139,10 @@ export default function BillingCheckout() {
         }
         return;
       }
-      const sub = await billingApi.activate(selectedPlan.slug);
+      const sub = await billingApi.activate(selectedPlan.slug, total, interval);
       queryClient.invalidateQueries({ queryKey: ["billing"] });
       if ((sub as { status?: string } | null)?.status === "active") {
+        await captureLatestInvoice();
         setResult("success");
       } else {
         setErrorMessage("Your payment was captured but the plan could not be activated. Please contact support — you have not been charged twice.");
@@ -144,12 +159,24 @@ export default function BillingCheckout() {
 
     // Bank transfer and wire/invoice are NOT charged here — they are recorded as
     // pending orders and settled offline. No gateway call, no plan activation yet.
-    if (payment.method === "bank") {
-      setResult("bank_pending");
-      return;
-    }
-    if (payment.method === "wire") {
-      setResult("wire_submitted");
+    if (payment.method === "bank" || payment.method === "wire") {
+      setProcessing(true);
+      try {
+        const order = await billingApi.createOrder({
+          planSlug: selectedPlan.slug,
+          method: payment.method,
+          interval,
+          amount: total,
+        });
+        if (order?.invoice?.id) setInvoiceId(String(order.invoice.id));
+        queryClient.invalidateQueries({ queryKey: ["billing"] });
+        setResult(payment.method === "bank" ? "bank_pending" : "wire_submitted");
+      } catch (e: unknown) {
+        setErrorMessage(e instanceof Error ? e.message : "Could not record your order. Please try again.");
+        setResult("failure");
+      } finally {
+        setProcessing(false);
+      }
       return;
     }
 
@@ -192,7 +219,21 @@ export default function BillingCheckout() {
     }
   };
 
-  const handleDownloadInvoice = () => {
+  const handleDownloadInvoice = async () => {
+    // Prefer the REAL, server-generated invoice document (built from the stored DB record).
+    if (invoiceId) {
+      try {
+        const doc = await billingApi.getInvoiceDocument(invoiceId);
+        if (doc?.content) {
+          const blob = new Blob([doc.content], { type: doc.contentType || "text/plain" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url; a.download = doc.filename || `invoice-${orderId}.txt`; a.click();
+          URL.revokeObjectURL(url);
+          return;
+        }
+      } catch { /* fall back to the client-side summary below */ }
+    }
     const content = `
 INVOICE — BAALVION NETSTACK
 ============================
@@ -278,6 +319,7 @@ Thank you for your business!
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Status</span><Badge variant="warning">Pending</Badge></div>
                   </div>
                   <div className="flex gap-3 justify-center pt-2">
+                    {invoiceId && <Button variant="outline" onClick={handleDownloadInvoice}>Download Invoice</Button>}
                     <Button onClick={() => navigate("/app/billing")}>View Billing</Button>
                     <Button variant="outline" onClick={() => navigate("/app")}>Go to Dashboard</Button>
                   </div>
