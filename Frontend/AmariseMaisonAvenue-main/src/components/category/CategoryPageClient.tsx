@@ -9,6 +9,60 @@ import { useProducts } from "@/lib/useCatalog";
 import { ProductGrid } from "@/components/category/ProductGrid";
 import { ShopByCategory } from "@/components/category/ShopByCategory";
 import { getCategorySidebar } from "@/lib/mock-category-data";
+import type { Product } from "@/lib/types";
+import type { FilterState } from "@/lib/mock-category-data";
+
+/**
+ * Apply the active sidebar/price filters to a list of products.
+ *
+ * - Price: keep products whose USD `basePrice` is within [priceMin, priceMax].
+ * - Color / Size: case-insensitive intersection against the product's own arrays.
+ * - Hardware / Style: best-effort substring match against the product `name`
+ *   (no dedicated field exists for these dimensions).
+ *
+ * A dimension with nothing selected never excludes a product.
+ */
+function applyFilters(products: Product[], state: FilterState): Product[] {
+  const lower = (arr: string[]) => arr.map((v) => v.toLowerCase());
+
+  const selectedColors = lower(state.color);
+  const selectedSizes = lower(state.size);
+  const nameTerms = lower([...state.hardware, ...state.style]);
+
+  return products.filter((p) => {
+    // Price (USD base)
+    if (p.basePrice < state.priceMin || p.basePrice > state.priceMax) {
+      return false;
+    }
+
+    // Color — intersect product colors (case-insensitive)
+    if (selectedColors.length > 0) {
+      const productColors = lower(p.colors ?? []);
+      const hit = productColors.some((c) =>
+        selectedColors.some((sel) => c === sel || c.includes(sel) || sel.includes(c))
+      );
+      if (!hit) return false;
+    }
+
+    // Size — intersect product sizes (case-insensitive)
+    if (selectedSizes.length > 0) {
+      const productSizes = lower(p.sizes ?? []);
+      const hit = productSizes.some((s) =>
+        selectedSizes.some((sel) => s === sel || s.includes(sel) || sel.includes(s))
+      );
+      if (!hit) return false;
+    }
+
+    // Hardware + Style — best-effort match against the product name
+    if (nameTerms.length > 0) {
+      const name = p.name.toLowerCase();
+      const hit = nameTerms.some((term) => name.includes(term));
+      if (!hit) return false;
+    }
+
+    return true;
+  });
+}
 
 interface CategoryPageClientProps {
     id: string;
@@ -27,7 +81,26 @@ export default function CategoryPageClient({
 }: CategoryPageClientProps) {
     const [filterOpen, setFilterOpen] = useState(false);
     const filter = useFilter();
-    const { products, total } = useProducts({ categoryId: id, limit: 50 });
+    const { products } = useProducts({ categoryId: id, limit: 50 });
+
+    // Apply the active filters to the products before rendering the grid.
+    const filteredProducts = useMemo(
+        () => applyFilters(products, filter.state),
+        [products, filter.state]
+    );
+
+    // Real color/size options present on this page's products (for accurate filter lists).
+    const availableColors = useMemo(() => {
+        const set = new Set<string>();
+        products.forEach((p) => (p.colors ?? []).forEach((c) => set.add(c)));
+        return set;
+    }, [products]);
+
+    const availableSizes = useMemo(() => {
+        const set = new Set<string>();
+        products.forEach((p) => (p.sizes ?? []).forEach((s) => set.add(s)));
+        return set;
+    }, [products]);
 
     // Find if the current ID matches a section/item/subItem in the resolved sidebar
     const findMatchingData = () => {
@@ -61,6 +134,9 @@ export default function CategoryPageClient({
                 open={filterOpen}
                 onClose={() => setFilterOpen(false)}
                 filter={filter}
+                availableColors={availableColors}
+                availableSizes={availableSizes}
+                resultCount={filteredProducts.length}
             />
 
             {/* ── Page body ── */}
@@ -108,15 +184,16 @@ export default function CategoryPageClient({
 
                             {/* Toolbar: product count + filter + sort + chips */}
                             <CollectionToolbar
-                                totalProducts={total}
+                                totalProducts={filteredProducts.length}
                                 filter={filter}
                                 onFilterOpen={() => setFilterOpen(true)}
                             />
                         </header>
 
-                        {/* Product grid */}
+                        {/* Product grid — filtered. The grid renders its own
+                            "no products" empty state when the list is empty. */}
                         <ProductGrid
-                            products={products}
+                            products={filteredProducts}
                             countryCode={country}
                         />
                     </main>

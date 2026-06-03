@@ -1,16 +1,17 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import { formatPrice } from "@/lib/mock-data";
+import { BrandImage } from "@/components/ui/BrandImage";
+import { formatProductPrice, normalizeCountry } from "@/lib/i18n/countries";
 import { useProducts } from "@/lib/useCatalog";
-import { Product } from "@/lib/types";
+import { Product, CountryCode } from "@/lib/types";
 import Link from "next/link";
 
 // ─── Card ─────────────────────────────────────────────────────────────────────
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, country }: { product: Product; country: CountryCode }) {
   const [wishlisted, setWishlisted] = useState(false);
 
   return (
@@ -36,12 +37,13 @@ function ProductCard({ product }: { product: Product }) {
           />
         </button>
 
-        <Link href={`/us/product/${product.id}`}>
-          <Image
-            fill
-            src={product.imageUrl[0]}
+        <Link href={`/${country}/product/${product.id}`} className="absolute inset-0">
+          <BrandImage
+            src={product.imageUrl?.[0]}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+            label={product.name}
+            className="absolute inset-0"
+            imgClassName="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           />
         </Link>
       </div>
@@ -52,7 +54,7 @@ function ProductCard({ product }: { product: Product }) {
           {product.name}
         </p>
         <p className="text-[13px] font-semibold text-gray-900 tabular-nums tracking-tight">
-          {formatPrice(product.basePrice, "us")}
+          {formatProductPrice(product, country)}
         </p>
       </div>
     </div>
@@ -60,7 +62,7 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 // ─── Mobile Card (compact, takes 50% width) ──────────────────────────────────
-function MobileProductCard({ product }: { product: Product }) {
+function MobileProductCard({ product, country }: { product: Product; country: CountryCode }) {
   const [wishlisted, setWishlisted] = useState(false);
 
   return (
@@ -85,12 +87,14 @@ function MobileProductCard({ product }: { product: Product }) {
           />
         </button>
 
-        <Link href={`/us/product/${product.id}`}>
-          <Image
-            fill
-            src={product.imageUrl[0]}
+        <Link href={`/${country}/product/${product.id}`} className="absolute inset-0">
+          <BrandImage
+            src={product.imageUrl?.[0]}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+            label={product.name}
+            variant="compact"
+            className="absolute inset-0"
+            imgClassName="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           />
         </Link>
       </div>
@@ -100,7 +104,7 @@ function MobileProductCard({ product }: { product: Product }) {
           {product.name}
         </p>
         <p className="text-[12px] font-semibold text-gray-900 tabular-nums tracking-tight">
-          {formatPrice(product.basePrice, "us")}
+          {formatProductPrice(product, country)}
         </p>
       </div>
     </div>
@@ -109,6 +113,9 @@ function MobileProductCard({ product }: { product: Product }) {
 
 // ─── Main Carousel ────────────────────────────────────────────────────────────
 export default function YouMayAlsoLike() {
+  const { country } = useParams();
+  const countryCode = normalizeCountry(country as string);
+
   // Limit products for the carousel
   const { products } = useProducts({ limit: 12 });
   const carouselProducts = products.slice(0, 12);
@@ -213,7 +220,7 @@ export default function YouMayAlsoLike() {
           <style>{`div::-webkit-scrollbar{display:none}`}</style>
           {carouselProducts.map((p) => (
             <div key={p.id} data-card>
-              <ProductCard product={p} />
+              <ProductCard product={p} country={countryCode} />
             </div>
           ))}
         </div>
@@ -251,7 +258,7 @@ export default function YouMayAlsoLike() {
             >
               <div className="grid grid-cols-2 gap-3">
                 {page.map((product) => (
-                  <MobileProductCard key={product.id} product={product} />
+                  <MobileProductCard key={product.id} product={product} country={countryCode} />
                 ))}
               </div>
             </div>

@@ -5,7 +5,7 @@ import { X, Play, Volume2, Pause, VolumeX, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
+import { BrandImage } from '@/components/ui/BrandImage';
 import { cn } from '@/lib/utils';
 
 /**
@@ -52,15 +52,15 @@ export function MadAveLiveWidget() {
         {/* Video Preview Area */}
         <div className="px-6 pb-6">
           <div className="relative aspect-[3/4] bg-muted overflow-hidden group">
-            <Image 
-              src="https://picsum.photos/seed/madave-live-preview/600/800" 
-              alt="Live Atelier Presentation" 
-              fill 
-              className={cn(
-                "object-cover transition-transform duration-[10s] ease-linear",
+            <BrandImage
+              src="https://picsum.photos/seed/madave-live-preview/600/800"
+              alt="Live Atelier Presentation"
+              className="absolute inset-0"
+              imgClassName={cn(
+                "transition-transform duration-[10s] ease-linear",
                 isPlaying ? "scale-110" : "scale-100"
               )}
-              data-ai-hint="luxury fashion"
+              label="Birkin 25 Rose Sakura"
             />
             <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
             

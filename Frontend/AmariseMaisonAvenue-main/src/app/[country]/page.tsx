@@ -7,7 +7,8 @@ import {
   Star,
 } from "lucide-react";
 import { useAppStore } from "@/lib/store";
-import Image from "next/image";
+import { BrandImage } from "@/components/ui/BrandImage";
+import { ProductBadge, getProductBadge } from "@/components/ui/ProductBadge";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import placeholderData from "@/app/lib/placeholder-images.json";
@@ -15,6 +16,7 @@ import { VipEmailSignup } from "@/components/home/VipEmailSingup";
 import { useProducts } from "@/lib/useCatalog";
 import { Product } from "@/lib/types";
 import { useParams } from "next/navigation";
+import { formatProductPrice, normalizeCountry } from "@/lib/i18n/countries";
 
 /* ─────────────────────────────────────────────────────────────────
    DATA
@@ -137,14 +139,14 @@ export default function HomePage() {
         className="relative w-full overflow-hidden"
         style={{ height: "clamp(380px, 70vh, 780px)" }}
       >
-        <Image
+        <BrandImage
           src={heroImage}
           alt="Spring Collection"
-          fill
           priority
-          className="object-cover object-center"
+          className="absolute inset-0"
+          imgClassName="object-center"
         />
-        {/* Subtle dark overlay */}
+        {/* Subtle dark overlay (only meaningful once a real hero photo is set) */}
         <div className="absolute inset-0 bg-black/20" />
 
         {/* Text overlay */}
@@ -267,11 +269,10 @@ export default function HomePage() {
           className="w-full lg:w-1/2 relative"
           style={{ minHeight: "400px" }}
         >
-          <Image
+          <BrandImage
             src={authImage}
             alt="100% Authenticity Guarantee"
-            fill
-            className="object-cover"
+            className="absolute inset-0"
           />
         </div>
         {/* Text side */}
@@ -331,11 +332,10 @@ export default function HomePage() {
           className="w-full lg:w-1/2 relative order-2 lg:order-1"
           style={{ minHeight: "420px" }}
         >
-          <Image
+          <BrandImage
             src={missionImage}
             alt="Our Mission"
-            fill
-            className="object-cover"
+            className="absolute inset-0"
           />
         </div>
         {/* Text side */}
@@ -344,10 +344,10 @@ export default function HomePage() {
             Our Mission
           </h2>
           <p className="text-[13px] lg:text-[14px] text-gray-600 font-light leading-[1.85] max-w-lg">
-            At Madison Avenue Couture, we specialize in the rare, the iconic,
-            and the extraordinary. As the leading U.S. reseller of Hermès and
-            Chanel handbags, we offer a curated selection of investment-worthy
-            pieces with unmatched access and authenticity.
+            At Amarisé Maison, we specialize in the rare, the iconic, and the
+            extraordinary. As a leading global house for Hermès and Chanel
+            handbags, we offer a curated selection of investment-worthy pieces
+            with unmatched access and authenticity.
           </p>
           <p className="text-[13px] lg:text-[14px] text-gray-600 font-light leading-[1.85] max-w-lg">
             We believe in empowering and inspiring women to express themselves
@@ -433,11 +433,11 @@ function CuratorialCard({
       className="group relative block overflow-hidden bg-gray-100"
       style={{ aspectRatio: "3/4" }}
     >
-      <Image
+      <BrandImage
         src={imageUrl}
         alt={title}
-        fill
-        className="object-cover transition-transform duration-[4s] ease-out group-hover:scale-105"
+        className="absolute inset-0"
+        imgClassName="transition-transform duration-[4s] ease-out group-hover:scale-105"
       />
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
@@ -465,6 +465,8 @@ function ProductCard({
   onWishlistToggle: () => void;
   countryCode: string;
 }) {
+  const badge = getProductBadge(product);
+
   return (
     <div className="group flex flex-col">
       {/* Image */}
@@ -473,12 +475,19 @@ function ProductCard({
         className="relative overflow-hidden bg-white block"
         style={{ aspectRatio: "4/5" }}
       >
-        <Image
-          src={product.imageUrl[0]}
+        <BrandImage
+          src={product.imageUrl?.[0]}
           alt={product.name}
-          fill
-          className="object-contain p-4 sm:p-6 transition-transform duration-[2.5s] ease-out group-hover:scale-105"
+          label={product.name}
+          className="absolute inset-0"
+          imgClassName="object-contain p-4 sm:p-6 transition-transform duration-[2.5s] ease-out group-hover:scale-105"
         />
+        {/* Merchandising badge */}
+        {badge && (
+          <div className="absolute top-3 left-3 z-10">
+            <ProductBadge label={badge.label} variant={badge.variant} />
+          </div>
+        )}
         {/* Wishlist button */}
         <button
           onClick={(e) => {
@@ -502,7 +511,7 @@ function ProductCard({
           {product.name}
         </p>
         <p className="text-[13px] font-semibold text-gray-900 tracking-wide">
-          ${product.basePrice.toLocaleString()}
+          {formatProductPrice(product, normalizeCountry(countryCode))}
         </p>
       </div>
     </div>
@@ -528,11 +537,11 @@ function InfoBlock({
         className="relative w-full overflow-hidden bg-gray-100 block"
         style={{ aspectRatio: "1/1" }}
       >
-        <Image
+        <BrandImage
           src={imageUrl}
           alt={title}
-          fill
-          className="object-cover transition-transform duration-[2s] ease-out group-hover:scale-105"
+          className="absolute inset-0"
+          imgClassName="transition-transform duration-[2s] ease-out group-hover:scale-105"
         />
       </Link>
 

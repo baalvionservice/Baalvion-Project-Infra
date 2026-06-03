@@ -1,9 +1,10 @@
 "use client";
 
 import { SlidersHorizontal } from "lucide-react";
+import { useParams } from "next/navigation";
 import { FilterChip } from "./FilterChip";
-import { formatPriceShort } from "@/lib/mock-category-data";
 import { FilterKey, UseFilterReturn } from "@/hooks/useFilter";
+import { normalizeCountry, formatFilterPrice } from "@/lib/i18n/countries";
 
 interface CollectionToolbarProps {
   totalProducts: number;
@@ -26,6 +27,9 @@ export function CollectionToolbar({
     sort,
     setSort,
   } = filter;
+
+  const { country } = useParams();
+  const cc = normalizeCountry(country);
 
   return (
     <div className="space-y-4">
@@ -79,9 +83,7 @@ export function CollectionToolbar({
         <div className="hidden md:flex flex-wrap items-center gap-2">
           {hasPriceChip && (
             <FilterChip
-              label={`${formatPriceShort(state.priceMin)} –${formatPriceShort(
-                state.priceMax
-              )}`}
+              label={`${formatFilterPrice(state.priceMin, cc)} – ${formatFilterPrice(state.priceMax, cc)}`}
               onRemove={() => removeChip("price")}
             />
           )}

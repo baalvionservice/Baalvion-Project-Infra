@@ -7,9 +7,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/comp
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, X, Trash2, ArrowRight, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { BrandImage } from '@/components/ui/BrandImage';
 import { useParams, useRouter } from 'next/navigation';
-import { formatPrice } from '@/lib/mock-data';
+import { formatProductPrice, formatAmount, normalizeCountry } from '@/lib/i18n/countries';
 
 /**
  * Maison Cart Drawer: Elite Acquisition Overlay.
@@ -18,10 +18,17 @@ import { formatPrice } from '@/lib/mock-data';
 export function CartSheet() {
   const { cart, removeFromCart, isCartOpen, setCartOpen } = useAppStore();
   const { country } = useParams();
-  const countryCode = (country as string) || 'us';
+  const countryCode = normalizeCountry(country as string);
   const router = useRouter();
 
-  const subtotal = cart.reduce((acc, item) => acc + (item.basePrice * item.quantity), 0);
+  // Sum line totals in the MARKET currency (price already FX-converted by the API; fall
+  // back to basePrice only when the API gave no country pricing). Never sum USD then relabel.
+  const subtotal = cart.reduce(
+    (acc, item) => acc + (item.price ?? item.basePrice) * item.quantity,
+    0
+  );
+  // All cart items share the active market, so the first item carries the market currency.
+  const currencyCode = cart[0]?.currencyCode;
 
   return (
     <Sheet open={isCartOpen} onOpenChange={setCartOpen}>
@@ -44,9 +51,13 @@ export function CartSheet() {
           {cart.length > 0 ? (
             cart.map((item) => (
               <div key={item.id} className="flex space-x-6 pb-8 border-b border-gray-200 group">
-                <div className="relative w-24 aspect-[3/4] overflow-hidden shrink-0">
-                  <Image src={item.imageUrl[0]} alt={item.name} fill className="object-contain p-2" />
-                </div>
+                <BrandImage
+                  src={item.imageUrl?.[0]}
+                  alt={item.name}
+                  variant="compact"
+                  className="w-24 aspect-[3/4] shrink-0"
+                  imgClassName="object-contain p-2"
+                />
                 <div className="flex-1 flex flex-col justify-between py-1">
                   <div className="space-y-1">
                     <h4 className="text-[11px] font-bold tracking-widest text-gray-900  transition-colors leading-relaxed">
@@ -55,7 +66,7 @@ export function CartSheet() {
                     <p className="text-xs font-bold tracking-widest text-gray-900   leading-relaxed">{item.colors}</p>
                   </div>
                   <div className="flex flex-col items-start mt-4">
-                    <span className="text-sm font-bold tabular-nums text-gray-900">{formatPrice(item.basePrice, countryCode)}</span>
+                    <span className="text-sm font-bold tabular-nums text-gray-900">{formatProductPrice(item, countryCode)}</span>
                     <button onClick={() => removeFromCart(item.id)} className="text-gray-300 hover:text-red-500  bg-transparent border-none outline-none cursor-pointer">
                       <span className="text-xs underline font-bold tracking-widest text-gray-900   leading-relaxed">Remove</span>
                     </button>
@@ -75,7 +86,7 @@ export function CartSheet() {
           <div className=" bg-[#fcfcfc] border-t pt-4 border-gray-300 space-y-6 shrink-0 shadow-[0_-10px_30px_rgba(0,0,0,0.02)]">
             <div className="flex justify-between items-center">
               <span className="text-[12px] font-bold text-black">Total:</span>
-              <span className="text-2xl font-bold tabular-nums text-gray-900">{formatPrice(subtotal, countryCode)}</span>
+              <span className="text-2xl font-bold tabular-nums text-gray-900">{formatAmount(subtotal, currencyCode ?? '', countryCode)}</span>
             </div>
 
             <div className="space-y-3">

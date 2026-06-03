@@ -28,7 +28,7 @@ import { apiOrchestrator } from "@/lib/api/orchestrator";
 import { handleNotImplementedError } from "@/lib/feature-policy";
 import { onMissingCheckoutDependency } from "@/lib/checkout-policy";
 import { PaymentGateway, CountryCode } from "@/lib/types";
-import { TaxEngine } from "@/lib/finance/tax-engine";
+import { formatAmount, normalizeCountry } from "@/lib/i18n/countries";
 import { RiskEngine } from "@/lib/fraud/risk-engine";
 
 export default function CheckoutPage() {
@@ -42,14 +42,12 @@ export default function CheckoutPage() {
     paymentPlans,
     countryConfigs,
     fxRates,
-    getLocalizedPrice,
-    taxRules,
     recordFraudLog,
     catalogSource,
   } = useAppStore();
   const { country } = useParams();
   const searchParams = useSearchParams();
-  const countryCode = (country as string) || "us";
+  const countryCode = normalizeCountry(country as string);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -85,23 +83,62 @@ export default function CheckoutPage() {
     [countryCode, countryConfigs]
   );
 
+  // The active market currency comes from the cart items (FX-resolved by the storefront API);
+  // a plan-only checkout has no item, so fall back to the country's own currency via formatAmount.
+  const marketCurrency = cart[0]?.currencyCode;
+  // Inclusive markets (UK/AE/IN/SG VAT/GST) show tax as already inside the price; the US adds it.
+  const marketTaxInclusive = cart[0]?.taxInclusive ?? false;
+  const renderAmount = (amount: number) =>
+    formatAmount(amount, marketCurrency ?? "", countryCode);
+
+  // Market-aware tax/total computation. Each line's money is already in the market currency
+  // (item.price); tax facts (rate/type/inclusive) come from the item's market fields, NOT a
+  // USD tax engine. Inclusive markets keep tax inside the price; exclusive (US) adds it on top.
   const taxCalculation = useMemo(() => {
-    const itemsToTax = [...cart];
+    let subtotal = 0;
+    let totalTax = 0;
+    const breakdown = cart.map((item) => {
+      const lineSubtotal = (item.price ?? item.basePrice) * item.quantity;
+      const rate = item.taxRate ?? 0;
+      const inclusive = item.taxInclusive ?? false;
+      const lineTax = rate
+        ? inclusive
+          ? lineSubtotal - lineSubtotal / (1 + rate / 100)
+          : lineSubtotal * (rate / 100)
+        : 0;
+      const lineTotal = inclusive ? lineSubtotal : lineSubtotal + lineTax;
+      subtotal += lineSubtotal;
+      totalTax += lineTax;
+      return {
+        itemId: item.id,
+        itemName: item.name,
+        itemPrice: lineSubtotal,
+        taxAmount: lineTax,
+        taxRate: rate,
+        taxType: item.taxType ?? null,
+        taxInclusive: inclusive,
+        lineTotal,
+      };
+    });
+
     if (selectedPlan) {
-      itemsToTax.push({
-        id: selectedPlan.id,
-        name: selectedPlan.name,
-        basePrice: selectedPlan.price,
-        quantity: 1,
-        categoryId: "service",
-      } as any);
+      // Subscriptions have no market FX/tax context — list at face value, no jurisdictional tax.
+      subtotal += selectedPlan.price;
+      breakdown.push({
+        itemId: selectedPlan.id,
+        itemName: selectedPlan.name,
+        itemPrice: selectedPlan.price,
+        taxAmount: 0,
+        taxRate: 0,
+        taxType: null,
+        taxInclusive: false,
+        lineTotal: selectedPlan.price,
+      });
     }
-    return TaxEngine.calculateOrderTax(
-      itemsToTax,
-      countryCode as CountryCode,
-      taxRules
-    );
-  }, [cart, selectedPlan, countryCode, taxRules]);
+
+    const totalAmount = breakdown.reduce((acc, b) => acc + b.lineTotal, 0);
+    return { subtotal, totalTax, totalAmount, breakdown };
+  }, [cart, selectedPlan]);
 
   const totalYield = taxCalculation.totalAmount;
 
@@ -224,6 +261,7 @@ export default function CheckoutPage() {
           quantity: c.quantity,
         })),
         currencyCode: currentCountryConfig?.currency || "USD",
+        country: countryCode,
         shippingAmount: 0,
         customerId: currentUser?.id,
         idempotencyKey: idempotencyKeyRef.current,
@@ -243,7 +281,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      const order = result.data;
+      const order = result.data.order;
       setOrderRef(order.id);
 
       // Local MIRROR for the admin/account demo views — NOT the order truth (backend is).
@@ -527,9 +565,7 @@ export default function CheckoutPage() {
                     >
                       {isSettling
                         ? "PROCESSING SETTLEMENT..."
-                        : `AUTHORIZE SETTLEMENT — ${getLocalizedPrice(
-                            totalYield
-                          )}`}
+                        : `AUTHORIZE SETTLEMENT — ${renderAmount(totalYield)}`}
                     </Button>
                     <button
                       onClick={() => setStep(1)}
@@ -560,15 +596,19 @@ export default function CheckoutPage() {
                         </span>
                         <div className="flex items-center space-x-2">
                           <span className="text-[9px] text-gray-400 font-bold uppercase">
-                            Price: {getLocalizedPrice(item.itemPrice)}
+                            Price: {renderAmount(item.itemPrice)}
                           </span>
-                          <span className="text-[9px] text-plum font-bold uppercase">
-                            +{item.taxRate}% {item.taxType}
-                          </span>
+                          {item.taxRate > 0 && item.taxType && (
+                            <span className="text-[9px] text-plum font-bold uppercase">
+                              {item.taxInclusive
+                                ? `incl. ${item.taxRate}% ${item.taxType}`
+                                : `+${item.taxRate}% ${item.taxType}`}
+                            </span>
+                          )}
                         </div>
                       </div>
                       <span className="font-bold text-md tabular pl-4">
-                        {getLocalizedPrice(item.itemPrice + item.taxAmount)}
+                        {renderAmount(item.lineTotal)}
                       </span>
                     </div>
                   ))}
@@ -578,15 +618,18 @@ export default function CheckoutPage() {
                   <div className="flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                     <span>Registry Subtotal</span>
                     <span className="text-gray-900 tabular">
-                      {getLocalizedPrice(taxCalculation.subtotal)}
+                      {renderAmount(taxCalculation.subtotal)}
                     </span>
                   </div>
-                  <div className="flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-widest">
-                    <span>Aggregate Tax</span>
-                    <span className="text-plum font-bold tabular">
-                      +{getLocalizedPrice(taxCalculation.totalTax)}
-                    </span>
-                  </div>
+                  {taxCalculation.totalTax > 0 && (
+                    <div className="flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                      <span>{marketTaxInclusive ? "Included Tax" : "Aggregate Tax"}</span>
+                      <span className="text-plum font-bold tabular">
+                        {marketTaxInclusive ? "" : "+"}
+                        {renderAmount(taxCalculation.totalTax)}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-[10px] text-gray-400 font-bold uppercase tracking-widest">
                     <span>Dispatch Protocol</span>
                     <span className="text-emerald-600">Complimentary</span>
@@ -597,11 +640,15 @@ export default function CheckoutPage() {
                     </span>
                     <div className="text-right">
                       <div className="text-3xl font-bold tabular leading-none">
-                        {getLocalizedPrice(totalYield)}
+                        {renderAmount(totalYield)}
                       </div>
-                      <p className="text-[8px] text-gray-400 uppercase font-bold mt-1">
-                        Inclusive of Jurisdictional Tax
-                      </p>
+                      {taxCalculation.totalTax > 0 && (
+                        <p className="text-[8px] text-gray-400 uppercase font-bold mt-1">
+                          {marketTaxInclusive
+                            ? "Inclusive of Jurisdictional Tax"
+                            : "Plus Jurisdictional Tax"}
+                        </p>
+                      )}
                     </div>
                   </div>
                 </div>

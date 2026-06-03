@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
 import { MAISON_REPORTS } from '@/lib/mock-monetization';
 import { Button } from '@/components/ui/button';
 import { Lock, FileText, Download, ShieldCheck, Sparkles, ArrowRight, BookOpen } from 'lucide-react';

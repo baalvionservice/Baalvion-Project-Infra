@@ -6,13 +6,14 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Heart, ArrowRight, ShieldCheck } from 'lucide-react';
 import { Product } from '@/lib/types';
-import { formatPrice } from '@/lib/mock-data';
+import { formatProductPrice, normalizeCountry } from '@/lib/i18n/countries';
 import { PRODUCTS_EXTENDED } from '@/lib/mock-monetization';
 import { useAppStore } from '@/lib/store';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 import { PlaceholderImage } from '@/components/ui/PlaceholderImage';
+import { ProductBadge, getProductBadge } from '@/components/ui/ProductBadge';
 
 interface ProductCardProps {
   product: Product;
@@ -26,6 +27,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
   
   const isWishlisted = wishlist.some(i => i.id === product.id);
   const monetization = useMemo(() => PRODUCTS_EXTENDED[product.id] || { priceVisible: true }, [product.id]);
+  const badge = getProductBadge(product);
 
   const targetFlow = product.isVip ? 'private-order' : 'product';
 
@@ -46,9 +48,9 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
           className="absolute inset-0 w-full h-full transition-transform duration-[3s] group-hover:scale-110" 
         />
         
-        {product.isVip && (
-          <div className="absolute top-4 lg:top-8 left-4 lg:left-8 bg-black px-4 py-2 text-[8px] lg:text-[10px] font-bold tracking-[0.5em] text-white uppercase z-10 shadow-2xl luxury-blur bg-opacity-80 border border-white/10">
-            PRIVATE ALLOCATION
+        {badge && (
+          <div className="absolute top-4 lg:top-8 left-4 lg:left-8 z-10">
+            <ProductBadge label={badge.label} variant={badge.variant} />
           </div>
         )}
 
@@ -81,7 +83,7 @@ export const ProductCard = memo(({ product }: ProductCardProps) => {
         
         <div className="flex flex-col items-center space-y-3">
           <span className="text-sm lg:text-lg font-bold tracking-tighter text-gray-900 tabular uppercase">
-            {monetization.priceVisible ? formatPrice(product.basePrice, countryCode) : "Inquire for Private Quote"}
+            {monetization.priceVisible ? formatProductPrice(product, normalizeCountry(countryCode)) : "Inquire for Private Quote"}
           </span>
           <div className="w-10 lg:w-16 h-[1.5px] bg-gray-100 group-hover:w-24 group-hover:bg-plum transition-all duration-1000" />
         </div>

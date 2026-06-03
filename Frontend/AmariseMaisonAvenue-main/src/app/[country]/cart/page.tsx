@@ -4,11 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
-import { formatPrice } from '@/lib/mock-data';
+import { formatProductPrice, formatAmount, normalizeCountry } from '@/lib/i18n/countries';
 import { Button } from '@/components/ui/button';
 import { Card } from "@/components/ui/card";
 import { Trash2, ShoppingBag, ShieldCheck, Truck, ChevronRight } from 'lucide-react';
-import Image from 'next/image';
+import { BrandImage } from '@/components/ui/BrandImage';
 
 /**
  * Bank-Grade Cart Page: Tactical Acquisition Ledger.
@@ -17,10 +17,30 @@ import Image from 'next/image';
 export default function CartPage() {
   const { cart, removeFromCart } = useAppStore();
   const { country } = useParams();
-  const countryCode = (country as string) || 'us';
+  const countryCode = normalizeCountry(country as string);
   const router = useRouter();
 
-  const subtotal = cart.reduce((acc, item) => acc + (item.basePrice * item.quantity), 0);
+  // Subtotal in the MARKET currency — price is already FX-converted by the storefront API;
+  // basePrice (USD) is only a fallback when no country pricing was returned.
+  const subtotal = cart.reduce(
+    (acc, item) => acc + (item.price ?? item.basePrice) * item.quantity,
+    0
+  );
+  // Market context is shared across the bag, so the first item carries currency + tax facts.
+  const currencyCode = cart[0]?.currencyCode;
+  const taxRate = cart[0]?.taxRate ?? 0;
+  const taxType = cart[0]?.taxType;
+  const taxInclusive = cart[0]?.taxInclusive ?? false;
+  // Inclusive markets (UK/AE/IN/SG): tax is already inside the price → break it out for display.
+  // Exclusive markets (US SALES_TAX): tax is added on top of the subtotal.
+  const taxAmount = taxRate
+    ? taxInclusive
+      ? subtotal - subtotal / (1 + taxRate / 100)
+      : subtotal * (taxRate / 100)
+    : 0;
+  const total = taxInclusive ? subtotal : subtotal + taxAmount;
+  const renderAmount = (amount: number) =>
+    formatAmount(amount, currencyCode ?? '', countryCode);
 
   if (cart.length === 0) {
     return (
@@ -59,14 +79,13 @@ export default function CartPage() {
           {cart.map((item) => (
             <div key={item.id} className="flex flex-col sm:flex-row gap-5 sm:gap-8 md:gap-12 pb-8 sm:pb-10 md:pb-12 border-b border-border group relative">
               {/* Product Image */}
-              <div className="relative w-full sm:w-36 md:w-48 aspect-[3/4] bg-white border border-border shadow-sm overflow-hidden flex-shrink-0 mx-auto sm:mx-0 max-w-[200px] sm:max-w-none">
-                <Image
-                  src={item.imageUrl[0]}
-                  alt={item.name}
-                  fill
-                  className="object-contain p-4 sm:p-6 transition-transform duration-[1.5s] group-hover:scale-105"
-                />
-              </div>
+              <BrandImage
+                src={item.imageUrl?.[0]}
+                alt={item.name}
+                label={item.name}
+                className="w-full sm:w-36 md:w-48 aspect-[3/4] border border-border shadow-sm flex-shrink-0 mx-auto sm:mx-0 max-w-[200px] sm:max-w-none"
+                imgClassName="object-contain p-4 sm:p-6 transition-transform duration-[1.5s] group-hover:scale-105"
+              />
 
               {/* Product Details */}
               <div className="flex-1 flex flex-col justify-between py-1 sm:py-2">
@@ -80,7 +99,7 @@ export default function CartPage() {
                       <p className="text-[9px] text-gray-400 font-mono uppercase tracking-tighter">REF: {item.id.toUpperCase()}</p>
                     </div>
                     <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tabular">
-                      {formatPrice(item.basePrice, countryCode)}
+                      {formatProductPrice(item, countryCode)}
                     </div>
                   </div>
 
@@ -119,8 +138,18 @@ export default function CartPage() {
             <div className="space-y-4 sm:space-y-6">
               <div className="flex justify-between text-xs font-light italic">
                 <span className="text-gray-500">Registry Subtotal</span>
-                <span className="font-bold tabular">{formatPrice(subtotal, countryCode)}</span>
+                <span className="font-bold tabular">{renderAmount(subtotal)}</span>
               </div>
+              {taxAmount > 0 && (
+                <div className="flex justify-between text-xs font-light italic">
+                  <span className="text-gray-500">
+                    {taxInclusive
+                      ? `Includes ${taxType} (${taxRate}%)`
+                      : `${taxType} (${taxRate}%)`}
+                  </span>
+                  <span className="font-bold tabular">{renderAmount(taxAmount)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-xs font-light italic">
                 <span className="text-gray-500">Global Logistics</span>
                 <span className="text-plum font-bold uppercase tracking-widest text-[10px] sm:text-xs">Complimentary</span>
@@ -134,7 +163,7 @@ export default function CartPage() {
                 <div className="space-y-1">
                   <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-gray-400">Total Yield</span>
                   <div className="text-2xl sm:text-3xl md:text-4xl font-body font-bold tabular leading-none">
-                    {formatPrice(subtotal, countryCode)}
+                    {renderAmount(total)}
                   </div>
                 </div>
               </div>

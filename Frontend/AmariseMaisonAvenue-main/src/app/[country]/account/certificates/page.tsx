@@ -21,7 +21,7 @@ import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import Image from 'next/image';
+import { BrandImage } from '@/components/ui/BrandImage';
 
 /**
  * Heritage Archive: Digital Certificate Registry.
@@ -58,7 +58,7 @@ export default function HeritageArchivePage() {
         {certificates.map((cert) => (
           <Card key={cert.id} className="bg-white border-border shadow-luxury group hover:border-plum transition-all overflow-hidden flex flex-col">
             <div className="aspect-[4/5] relative bg-muted overflow-hidden">
-               <Image src={cert.imageUrl} alt={cert.artifactName} fill className="object-contain p-8 group-hover:scale-105 transition-transform duration-[2s]" />
+               <BrandImage src={cert.imageUrl} alt={cert.artifactName} className="absolute inset-0" imgClassName="object-contain p-8 group-hover:scale-105 transition-transform duration-[2s]" label={cert.artifactName} />
                <div className="absolute inset-0 bg-black/5 group-hover:bg-transparent transition-colors" />
                <div className="absolute top-6 right-6">
                   <div className="bg-white/90 backdrop-blur-md p-3 border border-gray-100 shadow-xl rounded-full">

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
+import { BrandImage } from "@/components/ui/BrandImage";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
 import {
@@ -95,13 +95,13 @@ export default function BuyingGuideDetailPage() {
 
       {/* Hero Header */}
       <section className="relative h-[70vh] w-full flex items-end overflow-hidden border-b border-border">
-        <Image
+        <BrandImage
           src={guide.imageUrl}
           alt={guide.title}
-          fill
-          className="object-cover opacity-80 animate-slow-zoom"
+          label={guide.title}
+          className="absolute inset-0"
+          imgClassName="opacity-80 animate-slow-zoom"
           priority
-          data-ai-hint="luxury tutorial"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ivory via-ivory/10 to-transparent" />
         <div className="container mx-auto px-12 pb-24 relative z-10 max-w-[1600px]">

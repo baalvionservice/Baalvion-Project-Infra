@@ -11,8 +11,7 @@ export class LogisticsEngine {
     uk: ['Royal Mail Special Delivery', 'DHL Heritage'],
     ae: ['Aramex VIP', 'Maison Private Courier'],
     in: ['BlueDart Apex', 'Professional Logistics'],
-    sg: ['SingPost Platinum', 'DHL Global'],
-    ca: ['FedEx Canada', 'Purolator Heritage']
+    sg: ['SingPost Platinum', 'DHL Global']
   };
 
   /**

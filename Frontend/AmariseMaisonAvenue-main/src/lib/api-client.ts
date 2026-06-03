@@ -75,13 +75,34 @@ function authHeaders(): HeadersInit {
   return headers;
 }
 
+// ── Guest cart session (signed X-Cart-Session) ───────────────────────────────
+// order-service binds a guest's cart + order to a server-signed session token (returned by
+// cart-create). Persisted so the same anonymous shopper can create → read → pay for their
+// order without an account. Authenticated callers use the bearer token instead.
+const CART_SESSION_KEY = 'amarise.cartSession';
+export function getCartSessionToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  try { return window.localStorage.getItem(CART_SESSION_KEY); } catch { return null; }
+}
+export function setCartSessionToken(token: string | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (token) window.localStorage.setItem(CART_SESSION_KEY, token);
+    else window.localStorage.removeItem(CART_SESSION_KEY);
+  } catch { /* storage unavailable — guest checkout degrades to a single request */ }
+}
+function sessionHeaders(): Record<string, string> {
+  const t = getCartSessionToken();
+  return t ? { 'X-Cart-Session': t } : {};
+}
+
 // ── Core Fetch Wrapper ─────────────────────────────────────────────────────
 
 async function apiFetch<T>(url: string, options: RequestInit = {}, retry = true): Promise<ApiResult<T>> {
   try {
     const res = await fetch(url, {
       ...options,
-      headers: { ...authHeaders(), ...(options.headers ?? {}) },
+      headers: { ...authHeaders(), ...sessionHeaders(), ...(options.headers ?? {}) },
     });
 
     // Expired access token → one silent cookie refresh, then retry once.
@@ -345,11 +366,20 @@ export interface CreateOrderPayload {
   shippingAmount?: number;
   discountCode?: string;
   notes?: string;
+  // 5-market context (audit metadata; line money stays server-authoritative).
+  country?: string;
+  market?: string;
+  taxType?: string;
+  taxRate?: number;
+  taxInclusive?: boolean;
   shippingAddress?: Record<string, unknown>;
   billingAddress?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
   idempotencyKey?: string;
 }
+
+export interface PaymentIntent { intentId: string; status: string; }
+export interface PaymentConfirmation { status: string; transactionId?: string; reason?: string; }
 
 export interface Order {
   id: string;
@@ -390,6 +420,26 @@ export const orderApi = {
     const storeId = getStoreId();
     if (!storeId) return missingStore<Order>();
     return apiFetch<Order>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}`);
+  },
+
+  // Payment: create a provider intent, then confirm it (backend-authoritative capture —
+  // a client can never mark itself paid). Mock provider in non-prod; real adapters when configured.
+  createPaymentIntent(orderId: string): Promise<ApiResult<PaymentIntent>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<PaymentIntent>();
+    return apiFetch<PaymentIntent>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}/payments/intent`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  },
+
+  confirmPayment(orderId: string, intentId: string): Promise<ApiResult<PaymentConfirmation>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<PaymentConfirmation>();
+    return apiFetch<PaymentConfirmation>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}/payments/confirm`, {
+      method: 'POST',
+      body: JSON.stringify({ intentId }),
+    });
   },
 
   list(filters: OrderFilters = {}): Promise<ApiResult<PaginatedResponse<Order>>> {
@@ -435,6 +485,8 @@ export interface Cart {
   subtotal: number;
   currency: string;
   updatedAt: string;
+  /** Signed guest session returned by cart-create (only for anonymous shoppers). */
+  sessionToken?: string;
 }
 
 // ── cartApi (store-scoped, CART-ID keyed: /orders/stores/:storeId/carts) ──────
@@ -445,13 +497,16 @@ export interface CreateCartPayload { currencyCode?: string; customerId?: string;
 export interface CartItemInput { productId: string; variantId: string; quantity: number; }
 
 export const cartApi = {
-  create(payload: CreateCartPayload = {}): Promise<ApiResult<Cart>> {
+  async create(payload: CreateCartPayload = {}): Promise<ApiResult<Cart>> {
     const storeId = getStoreId();
     if (!storeId) return missingStore<Cart>();
-    return apiFetch<Cart>(`${ORDER_URL}/orders/stores/${storeId}/carts`, {
+    const res = await apiFetch<Cart>(`${ORDER_URL}/orders/stores/${storeId}/carts`, {
       method: 'POST',
       body: JSON.stringify({ currencyCode: 'USD', ...payload }),
     });
+    // Persist the signed guest session so subsequent order/payment calls are recognised as the owner.
+    if (res.ok && res.data?.sessionToken) setCartSessionToken(res.data.sessionToken);
+    return res;
   },
 
   get(cartId: string): Promise<ApiResult<Cart>> {

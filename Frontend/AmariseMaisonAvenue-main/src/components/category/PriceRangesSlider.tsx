@@ -2,6 +2,14 @@
 
 import { PRICE_ABSOLUTE_MAX, PRICE_ABSOLUTE_MIN } from "@/lib/mock-category-data";
 import { useState, useRef, useCallback } from "react";
+import { useParams } from "next/navigation";
+import {
+  normalizeCountry,
+  getCountryConfig,
+  countryToLocale,
+  convertFromUsd,
+  convertToUsd,
+} from "@/lib/i18n/countries";
 
 interface PriceRangeSliderProps {
   min: number;
@@ -10,6 +18,13 @@ interface PriceRangeSliderProps {
 }
 
 export function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) {
+  // Filter state stays in BASE (USD); only the display is converted to the active market.
+  const { country } = useParams();
+  const cc = normalizeCountry(country);
+  const symbol = getCountryConfig(cc).symbol;
+  const locale = countryToLocale(cc);
+  const display = (usd: number) => convertFromUsd(usd, cc).toLocaleString(locale);
+
   const [localMin, setLocalMin] = useState(min);
   const [localMax, setLocalMax] = useState(max);
   const rangeRef = useRef<HTMLDivElement>(null);
@@ -38,15 +53,18 @@ export function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) 
   );
 
   const handleMinInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // The user types in the MARKET currency; convert back to USD for the (USD) filter state.
     const raw = e.target.value.replace(/[^0-9]/g, "");
-    const val = Math.max(PRICE_ABSOLUTE_MIN, Math.min(Number(raw), localMax - 500));
+    const usd = convertToUsd(Number(raw), cc);
+    const val = Math.max(PRICE_ABSOLUTE_MIN, Math.min(usd, localMax - 500));
     setLocalMin(val);
     onChange(val, localMax);
   };
 
   const handleMaxInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value.replace(/[^0-9]/g, "");
-    const val = Math.min(PRICE_ABSOLUTE_MAX, Math.max(Number(raw), localMin + 500));
+    const usd = convertToUsd(Number(raw), cc);
+    const val = Math.min(PRICE_ABSOLUTE_MAX, Math.max(usd, localMin + 500));
     setLocalMax(val);
     onChange(localMin, val);
   };
@@ -104,10 +122,10 @@ export function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) 
             From
           </label>
           <div className="border border-[#d5d2cd] flex items-center px-3 py-2 bg-white hover:border-[#1a1a1a] transition-colors focus-within:border-[#1a1a1a]">
-            <span className="text-[12px] text-[#666] mr-1">$</span>
+            <span className="text-[12px] text-[#666] mr-1">{symbol}</span>
             <input
               type="text"
-              value={Math.round(localMin).toLocaleString()}
+              value={display(localMin)}
               onChange={handleMinInput}
               className="flex-1 min-w-0 text-[12px] text-[#1a1a1a] bg-transparent outline-none font-normal tracking-wide"
             />
@@ -123,10 +141,10 @@ export function PriceRangeSlider({ min, max, onChange }: PriceRangeSliderProps) 
             To
           </label>
           <div className="border border-[#d5d2cd] flex items-center px-3 py-2 bg-white hover:border-[#1a1a1a] transition-colors focus-within:border-[#1a1a1a]">
-            <span className="text-[12px] text-[#666] mr-1">$</span>
+            <span className="text-[12px] text-[#666] mr-1">{symbol}</span>
             <input
               type="text"
-              value={Math.round(localMax).toLocaleString()}
+              value={display(localMax)}
               onChange={handleMaxInput}
               className="flex-1 min-w-0 text-[12px] text-[#1a1a1a] bg-transparent outline-none font-normal tracking-wide"
             />

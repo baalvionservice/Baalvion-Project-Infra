@@ -18,8 +18,10 @@ export const CookiePopup = () => {
 
     if (!isOpen) return null;
     return (
-        <div className="fixed inset-x-0 z-[100] bottom-0 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-1000" role="dialog" aria-labelledby="popup-title">
-            <div className="relative flex-col justify-center items-center w-full space-y-2">
+        // pointer-events-none on the wrapper so the banner never traps clicks on the page
+        // content beneath it (e.g. the login button); the inner card re-enables pointer events.
+        <div className="fixed inset-x-0 z-[100] bottom-0 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-1000 pointer-events-none" role="dialog" aria-labelledby="popup-title">
+            <div className="relative flex-col justify-center items-center w-full space-y-2 pointer-events-auto">
 
                 <p className="text-white text-xs leading-5 tracking-wide text-center text-balance">The cookie settings on this website are set to 'allow all cookies' to give you the very best experience. Please click Accept the Cookie to use this site.</p>
                 <div className="flex gap-4 justify-center items-center">

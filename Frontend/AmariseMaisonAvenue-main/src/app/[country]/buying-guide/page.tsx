@@ -2,7 +2,7 @@
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
+import { BrandImage } from '@/components/ui/BrandImage';
 import { useAppStore } from '@/lib/store';
 import {
   ChevronRight,
@@ -68,11 +68,12 @@ export default async function BuyingGuideListingPage({ params }: BuyingGuidePage
                 className="group flex flex-col bg-white border border-border shadow-sm hover:shadow-luxury transition-all duration-700"
               >
                 <div className="relative aspect-[16/10] overflow-hidden">
-                  <Image
+                  <BrandImage
                     src={guide.imageUrl}
                     alt={guide.title}
-                    fill
-                    className="object-cover transition-transform duration-[2s] group-hover:scale-110"
+                    label={guide.title}
+                    className="absolute inset-0"
+                    imgClassName="transition-transform duration-[2s] group-hover:scale-110"
                   />
                   <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
                   <div className="absolute top-6 left-6 luxury-blur px-4 py-2 border border-border/40">

@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
-import Image from "next/image";
 import {
   ChevronUp,
   ChevronDown,
@@ -9,6 +8,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandImage } from "@/components/ui/BrandImage";
 
 interface VerticalGalleryProps {
   images: string[];
@@ -121,15 +121,13 @@ export function VerticalGallery({
                   isSelected && "ring-2 ring-black"
                 )}
               >
-                <div className="relative w-full h-full bg-gray-50">
-                  <Image
-                    src={image}
-                    alt={`${productName} view ${actualIndex + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="96px"
-                  />
-                </div>
+                <BrandImage
+                  src={image}
+                  alt={`${productName} view ${actualIndex + 1}`}
+                  variant="compact"
+                  className="absolute inset-0"
+                  sizes="96px"
+                />
               </div>
             );
           })}
@@ -162,15 +160,13 @@ export function VerticalGallery({
                 onClick={() => handleImageClick(index)}
                 className="flex-shrink-0 w-[100%] h-72 cursor-pointer transition-all duration-300 relative rounded-sm overflow-hidden snap-start"
               >
-                <div className="relative w-full h-full bg-gray-50">
-                  <Image
-                    src={image}
-                    alt={`${productName} view ${index + 1}`}
-                    fill
-                    className="object-cover"
-                    sizes="80px"
-                  />
-                </div>
+                <BrandImage
+                  src={image}
+                  alt={`${productName} view ${index + 1}`}
+                  variant="compact"
+                  className="absolute inset-0"
+                  sizes="80px"
+                />
               </div>
             ))}
           </div>

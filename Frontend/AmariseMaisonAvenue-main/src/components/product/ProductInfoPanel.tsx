@@ -13,21 +13,13 @@ import {
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
 import { Product } from "@/lib/types";
+import { formatMoney, formatProductPrice, normalizeCountry } from "@/lib/i18n/countries";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+// Delegates to the canonical 5-market money formatter so US/UK/AE/IN/SG all
+// render in their own currency (was a stale map keyed by gb/ch/eu).
 export function formatPrice(price: number, countryCode: string): string {
-  const map: Record<string, { locale: string; currency: string }> = {
-    us: { locale: "en-US", currency: "USD" },
-    gb: { locale: "en-GB", currency: "GBP" },
-    ch: { locale: "de-CH", currency: "CHF" },
-    eu: { locale: "de-DE", currency: "EUR" },
-  };
-  const { locale, currency } = map[countryCode] ?? map.us;
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-  }).format(price);
+  return formatMoney(price, normalizeCountry(countryCode), { withDecimals: true });
 }
 
 // ─── FAQ chips (from the reference site) ────────────────────────────────────
@@ -200,7 +192,12 @@ export default function ProductInfoPanel({
   product: Product;
   countryCode?: string;
 }) {
-  const { name, basePrice, condition, specialNotes } = product;
+  const { name, condition, specialNotes } = product;
+  const country = normalizeCountry(countryCode);
+  const taxNote =
+    product.taxType && product.taxRate != null
+      ? `${product.taxInclusive ? "Incl." : "Excl."} ${product.taxType.replace("_", " ").toLowerCase()} (${product.taxRate}%)`
+      : null;
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { addToCart, toggleWishlist, setCartOpen } = useAppStore();
 
@@ -221,10 +218,15 @@ export default function ProductInfoPanel({
         <h1 className="text-xl sm:text-2xl lg:text-3xl xl:text-[32px] font-serif font-normal text-gray-900 leading-[1.2] tracking-wide">
           {name}
         </h1>
-        <div className="flex items-baseline gap-4">
+        <div className="flex items-baseline gap-3">
           <p className="text-base sm:text-lg text-black tracking-tight tabular-nums leading-none">
-            {formatPrice(basePrice, countryCode)}
+            {formatProductPrice(product, country, { withDecimals: true })}
           </p>
+          {taxNote && (
+            <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-gray-500">
+              {taxNote}
+            </span>
+          )}
         </div>
       </header>
 

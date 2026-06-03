@@ -1,4 +1,4 @@
-export type CountryCode = "us" | "uk" | "ae" | "in" | "sg" | "ca";
+export type CountryCode = "us" | "uk" | "ae" | "in" | "sg";
 export type LanguageCode = "en" | "ar" | "hi" | "fr";
 
 export type PaymentGateway = "STRIPE" | "RAZORPAY" | "PAYU" | "BANK_TRANSFER";
@@ -129,6 +129,13 @@ export interface Product {
   subcategoryId: string;
   collectionId: string;
   basePrice: number;
+  // Per-country pricing + tax resolved by the storefront API when a ?country= is sent
+  // (base USD → market currency via FX). Absent when no country context — fall back to basePrice.
+  price?: number;
+  currencyCode?: string;
+  taxType?: TaxType;
+  taxRate?: number;
+  taxInclusive?: boolean;
   imageUrl: string[];
   isVip: boolean;
   rating: number;
@@ -167,6 +174,8 @@ export interface CountryConfig {
   locale: string;
   taxType: TaxType;
   taxRate: number;
+  /** 1 USD = fxRate of this market's currency. Mirrors commerce-service config/markets.js. */
+  fxRate?: number;
   messagingStrategy: "Email" | "WhatsApp" | "Concierge";
   pricingVisibility?: string;
   featuredCategories?: string[];

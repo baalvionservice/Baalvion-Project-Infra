@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
+import { BrandImage } from '@/components/ui/BrandImage';
 import { Button } from '@/components/ui/button';
 import {
   Gift,
@@ -25,7 +25,7 @@ export default function GiftRegistryPage() {
   return (
     <div className="animate-fade-in bg-ivory pb-32">
       <section className="relative h-[40vh] w-full flex items-center justify-center overflow-hidden border-b border-border">
-        <Image src="https://picsum.photos/seed/amarise-gift/2560/1440" alt="Maison Gifting" fill className="object-cover opacity-60 grayscale-[50%]" />
+        <BrandImage src="https://picsum.photos/seed/amarise-gift/2560/1440" alt="Maison Gifting" className="absolute inset-0" imgClassName="opacity-60 grayscale-[50%]" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ivory/20 to-ivory" />
         <div className="relative z-10 text-center space-y-4 px-6">
           <span className="text-primary text-[10px] font-bold tracking-[0.5em] uppercase">Heritage Gifting</span>

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { BrandImage } from "@/components/ui/BrandImage";
 import { CITIES, COUNTRIES } from "@/lib/mock-data";
 import { useProducts, useCollections } from "@/lib/useCatalog";
 import { generateCityNarrative } from "@/ai/flows/generate-city-narrative";
@@ -228,12 +228,12 @@ export default function CityPage() {
 
         <div className="flex flex-col lg:flex-row items-stretch gap-0 bg-white shadow-2xl border border-gray-100 overflow-hidden">
           <div className="lg:w-1/2 relative min-h-[600px] overflow-hidden group bg-muted">
-            <Image
+            <BrandImage
               src="https://picsum.photos/seed/amarise-flagship/1200/1200"
               alt={`${city.name} Flagship Sanctuary`}
-              fill
-              className="object-cover transition-transform duration-[3s] group-hover:scale-105 opacity-80 grayscale-[20%]"
-              data-ai-hint="luxury boutique"
+              className="absolute inset-0"
+              imgClassName="transition-transform duration-[3s] group-hover:scale-105 opacity-80 grayscale-[20%]"
+              label={`${city.name} Flagship`}
             />
             <div className="absolute inset-0 bg-black/10" />
             <div className="absolute inset-0 flex items-center justify-center p-12">
