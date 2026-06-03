@@ -10,12 +10,15 @@ const loginSchema = z.object({
     password: z.string().min(8),
 });
 
+// Public self-service signup. role/orgId are intentionally NOT accepted (the
+// registrant is always the OWNER of a brand-new org); unknown keys are stripped
+// by zod's default strip behavior, closing a privilege-escalation vector.
 const registerSchema = z.object({
     email: z.string().email(),
     password: z.string().min(8),
-    name: z.string().min(2).optional(),
-    role: z.string().optional(),
-    orgId: z.string().optional(),
+    fullName: z.string().min(2).max(100).optional(),
+    orgName: z.string().min(1).max(120).optional(),
+    plan: z.string().max(40).optional(),
 });
 
 const forgotPasswordSchema = z.object({ email: z.string().email() });

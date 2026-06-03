@@ -1,5 +1,6 @@
 const authService = require('../service/authService');
 const userService = require('../service/userService');
+const signupService = require('../service/signupService');
 const store = require('../service/platformStore');
 const inviteStore = require('../utils/inviteStore');
 const config = require('../config/appConfig');
@@ -23,8 +24,14 @@ const clearRefreshCookie = (res) => {
 
 const register = async (req, res, next) => {
     try {
-        const user = await userService.createUser(req.body);
-        return sendSuccess(req, res, authService.sanitizeUser(user), 201);
+        // Provisions org + owner + subscription and logs the user in. Returns
+        // { token, refreshToken, user, org, plan, subscription, requiresPayment }.
+        const result = await signupService.registerOrg(req.body, {
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent'],
+        });
+        setRefreshCookie(res, result.refreshToken);
+        return sendSuccess(req, res, result, 201);
     } catch (error) {
         return next(error);
     }

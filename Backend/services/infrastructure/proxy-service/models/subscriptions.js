@@ -39,6 +39,26 @@ module.exports = function(sequelize, DataTypes) {
     org_id: {
       type: DataTypes.UUID,
       allowNull: false
+    },
+    // Columns added by migration but previously missing from this model snapshot —
+    // without them Sequelize silently dropped plan_slug on create/update, so the
+    // subscription always read back as the fallback 'starter'.
+    plan_slug: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    enforcement_mode: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+      defaultValue: 'pay-as-you-go'
+    },
+    stripe_customer_id: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    stripe_subscription_id: {
+      type: DataTypes.TEXT,
+      allowNull: true
     }
   }, {
     sequelize,
