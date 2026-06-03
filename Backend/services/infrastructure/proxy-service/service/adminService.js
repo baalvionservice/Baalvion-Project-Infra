@@ -117,8 +117,116 @@ const updateFeatureFlag = async (key, payload) => {
 const getAuditLogs = async (query) => store.paginate(await store.getCollection('auditLogs'), query.page, query.pageSize);
 const exportAuditLogs = async () => ({ downloadUrl: '/downloads/admin-audit-logs.csv' });
 
+// ─── Billing administration (platform-admin) ──────────────────────────────────
+const _orgNameMap = async () => {
+    const orgs = await store.getCollection('organizations');
+    return orgs.reduce((m, o) => { m[o.id] = o.name; return m; }, {});
+};
+
+const listSubscriptions = async (query = {}) => {
+    const [subs, orgMap, plans] = await Promise.all([
+        store.getCollection('subscriptions'),
+        _orgNameMap(),
+        store.getCollection('plans'),
+    ]);
+    const planName = {};
+    plans.forEach((p) => { planName[p.slug] = p.name; planName[p.id] = p.name; });
+    let rows = subs.map((s) => ({
+        id: s.id,
+        orgId: s.orgId,
+        orgName: orgMap[s.orgId] || s.orgId,
+        planSlug: s.planSlug,
+        planName: planName[s.planSlug] || planName[s.planId] || s.planSlug,
+        status: s.status,
+        currentPeriodStart: s.currentPeriodStart,
+        currentPeriodEnd: s.currentPeriodEnd,
+        cancelAtPeriodEnd: s.cancelAtPeriodEnd,
+        createdAt: s.createdAt,
+    }));
+    if (query.status) rows = rows.filter((r) => r.status === query.status);
+    if (query.q) {
+        const q = String(query.q).toLowerCase();
+        rows = rows.filter((r) => (r.orgName || '').toLowerCase().includes(q) || (r.planSlug || '').toLowerCase().includes(q));
+    }
+    rows.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    return store.paginate(rows, query.page, query.pageSize);
+};
+
+const getSubscriptionSummary = async () => {
+    const [subs, plans] = await Promise.all([store.getCollection('subscriptions'), store.getCollection('plans')]);
+    const priceBySlug = {};
+    plans.forEach((p) => { priceBySlug[p.slug] = Number(p.monthlyPrice) || 0; });
+    const byStatus = {};
+    let mrr = 0;
+    subs.forEach((s) => {
+        byStatus[s.status] = (byStatus[s.status] || 0) + 1;
+        if (s.status === 'active') mrr += priceBySlug[s.planSlug] || 0;
+    });
+    return { total: subs.length, byStatus, activeMrr: Math.round(mrr * 100) / 100 };
+};
+
+const listAdminPlans = async () => store.getCollection('plans');
+
+const createPlan = async (payload) => {
+    if (!payload || !payload.name) throw new AppError('VALIDATION', 'Plan name is required', 400);
+    return store.insert('plans', {
+        name: payload.name,
+        monthlyPrice: Number(payload.monthlyPrice) || 0,
+        bandwidthLimitGb: Number(payload.bandwidthLimitGb) || 0,
+        features: Array.isArray(payload.features) ? payload.features : [],
+    });
+};
+
+const updatePlan = async (id, payload = {}) => {
+    const update = {};
+    if (payload.name !== undefined) update.name = payload.name;
+    if (payload.monthlyPrice !== undefined) update.monthlyPrice = Number(payload.monthlyPrice);
+    if (payload.bandwidthLimitGb !== undefined) update.bandwidthLimitGb = Number(payload.bandwidthLimitGb);
+    if (payload.features !== undefined) update.features = Array.isArray(payload.features) ? payload.features : [];
+    const plan = await store.update('plans', id, update);
+    if (!plan) throw new AppError('PLAN_NOT_FOUND', 'Plan not found', 404);
+    return plan;
+};
+
+const deletePlan = async (id) => {
+    const ok = await store.remove('plans', id);
+    if (!ok) throw new AppError('PLAN_NOT_FOUND', 'Plan not found', 404);
+};
+
+const _firstSub = async (orgId) => {
+    const subs = await store.getCollection('subscriptions', orgId);
+    return subs[0] || null;
+};
+
+const adminChangeOrgPlan = async (orgId, planSlug, actorId) => {
+    const sub = await _firstSub(orgId);
+    if (!sub) throw new AppError('NO_SUBSCRIPTION', 'Organization has no subscription', 404);
+    const plan = (await store.getCollection('plans')).find((p) => p.slug === planSlug);
+    if (!plan) throw new AppError('PLAN_NOT_FOUND', 'Plan not found', 404);
+    await store.update('subscriptions', sub.id, { planSlug, status: 'active' }, orgId);
+    await store.update('organizations', orgId, { planSlug, bandwidthLimitGb: plan.bandwidthLimitGb });
+    await store.createAuditLog({ orgId, actorUserId: actorId, action: 'billing.admin.change_plan', entityType: 'subscription', entityId: sub.id, details: { planSlug } });
+    return _firstSub(orgId);
+};
+
+const adminCancelOrgSubscription = async (orgId, actorId) => {
+    const sub = await _firstSub(orgId);
+    if (!sub) throw new AppError('NO_SUBSCRIPTION', 'Organization has no subscription', 404);
+    await store.update('subscriptions', sub.id, { status: 'cancelled', cancelAtPeriodEnd: true }, orgId);
+    await store.createAuditLog({ orgId, actorUserId: actorId, action: 'billing.admin.cancel', entityType: 'subscription', entityId: sub.id, details: {} });
+    return _firstSub(orgId);
+};
+
 module.exports = {
     getDashboard,
+    listSubscriptions,
+    getSubscriptionSummary,
+    listAdminPlans,
+    createPlan,
+    updatePlan,
+    deletePlan,
+    adminChangeOrgPlan,
+    adminCancelOrgSubscription,
     listTenants,
     getTenant,
     updateTenantStatus,

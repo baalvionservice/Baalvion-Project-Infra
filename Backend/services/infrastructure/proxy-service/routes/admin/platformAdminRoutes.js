@@ -15,6 +15,18 @@ const router = express.Router();
 
 router.use(authMiddleware, requirePlatformAdmin);
 
+// ─── Billing administration (subscriptions + plans) ────────────────────────────
+router.route('/billing/subscriptions').get(adminController.listSubscriptions);
+router.route('/billing/subscriptions/summary').get(adminController.subscriptionSummary);
+router.route('/billing/subscriptions/:orgId/change-plan').post(validate(schemas.planChangeSchema), adminController.changeOrgPlan);
+router.route('/billing/subscriptions/:orgId/cancel').post(adminController.cancelOrgSubscription);
+router.route('/billing/plans')
+    .get(adminController.listPlans)
+    .post(validate(schemas.genericObjectSchema), adminController.createPlan);
+router.route('/billing/plans/:id')
+    .patch(validate(schemas.genericObjectSchema), adminController.updatePlan)
+    .delete(adminController.deletePlan);
+
 // ─── Trust & Safety / compliance control plane ─────────────────────────────────
 router.route('/trust/cases').get(trust.listCases).post(validate(schemas.genericObjectSchema), trust.createCase);
 router.route('/trust/cases/:id/history').get(trust.caseHistory);
