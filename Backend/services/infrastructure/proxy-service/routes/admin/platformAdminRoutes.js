@@ -18,8 +18,12 @@ router.use(authMiddleware, requirePlatformAdmin);
 // ─── Billing administration (subscriptions + plans) ────────────────────────────
 router.route('/billing/subscriptions').get(adminController.listSubscriptions);
 router.route('/billing/subscriptions/summary').get(adminController.subscriptionSummary);
+router.route('/billing/revenue').get(adminController.revenueByCustomer);
 router.route('/billing/subscriptions/:orgId/change-plan').post(validate(schemas.planChangeSchema), adminController.changeOrgPlan);
 router.route('/billing/subscriptions/:orgId/cancel').post(adminController.cancelOrgSubscription);
+// Pending bank/wire orders awaiting offline settlement → staff mark "received" to activate.
+router.route('/billing/orders').get(adminController.listPendingOrders);
+router.route('/billing/orders/:invoiceId/mark-paid').post(adminController.markOrderPaid);
 router.route('/billing/plans')
     .get(adminController.listPlans)
     .post(validate(schemas.genericObjectSchema), adminController.createPlan);

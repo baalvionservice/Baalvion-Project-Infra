@@ -15,8 +15,11 @@ import {
   useUpdatePlan,
   useDeletePlan,
   useCancelOrgSubscription,
+  useRevenueByCustomer,
 } from '@/lib/queries/admin-billing.queries';
 import type { AdminPlan } from '@/lib/api/admin-billing';
+
+const usd = (n?: number) => `$${(n ?? 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'destructive'> = {
   active: 'default',
@@ -35,6 +38,7 @@ export default function BillingAdminPage() {
   }, [setBreadcrumbs]);
 
   const { data: summary } = useBillingSummary();
+  const { data: revenue } = useRevenueByCustomer();
   const { data: subs, isLoading: loadingSubs } = useAdminSubscriptions({ pageSize: 50 });
   const { data: plans } = useAdminPlans();
   const createPlan = useCreatePlan();
@@ -92,6 +96,55 @@ export default function BillingAdminPage() {
           </Card>
         ))}
       </div>
+
+      {/* Revenue by customer */}
+      <Card>
+        <CardHeader><CardTitle>Revenue by Customer</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-4">
+            {[
+              { label: 'MRR', value: usd(revenue?.totals.mrr) },
+              { label: 'ARR (projected)', value: usd(revenue?.totals.arr) },
+              { label: 'Prepaid credit revenue', value: usd(revenue?.totals.creditRevenue) },
+              { label: 'Total collected (lifetime)', value: usd(revenue?.totals.lifetimeRevenue) },
+            ].map((s) => (
+              <div key={s.label} className="rounded-lg border p-4">
+                <p className="text-sm text-muted-foreground">{s.label}</p>
+                <p className="text-2xl font-bold">{s.value}</p>
+              </div>
+            ))}
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b text-left text-muted-foreground">
+                  <th className="py-2 pr-4 font-medium">Customer</th>
+                  <th className="py-2 pr-4 font-medium">Plan</th>
+                  <th className="py-2 pr-4 font-medium">Status</th>
+                  <th className="py-2 pr-4 font-medium text-right">MRR</th>
+                  <th className="py-2 pr-4 font-medium text-right">Credit bought</th>
+                  <th className="py-2 pr-4 font-medium text-right">Lifetime</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(revenue?.customers ?? []).map((c) => (
+                  <tr key={c.orgId} className="border-b">
+                    <td className="py-2 pr-4 font-medium">{c.orgName}</td>
+                    <td className="py-2 pr-4 capitalize">{c.planSlug}</td>
+                    <td className="py-2 pr-4"><Badge variant={STATUS_VARIANT[c.status] ?? 'outline'} className="capitalize">{c.status}</Badge></td>
+                    <td className="py-2 pr-4 text-right">{usd(c.mrr)}</td>
+                    <td className="py-2 pr-4 text-right">{usd(c.creditPurchased)}</td>
+                    <td className="py-2 pr-4 text-right font-semibold">{usd(c.lifetimeRevenue)}</td>
+                  </tr>
+                ))}
+                {(revenue?.customers ?? []).length === 0 && (
+                  <tr><td colSpan={6} className="py-6 text-center text-muted-foreground">No revenue yet.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Plans */}
       <Card>

@@ -37,8 +37,27 @@ export interface AdminPlanInput {
   features?: string[];
 }
 
+export interface CustomerRevenue {
+  orgId: string;
+  orgName: string;
+  planSlug: string;
+  status: string;
+  mrr: number;
+  creditPurchased: number;
+  lifetimeRevenue: number;
+}
+
+export interface RevenueTotals {
+  mrr: number;
+  creditRevenue: number;
+  lifetimeRevenue: number;
+  customers: number;
+  arr: number;
+}
+
 export const adminBillingApi = {
   summary: () => apiClient.get('/admin/billing/subscriptions/summary'),
+  revenue: () => apiClient.get('/admin/billing/revenue'),
   listSubscriptions: (params?: { page?: number; pageSize?: number; status?: string; q?: string }) =>
     apiClient.get('/admin/billing/subscriptions', { params }),
   changeOrgPlan: (orgId: string, planSlug: string) =>

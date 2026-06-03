@@ -14,6 +14,9 @@ module.exports = {
     // ── Billing administration ──
     listSubscriptions: wrap(async (req, res) => sendPaginated(req, res, await adminService.listSubscriptions(req.query))),
     subscriptionSummary: wrap(async (req, res) => sendSuccess(req, res, await adminService.getSubscriptionSummary())),
+    revenueByCustomer: wrap(async (req, res) => sendSuccess(req, res, await adminService.getRevenueByCustomer())),
+    listPendingOrders: wrap(async (req, res) => sendSuccess(req, res, await adminService.listPendingOrders())),
+    markOrderPaid: wrap(async (req, res) => sendSuccess(req, res, await adminService.markOrderPaid(req.params.invoiceId))),
     listPlans: wrap(async (req, res) => sendSuccess(req, res, await adminService.listAdminPlans())),
     createPlan: wrap(async (req, res) => sendSuccess(req, res, await adminService.createPlan(req.body), 201)),
     updatePlan: wrap(async (req, res) => sendSuccess(req, res, await adminService.updatePlan(req.params.id, req.body))),
