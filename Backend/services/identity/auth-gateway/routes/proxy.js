@@ -20,7 +20,6 @@ const TARGETS = {
   orders:        process.env.SVC_ORDERS        || 'http://localhost:3013',
   proxy:         process.env.SVC_PROXY         || 'http://localhost:4000',
   // Phase 6E-5 — island backends (dual-auth via bffBridge; gateway is the preferred path).
-  'elite-circle': process.env.SVC_ELITE_CIRCLE || 'http://localhost:3051',
   insiders:       process.env.SVC_INSIDERS     || 'http://localhost:3050',
   trade:          process.env.SVC_TRADE        || 'http://localhost:3025',
   // financial-services-java — system of record for money/KYC/risk (Spring resource servers,

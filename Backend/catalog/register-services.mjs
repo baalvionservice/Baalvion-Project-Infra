@@ -41,7 +41,6 @@ const S = [
   ['ml-service', 'ml-service', 'knowledge', 'platform-core', 'ml', 'tier-2', 'python', ['postgres', 'clickhouse'], ['identity-platform']],
   // ── Ecosystem (vertical products) ──
   ['insiders-service', 'insiders-service', 'ecosystem', 'commerce', 'insiders', 'tier-2', 'node', ['postgres'], ['identity-platform']],
-  ['elite-circle-service', 'elite-circle-service', 'ecosystem', 'commerce', 'elite-circle', 'tier-2', 'node', ['postgres'], ['identity-platform']],
   ['law-elite', 'law-elite', 'ecosystem', 'legal', 'law-elite', 'tier-2', 'node', ['postgres'], ['identity-platform']],
   ['jobs-service', 'jobs-service', 'ecosystem', 'jobs', 'jobs', 'tier-2', 'node', ['postgres'], ['identity-platform']],
   ['brand-connector-service', 'brand-connector-service', 'ecosystem', 'shared-developer-platform', 'brand-connector', 'tier-3', 'node', ['postgres'], ['identity-platform']],
