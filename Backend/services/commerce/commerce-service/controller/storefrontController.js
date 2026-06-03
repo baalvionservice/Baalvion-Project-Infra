@@ -8,7 +8,7 @@ const listProducts = async (req, res, next) => {
 };
 
 const getProduct = async (req, res, next) => {
-    try { return sendSuccess(req, res, await storefront.getProduct(req.params.storeId, req.params.idOrSlug)); }
+    try { return sendSuccess(req, res, await storefront.getProduct(req.params.storeId, req.params.idOrSlug, req.query)); }
     catch (err) { return next(err); }
 };
 

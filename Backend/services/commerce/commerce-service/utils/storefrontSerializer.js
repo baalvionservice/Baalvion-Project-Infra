@@ -7,10 +7,22 @@
 // luxury attributes (isVip, regions, condition, colors, sizes, rating…) live in the
 // product's custom_fields jsonb. Read-only — used by the public storefront API only.
 
+const markets = require('../config/markets');
+
 const asObject = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
 
 const pickDefaultVariant = (variants = []) =>
     (variants.find((v) => v.isDefault) || variants[0] || null);
+
+// A product is sellable in `country` when it is global, region-less, or explicitly tagged.
+function isAvailableInCountry(productJson, country) {
+    if (!country) return true;
+    const cf = asObject(productJson.customFields);
+    if (cf.isGlobal) return true;
+    const regions = Array.isArray(cf.regions) ? cf.regions : [];
+    if (regions.length === 0) return true;
+    return regions.includes(country);
+}
 
 const mediaUrls = (p) =>
     (p.media || [])
@@ -19,11 +31,20 @@ const mediaUrls = (p) =>
         .map((m) => m.url)
         .filter(Boolean);
 
-function serializeProductListItem(p) {
+// opts.country (one of markets.SUPPORTED_MARKETS) → attach converted price + currency + tax.
+// opts.baseCurrency defaults to the store's authoring currency (USD).
+function serializeProductListItem(p, opts = {}) {
     const cf = asObject(p.customFields);
     const variant = pickDefaultVariant(p.variants);
     const basePrice = cf.basePrice != null ? Number(cf.basePrice) : variant ? Number(variant.price) : 0;
+    const safeBase = Number.isFinite(basePrice) ? basePrice : 0;
     const firstCollection = Array.isArray(p.collections) && p.collections[0] ? p.collections[0].slug : '';
+
+    // Per-country price + tax envelope (base + FX); absent when no/unknown country.
+    const pricing = opts.country
+        ? markets.priceFields(safeBase, opts.country, opts.baseCurrency)
+        : {};
+
     return {
         id: p.id,
         name: p.name,
@@ -32,7 +53,13 @@ function serializeProductListItem(p) {
         categoryId: cf.categoryId || (p.category && p.category.slug) || '',
         subcategoryId: cf.subcategoryId || '',
         collectionId: cf.collectionId || firstCollection || '',
-        basePrice: Number.isFinite(basePrice) ? basePrice : 0,
+        basePrice: safeBase,
+        // Country-resolved fields (undefined when no country context — client falls back to basePrice).
+        price: pricing.price,
+        currencyCode: pricing.currencyCode,
+        taxType: pricing.taxType,
+        taxRate: pricing.taxRate,
+        taxInclusive: pricing.taxInclusive,
         imageUrl: mediaUrls(p),
         isVip: cf.isVip != null ? !!cf.isVip : !!p.isFeatured,
         rating: Number(cf.rating ?? 0),
@@ -49,11 +76,11 @@ function serializeProductListItem(p) {
     };
 }
 
-function serializeProductDetail(p) {
+function serializeProductDetail(p, opts = {}) {
     const cf = asObject(p.customFields);
     const seo = asObject(p.seoMetadata);
     return {
-        ...serializeProductListItem(p),
+        ...serializeProductListItem(p, opts),
         description: p.description || '',
         specialNotes: cf.specialNotes,
         condition: cf.condition,
@@ -112,4 +139,5 @@ module.exports = {
     serializeDepartments,
     serializeCategories,
     serializeCollection,
+    isAvailableInCountry,
 };
