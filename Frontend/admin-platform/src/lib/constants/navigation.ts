@@ -149,6 +149,7 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Shipping',    href: '/commerce/shipping',    iconName: 'Truck'           },
           { title: 'Returns',     href: '/commerce/returns',     iconName: 'RotateCcw'       },
           { title: 'Analytics',   href: '/commerce/analytics',   iconName: 'BarChart3'       },
+          { title: 'Markets',     href: '/commerce/markets',     iconName: 'Globe2'          },
           { title: 'Reviews',     href: '/commerce/reviews',     iconName: 'Star'            },
           { title: 'Settings',    href: '/commerce/settings',    iconName: 'Settings'        },
         ],
@@ -190,6 +191,12 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Invoices',      href: '/payments/invoices',      iconName: 'Receipt'        },
           { title: 'Webhooks',      href: '/payments/webhooks',      iconName: 'Webhook'        },
         ],
+      },
+      {
+        title: 'Billing',
+        href: '/billing',
+        iconName: 'Wallet',
+        roles: ['super_admin', 'owner', 'admin'],
       },
       {
         title: 'Notifications',
