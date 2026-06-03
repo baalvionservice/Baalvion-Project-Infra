@@ -11,6 +11,11 @@ module.exports = function(sequelize, DataTypes) {
         fulfillmentStatus: { type: DataTypes.ENUM('unfulfilled', 'partial', 'fulfilled', 'returned'), defaultValue: 'unfulfilled' },
         paymentStatus: { type: DataTypes.ENUM('pending', 'authorized', 'paid', 'partially_paid', 'refunded', 'voided', 'failed'), defaultValue: 'pending' },
         currencyCode: { type: DataTypes.STRING(3), allowNull: false, defaultValue: 'USD' },
+        // 5-market commerce context (us/uk/ae/in/sg). Nullable for legacy rows; populated on create.
+        market: { type: DataTypes.STRING(2), allowNull: true },
+        taxType: { type: DataTypes.STRING(20), allowNull: true },
+        taxRate: { type: DataTypes.DECIMAL(7, 4), allowNull: true },
+        taxInclusive: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
         subtotal: { type: DataTypes.DECIMAL(14, 2), allowNull: false },
         discountAmount: { type: DataTypes.DECIMAL(14, 2), defaultValue: 0 },
         shippingAmount: { type: DataTypes.DECIMAL(14, 2), defaultValue: 0 },

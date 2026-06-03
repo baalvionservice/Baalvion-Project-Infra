@@ -29,9 +29,22 @@ const orderItemSchema = z.object({
     metadata: z.record(z.unknown()).default({}),
 });
 
+// 5-market commerce context the storefront/cart already carries (us/uk/ae/in/sg).
+// Constrained to known values so a client cannot inject arbitrary market/tax labels;
+// the actual line money remains server-authoritative (re-derived from commerce pricing).
+const SUPPORTED_MARKETS = ['us', 'uk', 'ae', 'in', 'sg'];
+const TAX_TYPES = ['SALES_TAX', 'VAT', 'GST'];
+
 exports.createOrderSchema = z.object({
     customerId: z.string().uuid().optional().nullable(),
     currencyCode: z.string().length(3).default('USD'),
+    // Market context (optional, backward-compatible): which market the order was placed in
+    // and the tax shape that applied. Persisted for auditability; defaults preserve legacy behaviour.
+    country: z.enum(SUPPORTED_MARKETS).optional().nullable(),
+    market: z.enum(SUPPORTED_MARKETS).optional().nullable(),
+    taxType: z.enum(TAX_TYPES).optional().nullable(),
+    taxRate: z.number().min(0).max(100).optional().nullable(),
+    taxInclusive: z.boolean().optional(),
     items: z.array(orderItemSchema).min(1),
     shippingAmount: z.number().min(0).default(0),
     taxAmount: z.number().min(0).default(0),

@@ -2,22 +2,26 @@
 const { Router } = require('express');
 const ctrl = require('../controller/orderController');
 const { validate } = require('../middleware/validate');
+const { authMiddleware } = require('../middleware/authMiddleware');
 const { loadStoreRole, requireStoreRole } = require('../middleware/rbacPep');
 const { createOrderSchema, updateOrderStatusSchema, cancelOrderSchema, recordPaymentSchema, refundPaymentSchema } = require('../validators/orderSchemas');
 
 const router = Router({ mergeParams: true });
 
 // ── Admin surface (RBAC store-scoped) ──────────────────────────────────────────
-// Listing all orders in a store exposes cross-tenant data → require a store role.
-router.get('/', loadStoreRole, requireStoreRole('store_viewer'), ctrl.listOrders);
-router.patch('/:orderId/status', loadStoreRole, requireStoreRole('ops_manager'), validate(updateOrderStatusSchema), ctrl.updateOrderStatus);
-router.post('/:orderId/cancel', loadStoreRole, requireStoreRole('ops_manager'), validate(cancelOrderSchema), ctrl.cancelOrder);
-router.post('/:orderId/payments', loadStoreRole, requireStoreRole('ops_manager'), validate(recordPaymentSchema), ctrl.recordPayment);
-router.post('/:orderId/refund', loadStoreRole, requireStoreRole('ops_manager'), validate(refundPaymentSchema), ctrl.refundPayment);
+// The router is mounted under optionalAuth (guest checkout), so these admin routes RE-APPLY
+// authMiddleware to require a valid token (a guest hitting them is 401'd before RBAC runs).
+// Listing all orders in a store exposes cross-tenant data → also require a store role.
+router.get('/', authMiddleware, loadStoreRole, requireStoreRole('store_viewer'), ctrl.listOrders);
+router.patch('/:orderId/status', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(updateOrderStatusSchema), ctrl.updateOrderStatus);
+router.post('/:orderId/cancel', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(cancelOrderSchema), ctrl.cancelOrder);
+router.post('/:orderId/payments', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(recordPaymentSchema), ctrl.recordPayment);
+router.post('/:orderId/refund', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(refundPaymentSchema), ctrl.refundPayment);
 
-// ── Shopper / checkout surface (authenticated customer; NOT store-role gated) ──
-// Gating these with a store-admin role would break storefront checkout. Customer-ownership
-// scoping (a customer may only see their own order) is a separate follow-up.
+// ── Shopper / checkout surface (guest-capable; NOT store-role gated) ───────────
+// Authenticated → bound to the user; guest → bound to a signed X-Cart-Session (same mechanism as
+// carts). Ownership (owner OR guest-session OR staff) is enforced in the service layer, never here.
+// Gating these with a store-admin role would break storefront checkout.
 router.post('/', validate(createOrderSchema), ctrl.createOrder);
 router.get('/:orderId', ctrl.getOrder);
 router.post('/:orderId/payments/intent', ctrl.createPaymentIntent);

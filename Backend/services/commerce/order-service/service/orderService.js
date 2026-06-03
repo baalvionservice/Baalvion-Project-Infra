@@ -11,6 +11,9 @@ const ownership = require('./ownership');
 const securityAudit = require('./securityAudit');
 const ledgerClient = require('./ledgerClient');
 const discountService = require('./discountService');
+const markets = require('../config/markets');
+const pricing = require('./pricing');
+const fxRateProvider = require('./fxRateProvider');
 
 // Mirror a money movement into the double-entry ledger without ever letting a ledger
 // problem break the payment path (the client already fails-open + logs internally).
@@ -26,11 +29,19 @@ function generateOrderNumber(storeCode = 'ORD') {
 }
 
 // An order is owned by the user behind its customer record (order.customerId → customer.userId).
-// Guest orders (no customerId) have no resolvable owner → only store staff may access them.
+// Guest orders (no customerId) are owned instead by the holder of the signed guest session bound
+// to them at creation (metadata.guestSessionId) — see ownership.enforce's session branch.
 async function orderOwnerUserId(customerId) {
     if (!customerId) return null;
     const c = await OrdersCustomer.findByPk(customerId, { attributes: ['userId'] });
     return c ? c.userId : null;
+}
+
+// The guest session (if any) an order is bound to. Used as ownerSessionId in ownership checks so a
+// guest who created the order (and still holds the signed X-Cart-Session) can read/pay for it.
+function orderOwnerSessionId(order) {
+    const meta = order && order.metadata;
+    return meta && typeof meta.guestSessionId === 'string' ? meta.guestSessionId : null;
 }
 
 async function listOrders(storeId, query = {}) {
@@ -63,23 +74,31 @@ async function getOrder(storeId, orderId, actor) {
         data = order.toJSON();
         await cache.set(cache.keys.order(orderId), data, config.cache.orderTtl);
     }
-    // Customer-ownership enforcement (owner OR store staff). Applies on cache hit and miss.
-    await ownership.enforce(actor, await orderOwnerUserId(data.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'order.read' });
+    // Ownership enforcement (owner OR guest-session owner OR store staff). On cache hit and miss.
+    await ownership.enforce(actor, await orderOwnerUserId(data.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'order.read', ownerSessionId: orderOwnerSessionId(data) });
     return data;
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
- * AUTHORITATIVE product/price validation. order-service and commerce-service share one
- * Postgres DB (different schemas), so we read commerce's tables directly (no new infra).
- * For each line: the product must exist in THIS store and be published; an active variant
- * is resolved (specified, else default); the unit price + tax come from store pricing
- * (commerce_product_pricing window) or the variant base price. Client monetary fields are
- * IGNORED. NOTE: stock/inventory is NOT in commerce (it is warehouse-scoped in
- * inventory-service), so oversell is not validated here — see hardening notes.
+ * AUTHORITATIVE product/price validation + market FX conversion. order-service and
+ * commerce-service share one Postgres DB (different schemas), so we read commerce's tables
+ * directly (no new infra). For each line: the product must exist in THIS store and be
+ * published; an active variant is resolved (specified, else default); the BASE (USD) unit
+ * price + per-variant tax come from store pricing (commerce_product_pricing window) or the
+ * variant base price. Client monetary fields are IGNORED.
+ *
+ * FX FIX: when `marketCode` is one of us|uk|ae|in|sg, the base USD price is converted to the
+ * market currency with the SAME FX + rounding the storefront uses (config/markets) and the
+ * MARKET tax rule (inclusive VAT/GST vs exclusive sales tax) is applied — so the persisted
+ * order matches the displayed price. With no/unknown market the legacy USD path is preserved
+ * (base price unchanged, per-variant tax rate, exclusive).
+ *
+ * NOTE: stock/inventory is NOT in commerce (it is warehouse-scoped in inventory-service),
+ * so oversell is not validated here — see hardening notes.
  */
-async function resolveAuthoritativeItems(storeId, items) {
+async function resolveAuthoritativeItems(storeId, items, marketCode = null) {
     const resolved = [];
     for (const i of items) {
         const productId = i.productId;
@@ -111,7 +130,7 @@ async function resolveAuthoritativeItems(storeId, items) {
         if (!variant) throw new AppError('VALIDATION_ERROR', `No purchasable variant for product ${productId}`, 400);
         if (variant.is_active === false) throw new AppError('VALIDATION_ERROR', `Variant ${variant.id} is inactive`, 400);
 
-        const [pricing] = await sequelize.query(
+        const [priceRow] = await sequelize.query(
             `SELECT price, tax_rate FROM commerce.commerce_product_pricing
                WHERE variant_id = :variantId AND store_id = :storeId AND is_active = true
                  AND (starts_at IS NULL OR starts_at <= now()) AND (ends_at IS NULL OR ends_at >= now())
@@ -119,18 +138,27 @@ async function resolveAuthoritativeItems(storeId, items) {
             { replacements: { variantId: variant.id, storeId }, type: QueryTypes.SELECT },
         );
 
-        const unitPrice = Number(pricing ? pricing.price : variant.price);
-        if (!Number.isFinite(unitPrice) || unitPrice < 0) {
+        const baseUsd = Number(priceRow ? priceRow.price : variant.price);
+        if (!Number.isFinite(baseUsd) || baseUsd < 0) {
             throw new AppError('VALIDATION_ERROR', `No valid price for variant ${variant.id}`, 400);
         }
-        const taxRate = Number((pricing && pricing.tax_rate) || 0);
-        const lineTax = Number(((unitPrice * i.quantity) * (taxRate / 100)).toFixed(2));
+        const variantTaxRate = Number((priceRow && priceRow.tax_rate) || 0);
+
+        // Convert base USD → market currency (or pass through for the legacy no-market path)
+        // and resolve the applicable tax rule, then derive gross/net/tax for the line.
+        const unit = pricing.resolveUnitPricing(baseUsd, marketCode, variantTaxRate);
+        const line = pricing.computeLine(unit.unitPrice, i.quantity, unit.taxRate, unit.taxInclusive);
 
         resolved.push({
             productId, variantId: variant.id, sku: variant.sku,
             name: product.name, variantName: variant.name || null,
-            quantity: i.quantity, price: unitPrice, compareAtPrice: null,
-            taxAmount: lineTax, metadata: i.metadata || {},
+            quantity: i.quantity,
+            basePriceUsd: pricing.round2(baseUsd),
+            price: unit.unitPrice,            // per-unit price in the order (market) currency
+            currencyCode: unit.currencyCode,  // null for the legacy no-market path
+            gross: line.gross, net: line.net, tax: line.tax, // canonical line shape (computeOrderTotals reads .net/.tax/.gross)
+            taxRate: unit.taxRate, taxInclusive: unit.taxInclusive,
+            compareAtPrice: null, metadata: i.metadata || {},
         });
     }
     return resolved;
@@ -176,9 +204,29 @@ async function reserveInventory(t, storeId, items) {
 }
 
 async function createOrder(storeId, body, actor) {
-    const { customerId, currencyCode = 'USD', shippingAmount = 0, discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
+    const { customerId, shippingAmount = 0, discountCode, notes, billingAddress, shippingAddress, metadata = {}, idempotencyKey } = body;
+
+    // 5-market commerce context (us/uk/ae/in/sg). The market is the SERVER-AUTHORITATIVE source
+    // of currency + tax rule — a client cannot claim market='in' but currencyCode='USD'. `market`
+    // falls back to `country` (the storefront sends ?country=). For a known market the order is
+    // priced in that market's currency (base USD × FX, matching the storefront); for an unknown/
+    // absent market the legacy USD path applies (currencyCode from the request, default USD).
+    const resolvedMarket = markets.getMarket(body.market || body.country);
+    const market = resolvedMarket ? resolvedMarket.country : null;
+    const currencyCode = resolvedMarket ? resolvedMarket.currency : (body.currencyCode || 'USD');
+    const taxType = resolvedMarket ? resolvedMarket.taxType : (body.taxType || null);
+    const taxInclusive = resolvedMarket ? resolvedMarket.taxInclusive : (body.taxInclusive === true);
+    const orderTaxRate = (body.taxRate != null && Number.isFinite(Number(body.taxRate))) ? Number(body.taxRate) : null;
 
     if (!body.items || !body.items.length) throw new AppError('VALIDATION_ERROR', 'Order must have at least one item', 400);
+
+    // Identity: the caller is EITHER authenticated (actor.userId) OR a guest holding a valid signed
+    // X-Cart-Session (actor.sessionId). A fully anonymous, session-less caller cannot create an order
+    // (it would be unattributable/unreadable). Guest orders are bound to actor.sessionId below.
+    const guestSessionId = (actor && actor.userId == null && actor.sessionId) ? actor.sessionId : null;
+    if (actor && actor.userId == null && !guestSessionId) {
+        throw new AppError('UNAUTHORIZED', 'Guest checkout requires a signed cart session (create a cart first to obtain X-Cart-Session)', 401);
+    }
 
     // Ownership: a caller may only place an order AS a customer they own. (Staff may place on
     // behalf of any customer.) Prevents attributing an order to someone else's customer record.
@@ -201,9 +249,9 @@ async function createOrder(storeId, body, actor) {
             // Guard against a race where the metadata row exists but the order was already deleted.
             if (!found) throw new AppError('NOT_FOUND', 'Order not found', 404);
             // Ownership check on replay: the replaying caller must be the original order's owner
-            // (or store staff). Prevents a different user from fetching another's order by
-            // guessing or colliding on an idempotencyKey.
-            await ownership.enforce(actor, await orderOwnerUserId(found.customerId), { resourceType: 'order', resourceId: existing.id, storeId, action: 'order.create' });
+            // (authenticated user, OR the guest session bound to it, OR store staff). Prevents a
+            // different caller from fetching another's order by guessing/colliding on an idempotencyKey.
+            await ownership.enforce(actor, await orderOwnerUserId(found.customerId), { resourceType: 'order', resourceId: existing.id, storeId, action: 'order.create', ownerSessionId: orderOwnerSessionId(found) });
             return found.toJSON();
         }
     }
@@ -211,28 +259,45 @@ async function createOrder(storeId, body, actor) {
     // ── Authoritative pricing + product validation (Phase 1) ────────────────────
     // Client price/subtotal/total/discount/tax are IGNORED. Every line price + tax is
     // re-derived from commerce-service data; all totals are recomputed server-side.
-    const items = await resolveAuthoritativeItems(storeId, body.items);
+    // Refresh the live FX memo from the shared snapshot (no-op when FX_LIVE_FEED is off) so
+    // the order is priced at the SAME rate the storefront displayed.
+    await fxRateProvider.primeFromCache().catch(() => {});
+    const items = await resolveAuthoritativeItems(storeId, body.items, market);
 
     const shipping = Number(shippingAmount);
     if (!Number.isFinite(shipping) || shipping < 0) {
         throw new AppError('VALIDATION_ERROR', 'shippingAmount must be a non-negative number', 400);
     }
 
-    const subtotal = Number(items.reduce((s, i) => s + i.price * i.quantity, 0).toFixed(2));
-    const taxAmount = Number(items.reduce((s, i) => s + i.taxAmount, 0).toFixed(2));
+    // Pre-discount totals (market currency). grossSubtotal is what the customer sees and is the
+    // base the discount + minimum-purchase rules apply against.
+    const pre = pricing.computeOrderTotals(items, shipping, 0);
     const orderNumber = generateOrderNumber();
 
     const order = await sequelize.transaction(async (t) => {
-        // Server-authoritative discount: the code is validated + computed from commerce data and a
-        // usage slot is atomically claimed within this txn (rolls back with the order on failure).
-        const promo = await discountService.applyDiscount(t, storeId, discountCode, subtotal, shipping);
-        const totalAmount = Number((subtotal + shipping + taxAmount - promo.discountAmount).toFixed(2));
+        // Server-authoritative discount: validated + computed from commerce data (USD-authored
+        // fixed amounts / thresholds are converted to the order's market currency) and a usage
+        // slot is atomically claimed within this txn (rolls back with the order on failure).
+        const promo = await discountService.applyDiscount(t, storeId, discountCode, pre.grossSubtotal, shipping, market);
+
+        // Final totals: subtotal (net) + tax + shipping - discount, all in the order currency.
+        const totals = pricing.computeOrderTotals(items, shipping, promo.discountAmount);
+
+        // Order-level effective tax rate: the market rate when a market applies; else the rate
+        // sent with the order; else derived from the server-computed line tax so audit rows are
+        // never silently null when tax applied.
+        const effectiveTaxRate = resolvedMarket
+            ? Number(resolvedMarket.taxRate)
+            : (orderTaxRate != null
+                ? orderTaxRate
+                : (totals.subtotal > 0 && totals.taxAmount > 0 ? pricing.round4((totals.taxAmount / totals.subtotal) * 100) : null));
 
         const o = await OrdersOrder.create({
             storeId, customerId, orderNumber, currencyCode,
-            subtotal, discountAmount: promo.discountAmount, shippingAmount: shipping, taxAmount, totalAmount,
+            market, taxType, taxRate: effectiveTaxRate, taxInclusive,
+            subtotal: totals.subtotal, discountAmount: totals.discount, shippingAmount: totals.shipping, taxAmount: totals.taxAmount, totalAmount: totals.totalAmount,
             discountCode: promo.code || discountCode || null, notes,
-            metadata: { ...metadata, ...(promo.discountId ? { discountId: promo.discountId } : {}), ...(idempotencyKey ? { idempotencyKey: String(idempotencyKey) } : {}) },
+            metadata: { ...metadata, ...(promo.discountId ? { discountId: promo.discountId } : {}), ...(idempotencyKey ? { idempotencyKey: String(idempotencyKey) } : {}), ...(guestSessionId ? { guestSessionId } : {}) },
             billingAddress, shippingAddress,
             // Never auto-paid — payment is confirmed only by the backend recordPayment path.
             status: 'pending', fulfillmentStatus: 'unfulfilled', paymentStatus: 'pending',
@@ -246,10 +311,12 @@ async function createOrder(storeId, body, actor) {
             name: i.name,
             variantName: i.variantName,
             quantity: i.quantity,
-            price: i.price,
+            price: i.price,                 // per-unit price in the order (market) currency
             compareAtPrice: i.compareAtPrice,
-            total: Number((i.price * i.quantity).toFixed(2)),
-            taxAmount: i.taxAmount,
+            total: i.gross,                 // line total the customer sees (gross, market currency)
+            taxAmount: i.tax,
+            taxRate: i.taxRate,
+            taxInclusive: i.taxInclusive,
             fulfillableQuantity: i.quantity,
             metadata: i.metadata,
         }));
@@ -263,7 +330,7 @@ async function createOrder(storeId, body, actor) {
     });
 
     // Phase 6: structured audit log (orderNumber is the cross-service correlation handle).
-    console.info(JSON.stringify({ evt: 'order.created', storeId, orderId: order.id, orderNumber, totalAmount: Number(order.totalAmount), discountAmount: Number(order.discountAmount), currencyCode, lineCount: items.length }));
+    console.info(JSON.stringify({ evt: 'order.created', storeId, orderId: order.id, orderNumber, totalAmount: Number(order.totalAmount), discountAmount: Number(order.discountAmount), currencyCode, market, taxType, taxInclusive, lineCount: items.length }));
     return order.toJSON();
 }
 
@@ -436,7 +503,7 @@ async function refundPayment(storeId, orderId, body = {}) {
 async function createPaymentIntent(storeId, orderId, actor) {
     const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
-    await ownership.enforce(actor, await orderOwnerUserId(order.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'payment.intent' });
+    await ownership.enforce(actor, await orderOwnerUserId(order.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'payment.intent', ownerSessionId: orderOwnerSessionId(order) });
     if (order.paymentStatus === 'paid') throw new AppError('CONFLICT', 'Order is already paid', 409);
     const provider = getProvider();
     const intent = await provider.createPaymentIntent({ orderId, amount: Number(order.totalAmount), currencyCode: order.currencyCode });
@@ -453,7 +520,7 @@ async function confirmPayment(storeId, orderId, intentId, actor) {
     if (!intentId) throw new AppError('VALIDATION_ERROR', 'intentId is required', 400);
     const order0 = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order0) throw new AppError('NOT_FOUND', 'Order not found', 404);
-    await ownership.enforce(actor, await orderOwnerUserId(order0.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'payment.confirm' });
+    await ownership.enforce(actor, await orderOwnerUserId(order0.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'payment.confirm', ownerSessionId: orderOwnerSessionId(order0) });
 
     // Replay/forgery guard: the intentId MUST correspond to a payment intent we created for
     // THIS order. Reject an unknown/foreign intent before touching the provider or order state.

@@ -1,5 +1,9 @@
+const path = require('path');
 const dotenv = require('dotenv');
-dotenv.config();
+// Load THIS service's .env with override so newly-added vars (e.g. CART_SESSION_SECRET) win
+// over a stale long-lived pm2-daemon environment that would otherwise shadow them. In
+// production no .env is shipped (env comes from Secrets Manager), so this is a safe no-op.
+dotenv.config({ path: path.resolve(__dirname, '..', '.env'), override: true });
 
 const parseList = (value, fallback = []) => {
     if (!value) return fallback;
