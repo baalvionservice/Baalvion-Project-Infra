@@ -202,6 +202,11 @@ const serviceClients = {
   // audit-service is the immutable hash-chain audit log (WORM). It mounts at /v1 and powers the
   // Audit Center (RBAC / payment / security event viewers, verify, CSV export).
   audit: makeServiceClient('audit', 3032, '/v1'),
+  // notification-service is the multi-channel delivery engine (email/sms/push/in-app). It mounts at
+  // /v1 (routes live under /v1/notifications/*) and powers the Notifications console: queue stats +
+  // the dead-letter queue (failed deliveries) viewer/retry. Admin reads require a super_admin/admin
+  // bearer (requireAdmin), forwarded by the shared attachToken interceptor.
+  notifications: makeServiceClient('notifications', 3031, '/v1'),
 };
 
 Object.values(serviceClients).forEach((client) => {

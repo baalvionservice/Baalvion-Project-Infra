@@ -1,6 +1,8 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
+  output: 'standalone',
   reactStrictMode: true,
   // Production build resilience: don't fail the build on pre-existing type/lint
   // issues in unrelated pages — the goal here is a stable, pre-compiled server.
