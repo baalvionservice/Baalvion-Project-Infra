@@ -61,7 +61,11 @@ const registerOrg = async (
 
   // 2. Resolve the chosen plan.
   const planRecord = await resolvePlan(planSlug);
-  const requiresPayment = !!(planRecord && Number(planRecord.monthlyPrice) > 0);
+  const isPayg = !!(planRecord && planRecord.slug === 'pay-as-you-go');
+  // PAYG has no monthly fee but still routes to checkout to buy prepaid credit;
+  // tiered plans route to checkout only when they cost money.
+  const requiresPayment = isPayg || !!(planRecord && Number(planRecord.monthlyPrice) > 0);
+  const billingMode = isPayg ? 'credit' : 'subscription';
 
   // 3-6. Provision org + owner user + membership + subscription ATOMICALLY. A
   // partial failure must never leave an orphaned org/user behind, so all writes
@@ -109,7 +113,9 @@ const registerOrg = async (
         userId: user.id,
         planId: planRecord.id,
         planSlug: planRecord.slug,
-        status: requiresPayment ? 'trialing' : 'active',
+        // PAYG is active immediately ($0/mo, pay via prepaid credit); paid tiers
+        // start as a trial until checkout converts them.
+        status: (requiresPayment && !isPayg) ? 'trialing' : 'active',
         enforcementMode: 'pay-as-you-go',
         currentPeriodStart: now.toISOString(),
         currentPeriodEnd: periodEnd.toISOString(),
@@ -139,6 +145,7 @@ const registerOrg = async (
       ? { status: subscription.status, planSlug: subscription.planSlug }
       : null,
     requiresPayment,
+    billingMode,
   };
 };
 

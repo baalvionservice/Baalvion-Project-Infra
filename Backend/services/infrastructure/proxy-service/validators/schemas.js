@@ -39,6 +39,7 @@ const proxySchema = z.object({
 }).passthrough();
 const presetSchema = z.object({ name: z.string().min(2), country: z.string().min(2).max(2), type: z.string(), protocol: z.string() }).passthrough();
 const planChangeSchema = z.object({ planSlug: z.string().min(2) });
+const creditPurchaseSchema = z.object({ amountUsd: z.coerce.number().positive().max(10000) });
 const paymentMethodSchema = z.object({ type: z.string(), brand: z.string(), last4: z.string().min(4).max(4), expiry: z.string(), isDefault: z.boolean().optional() }).passthrough();
 const orgUpdateSchema = z.object({ name: z.string().optional(), slug: z.string().optional(), status: z.string().optional() }).passthrough();
 const inviteUserSchema = z.object({ email: z.string().email(), name: z.string().min(2).optional(), role: z.string() }).passthrough();
@@ -66,6 +67,7 @@ module.exports = {
     proxySchema,
     presetSchema,
     planChangeSchema,
+    creditPurchaseSchema,
     paymentMethodSchema,
     orgUpdateSchema,
     inviteUserSchema,

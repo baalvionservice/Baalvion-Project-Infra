@@ -37,6 +37,7 @@ export default function BillingCheckout() {
   const [step, setStep] = useState(0);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
+  const [creditAmount, setCreditAmount] = useState(30); // PAYG prepaid top-up (USD)
   const [paymentTab, setPaymentTab] = useState("card");
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
@@ -59,9 +60,15 @@ export default function BillingCheckout() {
     }
   }, [planParam, plans, selectedPlan]);
 
+  // Pay-As-You-Go is metered: the customer buys prepaid credit (drawn down at $3/GB)
+  // instead of a fixed monthly subscription.
+  const isPayg = selectedPlan?.slug === "pay-as-you-go";
+  const USD_PER_GB = 3;
+  const creditPresets = [15, 30, 60, 150];
+
   const basePrice = selectedPlan ? (interval === "yearly" ? selectedPlan.monthlyPrice * 10 : selectedPlan.monthlyPrice) : 0;
-  const discount = couponApplied ? basePrice * 0.1 : 0;
-  const total = basePrice - discount;
+  const discount = !isPayg && couponApplied ? basePrice * 0.1 : 0;
+  const total = isPayg ? creditAmount : basePrice - discount;
 
   const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
 
@@ -72,6 +79,18 @@ export default function BillingCheckout() {
   const activateAndFinish = async () => {
     if (!selectedPlan) return;
     try {
+      if (isPayg) {
+        // PAYG: add the prepaid credit (server also ensures the PAYG subscription).
+        const res = await billingApi.buyCredit(creditAmount);
+        queryClient.invalidateQueries({ queryKey: ["billing"] });
+        if (res && typeof res.balanceUsd === "number") {
+          setResult("success");
+        } else {
+          setErrorMessage("Your payment was captured but credit could not be added. Please contact support.");
+          setResult("failure");
+        }
+        return;
+      }
       const sub = await billingApi.activate(selectedPlan.slug);
       queryClient.invalidateQueries({ queryKey: ["billing"] });
       if ((sub as { status?: string } | null)?.status === "active") {
@@ -81,7 +100,7 @@ export default function BillingCheckout() {
         setResult("failure");
       }
     } catch (e: unknown) {
-      setErrorMessage(e instanceof Error ? e.message : "Could not activate your subscription. Please contact support.");
+      setErrorMessage(e instanceof Error ? e.message : "Could not complete your purchase. Please contact support.");
       setResult("failure");
     }
   };
@@ -158,12 +177,16 @@ Thank you for your business!
                 <>
                   <CheckCircle2 className="w-16 h-16 text-success mx-auto" />
                   <h2 className="text-2xl font-bold">Payment Successful!</h2>
-                  <p className="text-muted-foreground">Your subscription to {selectedPlan?.name} is now active.</p>
+                  <p className="text-muted-foreground">
+                    {isPayg
+                      ? `$${creditAmount.toFixed(2)} credit added — ${(creditAmount / USD_PER_GB).toFixed(1)} GB at $${USD_PER_GB}/GB.`
+                      : `Your subscription to ${selectedPlan?.name} is now active.`}
+                  </p>
                   <div className="border border-border rounded-lg p-4 text-left space-y-2 mt-4">
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Order ID</span><span className="font-mono text-xs">{orderId}</span></div>
-                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Plan</span><span className="font-medium">{selectedPlan?.name}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Plan</span><span className="font-medium">{isPayg ? "Pay As You Go" : selectedPlan?.name}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Amount</span><span className="font-medium">${total.toFixed(2)}</span></div>
-                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Billing</span><span className="capitalize">{interval}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">{isPayg ? "Credit / GB" : "Billing"}</span><span className="capitalize">{isPayg ? `${(creditAmount / USD_PER_GB).toFixed(1)} GB` : interval}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Date</span><span>{new Date().toLocaleDateString()}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Status</span><Badge variant="success">Paid</Badge></div>
                   </div>
@@ -297,6 +320,41 @@ Thank you for your business!
                 <CardDescription>Enter your payment information</CardDescription>
               </CardHeader>
               <CardContent>
+                {isPayg && (
+                  <div className="mb-6 space-y-3">
+                    <div>
+                      <p className="font-medium">Choose your prepaid credit</p>
+                      <p className="text-sm text-muted-foreground">Billed at ${USD_PER_GB}/GB · no monthly fee · drawn down as you use bandwidth.</p>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {creditPresets.map((amt) => (
+                        <button
+                          key={amt}
+                          type="button"
+                          onClick={() => setCreditAmount(amt)}
+                          className={cn(
+                            "p-4 rounded-lg border-2 text-center transition-all",
+                            creditAmount === amt ? "border-primary bg-primary/10" : "border-border hover:border-primary/50"
+                          )}
+                        >
+                          <div className="text-xl font-bold">${amt}</div>
+                          <div className="text-xs text-muted-foreground">{Math.round(amt / USD_PER_GB)} GB</div>
+                        </button>
+                      ))}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm whitespace-nowrap">Custom $</Label>
+                      <Input
+                        type="number"
+                        min={5}
+                        value={creditAmount}
+                        onChange={(e) => setCreditAmount(Math.max(5, Number(e.target.value) || 0))}
+                        className="w-32"
+                      />
+                      <span className="text-sm text-muted-foreground">= {(creditAmount / USD_PER_GB).toFixed(1)} GB</span>
+                    </div>
+                  </div>
+                )}
                 <Tabs value={paymentTab} onValueChange={setPaymentTab}>
                   <TabsList className="w-full">
                     <TabsTrigger value="card" className="flex-1">Card</TabsTrigger>
@@ -352,19 +410,30 @@ Thank you for your business!
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="rounded-lg border border-border p-4 space-y-3">
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Plan</span><span className="font-medium">{selectedPlan?.name}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bandwidth</span><span>{selectedPlan?.bandwidthLimitGb} GB</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Billing</span><span className="capitalize">{interval}</span></div>
-                  <div className="flex justify-between text-sm"><span className="text-muted-foreground">Payment</span><span className="capitalize">{paymentTab === "card" ? "Card (secure checkout)" : paymentTab}</span></div>
-                </div>
-                <div className="flex gap-2">
-                  <Input placeholder="Promo code" value={coupon} onChange={e => setCoupon(e.target.value)} className="flex-1" />
-                  <Button variant="outline" onClick={() => { if (coupon.trim()) setCouponApplied(true); }}>
-                    <Tag className="w-4 h-4 mr-1" /> Apply
-                  </Button>
-                </div>
-                {couponApplied && <Badge variant="success">10% discount applied</Badge>}
+                {isPayg ? (
+                  <div className="rounded-lg border border-border p-4 space-y-3">
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Plan</span><span className="font-medium">Pay As You Go</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Prepaid credit</span><span className="font-medium">${creditAmount.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bandwidth</span><span>{(creditAmount / USD_PER_GB).toFixed(1)} GB @ ${USD_PER_GB}/GB</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Payment</span><span className="capitalize">{paymentTab === "card" ? "Card (secure checkout)" : paymentTab}</span></div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="rounded-lg border border-border p-4 space-y-3">
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Plan</span><span className="font-medium">{selectedPlan?.name}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bandwidth</span><span>{selectedPlan?.bandwidthLimitGb} GB</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Billing</span><span className="capitalize">{interval}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Payment</span><span className="capitalize">{paymentTab === "card" ? "Card (secure checkout)" : paymentTab}</span></div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Input placeholder="Promo code" value={coupon} onChange={e => setCoupon(e.target.value)} className="flex-1" />
+                      <Button variant="outline" onClick={() => { if (coupon.trim()) setCouponApplied(true); }}>
+                        <Tag className="w-4 h-4 mr-1" /> Apply
+                      </Button>
+                    </div>
+                    {couponApplied && <Badge variant="success">10% discount applied</Badge>}
+                  </>
+                )}
                 <p className="text-xs text-muted-foreground">
                   By completing this purchase, you agree to our Terms of Service and Refund Policy.
                 </p>
@@ -396,7 +465,23 @@ Thank you for your business!
           <Card>
             <CardHeader><CardTitle className="text-base">Order Summary</CardTitle></CardHeader>
             <CardContent className="space-y-3 text-sm">
-              {selectedPlan ? (
+              {selectedPlan && isPayg ? (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Prepaid credit</span>
+                    <span>${creditAmount.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Bandwidth</span>
+                    <span>{(creditAmount / USD_PER_GB).toFixed(1)} GB</span>
+                  </div>
+                  <div className="border-t border-border pt-2 flex justify-between font-bold">
+                    <span>Total</span>
+                    <span>${total.toFixed(2)}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">${USD_PER_GB}/GB · no monthly fee · USD</p>
+                </>
+              ) : selectedPlan ? (
                 <>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">{selectedPlan.name}</span>

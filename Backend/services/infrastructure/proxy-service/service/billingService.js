@@ -2,6 +2,7 @@ const Stripe = require('stripe');
 const config = require('../config/appConfig');
 const store = require('./platformStore');
 const authService = require('./authService');
+const creditService = require('./creditService');
 const { AppError } = require('../utils/errors');
 
 const stripe = config.stripe.secretKey ? new Stripe(config.stripe.secretKey) : null;
@@ -101,6 +102,19 @@ const activateSubscription = async (auth, planSlug) => {
     return await getSubscription(auth);
 };
 
+// PAYG prepaid top-up: credit the wallet (after a settled payment) and ensure the
+// org is on the Pay-As-You-Go plan. Returns the new balance + GB remaining.
+const purchaseCredit = async (auth, amountUsd) => {
+    const balance = await creditService.addCredit(auth.orgId, amountUsd, 'prepaid-topup');
+    const payg = await getPlan('pay-as-you-go');
+    if (payg) {
+        try { await activateSubscription(auth, 'pay-as-you-go'); } catch (_) { /* non-fatal: balance still added */ }
+    }
+    return { ...balance, planSlug: 'pay-as-you-go' };
+};
+
+const getCreditBalance = async (auth) => creditService.getBalance(auth.orgId);
+
 const addPaymentMethod = async (auth, payload) => store.insert('paymentMethods', { orgId: auth.orgId, ...payload });
 
 const removePaymentMethod = async (auth, id) => {
@@ -142,6 +156,8 @@ module.exports = {
     getPaymentMethods,
     changePlan,
     activateSubscription,
+    purchaseCredit,
+    getCreditBalance,
     addPaymentMethod,
     removePaymentMethod,
     getUsageForecast,

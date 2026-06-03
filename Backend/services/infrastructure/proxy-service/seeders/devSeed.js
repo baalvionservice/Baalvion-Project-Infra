@@ -106,6 +106,17 @@ const run = async () => {
     session_limits: 0,
     rotation_rules: { mode: 'smart', stickyOptions: ['5min', '10min', '30min'] },
   });
+  // Pay As You Go — metered ($3/GB), prepaid credit. Hidden from the main pricing
+  // tiers (publicPlans filters it out); it has its own dedicated pricing card.
+  await db.plans.create({
+    name: 'Pay As You Go',
+    price: 0,
+    bandwidth_limit: 0,
+    proxy_types_allowed: ['residential', 'datacenter', 'mobile'],
+    overage_price: 3,
+    session_limits: 0,
+    rotation_rules: { mode: 'rotating' },
+  });
 
   // ── Users ──────────────────────────────────────────────────────────────────
   const userOwner = await db.users.create({

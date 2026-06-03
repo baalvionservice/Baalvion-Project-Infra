@@ -121,6 +121,9 @@ router.route('/billing/invoices').get(requirePermission('billing:view'), control
 router.route('/billing/invoices/:id').get(requirePermission('billing:view'), controller.getInvoice);
 router.route('/billing/change-plan').post(requirePermission('billing:update'), validate(schemas.planChangeSchema), controller.changePlan);
 router.route('/billing/activate').post(requirePermission('billing:update'), validate(schemas.planChangeSchema), controller.activatePlan);
+router.route('/billing/credit')
+    .get(requirePermission('billing:view'), controller.getCredit)
+    .post(requirePermission('billing:update'), validate(schemas.creditPurchaseSchema), controller.buyCredit);
 router.route('/billing/payment-methods')
     .get(requirePermission('billing:view'), controller.getPaymentMethods)
     .post(requirePermission('billing:update'), validate(schemas.paymentMethodSchema), controller.addPaymentMethod);

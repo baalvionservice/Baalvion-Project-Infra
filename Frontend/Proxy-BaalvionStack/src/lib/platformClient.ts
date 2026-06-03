@@ -108,6 +108,10 @@ export const billingApi = {
   changePlan: (planSlug: string) => post<Subscription>("/billing/change-plan", { planSlug }),
   // Activate the org's subscription for a plan AFTER a successful payment (trial → active).
   activate: (planSlug: string) => post<Subscription>("/billing/activate", { planSlug }),
+  // Pay-As-You-Go prepaid credit wallet.
+  getCredit: () => get<{ balanceUsd: number; gbRemaining: number; usdPerGb: number }>("/billing/credit"),
+  buyCredit: (amountUsd: number) =>
+    post<{ balanceUsd: number; gbRemaining: number; usdPerGb: number; planSlug: string }>("/billing/credit", { amountUsd }),
   getPaymentMethods: () => get<PaymentMethod[]>("/billing/payment-methods"),
   addPaymentMethod: (data: Partial<PaymentMethod>) => post<PaymentMethod>("/billing/payment-methods", data),
   deletePaymentMethod: (id: string) => del<void>(`/billing/payment-methods/${id}`),

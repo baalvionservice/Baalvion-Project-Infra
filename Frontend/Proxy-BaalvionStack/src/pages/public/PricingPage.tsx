@@ -104,7 +104,7 @@ export default function PricingPage() {
                 <span className="text-muted-foreground">/GB</span>
               </div>
               <Button variant="outline" asChild>
-                <Link to="/signup?plan=starter">Start Now</Link>
+                <Link to="/signup?plan=pay-as-you-go">Start Now</Link>
               </Button>
             </div>
           </div>
