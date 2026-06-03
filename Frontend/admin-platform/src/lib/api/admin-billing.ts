@@ -55,6 +55,20 @@ export interface RevenueTotals {
   arr: number;
 }
 
+export interface PlanRevenue {
+  planSlug: string;
+  customers: number;
+  mrr: number;
+  lifetimeRevenue: number;
+  sharePct: number;
+}
+
+export interface RevenueReport {
+  customers: CustomerRevenue[];
+  totals: RevenueTotals;
+  byPlan: PlanRevenue[];
+}
+
 export const adminBillingApi = {
   summary: () => apiClient.get('/admin/billing/subscriptions/summary'),
   revenue: () => apiClient.get('/admin/billing/revenue'),

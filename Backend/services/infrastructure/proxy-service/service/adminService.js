@@ -105,7 +105,21 @@ const updateRateLimit = async (id, payload) => {
     return rateLimit;
 };
 
-const getRevenueSummary = async () => ({ mrr: 189400, arr: 2272800, churn: 1.8, ltv: 8420, arpu: 921 });
+// Real revenue summary derived from live subscriptions/credit/invoices (was mock).
+const getRevenueSummary = async () => {
+    const { totals } = await getRevenueByCustomer();
+    const arpu = totals.customers ? Math.round((totals.mrr / totals.customers) * 100) / 100 : 0;
+    return {
+        mrr: totals.mrr,
+        arr: totals.arr,
+        creditRevenue: totals.creditRevenue,
+        lifetimeRevenue: totals.lifetimeRevenue,
+        customers: totals.customers,
+        arpu,
+        ltv: 0,    // requires churn history (not yet tracked)
+        churn: 0,  // requires period-over-period snapshots (not yet tracked)
+    };
+};
 const getCohortRetention = async () => ({ cohorts: [{ month: '2026-01', retention: [100, 94, 90] }] });
 const getFeatureFlags = () => store.getCollection('featureFlags');
 const updateFeatureFlag = async (key, payload) => {
@@ -226,7 +240,27 @@ const getRevenueByCustomer = async () => {
     totals.lifetimeRevenue = Math.round(totals.lifetimeRevenue * 100) / 100;
     totals.arr = Math.round(totals.mrr * 12 * 100) / 100;
 
-    return { customers, totals };
+    // Revenue grouped by plan (real share for the "Revenue by Plan" breakdown).
+    const planAgg = {};
+    customers.forEach((c) => {
+        const key = c.planSlug || 'none';
+        if (!planAgg[key]) planAgg[key] = { planSlug: key, mrr: 0, lifetimeRevenue: 0, customers: 0 };
+        planAgg[key].mrr += c.mrr;
+        planAgg[key].lifetimeRevenue += c.lifetimeRevenue;
+        planAgg[key].customers += 1;
+    });
+    const byPlan = Object.values(planAgg)
+        .map((p) => ({
+            planSlug: p.planSlug,
+            customers: p.customers,
+            mrr: Math.round(p.mrr * 100) / 100,
+            lifetimeRevenue: Math.round(p.lifetimeRevenue * 100) / 100,
+            // % share of MRR (PAYG plans show their lifetime-credit share instead).
+            sharePct: totals.mrr > 0 ? Math.round((p.mrr / totals.mrr) * 1000) / 10 : 0,
+        }))
+        .sort((a, b) => b.mrr - a.mrr || b.lifetimeRevenue - a.lifetimeRevenue);
+
+    return { customers, totals, byPlan };
 };
 
 const listAdminPlans = async () => store.getCollection('plans');
@@ -346,7 +380,36 @@ const markOrderPaid = async (invoiceId) => {
             activated = true;
         } catch (e) { /* invoice still marked paid; activation is best-effort */ }
     }
-    return { invoiceId, status: 'paid', activated, orgId: invoice.orgId, planSlug: planSlug || null };
+    // Notify the customer: payment received + subscription live. Both channels are
+    // best-effort — they NEVER block or fail the settlement.
+    let notified = false;
+    let emailed = false;
+    try {
+        const plans = await store.getCollection('plans');
+        const planName = (plans.find((p) => p.slug === planSlug) || {}).name || planSlug || 'your';
+        const title = 'Payment received — subscription active';
+        const body = activated
+            ? `We've received your payment and your ${planName} subscription is now active. Thank you for choosing Baalvion NetStack.`
+            : `We've received your payment for the ${planName} plan. Thank you for choosing Baalvion NetStack.`;
+
+        // In-app notification — the guaranteed channel (shows in the customer's feed).
+        try {
+            await store.createNotification({ orgId: invoice.orgId, title, body, read: false, createdAt: new Date().toISOString() });
+            notified = true;
+        } catch (e) { /* non-fatal */ }
+
+        // Email — best-effort (Mailpit in dev, SMTP in prod).
+        try {
+            const user = invoice.userId ? await store.getById('users', invoice.userId) : null;
+            if (user && user.email) {
+                const mailer = require('./mailer');
+                const r = await mailer.sendMail({ to: user.email, subject: title, text: body });
+                emailed = !!(r && r.sent);
+            }
+        } catch (e) { /* non-fatal */ }
+    } catch (e) { /* notification is best-effort; never block the settlement */ }
+
+    return { invoiceId, status: 'paid', activated, notified, emailed, orgId: invoice.orgId, planSlug: planSlug || null };
 };
 
 module.exports = {

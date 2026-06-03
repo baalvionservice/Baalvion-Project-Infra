@@ -5,8 +5,7 @@ import {
   type SubscriptionSummary,
   type AdminPlan,
   type AdminPlanInput,
-  type CustomerRevenue,
-  type RevenueTotals,
+  type RevenueReport,
 } from '@/lib/api/admin-billing';
 
 const KEY = 'admin-billing';
@@ -27,7 +26,7 @@ export const useAdminSubscriptions = (params?: { page?: number; pageSize?: numbe
   });
 
 export const useRevenueByCustomer = () =>
-  useQuery<{ customers: CustomerRevenue[]; totals: RevenueTotals }>({
+  useQuery<RevenueReport>({
     queryKey: [KEY, 'revenue'],
     queryFn: () => adminBillingApi.revenue().then((r) => r.data.data),
     staleTime: 30_000,
