@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -40,8 +40,11 @@ type SignupFormData = z.infer<typeof signupSchema>;
 const AuthPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, register } = useAuth();
   const isLogin = location.pathname === "/login";
+  // Plan chosen on /pricing is carried as ?plan=<slug> and provisioned at signup.
+  const selectedPlan = searchParams.get("plan") || undefined;
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -87,9 +90,16 @@ const AuthPage = () => {
   const onSignupSubmit = async (data: SignupFormData) => {
     setIsLoading(true);
     try {
-      await register(data.email, data.password, data.fullName);
-      toast({ title: "Account created!", description: "Welcome! Check your email to verify your account." });
-      navigate("/app/dashboard", { replace: true });
+      const result = await register(data.email, data.password, data.fullName, selectedPlan);
+      // Paid plans are provisioned as a trial → route the new owner into checkout
+      // to activate. Free/$0 plans (or no plan) go straight to the dashboard.
+      if (result.requiresPayment && result.plan) {
+        toast({ title: "Account created!", description: `Complete payment to activate your ${result.plan.name} plan.` });
+        navigate(`/app/billing/checkout?plan=${encodeURIComponent(result.plan.slug)}`, { replace: true });
+      } else {
+        toast({ title: "Account created!", description: "Welcome to Baalvion NetStack." });
+        navigate("/app/dashboard", { replace: true });
+      }
     } catch (err: unknown) {
       toast({
         title: "Registration failed",

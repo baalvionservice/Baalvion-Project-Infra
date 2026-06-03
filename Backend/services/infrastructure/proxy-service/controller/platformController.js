@@ -181,6 +181,7 @@ module.exports = {
     getInvoices: wrap(async (req, res) => sendSuccess(req, res, await billingService.getInvoices(req.auth))),
     getInvoice: wrap(async (req, res) => sendSuccess(req, res, await billingService.getInvoice(req.auth, req.params.id))),
     changePlan: wrap(async (req, res) => sendSuccess(req, res, await billingService.changePlan(req.auth, req.body.planSlug))),
+    activatePlan: wrap(async (req, res) => sendSuccess(req, res, await billingService.activateSubscription(req.auth, req.body.planSlug))),
     getPaymentMethods: wrap(async (req, res) => sendSuccess(req, res, await billingService.getPaymentMethods(req.auth))),
     addPaymentMethod: wrap(async (req, res) => sendSuccess(req, res, await billingService.addPaymentMethod(req.auth, req.body), 201)),
     deletePaymentMethod: wrap(async (req, res) => { await billingService.removePaymentMethod(req.auth, req.params.id); sendSuccess(req, res, null, 200); }),

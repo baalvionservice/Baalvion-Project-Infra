@@ -76,12 +76,12 @@ export default function PricingPage() {
                 ))}
               </ul>
 
-              <Button 
-                variant={plan.popular ? "hero" : "outline"} 
+              <Button
+                variant={plan.popular ? "hero" : "outline"}
                 className="w-full"
                 asChild
               >
-                <Link to="/signup">Get Started</Link>
+                <Link to={`/signup?plan=${encodeURIComponent(plan.slug || plan.name.toLowerCase())}`}>Get Started</Link>
               </Button>
             </CardContent>
           </Card>
@@ -104,7 +104,7 @@ export default function PricingPage() {
                 <span className="text-muted-foreground">/GB</span>
               </div>
               <Button variant="outline" asChild>
-                <Link to="/signup">Start Now</Link>
+                <Link to="/signup?plan=starter">Start Now</Link>
               </Button>
             </div>
           </div>

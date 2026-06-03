@@ -58,6 +58,49 @@ const changePlan = async (auth, planSlug) => {
     return { checkoutUrl: session.url };
 };
 
+// Activate (or provision) the org's subscription for a plan AFTER a successful
+// payment. Unlike changePlan this never creates a new checkout session — it only
+// flips the subscription to `active` and renews the period, and keeps the org's
+// plan_slug/bandwidth in sync. Idempotent.
+const activateSubscription = async (auth, planSlug) => {
+    const targetPlan = await getPlan(planSlug);
+    if (!targetPlan) {
+        throw new AppError('PLAN_NOT_FOUND', 'Requested plan does not exist', 404);
+    }
+
+    const now = new Date();
+    const periodEnd = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+    const fields = {
+        planSlug,
+        status: 'active',
+        currentPeriodStart: now.toISOString(),
+        currentPeriodEnd: periodEnd.toISOString(),
+        cancelAtPeriodEnd: false,
+    };
+
+    const subscription = await getSubscription(auth);
+    if (subscription) {
+        await store.update('subscriptions', subscription.id, fields, auth.orgId);
+    } else {
+        await store.insert('subscriptions', {
+            orgId: auth.orgId,
+            userId: auth.userId,
+            planId: targetPlan.id,
+            enforcementMode: 'pay-as-you-go',
+            ...fields,
+        });
+    }
+
+    // Keep the org record's plan/limit in sync (used for feature gating + quotas).
+    await store.update('organizations', auth.orgId, {
+        planSlug,
+        bandwidthLimitGb: targetPlan.bandwidthLimitGb,
+    });
+
+    authService.issueEvent('plan.activated', auth.orgId, { planSlug });
+    return await getSubscription(auth);
+};
+
 const addPaymentMethod = async (auth, payload) => store.insert('paymentMethods', { orgId: auth.orgId, ...payload });
 
 const removePaymentMethod = async (auth, id) => {
@@ -98,6 +141,7 @@ module.exports = {
     getInvoice,
     getPaymentMethods,
     changePlan,
+    activateSubscription,
     addPaymentMethod,
     removePaymentMethod,
     getUsageForecast,
