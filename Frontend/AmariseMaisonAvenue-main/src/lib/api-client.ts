@@ -453,6 +453,19 @@ export const orderApi = {
     return apiFetch<PaginatedResponse<Order>>(`${ORDER_URL}/orders/stores/${storeId}/orders${qs ? `?${qs}` : ''}`);
   },
 
+  // Customer-facing: the authenticated shopper's OWN orders (order-service GET /orders/mine).
+  // Unlike list() (store-admin scoped), this requires only a logged-in user.
+  mine(filters: { page?: number; pageSize?: number } = {}): Promise<ApiResult<PaginatedResponse<Order>>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<PaginatedResponse<Order>>();
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v !== undefined) params.set(k, String(v));
+    });
+    const qs = params.toString();
+    return apiFetch<PaginatedResponse<Order>>(`${ORDER_URL}/orders/stores/${storeId}/orders/mine${qs ? `?${qs}` : ''}`);
+  },
+
   cancel(orderId: string, reason?: string): Promise<ApiResult<Order>> {
     const storeId = getStoreId();
     if (!storeId) return missingStore<Order>();
@@ -464,6 +477,36 @@ export const orderApi = {
 
   getByUser(userId: string, page = 1, pageSize = 20): Promise<ApiResult<PaginatedResponse<Order>>> {
     return orderApi.list({ userId, page, pageSize });
+  },
+};
+
+// ── Customer ─────────────────────────────────────────────────────────────────
+
+export interface Customer {
+  id: string;
+  userId?: number | null;
+  storeId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+}
+
+// customerApi (store-scoped: /orders/stores/:storeId/customers)
+export const customerApi = {
+  /**
+   * Find-or-create the AUTHENTICATED caller's customer record. The backend upsert is
+   * idempotent by (store, email) and stamps `userId` SERVER-SIDE from the bearer token
+   * (never trusted from the client). Returns the canonical customer — its UUID `id` is
+   * what links an order to the shopper (so it surfaces in GET /orders/mine).
+   */
+  ensure(input: { email: string; firstName: string; lastName: string; phone?: string }): Promise<ApiResult<Customer>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<Customer>();
+    return apiFetch<Customer>(`${ORDER_URL}/orders/stores/${storeId}/customers`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
   },
 };
 

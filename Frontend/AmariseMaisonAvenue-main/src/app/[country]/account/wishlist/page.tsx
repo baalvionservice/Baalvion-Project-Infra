@@ -2,16 +2,7 @@
 
 import React from 'react';
 import { useAppStore } from '@/lib/store';
-import { 
-  Heart, 
-  ChevronRight, 
-  ArrowRight, 
-  Sparkles, 
-  Share2,
-  Lock,
-  Package
-} from 'lucide-react';
-import { Card } from "@/components/ui/card";
+import { Heart, ChevronRight, Share2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { ProductCard } from '@/components/product/ProductCard';
 import Link from 'next/link';
@@ -54,33 +45,11 @@ export default function PrivateArchivePage() {
               <p className="text-xl font-headline font-bold italic text-gray-900">Your Archive is Empty</p>
               <p className="text-xs text-gray-500 font-light uppercase tracking-widest">Reserve artifacts while browsing the registry.</p>
            </div>
-           <Link href={`/${countryCode}/category/hermes`}>
-              <Button className="h-12 bg-black text-white hover:bg-plum rounded-none text-[9px] font-bold tracking-widest uppercase px-12">EXPLORE ATELIERS</Button>
+           <Link href={`/${countryCode}`}>
+              <Button className="h-12 bg-black text-white hover:bg-plum rounded-none text-[9px] font-bold tracking-widest uppercase px-12">EXPLORE THE MAISON</Button>
            </Link>
         </div>
       )}
-
-      {/* VIP Access Push */}
-      <section className="bg-black text-white p-12 relative overflow-hidden rounded-none shadow-2xl">
-         <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none"><Lock className="w-40 h-40" /></div>
-         <div className="relative z-10 flex flex-col md:row items-center justify-between gap-12 text-center md:text-left">
-            <div className="space-y-4 max-w-2xl">
-               <div className="flex items-center space-x-3 text-gold">
-                  <Sparkles className="w-5 h-5" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Private Collection Strategy</span>
-               </div>
-               <h3 className="text-3xl font-headline font-bold italic">Optimize your archive.</h3>
-               <p className="text-sm font-light italic opacity-60 leading-relaxed">
-                 "Our senior curators can analyze your archived artifacts to suggest a synergistic collection strategy based on historical appreciation and heritage value."
-               </p>
-            </div>
-            <Link href={`/${countryCode}/account/curation`}>
-               <Button className="h-16 px-12 bg-white text-black hover:bg-gold rounded-none text-[10px] font-bold tracking-[0.3em] uppercase transition-all shadow-xl">
-                  CONSULT SENIOR CURATOR
-               </Button>
-            </Link>
-         </div>
-      </section>
     </div>
   );
 }

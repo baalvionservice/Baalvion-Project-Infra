@@ -263,7 +263,10 @@ export default function CheckoutPage() {
         currencyCode: currentCountryConfig?.currency || "USD",
         country: countryCode,
         shippingAmount: 0,
-        customerId: currentUser?.id,
+        // Link to the REAL signed-in shopper (resolved inside placeOrder via the auth session,
+        // not the mock store). The form name seeds the customer record on first link; guests
+        // stay anonymous. Replaces the previous mock `currentUser?.id`.
+        customer: { firstName, lastName },
         idempotencyKey: idempotencyKeyRef.current,
         // shippingAddress omitted: the form lacks a full address (addressSchema requires
         // address1/city/countryCode) — a partial would fail backend validation.

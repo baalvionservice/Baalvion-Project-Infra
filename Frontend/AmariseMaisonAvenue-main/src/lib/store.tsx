@@ -406,6 +406,24 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     initializeGlobalHandlers();
   }, []);
 
+  // Persist the wishlist locally so it survives reloads. There is no wishlist
+  // backend yet, so localStorage is the source of truth for the Private Archive.
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("amarise.wishlist");
+      if (raw) setWishlist(JSON.parse(raw));
+    } catch {
+      /* storage unavailable — wishlist stays in-memory for this session */
+    }
+  }, []);
+  useEffect(() => {
+    try {
+      window.localStorage.setItem("amarise.wishlist", JSON.stringify(wishlist));
+    } catch {
+      /* ignore */
+    }
+  }, [wishlist]);
+
   const activeHub = useMemo(() => {
     if (!currentUser) return "global";
     if (currentUser.role === "super_admin") return adminJurisdiction;
