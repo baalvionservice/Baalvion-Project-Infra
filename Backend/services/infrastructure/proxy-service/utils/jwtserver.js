@@ -20,8 +20,14 @@ const auth = createAuthServer({
     issuer:                     process.env.JWT_ISSUER || 'baalvion-auth',
     audience:                   process.env.JWT_AUDIENCE || 'baalvion-platform',
     requireRs256InProduction:   true,
-    allowHs256Fallback:         false,  // Batch C: RS256-ONLY verify — HS256 tokens are rejected (when RS256 keys present)
-    hs256IncludeIssuerAudience: true,   // (legacy issuance fallback only; verify rejects HS256)
+    // Default (env !== 'production' → true): in dev, verify BOTH proxy's own HS256
+    // tokens AND the central auth-service's RS256 tokens (whose public key lives in
+    // config/keys/<kid>.pub) so the central admin console can call proxy admin APIs.
+    // Production stays RS256-only. Override with JWT_ALLOW_HS256_FALLBACK if needed.
+    allowHs256Fallback:         process.env.JWT_ALLOW_HS256_FALLBACK
+                                  ? process.env.JWT_ALLOW_HS256_FALLBACK === 'true'
+                                  : config.env !== 'production',
+    hs256IncludeIssuerAudience: true,   // (legacy issuance fallback only)
     refreshIncludeJti:          false,  // legacy refresh shape omits jti
 });
 
