@@ -5,6 +5,7 @@ const { AppError } = require('../utils/errors');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 const cache = require('./cacheService');
 const ownership = require('./ownership');
+const orderService = require('./orderService');
 
 async function orderOwnerUserId(customerId) {
     if (!customerId) return null;
@@ -23,6 +24,25 @@ async function listReturns(storeId, query = {}) {
     if (query.status) where.status = query.status;
     if (query.orderId) where.orderId = query.orderId;
     const { rows, count } = await OrdersReturn.findAndCountAll({ where, limit, offset, order: [['createdAt', 'DESC']], include: [{ model: OrdersReturnItem, as: 'items' }] });
+    return buildPaginated(rows, count, { page, limit });
+}
+
+// Customer-facing "my returns": returns owned by the authenticated user in this store.
+// A return belongs to a customer (OrdersReturn.customerId); we resolve the caller's customer
+// record(s) for the store, then page their returns. Mirrors orderService.listMyOrders — no
+// store-role required, and guests (no userId) get an empty page (returns require an owner).
+async function listMyReturns(storeId, userId, query = {}) {
+    const { page, limit, offset } = parsePagination(query);
+    if (userId == null) return buildPaginated([], 0, { page, limit });
+    const customers = await OrdersCustomer.findAll({ where: { storeId, userId }, attributes: ['id'] });
+    const customerIds = customers.map((c) => c.id);
+    if (customerIds.length === 0) return buildPaginated([], 0, { page, limit });
+    const where = { storeId, customerId: { [Op.in]: customerIds } };
+    if (query.status) where.status = query.status;
+    const { rows, count } = await OrdersReturn.findAndCountAll({
+        where, limit, offset, order: [['createdAt', 'DESC']],
+        include: [{ model: OrdersReturnItem, as: 'items' }],
+    });
     return buildPaginated(rows, count, { page, limit });
 }
 
