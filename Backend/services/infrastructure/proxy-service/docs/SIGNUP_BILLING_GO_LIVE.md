@@ -64,6 +64,26 @@ These are deliberately **not** completed by code alone — they need infrastruct
 - [ ] Serve via S3 + CloudFront (or the existing static host); reverse-proxy `/auth-bff` + `/api` to the gateway/proxy-service same-origin
 - [ ] Set `VITE_API_PLATFORM_BASE_URL` / `VITE_API_AUTH_BASE_URL` to the production API origin
 
+## Cross-service auth (admin console → proxy)
+
+The central **admin-platform** logs in via the central **auth-service (RS256)** and calls
+proxy-service's `/v1/admin/billing/*`. For proxy to verify those tokens it needs the
+central authority's **public** key in its keys dir (the dir is gitignored, so this is a
+one-time local setup; a fresh clone must repeat it):
+
+```bash
+# proxy verifies central RS256 tokens with this public key, keyed by the token's kid
+mkdir -p Backend/services/infrastructure/proxy-service/config/keys
+cp Backend/services/identity/.keys/jwt_public.pem \
+   Backend/services/infrastructure/proxy-service/config/keys/<central-kid>.pub
+# (<central-kid> = the `kid` in the auth-service access-token header)
+```
+
+Proxy still issues/verifies its own **HS256** tokens for the customer flow (dev keeps
+`allowHs256Fallback` on). **Production:** prefer the remote-JWKS verifier
+(`@baalvion/auth-node` `createRemoteVerifier` against the auth-service JWKS endpoint) so
+key rotation needs no file copies, and set `NODE_ENV=production` (RS256-only).
+
 ## Key endpoints (proxy-service, `/v1`)
 - `POST /auth/register` — provision tenant + log in
 - `POST /auth/login` `/auth/refresh` `/auth/logout`
