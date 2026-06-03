@@ -46,6 +46,40 @@ exports.unsuspendUser = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+exports.updateUser = async (req, res, next) => {
+    try {
+        const { fullName, full_name, avatarUrl, avatar_url, status } = req.body || {};
+        const user = await adminService.updateUser(
+            req.params.userId,
+            { fullName, full_name, avatarUrl, avatar_url, status },
+            req.auth.userId,
+            req.ip,
+        );
+        sendSuccess(req, res, user);
+    } catch (err) { next(err); }
+};
+
+exports.deleteUser = async (req, res, next) => {
+    try {
+        const result = await adminService.deleteUser(req.params.userId, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+exports.sendUserVerification = async (req, res, next) => {
+    try {
+        const result = await adminService.sendVerification(req.params.userId, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+exports.revokeUserSessions = async (req, res, next) => {
+    try {
+        const result = await adminService.revokeUserSessions(req.params.userId, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
 exports.listOrgs = async (req, res, next) => {
     try {
         const { page = 1, limit = 50, search, plan } = req.query;
@@ -56,6 +90,50 @@ exports.listOrgs = async (req, res, next) => {
             plan:   plan || undefined,
         });
         sendPaginated(req, res, result.items, result.total, result.page, result.limit);
+    } catch (err) { next(err); }
+};
+
+exports.getOrgDetail = async (req, res, next) => {
+    try {
+        const org = await adminService.getOrgById(req.params.orgId);
+        sendSuccess(req, res, org);
+    } catch (err) { next(err); }
+};
+
+exports.createOrg = async (req, res, next) => {
+    try {
+        const { name, slug, plan, ownerId, owner_id } = req.body || {};
+        const org = await adminService.createOrg(
+            { name, slug, plan, ownerId: ownerId !== undefined ? ownerId : owner_id },
+            req.auth.userId,
+            req.ip,
+        );
+        sendSuccess(req, res, org, 201);
+    } catch (err) { next(err); }
+};
+
+exports.updateOrg = async (req, res, next) => {
+    try {
+        const { name, slug, plan } = req.body || {};
+        const org = await adminService.updateOrg(req.params.orgId, { name, slug, plan }, req.auth.userId, req.ip);
+        sendSuccess(req, res, org);
+    } catch (err) { next(err); }
+};
+
+exports.deleteOrg = async (req, res, next) => {
+    try {
+        // Accept confirm via body or query (?confirm=true) — destructive, so it must be explicit.
+        const confirm = req.body?.confirm === true || req.query?.confirm === 'true';
+        const result = await adminService.deleteOrg(req.params.orgId, { confirm }, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+exports.suspendOrg = async (req, res, next) => {
+    try {
+        const { reason } = req.body || {};
+        const result = await adminService.suspendOrg(req.params.orgId, reason, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
     } catch (err) { next(err); }
 };
 

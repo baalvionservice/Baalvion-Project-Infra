@@ -159,6 +159,205 @@ async function unsuspendUser(userId, adminUserId, ipAddress) {
     logger.info({ userId, adminUserId }, 'User unsuspended');
 }
 
+// PATCH safe user fields only. NEVER patchable: password_hash, email, email_verified_at,
+// mfa_*, recovery_codes — i.e. no auth/verification bypass via this endpoint. The user's
+// org role lives on auth.team_members, not auth.users, so role changes are out of scope
+// here (handled by org membership endpoints).
+const USER_ALLOWED_STATUS = ['active', 'suspended'];
+
+async function updateUser(userId, patch, adminUserId, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+
+    const [user] = await db.sequelize.query(
+        'SELECT id, status FROM auth.users WHERE id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] }
+    );
+    if (!user) throw new AppError('NOT_FOUND', 'User not found', 404);
+
+    const sets = [];
+    const bind = [];
+    const changed = {};
+
+    // Accept both camelCase (fullName) and snake_case (full_name) from the console.
+    const fullName = patch.fullName !== undefined ? patch.fullName : patch.full_name;
+    if (fullName !== undefined) {
+        const trimmed = fullName == null ? null : String(fullName).trim();
+        if (trimmed != null && trimmed.length > 255) {
+            throw new AppError('VALIDATION_ERROR', 'Full name must be at most 255 chars', 400);
+        }
+        sets.push(`full_name = $${bind.length + 1}`); bind.push(trimmed || null); changed.fullName = trimmed || null;
+    }
+
+    const avatarUrl = patch.avatarUrl !== undefined ? patch.avatarUrl : patch.avatar_url;
+    if (avatarUrl !== undefined) {
+        const trimmed = avatarUrl == null ? null : String(avatarUrl).trim();
+        sets.push(`avatar_url = $${bind.length + 1}`); bind.push(trimmed || null); changed.avatarUrl = trimmed || null;
+    }
+
+    if (patch.status !== undefined) {
+        if (userId === String(adminUserId) && patch.status === 'suspended') {
+            throw new AppError('INVALID_REQUEST', 'Cannot suspend yourself', 400);
+        }
+        const status = String(patch.status).trim();
+        if (!USER_ALLOWED_STATUS.includes(status)) {
+            throw new AppError('VALIDATION_ERROR', `Invalid status; allowed: ${USER_ALLOWED_STATUS.join(', ')}`, 400);
+        }
+        sets.push(`status = $${bind.length + 1}`); bind.push(status); changed.status = status;
+    }
+
+    if (sets.length === 0) {
+        throw new AppError('VALIDATION_ERROR', 'No updatable fields provided (fullName, avatarUrl, status)', 400);
+    }
+
+    // If status is being moved to suspended, revoke active sessions/refresh tokens too
+    // (mirrors suspendUser side effects).
+    const goingSuspended = changed.status === 'suspended' && user.status !== 'suspended';
+
+    sets.push('updated_at = NOW()');
+    bind.push(userId);
+
+    const [updated] = await db.sequelize.query(
+        `UPDATE auth.users SET ${sets.join(', ')}
+         WHERE id = $${bind.length}
+         RETURNING id, email, full_name, avatar_url, status, email_verified_at, mfa_enabled, created_at, updated_at`,
+        { type: db.Sequelize.QueryTypes.SELECT, bind }
+    );
+
+    if (goingSuspended) {
+        await db.sequelize.query(
+            "UPDATE auth.sessions SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+            { bind: [userId] }
+        );
+        await db.sequelize.query(
+            "UPDATE auth.refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+            { bind: [userId] }
+        );
+    }
+
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, action, resource_type, resource_id, metadata, ip_address)
+         VALUES ($1, 'user.updated', 'user', $2, $3, $4)`,
+        { bind: [userId, String(userId), JSON.stringify({ changed, updatedBy: adminUserId }), ip] }
+    );
+
+    logger.info({ userId, adminUserId, event: 'admin.user_updated' }, 'User updated by admin');
+    return updated;
+}
+
+// SOFT delete: auth.users HAS a status column, so we mark the account 'deleted' rather
+// than physically removing the row (which would cascade-destroy sessions, memberships and
+// orphan audit history). Also revokes active sessions/refresh tokens.
+async function deleteUser(userId, adminUserId, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+
+    if (userId === String(adminUserId)) {
+        throw new AppError('INVALID_REQUEST', 'Cannot delete yourself', 400);
+    }
+
+    const [user] = await db.sequelize.query(
+        'SELECT id, status FROM auth.users WHERE id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] }
+    );
+    if (!user) throw new AppError('NOT_FOUND', 'User not found', 404);
+
+    // Guard: an org owner cannot be deleted while still owning organizations (FK is
+    // NOT NULL on organizations.owner_id; reassign/delete the org first).
+    const [{ owned_count }] = await db.sequelize.query(
+        'SELECT COUNT(*)::int AS owned_count FROM auth.organizations WHERE owner_id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] }
+    );
+    if (owned_count > 0) {
+        throw new AppError('CONFLICT', `User owns ${owned_count} organization(s); reassign or delete them first`, 409);
+    }
+
+    await db.sequelize.query(
+        "UPDATE auth.users SET status = 'deleted', updated_at = NOW() WHERE id = $1",
+        { bind: [userId] }
+    );
+    await db.sequelize.query(
+        "UPDATE auth.sessions SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+        { bind: [userId] }
+    );
+    await db.sequelize.query(
+        "UPDATE auth.refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+        { bind: [userId] }
+    );
+
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, action, resource_type, resource_id, metadata, ip_address)
+         VALUES ($1, 'user.deleted', 'user', $2, $3, $4)`,
+        { bind: [userId, String(userId), JSON.stringify({ softDelete: true, deletedBy: adminUserId }), ip] }
+    );
+
+    logger.warn({ userId, adminUserId, event: 'admin.user_deleted' }, 'User soft-deleted by admin');
+    return { id: String(userId), deleted: true, soft: true };
+}
+
+// Re-issue email verification. auth-service owns the email_verifications table + token
+// minting + mailer; admin-service does not. We record an audit entry and return a no-op
+// success (the console only needs a non-error acknowledgement). If the user is already
+// verified, surface that clearly.
+async function sendVerification(userId, adminUserId, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+
+    const [user] = await db.sequelize.query(
+        'SELECT id, email, email_verified_at FROM auth.users WHERE id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] }
+    );
+    if (!user) throw new AppError('NOT_FOUND', 'User not found', 404);
+    if (user.email_verified_at) {
+        return { message: 'Email already verified', alreadyVerified: true, queued: false };
+    }
+
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, action, resource_type, resource_id, metadata, ip_address)
+         VALUES ($1, 'user.verification_resend_requested', 'user', $2, $3, $4)`,
+        { bind: [userId, String(userId), JSON.stringify({ email: user.email, requestedBy: adminUserId, note: 'auth-service owns verification dispatch' }), ip] }
+    );
+
+    logger.info({ userId, adminUserId, event: 'admin.user_verification_requested' }, 'Verification resend requested');
+    return { message: 'Verification request recorded', queued: false };
+}
+
+// Revoke all active sessions + refresh tokens for a user (mirrors revokeSessionAdmin,
+// but for every session of one user).
+async function revokeUserSessions(userId, adminUserId, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+
+    const [user] = await db.sequelize.query(
+        'SELECT id FROM auth.users WHERE id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] }
+    );
+    if (!user) throw new AppError('NOT_FOUND', 'User not found', 404);
+
+    // RETURNING id yields one row per revoked session — its length is the exact count.
+    const revokedSessions = await db.sequelize.query(
+        `UPDATE auth.sessions SET revoked_at = NOW()
+         WHERE user_id = $1 AND revoked_at IS NULL
+         RETURNING id`,
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [userId] }
+    );
+    const revokedCount = Array.isArray(revokedSessions) ? revokedSessions.length : 0;
+
+    await db.sequelize.query(
+        "UPDATE auth.refresh_tokens SET revoked_at = NOW() WHERE user_id = $1 AND revoked_at IS NULL",
+        { bind: [userId] }
+    );
+
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, action, resource_type, resource_id, metadata, ip_address)
+         VALUES ($1, 'user.sessions_revoked', 'user', $2, $3, $4)`,
+        { bind: [userId, String(userId), JSON.stringify({ revokedBy: adminUserId, reason: 'admin_revoke_all' }), ip] }
+    );
+
+    logger.info({ userId, adminUserId, revokedCount, event: 'admin.user_sessions_revoked' }, 'All user sessions revoked by admin');
+    return { message: 'Sessions revoked', revokedCount };
+}
+
 // ── Org management ────────────────────────────────────────────────────────────
 
 async function listOrgs({ page = 1, limit = 50, search, plan }) {
@@ -191,6 +390,248 @@ async function listOrgs({ page = 1, limit = 50, search, plan }) {
     ]);
 
     return { items: orgs, total: count, page, limit, hasMore: offset + limit < count };
+}
+
+// Single-org detail (mirrors the listOrgs projection: owner join + active member count).
+async function getOrgById(orgId) {
+    const db = getDb();
+    const [org] = await db.sequelize.query(
+        `SELECT o.id, o.name, o.slug, o.plan, o.owner_id, o.created_at, o.updated_at,
+                COUNT(m.id)::int AS member_count,
+                ou.email AS owner_email, ou.full_name AS owner_name, ou.avatar_url AS owner_avatar
+         FROM auth.organizations o
+         LEFT JOIN auth.team_members m ON m.org_id = o.id AND m.status = 'active'
+         LEFT JOIN auth.users ou ON ou.id = o.owner_id
+         WHERE o.id = $1
+         GROUP BY o.id, ou.email, ou.full_name, ou.avatar_url`,
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [orgId] }
+    );
+    if (!org) throw new AppError('NOT_FOUND', 'Organization not found', 404);
+    return org;
+}
+
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+const ALLOWED_PLANS = ['free', 'starter', 'pro', 'business', 'enterprise'];
+
+// Normalize/validate a slug. Accepts an explicit slug or derives one from the name.
+function normalizeSlug(rawSlug, name) {
+    const base = (rawSlug != null && String(rawSlug).trim() !== '')
+        ? String(rawSlug)
+        : String(name || '');
+    const slug = base.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    if (!slug || slug.length > 100 || !SLUG_RE.test(slug)) {
+        throw new AppError('VALIDATION_ERROR', 'Invalid slug: use lowercase letters, numbers and hyphens (max 100 chars)', 400);
+    }
+    return slug;
+}
+
+async function createOrg({ name, slug, plan, ownerId }, adminUserId, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+
+    const trimmedName = typeof name === 'string' ? name.trim() : '';
+    if (!trimmedName || trimmedName.length > 255) {
+        throw new AppError('VALIDATION_ERROR', 'Organization name is required (max 255 chars)', 400);
+    }
+    const finalSlug = normalizeSlug(slug, trimmedName);
+
+    let finalPlan = 'free';
+    if (plan != null && String(plan).trim() !== '') {
+        finalPlan = String(plan).trim();
+        if (!ALLOWED_PLANS.includes(finalPlan)) {
+            throw new AppError('VALIDATION_ERROR', `Invalid plan; allowed: ${ALLOWED_PLANS.join(', ')}`, 400);
+        }
+    }
+
+    // owner_id is NOT NULL with an FK to auth.users. Default to the acting admin when
+    // the console does not supply one. Validate the referenced user exists (clear error
+    // instead of a raw FK violation).
+    const ownerCandidate = (ownerId != null && String(ownerId).trim() !== '') ? ownerId : adminUserId;
+    const [owner] = await db.sequelize.query(
+        'SELECT id FROM auth.users WHERE id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [ownerCandidate] }
+    );
+    if (!owner) throw new AppError('VALIDATION_ERROR', 'Owner user not found', 400);
+
+    // Pre-check slug uniqueness for a friendly error (the UNIQUE constraint is the
+    // authoritative guard against races).
+    const [existing] = await db.sequelize.query(
+        'SELECT id FROM auth.organizations WHERE slug = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [finalSlug] }
+    );
+    if (existing) throw new AppError('CONFLICT', 'An organization with that slug already exists', 409);
+
+    let created;
+    try {
+        [created] = await db.sequelize.query(
+            `INSERT INTO auth.organizations (name, slug, plan, owner_id)
+             VALUES ($1, $2, $3, $4)
+             RETURNING id, name, slug, plan, owner_id, created_at, updated_at`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind: [trimmedName, finalSlug, finalPlan, owner.id] }
+        );
+    } catch (err) {
+        if (err && /unique/i.test(err.message || '')) {
+            throw new AppError('CONFLICT', 'An organization with that slug already exists', 409);
+        }
+        throw err;
+    }
+
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, org_id, action, resource_type, resource_id, metadata, ip_address)
+         VALUES ($1, $2, 'org.created', 'organization', $3, $4, $5)`,
+        { bind: [adminUserId, created.id, String(created.id), JSON.stringify({ name: trimmedName, slug: finalSlug, plan: finalPlan, ownerId: owner.id }), ip] }
+    );
+
+    logger.info({ orgId: created.id, adminUserId, event: 'admin.org_created' }, 'Organization created by admin');
+    return created;
+}
+
+async function updateOrg(orgId, patch, adminUserId, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+
+    const [org] = await db.sequelize.query(
+        'SELECT id, name, slug, plan FROM auth.organizations WHERE id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [orgId] }
+    );
+    if (!org) throw new AppError('NOT_FOUND', 'Organization not found', 404);
+
+    // Whitelist of patchable columns only — never owner_id / id / timestamps via PATCH.
+    const sets = [];
+    const bind = [];
+    const changed = {};
+
+    if (patch.name !== undefined) {
+        const trimmedName = typeof patch.name === 'string' ? patch.name.trim() : '';
+        if (!trimmedName || trimmedName.length > 255) {
+            throw new AppError('VALIDATION_ERROR', 'Organization name must be 1-255 chars', 400);
+        }
+        sets.push(`name = $${bind.length + 1}`); bind.push(trimmedName); changed.name = trimmedName;
+    }
+    if (patch.slug !== undefined) {
+        const finalSlug = normalizeSlug(patch.slug, org.name);
+        if (finalSlug !== org.slug) {
+            const [dupe] = await db.sequelize.query(
+                'SELECT id FROM auth.organizations WHERE slug = $1 AND id <> $2',
+                { type: db.Sequelize.QueryTypes.SELECT, bind: [finalSlug, orgId] }
+            );
+            if (dupe) throw new AppError('CONFLICT', 'An organization with that slug already exists', 409);
+        }
+        sets.push(`slug = $${bind.length + 1}`); bind.push(finalSlug); changed.slug = finalSlug;
+    }
+    if (patch.plan !== undefined) {
+        const finalPlan = String(patch.plan).trim();
+        if (!ALLOWED_PLANS.includes(finalPlan)) {
+            throw new AppError('VALIDATION_ERROR', `Invalid plan; allowed: ${ALLOWED_PLANS.join(', ')}`, 400);
+        }
+        sets.push(`plan = $${bind.length + 1}`); bind.push(finalPlan); changed.plan = finalPlan;
+    }
+
+    if (sets.length === 0) {
+        throw new AppError('VALIDATION_ERROR', 'No updatable fields provided (name, slug, plan)', 400);
+    }
+
+    sets.push('updated_at = NOW()');
+    bind.push(orgId);
+
+    let updated;
+    try {
+        [updated] = await db.sequelize.query(
+            `UPDATE auth.organizations SET ${sets.join(', ')}
+             WHERE id = $${bind.length}
+             RETURNING id, name, slug, plan, owner_id, created_at, updated_at`,
+            { type: db.Sequelize.QueryTypes.SELECT, bind }
+        );
+    } catch (err) {
+        if (err && /unique/i.test(err.message || '')) {
+            throw new AppError('CONFLICT', 'An organization with that slug already exists', 409);
+        }
+        throw err;
+    }
+
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, org_id, action, resource_type, resource_id, metadata, ip_address)
+         VALUES ($1, $2, 'org.updated', 'organization', $3, $4, $5)`,
+        { bind: [adminUserId, orgId, String(orgId), JSON.stringify({ changed }), ip] }
+    );
+
+    logger.info({ orgId, adminUserId, event: 'admin.org_updated' }, 'Organization updated by admin');
+    return updated;
+}
+
+// HARD delete only. auth.organizations has NO status column (see migration 001), so a
+// status-based soft delete is impossible without an auth-schema migration — out of scope
+// for admin-service. Deleting an org CASCADES to team_members/sessions/refresh_tokens/
+// invitations (and SET NULL on audit_logs.org_id), so it is gated behind an explicit
+// confirm flag to prevent accidental destructive calls.
+async function deleteOrg(orgId, { confirm } = {}, adminUserId, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+
+    const [org] = await db.sequelize.query(
+        'SELECT id, name, slug, plan, owner_id FROM auth.organizations WHERE id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [orgId] }
+    );
+    if (!org) throw new AppError('NOT_FOUND', 'Organization not found', 404);
+
+    if (confirm !== true) {
+        throw new AppError(
+            'CONFIRMATION_REQUIRED',
+            'Deleting an organization permanently removes its members, sessions and invitations. Re-send with confirm=true to proceed.',
+            409,
+            { cascades: ['team_members', 'sessions', 'refresh_tokens', 'invitations'] }
+        );
+    }
+
+    const [{ member_count }] = await db.sequelize.query(
+        "SELECT COUNT(*)::int AS member_count FROM auth.team_members WHERE org_id = $1 AND status = 'active'",
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [orgId] }
+    );
+
+    // Audit BEFORE the delete (audit_logs.org_id is ON DELETE SET NULL, so the org_id
+    // reference would be nulled afterwards anyway — capture the id in metadata too).
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, org_id, action, resource_type, resource_id, metadata, ip_address)
+         VALUES ($1, $2, 'org.deleted', 'organization', $3, $4, $5)`,
+        { bind: [adminUserId, orgId, String(orgId), JSON.stringify({ orgId, name: org.name, slug: org.slug, plan: org.plan, memberCount: member_count, deletedBy: adminUserId }), ip] }
+    );
+
+    await db.sequelize.query(
+        'DELETE FROM auth.organizations WHERE id = $1',
+        { bind: [orgId] }
+    );
+
+    logger.warn({ orgId, adminUserId, memberCount: member_count, event: 'admin.org_deleted' }, 'Organization hard-deleted by admin');
+    return { id: String(orgId), deleted: true };
+}
+
+// Suspend an organization. auth.organizations has NO status column, so there is no
+// schema-supported way to mark an org suspended from admin-service alone. Rather than
+// silently lying or crashing, fail with a clear, structured error so the console can
+// surface it. (Wiring real org suspension requires an auth-schema status column.)
+async function suspendOrg(orgId, reason, adminUserId, ipAddress) {
+    const db = getDb();
+    const ip = ipAddress || '0.0.0.0';
+
+    const [org] = await db.sequelize.query(
+        'SELECT id FROM auth.organizations WHERE id = $1',
+        { type: db.Sequelize.QueryTypes.SELECT, bind: [orgId] }
+    );
+    if (!org) throw new AppError('NOT_FOUND', 'Organization not found', 404);
+
+    // Record the intent for auditability even though state cannot be changed here.
+    await db.sequelize.query(
+        `INSERT INTO auth.audit_logs (user_id, org_id, action, resource_type, resource_id, metadata, ip_address)
+         VALUES ($1, $2, 'org.suspend_requested', 'organization', $3, $4, $5)`,
+        { bind: [adminUserId, orgId, String(orgId), JSON.stringify({ reason: reason || null, note: 'no auth.organizations.status column' }), ip] }
+    );
+
+    logger.warn({ orgId, adminUserId, event: 'admin.org_suspend_unsupported' }, 'Org suspend requested but auth schema has no status column');
+    throw new AppError(
+        'NOT_IMPLEMENTED',
+        'Organization suspension is not supported: the auth schema has no organization status column.',
+        501
+    );
 }
 
 // ── Impersonation ─────────────────────────────────────────────────────────────
@@ -446,7 +887,8 @@ async function listRiskEvents({ page = 1, limit = 20 }) {
 module.exports = {
     getPlatformStats,
     listUsers, getUserDetail, suspendUser, unsuspendUser,
-    listOrgs,
+    updateUser, deleteUser, sendVerification, revokeUserSessions,
+    listOrgs, getOrgById, createOrg, updateOrg, deleteOrg, suspendOrg,
     createImpersonationToken,
     listAllSessions, revokeSessionAdmin,
     getAuditLogs,
