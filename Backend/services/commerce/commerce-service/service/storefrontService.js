@@ -128,4 +128,85 @@ async function listCollections(storeId) {
     return cols.map((c) => serializer.serializeCollection(c.toJSON()));
 }
 
-module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections };
+// Catalog-based related-products recommendations (replaces the dead mock). Builds an ordered,
+// de-duped candidate list — curated relations first, then same-collection members, then same
+// category, then featured-newest backfill — all constrained to the PUBLIC published catalog and
+// the optional per-market availability filter. Honest: it only ever returns real, in-market,
+// published products other than the source product, capped at `limit` (default 8, max 24).
+async function listRelated(storeId, idOrSlug, query = {}) {
+    await ensureStore(storeId);
+    const country = resolveCountry(query);
+    const limit = Math.min(24, Math.max(1, parseInt(query.limit, 10) || 8));
+
+    const idClause = UUID_RE.test(idOrSlug) ? { id: idOrSlug } : { slug: idOrSlug };
+    const source = await CommerceProduct.findOne({
+        where: { storeId, ...PUBLIC_WHERE, ...idClause },
+        include: [{ model: CommerceCollection, as: 'collections', through: { attributes: [] }, attributes: ['id'] }],
+    });
+    if (!source) throw new AppError('NOT_FOUND', 'Product not found', 404);
+
+    // Common WHERE for every candidate query: same store, public/published, exclude self, in-market.
+    const baseWhere = () => {
+        const where = { storeId, ...PUBLIC_WHERE, id: { [Op.ne]: source.id } };
+        if (country) where[Op.and] = [...(where[Op.and] || []), regionWhere(country)];
+        return where;
+    };
+
+    const picked = new Map(); // id -> product instance, preserves first-seen ordering
+    const take = (rows) => {
+        for (const r of rows) {
+            if (picked.size >= limit) break;
+            if (!picked.has(r.id) && r.id !== source.id) picked.set(r.id, r);
+        }
+    };
+    const remaining = () => limit - picked.size;
+
+    // (1) Curated related_product_ids, in declared order.
+    const curatedIds = Array.isArray(source.relatedProductIds) ? source.relatedProductIds.filter((x) => x && x !== source.id) : [];
+    if (curatedIds.length) {
+        const rows = await CommerceProduct.findAll({
+            where: { ...baseWhere(), id: { [Op.in]: curatedIds } },
+            include: baseIncludes(),
+        });
+        const byId = new Map(rows.map((r) => [r.id, r]));
+        take(curatedIds.map((id) => byId.get(id)).filter(Boolean));
+    }
+
+    // (2) Same-collection members.
+    const collectionIds = (source.collections || []).map((c) => c.id);
+    if (remaining() > 0 && collectionIds.length) {
+        const includes = baseIncludes();
+        const col = includes.find((i) => i.as === 'collections');
+        col.required = true;
+        col.where = { id: { [Op.in]: collectionIds } };
+        const rows = await CommerceProduct.findAll({
+            where: { ...baseWhere(), id: { [Op.notIn]: [source.id, ...picked.keys()] } },
+            include: includes, order: [['created_at', 'DESC']], limit: remaining(), subQuery: false, distinct: true,
+        });
+        take(rows);
+    }
+
+    // (3) Same category.
+    if (remaining() > 0 && source.categoryId) {
+        const rows = await CommerceProduct.findAll({
+            where: { ...baseWhere(), categoryId: source.categoryId, id: { [Op.notIn]: [source.id, ...picked.keys()] } },
+            include: baseIncludes(), order: [['created_at', 'DESC']], limit: remaining(),
+        });
+        take(rows);
+    }
+
+    // (4) Backfill with featured, newest first.
+    if (remaining() > 0) {
+        const rows = await CommerceProduct.findAll({
+            where: { ...baseWhere(), isFeatured: true, id: { [Op.notIn]: [source.id, ...picked.keys()] } },
+            include: baseIncludes(), order: [['created_at', 'DESC']], limit: remaining(),
+        });
+        take(rows);
+    }
+
+    return Array.from(picked.values())
+        .slice(0, limit)
+        .map((r) => serializer.serializeProductListItem(r.toJSON(), { country }));
+}
+
+module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listRelated };

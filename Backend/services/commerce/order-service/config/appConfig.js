@@ -76,6 +76,12 @@ module.exports = {
         opsEmail:    process.env.OPS_ALERT_EMAIL || '',
         timeoutMs:   Number(process.env.NOTIFICATION_TIMEOUT_MS || 4000),
         get enabled() { return !!this.internalKey && (!!this.opsUserId || !!this.opsEmail); },
+        // Transactional order emails (confirmation/paid) → notification-service. Independent of
+        // the ops-alert toggle above: only an internal key is required (recipient is the customer,
+        // not OPS_ALERT_*). Fail-open — a delivery failure never affects checkout.
+        get orderEmailsEnabled() { return !!this.internalKey; },
+        // Base URL used to build the {{orderUrl}} link in customer order emails.
+        storefrontUrl: process.env.STOREFRONT_URL || process.env.APP_URL || 'http://localhost:3000',
     },
     // Scheduled reconciliation sweep (BullMQ repeatable). Sweeps active stores, compares order
     // payments/refunds to the ledger, alerts on drift, and (optionally) auto-backfills missing entries.

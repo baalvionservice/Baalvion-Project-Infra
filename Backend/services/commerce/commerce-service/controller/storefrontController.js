@@ -1,6 +1,7 @@
 'use strict';
 const { sendSuccess } = require('../utils/response');
 const storefront = require('../service/storefrontService');
+const reviewService = require('../service/reviewService');
 
 const listProducts = async (req, res, next) => {
     try { return sendSuccess(req, res, await storefront.listProducts(req.params.storeId, req.query)); }
@@ -27,4 +28,14 @@ const listCollections = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
-module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections };
+const listReviews = async (req, res, next) => {
+    try { return sendSuccess(req, res, await reviewService.listProductReviews(req.params.storeId, req.params.idOrSlug, req.query)); }
+    catch (err) { return next(err); }
+};
+
+const listRelated = async (req, res, next) => {
+    try { return sendSuccess(req, res, await storefront.listRelated(req.params.storeId, req.params.idOrSlug, req.query)); }
+    catch (err) { return next(err); }
+};
+
+module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listReviews, listRelated };

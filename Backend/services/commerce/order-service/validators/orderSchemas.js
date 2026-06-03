@@ -89,3 +89,22 @@ exports.createReturnSchema = z.object({
 });
 
 exports.updateReturnStatusSchema = z.object({ status: z.enum(['approved', 'rejected', 'received', 'refunded', 'closed']) });
+
+// Shipment tracking (admin/ops). Status is constrained to the shipment lifecycle enum.
+const SHIPMENT_STATUSES = ['pending', 'in_transit', 'out_for_delivery', 'delivered', 'failed', 'returned'];
+
+exports.createShipmentSchema = z.object({
+    carrier: z.string().min(1).max(100),
+    trackingNumber: z.string().min(1).max(200),
+    trackingUrl: z.string().url().max(500).optional(),
+    estimatedDelivery: z.string().datetime().optional().nullable(),
+    status: z.enum(SHIPMENT_STATUSES).optional(),
+});
+
+exports.updateShipmentSchema = z.object({
+    status: z.enum(SHIPMENT_STATUSES),
+    location: z.string().max(200).optional(),
+    message: z.string().max(500).optional(),
+    trackingNumber: z.string().max(200).optional(),
+    trackingUrl: z.string().url().max(500).optional(),
+});

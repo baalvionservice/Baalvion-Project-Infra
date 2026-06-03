@@ -64,7 +64,10 @@ function serializeProductListItem(p, opts = {}) {
         isVip: cf.isVip != null ? !!cf.isVip : !!p.isFeatured,
         rating: Number(cf.rating ?? 0),
         reviewsCount: Number(cf.reviewsCount ?? 0),
-        stock: Number(cf.stock ?? 0),
+        // Inventory: prefer the first-class column, fall back to legacy custom_fields.stock.
+        // inStock honors track_inventory (untracked products are always purchasable).
+        stock: Number(p.stockQuantity ?? cf.stock ?? 0),
+        inStock: p.trackInventory ? Number(p.stockQuantity ?? cf.stock ?? 0) > 0 : true,
         brandId: cf.brandId || 'amarise-luxe',
         isGlobal: cf.isGlobal != null ? !!cf.isGlobal : true,
         regions: Array.isArray(cf.regions) ? cf.regions : [],

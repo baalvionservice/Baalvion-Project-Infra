@@ -1,10 +1,11 @@
 'use strict';
 const { Router } = require('express');
 const ctrl = require('../controller/orderController');
+const shipmentCtrl = require('../controller/shipmentController');
 const { validate } = require('../middleware/validate');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { loadStoreRole, requireStoreRole } = require('../middleware/rbacPep');
-const { createOrderSchema, updateOrderStatusSchema, cancelOrderSchema, recordPaymentSchema, refundPaymentSchema } = require('../validators/orderSchemas');
+const { createOrderSchema, updateOrderStatusSchema, cancelOrderSchema, recordPaymentSchema, refundPaymentSchema, createShipmentSchema, updateShipmentSchema } = require('../validators/orderSchemas');
 
 const router = Router({ mergeParams: true });
 
@@ -17,13 +18,22 @@ router.patch('/:orderId/status', authMiddleware, loadStoreRole, requireStoreRole
 router.post('/:orderId/cancel', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(cancelOrderSchema), ctrl.cancelOrder);
 router.post('/:orderId/payments', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(recordPaymentSchema), ctrl.recordPayment);
 router.post('/:orderId/refund', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(refundPaymentSchema), ctrl.refundPayment);
+// Shipment tracking — admin/ops writes (RBAC store-scoped).
+router.post('/:orderId/shipments', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(createShipmentSchema), shipmentCtrl.createShipment);
+router.patch('/shipments/:shipmentId/tracking', authMiddleware, loadStoreRole, requireStoreRole('ops_manager'), validate(updateShipmentSchema), shipmentCtrl.updateShipmentTracking);
 
 // ── Shopper / checkout surface (guest-capable; NOT store-role gated) ───────────
 // Authenticated → bound to the user; guest → bound to a signed X-Cart-Session (same mechanism as
 // carts). Ownership (owner OR guest-session OR staff) is enforced in the service layer, never here.
 // Gating these with a store-admin role would break storefront checkout.
 router.post('/', validate(createOrderSchema), ctrl.createOrder);
+// Customer-facing "my orders". MUST precede GET '/:orderId' so 'mine' is not parsed as an order id.
+// authMiddleware is re-applied (router is optionalAuth) so a guest is 401'd — there is no "my orders" for a guest.
+router.get('/mine', authMiddleware, ctrl.listMyOrders);
 router.get('/:orderId', ctrl.getOrder);
+// Customer-readable shipment tracking for an order. No store-role gate (inherits optionalAuth);
+// ownership (owner OR guest-session OR staff) is enforced in shipmentService.listOrderShipments.
+router.get('/:orderId/shipments', shipmentCtrl.listShipments);
 router.post('/:orderId/payments/intent', ctrl.createPaymentIntent);
 router.post('/:orderId/payments/confirm', ctrl.confirmPayment);
 

@@ -7,6 +7,8 @@ const ctrl = require('../controller/storefrontController');
 const router = Router({ mergeParams: true });
 
 router.get('/products', ctrl.listProducts);
+router.get('/products/:idOrSlug/reviews', ctrl.listReviews);
+router.get('/products/:idOrSlug/related', ctrl.listRelated);
 router.get('/products/:idOrSlug', ctrl.getProduct);
 router.get('/departments', ctrl.listDepartments);
 router.get('/categories', ctrl.listCategories);

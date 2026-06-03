@@ -14,6 +14,7 @@ const discountService = require('./discountService');
 const markets = require('../config/markets');
 const pricing = require('./pricing');
 const fxRateProvider = require('./fxRateProvider');
+const { sendOrderEmail } = require('./orderNotifications');
 
 // Mirror a money movement into the double-entry ledger without ever letting a ledger
 // problem break the payment path (the client already fails-open + logs internally).
@@ -54,6 +55,24 @@ async function listOrders(storeId, query = {}) {
     if (query.search) where.orderNumber = { [Op.iLike]: `%${query.search}%` };
     const { rows, count } = await OrdersOrder.findAndCountAll({
         where, limit, offset, order: [['createdAt', 'DESC']],
+        include: [{ model: OrdersOrderItem, as: 'items' }],
+    });
+    return buildPaginated(rows, count, { page, limit });
+}
+
+// Customer-facing "my orders": list orders owned by the authenticated user in this store.
+// An order is owned via order.customerId -> customer.userId (see orderOwnerUserId), so we resolve
+// the user's customer record(s) first, then page their orders. No store-role required — a shopper
+// only ever sees their own orders.
+async function listMyOrders(storeId, userId, query = {}) {
+    const { page, limit, offset } = parsePagination(query);
+    if (userId == null) return buildPaginated([], 0, { page, limit });
+    const customers = await OrdersCustomer.findAll({ where: { storeId, userId }, attributes: ['id'] });
+    const customerIds = customers.map((c) => c.id);
+    if (customerIds.length === 0) return buildPaginated([], 0, { page, limit });
+    const { rows, count } = await OrdersOrder.findAndCountAll({
+        where: { storeId, customerId: { [Op.in]: customerIds } },
+        limit, offset, order: [['createdAt', 'DESC']],
         include: [{ model: OrdersOrderItem, as: 'items' }],
     });
     return buildPaginated(rows, count, { page, limit });
@@ -325,12 +344,14 @@ async function createOrder(storeId, body, actor) {
         // Phase 1: reserve stock atomically (row-locked); throws OUT_OF_STOCK → rolls back the order.
         await reserveInventory(t, storeId, items);
 
-        if (customerId) await OrdersCustomer.increment({ totalOrders: 1, totalSpent: totalAmount }, { where: { id: customerId }, transaction: t });
+        if (customerId) await OrdersCustomer.increment({ totalOrders: 1, totalSpent: totals.totalAmount }, { where: { id: customerId }, transaction: t });
         return o;
     });
 
     // Phase 6: structured audit log (orderNumber is the cross-service correlation handle).
     console.info(JSON.stringify({ evt: 'order.created', storeId, orderId: order.id, orderNumber, totalAmount: Number(order.totalAmount), discountAmount: Number(order.discountAmount), currencyCode, market, taxType, taxInclusive, lineCount: items.length }));
+    // Transactional order-confirmation email (post-commit, fire-and-forget, fail-open).
+    sendOrderEmail('orderConfirmation', order.toJSON(), items).catch(() => {});
     return order.toJSON();
 }
 
@@ -434,6 +455,10 @@ async function recordPayment(storeId, orderId, body) {
             amount: body.amount, currencyCode: body.currencyCode || order.currencyCode,
             provider: body.provider, transactionId: body.transactionId,
         }), { storeId, orderId, phase: 'record_capture' });
+        // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
+        OrdersOrderItem.findAll({ where: { orderId } })
+            .then((items) => sendOrderEmail('orderPaid', order.toJSON(), items))
+            .catch(() => {});
     }
     return payment.toJSON();
 }
@@ -569,6 +594,10 @@ async function confirmPayment(storeId, orderId, intentId, actor) {
             amount: fresh.totalAmount, currencyCode: fresh.currencyCode,
             provider: intentPayment.provider, transactionId: result.transactionId,
         }), { storeId, orderId, phase: 'confirm_capture' });
+        // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
+        OrdersOrderItem.findAll({ where: { orderId } })
+            .then((items) => sendOrderEmail('orderPaid', fresh.toJSON(), items))
+            .catch(() => {});
     }
     return fresh.toJSON();
 }
@@ -602,4 +631,4 @@ async function cancelPayment(storeId, orderId, intentId) {
     return order.toJSON();
 }
 
-module.exports = { listOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, failPayment, cancelPayment };
+module.exports = { listOrders, listMyOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, failPayment, cancelPayment };

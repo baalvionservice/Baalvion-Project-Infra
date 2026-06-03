@@ -13,6 +13,12 @@ const getOrder = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
+// Customer-facing: the authenticated shopper's own orders in this store.
+const listMyOrders = async (req, res, next) => {
+    try { return sendPaginated(req, res, await orderService.listMyOrders(req.params.storeId, req.auth && req.auth.userId, req.query)); }
+    catch (err) { return next(err); }
+};
+
 const createOrder = async (req, res, next) => {
     try { return sendSuccess(req, res, await orderService.createOrder(req.params.storeId, req.validated, actorOf(req)), 201); }
     catch (err) { return next(err); }
@@ -48,4 +54,4 @@ const confirmPayment = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
-module.exports = { listOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment };
+module.exports = { listOrders, listMyOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment };
