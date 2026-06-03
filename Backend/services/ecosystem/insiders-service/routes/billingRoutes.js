@@ -11,6 +11,12 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 
 const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://localhost:3915';
 const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret';
+// Fail-fast: refuse to boot with the committed dev inter-service secret in production
+// (matches payment-service/cms-service appConfig guards). A misconfig is caught at deploy,
+// not at the first checkout — and never silently authenticates with a publicly-known string.
+if (process.env.NODE_ENV === 'production' && (!process.env.INTERNAL_SERVICE_SECRET || INTERNAL_SECRET === 'baalvion-internal-dev-secret')) {
+    throw new Error('INTERNAL_SERVICE_SECRET must be set to a non-default value in production');
+}
 const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'baalvion-elite-circle';
 
 router.post('/checkout', authMiddleware, async (req, res) => {
