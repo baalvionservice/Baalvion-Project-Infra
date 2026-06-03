@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -7,17 +7,50 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { SEOHead } from "@/components/SEOHead";
 import {
   CreditCard, ShieldCheck, CheckCircle2, ArrowRight, ArrowLeft,
-  Loader2, Ban, Lock, AlertTriangle, Tag, Globe, Smartphone, Server,
+  Loader2, Ban, Tag, Globe, Smartphone, Server, Landmark, Clock, Building2,
 } from "lucide-react";
 import { usePlans } from "@/hooks/usePlatform";
 import { Plan, billingApi } from "@/lib/platformClient";
 import { startGatewayCheckout } from "@/lib/gatewayCheckout";
+import { PaymentForms, emptyPayment, type PaymentState } from "@/components/billing/PaymentForms";
+import { validateCard } from "@/lib/payment/cards";
 import { cn } from "@/lib/utils";
+
+/** Branch validation on the selected payment method. Empty map = valid. */
+function validatePayment(payment: PaymentState): Record<string, string> {
+  switch (payment.method) {
+    case "card":
+      return validateCard(payment.card);
+    case "wallet":
+      return payment.wallet ? {} : { wallet: "Select a wallet to continue." };
+    case "bank": {
+      const errors: Record<string, string> = {};
+      if (!payment.bank.remitterName.trim()) errors.remitterName = "Account holder name is required.";
+      if (!payment.bank.remitterCountry.trim()) errors.remitterCountry = "Country is required.";
+      return errors;
+    }
+    case "wire": {
+      const errors: Record<string, string> = {};
+      if (!payment.wire.company.trim()) errors.company = "Company name is required.";
+      const email = payment.wire.contactEmail.trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.contactEmail = "Enter a valid contact email.";
+      return errors;
+    }
+    default:
+      return {};
+  }
+}
+
+const PAYMENT_LABEL: Record<PaymentState["method"], string> = {
+  card: "Card",
+  wallet: "Digital wallet",
+  bank: "Bank transfer",
+  wire: "Wire / invoice",
+};
 
 const steps = ["Select Plan", "Payment Details", "Confirm & Pay"];
 
@@ -27,7 +60,7 @@ const typeIcon = (slug: string) => {
   return <Globe className="w-5 h-5" />;
 };
 
-type ResultType = "success" | "failure" | "error";
+type ResultType = "success" | "failure" | "error" | "bank_pending" | "wire_submitted";
 
 export default function BillingCheckout() {
   const navigate = useNavigate();
@@ -38,11 +71,9 @@ export default function BillingCheckout() {
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
   const [creditAmount, setCreditAmount] = useState(30); // PAYG prepaid top-up (USD)
-  const [paymentTab, setPaymentTab] = useState("card");
+  const [payment, setPayment] = useState<PaymentState>(emptyPayment);
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
-  const [companyName, setCompanyName] = useState("");
-  const [vatNumber, setVatNumber] = useState("");
   const [result, setResult] = useState<ResultType | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [processing, setProcessing] = useState(false);
@@ -71,6 +102,9 @@ export default function BillingCheckout() {
   const total = isPayg ? creditAmount : basePrice - discount;
 
   const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
+
+  const payErrors = useMemo(() => validatePayment(payment), [payment]);
+  const payValid = Object.keys(payErrors).length === 0;
 
   // Activate the subscription server-side (trial → active) and refresh entitlements.
   // We only show "Payment Successful" when the backend confirms an ACTIVE
@@ -106,12 +140,28 @@ export default function BillingCheckout() {
   };
 
   const handlePay = async () => {
-    if (!selectedPlan) return;
+    if (!selectedPlan || !payValid) return;
+
+    // Bank transfer and wire/invoice are NOT charged here — they are recorded as
+    // pending orders and settled offline. No gateway call, no plan activation yet.
+    if (payment.method === "bank") {
+      setResult("bank_pending");
+      return;
+    }
+    if (payment.method === "wire") {
+      setResult("wire_submitted");
+      return;
+    }
+
     setProcessing(true);
     try {
-      // Hand off to the provider's hosted checkout via payment-service. In production
-      // the authoritative result also arrives via the provider webhook → payment-service
-      // ledger; here we activate on the client-confirmed success too (idempotent).
+      // Card + wallet: hand off to the provider's hosted checkout via payment-service.
+      // SECURITY: raw card data is NEVER passed — only the cardholder/company name as
+      // the customer name. Wallets go through the SAME gateway (the provider's hosted
+      // page shows the chosen wallet). In production the authoritative result also
+      // arrives via the provider webhook → payment-service ledger; here we activate on
+      // the client-confirmed success too (idempotent).
+      const customerName = payment.card.name || payment.companyName;
       let paid = false;
       try {
         const res = await startGatewayCheckout({
@@ -119,7 +169,7 @@ export default function BillingCheckout() {
           currency: "USD",
           idempotencyKey: `${selectedPlan.slug}-${interval}-${Date.now()}`,
           receipt: orderId,
-          customer: companyName ? { name: companyName } : undefined,
+          customer: customerName ? { name: customerName } : undefined,
         });
         if (res.status === "success") paid = true;
         else if (res.status === "cancelled") return; // stay on confirm so they can retry
@@ -208,6 +258,48 @@ Thank you for your business!
                   <div className="flex gap-3 justify-center pt-2">
                     <Button onClick={() => { setResult(null); setStep(1); }}>Try Again</Button>
                     <Button variant="outline" onClick={() => navigate("/app")}>Go to Dashboard</Button>
+                  </div>
+                </>
+              )}
+              {result === "bank_pending" && (
+                <>
+                  <Landmark className="w-16 h-16 text-primary mx-auto" />
+                  <h2 className="text-2xl font-bold">Order Received</h2>
+                  <p className="text-muted-foreground">
+                    We've emailed a pro-forma invoice with Baalvion's receiving bank details and your
+                    unique reference. Your subscription activates once we confirm your transfer —
+                    typically 1-2 business days.
+                  </p>
+                  <div className="border border-border rounded-lg p-4 text-left space-y-2 mt-4">
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Reference</span><span className="font-mono text-xs">{orderId}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Plan</span><span className="font-medium">{isPayg ? "Pay As You Go" : selectedPlan?.name}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Amount due</span><span className="font-medium">${total.toFixed(2)}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Method</span><span>Bank transfer</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Status</span><Badge variant="warning">Pending</Badge></div>
+                  </div>
+                  <div className="flex gap-3 justify-center pt-2">
+                    <Button onClick={() => navigate("/app/billing")}>View Billing</Button>
+                    <Button variant="outline" onClick={() => navigate("/app")}>Go to Dashboard</Button>
+                  </div>
+                </>
+              )}
+              {result === "wire_submitted" && (
+                <>
+                  <Building2 className="w-16 h-16 text-primary mx-auto" />
+                  <h2 className="text-2xl font-bold">Request Submitted</h2>
+                  <p className="text-muted-foreground">
+                    Thank you. Our enterprise team will contact you within 1 business day to set up
+                    your {payment.wire.terms === "net60" ? "Net 60" : "Net 30"} terms and wire transfer details.
+                  </p>
+                  <div className="border border-border rounded-lg p-4 text-left space-y-2 mt-4">
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Reference</span><span className="font-mono text-xs">{orderId}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Company</span><span className="font-medium">{payment.wire.company || "—"}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Contact</span><span className="text-xs">{payment.wire.contactEmail || "—"}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Terms</span><span>{payment.wire.terms === "net60" ? "Net 60" : "Net 30"}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Status</span><Badge variant="info"><Clock className="w-3 h-3 mr-1" />Awaiting setup</Badge></div>
+                  </div>
+                  <div className="flex gap-3 justify-center pt-2">
+                    <Button onClick={() => navigate("/app")}>Go to Dashboard</Button>
                   </div>
                 </>
               )}
@@ -355,48 +447,7 @@ Thank you for your business!
                     </div>
                   </div>
                 )}
-                <Tabs value={paymentTab} onValueChange={setPaymentTab}>
-                  <TabsList className="w-full">
-                    <TabsTrigger value="card" className="flex-1">Card</TabsTrigger>
-                    <TabsTrigger value="wallet" className="flex-1">Wallet</TabsTrigger>
-                    <TabsTrigger value="bank" className="flex-1">Bank</TabsTrigger>
-                    <TabsTrigger value="wire" className="flex-1">Wire</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="card" className="space-y-4 pt-4">
-                    <div className="rounded-lg border border-border bg-muted/30 p-4 flex items-start gap-3">
-                      <Lock className="w-5 h-5 text-success mt-0.5 shrink-0" />
-                      <div className="text-sm">
-                        <p className="font-medium">Secure checkout</p>
-                        <p className="text-muted-foreground">Card details are entered on the payment provider's PCI-compliant page — this site never sees or stores your card. You'll complete payment in the next step.</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label>Company (optional)</Label>
-                        <Input placeholder="Acme Corp" value={companyName} onChange={e => setCompanyName(e.target.value)} />
-                      </div>
-                      <div className="space-y-2">
-                        <Label>VAT Number (optional)</Label>
-                        <Input placeholder="EU123456789" value={vatNumber} onChange={e => setVatNumber(e.target.value)} />
-                      </div>
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="wallet" className="pt-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      {["PayPal", "Google Pay", "Apple Pay", "Amazon Pay"].map(w => (
-                        <Button key={w} variant="outline" className="h-16 text-base">{w}</Button>
-                      ))}
-                    </div>
-                  </TabsContent>
-                  <TabsContent value="bank" className="pt-4 text-center text-muted-foreground py-8">
-                    <p>Bank transfer details will be provided after order confirmation.</p>
-                    <p className="text-xs mt-2">Settlement: 2 business days</p>
-                  </TabsContent>
-                  <TabsContent value="wire" className="pt-4 text-center text-muted-foreground py-8">
-                    <Badge className="mb-2">Enterprise Only</Badge>
-                    <p>Wire transfer is available for Enterprise plans with Net 30/60 terms.</p>
-                  </TabsContent>
-                </Tabs>
+                <PaymentForms value={payment} onChange={setPayment} errors={payErrors} />
               </CardContent>
             </Card>
           )}
@@ -415,7 +466,7 @@ Thank you for your business!
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Plan</span><span className="font-medium">Pay As You Go</span></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Prepaid credit</span><span className="font-medium">${creditAmount.toFixed(2)}</span></div>
                     <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bandwidth</span><span>{(creditAmount / USD_PER_GB).toFixed(1)} GB @ ${USD_PER_GB}/GB</span></div>
-                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Payment</span><span className="capitalize">{paymentTab === "card" ? "Card (secure checkout)" : paymentTab}</span></div>
+                    <div className="flex justify-between text-sm"><span className="text-muted-foreground">Payment</span><span>{PAYMENT_LABEL[payment.method]}</span></div>
                   </div>
                 ) : (
                   <>
@@ -423,7 +474,7 @@ Thank you for your business!
                       <div className="flex justify-between text-sm"><span className="text-muted-foreground">Plan</span><span className="font-medium">{selectedPlan?.name}</span></div>
                       <div className="flex justify-between text-sm"><span className="text-muted-foreground">Bandwidth</span><span>{selectedPlan?.bandwidthLimitGb} GB</span></div>
                       <div className="flex justify-between text-sm"><span className="text-muted-foreground">Billing</span><span className="capitalize">{interval}</span></div>
-                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Payment</span><span className="capitalize">{paymentTab === "card" ? "Card (secure checkout)" : paymentTab}</span></div>
+                      <div className="flex justify-between text-sm"><span className="text-muted-foreground">Payment</span><span>{PAYMENT_LABEL[payment.method]}</span></div>
                     </div>
                     <div className="flex gap-2">
                       <Input placeholder="Promo code" value={coupon} onChange={e => setCoupon(e.target.value)} className="flex-1" />
@@ -451,10 +502,14 @@ Thank you for your business!
                 Next <ArrowRight className="w-4 h-4 ml-1" />
               </Button>
             ) : (
-              <Button variant="hero" onClick={handlePay} disabled={processing}>
+              <Button variant="hero" onClick={handlePay} disabled={processing || !payValid}>
                 {processing
                   ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing...</>
-                  : <>Pay ${total.toFixed(2)} <ArrowRight className="w-4 h-4 ml-1" /></>}
+                  : payment.method === "bank"
+                    ? <>Submit Order <ArrowRight className="w-4 h-4 ml-1" /></>
+                    : payment.method === "wire"
+                      ? <>Request Invoice <ArrowRight className="w-4 h-4 ml-1" /></>
+                      : <>Pay ${total.toFixed(2)} <ArrowRight className="w-4 h-4 ml-1" /></>}
               </Button>
             )}
           </div>
