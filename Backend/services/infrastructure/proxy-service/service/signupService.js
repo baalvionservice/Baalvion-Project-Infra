@@ -21,6 +21,7 @@ const store = require('./platformStore');
 const userService = require('./userService');
 const authService = require('./authService');
 const billingService = require('./billingService');
+const db = require('../models');
 const { AppError } = require('../utils/errors');
 const { generateToken } = require('../utils/crypto');
 
@@ -62,55 +63,59 @@ const registerOrg = async (
   const planRecord = await resolvePlan(planSlug);
   const requiresPayment = !!(planRecord && Number(planRecord.monthlyPrice) > 0);
 
-  // 3. Create the organization (unique slug — random suffix avoids collisions).
+  // 3-6. Provision org + owner user + membership + subscription ATOMICALLY. A
+  // partial failure must never leave an orphaned org/user behind, so all writes
+  // run in one transaction that rolls back together on any error.
   const orgDisplayName =
     (orgName && orgName.trim()) ||
     (fullName ? `${fullName.split(' ')[0]}'s Workspace` : 'My Workspace');
-  const org = await store.insert('organizations', {
-    slug: `${slugify(orgName || fullName || email.split('@')[0])}-${generateToken(4)}`,
-    name: orgDisplayName,
-    status: 'active',
-    planSlug: planRecord ? planRecord.slug : DEFAULT_PLAN_SLUG,
-    bandwidthLimitGb: planRecord ? planRecord.bandwidthLimitGb : 0,
-  });
-  if (!org || !org.id) {
-    throw new AppError('ORG_CREATE_FAILED', 'Could not create your workspace', 500);
-  }
+  const now = new Date();
+  const periodEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
 
-  // 4. Create the owner user inside the new org (role/orgId are set by us, not the client).
-  const user = await userService.createUser({
-    email,
-    password,
-    name: fullName,
-    orgId: org.id,
-    role: 'owner',
-    status: 'active',
-  });
-
-  // 5. Record the owner membership.
-  await store.insert('orgMemberships', {
-    orgId: org.id,
-    userId: user.id,
-    role: 'owner',
-    status: 'active',
-  });
-
-  // 6. Provision the subscription for the chosen plan.
+  let org;
+  let user;
   let subscription = null;
-  if (planRecord) {
-    const now = new Date();
-    const periodEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
-    subscription = await store.insert('subscriptions', {
+  await db.sequelize.transaction(async (t) => {
+    org = await store.insert('organizations', {
+      slug: `${slugify(orgName || fullName || email.split('@')[0])}-${generateToken(4)}`,
+      name: orgDisplayName,
+      status: 'active',
+      planSlug: planRecord ? planRecord.slug : DEFAULT_PLAN_SLUG,
+      bandwidthLimitGb: planRecord ? planRecord.bandwidthLimitGb : 0,
+    }, { transaction: t });
+    if (!org || !org.id) {
+      throw new AppError('ORG_CREATE_FAILED', 'Could not create your workspace', 500);
+    }
+
+    user = await userService.createUser({
+      email,
+      password,
+      name: fullName,
+      orgId: org.id,
+      role: 'owner',
+      status: 'active',
+    }, { transaction: t });
+
+    await store.insert('orgMemberships', {
       orgId: org.id,
       userId: user.id,
-      planId: planRecord.id,
-      planSlug: planRecord.slug,
-      status: requiresPayment ? 'trialing' : 'active',
-      enforcementMode: 'pay-as-you-go',
-      currentPeriodStart: now.toISOString(),
-      currentPeriodEnd: periodEnd.toISOString(),
-    });
-  }
+      role: 'owner',
+      status: 'active',
+    }, { transaction: t });
+
+    if (planRecord) {
+      subscription = await store.insert('subscriptions', {
+        orgId: org.id,
+        userId: user.id,
+        planId: planRecord.id,
+        planSlug: planRecord.slug,
+        status: requiresPayment ? 'trialing' : 'active',
+        enforcementMode: 'pay-as-you-go',
+        currentPeriodStart: now.toISOString(),
+        currentPeriodEnd: periodEnd.toISOString(),
+      }, { transaction: t });
+    }
+  });
 
   authService.issueEvent('org.created', org.id, {
     orgId: org.id,

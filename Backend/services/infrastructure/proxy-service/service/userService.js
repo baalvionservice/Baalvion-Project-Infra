@@ -4,7 +4,7 @@ const store = require('./platformStore');
 const authService = require('./authService');
 const { AppError } = require('../utils/errors');
 
-const createUser = async (userData) => {
+const createUser = async (userData, opts = {}) => {
     const existing = await store.findUserByEmail(userData.email);
     if (existing) {
         throw new AppError('USER_EXISTS', 'User already exists', 400);
@@ -22,7 +22,7 @@ const createUser = async (userData) => {
         mfaEnabled: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-    });
+    }, opts);
 };
 
 const existingUser = (email) => store.findUserByEmail(email);

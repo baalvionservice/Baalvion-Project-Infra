@@ -66,15 +66,24 @@ export default function BillingCheckout() {
   const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
 
   // Activate the subscription server-side (trial → active) and refresh entitlements.
+  // We only show "Payment Successful" when the backend confirms an ACTIVE
+  // subscription — never on a swallowed error (a customer must not see success
+  // while getting nothing).
   const activateAndFinish = async () => {
     if (!selectedPlan) return;
     try {
-      await billingApi.activate(selectedPlan.slug);
-    } catch {
-      /* non-fatal for the UI; webhook/reconciliation is the authoritative backstop */
+      const sub = await billingApi.activate(selectedPlan.slug);
+      queryClient.invalidateQueries({ queryKey: ["billing"] });
+      if ((sub as { status?: string } | null)?.status === "active") {
+        setResult("success");
+      } else {
+        setErrorMessage("Your payment was captured but the plan could not be activated. Please contact support — you have not been charged twice.");
+        setResult("failure");
+      }
+    } catch (e: unknown) {
+      setErrorMessage(e instanceof Error ? e.message : "Could not activate your subscription. Please contact support.");
+      setResult("failure");
     }
-    queryClient.invalidateQueries({ queryKey: ["billing"] });
-    setResult("success");
   };
 
   const handlePay = async () => {
@@ -95,10 +104,13 @@ export default function BillingCheckout() {
         });
         if (res.status === "success") paid = true;
         else if (res.status === "cancelled") return; // stay on confirm so they can retry
-        else if (import.meta.env.DEV) paid = true; // dev: no provider configured → simulate
-        else { setErrorMessage(res.message); setResult("failure"); return; }
+        // A genuine decline/failure is shown as a failure in ALL environments —
+        // never auto-"paid" (that would let a declined card activate a plan).
+        else { setErrorMessage(res.message || "Payment was not completed."); setResult("failure"); return; }
       } catch (e: unknown) {
-        // No payment provider configured (e.g. dev) → simulate so the flow is testable.
+        // Gateway threw → no payment provider is configured for this site. Only in
+        // local DEV do we simulate so the flow stays testable; any other build
+        // surfaces the real error. Production must configure a provider.
         if (import.meta.env.DEV) paid = true;
         else throw e;
       }
