@@ -12,6 +12,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(AppConfig.baseUrl),
+  icons: { icon: 'data:,' },
   title: {
     default: 'TalentOS by Baalvion | The OS for Modern Recruitment',
     template: '%s | TalentOS by Baalvion',

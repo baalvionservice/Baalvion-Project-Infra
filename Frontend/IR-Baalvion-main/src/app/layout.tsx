@@ -31,6 +31,7 @@ export const metadata: Metadata = {
   },
   description: 'The global operating system for B2B trade infrastructure. Access performance reports, board resolutions, and strategic materials.',
   metadataBase: new URL(AppConfig.baseUrl),
+  icons: { icon: 'data:,' },
   alternates: {
     canonical: '/',
   },

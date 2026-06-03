@@ -67,9 +67,6 @@ export function generateMetadata({
       images: [ogImage],
       creator: "@baalvion",
     },
-    icons: {
-      shortcut: "/favicon.ico",
-      apple: "/apple-touch-icon.png",
-    },
+    icons: { icon: "data:," },
   };
 }

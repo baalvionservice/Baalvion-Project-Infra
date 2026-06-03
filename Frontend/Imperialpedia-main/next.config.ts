@@ -49,13 +49,18 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              // Google Analytics / Tag Manager + AdSense hosts are allow-listed so analytics
+              // works when NEXT_PUBLIC_GA_ID / NEXT_PUBLIC_ADSENSE_CLIENT are set; the scripts
+              // themselves only render when those env vars are configured (see Analytics.tsx).
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com",
+              "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https://picsum.photos https://images.unsplash.com https://placehold.co https://imperialpedia.com https://www.investopedia.com",
+              "img-src 'self' data: https://picsum.photos https://images.unsplash.com https://placehold.co https://imperialpedia.com https://www.investopedia.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net",
               "font-src 'self'",
               // Dev: allow the local imperialpedia-service (:3004) and cms-service (:3018)
               // that client components (Market Movers, community, search) fetch directly.
-              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018",
+              "connect-src 'self' https://api.baalvion.com http://localhost:3004 http://localhost:3018 https://www.google-analytics.com https://*.google-analytics.com https://*.googlesyndication.com",
+              "frame-src https://googleads.g.doubleclick.net https://*.googlesyndication.com",
               "frame-ancestors 'self'",
             ].join('; '),
           },

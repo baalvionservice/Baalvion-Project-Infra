@@ -2,13 +2,14 @@ import React from "react";
 import "./globals.css";
 import { Metadata } from "next";
 import { env } from "@/config/env";
-import Script from "next/script";
 import { Playfair_Display, PT_Sans, Cabin } from "next/font/google";
 import { cn } from "@/lib/utils";
 import RootLayoutClient from "@/components/common/RootLayoutClient";
+import { Analytics } from "@/components/common/Analytics";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
+  icons: { icon: 'data:,' },
   title: {
     default: 'Imperialpedia — The Financial Intelligence Network',
     template: '%s | Imperialpedia',
@@ -114,27 +115,6 @@ export default function RootLayout({
         />
         <meta name="theme-color" content="#1C1822" />
         <link rel="preconnect" href="https://images.unsplash.com" />
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8968452296456450"
-          crossOrigin="anonymous"
-        ></script>
-
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-IMP-INDEX-42"
-          strategy="afterInteractive"
-        />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-IMP-INDEX-42', {
-              page_path: window.location.pathname,
-            });
-          `}
-        </Script>
       </head>
 
       <body className="font-ui bg-background text-foreground antialiased min-h-screen flex flex-col">
@@ -166,6 +146,7 @@ export default function RootLayout({
         </a>
 
         <RootLayoutClient>{children}</RootLayoutClient>
+        <Analytics />
       </body>
     </html>
   );

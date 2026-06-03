@@ -29,6 +29,7 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: "Baalvion Industries" }],
   metadataBase: new URL("https://about.baalvion.com"),
+  icons: { icon: 'data:,' },
   openGraph: {
     type: "website",
     locale: "en_US",

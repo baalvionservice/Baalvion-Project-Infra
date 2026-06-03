@@ -14,6 +14,9 @@ const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
+  // Suppress any favicon (no icon logo in the browser tab). `data:,` is an empty
+  // resource, so the browser renders no icon and stops requesting /favicon.ico.
+  icons: { icon: 'data:,' },
   title: {
     default: 'Law Elite Network | Global Legal Intelligence',
     template: '%s | Law Elite Network',

@@ -8,6 +8,7 @@ import Script from 'next/script';
 import { RoleProvider } from '@/hooks/use-view-role';
 
 export const metadata: Metadata = {
+  icons: { icon: 'data:,' },
   title: 'Baalvion',
   description: 'The Global Business Operating System',
   robots: { index: false, follow: false },

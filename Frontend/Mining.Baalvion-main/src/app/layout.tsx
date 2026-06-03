@@ -14,6 +14,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://mining.baalvion.com'),
+  icons: { icon: 'data:,' },
   title: {
     default: 'Baalvion Mining Inc. | Global Mining & Commodity Supply Network',
     template: '%s | Baalvion Mining Inc.'

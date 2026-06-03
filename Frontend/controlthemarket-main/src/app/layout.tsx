@@ -19,6 +19,7 @@ const spaceGrotesk = Space_Grotesk({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://controlthemarket.com'),
+  icons: { icon: 'data:,' },
   title: {
     default: 'ControlTheMarket — Hire by Skill, Not by Resume',
     template: '%s | ControlTheMarket',
