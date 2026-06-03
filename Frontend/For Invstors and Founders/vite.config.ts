@@ -11,7 +11,10 @@ const INSIDERS_TARGET = process.env.VITE_INSIDERS_TARGET ?? "http://localhost:30
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    // 8082 to avoid colliding with Proxy-BaalvionStack (8080); strictPort makes the
+    // conflict fail loudly instead of silently grabbing a random next port.
+    port: 8082,
+    strictPort: true,
     proxy: {
       // Authenticated path: browser → /auth-bff → auth-gateway (login/refresh/me/logout + /api/* proxy
       // which injects signed identity and enforces the session/CSRF trust boundary).

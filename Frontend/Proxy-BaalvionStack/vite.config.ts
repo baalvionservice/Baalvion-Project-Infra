@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
-import { componentTagger } from "lovable-tagger";
 
 // Same-origin auth proxy target. In production the SPA's static host (e.g. nginx) MUST reverse-proxy
 // /auth-bff → this gateway path so the httpOnly refresh cookie flows same-origin.
@@ -18,10 +17,11 @@ const PLATFORM_ORIGIN = toOrigin(process.env.VITE_API_PLATFORM_BASE_URL, 'https:
 const AUTH_ORIGIN = toOrigin(process.env.VITE_API_AUTH_BASE_URL, 'https://api.baalvion.com');
 
 // https://vitejs.dev/config/
-export default defineConfig(({ mode }) => ({
+export default defineConfig(() => ({
   server: {
     host: "::",
     port: 8080,
+    strictPort: true,
     proxy: {
       // Dev: forward same-origin /auth-bff/* to the auth gateway so the httpOnly cookie is set
       // against localhost:8080 and flows on every request. No CORS, no cross-site cookies.
@@ -52,7 +52,7 @@ export default defineConfig(({ mode }) => ({
       ].join('; '),
     },
   },
-  plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
+  plugins: [react()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
