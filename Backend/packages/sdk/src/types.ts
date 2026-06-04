@@ -1,5 +1,5 @@
 /**
- * @baalvion/sdk — public type surface (the contract every service codes against).
+ * @baelbvion/sdk — public type surface (the contract every service codes against).
  *
  * The SDK is a COMPOSITION layer. It standardizes six concerns behind one set of
  * interfaces and one factory (`createSdk`). Implementations either wrap an
@@ -7,8 +7,12 @@
  * (config-resolver → CMS hub, internal-auth, http-client, trace-context).
  *
  * Tenancy note: in this platform a tenant == an organisation == a CMS "website".
- * Everything is keyed by a `tenantSlug` (the CMS website slug, e.g. "baalvion-mining").
+ * Everything is keyed by a `tenantSlug` (the CMS website slug, e.g. "baelbvion-mining").
  */
+
+// Unified contract from @baelbvion/types to prevent duplication & casing drift
+import type { IntegrationCategory } from '@baelbvion/types';
+export type { IntegrationCategory };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. TRACE CONTEXT — end-to-end request tracking
@@ -56,8 +60,6 @@ export interface SdkLogger {
 // 3. CONFIG RESOLVER — secrets/keys from the CMS Integrations & Keys hub
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type IntegrationCategory = 'api' | 'payment' | 'sms' | 'ai' | 'webhook' | 'other';
-
 /** One resolved integration for a tenant (mirrors cms-service's internal resolver). */
 export interface IntegrationConfig {
   provider: string;                    // 'razorpay' | 'stripe' | 'backend_api' | 'twilio' | 'gemini' | …
@@ -88,7 +90,7 @@ export interface ConfigResolverOptions {
   internalSecret: string;
   /** Cache TTL for resolved config (default 60s). Keys change rarely; events bust it. */
   cacheTtlSeconds?: number;
-  /** Pluggable cache (Redis via @baalvion/cache, or the built-in in-memory cache). */
+  /** Pluggable cache (Redis via @baelbvion/cache, or the built-in in-memory cache). */
   cache?: SdkCache;
   logger?: SdkLogger;
   fetchImpl?: FetchLike;
@@ -107,7 +109,7 @@ export interface InternalAuth {
   verifyMiddleware(): SdkMiddleware;
   /** Transport-agnostic verification of raw header values. */
   verify(headers: Record<string, string | undefined>, req?: SignableRequest): boolean;
-  /** Role gate for verified principals (delegates to @baalvion/rbac semantics). */
+  /** Role gate for verified principals (delegates to @baelbvion/rbac semantics). */
   requireRole(...roles: string[]): SdkMiddleware;
 }
 
@@ -187,11 +189,11 @@ export interface HttpClientOptions {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. EVENT BUS — one canonical event schema over @baalvion/events
+// 6. EVENT BUS — one canonical event schema over @baelbvion/events
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * The canonical platform event envelope. Maps onto @baalvion/types `PlatformEvent`
+ * The canonical platform event envelope. Maps onto @baelbvion/types `PlatformEvent`
  * ( eventType→type, tenantId→orgId ) so the SDK and the existing bus interoperate.
  */
 export interface SdkEvent<T = unknown> {
@@ -214,7 +216,7 @@ export interface SdkEventBus {
   /** Durable subscription. `pattern` may use NATS wildcards (e.g. "billing.>"). */
   subscribe<T>(pattern: string, durable: string, handler: (e: SdkEvent<T>) => Promise<void> | void): Promise<EventSubscription>;
   close(): Promise<void>;
-  /** Escape hatch to the underlying @baalvion/events EventBus. */
+  /** Escape hatch to the underlying @baelbvion/events EventBus. */
   raw(): unknown;
 }
 

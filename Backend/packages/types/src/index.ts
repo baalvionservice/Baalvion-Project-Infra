@@ -1,3 +1,9 @@
+/**
+ * @fileOverview Unified Backend Contracts & Type Definitions
+ * Single source of truth for shared backend types (User, Auth, RBAC, CMS, Commerce, etc.).
+ * All services and SDKs should import from this package to avoid duplication and casing drift.
+ */
+
 // ─── User & Identity ──────────────────────────────────────────────────────────
 
 export type UserStatus = 'active' | 'suspended' | 'pending';
