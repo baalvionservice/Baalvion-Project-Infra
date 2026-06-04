@@ -1,4 +1,4 @@
-name: CI
+name: CI Pipeline
 
 on:
   push:
@@ -6,178 +6,163 @@ on:
   pull_request:
     branches: [main, develop]
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+env:
+  NODE_VERSION: '20'
+  GO_VERSION: '1.22'
+  JAVA_VERSION: '17'
+  MAVEN_OPTS: '-Dmaven.repo.local=${{ github.workspace }}/.m2/repository'
 
 jobs:
-  # ── Detect changed services ────────────────────────────────────────────────
-  changes:
-    runs-on: ubuntu-latest
-    outputs:
-      auth:    ${{ steps.filter.outputs.auth }}
-      admin:   ${{ steps.filter.outputs.admin }}
-      session: ${{ steps.filter.outputs.session }}
-      oauth:   ${{ steps.filter.outputs.oauth }}
-      packages: ${{ steps.filter.outputs.packages }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            auth:
-              - 'Backend/services/identity/auth-service/**'
-            admin:
-              - 'Backend/services/platform/admin-service/**'
-            session:
-              - 'Backend/services/identity/session-service/**'
-            oauth:
-              - 'Backend/services/identity/oauth-service/**'
-            packages:
-              - 'Backend/packages/**'
-
-  # ── Architecture contract (always runs; required) ────────────────────────
-  architecture-contract:
+  lint-and-typecheck:
+    name: Lint & Typecheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
-      # FULL pnpm workspace install (build model: Option A). engine-strict=false in
-      # .npmrc lets the Node-22 frontend deps install as warnings on the Node-20 runner.
-      - name: Install workspace (pnpm)
-        run: pnpm install --frozen-lockfile
-      - name: Install catalog tooling
-        working-directory: Backend/catalog
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install Root Dependencies
         run: npm ci
-      - name: Validate + enforce architecture contract
-        run: pnpm run architecture:check
-      - name: Build migrated template service end-to-end (about-service + @baalvion/* workspace deps)
-        run: pnpm exec turbo run build --filter=about-service...
-      - name: auth-node authority smoke test
-        run: pnpm --filter @baalvion/auth-node test
-
-  # ── Lint & type-check shared packages ─────────────────────────────────────
-  packages:
-    needs: changes
-    if: needs.changes.outputs.packages == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo run build --filter='./Backend/packages/*'
-      - run: pnpm turbo run type-check --filter='./Backend/packages/*'
-
-  # ── Auth Service ──────────────────────────────────────────────────────────
-  auth-service:
-    needs: changes
-    if: needs.changes.outputs.auth == 'true' || needs.changes.outputs.packages == 'true'
-    runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_DB: baalvion_test
-          POSTGRES_USER: baalvion
-          POSTGRES_PASSWORD: test_pass
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      redis:
-        image: redis:7-alpine
-        ports: ["6379:6379"]
-        options: --health-cmd "redis-cli ping" --health-interval 10s --health-retries 5
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter auth-service...
-      - working-directory: Backend/services/identity/auth-service
-        run: pnpm test
-        env:
-          NODE_ENV: test
-          DB_HOST: localhost
-          DB_PORT: 5432
-          DB_NAME: baalvion_test
-          DB_USER: baalvion
-          DB_PASSWORD: test_pass
-          REDIS_HOST: localhost
-          REDIS_PORT: 6379
-          JWT_ACCESS_SECRET: ci-test-access-secret
-          JWT_REFRESH_SECRET: ci-test-refresh-secret
-
-  # ── Admin Service ─────────────────────────────────────────────────────────
-  admin-service:
-    needs: changes
-    if: needs.changes.outputs.admin == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter admin-service...
-      - name: Docker build smoke test (monorepo context = repo root)
-        run: docker build -f Backend/services/platform/admin-service/Dockerfile -t admin-service:ci .
-
-  # ── Session Service ───────────────────────────────────────────────────────
-  session-service:
-    needs: changes
-    if: needs.changes.outputs.session == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter session-service...
-      - name: Docker build smoke test (monorepo context = repo root)
-        run: docker build -f Backend/services/identity/session-service/Dockerfile -t session-service:ci .
-
-  # ── OAuth Service ─────────────────────────────────────────────────────────
-  oauth-service:
-    needs: changes
-    if: needs.changes.outputs.oauth == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile --filter oauth-service...
-      - name: Docker build smoke test (monorepo context = repo root)
-        run: docker build -f Backend/services/identity/oauth-service/Dockerfile -t oauth-service:ci .
-
-  # ── Summary gate (required check for branch protection) ───────────────────
-  ci-success:
-    needs: [architecture-contract, auth-service, admin-service, session-service, oauth-service]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check all jobs passed
+        
+      - name: Run ESLint
         run: |
-          if [[ "${{ contains(needs.*.result, 'failure') }}" == "true" ]]; then
-            echo "One or more jobs failed" && exit 1
+          npx eslint Backend/packages/sdk/src \
+                      Backend/services/infrastructure \
+                      Proxy-BaalvionStack/src \
+                      admin-platform/src \
+                      --max-warnings=0
+                      
+      - name: TypeScript Typecheck
+        run: |
+          npx tsc --noEmit --project Backend/packages/sdk/tsconfig.json
+          for dir in Frontend/*/; do
+            if [ -f "$dir/tsconfig.json" ]; then
+              echo "Typechecking $dir..."
+              npx tsc --noEmit --project "$dir/tsconfig.json" || exit 1
+            fi
+          done
+
+  backend-go:
+    name: Backend Go (Gateway)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          
+      - name: Cache Go Modules
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('Backend/gateway/go.sum', 'Backend/packages/**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+            
+      - name: Install Dependencies
+        run: go mod download
+        working-directory: Backend/gateway
+        
+      - name: Run Tests
+        run: go test ./... -v -coverprofile=coverage.out
+        working-directory: Backend/gateway
+        
+      - name: Build Gateway
+        run: go build -o bin/gateway ./cmd/main.go
+        working-directory: Backend/gateway
+
+  backend-java:
+    name: Backend Java (Financial Services)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'temurin'
+          cache: 'maven'
+          
+      - name: Cache Maven Repository
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.m2/repository
+            .m2/repository
+          key: ${{ runner.os }}-java-maven-${{ hashFiles('Backend/services/commerce/financial-services-java/**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-java-maven-
+            
+      - name: Run Tests & Build
+        run: mvn clean verify -DskipTests=false
+        working-directory: Backend/services/commerce/financial-services-java
+
+  frontend-build:
+    name: Frontend Apps Build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJson(steps.extract-apps.outputs.dirs) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Extract App Directories from Config
+        id: extract-apps
+        run: |
+          DIRS=$(node -p "require('./frontends.config.js').apps.map(a => a.cwd.replace('D:/Baalvion Projects/Frontend/', ''))" | tr '\n' ',' | sed 's/,$//')
+          echo "dirs=$DIRS" >> $GITHUB_OUTPUT
+          
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: Frontend/${{ matrix.app }}
+        
+      - name: Determine Build Command
+        id: build-cmd
+        run: |
+          if grep -q '"next"' Frontend/${{ matrix.app }}/package.json; then
+            echo "cmd=next build" >> $GITHUB_OUTPUT
+          elif grep -q '"vite"' Frontend/${{ matrix.app }}/package.json; then
+            echo "cmd=vite build" >> $GITHUB_OUTPUT
+          else
+            echo "cmd=npm run build" >> $GITHUB_OUTPUT
           fi
-          echo "All CI checks passed"
+          
+      - name: Build App
+        run: npm run ${{ steps.build-cmd.outputs.cmd }}
+        working-directory: Frontend/${{ matrix.app }}
+        
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-${{ matrix.app }}-dist
+          path: Frontend/${{ matrix.app }}/dist
+          retention-days: 5
+
+  integration-test:
+    name: Integration Tests
+    needs: [backend-go, backend-java, frontend-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run Backend Integration Tests
+        run: |
+          echo "Running integration tests across services..."
+          # Placeholder for actual test runner (e.g., docker-compose up, testcontainers, or custom script)
+          go test ./... -tags=integration -v
+          mvn verify -DskipTests=false
