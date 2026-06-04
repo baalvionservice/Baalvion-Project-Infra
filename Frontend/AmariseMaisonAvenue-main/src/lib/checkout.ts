@@ -7,7 +7,7 @@
  *
  * Flow: resolve store → validate non-empty → orderApi.create(items) → real Order | error.
  */
-import { orderApi, customerApi, setCartSessionToken, type CreateOrderPayload, type Order, type ApiResult } from './api-client';
+import { orderApi, customerApi, setCartSessionToken, type CreateOrderPayload, type Order, type ApiResult, type PaymentIntent, type PaymentGatewaySlug } from './api-client';
 import { authClient, getAccessToken, getCurrentUser } from './auth';
 import { getStoreId } from './store-context';
 import { ensureCart, clearCartId } from './cart-session';
@@ -21,11 +21,21 @@ export interface CheckoutLine {
   productId?: string;
 }
 
+/** Live per-market tax facts (sourced from GET /commerce/markets via the store), overriding the
+ *  static FE copy so a backend rate change is reflected without a code change. */
+export interface MarketTaxContext {
+  taxType?: string;
+  taxRate?: number;
+  taxInclusive?: boolean;
+}
+
 export interface PlaceOrderInput {
   lines: CheckoutLine[];
   currencyCode: string;
   /** Active market (us|uk|ae|in|sg) — attaches market + tax context to the order. */
   country?: string;
+  /** Live market tax facts from the markets registry; falls back to the static config when absent. */
+  taxContext?: MarketTaxContext;
   shippingAmount?: number;
   shippingAddress?: Record<string, unknown>;
   /** An explicit customer UUID. When omitted, a signed-in shopper is auto-linked (see ensureMyCustomerId). */
@@ -33,11 +43,19 @@ export interface PlaceOrderInput {
   /** Shipping/billing name from the checkout form — used to name the customer record on first link. */
   customer?: { firstName?: string; lastName?: string };
   idempotencyKey?: string;
+  /** Chosen settlement gateway (stripe|razorpay|payu|bank). Recorded on the order/payment per C1. */
+  gateway?: PaymentGatewaySlug;
   /** Run payment (intent → confirm) after creating the order. Default true. */
   pay?: boolean;
 }
 
-export interface PlaceOrderResult { order: Order; paid: boolean; }
+export interface PlaceOrderResult {
+  order: Order;
+  paid: boolean;
+  /** Set for gateway providers (Razorpay): the order exists + a provider intent was created, but
+   *  payment is NOT done — the page must open the provider checkout and confirm interactively. */
+  intent?: PaymentIntent;
+}
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -98,22 +116,29 @@ export async function placeOrder(input: PlaceOrderInput): Promise<ApiResult<Plac
     customerId = (await ensureMyCustomerId(input.customer)) ?? undefined;
   }
 
+  // Tax facts: prefer the LIVE markets registry (input.taxContext, sourced from GET /commerce/markets)
+  // so a backend rate change is honored without a code change; fall back to the static market config.
+  const taxType = input.taxContext?.taxType ?? market?.taxType;
+  const taxRate = input.taxContext?.taxRate ?? market?.taxRate;
+  const taxInclusive =
+    input.taxContext?.taxInclusive ?? (cc ? cc !== 'us' : undefined);
+
   const payload: CreateOrderPayload = {
     currencyCode: input.currencyCode,
     items,
     shippingAmount: input.shippingAmount ?? 0,
-    ...(cc && market
+    ...(cc
       ? {
           country: cc,
           market: cc,
-          taxType: market.taxType,
-          taxRate: market.taxRate,
-          // VAT/GST markets are tax-inclusive; US sales tax is added on top.
-          taxInclusive: cc !== 'us',
+          ...(taxType ? { taxType } : {}),
+          ...(taxRate != null ? { taxRate } : {}),
+          ...(taxInclusive != null ? { taxInclusive } : {}),
         }
       : {}),
     ...(input.shippingAddress ? { shippingAddress: input.shippingAddress } : {}),
     ...(customerId ? { customerId } : {}),
+    ...(input.gateway ? { metadata: { gateway: input.gateway } } : {}),
     ...(input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : {}),
   };
 
@@ -121,22 +146,40 @@ export async function placeOrder(input: PlaceOrderInput): Promise<ApiResult<Plac
   if (!created.ok) return created;
   const order = created.data;
 
-  // Complete payment (intent → confirm). Non-fatal: the order exists regardless; a payment
-  // failure simply leaves it unpaid for ops follow-up (never a fake "paid" confirmation).
+  // Create a payment intent. Two provider shapes:
+  //  • mock (no keyId)   → auto-confirm server-side here (no user interaction), as before.
+  //  • gateway/Razorpay  → return the intent to the page so it can open the provider checkout;
+  //    DO NOT auto-confirm (the user must pay first, then the page confirms with the signed result).
+  // Non-fatal throughout: the order exists regardless; a failure leaves it unpaid for follow-up
+  // (never a fake "paid").
   let paid = false;
+  let paidOrder: Order | undefined;
+  let payIntent: PaymentIntent | undefined;
   if (input.pay !== false) {
     try {
-      const intent = await orderApi.createPaymentIntent(order.id);
+      const intent = await orderApi.createPaymentIntent(order.id, input.gateway);
       if (intent.ok && intent.data?.intentId) {
-        const confirmed = await orderApi.confirmPayment(order.id, intent.data.intentId);
-        paid = confirmed.ok && confirmed.data?.status === 'captured';
+        if (intent.data.keyId) {
+          payIntent = intent.data; // gateway → defer to interactive checkout on the page
+        } else {
+          // C1: confirmPayment returns the full updated Order; PAID iff paymentStatus === 'paid'.
+          const confirmed = await orderApi.confirmPayment(order.id, intent.data.intentId, {
+            gateway: input.gateway,
+          });
+          if (confirmed.ok && confirmed.data?.paymentStatus === 'paid') {
+            paid = true;
+            paidOrder = confirmed.data;
+          }
+        }
       }
     } catch { /* leave unpaid; order already created */ }
   }
 
-  // This cart/session is now consumed → start the next checkout fresh.
+  // This cart/session is consumed once the order exists → start the next checkout fresh.
+  // (Safe for the gateway path too: the order is already created; payment is tracked on the order.)
   clearCartId();
   setCartSessionToken(null);
 
-  return { ok: true, data: { order, paid } };
+  // Prefer the post-confirm order snapshot (real paymentStatus) when payment ran.
+  return { ok: true, data: { order: paidOrder ?? order, paid, intent: payIntent } };
 }

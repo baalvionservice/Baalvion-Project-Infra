@@ -253,6 +253,13 @@ async function createOrder(storeId, body, actor) {
         const cust = await OrdersCustomer.findOne({ where: { id: customerId, storeId }, attributes: ['id', 'userId'] });
         if (!cust) throw new AppError('VALIDATION_ERROR', 'customerId not found in this store', 400);
         await ownership.enforce(actor, cust.userId, { resourceType: 'customer', resourceId: customerId, storeId, action: 'order.create' });
+        // Link-on-checkout: an authenticated shopper ordering against an as-yet-unlinked customer row
+        // (userId=null, e.g. created by a prior guest/email upsert) claims it server-side now, so the
+        // /me reads (addresses/profile/returns) resolve afterwards. Ownership already passed, so the
+        // actor is the owner-or-staff; we never overwrite an existing different owner.
+        if (cust.userId == null && actor && actor.userId != null) {
+            await OrdersCustomer.update({ userId: actor.userId }, { where: { id: customerId, storeId, userId: null } });
+        }
     }
 
     // ── Idempotency / replay safety (Phase 4) ───────────────────────────────────
@@ -525,23 +532,49 @@ async function refundPayment(storeId, orderId, body = {}) {
 
 // ── Provider-authoritative payment flow (Phase 2) ───────────────────────────────
 // Orders are paid ONLY via backend provider confirmation — a client cannot self-mark paid.
-async function createPaymentIntent(storeId, orderId, actor) {
+// `selectedGateway` (C1) is the shopper's storefront gateway choice (stripe|razorpay|payu|bank).
+// It is RECORDED on the order/payment metadata for reporting + the success screen; the provider
+// that actually captures money is still resolved server-side by PAYMENT_PROVIDER (mock in non-prod).
+async function createPaymentIntent(storeId, orderId, actor, selectedGateway = null) {
     const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
     await ownership.enforce(actor, await orderOwnerUserId(order.customerId), { resourceType: 'order', resourceId: orderId, storeId, action: 'payment.intent', ownerSessionId: orderOwnerSessionId(order) });
     if (order.paymentStatus === 'paid') throw new AppError('CONFLICT', 'Order is already paid', 409);
+    // Record the selected gateway on the order metadata (immutable spread). Best-effort: a metadata
+    // write must never block creating the intent, so failures here fall through to intent creation.
+    if (selectedGateway) {
+        try {
+            await order.update({ metadata: { ...(order.metadata || {}), selectedGateway } });
+        } catch { /* gateway label is advisory; never block payment on a metadata write */ }
+    }
     const provider = getProvider();
-    const intent = await provider.createPaymentIntent({ orderId, amount: Number(order.totalAmount), currencyCode: order.currencyCode });
+    // A gateway create failure (declined / invalid amount-or-currency / provider down) is a payment
+    // error, not a server fault — map it to 402 and never leak the provider's raw message.
+    let intent;
+    try {
+        intent = await provider.createPaymentIntent({ orderId, amount: Number(order.totalAmount), currencyCode: order.currencyCode });
+    } catch (e) {
+        securityAudit.payment('intent_failed', 'deny', { userId: actor && actor.userId, storeId, resource: { type: 'order', id: orderId }, reason: 'provider_error', requestId: actor && actor.requestId, metadata: { provider: provider.name, providerStatus: e && e.providerStatus } });
+        throw new AppError('PAYMENT_ERROR', 'Could not initialise payment with the provider', 402);
+    }
     // Atomic via UNIQUE(order_id, transaction_id) — concurrent intents never duplicate a row.
+    // Persist the selected gateway on the payment metadata too (alongside the capture provider name)
+    // so a payment row self-describes which storefront gateway the shopper picked.
     await OrdersOrderPayment.findOrCreate({
         where: { orderId, transactionId: intent.intentId },
-        defaults: { orderId, provider: provider.name, transactionId: intent.intentId, amount: order.totalAmount, currencyCode: order.currencyCode, status: 'pending', metadata: { intentId: intent.intentId } },
+        defaults: { orderId, provider: provider.name, transactionId: intent.intentId, amount: order.totalAmount, currencyCode: order.currencyCode, status: 'pending', metadata: { intentId: intent.intentId, ...(selectedGateway ? { gateway: selectedGateway } : {}) } },
     });
     securityAudit.payment('intent_created', 'allow', { userId: actor && actor.userId, storeId, resource: { type: 'order', id: orderId }, requestId: actor && actor.requestId, metadata: { provider: provider.name, intentId: intent.intentId } });
-    return { intentId: intent.intentId, status: intent.status };
+    // Surface gateway client params (keyId/amount/currency) when present (e.g. Razorpay) so the
+    // storefront can open the provider checkout. Absent for the mock provider (the client's branch signal).
+    return {
+        intentId: intent.intentId,
+        status: intent.status,
+        ...(intent.keyId ? { keyId: intent.keyId, amount: intent.amount, currency: intent.currency } : {}),
+    };
 }
 
-async function confirmPayment(storeId, orderId, intentId, actor) {
+async function confirmPayment(storeId, orderId, intentId, actor, verification, selectedGateway = null) {
     if (!intentId) throw new AppError('VALIDATION_ERROR', 'intentId is required', 400);
     const order0 = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order0) throw new AppError('NOT_FOUND', 'Order not found', 404);
@@ -560,7 +593,10 @@ async function confirmPayment(storeId, orderId, intentId, actor) {
         return order0.toJSON();
     }
 
-    const result = await getProvider().confirmPayment({ intentId, orderId }); // BACKEND-AUTHORITATIVE
+    // BACKEND-AUTHORITATIVE capture. For gateway providers (Razorpay) `verification` carries the
+    // client-returned {payment_id, order_id, signature}; the provider verifies the HMAC server-side.
+    // The mock provider ignores `verification`, so the existing mock flow is unchanged.
+    const result = await getProvider().confirmPayment({ intentId, orderId, verification });
 
     const out = await sequelize.transaction(async (t) => {
         // Lock the order row: a concurrent confirm waits here, then sees paymentStatus='paid'
@@ -569,9 +605,12 @@ async function confirmPayment(storeId, orderId, intentId, actor) {
         if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
         if (order.paymentStatus === 'paid') return { ok: true, replay: true };
         const payment = await OrdersOrderPayment.findOne({ where: { orderId, transactionId: intentId }, transaction: t });
+        // The recorded storefront gateway: confirm's selection wins, else what intent persisted on
+        // the payment row (so a confirm without a gateway preserves the one chosen at intent time).
+        const gateway = selectedGateway || (payment && payment.metadata && payment.metadata.gateway) || null;
         if (result.status === 'captured') {
-            if (payment) await payment.update({ status: 'captured', paidAt: new Date(), metadata: { ...(payment.metadata || {}), transactionId: result.transactionId } }, { transaction: t });
-            await order.update({ paymentStatus: 'paid', status: order.status === 'pending' ? 'confirmed' : order.status }, { transaction: t });
+            if (payment) await payment.update({ status: 'captured', paidAt: new Date(), metadata: { ...(payment.metadata || {}), transactionId: result.transactionId, ...(gateway ? { gateway } : {}) } }, { transaction: t });
+            await order.update({ paymentStatus: 'paid', status: order.status === 'pending' ? 'confirmed' : order.status, ...(gateway ? { metadata: { ...(order.metadata || {}), selectedGateway: gateway } } : {}) }, { transaction: t });
             await unwindReservation(t, storeId, orderId, 'fulfill'); // reserved → deducted on capture
             return { ok: true };
         }
@@ -631,4 +670,17 @@ async function cancelPayment(storeId, orderId, intentId) {
     return order.toJSON();
 }
 
-module.exports = { listOrders, listMyOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, failPayment, cancelPayment };
+// Provider-initiated async webhook dispatch (signature-verified at the route). The webhook carries
+// orderId but not storeId, so we resolve the store from the order, then drive it to failed/voided
+// via the existing failPayment/cancelPayment (which unwind the stock reservation + post audit).
+// An unknown/already-terminal order is a no-op-safe 404/409 handled by those fns.
+async function handlePaymentWebhook({ event, orderId, intentId, reason }) {
+    const order = await OrdersOrder.findOne({ where: { id: orderId }, attributes: ['id', 'storeId', 'paymentStatus'] });
+    if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
+    if (event === 'payment.failed') {
+        return failPayment(order.storeId, orderId, intentId || null, reason || 'provider_webhook');
+    }
+    return cancelPayment(order.storeId, orderId, intentId || null);
+}
+
+module.exports = { listOrders, listMyOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, failPayment, cancelPayment, handlePaymentWebhook };

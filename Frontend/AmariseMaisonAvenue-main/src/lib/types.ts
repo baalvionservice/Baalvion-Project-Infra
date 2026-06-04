@@ -141,11 +141,14 @@ export interface Product {
   rating: number;
   reviewsCount: number;
   stock: number;
+  /** Server-computed availability (commerce-service: trackInventory ? stockQuantity>0 : true). */
+  inStock?: boolean;
   brandId: string;
   isGlobal: boolean;
   regions: CountryCode[];
   status: "draft" | "published";
   lastEditedRegion: CountryCode | "global";
+  description?: string;
   specialNotes?: string;
   condition?: string;
   conditionDetails?: string;

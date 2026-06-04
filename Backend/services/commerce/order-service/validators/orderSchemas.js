@@ -4,14 +4,20 @@ const { z } = require('zod');
 const addressSchema = z.object({
     firstName: z.string().min(1).max(100),
     lastName: z.string().min(1).max(100),
-    company: z.string().max(200).optional(),
+    // Optional fields are .nullable() to mirror customerSchemas.createAddressSchema: checkout sends
+    // the same shape (blank optional → explicit null), so a plain .optional() would 400 a guest order
+    // that omits company/line2/state/zip/phone. Required fields stay non-nullable.
+    company: z.string().max(200).optional().nullable(),
     address1: z.string().min(1).max(300),
-    address2: z.string().max(300).optional(),
+    address2: z.string().max(300).optional().nullable(),
     city: z.string().min(1).max(100),
-    state: z.string().max(100).optional(),
-    zip: z.string().max(20).optional(),
+    state: z.string().max(100).optional().nullable(),
+    zip: z.string().max(20).optional().nullable(),
     countryCode: z.string().length(2),
-    phone: z.string().max(30).optional(),
+    phone: z.string().max(30).optional().nullable(),
+    // Optional contact email on the order address — VALIDATED so a guest order can receive an
+    // order-confirmation email and an arbitrary/unsafe value can never be persisted or emailed.
+    email: z.string().email().max(254).optional(),
 });
 
 const orderItemSchema = z.object({
@@ -75,6 +81,40 @@ exports.refundPaymentSchema = z.object({
     reason: z.string().max(500).optional(),
 });
 
+// Selectable storefront gateways (C1 cross-service contract). The chosen gateway is RECORDED on the
+// order/payment metadata so reporting + the success screen reflect the shopper's selection; the
+// actual provider that captures money is still resolved server-side by PAYMENT_PROVIDER (the mock in
+// non-production). A client can therefore label intent intent without overriding capture authority.
+const GATEWAYS = ['stripe', 'razorpay', 'payu', 'bank'];
+
+// Create a payment intent. `gateway` is the shopper's selected storefront gateway (recorded only).
+exports.createPaymentIntentSchema = z.object({
+    gateway: z.enum(GATEWAYS).optional(),
+});
+
+// Confirm a payment intent. `verification` is the gateway (Razorpay) client-handler triple,
+// verified SERVER-SIDE (HMAC) — optional so the mock provider's {intentId} body still validates.
+// `gateway` (optional) lets confirm carry the selection when intent did not (recorded only).
+exports.confirmPaymentSchema = z.object({
+    intentId: z.string().min(1).max(200),
+    gateway: z.enum(GATEWAYS).optional(),
+    verification: z.object({
+        razorpay_payment_id: z.string().min(1).max(200),
+        razorpay_order_id: z.string().min(1).max(200),
+        razorpay_signature: z.string().min(1).max(512),
+    }).optional(),
+});
+
+// Provider-initiated async payment webhook (signature-verified upstream). Drives an order to
+// failed/voided when the gateway reports an out-of-band failure/cancellation. orderId scopes the
+// order; intentId (optional) targets the specific payment row.
+exports.paymentWebhookSchema = z.object({
+    event: z.enum(['payment.failed', 'payment.cancelled']),
+    orderId: z.string().uuid(),
+    intentId: z.string().min(1).max(200).optional().nullable(),
+    reason: z.string().max(500).optional().nullable(),
+});
+
 exports.createReturnSchema = z.object({
     orderId: z.string().uuid(),
     reason: z.string().min(1).max(200),
@@ -84,7 +124,9 @@ exports.createReturnSchema = z.object({
         quantity: z.number().int().min(1),
         reason: z.string().max(200).optional(),
         condition: z.enum(['new', 'like_new', 'good', 'fair', 'poor']).default('good'),
-        refundAmount: z.number().min(0).default(0),
+        // NOTE: refundAmount is intentionally NOT accepted from the client — it is derived
+        // SERVER-SIDE from the order item's own price×quantity in createReturn (a shopper must
+        // never be able to influence how much money is refunded).
     })).optional().default([]),
 });
 

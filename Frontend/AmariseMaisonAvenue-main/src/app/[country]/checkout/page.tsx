@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect } from "react";
+import Script from "next/script";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useAppStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
@@ -24,9 +25,21 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { placeOrder } from "@/lib/checkout";
+import {
+  addressApi,
+  orderApi,
+  type SavedAddress,
+  type AddressInput,
+  type Order,
+  type PaymentGatewaySlug,
+} from "@/lib/api-client";
+import { useMarket } from "@/lib/useMarkets";
+import type { RazorpayHandlerResponse } from "@/types/razorpay";
+import { authClient, getAccessToken, getCurrentUser } from "@/lib/auth";
 import { apiOrchestrator } from "@/lib/api/orchestrator";
 import { handleNotImplementedError } from "@/lib/feature-policy";
-import { onMissingCheckoutDependency } from "@/lib/checkout-policy";
+import { onMissingCheckoutDependency, revalidateCartStock } from "@/lib/checkout-policy";
+import { getProductById } from "@/lib/catalog";
 import { PaymentGateway, CountryCode } from "@/lib/types";
 import { formatAmount, normalizeCountry } from "@/lib/i18n/countries";
 import { RiskEngine } from "@/lib/fraud/risk-engine";
@@ -35,9 +48,6 @@ export default function CheckoutPage() {
   const {
     cart,
     clearCart,
-    createInvoice,
-    createTransaction,
-    activeBrandId,
     currentUser,
     paymentPlans,
     countryConfigs,
@@ -48,12 +58,48 @@ export default function CheckoutPage() {
   const { country } = useParams();
   const searchParams = useSearchParams();
   const countryCode = normalizeCountry(country as string);
+  // Live per-market tax facts (GET /commerce/markets); falls back to the static config when offline.
+  const { market: liveMarket } = useMarket(countryCode);
+
+  // Map the UI gateway enum to the C1 contract slug (stripe|razorpay|payu|bank).
+  const GATEWAY_SLUG: Record<PaymentGateway, PaymentGatewaySlug> = {
+    STRIPE: "stripe",
+    RAZORPAY: "razorpay",
+    PAYU: "payu",
+    BANK_TRANSFER: "bank",
+  };
   const router = useRouter();
   const { toast } = useToast();
 
   const [step, setStep] = useState(1);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
+
+  // ── Shipping address (full, backend-validatable) ──────────────────────────
+  // addressSchema requires address1 + city + countryCode; the rest are optional
+  // but we collect a complete address so the order's shippingAddress JSONB is real.
+  const [address1, setAddress1] = useState("");
+  const [address2, setAddress2] = useState("");
+  const [city, setCity] = useState("");
+  const [region, setRegion] = useState(""); // state / province / region
+  const [zip, setZip] = useState("");
+  const [addrCountryCode, setAddrCountryCode] = useState(
+    countryCode.toUpperCase()
+  );
+  const [phone, setPhone] = useState("");
+
+  // Saved-address autofill (signed-in shoppers only). Guests keep a blank form.
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(
+    null
+  );
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  // When the shopper has a saved address we show a "Deliver to" summary; this
+  // toggle reveals the editable form (new address or override).
+  const [isEnteringNewAddress, setIsEnteringNewAddress] = useState(false);
+  // Save-to-account: default ON for signed-in shoppers with nothing saved yet.
+  const [shouldSaveAddress, setShouldSaveAddress] = useState(false);
+
   const [selectedGateway, setSelectedGateway] =
     useState<PaymentGateway>("STRIPE");
   const [isSettling, setIsSettling] = useState(false);
@@ -66,12 +112,100 @@ export default function CheckoutPage() {
     `amarise-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
   );
 
-  // Prevent hydration mismatch for random order ID
+  // The confirmation reference is the REAL backend order.id (set in finalizeSuccess) — never a
+  // random #AM-#### placeholder.
+
+  // Copy a saved address into the editable form fields (incl. name).
+  const applyAddressToForm = (addr: SavedAddress) => {
+    setFirstName(addr.firstName ?? "");
+    setLastName(addr.lastName ?? "");
+    setAddress1(addr.address1 ?? "");
+    setAddress2(addr.address2 ?? "");
+    setCity(addr.city ?? "");
+    setRegion(addr.state ?? "");
+    setZip(addr.zip ?? "");
+    setAddrCountryCode((addr.countryCode || countryCode).toUpperCase());
+    setPhone(addr.phone ?? "");
+  };
+
+  // On mount: restore the real session (httpOnly refresh cookie) and, if signed
+  // in, load saved addresses and prefill from the default (or first). Guests and
+  // shoppers with no saved address fall back to a blank form. Never blocks checkout.
   useEffect(() => {
-    if (step === 3 && !orderRef) {
-      setOrderRef(`#AM-${Math.floor(Math.random() * 10000)}`);
-    }
-  }, [step, orderRef]);
+    let cancelled = false;
+    (async () => {
+      if (!getAccessToken()) {
+        await authClient.bootstrap();
+      }
+      const signedIn = !!getAccessToken() && !!getCurrentUser();
+      if (cancelled) return;
+      setIsSignedIn(signedIn);
+
+      if (!signedIn) {
+        // Guest: blank form, no save-to-account option.
+        setIsEnteringNewAddress(true);
+        return;
+      }
+
+      const res = await addressApi.listMine();
+      if (cancelled) return;
+
+      if (res.ok && res.data.length > 0) {
+        const preferred =
+          res.data.find((a) => a.isDefault) ?? res.data[0];
+        setSavedAddresses(res.data);
+        setSelectedAddressId(preferred.id);
+        applyAddressToForm(preferred);
+        // Has a saved address → show "Deliver to" summary; don't pre-check save.
+        setIsEnteringNewAddress(false);
+        setShouldSaveAddress(false);
+      } else {
+        // Signed in but nothing saved → blank form, default to saving it.
+        setIsEnteringNewAddress(true);
+        setShouldSaveAddress(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // countryCode is stable per route render; intentionally run once on mount.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Required-field gate for the dispatch step. Mirror the backend addressSchema requireds
+  // exactly: firstName/lastName/address1/city/countryCode. state/zip are OPTIONAL (not every
+  // market uses them) — requiring them here would wrongly block an otherwise-valid saved or
+  // entered address from checking out.
+  const isAddressComplete =
+    firstName.trim() !== "" &&
+    lastName.trim() !== "" &&
+    address1.trim() !== "" &&
+    city.trim() !== "" &&
+    addrCountryCode.trim() !== "";
+
+  const usingSavedSummary =
+    isSignedIn && savedAddresses.length > 0 && !isEnteringNewAddress;
+
+  // Build the immutable shippingAddress object passed to placeOrder + saved to
+  // the account. Optional fields are omitted when blank to keep the JSONB clean.
+  const buildShippingAddress = (): Record<string, unknown> => ({
+    firstName: firstName.trim(),
+    lastName: lastName.trim(),
+    address1: address1.trim(),
+    ...(address2.trim() ? { address2: address2.trim() } : {}),
+    city: city.trim(),
+    state: region.trim(),
+    zip: zip.trim(),
+    countryCode: addrCountryCode.trim().toUpperCase(),
+    ...(phone.trim() ? { phone: phone.trim() } : {}),
+  });
+
+  const handleSelectSavedAddress = (id: string) => {
+    const addr = savedAddresses.find((a) => a.id === id);
+    if (!addr) return;
+    setSelectedAddressId(id);
+    applyAddressToForm(addr);
+  };
 
   const planId = searchParams.get("planId");
   const selectedPlan = useMemo(
@@ -147,6 +281,24 @@ export default function CheckoutPage() {
    */
   const handleLockInventory = async () => {
     if (cart.length > 0) {
+      // 0. Oversell guard — synchronous live availability re-check against the catalog's
+      // server-computed `inStock`. Hard-blocks an item the catalog now reports sold out, closing
+      // the pre-order window for the last unit (createOrder still atomically reserves at order time).
+      const stock = await revalidateCartStock(
+        cart.map((c) => ({ productId: c.id, name: c.name })),
+        (productId) => getProductById(productId, countryCode as CountryCode),
+      );
+      if (!stock.available) {
+        toast({
+          variant: "destructive",
+          title: "No Longer Available",
+          description: `${stock.soldOut.join(", ")} just sold out. Please remove ${
+            stock.soldOut.length > 1 ? "these pieces" : "this piece"
+          } to continue.`,
+        });
+        return;
+      }
+
       toast({
         title: "Maison Security Audit",
         description: "Evaluating acquisition risk profile...",
@@ -234,6 +386,58 @@ export default function CheckoutPage() {
     }
   };
 
+  /**
+   * Shared success routine — identical for the mock provider, the gateway
+   * (Razorpay) post-capture path, and bank transfer. The backend order is the
+   * single source of truth (no local invoice/transaction mirror): we record the
+   * real order.id, advance to the confirmation step, clear the cart, and fire the
+   * optional save-address side effect.
+   */
+  const finalizeSuccess = (order: Order) => {
+    setOrderRef(order.id);
+
+    setIsSettling(false);
+    setStep(3);
+    clearCart();
+
+    // Fire-and-forget: persist the address to the signed-in shopper's account
+    // when opted in. A failure must NOT block or scare-toast the completed
+    // order — it's a soft convenience, so we log and move on.
+    if (shouldSaveAddress && isSignedIn) {
+      const newAddress: AddressInput = {
+        addressType: "shipping",
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        address1: address1.trim(),
+        address2: address2.trim() || null,
+        city: city.trim(),
+        state: region.trim() || null,
+        zip: zip.trim() || null,
+        countryCode: addrCountryCode.trim().toUpperCase(),
+        phone: phone.trim() || null,
+        isDefault: savedAddresses.length === 0, // first saved address becomes default
+      };
+      addressApi
+        .create(newAddress)
+        .then((saveRes) => {
+          if (!saveRes.ok) {
+            console.warn(
+              "[checkout] could not save address to account:",
+              saveRes.error
+            );
+          }
+        })
+        .catch((saveErr) => {
+          console.warn(
+            "[checkout] could not save address to account:",
+            saveErr
+          );
+        });
+    }
+
+    toast({ title: "Order Created", description: `Order ${order.id} confirmed.` });
+  };
+
   const handlePlaceOrder = async () => {
     setIsSettling(true);
 
@@ -263,13 +467,27 @@ export default function CheckoutPage() {
         currencyCode: currentCountryConfig?.currency || "USD",
         country: countryCode,
         shippingAmount: 0,
+        // Chosen settlement gateway, sent to + recorded by order-service (C1). Non-prod stays mocked.
+        gateway: GATEWAY_SLUG[selectedGateway],
+        // Live per-market tax facts (GET /commerce/markets) so a backend rate change is honored
+        // without a code change; placeOrder falls back to the static config when this is absent.
+        ...(liveMarket
+          ? {
+              taxContext: {
+                taxType: liveMarket.taxType,
+                taxRate: liveMarket.taxRate,
+                taxInclusive: liveMarket.taxInclusive,
+              },
+            }
+          : {}),
         // Link to the REAL signed-in shopper (resolved inside placeOrder via the auth session,
         // not the mock store). The form name seeds the customer record on first link; guests
         // stay anonymous. Replaces the previous mock `currentUser?.id`.
         customer: { firstName, lastName },
         idempotencyKey: idempotencyKeyRef.current,
-        // shippingAddress omitted: the form lacks a full address (addressSchema requires
-        // address1/city/countryCode) — a partial would fail backend validation.
+        // Full shipping address now collected (name + address1/city/state/zip/countryCode,
+        // optional address2/phone) → stored as-is in the order's shippingAddress JSONB.
+        shippingAddress: buildShippingAddress(),
       });
 
       if (!result.ok) {
@@ -285,51 +503,102 @@ export default function CheckoutPage() {
       }
 
       const order = result.data.order;
-      setOrderRef(order.id);
+      const intent = result.data.intent;
 
-      // Local MIRROR for the admin/account demo views — NOT the order truth (backend is).
-      const customerName = `${firstName} ${lastName}`;
-      const invoiceId = `inv-${order.id}`;
-      createInvoice({
-        id: invoiceId,
-        orderId: order.id,
-        customerName,
-        amount: totalYield,
-        currency: countryCode.toUpperCase(),
-        status: selectedGateway === "BANK_TRANSFER" ? "pending" : "paid",
-        date: new Date().toISOString(),
-        taxAmount: taxCalculation.totalTax,
-        taxRate: (taxCalculation.totalTax / taxCalculation.subtotal) * 100,
-        complianceCertified: true,
-        brandId: activeBrandId,
-        gateway: selectedGateway,
-        fxRate: lockedFXRate || 1,
-      });
-      createTransaction({
-        id: `tx-${order.id}`,
-        country: countryCode as CountryCode,
-        type: selectedPlan ? "Subscription" : "Sale",
-        clientName: customerName,
-        amount: totalYield,
-        netAmount: taxCalculation.subtotal,
-        taxAmount: taxCalculation.totalTax,
-        currency: countryCode.toUpperCase(),
-        status: selectedGateway === "BANK_TRANSFER" ? "Pending" : "Settled",
-        timestamp: new Date().toISOString(),
-        invoiceId,
-        brandId: activeBrandId,
-        artifactName: selectedPlan
-          ? selectedPlan.name
-          : cart[0]?.name || "Atelier Bundle",
-        isProvenanceCertified: true,
-        gateway: selectedGateway,
-        lockedRate: lockedFXRate || 1,
-      });
+      // ── Gateway path (Razorpay): the order exists but is UNPAID. Open the
+      // provider checkout and finalize only after a SERVER-VERIFIED capture.
+      // Bank transfer never carries an intent → it falls through to the
+      // pending/mock success path below, unchanged. ──────────────────────────
+      if (
+        intent?.keyId &&
+        intent.amount != null &&
+        intent.currency &&
+        selectedGateway !== "BANK_TRANSFER"
+      ) {
+        if (!window.Razorpay) {
+          // Script not loaded yet — never silently swallow; let the shopper retry.
+          setIsSettling(false);
+          toast({
+            variant: "destructive",
+            title: "Payment Loading",
+            description:
+              "Payment is still loading, please try again in a moment.",
+          });
+          return;
+        }
 
-      setIsSettling(false);
-      setStep(3);
-      clearCart();
-      toast({ title: "Order Created", description: `Order ${order.id} confirmed.` });
+        const currentUser = getCurrentUser();
+        const rzp = new window.Razorpay({
+          key: intent.keyId,
+          order_id: intent.intentId,
+          amount: intent.amount,
+          currency: intent.currency,
+          name: "Amarisé Maison Avenue",
+          description: `Order ${order.id}`,
+          prefill: {
+            name: `${firstName} ${lastName}`.trim(),
+            ...(currentUser?.email ? { email: currentUser.email } : {}),
+          },
+          theme: { color: "#5d2a4a" }, // on-brand plum
+          handler: async (resp: RazorpayHandlerResponse) => {
+            try {
+              const confirmed = await orderApi.confirmPayment(
+                order.id,
+                intent.intentId,
+                {
+                  gateway: GATEWAY_SLUG[selectedGateway],
+                  verification: {
+                    razorpay_payment_id: resp.razorpay_payment_id,
+                    razorpay_order_id: resp.razorpay_order_id,
+                    razorpay_signature: resp.razorpay_signature,
+                  },
+                }
+              );
+
+              // C1: confirmPayment returns the full updated Order; PAID iff paymentStatus === 'paid'.
+              if (confirmed.ok && confirmed.data.paymentStatus === "paid") {
+                // SUCCESS — server verified the HMAC + captured. Show the REAL
+                // order (real id + paid state) via the shared success routine.
+                finalizeSuccess(confirmed.data);
+                return;
+              }
+
+              // Verification/capture rejected — surface a clear reason, stay on the
+              // payment step, and re-enable the settle button.
+              setIsSettling(false);
+              toast({
+                variant: "destructive",
+                title: "Settlement Failed",
+                description: confirmed.ok
+                  ? "Payment could not be verified. Please try again."
+                  : confirmed.error.message,
+              });
+            } catch (confirmErr) {
+              setIsSettling(false);
+              toast({
+                variant: "destructive",
+                title: "Settlement Failed",
+                description:
+                  confirmErr instanceof Error
+                    ? confirmErr.message
+                    : "Payment confirmation failed. Please try again.",
+              });
+            }
+          },
+          modal: {
+            ondismiss: () => {
+              // Shopper closed the popup without paying — order stays unpaid
+              // (fine for follow-up). Just return the button to an actionable state.
+              setIsSettling(false);
+            },
+          },
+        });
+        rzp.open();
+        return; // the rest is handled asynchronously inside the handler/dismiss.
+      }
+
+      // ── Mock / bank-transfer / auto-confirmed path — unchanged behavior. ────
+      finalizeSuccess(order);
     } catch (e) {
       setIsSettling(false);
       toast({
@@ -406,6 +675,13 @@ export default function CheckoutPage() {
 
   return (
     <div className="container mx-auto px-2 md:px-12 py-2 md:py-24 max-w-7xl animate-fade-in font-body">
+      {/* Razorpay Checkout — loaded once so the provider popup is ready by the
+          time the shopper reaches the settlement step. Only opened on the
+          gateway path (see handlePlaceOrder). */}
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
       <div className="hidden md:flex justify-center items-center space-x-12 mb-24">
         <ProtocolStep
           num={1}
@@ -454,48 +730,300 @@ export default function CheckoutPage() {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div className="space-y-3">
-                      <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                        Legal First Name
-                      </Label>
-                      <Input
-                        className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
-                        placeholder="Julian"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-3">
-                      <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                        Legal Last Name
-                      </Label>
-                      <Input
-                        className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
-                        placeholder="Vandervilt"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                      />
-                    </div>
-                    <div className="md:col-span-2 space-y-3">
-                      <Label className="text-[10px] uppercase font-bold tracking-widest text-slate-500">
-                        Primary Residence / Dispatch Address
-                      </Label>
-                      <Input
-                        className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
-                        placeholder="730 Fifth Avenue"
-                      />
-                    </div>
-                  </div>
+                  {usingSavedSummary ? (
+                    /* Signed-in shopper with a saved address: tasteful summary +
+                       optional selector + "use a different address" escape hatch. */
+                    <div className="space-y-8 animate-fade-in">
+                      <fieldset className="border border-border bg-ivory/40 p-8 space-y-6">
+                        <legend className="px-3 text-[9px] font-bold uppercase tracking-[0.3em] text-plum flex items-center space-x-2">
+                          <Truck className="w-3 h-3" />
+                          <span>Deliver To</span>
+                        </legend>
 
-                    <Button
-                      className="h-20 px-16 w-full mx-auto bg-black text-white hover:bg-plum rounded-none text-[11px] font-bold tracking-[0.4em] uppercase transition-all shadow-2xl disabled:opacity-30"
-                      onClick={handleLockInventory}
-                      disabled={!firstName || !lastName}
-                    >
-                      CONTINUE TO SETTLEMENT{" "}
-                      <ArrowRight className="ml-4 w-4 h-4" />
-                    </Button>
+                        {savedAddresses.length > 1 && (
+                          <div className="space-y-3">
+                            <Label
+                              htmlFor="saved-address-select"
+                              className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                            >
+                              Saved Dispatch Registry
+                            </Label>
+                            <select
+                              id="saved-address-select"
+                              className="w-full rounded-none border border-border bg-white h-14 px-4 text-md italic focus:border-plum focus:outline-none"
+                              value={selectedAddressId ?? ""}
+                              onChange={(e) =>
+                                handleSelectSavedAddress(e.target.value)
+                              }
+                            >
+                              {savedAddresses.map((a) => (
+                                <option key={a.id} value={a.id}>
+                                  {`${a.address1}, ${a.city}${
+                                    a.state ? `, ${a.state}` : ""
+                                  } — ${a.countryCode}`}
+                                  {a.isDefault ? " (Default)" : ""}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+
+                        <address className="not-italic space-y-1 text-md text-gray-800 font-light">
+                          <p className="font-bold text-gray-900 uppercase tracking-tight text-sm">
+                            {firstName} {lastName}
+                          </p>
+                          <p>{address1}</p>
+                          {address2 && <p>{address2}</p>}
+                          <p>
+                            {[city, region, zip].filter(Boolean).join(", ")}
+                          </p>
+                          <p className="uppercase tracking-widest text-[11px] text-gray-500">
+                            {addrCountryCode}
+                          </p>
+                          {phone && (
+                            <p className="text-[11px] text-gray-500">{phone}</p>
+                          )}
+                        </address>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsEnteringNewAddress(true);
+                            setShouldSaveAddress(true);
+                          }}
+                          className="text-[10px] font-bold uppercase tracking-[0.3em] text-plum hover:text-black transition-colors underline underline-offset-4"
+                        >
+                          Use a different address
+                        </button>
+                      </fieldset>
+                    </div>
+                  ) : (
+                    /* Editable form — guests, signed-in shoppers with no saved
+                       address, and the "use a different address" path. */
+                    <div className="space-y-8 animate-fade-in">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="checkout-first-name"
+                            className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                          >
+                            Legal First Name
+                          </Label>
+                          <Input
+                            id="checkout-first-name"
+                            autoComplete="given-name"
+                            aria-required="true"
+                            className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
+                            placeholder="Julian"
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="checkout-last-name"
+                            className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                          >
+                            Legal Last Name
+                          </Label>
+                          <Input
+                            id="checkout-last-name"
+                            autoComplete="family-name"
+                            aria-required="true"
+                            className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
+                            placeholder="Vandervilt"
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="md:col-span-2 space-y-3">
+                          <Label
+                            htmlFor="checkout-address1"
+                            className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                          >
+                            Dispatch Address
+                          </Label>
+                          <Input
+                            id="checkout-address1"
+                            autoComplete="address-line1"
+                            aria-required="true"
+                            className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
+                            placeholder="730 Fifth Avenue"
+                            value={address1}
+                            onChange={(e) => setAddress1(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="md:col-span-2 space-y-3">
+                          <Label
+                            htmlFor="checkout-address2"
+                            className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                          >
+                            Apartment / Suite{" "}
+                            <span className="text-gray-300 normal-case font-light tracking-normal">
+                              (optional)
+                            </span>
+                          </Label>
+                          <Input
+                            id="checkout-address2"
+                            autoComplete="address-line2"
+                            className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
+                            placeholder="Penthouse 12B"
+                            value={address2}
+                            onChange={(e) => setAddress2(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="checkout-city"
+                            className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                          >
+                            City
+                          </Label>
+                          <Input
+                            id="checkout-city"
+                            autoComplete="address-level2"
+                            aria-required="true"
+                            className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
+                            placeholder="New York"
+                            value={city}
+                            onChange={(e) => setCity(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="checkout-region"
+                            className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                          >
+                            State / Region
+                          </Label>
+                          <Input
+                            id="checkout-region"
+                            autoComplete="address-level1"
+                            aria-required="true"
+                            className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
+                            placeholder="NY"
+                            value={region}
+                            onChange={(e) => setRegion(e.target.value)}
+                          />
+                        </div>
+
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="checkout-zip"
+                            className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                          >
+                            Postal / ZIP Code
+                          </Label>
+                          <Input
+                            id="checkout-zip"
+                            autoComplete="postal-code"
+                            aria-required="true"
+                            className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
+                            placeholder="10019"
+                            value={zip}
+                            onChange={(e) => setZip(e.target.value)}
+                          />
+                        </div>
+                        <div className="space-y-3">
+                          <Label
+                            htmlFor="checkout-country"
+                            className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                          >
+                            Country Code
+                          </Label>
+                          <Input
+                            id="checkout-country"
+                            autoComplete="country"
+                            aria-required="true"
+                            maxLength={2}
+                            className="rounded-none border-border bg-ivory/30 h-14 text-md italic uppercase focus:border-plum"
+                            placeholder="US"
+                            value={addrCountryCode}
+                            onChange={(e) =>
+                              setAddrCountryCode(
+                                e.target.value.toUpperCase().slice(0, 2)
+                              )
+                            }
+                          />
+                        </div>
+
+                        <div className="md:col-span-2 space-y-3">
+                          <Label
+                            htmlFor="checkout-phone"
+                            className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                          >
+                            Contact Phone{" "}
+                            <span className="text-gray-300 normal-case font-light tracking-normal">
+                              (optional)
+                            </span>
+                          </Label>
+                          <Input
+                            id="checkout-phone"
+                            autoComplete="tel"
+                            type="tel"
+                            className="rounded-none border-border bg-ivory/30 h-14 text-md italic focus:border-plum"
+                            placeholder="+1 212 555 0100"
+                            value={phone}
+                            onChange={(e) => setPhone(e.target.value)}
+                          />
+                        </div>
+                      </div>
+
+                      {!isAddressComplete && (
+                        <p
+                          role="status"
+                          className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400"
+                        >
+                          Complete the required dispatch fields to continue.
+                        </p>
+                      )}
+
+                      {isSignedIn && (
+                        <label className="flex items-center space-x-3 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={shouldSaveAddress}
+                            onChange={(e) =>
+                              setShouldSaveAddress(e.target.checked)
+                            }
+                            className="w-4 h-4 accent-plum border-border rounded-none"
+                          />
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                            Save this address to my account
+                          </span>
+                        </label>
+                      )}
+
+                      {isSignedIn && savedAddresses.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsEnteringNewAddress(false);
+                            const preferred =
+                              savedAddresses.find((a) => a.isDefault) ??
+                              savedAddresses[0];
+                            setSelectedAddressId(preferred.id);
+                            applyAddressToForm(preferred);
+                          }}
+                          className="block text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-colors underline underline-offset-4"
+                        >
+                          Use a saved address instead
+                        </button>
+                      )}
+                    </div>
+                  )}
+
+                  <Button
+                    className="h-20 px-16 w-full mx-auto bg-black text-white hover:bg-plum rounded-none text-[11px] font-bold tracking-[0.4em] uppercase transition-all shadow-2xl disabled:opacity-30"
+                    onClick={handleLockInventory}
+                    disabled={!isAddressComplete}
+                  >
+                    CONTINUE TO SETTLEMENT{" "}
+                    <ArrowRight className="ml-4 w-4 h-4" />
+                  </Button>
                 </div>
               )}
 

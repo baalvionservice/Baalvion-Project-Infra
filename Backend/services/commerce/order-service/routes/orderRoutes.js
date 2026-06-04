@@ -5,7 +5,7 @@ const shipmentCtrl = require('../controller/shipmentController');
 const { validate } = require('../middleware/validate');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { loadStoreRole, requireStoreRole } = require('../middleware/rbacPep');
-const { createOrderSchema, updateOrderStatusSchema, cancelOrderSchema, recordPaymentSchema, refundPaymentSchema, createShipmentSchema, updateShipmentSchema } = require('../validators/orderSchemas');
+const { createOrderSchema, updateOrderStatusSchema, cancelOrderSchema, recordPaymentSchema, refundPaymentSchema, createPaymentIntentSchema, confirmPaymentSchema, createShipmentSchema, updateShipmentSchema } = require('../validators/orderSchemas');
 
 const router = Router({ mergeParams: true });
 
@@ -34,7 +34,7 @@ router.get('/:orderId', ctrl.getOrder);
 // Customer-readable shipment tracking for an order. No store-role gate (inherits optionalAuth);
 // ownership (owner OR guest-session OR staff) is enforced in shipmentService.listOrderShipments.
 router.get('/:orderId/shipments', shipmentCtrl.listShipments);
-router.post('/:orderId/payments/intent', ctrl.createPaymentIntent);
-router.post('/:orderId/payments/confirm', ctrl.confirmPayment);
+router.post('/:orderId/payments/intent', validate(createPaymentIntentSchema), ctrl.createPaymentIntent);
+router.post('/:orderId/payments/confirm', validate(confirmPaymentSchema), ctrl.confirmPayment);
 
 module.exports = router;
