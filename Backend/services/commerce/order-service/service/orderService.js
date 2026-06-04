@@ -683,4 +683,53 @@ async function handlePaymentWebhook({ event, orderId, intentId, reason }) {
     return cancelPayment(order.storeId, orderId, intentId || null);
 }
 
+// Capture backstop for the SUCCESS case: a signature-verified Razorpay 'payment.captured'/'order.paid'
+// webhook settles the order even if the shopper's browser never returned to confirm (closed/crashed
+// mid-redirect). Keyed off the Razorpay order_id we stored as the intent's transactionId → resolves
+// the order, then captures it under the SAME order-row LOCK.UPDATE as confirmPayment: whichever of
+// {client confirm, webhook} acquires the lock first captures; the other sees paymentStatus='paid' and
+// no-ops. So it is idempotent AND never double-fulfills / double-ledgers / double-emails — even if
+// the webhook is delivered more than once or races the client confirm.
+async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId }) {
+    if (!providerOrderId) return { ok: false, reason: 'missing_order_id' };
+    const intentPayment = await OrdersOrderPayment.findOne({ where: { transactionId: providerOrderId } });
+    if (!intentPayment) {
+        // Not an order we created an intent for → ack-and-ignore (logged). The route returns 200 so
+        // Razorpay stops retrying a webhook we can never map.
+        console.warn(JSON.stringify({ evt: 'razorpay_webhook_unknown_order', providerOrderId }));
+        return { ok: false, reason: 'unknown_order' };
+    }
+    const orderId = intentPayment.orderId;
+    const base = await OrdersOrder.findOne({ where: { id: orderId }, attributes: ['id', 'storeId'] });
+    if (!base) return { ok: false, reason: 'order_not_found' };
+    const storeId = base.storeId;
+
+    const out = await sequelize.transaction(async (t) => {
+        const order = await OrdersOrder.findOne({ where: { id: orderId, storeId }, lock: t.LOCK.UPDATE, transaction: t });
+        if (!order) return { ok: false };
+        if (order.paymentStatus === 'paid') return { ok: true, replay: true }; // confirm or a prior webhook already captured
+        const payment = await OrdersOrderPayment.findOne({ where: { orderId, transactionId: providerOrderId }, transaction: t });
+        if (payment) await payment.update({ status: 'captured', paidAt: new Date(), metadata: { ...(payment.metadata || {}), transactionId: providerPaymentId, capturedVia: 'webhook' } }, { transaction: t });
+        await order.update({ paymentStatus: 'paid', status: order.status === 'pending' ? 'confirmed' : order.status }, { transaction: t });
+        await unwindReservation(t, storeId, orderId, 'fulfill'); // reserved → deducted on capture
+        return { ok: true };
+    });
+    await cache.del(cache.keys.order(orderId));
+    if (out.ok && !out.replay) {
+        securityAudit.payment('captured', 'allow', { storeId, resource: { type: 'order', id: orderId }, metadata: { via: 'webhook', providerPaymentId } });
+        const fresh = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
+        await safeLedger(() => ledgerClient.recordPaymentCapture(storeId, {
+            paymentId: intentPayment.id, orderId, orderNumber: fresh.orderNumber,
+            amount: fresh.totalAmount, currencyCode: fresh.currencyCode,
+            provider: intentPayment.provider, transactionId: providerPaymentId,
+        }), { storeId, orderId, phase: 'webhook_capture' });
+        OrdersOrderItem.findAll({ where: { orderId } })
+            .then((items) => sendOrderEmail('orderPaid', fresh.toJSON(), items))
+            .catch(() => {});
+    }
+    return out;
+}
+
 module.exports = { listOrders, listMyOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, failPayment, cancelPayment, handlePaymentWebhook };
+// Appended export (separate statement to avoid colliding with concurrent edits to the line above).
+module.exports.capturePaymentFromWebhook = capturePaymentFromWebhook;
