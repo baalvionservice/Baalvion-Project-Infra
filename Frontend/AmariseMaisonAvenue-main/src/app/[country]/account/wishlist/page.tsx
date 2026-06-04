@@ -1,17 +1,46 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppStore } from '@/lib/store';
-import { Heart, ChevronRight, Share2 } from 'lucide-react';
+import { Heart, ChevronRight, Share2, Check } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { ProductCard } from '@/components/product/ProductCard';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PrivateArchivePage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
   const { wishlist } = useAppStore();
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  // Share the archive: native Web Share API when available, else copy the page link.
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const shareData = {
+      title: 'My Amarisé Private Archive',
+      text: 'A curated selection of artifacts from Amarisé Maison Avenue.',
+      url,
+    };
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        toast({ title: 'Link copied', description: 'Your archive link is on the clipboard.' });
+        return;
+      }
+      toast({ variant: 'destructive', title: 'Unable to share', description: 'Sharing is not supported on this device.' });
+    } catch {
+      // User dismissed the native share sheet — not an error.
+    }
+  };
 
   return (
     <div className="space-y-12">
@@ -25,9 +54,24 @@ export default function PrivateArchivePage() {
           <h1 className="text-4xl font-headline font-bold italic tracking-tight text-gray-900 uppercase">Archive</h1>
           <p className="text-sm text-gray-500 font-light italic">A curated selection of artifacts reserved for your future acquisition.</p>
         </div>
-        <Button variant="outline" className="h-12 border-border text-[9px] font-bold uppercase tracking-widest px-8 rounded-none">
-           <Share2 className="w-3.5 h-3.5 mr-2" /> SHARE SELECTION
-        </Button>
+        {wishlist.length > 0 && (
+          <Button
+            type="button"
+            onClick={handleShare}
+            variant="outline"
+            className="h-12 border-border text-[9px] font-bold uppercase tracking-widest px-8 rounded-none"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 mr-2 text-emerald-600" /> LINK COPIED
+              </>
+            ) : (
+              <>
+                <Share2 className="w-3.5 h-3.5 mr-2" /> SHARE SELECTION
+              </>
+            )}
+          </Button>
+        )}
       </header>
 
       {wishlist.length > 0 ? (

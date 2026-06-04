@@ -33,15 +33,60 @@
 const cacheService = require('./cacheService');
 
 // ── Tunables (all env-overridable) ─────────────────────────────────────────────
-const LIVE_FEED_ENABLED = String(process.env.FX_LIVE_FEED || 'false').toLowerCase() === 'true';
+const FX_LIVE_FEED_REQUESTED = String(process.env.FX_LIVE_FEED || 'false').toLowerCase() === 'true';
 // TTL on the cached snapshot. A snapshot older than this is treated as stale → static fallback.
 const FX_CACHE_TTL = Number(process.env.FX_CACHE_TTL || 3600); // 1h
 // Suggested cadence for the background refresh job (kept below the TTL so the cache never expires).
 const REFRESH_INTERVAL_MS = Number(process.env.FX_REFRESH_INTERVAL_MS || 30 * 60 * 1000); // 30m
-const FX_API_URL = process.env.FX_API_URL || '';
+// Default to a KEYLESS, USD-base public FX feed (open.er-api.com) so a live feed works with zero
+// secrets in non-prod. Override FX_API_URL for a paid/keyed provider; FX_API_KEY is appended as
+// access_key only when set. The feed is OFF unless FX_LIVE_FEED=true regardless of this default.
+const DEFAULT_FX_API_URL = 'https://open.er-api.com/v6/latest/USD';
+const FX_API_URL = process.env.FX_API_URL || DEFAULT_FX_API_URL;
 const FX_API_KEY = process.env.FX_API_KEY || '';
+// Hard cap on the upstream fetch so a hung feed never blocks the refresh job.
+const FETCH_TIMEOUT_MS = Number(process.env.FX_FETCH_TIMEOUT_MS || 5000);
 
 const CACHE_KEY = 'commerce:fx:snapshot:usd';
+
+// SSRF guard for an operator-misconfigured FX_API_URL. The URL is operator-supplied, so a typo or a
+// hostile-internal value could point the refresh job at an internal/metadata endpoint. We require a
+// well-formed https:// URL whose host is NOT loopback/link-local/private (RFC1918). Returns true only
+// for a safe public-looking https URL. Hostname comparison is purely lexical — we never resolve DNS.
+function isSafeFeedUrl(rawUrl) {
+    let parsed;
+    try {
+        parsed = new URL(rawUrl);
+    } catch {
+        return false; // not a parseable absolute URL
+    }
+    if (parsed.protocol !== 'https:') return false; // plaintext / file: / etc. rejected
+    const host = parsed.hostname.toLowerCase().replace(/^\[|\]$/g, ''); // strip IPv6 brackets
+    if (host === 'localhost' || host === '::1' || host === '0.0.0.0' || host === '') return false;
+    // IPv6 loopback / link-local / unique-local (fc00::/7) — lexical prefix checks.
+    if (host === '::' || host.startsWith('fe80:') || host.startsWith('fc') || host.startsWith('fd')) return false;
+    // IPv4 RFC1918 private + loopback + link-local ranges.
+    const v4 = host.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    if (v4) {
+        const [a, b] = [Number(v4[1]), Number(v4[2])];
+        if (a === 10) return false;                       // 10.0.0.0/8
+        if (a === 127) return false;                      // 127.0.0.0/8 loopback
+        if (a === 169 && b === 254) return false;         // 169.254.0.0/16 link-local
+        if (a === 172 && b >= 16 && b <= 31) return false; // 172.16.0.0/12
+        if (a === 192 && b === 168) return false;         // 192.168.0.0/16
+    }
+    return true;
+}
+
+// Effective enable flag: the live feed only runs when explicitly requested AND its URL passes the
+// SSRF guard. An invalid/private FX_API_URL DISABLES the feed (warn + static fallback) instead of
+// throwing into boot, so the store still prices every product from the static rates.
+const LIVE_FEED_ENABLED = FX_LIVE_FEED_REQUESTED && isSafeFeedUrl(FX_API_URL);
+if (FX_LIVE_FEED_REQUESTED && !LIVE_FEED_ENABLED) {
+    // eslint-disable-next-line no-console
+    console.warn(`[Commerce FX] FX_LIVE_FEED is on but FX_API_URL is invalid or points at a private/`
+        + `non-https host — live feed DISABLED, falling back to static rates. URL: ${FX_API_URL}`);
+}
 
 // In-process memo of the latest validated snapshot. The hot path reads THIS (sync) so a
 // per-request price conversion never awaits Redis. Refreshed by refreshRates()/primeFromCache().
@@ -99,23 +144,49 @@ function getEffectiveFxRate(currency, staticRate) {
     return staticRate; // graceful fallback: feed down / stale / missing this currency
 }
 
+// Build the upstream URL, appending the access_key query param only when FX_API_KEY is set (so the
+// keyless default stays clean and keyed providers like exchangerate.host/apilayer work too).
+function buildFeedUrl() {
+    if (!FX_API_URL) return null;
+    if (!FX_API_KEY) return FX_API_URL;
+    const sep = FX_API_URL.includes('?') ? '&' : '?';
+    return `${FX_API_URL}${sep}access_key=${encodeURIComponent(FX_API_KEY)}`;
+}
+
+// Extract a USD-base rates map from the common provider wire formats. Supports the keyless
+// open.er-api.com shape ({ result:'success', rates:{...} }) and the exchangerate.host /
+// exchangeratesapi shape ({ success:true, base:'USD', rates:{...} }). Returns the raw map (or null);
+// validation/normalization happens in normalizeRates(). USD is forced to 1 as the base anchor.
+function extractRates(body) {
+    if (!body || typeof body !== 'object') return null;
+    // Explicit failure flags from keyed providers.
+    if (body.success === false || (typeof body.result === 'string' && body.result !== 'success')) return null;
+    const rates = body.rates && typeof body.rates === 'object' ? body.rates : null;
+    if (!rates) return null;
+    // Only USD-base snapshots are usable (markets.js converts FROM USD). If a provider returns a
+    // different base we cannot safely use it → bail to static.
+    if (body.base && String(body.base).toUpperCase() !== 'USD') return null;
+    return { ...rates, USD: 1 };
+}
+
 // ── LIVE-FEED INTEGRATION POINT ────────────────────────────────────────────────
-// Implement the real API call here. Must return a USD-base rates map
-// ({ USD: 1, GBP: 0.79, ... }) or null on any failure (never throw). This is the ONLY
-// function that should know about the upstream provider's wire format / auth.
-//
-// Example skeleton (kept commented so the service has no hard dependency on a feed):
-//
-//   const res = await fetch(`${FX_API_URL}?base=USD&access_key=${FX_API_KEY}`);
-//   if (!res.ok) return null;
-//   const body = await res.json();
-//   return body && body.rates ? { USD: 1, ...body.rates } : null;
-//
+// Calls the configured USD-base FX provider and returns a raw rates map (USD-anchored) or null on
+// ANY failure (never throws). normalizeRates() downstream drops junk and rejects an empty result.
 async function fetchLiveSnapshot() {
-    if (!FX_API_URL) return null; // no feed configured → caller falls back to static
-    // Intentionally a stub: returning null keeps the static rates authoritative until a
-    // real provider is wired in above. Implement and return a normalized rates map here.
-    return null;
+    const url = buildFeedUrl();
+    if (!url) return null; // no feed configured → caller falls back to static
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    try {
+        const res = await fetch(url, { signal: controller.signal, headers: { accept: 'application/json' } });
+        if (!res || !res.ok) return null;
+        const body = await res.json();
+        return extractRates(body);
+    } catch {
+        return null; // network error / timeout / bad JSON → static fallback
+    } finally {
+        clearTimeout(timer);
+    }
 }
 
 /**
@@ -157,17 +228,46 @@ async function primeFromCache() {
     return false;
 }
 
+let refreshTimer = null;
+
+/**
+ * Boot the live-feed lifecycle: hydrate from Redis, kick an immediate refresh, then refresh on an
+ * interval (kept below the cache TTL so the snapshot never expires under the read path). A complete
+ * NO-OP when FX_LIVE_FEED is disabled, so the static-pricing default boots with zero side effects.
+ * Returns a stop() handle (used by tests / graceful shutdown). The timer is unref()'d so it never
+ * keeps the process alive on its own.
+ */
+function startBackgroundRefresh() {
+    if (!LIVE_FEED_ENABLED) return { started: false, stop: () => {} };
+    if (refreshTimer) return { started: true, stop: stopBackgroundRefresh };
+    // Prime + first refresh asynchronously; never block boot, never throw.
+    primeFromCache().catch(() => {});
+    refreshRates().catch(() => {});
+    refreshTimer = setInterval(() => { refreshRates().catch(() => {}); }, REFRESH_INTERVAL_MS);
+    if (typeof refreshTimer.unref === 'function') refreshTimer.unref();
+    return { started: true, stop: stopBackgroundRefresh };
+}
+
+function stopBackgroundRefresh() {
+    if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; }
+}
+
 // Test-only: reset the in-process memo so unit tests start from a known (static) state.
 function _resetForTest() {
     memo = null;
+    stopBackgroundRefresh();
 }
 
 module.exports = {
     isLiveFeedEnabled,
+    isSafeFeedUrl,
     getEffectiveFxRate,
     refreshRates,
     primeFromCache,
     normalizeRates,
+    startBackgroundRefresh,
+    stopBackgroundRefresh,
+    fetchLiveSnapshot,
     REFRESH_INTERVAL_MS,
     FX_CACHE_TTL,
     CACHE_KEY,

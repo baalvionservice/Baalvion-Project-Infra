@@ -24,12 +24,39 @@ function isAvailableInCountry(productJson, country) {
     return regions.includes(country);
 }
 
-const mediaUrls = (p) =>
+// Ordered media rows (featured first, then sortOrder) — the source of truth for storefront
+// imagery. Each CommerceProductMedia.url is a real https URL produced by productMediaService
+// (local /uploads or S3/MinIO public URL); the storefront renders these directly.
+const orderedMedia = (p) =>
     (p.media || [])
         .slice()
-        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-        .map((m) => m.url)
-        .filter(Boolean);
+        .sort((a, b) => (Number(b.isFeatured) - Number(a.isFeatured)) || ((a.sortOrder || 0) - (b.sortOrder || 0)));
+
+const mediaUrls = (p) => orderedMedia(p).map((m) => m.url).filter(Boolean);
+
+// Rich media objects (url + thumbnail + alt) for galleries; same ordering as imageUrl.
+const mediaObjects = (p) =>
+    orderedMedia(p)
+        .filter((m) => m.url)
+        .map((m) => ({
+            url: m.url,
+            thumbnailUrl: m.thumbnailUrl || m.url,
+            altText: m.altText || '',
+            mediaType: m.mediaType || 'image',
+        }));
+
+// Server-side rating aggregate over ALL approved reviews. recomputeAggregate() (reviewService)
+// mirrors AVG(rating)/COUNT into custom_fields.rating/reviewsCount, so the serializer can surface
+// a GLOBAL average + count without a read join. Exposed as ratingAverage/ratingCount (the canonical
+// C4 fields) AND the legacy rating/reviewsCount aliases so existing consumers keep working.
+const ratingAverage = (cf) => {
+    const n = Number(cf.rating);
+    return Number.isFinite(n) && n >= 0 ? Math.round(n * 10) / 10 : 0;
+};
+const ratingCount = (cf) => {
+    const n = Number(cf.reviewsCount);
+    return Number.isFinite(n) && n >= 0 ? Math.trunc(n) : 0;
+};
 
 // opts.country (one of markets.SUPPORTED_MARKETS) → attach converted price + currency + tax.
 // opts.baseCurrency defaults to the store's authoring currency (USD).
@@ -45,12 +72,25 @@ function serializeProductListItem(p, opts = {}) {
         ? markets.priceFields(safeBase, opts.country, opts.baseCurrency)
         : {};
 
+    // Department/brand taxonomy from real backend fields: prefer the resolved category's PARENT
+    // (root category = department/brand), fall back to the authored custom_fields.departmentId.
+    // This is what the storefront brand tabs / department pages key on — a real backend value,
+    // never a hardcoded slug.
+    const parentCat = asObject(p.category && p.category.parent);
+    const departmentId = parentCat.slug
+        || cf.departmentId
+        || (p.category && p.category.slug)
+        || '';
+    const department = parentCat.name || cf.department || '';
+
     return {
         id: p.id,
         name: p.name,
         slug: p.slug,
-        departmentId: cf.departmentId || '',
+        departmentId,
+        department,
         categoryId: cf.categoryId || (p.category && p.category.slug) || '',
+        categoryName: (p.category && p.category.name) || '',
         subcategoryId: cf.subcategoryId || '',
         collectionId: cf.collectionId || firstCollection || '',
         basePrice: safeBase,
@@ -61,9 +101,14 @@ function serializeProductListItem(p, opts = {}) {
         taxRate: pricing.taxRate,
         taxInclusive: pricing.taxInclusive,
         imageUrl: mediaUrls(p),
+        media: mediaObjects(p),
         isVip: cf.isVip != null ? !!cf.isVip : !!p.isFeatured,
-        rating: Number(cf.rating ?? 0),
-        reviewsCount: Number(cf.reviewsCount ?? 0),
+        // Server-computed rating aggregate over ALL approved reviews (C4). Canonical fields +
+        // legacy aliases so the PDP header reads a global average, not a page-scoped client mean.
+        ratingAverage: ratingAverage(cf),
+        ratingCount: ratingCount(cf),
+        rating: ratingAverage(cf),
+        reviewsCount: ratingCount(cf),
         // Inventory: prefer the first-class column, fall back to legacy custom_fields.stock.
         // inStock honors track_inventory (untracked products are always purchasable).
         stock: Number(p.stockQuantity ?? cf.stock ?? 0),

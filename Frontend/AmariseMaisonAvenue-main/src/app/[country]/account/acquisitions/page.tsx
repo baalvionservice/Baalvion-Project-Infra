@@ -8,6 +8,7 @@ import {
   X,
   AlertCircle,
   Loader2,
+  RotateCcw,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -24,11 +25,22 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { orderApi } from '@/lib/api-client';
+import {
+  orderApi,
+  type OrderLineItem,
+  type Order,
+  type OrderPaymentStatus,
+} from '@/lib/api-client';
+import { ShipmentTracking } from './ShipmentTracking';
+import { ReturnRequest } from './ReturnRequest';
 
 /**
  * Acquisitions — the authenticated shopper's REAL order history from order-service
  * (GET /orders/mine). No mock ledger; honest loading / empty / error states.
+ *
+ * The detail modal also surfaces the order's REAL shipment timeline
+ * (GET /orders/:id/shipments) and lets the shopper request a return on a
+ * shipped/delivered order (POST /returns) — both backed by order-service, never faked.
  */
 const money = (amount: unknown, currency?: string) =>
   `${(currency || 'USD').toUpperCase()} ${Number(amount ?? 0).toLocaleString(undefined, {
@@ -45,11 +57,25 @@ const STATUS_STYLE: Record<string, string> = {
   refunded: 'bg-red-50 text-red-500',
 };
 
+// Human label per payment-status enum value (covers the full backend union, incl.
+// authorized / partially_paid / voided which the older FE type omitted).
+const PAYMENT_STATUS_LABEL: Record<OrderPaymentStatus, string> = {
+  pending: 'Pending',
+  authorized: 'Authorized',
+  paid: 'Paid',
+  partially_paid: 'Partially paid',
+  refunded: 'Refunded',
+  voided: 'Voided',
+  failed: 'Failed',
+};
+
+const RETURN_ELIGIBLE_STATUSES = new Set(['shipped', 'delivered']);
+
 export default function AcquisitionsPage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
 
-  const [orders, setOrders] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -77,7 +103,7 @@ export default function AcquisitionsPage() {
     <div className="space-y-12 animate-fade-in">
       {/* Detail modal — real order */}
       <Dialog open={!!selectedId} onOpenChange={() => setSelectedId(null)}>
-        <DialogContent className="max-w-3xl bg-white border-none shadow-2xl rounded-none p-0 overflow-hidden">
+        <DialogContent className="max-w-3xl bg-white border-none shadow-2xl rounded-none p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
           {selected && (
             <div className="flex flex-col">
               <div className="bg-ivory p-10 border-b border-border flex items-start justify-between">
@@ -89,10 +115,11 @@ export default function AcquisitionsPage() {
                     {selected.orderNumber}
                   </h3>
                   <p className="text-[9px] text-gray-400 font-mono uppercase tracking-widest">
-                    {new Date(selected.createdAt).toLocaleString()} · Payment: {selected.paymentStatus}
+                    {new Date(selected.createdAt).toLocaleString()} · Payment:{' '}
+                    {PAYMENT_STATUS_LABEL[selected.paymentStatus] ?? selected.paymentStatus}
                   </p>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedId(null)}>
+                <Button variant="ghost" size="icon" onClick={() => setSelectedId(null)} aria-label="Close order detail">
                   <X className="w-4 h-4" />
                 </Button>
               </div>
@@ -101,8 +128,8 @@ export default function AcquisitionsPage() {
                 <div className="space-y-4">
                   <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-gray-400">Items</p>
                   <div className="divide-y divide-border border border-border">
-                    {(selected.items ?? []).map((it: any) => (
-                      <div key={it.id} className="p-4 flex items-center justify-between">
+                    {(selected.items ?? []).map((it: OrderLineItem) => (
+                      <div key={it.id ?? `${it.productId}-${it.variantId}`} className="p-4 flex items-center justify-between">
                         <div>
                           <p className="text-xs font-bold uppercase tracking-tight text-gray-900">{it.name}</p>
                           <p className="text-[9px] text-gray-400 font-mono">
@@ -135,6 +162,19 @@ export default function AcquisitionsPage() {
                     <span className="font-body text-plum tabular">{money(selected.totalAmount, selected.currencyCode)}</span>
                   </div>
                 </div>
+
+                {/* Shipment tracking (real, order-service) */}
+                <ShipmentTracking key={`ship-${selected.id}`} orderId={selected.id} />
+
+                {/* Request a return (only for shipped/delivered orders) */}
+                {RETURN_ELIGIBLE_STATUSES.has(String(selected.status)) && (
+                  <ReturnRequest
+                    key={`ret-${selected.id}`}
+                    orderId={selected.id}
+                    items={(selected.items ?? []) as OrderLineItem[]}
+                    countryCode={countryCode}
+                  />
+                )}
               </div>
             </div>
           )}
@@ -150,7 +190,15 @@ export default function AcquisitionsPage() {
         <h1 className="text-4xl font-headline font-bold italic tracking-tight text-gray-900 uppercase">
           Acquisitions
         </h1>
-        <p className="text-sm text-gray-500 font-light italic">Your Maison order history.</p>
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm text-gray-500 font-light italic">Your Maison order history.</p>
+          <Link
+            href={`/${countryCode}/account/returns`}
+            className="inline-flex items-center text-[10px] font-bold uppercase tracking-widest text-plum hover:text-gold transition-colors shrink-0"
+          >
+            <RotateCcw className="mr-2 w-3 h-3" /> View returns
+          </Link>
+        </div>
       </header>
 
       <Card className="bg-white border-border shadow-luxury overflow-hidden rounded-none">
@@ -212,8 +260,10 @@ export default function AcquisitionsPage() {
                   </TableCell>
                   <TableCell className="text-right pr-8">
                     <span className="inline-flex items-center text-[9px] font-bold uppercase tracking-widest text-gray-400">
-                      {o.paymentStatus === 'paid' && <CheckCircle2 className="w-3 h-3 mr-1 text-green-600" />}
-                      {o.paymentStatus}
+                      {(o.paymentStatus === 'paid' || o.paymentStatus === 'partially_paid') && (
+                        <CheckCircle2 className="w-3 h-3 mr-1 text-green-600" />
+                      )}
+                      {PAYMENT_STATUS_LABEL[o.paymentStatus] ?? o.paymentStatus}
                     </span>
                   </TableCell>
                 </TableRow>

@@ -1,6 +1,25 @@
 'use strict';
 const { z } = require('zod');
 
+// Bounded free-form metadata. Unbounded z.record(z.unknown()) lets a client persist arbitrarily
+// large / deeply-nested blobs on an order or line item (storage abuse + a downstream JSON-size risk).
+// We cap the key count and restrict values to scalars (string ≤ 500 / number / boolean / null) so the
+// shape stays small and flat. Existing callers send small metadata, so this is non-breaking.
+const METADATA_MAX_KEYS = 30;
+const METADATA_STRING_MAX = 500;
+const metadataValueSchema = z.union([
+    z.string().max(METADATA_STRING_MAX),
+    z.number(),
+    z.boolean(),
+    z.null(),
+]);
+const metadataSchema = z
+    .record(metadataValueSchema)
+    .refine((m) => Object.keys(m).length <= METADATA_MAX_KEYS, {
+        message: `metadata may not exceed ${METADATA_MAX_KEYS} keys`,
+    })
+    .default({});
+
 const addressSchema = z.object({
     firstName: z.string().min(1).max(100),
     lastName: z.string().min(1).max(100),
@@ -32,7 +51,7 @@ const orderItemSchema = z.object({
     price: z.number().min(0).optional(),
     compareAtPrice: z.number().min(0).optional().nullable(),
     taxAmount: z.number().min(0).default(0),
-    metadata: z.record(z.unknown()).default({}),
+    metadata: metadataSchema,
 });
 
 // 5-market commerce context the storefront/cart already carries (us/uk/ae/in/sg).
@@ -59,7 +78,7 @@ exports.createOrderSchema = z.object({
     notes: z.string().max(2000).optional(),
     billingAddress: addressSchema.optional().nullable(),
     shippingAddress: addressSchema.optional().nullable(),
-    metadata: z.record(z.unknown()).default({}),
+    metadata: metadataSchema,
     idempotencyKey: z.string().max(128).optional(),
 });
 

@@ -11,6 +11,8 @@ import {
   ShieldCheck,
   Package,
   ChevronRight,
+  RotateCcw,
+  MapPin,
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -154,8 +156,10 @@ export default function AccountDashboard() {
       </section>
 
       {/* Quick links to the real sections */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         <QuickLink label="Acquisitions" desc="Order history & status" href={`/${countryCode}/account/acquisitions`} icon={<ShoppingBag className="w-4 h-4" />} />
+        <QuickLink label="Returns" desc="Request & track returns" href={`/${countryCode}/account/returns`} icon={<RotateCcw className="w-4 h-4" />} />
+        <QuickLink label="Addresses" desc="Shipping & billing details" href={`/${countryCode}/account/addresses`} icon={<MapPin className="w-4 h-4" />} />
         <QuickLink label="Private Archive" desc="Your saved pieces" href={`/${countryCode}/account/wishlist`} icon={<Heart className="w-4 h-4" />} />
         <QuickLink label="Identity" desc="Profile & security" href={`/${countryCode}/account/settings`} icon={<Settings className="w-4 h-4" />} />
       </div>

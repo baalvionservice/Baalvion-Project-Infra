@@ -1,24 +1,118 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { formatProductPrice, formatAmount, normalizeCountry } from '@/lib/i18n/countries';
 import { Button } from '@/components/ui/button';
 import { Card } from "@/components/ui/card";
-import { Trash2, ShoppingBag, ShieldCheck, Truck, ChevronRight } from 'lucide-react';
+import { Trash2, ShoppingBag, ShieldCheck, Truck, ChevronRight, Minus, Plus, Loader2 } from 'lucide-react';
 import { BrandImage } from '@/components/ui/BrandImage';
+import { useToast } from '@/hooks/use-toast';
+import { getProductById } from '@/lib/catalog';
 
 /**
  * Bank-Grade Cart Page: Tactical Acquisition Ledger.
  * Optimized for high-fidelity transactional review.
+ *
+ * The bag persists across reloads (store localStorage). Quantities are editable with a live
+ * server stock check, and line prices are re-validated against the live catalog before checkout.
  */
 export default function CartPage() {
-  const { cart, removeFromCart } = useAppStore();
+  const { cart, removeFromCart, updateCartQuantity } = useAppStore();
   const { country } = useParams();
   const countryCode = normalizeCountry(country as string);
   const router = useRouter();
+  const { toast } = useToast();
+
+  // Per-line "checking stock" flag for the quantity stepper.
+  const [checkingId, setCheckingId] = useState<string | null>(null);
+  // Whole-bag price re-validation state before proceeding to settlement.
+  const [revalidating, setRevalidating] = useState(false);
+
+  // Increase a line quantity only after confirming live availability covers the new amount.
+  const handleQuantityChange = async (id: string, nextQty: number) => {
+    if (nextQty < 1) return;
+    const line = cart.find((c) => c.id === id);
+    if (!line) return;
+    // Decreasing never needs a stock check.
+    if (nextQty <= line.quantity) {
+      updateCartQuantity(id, nextQty);
+      return;
+    }
+    setCheckingId(id);
+    try {
+      const live = await getProductById(id, countryCode);
+      // inStock === false → sold out; numeric stock caps the max when tracked.
+      const cap = typeof live?.stock === 'number' && live.stock > 0 ? live.stock : undefined;
+      if (live?.inStock === false || (cap !== undefined && nextQty > cap)) {
+        toast({
+          variant: 'destructive',
+          title: 'Limited Availability',
+          description:
+            cap !== undefined
+              ? `Only ${cap} of ${line.name} ${cap === 1 ? 'is' : 'are'} available.`
+              : `${line.name} is currently unavailable.`,
+        });
+        return;
+      }
+      updateCartQuantity(id, nextQty);
+    } catch {
+      // Fail-open: a transient catalog error shouldn't block a quantity bump.
+      updateCartQuantity(id, nextQty);
+    } finally {
+      setCheckingId(null);
+    }
+  };
+
+  // Re-validate every line's live availability + price before settlement so a stale bag can't
+  // carry a sold-out item or an outdated price into checkout. Blocks on a sold-out item, warns on
+  // a price change (order-service re-derives all money server-authoritatively at order time), and
+  // only then routes to checkout.
+  const handleProceed = async () => {
+    setRevalidating(true);
+    try {
+      const results = await Promise.all(
+        cart.map((item) => getProductById(item.id, countryCode).catch(() => null))
+      );
+      const soldOut: string[] = [];
+      let priceDrift = false;
+      results.forEach((live, i) => {
+        const item = cart[i];
+        if (!live) return;
+        if (live.inStock === false) {
+          soldOut.push(item.name);
+          return;
+        }
+        const livePrice = live.price ?? live.basePrice;
+        const cartPrice = item.price ?? item.basePrice;
+        if (typeof livePrice === 'number' && Math.abs(livePrice - cartPrice) > 0.01) {
+          priceDrift = true;
+        }
+      });
+      if (soldOut.length > 0) {
+        toast({
+          variant: 'destructive',
+          title: 'No Longer Available',
+          description: `${soldOut.join(', ')} just sold out. Please remove ${
+            soldOut.length > 1 ? 'these pieces' : 'this piece'
+          } to continue.`,
+        });
+        return;
+      }
+      if (priceDrift) {
+        toast({
+          title: 'Pricing Updated',
+          description:
+            'Some prices changed since you added these items. Your order total will reflect the latest pricing.',
+        });
+      }
+      router.push(`/${countryCode}/checkout`);
+    } finally {
+      setRevalidating(false);
+    }
+  };
 
   // Subtotal in the MARKET currency — price is already FX-converted by the storefront API;
   // basePrice (USD) is only a fallback when no country pricing was returned.
@@ -104,9 +198,35 @@ export default function CartPage() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-4 sm:gap-0 sm:space-x-8 text-[9px] font-bold uppercase tracking-widest text-gray-400">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-3">
                       <span className="opacity-60">Quantity:</span>
-                      <span className="text-black">{item.quantity}</span>
+                      <div className="flex items-center border border-border">
+                        <button
+                          type="button"
+                          aria-label={`Decrease quantity of ${item.name}`}
+                          onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                          disabled={item.quantity <= 1 || checkingId === item.id}
+                          className="h-8 w-8 flex items-center justify-center text-gray-600 hover:bg-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <Minus className="w-3 h-3" />
+                        </button>
+                        <span className="h-8 min-w-[2.5rem] flex items-center justify-center text-black tabular-nums border-x border-border">
+                          {checkingId === item.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
+                          ) : (
+                            item.quantity
+                          )}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label={`Increase quantity of ${item.name}`}
+                          onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                          disabled={checkingId === item.id}
+                          className="h-8 w-8 flex items-center justify-center text-gray-600 hover:bg-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                        >
+                          <Plus className="w-3 h-3" />
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center space-x-2">
                       <ShieldCheck className="w-3 h-3 text-emerald-500" />
@@ -170,11 +290,19 @@ export default function CartPage() {
             </div>
 
             <div className="space-y-4 pt-4 sm:pt-6">
-              <Link href={`/${countryCode}/checkout`} className="block">
-                <Button className="w-full bg-black text-white hover:bg-plum h-14 sm:h-16 md:h-20 rounded-none text-[10px] sm:text-[11px] font-bold tracking-[0.3em] sm:tracking-[0.4em] uppercase shadow-2xl transition-all">
-                  PROCEED TO SETTLEMENT
-                </Button>
-              </Link>
+              <Button
+                onClick={handleProceed}
+                disabled={revalidating}
+                className="w-full bg-black text-white hover:bg-plum h-14 sm:h-16 md:h-20 rounded-none text-[10px] sm:text-[11px] font-bold tracking-[0.3em] sm:tracking-[0.4em] uppercase shadow-2xl transition-all disabled:opacity-60"
+              >
+                {revalidating ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-3 animate-spin" /> VERIFYING AVAILABILITY…
+                  </>
+                ) : (
+                  'PROCEED TO SETTLEMENT'
+                )}
+              </Button>
               <p className="text-[9px] text-gray-400 text-center italic leading-relaxed">
                 &ldquo;By proceeding, you authorize the Maison to begin curatorial audit and logistical preparation for your artifacts.&rdquo;
               </p>

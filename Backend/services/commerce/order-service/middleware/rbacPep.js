@@ -39,6 +39,21 @@ const pep = createPep({ scope, resolveStoreScope, config: { failMode: config.rba
 
 const jwtRolesOf = (req) => (Array.isArray(req.auth && req.auth.roles) ? req.auth.roles : (req.auth && req.auth.role != null ? [req.auth.role] : []));
 
+// Platform-level role gate for CROSS-STORE aggregates (e.g. the order-revenue endpoint). The
+// store-scoped PEP (loadStoreRole/requireStoreRole) is the WRONG authority for an all-stores query
+// — it 403s without a per-store role. This mirrors proxy-service requirePlatformAdmin: it admits
+// only the platform-tier roles from the JWT roles[]/role claim. super_admin is included (it is
+// strictly above any platform role). A store_viewer-only or guest token is rejected 403/401.
+const PLATFORM_ADMIN_ROLES = new Set(['super_admin', 'country_admin']);
+const requirePlatformAdmin = (req, res, next) => {
+    if (!req.auth) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
+    const roles = [req.auth.role, ...(Array.isArray(req.auth.roles) ? req.auth.roles : [])].filter(Boolean);
+    if (!roles.some((r) => PLATFORM_ADMIN_ROLES.has(r))) {
+        return next(new AppError('FORBIDDEN', 'Platform admin role required (super_admin or country_admin)', 403));
+    }
+    return next();
+};
+
 // SOFT store-capability check for owner-OR-staff ownership enforcement (used by shopper
 // endpoints that are also accessible to admins/staff). Resolves the caller's store capability
 // WITHOUT denying; returns true if they hold ANY store role. RBAC outage → false, EXCEPT a
@@ -61,6 +76,7 @@ module.exports = {
     loadStoreRole: pep.loadStoreRole,
     requireStoreRole: pep.requireStoreRole,
     loadAccessScope: pep.loadAccessScope,
+    requirePlatformAdmin,
     isStoreStaff,
     audit,
 };

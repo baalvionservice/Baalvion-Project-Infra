@@ -11,6 +11,9 @@ import {
   LayoutDashboard,
   LogOut,
   Loader2,
+  RotateCcw,
+  MapPin,
+  Wallet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
@@ -69,6 +72,9 @@ function AccountShell({ children }: { children: React.ReactNode }) {
   const menuItems = [
     { icon: <LayoutDashboard />, label: "Dashboard", href: `/${countryCode}/account` },
     { icon: <ShoppingBag />, label: "Acquisitions", href: `/${countryCode}/account/acquisitions` },
+    { icon: <RotateCcw />, label: "Returns", href: `/${countryCode}/account/returns` },
+    { icon: <MapPin />, label: "Addresses", href: `/${countryCode}/account/addresses` },
+    { icon: <Wallet />, label: "Wallet", href: `/${countryCode}/account/wallet` },
     { icon: <Heart />, label: "Private Archive", href: `/${countryCode}/account/wishlist` },
     { icon: <Settings />, label: "Identity", href: `/${countryCode}/account/settings` },
   ];

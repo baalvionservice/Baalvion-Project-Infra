@@ -7,8 +7,10 @@ import React, {
   useMemo,
   useCallback,
   useEffect,
+  useRef,
 } from "react";
 import { getProducts, getCollections } from "./catalog";
+import { getMarkets } from "./markets";
 import {
   Product,
   CountryCode,
@@ -158,6 +160,8 @@ interface AppContextType {
   upsertProduct: (p: Product, reason?: string) => void;
   addToCart: (p: Product) => void;
   removeFromCart: (id: string) => void;
+  /** Set an exact line quantity (clamped to >= 1); used by the cart quantity editor. */
+  updateCartQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
   setCartOpen: (open: boolean) => void;
   toggleWishlist: (p: Product) => void;
@@ -394,6 +398,70 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }))
   );
 
+  // FX rates are sourced from the live commerce-service markets registry (see effect below);
+  // the static FX_RATES seed is only an offline fallback until that hydrates.
+  const [fxRates, setFxRates] = useState<FXRate[]>(FX_RATES);
+
+  // Hydrate per-market currency / tax / FX from the authoritative public /commerce/markets feed
+  // (C3). The backend registry is the single source of truth; on any failure we keep the static
+  // COUNTRIES_CONFIG / FX_RATES seeds so pricing never breaks. Runs once on mount.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const registry = await getMarkets();
+        if (cancelled) return;
+        if (registry.markets.length === 0) {
+          // Fail-open: an empty registry means the public /commerce/markets feed was
+          // unreachable or misconfigured (getMarkets() swallows the error and returns EMPTY).
+          // We keep the static COUNTRIES_CONFIG / FX_RATES seeds, but surface a diagnostic so a
+          // wrong NEXT_PUBLIC_COMMERCE_URL serving stale static FX is not invisible to operators.
+          // eslint-disable-next-line no-console -- deliberate operator diagnostic: stale-FX fail-open signal
+          console.warn(
+            "[store] markets hydration failed; using static FX seeds",
+            new Error("empty markets registry (commerce-service /commerce/markets unreachable or misconfigured)")
+          );
+          return;
+        }
+        const byCountry = new Map(registry.markets.map((m) => [m.country, m]));
+
+        setCountryConfigs((prev) =>
+          prev.map((c) => {
+            const m = byCountry.get(c.code);
+            if (!m) return c;
+            return {
+              ...c,
+              currency: m.currencyCode,
+              taxType: m.taxType,
+              taxRate: m.taxRate,
+              fxRate: m.fxRate,
+            };
+          })
+        );
+
+        setFxRates(
+          registry.markets.map((m): FXRate => ({
+            currencyCode: m.currencyCode,
+            baseCurrency: registry.baseCurrency,
+            rate: m.fxRate,
+            spread: 0,
+            lastUpdated: new Date().toISOString(),
+            source: "commerce-service/markets",
+          }))
+        );
+      } catch (err) {
+        if (cancelled) return;
+        // Defensive: getMarkets() is designed never to throw, but if anything in this hydration
+        // path does, keep the static FX seeds (fail-open) and surface a visible diagnostic.
+        // eslint-disable-next-line no-console -- deliberate operator diagnostic: stale-FX fail-open signal
+        console.warn("[store] markets hydration failed; using static FX seeds", err);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const [globalSettings, setGlobalSettings] = useState<GlobalSettings>({
     theme: { primary: "#7E3F98", accent: "#D4AF37", fontFamily: "Alegreya" },
     emergencyMode: false,
@@ -423,6 +491,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       /* ignore */
     }
   }, [wishlist]);
+
+  // Persist the shopping bag locally so it survives reloads / new tabs (the order-service cart
+  // API is cartId-keyed and created at checkout; localStorage is the cross-reload source for the
+  // in-progress bag).
+  //
+  // Why a ref-guard + two effects instead of a useState lazy initializer:
+  //   The cart MUST start empty on the server (SSR has no localStorage); a lazy initializer that
+  //   read localStorage would either crash on the server or diverge from the server-rendered empty
+  //   cart and trip a Next.js hydration mismatch. So we initialize empty, then hydrate from storage
+  //   in a mount-only effect (client-only, post-hydration — safe).
+  //
+  // Effect-ordering safety: React runs effects in declaration order, so on mount the HYDRATE
+  // effect below runs (and flips `_cartHydrated` true) before the SAVE effect's first reactive run
+  // matters. `_cartHydrated` gates the SAVE effect so the empty initial `cart` state can never
+  // clobber a persisted cart before it has been restored. After hydration, every `cart` change
+  // writes through to storage.
+  const _cartHydrated = useRef(false);
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem("amarise.cart");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) setCart(parsed);
+      }
+    } catch {
+      /* storage unavailable — cart stays in-memory for this session */
+    }
+    _cartHydrated.current = true;
+  }, []);
+  useEffect(() => {
+    if (!_cartHydrated.current) return;
+    try {
+      window.localStorage.setItem("amarise.cart", JSON.stringify(cart));
+    } catch {
+      /* ignore */
+    }
+  }, [cart]);
 
   const activeHub = useMemo(() => {
     if (!currentUser) return "global";
@@ -572,7 +677,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     currentLanguage,
     paymentPlans: PAYMENT_PLANS,
     subscriptions: SUBSCRIPTIONS,
-    fxRates: FX_RATES,
+    fxRates,
     taxRules: TAX_RULES,
     scopedProducts,
     scopedTransactions,
@@ -665,6 +770,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         return [...prev, { ...p, quantity: 1 }];
       }),
     removeFromCart: (id) => setCart((prev) => prev.filter((i) => i.id !== id)),
+    updateCartQuantity: (id, quantity) =>
+      setCart((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, quantity: Math.max(1, Math.floor(quantity)) } : item
+        )
+      ),
     clearCart: () => setCart([]),
     setCartOpen,
     toggleWishlist: (p) =>

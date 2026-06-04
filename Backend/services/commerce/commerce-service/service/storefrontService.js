@@ -15,6 +15,7 @@ const { AppError } = require('../utils/errors');
 const { parsePagination } = require('../utils/pagination');
 const serializer = require('../utils/storefrontSerializer');
 const { isSupportedMarket } = require('../config/markets');
+const discountService = require('./discountService');
 
 const PUBLIC_WHERE = { status: 'published', visibility: 'public' };
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -29,12 +30,20 @@ function resolveCountry(query = {}) {
     if (!isSupportedMarket(c)) {
         throw new AppError('BAD_REQUEST', `Unsupported country: ${c}`, 400);
     }
+    // regionWhere() deliberately repeats this allowlist check as SQL-interpolation defense-in-depth
+    // (it interpolates `country` into raw SQL), so an un-validated future call path can't open a hole.
     return c;
 }
 
 // Postgres JSONB availability predicate: global OR region-less OR regions contains country.
 // `country` is pre-validated to the allowlist, so the embedded literal is injection-safe.
 function regionWhere(country) {
+    // Defense-in-depth: this function interpolates `country` into raw SQL. Never trust a caller
+    // to have validated it — assert the allowlist invariant here so a future un-validated call
+    // path fails loudly instead of opening an injection hole.
+    if (!isSupportedMarket(country)) {
+        throw new AppError('BAD_REQUEST', `Unsupported country: ${country}`, 400);
+    }
     const arr = JSON.stringify([country]); // e.g. ["us"]
     return literal(
         `(COALESCE((custom_fields->>'isGlobal')::boolean, false) = true`
@@ -47,7 +56,12 @@ const baseIncludes = () => ([
     { model: CommerceProductVariant, as: 'variants', separate: true, order: [['sortOrder', 'ASC']] },
     { model: CommerceProductMedia, as: 'media', separate: true, order: [['sortOrder', 'ASC']] },
     { model: CommerceCollection, as: 'collections', through: { attributes: [] }, attributes: ['id', 'slug', 'name'] },
-    { model: CommerceCategory, as: 'category', attributes: ['id', 'slug', 'name'] },
+    {
+        model: CommerceCategory, as: 'category', attributes: ['id', 'slug', 'name', 'parentId'],
+        // Parent = department/brand (root category). Surfaced so the serializer can emit a real
+        // departmentId/department for the storefront brand tabs + department pages.
+        include: [{ model: CommerceCategory, as: 'parent', attributes: ['id', 'slug', 'name'] }],
+    },
 ]);
 
 async function ensureStore(storeId) {
@@ -209,4 +223,27 @@ async function listRelated(storeId, idOrSlug, query = {}) {
         .map((r) => serializer.serializeProductListItem(r.toJSON(), { country }));
 }
 
-module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listRelated };
+// Anonymous storefront discount PREVIEW — lets a shopper check a promo code before order creation
+// WITHOUT exposing admin-only discount internals (id, name, targetIds, usageCount/limit, dates).
+// Validity, eligibility (min-purchase / usage-limit) and the computed amount are server-authoritative
+// (delegated to discountService.validateDiscount — the same logic order-service applies); this only
+// projects a non-leaky envelope. Final application stays server-authoritative at order creation.
+async function previewDiscount(storeId, { code, orderAmount = 0 }) {
+    await ensureStore(storeId);
+    const amount = Number(orderAmount);
+    const safeAmount = Number.isFinite(amount) && amount >= 0 ? amount : 0;
+    const { discount, discountAmount } = await discountService.validateDiscount(storeId, code, safeAmount);
+    // Non-leaky projection: only the fields a storefront needs to render the promo line.
+    return {
+        valid: true,
+        code: discount.code,
+        type: discount.type,
+        amount: Math.round(discountAmount * 100) / 100,
+        eligibility: {
+            minPurchaseAmount: discount.minPurchaseAmount != null ? Number(discount.minPurchaseAmount) : null,
+            appliesTo: discount.appliesTo || 'all',
+        },
+    };
+}
+
+module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listRelated, previewDiscount };

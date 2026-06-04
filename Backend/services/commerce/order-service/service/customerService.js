@@ -94,4 +94,59 @@ async function deleteAddress(storeId, customerId, addressId, actor) {
     await address.destroy();
 }
 
-module.exports = { listCustomers, getCustomer, upsertCustomer, updateCustomer, listAddresses, addAddress, updateAddress, deleteAddress };
+// ── /me-scoped self-service (IDOR-safe) ────────────────────────────────────────
+// The customer is resolved SERVER-SIDE from the authenticated userId — never a client-supplied
+// customerId. This is the address equivalent of orders/mine: a shopper only ever touches their
+// own customer record + addresses, so no per-record ownership re-check or store role is needed.
+
+// Resolve the authenticated user's customer record in this store. Primary lookup is by
+// (storeId, userId). If none is linked yet, fall back to an EMAIL-based CLAIM: a pre-existing
+// UNLINKED row (userId=null) with the caller's verified JWT email is the same shopper who checked
+// out before linkage (guest/email upsert), so we atomically claim it (only when still userId=null,
+// so a concurrent claim can never hijack an already-linked record). `email` is the verified JWT
+// claim (server-side) — never a client-supplied value.
+async function resolveMyCustomer(storeId, userId, email = null) {
+    if (userId == null) throw new AppError('UNAUTHORIZED', 'Authentication required', 401);
+    let customer = await OrdersCustomer.findOne({ where: { storeId, userId } });
+    if (!customer && email) {
+        const unlinked = await OrdersCustomer.findOne({ where: { storeId, userId: null, email: String(email).toLowerCase() } });
+        if (unlinked) {
+            // Atomic claim: only succeeds while the row is still unlinked.
+            const [claimed] = await OrdersCustomer.update({ userId }, { where: { id: unlinked.id, storeId, userId: null } });
+            if (claimed > 0) { await cache.del(cache.keys.customer(unlinked.id)); customer = await unlinked.reload(); }
+            else customer = await OrdersCustomer.findOne({ where: { storeId, userId } }); // lost the race → re-read
+        }
+    }
+    if (!customer) throw new AppError('NOT_FOUND', 'No customer profile for this user in this store', 404);
+    return customer;
+}
+
+async function listMyAddresses(storeId, userId, email = null) {
+    const customer = await resolveMyCustomer(storeId, userId, email);
+    return OrdersAddress.findAll({ where: { customerId: customer.id }, order: [['isDefault', 'DESC'], ['createdAt', 'DESC']] });
+}
+
+async function addMyAddress(storeId, userId, body, email = null) {
+    const customer = await resolveMyCustomer(storeId, userId, email);
+    if (body.isDefault) await OrdersAddress.update({ isDefault: false }, { where: { customerId: customer.id } });
+    return OrdersAddress.create({ ...body, customerId: customer.id, storeId });
+}
+
+async function updateMyAddress(storeId, userId, addressId, body, email = null) {
+    const customer = await resolveMyCustomer(storeId, userId, email);
+    const address = await OrdersAddress.findOne({ where: { id: addressId, customerId: customer.id, storeId } });
+    if (!address) throw new AppError('NOT_FOUND', 'Address not found', 404);
+    if (body.isDefault) await OrdersAddress.update({ isDefault: false }, { where: { customerId: customer.id } });
+    await address.update(body);
+    return address.toJSON();
+}
+
+async function deleteMyAddress(storeId, userId, addressId, email = null) {
+    const customer = await resolveMyCustomer(storeId, userId, email);
+    const address = await OrdersAddress.findOne({ where: { id: addressId, customerId: customer.id, storeId } });
+    if (!address) throw new AppError('NOT_FOUND', 'Address not found', 404);
+    if (address.isDefault) throw new AppError('FORBIDDEN', 'Cannot delete the default address', 403);
+    await address.destroy();
+}
+
+module.exports = { listCustomers, getCustomer, upsertCustomer, updateCustomer, listAddresses, addAddress, updateAddress, deleteAddress, resolveMyCustomer, listMyAddresses, addMyAddress, updateMyAddress, deleteMyAddress };

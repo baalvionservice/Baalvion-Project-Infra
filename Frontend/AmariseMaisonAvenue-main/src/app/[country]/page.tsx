@@ -22,17 +22,6 @@ import { formatProductPrice, normalizeCountry } from "@/lib/i18n/countries";
    DATA
 ───────────────────────────────────────────────────────────────── */
 
-const NAV_LINKS = [
-  { label: "NEW ARRIVALS", href: "#" },
-  { label: "HERMÈS", href: "#" },
-  { label: "CHANEL", href: "#" },
-  { label: "GOYARD", href: "#" },
-  { label: "OTHER BRANDS", href: "#" },
-  { label: "JEWELRY", href: "#" },
-  { label: "LIVE SHOP", href: "#" },
-  { label: "BLOG", href: "#" },
-];
-
 const PRESS_LOGOS = [
   "Business Insider",
   "Barron's",
@@ -72,65 +61,51 @@ export default function HomePage() {
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
 
-  const heroImage =
-    placeholderData.placeholderImages.find(
-      (img) => img.id === "home-hero-banner-main"
-    )?.imageUrl || "https://picsum.photos/seed/mac-hero/1600/900";
+  // Resolve a CMS/asset banner URL by id. Returns undefined when no real asset is registered —
+  // BrandImage then renders the branded monogram placeholder (no random picsum stock photos).
+  // When real photography is uploaded to placeholder-images.json (or a CMS feed), it drops in here.
+  const bannerUrl = (id: string): string | undefined =>
+    placeholderData.placeholderImages.find((img) => img.id === id)?.imageUrl;
 
-  const authImage =
-    placeholderData.placeholderImages.find(
-      (img) => img.id === "home-authenticity-banner"
-    )?.imageUrl || "https://picsum.photos/seed/mac-auth/900/600";
-
-  const missionImage =
-    placeholderData.placeholderImages.find(
-      (img) => img.id === "home-mission-banner"
-    )?.imageUrl || "https://picsum.photos/seed/mac-mission/900/600";
-
-  const liveImage =
-    placeholderData.placeholderImages.find(
-      (img) => img.id === "madave-live-section"
-    )?.imageUrl || "https://picsum.photos/seed/mac-live/900/600";
+  const heroImage = bannerUrl("home-hero-banner-main");
+  const authImage = bannerUrl("home-authenticity-banner");
+  const missionImage = bannerUrl("home-mission-banner");
 
   const gridImages = {
-    spring:
-      placeholderData.placeholderImages.find(
-        (img) => img.id === "home-grid-spring"
-      )?.imageUrl || "https://picsum.photos/seed/mac-grid-spring/600/750",
-    arrivals:
-      placeholderData.placeholderImages.find(
-        (img) => img.id === "home-grid-arrivals"
-      )?.imageUrl || "https://picsum.photos/seed/mac-grid-arrivals/600/750",
-    visit:
-      placeholderData.placeholderImages.find(
-        (img) => img.id === "home-grid-visit"
-      )?.imageUrl || "https://picsum.photos/seed/mac-grid-visit/600/750",
+    spring: bannerUrl("home-grid-spring"),
+    arrivals: bannerUrl("home-grid-arrivals"),
+    visit: bannerUrl("home-grid-visit"),
   };
 
   const infoImages = {
-    auth:
-      placeholderData.placeholderImages.find(
-        (img) => img.id === "home-info-auth"
-      )?.imageUrl || "https://picsum.photos/seed/mac-info-auth/500/500",
-    sell:
-      placeholderData.placeholderImages.find(
-        (img) => img.id === "home-info-sell"
-      )?.imageUrl || "https://picsum.photos/seed/mac-info-sell/500/500",
-    showroom:
-      placeholderData.placeholderImages.find(
-        (img) => img.id === "home-info-showrooms"
-      )?.imageUrl || "https://picsum.photos/seed/mac-info-showroom/500/500",
+    auth: bannerUrl("home-info-auth"),
+    sell: bannerUrl("home-info-sell"),
+    showroom: bannerUrl("home-info-showrooms"),
   };
 
+  // Tab → brand match terms. We key the brand tabs on REAL backend fields (departmentId /
+  // categoryId / collectionId / brandId / name) rather than departmentId alone, so the tabs
+  // still surface products when the serializer leaves departmentId empty for a catalog.
   const TAB_BRAND: Record<string, string | undefined> = {
     "Hermès": "hermes",
     Chanel: "chanel",
     "Other Brands": "other-brands",
   };
+  const matchesBrand = (p: Product, term: string): boolean => {
+    const fields = [
+      p.departmentId,
+      p.categoryId,
+      p.collectionId,
+      p.brandId,
+      p.name,
+    ];
+    return fields.some((f) => typeof f === "string" && f.toLowerCase().includes(term));
+  };
+  const brandTerm = TAB_BRAND[activeTab];
   const visibleProducts =
-    activeTab === "View All"
-      ? products
-      : products.filter((p) => p.departmentId === TAB_BRAND[activeTab]).slice(0, 8);
+    activeTab === "View All" || !brandTerm
+      ? products.slice(0, 8)
+      : products.filter((p) => matchesBrand(p, brandTerm)).slice(0, 8);
 
   return (
     <div className="bg-white min-h-screen font-sans">
@@ -386,7 +361,7 @@ export default function HomePage() {
         </div>
         <div className="text-center mt-8">
           <Link
-            href="#"
+            href={`/${countryCode}/journal`}
             className="text-[11px] font-bold tracking-[0.35em] uppercase text-black border-b-2 border-black pb-1 hover:opacity-60 transition-opacity"
           >
             SEE ALL PRESS
@@ -421,7 +396,7 @@ function CuratorialCard({
   subtitle,
   href,
 }: {
-  imageUrl: string;
+  imageUrl?: string;
   eyebrow: string;
   title: string;
   subtitle: string;
@@ -524,7 +499,7 @@ function InfoBlock({
   description,
   href,
 }: {
-  imageUrl: string;
+  imageUrl?: string;
   title: string;
   description: string;
   href: string;

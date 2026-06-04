@@ -1,5 +1,5 @@
 import React from "react";
-import { getProductById } from "@/lib/catalog";
+import { getProductById, getProductReviews, getRelatedProducts } from "@/lib/catalog";
 import { buildAlternates } from "@/lib/seo";
 import {
   normalizeCountry,
@@ -88,6 +88,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
       </div>
     );
 
+  // SSR-fetch the supporting sections in parallel so the page paints with real
+  // reviews + related artifacts (no client waterfall). Both helpers fail soft to
+  // empty results, so a section never breaks the product page.
+  const [reviewsPage, related] = await Promise.all([
+    getProductReviews(id, { limit: 10 }),
+    getRelatedProducts(id, countryCode, 8),
+  ]);
+
   return (
     <div className="bg-white min-h-screen animate-fade-in font-body">
       {/* Container with responsive max-width */}
@@ -127,8 +135,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Additional Sections */}
         <div className="space-y-16 sm:space-y-20">
-          <YouMayAlsoLike />
-          <CustomerReviews />
+          <YouMayAlsoLike
+            productId={id}
+            country={countryCode}
+            initialRelated={related}
+          />
+          <CustomerReviews
+            productId={id}
+            country={countryCode}
+            initialReviews={reviewsPage}
+            ratingAverage={product.rating}
+            ratingCount={product.reviewsCount}
+          />
         </div>
       </div>
     </div>

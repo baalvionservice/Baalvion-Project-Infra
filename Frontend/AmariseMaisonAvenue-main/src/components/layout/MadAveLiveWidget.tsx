@@ -10,8 +10,13 @@ import { cn } from '@/lib/utils';
 
 /**
  * MadAveLiveWidget: Persistent storefront live-stream preview.
- * Updated to AMARISÉ branding.
+ *
+ * GATED: the live experience (/account/live) is mock-backed (no real streaming service), so this
+ * widget is disabled by default and never surfaces the mock "live" surface to visitors. Re-enable
+ * it by setting NEXT_PUBLIC_ENABLE_LIVE_SHOP=true once a real live-shop service exists.
  */
+const LIVE_SHOP_ENABLED = process.env.NEXT_PUBLIC_ENABLE_LIVE_SHOP === 'true';
+
 export function MadAveLiveWidget() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -20,11 +25,14 @@ export function MadAveLiveWidget() {
   const countryCode = (country as string) || 'us';
 
   useEffect(() => {
+    if (!LIVE_SHOP_ENABLED) return;
     // Show widget after a brief delay for institutional presence
     const timer = setTimeout(() => setIsVisible(true), 2000);
     return () => clearTimeout(timer);
   }, []);
 
+  // Disabled until a real live-shop service backs the experience.
+  if (!LIVE_SHOP_ENABLED) return null;
   if (!isVisible) return null;
 
   return (

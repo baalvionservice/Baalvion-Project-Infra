@@ -64,11 +64,12 @@ async function resolveAuthorName(storeId, userId, isVerified) {
     return `${first}${lastInitial}`.trim() || fallback;
 }
 
-// Recompute AVG(rating)/COUNT over APPROVED reviews and mirror into the product's custom_fields
-// (rating + reviewsCount) so the existing storefront serializer surfaces them with no read joins.
-async function recomputeAggregate(product, transaction) {
+// AVG(rating)/COUNT over APPROVED reviews for a product — the authoritative GLOBAL aggregate
+// (over every approved review, not a page-scoped subset). Shared by recomputeAggregate (rollup
+// into custom_fields) and listProductReviews (header average surfaced to the storefront).
+async function computeApprovedAggregate(productId, transaction) {
     const [agg] = await CommerceReview.findAll({
-        where: { productId: product.id, status: 'approved' },
+        where: { productId, status: 'approved' },
         attributes: [
             [sequelize.fn('COALESCE', sequelize.fn('AVG', sequelize.col('rating')), 0), 'avg'],
             [sequelize.fn('COUNT', sequelize.col('id')), 'count'],
@@ -76,11 +77,22 @@ async function recomputeAggregate(product, transaction) {
         raw: true,
         transaction,
     });
-    const rating = Math.round((Number(agg.avg) || 0) * 10) / 10; // one decimal place
-    const reviewsCount = Number(agg.count) || 0;
+    return {
+        ratingAverage: Math.round((Number(agg.avg) || 0) * 10) / 10, // one decimal place
+        ratingCount: Number(agg.count) || 0,
+    };
+}
+
+// Recompute AVG(rating)/COUNT over APPROVED reviews and mirror into the product's custom_fields
+// (rating + reviewsCount) so the existing storefront serializer surfaces them with no read joins.
+async function recomputeAggregate(product, transaction) {
+    const { ratingAverage, ratingCount } = await computeApprovedAggregate(product.id, transaction);
     const cf = asObject(product.customFields);
-    await product.update({ customFields: { ...cf, rating, reviewsCount } }, { transaction });
-    return { rating, reviewsCount };
+    await product.update(
+        { customFields: { ...cf, rating: ratingAverage, reviewsCount: ratingCount } },
+        { transaction },
+    );
+    return { rating: ratingAverage, reviewsCount: ratingCount };
 }
 
 // Create or update (one per product+user) a review. userId is required. verified_purchase and
@@ -136,12 +148,18 @@ async function listProductReviews(storeId, idOrSlug, query = {}) {
     const items = await Promise.all(
         rows.map(async (r) => serializeReview(r, await resolveAuthorName(storeId, r.userId, r.isVerifiedPurchase)))
     );
+    // Server-computed GLOBAL aggregate over ALL approved reviews (not just this page), so the
+    // storefront header renders a real average consistent with `total`, regardless of how many
+    // pages the client has loaded (C4). ratingCount equals `total` here (both = approved count).
+    const { ratingAverage, ratingCount } = await computeApprovedAggregate(product.id);
     return {
         items,
         total: count,
         page,
         pageSize: limit,
         totalPages: Math.max(1, Math.ceil(count / limit)),
+        ratingAverage,
+        ratingCount,
     };
 }
 

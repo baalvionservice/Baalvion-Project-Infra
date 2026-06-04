@@ -19,4 +19,11 @@ const revenueTimeSeries = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
-module.exports = { summary, topProducts, salesByCountry, revenueTimeSeries };
+// Platform-wide order revenue (C2) — cross-store, EARNED, currency-normalized. NOT store-scoped:
+// `storeId` is an OPTIONAL query filter (not a path param), so this never depends on a selected store.
+const platformRevenue = async (req, res, next) => {
+    try { return sendSuccess(req, res, await analyticsService.platformRevenue(req.query)); }
+    catch (err) { return next(err); }
+};
+
+module.exports = { summary, topProducts, salesByCountry, revenueTimeSeries, platformRevenue };

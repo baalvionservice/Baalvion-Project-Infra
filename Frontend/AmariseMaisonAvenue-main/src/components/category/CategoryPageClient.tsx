@@ -5,7 +5,7 @@ import { useFilter } from "@/hooks/useFilter";
 import { FilterSheet } from "@/components/category/FilterSheet";
 import { CategorySidebar } from "@/components/category/CatergorySidebar";
 import { CollectionToolbar } from "@/components/category/CollectionToolbar";
-import { useProducts } from "@/lib/useCatalog";
+import { useProducts, useCategories } from "@/lib/useCatalog";
 import { ProductGrid } from "@/components/category/ProductGrid";
 import { ShopByCategory } from "@/components/category/ShopByCategory";
 import { getCategorySidebar } from "@/lib/mock-category-data";
@@ -83,6 +83,18 @@ export default function CategoryPageClient({
     const filter = useFilter();
     const { products } = useProducts({ categoryId: id, limit: 50 });
 
+    // Prefer the LIVE backend category name (matched by id or slug) so the heading reflects the
+    // real taxonomy and there's no hardcoded slug→label drift; fall back to the static label prop
+    // for categories that have no backend record yet.
+    const { categories } = useCategories();
+    const liveCategoryName = useMemo(() => {
+        const match = categories.find(
+            (c) => c.id === id || (c as { slug?: string }).slug === id
+        );
+        return match?.name;
+    }, [categories, id]);
+    const resolvedTitle = liveCategoryName ?? pageTitle;
+
     // Apply the active filters to the products before rendering the grid.
     const filteredProducts = useMemo(
         () => applyFilters(products, filter.state),
@@ -143,7 +155,7 @@ export default function CategoryPageClient({
             <div className="max-w-[1200px] mx-auto px-1 lg:px-12 pt-10 lg:pt-14 pb-28">
                 <div className="flex flex-col lg:flex-row ">
                     <h1 className=" md:hidden text-[24px] font-medium text-[#1a1a1a] tracking-tight leading-none mb-[18px]">
-                        {pageTitle}
+                        {resolvedTitle}
                     </h1>
 
                     {/* ── Left: Sidebar navigation ── */}
@@ -160,7 +172,7 @@ export default function CategoryPageClient({
                         {/* Page heading */}
                         <header>
                             <h1 className="hidden md:flex text-[34px] font-medium text-[#1a1a1a] tracking-tight leading-none mb-[18px]">
-                                {pageTitle}
+                                {resolvedTitle}
                             </h1>
 
                             {/* Shop by Category Components based on matching data */}

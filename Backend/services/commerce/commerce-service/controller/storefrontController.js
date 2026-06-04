@@ -38,4 +38,10 @@ const listRelated = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
-module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listReviews, listRelated };
+// Anonymous promo-code preview (no store role). Body is schema-validated upstream (req.validated).
+const previewDiscount = async (req, res, next) => {
+    try { return sendSuccess(req, res, await storefront.previewDiscount(req.params.storeId, req.validated)); }
+    catch (err) { return next(err); }
+};
+
+module.exports = { listProducts, getProduct, listDepartments, listCategories, listCollections, listReviews, listRelated, previewDiscount };

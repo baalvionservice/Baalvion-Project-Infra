@@ -173,14 +173,6 @@ export function Footer() {
                                     </li>
                                     <li>
                                         <Link
-                                            href={`/${countryCode}/account/live`}
-                                            className="text-black transition-colors"
-                                        >
-                                            Live Shops
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
                                             href={`/${countryCode}/category/new-arrivals`}
                                             className="text-black transition-colors"
                                         >
@@ -394,14 +386,6 @@ export function Footer() {
                                     className="text-black transition-colors"
                                 >
                                     Archive Registry
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href={`/${countryCode}/account/live`}
-                                    className="text-black transition-colors"
-                                >
-                                    Live Shops
                                 </Link>
                             </li>
                             <li>

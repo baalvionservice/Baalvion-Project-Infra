@@ -52,6 +52,38 @@ test('normalizeRates returns null for empty / non-object / all-junk input', () =
     assert.equal(fx.normalizeRates('nope'), null);
 });
 
+test('isSafeFeedUrl accepts a well-formed public https feed URL', () => {
+    assert.equal(fx.isSafeFeedUrl('https://open.er-api.com/v6/latest/USD'), true);
+    assert.equal(fx.isSafeFeedUrl('https://api.exchangerate.host/latest?base=USD'), true);
+});
+
+test('isSafeFeedUrl rejects non-https schemes and unparseable URLs', () => {
+    assert.equal(fx.isSafeFeedUrl('http://open.er-api.com/v6/latest/USD'), false); // plaintext
+    assert.equal(fx.isSafeFeedUrl('ftp://example.com/rates'), false);
+    assert.equal(fx.isSafeFeedUrl('file:///etc/passwd'), false);
+    assert.equal(fx.isSafeFeedUrl('not a url'), false);
+    assert.equal(fx.isSafeFeedUrl(''), false);
+});
+
+test('isSafeFeedUrl rejects loopback / link-local / RFC1918 private hosts (SSRF guard)', () => {
+    assert.equal(fx.isSafeFeedUrl('https://localhost/rates'), false);
+    assert.equal(fx.isSafeFeedUrl('https://127.0.0.1/rates'), false);
+    assert.equal(fx.isSafeFeedUrl('https://10.0.0.5/rates'), false);
+    assert.equal(fx.isSafeFeedUrl('https://172.16.0.1/rates'), false);
+    assert.equal(fx.isSafeFeedUrl('https://172.31.255.254/rates'), false);
+    assert.equal(fx.isSafeFeedUrl('https://192.168.1.1/rates'), false);
+    assert.equal(fx.isSafeFeedUrl('https://169.254.169.254/latest/meta-data'), false); // cloud metadata
+    assert.equal(fx.isSafeFeedUrl('https://[::1]/rates'), false); // IPv6 loopback
+    assert.equal(fx.isSafeFeedUrl('https://[fd00::1]/rates'), false); // IPv6 unique-local
+});
+
+test('isSafeFeedUrl does NOT reject public hosts that merely look private-adjacent', () => {
+    // 172.32.x is OUTSIDE the 172.16-31 private block → public.
+    assert.equal(fx.isSafeFeedUrl('https://172.32.0.1/rates'), true);
+    // 11.x and 9.x are public.
+    assert.equal(fx.isSafeFeedUrl('https://11.0.0.1/rates'), true);
+});
+
 test('the cache key and tunables are exposed for the refresh job', () => {
     assert.equal(fx.CACHE_KEY, 'commerce:fx:snapshot:usd');
     assert.ok(Number.isFinite(fx.FX_CACHE_TTL) && fx.FX_CACHE_TTL > 0);

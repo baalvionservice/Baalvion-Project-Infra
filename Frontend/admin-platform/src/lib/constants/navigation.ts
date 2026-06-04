@@ -149,6 +149,7 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Shipping',    href: '/commerce/shipping',    iconName: 'Truck'           },
           { title: 'Returns',     href: '/commerce/returns',     iconName: 'RotateCcw'       },
           { title: 'Analytics',   href: '/commerce/analytics',   iconName: 'BarChart3'       },
+          { title: 'Revenue',     href: '/commerce/revenue',     iconName: 'DollarSign', roles: ['super_admin', 'owner', 'admin'] },
           { title: 'Markets',     href: '/commerce/markets',     iconName: 'Globe2'          },
           { title: 'Reviews',     href: '/commerce/reviews',     iconName: 'Star'            },
           { title: 'Settings',    href: '/commerce/settings',    iconName: 'Settings'        },

@@ -13,7 +13,8 @@ module.exports = function(sequelize, DataTypes) {
         city: { type: DataTypes.STRING(100), allowNull: false },
         state: { type: DataTypes.STRING(100), allowNull: true },
         zip: { type: DataTypes.STRING(20), allowNull: true },
-        countryCode: { type: DataTypes.STRING(3), allowNull: false },
+        // ISO-3166-1 alpha-2 (the API contract enforces length(2) in customerSchemas/orderSchemas).
+        countryCode: { type: DataTypes.STRING(2), allowNull: false },
         phone: { type: DataTypes.STRING(30), allowNull: true },
         isDefault: { type: DataTypes.BOOLEAN, defaultValue: false },
     }, { schema: 'orders', underscored: true, timestamps: true, tableName: 'orders_addresses' });
