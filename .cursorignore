@@ -1,0 +1,152 @@
+# .cursorignore — paths Cursor should not index or load into AI context.
+# Uses .gitignore syntax. Cursor already honors .gitignore; this layers on
+# extra noise/secret exclusions. Keep aligned with .gitignore / .claudeignore.
+
+# ──────────────────────────────────────────────
+# Environment / Secrets — NEVER index or send to AI
+# ──────────────────────────────────────────────
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials.json
+service-account.json
+make_keys.cjs
+
+# ──────────────────────────────────────────────
+# Dependencies
+# ──────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# ──────────────────────────────────────────────
+# Build outputs
+# ──────────────────────────────────────────────
+dist/
+build/
+.next/
+.turbo/
+out/
+target/
+*.tsbuildinfo
+
+# ──────────────────────────────────────────────
+# Lockfiles — huge, generated, never edited by hand
+# ──────────────────────────────────────────────
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# ──────────────────────────────────────────────
+# Generated / minified / vendored code
+# ──────────────────────────────────────────────
+*.min.js
+*.min.css
+*.map
+**/generated/**
+**/*.generated.*
+
+# ──────────────────────────────────────────────
+# Test / Coverage / Reports
+# ──────────────────────────────────────────────
+coverage/
+playwright-report/
+test-results/
+.nyc_output/
+*.lcov
+.lighthouseci/
+*.snap
+
+# ──────────────────────────────────────────────
+# Logs
+# ──────────────────────────────────────────────
+logs/
+# …but Next.js App Router route segments may legitimately be named "logs"
+# (e.g. /notifications/logs) — those are source, not log output.
+!**/src/app/**/logs/
+!**/src/app/**/logs/**
+*.log
+
+# ──────────────────────────────────────────────
+# Databases / dumps / backups (may contain real data / PII)
+# ──────────────────────────────────────────────
+backups/
+*.sqlite
+*.db
+*.dump
+*.sql.gz
+/snapshot_*.sql
+
+# ──────────────────────────────────────────────
+# Binary / media assets — waste context, not searchable as text
+# ──────────────────────────────────────────────
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.avif
+*.ico
+*.svg
+*.mp4
+*.webm
+*.mov
+*.mp3
+*.wav
+*.woff
+*.woff2
+*.ttf
+*.otf
+*.eot
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.gz
+*.7z
+*.rar
+
+# ──────────────────────────────────────────────
+# OS / Editor / Harness
+# ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.idea/
+.vs/
+.vscode/settings.json
+.claude/
+.devlogs/
+*.swp
+*.swo
+*~
+
+# ──────────────────────────────────────────────
+# Infra state
+# ──────────────────────────────────────────────
+docker-compose.override.yml
+*.tfstate
+*.tfstate.backup
+.terraform/
+terraform.tfvars
+
+# ──────────────────────────────────────────────
+# Local scratch / diagnostic dumps — not real source
+# ──────────────────────────────────────────────
+_diag_*
+_kill_report.txt
+temp_*.py
+*.tmp
+/*.out.json
+/backend-tree-*.txt
+.dep-err.txt
+.dependabot-alerts.json
+REPOSITORY_INVENTORY.md

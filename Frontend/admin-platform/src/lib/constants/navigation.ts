@@ -175,7 +175,16 @@ export const NAVIGATION: NavGroup[] = [
     items: [
       { title: 'Law Elite',         href: '/law',           iconName: 'Scale'   },
       { title: 'ControlTheMarket',  href: '/ctm',           iconName: 'Trophy'  },
-      { title: 'Imperialpedia',     href: '/imperialpedia', iconName: 'BookOpen' },
+      {
+        title: 'Imperialpedia',
+        href: '/imperialpedia',
+        iconName: 'BookOpen',
+        children: [
+          { title: 'Overview',  href: '/imperialpedia',          iconName: 'LayoutDashboard' },
+          { title: 'Glossary',  href: '/imperialpedia/glossary', iconName: 'FileText'        },
+          { title: 'Entities',  href: '/imperialpedia/entities', iconName: 'Building2'        },
+        ],
+      },
     ],
   },
   {

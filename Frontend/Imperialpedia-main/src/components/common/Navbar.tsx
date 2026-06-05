@@ -411,6 +411,14 @@ export const Navbar = () => {
                   </div>
                 </div>
               ))}
+
+              {/* Standalone Glossary link (no dropdown) */}
+              <Link
+                href="/glossary"
+                className="text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-primary transition-all"
+              >
+                {t("nav.glossary")}
+              </Link>
             </div>
 
             {/* ── Scrolled state: search + hamburger ── */}
@@ -540,6 +548,18 @@ export const Navbar = () => {
                     <ChevronRight className="h-[17px] w-[17px] text-foreground/50 shrink-0" />
                   </button>
                 ))}
+
+                {/* Standalone Glossary row (no sub-panel) */}
+                <Link
+                  href="/glossary"
+                  onClick={() => setIsOpen(false)}
+                  className="w-full flex items-center justify-between px-4 py-[16px] border-b border-border hover:bg-muted/30 transition-colors"
+                >
+                  <span className="text-[13px] font-bold uppercase tracking-[0.07em] text-foreground">
+                    {t("nav.glossary")}
+                  </span>
+                  <ChevronRight className="h-[17px] w-[17px] text-foreground/50 shrink-0" />
+                </Link>
 
                 {isAdmin && (
                   <button

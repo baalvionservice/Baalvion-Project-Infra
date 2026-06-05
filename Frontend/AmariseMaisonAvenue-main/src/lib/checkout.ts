@@ -45,6 +45,8 @@ export interface PlaceOrderInput {
   idempotencyKey?: string;
   /** Chosen settlement gateway (stripe|razorpay|payu|bank). Recorded on the order/payment per C1. */
   gateway?: PaymentGatewaySlug;
+  /** Optional gift note / order instructions from the shopper — persisted to the order metadata. */
+  note?: string;
   /** Run payment (intent → confirm) after creating the order. Default true. */
   pay?: boolean;
 }
@@ -138,7 +140,15 @@ export async function placeOrder(input: PlaceOrderInput): Promise<ApiResult<Plac
       : {}),
     ...(input.shippingAddress ? { shippingAddress: input.shippingAddress } : {}),
     ...(customerId ? { customerId } : {}),
-    ...(input.gateway ? { metadata: { gateway: input.gateway } } : {}),
+    // Persist gateway + optional gift note on the order's metadata JSONB (open record).
+    ...((input.gateway || input.note?.trim())
+      ? {
+          metadata: {
+            ...(input.gateway ? { gateway: input.gateway } : {}),
+            ...(input.note?.trim() ? { note: input.note.trim().slice(0, 500) } : {}),
+          },
+        }
+      : {}),
     ...(input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : {}),
   };
 

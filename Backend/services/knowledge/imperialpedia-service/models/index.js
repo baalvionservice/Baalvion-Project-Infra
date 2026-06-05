@@ -25,6 +25,9 @@ db.CommunityDebate = require('./community_debates')(sequelize, DataTypes);
 db.AssetSentiment = require('./asset_sentiments')(sequelize, DataTypes);
 db.WatchlistItem = require('./watchlist_items')(sequelize, DataTypes);
 db.PortfolioHolding = require('./portfolio_holdings')(sequelize, DataTypes);
+db.GlossaryTerm = require('./glossary_terms')(sequelize, DataTypes);
+db.GlossaryExample = require('./glossary_examples')(sequelize, DataTypes);
+db.GlossaryRelation = require('./glossary_relations')(sequelize, DataTypes);
 
 // Associations
 // Article -> CreatorProfile (author)
@@ -41,5 +44,11 @@ db.Comment.belongsTo(db.Comment, { foreignKey: 'parent_id', as: 'parent' });
 
 // Vote polymorphic (no FK constraints — handled in code)
 // Vote.user_id, Vote.target_type, Vote.target_id
+
+// Glossary: term -> examples (1:N) and term -> relations (1:N, typed graph edges).
+db.GlossaryTerm.hasMany(db.GlossaryExample, { foreignKey: 'term_id', as: 'examples', onDelete: 'CASCADE' });
+db.GlossaryExample.belongsTo(db.GlossaryTerm, { foreignKey: 'term_id', as: 'term' });
+db.GlossaryTerm.hasMany(db.GlossaryRelation, { foreignKey: 'term_id', as: 'relations', onDelete: 'CASCADE' });
+db.GlossaryRelation.belongsTo(db.GlossaryTerm, { foreignKey: 'related_id', as: 'related', constraints: false });
 
 module.exports = db;

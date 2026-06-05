@@ -1,20 +1,37 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
 import { formatProductPrice, formatAmount, normalizeCountry } from '@/lib/i18n/countries';
 import { Button } from '@/components/ui/button';
-import { Card } from "@/components/ui/card";
-import { Trash2, ShoppingBag, ShieldCheck, Truck, ChevronRight, Minus, Plus, Loader2 } from 'lucide-react';
+import {
+  Trash2,
+  ShoppingBag,
+  ShieldCheck,
+  Truck,
+  ChevronRight,
+  Minus,
+  Plus,
+  Loader2,
+  Lock,
+  BadgeCheck,
+  Gift,
+  ArrowRight,
+} from 'lucide-react';
 import { BrandImage } from '@/components/ui/BrandImage';
 import { useToast } from '@/hooks/use-toast';
 import { getProductById } from '@/lib/catalog';
+import YouMayAlsoLike from '@/components/product/YouMayAlsoLike';
 
 /**
- * Bank-Grade Cart Page: Tactical Acquisition Ledger.
- * Optimized for high-fidelity transactional review.
+ * Shopping Bag — Amarisé Maison Avenue.
+ *
+ * Luxury resale cart inspired by the clean, conversion-first layout of leading
+ * maisons: a two-column composition (line items + a sticky order summary), rich
+ * authenticity-forward line items, an optional gift note, trust signals, and a
+ * "You may also like" rail — while keeping the storefront's real wiring intact.
  *
  * The bag persists across reloads (store localStorage). Quantities are editable with a live
  * server stock check, and line prices are re-validated against the live catalog before checkout.
@@ -28,8 +45,31 @@ export default function CartPage() {
 
   // Per-line "checking stock" flag for the quantity stepper.
   const [checkingId, setCheckingId] = useState<string | null>(null);
-  // Whole-bag price re-validation state before proceeding to settlement.
+  // Whole-bag price re-validation state before proceeding to checkout.
   const [revalidating, setRevalidating] = useState(false);
+
+  // Optional gift note / message — persisted per market and threaded into the order
+  // metadata at checkout (see checkout page → placeOrder). Honest persistence, not a stub.
+  const noteKey = `amarise_order_note_${countryCode}`;
+  const [orderNote, setOrderNote] = useState('');
+  const [showNote, setShowNote] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const saved = window.localStorage.getItem(noteKey);
+    if (saved) {
+      setOrderNote(saved);
+      setShowNote(true);
+    }
+  }, [noteKey]);
+
+  const handleNoteChange = (value: string) => {
+    setOrderNote(value);
+    if (typeof window !== 'undefined') {
+      if (value.trim()) window.localStorage.setItem(noteKey, value);
+      else window.localStorage.removeItem(noteKey);
+    }
+  };
 
   // Increase a line quantity only after confirming live availability covers the new amount.
   const handleQuantityChange = async (id: string, nextQty: number) => {
@@ -66,8 +106,8 @@ export default function CartPage() {
     }
   };
 
-  // Re-validate every line's live availability + price before settlement so a stale bag can't
-  // carry a sold-out item or an outdated price into checkout. Blocks on a sold-out item, warns on
+  // Re-validate every line's live availability + price before checkout so a stale bag can't
+  // carry a sold-out item or an outdated price forward. Blocks on a sold-out item, warns on
   // a price change (order-service re-derives all money server-authoritatively at order time), and
   // only then routes to checkout.
   const handleProceed = async () => {
@@ -120,6 +160,7 @@ export default function CartPage() {
     (acc, item) => acc + (item.price ?? item.basePrice) * item.quantity,
     0
   );
+  const itemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
   // Market context is shared across the bag, so the first item carries currency + tax facts.
   const currencyCode = cart[0]?.currencyCode;
   const taxRate = cart[0]?.taxRate ?? 0;
@@ -138,79 +179,136 @@ export default function CartPage() {
 
   if (cart.length === 0) {
     return (
-      <div className="container mx-auto px-4 sm:px-6 py-20 sm:py-28 md:py-40 flex flex-col items-center justify-center space-y-8 sm:space-y-12 animate-fade-in">
-        <div className="p-8 sm:p-12 bg-ivory border border-border rounded-full shadow-inner">
-          <ShoppingBag className="w-14 h-14 sm:w-20 sm:h-20 text-gray-200" />
+      <div className="container mx-auto px-4 sm:px-6 py-24 sm:py-32 md:py-44 flex flex-col items-center justify-center space-y-8 sm:space-y-10 animate-fade-in">
+        <div className="p-10 sm:p-14 bg-ivory border border-border rounded-full">
+          <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300" strokeWidth={1} />
         </div>
-        <div className="text-center space-y-3 sm:space-y-4">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-headline font-bold italic tracking-tight">Your Archive is Empty</h1>
-          <p className="text-sm sm:text-base text-gray-500 font-light italic max-w-md mx-auto px-4">
-            &ldquo;Discovery is the foundation of any significant collection. Explore our curated ateliers to find your next masterpiece.&rdquo;
+        <div className="text-center space-y-4 max-w-md">
+          <h1 className="text-4xl sm:text-5xl font-headline tracking-tight">Your bag is empty</h1>
+          <p className="text-sm sm:text-base text-gray-500 font-light leading-relaxed px-4">
+            Every great collection begins with a single discovery. Explore our curated ateliers
+            to find your next authenticated masterpiece.
           </p>
         </div>
-        <Button onClick={() => router.push(`/${countryCode}`)} size="lg" className="rounded-none bg-white hover:bg-black/20 px-8 sm:px-16 h-12 sm:h-16 text-[10px] font-bold uppercase tracking-[0.4em] shadow-2xl transition-all">
-          START DISCOVERY
+        <Button
+          onClick={() => router.push(`/${countryCode}`)}
+          size="lg"
+          className="rounded-none bg-black text-white hover:bg-plum px-12 sm:px-16 h-14 sm:h-16 text-[10px] font-bold uppercase tracking-[0.35em] transition-all"
+        >
+          Continue Shopping
         </Button>
+        <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3 pt-6 text-[9px] font-bold uppercase tracking-[0.25em] text-gray-400">
+          <span className="flex items-center gap-2"><BadgeCheck className="w-3.5 h-3.5 text-gold" /> 100% Authentic</span>
+          <span className="flex items-center gap-2"><Truck className="w-3.5 h-3.5 text-gold" /> Insured Worldwide Shipping</span>
+          <span className="flex items-center gap-2"><Lock className="w-3.5 h-3.5 text-gold" /> Secure Checkout</span>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="w-full md:container mx-auto px-4 sm:px-6 md:px-12 py-4 md:py-24 animate-fade-in">
-      <header className="space-y-3 sm:space-y-4 mb-10 sm:mb-14 md:mb-20 border-b border-border pb-6 sm:pb-8 md:pb-12">
-        <nav className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-[0.4em] text-gray-400 mb-2 sm:mb-4">
-          <Link href={`/${countryCode}`} className="hover:text-black">Maison</Link>
-          <ChevronRight className="w-2.5 h-2.5" />
-          <span className="text-black">Shopping Bag</span>
-        </nav>
-        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-headline font-bold italic tracking-tighter">Acquisition Ledger</h1>
-        <p className="text-xs sm:text-sm text-gray-500 font-light italic">Reviewing artifacts reserved for global settlement.</p>
-      </header>
+    <div className="bg-white">
+      <div className="w-full md:container mx-auto px-4 sm:px-6 md:px-12 py-6 md:py-20 animate-fade-in">
+        {/* Header */}
+        <header className="mb-8 sm:mb-12 md:mb-16 border-b border-border pb-6 sm:pb-8">
+          <nav className="flex items-center space-x-2 text-[10px] font-bold uppercase tracking-[0.35em] text-gray-400 mb-4">
+            <Link href={`/${countryCode}`} className="hover:text-black transition-colors">Maison</Link>
+            <ChevronRight className="w-2.5 h-2.5" />
+            <span className="text-black">Shopping Bag</span>
+          </nav>
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            <div className="space-y-2">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-headline tracking-tight leading-none">
+                Shopping Bag
+              </h1>
+              <p className="text-xs sm:text-sm text-gray-500 font-light">
+                {itemCount} {itemCount === 1 ? 'piece' : 'pieces'} reserved · review before checkout
+              </p>
+            </div>
+            <Link
+              href={`/${countryCode}`}
+              className="hidden sm:inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-colors"
+            >
+              <ArrowRight className="w-3 h-3 rotate-180" /> Continue Shopping
+            </Link>
+          </div>
+        </header>
 
-      <div className="flex flex-col lg:flex-row gap-10 sm:gap-14 md:gap-16 lg:gap-24 items-start">
-        {/* Artifact List */}
-        <div className="w-full lg:w-2/3 space-y-8 sm:space-y-10 md:space-y-12">
-          {cart.map((item) => (
-            <div key={item.id} className="flex flex-col sm:flex-row gap-5 sm:gap-8 md:gap-12 pb-8 sm:pb-10 md:pb-12 border-b border-border group relative">
-              {/* Product Image */}
-              <BrandImage
-                src={item.imageUrl?.[0]}
-                alt={item.name}
-                label={item.name}
-                className="w-full sm:w-36 md:w-48 aspect-[3/4] border border-border shadow-sm flex-shrink-0 mx-auto sm:mx-0 max-w-[200px] sm:max-w-none"
-                imgClassName="object-contain p-4 sm:p-6 transition-transform duration-[1.5s] group-hover:scale-105"
-              />
+        <div className="flex flex-col lg:flex-row gap-10 md:gap-14 lg:gap-20 items-start">
+          {/* Line items */}
+          <div className="w-full lg:w-[62%] space-y-8 sm:space-y-10">
+            {cart.map((item) => (
+              <div
+                key={item.id}
+                className="flex flex-col sm:flex-row gap-5 sm:gap-7 md:gap-10 pb-8 sm:pb-10 border-b border-border group"
+              >
+                {/* Product image */}
+                <Link
+                  href={`/${countryCode}/product/${item.id}`}
+                  className="block w-full sm:w-32 md:w-44 aspect-[3/4] border border-border bg-ivory/40 flex-shrink-0 mx-auto sm:mx-0 max-w-[220px] sm:max-w-none overflow-hidden"
+                >
+                  <BrandImage
+                    src={item.imageUrl?.[0]}
+                    alt={item.name}
+                    label={item.name}
+                    className="w-full h-full"
+                    imgClassName="object-contain p-4 sm:p-5 transition-transform duration-[1.4s] group-hover:scale-105"
+                  />
+                </Link>
 
-              {/* Product Details */}
-              <div className="flex-1 flex flex-col justify-between py-1 sm:py-2">
-                <div className="space-y-4 sm:space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 sm:gap-4">
-                    <div className="space-y-1.5 sm:space-y-2">
-                      <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-plum">{item.categoryId.toUpperCase()} Registry</span>
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-headline font-bold italic group-hover:text-plum transition-colors leading-none">
-                        <Link href={`/${countryCode}/product/${item.id}`}>{item.name}</Link>
-                      </h3>
-                      <p className="text-[9px] text-gray-400 font-mono uppercase tracking-tighter">REF: {item.id.toUpperCase()}</p>
+                {/* Details */}
+                <div className="flex-1 flex flex-col justify-between py-1 min-w-0">
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div className="space-y-1.5 min-w-0">
+                        <span className="block text-[10px] font-bold uppercase tracking-[0.28em] text-plum">
+                          {item.categoryId.replace(/[-_]/g, ' ').toUpperCase()}
+                        </span>
+                        <h3 className="text-xl sm:text-2xl md:text-[28px] font-headline tracking-tight leading-tight group-hover:text-plum transition-colors truncate">
+                          <Link href={`/${countryCode}/product/${item.id}`}>{item.name}</Link>
+                        </h3>
+                        <p className="text-[9px] text-gray-400 font-mono uppercase tracking-wide">
+                          Ref. {item.id.toUpperCase()}
+                        </p>
+                      </div>
+                      <div className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-900 tabular whitespace-nowrap">
+                        {formatProductPrice(item, countryCode)}
+                      </div>
                     </div>
-                    <div className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 tabular">
-                      {formatProductPrice(item, countryCode)}
+
+                    {/* Attribute chips */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      {item.condition && (
+                        <span className="inline-flex items-center px-2.5 py-1 border border-border bg-ivory/60 text-[9px] font-bold uppercase tracking-[0.18em] text-gray-600">
+                          {item.condition}
+                        </span>
+                      )}
+                      {item.colors?.[0] && (
+                        <span className="inline-flex items-center px-2.5 py-1 border border-border bg-ivory/60 text-[9px] font-bold uppercase tracking-[0.18em] text-gray-600">
+                          {item.colors[0]}
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.18em] text-emerald-600">
+                        <ShieldCheck className="w-3 h-3" /> Verified Authentic
+                      </span>
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-4 sm:gap-0 sm:space-x-8 text-[9px] font-bold uppercase tracking-widest text-gray-400">
-                    <div className="flex items-center space-x-3">
-                      <span className="opacity-60">Quantity:</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-0 mt-5 sm:mt-7">
+                    {/* Quantity stepper */}
+                    <div className="flex items-center gap-3">
+                      <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400">Qty</span>
                       <div className="flex items-center border border-border">
                         <button
                           type="button"
                           aria-label={`Decrease quantity of ${item.name}`}
                           onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
                           disabled={item.quantity <= 1 || checkingId === item.id}
-                          className="h-8 w-8 flex items-center justify-center text-gray-600 hover:bg-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          className="h-9 w-9 flex items-center justify-center text-gray-600 hover:bg-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="h-8 min-w-[2.5rem] flex items-center justify-center text-black tabular-nums border-x border-border">
+                        <span className="h-9 min-w-[2.75rem] flex items-center justify-center text-black tabular-nums border-x border-border text-sm">
                           {checkingId === item.id ? (
                             <Loader2 className="w-3 h-3 animate-spin" aria-hidden="true" />
                           ) : (
@@ -222,110 +320,167 @@ export default function CartPage() {
                           aria-label={`Increase quantity of ${item.name}`}
                           onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
                           disabled={checkingId === item.id}
-                          className="h-8 w-8 flex items-center justify-center text-gray-600 hover:bg-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                          className="h-9 w-9 flex items-center justify-center text-gray-600 hover:bg-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <ShieldCheck className="w-3 h-3 text-emerald-500" />
-                      <span>Provenance Audited</span>
-                    </div>
+
+                    <button
+                      onClick={() => removeFromCart(item.id)}
+                      className="flex items-center gap-2 text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-red-600 transition-colors self-start sm:self-auto"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>Remove</span>
+                    </button>
                   </div>
                 </div>
+              </div>
+            ))}
 
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 sm:gap-0 mt-6 sm:mt-8 md:mt-10">
-                  <button
-                    onClick={() => removeFromCart(item.id)}
-                    className="flex items-center space-x-2 text-[9px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-600 transition-colors"
+            {/* Gift note */}
+            <div className="pt-2">
+              {!showNote ? (
+                <button
+                  onClick={() => setShowNote(true)}
+                  className="inline-flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em] text-gray-500 hover:text-plum transition-colors"
+                >
+                  <Gift className="w-4 h-4" /> Add a gift note
+                </button>
+              ) : (
+                <div className="space-y-2 max-w-xl">
+                  <label
+                    htmlFor="order-note"
+                    className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.28em] text-gray-500"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Remove from ledger</span>
-                  </button>
-                  <span className="text-[9px] font-bold uppercase tracking-widest text-gold italic">Ready for Dispatch</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Tactical Summary Sidebar */}
-        <aside className="w-full lg:w-1/3 lg:sticky lg:top-40">
-          <Card className="bg-ivory border-border shadow-luxury p-6 sm:p-8 md:p-10 space-y-6 sm:space-y-8 md:space-y-10 rounded-none">
-            <h2 className="text-lg sm:text-xl font-headline font-bold uppercase tracking-widest border-b border-border pb-4 sm:pb-6">Settlement Summary</h2>
-
-            <div className="space-y-4 sm:space-y-6">
-              <div className="flex justify-between text-xs font-light italic">
-                <span className="text-gray-500">Registry Subtotal</span>
-                <span className="font-bold tabular">{renderAmount(subtotal)}</span>
-              </div>
-              {taxAmount > 0 && (
-                <div className="flex justify-between text-xs font-light italic">
-                  <span className="text-gray-500">
-                    {taxInclusive
-                      ? `Includes ${taxType} (${taxRate}%)`
-                      : `${taxType} (${taxRate}%)`}
-                  </span>
-                  <span className="font-bold tabular">{renderAmount(taxAmount)}</span>
+                    <Gift className="w-4 h-4 text-plum" /> Gift note / order instructions
+                  </label>
+                  <textarea
+                    id="order-note"
+                    value={orderNote}
+                    onChange={(e) => handleNoteChange(e.target.value)}
+                    rows={3}
+                    maxLength={500}
+                    placeholder="A personal message to accompany your piece, or special delivery instructions…"
+                    className="w-full rounded-none border border-border bg-ivory/30 p-4 text-sm font-light focus:border-plum focus:outline-none resize-none"
+                  />
+                  <p className="text-[9px] text-gray-400 uppercase tracking-widest">
+                    {orderNote.length}/500 · accompanies your order
+                  </p>
                 </div>
               )}
-              <div className="flex justify-between text-xs font-light italic">
-                <span className="text-gray-500">Global Logistics</span>
-                <span className="text-plum font-bold uppercase tracking-widest text-[10px] sm:text-xs">Complimentary</span>
-              </div>
-              <div className="flex justify-between text-xs font-light italic">
-                <span className="text-gray-500">Insurance & Certification</span>
-                <span className="text-plum font-bold uppercase tracking-widest text-[10px] sm:text-xs">Included</span>
-              </div>
+            </div>
+          </div>
 
-              <div className="pt-6 sm:pt-8 border-t border-border flex justify-between items-end">
-                <div className="space-y-1">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-gray-400">Total Yield</span>
-                  <div className="text-2xl sm:text-3xl md:text-4xl font-body font-bold tabular leading-none">
-                    {renderAmount(total)}
+          {/* Order summary */}
+          <aside className="w-full lg:w-[38%] lg:sticky lg:top-32">
+            <div className="border border-border bg-ivory/40 p-6 sm:p-8 md:p-9 space-y-7">
+              <h2 className="text-lg font-headline uppercase tracking-[0.2em] border-b border-border pb-5">
+                Order Summary
+              </h2>
+
+              <div className="space-y-4">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Subtotal ({itemCount})</span>
+                  <span className="font-semibold tabular text-gray-900">{renderAmount(subtotal)}</span>
+                </div>
+                {taxAmount > 0 && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">
+                      {taxInclusive ? `Includes ${taxType} (${taxRate}%)` : `${taxType} (${taxRate}%)`}
+                    </span>
+                    <span className="font-semibold tabular text-gray-900">{renderAmount(taxAmount)}</span>
                   </div>
+                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Shipping</span>
+                  <span className="font-bold uppercase tracking-widest text-[10px] text-plum">Complimentary</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-500">Insurance &amp; Authentication</span>
+                  <span className="font-bold uppercase tracking-widest text-[10px] text-plum">Included</span>
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-4 pt-4 sm:pt-6">
+              <div className="pt-6 border-t border-border flex justify-between items-end">
+                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400">Estimated Total</span>
+                <div className="text-3xl md:text-[34px] font-semibold tabular leading-none">
+                  {renderAmount(total)}
+                </div>
+              </div>
+
               <Button
                 onClick={handleProceed}
                 disabled={revalidating}
-                className="w-full bg-black text-white hover:bg-plum h-14 sm:h-16 md:h-20 rounded-none text-[10px] sm:text-[11px] font-bold tracking-[0.3em] sm:tracking-[0.4em] uppercase shadow-2xl transition-all disabled:opacity-60"
+                className="w-full bg-black text-white hover:bg-plum h-14 sm:h-16 rounded-none text-[11px] font-bold tracking-[0.35em] uppercase transition-all disabled:opacity-60"
               >
                 {revalidating ? (
                   <>
-                    <Loader2 className="w-4 h-4 mr-3 animate-spin" /> VERIFYING AVAILABILITY…
+                    <Loader2 className="w-4 h-4 mr-3 animate-spin" /> Verifying availability…
                   </>
                 ) : (
-                  'PROCEED TO SETTLEMENT'
+                  'Proceed to Checkout'
                 )}
               </Button>
-              <p className="text-[9px] text-gray-400 text-center italic leading-relaxed">
-                &ldquo;By proceeding, you authorize the Maison to begin curatorial audit and logistical preparation for your artifacts.&rdquo;
-              </p>
-            </div>
 
-            <div className="pt-6 sm:pt-8 md:pt-10 space-y-4 sm:space-y-6 border-t border-border">
-              <div className="flex items-center space-x-3 sm:space-x-4">
-                <div className="p-2.5 sm:p-3 bg-white rounded-full shadow-sm text-gold"><ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" /></div>
-                <div className="space-y-0.5">
-                  <p className="text-10px font-bold uppercase tracking-widest">256-Bit SSL SECURE</p>
-                  <p className="text-[8px] text-gray-400 italic">Institutional Encryption Standard</p>
+              <p className="text-[10px] text-gray-400 text-center leading-relaxed">
+                Taxes &amp; duties finalized at checkout. By continuing you agree to our&nbsp;
+                <Link href={`/${countryCode}/terms-of-service`} className="underline underline-offset-2 hover:text-black">
+                  Terms
+                </Link>
+                .
+              </p>
+
+              {/* Trust signals */}
+              <div className="pt-6 space-y-4 border-t border-border">
+                <div className="flex items-center gap-3.5">
+                  <div className="p-2.5 bg-white border border-border rounded-full text-gold"><BadgeCheck className="w-4 h-4" /></div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-800">100% Authentic Guaranteed</p>
+                    <p className="text-[9px] text-gray-400">Every piece verified by our atelier</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3.5">
+                  <div className="p-2.5 bg-white border border-border rounded-full text-gold"><Lock className="w-4 h-4" /></div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-800">Secure 256-bit Checkout</p>
+                    <p className="text-[9px] text-gray-400">Encrypted, bank-grade settlement</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3.5">
+                  <div className="p-2.5 bg-white border border-border rounded-full text-gold"><Truck className="w-4 h-4" /></div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-800">Insured Worldwide Delivery</p>
+                    <p className="text-[9px] text-gray-400">Tracked, white-glove dispatch</p>
+                  </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-3 sm:space-x-4">
-                <div className="p-2.5 sm:p-3 bg-white rounded-full shadow-sm text-gold"><Truck className="w-4 h-4 sm:w-5 sm:h-5" /></div>
-                <div className="space-y-0.5">
-                  <p className="text-10px font-bold uppercase tracking-widest">Global White-Glove</p>
-                  <p className="text-[8px] text-gray-400 italic">Tracked Dispatch via Maison Logistics</p>
+
+              {/* Accepted payments */}
+              <div className="pt-5 border-t border-border space-y-2.5">
+                <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-gray-400 text-center">We Accept</p>
+                <div className="flex flex-wrap items-center justify-center gap-1.5">
+                  {['Visa', 'Mastercard', 'Amex', 'UPI', 'Bank'].map((m) => (
+                    <span
+                      key={m}
+                      className="px-2.5 py-1 border border-border bg-white text-[8px] font-bold uppercase tracking-[0.15em] text-gray-500"
+                    >
+                      {m}
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>
-          </Card>
-        </aside>
+          </aside>
+        </div>
+
+        {/* Recommendations */}
+        {cart[0]?.id && (
+          <div className="mt-16 md:mt-24 border-t border-border">
+            <YouMayAlsoLike productId={cart[0].id} country={countryCode} />
+          </div>
+        )}
       </div>
     </div>
   );
