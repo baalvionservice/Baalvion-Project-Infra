@@ -7,7 +7,10 @@ const MEDIA_HOST = (process.env.NEXT_PUBLIC_MEDIA_HOST || '').trim();
 
 const nextConfig: NextConfig = {
   // Self-contained server bundle for Docker/ECS/Amplify (.next/standalone + server.js).
-  output: 'standalone',
+  // Standalone file-tracing recreates the pnpm symlink tree, which throws EPERM on Windows
+  // (symlink creation needs Admin/Developer Mode). Production images build on Linux where this
+  // works; skip it on win32 so local Windows builds succeed without changing the deploy artifact.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
   },

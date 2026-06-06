@@ -2,7 +2,10 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
-  output: 'standalone',
+  // Standalone file-tracing recreates the pnpm symlink tree, which throws EPERM on Windows
+  // (symlink creation needs Admin/Developer Mode). Production images build on Linux where this
+  // works; skip it on win32 so local Windows builds succeed without changing the deploy artifact.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   reactStrictMode: true,
   // Production build resilience: don't fail the build on pre-existing type/lint
   // issues in unrelated pages — the goal here is a stable, pre-compiled server.
