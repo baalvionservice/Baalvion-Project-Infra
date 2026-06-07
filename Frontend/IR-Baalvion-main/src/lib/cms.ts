@@ -152,6 +152,8 @@ export interface LeadershipMember {
   imageUrl?: string;
   imageId?: string;
   bio?: string;
+  /** Full rich profile body rendered to HTML (paragraphs, lists, images, headings). */
+  bodyHtml?: string;
   order: number;
 }
 
@@ -163,6 +165,57 @@ function firstImageBlockSrc(c: CmsContent): string | undefined {
 function firstParagraph(c: CmsContent): string | undefined {
   const p = (c.contentBlocks || []).find((b) => b.type === 'paragraph' && b.content?.text);
   return p?.content?.text as string | undefined;
+}
+
+const escapeHtml = (s: string) =>
+  String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+// Neutralise junk that comes from pasting (e.g. from ChatGPT/Word/another site): inline
+// `style` (which can set near-white text colours that vanish on a white page), foreign
+// `class` names, and `data-*` attributes. Keeps the semantic tags + text intact.
+const stripInlineJunk = (html: string): string =>
+  String(html)
+    .replace(/\s(?:style|class)="[^"]*"/gi, '')
+    .replace(/\s(?:style|class)='[^']*'/gi, '')
+    .replace(/\sdata-[\w-]+="[^"]*"/gi, '')
+    .replace(/\sdata-[\w-]+='[^']*'/gi, '');
+const stripTags = (s?: string) => (s ? s.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim() : undefined);
+
+// Render the content blocks to an HTML string for public display. Paragraph/HTML blocks
+// carry rich HTML from the editor (bold, lists, inline images, links); structural blocks
+// are mapped to semantic markup. Authored content is workflow-gated (trusted).
+function renderBlocksToHtml(c: CmsContent): string | undefined {
+  const blocks = [...(c.contentBlocks || [])].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  if (!blocks.length) return undefined;
+  const parts: string[] = [];
+  // The FIRST image block is used as the hero/portrait (firstImageBlockSrc → imageUrl),
+  // so skip it here to avoid showing the same photo twice. Additional images still render.
+  let heroImageSkipped = false;
+  for (const b of blocks) {
+    const ct = b.content || {};
+    switch (b.type) {
+      case 'paragraph': if (ct.text) parts.push(`<div class="rt">${stripInlineJunk(String(ct.text))}</div>`); break;
+      case 'html': if (ct.html) parts.push(stripInlineJunk(String(ct.html))); break;
+      case 'heading': {
+        const lvl = Math.min(6, Math.max(1, Number(ct.level) || 2));
+        if (ct.text) parts.push(`<h${lvl}>${escapeHtml(String(ct.text))}</h${lvl}>`);
+        break;
+      }
+      case 'image':
+        if (!heroImageSkipped) { heroImageSkipped = true; break; }
+        if (ct.src) parts.push(`<figure><img src="${escapeHtml(String(ct.src))}" alt="${escapeHtml(String(ct.alt || ''))}" />${ct.caption ? `<figcaption>${escapeHtml(String(ct.caption))}</figcaption>` : ''}</figure>`);
+        break;
+      case 'quote':
+        if (ct.text) parts.push(`<blockquote>${escapeHtml(String(ct.text))}${ct.cite ? `<cite>— ${escapeHtml(String(ct.cite))}</cite>` : ''}</blockquote>`);
+        break;
+      case 'callout': if (ct.text) parts.push(`<div class="callout">${escapeHtml(String(ct.text))}</div>`); break;
+      case 'code': if (ct.code) parts.push(`<pre><code>${escapeHtml(String(ct.code))}</code></pre>`); break;
+      case 'divider': parts.push('<hr/>'); break;
+      case 'button': if (ct.href) parts.push(`<a class="btn" href="${escapeHtml(String(ct.href))}">${escapeHtml(String(ct.text || 'Learn more'))}</a>`); break;
+      default: break;
+    }
+  }
+  return parts.join('\n') || undefined;
 }
 
 function mapMember(c: CmsContent): LeadershipMember {
@@ -177,7 +230,8 @@ function mapMember(c: CmsContent): LeadershipMember {
     // then the local placeholder map resolved by imageId
     imageUrl: firstImageBlockSrc(c) || cf.imageUrl || phUrl(cf.imageId) || undefined,
     imageId: cf.imageId || undefined,
-    bio: firstParagraph(c) || undefined,
+    bio: stripTags(firstParagraph(c)) || undefined,
+    bodyHtml: renderBlocksToHtml(c) || undefined,
     order: typeof cf.order === 'number' ? cf.order : 999,
   };
 }

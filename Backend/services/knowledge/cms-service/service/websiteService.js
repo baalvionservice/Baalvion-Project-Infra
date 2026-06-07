@@ -181,4 +181,26 @@ async function searchUsers(websiteId, orgId, q) {
     }));
 }
 
-module.exports = { listWebsites, getWebsite, createWebsite, updateWebsite, deleteWebsite, listMembers, addMember, updateMemberRole, removeMember, searchUsers };
+// Real per-website content/media counts for the dashboard (replaces the prior 404).
+const db = require('../models');
+async function getStats(websiteId) {
+    const C = db.CmsContent;
+    const [totalContent, publishedContent, draftContent, scheduledContent, pendingReview] = await Promise.all([
+        C.count({ where: { websiteId } }),
+        C.count({ where: { websiteId, status: 'published' } }),
+        C.count({ where: { websiteId, status: 'draft' } }),
+        C.count({ where: { websiteId, status: 'scheduled' } }),
+        C.count({ where: { websiteId, status: ['pending_review', 'compliance_review'] } }),
+    ]);
+    let totalMedia = 0;
+    try {
+        const rows = await db.sequelize.query(
+            'SELECT COUNT(DISTINCT mr.media_id)::int AS n FROM cms.cms_media_references mr JOIN cms.cms_contents c ON c.id = mr.content_id WHERE c.website_id = :wid',
+            { replacements: { wid: websiteId }, type: db.Sequelize.QueryTypes.SELECT },
+        );
+        totalMedia = rows[0]?.n ?? 0;
+    } catch { /* media references optional */ }
+    return { totalContent, publishedContent, draftContent, scheduledContent, pendingReview, totalMedia, mediaStorageUsedMb: 0 };
+}
+
+module.exports = { listWebsites, getWebsite, createWebsite, updateWebsite, deleteWebsite, listMembers, addMember, updateMemberRole, removeMember, searchUsers, getStats };

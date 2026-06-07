@@ -119,3 +119,14 @@ backups/
 *.dump
 *.sql.gz
 .aider*
+
+# Reports
+Reports/
+
+# Generic cache
+.cache/
+
+# scratch artifacts (do not commit)
+PROJECT_STRUCTURE.txt
+error-report.json
+error-report.txt

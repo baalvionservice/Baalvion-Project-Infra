@@ -19,7 +19,7 @@ const CMS_API_URL   = process.env.NEXT_PUBLIC_CMS_API_URL     || 'https://api.ba
 export const apiClient = axios.create({
   baseURL: BASE_URL,
   withCredentials: true,
-  timeout: 30_000,
+  timeout: 8_000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -27,7 +27,7 @@ export const apiClient = axios.create({
 export const authClient = axios.create({
   baseURL: AUTH_URL,
   withCredentials: true,
-  timeout: 15_000,
+  timeout: 8_000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -127,28 +127,28 @@ export const normalizeError = (error: AxiosError): NormalizedError => {
 export const adminApiClient = axios.create({
   baseURL: ADMIN_API_URL,
   withCredentials: true,
-  timeout: 30_000,
+  timeout: 8_000,
   headers: { 'Content-Type': 'application/json' },
 });
 
 export const sessionApiClient = axios.create({
   baseURL: SESSION_URL,
   withCredentials: true,
-  timeout: 30_000,
+  timeout: 8_000,
   headers: { 'Content-Type': 'application/json' },
 });
 
 export const oauthApiClient = axios.create({
   baseURL: OAUTH_URL,
   withCredentials: true,
-  timeout: 30_000,
+  timeout: 8_000,
   headers: { 'Content-Type': 'application/json' },
 });
 
 export const cmsApiClient = axios.create({
   baseURL: CMS_API_URL,
   withCredentials: true,
-  timeout: 30_000,
+  timeout: 8_000,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -175,7 +175,7 @@ const makeServiceClient = (name: string, port: number, path = '/api/v1') =>
   axios.create({
     baseURL: SERVICE_URL_MAP[name] || `${SERVICES_HOST}:${port}${path}`,
     withCredentials: true,
-    timeout: 30_000,
+    timeout: 8_000,
     headers: { 'Content-Type': 'application/json' },
   });
 
@@ -207,6 +207,10 @@ const serviceClients = {
   // the dead-letter queue (failed deliveries) viewer/retry. Admin reads require a super_admin/admin
   // bearer (requireAdmin), forwarded by the shared attachToken interceptor.
   notifications: makeServiceClient('notifications', 3031, '/v1'),
+  // marketplace-service is the investment-marketplace domain (companies, investors,
+  // opportunities, deals). Mounts at /api/v1; admin reads/reviews require a staff bearer
+  // (forwarded by attachToken) — see Backend/services/marketplace.
+  marketplace: makeServiceClient('marketplace', 3062),
 };
 
 Object.values(serviceClients).forEach((client) => {

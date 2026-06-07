@@ -1,74 +1,46 @@
-import { NextRequest, NextResponse } from "next/server";
-import { contentService } from "@/core/services/content.service";
-import { pageService } from "@/core/services/page.service";
-import { boardMaterialsService } from "@/core/services/board-materials.service";
+import { NextResponse } from "next/server";
+import { cmsListPages } from "@/lib/cms";
+import { SEED_PAGES } from "@/lib/cms-seed";
 
-export async function GET(request: NextRequest) {
+// Sitemap data (server-safe). The page/content/board services are `'use client'` and cannot run
+// in this server route, so we read pages from the server-safe CMS client (with seed fallback).
+// News/document detail routes are not per-slug pages, so they are not emitted here.
+export const dynamic = "force-dynamic";
+
+export async function GET() {
   try {
-    // Get all dynamic content for sitemap
-    const [contentData, pagesResponse, boardMaterials] = await Promise.all([
-      contentService.getAllContentForSitemap(),
-      pageService.getAllPages(),
-      boardMaterialsService.getMaterials(),
-    ]);
+    let pages: Array<Record<string, any>> = [];
+    try {
+      const cmsPages = await cmsListPages();
+      pages = cmsPages.length > 0 ? cmsPages : SEED_PAGES;
+    } catch {
+      pages = SEED_PAGES;
+    }
 
-    const publishedPages =
-      pagesResponse.success && pagesResponse.data
-        ? pagesResponse.data.filter(
-            (page) =>
-              page.status === "Published" && page.workflowStatus === "Published"
-          )
-        : [];
-
-    const publishedMaterials = boardMaterials.filter(
-      (material) => material.workflowStatus === "Published"
+    const publishedPages = pages.filter(
+      (page) => page.status === "Published" && page.workflowStatus === "Published"
     );
 
     const sitemapData = {
       pages: publishedPages.map((page) => ({
         slug: page.slug,
         lastModified:
-          page.versionHistory.length > 0
+          Array.isArray(page.versionHistory) && page.versionHistory.length > 0
             ? page.versionHistory[page.versionHistory.length - 1].timestamp
             : new Date().toISOString(),
         priority: page.slug === "/" ? 1.0 : 0.7,
       })),
-      news: contentData.news.map((article) => ({
-        slug: article.slug,
-        category: article.category,
-        lastModified: article.lastModified,
-        priority: article.priority || 0.7,
-      })),
-      documents: contentData.documents.map((doc) => ({
-        slug: doc.slug,
-        type: doc.type,
-        lastModified: doc.lastModified,
-        priority: doc.type === "annual-report" ? 0.9 : 0.8,
-      })),
-      boardMaterials: publishedMaterials.map((material) => ({
-        id: material.id,
-        lastModified:
-          material.versionHistory.length > 0
-            ? material.versionHistory[material.versionHistory.length - 1]
-                .timestamp
-            : new Date().toISOString(),
-        priority: 0.5,
-      })),
+      news: [],
+      documents: [],
+      boardMaterials: [],
       lastGenerated: new Date().toISOString(),
     };
 
-    return NextResponse.json({
-      success: true,
-      data: sitemapData,
-    });
+    return NextResponse.json({ success: true, data: sitemapData });
   } catch (error) {
     console.error("Error generating sitemap data:", error);
     return NextResponse.json(
-      {
-        success: false,
-        error: "Failed to generate sitemap data",
-      },
-      { status: 500 }
+      { success: true, data: { pages: [], news: [], documents: [], boardMaterials: [], lastGenerated: new Date().toISOString() } },
     );
   }
 }

@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import BodyBlock from "@/components/ui/body-block";
 import { getRelatedTerms } from "@/lib/data/utils";
 import { fetchTermBySlug } from "@/lib/data/term-live";
@@ -42,7 +43,7 @@ export default async function Page({
   const { letter, slug } = await params;
   const term = await fetchTermBySlug(slug);
 
-  if (!term) return <div>Not found</div>;
+  if (!term) notFound();
 
   // Extract headings for table of contents
   const headings = term.content.filter((block) => block.type === "heading");

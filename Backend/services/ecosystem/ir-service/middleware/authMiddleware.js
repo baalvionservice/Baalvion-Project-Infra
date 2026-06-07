@@ -26,8 +26,23 @@ const authMiddleware = (req, res, next) => _canonical(req, res, (err) => {
     return next();
 });
 
+// Optional auth for public-read endpoints that also back an authenticated admin view.
+// When a valid Bearer token is present we attach req.user (so controllers scope to the
+// caller's org and can return all statuses); with no/invalid token we proceed as the
+// anonymous public path (default org, published-only) instead of rejecting.
+const optionalAuth = (req, res, next) => {
+    const header = req.headers.authorization || '';
+    if (!header.startsWith('Bearer ')) return next();
+    return _canonical(req, res, (err) => {
+        if (!err && req.auth) {
+            req.user = { id: req.auth.userId, orgId: req.auth.orgId, roles: req.auth.roles };
+        }
+        return next();
+    });
+};
+
 const wrap = (mw) => (req, res, next) => mw(req, res, (err) => (err ? next(toAppError(err)) : next()));
 const requireRole = (...roles) => wrap(rbacRequireRole(...roles));
 const requirePermission = (...perms) => wrap(rbacRequirePermission(...perms));
 
-module.exports = { authMiddleware, requireRole, requirePermission };
+module.exports = { authMiddleware, optionalAuth, requireRole, requirePermission };

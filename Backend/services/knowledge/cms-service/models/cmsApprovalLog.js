@@ -7,6 +7,7 @@ module.exports = function (sequelize, DataTypes) {
         action: {
             type: DataTypes.ENUM(
                 'submit_for_review', 'approve', 'request_changes',
+                'submit_for_compliance', 'compliance_approve', 'compliance_reject',
                 'publish', 'schedule', 'unpublish', 'archive',
                 'restore_to_draft', 'autosave'
             ),

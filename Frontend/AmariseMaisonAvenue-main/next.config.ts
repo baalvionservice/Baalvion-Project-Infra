@@ -6,6 +6,26 @@ import type { NextConfig } from 'next';
 const MEDIA_HOST = (process.env.NEXT_PUBLIC_MEDIA_HOST || '').trim();
 
 const nextConfig: NextConfig = {
+  // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
+  // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
+  // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
+  // "Critical dependency: the request of a dependency is an expression" build warnings with no
+  // behaviour change — src/ai/* is `server-only`, reached only through flows / route handlers.
+  serverExternalPackages: [
+    'genkit',
+    '@genkit-ai/core',
+    '@genkit-ai/ai',
+    '@genkit-ai/google-genai',
+    'dotprompt',
+    'handlebars',
+    '@opentelemetry/sdk-node',
+    '@opentelemetry/api',
+    '@opentelemetry/instrumentation',
+    'require-in-the-middle',
+    'import-in-the-middle',
+    'protobufjs',
+    'express',
+  ],
   // Self-contained server bundle for Docker/ECS/Amplify (.next/standalone + server.js).
   // Standalone file-tracing recreates the pnpm symlink tree, which throws EPERM on Windows
   // (symlink creation needs Admin/Developer Mode). Production images build on Linux where this

@@ -1,5 +1,5 @@
 /**
- * @baelbvion/sdk — public type surface (the contract every service codes against).
+ * @baalvion/sdk — public type surface (the contract every service codes against).
  *
  * The SDK is a COMPOSITION layer. It standardizes six concerns behind one set of
  * interfaces and one factory (`createSdk`). Implementations either wrap an
@@ -7,11 +7,11 @@
  * (config-resolver → CMS hub, internal-auth, http-client, trace-context).
  *
  * Tenancy note: in this platform a tenant == an organisation == a CMS "website".
- * Everything is keyed by a `tenantSlug` (the CMS website slug, e.g. "baelbvion-mining").
+ * Everything is keyed by a `tenantSlug` (the CMS website slug, e.g. "baalvion-mining").
  */
 
-// Unified contract from @baelbvion/types to prevent duplication & casing drift
-import type { IntegrationCategory } from '@baelbvion/types';
+// Unified contract from @baalvion/types to prevent duplication & casing drift
+import type { IntegrationCategory } from '@baalvion/types';
 export type { IntegrationCategory };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -90,7 +90,7 @@ export interface ConfigResolverOptions {
   internalSecret: string;
   /** Cache TTL for resolved config (default 60s). Keys change rarely; events bust it. */
   cacheTtlSeconds?: number;
-  /** Pluggable cache (Redis via @baelbvion/cache, or the built-in in-memory cache). */
+  /** Pluggable cache (Redis via @baalvion/cache, or the built-in in-memory cache). */
   cache?: SdkCache;
   logger?: SdkLogger;
   fetchImpl?: FetchLike;
@@ -109,7 +109,7 @@ export interface InternalAuth {
   verifyMiddleware(): SdkMiddleware;
   /** Transport-agnostic verification of raw header values. */
   verify(headers: Record<string, string | undefined>, req?: SignableRequest): boolean;
-  /** Role gate for verified principals (delegates to @baelbvion/rbac semantics). */
+  /** Role gate for verified principals (delegates to @baalvion/rbac semantics). */
   requireRole(...roles: string[]): SdkMiddleware;
 }
 
@@ -189,11 +189,11 @@ export interface HttpClientOptions {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 6. EVENT BUS — one canonical event schema over @baelbvion/events
+// 6. EVENT BUS — one canonical event schema over @baalvion/events
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * The canonical platform event envelope. Maps onto @baelbvion/types `PlatformEvent`
+ * The canonical platform event envelope. Maps onto @baalvion/types `PlatformEvent`
  * ( eventType→type, tenantId→orgId ) so the SDK and the existing bus interoperate.
  */
 export interface SdkEvent<T = unknown> {
@@ -216,7 +216,7 @@ export interface SdkEventBus {
   /** Durable subscription. `pattern` may use NATS wildcards (e.g. "billing.>"). */
   subscribe<T>(pattern: string, durable: string, handler: (e: SdkEvent<T>) => Promise<void> | void): Promise<EventSubscription>;
   close(): Promise<void>;
-  /** Escape hatch to the underlying @baelbvion/events EventBus. */
+  /** Escape hatch to the underlying @baalvion/events EventBus. */
   raw(): unknown;
 }
 

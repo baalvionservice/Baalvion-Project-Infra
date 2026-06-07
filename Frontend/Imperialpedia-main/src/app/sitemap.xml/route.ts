@@ -7,21 +7,22 @@ export const dynamic = "force-dynamic";
 export const revalidate = 3600;
 
 /**
- * Dynamic Route handler for sitemap.xml (Main Index).
- * Points crawlers to the individual segment sitemaps for at-scale indexing.
+ * sitemap.xml — the sitemap INDEX. Points crawlers at the sharded url-sets
+ * (/sitemaps/{i}.xml), each holding < 50,000 URLs per the sitemap standard,
+ * so the system scales to 1M+ URLs.
  */
 export async function GET() {
   try {
-    const sitemap = await sitemapService.regenerateSitemap();
+    const xml = await sitemapService.buildIndex();
 
-    return new NextResponse(sitemap, {
+    return new NextResponse(xml, {
       headers: {
         'Content-Type': 'application/xml',
         'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
       },
     });
   } catch (error) {
-    console.error('Sitemap generation error:', error);
-    return new Response('Error generating sitemap', { status: 500 });
+    console.error('Sitemap index generation error:', error);
+    return new Response('Error generating sitemap index', { status: 500 });
   }
 }

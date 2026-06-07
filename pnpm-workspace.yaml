@@ -1,7 +1,7 @@
 packages:
-  - 'Frontend/*'
-  - 'Backend/packages/*'
-  - 'Backend/services/*/*'
-  - 'Backend/platform/*'
-  - 'Backend/database/*'
-
+  - "Frontend/*"
+  - "Backend/packages/*"
+  - "Backend/services/**/*"
+  - "Backend/platform/*"
+  - "Backend/database/*"
+  - "Backend/*"

@@ -1,6 +1,6 @@
 'use strict';
 const { Op } = require('sequelize');
-const { CmsContent, CmsCategory, CmsTag, CmsWorkflow, CmsContentRevision, sequelize } = require('../models');
+const { CmsContent, CmsCategory, CmsTag, CmsWorkflow, CmsContentRevision, CmsWebsite, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
@@ -14,7 +14,13 @@ async function listContent(websiteId, query = {}) {
     const where = { websiteId };
     if (status) where.status = Array.isArray(status) ? { [Op.in]: status } : status;
     if (contentType) where.contentType = contentType;
-    if (categoryId) where.categoryId = categoryId;
+    // Match content whose primary OR secondary categories include the filter id.
+    if (categoryId) {
+        where[Op.and] = [
+            ...(where[Op.and] || []),
+            { [Op.or]: [{ categoryId }, { categoryIds: { [Op.contains]: [categoryId] } }] },
+        ];
+    }
     if (authorId) where.authorId = authorId;
     if (search) {
         where[Op.or] = [
@@ -64,17 +70,22 @@ async function _uniqueSlug(websiteId, base, excludeId = null) {
 }
 
 async function createContent(websiteId, userId, body) {
-    const { title, slug: rawSlug, categoryId, contentType, contentBlocks, tagIds, seoMetadata, visibility, scheduledAt, customFields, excerpt, featuredImage } = body;
+    const { title, slug: rawSlug, categoryId, categoryIds, contentType, contentBlocks, tagIds, seoMetadata, visibility, scheduledAt, customFields, excerpt, featuredImage } = body;
     const slug = await _uniqueSlug(websiteId, rawSlug || slugify(title));
 
-    if (categoryId) {
-        const cat = await CmsCategory.findOne({ where: { id: categoryId, websiteId } });
-        if (!cat) throw new AppError('NOT_FOUND', 'Category not found', 404);
+    // An article can sit in multiple categories. `cats` is the full deduped set;
+    // `primaryCategoryId` (the first) stays in category_id for backwards compatibility.
+    const cats = _normalizeCategoryIds(categoryIds, categoryId);
+    const primaryCategoryId = cats[0] || null;
+
+    if (cats.length) {
+        const found = await CmsCategory.count({ where: { id: { [Op.in]: cats }, websiteId } });
+        if (found !== cats.length) throw new AppError('NOT_FOUND', 'One or more categories not found', 404);
     }
 
     const content = await sequelize.transaction(async (t) => {
         const c = await CmsContent.create({
-            websiteId, categoryId: categoryId || null, authorId: userId, lastEditedBy: userId,
+            websiteId, categoryId: primaryCategoryId, categoryIds: cats, authorId: userId, lastEditedBy: userId,
             title, slug, excerpt, featuredImage, contentType,
             contentBlocks, tagIds, seoMetadata, visibility,
             scheduledAt: scheduledAt || null, customFields,
@@ -94,13 +105,24 @@ async function updateContent(websiteId, contentId, userId, body) {
     const content = await CmsContent.findOne({ where: { id: contentId, websiteId } });
     if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
 
-    if (['published', 'archived'].includes(content.status)) {
-        throw new AppError('FORBIDDEN', 'Cannot edit content in its current state', 403);
+    // Published content can be edited in place — edits go live immediately (and the public
+    // cache is busted below). Only archived content is locked; restore it to draft first.
+    if (content.status === 'archived') {
+        throw new AppError('FORBIDDEN', 'This content is archived. Restore it to a draft before editing.', 403);
     }
 
     if (body.slug && body.slug !== content.slug) {
         const existing = await CmsContent.findOne({ where: { websiteId, slug: body.slug, id: { [Op.ne]: contentId } } });
         if (existing) throw new AppError('CONFLICT', 'Content with this slug already exists', 409);
+    }
+
+    // Keep the multi-category array and the primary category_id in sync.
+    if (body.categoryIds !== undefined) {
+        body.categoryIds = _normalizeCategoryIds(body.categoryIds, null);
+        body.categoryId = body.categoryIds[0] || null;
+    } else if (body.categoryId !== undefined) {
+        body.categoryIds = _normalizeCategoryIds(null, body.categoryId);
+        body.categoryId = body.categoryIds[0] || null;
     }
 
     const oldTagIds = content.tagIds || [];
@@ -114,6 +136,14 @@ async function updateContent(websiteId, contentId, userId, body) {
     }
 
     await cache.del(cache.keys.content(contentId));
+    // If the edited item is live, bust the public delivery cache so the change appears
+    // on the website immediately instead of waiting out the public TTL.
+    if (content.status === 'published') {
+        try {
+            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug'] });
+            if (website?.slug) await cache.delPattern(`cms:public:${website.slug}:*`);
+        } catch { /* fail-open */ }
+    }
     return content.toJSON();
 }
 
@@ -175,6 +205,14 @@ async function _incrementTagUsage(websiteId, tagIds, delta) {
     if (!tagIds.length) return;
     await CmsTag.increment('usageCount', { by: delta, where: { id: { [Op.in]: tagIds }, websiteId } });
     await cache.del(cache.keys.tagList(websiteId));
+}
+
+// Merge an explicit categoryIds array with the legacy single categoryId into one
+// deduped, order-preserving array (the first element is treated as the primary).
+function _normalizeCategoryIds(categoryIds, categoryId) {
+    const source = Array.isArray(categoryIds) ? categoryIds : [];
+    const merged = categoryId ? [categoryId, ...source] : source;
+    return [...new Set(merged.filter(Boolean))];
 }
 
 module.exports = { listContent, getContent, createContent, updateContent, autosaveContent, deleteContent, bulkUpdate, incrementViewCount };

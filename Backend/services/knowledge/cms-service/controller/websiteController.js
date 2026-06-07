@@ -23,6 +23,13 @@ const getOne = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+const getStats = async (req, res, next) => {
+    try {
+        const stats = await websiteService.getStats(req.params.websiteId);
+        return sendSuccess(req, res, stats);
+    } catch (err) { return next(err); }
+};
+
 const update = async (req, res, next) => {
     try {
         const website = await websiteService.updateWebsite(req.params.websiteId, req.user.orgId, req.validated);
@@ -72,4 +79,4 @@ const removeMember = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { list, create, getOne, update, remove, listMembers, addMember, updateMemberRole, removeMember, searchUsers };
+module.exports = { list, create, getStats, getOne, update, remove, listMembers, addMember, updateMemberRole, removeMember, searchUsers };

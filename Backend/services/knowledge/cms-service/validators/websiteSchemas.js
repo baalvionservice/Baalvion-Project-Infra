@@ -44,7 +44,7 @@ const updateWebsiteSchema = z.object({
     branding: brandingSchema.optional(),
 });
 
-const cmsRoleEnum = z.enum(['cms_admin', 'cms_editor', 'cms_author', 'cms_contributor', 'cms_reviewer', 'cms_publisher', 'cms_seo_manager', 'cms_viewer']);
+const cmsRoleEnum = z.enum(['cms_admin', 'cms_editor', 'cms_publisher', 'cms_compliance', 'cms_reviewer', 'cms_seo_manager', 'cms_author', 'cms_contributor', 'cms_viewer']);
 
 const addMemberSchema = z
     .object({

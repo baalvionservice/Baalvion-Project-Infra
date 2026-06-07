@@ -21,7 +21,7 @@ export const useAuth = () => {
         return { mfaRequired: true, tempToken };
       }
       store.setAuth(user, accessToken, expiresIn, org);
-      router.replace('/dashboard');
+      router.replace('/welcome');
     },
     onError: (err: { message: string }) => {
       toast.error(err.message || 'Login failed');
@@ -33,7 +33,7 @@ export const useAuth = () => {
     onSuccess: ({ data }) => {
       const { user, org, accessToken, expiresIn } = data.data;
       store.setAuth(user, accessToken, expiresIn, org);
-      router.replace('/dashboard');
+      router.replace('/welcome');
     },
     onError: (err: { message: string }) => {
       toast.error(err.message || 'MFA verification failed');

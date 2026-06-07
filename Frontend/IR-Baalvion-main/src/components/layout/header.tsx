@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, memo } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -11,10 +12,15 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
+import {
   Menu,
   Loader2,
   LogOut,
-  LayoutDashboard,
   Bell,
   ChevronRight,
   ChevronDown,
@@ -33,14 +39,25 @@ import { authService } from "@/core/services/auth.service";
 import { NavigationItem, UserRole } from "@/core/content/schemas";
 import { AlertsSidebar } from "@/components/notifications/AlertsSidebar";
 import { LanguageSelector } from "./LanguageSelector";
+import { LoginModal } from "@/components/auth/LoginModal";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [isAlertsOpen, setIsAlertsOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [navItems, setNavItems] = useState<NavigationItem[]>([]);
   const [userRole, setUserRole] = useState<UserRole>("public");
   const [isLoading, setIsLoading] = useState(true);
+
+  // Auto-open the login modal when the middleware bounced an unauthenticated user
+  // to "/?login=1&next=…".
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("login") === "1") {
+      setIsLoginOpen(true);
+    }
+  }, []);
 
   const loadNavigation = useCallback(async () => {
     setIsLoading(true);
@@ -108,6 +125,12 @@ export default function Header() {
               ) : (
                 <NavItems items={navItems} />
               )}
+              <Link
+                href="/invest"
+                className="ml-1 rounded-full bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-white"
+              >
+                Invest
+              </Link>
             </nav>
           </div>
 
@@ -128,7 +151,7 @@ export default function Header() {
             <LanguageSelector />
 
             <div className="hidden md:flex items-center gap-2">
-              <AuthButtons userRole={userRole} />
+              <AuthButtons userRole={userRole} onLogin={() => setIsLoginOpen(true)} />
             </div>
 
             <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
@@ -151,24 +174,29 @@ export default function Header() {
                     <span className="tracking-tighter">Baalvion Portal</span>
                   </SheetTitle>
                 </SheetHeader>
-                <div className="flex flex-col h-[calc(100vh-73px)]">
+                <div className="flex flex-col h-[calc(100dvh-73px)]">
                   <nav
-                    className="flex-1 overflow-y-auto py-6"
+                    className="flex-1 overflow-y-auto overscroll-contain py-3 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border hover:[&::-webkit-scrollbar-thumb]:bg-muted-foreground/40"
                     aria-label="Mobile Navigation"
                   >
-                    <div className="px-4 space-y-6">
-                      <NavItems
-                        items={navItems}
-                        isMobile
-                        onLinkClick={closeSheet}
-                      />
-                    </div>
+                    {isLoading ? (
+                      <div className="flex items-center gap-2 px-6 py-4 text-xs text-muted-foreground">
+                        <Loader2 className="h-3 w-3 animate-spin" aria-hidden="true" />
+                        <span>Loading menu…</span>
+                      </div>
+                    ) : (
+                      <MobileNav items={navItems} onLinkClick={closeSheet} />
+                    )}
                   </nav>
                   <div className="p-6 border-t bg-muted/5">
                     <AuthButtons
                       userRole={userRole}
                       isMobile
                       onAction={closeSheet}
+                      onLogin={() => {
+                        closeSheet();
+                        setIsLoginOpen(true);
+                      }}
                     />
                   </div>
                 </div>
@@ -179,6 +207,7 @@ export default function Header() {
       </header>
 
       <AlertsSidebar open={isAlertsOpen} onOpenChange={setIsAlertsOpen} />
+      <LoginModal open={isLoginOpen} onOpenChange={setIsLoginOpen} />
     </>
   );
 }
@@ -302,7 +331,135 @@ function NavChild({
   );
 }
 
-function AuthButtons({ userRole, isMobile, onAction }: any) {
+// Mobile navigation: collapsible accordion groups so the menu stays short and scannable
+// instead of dumping every child of every section into one long flat list. Single-open
+// (tapping a group collapses the others); the group containing the current route opens
+// by default. Standalone top-level links render above the accordion.
+function MobileNav({
+  items,
+  onLinkClick,
+}: {
+  items: NavigationItem[];
+  onLinkClick?: () => void;
+}) {
+  const pathname = usePathname();
+  const groups = items.filter((i) => i.children && i.children.length > 0);
+  const standalone = items.filter((i) => !i.children || i.children.length === 0);
+
+  const activeGroup = groups.find((g) =>
+    g.children?.some((c) => c.href && c.href === pathname)
+  );
+  const defaultValue = activeGroup?.id ?? groups[0]?.id;
+
+  return (
+    <div className="px-3 pb-4">
+      <Link
+        href="/invest"
+        onClick={onLinkClick}
+        className={cn(
+          'mb-1 flex items-center justify-between rounded-lg px-3 py-3 text-base font-bold transition-colors',
+          pathname?.startsWith('/invest') ? 'bg-primary text-white' : 'bg-primary/10 text-primary hover:bg-primary hover:text-white'
+        )}
+      >
+        Invest
+        <ChevronRight className="h-4 w-4" />
+      </Link>
+      {standalone.map((item) => {
+        const active = pathname === item.href;
+        return (
+          <Link
+            key={item.id}
+            href={item.href || "#"}
+            onClick={onLinkClick}
+            className={cn(
+              "flex items-center justify-between rounded-lg px-3 py-3 text-base font-semibold transition-colors",
+              active ? "bg-primary/10 text-primary" : "text-foreground hover:bg-muted"
+            )}
+          >
+            {item.label}
+          </Link>
+        );
+      })}
+
+      <Accordion type="single" collapsible defaultValue={defaultValue} className="w-full">
+        {groups.map((group) => {
+          const hasActiveChild = group.children?.some(
+            (c) => c.href && c.href === pathname
+          );
+          return (
+            <AccordionItem key={group.id} value={group.id} className="border-b-0">
+              <AccordionTrigger
+                className={cn(
+                  "rounded-lg px-3 py-3 text-[11px] font-bold uppercase tracking-[0.18em] hover:no-underline",
+                  hasActiveChild
+                    ? "text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {group.label}
+              </AccordionTrigger>
+              <AccordionContent className="pb-1 pt-0">
+                <div className="flex flex-col gap-0.5 border-l border-border/60 pl-2 ml-3">
+                  {group.children?.map((child) => (
+                    <MobileNavChild
+                      key={child.id}
+                      child={child}
+                      pathname={pathname}
+                      onLinkClick={onLinkClick}
+                    />
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          );
+        })}
+      </Accordion>
+    </div>
+  );
+}
+
+function MobileNavChild({
+  child,
+  pathname,
+  onLinkClick,
+}: {
+  child: NavigationItem;
+  pathname: string;
+  onLinkClick?: () => void;
+}) {
+  if (child.isHeader) {
+    return (
+      <p className="px-3 pb-1 pt-3 text-[9px] font-bold uppercase tracking-widest text-muted-foreground/70">
+        {child.label}
+      </p>
+    );
+  }
+  if (child.label === "---") {
+    return <div className="my-1.5 mr-3 border-t border-border/60" aria-hidden="true" />;
+  }
+  const active = pathname === child.href;
+  return (
+    <Link
+      href={child.href || "#"}
+      onClick={onLinkClick}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "flex items-center justify-between rounded-md px-3 py-2.5 text-sm transition-colors",
+        active
+          ? "bg-primary/10 font-semibold text-primary"
+          : "font-medium text-foreground/80 hover:bg-muted hover:text-foreground"
+      )}
+    >
+      <span>{child.label}</span>
+      <ChevronRight
+        className={cn("h-3.5 w-3.5 shrink-0", active ? "text-primary" : "opacity-30")}
+        aria-hidden="true"
+      />
+    </Link>
+  );
+}
+
+function AuthButtons({ userRole, isMobile, onAction, onLogin }: any) {
   if (userRole !== "public") {
     return (
       <div
@@ -319,12 +476,6 @@ function AuthButtons({ userRole, isMobile, onAction }: any) {
         >
           <LogOut className="h-4 w-4" aria-hidden="true" /> Sign Out
         </Button>
-        {/* <Button asChild size="sm" className="shadow-lg gap-2 w-full font-bold">
-          <Link href="/admin/performance" onClick={onAction}>
-            <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> Portal
-            Hub
-          </Link>
-        </Button> */}
       </div>
     );
   }
@@ -337,96 +488,13 @@ function AuthButtons({ userRole, isMobile, onAction }: any) {
           Start Onboarding
         </Link>
       </Button>
-      {process.env.NODE_ENV !== 'production' && (
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            size="sm"
-            className="shadow-md w-full font-bold"
-            aria-label="Institutional login simulator (dev only)"
-          >
-            Simulation Login (dev)
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-64">
-          <DropdownMenuLabel className="text-[10px] uppercase font-bold text-muted-foreground pb-2 border-b">
-            Select Simulation Profile
-          </DropdownMenuLabel>
-          <div className="pt-2">
-            <DropdownMenuItem
-              onClick={() => {
-                authService.setRole("phase1");
-                window.location.href = "/dashboard";
-              }}
-              className="py-3 px-4"
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="font-bold">Institutional Investor</span>
-                <span className="text-[10px] text-muted-foreground">
-                  Full portfolio & capital ops access
-                </span>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                authService.setRole("phase2");
-                window.location.href = "/phase2/dashboard";
-              }}
-              className="py-3 px-4"
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="font-bold">Private SPVs</span>
-                <span className="text-[10px] text-muted-foreground">
-                  Command center & compliance management
-                </span>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                authService.setRole("phase3");
-                window.location.href = "/phase3/dashboard";
-              }}
-              className="py-3 px-4"
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="font-bold">Strategic Operators</span>
-                <span className="text-[10px] text-muted-foreground">
-                  ESG & audit trail focus
-                </span>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                authService.setRole("admin");
-                window.location.href = "/admin/dashboard";
-              }}
-              className="py-3 px-4"
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="font-bold">Admin</span>
-                <span className="text-[10px] text-muted-foreground">
-                  Admin dashboard
-                </span>
-              </div>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => {
-                authService.setRole("compliance");
-                window.location.href = "/admin/dashboard";
-              }}
-              className="py-3 px-4"
-            >
-              <div className="flex flex-col gap-0.5">
-                <span className="font-bold">Compliance</span>
-                <span className="text-[10px] text-muted-foreground">
-                  This is Compliance
-                </span>
-              </div>
-            </DropdownMenuItem>
-          </div>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      )}
+      <Button
+        size="sm"
+        className="shadow-md w-full font-bold"
+        onClick={() => onLogin?.()}
+      >
+        Sign In
+      </Button>
     </div>
   );
 }

@@ -12,7 +12,9 @@
 
 import type { AppRole } from '@/lib/rbac/roles';
 
-const AUTH_URL = '/auth-bff';
+// Default: the same-origin gateway proxy (/auth-bff → next.config rewrite → auth-service).
+// In local/standalone dev this is pointed at /api/auth-local (self-contained seed-user backend).
+const AUTH_URL = process.env.NEXT_PUBLIC_AUTH_BFF_PATH || '/auth-bff';
 const IR_URL =
   process.env.NEXT_PUBLIC_IR_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ir';
 

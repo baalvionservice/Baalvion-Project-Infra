@@ -18,7 +18,10 @@ const s3 = require('../utils/s3Client');
 const DRIVER      = (process.env.MEDIA_DRIVER || 'local').toLowerCase();
 const BUCKET      = process.env.S3_BUCKET || 'cms-media';
 const UPLOAD_DIR  = path.resolve(__dirname, '..', 'uploads');
-const PUBLIC_BASE = (process.env.CMS_PUBLIC_URL || 'http://localhost:3018').replace(/\/$/, '');
+// Base URL prepended to uploaded-media paths. Must point at THIS service's reachable
+// origin (cms-service serves /uploads). Defaults to :3011 (the cms-service port) — the
+// previous :3018 default produced unreachable image URLs.
+const PUBLIC_BASE = (process.env.CMS_PUBLIC_URL || process.env.MEDIA_PUBLIC_BASE || 'http://localhost:3011').replace(/\/$/, '');
 const MAX_BYTES   = Number(process.env.MEDIA_MAX_BYTES || 50 * 1024 * 1024);
 const EXT_BY_MIME = {
     'image/jpeg': '.jpg', 'image/png': '.png', 'image/gif': '.gif', 'image/webp': '.webp',

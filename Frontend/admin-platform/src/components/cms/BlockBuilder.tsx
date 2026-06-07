@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import RichTextEditor from './RichTextEditor';
 import { BLOCK_REGISTRY } from '@/lib/types/cms-content.types';
 import type { ContentBlock, BlockType } from '@/lib/types/cms-content.types';
 
@@ -51,11 +52,10 @@ function BlockEditor({ block, onChange }: { block: ContentBlock; onChange: (b: C
   switch (block.type) {
     case 'paragraph':
       return (
-        <textarea
-          className="w-full resize-none rounded border-0 bg-transparent p-0 text-sm focus:outline-none focus:ring-0 min-h-[60px]"
-          placeholder="Write something..."
+        <RichTextEditor
           value={(block.content.text as string) ?? ''}
-          onChange={(e) => update({ text: e.target.value })}
+          onChange={(html) => update({ text: html })}
+          placeholder="Write something… use the toolbar for bold, lists, links and images."
         />
       );
 

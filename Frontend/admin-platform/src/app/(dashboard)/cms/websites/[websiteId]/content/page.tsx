@@ -3,12 +3,16 @@
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Plus, MoreHorizontal, Copy, Trash2, ArrowLeft } from 'lucide-react';
+import { Plus, MoreHorizontal, Copy, Trash2, ArrowLeft, Upload, Send, Archive } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import DataTable from '@/components/data-table/DataTable';
 import DataTableColumnHeader from '@/components/data-table/DataTableColumnHeader';
 import ContentWorkflowBadge from '@/components/cms/ContentWorkflowBadge';
+import ImportContentDialog from '@/components/cms/ImportContentDialog';
+import { cmsContentApi } from '@/lib/api/cms-content';
+import { cmsWorkflowApi } from '@/lib/api/cms-workflow';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -31,6 +35,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useContentList, useCreateContent, useDeleteContent, useDuplicateContent } from '@/lib/queries/cms-content.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
+import { useWebsiteCategories } from '@/lib/queries/cms-taxonomy.queries';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import { formatDate } from '@/lib/utils/format';
@@ -49,21 +54,56 @@ export default function WebsiteContentPage({
   const [page, setPage] = useState(1);
   const [typeFilter, setTypeFilter] = useState<ContentItemType | ''>('');
   const [statusFilter, setStatusFilter] = useState<ContentWorkflowStatus | ''>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [createOpen, setCreateOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newType, setNewType] = useState<ContentItemType>('post');
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   const { data: website } = useWebsite(websiteId);
-  const { data, isLoading } = useContentList({
+  const { data: categories } = useWebsiteCategories(websiteId);
+  const { data, isLoading, refetch } = useContentList({
     websiteId,
     page,
     limit: 20,
     type: typeFilter || undefined,
     status: statusFilter || undefined,
+    categoryId: categoryFilter || undefined,
   });
   const { mutate: create, isPending: isCreating } = useCreateContent();
   const { mutate: remove } = useDeleteContent();
   const { mutate: duplicate } = useDuplicateContent();
+
+  // Selection is reported from DataTable during render — only update state when the
+  // id set actually changes, otherwise we'd trigger an infinite re-render loop.
+  const handleSelection = (rows: ContentItem[]) => {
+    const ids = rows.map((r) => r.id);
+    setSelectedIds((prev) =>
+      prev.length === ids.length && prev.every((v, i) => v === ids[i]) ? prev : ids,
+    );
+  };
+
+  const runBulk = async (fn: () => Promise<unknown>) => {
+    setBulkBusy(true);
+    try {
+      await fn();
+      await refetch();
+      setSelectedIds([]);
+    } finally {
+      setBulkBusy(false);
+    }
+  };
+
+  const bulkPublish = () =>
+    runBulk(async () => {
+      for (const id of selectedIds) {
+        await cmsWorkflowApi.transition({ contentId: id, action: 'publish' }).catch(() => undefined);
+      }
+    });
+  const bulkArchive = () => runBulk(() => cmsContentApi.bulkUpdateStatus(selectedIds, 'archive'));
+  const bulkDelete = () => runBulk(() => cmsContentApi.bulkDelete(selectedIds));
 
   useEffect(() => {
     setBreadcrumbs([
@@ -93,6 +133,27 @@ export default function WebsiteContentPage({
   };
 
   const columns: ColumnDef<ContentItem>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          aria-label="Select all"
+          checked={
+            table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
+          }
+          onCheckedChange={(v) => table.toggleAllPageRowsSelected(!!v)}
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          aria-label="Select row"
+          checked={row.getIsSelected()}
+          onCheckedChange={(v) => row.toggleSelected(!!v)}
+          onClick={(e) => e.stopPropagation()}
+        />
+      ),
+      enableSorting: false,
+    },
     {
       accessorKey: 'title',
       header: ({ column }) => <DataTableColumnHeader column={column} title="Title" />,
@@ -196,13 +257,51 @@ export default function WebsiteContentPage({
           title="Content"
           description={`${data?.pagination.total ?? 0} items`}
           actions={
-            <Button size="sm" onClick={() => setCreateOpen(true)}>
-              <Plus className="mr-2 h-4 w-4" />
-              New Content
-            </Button>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+                <Upload className="mr-2 h-4 w-4" />
+                Import
+              </Button>
+              <Button size="sm" onClick={() => setCreateOpen(true)}>
+                <Plus className="mr-2 h-4 w-4" />
+                New Content
+              </Button>
+            </div>
           }
         />
       </div>
+
+      {/* Category quick-filters — jump straight to a section (Board of Directors, News, …) */}
+      {categories && categories.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="mr-1 text-xs font-medium text-muted-foreground">Sections:</span>
+          <button
+            type="button"
+            onClick={() => { setCategoryFilter(''); setPage(1); }}
+            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+              categoryFilter === ''
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-background text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            All
+          </button>
+          {categories.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => { setCategoryFilter(c.id); setPage(1); }}
+              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                categoryFilter === c.id
+                  ? 'border-primary bg-primary text-primary-foreground'
+                  : 'border-border bg-background text-muted-foreground hover:bg-muted'
+              }`}
+            >
+              {c.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       <DataTable
         columns={columns}
@@ -213,6 +312,30 @@ export default function WebsiteContentPage({
         totalCount={data?.pagination.total}
         page={page}
         onPageChange={setPage}
+        selectable
+        onSelectionChange={handleSelection}
+        toolbar={
+          selectedIds.length > 0 ? (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">{selectedIds.length} selected</span>
+              <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkPublish}>
+                <Send className="mr-1.5 h-3.5 w-3.5" /> Publish
+              </Button>
+              <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkArchive}>
+                <Archive className="mr-1.5 h-3.5 w-3.5" /> Archive
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="text-destructive"
+                disabled={bulkBusy}
+                onClick={bulkDelete}
+              >
+                <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
+              </Button>
+            </div>
+          ) : undefined
+        }
         filters={
           <div className="flex gap-2">
             <Select
@@ -301,6 +424,14 @@ export default function WebsiteContentPage({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Bulk import dialog */}
+      <ImportContentDialog
+        websiteId={websiteId}
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImported={() => refetch()}
+      />
     </div>
   );
 }

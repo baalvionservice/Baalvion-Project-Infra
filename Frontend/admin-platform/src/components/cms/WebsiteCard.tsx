@@ -53,7 +53,7 @@ export default function WebsiteCard({ website, onDelete, onSelect }: Props) {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
-                <Link href={`/cms/websites/${website.id}`}>
+                <Link href={`/cms/websites/${website.slug}`}>
                   <Settings className="mr-2 h-4 w-4" />
                   Manage
                 </Link>
@@ -127,7 +127,7 @@ export default function WebsiteCard({ website, onDelete, onSelect }: Props) {
           onClick={() => onSelect?.(website)}
           asChild
         >
-          <Link href={`/cms/websites/${website.id}/content`}>
+          <Link href={`/cms/websites/${website.slug}/content`}>
             Manage Content
           </Link>
         </Button>

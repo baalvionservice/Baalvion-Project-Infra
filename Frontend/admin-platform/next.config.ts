@@ -40,6 +40,14 @@ const nextConfig: NextConfig = {
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
         ],
       },
+      {
+        // Hashed build assets are immutable — cache them hard so repeat loads and
+        // page-to-page navigation pull JS/CSS from the browser cache instantly.
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+        ],
+      },
     ];
   },
 };

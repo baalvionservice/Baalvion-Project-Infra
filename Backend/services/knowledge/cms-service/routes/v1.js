@@ -30,7 +30,11 @@ router.use('/cms/websites', authMiddleware, websiteRoutes);
 // Media library (org-scoped, global across the org's websites)
 router.use('/cms/media', authMiddleware, mediaRoutes);
 
-// Website-scoped taxonomy, content, and integration/key routes
+// Website-scoped taxonomy, content, and integration/key routes.
+// A slug in :websiteId is normalised to the canonical UUID inside loadCmsRole
+// (the first handler on each of these sub-routes) — it must run in the same
+// route layer as the controller, not at this mount, or Express re-extraction
+// would discard it before the mergeParams sub-router runs.
 router.use('/cms/websites/:websiteId', authMiddleware, taxonomyRoutes);
 router.use('/cms/websites/:websiteId/content', authMiddleware, contentRoutes);
 router.use('/cms/websites/:websiteId/integrations', authMiddleware, integrationRoutes);

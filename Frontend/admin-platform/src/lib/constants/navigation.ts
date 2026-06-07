@@ -171,6 +171,50 @@ export const NAVIGATION: NavGroup[] = [
     ],
   },
   {
+    label: 'Investor Relations',
+    items: [
+      {
+        title: 'Investor Relations',
+        href: '/ir',
+        iconName: 'TrendingUp',
+        roles: ['super_admin', 'owner', 'admin'],
+        children: [
+          { title: 'Overview',          href: '/ir',                            iconName: 'LayoutDashboard' },
+          { title: 'Investor Applications', href: '/ir/applications',           iconName: 'UserCheck'       },
+          { title: 'Financial Reports', href: '/ir/financials',                 iconName: 'FileBarChart'    },
+          { title: 'Earnings',          href: '/ir/earnings',                   iconName: 'Mic'             },
+          { title: 'Events & Calendar', href: '/ir/events',                     iconName: 'CalendarDays'    },
+          { title: 'Regulatory Filings',href: '/ir/filings',                    iconName: 'FileCheck'       },
+          { title: 'Documents',         href: '/ir/documents',                  iconName: 'FolderArchive'   },
+          { title: 'Shareholders',      href: '/ir/shareholders',               iconName: 'Users2'          },
+          { title: 'Performance',       href: '/ir/performance',                iconName: 'LineChart'       },
+          { title: 'Stock & Market',    href: '/ir/market',                     iconName: 'CandlestickChart'},
+          { title: 'Analytics',         href: '/ir/analytics',                  iconName: 'BarChart3'       },
+          { title: 'Newsroom',          href: '/cms/websites/ir.baalvion.com',  iconName: 'Newspaper'       },
+          { title: 'SEO',               href: '/cms/websites/ir.baalvion.com/seo',     iconName: 'Search'   },
+          { title: 'Team & Access',     href: '/cms/websites/ir.baalvion.com/members', iconName: 'UsersRound' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Marketplace',
+    items: [
+      {
+        title: 'Baalvion Invest',
+        href: '/marketplace/companies',
+        iconName: 'Handshake',
+        roles: ['super_admin', 'owner', 'admin', 'compliance'],
+        children: [
+          { title: 'Companies',     href: '/marketplace/companies',     iconName: 'Building2'    },
+          { title: 'Investors',     href: '/marketplace/investors',     iconName: 'Users2'       },
+          { title: 'Opportunities', href: '/marketplace/opportunities', iconName: 'Megaphone'    },
+          { title: 'Deals',         href: '/marketplace/deals',         iconName: 'Handshake'    },
+        ],
+      },
+    ],
+  },
+  {
     label: 'Ecosystem',
     items: [
       { title: 'Law Elite',         href: '/law',           iconName: 'Scale'   },

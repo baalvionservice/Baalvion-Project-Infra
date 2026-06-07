@@ -4,7 +4,7 @@ module.exports = function (sequelize, DataTypes) {
         contentId: { type: DataTypes.UUID, allowNull: false, unique: true },
         currentState: {
             type: DataTypes.ENUM(
-                'draft', 'pending_review', 'changes_requested',
+                'draft', 'pending_review', 'changes_requested', 'compliance_review',
                 'approved', 'scheduled', 'published', 'archived'
             ),
             allowNull: false,

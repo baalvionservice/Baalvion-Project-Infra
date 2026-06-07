@@ -1,33 +1,45 @@
 {
   "name": "@baalvion/sdk",
   "version": "1.0.0",
-  "description": "Baalvion Platform SDK v1 — the single standard way every service talks to the platform: CMS-hub config/secret resolution, service-to-service auth, resilient HTTP, the event bus, structured logging, and end-to-end trace context. Composes the existing @baalvion/* packages and fills the gaps. Zero runtime npm dependencies; @baalvion/* peers load at runtime.",
+  "description": "Baalvion Platform SDK v1 — unified service communication layer for CMS config resolution, service auth, event bus, logging, telemetry, and trace context. Composes internal @baalvion/* modules. Zero external runtime dependencies.",
   "private": true,
+
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+
+  "files": [
+    "dist"
+  ],
+
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "type-check": "tsc --noEmit",
     "clean": "rimraf dist"
   },
-  "dependencies": {},
-  "peerDependencies": {
-    "@baalvion/events": "*",
-    "@baalvion/logger": "*",
-    "@baalvion/telemetry": "*",
-    "@baalvion/service-kit": "*",
-    "@baalvion/cache": "*",
-    "express": "*"
+
+  "dependencies": {
+    "@baalvion/types": "workspace:*"
   },
+
+  "peerDependencies": {
+    "@baalvion/events": "workspace:*",
+    "@baalvion/logger": "workspace:*",
+    "@baalvion/telemetry": "workspace:*",
+    "@baalvion/service-kit": "workspace:*",
+    "@baalvion/cache": "workspace:*",
+    "express": "^4 || ^5"
+  },
+
   "peerDependenciesMeta": {
     "@baalvion/events": { "optional": true },
     "@baalvion/logger": { "optional": true },
@@ -36,6 +48,7 @@
     "@baalvion/cache": { "optional": true },
     "express": { "optional": true }
   },
+
   "devDependencies": {
     "tsup": "^8.3.0",
     "typescript": "^5.7.2",

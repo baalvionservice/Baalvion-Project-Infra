@@ -36,6 +36,26 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
+  // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
+  // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
+  // "Critical dependency: the request of a dependency is an expression" build warnings with no
+  // behaviour change — src/ai/* is `server-only`, reached only through flows / route handlers.
+  serverExternalPackages: [
+    'genkit',
+    '@genkit-ai/core',
+    '@genkit-ai/ai',
+    '@genkit-ai/google-genai',
+    'dotprompt',
+    'handlebars',
+    '@opentelemetry/sdk-node',
+    '@opentelemetry/api',
+    '@opentelemetry/instrumentation',
+    'require-in-the-middle',
+    'import-in-the-middle',
+    'protobufjs',
+    'express',
+  ],
   // Single env-driven base for the ~61 BFF route handlers. Defaulting it here makes
   // process.env.BRAND_API_URL always defined, so the per-file `|| 'http://localhost:3006'`
   // fallbacks are never reached (no individual route edits needed). The service's

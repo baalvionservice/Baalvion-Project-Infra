@@ -5,6 +5,9 @@ export type WorkflowAction =
   | 'submit_for_review'
   | 'approve'
   | 'request_changes'
+  | 'submit_for_compliance'
+  | 'compliance_approve'
+  | 'compliance_reject'
   | 'publish'
   | 'schedule'
   | 'unpublish'
@@ -49,6 +52,28 @@ export const WORKFLOW_TRANSITIONS: WorkflowTransitionDef[] = [
     action: 'submit_for_review',
     requiredRoles: ['cms_admin', 'cms_editor', 'cms_author', 'cms_contributor'],
     label: 'Resubmit for Review',
+  },
+  {
+    from: 'approved',
+    to: 'compliance_review',
+    action: 'submit_for_compliance',
+    requiredRoles: ['cms_admin', 'cms_editor', 'cms_reviewer'],
+    label: 'Send to Compliance',
+  },
+  {
+    from: 'compliance_review',
+    to: 'approved',
+    action: 'compliance_approve',
+    requiredRoles: ['cms_admin', 'cms_compliance'],
+    label: 'Compliance Approve',
+  },
+  {
+    from: 'compliance_review',
+    to: 'changes_requested',
+    action: 'compliance_reject',
+    requiredRoles: ['cms_admin', 'cms_compliance'],
+    label: 'Compliance Reject',
+    requiresNote: true,
   },
   {
     from: 'approved',

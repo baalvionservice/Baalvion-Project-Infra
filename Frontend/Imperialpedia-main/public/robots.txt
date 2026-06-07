@@ -1,11 +1,15 @@
 User-agent: *
 Allow: /
 
-# Block only sensitive/private areas
+# Block only sensitive/private / non-indexable areas
 Disallow: /admin/
 Disallow: /api/
 Disallow: /private/
+Disallow: /auth/
 Disallow: /creator/dashboard/
 Disallow: /dashboard/
+Disallow: /editor/
+Disallow: /writer/
+Disallow: /maintenance
 
 Sitemap: https://imperialpedia.com/sitemap.xml

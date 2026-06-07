@@ -1,55 +1,56 @@
-
 import React from "react";
-import { HeroSection } from "@/components/landing/HeroSection";
-
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
 
-
-import { MainNewsSection } from "@/components/common/MainNewsSection";
-import LatestArticles from "@/components/common/LatestArticles";
-import { ImperialpediaForAdvisors } from "@/components/common/Advisors";
-import { OurMission } from "@/components/common/OurMission";
-import StocksSection from "@/components/common/StocksSection";
-
-
-
+import { TrendingBar } from "@/components/landing/investopedia/TrendingBar";
+import { LeadStory } from "@/components/landing/investopedia/LeadStory";
+import { TopicSection } from "@/components/landing/investopedia/TopicSection";
+import { TermOfDay } from "@/components/landing/investopedia/TermOfDay";
+import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
+import {
+  LEAD_STORY,
+  TOP_STORIES,
+  TOPIC_GROUPS,
+  TERM_OF_DAY,
+} from "@/components/landing/investopedia/content";
 
 /**
- * The main Home page for Imperialpedia.
- * Optimized for institutional-grade performance with dynamic imports and high-priority LCP handling.
+ * Imperialpedia home — content-led editorial layout in the style of a modern
+ * financial-reference publication: trending bar, lead story, topic rows,
+ * term of the day, and a newsletter conversion band.
  */
 export default function Home() {
-
   return (
     <div className="flex flex-col w-full">
-      <div className="flex max-w-7xl mx-auto flex-col w-full">
-        <JsonLd
-          data={{
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            name: "Imperialpedia",
-            url: "https://imperialpedia.com",
-            potentialAction: {
-              "@type": "SearchAction",
-              target: "https://imperialpedia.com/search?q={search_term_string}",
-              "query-input": "required name=search_term_string",
-            },
-          }}
-        />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Imperialpedia",
+          url: "https://imperialpedia.com",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://imperialpedia.com/search?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }}
+      />
 
-        {/* Above the fold - Priority Loading */}
-        <HeroSection />
-        <StocksSection />
-        <MainNewsSection />
-        <LatestArticles />
+      <TrendingBar />
+      <LeadStory lead={LEAD_STORY} secondary={TOP_STORIES} />
 
+      <TopicSection group={TOPIC_GROUPS[0]} />
+      <TopicSection group={TOPIC_GROUPS[1]} />
 
+      <TermOfDay
+        term={TERM_OF_DAY.term}
+        definition={TERM_OF_DAY.definition}
+        href={TERM_OF_DAY.href}
+      />
 
-      </div>
-      <ImperialpediaForAdvisors />
-      <div className="flex max-w-7xl mx-auto flex-col w-full">
-        <OurMission />
-      </div>
+      <TopicSection group={TOPIC_GROUPS[2]} />
+      <TopicSection group={TOPIC_GROUPS[3]} />
+
+      <NewsletterBand />
     </div>
   );
 }
