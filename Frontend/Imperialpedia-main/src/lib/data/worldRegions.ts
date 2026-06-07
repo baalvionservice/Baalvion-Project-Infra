@@ -72,6 +72,8 @@ export interface WorldData {
   latest: typeof latestNews;
   sections: typeof newsGridSections;
   watchlist: typeof watchlistItems;
+  /** Region ids enabled in the admin World Control panel (undefined = all). */
+  enabledRegions?: RegionId[];
 }
 
 export const REGIONS: RegionConfig[] = [

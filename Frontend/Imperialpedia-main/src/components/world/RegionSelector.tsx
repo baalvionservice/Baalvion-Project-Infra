@@ -6,7 +6,17 @@ import { REGIONS, regionPath, type RegionId } from "@/lib/data/worldRegions";
  * (e.g. /world/?region=europe). Server component — pure links, the active
  * region is highlighted with the signature red underline.
  */
-export default function RegionSelector({ current }: { current: RegionId }) {
+export default function RegionSelector({
+  current,
+  enabled,
+}: {
+  current: RegionId;
+  enabled?: RegionId[];
+}) {
+  // Show only admin-enabled regions (always keep the active one visible).
+  const regions = enabled
+    ? REGIONS.filter((r) => enabled.includes(r.id) || r.id === current)
+    : REGIONS;
   return (
     <div className="bg-white border-b border-gray-200">
       <div className="max-w-screen-xl mx-auto px-2 sm:px-4">
@@ -14,7 +24,7 @@ export default function RegionSelector({ current }: { current: RegionId }) {
           <span className="hidden sm:flex items-center text-[10px] font-black tracking-widest text-gray-400 uppercase pr-3 shrink-0">
             Region
           </span>
-          {REGIONS.map((r) => {
+          {regions.map((r) => {
             const active = r.id === current;
             return (
               <Link

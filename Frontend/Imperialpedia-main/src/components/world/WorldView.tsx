@@ -61,7 +61,7 @@ export default function WorldView({ data }: { data: WorldData }) {
       <MarketTicker indicators={data.indicators} />
 
       {/* CNBC-style region selector → clean /world/<region> paths */}
-      <RegionSelector current={data.region.id} />
+      <RegionSelector current={data.region.id} enabled={data.enabledRegions} />
 
       {/* Dark market indicators strip */}
       <div className="max-w-screen-xl mx-auto">

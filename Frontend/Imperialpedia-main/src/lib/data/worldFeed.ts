@@ -125,6 +125,55 @@ const WATCHLIST_SYMBOLS: { symbol: string; name: string }[] = [
   { symbol: "JPM", name: "JPMorgan" },
 ];
 
+// ── Admin World Control config (imperialpedia-service) ──────────────────────
+// Editors control the markets, watchlist and feed settings from the admin
+// panel; this reads that config. Falls back to the shipped defaults above.
+
+const IMPERIALPEDIA_API =
+  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || "http://localhost:3004/api/v1";
+
+interface WorldConfig {
+  settings?: { newsFallback?: boolean; refreshSeconds?: number };
+  watchlist?: { symbol: string; name: string }[];
+  regions?: {
+    id: string;
+    label?: string;
+    enabled?: boolean;
+    indices?: Array<Partial<SymbolDef> & { symbol: string; name: string }>;
+  }[];
+}
+
+async function getWorldConfig(): Promise<WorldConfig | null> {
+  try {
+    const res = await fetch(`${IMPERIALPEDIA_API}/world-config`, {
+      next: { revalidate: 120 },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { data?: WorldConfig };
+    return json?.data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+const KINDS: Kind[] = ["index", "fx", "commodity", "crypto", "yield"];
+
+function coerceDef(x: Partial<SymbolDef> & { symbol?: string; name?: string }): SymbolDef | null {
+  if (!x?.symbol || !x?.name) return null;
+  const kind = KINDS.includes(x.kind as Kind) ? (x.kind as Kind) : "index";
+  const group =
+    x.group === "Americas" || x.group === "Europe" || x.group === "Asia-Pacific"
+      ? x.group
+      : undefined;
+  return {
+    symbol: String(x.symbol),
+    name: String(x.name),
+    dec: Number.isFinite(x.dec) ? Number(x.dec) : 2,
+    kind,
+    group,
+  };
+}
+
 // ── Yahoo fetch ─────────────────────────────────────────────────────────────
 
 interface Quote {
@@ -176,9 +225,9 @@ function toIndicator(def: SymbolDef, q: Quote): Indicator {
   };
 }
 
-/** Fetch the region's indicators from Yahoo; null if too few succeed. */
-async function buildIndicators(region: RegionId): Promise<Indicator[] | null> {
-  const defs = YAHOO_SYMBOLS[region];
+/** Fetch indicators from Yahoo for the given symbol set; null if too few succeed. */
+async function buildIndicators(defs: SymbolDef[]): Promise<Indicator[] | null> {
+  if (!defs.length) return null;
   const settled = await Promise.allSettled(defs.map((d) => fetchYahooQuote(d.symbol)));
   const out: Indicator[] = [];
   settled.forEach((r, i) => {
@@ -189,8 +238,11 @@ async function buildIndicators(region: RegionId): Promise<Indicator[] | null> {
 }
 
 /** Markets panel derived from the same region quotes (index instruments only). */
-function buildMarkets(region: RegionId, indicators: Indicator[]): MarketRegionGroup[] {
-  const defs = YAHOO_SYMBOLS[region];
+function buildMarkets(
+  region: RegionId,
+  indicators: Indicator[],
+  defs: SymbolDef[],
+): MarketRegionGroup[] {
   const byName = new Map(indicators.map((i) => [i.name, i]));
   const rows = defs
     .filter((d) => d.kind === "index" && byName.has(d.name))
@@ -221,10 +273,11 @@ function buildMarkets(region: RegionId, indicators: Indicator[]): MarketRegionGr
   ];
 }
 
-async function buildWatchlist(): Promise<WorldData["watchlist"] | null> {
-  const settled = await Promise.allSettled(
-    WATCHLIST_SYMBOLS.map((w) => fetchYahooQuote(w.symbol)),
-  );
+async function buildWatchlist(
+  symbols: { symbol: string; name: string }[],
+): Promise<WorldData["watchlist"] | null> {
+  if (!symbols.length) return null;
+  const settled = await Promise.allSettled(symbols.map((w) => fetchYahooQuote(w.symbol)));
   const out: WorldData["watchlist"] = [];
   settled.forEach((r, i) => {
     if (r.status !== "fulfilled") return;
@@ -232,14 +285,14 @@ async function buildWatchlist(): Promise<WorldData["watchlist"] | null> {
     const pct = r.value.prev !== 0 ? (change / r.value.prev) * 100 : 0;
     const positive = change >= 0;
     out.push({
-      ticker: WATCHLIST_SYMBOLS[i].symbol,
-      name: WATCHLIST_SYMBOLS[i].name,
+      ticker: symbols[i].symbol,
+      name: symbols[i].name,
       price: fmt(r.value.price, 2),
       change: (positive ? "+" : "") + pct.toFixed(2) + "%",
       positive,
     });
   });
-  return out.length >= 5 ? out : null;
+  return out.length >= Math.min(5, symbols.length) ? out : null;
 }
 
 // ── Google News RSS (keyless) ───────────────────────────────────────────────
@@ -604,16 +657,33 @@ export async function getWorldDataLive(raw?: string | null): Promise<WorldData> 
   const fallback = getWorldData(raw);
   const region = fallback.region;
 
+  // Admin World Control config (markets, watchlist, settings). Falls back to
+  // the shipped defaults per-field if absent.
+  const config = await safe(() => getWorldConfig());
+  const cfgRegion = config?.regions?.find((r) => r.id === region.id);
+  const cfgDefs = (cfgRegion?.indices?.map(coerceDef).filter(Boolean) ?? []) as SymbolDef[];
+  const defs = cfgDefs.length ? cfgDefs : YAHOO_SYMBOLS[region.id];
+  const watch =
+    config?.watchlist?.length
+      ? config.watchlist.map((w) => ({ symbol: String(w.symbol), name: String(w.name) }))
+      : WATCHLIST_SYMBOLS;
+  const newsFallbackEnabled = config?.settings?.newsFallback !== false;
+  const enabledRegions = config?.regions
+    ? (config.regions.filter((r) => r.enabled !== false).map((r) => r.id) as RegionId[])
+    : undefined;
+
   const [indicators, watchlist, cmsNews] = await Promise.all([
-    safe(() => buildIndicators(region.id)),
-    safe(() => buildWatchlist()),
+    safe(() => buildIndicators(defs)),
+    safe(() => buildWatchlist(watch)),
     safe(() => buildCmsNews(region.id)),
   ]);
 
-  // Admin/CMS wins. Only reach for Google News when the CMS has nothing yet.
-  const news = cmsNews ?? (await safe(() => buildNews(region.id)));
+  // Admin/CMS wins. Reach for Google News only when the CMS is empty AND the
+  // admin left the wire-service fallback enabled.
+  let news = cmsNews;
+  if (!news && newsFallbackEnabled) news = await safe(() => buildNews(region.id));
 
-  const markets = indicators ? buildMarkets(region.id, indicators) : fallback.markets;
+  const markets = indicators ? buildMarkets(region.id, indicators, defs) : fallback.markets;
 
   return {
     region,
@@ -624,5 +694,6 @@ export async function getWorldDataLive(raw?: string | null): Promise<WorldData> 
     latest: news?.latest?.length ? news.latest : fallback.latest,
     sections: news?.sections?.length ? news.sections : fallback.sections,
     watchlist: watchlist ?? fallback.watchlist,
+    enabledRegions,
   };
 }

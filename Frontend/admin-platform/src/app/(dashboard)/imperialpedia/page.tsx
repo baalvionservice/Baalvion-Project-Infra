@@ -51,6 +51,16 @@ export default function ImperialpediaAdminPage() {
             Structured knowledge-graph entities — companies, people, places keyed by type and slug.
           </p>
         </Link>
+        <Link
+          href="/imperialpedia/world"
+          className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-accent"
+        >
+          <div className="font-semibold">World Control →</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Control the live /world markets &amp; news page — indices, watchlist, news source and
+            regions.
+          </p>
+        </Link>
       </div>
       <Card>
         <CardHeader><CardTitle>Entities ({entities.length})</CardTitle></CardHeader>
