@@ -14,7 +14,7 @@
  * regardless of traffic, so the page stays fast and we never hammer Yahoo/GDELT.
  */
 
-import { listCmsContent } from "@/services/data/cms-public";
+import type { CmsContent } from "@/services/data/cms-public";
 import {
   getWorldData,
   resolveRegion,
@@ -441,26 +441,124 @@ async function buildNews(region: RegionId): Promise<NewsBundle | null> {
   return { featured, latest, sections };
 }
 
-// ── CMS (owned editorial) ───────────────────────────────────────────────────
+// ── CMS as the PRIMARY, admin-controlled news source ────────────────────────
+// Whatever editors publish in the admin panel (cms-service) drives the World
+// feed. Region targeting is by category: create a CMS category whose slug
+// matches the region id (us, europe, asia, china, emerging) and assign content
+// to it. Anything published also flows into the general feed.
 
-interface CmsLite {
-  headline: string;
-  image: string | null;
-  time: string;
+// Cached CMS read (own copy, not the shared no-store client) so the World page
+// stays statically cached / ISR instead of being forced into dynamic rendering.
+const CMS_PUBLIC_URL =
+  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || "http://localhost:3011/api/v1/public";
+const CMS_SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
+
+async function cmsList(params: {
+  contentType?: string;
+  categorySlug?: string;
+  limit?: number;
+}): Promise<CmsContent[]> {
+  const q = new URLSearchParams();
+  if (params.contentType) q.set("contentType", params.contentType);
+  if (params.categorySlug) q.set("categorySlug", params.categorySlug);
+  if (params.limit) q.set("limit", String(params.limit));
+  const res = await fetch(`${CMS_PUBLIC_URL}/${CMS_SITE}/content?${q.toString()}`, {
+    headers: { Accept: "application/json" },
+    next: { revalidate: 120 },
+  });
+  if (!res.ok) throw new Error(`cms ${res.status}`);
+  const env = (await res.json()) as { data?: CmsContent[] };
+  return env.data ?? [];
 }
 
-async function buildCms(): Promise<CmsLite[] | null> {
-  try {
-    const { items } = await listCmsContent({ contentType: "article", limit: 6 });
-    if (!items.length) return null;
-    return items.map((c) => ({
-      headline: c.title,
-      image: c.featuredImage ?? null,
-      time: c.publishedAt ? relativeTime(Date.parse(c.publishedAt)) : "recently",
-    }));
-  } catch {
-    return null;
+const CMS_TIME = (c: CmsContent): string =>
+  c.publishedAt ? relativeTime(Date.parse(c.publishedAt)) : "recently";
+
+function mapCmsCategory(name: string | null | undefined, title: string): string {
+  const n = (name ?? "").toLowerCase();
+  if (/crypto|bitcoin/.test(n)) return "CRYPTO";
+  if (/tech/.test(n)) return "TECH";
+  if (/energy|climate|oil/.test(n)) return "ENERGY";
+  if (/econom|inflation|\bfed\b/.test(n)) return "ECONOMY";
+  if (/politic|policy|government/.test(n)) return "POLITICS";
+  if (/market|stock|invest|business/.test(n)) return "MARKETS";
+  return classifyCategory(title);
+}
+
+/** Newest published CMS content for the region (region category first, then general). */
+async function fetchCmsItems(region: RegionId): Promise<CmsContent[]> {
+  const calls = [
+    cmsList({ contentType: "news", limit: 30 }).catch(() => [] as CmsContent[]),
+    cmsList({ contentType: "article", limit: 30 }).catch(() => [] as CmsContent[]),
+  ];
+  // Region-targeted content (if a matching category exists) is prioritized.
+  if (region !== "world") {
+    calls.unshift(cmsList({ categorySlug: region, limit: 30 }).catch(() => [] as CmsContent[]));
   }
+  const results = await Promise.all(calls);
+  const seen = new Set<string>();
+  const merged: CmsContent[] = [];
+  for (const items of results) {
+    for (const it of items) {
+      if (it.id && !seen.has(it.id)) {
+        seen.add(it.id);
+        merged.push(it);
+      }
+    }
+  }
+  merged.sort(
+    (a, b) =>
+      Date.parse(b.publishedAt ?? b.updatedAt ?? "") -
+      Date.parse(a.publishedAt ?? a.updatedAt ?? ""),
+  );
+  return merged;
+}
+
+async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
+  const items = await fetchCmsItems(region);
+  if (items.length < 4) return null;
+
+  const featured: FeaturedStory[] = items.slice(0, 3).map((c, i) => {
+    const category = mapCmsCategory(c.category?.name, c.title);
+    return {
+      id: 1000 + i,
+      category,
+      headline: c.title,
+      summary: c.excerpt ?? "",
+      image: safeImage(c.featuredImage, category),
+      time: CMS_TIME(c),
+      author: "Imperialpedia",
+      tag: i === 0 ? "EXCLUSIVE" : null,
+    };
+  });
+
+  const latest: WorldData["latest"] = items.slice(3, 16).map((c, i) => ({
+    id: 2000 + i,
+    time: CMS_TIME(c),
+    category: mapCmsCategory(c.category?.name, c.title),
+    headline: c.title,
+    positive: classifyPositive(c.title),
+  }));
+
+  const buckets = new Map<string, CmsContent[]>();
+  for (const c of items.slice(3)) {
+    const k = mapCmsCategory(c.category?.name, c.title);
+    (buckets.get(k) ?? buckets.set(k, []).get(k)!).push(c);
+  }
+  const sections: WorldData["sections"] = SECTION_DEFS.map((def, idx) => {
+    const its = def.cats
+      .flatMap((k) => buckets.get(k) ?? [])
+      .slice(0, 4)
+      .map((c, i) => ({
+        id: 3000 + idx * 10 + i,
+        headline: c.title,
+        time: CMS_TIME(c),
+        image: i === 0 ? safeImage(c.featuredImage, mapCmsCategory(c.category?.name, c.title)) : null,
+      }));
+    return { section: def.section, color: "#0a2463", items: its };
+  }).filter((s) => s.items.length > 0);
+
+  return { featured, latest, sections };
 }
 
 // ── timestamp ───────────────────────────────────────────────────────────────
@@ -492,63 +590,39 @@ async function safe<T>(fn: () => Promise<T>): Promise<T | null> {
 }
 
 /**
- * Region-scoped World data with REAL market + news data, falling back to the
- * static demo set per-section if an upstream is unavailable.
+ * Region-scoped World data: REAL live markets (Yahoo) + admin-controlled news.
+ *
+ * News precedence:
+ *   1. CMS (admin panel) — the source of truth once editors publish content.
+ *   2. Google News — automatic fallback so the page is never empty pre-launch.
+ *   3. Static demo set — last-resort fallback if every upstream is down.
+ *
+ * Markets, watchlist and timestamp are always live (Yahoo), falling back to the
+ * static set only if Yahoo is unavailable.
  */
 export async function getWorldDataLive(raw?: string | null): Promise<WorldData> {
   const fallback = getWorldData(raw);
   const region = fallback.region;
 
-  const [indicators, watchlist, news, cms] = await Promise.all([
+  const [indicators, watchlist, cmsNews] = await Promise.all([
     safe(() => buildIndicators(region.id)),
     safe(() => buildWatchlist()),
-    safe(() => buildNews(region.id)),
-    safe(() => buildCms()),
+    safe(() => buildCmsNews(region.id)),
   ]);
 
-  const markets = indicators ? buildMarkets(region.id, indicators) : fallback.markets;
+  // Admin/CMS wins. Only reach for Google News when the CMS has nothing yet.
+  const news = cmsNews ?? (await safe(() => buildNews(region.id)));
 
-  // Blend owned CMS editorial in as the lead story + a dedicated section.
-  let featured = news?.featured?.length ? news.featured : fallback.featured;
-  let sections = news?.sections?.length ? news.sections : fallback.sections;
-  if (cms && cms.length) {
-    const lead = cms[0];
-    featured = [
-      {
-        id: 999,
-        category: "IMPERIALPEDIA",
-        headline: lead.headline,
-        summary: "Published by the Imperialpedia newsroom.",
-        image: safeImage(lead.image, "MARKETS"),
-        time: lead.time,
-        author: "Imperialpedia",
-        tag: "EXCLUSIVE",
-      },
-      ...featured.slice(0, 2),
-    ];
-    sections = [
-      {
-        section: "From Imperialpedia",
-        color: "#CC0000",
-        items: cms.slice(0, 4).map((c, i) => ({
-          id: 4000 + i,
-          headline: c.headline,
-          time: c.time,
-          image: i === 0 ? safeImage(c.image, "MARKETS") : null,
-        })),
-      },
-      ...sections,
-    ];
-  }
+  const markets = indicators ? buildMarkets(region.id, indicators) : fallback.markets;
 
   return {
     region,
     asOf: indicators ? nowEt() : fallback.asOf,
     indicators: indicators ?? fallback.indicators,
     markets,
-    featured,
+    featured: news?.featured?.length ? news.featured : fallback.featured,
     latest: news?.latest?.length ? news.latest : fallback.latest,
-    sections,
+    sections: news?.sections?.length ? news.sections : fallback.sections,
     watchlist: watchlist ?? fallback.watchlist,
   };
 }

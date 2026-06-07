@@ -434,6 +434,27 @@ const MARKETS: Record<RegionId, MarketRegionGroup[]> = {
   emerging: [EMERGING],
 };
 
+/** Canonical clean path for a region: world → /world, others → /world/<id>. */
+export function regionPath(id: RegionId): string {
+  return id === "world" ? "/world" : `/world/${id}`;
+}
+
+/** Shared SEO metadata fields for a region's World page. */
+export function worldSeo(raw?: string | null): {
+  region: RegionConfig;
+  canonical: string;
+  title: string;
+  description: string;
+} {
+  const region = resolveRegion(raw);
+  return {
+    region,
+    canonical: regionPath(region.id),
+    title: `${region.label} Markets & Business News | Imperialpedia World`,
+    description: `Live ${region.label} markets, indices and the latest business, economy and financial news — updated continuously by Imperialpedia.`,
+  };
+}
+
 /** Build the full region-scoped payload for the World page. */
 export function getWorldData(raw?: string | null): WorldData {
   const region = resolveRegion(raw);

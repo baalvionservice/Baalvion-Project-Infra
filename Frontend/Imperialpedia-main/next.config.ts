@@ -1,6 +1,26 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
+  // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
+  // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
+  // "Critical dependency: the request of a dependency is an expression" build warnings with no
+  // behaviour change — src/ai/* is `server-only`, reached only through flows / route handlers.
+  serverExternalPackages: [
+    'genkit',
+    '@genkit-ai/core',
+    '@genkit-ai/ai',
+    '@genkit-ai/google-genai',
+    'dotprompt',
+    'handlebars',
+    '@opentelemetry/sdk-node',
+    '@opentelemetry/api',
+    '@opentelemetry/instrumentation',
+    'require-in-the-middle',
+    'import-in-the-middle',
+    'protobufjs',
+    'express',
+  ],
   reactStrictMode: true,
   typescript: {
     // Type errors will now fail the build — all type issues must be resolved.
@@ -17,7 +37,12 @@ const nextConfig: NextConfig = {
       process.env.AUTH_PROXY_TARGET ||
       'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
     // Same-origin auth proxy so the httpOnly refresh cookie flows in dev and prod.
-    return [{ source: '/auth-bff/:path*', destination: `${authTarget}/:path*` }];
+    return [
+      { source: '/auth-bff/:path*', destination: `${authTarget}/:path*` },
+      // Investopedia-style A–Z glossary URLs (e.g. /terms-beginning-with-a,
+      // /terms-beginning-with-num) map onto the real /terms/[letter] listing route.
+      { source: '/terms-beginning-with-:letter', destination: '/terms/:letter' },
+    ];
   },
   async redirects() {
     // The in-app admin/editor/writer panels are RETIRED in favour of the central
@@ -30,6 +55,20 @@ const nextConfig: NextConfig = {
       { source: '/editor/:path*', destination: `${admin}/cms/workflows`, permanent: false },
       { source: '/writer', destination: `${admin}/cms/posts`, permanent: false },
       { source: '/writer/:path*', destination: `${admin}/cms/posts`, permanent: false },
+      // Back-compat: the old query-param World URLs now live at clean paths.
+      // /world?region=us → /world/us, /world?region=world → /world.
+      {
+        source: '/world',
+        has: [{ type: 'query', key: 'region', value: '(?<region>us|europe|asia|china|emerging)' }],
+        destination: '/world/:region',
+        permanent: true,
+      },
+      {
+        source: '/world',
+        has: [{ type: 'query', key: 'region', value: 'world' }],
+        destination: '/world',
+        permanent: true,
+      },
     ];
   },
   async headers() {

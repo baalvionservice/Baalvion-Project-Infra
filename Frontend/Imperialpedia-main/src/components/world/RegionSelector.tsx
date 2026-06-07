@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { REGIONS, type RegionId } from "@/lib/data/worldRegions";
+import { REGIONS, regionPath, type RegionId } from "@/lib/data/worldRegions";
 
 /**
  * CNBC-style region tab bar that drives the `?region=` query param
@@ -19,7 +19,7 @@ export default function RegionSelector({ current }: { current: RegionId }) {
             return (
               <Link
                 key={r.id}
-                href={`/world/?region=${r.id}`}
+                href={regionPath(r.id)}
                 aria-current={active ? "page" : undefined}
                 className={`whitespace-nowrap text-[11px] sm:text-xs font-bold tracking-wide uppercase px-3 py-3 border-b-[3px] transition-all ${
                   active
