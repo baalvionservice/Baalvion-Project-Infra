@@ -28,6 +28,7 @@ db.PortfolioHolding = require('./portfolio_holdings')(sequelize, DataTypes);
 db.GlossaryTerm = require('./glossary_terms')(sequelize, DataTypes);
 db.GlossaryExample = require('./glossary_examples')(sequelize, DataTypes);
 db.GlossaryRelation = require('./glossary_relations')(sequelize, DataTypes);
+db.WorldConfig = require('./world_config')(sequelize, DataTypes);
 
 // Associations
 // Article -> CreatorProfile (author)
