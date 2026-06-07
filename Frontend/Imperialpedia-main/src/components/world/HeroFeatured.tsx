@@ -1,8 +1,8 @@
-import { featuredNews } from "@/lib/data/worldData";
+import type { FeaturedStory } from "@/lib/data/worldRegions";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 
-export default function HeroFeatured() {
-  const [main, ...secondary] = featuredNews;
+export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }) {
+  const [main, ...secondary] = featured;
 
   return (
     <div className="flex flex-col lg:grid lg:grid-cols-3 gap-px bg-gray-200 border-b border-gray-200">

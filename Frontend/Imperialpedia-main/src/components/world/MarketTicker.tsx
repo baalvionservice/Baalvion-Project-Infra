@@ -1,8 +1,8 @@
 "use client";
-import { marketIndicators } from "@/lib/data/worldData";
+import type { Indicator } from "@/lib/data/worldRegions";
 
-export default function MarketTicker() {
-  const doubled = [...marketIndicators, ...marketIndicators];
+export default function MarketTicker({ indicators }: { indicators: Indicator[] }) {
+  const doubled = [...indicators, ...indicators];
 
   return (
     <div className="bg-[#0a0a0a] border-b border-gray-800 overflow-hidden py-2">
