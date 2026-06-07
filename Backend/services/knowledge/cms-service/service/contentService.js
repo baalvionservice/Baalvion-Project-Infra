@@ -47,12 +47,25 @@ async function getContent(websiteId, contentId) {
     return data;
 }
 
+// Find a slug that is unique within the website, appending -2, -3, ... on collision.
+// This makes it impossible to error out when creating two items with the same title
+// (e.g. two co-founders with identical names) — the slug is silently disambiguated.
+async function _uniqueSlug(websiteId, base, excludeId = null) {
+    const clean = (base && String(base).trim()) || 'item';
+    let candidate = clean;
+    for (let n = 2; n <= 1000; n++) {
+        const where = { websiteId, slug: candidate };
+        if (excludeId) where.id = { [Op.ne]: excludeId };
+        const existing = await CmsContent.findOne({ where });
+        if (!existing) return candidate;
+        candidate = `${clean}-${n}`;
+    }
+    return `${clean}-${Date.now()}`;
+}
+
 async function createContent(websiteId, userId, body) {
     const { title, slug: rawSlug, categoryId, contentType, contentBlocks, tagIds, seoMetadata, visibility, scheduledAt, customFields, excerpt, featuredImage } = body;
-    const slug = rawSlug || slugify(title);
-
-    const existing = await CmsContent.findOne({ where: { websiteId, slug } });
-    if (existing) throw new AppError('CONFLICT', 'Content with this slug already exists in this website', 409);
+    const slug = await _uniqueSlug(websiteId, rawSlug || slugify(title));
 
     if (categoryId) {
         const cat = await CmsCategory.findOne({ where: { id: categoryId, websiteId } });

@@ -1,72 +1,47 @@
-"use client";
-
-import { useState } from 'react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
-import { boardOfDirectors } from '@/lib/data';
-import BoardMemberBioDialog from '@/components/shared/BoardMemberBioDialog';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
-import Image from 'next/image';
+import { cmsGetBoard } from '@/lib/cms';
+import BoardGrid from './BoardGrid';
 
-type BoardMember = (typeof boardOfDirectors)[0];
+// Read live from the central CMS on every request so console edits show immediately.
+export const dynamic = 'force-dynamic';
 
-export default function BoardOfDirectorsPage() {
-    const [selectedMember, setSelectedMember] = useState<BoardMember | null>(null);
+export const metadata: Metadata = {
+  title: 'Board of Directors',
+  description:
+    "Meet Baalvion's Board of Directors — the governance leaders providing strategic oversight across finance, technology, and global trade infrastructure.",
+  alternates: { canonical: '/governance/board-of-directors' },
+  openGraph: {
+    title: 'Baalvion Board of Directors',
+    description:
+      "Meet Baalvion's Board of Directors — strategic oversight across finance, technology, and global trade.",
+    url: 'https://ir.baalvion.com/governance/board-of-directors',
+    type: 'website',
+  },
+};
 
-    return (
-        <>
-            <section className="bg-black text-white py-12 md:py-20">
-                <div className="container mx-auto px-4 text-center">
-                    <p className="text-sm font-bold text-primary tracking-widest mb-2">GOVERNANCE</p>
-                    <h1 className="text-4xl md:text-5xl font-bold">Board of Directors</h1>
-                </div>
-            </section>
-            <section className="py-16 md:py-24 bg-white text-black">
-                <div className="container mx-auto px-4">
-                    <div className="text-center mb-16">
-                        <Link href="#" className="text-sm text-gray-600 hover:underline">
-                            Click here to read about Baalvion's approach to Board diversity
-                        </Link>
-                    </div>
+export default async function BoardOfDirectorsPage() {
+  const members = await cmsGetBoard();
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-8 gap-y-16 max-w-7xl mx-auto">
-                        {boardOfDirectors.map((member) => {
-                            const memberImage = PlaceHolderImages.find((p) => p.id === member.imageId);
+  return (
+    <>
+      <section className="bg-black text-white py-12 md:py-20">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-sm font-bold text-primary tracking-widest mb-2">GOVERNANCE</p>
+          <h1 className="text-4xl md:text-5xl font-bold">Board of Directors</h1>
+        </div>
+      </section>
+      <section className="py-16 md:py-24 bg-white text-black">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <Link href="#" className="text-sm text-gray-600 hover:underline">
+              Click here to read about Baalvion's approach to Board diversity
+            </Link>
+          </div>
 
-                            return (
-
-                                <div
-                                    key={member.name}
-                                    className="text-center flex flex-col items-center cursor-pointer group"
-                                    onClick={() => setSelectedMember(member)}
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={(e) => e.key === 'Enter' || e.key === ' ' ? setSelectedMember(member) : undefined}
-                                    aria-label={`View bio for ${member.name}`}
-                                >
-                                    {memberImage && (
-                                        <Image
-                                            src={memberImage.imageUrl}
-                                            alt={`Photo of ${member.name}`}
-                                            data-ai-hint={memberImage.imageHint}
-                                            width={120}
-                                            height={120}
-                                            className="size-32 rounded-full object-cover mb-4"
-                                        />
-                                    )}
-                                    <p className="text-sm text-gray-600 mt-1">{member.title}</p>
-                                </div>
-                            )
-                        })}
-
-
-                    </div>
-                </div>
-            </section>
-            <BoardMemberBioDialog
-                isOpen={!!selectedMember}
-                onOpenChange={() => setSelectedMember(null)}
-                member={selectedMember}
-            />
-        </>
-    );
+          <BoardGrid members={members} />
+        </div>
+      </section>
+    </>
+  );
 }

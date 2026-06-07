@@ -95,7 +95,7 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
         const eventType = action === 'publish' ? CmsEvents.CONTENT_PUBLISHED : CmsEvents.CONTENT_UNPUBLISHED;
         const content = result.content;
         void (async () => {
-            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug'] });
+            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
             const websiteSlug = website ? website.slug : null;
             emitSafe(eventType, {
                 websiteId,
@@ -106,6 +106,10 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
                 state: result.workflow.currentState,
                 action,
             }, { tenantId: websiteSlug });
+            // SEO indexing trigger: notify search engines immediately on publish.
+            if (action === 'publish') {
+                try { require('./seoPingService').pingForWebsite(website); } catch { /* fail-open */ }
+            }
         })().catch((err) => {
             // Event emission must never affect the request, but a dropped event
             // (e.g. the slug lookup hit a DB error) should still be observable.

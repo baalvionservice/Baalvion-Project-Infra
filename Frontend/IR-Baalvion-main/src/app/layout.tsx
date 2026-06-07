@@ -76,6 +76,13 @@ export const metadata: Metadata = {
   },
 };
 
+// Render every route dynamically (no static caching) so content edited in the
+// central CMS console (admin-platform → /cms/websites/ir.baalvion.com) and other
+// live backends is always reflected on the next request. This route-segment config
+// cascades from the root layout to every page under app/.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function RootLayout({
   children,
 }: Readonly<{
