@@ -6,7 +6,8 @@ import MarketsPanel from "@/components/world/MarketsPanel";
 import MarketTicker from "@/components/world/MarketTicker";
 import NewsGrid from "@/components/world/NewsGrid";
 import RegionSelector from "@/components/world/RegionSelector";
-import { getWorldData, resolveRegion } from "@/lib/data/worldRegions";
+import { resolveRegion } from "@/lib/data/worldRegions";
+import { getWorldDataLive } from "@/lib/data/worldFeed";
 
 type SearchParams = Promise<{ region?: string }>;
 
@@ -30,7 +31,7 @@ export default async function WorldPage({
   searchParams: SearchParams;
 }) {
   const { region } = await searchParams;
-  const data = getWorldData(region);
+  const data = await getWorldDataLive(region);
 
   return (
     <div className="min-h-screen bg-gray-100 mt-12 font-sans">
