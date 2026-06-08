@@ -13,6 +13,7 @@ const db = require('../models');
 const config = require('../config/appConfig');
 const { runWithTenant } = require('@baalvion/tenancy');
 const { orderTransitionFor } = require('../services/orderSaga');
+const { orderRefFromPayload } = require('../services/financeRef');
 
 function verifySignature(req) {
     const header = req.headers['x-webhook-signature'] || '';
@@ -24,7 +25,7 @@ function verifySignature(req) {
     return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-function refOf(p) { return p.orderId || p.order_id || p.reference || null; }
+function refOf(p) { return orderRefFromPayload(p); }
 
 // Cascade within an EXISTING transaction (the caller owns the tenant context).
 async function cascadeInTx(t, eventType, payload) {
