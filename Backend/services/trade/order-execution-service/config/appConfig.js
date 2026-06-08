@@ -6,11 +6,27 @@ const parseList = (v, f = []) => (v ? v.split(',').map((s) => s.trim()).filter(B
 
 const DEV_DEFAULTS = new Set(['changeme', 'secret', 'change_me', 'dev_finance_webhook_secret_change_me_min32']);
 
+// Schema name is interpolated as a raw SQL identifier (Sequelize :replacements only
+// parameterize VALUES, not identifiers). Validate against a strict allowlist at boot
+// so an attacker-controlled DB_SCHEMA can never inject SQL via raw `FROM ${schema}.…`.
+const ALLOWED_SCHEMAS = new Set(['oms']); // add others only if legitimately used
+const schema = process.env.DB_SCHEMA || 'oms';
+if (!ALLOWED_SCHEMAS.has(schema)) {
+    throw new Error(`Illegal DB_SCHEMA: ${schema}`);
+}
+
+// Only these envs may fall back to a baked-in dev default. Every other env
+// (production, staging, preprod, …) MUST supply a real secret — a guessable dev
+// default there is fail-fast, closing the prior gap where only NODE_ENV==='production'
+// was guarded and `staging` silently ran on the dev secret.
+const SECRET_RELAXED_ENVS = new Set(['development', 'test']);
+
 function requireSecret(envVar, devDefault, label) {
     const value = process.env[envVar];
-    if (process.env.NODE_ENV === 'production') {
+    const env = process.env.NODE_ENV || 'development';
+    if (!SECRET_RELAXED_ENVS.has(env)) {
         if (!value || value.trim() === '' || DEV_DEFAULTS.has(value.trim())) {
-            console.error(`[appConfig] FATAL: ${label} (${envVar}) missing or dev default in production.`);
+            console.error(`[appConfig] FATAL: ${label} (${envVar}) missing or dev default in env '${env}'.`);
             process.exit(1);
         }
         return value.trim();
@@ -25,7 +41,7 @@ module.exports = {
     port: Number(process.env.PORT || 3052),
     // F3: own schema (not `trade`) — avoids the table collision with
     // commerce/trade-service which owns the canonical integer-keyed trade.orders.
-    schema: process.env.DB_SCHEMA || 'oms',
+    schema,
     apiVersion: 'v1',
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000']),
     db: {
@@ -62,6 +78,9 @@ module.exports = {
     startEventConsumer: process.env.EVENT_CONSUMER !== 'false',
     // Periodic money-truth / saga / outbox drift sweep (detection-only).
     startReconciliation: process.env.RECONCILIATION !== 'false',
+    // Outbox redrive worker (recovery): re-publishes stuck PENDING / retriable FAILED
+    // outbox rows via the existing bus. Leader-guarded so only one replica sweeps.
+    startOutboxRedrive: process.env.OUTBOX_REDRIVE !== 'false',
     // Payment-service initiation (E2E money loop): oes triggers a real payment on
     // confirm; payment-service posts the ledger double-entry via Kafka choreography.
     payment: {

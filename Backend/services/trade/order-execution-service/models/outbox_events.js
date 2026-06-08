@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => sequelize.define('OutboxEvent', {
     payload: { type: DataTypes.JSONB, allowNull: false },
     status: { type: DataTypes.ENUM('PENDING', 'SENT', 'FAILED'), defaultValue: 'PENDING' },
     attempts: { type: DataTypes.INTEGER, defaultValue: 0 },
+    last_error: { type: DataTypes.TEXT },
     available_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     sent_at: { type: DataTypes.DATE },
 }, { schema: 'oms', tableName: 'outbox_events', underscored: true, timestamps: true, updatedAt: false });
