@@ -7,6 +7,7 @@ const { OrderEvents } = require('../platform/events');
 const { canTransition } = require('../services/orderSaga');
 const { computeOrderPricing } = require('../services/pricing');
 const { screenCounterparties } = require('../services/counterpartyScreening');
+const paymentClient = require('../services/paymentClient');
 const config = require('../config/appConfig');
 const fx = require('../providers/fx');
 
@@ -152,7 +153,28 @@ const confirmPayment = async (req, res, next) => {
             }, { transaction: t });
             return o;
         });
-        return sendSuccess(req, res, order);
+        // E2E money loop: trigger a REAL payment (payment-service posts the ledger
+        // double-entry via the Kafka choreography; the terminal state returns to oes
+        // through the signed finance-events webhook → saga cascade to payment_confirmed).
+        // Requires account UUIDs; a failure leaves the order 'pending' for retry.
+        let payment = null;
+        let paymentError = null;
+        if (config.payment.enabled && order.buyer_org_id && order.seller_org_id) {
+            try {
+                payment = await paymentClient.initiate({
+                    idempotencyKey: `order-${order.id}`,
+                    sourceAccountId: order.buyer_org_id,
+                    destinationAccountId: order.seller_org_id,
+                    amount: Number(order.base_currency_amount),
+                    currency: order.base_currency,
+                    tenantId,
+                });
+            } catch (e) {
+                paymentError = e.message;
+                console.error(`[${config.service}] payment initiate failed for order ${order.id}:`, e.message);
+            }
+        }
+        return sendSuccess(req, res, { ...order.toJSON(), payment, paymentError });
     } catch (err) { return next(err); }
 };
 

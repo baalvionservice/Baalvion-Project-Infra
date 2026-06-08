@@ -62,6 +62,13 @@ module.exports = {
     startEventConsumer: process.env.EVENT_CONSUMER !== 'false',
     // Periodic money-truth / saga / outbox drift sweep (detection-only).
     startReconciliation: process.env.RECONCILIATION !== 'false',
+    // Payment-service initiation (E2E money loop): oes triggers a real payment on
+    // confirm; payment-service posts the ledger double-entry via Kafka choreography.
+    payment: {
+        enabled: process.env.PAYMENT_INITIATE !== 'false',
+        url: process.env.PAYMENT_SERVICE_URL || 'http://127.0.0.1:3015',
+        timeoutMs: Number(process.env.PAYMENT_TIMEOUT_MS || 5000),
+    },
     // R8 sanctions screening (counterparty screening at order placement).
     sanctions: {
         enabled: process.env.SANCTIONS_SCREENING !== 'false',
