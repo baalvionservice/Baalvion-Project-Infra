@@ -136,7 +136,9 @@ services:
   risk-service:
     build: { context: ., args: { SERVICE: risk-service } }
     environment: { <<: *service-env, PORT: "3035" }
-    ports: ["3035:3035"]
+    # Host port is overridable (RISK_HOST_PORT) so the suite can run alongside another
+    # process already bound to 3035 on the host. Container port stays 3035.
+    ports: ["${RISK_HOST_PORT:-3035}:3035"]
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_started }
