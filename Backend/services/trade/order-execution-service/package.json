@@ -1,0 +1,38 @@
+{
+  "name": "order-execution-service",
+  "version": "1.0.0",
+  "description": "GTOS order lifecycle state machine, transactional outbox + payment→order saga (R3).",
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "migrate": "node migrate.js",
+    "migrate:status": "node migrate.js status",
+    "test": "jest --forceExit --runInBand"
+  },
+  "dependencies": {
+    "@baalvion/auth-node": "workspace:*",
+    "@baalvion/tenancy": "workspace:*",
+    "@baalvion/sdk": "workspace:*",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.0.0",
+    "express": "^5.2.1",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "ioredis": "^5.10.1",
+    "pg": "^8.13.0",
+    "pg-hstore": "^2.3.4",
+    "prom-client": "^15.1.0",
+    "sequelize": "^6.37.0",
+    "uuid": "^11.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "jest": "^30.4.2",
+    "nodemon": "^3.1.0",
+    "supertest": "^7.2.2"
+  }
+}
