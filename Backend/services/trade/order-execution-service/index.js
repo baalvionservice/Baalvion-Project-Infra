@@ -53,6 +53,7 @@ const start = async () => {
         const sdk = await initSdk();
         if (config.startOutboxPublisher) require('./services/outboxPublisher').startOutboxPublisher(sdk);
         if (config.startEventConsumer) await require('./workers/eventConsumer').startEventConsumer();
+        if (config.startPaymentSimulator) await require('./workers/paymentSimulator').startPaymentSimulator();
     } catch (err) {
         console.warn(`[${config.service}] SDK/background init degraded:`, err.message);
     }

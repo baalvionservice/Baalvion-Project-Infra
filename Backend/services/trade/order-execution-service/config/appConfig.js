@@ -60,4 +60,7 @@ module.exports = {
     bootstrapMigrations: process.env.BOOTSTRAP_MIGRATIONS !== 'false',
     startOutboxPublisher: process.env.OUTBOX_PUBLISHER !== 'false',
     startEventConsumer: process.env.EVENT_CONSUMER !== 'false',
+    // DEV/trader-wedge only: simulate payment completion so orders advance placed→payment_confirmed
+    // without the full Java payment rails. OFF by default; real payment-service emits the event in prod.
+    startPaymentSimulator: process.env.PAYMENT_SIMULATOR === 'true',
 };
