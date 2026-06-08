@@ -12,6 +12,14 @@ const OrderEvents = Object.freeze({
     PAYMENT_CONFIRMED: 'gtos.order.payment_confirmed.v1',
     FAILED: 'gtos.order.failed.v1',
     STATE_CHANGED: 'gtos.order.state_changed.v1',
+    // Settlement on the external (RazorpayX) rail -> request a GL double-entry. Written to
+    // the outbox in the SAME tx as the saga advance (publish-iff-commit); a consumer posts
+    // it to the Java ledger (idempotent by transactionRef).
+    SETTLEMENT_LEDGER_POST: 'oms.order.settlement.ledger_post.v1',
+    // A settlement GL post PERMANENTLY failed (the ledger will always reject it): money moved
+    // with no GL record. Emitted best-effort by the ledger consumer so the failure ALERTS
+    // (manual review) instead of silently vanishing on the permanent-ack path.
+    SETTLEMENT_LEDGER_POST_FAILED: 'oms.order.settlement.ledger_post_failed.v1',
 });
 
 async function emit(eventType, payload, meta) {

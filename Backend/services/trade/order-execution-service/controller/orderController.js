@@ -8,6 +8,7 @@ const { canTransition } = require('../services/orderSaga');
 const { computeOrderPricing } = require('../services/pricing');
 const { screenCounterparties } = require('../services/counterpartyScreening');
 const paymentClient = require('../services/paymentClient');
+const kycClient = require('../services/kycClient');
 const config = require('../config/appConfig');
 const fx = require('../providers/fx');
 
@@ -25,6 +26,10 @@ const createSchema = z.object({
     seller_name: z.string().optional(),
     buyer_country: z.string().length(2).optional(),
     seller_country: z.string().length(2).optional(),
+    // Optional KYC/IDV references (provider verification ids) for the placement gate.
+    // Bounded length — these are opaque provider ids, not free text (see KYC IDOR note below).
+    buyer_kyc_id: z.string().max(128).optional(),
+    seller_kyc_id: z.string().max(128).optional(),
     lines: z.array(z.object({
         product_id: z.string(), sku: z.string().optional(),
         hs_code: z.string().optional(),
@@ -80,6 +85,39 @@ const createOrder = async (req, res, next) => {
             if (screening.decision === 'BLOCK') {
                 const why = screening.blocked.map((b) => `${b.party.role}:${b.reason}`).join(', ');
                 return next(new AppError('SANCTIONS_BLOCK', `Order refused — sanctions screening (${why})`, 451));
+            }
+        }
+
+        // KYC gate (fail-closed): when enabled, both counterparties must hold an APPROVED KYC
+        // reference before any money-truth row is written. Missing ref / non-APPROVED status /
+        // unreachable provider all block by default (set KYC_FAIL_OPEN=true to flag-not-block).
+        //
+        // SECURITY/IDOR: kycId is caller-supplied and NOT tenant-bound — a valid APPROVED id from
+        // another tenant would pass. This gate is EXPERIMENTAL and must NOT be enabled in
+        // production until a tenant-bound KYC registry (owned by onboarding/account-service)
+        // verifies the reference belongs to this tenant. Default OFF (KYC_GATE).
+        if (config.kyc.enabled) {
+            const refs = [
+                { role: 'buyer', kycId: body.buyer_kyc_id },
+                { role: 'seller', kycId: body.seller_kyc_id },
+            ];
+            const blocked = [];
+            for (const ref of refs) {
+                if (!ref.kycId) {
+                    if (!config.kyc.failOpen) blocked.push(`${ref.role}:KYC_MISSING`);
+                    continue;
+                }
+                try {
+                    const result = await kycClient.getStatus({ kycId: ref.kycId, tenantId });
+                    if (!result || result.status !== 'APPROVED') {
+                        blocked.push(`${ref.role}:KYC_${(result && result.status) || 'UNKNOWN'}`);
+                    }
+                } catch (e) {
+                    if (!config.kyc.failOpen) blocked.push(`${ref.role}:KYC_UNAVAILABLE`);
+                }
+            }
+            if (blocked.length) {
+                return next(new AppError('KYC_BLOCK', `Order refused — KYC not verified (${blocked.join(', ')})`, 451));
             }
         }
 

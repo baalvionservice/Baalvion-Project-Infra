@@ -112,4 +112,13 @@ describe('handleRazorpayWebhook', () => {
         const out = await handleRazorpayWebhook(base, { verify: () => true, parse: () => ({ rawStatus: 'processed', idempotencyKey: 'order-abc' }), apply: applyErr });
         expect(out.status).toBe(500);
     });
+
+    test('forwards the ledgerPost intent from input through to applySettlement', async () => {
+        const ledgerPost = { debitAccountId: 'd', creditAccountId: 'c' };
+        await handleRazorpayWebhook(
+            { hash: 'h', ledgerPost },
+            { verify: () => true, parse: () => ({ rawStatus: 'processed', idempotencyKey: 'order-abc', providerId: 'p', amount: 1, currency: 'INR' }), apply },
+        );
+        expect(apply).toHaveBeenCalledWith(expect.objectContaining({ ledgerPost }));
+    });
 });

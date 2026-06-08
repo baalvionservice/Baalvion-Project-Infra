@@ -14,6 +14,25 @@ const config = require('../config/appConfig');
 const { runWithTenant } = require('@baalvion/tenancy');
 const { orderTransitionFor, canTransition } = require('../services/orderSaga');
 const { orderRefFromPayload } = require('../services/financeRef');
+const { OrderEvents } = require('../platform/events');
+
+const ACCT_UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Strip CR/LF/tab from dynamic values before logging (no log-injection / forging).
+const sanitize = (v) => String(v == null ? '' : v).replace(/[\r\n\t]/g, ' ');
+
+// Pure decision: may we write the settlement GL outbox row? Skips when (a) a prior
+// SETTLEMENT_LEDGER_POST row already exists (app-layer dedup — no second GL post intent),
+// (b) either chart-of-accounts id is not a UUID, or (c) the order's tenant id is not a UUID
+// (never post a GL entry under an ambiguous tenant). Unit-tested in isolation.
+function shouldWriteLedgerOutbox({ existing, debitAccountId, creditAccountId, tenantId }) {
+    if (existing) return { write: false, reason: 'dedup' };
+    if (!ACCT_UUID_RE.test(String(debitAccountId)) || !ACCT_UUID_RE.test(String(creditAccountId))) {
+        return { write: false, reason: 'non_uuid_accounts' };
+    }
+    if (!ACCT_UUID_RE.test(String(tenantId))) return { write: false, reason: 'non_uuid_tenant' };
+    return { write: true };
+}
 
 // Money is DECIMAL(20,2); compare at 2-dp with a 0.01 epsilon so float echoes
 // (e.g. 1917.5 vs 1917.50) and minor-unit conversion never spuriously mismatch.
@@ -77,6 +96,45 @@ async function cascadeOrderInTx(t, eventType, orderId, opts = {}) {
         order_id: String(order.id), tenant_id: order.tenant_id,
         state: tr.state, last_event: eventType, updated_at: new Date(),
     }, { transaction: t });
+
+    // GL double-entry (external rail only): on a CONFIRMED settlement, enqueue a ledger-post
+    // intent in the SAME tx (publish-iff-commit). A consumer posts it to the Java ledger
+    // (idempotent by transactionRef). Skipped unless both account ids resolve to UUIDs —
+    // a guessed/missing chart-of-accounts mapping must never produce a malformed GL row.
+    if (opts.ledgerPost && eventType === 'payments.transaction.completed') {
+        const debitAccountId = opts.ledgerPost.debitAccountId || order.buyer_org_id;
+        const creditAccountId = opts.ledgerPost.creditAccountId || order.seller_org_id;
+        // 1a: app-layer dedup — never enqueue a SECOND GL post intent for the same order, even
+        // if the cascade somehow re-runs (the consumer is idempotent by transactionRef, but a
+        // duplicate outbox row is a second money-movement signal we must not produce).
+        const existing = await db.OutboxEvent.findOne({
+            where: { aggregate_id: String(order.id), event_type: OrderEvents.SETTLEMENT_LEDGER_POST },
+            transaction: t,
+        });
+        const decision = shouldWriteLedgerOutbox({
+            existing, debitAccountId, creditAccountId, tenantId: order.tenant_id,
+        });
+        if (decision.write) {
+            await db.OutboxEvent.create({
+                tenant_id: order.tenant_id, aggregate_type: 'order', aggregate_id: String(order.id),
+                event_type: OrderEvents.SETTLEMENT_LEDGER_POST,
+                payload: {
+                    orderId: String(order.id), tenantId: order.tenant_id,
+                    amount: order.base_currency_amount, currency: order.base_currency,
+                    debitAccountId: String(debitAccountId), creditAccountId: String(creditAccountId),
+                    transactionRef: `oms-settle-${order.id}`,
+                },
+            }, { transaction: t });
+        } else if (decision.reason === 'dedup') {
+            // Already posted — nothing to do (no second GL intent, no error).
+        } else if (decision.reason === 'non_uuid_tenant') {
+            console.error(`[${config.service}] settlement GL post skipped for order ${sanitize(order.id)}: `
+                + 'tenant id is not a UUID (ambiguous tenant — refusing to post a GL entry)');
+        } else {
+            console.error(`[${config.service}] settlement GL post skipped for order ${sanitize(order.id)}: `
+                + 'debit/credit account ids are not UUIDs (configure LEDGER_SETTLEMENT_*_ACCOUNT_ID)');
+        }
+    }
     return { matched: true, orderId: order.id, state: tr.state };
 }
 
@@ -92,13 +150,13 @@ async function cascadeInTx(t, eventType, payload) {
  * a cascade failure rolls back the marker too so the sender can safely retry.
  * Reused by the RazorpayX settlement webhook.
  */
-async function applySettlement({ webhookId, eventType, hash, orderId, expect, requireForward, requirePending }) {
+async function applySettlement({ webhookId, eventType, hash, orderId, expect, requireForward, requirePending, ledgerPost }) {
     return runWithTenant({ tenantId: null, bypass: true }, () =>
         db.sequelize.transaction(async (t) => {
             // Marker commits FIRST. A guard rejection (returns {matched:false,rejected}, does
             // NOT throw) still commits the marker, so the same providerId is never reprocessed.
             await db.ProcessedWebhook.create({ webhook_id: webhookId, event_type: eventType, payload_hash: hash }, { transaction: t });
-            return cascadeOrderInTx(t, eventType, orderId, { expect, requireForward, requirePending });
+            return cascadeOrderInTx(t, eventType, orderId, { expect, requireForward, requirePending, ledgerPost });
         }));
 }
 
@@ -125,7 +183,7 @@ exports.financeEvents = async (req, res) => {
             return res.status(200).json({ ok: true, deduped: true, event: eventType });
         }
         // Cascade failed → marker rolled back. Signal retry (at-least-once delivery).
-        console.error(`[${config.service}] finance-event processing failed:`, eventType, err.message);
+        console.error(`[${config.service}] finance-event processing failed:`, sanitize(eventType), sanitize(err.message));
         return res.status(500).json({ error: { code: 'CASCADE_FAILED', message: 'event processing failed; retry' } });
     }
 };
@@ -133,3 +191,4 @@ exports.financeEvents = async (req, res) => {
 // Reused by the RazorpayX settlement webhook (controller/paymentWebhookController).
 exports.applySettlement = applySettlement;
 exports.cascadeOrderInTx = cascadeOrderInTx;
+exports.shouldWriteLedgerOutbox = shouldWriteLedgerOutbox;

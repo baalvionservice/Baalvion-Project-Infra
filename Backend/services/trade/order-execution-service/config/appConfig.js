@@ -1,8 +1,14 @@
 'use strict';
 const dotenv = require('dotenv');
 dotenv.config();
+const { parseHttpUrl } = require('../integrations/_shared/config');
 
 const parseList = (v, f = []) => (v ? v.split(',').map((s) => s.trim()).filter(Boolean) : f);
+
+// Allowed ledger entry types (mirrors the Java ledger-service EntryType enum). When the
+// GL-on-settlement post is enabled, an illegal entry type would be rejected by the ledger at
+// runtime on every settlement — fail fast at boot instead.
+const ALLOWED_LEDGER_ENTRY_TYPES = new Set(['PAYMENT', 'FEE', 'REVERSAL', 'SETTLEMENT', 'ESCROW', 'REFUND', 'ADJUSTMENT']);
 
 const DEV_DEFAULTS = new Set(['changeme', 'secret', 'change_me', 'dev_finance_webhook_secret_change_me_min32']);
 
@@ -49,6 +55,51 @@ function resolveRazorpayWebhookSecret() {
     console.error(`[appConfig] WARN: PAYMENT_PROVIDER=razorpayx but RAZORPAYX_WEBHOOK_SECRET is empty in env '${env}' — all settlement webhooks will 401.`);
     return value;
 }
+
+// LOW: validate the ledger entry type + service URL at boot when the GL-on-settlement post is
+// armed. A bad entry type or non-http(s) URL would otherwise fail (or, for the URL, risk an
+// SSRF) only at the first real settlement — surface it at boot instead.
+function validateLedgerConfig() {
+    if (process.env.LEDGER_POST_ON_SETTLEMENT !== 'true') return;
+    const entryType = process.env.LEDGER_SETTLEMENT_ENTRY_TYPE || 'SETTLEMENT';
+    if (!ALLOWED_LEDGER_ENTRY_TYPES.has(entryType)) {
+        throw new Error(`Illegal LEDGER_SETTLEMENT_ENTRY_TYPE: ${entryType} (allowed: ${[...ALLOWED_LEDGER_ENTRY_TYPES].join(', ')})`);
+    }
+    const ledgerUrl = process.env.LEDGER_SERVICE_URL || 'http://127.0.0.1:3016';
+    parseHttpUrl(ledgerUrl); // throws INVALID_URL on unparseable / non-http(s)
+}
+validateLedgerConfig();
+
+// KYC gate boot guards. The gate resolves a CALLER-SUPPLIED kycId directly against Onfido with
+// NO tenant binding — an APPROVED verification id from any org would gate-pass (IDOR). It is
+// EXPERIMENTAL and default-OFF; these guards make that limitation impossible to miss when armed,
+// and fail fast when the Onfido token is missing (the gate would otherwise block every order).
+function guardKycGate() {
+    if (process.env.KYC_GATE !== 'true') return;
+    const env = process.env.NODE_ENV || 'development';
+    if (SECRET_RELAXED_ENVS.has(env)) {
+        if (process.env.KYC_PROVIDER === 'onfido' && !(process.env.ONFIDO_API_TOKEN || '').trim()) {
+            console.error(`[appConfig] WARN: KYC_GATE=true with provider=onfido but ONFIDO_API_TOKEN is empty in env '${env}' — every order would block with KYC_UNAVAILABLE.`);
+        }
+        return;
+    }
+    // 5a: loud WARNING naming the IDOR — do NOT exit, but make it impossible to miss.
+    console.error('[appConfig] ============================================================');
+    console.error(`[appConfig] WARNING: KYC_GATE is ENABLED in a non-relaxed env ('${env}').`);
+    console.error('[appConfig] WARNING: kycId is CALLER-SUPPLIED and NOT tenant-bound — a valid');
+    console.error('[appConfig] WARNING: APPROVED KYC id from ANOTHER tenant would PASS this gate (IDOR).');
+    console.error('[appConfig] WARNING: This gate is EXPERIMENTAL and is NOT production-safe until a');
+    console.error('[appConfig] WARNING: tenant-bound KYC registry (onboarding/account-service) verifies');
+    console.error('[appConfig] WARNING: the reference belongs to this tenant. Do NOT rely on it.');
+    console.error('[appConfig] ============================================================');
+    // 5b: the Onfido token is mandatory when the gate is on — otherwise EVERY order blocks at
+    // runtime with KYC_UNAVAILABLE. Fail fast (non-relaxed env only).
+    if ((process.env.KYC_PROVIDER || 'onfido') === 'onfido' && !(process.env.ONFIDO_API_TOKEN || '').trim()) {
+        console.error(`[appConfig] FATAL: KYC_GATE=true and KYC_PROVIDER=onfido but ONFIDO_API_TOKEN is empty in env '${env}' — the gate would block every order.`);
+        process.exit(1);
+    }
+}
+guardKycGate();
 
 module.exports = {
     service: process.env.SERVICE_NAME || 'order-execution-service',
@@ -126,6 +177,29 @@ module.exports = {
         failOpen: process.env.SANCTIONS_FAIL_OPEN === 'true',
         // A potential (non-confirmed) match blocks by default; set false to allow + flag for review.
         blockOnPotential: process.env.SANCTIONS_BLOCK_ON_POTENTIAL !== 'false',
+    },
+    // Ledger GL double-entry on settlement. The 'internal' rail already posts the ledger
+    // via the Java Kafka choreography; this is for the 'razorpayx' rail, which otherwise
+    // moves money WITHOUT a GL record. OFF by default: posting needs a real chart-of-accounts
+    // mapping (debit/credit account UUIDs) that finance must configure — guessed accounts
+    // must never hit a production ledger.
+    ledger: {
+        postOnSettlement: process.env.LEDGER_POST_ON_SETTLEMENT === 'true',
+        url: process.env.LEDGER_SERVICE_URL || 'http://127.0.0.1:3016',
+        timeoutMs: Number(process.env.LEDGER_TIMEOUT_MS || 5000),
+        entryType: process.env.LEDGER_SETTLEMENT_ENTRY_TYPE || 'SETTLEMENT',
+        // Explicit chart-of-accounts UUIDs; fall back to the order's buyer/seller org ids.
+        debitAccountId: process.env.LEDGER_SETTLEMENT_DEBIT_ACCOUNT_ID || null,
+        creditAccountId: process.env.LEDGER_SETTLEMENT_CREDIT_ACCOUNT_ID || null,
+    },
+    // KYC/IDV gate at order placement (fail-closed). OFF by default. When enabled, an order
+    // must carry APPROVED KYC references for its named counterparties before any money-truth
+    // row is written — mirrors the sanctions gate. Verified via the real Onfido adapter.
+    kyc: {
+        enabled: process.env.KYC_GATE === 'true',
+        provider: process.env.KYC_PROVIDER || 'onfido',
+        // Fail-CLOSED: a missing/non-APPROVED KYC reference (or an unreachable provider) blocks.
+        failOpen: process.env.KYC_FAIL_OPEN === 'true',
     },
     // DEV/trader-wedge only: simulate payment completion so orders advance placed→payment_confirmed
     // without the full Java payment rails. OFF by default; real payment-service emits the event in prod.

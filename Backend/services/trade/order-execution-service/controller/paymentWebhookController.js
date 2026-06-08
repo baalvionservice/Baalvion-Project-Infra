@@ -68,6 +68,8 @@ async function handleRazorpayWebhook(input, deps) {
             expect: { amount: parsed.amount, currency: parsed.currency },
             requireForward: true,
             requirePending: eventType === 'payments.transaction.completed',
+            // GL double-entry intent (external rail only) — enqueued in the cascade tx when configured.
+            ledgerPost: input.ledgerPost,
         });
         // A guard rejected the event (amount/currency mismatch, illegal transition, not-pending).
         // This is permanent — ack 200 so RazorpayX stops retrying — but the order did NOT advance.
@@ -82,7 +84,7 @@ async function handleRazorpayWebhook(input, deps) {
         if (err && err.name === 'SequelizeUniqueConstraintError') {
             return { status: 200, json: { ok: true, deduped: true, event: eventType } };
         }
-        console.error(`[${config.service}] razorpay webhook cascade failed:`, eventType, err.message);
+        console.error(`[${config.service}] razorpay webhook cascade failed:`, sanitizeLog(eventType), sanitizeLog(err.message));
         return { status: 500, json: { error: { code: 'CASCADE_FAILED', message: 'event processing failed; retry' } } };
     }
 }
@@ -100,8 +102,11 @@ async function razorpayWebhook(req, res) {
     const hash = crypto.createHash('sha256').update(raw).digest('hex');
     // 2A: webhookId is derived INSIDE handleRazorpayWebhook from signed body data only.
     // The X-Razorpay-Event-Id header is NOT HMAC-covered, so it is intentionally not passed.
+    const ledgerPost = config.ledger.postOnSettlement
+        ? { debitAccountId: config.ledger.debitAccountId, creditAccountId: config.ledger.creditAccountId }
+        : null;
     const out = await handleRazorpayWebhook(
-        { hash },
+        { hash, ledgerPost },
         {
             verify: () => verifyRazorpayWebhook({ rawBody: raw, signatureHeader, secret }),
             parse: () => parsePayoutEvent(req.body || {}),
