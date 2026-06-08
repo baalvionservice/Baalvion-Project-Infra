@@ -73,12 +73,20 @@ const FINANCE = {
 
 const svcOf = (url) => (url.split('?')[0].split('/')[1] || '');
 
+// R3 cutover: order lifecycle is owned by the GTOS order-execution-service (schema `oms`,
+// money-truth + saga). Only the /trade/v1/orders subtree moves there; RFQ/quote/deal/listing/
+// escrow stay on the legacy trade-service. The standard /<svc>-strip rewrite still applies
+// (it produces /v1/orders..., which order-execution mounts), so only the target differs.
+const ORDER_EXECUTION = process.env.SVC_ORDER_EXECUTION || 'http://localhost:3052';
+const isTradeOrders = (url) => /^\/trade\/v1\/orders(\/|$)/.test(String(url).split('?')[0]);
+
 const proxy = createProxyMiddleware({
   changeOrigin: true,
   // mounted at /api → req.url is /<svc>/... ; resolve the per-service target.
-  router: (req) => FINANCE[svcOf(req.url)] || TARGETS[svcOf(req.url)],
+  router: (req) => (isTradeOrders(req.url) ? ORDER_EXECUTION : (FINANCE[svcOf(req.url)] || TARGETS[svcOf(req.url)])),
   // Legacy services: strip the /<svc> prefix (per-backend base path lives on the target).
   // Finance services: KEEP the segment and prepend /api/v1 (the Spring controller base path).
+  // Trade orders take the legacy strip branch → /v1/orders... (order-execution's mount).
   pathRewrite: (path) => (FINANCE[svcOf(path)] ? '/api/v1' + path : (path.replace(/^\/[^/?]+/, '') || '/')),
   // http-proxy-middleware v3: event handlers live under `on` (the v2 top-level
   // onProxyReq/onError are ignored, which silently disables the trust boundary).
