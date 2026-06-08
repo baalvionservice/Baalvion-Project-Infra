@@ -6,6 +6,8 @@ const { AppError } = require('../utils/errors');
 const { OrderEvents } = require('../platform/events');
 const { canTransition } = require('../services/orderSaga');
 const { computeOrderPricing } = require('../services/pricing');
+const { screenCounterparties } = require('../services/counterpartyScreening');
+const config = require('../config/appConfig');
 const fx = require('../providers/fx');
 
 const tenantOf = (req) => (req.auth && (req.auth.tenantId || req.auth.orgId)) || null;
@@ -17,6 +19,11 @@ const createSchema = z.object({
     deal_id: z.string().optional(),
     buyer_org_id: z.string().optional(),
     seller_org_id: z.string().optional(),
+    // Counterparty legal names + ISO country for R8 sanctions screening at placement.
+    buyer_name: z.string().optional(),
+    seller_name: z.string().optional(),
+    buyer_country: z.string().length(2).optional(),
+    seller_country: z.string().length(2).optional(),
     lines: z.array(z.object({
         product_id: z.string(), sku: z.string().optional(),
         hs_code: z.string().optional(),
@@ -56,6 +63,25 @@ const createOrder = async (req, res, next) => {
         const tenantId = tenantOf(req);
         if (!tenantId) return next(new AppError('TENANT_REQUIRED', 'Tenant context required', 400));
 
+        // R8: screen counterparties BEFORE writing any money-truth row. A confirmed (or,
+        // by policy, potential) sanctions match refuses the trade; an unreachable engine
+        // fails closed by default. The engine persists its own audit row + event.
+        let screeningSummary = null;
+        if (config.sanctions.enabled) {
+            const screening = await screenCounterparties({
+                tenantId,
+                parties: [
+                    { role: 'buyer', name: body.buyer_name, country: body.buyer_country },
+                    { role: 'seller', name: body.seller_name, country: body.seller_country },
+                ],
+            });
+            screeningSummary = screening.screened;
+            if (screening.decision === 'BLOCK') {
+                const why = screening.blocked.map((b) => `${b.party.role}:${b.reason}`).join(', ');
+                return next(new AppError('SANCTIONS_BLOCK', `Order refused — sanctions screening (${why})`, 451));
+            }
+        }
+
         // Money truth (R3): resolve the live FX rate (order currency → base), then compute the
         // total server-side. FX failure degrades to a fallback rate (provider is fail-open), it
         // never blocks order placement; the rate used is persisted for audit.
@@ -91,6 +117,7 @@ const createOrder = async (req, res, next) => {
                     totalValue: pricing.totalValue, currency: pricing.currency,
                     baseCurrencyAmount: pricing.baseCurrencyAmount, baseCurrency: pricing.baseCurrency,
                     fxRateUsed: pricing.fxRateUsed,
+                    sanctionsScreening: screeningSummary,
                 },
             }, { transaction: t });
             await db.OrderSagaState.create({ order_id: String(o.id), tenant_id: tenantId, state: 'CREATED', last_event: OrderEvents.CREATED }, { transaction: t });

@@ -62,6 +62,17 @@ module.exports = {
     startEventConsumer: process.env.EVENT_CONSUMER !== 'false',
     // Periodic money-truth / saga / outbox drift sweep (detection-only).
     startReconciliation: process.env.RECONCILIATION !== 'false',
+    // R8 sanctions screening (counterparty screening at order placement).
+    sanctions: {
+        enabled: process.env.SANCTIONS_SCREENING !== 'false',
+        url: process.env.RISK_SERVICE_URL || 'http://127.0.0.1:3035',
+        timeoutMs: Number(process.env.SANCTIONS_TIMEOUT_MS || 4000),
+        // Fail-CLOSED by default: if the screening engine is unreachable, block the order
+        // rather than let a potentially-sanctioned counterparty through (strict-liability).
+        failOpen: process.env.SANCTIONS_FAIL_OPEN === 'true',
+        // A potential (non-confirmed) match blocks by default; set false to allow + flag for review.
+        blockOnPotential: process.env.SANCTIONS_BLOCK_ON_POTENTIAL !== 'false',
+    },
     // DEV/trader-wedge only: simulate payment completion so orders advance placed→payment_confirmed
     // without the full Java payment rails. OFF by default; real payment-service emits the event in prod.
     startPaymentSimulator: process.env.PAYMENT_SIMULATOR === 'true',
