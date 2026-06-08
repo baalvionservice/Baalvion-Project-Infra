@@ -13,8 +13,16 @@ CREATE TABLE IF NOT EXISTS oms.orders (
   buyer_org_id   text,
   seller_org_id  text,
   lines          jsonb NOT NULL DEFAULT '[]',
-  total_value    numeric(20,2) NOT NULL DEFAULT 0,
-  currency       varchar(10) NOT NULL DEFAULT 'USD',
+  -- Money-truth breakdown (R3): all server-computed (services/pricing.js), never client-supplied.
+  subtotal             numeric(20,2) NOT NULL DEFAULT 0,
+  duty_amount          numeric(20,2) NOT NULL DEFAULT 0,
+  tax_amount           numeric(20,2) NOT NULL DEFAULT 0,
+  total_value          numeric(20,2) NOT NULL DEFAULT 0,
+  currency             varchar(10) NOT NULL DEFAULT 'USD',
+  base_currency        varchar(10) NOT NULL DEFAULT 'USD',
+  base_currency_amount numeric(20,2) NOT NULL DEFAULT 0,
+  fx_rate_used         numeric(18,8) NOT NULL DEFAULT 1,
+  destination_country  varchar(2),
   status         text NOT NULL DEFAULT 'draft'
                  CHECK (status IN ('draft','placed','payment_confirmed','in_fulfillment','shipped','delivered','closed','cancelled')),
   payment_status text NOT NULL DEFAULT 'unpaid'
@@ -23,6 +31,16 @@ CREATE TABLE IF NOT EXISTS oms.orders (
   updated_at     timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_oes_orders_tenant ON oms.orders (tenant_id);
+
+-- Additive + idempotent: a DB created before money-truth columns existed gets them here,
+-- so re-running 001 upgrades an already-migrated oms.orders without a data wipe.
+ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS subtotal             numeric(20,2) NOT NULL DEFAULT 0;
+ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS duty_amount          numeric(20,2) NOT NULL DEFAULT 0;
+ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS tax_amount           numeric(20,2) NOT NULL DEFAULT 0;
+ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS base_currency        varchar(10) NOT NULL DEFAULT 'USD';
+ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS base_currency_amount numeric(20,2) NOT NULL DEFAULT 0;
+ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS fx_rate_used         numeric(18,8) NOT NULL DEFAULT 1;
+ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS destination_country  varchar(2);
 CREATE INDEX IF NOT EXISTS idx_oes_orders_status ON oms.orders (status);
 
 CREATE TABLE IF NOT EXISTS oms.outbox_events (

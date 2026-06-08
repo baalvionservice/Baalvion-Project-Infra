@@ -5,8 +5,13 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { OrderEvents } = require('../platform/events');
 const { canTransition } = require('../services/orderSaga');
+const { computeOrderPricing } = require('../services/pricing');
+const fx = require('../providers/fx');
 
 const tenantOf = (req) => (req.auth && (req.auth.tenantId || req.auth.orgId)) || null;
+
+// Platform settlement/base currency for normalization (auditable ledger).
+const BASE_CURRENCY = (process.env.BASE_CURRENCY || 'USD').toUpperCase();
 
 const createSchema = z.object({
     deal_id: z.string().optional(),
@@ -14,9 +19,12 @@ const createSchema = z.object({
     seller_org_id: z.string().optional(),
     lines: z.array(z.object({
         product_id: z.string(), sku: z.string().optional(),
+        hs_code: z.string().optional(),
         quantity: z.number().positive(), unit_price: z.number().nonnegative(),
     })).default([]),
     currency: z.string().default('USD'),
+    destination_country: z.string().length(2).optional(),
+    // NOTE: any client-supplied total is deliberately ignored — the server computes it (R3).
 });
 
 // F2: reads run inside a tenant transaction so the RLS GUC (app.current_tenant)
@@ -47,18 +55,43 @@ const createOrder = async (req, res, next) => {
         const body = createSchema.parse(req.body || {});
         const tenantId = tenantOf(req);
         if (!tenantId) return next(new AppError('TENANT_REQUIRED', 'Tenant context required', 400));
-        const total = body.lines.reduce((s, l) => s + l.quantity * l.unit_price, 0);
+
+        // Money truth (R3): resolve the live FX rate (order currency → base), then compute the
+        // total server-side. FX failure degrades to a fallback rate (provider is fail-open), it
+        // never blocks order placement; the rate used is persisted for audit.
+        const currency = String(body.currency || 'USD').toUpperCase();
+        let fxRate = 1;
+        if (currency !== BASE_CURRENCY) {
+            const quote = await fx.getRate(currency, BASE_CURRENCY);
+            fxRate = quote.rate;
+        }
+        const pricing = computeOrderPricing({
+            lines: body.lines,
+            currency,
+            baseCurrency: BASE_CURRENCY,
+            destinationCountry: body.destination_country,
+            fxRate,
+        });
 
         const order = await db.sequelize.transaction(async (t) => {
             const o = await db.Order.create({
                 tenant_id: tenantId, deal_id: body.deal_id, buyer_org_id: body.buyer_org_id,
-                seller_org_id: body.seller_org_id, lines: body.lines, total_value: total,
-                currency: body.currency, status: 'placed', payment_status: 'unpaid',
+                seller_org_id: body.seller_org_id, lines: body.lines,
+                subtotal: pricing.subtotal, duty_amount: pricing.dutyAmount, tax_amount: pricing.taxAmount,
+                total_value: pricing.totalValue, currency: pricing.currency,
+                base_currency: pricing.baseCurrency, base_currency_amount: pricing.baseCurrencyAmount,
+                fx_rate_used: pricing.fxRateUsed, destination_country: body.destination_country,
+                status: 'placed', payment_status: 'unpaid',
             }, { transaction: t });
             await db.OutboxEvent.create({
                 tenant_id: tenantId, aggregate_type: 'order', aggregate_id: String(o.id),
                 event_type: OrderEvents.CREATED,
-                payload: { orderId: o.id, buyerOrgId: o.buyer_org_id, sellerOrgId: o.seller_org_id, totalValue: total, currency: o.currency },
+                payload: {
+                    orderId: o.id, buyerOrgId: o.buyer_org_id, sellerOrgId: o.seller_org_id,
+                    totalValue: pricing.totalValue, currency: pricing.currency,
+                    baseCurrencyAmount: pricing.baseCurrencyAmount, baseCurrency: pricing.baseCurrency,
+                    fxRateUsed: pricing.fxRateUsed,
+                },
             }, { transaction: t });
             await db.OrderSagaState.create({ order_id: String(o.id), tenant_id: tenantId, state: 'CREATED', last_event: OrderEvents.CREATED }, { transaction: t });
             return o;
@@ -82,7 +115,13 @@ const confirmPayment = async (req, res, next) => {
             await db.OutboxEvent.create({
                 tenant_id: tenantId, aggregate_type: 'order', aggregate_id: String(o.id),
                 event_type: 'gtos.order.payment_requested.v1',
-                payload: { orderId: o.id, amount: o.total_value, currency: o.currency },
+                // Carry both the order-currency amount and the normalized base amount so the
+                // finance suite settles against an auditable figure that matches the order ledger.
+                payload: {
+                    orderId: o.id, amount: o.total_value, currency: o.currency,
+                    baseCurrencyAmount: o.base_currency_amount, baseCurrency: o.base_currency,
+                    fxRateUsed: o.fx_rate_used,
+                },
             }, { transaction: t });
             return o;
         });
