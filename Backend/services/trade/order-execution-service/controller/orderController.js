@@ -8,11 +8,42 @@ const { canTransition } = require('../services/orderSaga');
 const { computeOrderPricing } = require('../services/pricing');
 const { screenCounterparties } = require('../services/counterpartyScreening');
 const paymentClient = require('../services/paymentClient');
-const kycClient = require('../services/kycClient');
+const kycRegistry = require('../services/kycRegistry');
 const config = require('../config/appConfig');
 const fx = require('../providers/fx');
 
 const tenantOf = (req) => (req.auth && (req.auth.tenantId || req.auth.orgId)) || null;
+
+/**
+ * PURE KYC-gate decision (fail-closed). Returns an array of blocked reason strings (`role:KYC_*`);
+ * an empty array means the gate passes. Extracted so the core gate behaviour is unit-testable
+ * without the DB/Express layers. `requireApprovedFn` is a tenant-bound closure over
+ * kycRegistry.requireApproved (so tenant scoping is decided by the caller, never weakened here).
+ *
+ * @param {{ enabled:boolean, failOpen:boolean, refs:Array<{role:string, subjectRef?:string}> }} cfg
+ * @param {(args:{subjectRef:string}) => Promise<{approved:boolean, status:string}>} requireApprovedFn
+ * @returns {Promise<string[]>} blocked reasons (empty = allowed)
+ */
+async function evaluateKycGate({ enabled, failOpen, refs }, requireApprovedFn) {
+    if (!enabled) return [];
+    const blocked = [];
+    for (const ref of refs) {
+        if (!ref.subjectRef) {
+            if (!failOpen) blocked.push(`${ref.role}:KYC_MISSING`);
+            continue;
+        }
+        let result;
+        try {
+            result = await requireApprovedFn({ subjectRef: ref.subjectRef });
+        } catch (e) {
+            // Registry unreachable -> fail closed (block) unless explicitly flagged to fail open.
+            if (!failOpen) blocked.push(`${ref.role}:KYC_UNAVAILABLE`);
+            continue;
+        }
+        if (!result.approved) blocked.push(`${ref.role}:KYC_${result.status}`);
+    }
+    return blocked;
+}
 
 // Platform settlement/base currency for normalization (auditable ledger).
 const BASE_CURRENCY = (process.env.BASE_CURRENCY || 'USD').toUpperCase();
@@ -26,10 +57,12 @@ const createSchema = z.object({
     seller_name: z.string().optional(),
     buyer_country: z.string().length(2).optional(),
     seller_country: z.string().length(2).optional(),
-    // Optional KYC/IDV references (provider verification ids) for the placement gate.
-    // Bounded length — these are opaque provider ids, not free text (see KYC IDOR note below).
-    buyer_kyc_id: z.string().max(128).optional(),
-    seller_kyc_id: z.string().max(128).optional(),
+    // KYC subject refs for the placement gate. These are TENANT-OWNED subject identifiers
+    // (e.g. the counterparty org id), NOT provider verification ids. The gate resolves the
+    // tenant-bound registry binding (tenant_id, subject_ref) -> status server-side, so a
+    // caller can never reference another tenant's verification (closes the prior IDOR).
+    buyer_kyc_ref: z.string().max(128).optional(),
+    seller_kyc_ref: z.string().max(128).optional(),
     lines: z.array(z.object({
         product_id: z.string(), sku: z.string().optional(),
         hs_code: z.string().optional(),
@@ -89,33 +122,24 @@ const createOrder = async (req, res, next) => {
         }
 
         // KYC gate (fail-closed): when enabled, both counterparties must hold an APPROVED KYC
-        // reference before any money-truth row is written. Missing ref / non-APPROVED status /
-        // unreachable provider all block by default (set KYC_FAIL_OPEN=true to flag-not-block).
-        //
-        // SECURITY/IDOR: kycId is caller-supplied and NOT tenant-bound — a valid APPROVED id from
-        // another tenant would pass. This gate is EXPERIMENTAL and must NOT be enabled in
-        // production until a tenant-bound KYC registry (owned by onboarding/account-service)
-        // verifies the reference belongs to this tenant. Default OFF (KYC_GATE).
+        // verification before any money-truth row is written. This is now TENANT-BOUND — the gate
+        // resolves the platform-owned registry binding (tenant_id, subject_ref) -> status via
+        // kycRegistry.requireApproved, which filters `WHERE tenant_id = <order tenant>` (+ RLS).
+        // The Onfido verification id is stored server-side and is NEVER accepted here, so a valid
+        // APPROVED verification from another tenant can no longer satisfy this gate (IDOR closed).
+        // Missing ref / non-APPROVED status / unavailable registry all block by default
+        // (set KYC_FAIL_OPEN=true to flag-not-block).
         if (config.kyc.enabled) {
             const refs = [
-                { role: 'buyer', kycId: body.buyer_kyc_id },
-                { role: 'seller', kycId: body.seller_kyc_id },
+                { role: 'buyer', subjectRef: body.buyer_kyc_ref || body.buyer_org_id },
+                { role: 'seller', subjectRef: body.seller_kyc_ref || body.seller_org_id },
             ];
-            const blocked = [];
-            for (const ref of refs) {
-                if (!ref.kycId) {
-                    if (!config.kyc.failOpen) blocked.push(`${ref.role}:KYC_MISSING`);
-                    continue;
-                }
-                try {
-                    const result = await kycClient.getStatus({ kycId: ref.kycId, tenantId });
-                    if (!result || result.status !== 'APPROVED') {
-                        blocked.push(`${ref.role}:KYC_${(result && result.status) || 'UNKNOWN'}`);
-                    }
-                } catch (e) {
-                    if (!config.kyc.failOpen) blocked.push(`${ref.role}:KYC_UNAVAILABLE`);
-                }
-            }
+            // requireApproved is bound to THIS order's tenant — the closure preserves tenant scoping
+            // (WHERE tenant_id + subject_ref under runWithTenant); the pure helper never sees tenantId.
+            const blocked = await evaluateKycGate(
+                { enabled: true, failOpen: config.kyc.failOpen, refs },
+                ({ subjectRef }) => kycRegistry.requireApproved({ tenantId, subjectRef }),
+            );
             if (blocked.length) {
                 return next(new AppError('KYC_BLOCK', `Order refused — KYC not verified (${blocked.join(', ')})`, 451));
             }
@@ -224,4 +248,4 @@ const getTimeline = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listOrders, getOrder, createOrder, confirmPayment, getTimeline, canTransition };
+module.exports = { listOrders, getOrder, createOrder, confirmPayment, getTimeline, canTransition, evaluateKycGate };

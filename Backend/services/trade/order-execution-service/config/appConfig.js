@@ -70,34 +70,22 @@ function validateLedgerConfig() {
 }
 validateLedgerConfig();
 
-// KYC gate boot guards. The gate resolves a CALLER-SUPPLIED kycId directly against Onfido with
-// NO tenant binding — an APPROVED verification id from any org would gate-pass (IDOR). It is
-// EXPERIMENTAL and default-OFF; these guards make that limitation impossible to miss when armed,
-// and fail fast when the Onfido token is missing (the gate would otherwise block every order).
+// KYC gate boot guard. The gate is now TENANT-BOUND: it resolves a platform-owned registry
+// binding (tenant_id, subject_ref) -> status (services/kycRegistry), filtering by the order's
+// tenant (+ RLS), and the provider verification id is stored server-side — so the prior
+// caller-supplied-kycId IDOR is closed. The only remaining boot concern is that start/refresh
+// still need the Onfido token, so fail fast when it is missing in a non-relaxed env.
 function guardKycGate() {
     if (process.env.KYC_GATE !== 'true') return;
     const env = process.env.NODE_ENV || 'development';
+    if ((process.env.KYC_PROVIDER || 'onfido') !== 'onfido') return;
+    if ((process.env.ONFIDO_API_TOKEN || '').trim()) return;
     if (SECRET_RELAXED_ENVS.has(env)) {
-        if (process.env.KYC_PROVIDER === 'onfido' && !(process.env.ONFIDO_API_TOKEN || '').trim()) {
-            console.error(`[appConfig] WARN: KYC_GATE=true with provider=onfido but ONFIDO_API_TOKEN is empty in env '${env}' — every order would block with KYC_UNAVAILABLE.`);
-        }
+        console.error(`[appConfig] WARN: KYC_GATE=true with provider=onfido but ONFIDO_API_TOKEN is empty in env '${env}' — KYC start/refresh would fail (the registry gate still blocks un-verified subjects).`);
         return;
     }
-    // 5a: loud WARNING naming the IDOR — do NOT exit, but make it impossible to miss.
-    console.error('[appConfig] ============================================================');
-    console.error(`[appConfig] WARNING: KYC_GATE is ENABLED in a non-relaxed env ('${env}').`);
-    console.error('[appConfig] WARNING: kycId is CALLER-SUPPLIED and NOT tenant-bound — a valid');
-    console.error('[appConfig] WARNING: APPROVED KYC id from ANOTHER tenant would PASS this gate (IDOR).');
-    console.error('[appConfig] WARNING: This gate is EXPERIMENTAL and is NOT production-safe until a');
-    console.error('[appConfig] WARNING: tenant-bound KYC registry (onboarding/account-service) verifies');
-    console.error('[appConfig] WARNING: the reference belongs to this tenant. Do NOT rely on it.');
-    console.error('[appConfig] ============================================================');
-    // 5b: the Onfido token is mandatory when the gate is on — otherwise EVERY order blocks at
-    // runtime with KYC_UNAVAILABLE. Fail fast (non-relaxed env only).
-    if ((process.env.KYC_PROVIDER || 'onfido') === 'onfido' && !(process.env.ONFIDO_API_TOKEN || '').trim()) {
-        console.error(`[appConfig] FATAL: KYC_GATE=true and KYC_PROVIDER=onfido but ONFIDO_API_TOKEN is empty in env '${env}' — the gate would block every order.`);
-        process.exit(1);
-    }
+    console.error(`[appConfig] FATAL: KYC_GATE=true and KYC_PROVIDER=onfido but ONFIDO_API_TOKEN is empty in env '${env}' — KYC verifications cannot be started/refreshed.`);
+    process.exit(1);
 }
 guardKycGate();
 
@@ -192,14 +180,20 @@ module.exports = {
         debitAccountId: process.env.LEDGER_SETTLEMENT_DEBIT_ACCOUNT_ID || null,
         creditAccountId: process.env.LEDGER_SETTLEMENT_CREDIT_ACCOUNT_ID || null,
     },
-    // KYC/IDV gate at order placement (fail-closed). OFF by default. When enabled, an order
-    // must carry APPROVED KYC references for its named counterparties before any money-truth
-    // row is written — mirrors the sanctions gate. Verified via the real Onfido adapter.
+    // KYC/IDV gate at order placement (fail-closed). OFF by default. When enabled, both named
+    // counterparties must hold an APPROVED verification in the TENANT-BOUND registry
+    // (services/kycRegistry) before any money-truth row is written — mirrors the sanctions gate.
+    // The registry binds (tenant_id, subject_ref) -> Onfido verification id + status server-side,
+    // so the gate is resolved by the order's tenant, never by a caller-supplied provider id.
     kyc: {
         enabled: process.env.KYC_GATE === 'true',
         provider: process.env.KYC_PROVIDER || 'onfido',
-        // Fail-CLOSED: a missing/non-APPROVED KYC reference (or an unreachable provider) blocks.
+        // Fail-CLOSED: a missing/non-APPROVED KYC binding (or an unavailable registry) blocks.
         failOpen: process.env.KYC_FAIL_OPEN === 'true',
+        // HMAC key for inbound Onfido webhook signatures (X-SHA2-Signature).
+        webhookToken: process.env.ONFIDO_WEBHOOK_TOKEN || '',
+        // When set, GET status auto-refreshes a non-terminal binding from the provider.
+        autoRefresh: process.env.KYC_AUTO_REFRESH === 'true',
     },
     // DEV/trader-wedge only: simulate payment completion so orders advance placed→payment_confirmed
     // without the full Java payment rails. OFF by default; real payment-service emits the event in prod.
