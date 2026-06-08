@@ -97,7 +97,7 @@ services:
   payment-service:
     build: { context: ., args: { SERVICE: payment-service } }
     environment: { <<: *service-env, PORT: "3015", REDIS_HOST: redis, REDIS_PORT: "6379" }
-    ports: ["3015:3015"]
+    ports: ["${PAYMENT_HOST_PORT:-3015}:3015"]
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_started }
@@ -130,7 +130,7 @@ services:
   audit-service:
     build: { context: ., args: { SERVICE: audit-service } }
     environment: { <<: *service-env, PORT: "3020" }
-    ports: ["3020:3020"]
+    ports: ["${AUDIT_HOST_PORT:-3020}:3020"]
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_started }
