@@ -25,6 +25,14 @@ x-service-env: &service-env
   # Local dev has no IdP — run permissive. In real environments set APP_SECURITY_ENABLED=true
   # and OAUTH_ISSUER_URI / OAUTH_JWK_SET_URI to point at the platform's RS256 JWKS (auth-service).
   APP_SECURITY_ENABLED: ${APP_SECURITY_ENABLED:-false}
+  # Services share one Postgres (separate schemas); once any service has populated the
+  # default `public` schema, a sibling's first Flyway run refuses with "non-empty schema,
+  # no history table". Baseline-on-migrate lets each service initialize its own history
+  # against the shared DB. Safe: each service's migrations target its own schema.
+  SPRING_FLYWAY_BASELINE_ON_MIGRATE: ${SPRING_FLYWAY_BASELINE_ON_MIGRATE:-true}
+  # Baseline at v0 so a service's own V1+ migrations still apply (default baseline=1
+  # would mark V1 as already-applied and skip table creation on the shared DB).
+  SPRING_FLYWAY_BASELINE_VERSION: ${SPRING_FLYWAY_BASELINE_VERSION:-0}
 
 services:
   postgres:
@@ -80,7 +88,8 @@ services:
   ledger-service:
     build: { context: ., args: { SERVICE: ledger-service } }
     environment: { <<: *service-env, PORT: "3014" }
-    ports: ["3014:3014"]
+    # Host port overridable (LEDGER_HOST_PORT) to coexist with a process already on 3014.
+    ports: ["${LEDGER_HOST_PORT:-3014}:3014"]
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_started }
