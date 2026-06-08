@@ -106,7 +106,7 @@ services:
   escrow-service:
     build: { context: ., args: { SERVICE: escrow-service } }
     environment: { <<: *service-env, PORT: "3017" }
-    ports: ["3017:3017"]
+    ports: ["${ESCROW_HOST_PORT:-3017}:3017"]
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_started }
@@ -114,7 +114,7 @@ services:
   settlement-service:
     build: { context: ., args: { SERVICE: settlement-service } }
     environment: { <<: *service-env, PORT: "3018" }
-    ports: ["3018:3018"]
+    ports: ["${SETTLEMENT_HOST_PORT:-3018}:3018"]
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_started }
