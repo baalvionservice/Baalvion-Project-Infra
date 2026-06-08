@@ -34,6 +34,22 @@ function requireSecret(envVar, devDefault, label) {
     return value || devDefault;
 }
 
+// 7A: when the RazorpayX rail is live, an empty inbound-webhook secret means every
+// settlement webhook silently 401s (real money never settles back). Fail-fast in a
+// non-relaxed env (mirrors requireSecret); WARN in dev/test so it stays runnable.
+function resolveRazorpayWebhookSecret() {
+    const value = process.env.RAZORPAYX_WEBHOOK_SECRET || process.env.RAZORPAY_WEBHOOK_SECRET || '';
+    if ((process.env.PAYMENT_PROVIDER || 'internal') !== 'razorpayx') return value;
+    if (value && value.trim() !== '') return value;
+    const env = process.env.NODE_ENV || 'development';
+    if (!SECRET_RELAXED_ENVS.has(env)) {
+        console.error(`[appConfig] FATAL: RazorpayX webhook secret (RAZORPAYX_WEBHOOK_SECRET) missing while PAYMENT_PROVIDER=razorpayx in env '${env}'.`);
+        process.exit(1);
+    }
+    console.error(`[appConfig] WARN: PAYMENT_PROVIDER=razorpayx but RAZORPAYX_WEBHOOK_SECRET is empty in env '${env}' — all settlement webhooks will 401.`);
+    return value;
+}
+
 module.exports = {
     service: process.env.SERVICE_NAME || 'order-execution-service',
     version: '1.0.0',
@@ -87,10 +103,22 @@ module.exports = {
         enabled: process.env.PAYMENT_INITIATE !== 'false',
         url: process.env.PAYMENT_SERVICE_URL || 'http://127.0.0.1:3015',
         timeoutMs: Number(process.env.PAYMENT_TIMEOUT_MS || 5000),
+        // Rail selection. 'internal' = Java payment-service (Kafka -> ledger double-entry,
+        // settled back via the signed /finance-events webhook). 'razorpayx' = REAL RazorpayX
+        // payout rail, settled back via the /webhooks/razorpay HMAC webhook. Default keeps
+        // the existing internal path so flipping to a real rail is an explicit env choice.
+        provider: process.env.PAYMENT_PROVIDER || 'internal',
+        // Verifies inbound RazorpayX/Razorpay settlement webhooks (X-Razorpay-Signature).
+        // 7A: boot fail-fast (non-relaxed env) when provider=razorpayx and the secret is empty.
+        razorpayWebhookSecret: resolveRazorpayWebhookSecret(),
     },
     // R8 sanctions screening (counterparty screening at order placement).
     sanctions: {
         enabled: process.env.SANCTIONS_SCREENING !== 'false',
+        // Screening backend. 'risk-service' = the in-repo Jaro-Winkler watchlist. 'opensanctions'
+        // = the REAL OpenSanctions/yente engine (consolidated OFAC+EU+UN+UK lists). Both return
+        // the same {status,confidence,matches} verdict and both FAIL-CLOSED on unavailability.
+        provider: process.env.SANCTIONS_PROVIDER || 'risk-service',
         url: process.env.RISK_SERVICE_URL || 'http://127.0.0.1:3035',
         timeoutMs: Number(process.env.SANCTIONS_TIMEOUT_MS || 4000),
         // Fail-CLOSED by default: if the screening engine is unreachable, block the order

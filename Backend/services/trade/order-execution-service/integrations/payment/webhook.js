@@ -46,7 +46,7 @@ function verifyRazorpayWebhook({ rawBody, signatureHeader, secret }) {
  *   { event, payload: { payout: { entity: {...} } } }
  * or a bare payout entity.
  * @param {object|string} body  parsed JSON object (or JSON string)
- * @returns {{ providerId:string, idempotencyKey:string, status:keyof typeof PAYMENT_STATUS, rawStatus:string, event?:string }}
+ * @returns {{ providerId:string, idempotencyKey:string, amount:(number|null), currency:(string|null), status:keyof typeof PAYMENT_STATUS, rawStatus:string, event?:string }}
  */
 function parsePayoutEvent(body) {
     const obj = typeof body === 'string' ? safeParse(body) : body;
@@ -61,10 +61,22 @@ function parsePayoutEvent(body) {
     return {
         providerId: entity.id,
         idempotencyKey: entity.reference_id,
+        // RazorpayX `entity.amount` is in the minor unit (paise) — convert to MAJOR units
+        // so it can be compared to the order's stored base_currency_amount. Guard non-finite.
+        amount: paiseToMajor(entity.amount),
+        currency: entity.currency != null ? String(entity.currency) : null,
         status,
         rawStatus,
         event: obj.event,
     };
+}
+
+// RazorpayX amounts are integer paise (1/100 of the major unit). Returns null when
+// the value is missing or non-finite so a forged/absent amount can never settle.
+function paiseToMajor(paise) {
+    const n = Number(paise);
+    if (!Number.isFinite(n)) return null;
+    return n / 100;
 }
 
 function safeParse(s) {

@@ -27,13 +27,24 @@ describe('payment webhook — signature verification', () => {
 });
 
 describe('payment webhook — payout event normalization', () => {
-    test('parses the standard envelope into providerId/idempotencyKey/status', () => {
-        const body = { event: 'payout.processed', payload: { payout: { entity: { id: 'pout_9', status: 'processed', reference_id: 'idem-9' } } } };
+    test('parses the standard envelope into providerId/idempotencyKey/status/amount/currency', () => {
+        const body = { event: 'payout.processed', payload: { payout: { entity: { id: 'pout_9', status: 'processed', reference_id: 'idem-9', amount: 191750, currency: 'INR' } } } };
         const ev = parsePayoutEvent(body);
         expect(ev.providerId).toBe('pout_9');
         expect(ev.idempotencyKey).toBe('idem-9');
         expect(ev.status).toBe(PAYMENT_STATUS.COMPLETED);
         expect(ev.event).toBe('payout.processed');
+        // 3A: paise (191750) -> MAJOR units (1917.50) so it can bind to the order total.
+        expect(ev.amount).toBe(1917.5);
+        expect(ev.currency).toBe('INR');
+    });
+
+    test('amount is null when absent or non-finite (a forged/missing amount can never settle)', () => {
+        const noAmt = parsePayoutEvent({ id: 'p', status: 'processed', reference_id: 'i' });
+        expect(noAmt.amount).toBeNull();
+        expect(noAmt.currency).toBeNull();
+        const badAmt = parsePayoutEvent({ id: 'p', status: 'processed', reference_id: 'i', amount: 'NaN', currency: 'INR' });
+        expect(badAmt.amount).toBeNull();
     });
 
     test('maps reversed -> FAILED and accepts a bare entity', () => {
