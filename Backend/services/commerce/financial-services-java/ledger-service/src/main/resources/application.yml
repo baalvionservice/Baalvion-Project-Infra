@@ -65,8 +65,10 @@ server:
     enabled: true
     min-response-size: 1024
   error:
-    include-message: always
-    include-binding-errors: always
+    # Do not leak internal exception detail (Hibernate/SQL/Kafka messages) to API callers.
+    # Dev verbosity is opt-in via the `dev` Spring profile (see the profile document below).
+    include-message: never
+    include-binding-errors: never
 
 management:
   endpoints:
@@ -96,3 +98,25 @@ app:
   name: Baalvion Ledger Service
   version: 1.0.0
   description: Double-entry ledger for Global Trade Infrastructure
+
+  # Transactional-outbox relay (LedgerOutboxRelay). All values env-overridable.
+  outbox:
+    poll-ms: ${OUTBOX_POLL_MS:2000}
+    batch-size: ${OUTBOX_BATCH_SIZE:100}
+    max-attempts: ${OUTBOX_MAX_ATTEMPTS:10}
+    send-timeout-ms: ${OUTBOX_SEND_TIMEOUT_MS:10000}
+    backoff-base-ms: ${OUTBOX_BACKOFF_BASE_MS:2000}
+    backoff-max-ms: ${OUTBOX_BACKOFF_MAX_MS:300000}
+
+---
+# Dev-only verbosity: surface exception/binding detail in error responses ONLY under the `dev`
+# profile (SPRING_PROFILES_ACTIVE=dev). Never enabled in the default/prod configuration above.
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
