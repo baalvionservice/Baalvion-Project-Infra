@@ -154,6 +154,49 @@ jobs:
           path: Frontend/${{ matrix.app }}/dist
           retention-days: 5
 
+  security-cross-tenant:
+    name: Security — Cross-Tenant RLS (R1)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baalvion_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    env:
+      DB_HOST: localhost
+      DB_PORT: '5432'
+      DB_NAME: baalvion_db
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Install pg (probe dependency)
+        run: npm init -y >/dev/null 2>&1 && npm install pg@8 --no-save
+        working-directory: Backend/services/commerce/trade-service
+      - name: Install trade-service dependencies
+        run: npm install --no-package-lock --legacy-peer-deps || true
+        working-directory: Backend/services/commerce/trade-service
+      - name: Create baalvion_app role (027)
+        run: psql "postgresql://postgres:postgres@localhost:5432/baalvion_db" -v app_pw=ci_app_pw -f Backend/database/migrations/027_app_role.sql
+      - name: Apply trade-service migrations (owner role)
+        run: DB_USER=postgres DB_PASSWORD=postgres node migrate.js
+        working-directory: Backend/services/commerce/trade-service
+      - name: Grant baalvion_app on freshly-created tables (027 re-run for defaults)
+        run: psql "postgresql://postgres:postgres@localhost:5432/baalvion_db" -v app_pw=ci_app_pw -f Backend/database/migrations/027_app_role.sql
+      - name: Run cross-tenant RLS probe (as baalvion_app)
+        run: BAALVION_APP_PASSWORD=ci_app_pw node --test tests/rls-cross-tenant.test.mjs
+        working-directory: Backend/services/commerce/trade-service
+
   integration-test:
     name: Integration Tests
     needs: [backend-go, backend-java, frontend-build]
