@@ -31,16 +31,6 @@ CREATE TABLE IF NOT EXISTS oms.orders (
   updated_at     timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_oes_orders_tenant ON oms.orders (tenant_id);
-
--- Additive + idempotent: a DB created before money-truth columns existed gets them here,
--- so re-running 001 upgrades an already-migrated oms.orders without a data wipe.
-ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS subtotal             numeric(20,2) NOT NULL DEFAULT 0;
-ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS duty_amount          numeric(20,2) NOT NULL DEFAULT 0;
-ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS tax_amount           numeric(20,2) NOT NULL DEFAULT 0;
-ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS base_currency        varchar(10) NOT NULL DEFAULT 'USD';
-ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS base_currency_amount numeric(20,2) NOT NULL DEFAULT 0;
-ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS fx_rate_used         numeric(18,8) NOT NULL DEFAULT 1;
-ALTER TABLE oms.orders ADD COLUMN IF NOT EXISTS destination_country  varchar(2);
 CREATE INDEX IF NOT EXISTS idx_oes_orders_status ON oms.orders (status);
 
 CREATE TABLE IF NOT EXISTS oms.outbox_events (
