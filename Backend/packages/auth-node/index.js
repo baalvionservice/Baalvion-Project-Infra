@@ -76,8 +76,8 @@ function makeAuthError(status, code, message) {
  * @param {string}  [opts.activeKid]
  * @param {string}  [opts.issuer]
  * @param {string}  [opts.audience]
- * @param {boolean} [opts.allowHs256Fallback]  default: env !== 'production'
- * @param {boolean} [opts.requireRs256InProduction=false]
+ * @param {boolean} [opts.allowHs256Fallback]  DEPRECATED/INERT — HS256 access tokens are disabled (R2)
+ * @param {boolean} [opts.requireRs256InProduction=false]  DEPRECATED/INERT — RS256 is always required for access tokens
  * @param {boolean} [opts.normalizeClaims=false] add userId/organizationId to decoded
  * @param {'sub'|'id'} [opts.claimStyle='sub']   claim shape for generateAccessToken
  * @param {object}  [opts.logger=console]
@@ -103,13 +103,12 @@ function createAuthServer(opts = {}) {
   // default), matching hand-rolled verifiers that pass undefined when unset.
   const verifyIssuer = opts.issuer || process.env.JWT_ISSUER || null;
   const verifyAudience = opts.audience || process.env.JWT_AUDIENCE || null;
-  const hs256FallbackDefault = env !== 'production';
-  const allowHs256Fallback =
-    opts.allowHs256Fallback != null
-      ? opts.allowHs256Fallback
-      : (process.env.JWT_ALLOW_HS256_FALLBACK
-          ? process.env.JWT_ALLOW_HS256_FALLBACK === 'true'
-          : hs256FallbackDefault);
+  // R2 (GO/NO-GO): HS256 access tokens are permanently disabled platform-wide.
+  // The algorithm-confusion / shared-secret-forgery bypass is closed by accepting
+  // and issuing ONLY RS256 access tokens. Refresh tokens remain HS256 by design
+  // (opaque, per-service, never verified cross-service — see verifyRefreshToken).
+  // `opts.allowHs256Fallback` / `JWT_ALLOW_HS256_FALLBACK` are now inert and kept
+  // only so existing adapters that still pass them do not error.
 
   // ── key material ───────────────────────────────────────────────────────────
   function loadPrivate() {
@@ -153,12 +152,14 @@ function createAuthServer(opts = {}) {
   let canVerifyRs256 = Object.keys(publicKeys).length > 0;
   let canIssueRs256 = Boolean(privatePem && canVerifyRs256);
 
-  if (!canIssueRs256 && env === 'production' && requireRs256InProduction && !allowHs256Fallback) {
-    throw new Error('[auth-node] RS256 keys missing and HS256 fallback disabled — refusing to start in production');
+  // R2 fail-closed: in production a verifier MUST hold an RS256 public key. Without
+  // one, every access token would be unverifiable and (pre-R2) silently fell back to
+  // HS256 — the island we are closing. Refuse to start rather than serve insecurely.
+  // Dev/test may construct without keys (verify simply rejects all tokens, still
+  // fail-closed) so local tooling and unit tests keep working.
+  if (!canVerifyRs256 && env === 'production') {
+    throw new Error('[auth-node] R2: no RS256 public key configured — refusing to start (HS256 access tokens are disabled)');
   }
-
-  // HS256 is the only path when no RS256 verify key is present; otherwise it is a gated fallback.
-  const hs256Allowed = () => !canVerifyRs256 || allowHs256Fallback;
 
   function reloadKeys() {
     privatePem = disableRs256 ? null : loadPrivate();
@@ -231,14 +232,14 @@ function createAuthServer(opts = {}) {
   // ── issue ──────────────────────────────────────────────────────────────────
   function generateAccessToken(payload) {
     const claims = buildClaims(payload);
-    if (canIssueRs256) {
-      return jwt.sign(claims, privatePem, {
-        algorithm: 'RS256', keyid: ACTIVE_KID, expiresIn: accessExpiresIn, issuer: ISSUER, audience: AUDIENCE,
-      });
+    // R2: access tokens are RS256-only. An issuer without an RS256 private key
+    // can no longer mint HS256 access tokens (closed island).
+    if (!canIssueRs256) {
+      throw new Error('[auth-node] R2: RS256 private key required to issue access tokens (HS256 issuance disabled)');
     }
-    const hsOpts = { algorithm: 'HS256', expiresIn: accessExpiresIn };
-    if (opts.hs256IncludeIssuerAudience) { hsOpts.issuer = ISSUER; hsOpts.audience = AUDIENCE; }
-    return jwt.sign(claims, accessSecret, hsOpts);
+    return jwt.sign(claims, privatePem, {
+      algorithm: 'RS256', keyid: ACTIVE_KID, expiresIn: accessExpiresIn, issuer: ISSUER, audience: AUDIENCE,
+    });
   }
 
   // Raw passthrough sign — preserves the legacy signAccessToken(payload, ttl) API.
@@ -256,18 +257,20 @@ function createAuthServer(opts = {}) {
   // ── verify ───────────────────────────────────────────────────────────────
   function verifyAccessToken(token) {
     const header = (jwt.decode(token, { complete: true }) || {}).header || {};
-    if (canVerifyRs256 && header.alg === 'RS256') {
-      const pem = publicKeys[header.kid] || publicKeys[ACTIVE_KID];
-      if (!pem) throw new Error('Unknown token key id');
-      const vo = { algorithms: ['RS256'] };
-      if (verifyIssuer) vo.issuer = verifyIssuer;
-      if (verifyAudience) vo.audience = verifyAudience;
-      return normalize(jwt.verify(token, pem, vo));
+    // R2: only RS256 access tokens are accepted. Any other alg (HS256, none, …)
+    // is rejected outright — this is the algorithm-confusion bypass closure.
+    if (header.alg !== 'RS256') {
+      throw new Error('[auth-node] R2: only RS256 access tokens are accepted');
     }
-    if (hs256Allowed() && (!header.alg || header.alg === 'HS256')) {
-      return normalize(jwt.verify(token, accessSecret, { algorithms: ['HS256'] }));
+    if (!canVerifyRs256) {
+      throw new Error('[auth-node] R2: no RS256 public key configured to verify access tokens');
     }
-    throw new Error('Unsupported or untrusted token algorithm');
+    const pem = publicKeys[header.kid] || publicKeys[ACTIVE_KID];
+    if (!pem) throw new Error('Unknown token key id');
+    const vo = { algorithms: ['RS256'] };
+    if (verifyIssuer) vo.issuer = verifyIssuer;
+    if (verifyAudience) vo.audience = verifyAudience;
+    return normalize(jwt.verify(token, pem, vo));
   }
 
   function verifyRefreshToken(token) {

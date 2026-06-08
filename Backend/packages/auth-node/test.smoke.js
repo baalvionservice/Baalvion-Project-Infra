@@ -8,31 +8,30 @@ const { createAuthServer, createJwksVerifier } = require('./index.js');
 let pass = 0;
 const ok = (m) => { console.log('  ✓', m); pass++; };
 
-// 1. verify-only / legacy HS256 issuer (auth-service style: claimStyle 'id')
+// 1. R2: an issuer WITHOUT an RS256 private key can no longer mint HS256 access
+//    tokens, but refresh tokens (HS256 by design) still round-trip.
 {
   const a = createAuthServer({ accessSecret: 's3cr3t', refreshSecret: 'r3fr3sh', claimStyle: 'id', env: 'test' });
-  const at = a.generateAccessToken({ id: 7, email: 'x@b.io', orgId: 'o1', role: 'admin', permissions: ['p'], sessionId: 'sess' });
-  const dec = a.verifyAccessToken(at);
-  assert.strictEqual(dec.id, 7);
-  assert.strictEqual(dec.email, 'x@b.io');
-  assert.strictEqual(dec.orgId, 'o1');
-  assert.deepStrictEqual(dec.permissions, ['p']);
-  assert.ok(dec.jti);
+  assert.throws(
+    () => a.generateAccessToken({ id: 7, email: 'x@b.io', orgId: 'o1', role: 'admin' }),
+    /RS256 private key required/,
+    'R2: HS256 access-token issuance must be rejected',
+  );
   const rt = a.generateRefreshToken({ id: 7, orgId: 'o1', sessionId: 'sess' });
   assert.strictEqual(a.verifyRefreshToken(rt).id, 7);
-  ok('HS256 legacy-id issuer round-trips (access + refresh)');
+  ok('R2: HS256 access issuance disabled; refresh HS256 still round-trips');
 }
 
-// 2. raw passthrough signAccessToken (trade/elite-circle style)
+// 2. R2: verifyAccessToken rejects an HS256 token (raw signAccessToken passthrough).
 {
   const a = createAuthServer({ accessSecret: 'k', env: 'test' });
-  const t = a.signAccessToken({ id: 1, scope: 'read' }, '1h');
-  const dec = a.verifyAccessToken(t);
-  assert.strictEqual(dec.id, 1);
-  assert.strictEqual(dec.scope, 'read');
-  // verify-only services get the RAW decoded payload (no normalize) — shape preserved
-  assert.strictEqual(dec.userId, undefined);
-  ok('raw signAccessToken passthrough verifies, decoded shape unchanged');
+  const t = a.signAccessToken({ id: 1, scope: 'read' }, '1h'); // HS256 raw token
+  assert.throws(
+    () => a.verifyAccessToken(t),
+    /only RS256 access tokens/,
+    'R2: HS256 access-token verification must be rejected',
+  );
+  ok('R2: verifyAccessToken rejects HS256 access tokens');
 }
 
 // 3. modern RS256 + JWKS issuer/verifier (proxy style: claimStyle 'sub', normalize)
@@ -55,13 +54,17 @@ const ok = (m) => { console.log('  ✓', m); pass++; };
   ok('RS256/JWKS issuer round-trips + publishes JWKS');
 }
 
-// 4. cross-scheme: RS256-capable verifier accepts a legacy HS256 token via fallback
+// 4. R2: no cross-scheme HS256 migration fallback — a legacy HS256 token is rejected.
 {
   const issuer = createAuthServer({ accessSecret: 'shared', claimStyle: 'id', env: 'development' });
   const legacy = issuer.signAccessToken({ id: 99 });
-  const verifier = createAuthServer({ accessSecret: 'shared', env: 'development' }); // no keys -> HS256 path
-  assert.strictEqual(verifier.verifyAccessToken(legacy).id, 99);
-  ok('verifier accepts legacy HS256 token (migration fallback)');
+  const verifier = createAuthServer({ accessSecret: 'shared', env: 'development' }); // no keys
+  assert.throws(
+    () => verifier.verifyAccessToken(legacy),
+    /only RS256 access tokens/,
+    'R2: HS256 migration fallback must be closed',
+  );
+  ok('R2: HS256 access tokens are not accepted (island closed)');
 }
 
 // 5. static-public-key verify-only mode (session/admin/notification verifier style)
