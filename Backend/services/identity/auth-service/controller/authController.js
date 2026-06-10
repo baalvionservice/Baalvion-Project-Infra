@@ -16,7 +16,7 @@ exports.register = async (req, res, next) => {
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         const result = await authService.register({ ...parsed.data, ...parseClientInfo(req) });
         res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
-        sendSuccess(req, res, { accessToken: result.accessToken, refreshToken: result.refreshToken, user: result.user, org: result.org }, 201);
+        sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, org: result.org }, 201);
     } catch (err) { next(err); }
 };
 
@@ -25,12 +25,16 @@ exports.login = async (req, res, next) => {
         const parsed = schemas.login.safeParse(req.body);
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         const result = await authService.login({ ...parsed.data, ...parseClientInfo(req) });
+        // Second-factor continuation paths — no session/cookie yet, relay the challenge token.
         if (result.mfa_required) {
             return sendSuccess(req, res, { mfa_required: true, challengeToken: result.challengeToken });
         }
+        if (result.mfa_enrollment_required) {
+            return sendSuccess(req, res, { mfa_enrollment_required: true, challengeToken: result.challengeToken });
+        }
         res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
         req.audit?.log('login_success', { userId: result.user?.id, orgId: result.user?.orgId, metadata: { email: parsed.data.email } });
-        sendSuccess(req, res, { accessToken: result.accessToken, refreshToken: result.refreshToken, user: result.user, expiresAt: result.expiresAt });
+        sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt });
     } catch (err) {
         req.audit?.log('login_failure', { metadata: { email: req.body?.email, reason: err.code || 'error' } });
         next(err);
@@ -54,17 +58,44 @@ exports.mfaChallenge = async (req, res, next) => {
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         const result = await authService.completeMfaLogin({ ...parsed.data, ...parseClientInfo(req) });
         res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
-        sendSuccess(req, res, { accessToken: result.accessToken, refreshToken: result.refreshToken, user: result.user, expiresAt: result.expiresAt });
+        sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt });
+    } catch (err) { next(err); }
+};
+
+// Force-MFA enrolment step 1: generate (but do not yet activate) a pending TOTP secret for the
+// challenge holder. Public — keyed by the enrollment challenge token, not a session. Returns the
+// provisioning material (QR + secret + recovery codes) without consuming the challenge.
+exports.enrollMfaStart = async (req, res, next) => {
+    try {
+        const parsed = schemas.mfaEnrollStart.safeParse(req.body);
+        if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
+        const result = await authService.enrollMfaStart(parsed.data.challengeToken);
+        sendSuccess(req, res, { qrCodeUrl: result.qrCodeUrl, secret: result.secret, recoveryCodes: result.recoveryCodes });
+    } catch (err) { next(err); }
+};
+
+// Force-MFA enrolment step 2: confirm the 6-digit code, activate MFA, consume the challenge and
+// auto-log-in (full token pair). Mirrors login/acceptInvite — sets the refresh cookie.
+exports.enrollMfa = async (req, res, next) => {
+    try {
+        const parsed = schemas.mfaEnroll.safeParse(req.body);
+        if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
+        const result = await authService.enrollMfaComplete({ ...parsed.data, ...parseClientInfo(req) });
+        res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        req.audit?.log('mfa_enrolled', { userId: result.user?.id, orgId: result.user?.orgId });
+        sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt }, 201);
     } catch (err) { next(err); }
 };
 
 exports.refresh = async (req, res, next) => {
     try {
-        const rawToken = req.cookies?.[config.refreshCookieName] || req.body?.refreshToken;
+        // CR-13/M-3: refresh tokens are accepted ONLY from the HttpOnly cookie,
+        // never from the request body (which is reachable via XSS / logs).
+        const rawToken = req.cookies?.[config.refreshCookieName];
         const result = await authService.refresh(rawToken, req.ip);
         res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
         req.audit?.log('refresh', { userId: result.userId ?? result.user?.id ?? null });
-        sendSuccess(req, res, { accessToken: result.accessToken, refreshToken: result.refreshToken, expiresAt: result.expiresAt });
+        sendSuccess(req, res, { accessToken: result.accessToken, expiresAt: result.expiresAt });
     } catch (err) { next(err); }
 };
 
@@ -209,6 +240,6 @@ exports.acceptInvite = async (req, res, next) => {
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
-        sendSuccess(req, res, { accessToken: result.accessToken, refreshToken: result.refreshToken, user: result.user, expiresAt: result.expiresAt }, 201);
+        sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt }, 201);
     } catch (err) { next(err); }
 };
