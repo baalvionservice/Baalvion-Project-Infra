@@ -185,9 +185,25 @@ exports.listSubmissions = async (req, res, next) => {
         const { offset, limit } = page(req);
         const where = {};
         if (req.query.task_id)   where.task_id   = req.query.task_id;
-        if (req.query.user_id)   where.user_id   = req.query.user_id;
         if (req.query.status)    where.status     = req.query.status;
-        const { count, rows } = await db.submissions.findAndCountAll({ where, offset, limit, order: [['submitted_at', 'DESC']], include: [{ association: 'task', attributes: ['id', 'title', 'company_id'] }] });
+        // Tenant scoping: admins see everything; a candidate sees only their own
+        // submissions; a company member sees only submissions on their org's tasks.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const taskWhere = {};
+        if (!isAdmin) {
+            const callerUserId = req.auth?.userId;
+            const callerOrgId = req.auth?.orgId;
+            if (callerOrgId) taskWhere.company_id = callerOrgId; // company-scoped review queue
+            else if (callerUserId != null) where.user_id = callerUserId; // candidate's own work
+            else throw new AppError('FORBIDDEN', 'Authentication context required', 403);
+        } else if (req.query.user_id) {
+            where.user_id = req.query.user_id;
+        }
+        const { count, rows } = await db.submissions.findAndCountAll({
+            where, offset, limit, order: [['submitted_at', 'DESC']],
+            include: [{ association: 'task', attributes: ['id', 'title', 'company_id'], where: Object.keys(taskWhere).length ? taskWhere : undefined, required: Object.keys(taskWhere).length > 0 }],
+        });
         sendPaginated(res, rows, count, Number(req.query.page || 1), limit);
     } catch (err) { next(err); }
 };
@@ -289,12 +305,21 @@ exports.createEvaluation = async (req, res, next) => {
         const userId = req.auth?.userId;
         const { submission_id, score, feedback, criteria, is_final } = req.body;
         if (!submission_id || score === undefined) throw new AppError('VALIDATION_ERROR', 'submission_id and score are required', 400);
+        // Authorize BEFORE writing: only the company that owns the evaluated submission's
+        // task (matched by orgId) — or an admin — may score it.
+        const sub = await db.submissions.findByPk(submission_id, { include: [{ association: 'task', attributes: ['company_id'] }] });
+        if (!sub) throw new AppError('NOT_FOUND', 'Submission not found', 404);
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const isCompanyOwner = req.auth?.orgId && sub.task && String(sub.task.company_id) === String(req.auth.orgId);
+        if (!isAdmin && !isCompanyOwner) {
+            throw new AppError('FORBIDDEN', 'You do not have permission to evaluate this submission', 403);
+        }
         const evaluation = await db.evaluations.create({ submission_id, evaluator_id: userId, score, feedback, criteria: criteria || {}, is_final: is_final || false });
         if (is_final) {
             await db.submissions.update({ score, feedback, status: 'under_review' }, { where: { id: submission_id } });
         }
-        const sub = await db.submissions.findByPk(submission_id, { include: [{ association: 'task', attributes: ['company_id'] }] });
-        events.emit('submission.evaluated', { id: evaluation.id, submission_id, score, user_id: sub ? String(sub.user_id) : undefined }, { companyId: sub?.task?.company_id, related: { type: 'Submission', id: submission_id } });
+        events.emit('submission.evaluated', { id: evaluation.id, submission_id, score, user_id: String(sub.user_id) }, { companyId: sub.task?.company_id, related: { type: 'Submission', id: submission_id } });
         sendSuccess(res, evaluation, 201);
     } catch (err) { next(err); }
 };

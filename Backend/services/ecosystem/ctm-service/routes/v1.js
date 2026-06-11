@@ -33,7 +33,9 @@ router.post('/tasks/:id/publish', authMiddleware, ctrl.publishTask);
 router.post('/tasks/:id/close',   authMiddleware, ctrl.closeTask);
 
 // ── Submissions ───────────────────────────────────────────────────────────────
-router.get('/submissions',               optionalAuth, ctrl.listSubmissions);
+// Submissions are candidate work + scores (sensitive). Require auth; the controller
+// scopes the result to the caller's own submissions or their company's tasks.
+router.get('/submissions',               authMiddleware, ctrl.listSubmissions);
 router.get('/submissions/:id',           optionalAuth, ctrl.getSubmission);
 router.post('/submissions',              authed, ctrl.createSubmission);
 router.patch('/submissions/:id',         authMiddleware, ctrl.updateSubmission);
@@ -45,7 +47,11 @@ router.post('/evaluations',        authed, ctrl.createEvaluation);
 router.get('/evaluation-schemas',  optionalAuth,   ctrl.getEvaluationSchemas);
 
 // ── Users / Profiles ────────────────────────────────────────────────────────────
-router.get('/users',                 optionalAuth,   ex.listUsers);
+// The directory list exposes emails/PII across tenants → require auth (handler still
+// returns the full set for admins; everyone else is scoped to their own org/profile).
+// The SINGLE profile (`/users/:id`) stays public: it is the candidate marketing page
+// and is returned through a public-safe projection in the controller.
+router.get('/users',                 authMiddleware, ex.listUsers);
 router.get('/users/:userId/badges',  optionalAuth,   ctrl.getUserBadges);
 router.get('/users/:id',             optionalAuth,   ex.getUser);
 router.post('/users',                authed,         ex.upsertUser);
@@ -59,7 +65,9 @@ router.get('/badges',  optionalAuth, ctrl.listBadges);
 router.get('/teams',  optionalAuth, ctrl.listTeams);
 
 // ── Notifications ─────────────────────────────────────────────────────────────
-router.get('/notifications',        optionalAuth,   ex.listNotifications);
+// `?scope=all` (admin firehose) requires a real session; the default per-user view
+// also needs identity. Require auth; the controller scopes by req.auth.userId.
+router.get('/notifications',        authMiddleware, ex.listNotifications);
 router.post('/notifications',       authMiddleware, ex.createNotification);
 router.patch('/notifications/:id',  authMiddleware, ex.updateNotification);
 
@@ -77,7 +85,8 @@ router.post('/subscriptions',        authed,         ctrl.createSubscription);
 router.patch('/subscriptions/:id',   authMiddleware, ctrl.updateSubscription);
 
 // ── Invoices ──────────────────────────────────────────────────────────────────
-router.get('/invoices',      optionalAuth,   ex.listInvoices);
+// Invoices are billing PII. Require auth; the handler scopes by the caller's org.
+router.get('/invoices',      authMiddleware, ex.listInvoices);
 router.get('/invoices/:id',  optionalAuth,   ex.getInvoice);
 router.post('/invoices',     authed,         ex.createInvoice);
 
@@ -108,20 +117,22 @@ router.get('/usage/plan',            authMiddleware, obs.getPlanUsage);
 router.get('/usage/metrics',         authMiddleware, obs.getUsageMetrics);
 
 // ── Webhooks (outbound, HMAC-signed) — FULLY LIVE ───────────────────────────────
-router.get('/webhooks',             optionalAuth,   integ.listWebhooks);
+router.get('/webhooks',             authMiddleware, integ.listWebhooks);
 router.post('/webhooks',            authMiddleware, integ.createWebhook);
 router.patch('/webhooks/:id',       authMiddleware, integ.updateWebhook);
 router.delete('/webhooks/:id',      authMiddleware, integ.deleteWebhook);
-router.get('/webhooks/:id/deliveries', optionalAuth, integ.getWebhookDeliveries);
+router.get('/webhooks/:id/deliveries', authMiddleware, integ.getWebhookDeliveries);
 router.post('/webhooks/:id/test',   authMiddleware, integ.testWebhook);
 
 // ── API integrations registry + logs ────────────────────────────────────────────
-router.get('/api-integrations',          optionalAuth,   integ.listApiIntegrations);
+router.get('/api-integrations',          authMiddleware, integ.listApiIntegrations);
 router.post('/api-integrations',         authMiddleware, integ.createApiIntegration);
 router.patch('/api-integrations/:id',    authMiddleware, integ.updateApiIntegration);
 router.delete('/api-integrations/:id',   authMiddleware, integ.deleteApiIntegration);
 router.post('/api-integrations/:id/test', authMiddleware, integ.testApiIntegration);
-router.get('/integration-logs',          optionalAuth,   integ.listIntegrationLogs);
+// Integration logs are internal infra telemetry; require auth (no per-tenant column on
+// this global log, so restrict to admins in the controller).
+router.get('/integration-logs',          adminOnly,      integ.listIntegrationLogs);
 
 // ── GitHub (real public-repo metadata; GITHUB_TOKEN optional) ───────────────────
 router.get('/integrations/github/repos', optionalAuth, integ.listGitHubRepositories);

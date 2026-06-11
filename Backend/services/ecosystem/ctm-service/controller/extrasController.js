@@ -71,8 +71,18 @@ exports.listUsers = async (req, res, next) => {
     try {
         const { offset, limit } = page(req);
         const where = {};
+        // Tenant scoping: admins may query any org; everyone else is locked to their own
+        // company (company members) or just their own profile (no org context).
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            const callerOrgId = req.auth?.orgId;
+            if (callerOrgId) where.company_id = callerOrgId;
+            else where.user_id = req.auth?.userId ?? null;
+        } else if (req.query.company_id) {
+            where.company_id = req.query.company_id;
+        }
         if (req.query.role) where.role = req.query.role;
-        if (req.query.company_id) where.company_id = req.query.company_id;
         if (req.query.is_active !== undefined) where.is_active = req.query.is_active === 'true';
         if (req.query.search) {
             where[Op.or] = [
@@ -130,12 +140,23 @@ exports.updateUser = async (req, res, next) => {
     try {
         const profile = await db.user_profiles.findByPk(req.params.id);
         if (!profile) throw new AppError('NOT_FOUND', 'User not found', 404);
-        const fields = [
-            'name', 'email', 'role', 'company_id', 'avatar_url', 'bio', 'location',
+        // IDOR + privilege-escalation guard: a caller may only edit their OWN profile
+        // unless they hold admin/super_admin. And privileged fields (role, company_id,
+        // is_active, is_verified) may ONLY be written by an admin — never via self-update.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const isSelf = String(req.auth?.userId || '') === String(req.params.id);
+        if (!isAdmin && !isSelf) {
+            throw new AppError('FORBIDDEN', 'You do not have permission to edit this user', 403);
+        }
+        const selfFields = [
+            'name', 'email', 'avatar_url', 'bio', 'location',
             'experience_level', 'skills', 'github_url', 'linkedin_url', 'portfolio_links',
-            'is_active', 'is_verified', 'consent_accepted', 'consent_accepted_at',
+            'consent_accepted', 'consent_accepted_at',
             'onboarding_completed', 'candidate_onboarding_completed', 'metadata',
         ];
+        const adminOnlyFields = ['role', 'company_id', 'is_active', 'is_verified'];
+        const fields = isAdmin ? [...selfFields, ...adminOnlyFields] : selfFields;
         fields.forEach((f) => { if (req.body[f] !== undefined) profile[f] = req.body[f]; });
         await profile.save();
         sendSuccess(res, profile);
@@ -183,12 +204,20 @@ exports.listNotifications = async (req, res, next) => {
     try {
         const { offset, limit } = page(req);
         const where = {};
-        // Default: the caller's notifications + broadcasts, unless explicitly filtered.
-        if (req.query.user_id) where.user_id = req.query.user_id;
-        else if (req.auth?.userId && req.query.scope !== 'all') {
-            where[Op.or] = [{ user_id: req.auth.userId }, { user_id: null }];
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const wantsAll = req.query.scope === 'all';
+        // `?scope=all` (and reading another user's feed) is an admin-only firehose.
+        if (wantsAll || (req.query.user_id && String(req.query.user_id) !== String(req.auth?.userId || ''))) {
+            if (!isAdmin) throw new AppError('FORBIDDEN', 'You do not have permission to view all notifications', 403);
+            if (req.query.user_id) where.user_id = req.query.user_id;
+        } else {
+            // Default: the caller's own notifications + broadcasts only.
+            const callerId = req.auth?.userId;
+            if (!callerId) throw new AppError('UNAUTHORIZED', 'Authentication required', 401);
+            where[Op.or] = [{ user_id: callerId }, { user_id: null }];
         }
-        if (req.query.company_id) where.company_id = req.query.company_id;
+        if (req.query.company_id && isAdmin) where.company_id = req.query.company_id;
         if (req.query.status) where.status = req.query.status;
         if (req.query.type) where.type = req.query.type;
         const { count, rows } = await db.notifications.findAndCountAll({
@@ -259,6 +288,13 @@ exports.deleteTemplate = async (req, res, next) => {
     try {
         const t = await db.task_templates.findByPk(req.params.id);
         if (!t) throw new AppError('NOT_FOUND', 'Template not found', 404);
+        // IDOR guard: only the owning org (orgId === template.company_id) or an admin
+        // may delete a task template.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin && String(t.company_id) !== String(req.auth?.orgId || '')) {
+            throw new AppError('FORBIDDEN', 'You do not have permission to delete this template', 403);
+        }
         await t.destroy();
         sendSuccess(res, { id: req.params.id, deleted: true });
     } catch (err) { next(err); }
@@ -270,7 +306,16 @@ exports.listInvoices = async (req, res, next) => {
     try {
         const { offset, limit } = page(req);
         const where = {};
-        if (req.query.company_id) where.company_id = req.query.company_id;
+        // Tenant scoping: non-admins are locked to their own org; the query param is ignored.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (isAdmin) {
+            if (req.query.company_id) where.company_id = req.query.company_id;
+        } else {
+            const callerOrgId = req.auth?.orgId;
+            if (!callerOrgId) throw new AppError('FORBIDDEN', 'Organization context required', 403);
+            where.company_id = callerOrgId;
+        }
         if (req.query.status) where.status = req.query.status;
         const { count, rows } = await db.invoices.findAndCountAll({
             where, offset, limit, order: [['issued_at', 'DESC']],

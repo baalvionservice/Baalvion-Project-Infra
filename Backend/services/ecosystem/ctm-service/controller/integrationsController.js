@@ -20,7 +20,17 @@ const mapWebhook = (w, includeSecret = false) => ({
 exports.listWebhooks = async (req, res, next) => {
     try {
         const where = {};
-        if (req.query.company_id) where[Op.or] = [{ company_id: req.query.company_id }, { company_id: null }];
+        // Tenant scoping: non-admins see only their org's webhooks (+ global nulls);
+        // admins may target any company.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (isAdmin) {
+            if (req.query.company_id) where[Op.or] = [{ company_id: req.query.company_id }, { company_id: null }];
+        } else {
+            const callerOrgId = req.auth?.orgId;
+            if (!callerOrgId) throw new AppError('FORBIDDEN', 'Organization context required', 403);
+            where[Op.or] = [{ company_id: callerOrgId }, { company_id: null }];
+        }
         const rows = await db.webhooks.findAll({ where, order: [['created_at', 'DESC']] });
         sendSuccess(res, rows.map((w) => mapWebhook(w)));
     } catch (err) { next(err); }
@@ -61,6 +71,14 @@ exports.deleteWebhook = async (req, res, next) => {
 
 exports.getWebhookDeliveries = async (req, res, next) => {
     try {
+        // IDOR guard: only the owning org (or an admin) may read a webhook's deliveries.
+        const w = await db.webhooks.findByPk(req.params.id);
+        if (!w) throw new AppError('NOT_FOUND', 'Webhook not found', 404);
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin && w.company_id && String(w.company_id) !== String(req.auth?.orgId || '')) {
+            throw new AppError('FORBIDDEN', 'You do not have permission to view these deliveries', 403);
+        }
         const rows = await db.webhook_deliveries.findAll({
             where: { webhook_id: req.params.id }, order: [['created_at', 'DESC']], limit: 100,
         });
@@ -98,7 +116,16 @@ const mapIntegration = (i) => {
 exports.listApiIntegrations = async (req, res, next) => {
     try {
         const where = {};
-        if (req.query.company_id) where[Op.or] = [{ company_id: req.query.company_id }, { company_id: null }];
+        // Tenant scoping: non-admins see only their org's integrations (+ global nulls).
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (isAdmin) {
+            if (req.query.company_id) where[Op.or] = [{ company_id: req.query.company_id }, { company_id: null }];
+        } else {
+            const callerOrgId = req.auth?.orgId;
+            if (!callerOrgId) throw new AppError('FORBIDDEN', 'Organization context required', 403);
+            where[Op.or] = [{ company_id: callerOrgId }, { company_id: null }];
+        }
         const rows = await db.api_integrations.findAll({ where, order: [['created_at', 'DESC']] });
         sendSuccess(res, rows.map(mapIntegration));
     } catch (err) { next(err); }
