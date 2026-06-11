@@ -11,7 +11,7 @@ const options = {
             contact:     { name: 'Baalvion Engineering', email: 'infra.baalvion@gmail.com' },
         },
         servers: [
-            { url: 'http://localhost:3011/api/v1', description: 'Development' },
+            { url: 'http://localhost:3017/api/v1', description: 'Development' },
         ],
         components: {
             securitySchemes: {
