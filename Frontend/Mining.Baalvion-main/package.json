@@ -9,7 +9,8 @@
                     "build":  "npm run typecheck \u0026\u0026 next build",
                     "start":  "next start",
                     "lint":  "eslint . --ext .js,.jsx,.ts,.tsx",
-                    "typecheck":  "tsc --noEmit"
+                    "typecheck":  "tsc --noEmit",
+                    "gen:assets":  "node scripts/generate-raster-assets.mjs"
                 },
     "dependencies":  {
                          "@baalvion/auth-sdk":  "workspace:*",
