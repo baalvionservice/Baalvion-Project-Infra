@@ -4,4 +4,46 @@
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
-  maxInstances: 1
+  maxInstances: 3
+
+# Environment variables.
+# NEXT_PUBLIC_* values are baked into the client bundle at BUILD time, so they
+# must be available during the build (availability: BUILD). Set the real
+# backend hosts before the first production deploy — the API/auth URLs below
+# are REQUIRED placeholders and MUST be overridden with production endpoints.
+env:
+  # Canonical public origin — drives all SEO canonicals, robots.txt host, and
+  # sitemap.xml absolute URLs (src/lib/site-url.ts). MUST be the real prod domain.
+  - variable: NEXT_PUBLIC_APP_URL
+    value: https://controlthemarket.com
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Never ship mock mode to production.
+  - variable: NEXT_PUBLIC_USE_MOCK
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # REQUIRED: production CTM API base. Replace with the real backend origin
+  # (routed through the auth-gateway, not directly to the service port).
+  - variable: NEXT_PUBLIC_CTM_API_URL
+    value: https://api.controlthemarket.com/api/v1
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # REQUIRED: production auth endpoint base.
+  - variable: NEXT_PUBLIC_AUTH_URL
+    value: https://api.controlthemarket.com/v1/auth
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # REQUIRED: server-side auth proxy target for /auth-bff/* rewrites.
+  - variable: AUTH_PROXY_TARGET
+    value: https://api.controlthemarket.com/auth
+    availability:
+      - RUNTIME

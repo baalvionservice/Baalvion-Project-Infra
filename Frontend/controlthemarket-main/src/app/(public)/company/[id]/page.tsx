@@ -24,6 +24,52 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { TaskCard } from "@/app/(app)/candidate/tasks/task-card";
+import type { Metadata } from "next";
+import { absoluteUrl } from "@/lib/site-url";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const company = await getCompany(id).catch(() => null);
+
+  if (!company) {
+    return {
+      title: "Company Not Found",
+      description: "This company profile could not be found on ControlTheMarket.",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const canonical = absoluteUrl(`/company/${company.id}`);
+  const title = company.name;
+  const description =
+    company.description?.trim() ||
+    `Discover ${company.name}'s open roles and skill-based hiring challenges on ControlTheMarket${
+      company.industry ? ` — ${company.industry}` : ""
+    }.`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "website",
+      title: `${title} | ControlTheMarket`,
+      description,
+      url: canonical,
+      images: company.logoUrl ? [{ url: company.logoUrl, alt: company.name }] : undefined,
+    },
+    twitter: {
+      card: "summary",
+      title: `${title} | ControlTheMarket`,
+      description,
+      images: company.logoUrl ? [company.logoUrl] : undefined,
+    },
+  };
+}
 
 export default async function CompanyProfilePage({
   params,

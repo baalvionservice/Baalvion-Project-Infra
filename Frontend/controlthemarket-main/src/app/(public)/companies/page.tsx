@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/site-url';
 import { getCompanies } from '@/lib/api';
 
 export const metadata: Metadata = {
@@ -6,10 +7,10 @@ export const metadata: Metadata = {
   description:
     'Explore innovative companies on ControlTheMarket that find top talent based on proven skills — not resumes. Browse open opportunities today.',
   alternates: {
-    canonical: 'https://controlthemarket.com/companies',
+    canonical: absoluteUrl('/companies'),
   },
   openGraph: {
-    url: 'https://controlthemarket.com/companies',
+    url: absoluteUrl('/companies'),
     title: 'Companies Hiring | ControlTheMarket',
     description:
       'Explore innovative companies finding top talent based on proven skills — not resumes.',

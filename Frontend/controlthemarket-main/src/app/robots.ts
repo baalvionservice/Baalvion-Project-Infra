@@ -1,12 +1,16 @@
 import type { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export default function robots(): MetadataRoute.Robots {
+  const base = getSiteUrl();
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
-      disallow: ['/company/', '/candidate/', '/admin/', '/dashboard/'],
+      disallow: ['/admin/', '/dashboard/', '/login', '/signup'],
     },
-    sitemap: 'https://controlthemarket.com/sitemap.xml',
+    sitemap: `${base}/sitemap.xml`,
+    host: base,
   };
 }
