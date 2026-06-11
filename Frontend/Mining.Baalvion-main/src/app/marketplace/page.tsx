@@ -1,6 +1,7 @@
 "use client"
 
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,6 +11,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { trackEvent } from "@/lib/monitoring";
 import { products } from "@/lib/sitemap-data";
+import { BRAND_IMAGES } from "@/lib/brand-assets";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -98,7 +100,7 @@ export default function MarketplacePage() {
                   <Card className="overflow-hidden border-none shadow-sm hover:shadow-xl transition-all h-full flex flex-col">
                     <div className="relative h-48 bg-muted">
                       <Image 
-                        src={`https://picsum.photos/seed/${p.slug}/400/300`} 
+                        src={BRAND_IMAGES.mineral}
                         alt={`${p.slug.replace(/-/g, ' ')} high-grade industrial mineral`} 
                         fill 
                         priority={idx < 6}
@@ -171,6 +173,7 @@ export default function MarketplacePage() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

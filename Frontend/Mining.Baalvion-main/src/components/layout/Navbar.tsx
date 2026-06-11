@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Globe, Menu, Search, User, Lightbulb, ChevronDown } from "lucide-react";
+import { Globe, Menu, Search, User, ChevronDown } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -36,13 +36,13 @@ export function Navbar() {
 
   const NavLinks = () => (
     <>
-      <Link href="/marketplace" className="text-sm font-medium hover:text-primary transition-colors">Marketplace</Link>
-      <Link href="/directory" className="text-sm font-medium hover:text-primary transition-colors">Suppliers</Link>
-      <Link href="/guides" className="text-sm font-bold text-primary flex items-center gap-1.5 hover:text-primary/80 transition-colors">
-        <Lightbulb className="h-4 w-4" aria-hidden="true" /> Knowledge Hub
-      </Link>
+      <Link href="/about" className="text-sm font-medium hover:text-primary transition-colors">About</Link>
       <Link href="/solutions" className="text-sm font-medium hover:text-primary transition-colors">Solutions</Link>
+      <Link href="/marketplace" className="text-sm font-medium hover:text-primary transition-colors">Marketplace</Link>
+      <Link href="/directory" className="text-sm font-medium hover:text-primary transition-colors">Directory</Link>
       <Link href="/logistics" className="text-sm font-medium hover:text-primary transition-colors">Logistics</Link>
+      <Link href="/investors" className="text-sm font-medium hover:text-primary transition-colors">Investors</Link>
+      <Link href="/contact" className="text-sm font-medium hover:text-primary transition-colors">Contact</Link>
     </>
   );
 

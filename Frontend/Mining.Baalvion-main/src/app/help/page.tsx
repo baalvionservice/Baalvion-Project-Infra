@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Search, 
@@ -14,7 +15,7 @@ import { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: 'Help Center | Baalvion Mining Inc. Support',
+  title: 'Help Center Support',
   description: 'Find answers to frequently asked questions about mineral trading, compliance verification, escrow payments, and global logistics on Baalvion Mining Inc.',
 };
 
@@ -85,6 +86,7 @@ export default function HelpCenter() {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

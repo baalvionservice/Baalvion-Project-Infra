@@ -14,16 +14,23 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://mining.baalvion.com'),
-  icons: { icon: 'data:,' },
+  // Favicon is served via the app/icon.svg file convention; apple-touch icon set here.
+  icons: {
+    apple: '/favicon.svg',
+    shortcut: '/favicon.svg',
+  },
   title: {
     default: 'Baalvion Mining Inc. | Global Mining & Commodity Supply Network',
     template: '%s | Baalvion Mining Inc.'
   },
   description: 'The premier secure marketplace for bulk mineral trade and AI-powered compliance by Baalvion Mining Inc. Connect with verified producers and industrial buyers worldwide.',
   keywords: ['Baalvion', 'mineral trading', 'B2B mining', 'iron ore export', 'lithium supply chain', 'mining compliance', 'industrial minerals', 'commodity supply network'],
-  authors: [{ name: 'Baalvion Mining Inc. Team' }],
+  authors: [{ name: 'Baalvion Industries Private Limited' }],
   creator: 'Baalvion Mining Inc.',
   publisher: 'Baalvion Industries Private Limited',
+  alternates: {
+    canonical: '/',
+  },
   formatDetection: {
     email: false,
     address: false,
@@ -37,17 +44,18 @@ export const metadata: Metadata = {
     title: 'Baalvion Mining Inc. | Global Mining & Commodity Supply Network',
     description: 'Empowering the world\'s mineral trade with security, transparency, and innovation.',
     images: [{
-      url: 'https://picsum.photos/seed/baalvion-og/1200/630',
+      url: '/images/og/og-default.svg',
       width: 1200,
       height: 630,
-      alt: 'Baalvion Mining Inc. Global Operations'
+      type: 'image/svg+xml',
+      alt: 'Baalvion Mining Inc. — Global Mineral Trade & Commodity Supply Network'
     }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Baalvion Mining Inc. | Global B2B Mineral Trading',
     description: 'Secure, transparent, and AI-powered mineral trade for global industries.',
-    images: ['https://picsum.photos/seed/baalvion-twitter/1200/630'],
+    images: ['/images/og/og-default.svg'],
     creator: '@baalvion',
   },
   robots: {
@@ -65,11 +73,21 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Baalvion Mining Inc.",
+    "legalName": "Baalvion Industries Private Limited",
     "url": "https://mining.baalvion.com",
-    "logo": "https://mining.baalvion.com/logo.png",
+    "logo": "https://mining.baalvion.com/logo.svg",
+    "image": "https://mining.baalvion.com/images/og/og-default.svg",
     "description": "Global Mining & Commodity Supply Network operated by Baalvion Industries Private Limited.",
+    "foundingDate": "2025",
+    "email": "trade@baalvion.com",
+    "identifier": {
+      "@type": "PropertyValue",
+      "propertyID": "CIN",
+      "value": "U43121OD2025PTC048479"
+    },
     "address": {
       "@type": "PostalAddress",
+      "streetAddress": "Altamount Road, Lodha Altamount",
       "addressLocality": "Mumbai",
       "addressRegion": "Maharashtra",
       "postalCode": "400026",
@@ -78,7 +96,34 @@ export default function RootLayout({
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+91 89512 84770",
-      "contactType": "customer service"
+      "email": "trade@baalvion.com",
+      "contactType": "customer service",
+      "areaServed": "Worldwide",
+      "availableLanguage": ["English", "Hindi"]
+    },
+    "sameAs": [
+      "https://www.linkedin.com/company/baalvion",
+      "https://twitter.com/baalvion"
+    ]
+  };
+
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": "https://mining.baalvion.com/#headquarters",
+    "name": "Baalvion Mining Inc. — Headquarters",
+    "url": "https://mining.baalvion.com",
+    "logo": "https://mining.baalvion.com/logo.svg",
+    "telephone": "+91 89512 84770",
+    "email": "trade@baalvion.com",
+    "priceRange": "$$$",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Altamount Road, Lodha Altamount",
+      "addressLocality": "Mumbai",
+      "addressRegion": "Maharashtra",
+      "postalCode": "400026",
+      "addressCountry": "IN"
     }
   };
 
@@ -94,6 +139,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
         />
         <GoogleAnalytics />
         {children}

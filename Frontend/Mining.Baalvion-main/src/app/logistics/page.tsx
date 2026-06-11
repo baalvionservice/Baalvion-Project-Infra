@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,55 +30,48 @@ import {
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+// NOTE: These are GENERIC, illustrative logistics service categories — not real
+// companies, and they carry no ratings/reviews or performance claims.
+// TODO(business): Replace with real, contracted logistics partners and their
+// verified service data once partner agreements are in place. Do not reintroduce
+// third-party brand names (e.g. real carriers) as placeholder content.
 const logisticsProviders = [
   {
     id: "LOG-001",
-    name: "Maersk Global Logistics",
+    name: "Global Maritime Logistics",
     type: "Sea Freight",
     routes: ["Asia-Pacific", "Europe", "Americas"],
-    rating: 4.9,
-    reviews: 342,
     specialties: ["Bulk Cargo", "Container Shipping", "Port-to-Port"],
-    verified: true,
     featured: true,
     transitTime: "14-21 days",
     coverage: "Global",
   },
   {
     id: "LOG-002",
-    name: "DHL Industrial Solutions",
+    name: "Industrial Freight Network",
     type: "Air & Road",
     routes: ["Europe", "Africa", "Middle East"],
-    rating: 4.7,
-    reviews: 189,
     specialties: ["Express Delivery", "Customs Clearance", "Last Mile"],
-    verified: true,
     featured: false,
     transitTime: "3-7 days",
     coverage: "Regional",
   },
   {
     id: "LOG-003",
-    name: "Trans-Continental Rail",
+    name: "Continental Rail Freight",
     type: "Rail Freight",
     routes: ["Asia-Europe", "North America"],
-    rating: 4.5,
-    reviews: 156,
     specialties: ["Heavy Cargo", "Bulk Materials", "Cross-Border"],
-    verified: true,
     featured: true,
     transitTime: "10-18 days",
     coverage: "Continental",
   },
   {
     id: "LOG-004",
-    name: "African Logistics Network",
+    name: "Bulk Cargo Partner",
     type: "Multi-Modal",
     routes: ["Sub-Saharan Africa", "North Africa"],
-    rating: 4.3,
-    reviews: 98,
     specialties: ["Mining Logistics", "Infrastructure", "Local Expertise"],
-    verified: true,
     featured: false,
     transitTime: "5-14 days",
     coverage: "Regional",
@@ -317,11 +311,11 @@ export default function LogisticsPage() {
           <div className="flex-1 space-y-8">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-sm text-slate-500 font-medium">
-                Found{" "}
+                Showing{" "}
                 <span className="font-bold text-slate-900">
                   {filteredProviders.length}
                 </span>{" "}
-                verified logistics providers.
+                logistics service categories.
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-xs font-medium text-slate-400">
@@ -358,11 +352,8 @@ export default function LogisticsPage() {
                               </h3>
                               {provider.featured && (
                                 <Badge className="bg-secondary/10 text-secondary text-[10px] font-bold uppercase tracking-wider border-secondary/20">
-                                  Featured
+                                  Service Category
                                 </Badge>
-                              )}
-                              {provider.verified && (
-                                <ShieldCheck className="h-4 w-4 text-emerald-500" />
                               )}
                             </div>
                             <div className="flex items-center gap-4 text-sm text-slate-500 font-medium">
@@ -417,48 +408,32 @@ export default function LogisticsPage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-6 pt-2">
-                          <div className="flex items-center gap-1.5">
-                            <div
-                              className="flex"
-                              aria-label={`Rating: ${provider.rating} out of 5 stars`}
-                            >
-                              {[1, 2, 3, 4, 5].map((i) => (
-                                <Star
-                                  key={i}
-                                  className={cn(
-                                    "h-3.5 w-3.5",
-                                    i <= Math.floor(provider.rating)
-                                      ? "fill-amber-400 text-amber-400"
-                                      : "text-slate-200"
-                                  )}
-                                />
-                              ))}
-                            </div>
-                            <span className="text-sm font-bold text-slate-900">
-                              {provider.rating}
-                            </span>
-                            <span className="text-xs text-slate-400">
-                              ({provider.reviews} reviews)
-                            </span>
+                          <div className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
+                            <Clock className="h-3.5 w-3.5 text-slate-400" />
+                            Indicative transit: {provider.transitTime}
                           </div>
                           <div className="h-4 w-px bg-slate-200 hidden sm:block" />
-                          <div className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                          <div className="text-xs font-bold text-primary flex items-center gap-1">
                             <CheckCircle2 className="h-3.5 w-3.5" />
-                            Verified Partner
+                            Onboarded after verification
                           </div>
                         </div>
                       </div>
 
                       <div className="flex flex-col gap-2 w-full lg:w-48">
-                        <Button className="w-full font-bold h-12 gap-2">
-                          Get Quote <ChevronRight className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="w-full font-bold border-slate-200 h-12"
-                        >
-                          View Details
-                        </Button>
+                        <Link href="/contact" className="w-full">
+                          <Button className="w-full font-bold h-12 gap-2">
+                            Request Quote <ChevronRight className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Link href="/contact" className="w-full">
+                          <Button
+                            variant="outline"
+                            className="w-full font-bold border-slate-200 h-12"
+                          >
+                            Enquire
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </CardContent>
@@ -506,24 +481,31 @@ export default function LogisticsPage() {
                     Global Coverage
                   </h3>
                   <p className="text-sm text-slate-500 leading-relaxed">
-                    Access logistics networks spanning 180+ countries with
-                    specialized mineral transport capabilities.
+                    Access logistics networks across global trade corridors with
+                    specialized bulk and mineral transport capabilities.
                   </p>
                 </CardContent>
               </Card>
             </div>
 
-            <div className="flex justify-center pt-8">
-              <Button
-                variant="outline"
-                className="px-12 border-slate-300 font-bold h-12 text-slate-600"
-              >
-                Load More Providers
-              </Button>
+            <div className="flex flex-col items-center gap-3 pt-8 text-center">
+              <p className="text-xs text-slate-400 max-w-md">
+                The categories above are illustrative. Verified logistics partners
+                are matched to your shipment after onboarding.
+              </p>
+              <Link href="/contact">
+                <Button
+                  variant="outline"
+                  className="px-12 border-slate-300 font-bold h-12 text-slate-600"
+                >
+                  Talk to a Logistics Specialist
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

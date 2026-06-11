@@ -1,14 +1,15 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { ShieldCheck, Truck, BarChart3, Users, Globe } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Trade Solutions | Baalvion Mining Inc.",
+  title: "Trade Solutions",
   description:
     "End-to-end technology solutions for global mineral trade: AI compliance verification, RFQ procurement, logistics tracking, and secure escrow settlement.",
   alternates: { canonical: "https://mining.baalvion.com/solutions" },
   openGraph: {
-    title: "Trade Solutions | Baalvion Mining Inc.",
+    title: "Trade Solutions",
     description:
       "End-to-end technology solutions for global mineral trade: AI compliance, RFQ, logistics, and secure settlement.",
     url: "https://mining.baalvion.com/solutions",
@@ -65,6 +66,7 @@ export default function SolutionsPage() {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

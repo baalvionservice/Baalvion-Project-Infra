@@ -1,0 +1,24 @@
+<svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Baalvion corporate">
+  <defs>
+    <linearGradient id="c" x1="0" y1="0" x2="0" y2="800" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B2540"/><stop offset="1" stop-color="#0A1A2B"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#c)"/>
+  <g fill="#103a63">
+    <rect x="120" y="380" width="120" height="320"/>
+    <rect x="280" y="300" width="140" height="400"/>
+    <rect x="460" y="220" width="160" height="480"/>
+    <rect x="660" y="320" width="140" height="380"/>
+    <rect x="840" y="400" width="120" height="300"/>
+  </g>
+  <g fill="#21CEDD" opacity="0.7">
+    <rect x="150" y="410" width="20" height="20"/><rect x="190" y="410" width="20" height="20"/>
+    <rect x="500" y="260" width="22" height="22"/><rect x="540" y="260" width="22" height="22"/>
+    <rect x="500" y="320" width="22" height="22"/><rect x="540" y="320" width="22" height="22"/>
+    <rect x="700" y="360" width="20" height="20"/><rect x="740" y="360" width="20" height="20"/>
+  </g>
+  <rect x="64" y="96" width="120" height="6" rx="3" fill="#21CEDD"/>
+  <text x="64" y="150" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="800" fill="#FFFFFF">Baalvion Industries Pvt. Ltd.</text>
+  <text x="64" y="186" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#9FC6D6">CIN U43121OD2025PTC048479</text>
+</svg>

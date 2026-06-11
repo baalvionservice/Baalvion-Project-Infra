@@ -7,6 +7,7 @@ import { ShieldCheck, Truck, BarChart3, ArrowRight, Briefcase, Gem, Zap, Globe }
 import Image from "next/image";
 import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { BRAND_IMAGES } from "@/lib/brand-assets";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export default function Home() {
@@ -51,20 +52,25 @@ export default function Home() {
                     </Button>
                   </Link>
                   <Link href="/marketplace" className="w-full sm:w-auto">
-                    <Button size="lg" variant="outline" className="border-white/20 text-black hover:bg-white/10 w-full px-8 py-7 text-lg font-bold">
+                    <Button size="lg" variant="outline" className="border-white/20 text-white hover:bg-white/10 w-full px-8 py-7 text-lg font-bold">
                       Browse Marketplace
                     </Button>
                   </Link>
                 </div>
-                <div className="flex items-center gap-8 pt-6 border-t border-white/10">
-                  <div className="flex flex-col">
-                    <span className="text-2xl font-bold">$12.4B+</span>
-                    <span className="text-[10px] text-primary-foreground/40 uppercase font-black tracking-widest">Trading Volume</span>
+                <div className="flex flex-wrap items-center gap-6 pt-6 border-t border-white/10">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-secondary" />
+                    <span className="text-xs font-bold text-primary-foreground/80 uppercase tracking-wider">KYC &amp; Compliance-First</span>
                   </div>
-                  <div className="h-10 w-px bg-white/10" />
-                  <div className="flex flex-col">
-                    <span className="text-2xl font-bold">5,000+</span>
-                    <span className="text-[10px] text-primary-foreground/40 uppercase font-black tracking-widest">Verified Partners</span>
+                  <div className="h-6 w-px bg-white/10 hidden sm:block" />
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-secondary" />
+                    <span className="text-xs font-bold text-primary-foreground/80 uppercase tracking-wider">Secure Escrow Settlement</span>
+                  </div>
+                  <div className="h-6 w-px bg-white/10 hidden sm:block" />
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-5 w-5 text-secondary" />
+                    <span className="text-xs font-bold text-primary-foreground/80 uppercase tracking-wider">Registered in India · CIN U43121OD2025PTC048479</span>
                   </div>
                 </div>
               </div>
@@ -72,7 +78,7 @@ export default function Home() {
                 <div className="absolute -inset-4 rounded-3xl bg-secondary/20 blur-3xl" />
                 <div className="relative rounded-[2.5rem] overflow-hidden border-8 border-white/5 shadow-2xl shadow-black/50 aspect-[4/3]">
                   <Image 
-                    src={heroImage?.imageUrl || "https://picsum.photos/seed/baalvion/800/600"} 
+                    src={heroImage?.imageUrl || BRAND_IMAGES.hero}
                     alt="Baalvion Mining Inc. Platform Interface - Global Industrial Network" 
                     fill 
                     priority
@@ -141,7 +147,7 @@ export default function Home() {
           <div className="container relative z-10 px-4 md:px-8 max-w-7xl mx-auto">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <div className="relative aspect-video rounded-3xl overflow-hidden border border-white/10">
-                <Image src="https://picsum.photos/seed/baalvion-global/1200/800" alt="Global logistics network" fill loading="lazy" className="object-cover" />
+                <Image src={BRAND_IMAGES.globalNetwork} alt="Baalvion Mining global logistics and supply network" fill loading="lazy" className="object-cover" />
               </div>
               <div className="space-y-8">
                 <h2 className="text-3xl md:text-5xl font-headline font-bold italic tracking-tighter uppercase leading-none">
@@ -152,17 +158,21 @@ export default function Home() {
                 </p>
                 <div className="grid grid-cols-2 gap-6">
                   <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-                    <p className="text-2xl font-bold text-secondary">150+</p>
-                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Countries Reached</p>
+                    <Gem className="h-6 w-6 text-secondary mb-3" />
+                    <p className="text-base font-bold text-white leading-tight">Bulk &amp; Industrial Minerals</p>
+                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-1">Ferrous · Base · Critical</p>
                   </div>
                   <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-                    <p className="text-2xl font-bold text-secondary">98%</p>
-                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">Lead Fulfillment</p>
+                    <ShieldCheck className="h-6 w-6 text-secondary mb-3" />
+                    <p className="text-base font-bold text-white leading-tight">Verified Supply Chains</p>
+                    <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest mt-1">Compliance-led trade</p>
                   </div>
                 </div>
-                <Button variant="outline" size="lg" className="h-14 border-white/20 text-black hover:bg-white/10 hover:text-white px-8 font-bold gap-2">
-                  View Trade Solutions <ArrowRight className="h-4 w-4" />
-                </Button>
+                <Link href="/solutions">
+                  <Button variant="outline" size="lg" className="h-14 border-white/20 text-white hover:bg-white/10 hover:text-white px-8 font-bold gap-2">
+                    View Trade Solutions <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

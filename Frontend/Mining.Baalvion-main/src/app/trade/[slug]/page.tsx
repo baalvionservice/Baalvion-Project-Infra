@@ -17,13 +17,13 @@ export async function generateMetadata({ params }: TradePageProps): Promise<Meta
   const { slug } = await params;
   const data = getPseoPageBySlug(slug);
 
-  if (!data) return { title: 'Trade Corridor Not Found | Baalvion Mining Inc.' };
+  if (!data) return { title: 'Trade Corridor Not Found' };
 
   const isHighQuality = isValidPseoPage(data);
   const { productName, location, role, intent, industry, avgPurity, supplierCount, keywords } = data;
 
   // Intent-based Title Generation using Keyword Map
-  let title = `Verified ${productName} ${role} in ${location} | Baalvion Mining Inc.`;
+  let title = `Verified ${productName} ${role} in ${location}`;
   
   if (intent === 'BUY') title = `Where to Buy ${productName} in ${location} | Verified Wholesale`;
   if (intent === 'INDUSTRY') title = `${productName} for ${industry} | High-Grade ${avgPurity} Supply`;
@@ -50,7 +50,7 @@ export async function generateMetadata({ params }: TradePageProps): Promise<Meta
     openGraph: {
       title,
       description,
-      images: [`https://picsum.photos/seed/${slug}/1200/630`],
+      images: ['https://mining.baalvion.com/images/og/og-default.svg'],
     }
   };
 }

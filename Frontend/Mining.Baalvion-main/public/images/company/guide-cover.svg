@@ -1,0 +1,18 @@
+<svg viewBox="0 0 1200 630" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Baalvion guide">
+  <defs>
+    <linearGradient id="gd" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0A1A2B"/><stop offset="1" stop-color="#0E2E4E"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#gd)"/>
+  <g stroke="#21CEDD" stroke-opacity="0.12" stroke-width="1">
+    <line x1="0" y1="158" x2="1200" y2="158"/><line x1="0" y1="316" x2="1200" y2="316"/><line x1="0" y1="474" x2="1200" y2="474"/>
+  </g>
+  <rect x="860" y="150" width="260" height="330" rx="10" fill="#103a63" stroke="#21CEDD" stroke-opacity="0.4"/>
+  <rect x="892" y="190" width="196" height="14" rx="7" fill="#21CEDD" opacity="0.7"/>
+  <rect x="892" y="226" width="150" height="10" rx="5" fill="#9FC6D6" opacity="0.5"/>
+  <rect x="892" y="252" width="170" height="10" rx="5" fill="#9FC6D6" opacity="0.5"/>
+  <rect x="80" y="130" width="90" height="6" rx="3" fill="#21CEDD"/>
+  <text x="80" y="210" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="800" fill="#FFFFFF">Knowledge Hub</text>
+  <text x="80" y="256" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#9FC6D6">Guides &amp; Industry Reports</text>
+</svg>

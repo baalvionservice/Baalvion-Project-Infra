@@ -11,6 +11,8 @@
  * blog pages fall back to their built-in seed content.
  */
 
+import { BRAND_IMAGES } from './brand-assets';
+
 const CMS_BASE = process.env.CMS_PUBLIC_URL || 'http://localhost:3018/api/v1/public';
 const SITE = process.env.CMS_WEBSITE_SLUG || 'baalvion-mining';
 const BASE = `${CMS_BASE}/${SITE}`;
@@ -141,7 +143,7 @@ function mapPost(c: CmsContent): MiningPost {
     date: formatDate(c),
     readTime: cf.readTime || '4 min read',
     excerpt: c.excerpt || '',
-    image: c.featuredImage || `https://picsum.photos/seed/${c.slug}/1200/600`,
+    image: c.featuredImage || BRAND_IMAGES.insight,
     contentHtml: blocksToHtml(c.contentBlocks),
   };
 }
