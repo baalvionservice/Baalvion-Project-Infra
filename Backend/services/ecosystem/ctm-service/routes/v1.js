@@ -10,13 +10,14 @@ const { authMiddleware, optionalAuth, requireRole } = require('../middleware/aut
 // Authenticated + mirror the acting identity user into CTM (user_profiles).
 const authed = [authMiddleware, ex.ensureUserProfile];
 
-// READ-ACCESS NOTE: GET endpoints are `optionalAuth` because the frontend reads them
-// from Next server actions (src/lib/api.ts, 'use server') which run server-side WITHOUT
-// the browser-held access token. optionalAuth still populates req.auth when a valid token
-// IS present (client-side ctmClient reads), so handlers can scope by req.auth when available.
-// Every mutation (POST/PATCH/DELETE) stays hard-authed.
-// TODO(hardening, Phase 2): move tenant-scoped reads (submissions/invoices/notifications)
-// behind the BFF so the server action can forward the caller's identity, then re-tighten.
+// READ-ACCESS NOTE: PUBLIC marketing reads (companies, tasks, plans, badges, leaderboard,
+// single candidate profile) stay `optionalAuth` so Next server actions can render them
+// without the browser-held token; the single profile is returned through a public-safe
+// projection. SENSITIVE reads that expose PII / billing / candidate work / tenant data
+// (users list, submissions, invoices, subscriptions, evaluations, activities, notifications,
+// webhooks, integrations, test-cases) now require `authMiddleware` and are tenant-scoped in
+// their controllers. Every mutation (POST/PATCH/DELETE) is hard-authed + ownership-checked.
+// Phase 2: route authenticated reads through the BFF so server actions forward identity.
 
 // ── Companies ─────────────────────────────────────────────────────────────────
 router.get('/companies',          optionalAuth, ctrl.listCompanies);
@@ -36,13 +37,13 @@ router.post('/tasks/:id/close',   authMiddleware, ctrl.closeTask);
 // Submissions are candidate work + scores (sensitive). Require auth; the controller
 // scopes the result to the caller's own submissions or their company's tasks.
 router.get('/submissions',               authMiddleware, ctrl.listSubmissions);
-router.get('/submissions/:id',           optionalAuth, ctrl.getSubmission);
+router.get('/submissions/:id',           authMiddleware, ctrl.getSubmission);
 router.post('/submissions',              authed, ctrl.createSubmission);
 router.patch('/submissions/:id',         authMiddleware, ctrl.updateSubmission);
 router.patch('/submissions/:id/status',  authMiddleware, ctrl.updateSubmissionStatus);
 
 // ── Evaluations ───────────────────────────────────────────────────────────────
-router.get('/evaluations',         optionalAuth, ctrl.listEvaluations);
+router.get('/evaluations',         authMiddleware, ctrl.listEvaluations);
 router.post('/evaluations',        authed, ctrl.createEvaluation);
 router.get('/evaluation-schemas',  optionalAuth,   ctrl.getEvaluationSchemas);
 
@@ -87,11 +88,11 @@ router.patch('/subscriptions/:id',   authMiddleware, ctrl.updateSubscription);
 // ── Invoices ──────────────────────────────────────────────────────────────────
 // Invoices are billing PII. Require auth; the handler scopes by the caller's org.
 router.get('/invoices',      authMiddleware, ex.listInvoices);
-router.get('/invoices/:id',  optionalAuth,   ex.getInvoice);
+router.get('/invoices/:id',  authMiddleware, ex.getInvoice);
 router.post('/invoices',     authed,         ex.createInvoice);
 
 // ── Activities ────────────────────────────────────────────────────────────────
-router.get('/activities',  optionalAuth, ctrl.listActivities);
+router.get('/activities',  authMiddleware, ctrl.listActivities);
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
 router.get('/analytics',  optionalAuth, ctrl.getAnalytics);
@@ -139,7 +140,7 @@ router.get('/integrations/github/repos', optionalAuth, integ.listGitHubRepositor
 router.get('/integrations/github/repo',  optionalAuth, integ.getGitHubRepo);
 
 // ── Test cases / auto-validation (Judge0 sandbox when configured) ────────────────
-router.get('/submissions/:id/test-cases',     optionalAuth,   integ.listTestCases);
+router.get('/submissions/:id/test-cases',     authMiddleware, integ.listTestCases);
 router.post('/submissions/:id/test-cases',    authMiddleware, integ.createTestCase);
 router.post('/submissions/:id/test-cases/run', authMiddleware, integ.runTestCases);
 

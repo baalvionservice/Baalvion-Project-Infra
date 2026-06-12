@@ -39,6 +39,23 @@ function shapeUser(profile, perf, badges) {
     };
 }
 
+// Public-safe projection of a profile for the anonymous candidate marketing page.
+// Excludes PII / account fields: email, company_id, is_active, is_verified,
+// consent_*, onboarding_*, metadata.
+const PUBLIC_PROFILE_FIELDS = [
+    'user_id', 'name', 'role', 'avatar_url', 'bio', 'location',
+    'experience_level', 'skills', 'github_url', 'linkedin_url', 'portfolio_links', 'ranking',
+];
+
+function publicProfile(shaped) {
+    const out = {};
+    for (const f of PUBLIC_PROFILE_FIELDS) if (shaped[f] !== undefined) out[f] = shaped[f];
+    out.completed_tasks = shaped.completed_tasks ?? 0;
+    out.average_score = shaped.average_score ?? 0;
+    if (shaped.badges !== undefined) out.badges = shaped.badges;
+    return out;
+}
+
 // ── Lazy profile provisioning (safety net on authenticated routes) ──────────────
 // Guarded by an in-process Set so we issue at most one findOrCreate per user per
 // process lifetime instead of a write on every request.
@@ -106,7 +123,14 @@ exports.getUser = async (req, res, next) => {
             computePerformance(profile.user_id),
             db.user_badges.findAll({ where: { user_id: profile.user_id }, include: [{ association: 'badge' }] }),
         ]);
-        sendSuccess(res, shapeUser(profile, perf, badges));
+        const shaped = shapeUser(profile, perf, badges);
+        // PII guard: only the profile owner or an admin receives the full record
+        // (email, company_id, verification/consent flags, metadata). Everyone else —
+        // including the anonymous public candidate page — gets a public-safe projection.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const isSelf = String(req.auth?.userId || '') === String(profile.user_id);
+        sendSuccess(res, (isAdmin || isSelf) ? shaped : publicProfile(shaped));
     } catch (err) { next(err); }
 };
 
@@ -229,8 +253,14 @@ exports.listNotifications = async (req, res, next) => {
 
 exports.createNotification = async (req, res, next) => {
     try {
-        const { user_id, company_id, type, priority, title, description, related_entity } = req.body;
+        const { type, priority, title, description, related_entity } = req.body;
         if (!type || !title) throw new AppError('VALIDATION_ERROR', 'type and title are required', 400);
+        // Cross-tenant-injection guard: only admins may target an arbitrary user/company.
+        // Everyone else is pinned to their own verified identity + org.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const user_id = isAdmin ? req.body.user_id : (req.auth?.userId ?? null);
+        const company_id = isAdmin ? req.body.company_id : (req.auth?.orgId ?? null);
         const n = await db.notifications.create({
             user_id, company_id, type, priority, title, description,
             related_entity: related_entity || {},
@@ -243,6 +273,13 @@ exports.updateNotification = async (req, res, next) => {
     try {
         const n = await db.notifications.findByPk(req.params.id);
         if (!n) throw new AppError('NOT_FOUND', 'Notification not found', 404);
+        // IDOR guard: a user may only mutate their OWN notification; broadcasts (null
+        // user_id) and other users' notifications are admin-only.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin && String(n.user_id || '') !== String(req.auth?.userId || '')) {
+            throw new AppError('FORBIDDEN', 'You do not have permission to modify this notification', 403);
+        }
         if (req.body.status !== undefined) n.status = req.body.status;
         if (req.body.priority !== undefined) n.priority = req.body.priority;
         await n.save();
@@ -329,6 +366,12 @@ exports.getInvoice = async (req, res, next) => {
     try {
         const inv = await db.invoices.findByPk(req.params.id, { include: [{ association: 'company', attributes: ['id', 'name'] }] });
         if (!inv) throw new AppError('NOT_FOUND', 'Invoice not found', 404);
+        // IDOR guard: invoices are billing PII — only the owning org or an admin may read one.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin && String(inv.company_id) !== String(req.auth?.orgId || '')) {
+            throw new AppError('FORBIDDEN', 'You do not have permission to view this invoice', 403);
+        }
         sendSuccess(res, inv);
     } catch (err) { next(err); }
 };
