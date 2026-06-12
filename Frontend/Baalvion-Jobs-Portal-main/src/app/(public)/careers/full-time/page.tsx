@@ -217,6 +217,10 @@ const faqs = [
   },
 ];
 
+// Live job data is fetched per request; opt out of build-time prerendering so
+// the build does not depend on the jobs API being reachable in CI.
+export const dynamic = 'force-dynamic';
+
 export default async function FullTimeRolesPage() {
   const [jobs, countries, departments] = await Promise.all([
     talentService.getJobs({ status: 'published', employmentType: 'Full-time' }),

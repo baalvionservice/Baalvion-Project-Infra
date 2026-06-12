@@ -55,6 +55,10 @@ const LocationCard = ({ country, imageUrl, address }: { country: Country, imageU
 );
 
 
+// Fetches live country data per request; opt out of build-time prerendering so
+// the build does not depend on the jobs API being reachable in CI.
+export const dynamic = 'force-dynamic';
+
 export default async function ContactPage() {
     const countries = await talentService.getCountries({ isActive: true });
     const mockAddresses: { [key: string]: string[] } = {

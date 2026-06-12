@@ -16,6 +16,10 @@ export const metadata: Metadata = {
     },
 };
 
+// Live job data is fetched per request; opt out of build-time prerendering so
+// the build does not depend on the jobs API being reachable in CI.
+export const dynamic = 'force-dynamic';
+
 export default async function OpenPositionsPage() {
     // Fetch data needed for filters, but not the jobs themselves.
     // The client component `GlobalJobListing` will fetch jobs.
