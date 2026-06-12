@@ -19,7 +19,7 @@ const options = {
                     type:         'http',
                     scheme:       'bearer',
                     bearerFormat: 'JWT',
-                    description:  'HS256 JWT issued by proxy backend (port 4000)',
+                    description:  'RS256 JWT verified via JWKS (issuer baalvion-auth); obtain it by logging in through the auth-gateway / auth-service.',
                 },
             },
         },

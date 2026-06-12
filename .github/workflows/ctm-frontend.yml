@@ -37,7 +37,9 @@ jobs:
         run: pnpm install --frozen-lockfile --filter controlthemarket-web...
 
       - name: Type check
-        run: pnpm --filter controlthemarket-web typecheck 2>&1 | grep -v "DataProof.tsx" || true
+        # tsc --noEmit is clean (next.config no longer ignores build type errors),
+        # so this is a real gate — no error filtering.
+        run: pnpm --filter controlthemarket-web typecheck
 
       - name: Run tests
         working-directory: .
@@ -52,8 +54,7 @@ jobs:
     env:
       NEXT_PUBLIC_USE_MOCK: 'false'
       NEXT_PUBLIC_CTM_API_URL: ${{ secrets.CTM_API_URL || 'http://localhost:3017/api/v1' }}
-      NEXT_PUBLIC_AUTH_URL: ${{ secrets.AUTH_URL || 'http://localhost:4000/v1/auth' }}
-      NEXT_PUBLIC_APP_URL: ${{ secrets.CTM_APP_URL || 'http://localhost:3025' }}
+      NEXT_PUBLIC_APP_URL: ${{ secrets.CTM_APP_URL || 'http://localhost:3034' }}
 
     steps:
       - uses: actions/checkout@v4
