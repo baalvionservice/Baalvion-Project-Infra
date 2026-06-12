@@ -227,12 +227,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install psql client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
-      - name: Install pg (probe dependency)
-        run: npm init -y >/dev/null 2>&1 && npm install pg@8 --no-save
-        working-directory: Backend/services/commerce/trade-service
+      # trade-service declares @baalvion/auth-node as a pnpm `workspace:*` dep,
+      # which npm cannot resolve in a standalone submodule checkout
+      # (EUNSUPPORTEDPROTOCOL). migrate.js and the RLS probe don't use it, so
+      # strip workspace-only deps and install the rest (pg, sequelize, …) with npm.
       - name: Install trade-service dependencies
-        run: npm install --no-package-lock --legacy-peer-deps || true
         working-directory: Backend/services/commerce/trade-service
+        run: |
+          node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));for(const f of ['dependencies','devDependencies','optionalDependencies']){if(!p[f])continue;for(const k of Object.keys(p[f]))if(String(p[f][k]).startsWith('workspace:'))delete p[f][k];}fs.writeFileSync('package.json',JSON.stringify(p,null,2));"
+          npm install --no-package-lock --legacy-peer-deps
       - name: Create baalvion_app role (027)
         run: psql "postgresql://postgres:postgres@localhost:5432/baalvion_db" -v app_pw=ci_app_pw -f Backend/database/migrations/027_app_role.sql
       - name: Apply trade-service migrations (owner role)
