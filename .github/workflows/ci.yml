@@ -215,11 +215,13 @@ jobs:
       DB_NAME: baalvion_db
       PGPASSWORD: postgres
     steps:
-      # trade-service lives in a public git submodule; without this the gitlink
-      # is empty and `node migrate.js` / the RLS probe cannot find their files.
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
+      # The RLS probe needs only the trade-service submodule (public). Init it
+      # directly rather than `submodules: recursive`, which would also pull the
+      # Global-Trade-Infrastructure submodule whose gitlink points to an
+      # unpushed commit ("not our ref") and fails the whole checkout step.
+      - name: Check out trade-service submodule
+        run: git submodule update --init --depth=1 Backend/services/commerce/trade-service
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
