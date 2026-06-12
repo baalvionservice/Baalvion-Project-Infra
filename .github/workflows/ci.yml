@@ -118,22 +118,33 @@ jobs:
         run: mvn clean verify -DskipTests=false
         working-directory: Backend/services/commerce/financial-services-java
 
-  frontend-build:
-    name: Frontend Apps Build
+  # Matrix inputs must be known at workflow setup — they cannot reference a
+  # same-job `steps.*` output (that was the pre-existing startup_failure). So a
+  # dedicated job discovers the frontend dirs and exposes them as a JSON output.
+  discover-frontends:
+    name: Discover Frontend Apps
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJson(steps.extract-apps.outputs.dirs) }}
-      fail-fast: false
+    outputs:
+      dirs: ${{ steps.extract-apps.outputs.dirs }}
     steps:
       - uses: actions/checkout@v4
-      
       - name: Extract App Directories from Config
         id: extract-apps
         run: |
-          DIRS=$(node -p "require('./frontends.config.js').apps.map(a => a.cwd.replace('D:/Baalvion Projects/Frontend/', ''))" | tr '\n' ',' | sed 's/,$//')
-          echo "dirs=$DIRS" >> $GITHUB_OUTPUT
-          
+          DIRS=$(node -p "JSON.stringify(require('./frontends.config.js').apps.map(a => a.cwd.replace('D:/Baalvion Projects/Frontend/', '')))")
+          echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
+
+  frontend-build:
+    name: Frontend Apps Build
+    runs-on: ubuntu-latest
+    needs: discover-frontends
+    strategy:
+      matrix:
+        app: ${{ fromJson(needs.discover-frontends.outputs.dirs) }}
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
 
@@ -235,6 +246,7 @@ jobs:
       - lint-and-typecheck
       - backend-go
       - backend-java
+      - discover-frontends
       - frontend-build
       - security-cross-tenant
       - integration-test
@@ -242,7 +254,7 @@ jobs:
     steps:
       - name: Verify all required jobs succeeded
         run: |
-          results='${{ join(needs.*.result, ",") }}'
+          results='${{ join(needs.*.result, ',') }}'
           echo "Upstream job results: $results"
           if echo "$results" | grep -qE 'failure|cancelled'; then
             echo "::error::One or more required CI jobs failed or were cancelled."
