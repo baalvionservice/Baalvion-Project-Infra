@@ -8,7 +8,14 @@ import Script from 'next/script';
  * Optimized for Next.js to load without blocking the main thread by using lazyOnload.
  */
 export function GoogleAnalytics() {
-  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID || 'G-XXXXXXXXXX';
+  const measurementId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
+  // Do not load gtag unless a real measurement ID is configured. This prevents
+  // requests to an invalid property (the previous placeholder 'G-XXXXXXXXXX')
+  // and avoids loading analytics scripts that have no destination.
+  if (!measurementId || measurementId === 'G-XXXXXXXXXX') {
+    return null;
+  }
 
   return (
     <>

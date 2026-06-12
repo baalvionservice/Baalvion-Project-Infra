@@ -51,6 +51,54 @@ import { badges as mockBadges } from '@/lib/badges';
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { absoluteUrl } from "@/lib/site-url";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const candidate = await getUser(id).catch(() => null);
+
+  if (!candidate || candidate.role !== "candidate") {
+    return {
+      title: "Candidate Not Found",
+      description: "This candidate profile could not be found on ControlTheMarket.",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const canonical = absoluteUrl(`/candidate/${candidate.id}`);
+  const skills = candidate.profile?.skills?.slice(0, 5).join(", ");
+  const title = candidate.name;
+  const description =
+    candidate.profile?.bio?.trim() ||
+    `View ${candidate.name}'s verified, proof-of-skill profile on ControlTheMarket${
+      skills ? ` — skilled in ${skills}` : ""
+    }.`;
+  const avatarUrl = candidate.profile?.avatarUrl;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "profile",
+      title: `${title} | ControlTheMarket`,
+      description,
+      url: canonical,
+      images: avatarUrl ? [{ url: avatarUrl, alt: candidate.name }] : undefined,
+    },
+    twitter: {
+      card: "summary",
+      title: `${title} | ControlTheMarket`,
+      description,
+      images: avatarUrl ? [avatarUrl] : undefined,
+    },
+  };
+}
 
 const badgeIcons: { [key: string]: React.ElementType } = {
   Trophy,

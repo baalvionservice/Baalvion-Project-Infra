@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Post, CAT_LABELS, CAT_STYLES } from "./data";
+import { Post, CAT_LABELS, CAT_STYLES, getArticleBySlug } from "./data";
 
 interface FeaturedCardProps {
   post: Post;
@@ -9,14 +10,14 @@ interface FeaturedCardProps {
 }
 
 export default function FeaturedCard({ post, onClick }: FeaturedCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 24 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      onClick={onClick}
-      className="bg-white border border-gray-200 rounded-2xl overflow-hidden mb-9 cursor-pointer hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-shadow grid grid-cols-1 md:grid-cols-2"
-    >
+  // Featured post links to its real page when full content exists, else modal.
+  const hasPage = getArticleBySlug(post.id) !== null;
+
+  const cardClass =
+    "block bg-white border border-gray-200 rounded-2xl overflow-hidden mb-9 cursor-pointer hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-shadow grid grid-cols-1 md:grid-cols-2";
+
+  const inner = (
+    <>
       {/* Image panel */}
       <div
         className="flex flex-col justify-between p-10 min-h-[220px] md:min-h-[280px]"
@@ -51,10 +52,28 @@ export default function FeaturedCard({ post, onClick }: FeaturedCardProps) {
           <span className="w-[3px] h-[3px] rounded-full bg-gray-300" />
           <span>March 2026</span>
         </div>
-        <button className="inline-flex items-center gap-1.5 bg-green-600 text-white text-[13px] font-semibold px-[18px] py-2 rounded-lg hover:bg-green-700 transition-colors border-none cursor-pointer font-[inherit]">
+        <span className="inline-flex items-center gap-1.5 bg-green-600 text-white text-[13px] font-semibold px-[18px] py-2 rounded-lg hover:bg-green-700 transition-colors border-none cursor-pointer font-[inherit]">
           Read article →
-        </button>
+        </span>
       </div>
+    </>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {hasPage ? (
+        <Link href={`/blog/${post.id}`} className={cardClass}>
+          {inner}
+        </Link>
+      ) : (
+        <div onClick={onClick} className={cardClass}>
+          {inner}
+        </div>
+      )}
     </motion.div>
   );
 }

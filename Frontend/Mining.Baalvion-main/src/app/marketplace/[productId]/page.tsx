@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { RelatedProducts } from "@/components/marketplace/RelatedProducts";
 import { JsonLd } from "@/components/seo/JsonLd";
+import { BRAND_IMAGES } from "@/lib/brand-assets";
 
 // Mock helper to simulate data fetching based on slug
 const getProductData = (slug: string) => {
@@ -41,7 +42,7 @@ const getProductData = (slug: string) => {
     supplier: "Baalvion Verified Partner",
     supplierRating: 4.8,
     description: `Premium industrial material optimized for global manufacturing. This batch of ${slug.replace(/-/g, ' ')} features exceptional consistency and minimal impurities. Verified for immediate export with all international documentation ready for transit.`,
-    imageUrl: `https://picsum.photos/seed/${slug}/800/600`
+    imageUrl: BRAND_IMAGES.mineral
   };
 };
 

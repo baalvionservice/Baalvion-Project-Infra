@@ -1,0 +1,26 @@
+<svg viewBox="0 0 1200 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Baalvion Mining — global mineral trading">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B2540"/>
+      <stop offset="1" stop-color="#0A1A2B"/>
+    </linearGradient>
+    <linearGradient id="acc" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#21CEDD"/>
+      <stop offset="1" stop-color="#1AA7B5"/>
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#21CEDD" stroke-opacity="0.08" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="900" fill="url(#sky)"/>
+  <rect width="1200" height="900" fill="url(#grid)"/>
+  <circle cx="980" cy="190" r="320" fill="#21CEDD" opacity="0.06"/>
+  <!-- mountain range -->
+  <path d="M0 720 L220 470 L360 600 L520 380 L700 640 L860 430 L1040 660 L1200 520 L1200 900 L0 900 Z" fill="#0E2E4E"/>
+  <path d="M0 760 L180 560 L340 700 L520 520 L720 720 L920 560 L1120 740 L1200 690 L1200 900 L0 900 Z" fill="#103a63"/>
+  <path d="M520 380 L560 440 L470 600 L380 460 Z" fill="url(#acc)" opacity="0.85"/>
+  <circle cx="520" cy="380" r="7" fill="#FFFFFF"/>
+  <rect x="64" y="96" width="150" height="6" rx="3" fill="url(#acc)"/>
+  <text x="64" y="160" font-family="Arial, Helvetica, sans-serif" font-size="46" font-weight="800" fill="#FFFFFF">BAALVION MINING INC.</text>
+  <text x="64" y="200" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="600" fill="#9FC6D6">Global Mineral Trade &amp; Commodity Supply Network</text>
+</svg>

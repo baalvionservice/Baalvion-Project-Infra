@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -288,11 +289,14 @@ export default function SupplierDirectoryPage() {
             </div>
 
             <div className="flex justify-center pt-8">
-              <Button variant="outline" className="px-12 border-slate-300 font-bold h-12 text-slate-600">Load More Suppliers</Button>
+              <Link href="/contact">
+                <Button variant="outline" className="px-12 border-slate-300 font-bold h-12 text-slate-600">Request Supplier Introductions</Button>
+              </Link>
             </div>
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

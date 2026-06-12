@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/site-url';
 import { getLeaderboard } from '@/lib/ranking-engine';
 
 export const metadata: Metadata = {
@@ -6,10 +7,10 @@ export const metadata: Metadata = {
   description:
     'See the top-ranked candidates on ControlTheMarket ranked by verified real-world skill performance. Discover who is leading the market.',
   alternates: {
-    canonical: 'https://controlthemarket.com/leaderboard',
+    canonical: absoluteUrl('/leaderboard'),
   },
   openGraph: {
-    url: 'https://controlthemarket.com/leaderboard',
+    url: absoluteUrl('/leaderboard'),
     title: 'Skill Leaderboard | ControlTheMarket',
     description:
       'See the top-ranked candidates ranked by verified real-world skill performance.',

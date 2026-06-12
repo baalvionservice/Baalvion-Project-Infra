@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/site-url';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata: Metadata = {
@@ -6,10 +7,10 @@ export const metadata: Metadata = {
   description:
     'ControlTheMarket was founded on a simple premise: the best way to know if someone can do a job is to see them do the work. Learn about our mission to create a more equitable hiring landscape.',
   alternates: {
-    canonical: 'https://controlthemarket.com/about',
+    canonical: absoluteUrl('/about'),
   },
   openGraph: {
-    url: 'https://controlthemarket.com/about',
+    url: absoluteUrl('/about'),
     title: 'About Us | ControlTheMarket',
     description:
       'ControlTheMarket was founded on a simple premise: the best way to know if someone can do a job is to see them do the work.',

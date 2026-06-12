@@ -45,14 +45,55 @@ export default function ContactPage() {
 
   const onSubmit = async (data: z.infer<typeof contactSchema>) => {
     setIsSubmitting(true);
-    await new Promise(r => setTimeout(r, 1500));
-    setIsSubmitting(false);
-    
-    toast({
-      title: "Inquiry Sent",
-      description: "A trade specialist from Baalvion Mining Inc. will contact you shortly.",
-    });
-    form.reset();
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...data, source: "contact-page", company_website: "" }),
+      });
+      const json = await res.json().catch(() => ({}));
+
+      if (res.ok && json?.success) {
+        toast({
+          title: "Inquiry Sent",
+          description:
+            json.message ??
+            "A trade specialist from Baalvion Mining Inc. will contact you shortly.",
+        });
+        form.reset();
+        return;
+      }
+
+      // Surface field-level errors back onto the form when present.
+      if (json?.fieldErrors && typeof json.fieldErrors === "object") {
+        for (const [name, messages] of Object.entries(json.fieldErrors)) {
+          const message = Array.isArray(messages) ? messages[0] : undefined;
+          if (message) {
+            form.setError(name as keyof z.infer<typeof contactSchema>, {
+              type: "server",
+              message: String(message),
+            });
+          }
+        }
+      }
+
+      toast({
+        variant: "destructive",
+        title: "Submission Failed",
+        description:
+          json?.error ??
+          "We could not send your inquiry. Please try again or email trade@baalvion.com.",
+      });
+    } catch {
+      toast({
+        variant: "destructive",
+        title: "Network Error",
+        description:
+          "We could not reach the server. Please check your connection and try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -65,7 +106,7 @@ export default function ContactPage() {
               <Badge className="bg-secondary text-secondary-foreground uppercase font-black tracking-widest text-[10px] px-4 py-1">Global Terminal</Badge>
               <h1 className="text-4xl md:text-6xl font-headline font-bold text-primary tracking-tight">Connect with <br /> Our Experts</h1>
               <p className="text-lg text-slate-500 leading-relaxed max-w-lg">
-                Our team at **Baalvion Mining Inc.** is ready to facilitate your bulk industrial and commodity supply chain requirements.
+                Our team at <strong className="font-bold text-slate-700">Baalvion Mining Inc.</strong> is ready to facilitate your bulk industrial and commodity supply chain requirements.
               </p>
             </div>
 

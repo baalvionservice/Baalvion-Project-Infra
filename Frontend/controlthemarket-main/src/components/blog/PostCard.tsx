@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
-import { Post, CAT_LABELS, CAT_STYLES } from "./data";
+import { Post, CAT_LABELS, CAT_STYLES, getArticleBySlug } from "./data";
 
 interface PostCardProps {
   post: Post;
@@ -10,14 +11,15 @@ interface PostCardProps {
 }
 
 export default function PostCard({ post, index, onClick }: PostCardProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.05 }}
-      onClick={onClick}
-      className="bg-white border border-gray-200 rounded-2xl overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all"
-    >
+  // Posts with a full article body get a real, crawlable link to /blog/<slug>;
+  // placeholder posts keep the in-page modal behaviour.
+  const hasPage = getArticleBySlug(post.id) !== null;
+
+  const cardClass =
+    "block bg-white border border-gray-200 rounded-2xl overflow-hidden cursor-pointer hover:shadow-md hover:-translate-y-0.5 transition-all";
+
+  const inner = (
+    <>
       {/* Thumbnail */}
       <div
         className="h-[140px] flex items-center justify-center text-[36px] relative"
@@ -51,6 +53,24 @@ export default function PostCard({ post, index, onClick }: PostCardProps) {
           <span className="text-[11px] text-gray-400 whitespace-nowrap ml-2">{post.read}</span>
         </div>
       </div>
+    </>
+  );
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
+    >
+      {hasPage ? (
+        <Link href={`/blog/${post.id}`} className={cardClass}>
+          {inner}
+        </Link>
+      ) : (
+        <div onClick={onClick} className={cardClass}>
+          {inner}
+        </div>
+      )}
     </motion.div>
   );
 }

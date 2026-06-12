@@ -22,6 +22,14 @@ if (config.env === 'production' && (!INTERNAL_SECRET || INTERNAL_SECRET === 'dev
   process.exit(1);
 }
 
+// Gateway HMAC signing secret: downstream backends trust the gateway only because it holds this.
+// In production this key MUST be set to a real value; the dev placeholder is rejected fail-closed.
+const SIGNING_SECRET = process.env.GATEWAY_SIGNING_SECRET || '';
+if (config.env === 'production' && (!SIGNING_SECRET || SIGNING_SECRET === 'dev_gateway_signing_secret_change_me_min32')) {
+  console.error('[auth-gateway] FATAL: GATEWAY_SIGNING_SECRET must be set in production');
+  process.exit(1);
+}
+
 // Trusted loopback / private-network CIDR prefixes (IPv4 and IPv6).
 const TRUSTED_INTERNAL_PREFIXES = ['127.', '::1', '10.', '172.16.', '172.17.', '172.18.', '172.19.', '172.20.', '172.21.', '172.22.', '172.23.', '172.24.', '172.25.', '172.26.', '172.27.', '172.28.', '172.29.', '172.30.', '172.31.', '192.168.'];
 const isInternalIp = (ip) => TRUSTED_INTERNAL_PREFIXES.some((pfx) => (ip || '').startsWith(pfx));

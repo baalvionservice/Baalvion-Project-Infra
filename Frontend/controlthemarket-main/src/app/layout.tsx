@@ -4,6 +4,9 @@ import { AuthProvider } from '@/contexts/auth-context';
 import { Toaster } from '@/components/ui/toaster';
 import './globals.css';
 import { SubmissionsProvider } from '@/contexts/submissions-context';
+import { getSiteUrl } from '@/lib/site-url';
+
+const siteUrl = getSiteUrl();
 
 const inter = Inter({
   subsets: ['latin'],
@@ -18,7 +21,7 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://controlthemarket.com'),
+  metadataBase: new URL(siteUrl),
   icons: { icon: 'data:,' },
   title: {
     default: 'ControlTheMarket — Hire by Skill, Not by Resume',
@@ -32,22 +35,16 @@ export const metadata: Metadata = {
     title: 'ControlTheMarket — Hire by Skill, Not by Resume',
     description:
       'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance — not paper.',
-    url: 'https://controlthemarket.com',
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'ControlTheMarket — Proof-of-Skill Hiring Platform',
-      },
-    ],
+    url: siteUrl,
+    // og:image is provided automatically by the file-convention
+    // `src/app/opengraph-image.tsx` (resolved against metadataBase).
   },
   twitter: {
     card: 'summary_large_image',
     title: 'ControlTheMarket — Hire by Skill, Not by Resume',
     description:
       'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance — not paper.',
-    images: ['/og-image.png'],
+    // twitter:image is provided automatically by the file-convention OG image.
   },
   robots: {
     index: true,
@@ -66,10 +63,10 @@ const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Organization',
   name: 'ControlTheMarket',
-  url: 'https://controlthemarket.com',
+  url: siteUrl,
   description:
     'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance.',
-  sameAs: ['https://controlthemarket.com'],
+  sameAs: [siteUrl],
 };
 
 export default function RootLayout({
