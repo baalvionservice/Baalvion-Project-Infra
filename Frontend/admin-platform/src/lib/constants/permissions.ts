@@ -80,6 +80,12 @@ const ROLE_PERMISSIONS: Record<UserRole, PermissionMatrix> = {
     payments: ['read'],
     analytics: ['read'],
   },
+  compliance: {
+    cms: ['read', 'update'],
+    audit_logs: ['read', 'manage'],
+    users: ['read'],
+    analytics: ['read'],
+  },
   moderator: {
     cms: ['read', 'update', 'delete'],
     media: ['read', 'update'],

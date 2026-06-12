@@ -96,6 +96,7 @@ const ROLE_LABEL: Partial<Record<CmsRole, string>> = {
   cms_editor: 'Editor',
   cms_publisher: 'Publisher',
   cms_reviewer: 'Reviewer',
+  cms_compliance: 'Compliance',
   cms_seo_manager: 'SEO Manager',
   cms_author: 'Author',
   cms_contributor: 'Contributor',

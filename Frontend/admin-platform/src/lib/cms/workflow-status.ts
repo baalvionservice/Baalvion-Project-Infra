@@ -17,6 +17,7 @@ export const PIPELINE_STAGES: PipelineStageMeta[] = [
   { status: 'scheduled', label: 'Scheduled', dot: 'bg-violet-400', ring: 'border-violet-400/40' },
   { status: 'published', label: 'Published', dot: 'bg-green-400', ring: 'border-green-400/40' },
   { status: 'changes_requested', label: 'Rejected', dot: 'bg-rose-400', ring: 'border-rose-400/40' },
+  { status: 'compliance_review', label: 'Compliance', dot: 'bg-indigo-400', ring: 'border-indigo-400/40' },
   { status: 'archived', label: 'Archived', dot: 'bg-zinc-500', ring: 'border-zinc-500/40' },
 ];
 

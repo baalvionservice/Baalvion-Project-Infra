@@ -69,6 +69,14 @@ const ROLE_MAP: Record<UserRole, RoleWelcome> = {
     icon: 'Landmark',
     clearance: 'Clearance · Tier 3 — Capital',
   },
+  compliance: {
+    roleName: 'Compliance Officer',
+    division: 'Governance & Trust',
+    message:
+      'Compliance review, audit trails, and regulatory controls are active. Sign-off authority rests with you.',
+    icon: 'Scale',
+    clearance: 'Clearance · Tier 2 — Compliance',
+  },
   developer: {
     roleName: 'Engineering Lead',
     division: 'Engineering & Infrastructure',

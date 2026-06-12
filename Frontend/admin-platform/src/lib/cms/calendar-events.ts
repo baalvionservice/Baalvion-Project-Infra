@@ -19,6 +19,7 @@ export const EVENT_TONE: Record<ContentWorkflowStatus, string> = {
   draft: 'border-zinc-500/40 bg-zinc-500/15 text-zinc-300',
   pending_review: 'border-amber-500/40 bg-amber-500/15 text-amber-300',
   changes_requested: 'border-rose-500/40 bg-rose-500/15 text-rose-300',
+  compliance_review: 'border-indigo-500/40 bg-indigo-500/15 text-indigo-300',
   archived: 'border-zinc-600/40 bg-zinc-600/15 text-zinc-400',
 };
 
