@@ -12,37 +12,49 @@ env:
   JAVA_VERSION: '17'
   MAVEN_OPTS: '-Dmaven.repo.local=${{ github.workspace }}/.m2/repository'
 
+# Least-privilege default token; jobs that need more must opt in explicitly.
+permissions:
+  contents: read
+
+# Cancel superseded runs on the same ref to save minutes and speed feedback.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint-and-typecheck:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          
-      - name: Install Root Dependencies
-        run: npm ci
-        
+          cache: 'pnpm'
+
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Run ESLint
         run: |
-          npx eslint Backend/packages/sdk/src \
+          pnpm exec eslint Backend/packages/sdk/src \
                       Backend/services/infrastructure \
-                      Proxy-BaalvionStack/src \
-                      admin-platform/src \
+                      Frontend/Proxy-BaalvionStack/src \
+                      Frontend/admin-platform/src \
                       --max-warnings=0
-                      
+
       - name: TypeScript Typecheck
         run: |
-          npx tsc --noEmit --project Backend/packages/sdk/tsconfig.json
+          pnpm exec tsc --noEmit --project Backend/packages/sdk/tsconfig.json
           for dir in Frontend/*/; do
             if [ -f "$dir/tsconfig.json" ]; then
               echo "Typechecking $dir..."
-              npx tsc --noEmit --project "$dir/tsconfig.json" || exit 1
+              pnpm exec tsc --noEmit --project "$dir/tsconfig.json" || exit 1
             fi
           done
 
@@ -122,29 +134,32 @@ jobs:
           DIRS=$(node -p "require('./frontends.config.js').apps.map(a => a.cwd.replace('D:/Baalvion Projects/Frontend/', ''))" | tr '\n' ',' | sed 's/,$//')
           echo "dirs=$DIRS" >> $GITHUB_OUTPUT
           
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          
+          cache: 'pnpm'
+
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
         working-directory: Frontend/${{ matrix.app }}
-        
+
       - name: Determine Build Command
         id: build-cmd
         run: |
           if grep -q '"next"' Frontend/${{ matrix.app }}/package.json; then
-            echo "cmd=next build" >> $GITHUB_OUTPUT
+            echo "cmd=exec next build" >> $GITHUB_OUTPUT
           elif grep -q '"vite"' Frontend/${{ matrix.app }}/package.json; then
-            echo "cmd=vite build" >> $GITHUB_OUTPUT
+            echo "cmd=exec vite build" >> $GITHUB_OUTPUT
           else
-            echo "cmd=npm run build" >> $GITHUB_OUTPUT
+            echo "cmd=run build" >> $GITHUB_OUTPUT
           fi
-          
+
       - name: Build App
-        run: npm run ${{ steps.build-cmd.outputs.cmd }}
+        run: pnpm ${{ steps.build-cmd.outputs.cmd }}
         working-directory: Frontend/${{ matrix.app }}
         
       - name: Upload Build Artifacts
@@ -209,3 +224,28 @@ jobs:
           # Placeholder for actual test runner (e.g., docker-compose up, testcontainers, or custom script)
           go test ./... -tags=integration -v
           mvn verify -DskipTests=false
+
+  # Aggregate gate required by branch protection on `main`.
+  # A single stable context that turns red if ANY required job failed or was
+  # cancelled — set this as the required status check in branch protection.
+  ci-success:
+    name: ci-success
+    if: always()
+    needs:
+      - lint-and-typecheck
+      - backend-go
+      - backend-java
+      - frontend-build
+      - security-cross-tenant
+      - integration-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all required jobs succeeded
+        run: |
+          results='${{ join(needs.*.result, ",") }}'
+          echo "Upstream job results: $results"
+          if echo "$results" | grep -qE 'failure|cancelled'; then
+            echo "::error::One or more required CI jobs failed or were cancelled."
+            exit 1
+          fi
+          echo "All required CI jobs passed."
