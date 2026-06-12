@@ -214,6 +214,10 @@ jobs:
       DB_PORT: '5432'
       DB_NAME: baalvion_db
       PGPASSWORD: postgres
+      # appConfig.js calls requireEnv('JWT_ACCESS_SECRET') at load time (pulled in
+      # transitively by migrate.js -> models -> appConfig). Dummy value: this job
+      # only runs migrations + an RLS probe, it never mints real tokens.
+      JWT_ACCESS_SECRET: ci-dummy-access-secret-not-used-for-real-auth
     steps:
       - uses: actions/checkout@v4
       # The RLS probe needs only the trade-service submodule (public). Init it
@@ -236,6 +240,15 @@ jobs:
         run: |
           node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));for(const f of ['dependencies','devDependencies','optionalDependencies']){if(!p[f])continue;for(const k of Object.keys(p[f]))if(String(p[f][k]).startsWith('workspace:'))delete p[f][k];}fs.writeFileSync('package.json',JSON.stringify(p,null,2));"
           npm install --no-package-lock --legacy-peer-deps
+      # migrate.js -> models -> config/appConfig requires @baalvion/auth-node
+      # (plain JS, main index.js, only needs jsonwebtoken which npm just installed).
+      # Link it from the parent monorepo checkout so node can resolve the
+      # workspace package we stripped above.
+      - name: Link @baalvion/auth-node from the monorepo
+        working-directory: Backend/services/commerce/trade-service
+        run: |
+          mkdir -p node_modules/@baalvion
+          ln -sfn "$GITHUB_WORKSPACE/Backend/packages/auth-node" node_modules/@baalvion/auth-node
       - name: Create baalvion_app role (027)
         run: psql "postgresql://postgres:postgres@localhost:5432/baalvion_db" -v app_pw=ci_app_pw -f Backend/database/migrations/027_app_role.sql
       - name: Apply trade-service migrations (owner role)
