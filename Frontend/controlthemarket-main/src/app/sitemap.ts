@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getSiteUrl } from '@/lib/site-url';
+import { getFullArticleSlugs } from '@/components/blog/data';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = getSiteUrl();
@@ -27,10 +28,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: '/terms', changeFrequency: 'yearly', priority: 0.3 },
   ];
 
-  return routes.map((route) => ({
+  const staticEntries: MetadataRoute.Sitemap = routes.map((route) => ({
     url: `${base}${route.path}`,
     lastModified: now,
     changeFrequency: route.changeFrequency,
     priority: route.priority,
   }));
+
+  // Individual blog articles that have full, crawlable content. Slugs come from
+  // the shared blog data module so this list never drifts from the route.
+  const blogEntries: MetadataRoute.Sitemap = getFullArticleSlugs().map((slug) => ({
+    url: `${base}/blog/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
+
+  return [...staticEntries, ...blogEntries];
 }

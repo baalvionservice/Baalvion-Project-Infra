@@ -23,9 +23,13 @@ const nextConfig: NextConfig = {
     'express',
   ],
   typescript: {
-    ignoreBuildErrors: true,
+    // tsc --noEmit is clean (exit 0), so type errors now fail the build.
+    ignoreBuildErrors: false,
   },
   eslint: {
+    // ESLint is not configured in this app (no eslint config + `next lint`
+    // prompts interactive setup), so there is no working lint to gate on.
+    // Left enabled until a lint config is wired and proven clean.
     ignoreDuringBuilds: true,
   },
   async rewrites() {

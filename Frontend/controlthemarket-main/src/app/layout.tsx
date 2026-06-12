@@ -36,21 +36,15 @@ export const metadata: Metadata = {
     description:
       'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance — not paper.',
     url: siteUrl,
-    images: [
-      {
-        url: '/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'ControlTheMarket — Proof-of-Skill Hiring Platform',
-      },
-    ],
+    // og:image is provided automatically by the file-convention
+    // `src/app/opengraph-image.tsx` (resolved against metadataBase).
   },
   twitter: {
     card: 'summary_large_image',
     title: 'ControlTheMarket — Hire by Skill, Not by Resume',
     description:
       'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance — not paper.',
-    images: ['/og-image.png'],
+    // twitter:image is provided automatically by the file-convention OG image.
   },
   robots: {
     index: true,
