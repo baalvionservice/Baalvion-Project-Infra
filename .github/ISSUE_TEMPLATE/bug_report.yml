@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Thanks for filing a bug. Please **do not** report security
-        vulnerabilities here — follow [SECURITY.md](../../security/policy).
+        vulnerabilities here — follow our [Security Policy](https://github.com/baalvionservice/Baalvion-Project-Infra/security/policy).
   - type: input
     id: area
     attributes:

@@ -4,9 +4,12 @@ Thank you for contributing. This is a pnpm + Turborepo monorepo housing the
 Baalvion backend services, shared packages, and frontend applications. This
 guide describes how we work so that changes land safely and predictably.
 
-> Access is restricted to authorized personnel. By contributing you agree that
-> your contributions are made under the terms of your engagement with Baalvion
-> and the repository [LICENSE](./LICENSE).
+> This repository is published publicly as a source-available reference under
+> the proprietary Baalvion [LICENSE](./LICENSE) — public visibility grants **no**
+> rights to use, copy, or modify the Software. Canonical development is performed
+> by Baalvion's internal engineers; by contributing you agree that your
+> contributions are made under the terms of your engagement with Baalvion and the
+> repository LICENSE.
 
 ## Prerequisites
 
@@ -80,10 +83,12 @@ feat(imperialpedia): wire live entities API into structured pages
    pnpm run architecture:check
    ```
 2. Open a PR against `main` using the PR template. Link the issue it closes.
-3. PRs require review from the owning team per [CODEOWNERS](./CODEOWNERS) and a
-   green CI summary check (`ci-success`).
+3. PRs require code-owner review per [CODEOWNERS](./CODEOWNERS) and a green CI
+   summary check (`ci-success`). Code-owner routing currently resolves to the
+   maintainer; per-context **team** ownership becomes active once the repo
+   migrates to a GitHub organization (see the CODEOWNERS header).
 4. A change that touches another bounded context's contract requires that
-   context's team approval — this is how boundaries are enforced.
+   context's code-owner approval — this is how boundaries are enforced.
 5. Squash-merge with a Conventional-Commit title.
 
 ## Security
