@@ -7,7 +7,15 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 router.use('/staff', require('./staffPublicRoutes'));
 
 router.use(authMiddleware);
+// Phase 2 modules. The specific /admin/* prefixes MUST be registered BEFORE the generic
+// /admin mount, otherwise Express routes /admin/feature-flags|analytics into adminRoutes
+// (which lacks them) and 404s.
+router.use('/admin/feature-flags', require('./featureFlagsRoutes'));
+router.use('/admin/analytics', require('./analyticsRoutes'));
 router.use('/admin', require('./adminRoutes'));
+router.use('/support', require('./supportRoutes'));
+router.use('/ai', require('./aiRoutes'));
+router.use('/developer', require('./developerRoutes'));
 router.use('/identity', require('./identityRoutes'));
 router.use('/staff', require('./staffRoutes'));
 

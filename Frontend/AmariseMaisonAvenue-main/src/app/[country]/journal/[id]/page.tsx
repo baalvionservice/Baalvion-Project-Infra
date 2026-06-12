@@ -4,6 +4,7 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAppStore } from '@/lib/store';
+import { getEditorial, type EditorialContent } from '@/lib/cms';
 import { 
   ChevronLeft, 
   Share2, 
@@ -36,13 +37,36 @@ export default function JournalArticlePage() {
   const { editorials, products, socialMetrics, toggleLike, trackShare, wishlist } = useAppStore();
   const { toast } = useToast();
   const countryCode = (country as string) || 'us';
-  
-  const article = editorials.find(ed => ed.id === id);
-  const featured = products.filter(p => article?.featuredProducts.includes(p.id));
+
+  const mockArticle = editorials.find(ed => ed.id === id);
+
+  // CMS-managed editorial (centrally edited); overlay its fields onto the mock article so
+  // mock-only fields (featuredProducts, contentOutline) survive, and CMS-only articles render too.
+  const [cmsArticle, setCmsArticle] = React.useState<EditorialContent | null>(null);
+  const [cmsResolved, setCmsResolved] = React.useState(false);
+  React.useEffect(() => {
+    let active = true;
+    getEditorial(id as string)
+      .then((ed) => { if (active) { setCmsArticle(ed); setCmsResolved(true); } })
+      .catch(() => { if (active) setCmsResolved(true); });
+  }, [id]);
+
+  const article = cmsArticle
+    ? { ...(mockArticle ?? ({} as any)), id: cmsArticle.id, title: cmsArticle.title, excerpt: cmsArticle.excerpt,
+        content: cmsArticle.content, category: cmsArticle.category, author: cmsArticle.author, date: cmsArticle.date,
+        imageUrl: cmsArticle.imageUrl, metaDescription: cmsArticle.metaDescription,
+        featuredProducts: mockArticle?.featuredProducts ?? [] }
+    : mockArticle;
+
+  const featured = products.filter(p => article?.featuredProducts?.includes(p.id));
   const metrics = socialMetrics[id as string] || { likes: 0, shares: 0, engagementRate: 0 };
   const isLiked = wishlist.some(w => w.id === id);
 
+  // While the CMS lookup is pending and there's no bundled article, hold render to avoid a flash.
   if (!article) {
+    if (!cmsResolved) {
+      return <div className="py-40 text-center font-headline text-3xl text-muted-foreground italic">Retrieving from the archives…</div>;
+    }
     return <div className="py-40 text-center font-headline text-3xl">Article not found in the archives.</div>;
   }
 
@@ -137,7 +161,7 @@ export default function JournalArticlePage() {
              <div className="space-y-8">
                 <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-secondary">In This Volume</h4>
                 <ul className="space-y-6">
-                   {(article.contentOutline || ['The Heritage of Craft', 'Modern Market Dynamics', 'The Collector Perspective']).map((item, i) => (
+                   {((article.contentOutline as string[] | undefined) || ['The Heritage of Craft', 'Modern Market Dynamics', 'The Collector Perspective']).map((item: string, i: number) => (
                      <li key={i} className="group cursor-pointer">
                         <div className="flex items-center space-x-4 border-b border-gray-50 pb-4 group-hover:border-plum transition-colors">
                            <span className="text-[10px] font-bold text-gray-300">0{i+1}</span>

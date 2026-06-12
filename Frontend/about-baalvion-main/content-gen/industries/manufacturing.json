@@ -1,0 +1,55 @@
+{
+  "slug": "manufacturing",
+  "title": "Baalvion for Manufacturing",
+  "kind": "industry",
+  "heroImageSeed": "ind-manufacturing",
+  "excerpt": "Industrial telemetry, operations visibility, and supply-chain integration — turning sensor data into uptime and throughput.",
+  "seo": {
+    "title": "Manufacturing & Industrial Technology | Baalvion",
+    "description": "Baalvion builds industrial platforms: high-scale telemetry, real-time operations dashboards, predictive maintenance, and supply-chain integration.",
+    "keywords": ["manufacturing technology", "industrial IoT", "telemetry", "predictive maintenance", "Baalvion industries", "operations"]
+  },
+  "customFields": {
+    "challenges": [
+      "High-volume sensor data with no unified view",
+      "Unplanned downtime that's discovered too late",
+      "Disconnected operational and supply-chain systems",
+      "Optimising throughput across sites"
+    ],
+    "solutions": [
+      "High-throughput telemetry ingestion and time-series storage",
+      "Real-time dashboards and trend-based alerting",
+      "Predictive signals to catch failures early",
+      "Integrated supply-chain and logistics visibility"
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Sector Overview" },
+    { "type": "paragraph", "text": "Manufacturing generates enormous volumes of operational data — and historically wastes most of it. Sensors stream readings into isolated systems, problems surface only after they cause downtime, and no one has a unified operational picture. Baalvion turns that noise into decisions, as we did in [a real-time command center for mining operations](/case-studies/mining-operations-command-center)." },
+    { "type": "heading", "level": 2, "text": "Challenges" },
+    { "type": "list", "ordered": false, "items": [
+      "**Data volume:** hundreds of sensors per site, with no single view.",
+      "**Downtime:** failures discovered after the fact, not before.",
+      "**Disconnection:** operations and supply chain rarely integrated.",
+      "**Throughput:** optimising across multiple sites is hard without live data."
+    ] },
+    { "type": "heading", "level": 2, "text": "How Baalvion Helps" },
+    { "type": "paragraph", "text": "We build high-throughput telemetry pipelines feeding real-time command centers, with trend-based alerting that catches developing problems early — the [observability](/news/tech/observability-for-distributed-systems) discipline applied to physical operations. We integrate supply chain and logistics for end-to-end visibility, connecting to capabilities like our [logistics control tower](/case-studies/logistics-control-tower)." },
+    { "type": "heading", "level": 2, "text": "Relevant Services" },
+    { "type": "paragraph", "text": "Manufacturing engagements typically combine [automation](/services/automation), [cloud solutions](/services/cloud-solutions), and [AI solutions](/services/ai-solutions) for predictive maintenance, plus [enterprise software](/services/enterprise-software) to tie operations together." },
+    { "type": "heading", "level": 2, "text": "Outcomes" },
+    { "type": "paragraph", "text": "Manufacturers gain a single live operational picture across sites, catch equipment issues before they cause downtime, and connect operations to the supply chain — improving uptime and throughput together." }
+  ],
+  "faqs": [
+    { "q": "Can you handle our sensor data volume?", "a": "Yes — our telemetry pipelines are sized for hundreds of sensors per site across many sites, with second-level latency into live dashboards." },
+    { "q": "How does predictive maintenance work?", "a": "Trend-based anomaly detection over time-series data flags developing equipment issues early, so they can be addressed before causing downtime." },
+    { "q": "Can you connect operations to our supply chain?", "a": "Yes — we integrate operational data with supply-chain and logistics visibility, as in our [logistics control tower](/case-studies/logistics-control-tower)." },
+    { "q": "Which services apply to manufacturing?", "a": "Typically [automation](/services/automation), [cloud solutions](/services/cloud-solutions), and [AI solutions](/services/ai-solutions)." }
+  ],
+  "internalLinks": [
+    { "anchor": "a real-time command center for mining operations", "href": "/case-studies/mining-operations-command-center" },
+    { "anchor": "observability", "href": "/news/tech/observability-for-distributed-systems" },
+    { "anchor": "automation", "href": "/services/automation" },
+    { "anchor": "logistics control tower", "href": "/case-studies/logistics-control-tower" }
+  ]
+}

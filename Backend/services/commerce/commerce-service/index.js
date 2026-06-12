@@ -12,6 +12,7 @@ const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
 const { startProductWorker } = require('./queues/productQueue');
 const { UPLOAD_DIR } = require('./service/productMediaService');
+const fxRateProvider = require('./service/fxRateProvider');
 
 const app = express();
 
@@ -61,6 +62,10 @@ async function start() {
         await connectDB();
         await sequelize.query('CREATE SCHEMA IF NOT EXISTS commerce;');
         startProductWorker();
+        // Live FX feed: prime from Redis + refresh on an interval (no-op unless FX_LIVE_FEED=true;
+        // every read gracefully falls back to the static markets.js rate if the feed is unavailable).
+        const fx = fxRateProvider.startBackgroundRefresh();
+        if (fx.started) console.log('[Commerce Service] Live FX feed enabled (background refresh started)');
         app.listen(config.port, () => {
             console.log(`[Commerce Service] Running on port ${config.port} (${config.env})`);
         });

@@ -10,6 +10,7 @@ export const ROUTE_POLICIES: Record<string, AppPermission> = {
   '/admin': 'VIEW_ADMIN_PANEL',
   '/phase2': 'VIEW_DASHBOARD',
   '/phase3': 'VIEW_DASHBOARD',
+  '/capital-ops': 'VIEW_DASHBOARD',
   '/governance/my-voting': 'VOTE_RESOLUTION',
 };
 

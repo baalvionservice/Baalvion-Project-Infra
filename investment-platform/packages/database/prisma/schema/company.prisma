@@ -1,0 +1,62 @@
+// ============================================================================
+//  Company (issuer) — profile, founders. One Company per company Organization.
+//  Opportunities (fundraising rounds) are defined in deal.prisma.
+// ============================================================================
+
+model Company {
+  id             String        @id @default(uuid()) @db.Uuid
+  orgId          String        @unique @db.Uuid
+  legalName      String
+  brandName      String?
+  registrationNo String?
+  country        String?       @db.VarChar(2)
+  industryCode   String?
+  stage          CompanyStage  @default(STARTUP)
+  status         CompanyStatus @default(DRAFT)
+  websiteUrl     String?
+  foundedYear    Int?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  org           Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  profile       CompanyProfile?
+  founders      Founder[]
+  opportunities Opportunity[]
+
+  @@index([stage])
+  @@index([status])
+}
+
+model CompanyProfile {
+  id                String   @id @default(uuid()) @db.Uuid
+  companyId         String   @unique @db.Uuid
+  summary           String?
+  problem           String?
+  solution          String?
+  tractionJson      Json?
+  teamSize          Int?
+  fundingRaised     Decimal? @db.Decimal(20, 4)
+  fundingTarget     Decimal? @db.Decimal(20, 4)
+  valuationTarget   Decimal? @db.Decimal(20, 4)
+  currency          String   @default("USD") @db.VarChar(3)
+  deckDocumentId    String?  @db.Uuid // -> Document
+  updatedAt         DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Founder {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String   @db.Uuid
+  name        String
+  role        String?
+  email       String?
+  linkedinUrl String?
+  equityPct   Decimal? @db.Decimal(7, 4)
+  bio         String?
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}

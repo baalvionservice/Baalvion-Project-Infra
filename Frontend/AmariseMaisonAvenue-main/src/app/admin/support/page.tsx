@@ -33,6 +33,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAppStore } from "@/lib/store";
+import { listSupportTickets } from "@/lib/crm-client";
+import type { SupportTicket } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -58,9 +60,24 @@ export default function SupportAdminPanel() {
   const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
 
-  const { supportTickets, supportStats, updateTicketStatus, addTicketMessage } =
-    useAppStore();
+  const {
+    supportTickets: storeTickets,
+    supportStats,
+    updateTicketStatus,
+    addTicketMessage,
+  } = useAppStore();
   const { toast } = useToast();
+
+  // Real support tickets from crm-service; fall back to the store when the CRM is unreachable.
+  const [crmTickets, setCrmTickets] = useState<SupportTicket[] | null>(null);
+  React.useEffect(() => {
+    let active = true;
+    listSupportTickets()
+      .then((t) => { if (active && t.length) setCrmTickets(t); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const supportTickets = crmTickets ?? storeTickets;
 
   const selectedTicket = useMemo(
     () => supportTickets.find((t) => t.id === selectedTicketId),

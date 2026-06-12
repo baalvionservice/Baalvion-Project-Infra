@@ -19,8 +19,8 @@ function startSchedulerWorker() {
     worker = new Worker('cms-scheduler', async (job) => {
         // Lazy-require to avoid circular dependencies at module load time
         const { CmsContent, CmsWorkflow, CmsWebsite } = require('../models');
-        const cache = require('./cacheService');
-        const auditService = require('./auditService');
+        const cache = require('../service/cacheService');
+        const auditService = require('../service/auditService');
 
         const { contentId, websiteId } = job.data;
 
@@ -44,13 +44,16 @@ function startSchedulerWorker() {
 
         // Domain event: same cms.content.published the manual publish path emits,
         // so analytics / cache-bust consumers react identically to scheduled posts.
-        const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug'] });
+        const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
         const websiteSlug = website ? website.slug : null;
         emitSafe(CmsEvents.CONTENT_PUBLISHED, {
             websiteId, websiteSlug, contentId,
             slug: content.slug, contentType: content.contentType ?? null,
             trigger: 'scheduler',
         }, { tenantId: websiteSlug });
+
+        // SEO indexing trigger: notify search engines immediately on auto-publish too.
+        try { require('../service/seoPingService').pingForWebsite(website); } catch { /* fail-open */ }
 
         logger('scheduler').info({ contentId, websiteSlug }, 'auto-published scheduled content');
     }, { connection });
@@ -63,12 +66,13 @@ async function scheduleContentPublish(contentId, websiteId, scheduledAt) {
     const delay = new Date(scheduledAt).getTime() - Date.now();
     if (delay <= 0) throw new Error('scheduledAt must be in the future');
 
-    const job = await schedulerQueue.add('publish', { contentId, websiteId }, { delay, jobId: `publish:${contentId}`, removeOnComplete: true, removeOnFail: false });
+    // NOTE: BullMQ v5 forbids ':' in a custom jobId — use '-' as the separator.
+    const job = await schedulerQueue.add('publish', { contentId, websiteId }, { delay, jobId: `publish-${contentId}`, removeOnComplete: true, removeOnFail: false });
     return job.id;
 }
 
 async function cancelScheduledPublish(contentId) {
-    const job = await schedulerQueue.getJob(`publish:${contentId}`);
+    const job = await schedulerQueue.getJob(`publish-${contentId}`);
     if (job) await job.remove();
 }
 

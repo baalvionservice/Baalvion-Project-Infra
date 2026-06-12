@@ -18,8 +18,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    username: ${DB_APP_USER:${DB_USER:postgres}}
+    password: ${DB_APP_PASSWORD:${DB_PASSWORD:postgres}}
     hikari:
       data-source-properties:
         stringtype: unspecified
@@ -34,6 +34,8 @@ spring:
       compression-type: snappy
 
   flyway:
+    user: ${DB_MIGRATION_USER:${DB_USER:postgres}}
+    password: ${DB_MIGRATION_PASSWORD:${DB_PASSWORD:postgres}}
     enabled: true
     table: flyway_history_aml
 

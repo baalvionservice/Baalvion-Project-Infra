@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "What We Do | Baalvion Industries",
   description:
     "We are architecting the foundational layer for the next century of international commerce, bridging the gap between legacy systems and future automation.",
+  alternates: { canonical: "https://about.baalvion.com/company" },
   openGraph: {
     title: "What We Do | Baalvion Industries",
     description:
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     siteName: "Baalvion Operating System (BOS)",
     images: [
       {
-        url: "https://picsum.photos/seed/baalvion-company/1200/630",
+        url: "https://about.baalvion.com/api/og?title=About+Baalvion&eyebrow=Baalvion+Industries",
         width: 1200,
         height: 630,
         alt: "Baalvion Company Overview",
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     title: "What We Do | Baalvion Industries",
     description:
       "We are architecting the foundational layer for the next century of international commerce, bridging the gap between legacy systems and future automation.",
-    images: ["https://picsum.photos/seed/baalvion-company/1200/630"],
+    images: ["https://about.baalvion.com/api/og?title=About+Baalvion&eyebrow=Baalvion+Industries"],
   },
 };
 

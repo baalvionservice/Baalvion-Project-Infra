@@ -39,10 +39,10 @@ interface DashboardShellProps {
 export function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, profile, logout } = useAuthContext();
-  
+  const { user, logout } = useAuthContext();
+
   const pathSegments = pathname.split("/").filter(Boolean);
-  const displayUser = profile || user;
+  const displayUser = user;
 
   const handleLogout = async () => {
     await logout();
@@ -122,7 +122,7 @@ export function DashboardShell({ children }: DashboardShellProps) {
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 hover:opacity-80 transition-opacity focus:outline-none">
                   <Avatar className="h-8 w-8 border border-slate-200">
-                    <AvatarImage src={displayUser?.avatar || displayUser?.profileImage} />
+                    <AvatarImage src={(displayUser as any)?.avatar || (displayUser as any)?.profileImage} />
                     <AvatarFallback className="bg-[#0B1F3A] text-white text-[10px] font-bold">
                       {displayUser?.name?.charAt(0) || 'U'}
                     </AvatarFallback>

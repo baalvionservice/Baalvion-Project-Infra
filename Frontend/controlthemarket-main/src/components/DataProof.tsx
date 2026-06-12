@@ -1,15 +1,15 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import BarChartCard from "./BarChartCard";
 
-const fadeLeft = {
+const fadeLeft: Variants = {
   hidden: { opacity: 0, x: -32 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.65, ease: "easeOut" } },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.65, ease: "easeOut" as const } },
 };
-const fadeRight = {
+const fadeRight: Variants = {
   hidden: { opacity: 0, x: 32 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.65, ease: "easeOut" } },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.65, ease: "easeOut" as const } },
 };
 
 function SectionTag({ children }: { children: React.ReactNode }) {

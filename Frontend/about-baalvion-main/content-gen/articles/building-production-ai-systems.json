@@ -1,0 +1,152 @@
+{
+  "slug": "building-production-ai-systems",
+  "title": "Building Production-Grade AI Systems",
+  "kind": "article",
+  "category": "tech",
+  "seo": {
+    "title": "Building Production-Grade AI Systems",
+    "description": "From prototype to production AI: reliability, evals, observability, cost control, guardrails, and retrieval — the engineering disciplines Baalvion runs inside BOS.",
+    "keywords": [
+      "production AI systems",
+      "LLM reliability",
+      "AI evals",
+      "LLM observability",
+      "AI cost control",
+      "guardrails",
+      "retrieval augmented generation",
+      "RAG",
+      "AI engineering",
+      "model governance"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "9 min read",
+  "heroImageSeed": "prod-ai-bos-5183",
+  "excerpt": "A working demo and a production AI system are different artefacts. This is the engineering discipline — reliability, evals, observability, cost, guardrails, retrieval — that separates them.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "A working demo and a production AI system are different artefacts that happen to share a model. The demo proves a capability exists; the production system has to deliver that capability tens of thousands of times a day, within a latency budget, within a cost budget, without leaking one tenant's data into another's response, and with an audit trail that survives a SOC 2 examiner. At Baalvion Industries we run AI as the Intelligence layer of the Baalvion Operating System (BOS), alongside Infrastructure, Governance, Commerce, and Finance, across 198 markets and 180+ jurisdictions. The hard lessons are not about which model is cleverest. They are about the engineering that wraps the model so it behaves like infrastructure rather than a science experiment. This article is that engineering, in the order it actually bites."
+    },
+    { "type": "heading", "level": 2, "text": "The prototype-to-production gap" },
+    {
+      "type": "paragraph",
+      "text": "The gap is not a single chasm; it is a sequence of properties a prototype is allowed to lack and a production system is not. A prototype can be non-deterministic, unmonitored, unbounded in cost, and trusted to behave because you watched it behave once. A production system must hold up under inputs nobody anticipated, degrade gracefully when a dependency fails, prove what it did after the fact, and stay inside a cost envelope that does not blow up with traffic. Closing that gap is mostly classic distributed-systems engineering applied to a probabilistic component — with a few twists that are genuinely new."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Determinism is gone — the same input can produce different output, so your correctness story has to be statistical, not exact.",
+        "The failure modes are weird — models do not crash, they hallucinate confidently, which is far harder to detect than a stack trace.",
+        "Cost scales with tokens, not requests — a single verbose prompt or runaway agent loop can cost orders of magnitude more than a normal call.",
+        "The dependency is external and rate-limited — provider latency, quota, and outages become part of your reliability budget whether you like it or not."
+      ]
+    },
+    { "type": "heading", "level": 2, "text": "Reliability: design for the model being wrong" },
+    {
+      "type": "paragraph",
+      "text": "The first reliability principle is that the model will be wrong, will be slow, and will sometimes be unavailable, and the system must remain correct anyway. We treat every model call the way we treat any unreliable network dependency: wrapped in a timeout, a bounded retry with backoff, and a circuit breaker that sheds load to a fallback when the provider degrades. A retrieval call that normally takes 400ms cannot be allowed to hang a user-facing request for thirty seconds because an upstream provider is having a bad minute. Inside BOS these patterns are not bespoke per service — they live in a shared resilience layer so every team inherits the same timeout, retry, bulkhead, and rate-limiter behaviour rather than reinventing it inconsistently."
+    },
+    {
+      "type": "paragraph",
+      "text": "The second principle is graceful degradation. A search ranker backed by an LLM should fall back to lexical search, not to an error page, when the model is unavailable. A drafting assistant should return a clearly-labelled deterministic template rather than nothing. The third, and the one most teams skip, is idempotency: because retries are inevitable with a flaky external dependency, every model-backed operation that has side effects must carry an idempotency key so a retried request does not double-charge, double-post, or double-act. Reliability for AI is, unglamorously, the same reliability engineering that makes our [cloud solutions](/services/cloud-solutions) and [DevOps](/services/devops) practice work — applied to a component that fails in stranger ways."
+    },
+    { "type": "heading", "level": 2, "text": "Evals: the test suite for a probabilistic system" },
+    {
+      "type": "paragraph",
+      "text": "You cannot ship a system you cannot measure, and you cannot measure a probabilistic system with the pass/fail unit tests you use for deterministic code. Evals are the answer: a versioned, held-out suite of cases that the system is scored against on every change, in CI, before promotion. The discipline mirrors test-driven development — write the eval that captures the behaviour you want, watch the current system fail it, then improve prompt, retrieval, or model until it passes — except the assertion is a score over a distribution, not a single equality check."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Golden sets — curated input/expected-behaviour pairs for the cases you most need to get right, scored on exact match where possible and on rubric where not.",
+        "LLM-as-judge — a second model scores open-ended output against a rubric, calibrated against human grades so you trust the judge before you trust its verdicts.",
+        "Adversarial and regression cases — every incident and every reported failure becomes a permanent eval case, so the same mistake cannot ship twice.",
+        "Slice metrics — scores broken down by language, jurisdiction, and tenant segment, because an aggregate that looks healthy can hide a segment that is badly broken."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The non-negotiable rule is that a model or prompt change cannot be promoted if it regresses the eval suite on safety or correctness, not merely on a headline accuracy number. This is exactly the gate that lets us change foundation models without fear: the eval suite, not a human's gut feeling, decides whether the new model is actually better for our workload. Evals are also where buy-versus-build becomes a measurable decision rather than an argument — the suite tells you in numbers whether a cheaper model is good enough for a given slice."
+    },
+    { "type": "heading", "level": 2, "text": "Observability: you cannot debug what you cannot see" },
+    {
+      "type": "paragraph",
+      "text": "A model that misbehaves in production leaves no stack trace. The only way to debug it is to have captured, before the fact, everything needed to reconstruct what happened. For every AI interaction we record a structured trace: the full prompt as sent (including the retrieved context), the model and version, the parameters, the raw output, the tokens consumed, the latency, and the downstream decision the output drove. Traces are correlated end to end so a single request can be followed from the user action through retrieval, generation, guardrail checks, and the final committed effect."
+    },
+    {
+      "type": "paragraph",
+      "text": "On top of raw traces we monitor the signals that actually predict trouble: latency and token distributions (the p95 and p99, never the mean), error and fallback rates per dependency, guardrail trigger rates, and output-quality proxies sampled and scored continuously rather than only at release. Crucially, we watch for drift — when the input distribution or the model's output quality shifts away from what the eval suite assumes, an alert fires before users notice. Observability is the same operational backbone behind every system we run; treating an LLM as exempt from it is how teams end up with an outage they cannot explain. The discipline here is continuous with our broader [governance and compliance approach](/platform) inside BOS, where every consequential decision is reconstructable on demand."
+    },
+    { "type": "heading", "level": 2, "text": "Cost control: tokens are a budget, not an afterthought" },
+    {
+      "type": "paragraph",
+      "text": "AI cost does not scale with requests, it scales with tokens, and that distinction wrecks budgets that were forecast on request volume. A naive design that stuffs an entire document into every prompt, calls the largest model for every task, and lets agents loop without a ceiling can cost ten to a hundred times what a disciplined one costs for identical user value. Cost control is therefore a first-class engineering concern, not a procurement conversation held after the bill arrives."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Route by difficulty — send easy, high-volume tasks to a small fast model and reserve the expensive model for the cases that genuinely need it, gated by the eval suite so quality is not silently traded away.",
+        "Cache aggressively — semantic and exact-match caching of responses, plus prompt caching of stable context, removes a large fraction of calls entirely.",
+        "Trim context — retrieve the few relevant chunks rather than the whole corpus, and compress system prompts; the cheapest token is the one you never send.",
+        "Bound everything — hard ceilings on output length, on agent iterations, and on per-tenant spend, so a single pathological request cannot become a runaway cost or denial-of-wallet event."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "We attribute cost per tenant and per use case the same way we attribute any resource, because unattributed AI spend is the fastest way to lose control of a multi-tenant platform's unit economics. The honest trade-off is latency and quality against cost: a smaller model is cheaper and faster but needs the eval suite to prove it is good enough, and caching trades freshness for cost. Making those trade-offs explicit and measured is the job; pretending they do not exist is how a promising pilot becomes an unaffordable product."
+    },
+    { "type": "heading", "level": 2, "text": "Guardrails and retrieval: where most production incidents originate" },
+    {
+      "type": "paragraph",
+      "text": "Guardrails are the deterministic envelope around a non-deterministic core. On the way in we validate and sanitise input, enforce length and schema, and screen for prompt-injection attempts — especially critical when the model will act on retrieved or user-supplied text. On the way out we validate structure, filter for policy and safety, and check that the output is grounded in the retrieved context rather than invented. The governing principle, which we apply without exception in regulated flows, is that AI alone never blocks and never acts irreversibly: a high-stakes generation produces a recommendation and an explanation, and a deterministic rule or a human makes the binding call. That is precisely the pattern behind our [AI compliance scoring platform](/case-studies/ai-compliance-scoring-platform), where model and rule signals are fused but the model can only corroborate a decision, never trigger an irreversible one on its own."
+    },
+    {
+      "type": "paragraph",
+      "text": "Retrieval is where correctness and security meet. Retrieval-augmented generation grounds the model in your own current, authoritative data instead of its frozen, generic training set — but a careless RAG pipeline is also the most common source of both wrong answers and data leaks. Quality depends on unglamorous plumbing: sensible chunking, good embeddings, hybrid lexical-plus-vector search, and reranking so the model sees the few best passages rather than many mediocre ones. Security depends on enforcing tenant isolation at the data layer, not in the prompt: in a multi-tenant platform an LLM must be structurally incapable of retrieving another tenant's documents, which means row-level access control on the retrieval store with the same rigour as any other query path. The same data discipline behind our [enterprise data lakehouse](/case-studies/enterprise-data-lakehouse) is what makes retrieval trustworthy rather than a liability."
+    },
+    { "type": "heading", "level": 2, "text": "Putting it together" },
+    {
+      "type": "paragraph",
+      "text": "A production-grade AI system is a small probabilistic core wrapped in a large amount of ordinary, excellent engineering: resilient calls, statistical tests, deep observability, deliberate cost control, deterministic guardrails, and secure retrieval. The model is the part you can swap out in an afternoon; the wrapping is the part that takes the work and creates the value. Teams moving from a convincing prototype to a system they can stake a business on usually need [AI solutions](/services/ai-solutions) and [enterprise software](/services/enterprise-software) engineering built together, because the model and the system around it have to be designed as one thing. That is how AI stops being a demo and becomes infrastructure — which, as with everything in BOS, is the only form in which it actually pays back."
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What is the hardest part of taking AI from prototype to production?",
+      "a": "Not the model — the engineering around it. A prototype is allowed to be non-deterministic, unmonitored, and unbounded in cost. A production system must stay correct under unexpected inputs, degrade gracefully when the provider fails, prove what it did afterwards, and hold a cost envelope. Most of that is classic reliability and observability work applied to a probabilistic component."
+    },
+    {
+      "q": "How do you test a system whose output is non-deterministic?",
+      "a": "With evals: a versioned, held-out suite of cases scored on every change in CI. Use golden sets for cases you must get right, an LLM-as-judge calibrated against human grades for open-ended output, and permanent regression cases drawn from every past incident. The gate is that a change cannot ship if it regresses safety or correctness scores, even if headline accuracy improves."
+    },
+    {
+      "q": "Why does AI cost spiral, and how do you control it?",
+      "a": "Cost scales with tokens, not requests, so verbose prompts, oversized models, and unbounded agent loops can cost ten to a hundred times more for the same value. Control it by routing easy tasks to small models, caching responses and stable context, trimming retrieved context, and putting hard ceilings on output length, agent iterations, and per-tenant spend to prevent denial-of-wallet events."
+    },
+    {
+      "q": "What observability do you need for an LLM in production?",
+      "a": "A structured trace per interaction capturing the full prompt and retrieved context, the model and version, parameters, raw output, tokens, latency, and the downstream decision — correlated end to end. On top of that, monitor latency and token distributions at p95/p99, fallback and guardrail trigger rates, and drift in input distribution or output quality, with alerts that fire before users notice."
+    },
+    {
+      "q": "How do guardrails keep AI safe in regulated workflows?",
+      "a": "Guardrails are the deterministic envelope around the model: input validation and prompt-injection screening on the way in, structure, policy, and grounding checks on the way out. The governing rule is that AI alone never blocks or acts irreversibly — a high-stakes model produces a recommendation and an explanation, and a deterministic rule or a human makes the binding decision."
+    },
+    {
+      "q": "How do you keep retrieval (RAG) accurate and secure in a multi-tenant platform?",
+      "a": "Accuracy comes from sensible chunking, good embeddings, hybrid lexical-plus-vector search, and reranking so the model sees the best few passages. Security comes from enforcing tenant isolation at the data layer with row-level access control, not in the prompt — the model must be structurally incapable of retrieving another tenant's documents."
+    }
+  ],
+  "internalLinks": [
+    { "anchor": "AI solutions", "href": "/services/ai-solutions" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" },
+    { "anchor": "AI compliance scoring platform", "href": "/case-studies/ai-compliance-scoring-platform" },
+    { "anchor": "enterprise data lakehouse", "href": "/case-studies/enterprise-data-lakehouse" },
+    { "anchor": "governance and compliance approach", "href": "/platform" }
+  ],
+  "customFields": {}
+}

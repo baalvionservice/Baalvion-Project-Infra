@@ -48,7 +48,7 @@ export function useDashboardData(userId: string | undefined) {
         allDocs = docResults.flat().sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       }
 
-      setData(prev => ({
+      setData((prev: any) => ({
         ...prev,
         profile,
         cases,
@@ -59,7 +59,7 @@ export function useDashboardData(userId: string | undefined) {
       }));
     } catch (err: any) {
       console.error("Dashboard aggregation failure:", err);
-      setData(prev => ({ ...prev, loading: false, error: err.message }));
+      setData((prev: any) => ({ ...prev, loading: false, error: err.message }));
     }
   }, [userId]);
 
@@ -69,7 +69,7 @@ export function useDashboardData(userId: string | undefined) {
       
       // 3. Real-time Subscription for Notifications
       const unsubNotifications = subscribeToNotifications(userId, (notifications) => {
-        setData(prev => ({ ...prev, notifications }));
+        setData((prev: any) => ({ ...prev, notifications }));
       });
 
       return () => {

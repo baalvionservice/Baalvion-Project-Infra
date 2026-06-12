@@ -22,7 +22,9 @@ function internalAuth(req, _res, next) {
     if (age > 30_000) return next(new AppError('UNAUTHORIZED', 'Timestamp expired', 401));
 
     const expected = crypto.createHmac('sha256', secret).update(`${ts}:${req.method}:${req.path}`).digest('hex');
-    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) {
+    const sigBuf = Buffer.from(String(sig), 'utf8');
+    const expBuf = Buffer.from(expected, 'utf8');
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) {
         return next(new AppError('UNAUTHORIZED', 'Invalid service signature', 401));
     }
     next();

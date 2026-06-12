@@ -1,0 +1,24 @@
+{
+  "name": "baalvion-investment-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Global investment platform — NestJS + Next.js 15 + Prisma/PostgreSQL",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20.11.0"
+  },
+  "scripts": {
+    "db:generate": "pnpm --filter @baalvion-invest/database generate",
+    "db:migrate": "pnpm --filter @baalvion-invest/database migrate",
+    "db:migrate:deploy": "pnpm --filter @baalvion-invest/database migrate:deploy",
+    "db:studio": "pnpm --filter @baalvion-invest/database studio",
+    "db:validate": "pnpm --filter @baalvion-invest/database validate",
+    "db:format": "pnpm --filter @baalvion-invest/database format",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0"
+  }
+}

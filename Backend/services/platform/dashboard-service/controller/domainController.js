@@ -46,7 +46,8 @@ exports.updateDomain = async (req, res, next) => {
     try {
         const domain = await db.Domain.findOne({ where: { id: req.params.id, org_id: req.user.orgId } });
         if (!domain) return next(new AppError('NOT_FOUND', 'Domain not found', 404));
-        await domain.update(req.body);
+        const { name, type, description, country, country_code, currency, status } = req.body;
+        await domain.update({ name, type, description, country, country_code, currency, status });
         await _createAuditLog(req, 'UPDATE_DOMAIN', 'domain', String(domain.id));
         return sendSuccess(req, res, domain);
     } catch (err) { return next(err); }

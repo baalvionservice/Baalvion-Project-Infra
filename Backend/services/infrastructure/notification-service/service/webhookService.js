@@ -2,8 +2,8 @@
 const crypto  = require('crypto');
 const https   = require('https');
 const http    = require('http');
-const { URL } = require('url');
 const logger  = require('../utils/logger');
+const { assertSafeUrl } = require('../utils/safeUrl');
 
 const TIMEOUT_MS = 10_000;
 
@@ -20,9 +20,11 @@ function signPayload(secret, payload) {
 
 // ── HTTP delivery ─────────────────────────────────────────────────────────────
 
-function deliverHttp(webhookUrl, payload, headers) {
+async function deliverHttp(webhookUrl, payload, headers) {
+    // SSRF guard: validate the URL before making any outbound request
+    const url = await assertSafeUrl(webhookUrl);
+
     return new Promise((resolve, reject) => {
-        const url      = new URL(webhookUrl);
         const body     = JSON.stringify(payload);
         const lib      = url.protocol === 'https:' ? https : http;
         const options  = {

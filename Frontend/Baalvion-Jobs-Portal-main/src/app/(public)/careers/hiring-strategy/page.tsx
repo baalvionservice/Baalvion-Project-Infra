@@ -6,6 +6,14 @@ import { Check } from "lucide-react";
 export const metadata: Metadata = {
     title: "Our Hiring Strategy | Baalvion Careers",
     description: "Learn about Baalvion's data-driven, globally-minded approach to building a world-class team.",
+    alternates: {
+        canonical: '/careers/hiring-strategy',
+    },
+    openGraph: {
+        title: "Our Hiring Strategy | TalentOS by Baalvion",
+        description: "Learn about Baalvion's data-driven, globally-minded approach to building a world-class team.",
+        url: '/careers/hiring-strategy',
+    },
 };
 
 const hiringPrinciples = [

@@ -1,9 +1,18 @@
+export interface CategorySeo {
+  title?: string;
+  description?: string;
+  keywords?: string[];
+  ogImage?: string;
+  noIndex?: boolean;
+}
+
 export interface WebsiteCategory {
   id: string;
   websiteId: string;
   name: string;
   slug: string;
   description?: string;
+  seoMetadata?: CategorySeo;
   parentId: string | null;
   depth: number;
   order: number;
@@ -29,6 +38,7 @@ export interface CreateCategoryPayload {
   name: string;
   slug: string;
   description?: string;
+  seoMetadata?: CategorySeo;
   parentId?: string | null;
   order?: number;
 }
@@ -37,6 +47,7 @@ export interface UpdateCategoryPayload {
   name?: string;
   slug?: string;
   description?: string;
+  seoMetadata?: CategorySeo;
   parentId?: string | null;
   order?: number;
 }

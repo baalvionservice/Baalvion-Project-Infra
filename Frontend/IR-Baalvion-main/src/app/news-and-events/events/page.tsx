@@ -18,22 +18,14 @@ type EventItem = {
     type: "Webcast" | "Earnings Call" | "Conference" | "Other";
 };
 
-const events: EventItem[] = [
-    {
-        id: "event-2026-02-10",
-        date: new Date("2026-02-10T12:00:00Z"),
-        title: "Baalvion's Martin S. Small to Present at the 2026 Bank of America Securities Financial Services Conference",
-        time: "11:20 AM ET",
-        type: "Conference",
-    },
-    {
-        id: "event-2026-01-15",
-        date: new Date("2026-01-15T07:30:00Z"),
-        title: "Q4 2025 Baalvion, Inc. Earnings Conference Call",
-        time: "7:30 AM ET",
-        type: "Earnings Call",
-    },
-];
+// Live events come from ir-service via the same-origin BFF (/api/v1/events). Map the
+// backend event_type to the calendar's display categories.
+function mapEventType(t: string): EventItem["type"] {
+    if (t === "earnings_call") return "Earnings Call";
+    if (t === "conference") return "Conference";
+    if (t === "webinar" || t === "webcast") return "Webcast";
+    return "Other";
+}
 
 function isSameDay(a: Date, b: Date) {
     return (
@@ -56,10 +48,34 @@ function formatFullDate(date: Date | undefined) {
 export default function EventsPage() {
     const today = React.useMemo(() => new Date(), []);
     const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(today);
+    const [events, setEvents] = React.useState<EventItem[]>([]);
+
+    React.useEffect(() => {
+        let cancelled = false;
+        fetch("/api/v1/events")
+            .then((r) => r.json())
+            .then((json) => {
+                const items = json?.data?.items;
+                if (cancelled || !Array.isArray(items)) return;
+                setEvents(
+                    items.map((e: any) => ({
+                        id: String(e.id),
+                        date: new Date(e.scheduled_at),
+                        title: e.title,
+                        time: e.scheduled_at
+                            ? new Date(e.scheduled_at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+                            : undefined,
+                        type: mapEventType(e.event_type),
+                    }))
+                );
+            })
+            .catch(() => undefined);
+        return () => { cancelled = true; };
+    }, []);
 
     const eventDates = React.useMemo(
         () => events.map((event) => event.date),
-        []
+        [events]
     );
 
     const eventsForSelectedDay = React.useMemo(
@@ -67,7 +83,7 @@ export default function EventsPage() {
             selectedDate
                 ? events.filter((event) => isSameDay(event.date, selectedDate))
                 : [],
-        [selectedDate]
+        [selectedDate, events]
     );
 
     const presentationImage = PlaceHolderImages.find(p => p.id === 'news-3-image');
@@ -174,7 +190,7 @@ export default function EventsPage() {
                                 </p>
                                 <div className="border border-gray-200 p-8">
                                     <h3 className="text-xl font-bold mb-2">
-                                        Baalvion's Martin S. Small to Present at the 2026 Bank of America Securities Financial Services Conference on February 10th
+                                        Baalvion Industries to Present at the 2026 Global B2B Commerce & Trade Finance Conference on February 10th
                                     </h3>
                                     <p className="text-sm text-gray-500 mb-6">Feb 10, 2026</p>
                                     <Link href="#" className="text-sm font-bold text-primary hover:underline flex items-center">
@@ -242,7 +258,7 @@ export default function EventsPage() {
                             <div className="border-b border-gray-200 pb-8">
                                 <p className="text-sm text-gray-500 mb-2">10 Feb 2026 11:20 AM ET</p>
                                 <h3 className="text-xl font-bold mb-4">
-                                    Baalvion's Martin S. Small to Present at the 2026 Bank of America Securities Financial Services Conference on February 10th
+                                    Baalvion Industries to Present at the 2026 Global B2B Commerce & Trade Finance Conference on February 10th
                                 </h3>
                                 <div className="flex gap-4">
                                     <Link href="#" className="text-sm font-bold text-primary hover:underline flex items-center gap-1">

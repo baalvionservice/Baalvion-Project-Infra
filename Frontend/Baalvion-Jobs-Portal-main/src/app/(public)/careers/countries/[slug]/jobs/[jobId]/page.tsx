@@ -94,11 +94,41 @@ export default async function JobDetailPage(props: Props) {
   );
   const applyUrl = `/careers/application/${country.slug}?jobId=${job.id}`;
 
-  // Generate structured data using our utility
-  const structuredData = generateJobPostingStructuredData(
-    job,
-    AppConfig.baseUrl,
-  );
+  // Generate JobPosting structured data using our utility, passing the real
+  // resolved country so we don't fall back to the hard-coded country map.
+  const structuredData = generateJobPostingStructuredData(job, AppConfig.baseUrl, {
+    country: {
+      isoCode: country.isoCode,
+      slug: country.slug,
+      name: country.name,
+    },
+  });
+
+  // Breadcrumb structured data (Home › Careers › Country › Job)
+  const breadcrumbData = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: AppConfig.baseUrl },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Careers',
+        item: `${AppConfig.baseUrl}/careers/open-positions`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `Jobs in ${country.name}`,
+        item: `${AppConfig.baseUrl}/careers/countries/${country.slug}`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: job.title,
+      },
+    ],
+  };
 
   return (
     <>
@@ -106,6 +136,10 @@ export default async function JobDetailPage(props: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbData) }}
       />
       <main className="bg-background">
         <JobHeader

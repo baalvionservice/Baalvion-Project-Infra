@@ -45,6 +45,7 @@ export default function TopBar() {
           size="icon"
           className="md:hidden"
           onClick={() => setCommandPaletteOpen(true)}
+          aria-label="Open search"
         >
           <Search className="h-4 w-4" />
         </Button>

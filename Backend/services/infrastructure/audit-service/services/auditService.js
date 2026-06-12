@@ -78,9 +78,44 @@ function serialize(r) {
 }
 
 // ─── Query ──────────────────────────────────────────────────────────────────
-async function query(f = {}) {
+/**
+ * @param {object} f           - raw filter params (from req.query)
+ * @param {object} [caller]    - { orgId, isSuperAdmin } derived from req.auth
+ *
+ * For non-super_admin callers the tenant scope is ALWAYS forced to caller.orgId.
+ * Any client-supplied ?tenantId that differs is silently overridden so that a
+ * scoped caller can never enumerate events belonging to another tenant.
+ *
+ * Internal service principals (req.internal) bypass tenant scoping because they
+ * write cross-tenant events on behalf of the platform.
+ */
+async function query(f = {}, caller = {}) {
     const where = {};
     const { Op } = db.Sequelize;
+
+    // ── Tenant scope enforcement ──────────────────────────────────────────────
+    // Super-admins and internal service callers may pass an explicit tenantId.
+    // All other callers are pinned to their own orgId and may NOT widen the scope.
+    const isSuperAdmin = caller.isSuperAdmin === true;
+    const isInternal   = caller.isInternal   === true;
+    if (!isSuperAdmin && !isInternal) {
+        // Non-privileged: scope is always the caller's own org.  Ignore any
+        // client-supplied tenantId that differs to prevent cross-tenant reads.
+        if (caller.orgId) {
+            where.tenant_id = String(caller.orgId);
+        } else {
+            // Caller authenticated but carries no org claim; return an empty
+            // result set using an impossible seq condition.  This is safer than
+            // scoping to actor_org_id = null, which would accidentally expose
+            // all platform-level events that were written without a tenant.
+            where.seq = -1;
+        }
+    } else if (f.tenantId) {
+        // Privileged caller may filter by a specific tenant.
+        where.tenant_id = String(f.tenantId);
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     if (f.actorId)       where.actor_id = String(f.actorId);
     if (f.action)        where.action = f.action;
     if (f.resourceType)  where.resource_type = f.resourceType;
@@ -88,7 +123,6 @@ async function query(f = {}) {
     if (f.sourceService) where.source_service = f.sourceService;
     if (f.severity)      where.severity = f.severity;
     if (f.outcome)       where.outcome = f.outcome;
-    if (f.tenantId)      where.tenant_id = String(f.tenantId);
     if (f.correlationId) where.correlation_id = String(f.correlationId);
     if (f.from || f.to) {
         where.occurred_at = {};
@@ -101,20 +135,61 @@ async function query(f = {}) {
     return { items: rows.map((r) => serialize(r.get({ plain: true }))), total: count, limit, offset };
 }
 
-async function getBySeq(seq) {
+/**
+ * Fetch a single event by primary-key seq.
+ * Non-super_admin / non-internal callers are restricted to events that belong
+ * to their own tenant so they cannot enumerate cross-tenant rows by seq probing.
+ *
+ * @param {number|string} seq
+ * @param {object} [caller]  - { orgId, isSuperAdmin, isInternal } from req.auth
+ */
+async function getBySeq(seq, caller = {}) {
     const r = await db.AuditEvent.findByPk(seq);
     if (!r) throw Errors.notFound('Audit event not found');
-    return serialize(r.get({ plain: true }));
+    const row = r.get({ plain: true });
+
+    // ── Tenant scope enforcement ──────────────────────────────────────────────
+    const isSuperAdmin = caller.isSuperAdmin === true;
+    const isInternal   = caller.isInternal   === true;
+    if (!isSuperAdmin && !isInternal) {
+        // A caller without an org claim must NOT see any event; return 404 so
+        // the existence of the seq is not leaked (same as not-found behaviour).
+        if (!caller.orgId) throw Errors.notFound('Audit event not found');
+        if (row.tenant_id !== String(caller.orgId)) throw Errors.notFound('Audit event not found');
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
+    return serialize(row);
 }
 
 /**
  * Re-walk the chain and detect tampering. Catches BOTH content edits (recomputed
  * hash ≠ stored hash) and inserted/removed rows (prev_hash ≠ previous row's hash).
+ *
+ * @param {object} opts      - { fromSeq, toSeq }
+ * @param {object} [caller]  - { orgId, isSuperAdmin, isInternal } from req.auth
+ *
+ * Non-super_admin / non-internal callers are scoped to their own tenant so they
+ * cannot verify (and thus enumerate) events belonging to other tenants.
  */
-async function verify({ fromSeq = 0, toSeq } = {}) {
+async function verify({ fromSeq = 0, toSeq } = {}, caller = {}) {
     const { Op } = db.Sequelize;
     const where = { seq: { [Op.gte]: Number(fromSeq) || 0 } };
     if (toSeq) where.seq[Op.lte] = Number(toSeq);
+
+    // ── Tenant scope enforcement ──────────────────────────────────────────────
+    const isSuperAdmin = caller.isSuperAdmin === true;
+    const isInternal   = caller.isInternal   === true;
+    if (!isSuperAdmin && !isInternal) {
+        if (caller.orgId) {
+            where.tenant_id = String(caller.orgId);
+        } else {
+            // No org claim and not privileged — verify over zero rows (safe default).
+            where.seq = { ...where.seq, [db.Sequelize.Op.lt]: 0 };
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     const rows = await db.AuditEvent.findAll({ where, order: [['seq', 'ASC']] });
 
     let prevRowHash = null;
@@ -139,8 +214,8 @@ function toCsv(items) {
     return [CSV_COLS.join(','), ...items.map((it) => CSV_COLS.map((c) => esc(it[c])).join(','))].join('\n');
 }
 
-async function exportEvents(f = {}) {
-    const res = await query({ ...f, limit: 500 });
+async function exportEvents(f = {}, caller = {}) {
+    const res = await query({ ...f, limit: 500 }, caller);
     return toCsv(res.items);
 }
 

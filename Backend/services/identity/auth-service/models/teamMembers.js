@@ -7,7 +7,10 @@ module.exports = function (sequelize, DataTypes) {
         service_roles: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
         invited_by: { type: DataTypes.BIGINT, allowNull: true },
         joined_at: { type: DataTypes.DATE, allowNull: true },
+        // 'active' | 'suspended' | 'removed'
         status: { type: DataTypes.STRING(16), allowNull: false, defaultValue: 'active' },
+        suspended_at: { type: DataTypes.DATE, allowNull: true },
+        suspended_by: { type: DataTypes.BIGINT, allowNull: true },
     }, {
         sequelize,
         tableName: 'team_members',

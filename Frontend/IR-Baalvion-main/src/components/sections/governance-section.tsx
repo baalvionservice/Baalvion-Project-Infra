@@ -1,7 +1,10 @@
 import Image from "next/image";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { leadershipTeam } from "@/lib/data";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
+import { PlaceHolderImages, placeholderImage } from "@/lib/placeholder-images";
+
+const initials = (name: string) =>
+  name.split(" ").filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase();
 
 export default function GovernanceSection({ id }: { id: string }) {
   return (
@@ -18,18 +21,23 @@ export default function GovernanceSection({ id }: { id: string }) {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
           {leadershipTeam.map((member) => {
             const memberImage = PlaceHolderImages.find((p) => p.id === member.imageId);
+            const hasPhoto = !!memberImage && memberImage.imageUrl !== placeholderImage;
             return (
               <Card key={member.name} className="flex flex-col">
                 <CardHeader className="items-center text-center">
-                  {memberImage && (
+                  {hasPhoto ? (
                     <Image
-                      src={memberImage.imageUrl}
+                      src={memberImage!.imageUrl}
                       alt={`Photo of ${member.name}`}
-                      data-ai-hint={memberImage.imageHint}
-                      width={120}
-                      height={120}
-                      className="size-32 rounded-full object-cover mb-4"
+                      data-ai-hint={memberImage!.imageHint}
+                      width={128}
+                      height={128}
+                      className="size-32 rounded-full object-cover object-top mb-4 ring-1 ring-border"
                     />
+                  ) : (
+                    <div className="mb-4 flex size-32 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-muted text-3xl font-semibold text-primary ring-1 ring-border">
+                      {initials(member.name)}
+                    </div>
                   )}
                   <CardTitle>{member.name}</CardTitle>
                   <p className="text-sm font-medium text-primary">{member.title}</p>
@@ -42,9 +50,9 @@ export default function GovernanceSection({ id }: { id: string }) {
           })}
         </div>
         <div className="mt-16 text-center">
-          <h3 className="text-2xl font-bold">Elite Operator Framework (Phase 3 Teaser)</h3>
+          <h3 className="text-2xl font-bold">Strategic Operator Network</h3>
           <p className="mt-4 max-w-3xl mx-auto text-muted-foreground">
-            In addition to our core leadership, Baalvion is pioneering an equity framework for a select group of the world's top 30 operators. This initiative reserves a dedicated equity pool for industry leaders who provide strategic value, ensuring a deep alignment of interests and unparalleled execution capability. Access to this program is by invitation only and represents the pinnacle of strategic partnership within our ecosystem.
+            Alongside our core leadership, Baalvion engages a select network of experienced operators and advisors across logistics, trade finance and technology. This framework aligns long-term incentives with the people who help execute our strategy — strengthening governance, accountability and the depth of expertise behind every decision.
           </p>
         </div>
       </div>

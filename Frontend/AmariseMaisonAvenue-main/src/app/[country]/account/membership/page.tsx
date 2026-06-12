@@ -23,6 +23,7 @@ import { Progress } from "@/components/ui/progress";
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/lib/auth-context';
 
 /**
  * Maison Membership Hub: Subscription Lifecycle Management.
@@ -32,8 +33,12 @@ export default function MembershipPage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
   const { subscriptions, activeVip } = useAppStore();
+  const { user } = useAuth();
 
-  const activeSub = subscriptions.find(s => s.userId === 'u-client-1');
+  // The active membership belongs to the logged-in user — not a hardcoded demo id. Until a
+  // billing/subscription service is wired, a real user with no paid tier correctly shows as a
+  // Standard Member rather than a fabricated subscription.
+  const activeSub = user ? subscriptions.find(s => s.userId === user.id) : undefined;
 
   return (
     <div className="space-y-12 animate-fade-in">

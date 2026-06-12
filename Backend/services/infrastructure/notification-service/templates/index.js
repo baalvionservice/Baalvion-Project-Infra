@@ -117,6 +117,80 @@ const TEMPLATES = {
 `, 'MFA enabled on your account'),
     },
 
+    // Order placed — confirmation (sent on order creation, before payment)
+    orderConfirmation: {
+        subject: 'Order confirmed: {{orderNumber}}',
+        preview: 'We received your order {{orderNumber}}',
+        body: baseLayout(`
+<h1 class="h1">Thank you{{#if name}}, {{name}}{{/if}}!</h1>
+<p class="text">We've received your order <strong>{{orderNumber}}</strong> and it is now being processed. A summary is below.</p>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border-collapse:collapse">
+  <thead>
+    <tr>
+      <th align="left"  style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Item</th>
+      <th align="center" style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Qty</th>
+      <th align="right" style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each items}}
+    <tr>
+      <td align="left"  style="padding:10px 0;font-size:14px;color:#09090b;border-bottom:1px solid #f4f4f5">{{this.name}}</td>
+      <td align="center" style="padding:10px 0;font-size:14px;color:#52525b;border-bottom:1px solid #f4f4f5">{{this.quantity}}</td>
+      <td align="right" style="padding:10px 0;font-size:14px;color:#09090b;border-bottom:1px solid #f4f4f5">{{this.total}} {{../currency}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2" align="right" style="padding:14px 0 0;font-size:15px;font-weight:700;color:#09090b">Total</td>
+      <td align="right" style="padding:14px 0 0;font-size:15px;font-weight:700;color:#09090b">{{total}} {{currency}}</td>
+    </tr>
+  </tfoot>
+</table>
+<a href="{{orderUrl}}" class="btn">View Your Order</a>
+<p class="text" style="font-size:13px;color:#a1a1aa">You'll receive another email once payment is confirmed.</p>
+`, 'We received your order {{orderNumber}}'),
+    },
+
+    // Payment captured — order paid (sent when payment is confirmed/captured)
+    orderPaid: {
+        subject: 'Payment received for {{orderNumber}}',
+        preview: 'Your payment for {{orderNumber}} was successful',
+        body: baseLayout(`
+<h1 class="h1">Payment received{{#if name}}, {{name}}{{/if}}</h1>
+<div class="success-box">
+  <p style="margin:0;font-size:14px;color:#14532d"><strong>We've received your payment.</strong> Your order <strong>{{orderNumber}}</strong> is now confirmed and being prepared.</p>
+</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:16px 0;border-collapse:collapse">
+  <thead>
+    <tr>
+      <th align="left"  style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Item</th>
+      <th align="center" style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Qty</th>
+      <th align="right" style="padding:8px 0;font-size:12px;color:#a1a1aa;border-bottom:1px solid #e4e4e7;text-transform:uppercase;letter-spacing:0.5px">Total</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{#each items}}
+    <tr>
+      <td align="left"  style="padding:10px 0;font-size:14px;color:#09090b;border-bottom:1px solid #f4f4f5">{{this.name}}</td>
+      <td align="center" style="padding:10px 0;font-size:14px;color:#52525b;border-bottom:1px solid #f4f4f5">{{this.quantity}}</td>
+      <td align="right" style="padding:10px 0;font-size:14px;color:#09090b;border-bottom:1px solid #f4f4f5">{{this.total}} {{../currency}}</td>
+    </tr>
+    {{/each}}
+  </tbody>
+  <tfoot>
+    <tr>
+      <td colspan="2" align="right" style="padding:14px 0 0;font-size:15px;font-weight:700;color:#09090b">Total paid</td>
+      <td align="right" style="padding:14px 0 0;font-size:15px;font-weight:700;color:#09090b">{{total}} {{currency}}</td>
+    </tr>
+  </tfoot>
+</table>
+<a href="{{orderUrl}}" class="btn">View Your Order</a>
+<p class="text" style="font-size:13px;color:#a1a1aa">A receipt for this payment is available on your order page.</p>
+`, 'Your payment for {{orderNumber}} was successful'),
+    },
+
     // Impersonation notification (sent to admin + target)
     impersonationAlert: {
         subject: '[Admin] Impersonation session started',

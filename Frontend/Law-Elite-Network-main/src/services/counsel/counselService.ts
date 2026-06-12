@@ -14,7 +14,7 @@ export const getMyCounsel = async (userId: string) => {
   await new Promise(resolve => setTimeout(resolve, 600));
   
   const cases = await getCasesByClient(userId);
-  const lawyerIds = Array.from(new Set(cases.map(c => c.assignedLawyerId).filter(Boolean)));
+  const lawyerIds = Array.from(new Set(cases.map((c: any) => c?.assignedLawyerId).filter(Boolean)));
   
   if (lawyerIds.length === 0) return [];
 

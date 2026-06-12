@@ -81,6 +81,21 @@ module.exports = {
             env: { NODE_ENV: 'development', PORT: 3008 },
             log_date_format: 'HH:mm:ss',
         },
+        // ── CRM & Marketing Service ──────────────────────────────────────────
+        // Has no own node_modules — borrows ir-service's via NODE_PATH (same precedent
+        // as marketplace-service). Schema `crm`; brand-scoped (amarise-luxe).
+        {
+            name: 'crm-service',
+            cwd: './Backend/services/ecosystem/crm-service',
+            script: 'index.js',
+            watch: false,
+            env: {
+                NODE_ENV: 'development',
+                PORT: 3063,
+                NODE_PATH: require('path').resolve(__dirname, 'Backend/services/ecosystem/ir-service/node_modules'),
+            },
+            log_date_format: 'HH:mm:ss',
+        },
         // ── Dashboard Service ────────────────────────────────────────────────
         {
             name: 'dashboard-service',
@@ -149,13 +164,15 @@ module.exports = {
         // FRONTENDS  (Windows: use npm.cmd + interpreter none)
         // ════════════════════════════════════════════════════════════════════
         {
-            name: 'fe-about',
+            // Production: `next start` against the prebuilt .next output (run `npm run build` first).
+            // SEO/indexing requires production mode — dev mode is unoptimized and not statically rendered.
+            name: 'about-web',
             cwd: './Frontend/about-baalvion-main',
-            script: 'npm.cmd',
-            args: 'run dev',
-            interpreter: 'none',
+            script: './node_modules/next/dist/bin/next',
+            args: 'start -p 3020',
+            interpreter: 'node',
             watch: false,
-            env: { NODE_ENV: 'development' },
+            env: { NODE_ENV: 'production', PORT: '3020' },
             log_date_format: 'HH:mm:ss',
         },
         {

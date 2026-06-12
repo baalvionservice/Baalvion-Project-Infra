@@ -9,7 +9,10 @@ import { useAuthContext } from '@/context/AuthContext';
  * Orchestrates a unified synchronization ledger for Users, Cases, Bookings, and Logs.
  */
 export function useAdminDashboardData() {
-  const { adminController, role } = useAuthContext();
+  const { role } = useAuthContext();
+  // adminController is not yet wired to AuthContext; admin data falls back to mock services
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const adminController: any = null;
   const [data, setData] = useState<any>({
     users: [],
     cases: [],

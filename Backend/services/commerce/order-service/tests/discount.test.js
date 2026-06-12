@@ -2,6 +2,9 @@
 // Discount engine — server-authoritative computation, caps, validation, atomic usage claim.
 process.env.JWT_PUBLIC_KEY = process.env.JWT_PUBLIC_KEY || 'dummy';
 process.env.CART_SESSION_SECRET = process.env.CART_SESSION_SECRET || 'test';
+// Pin FX so market-conversion assertions are deterministic.
+process.env.FX_LIVE_FEED = 'false';
+process.env.FX_USD_INR = '83.3';
 
 const { test } = require('node:test');
 const assert = require('node:assert');
@@ -75,4 +78,35 @@ test('rejects unsupported types and item-restricted discounts (400)', async () =
 test('usage limit exhausted → 409 (atomic claim returned no row)', async () => {
     stub(base({ usageLimit: 5, usageCount: 5 }), []); // claim UPDATE affects nothing
     assert.equal(await code(() => discountService.applyDiscount(T, STORE, 'SAVE', 100, 0)), 409);
+});
+
+// ════════════════════ market-currency conversion (FX fix) ════════════════════
+test('fixed_amount is converted from USD to the order market currency', async () => {
+    // $50 fixed discount in the IN market → 50 × 83.3 = 4165 → nearest 100 → 4200.
+    stub(base({ type: 'fixed_amount', value: 50 }));
+    const out = await discountService.applyDiscount(T, STORE, 'SAVE', 1000000, 0, 'in');
+    assert.equal(out.discountAmount, 4200, '$50 → ₹4,200 (not ₹50)');
+});
+
+test('percentage discount is currency-agnostic across markets', async () => {
+    stub(base({ type: 'percentage', value: 10 }));
+    const out = await discountService.applyDiscount(T, STORE, 'SAVE', 1000000, 0, 'in');
+    assert.equal(out.discountAmount, 100000, '10% of a ₹1,000,000 subtotal');
+});
+
+test('min-purchase threshold is converted to market currency before comparison', async () => {
+    // $100 min-purchase → ₹8,300. An ₹8,000 INR subtotal is BELOW it → 400.
+    stub(base({ minPurchase: 100 }));
+    assert.equal(await code(() => discountService.applyDiscount(T, STORE, 'SAVE', 8000, 0, 'in')), 400);
+    // An ₹9,000 INR subtotal clears it → discount applies.
+    stub(base({ type: 'percentage', value: 10, minPurchase: 100 }));
+    const out = await discountService.applyDiscount(T, STORE, 'SAVE', 9000, 0, 'in');
+    assert.equal(out.discountAmount, 900);
+});
+
+test('max-discount cap is converted to market currency', async () => {
+    // 50% of ₹1,000,000 = ₹500,000, capped by a $1,000 USD max → ₹83,300 → nearest 100 → 83300.
+    stub(base({ type: 'percentage', value: 50, maxDiscount: 1000 }));
+    const out = await discountService.applyDiscount(T, STORE, 'SAVE', 1000000, 0, 'in');
+    assert.equal(out.discountAmount, 83300, '$1,000 cap → ₹83,300');
 });

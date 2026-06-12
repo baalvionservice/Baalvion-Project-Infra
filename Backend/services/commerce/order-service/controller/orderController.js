@@ -13,6 +13,12 @@ const getOrder = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
+// Customer-facing: the authenticated shopper's own orders in this store.
+const listMyOrders = async (req, res, next) => {
+    try { return sendPaginated(req, res, await orderService.listMyOrders(req.params.storeId, req.auth && req.auth.userId, req.query)); }
+    catch (err) { return next(err); }
+};
+
 const createOrder = async (req, res, next) => {
     try { return sendSuccess(req, res, await orderService.createOrder(req.params.storeId, req.validated, actorOf(req)), 201); }
     catch (err) { return next(err); }
@@ -39,13 +45,28 @@ const refundPayment = async (req, res, next) => {
 };
 
 const createPaymentIntent = async (req, res, next) => {
-    try { return sendSuccess(req, res, await orderService.createPaymentIntent(req.params.storeId, req.params.orderId, actorOf(req)), 201); }
-    catch (err) { return next(err); }
+    try {
+        const body = req.validated || req.body || {};
+        return sendSuccess(req, res, await orderService.createPaymentIntent(req.params.storeId, req.params.orderId, actorOf(req), body.gateway || null), 201);
+    } catch (err) { return next(err); }
 };
 
 const confirmPayment = async (req, res, next) => {
-    try { return sendSuccess(req, res, await orderService.confirmPayment(req.params.storeId, req.params.orderId, req.body && req.body.intentId, actorOf(req))); }
-    catch (err) { return next(err); }
+    try {
+        const body = req.validated || req.body || {};
+        // C1 contract: confirmPayment resolves the FULL updated order (top-level id + paymentStatus);
+        // the FE treats it as PAID iff response.paymentStatus === 'paid'. `gateway` is recorded only.
+        return sendSuccess(req, res, await orderService.confirmPayment(req.params.storeId, req.params.orderId, body.intentId, actorOf(req), body.verification, body.gateway || null));
+    } catch (err) { return next(err); }
 };
 
-module.exports = { listOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment };
+// Provider-initiated payment webhook (signature-verified by paymentWebhookAuth). Drives an order
+// to failed/voided on an out-of-band gateway failure/cancellation. Returns the updated order.
+const paymentWebhook = async (req, res, next) => {
+    try {
+        const body = req.validated || req.body || {};
+        return sendSuccess(req, res, await orderService.handlePaymentWebhook(body));
+    } catch (err) { return next(err); }
+};
+
+module.exports = { listOrders, listMyOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, paymentWebhook };

@@ -85,12 +85,15 @@ module.exports = {
   },
 };
 
-// Fail fast in production if the shared inter-service secret (used by sdk.internalAuth
-// to guard the gateway create/read API and to authenticate to the CMS vault) was
-// left at the insecure development default.
+// Fail fast in any non-dev/test env (production, staging, preprod, …) if the shared
+// inter-service secret (used by sdk.internalAuth to guard the gateway create/read API
+// and to authenticate to the CMS vault) was left at the insecure development default.
+// Previously only NODE_ENV==='production' was guarded, so 'staging'/'preprod' could
+// silently run on the dev default — a service-impersonation vector on those envs.
+const SECRET_RELAXED_ENVS = new Set(['development', 'test']);
 if (
-  module.exports.env === 'production' &&
+  !SECRET_RELAXED_ENVS.has(module.exports.env) &&
   (!process.env.INTERNAL_SERVICE_SECRET || module.exports.internalSecret === 'baalvion-internal-dev-secret')
 ) {
-  throw new Error('[payment-service] INTERNAL_SERVICE_SECRET must be set in production — refusing to start with the dev default');
+  throw new Error('[payment-service] INTERNAL_SERVICE_SECRET must be set (non-dev env) — refusing to start with the dev default');
 }

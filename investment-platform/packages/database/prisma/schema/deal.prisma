@@ -1,0 +1,126 @@
+// ============================================================================
+//  Deals — fundraising opportunities, AI matching, deal rooms, secure
+//  messaging, NDAs. A Deal is a private negotiation between one investor org
+//  and one company org, optionally anchored to a published Opportunity.
+// ============================================================================
+
+model Opportunity {
+  id                 String                @id @default(uuid()) @db.Uuid
+  companyId          String                @db.Uuid
+  companyOrgId       String                @db.Uuid // denormalized tenant key
+  round              OpportunityStage
+  amountSought       Decimal               @db.Decimal(20, 4)
+  currency           String                @default("USD") @db.VarChar(3)
+  preMoneyValuation  Decimal?              @db.Decimal(20, 4)
+  equityOfferedPct   Decimal?              @db.Decimal(7, 4)
+  securityType       SecurityType          @default(EQUITY)
+  minTicket          Decimal?              @db.Decimal(20, 4)
+  deadline           DateTime?
+  status             OpportunityStatus     @default(DRAFT)
+  visibility         OpportunityVisibility @default(PRIVATE)
+  summary            String?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  matches Match[]
+  deals   Deal[]
+
+  @@index([status])
+  @@index([round])
+  @@index([companyOrgId])
+}
+
+model Match {
+  id            String      @id @default(uuid()) @db.Uuid
+  opportunityId String      @db.Uuid
+  investorOrgId String      @db.Uuid
+  score         Decimal     @db.Decimal(6, 4) // 0.0000 - 1.0000
+  reasonsJson   Json?
+  modelVersion  String?
+  status        MatchStatus @default(SUGGESTED)
+  createdAt     DateTime    @default(now())
+
+  opportunity Opportunity @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@unique([opportunityId, investorOrgId])
+  @@index([investorOrgId])
+}
+
+model Watchlist {
+  id            String   @id @default(uuid()) @db.Uuid
+  investorOrgId String   @db.Uuid
+  opportunityId String   @db.Uuid
+  createdAt     DateTime @default(now())
+
+  @@unique([investorOrgId, opportunityId])
+}
+
+model Deal {
+  id               String     @id @default(uuid()) @db.Uuid
+  opportunityId    String?    @db.Uuid
+  companyOrgId     String     @db.Uuid
+  investorOrgId    String     @db.Uuid
+  leadInvestorUserId String?  @db.Uuid
+  status           DealStatus @default(OPEN)
+  currency         String     @default("USD") @db.VarChar(3)
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+
+  opportunity      Opportunity?      @relation(fields: [opportunityId], references: [id])
+  members          DealMember[]
+  messages         DealMessage[]
+  ndas             NdaAgreement[]
+  documents        Document[]
+  dueDiligenceItems DueDiligenceItem[]
+  documentRequests DocumentRequest[]
+  termSheets       TermSheet[]
+  investments      Investment[]
+  escrowAccounts   EscrowAccount[]
+
+  @@index([companyOrgId])
+  @@index([investorOrgId])
+  @@index([status])
+}
+
+model DealMember {
+  id      String         @id @default(uuid()) @db.Uuid
+  dealId  String         @db.Uuid
+  userId  String         @db.Uuid
+  orgId   String         @db.Uuid
+  role    DealMemberRole @default(PARTICIPANT)
+  addedAt DateTime       @default(now())
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@unique([dealId, userId])
+  @@index([dealId])
+}
+
+model DealMessage {
+  id              String   @id @default(uuid()) @db.Uuid
+  dealId          String   @db.Uuid
+  senderUserId    String   @db.Uuid
+  body            String
+  attachmentsJson Json?
+  isSystem        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([dealId])
+}
+
+model NdaAgreement {
+  id                 String          @id @default(uuid()) @db.Uuid
+  dealId             String          @db.Uuid
+  partyOrgId         String          @db.Uuid
+  templateId         String?
+  status             SignatureStatus @default(SENT)
+  signatureEnvelopeId String?        @db.Uuid // -> SignatureEnvelope
+  createdAt          DateTime        @default(now())
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([dealId])
+}

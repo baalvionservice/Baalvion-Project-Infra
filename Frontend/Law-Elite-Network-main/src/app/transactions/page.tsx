@@ -47,7 +47,7 @@ function TransactionsContent() {
     load();
   }, [user]);
 
-  const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
+  const totalSpent = transactions.reduce((sum, t) => sum + (t.amount ?? 0), 0);
 
   return (
     <div className="container mx-auto px-8 pt-8 pb-12 animate-in fade-in duration-700">

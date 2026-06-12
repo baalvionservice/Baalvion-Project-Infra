@@ -13,11 +13,12 @@ const config = require('../config/appConfig');
 const { randomToken, signWebhook } = require('./signing');
 const { Errors } = require('../utils/errors');
 const logger = require('../utils/logger');
+const { validateWebhookUrl } = require('../utils/safeUrl');
 
 // ── endpoints ─────────────────────────────────────────────────────────────────
 
 async function createEndpoint({ orgId, url, description, events = ['*'], mode = 'live', actorId }) {
-    if (!/^https?:\/\//i.test(url)) throw Errors.badRequest('url must be http(s)');
+    await validateWebhookUrl(url);
     const ep = await db.WebhookEndpoint.create({
         org_id: orgId ?? null, url, description: description ?? null,
         secret: `whsec_${randomToken(24)}`, events: Array.isArray(events) && events.length ? events : ['*'],
@@ -45,7 +46,7 @@ async function updateEndpoint(id, data, orgScope) {
     const ep = await getEndpoint(id, orgScope);
     const patch = {};
     for (const k of ['url', 'description', 'events', 'status', 'mode']) if (data[k] !== undefined) patch[k] = data[k];
-    if (patch.url && !/^https?:\/\//i.test(patch.url)) throw Errors.badRequest('url must be http(s)');
+    if (patch.url) await validateWebhookUrl(patch.url);
     patch.updated_at = new Date();
     await ep.update(patch);
     return ep.toJSON();
@@ -100,6 +101,17 @@ async function attemptDelivery(delivery) {
     };
     const body = JSON.stringify(envelope);
     const sig = signWebhook(ep.secret, body);
+
+    // SSRF guard: re-validate the stored URL at delivery time (defence-in-depth
+    // against DNS rebinding and URLs that slipped in before this guard existed).
+    // Mark the delivery as failed rather than throwing uncaught.
+    try {
+        await validateWebhookUrl(ep.url);
+    } catch (ssrfErr) {
+        await delivery.update({ status: 'failed', last_error: `SSRF guard: ${ssrfErr.message}`, next_attempt_at: null });
+        logger.warn({ deliveryId: delivery.id, url: ep.url, err: ssrfErr.message }, 'webhook delivery blocked by SSRF guard');
+        return { id: delivery.id, status: 'failed' };
+    }
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), config.webhooks.timeoutMs);

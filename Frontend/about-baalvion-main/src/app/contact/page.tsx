@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Contact Us | Baalvion Industries",
   description:
     "Initiate a strategic partnership or project briefing. Our global trade specialists are ready to architect your integration.",
+  alternates: { canonical: "https://about.baalvion.com/contact" },
   openGraph: {
     title: "Contact Us | Baalvion Industries",
     description:
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
     siteName: "Baalvion Operating System (BOS)",
     images: [
       {
-        url: "https://picsum.photos/seed/baalvion-contact/1200/630",
+        url: "https://about.baalvion.com/api/og?title=Contact+Baalvion&eyebrow=Baalvion+Industries",
         width: 1200,
         height: 630,
         alt: "Contact Baalvion Industries",
@@ -29,7 +30,7 @@ export const metadata: Metadata = {
     title: "Contact Us | Baalvion Industries",
     description:
       "Initiate a strategic partnership or project briefing. Our global trade specialists are ready to architect your integration.",
-    images: ["https://picsum.photos/seed/baalvion-contact/1200/630"],
+    images: ["https://about.baalvion.com/api/og?title=Contact+Baalvion&eyebrow=Baalvion+Industries"],
   },
 };
 

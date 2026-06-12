@@ -9,4 +9,7 @@ export const ApiAnalyticsService: AnalyticsService = {
     // return res.json();
     throw new Error('API service not implemented');
   },
+  async getApplicationsByCountry() {
+    throw new Error('API service not implemented');
+  },
 };

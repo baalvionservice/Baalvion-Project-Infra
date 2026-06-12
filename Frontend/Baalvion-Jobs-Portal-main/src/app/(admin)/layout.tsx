@@ -1,7 +1,11 @@
-import { redirect } from 'next/navigation';
+import AdminLayout from '@/components/layout/AdminLayout';
 
-// Per-app admin RETIRED. Jobs administration is centralized in the Baalvion admin-platform
-// console → Talent → Jobs section.
-export default function AdminGroupLayout() {
-  redirect(process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL || 'http://localhost:3030/jobs');
+// In-app admin panel. Renders the role-guarded admin shell (sidebar + topbar)
+// so administrators can see everything happening — recruitment pipeline, campus
+// placements, and college/student onboarding applications — in one console.
+//
+// To centralize administration in the external Baalvion admin-platform console
+// instead, set NEXT_PUBLIC_ADMIN_CONSOLE_URL and redirect from here.
+export default function AdminGroupLayout({ children }: { children: React.ReactNode }) {
+  return <AdminLayout>{children}</AdminLayout>;
 }

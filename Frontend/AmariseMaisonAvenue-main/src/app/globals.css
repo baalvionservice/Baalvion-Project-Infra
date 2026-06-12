@@ -1,5 +1,7 @@
-@import url("https://fonts.googleapis.com/css2?family=Ivy+Ora:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Avenir:wght@300;400;500;600;700&display=swap");
+/* NOTE: "Ivy Ora" and "Avenir" are premium foundry fonts, NOT hosted on Google Fonts —
+   those @import URLs always 404'd (ORB-blocked in the browser console) and never loaded.
+   Headlines fall back to the serif stack and body text to Inter (loaded via next/font in
+   the root layout). Removed the dead imports to keep the production console clean. */
 
 @tailwind base;
 @tailwind components;
@@ -73,20 +75,20 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: "Avenir", sans-serif;
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
 
-  /* Heading tags use Ivy Ora font */
+  /* Heading tags use the luxury serif (Cormorant Garamond via next/font). */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    font-family: "Ivy Ora", serif;
+    font-family: var(--font-serif), "Cormorant Garamond", Georgia, serif;
   }
 
-  /* All other elements use Avenir font */
+  /* All other elements use the body sans (Inter via next/font). */
   p,
   span,
   div,
@@ -98,7 +100,7 @@
   li,
   td,
   th {
-    font-family: "Avenir", sans-serif;
+    font-family: var(--font-inter), system-ui, sans-serif;
   }
 }
 

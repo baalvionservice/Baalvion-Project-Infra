@@ -22,12 +22,12 @@ const wid = (): string => {
 };
 
 interface RawContent {
-  id: string; websiteId: string; categoryId: string | null; authorId: string | number;
+  id: string; websiteId: string; categoryId: string | null; categoryIds?: string[]; authorId: string | number;
   lastEditedBy?: string | number | null; title: string; slug: string; excerpt?: string | null;
   featuredImage?: string | null; contentType: ContentItem['type']; contentBlocks?: unknown[];
   tagIds?: string[]; seoMetadata?: Record<string, unknown>; status: ContentItem['status'];
   visibility?: string; scheduledAt?: string | null; publishedAt?: string | null;
-  viewCount?: string | number; revisionCount?: number; createdAt: string; updatedAt: string;
+  viewCount?: string | number; revisionCount?: number; customFields?: Record<string, unknown>; createdAt: string; updatedAt: string;
 }
 
 const author = (id: string | number | null | undefined) =>
@@ -44,7 +44,12 @@ const toContentItem = (r: RawContent): ContentItem => ({
   status: r.status,
   blocks: (r.contentBlocks ?? []) as ContentItem['blocks'],
   seo: (r.seoMetadata ?? {}) as ContentItem['seo'],
-  categoryIds: r.categoryId ? [r.categoryId] : [],
+  categoryIds:
+    Array.isArray(r.categoryIds) && r.categoryIds.length
+      ? r.categoryIds
+      : r.categoryId
+        ? [r.categoryId]
+        : [],
   tagIds: r.tagIds ?? [],
   author: author(r.authorId),
   lastEditedBy: r.lastEditedBy ? author(r.lastEditedBy) : undefined,
@@ -52,6 +57,7 @@ const toContentItem = (r: RawContent): ContentItem => ({
   scheduledAt: r.scheduledAt ?? null,
   viewCount: Number(r.viewCount ?? 0),
   revisionCount: r.revisionCount ?? 0,
+  customFields: (r.customFields ?? {}) as Record<string, unknown>,
   createdAt: r.createdAt,
   updatedAt: r.updatedAt,
 });
@@ -66,8 +72,9 @@ const toCreateBody = (p: CreateContentPayload) => ({
   ...(p.blocks ? { contentBlocks: p.blocks } : {}),
   ...(p.tagIds ? { tagIds: p.tagIds } : {}),
   ...(p.seo ? { seoMetadata: p.seo } : {}),
-  ...(p.categoryIds?.[0] ? { categoryId: p.categoryIds[0] } : {}),
+  ...(p.categoryIds ? { categoryIds: p.categoryIds } : {}),
   ...(p.scheduledAt ? { scheduledAt: p.scheduledAt } : {}),
+  ...(p.customFields ? { customFields: p.customFields } : {}),
 });
 
 const toUpdateBody = (p: UpdateContentPayload) => ({
@@ -78,8 +85,9 @@ const toUpdateBody = (p: UpdateContentPayload) => ({
   ...(p.blocks !== undefined ? { contentBlocks: p.blocks } : {}),
   ...(p.tagIds !== undefined ? { tagIds: p.tagIds } : {}),
   ...(p.seo !== undefined ? { seoMetadata: p.seo } : {}),
-  ...(p.categoryIds ? { categoryId: p.categoryIds[0] ?? null } : {}),
+  ...(p.categoryIds !== undefined ? { categoryIds: p.categoryIds } : {}),
   ...(p.scheduledAt !== undefined ? { scheduledAt: p.scheduledAt } : {}),
+  ...(p.customFields !== undefined ? { customFields: p.customFields } : {}),
 });
 
 export const cmsContentApi = {

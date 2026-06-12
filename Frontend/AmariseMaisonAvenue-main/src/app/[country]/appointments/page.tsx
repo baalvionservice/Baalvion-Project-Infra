@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
+import { BrandImage } from "@/components/ui/BrandImage";
 import { COUNTRIES } from "@/lib/mock-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,11 +60,11 @@ export default function AppointmentBookingPage() {
   return (
     <div className="animate-fade-in bg-ivory pb-32">
       <section className="relative h-[40vh] w-full flex items-center justify-center overflow-hidden border-b border-border">
-        <Image
+        <BrandImage
           src="https://picsum.photos/seed/amarise-viewing/2560/1440"
           alt="Maison Private Salon"
-          fill
-          className="object-cover opacity-60 grayscale-[50%]"
+          className="absolute inset-0"
+          imgClassName="opacity-60 grayscale-[50%]"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ivory/20 to-ivory" />
         <div className="relative z-10 text-center space-y-4 px-6">

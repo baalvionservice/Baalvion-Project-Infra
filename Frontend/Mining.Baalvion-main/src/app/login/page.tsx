@@ -50,7 +50,7 @@ export default function LoginPage() {
     trackEvent('login', { method: 'password' });
     toast({
       title: "Session Initialized",
-      description: "Welcome back to GeoTrade Nexus.",
+      description: "Welcome back to Baalvion Mining Inc.",
     });
     window.location.href = "/dashboard";
   };

@@ -85,6 +85,25 @@ export const TOPICS = [
   "ROI", "Diversity", "Assessment",
 ];
 
+/**
+ * Slugs that have full, crawlable article bodies (keys of {@link ARTICLES}).
+ * Used by the server-rendered `/blog/[slug]` route for `generateStaticParams`,
+ * the sitemap, and to decide which index cards link to a real page.
+ */
+export function getFullArticleSlugs(): string[] {
+  return Object.keys(ARTICLES);
+}
+
+/** Returns the post metadata + full article for a slug, or null if missing. */
+export function getArticleBySlug(
+  slug: string,
+): { post: Post; article: Article } | null {
+  const article = ARTICLES[slug];
+  const post = POSTS.find((p) => p.id === slug);
+  if (!article || !post) return null;
+  return { post, article };
+}
+
 export const ARTICLES: Record<string, Article> = {
   "why-verified-skills": {
     cat: "why", catLabel: "Why SkillMatch Pro", read: "8 min", date: "March 2026",

@@ -1,0 +1,62 @@
+{
+  "slug": "mining-operations-command-center",
+  "title": "A Real-Time Command Center for Mining Operations",
+  "kind": "case_study",
+  "heroImageSeed": "cs-mining",
+  "excerpt": "High-scale telemetry, live monitoring, and optimisation for industrial mining — turning sensor noise into operational decisions.",
+  "seo": {
+    "title": "Case Study: Mining Operations Command Center | Baalvion",
+    "description": "How Baalvion built a real-time command center ingesting high-scale mining telemetry into live dashboards and optimisation on the Baalvion Operating System.",
+    "keywords": ["mining operations", "industrial IoT", "telemetry", "real-time dashboards", "Baalvion case study", "operations optimisation"]
+  },
+  "customFields": {
+    "client": "A high-scale industrial mining operator",
+    "sector": "Manufacturing & Industrial",
+    "challenge": "Sensor data scattered across sites with no live, unified operational picture.",
+    "solution": "A streaming telemetry pipeline feeding a real-time command center with alerting and optimisation.",
+    "architecture": "High-throughput ingestion, time-series storage, stream processing, threshold and anomaly alerting.",
+    "techStack": ["Stream ingestion", "Time-series database", "Real-time dashboards", "Anomaly detection", "Alerting"],
+    "results": [
+      { "metric": "Telemetry latency", "value": "Seconds" },
+      { "metric": "Unplanned downtime", "value": "-28%" },
+      { "metric": "Sites unified", "value": "1 view" }
+    ],
+    "lessons": [
+      "Model the data contract before the dashboard.",
+      "Alert on trends, not just thresholds.",
+      "Operators trust systems that explain themselves."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "Each mining site streamed data from hundreds of sensors — equipment health, throughput, environmental readings — into local systems that never spoke to each other. Leadership had no live operational picture, and problems were typically discovered only after they caused downtime. The operator needed a single command center that could turn high-volume sensor noise into timely decisions." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We built a streaming telemetry pipeline on the Baalvion Operating System that ingests sensor data at scale, stores it as time series, and feeds a real-time command center. Operators see live equipment status across every site, with anomaly detection surfacing developing problems before they become outages." },
+    { "type": "list", "ordered": false, "items": [
+      "**High-throughput ingestion** sized for hundreds of sensors per site.",
+      "**Time-series storage** optimised for fast range queries.",
+      "**Live dashboards** giving one operational picture across all sites.",
+      "**Anomaly and threshold alerting** that flags trends, not just breaches."
+    ] },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "Sensors publish to a high-throughput ingestion layer that normalises readings into a strict data contract. A stream processor computes rolling aggregates and runs anomaly detection, writing both raw and derived series to a time-series store. The command center reads from there for live dashboards, and the alerting service notifies operators the moment a trend crosses a learned bound. The approach mirrors [observability for distributed systems](/news/tech/observability-for-distributed-systems)." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "Stream ingestion, a time-series database, real-time dashboards, anomaly detection, and an alerting service — delivered through our [automation](/services/automation) and [cloud solutions](/services/cloud-solutions) practices for the [manufacturing](/industries/manufacturing) sector." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "Telemetry now reaches operators in seconds rather than after the fact. Unplanned downtime dropped by roughly 28% as developing equipment issues were caught early, and every site is visible in a single operational view." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "Defining the sensor data contract before building the dashboard prevented a swamp of inconsistent readings. Alerting on trends rather than raw thresholds cut alert fatigue dramatically. And operators only trusted the system once it could explain *why* it raised an alert — explainability mattered as much as accuracy." }
+  ],
+  "faqs": [
+    { "q": "How much sensor data can the pipeline handle?", "a": "It is sized for hundreds of sensors per site across many sites, ingesting and processing telemetry with second-level latency." },
+    { "q": "How does anomaly detection avoid false alarms?", "a": "It alerts on learned trends and rolling aggregates rather than static thresholds, which sharply reduces noise and alert fatigue." },
+    { "q": "Can it unify multiple sites?", "a": "Yes — every site feeds one command center, giving leadership a single live operational picture across the whole operation." },
+    { "q": "Which industries does this apply to?", "a": "Any operation with high-volume telemetry — see [Baalvion for manufacturing](/industries/manufacturing) and [logistics](/industries/logistics)." }
+  ],
+  "internalLinks": [
+    { "anchor": "observability for distributed systems", "href": "/news/tech/observability-for-distributed-systems" },
+    { "anchor": "automation", "href": "/services/automation" },
+    { "anchor": "manufacturing", "href": "/industries/manufacturing" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" }
+  ]
+}

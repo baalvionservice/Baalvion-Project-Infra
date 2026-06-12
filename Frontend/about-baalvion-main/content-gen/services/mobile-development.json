@@ -1,0 +1,56 @@
+{
+  "slug": "mobile-development",
+  "title": "Mobile Development",
+  "kind": "service",
+  "heroImageSeed": "svc-mobile",
+  "excerpt": "Native and cross-platform mobile apps that feel fast, work offline, and integrate cleanly with your platform.",
+  "seo": {
+    "title": "Mobile App Development Services | Baalvion",
+    "description": "Baalvion builds native and cross-platform mobile apps with offline support, clean API integration, and production-grade quality. Explore our process and stack.",
+    "keywords": ["mobile development", "iOS", "Android", "cross-platform apps", "Baalvion services", "mobile engineering"]
+  },
+  "customFields": {
+    "benefits": [
+      "Native-quality experience on iOS and Android",
+      "Offline-first where it matters",
+      "Clean integration with your APIs and identity",
+      "One codebase option to move faster"
+    ],
+    "process": [
+      { "step": "Define", "desc": "Platforms, offline needs, and the core jobs-to-be-done." },
+      { "step": "Design", "desc": "Platform-aware UX that respects each OS's conventions." },
+      { "step": "Build", "desc": "Cross-platform or native, with automated testing and CI." },
+      { "step": "Release", "desc": "Store submission, phased rollout, crash and performance monitoring." }
+    ],
+    "techStack": ["React Native", "Swift", "Kotlin", "TypeScript", "Offline sync", "Mobile CI/CD"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "Mobile is where many users actually live, and it's unforgiving — a slow or flaky app gets deleted. Baalvion builds mobile apps that feel fast, handle poor connectivity gracefully, and integrate cleanly with your backend and identity. We choose native or cross-platform based on your goals, not dogma." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Native-quality** experiences that respect iOS and Android conventions.",
+      "**Offline-first** patterns so the app works when the network doesn't.",
+      "**Clean integration** with your APIs and single sign-on.",
+      "**Velocity:** a shared cross-platform codebase when it fits."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We define the platforms and offline requirements, design platform-aware UX, build with automated testing and continuous integration, and release with phased rollouts plus crash and performance monitoring. Quality and observability carry over from our [custom software development](/services/custom-software-development) practice." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "React Native with TypeScript for shared codebases, Swift and Kotlin for native modules and performance-critical paths, offline sync patterns, and mobile CI/CD for repeatable releases. We connect apps to platform APIs the [API-first](/news/tech/api-first-architecture) way." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "Our apps plug into the same secure identity and API layer that powers the rest of the platform — see [a canonical multi-tenant identity platform](/case-studies/multi-tenant-identity-platform). Pair mobile with [cloud solutions](/services/cloud-solutions) and [DevOps](/services/devops) for a complete delivery pipeline." }
+  ],
+  "faqs": [
+    { "q": "Native or cross-platform — which should we choose?", "a": "Cross-platform (React Native) maximises speed and code reuse for most apps; native (Swift/Kotlin) suits performance-critical or deeply platform-specific features. We often combine both." },
+    { "q": "Can the app work offline?", "a": "Yes. We use offline-first sync patterns so core functionality keeps working through poor or absent connectivity and reconciles when back online." },
+    { "q": "How do apps integrate with our systems?", "a": "Through a clean, API-first integration and shared single sign-on — see [API-first architecture](/news/tech/api-first-architecture)." },
+    { "q": "Do you handle store release and monitoring?", "a": "Yes — store submission, phased rollouts, and crash/performance monitoring are part of the release process." }
+  ],
+  "internalLinks": [
+    { "anchor": "custom software development", "href": "/services/custom-software-development" },
+    { "anchor": "API-first architecture", "href": "/news/tech/api-first-architecture" },
+    { "anchor": "a canonical multi-tenant identity platform", "href": "/case-studies/multi-tenant-identity-platform" },
+    { "anchor": "DevOps", "href": "/services/devops" }
+  ]
+}

@@ -1,7 +1,17 @@
+/**
+ * @fileOverview Unified Backend Contracts & Type Definitions
+ * Single source of truth for shared backend types (User, Auth, RBAC, CMS, Commerce, etc.).
+ * All services and SDKs should import from this package to avoid duplication and casing drift.
+ */
+
 // ─── User & Identity ──────────────────────────────────────────────────────────
 
 export type UserStatus = 'active' | 'suspended' | 'pending';
+// Per-organization (tenant-scoped) roles. NEVER grant tenant-RLS bypass (C4).
 export type UserRole   = 'super_admin' | 'owner' | 'admin' | 'manager' | 'editor' | 'member' | 'viewer';
+// Global platform-operator roles — a separate dimension from UserRole, never an org membership.
+// Only platform_admin / platform_security_admin may bypass tenant isolation.
+export type PlatformRole = 'platform_admin' | 'platform_security_admin' | 'platform_support_admin';
 export type OrgPlan    = 'free' | 'starter' | 'pro' | 'enterprise';
 
 export interface User {

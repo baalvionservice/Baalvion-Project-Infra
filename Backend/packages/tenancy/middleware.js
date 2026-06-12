@@ -4,8 +4,13 @@
  * request. Place it AFTER your auth middleware (it reads req.auth).
  */
 const { runWithTenant, getTenantContext } = require('./context');
+const { PLATFORM_BYPASS_ROLES } = require('./roles');
 
-/** Default: tenant from X-Tenant-Id header or req.auth.tenantId/orgId; bypass for super_admin. */
+/**
+ * Default: tenant from X-Tenant-Id header or req.auth.tenantId/orgId; bypass ONLY for platform
+ * operators (PLATFORM_BYPASS_ROLES). Tenant-scoped roles (admin/owner/...) never bypass — see
+ * C4 remediation in ./roles.js.
+ */
 function defaultResolve(req, bypassRoles) {
     const auth = req.auth || {};
     const roles = Array.isArray(auth.roles) ? auth.roles : (auth.role != null ? [auth.role] : []);
@@ -17,11 +22,11 @@ function defaultResolve(req, bypassRoles) {
 /**
  * @param {object} [opts]
  * @param {(req, bypassRoles:string[]) => {tenantId, bypass}} [opts.resolve]
- * @param {string[]} [opts.bypassRoles=['super_admin']]
+ * @param {string[]} [opts.bypassRoles=PLATFORM_BYPASS_ROLES] platform-only by default
  */
 function tenantMiddleware(opts = {}) {
     const resolve = opts.resolve || defaultResolve;
-    const bypassRoles = opts.bypassRoles || ['super_admin'];
+    const bypassRoles = opts.bypassRoles || PLATFORM_BYPASS_ROLES;
     return (req, _res, next) => {
         let ctx;
         try { ctx = resolve(req, bypassRoles); } catch { ctx = { tenantId: null, bypass: false }; }

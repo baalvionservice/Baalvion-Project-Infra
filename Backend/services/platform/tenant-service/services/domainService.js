@@ -37,14 +37,20 @@ async function add({ tenantId, domain, app = 'default', isPrimary = false }) {
     };
 }
 
+// DNS lookup timeout — prevents indefinite hangs on slow/unresponsive resolvers.
+const DNS_TIMEOUT_MS = 5000;
+
 async function checkDns(domain, token) {
     const names = [domain, `_baalvion-challenge.${domain}`];
     for (const name of names) {
         try {
-            const records = await dns.resolveTxt(name);
+            const timeout = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('dns_timeout')), DNS_TIMEOUT_MS)
+            );
+            const records = await Promise.race([dns.resolveTxt(name), timeout]);
             const flat = records.map((r) => r.join(''));
             if (flat.includes(token)) return true;
-        } catch { /* NXDOMAIN / no record — try next */ }
+        } catch { /* NXDOMAIN / no record / timeout — try next */ }
     }
     return false;
 }

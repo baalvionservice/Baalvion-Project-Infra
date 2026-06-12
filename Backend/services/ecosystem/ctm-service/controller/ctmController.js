@@ -55,6 +55,19 @@ exports.updateCompany = async (req, res, next) => {
     try {
         const company = await db.companies.findByPk(req.params.id);
         if (!company) throw new AppError('NOT_FOUND', 'Company not found', 404);
+        // IDOR guard: caller must own this company (via orgId or userId) unless admin/super_admin.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            const callerOrgId = req.auth?.orgId;
+            const callerUserId = String(req.auth?.userId || '');
+            const ownsViaOrg = callerOrgId && String(company.id) === String(callerOrgId);
+            const ownsViaUser = callerUserId && String(company.owner_user_id) === callerUserId;
+            if (!ownsViaOrg && !ownsViaUser) {
+                throw new AppError('FORBIDDEN', 'You do not have permission to update this company', 403);
+            }
+        }
+        // Mass-assignment guard: explicit allowlist only; org_id/owner_user_id/slug never writeable.
         const fields = ['name', 'description', 'website', 'logo_url', 'tier', 'status', 'settings'];
         fields.forEach(f => { if (req.body[f] !== undefined) company[f] = req.body[f]; });
         await company.save();
@@ -100,6 +113,19 @@ exports.updateTask = async (req, res, next) => {
     try {
         const task = await db.tasks.findByPk(req.params.id);
         if (!task) throw new AppError('NOT_FOUND', 'Task not found', 404);
+        // IDOR guard: caller's org must own the company that owns this task, or caller created it.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            const callerOrgId = req.auth?.orgId;
+            const callerUserId = String(req.auth?.userId || '');
+            const ownsViaOrg = callerOrgId && String(task.company_id) === String(callerOrgId);
+            const ownsViaCreator = callerUserId && String(task.created_by) === callerUserId;
+            if (!ownsViaOrg && !ownsViaCreator) {
+                throw new AppError('FORBIDDEN', 'You do not have permission to update this task', 403);
+            }
+        }
+        // Mass-assignment guard: company_id and created_by are never writeable.
         const fields = ['title', 'description', 'requirements', 'tech_stack', 'difficulty', 'status', 'reward', 'currency', 'deadline', 'tags', 'max_submissions', 'metadata'];
         fields.forEach(f => { if (req.body[f] !== undefined) task[f] = req.body[f]; });
         await task.save();
@@ -111,6 +137,18 @@ exports.publishTask = async (req, res, next) => {
     try {
         const task = await db.tasks.findByPk(req.params.id);
         if (!task) throw new AppError('NOT_FOUND', 'Task not found', 404);
+        // IDOR guard: only the owning company or an admin may publish.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            const callerOrgId = req.auth?.orgId;
+            const callerUserId = String(req.auth?.userId || '');
+            const ownsViaOrg = callerOrgId && String(task.company_id) === String(callerOrgId);
+            const ownsViaCreator = callerUserId && String(task.created_by) === callerUserId;
+            if (!ownsViaOrg && !ownsViaCreator) {
+                throw new AppError('FORBIDDEN', 'You do not have permission to publish this task', 403);
+            }
+        }
         task.status = 'open';
         await task.save();
         events.emit('task.published', { id: task.id, title: task.title, company_id: task.company_id }, { companyId: task.company_id, related: { type: 'Task', id: task.id, name: task.title } });
@@ -122,6 +160,18 @@ exports.closeTask = async (req, res, next) => {
     try {
         const task = await db.tasks.findByPk(req.params.id);
         if (!task) throw new AppError('NOT_FOUND', 'Task not found', 404);
+        // IDOR guard: only the owning company or an admin may close.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            const callerOrgId = req.auth?.orgId;
+            const callerUserId = String(req.auth?.userId || '');
+            const ownsViaOrg = callerOrgId && String(task.company_id) === String(callerOrgId);
+            const ownsViaCreator = callerUserId && String(task.created_by) === callerUserId;
+            if (!ownsViaOrg && !ownsViaCreator) {
+                throw new AppError('FORBIDDEN', 'You do not have permission to close this task', 403);
+            }
+        }
         task.status = 'closed';
         await task.save();
         sendSuccess(res, task);
@@ -135,9 +185,25 @@ exports.listSubmissions = async (req, res, next) => {
         const { offset, limit } = page(req);
         const where = {};
         if (req.query.task_id)   where.task_id   = req.query.task_id;
-        if (req.query.user_id)   where.user_id   = req.query.user_id;
         if (req.query.status)    where.status     = req.query.status;
-        const { count, rows } = await db.submissions.findAndCountAll({ where, offset, limit, order: [['submitted_at', 'DESC']], include: [{ association: 'task', attributes: ['id', 'title', 'company_id'] }] });
+        // Tenant scoping: admins see everything; a candidate sees only their own
+        // submissions; a company member sees only submissions on their org's tasks.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const taskWhere = {};
+        if (!isAdmin) {
+            const callerUserId = req.auth?.userId;
+            const callerOrgId = req.auth?.orgId;
+            if (callerOrgId) taskWhere.company_id = callerOrgId; // company-scoped review queue
+            else if (callerUserId != null) where.user_id = callerUserId; // candidate's own work
+            else throw new AppError('FORBIDDEN', 'Authentication context required', 403);
+        } else if (req.query.user_id) {
+            where.user_id = req.query.user_id;
+        }
+        const { count, rows } = await db.submissions.findAndCountAll({
+            where, offset, limit, order: [['submitted_at', 'DESC']],
+            include: [{ association: 'task', attributes: ['id', 'title', 'company_id'], where: Object.keys(taskWhere).length ? taskWhere : undefined, required: Object.keys(taskWhere).length > 0 }],
+        });
         sendPaginated(res, rows, count, Number(req.query.page || 1), limit);
     } catch (err) { next(err); }
 };
@@ -146,6 +212,15 @@ exports.getSubmission = async (req, res, next) => {
     try {
         const submission = await db.submissions.findByPk(req.params.id, { include: [{ association: 'task' }, { association: 'evaluation' }] });
         if (!submission) throw new AppError('NOT_FOUND', 'Submission not found', 404);
+        // IDOR guard: candidate code + scores are sensitive — only the submitter, the
+        // owning company, or an admin may view a submission.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const isOwner = String(submission.user_id) === String(req.auth?.userId || '');
+        const isCompany = req.auth?.orgId && submission.task && String(submission.task.company_id) === String(req.auth.orgId);
+        if (!isAdmin && !isOwner && !isCompany) {
+            throw new AppError('FORBIDDEN', 'You do not have permission to view this submission', 403);
+        }
         sendSuccess(res, submission);
     } catch (err) { next(err); }
 };
@@ -166,8 +241,29 @@ exports.createSubmission = async (req, res, next) => {
 
 exports.updateSubmission = async (req, res, next) => {
     try {
-        const submission = await db.submissions.findByPk(req.params.id);
+        const submission = await db.submissions.findByPk(req.params.id, { include: [{ association: 'task', attributes: ['company_id'] }] });
         if (!submission) throw new AppError('NOT_FOUND', 'Submission not found', 404);
+        // IDOR guard: submitter can edit their own; company admin/admin role can edit any submission on their tasks.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            const callerUserId = String(req.auth?.userId || '');
+            const callerOrgId = req.auth?.orgId;
+            const isOwner = callerUserId && String(submission.user_id) === callerUserId;
+            const isCompanyAdmin = callerOrgId && submission.task && String(submission.task.company_id) === String(callerOrgId);
+            if (!isOwner && !isCompanyAdmin) {
+                throw new AppError('FORBIDDEN', 'You do not have permission to update this submission', 403);
+            }
+            // Non-admin submitter can only update their own content fields; score/feedback/rank/status
+            // are review fields that only a company admin (or admin) may write.
+            if (isOwner && !isCompanyAdmin) {
+                const submitterFields = ['code_url', 'demo_url', 'description', 'notes'];
+                submitterFields.forEach(f => { if (req.body[f] !== undefined) submission[f] = req.body[f]; });
+                await submission.save();
+                return sendSuccess(res, submission);
+            }
+        }
+        // Admin or company admin path: allow all review fields too.
         const fields = ['code_url', 'demo_url', 'description', 'notes', 'status', 'score', 'feedback', 'rank'];
         fields.forEach(f => { if (req.body[f] !== undefined) submission[f] = req.body[f]; });
         await submission.save();
@@ -177,10 +273,23 @@ exports.updateSubmission = async (req, res, next) => {
 
 exports.updateSubmissionStatus = async (req, res, next) => {
     try {
-        const submission = await db.submissions.findByPk(req.params.id);
+        const submission = await db.submissions.findByPk(req.params.id, { include: [{ association: 'task', attributes: ['company_id'] }] });
         if (!submission) throw new AppError('NOT_FOUND', 'Submission not found', 404);
         const { status } = req.body;
         if (!status) throw new AppError('VALIDATION_ERROR', 'status is required', 400);
+        // IDOR guard: only the owning company or admin may change submission status.
+        // Submitter may only withdraw their own (status === 'withdrawn').
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            const callerUserId = String(req.auth?.userId || '');
+            const callerOrgId = req.auth?.orgId;
+            const isCompanyAdmin = callerOrgId && submission.task && String(submission.task.company_id) === String(callerOrgId);
+            const isSelfWithdraw = callerUserId && String(submission.user_id) === callerUserId && status === 'withdrawn';
+            if (!isCompanyAdmin && !isSelfWithdraw) {
+                throw new AppError('FORBIDDEN', 'You do not have permission to update this submission status', 403);
+            }
+        }
         submission.status = status;
         await submission.save();
         sendSuccess(res, submission);
@@ -195,6 +304,19 @@ exports.listEvaluations = async (req, res, next) => {
         const where = {};
         if (req.query.submission_id) where.submission_id = req.query.submission_id;
         if (req.query.evaluator_id)  where.evaluator_id  = req.query.evaluator_id;
+        // Tenant scoping: evaluations carry candidate scores/feedback. Admins may list
+        // freely; everyone else must scope to a single submission they own (as submitter
+        // or owning company) so they cannot enumerate other candidates' evaluations.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            if (!req.query.submission_id) throw new AppError('VALIDATION_ERROR', 'submission_id is required', 400);
+            const sub = await db.submissions.findByPk(req.query.submission_id, { include: [{ association: 'task', attributes: ['company_id'] }] });
+            if (!sub) throw new AppError('NOT_FOUND', 'Submission not found', 404);
+            const isOwner = String(sub.user_id) === String(req.auth?.userId || '');
+            const isCompany = req.auth?.orgId && sub.task && String(sub.task.company_id) === String(req.auth.orgId);
+            if (!isOwner && !isCompany) throw new AppError('FORBIDDEN', 'You do not have permission to view these evaluations', 403);
+        }
         const { count, rows } = await db.evaluations.findAndCountAll({ where, offset, limit, order: [['created_at', 'DESC']] });
         sendPaginated(res, rows, count, Number(req.query.page || 1), limit);
     } catch (err) { next(err); }
@@ -205,12 +327,21 @@ exports.createEvaluation = async (req, res, next) => {
         const userId = req.auth?.userId;
         const { submission_id, score, feedback, criteria, is_final } = req.body;
         if (!submission_id || score === undefined) throw new AppError('VALIDATION_ERROR', 'submission_id and score are required', 400);
+        // Authorize BEFORE writing: only the company that owns the evaluated submission's
+        // task (matched by orgId) — or an admin — may score it.
+        const sub = await db.submissions.findByPk(submission_id, { include: [{ association: 'task', attributes: ['company_id'] }] });
+        if (!sub) throw new AppError('NOT_FOUND', 'Submission not found', 404);
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const isCompanyOwner = req.auth?.orgId && sub.task && String(sub.task.company_id) === String(req.auth.orgId);
+        if (!isAdmin && !isCompanyOwner) {
+            throw new AppError('FORBIDDEN', 'You do not have permission to evaluate this submission', 403);
+        }
         const evaluation = await db.evaluations.create({ submission_id, evaluator_id: userId, score, feedback, criteria: criteria || {}, is_final: is_final || false });
         if (is_final) {
             await db.submissions.update({ score, feedback, status: 'under_review' }, { where: { id: submission_id } });
         }
-        const sub = await db.submissions.findByPk(submission_id, { include: [{ association: 'task', attributes: ['company_id'] }] });
-        events.emit('submission.evaluated', { id: evaluation.id, submission_id, score, user_id: sub ? String(sub.user_id) : undefined }, { companyId: sub?.task?.company_id, related: { type: 'Submission', id: submission_id } });
+        events.emit('submission.evaluated', { id: evaluation.id, submission_id, score, user_id: String(sub.user_id) }, { companyId: sub.task?.company_id, related: { type: 'Submission', id: submission_id } });
         sendSuccess(res, evaluation, 201);
     } catch (err) { next(err); }
 };
@@ -290,8 +421,18 @@ exports.listPlans = async (req, res, next) => {
 
 exports.listSubscriptions = async (req, res, next) => {
     try {
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
         const where = {};
-        if (req.query.company_id) where.company_id = req.query.company_id;
+        if (isAdmin) {
+            // Admins may query any company.
+            if (req.query.company_id) where.company_id = req.query.company_id;
+        } else {
+            // Non-admins are locked to their own org; query param is ignored.
+            const callerOrgId = req.auth?.orgId;
+            if (!callerOrgId) throw new AppError('FORBIDDEN', 'Organization context required', 403);
+            where.company_id = callerOrgId;
+        }
         const subs = await db.subscriptions.findAll({ where, include: [{ association: 'company', attributes: ['id', 'name'] }] });
         sendSuccess(res, subs);
     } catch (err) { next(err); }
@@ -299,7 +440,19 @@ exports.listSubscriptions = async (req, res, next) => {
 
 exports.createSubscription = async (req, res, next) => {
     try {
-        const { company_id, plan_id, billing_cycle } = req.body;
+        const { plan_id, billing_cycle } = req.body;
+        // company_id is derived from the caller's verified org; body-supplied value is
+        // accepted only when the caller is an admin (prevents mass-assignment of company_id).
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        let company_id;
+        if (isAdmin) {
+            // Admin may supply an explicit company_id or their own orgId.
+            company_id = req.body.company_id || req.auth?.orgId;
+        } else {
+            // Non-admins are locked to their verified orgId; body company_id is ignored.
+            company_id = req.auth?.orgId;
+        }
         if (!company_id || !plan_id) throw new AppError('VALIDATION_ERROR', 'company_id and plan_id are required', 400);
         const now = new Date();
         const periodEnd = new Date(now);
@@ -313,6 +466,16 @@ exports.updateSubscription = async (req, res, next) => {
     try {
         const sub = await db.subscriptions.findByPk(req.params.id);
         if (!sub) throw new AppError('NOT_FOUND', 'Subscription not found', 404);
+        // IDOR guard: caller's org must own this subscription, or caller is admin.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin) {
+            const callerOrgId = req.auth?.orgId;
+            if (!callerOrgId || String(sub.company_id) !== String(callerOrgId)) {
+                throw new AppError('FORBIDDEN', 'You do not have permission to update this subscription', 403);
+            }
+        }
+        // Mass-assignment guard: company_id is never writeable.
         const fields = ['status', 'plan_id', 'billing_cycle', 'gateway', 'gateway_subscription_id'];
         fields.forEach(f => { if (req.body[f] !== undefined) sub[f] = req.body[f]; });
         await sub.save();
@@ -326,8 +489,20 @@ exports.listActivities = async (req, res, next) => {
     try {
         const { offset, limit } = page(req);
         const where = {};
-        if (req.query.user_id)    where.user_id    = req.query.user_id;
-        if (req.query.company_id) where.company_id  = req.query.company_id;
+        // Tenant scoping: admins may query any user/company feed; everyone else is locked
+        // to their own company feed (company members) or their own activity (candidates).
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (isAdmin) {
+            if (req.query.user_id)    where.user_id    = req.query.user_id;
+            if (req.query.company_id) where.company_id = req.query.company_id;
+        } else {
+            const callerOrgId = req.auth?.orgId;
+            const callerUserId = req.auth?.userId;
+            if (callerOrgId) where.company_id = callerOrgId;
+            else if (callerUserId != null) where.user_id = callerUserId;
+            else throw new AppError('FORBIDDEN', 'Authentication context required', 403);
+        }
         const { count, rows } = await db.activities.findAndCountAll({ where, offset, limit, order: [['created_at', 'DESC']] });
         sendPaginated(res, rows, count, Number(req.query.page || 1), limit);
     } catch (err) { next(err); }

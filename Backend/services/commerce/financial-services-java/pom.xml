@@ -18,6 +18,7 @@
     <module>ledger-service</module>
     <module>payment-service</module>
     <module>account-service</module>
+    <module>invoice-service</module>
     <module>escrow-service</module>
     <module>settlement-service</module>
     <module>reconciliation-service</module>

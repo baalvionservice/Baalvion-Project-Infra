@@ -1,0 +1,169 @@
+{
+  "slug": "legacy-system-migration",
+  "title": "Legacy System Migration Strategies",
+  "kind": "article",
+  "category": "insights",
+  "seo": {
+    "title": "Legacy System Migration Strategies",
+    "description": "A field guide to legacy migration: choosing a pattern, moving data with backfill plus CDC, dual-running with reconciliation, and scaling the strangler fig.",
+    "keywords": [
+      "legacy system migration",
+      "data migration",
+      "dual running",
+      "strangler fig pattern",
+      "change data capture",
+      "backfill and CDC",
+      "migration risk management",
+      "reconciliation",
+      "phased cutover",
+      "Baalvion Operating System"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "9 min read",
+  "heroImageSeed": "legacy-mig-cdc-4k9",
+  "excerpt": "Migration is mostly data and risk, not code. Here is how Baalvion chooses a pattern, moves data with backfill plus CDC, dual-runs with reconciliation, and scales the strangler fig.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Most legacy migration advice stops at the architecture diagram. In practice the diagram is the easy part. The hard part is moving years of accreted data without losing a row, running two systems side by side long enough to trust the new one, and doing all of it while the business keeps trading. Across 198 markets and 180+ jurisdictions, Baalvion has migrated settlement, customs, identity, and order-execution workloads off systems that long predate the teams now responsible for them. What follows is the field guide we actually use — the choice of pattern, the mechanics of data migration, the discipline of dual-running, and how the [strangler fig pattern](/news/insights/enterprise-modernization) holds up when you apply it across an entire estate rather than a single service."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Choose the migration pattern before the target architecture"
+    },
+    {
+      "type": "paragraph",
+      "text": "The first decision is not microservices versus monolith or cloud versus on-prem. It is how you intend to get from here to there safely, because the pattern constrains every other choice. There are only a handful of patterns worth naming, and most real programmes blend them per capability rather than committing to one for the estate."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Big-bang cutover — freeze, migrate everything, switch over in one event. Cheap in coordination, catastrophic in risk. Justifiable only for small, well-understood systems on a hard deadline.",
+        "Strangler fig — place a routing facade in front of the legacy system and replace capabilities one slice at a time, deleting old code as each proves out. The default for anything large enough to matter.",
+        "Parallel run (dual-running) — operate old and new together, feeding both, and compare outputs until the new system earns the traffic. Almost always layered on a strangler approach for money- and compliance-touching capabilities.",
+        "Lift-and-shift then refactor — move the workload to new infrastructure unchanged, then modernize in place. Useful when the deadline is a datacentre exit; the trap is that the refactor phase quietly never happens."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "At Baalvion we route on capability boundaries — orders, settlement, customs, identity — because a capability is something the business recognizes and can roll back as a unit. The pattern we reach for by default is the strangler fig wrapped in a parallel run. The rest of this article is about the two things that make that combination survive production: moving the data, and proving the new path against the old one before it serves a customer."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Data migration is the project"
+    },
+    {
+      "type": "paragraph",
+      "text": "Code can be rewritten and redeployed in an afternoon. Data cannot. A migration that ships a clean new service on top of corrupted, half-translated, or silently-truncated data has failed regardless of how elegant the code is. We treat data migration as the primary risk surface and design it in two halves: a historical backfill and an ongoing change-data-capture (CDC) stream that keeps the two stores converged while both are live."
+    },
+    {
+      "type": "paragraph",
+      "text": "The backfill is a controlled, resumable batch that reads the legacy store, transforms each record through an explicit mapping, and writes it into the new schema. Three properties are non-negotiable. It must be idempotent, so a failed batch re-runs from a checkpoint without creating duplicates — we key writes on a stable natural identifier and upsert. It must be chunked and rate-limited, so it never saturates the legacy database still serving traffic. And it must record a per-record outcome, so a count of source rows, transformed rows, and loaded rows reconciles exactly at the end. A backfill that cannot tell you why the numbers do not add up is not a migration, it is a hope."
+    },
+    {
+      "type": "paragraph",
+      "text": "The transform step is where legacy assumptions surface and must be confronted, not absorbed. A status held as free-text becomes an enumerated value, with a rule for every observed string and a hard failure for any string nobody anticipated. A currency implied by which table a row lives in becomes an explicit ISO code. Dates stored in local time without a zone get pinned to UTC with the originating jurisdiction recorded alongside. This translation is exactly the work of an anti-corruption layer, and doing it in the pipeline rather than leaking it into the new domain keeps the model clean. Money-touching transforms — applying an FX rate, recomputing an inclusive-versus-exclusive tax figure — are the ones we test hardest, because a rounding rule off by a fraction of a unit reconciles to zero on small samples and diverges by real money at scale."
+    },
+    {
+      "type": "paragraph",
+      "text": "Backfill alone is not enough, because the moment it starts the legacy system keeps changing underneath it. That is what CDC is for. By tailing the legacy database's transaction log — via Debezium against the write-ahead log, or native logical replication — every insert, update, and delete after the backfill watermark flows into the new store in near-real-time. The pattern is backfill-then-tail: snapshot historical state, record the log position, replay everything since, then stay caught up. Once CDC lag is consistently near zero, the two stores are converged and you have a defensible moment to begin moving traffic. The same transactional outbox discipline we use in [building production AI systems](/news/tech/building-production-ai-systems) applies here — writes to the new store and the events that notify the legacy side commit together, so the two never silently disagree."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Dual-running: earn the traffic, do not assume it"
+    },
+    {
+      "type": "paragraph",
+      "text": "With data converged, the new capability does not immediately take over. It runs in parallel with the legacy one, and the migration spends most of its calendar time here. Dual-running comes in two flavours, and a mature migration uses both in sequence."
+    },
+    {
+      "type": "paragraph",
+      "text": "First is shadow mode. Live traffic is mirrored to the new service, which computes its result and discards it — the customer is still served entirely by the legacy system. The new output is compared against the legacy output asynchronously, and divergences are logged. Shadow mode is free in customer risk and expensive only in compute, the cheapest way to discover that your reimplemented tax engine disagrees with the original on every order shipping to one jurisdiction. We held order-execution to this bar: the server-computed total ran in shadow against the legacy total until the figures matched to the cent, and only then did production traffic begin to move."
+    },
+    {
+      "type": "paragraph",
+      "text": "Second is canary traffic behind a feature flag. Once shadow comparisons are clean, a small percentage of real requests are served by the new path while the rest stay on legacy. The flag makes blast radius a configuration choice rather than a code path — if reconciliation drifts, you flip it back and you are exactly where you started, with no emergency restore and no war room. In multi-tenant estates the flag is keyed per tenant, so a problem is contained to one cohort. The crucial point about both flavours is that the comparison is at the level of business outcomes, not HTTP status codes. A migrated settlement path that returns 200 while computing a balance that diverges by a fraction of a unit is a worse failure than one that returns 500, because it is silent. We reconcile balances, inventory, and regulatory state to the smallest unit, and keep the reconciliation job running well past cutover so any late divergence is caught immediately, not discovered in an audit."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Managing risk across the cutover"
+    },
+    {
+      "type": "paragraph",
+      "text": "Dual-running converts one large bet into many small, reversible ones, but small bets still need governance. The controls that matter are few and concrete:"
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Sequence for proof, not value. The first slice should exercise the full pipeline — facade, backfill, CDC, dual-run, reconciliation — yet be contained enough that reverting it is cheap. Do not migrate the crown jewels while the process is unproven.",
+        "Reconcile on outcomes, alert on divergence. For anything touching money, inventory, or regulatory state, compare business figures to the smallest unit and alert on drift, not only on errors. Keep the job running after cutover.",
+        "Make rollback a configuration flip. Every slice sits behind a feature flag so it reverts in seconds without a deploy. A migration whose rollback requires a release is not really reversible.",
+        "Plan the decommission as a first-class task. A strangler migration that never deletes the legacy path just adds a system instead of replacing one — a distributed legacy problem that is strictly worse.",
+        "Preserve the audit trail. Append-only event logs and traceable cutover decisions are a baseline expectation under SOC 2 Type II and ISO 27001, and let you reconstruct exactly what moved, when, and why."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The honest cost of this discipline is the seam. While a capability is split across old and new you are running both, paying for the compute, the observability, and the cognitive load of two code paths. That is the price of a safe rollback, and why decommissioning is scheduled rather than aspirational: a seam left open indefinitely has spent the money and kept the risk."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The strangler fig at scale"
+    },
+    {
+      "type": "paragraph",
+      "text": "A single service is easy to strangle. An estate of forty interdependent systems is a different problem, and this is where most programmes lose the plot. The technique that holds up is to treat the migration as a dependency graph, not a list. You cannot move a capability that still reads from a legacy store a dozen other unmigrated capabilities write to, so you sequence by data ownership: identify the source of truth for each entity, migrate the owner with an anti-corruption layer in front, and let dependents keep reading through that layer until their turn comes. The facade becomes a layered set of gateways, and the CDC streams form a temporary mesh that keeps stores converged while the graph is partially migrated."
+    },
+    {
+      "type": "paragraph",
+      "text": "This is precisely why the [Baalvion Operating System](/platform) is organized into five layers — Infrastructure, Intelligence, Governance, Commerce, and Finance. The layer boundaries are the seams a strangler approach exploits, so modernization stops being a special project and becomes the ordinary way the platform evolves: stand up a capability behind a flag, backfill and tail its data, dual-run it against what it replaces, ramp it per tenant, and delete what it supersedes. You can see the end state of that discipline in our [case study on unifying global trade operations](/case-studies/unifying-global-trade-operations), where dozens of formerly siloed systems now sit behind one multi-tenant platform — without a single big-bang weekend."
+    },
+    {
+      "type": "paragraph",
+      "text": "For an organization carrying a legacy estate, the takeaway is narrow and practical. Pick the migration pattern before the target architecture. Treat the data as the project: backfill idempotently, tail with CDC, and translate legacy assumptions out at the boundary. Dual-run every consequential capability and reconcile on outcomes before you move a single customer. Keep rollback a flip away, and schedule the decommission so the seam closes. It is slower to start and far faster to finish, because nothing it ships has to be unwound. To see how we put this into production, our [enterprise software services](/services/enterprise-software) and [cloud solutions practice](/services/cloud-solutions) are built around exactly this discipline."
+    }
+  ],
+  "faqs": [
+    {
+      "q": "What is the difference between backfill and change data capture in a data migration?",
+      "a": "Backfill is the one-time historical load: a resumable, idempotent batch that reads the legacy store and writes transformed records into the new schema. Change data capture (CDC) handles everything that changes after the backfill starts, tailing the legacy database's transaction log so new inserts, updates, and deletes flow into the new store in near-real-time. You need both — backfill for history, CDC to keep the two stores converged while both are live."
+    },
+    {
+      "q": "Why does the data migration matter more than the application rewrite?",
+      "a": "Code can be redeployed in an afternoon; data cannot. A migration that ships clean code on top of truncated, half-translated, or duplicated data has failed regardless of code quality. Most of the real risk — lost rows, silent rounding drift on money figures, mistranslated statuses — lives in the data path, which is why we design and test it as the primary risk surface."
+    },
+    {
+      "q": "What is dual-running and why not just cut over once the new system is ready?",
+      "a": "Dual-running operates the old and new systems together so you can compare their outputs on real traffic before the new one serves customers. You cut over only after the comparison is clean because reimplemented logic almost always disagrees with the original on edge cases that no spec captured — obscure jurisdiction rules, rounding behaviour, undocumented partner formats. Shadow mode finds those for free; a blind cutover finds them in production."
+    },
+    {
+      "q": "How do you reconcile a financial system during migration?",
+      "a": "Compare business outcomes, not HTTP status codes. New and legacy figures — balances, totals, tax, FX-converted amounts — must match to the smallest currency unit before any real traffic moves. The reconciliation runs in shadow mode first, then continues during canary and well past cutover, alerting on divergence rather than only on errors so that silent drift is caught immediately."
+    },
+    {
+      "q": "How do you scale the strangler fig pattern across many interdependent systems?",
+      "a": "Treat the estate as a dependency graph and sequence by data ownership. Identify the source-of-truth system for each entity, migrate that owner first with an anti-corruption layer in front of it, and let dependents keep reading through the layer until their turn. The facade becomes a layered set of gateways and the CDC streams form a temporary mesh that keeps stores converged while the graph is only partially migrated."
+    },
+    {
+      "q": "When is a big-bang cutover actually the right choice?",
+      "a": "Rarely. It can be justified when the legacy system is small, well understood, and genuinely cannot be split — or when an external deadline such as a datacentre exit forces a hard date. Even then, shadow-running the replacement against live traffic before the switch dramatically reduces the risk, so a pure big bang with no parallel run is almost never the best available option."
+    }
+  ],
+  "internalLinks": [
+    { "anchor": "strangler fig pattern", "href": "/news/insights/enterprise-modernization" },
+    { "anchor": "building production AI systems", "href": "/news/tech/building-production-ai-systems" },
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "unifying global trade operations", "href": "/case-studies/unifying-global-trade-operations" },
+    { "anchor": "enterprise software services", "href": "/services/enterprise-software" },
+    { "anchor": "cloud solutions practice", "href": "/services/cloud-solutions" }
+  ],
+  "customFields": {}
+}

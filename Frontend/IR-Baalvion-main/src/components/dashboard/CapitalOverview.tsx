@@ -19,23 +19,33 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
+const EMPTY_SUMMARY: CapitalSummary = {
+  commitment: 0,
+  calledCapital: 0,
+  distributions: 0,
+  nav: 0,
+  irr: 0,
+};
+
 export default function CapitalOverview({
   summary,
 }: {
-  summary: CapitalSummary;
+  summary: CapitalSummary | null | undefined;
 }) {
-  const remainingCommitment = summary.commitment - summary.calledCapital;
+  // Defense-in-depth: never crash when the data layer hands us a null summary.
+  const safe = summary ?? EMPTY_SUMMARY;
+  const remainingCommitment = safe.commitment - safe.calledCapital;
 
   const metrics = [
     {
       title: "Total Commitment",
-      value: formatCurrency(summary.commitment),
+      value: formatCurrency(safe.commitment),
       icon: Wallet,
       color: "text-primary",
     },
     {
       title: "Called Capital",
-      value: formatCurrency(summary.calledCapital),
+      value: formatCurrency(safe.calledCapital),
       icon: DollarSign,
       color: "text-blue-500",
     },
@@ -47,19 +57,19 @@ export default function CapitalOverview({
     },
     {
       title: "Total Distributions",
-      value: formatCurrency(summary.distributions),
+      value: formatCurrency(safe.distributions),
       icon: TrendingUp,
       color: "text-green-500",
     },
     {
       title: "Current NAV",
-      value: formatCurrency(summary.nav),
+      value: formatCurrency(safe.nav),
       icon: DollarSign,
       color: "text-purple-500",
     },
     {
       title: "Net IRR",
-      value: `${summary.irr}%`,
+      value: `${safe.irr}%`,
       icon: Percent,
       color: "text-primary",
     },

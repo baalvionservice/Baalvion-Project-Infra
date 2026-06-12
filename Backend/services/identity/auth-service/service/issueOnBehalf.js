@@ -9,6 +9,8 @@ const jwt = require('../utils/jwtRsa');
 const eventBus = require('../utils/eventBus');
 const { AppError } = require('../utils/errors');
 const config = require('../config/appConfig');
+// C4: keep platform/tenant roles separate on this dual-issue path too.
+const { assertNoRoleConfusion, isPlatformRole } = require('@baalvion/auth-node');
 
 async function issueOnBehalf({ email, service, ipAddress, userAgent }) {
     const user = await userRepo.findByEmail(email);
@@ -23,10 +25,15 @@ async function issueOnBehalf({ email, service, ipAddress, userAgent }) {
     const serviceRoles = membership.service_roles || {};
     const permissions  = Object.keys(serviceRoles);
 
+    // C4: org-membership role must not be a platform role; carry an explicit platform grant if any.
+    assertNoRoleConfusion(role);
+    const platformRole = isPlatformRole(user.platform_role) ? user.platform_role : null;
+    const roles = platformRole ? [platformRole, role] : [role];
+
     const session = await sessionRepo.create({ userId: user.id, orgId, ipAddress, userAgent });
 
     const accessToken = jwt.signAccessToken({
-        sub: user.id, email: user.email, orgId, role, permissions, sid: session.id,
+        sub: user.id, email: user.email, orgId, role, roles, permissions, sid: session.id,
     });
 
     await auditRepo.append({
@@ -46,7 +53,7 @@ async function issueOnBehalf({ email, service, ipAddress, userAgent }) {
         sub:       String(user.id),
         org_id:    orgId,
         sid:       session.id,
-        roles:     [role],
+        roles,
     };
 }
 

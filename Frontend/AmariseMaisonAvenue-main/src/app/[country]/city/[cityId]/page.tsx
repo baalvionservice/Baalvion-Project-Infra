@@ -3,8 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
+import { BrandImage } from "@/components/ui/BrandImage";
 import { CITIES, COUNTRIES } from "@/lib/mock-data";
+import { getCity } from "@/lib/cms";
 import { useProducts, useCollections } from "@/lib/useCatalog";
 import { generateCityNarrative } from "@/ai/flows/generate-city-narrative";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -30,11 +31,44 @@ import { Button } from "@/components/ui/button";
 export default function CityPage() {
   const { country, cityId } = useParams();
   const countryCode = (country as string) || "us";
-  const city = CITIES.find((c) => c.id === cityId);
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
+
+  // CMS-first: editorial city content from the central CMS, merged over the mock so
+  // mock-only fields (e.g. `office`) survive. Falls back to the mock when CMS is empty.
+  const mockCity = CITIES.find((c) => c.id === cityId);
+  const [cmsCity, setCmsCity] = useState<Awaited<ReturnType<typeof getCity>>>(null);
+  // Keep the mock as the base (it carries `office`, not managed by the CMS) and overlay
+  // the CMS-managed editorial fields when present.
+  const city =
+    mockCity && cmsCity
+      ? {
+          ...mockCity,
+          name: cmsCity.name,
+          countryCode: cmsCity.countryCode,
+          description: cmsCity.description,
+          heroImage: cmsCity.heroImage,
+          trends: cmsCity.trends,
+          featuredCollections: cmsCity.featuredCollections,
+          featuredProducts: cmsCity.featuredProducts,
+        }
+      : mockCity;
 
   const [narrative, setNarrative] = useState<string | null>(null);
   const [loadingNarrative, setLoadingNarrative] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    getCity(cityId as string)
+      .then((c) => {
+        if (active) setCmsCity(c);
+      })
+      .catch(() => {
+        if (active) setCmsCity(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [cityId]);
 
   const { products: featuredProducts } = useProducts({ isFeatured: true, limit: 8 });
   const { collections: featuredCollections } = useCollections();
@@ -228,12 +262,12 @@ export default function CityPage() {
 
         <div className="flex flex-col lg:flex-row items-stretch gap-0 bg-white shadow-2xl border border-gray-100 overflow-hidden">
           <div className="lg:w-1/2 relative min-h-[600px] overflow-hidden group bg-muted">
-            <Image
+            <BrandImage
               src="https://picsum.photos/seed/amarise-flagship/1200/1200"
               alt={`${city.name} Flagship Sanctuary`}
-              fill
-              className="object-cover transition-transform duration-[3s] group-hover:scale-105 opacity-80 grayscale-[20%]"
-              data-ai-hint="luxury boutique"
+              className="absolute inset-0"
+              imgClassName="transition-transform duration-[3s] group-hover:scale-105 opacity-80 grayscale-[20%]"
+              label={`${city.name} Flagship`}
             />
             <div className="absolute inset-0 bg-black/10" />
             <div className="absolute inset-0 flex items-center justify-center p-12">
@@ -279,6 +313,7 @@ export default function CityPage() {
               <Link
                 href={city.office.mapUrl}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="flex-1"
               >
                 <Button

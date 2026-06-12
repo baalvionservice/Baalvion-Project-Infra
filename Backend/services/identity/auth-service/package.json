@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "generate-keys": "node scripts/generateKeys.js",
-    "migrate": "psql $DATABASE_URL -f migrations/001_auth_schema.sql && psql $DATABASE_URL -f migrations/002_add_family_id.sql"
+    "migrate": "psql $DATABASE_URL -f migrations/001_auth_schema.sql && psql $DATABASE_URL -f migrations/002_add_family_id.sql && psql $DATABASE_URL -f migrations/003_auth_audit_log.sql && psql $DATABASE_URL -f migrations/004_org_type.sql",
+    "seed:gti": "node scripts/seedGtiOrganizations.js"
   },
   "dependencies": {
     "express-rate-limit": "^7.5.0",
@@ -42,6 +43,6 @@
   "devDependencies": {
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.0"
   }
 }

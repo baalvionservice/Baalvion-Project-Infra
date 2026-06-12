@@ -1,0 +1,62 @@
+{
+  "slug": "multi-tenant-identity-platform",
+  "title": "A Canonical Multi-Tenant Identity Platform",
+  "kind": "case_study",
+  "heroImageSeed": "cs-identity",
+  "excerpt": "One identity and access layer across every Baalvion property — RS256 tokens, role-based access, and row-level tenant isolation.",
+  "seo": {
+    "title": "Case Study: Multi-Tenant Identity Platform | Baalvion",
+    "description": "How Baalvion built one canonical identity and access layer across every property, with RS256 tokens, RBAC, and row-level tenant isolation.",
+    "keywords": ["identity platform", "multi-tenant", "RBAC", "authentication", "row-level security", "Baalvion case study"]
+  },
+  "customFields": {
+    "client": "The Baalvion Group platform team",
+    "sector": "Platform Engineering",
+    "challenge": "Each property had its own login, roles, and token scheme — a security and UX liability.",
+    "solution": "One canonical identity service issuing RS256 tokens, with RBAC and tenant-aware authorization.",
+    "architecture": "Central auth service, asymmetric token signing, organisation/role model, RLS-backed tenancy.",
+    "techStack": ["RS256 JWT", "RBAC", "Row-level security", "API gateway", "Organisation model"],
+    "results": [
+      { "metric": "Login systems", "value": "Many → 1" },
+      { "metric": "Token scheme", "value": "RS256 only" },
+      { "metric": "Cross-tenant leaks", "value": "Zero (verified)" }
+    ],
+    "lessons": [
+      "Asymmetric signing lets services verify without sharing secrets.",
+      "Authorization belongs in the platform, not each app.",
+      "Prove tenant isolation with adversarial tests."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "Every Baalvion property had grown its own authentication: different login screens, different role models, and inconsistent token schemes — some using shared-secret signing that any service could forge. There was no single way to reason about who could access what, and tenant boundaries were enforced inconsistently across services." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We built one canonical identity service for the entire group. It issues RS256-signed access tokens — services verify them with a public key and can never mint their own. A unified organisation-and-role model defines access centrally, and every tenant's data is isolated at the database layer with row-level security. This is the multi-tenancy discipline we describe in [building multi-tenant SaaS](/news/tech/building-multi-tenant-saas)." },
+    { "type": "list", "ordered": false, "items": [
+      "**One login** across every property.",
+      "**RS256 tokens** so services verify without holding signing secrets.",
+      "**Central RBAC** with an organisation and role model.",
+      "**Row-level security** enforcing tenant isolation at the data layer."
+    ] },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "A central auth service authenticates users and issues asymmetric-signed tokens carrying organisation and role claims. The API gateway validates tokens and forwards a tenant context that every downstream service uses to scope queries. At the database, row-level security policies fail closed — a query without the correct tenant context returns nothing. We verified isolation with adversarial cross-tenant probes, a practice covered in [secure software development](/news/tech/secure-software-development)." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "RS256 JWTs, a role-based access model, row-level security for tenancy, an API gateway, and a shared organisation model — delivered through our [enterprise software](/services/enterprise-software) and [technology consulting](/services/technology-consulting) practices." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "Many login systems collapsed into one. The token scheme is now RS256-only, eliminating forgeable shared secrets. And adversarial testing confirmed zero cross-tenant data leakage across the platform." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "Asymmetric signing was the key decision — services verify tokens without ever being able to forge them. Centralising authorization stopped each app reinventing access control inconsistently. And isolation is only real once you've tried to break it: adversarial cross-tenant tests turned an assumption into a guarantee." }
+  ],
+  "faqs": [
+    { "q": "Why RS256 instead of a shared secret?", "a": "With RS256, the auth service signs with a private key and every other service verifies with the public key — so no downstream service can forge a token, which a shared secret would allow." },
+    { "q": "How is tenant isolation enforced?", "a": "At the database layer with row-level security policies that fail closed: a query lacking the correct tenant context returns no rows." },
+    { "q": "How was isolation verified?", "a": "With adversarial cross-tenant probes that deliberately attempt to read another tenant's data and confirm it is impossible." },
+    { "q": "Does one identity layer hurt user experience?", "a": "The opposite — users get a single sign-on across every property, while the platform gets one consistent place to reason about access." }
+  ],
+  "internalLinks": [
+    { "anchor": "building multi-tenant SaaS", "href": "/news/tech/building-multi-tenant-saas" },
+    { "anchor": "secure software development", "href": "/news/tech/secure-software-development" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" },
+    { "anchor": "technology consulting", "href": "/services/technology-consulting" }
+  ]
+}

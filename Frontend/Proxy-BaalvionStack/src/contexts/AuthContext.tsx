@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
-import { authClient, AuthUser, AuthTokens } from "@/lib/authClient";
+import { authClient, AuthUser, AuthTokens, RegisterResult } from "@/lib/authClient";
 import { tokenStore } from "@/lib/tokenStore";
 
 /**
@@ -13,7 +13,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isInitialized: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, fullName: string) => Promise<void>;
+  register: (email: string, password: string, fullName: string, plan?: string) => Promise<RegisterResult>;
   logout: () => Promise<void>;
   loginWithTokens: (tokens: AuthTokens) => void;
 }
@@ -64,8 +64,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     apply(await authClient.login(email, password));
   }, [apply]);
 
-  const register = useCallback(async (email: string, password: string, fullName: string) => {
-    apply(await authClient.register(email, password, fullName));
+  const register = useCallback(async (email: string, password: string, fullName: string, plan?: string) => {
+    const result = await authClient.register(email, password, fullName, plan);
+    apply(result);
+    return result;
   }, [apply]);
 
   const logout = useCallback(async () => {

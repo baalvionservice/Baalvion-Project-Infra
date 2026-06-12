@@ -1,0 +1,55 @@
+{
+  "slug": "finance",
+  "title": "Baalvion for Finance",
+  "kind": "industry",
+  "heroImageSeed": "ind-finance",
+  "excerpt": "Trade finance, payments, compliance, and settlement — built on a double-entry ledger with real-time risk screening.",
+  "seo": {
+    "title": "Financial Technology Solutions | Baalvion",
+    "description": "Baalvion builds finance platforms with double-entry ledgering, real-time settlement, and AI compliance screening across 180+ jurisdictions.",
+    "keywords": ["financial technology", "trade finance", "payments", "settlement", "compliance", "Baalvion industries", "fintech"]
+  },
+  "customFields": {
+    "challenges": [
+      "Money movement that must always reconcile",
+      "Real-time compliance across many jurisdictions",
+      "Settlement latency and single-rail fragility",
+      "Fraud at scale without blocking good customers"
+    ],
+    "solutions": [
+      "A double-entry ledger as the financial source of truth",
+      "AI-driven sanctions and risk screening in real time",
+      "Multi-rail, idempotent settlement with failover",
+      "Hybrid rules-plus-ML fraud detection"
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Sector Overview" },
+    { "type": "paragraph", "text": "Finance is the sector Baalvion knows most intimately — the [Baalvion Operating System](/platform) was built to move value across 198 markets. Financial systems have an unforgiving requirement: the money must always reconcile, every decision must be defensible, and nothing can be lost. We engineer to that bar." },
+    { "type": "heading", "level": 2, "text": "Challenges" },
+    { "type": "list", "ordered": false, "items": [
+      "**Integrity:** every movement must balance and reconcile, always.",
+      "**Compliance:** sanctions and KYC/AML screening across many jurisdictions, in real time.",
+      "**Settlement:** latency and reliance on a single rail create risk.",
+      "**Fraud:** stopping it without blocking legitimate customers."
+    ] },
+    { "type": "heading", "level": 2, "text": "How Baalvion Helps" },
+    { "type": "paragraph", "text": "We build on a double-entry ledger so every transaction balances, add real-time AI compliance screening as in [AI compliance scoring across 180+ jurisdictions](/case-studies/ai-compliance-scoring-platform), settle across multiple rails with idempotency and failover as in [real-time cross-border settlement](/case-studies/real-time-cross-border-settlement), and detect fraud with the hybrid engine from our [fraud detection](/case-studies/fraud-detection-engine) work." },
+    { "type": "heading", "level": 2, "text": "Relevant Services" },
+    { "type": "paragraph", "text": "Finance engagements draw on [enterprise software](/services/enterprise-software), [automation](/services/automation), and [AI solutions](/services/ai-solutions), with the strategy explored in [trade finance automation](/news/finance/trade-finance-automation) and [cross-border compliance AI](/news/finance/cross-border-compliance-ai)." },
+    { "type": "heading", "level": 2, "text": "Outcomes" },
+    { "type": "paragraph", "text": "Finance platforms that reconcile to the cent, clear faster across borders, screen every transaction in real time with auditable decisions, and stop more fraud while blocking fewer good customers." }
+  ],
+  "faqs": [
+    { "q": "Why a double-entry ledger?", "a": "It guarantees that every movement balances, making reconciliation and dispute resolution fast and trustworthy — the foundation of any serious finance platform." },
+    { "q": "How is compliance handled across jurisdictions?", "a": "Real-time AI screening over versioned sanctions data with auditable decisions across 180+ jurisdictions — see [our AI compliance case study](/case-studies/ai-compliance-scoring-platform)." },
+    { "q": "How do you reduce settlement risk?", "a": "Multi-rail routing with automatic failover and idempotent settlement, so a single provider outage never halts the business." },
+    { "q": "Which services apply to finance?", "a": "Primarily [enterprise software](/services/enterprise-software), [automation](/services/automation), and [AI solutions](/services/ai-solutions)." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "real-time cross-border settlement", "href": "/case-studies/real-time-cross-border-settlement" },
+    { "anchor": "trade finance automation", "href": "/news/finance/trade-finance-automation" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" }
+  ]
+}

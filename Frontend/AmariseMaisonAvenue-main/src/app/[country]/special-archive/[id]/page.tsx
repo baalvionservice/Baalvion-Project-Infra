@@ -3,8 +3,9 @@
 
 import React, { useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
-import { formatPrice, COUNTRIES } from '@/lib/mock-data';
+import { BrandImage } from '@/components/ui/BrandImage';
+import { COUNTRIES } from '@/lib/mock-data';
+import { formatProductPrice, normalizeCountry } from '@/lib/i18n/countries';
 import { useProduct } from '@/lib/useCatalog';
 import { Button } from '@/components/ui/button';
 import { Star, ChevronRight, Sparkles } from 'lucide-react';
@@ -53,7 +54,7 @@ export default function SpecialArchivePage() {
           {/* Previous Design: Simple 2-column layout */}
           <div className="w-full lg:w-3/5 space-y-8">
             <div className="relative aspect-[4/5] bg-white border border-border shadow-luxury overflow-hidden">
-              <Image src={product.imageUrl[0]} alt={product.name} fill className="object-cover" priority />
+              <BrandImage src={product.imageUrl?.[0]} alt={product.name} label={product.name} className="absolute inset-0" priority />
             </div>
           </div>
 
@@ -72,7 +73,7 @@ export default function SpecialArchivePage() {
                 <span className="text-[10px] text-muted-foreground uppercase tracking-[0.3em] font-bold">{product.reviewsCount} Critiques</span>
               </div>
               <div className="text-6xl font-light tracking-tighter pt-4 text-gray-900">
-                {formatPrice(product.basePrice, countryCode)}
+                {formatProductPrice(product, normalizeCountry(countryCode))}
               </div>
             </div>
 

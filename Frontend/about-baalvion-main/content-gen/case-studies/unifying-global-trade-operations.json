@@ -1,0 +1,64 @@
+{
+  "slug": "unifying-global-trade-operations",
+  "title": "Unifying Global Trade Operations on a Single Platform",
+  "kind": "case_study",
+  "heroImageSeed": "cs-unify-trade",
+  "excerpt": "How a multi-jurisdiction trade operator replaced eleven disconnected systems with one auditable operating layer on the Baalvion Operating System.",
+  "seo": {
+    "title": "Case Study: Unifying Global Trade Operations | Baalvion",
+    "description": "A multi-jurisdiction trade operator consolidated eleven siloed systems onto the Baalvion Operating System, cutting reconciliation time and closing compliance gaps.",
+    "keywords": ["trade operations", "platform consolidation", "global trade infrastructure", "Baalvion case study", "multi-tenant platform", "trade compliance"]
+  },
+  "customFields": {
+    "client": "A mid-market international trading group operating across South Asia, the Gulf, and the EU",
+    "sector": "Global Trade",
+    "challenge": "Eleven disconnected systems across jurisdictions with no single source of truth for orders, settlement, or compliance.",
+    "solution": "A unified operating layer on the Baalvion Operating System with one canonical identity, ledger, and compliance engine.",
+    "architecture": "Multi-tenant services with row-level isolation, an event-driven backbone, and a double-entry general ledger.",
+    "techStack": ["Multi-tenant Postgres (RLS)", "Event streaming", "Double-entry ledger", "API gateway", "AI compliance scoring"],
+    "results": [
+      { "metric": "Reconciliation time", "value": "-72%" },
+      { "metric": "Systems retired", "value": "11 → 1" },
+      { "metric": "Audit prep", "value": "Days → hours" },
+      { "metric": "Cross-border clearing", "value": "+40% faster" }
+    ],
+    "lessons": [
+      "Consolidate identity before workflows — one canonical user model removes most integration pain.",
+      "A double-entry ledger is the cheapest insurance against money-movement disputes.",
+      "Incremental cutover beats big-bang migration in regulated environments."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "A mid-market trading group had grown by acquisition across South Asia, the Gulf, and the European Union. Each region ran its own order-management tool, banking integration, and compliance spreadsheet. Eleven systems in total, none of which agreed with the others. Closing the books took three weeks, every cross-border shipment required manual sanctions checks, and no executive could answer a simple question — *what is our real-time exposure by counterparty?* — without a week of analyst work." },
+    { "type": "paragraph", "text": "The fragmentation was not just inconvenient; it was a compliance risk. Manual screening missed updates to sanctions lists, and reconciliation gaps meant settlement discrepancies were discovered weeks after the fact. The group needed a single, auditable execution layer — the problem the [Baalvion Operating System](/platform) was built to solve." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We consolidated all eleven systems onto one multi-tenant platform with a single canonical identity, one shared ledger, and a unified compliance engine. Rather than forcing a risky overnight migration, we ran the new platform in parallel with the legacy estate, moving one trade corridor at a time and reconciling both until the numbers matched exactly." },
+    { "type": "list", "ordered": false, "items": [
+      "**One identity:** every user, organisation, and counterparty modelled once, with role-based access.",
+      "**One ledger:** a double-entry general ledger that records every state change as a balanced transaction.",
+      "**One compliance engine:** automated, real-time sanctions and risk screening drawing on our [AI compliance scoring](/case-studies/ai-compliance-scoring-platform) capability.",
+      "**One API surface:** a governed gateway so the group's downstream tools read from a single source of truth."
+    ] },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "The platform is built as a set of multi-tenant services with strict row-level isolation, so each subsidiary's data stays logically separated while sharing one operational backbone. An event-driven core publishes every change — an order placed, a payment cleared, a shipment milestone reached — onto a durable stream, which the ledger, compliance engine, and reporting layer all consume independently. This is the same scalable approach described in [how Baalvion builds scalable software](/news/tech/how-baalvion-builds-scalable-software)." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "Multi-tenant PostgreSQL with row-level security for tenant isolation, an event-streaming backbone for change propagation, a double-entry ledger service for financial integrity, an API gateway for governed access, and the Baalvion AI compliance engine for real-time screening. Our broader approach is covered in [enterprise software](/services/enterprise-software) and [cloud solutions](/services/cloud-solutions)." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "Within two quarters the group retired all eleven legacy systems. Reconciliation that once took three weeks now completes in under two days, audit preparation dropped from days to hours, and cross-border clearing accelerated by roughly 40%. Most importantly, leadership gained a live, single view of exposure across every jurisdiction." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "Consolidating identity first removed most of the downstream integration friction. The double-entry ledger paid for itself the first time a settlement dispute was resolved in minutes instead of days. And the parallel-run cutover, while slower, kept a regulated business safe throughout the transition — a pattern we reuse in every [legacy system migration](/news/insights/legacy-system-migration)." }
+  ],
+  "faqs": [
+    { "q": "How long did the consolidation take?", "a": "The full migration of all eleven systems completed over two quarters, using a corridor-by-corridor parallel-run approach rather than a single cutover." },
+    { "q": "How was data kept isolated between subsidiaries?", "a": "Each subsidiary operates as a tenant with row-level security, so data is logically isolated while sharing one operational backbone and ledger." },
+    { "q": "What delivered the biggest immediate win?", "a": "Unifying identity and the ledger. A single source of truth for users and money eliminated most reconciliation and access-control problems on day one." },
+    { "q": "Is this approach only for large enterprises?", "a": "No. The same multi-tenant model scales down to mid-market operators and up to large groups — see our work on [building multi-tenant SaaS](/news/tech/building-multi-tenant-saas)." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "AI compliance scoring", "href": "/case-studies/ai-compliance-scoring-platform" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" },
+    { "anchor": "legacy system migration", "href": "/news/insights/legacy-system-migration" }
+  ]
+}

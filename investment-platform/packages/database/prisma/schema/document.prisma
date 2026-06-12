@@ -1,0 +1,94 @@
+// ============================================================================
+//  Document vault — S3-backed, versioned, access-controlled documents with
+//  full access logging (for watermarking & audit). Due-diligence checklist
+//  and document-request workflow live here too.
+// ============================================================================
+
+model Document {
+  id               String             @id @default(uuid()) @db.Uuid
+  orgId            String             @db.Uuid // owning tenant
+  dealId           String?            @db.Uuid
+  companyId        String?            @db.Uuid
+  category         DocumentCategory
+  visibility       DocumentVisibility @default(PRIVATE)
+  fileName         String
+  mimeType         String
+  sizeBytes        BigInt
+  s3Bucket         String
+  s3Key            String
+  checksumSha256   String?
+  encryptionKeyId  String? // KMS key / envelope key id
+  version          Int                @default(1)
+  parentDocumentId String?            @db.Uuid // version chain
+  virusScanStatus  VirusScanStatus    @default(PENDING)
+  uploadedByUserId String             @db.Uuid
+  createdAt        DateTime           @default(now())
+
+  deal        Deal?                 @relation(fields: [dealId], references: [id])
+  accessGrants DocumentAccessGrant[]
+  accessLogs  DocumentAccessLog[]
+
+  @@index([orgId])
+  @@index([dealId])
+  @@index([companyId])
+}
+
+model DocumentAccessGrant {
+  id            String          @id @default(uuid()) @db.Uuid
+  documentId    String          @db.Uuid
+  granteeOrgId  String?         @db.Uuid
+  granteeUserId String?         @db.Uuid
+  condition     AccessCondition @default(NONE)
+  expiresAt     DateTime?
+  createdAt     DateTime        @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+}
+
+model DocumentAccessLog {
+  id          String          @id @default(uuid()) @db.Uuid
+  documentId  String          @db.Uuid
+  userId      String          @db.Uuid
+  action      DocAccessAction
+  ipAddress   String?
+  watermarkId String?
+  createdAt   DateTime        @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([documentId])
+}
+
+model DueDiligenceItem {
+  id                 String               @id @default(uuid()) @db.Uuid
+  dealId             String               @db.Uuid
+  category           DueDiligenceCategory
+  title              String
+  status             DueDiligenceStatus   @default(OPEN)
+  evidenceDocumentId String?              @db.Uuid
+  assigneeUserId     String?              @db.Uuid
+  notes              String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([dealId])
+}
+
+model DocumentRequest {
+  id                  String                @id @default(uuid()) @db.Uuid
+  dealId              String                @db.Uuid
+  category            DocumentCategory
+  description         String
+  status              DocumentRequestStatus @default(REQUESTED)
+  requestedByUserId   String                @db.Uuid
+  fulfilledDocumentId String?               @db.Uuid
+  createdAt           DateTime              @default(now())
+
+  deal Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
+
+  @@index([dealId])
+}

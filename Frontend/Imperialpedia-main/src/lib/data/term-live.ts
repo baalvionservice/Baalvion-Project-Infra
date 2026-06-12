@@ -4,7 +4,7 @@
  * The sync helpers in `./utils` (getTermUrl / getRelatedTerms) stay on the bundled static set
  * — its slug set is identical (the backend was seeded from it), so links/related still resolve.
  */
-import { Term } from './terms';
+import { Term, terms as staticTerms } from './terms';
 import { getTermBySlug as staticTermBySlug, getTermsByLetter as staticTermsByLetter } from './utils';
 
 const IMP_API =
@@ -40,4 +40,19 @@ export async function fetchTermsByLetter(letter: string): Promise<Term[]> {
     /* fall through to static */
   }
   return staticTermsByLetter(letter);
+}
+
+export async function fetchAllTerms(): Promise<Term[]> {
+  try {
+    const res = await fetch(`${IMP_API}/entities?type=term&limit=500`, { cache: 'no-store' });
+    if (res.ok) {
+      const items = (((await res.json())?.data?.items ?? []) as Term[]).filter(
+        (t) => t?.title && t?.slug,
+      );
+      if (items.length) return items;
+    }
+  } catch {
+    /* fall through to static */
+  }
+  return [...staticTerms];
 }

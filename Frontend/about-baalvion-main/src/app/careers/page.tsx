@@ -5,13 +5,28 @@ import { SubPageHero, SubPageContent } from "@/components/sub-page-hero";
 
 export const metadata = {
   title: "Working at Baalvion | Careers",
-  description: "Join the team architecting the future of global trade.",
+  description: "Join the team architecting the future of global trade infrastructure. Explore careers and open roles at Baalvion Industries.",
   robots: {
     index: true,
     follow: true,
   },
   alternates: {
     canonical: "https://about.baalvion.com/careers",
+  },
+  openGraph: {
+    title: "Working at Baalvion | Careers",
+    description: "Join the team architecting the future of global trade infrastructure. Explore careers and open roles at Baalvion Industries.",
+    url: "https://about.baalvion.com/careers",
+    siteName: "Baalvion Operating System (BOS)",
+    images: [{ url: "https://about.baalvion.com/api/og?title=Careers+at+Baalvion&eyebrow=Baalvion+Industries", width: 1200, height: 630, alt: "Careers at Baalvion" }],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Working at Baalvion | Careers",
+    description: "Join the team architecting the future of global trade infrastructure. Explore careers and open roles at Baalvion Industries.",
+    images: ["https://about.baalvion.com/api/og?title=Careers+at+Baalvion&eyebrow=Baalvion+Industries"],
   },
 };
 

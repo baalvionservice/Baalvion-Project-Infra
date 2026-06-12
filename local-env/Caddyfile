@@ -1,0 +1,82 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Baalvion local env — HTTPS tier (optional, replaces reverse-proxy.mjs)
+#
+# Caddy serves the three domains over locally-trusted HTTPS (its internal CA) and
+# fronts the backend fleet on the SAME origin under /__api/<service>/*, exactly
+# like the Node proxy. Because every browser request is same-origin HTTPS there is
+# no mixed-content and no CORS to configure.
+#
+#   1. Install Caddy:            winget install CaddyServer.Caddy   (or: choco install caddy)
+#   2. Trust the local CA once:  caddy trust          (elevated — installs Caddy's root CA)
+#   3. Run:                      caddy run --config "D:\Baalvion Projects\local-env\Caddyfile"
+#   4. Flip the frontend .env.local URLs from http:// to https:// and rebuild.
+#
+# Backends are reached on 127.0.0.1; if a service binds IPv6-only, change its line
+# to [::1]:<port>.
+# ─────────────────────────────────────────────────────────────────────────────
+
+{
+	# Local-only: no public ACME, use the internal CA for *.local names.
+	auto_https disable_redirects
+}
+
+# Shared API gateway: same routing table as reverse-proxy.mjs. handle_path strips
+# the /__api/<name> prefix and forwards the remaining path to the service.
+(api) {
+	handle_path /__api/imperialpedia/* { reverse_proxy 127.0.0.1:3004 }
+	handle_path /__api/cms/*           { reverse_proxy 127.0.0.1:3011 }
+	handle_path /__api/admin/*         { reverse_proxy 127.0.0.1:3021 }
+	handle_path /__api/session/*       { reverse_proxy 127.0.0.1:3022 }
+	handle_path /__api/oauth/*         { reverse_proxy 127.0.0.1:3023 }
+	handle_path /__api/proxy/*         { reverse_proxy 127.0.0.1:4000 }
+	handle_path /__api/jobs/*          { reverse_proxy 127.0.0.1:3002 }
+	handle_path /__api/mining/*        { reverse_proxy 127.0.0.1:3003 }
+	handle_path /__api/realEstate/*    { reverse_proxy 127.0.0.1:3005 }
+	handle_path /__api/brand/*         { reverse_proxy 127.0.0.1:3006 }
+	handle_path /__api/market/*        { reverse_proxy 127.0.0.1:3007 }
+	handle_path /__api/ir/*            { reverse_proxy 127.0.0.1:3008 }
+	handle_path /__api/dashboard/*     { reverse_proxy 127.0.0.1:3009 }
+	handle_path /__api/about/*         { reverse_proxy 127.0.0.1:3020 }
+	handle_path /__api/ctm/*           { reverse_proxy 127.0.0.1:3017 }
+	handle_path /__api/commerce/*      { reverse_proxy 127.0.0.1:3012 }
+	handle_path /__api/orders/*        { reverse_proxy 127.0.0.1:3013 }
+	handle_path /__api/inventory/*     { reverse_proxy 127.0.0.1:3014 }
+	handle_path /__api/fulfillment/*   { reverse_proxy 127.0.0.1:3016 }
+	handle_path /__api/law/*           { reverse_proxy 127.0.0.1:3015 }
+	handle_path /__api/rbac/*          { reverse_proxy 127.0.0.1:3055 }
+	handle_path /__api/audit/*         { reverse_proxy 127.0.0.1:3032 }
+	handle_path /__api/notifications/* { reverse_proxy 127.0.0.1:3031 }
+	handle_path /__api/realtime/*      { reverse_proxy 127.0.0.1:3026 }
+}
+
+imperialpedia.local {
+	tls internal
+	import api
+	reverse_proxy 127.0.0.1:3029
+}
+
+admin.baalvion.local {
+	tls internal
+	import api
+	reverse_proxy 127.0.0.1:3030
+}
+
+ir.baalvion.local {
+	tls internal
+	import api
+	reverse_proxy 127.0.0.1:3027
+}
+
+# Vite SPAs (served by `vite preview` — production build). Both .local and the real
+# .com domains front the same local build.
+founders.baalvion.local, founders.baalvion.com {
+	tls internal
+	import api
+	reverse_proxy 127.0.0.1:8082
+}
+
+proxy.baalvionstack.local, proxy.baalvionstack.com {
+	tls internal
+	import api
+	reverse_proxy 127.0.0.1:8080
+}

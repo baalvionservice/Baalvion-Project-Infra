@@ -1,0 +1,38 @@
+{
+  "slug": "mission",
+  "title": "Our Mission",
+  "kind": "company",
+  "heroImageSeed": "co-mission",
+  "excerpt": "To make global trade work like one connected system — transparent, compliant, and accessible to every business.",
+  "seo": {
+    "title": "Our Mission | Baalvion",
+    "description": "Baalvion's mission is to make global trade work like one connected system — transparent, compliant, and accessible to every business, through the Baalvion Operating System.",
+    "keywords": ["Baalvion mission", "global trade infrastructure", "company mission", "Baalvion Operating System"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Our Mission" },
+    { "type": "paragraph", "text": "Baalvion exists to make global trade work like one connected system. Today, international commerce runs on a patchwork of disconnected tools, manual compliance, and slow settlement — friction that quietly taxes every business that trades across borders. Our mission is to replace that fragmentation with a single, transparent, compliant operating layer: the [Baalvion Operating System](/platform)." },
+    { "type": "heading", "level": 2, "text": "What we're building toward" },
+    { "type": "paragraph", "text": "We believe that the infrastructure of trade — identity, payments, compliance, logistics, and intelligence — should be unified rather than stitched together by each business on its own. When those layers share one ledger and one source of truth, value moves faster, risk is easier to see, and smaller players gain access to capabilities once reserved for the largest." },
+    { "type": "list", "ordered": false, "items": [
+      "**Transparency:** every transaction and decision is auditable.",
+      "**Compliance-first:** screening and controls built in, not bolted on.",
+      "**Accessibility:** infrastructure-grade capability available to businesses of every size.",
+      "**Integrity:** money and state that always reconcile."
+    ] },
+    { "type": "heading", "level": 2, "text": "Why it matters" },
+    { "type": "paragraph", "text": "Trade is how the world's value actually moves. Making it faster, fairer, and more transparent isn't just an engineering goal — it's an economic one. That conviction shapes every decision we make, from architecture to the [services](/services) we offer partners. To see how the mission becomes real, explore our [case studies](/case-studies) or read [what Baalvion is](/news/insights/what-is-baalvion)." },
+    { "type": "paragraph", "text": "If this mission resonates, we'd like to hear from you — whether you want to [partner with us](/contact) or [build with us](/careers)." }
+  ],
+  "faqs": [
+    { "q": "What is Baalvion's mission in one sentence?", "a": "To make global trade work like one connected system — transparent, compliant, and accessible to every business." },
+    { "q": "How does the mission translate into product?", "a": "Through the Baalvion Operating System, which unifies identity, payments, compliance, logistics, and intelligence onto one auditable platform." },
+    { "q": "How is this different from existing trade software?", "a": "Most tools solve one slice and leave businesses to integrate the rest. We unify the layers on one ledger and one source of truth — read [what Baalvion is](/news/insights/what-is-baalvion)." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "what Baalvion is", "href": "/news/insights/what-is-baalvion" },
+    { "anchor": "case studies", "href": "/case-studies" },
+    { "anchor": "partner with us", "href": "/contact" }
+  ]
+}

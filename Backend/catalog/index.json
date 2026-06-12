@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-31T20:31:14.388Z",
+  "generatedAt": "2026-06-03T08:29:13.954Z",
   "services": [
     "about-service",
     "abuse-platform",
@@ -24,7 +24,6 @@
     "deal-room-service",
     "developer-service",
     "dispute-service",
-    "elite-circle-service",
     "escrow-service",
     "finance-audit-service",
     "fulfillment-service",
@@ -129,9 +128,6 @@
     ],
     "dispute-service": [
       "auth-service"
-    ],
-    "elite-circle-service": [
-      "identity-platform"
     ],
     "escrow-service": [
       "auth-service"

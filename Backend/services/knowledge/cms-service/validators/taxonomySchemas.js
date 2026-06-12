@@ -3,15 +3,22 @@ const { z } = require('zod');
 
 const categoryStatusEnum = z.enum(['active', 'inactive', 'archived']);
 
+// Per-category SEO. Drives the category/topic landing page's title, meta description,
+// keywords, social image and index directive so every section can rank on its own.
+const categorySeoSchema = z.object({
+    title: z.string().max(200).optional(),
+    description: z.string().max(500).optional(),
+    keywords: z.array(z.string().max(80)).max(30).optional(),
+    ogImage: z.string().url().optional(),
+    noIndex: z.boolean().optional(),
+}).optional();
+
 const createCategorySchema = z.object({
     parentId: z.string().uuid().optional().nullable(),
     name: z.string().min(1).max(200),
     slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens').optional(),
     description: z.string().max(1000).optional().nullable(),
-    seoMetadata: z.object({
-        title: z.string().max(200).optional(),
-        description: z.string().max(500).optional(),
-    }).optional(),
+    seoMetadata: categorySeoSchema,
     sortOrder: z.number().int().min(0).default(0),
 });
 
@@ -20,10 +27,7 @@ const updateCategorySchema = z.object({
     name: z.string().min(1).max(200).optional(),
     slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/).optional(),
     description: z.string().max(1000).optional().nullable(),
-    seoMetadata: z.object({
-        title: z.string().max(200).optional(),
-        description: z.string().max(500).optional(),
-    }).optional(),
+    seoMetadata: categorySeoSchema,
     status: categoryStatusEnum.optional(),
     sortOrder: z.number().int().min(0).optional(),
 });

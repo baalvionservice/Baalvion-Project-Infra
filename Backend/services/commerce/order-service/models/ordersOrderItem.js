@@ -13,6 +13,9 @@ module.exports = function(sequelize, DataTypes) {
         compareAtPrice: { type: DataTypes.DECIMAL(14, 2), allowNull: true },
         total: { type: DataTypes.DECIMAL(14, 2), allowNull: false },
         taxAmount: { type: DataTypes.DECIMAL(14, 2), defaultValue: 0 },
+        // Per-line tax shape for audit / re-derivation (matches the order's market context).
+        taxRate: { type: DataTypes.DECIMAL(7, 4), allowNull: true },
+        taxInclusive: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
         fulfillableQuantity: { type: DataTypes.INTEGER, defaultValue: 0 },
         fulfilledQuantity: { type: DataTypes.INTEGER, defaultValue: 0 },
         metadata: { type: DataTypes.JSONB, defaultValue: {} },

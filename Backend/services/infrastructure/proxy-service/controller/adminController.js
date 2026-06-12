@@ -11,6 +11,18 @@ const wrap = (handler) => async (req, res, next) => {
 
 module.exports = {
     dashboard: wrap(async (req, res) => sendSuccess(req, res, await adminService.getDashboard())),
+    // ── Billing administration ──
+    listSubscriptions: wrap(async (req, res) => sendPaginated(req, res, await adminService.listSubscriptions(req.query))),
+    subscriptionSummary: wrap(async (req, res) => sendSuccess(req, res, await adminService.getSubscriptionSummary())),
+    revenueByCustomer: wrap(async (req, res) => sendSuccess(req, res, await adminService.getRevenueByCustomer())),
+    listPendingOrders: wrap(async (req, res) => sendSuccess(req, res, await adminService.listPendingOrders())),
+    markOrderPaid: wrap(async (req, res) => sendSuccess(req, res, await adminService.markOrderPaid(req.params.invoiceId))),
+    listPlans: wrap(async (req, res) => sendSuccess(req, res, await adminService.listAdminPlans())),
+    createPlan: wrap(async (req, res) => sendSuccess(req, res, await adminService.createPlan(req.body), 201)),
+    updatePlan: wrap(async (req, res) => sendSuccess(req, res, await adminService.updatePlan(req.params.id, req.body))),
+    deletePlan: wrap(async (req, res) => { await adminService.deletePlan(req.params.id); sendSuccess(req, res, null, 200); }),
+    changeOrgPlan: wrap(async (req, res) => sendSuccess(req, res, await adminService.adminChangeOrgPlan(req.params.orgId, req.body.planSlug, req.auth && req.auth.userId))),
+    cancelOrgSubscription: wrap(async (req, res) => sendSuccess(req, res, await adminService.adminCancelOrgSubscription(req.params.orgId, req.auth && req.auth.userId))),
     listTenants: wrap(async (req, res) => sendPaginated(req, res, await adminService.listTenants(req.query))),
     getTenant: wrap(async (req, res) => sendSuccess(req, res, await adminService.getTenant(req.params.orgId))),
     suspendTenant: wrap(async (req, res) => { await adminService.updateTenantStatus(req.params.orgId, 'suspended'); sendSuccess(req, res, null, 200); }),

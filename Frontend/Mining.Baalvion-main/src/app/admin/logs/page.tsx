@@ -124,7 +124,7 @@ export default function AdminAuditLogsPage() {
         <div className="space-y-2 relative z-10 text-center md:text-left">
           <h3 className="text-lg font-bold">Ledger Integrity Proof</h3>
           <p className="text-xs text-slate-400 max-w-xl leading-relaxed">
-            The GeoTrade Nexus audit log utilizes cryptographic hashing to ensure that no log entry can be modified or deleted once created. This ledger is synchronized across geographically distributed secure platform nodes.
+            The Baalvion Mining Inc. audit log utilizes cryptographic hashing to ensure that no log entry can be modified or deleted once created. This ledger is synchronized across geographically distributed secure platform nodes.
           </p>
         </div>
         <div className="flex gap-4 relative z-10 shrink-0">

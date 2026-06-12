@@ -1,19 +1,35 @@
 import { MetadataRoute } from 'next';
-import { cmsGetPages, cmsGetProjects, cmsGetArticles, cmsGetUpdates } from '@/lib/cms';
+import {
+  cmsGetPages,
+  cmsGetProjects,
+  cmsGetArticles,
+  cmsGetUpdates,
+  cmsGetServices,
+  cmsGetIndustries,
+  cmsGetCaseStudies,
+  cmsGetAboutPages,
+} from '@/lib/cms';
 
 const BASE_URL = 'https://about.baalvion.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [pages, projects, articles, updates] = await Promise.all([
-    cmsGetPages(),
-    cmsGetProjects(),
-    cmsGetArticles(),
-    cmsGetUpdates(),
-  ]);
+  const [pages, projects, articles, updates, services, industries, caseStudies, aboutPages] =
+    await Promise.all([
+      cmsGetPages(),
+      cmsGetProjects(),
+      cmsGetArticles(),
+      cmsGetUpdates(),
+      cmsGetServices(),
+      cmsGetIndustries(),
+      cmsGetCaseStudies(),
+      cmsGetAboutPages(),
+    ]);
+
+  const now = new Date();
 
   const staticRoutes: MetadataRoute.Sitemap = pages.map((page) => ({
     url: `${BASE_URL}/${page.slug === 'home' ? '' : page.slug}`,
-    lastModified: new Date(),
+    lastModified: now,
     changeFrequency: 'weekly',
     priority: page.slug === 'home' ? 1 : 0.8,
   }));
@@ -27,8 +43,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const articleRoutes: MetadataRoute.Sitemap = articles.map((article) => ({
     url: `${BASE_URL}/news/${article.category}/${article.slug}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily',
+    lastModified: now,
+    changeFrequency: 'weekly',
     priority: 0.6,
   }));
 
@@ -39,22 +55,76 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
-  return [
+  const serviceRoutes: MetadataRoute.Sitemap = services.map((s) => ({
+    url: `${BASE_URL}/services/${s.slug}`,
+    lastModified: new Date(s.updatedAt),
+    changeFrequency: 'monthly',
+    priority: 0.8,
+  }));
+
+  const industryRoutes: MetadataRoute.Sitemap = industries.map((s) => ({
+    url: `${BASE_URL}/industries/${s.slug}`,
+    lastModified: new Date(s.updatedAt),
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  const caseStudyRoutes: MetadataRoute.Sitemap = caseStudies.map((s) => ({
+    url: `${BASE_URL}/case-studies/${s.slug}`,
+    lastModified: new Date(s.updatedAt),
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  const aboutRoutes: MetadataRoute.Sitemap = aboutPages.map((s) => ({
+    url: `${BASE_URL}/about/${s.slug}`,
+    lastModified: new Date(s.updatedAt),
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }));
+
+  // Hub / index routes that exist as explicit pages in the app router.
+  const hubRoutes: MetadataRoute.Sitemap = [
+    ['', 1],
+    ['about', 0.8],
+    ['structure', 0.8],
+    ['philosophy', 0.8],
+    ['services', 0.9],
+    ['industries', 0.8],
+    ['case-studies', 0.8],
+    ['company', 0.6],
+    ['contact', 0.6],
+    ['careers', 0.6],
+    ['leadership', 0.6],
+    ['platform', 0.6],
+    ['ecosystem', 0.6],
+    ['projects', 0.7],
+    ['news', 0.7],
+    ['trust', 0.5],
+    ['investors', 0.5],
+  ].map(([path, priority]) => ({
+    url: `${BASE_URL}${path ? `/${path}` : ''}`,
+    lastModified: now,
+    changeFrequency: 'weekly' as const,
+    priority: priority as number,
+  }));
+
+  // Deduplicate by URL (hub routes may overlap with CMS page routes).
+  const all = [
+    ...hubRoutes,
     ...staticRoutes,
     ...projectRoutes,
     ...articleRoutes,
     ...updateRoutes,
-    {
-      url: `${BASE_URL}/company`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-    },
-    {
-      url: `${BASE_URL}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'yearly',
-      priority: 0.5,
-    },
+    ...serviceRoutes,
+    ...industryRoutes,
+    ...caseStudyRoutes,
+    ...aboutRoutes,
   ];
+  const seen = new Set<string>();
+  return all.filter((entry) => {
+    if (seen.has(entry.url)) return false;
+    seen.add(entry.url);
+    return true;
+  });
 }

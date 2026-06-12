@@ -11,6 +11,14 @@ module.exports = function (sequelize, DataTypes) {
         mfa_secret: { type: DataTypes.TEXT, allowNull: true },
         mfa_pending_secret: { type: DataTypes.TEXT, allowNull: true },
         recovery_codes: { type: DataTypes.JSONB, allowNull: true, defaultValue: [] },
+        last_login_at: { type: DataTypes.DATE, allowNull: true },
+        // Force-MFA: when true the user must enrol an authenticator before operating.
+        mfa_required: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        // C4: GLOBAL platform-operator role, separate from org membership. NULL for ordinary
+        // tenant users. Only platform_admin/platform_security_admin may bypass tenant isolation;
+        // this is the single authoritative source of a cross-tenant grant (added to roles[] at
+        // issuance). See migration 006_user_platform_role.sql.
+        platform_role: { type: DataTypes.STRING(32), allowNull: true, defaultValue: null },
     }, {
         sequelize,
         tableName: 'users',

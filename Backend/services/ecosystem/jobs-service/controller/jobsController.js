@@ -268,8 +268,10 @@ const multerMemory = multer({ storage: multer.memoryStorage(), limits: { fileSiz
 
 const presignUpload = async (req, res, next) => {
     try {
-        const { folder = 'resumes', filename, contentType, fileSizeBytes } = req.body;
+        const { folder: rawFolder = 'resumes', filename, contentType, fileSizeBytes } = req.body;
         if (!filename || !contentType) throw new AppError('VALIDATION_ERROR', 'filename and contentType required', 422);
+        // Apply the same allowlist check that uploadFile uses — reject arbitrary storage prefixes.
+        const folder = ALLOWED_FOLDERS.has(rawFolder) ? rawFolder : 'misc';
         const result = await uploadService.getPresignedUploadUrl({ folder, filename, contentType, fileSizeBytes });
         return sendSuccess(req, res, result);
     } catch (err) { return next(err); }

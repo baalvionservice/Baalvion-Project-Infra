@@ -3,28 +3,10 @@
 
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
-import { UserRole } from '@/types/contracts';
 import { authServerService, getPortalProfile } from '@/services/adapters/server/auth.server';
-
-// Map backend role strings to portal UserRole enum
-function normalizeRole(raw: string): UserRole {
-  const upper = raw.toUpperCase();
-  const roleMap: Record<string, UserRole> = {
-    OWNER:       'SUPER_ADMIN',
-    SUPER_ADMIN: 'SUPER_ADMIN',
-    ADMIN:       'ADMIN',
-    MANAGER:     'ADMIN',
-    RECRUITER:   'RECRUITER',
-    INTERVIEWER: 'INTERVIEWER',
-    FINANCE:     'FINANCE',
-    CONTRACTOR:  'CONTRACTOR',
-    CLIENT:      'CLIENT',
-    CANDIDATE:   'CANDIDATE',
-    MEMBER:      'CANDIDATE',
-    VIEWER:      'CANDIDATE',
-  };
-  return roleMap[upper] ?? 'CANDIDATE';
-}
+// Single source of truth for backend-role → portal-role mapping (shared with the
+// server-side admin guard in lib/server/onboarding-auth.ts).
+import { normalizeRole } from '@/lib/access/roles';
 
 export const useAuth = () => {
   const { user, isLoading, setTokens, clearAuth, setIsLoading, setRole } = useAuthStore();

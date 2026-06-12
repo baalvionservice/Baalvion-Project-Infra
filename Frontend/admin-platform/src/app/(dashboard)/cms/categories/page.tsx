@@ -34,7 +34,7 @@ export default function GlobalCategoriesPage() {
       ) : (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {(data?.data ?? []).map((w) => (
-            <Link key={w.id} href={`/cms/websites/${w.id}/categories`}>
+            <Link key={w.id} href={`/cms/websites/${w.slug}/categories`}>
               <Card className="hover:shadow-md transition-shadow cursor-pointer">
                 <CardContent className="p-4 flex items-center justify-between">
                   <div className="flex items-center gap-3">

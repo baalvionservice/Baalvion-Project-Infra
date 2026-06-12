@@ -58,8 +58,7 @@ export class FXEngine {
       uk: 'GBP',
       ae: 'AED',
       in: 'INR',
-      sg: 'SGD',
-      ca: 'CAD'
+      sg: 'SGD'
     };
     return map[code] || 'USD';
   }
@@ -70,8 +69,7 @@ export class FXEngine {
       uk: 'en-GB',
       ae: 'ar-AE',
       in: 'en-IN',
-      sg: 'en-SG',
-      ca: 'en-CA'
+      sg: 'en-SG'
     };
     return map[code] || 'en-US';
   }

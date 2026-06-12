@@ -21,6 +21,19 @@ export default async function Home() {
           description: "A platform where founders find active investors and get funded faster.",
         }}
       />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Baalvion Insiders",
+          url: SITE_URL,
+          potentialAction: {
+            "@type": "SearchAction",
+            target: { "@type": "EntryPoint", urlTemplate: `${SITE_URL}/investors/sector/{search_term_string}` },
+            "query-input": "required name=search_term_string",
+          },
+        }}
+      />
       <section className="hero">
         <h1>Where founders meet investors who just funded businesses like theirs.</h1>
         <p>

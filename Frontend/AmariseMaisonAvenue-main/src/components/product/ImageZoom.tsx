@@ -4,6 +4,7 @@ import React, { useState, useRef, MouseEvent } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { BrandImage, isRealImage } from "@/components/ui/BrandImage";
 
 interface ImageZoomProps {
   src: string;
@@ -40,6 +41,11 @@ export function ImageZoom({
   const handleMouseLeave = () => {
     setIsZooming(false);
   };
+
+  // No real photo yet → elegant branded placeholder (no zoom needed).
+  if (!isRealImage(src)) {
+    return <BrandImage src={src} alt={alt} className={cn("aspect-square", className)} />;
+  }
 
   return (
     <div

@@ -17,7 +17,11 @@ module.exports = {
     { ...base, name: 'oauth-service',     cwd: `${BACKEND}/identity/oauth-service`,   script: 'index.js' },
     { ...base, name: 'admin-service',     cwd: `${BACKEND}/platform/admin-service`,   script: 'index.js' },
     { ...base, name: 'commerce-service',  cwd: `${BACKEND}/commerce/commerce-service`,script: 'index.js' },
-    { ...base, name: 'cms-service',       cwd: `${BACKEND}/knowledge/cms-service`,    script: 'index.js' },
+    // cms-service is OWNED BY DOCKER (baalvion-cms, :3011 — see docker-compose.yml). It was
+    // previously ALSO declared here, so a `pm2 start` raced Docker for :3011 and the loser
+    // crash-looped (3000+ restarts). Single owner = Docker. Do NOT re-add it here; if you run a
+    // PM2-only local stack instead, `docker stop baalvion-cms` first to free the port.
+    // (Same applies to law-service/payment-service/rbac-service — Docker-owned.)
     {
       ...base, name: 'realtime-service', cwd: `${BACKEND}/platform/realtime-service`, script: 'index.js',
       // realtime-service borrows pg/ioredis/jsonwebtoken from session-service's modules.

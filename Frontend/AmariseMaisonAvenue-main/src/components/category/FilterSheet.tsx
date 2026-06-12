@@ -1,15 +1,16 @@
 "use client";
 
 import { X } from "lucide-react";
+import { useParams } from "next/navigation";
 import { FilterChip } from "./FilterChip";
 import { FilterKey, UseFilterReturn } from "@/hooks/useFilter";
 import {
   COLORS,
-  formatPriceShort,
   HARDWARE_OPTIONS,
   SIZE_OPTIONS,
   STYLE_OPTIONS,
 } from "@/lib/mock-category-data";
+import { normalizeCountry, formatFilterPrice } from "@/lib/i18n/countries";
 import { FilterAccordion } from "./FilterAccordian";
 import { FilterCheckbox } from "./FilterCheckbox";
 import { PriceRangeSlider } from "./PriceRangesSlider";
@@ -18,9 +19,22 @@ interface FilterSheetProps {
   open: boolean;
   onClose: () => void;
   filter: UseFilterReturn;
+  /** Colors actually present on the current page's products (lowercased compare). */
+  availableColors?: Set<string>;
+  /** Sizes actually present on the current page's products (lowercased compare). */
+  availableSizes?: Set<string>;
+  /** Number of products matching the current filters (shown on the View button). */
+  resultCount?: number;
 }
 
-export function FilterSheet({ open, onClose, filter }: FilterSheetProps) {
+export function FilterSheet({
+  open,
+  onClose,
+  filter,
+  availableColors,
+  availableSizes,
+  resultCount,
+}: FilterSheetProps) {
   const {
     state,
     toggle,
@@ -32,9 +46,31 @@ export function FilterSheet({ open, onClose, filter }: FilterSheetProps) {
     totalActive,
   } = filter;
 
-  const priceChipLabel = `${formatPriceShort(
-    state.priceMin
-  )} –${formatPriceShort(state.priceMax)}`;
+  const { country } = useParams();
+  const cc = normalizeCountry(country);
+  const priceChipLabel = `${formatFilterPrice(state.priceMin, cc)} – ${formatFilterPrice(state.priceMax, cc)}`;
+
+  // Show an option when the page's products actually have it, OR when it is
+  // already selected (so it can still be removed). If we have no product data
+  // for a dimension at all, keep the full static list so the control is usable.
+  const lowerSet = (s?: Set<string>): Set<string> | undefined =>
+    s ? new Set(Array.from(s, (v) => v.toLowerCase())) : undefined;
+
+  const colorSet = lowerSet(availableColors);
+  const sizeSet = lowerSet(availableSizes);
+
+  const showColor = (name: string): boolean =>
+    !colorSet || colorSet.size === 0
+      ? true
+      : colorSet.has(name.toLowerCase()) || state.color.includes(name);
+
+  const showSize = (size: string): boolean =>
+    !sizeSet || sizeSet.size === 0
+      ? true
+      : sizeSet.has(size.toLowerCase()) || state.size.includes(size);
+
+  const visibleColors = COLORS.filter((c) => showColor(c.name));
+  const visibleSizes = SIZE_OPTIONS.filter((s) => showSize(s));
 
   return (
     <>
@@ -98,7 +134,7 @@ export function FilterSheet({ open, onClose, filter }: FilterSheetProps) {
           {/* COLOR */}
           <FilterAccordion label="Color">
             <div className="space-y-[13px] pt-0">
-              {COLORS.map((c) => (
+              {visibleColors.map((c) => (
                 <FilterCheckbox
                   key={c.name}
                   label={c.name}
@@ -139,7 +175,7 @@ export function FilterSheet({ open, onClose, filter }: FilterSheetProps) {
           {/* SIZE */}
           <FilterAccordion label="Size">
             <div className="space-y-[13px] pt-0">
-              {SIZE_OPTIONS.map((s) => (
+              {visibleSizes.map((s) => (
                 <FilterCheckbox
                   key={s}
                   label={s}
@@ -186,7 +222,7 @@ export function FilterSheet({ open, onClose, filter }: FilterSheetProps) {
             onClick={onClose}
             className="h-[52px] border border-[#1a1a1a] bg-[#1a1a1a] text-white text-[10px] font-bold tracking-[0.22em] uppercase transition-colors hover:bg-[#333] active:bg-[#000]"
           >
-            View ({totalActive > 0 ? totalActive * 14 + 6 : 6})
+            View ({resultCount ?? (totalActive > 0 ? totalActive * 14 + 6 : 6)})
           </button>
         </div>
       </div>

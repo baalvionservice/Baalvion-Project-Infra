@@ -41,8 +41,45 @@ app.get('/.well-known/jwks.json', (req, res) => {
 });
 
 // Prometheus metrics (auth + default runtime). No-op text if prom-client absent.
+// Gated: only localhost/127.x/::1 or callers that present the correct
+// METRICS_SECRET token (Authorization: Bearer <token> or ?token=<token>).
 const authMetrics = require('./observability/authMetrics');
-app.get('/metrics', async (req, res) => {
+
+const METRICS_SECRET = process.env.METRICS_SECRET || '';
+const METRICS_IP_ALLOWLIST = (() => {
+    const raw = process.env.METRICS_IP_ALLOWLIST || '';
+    const parsed = raw.split(',').map((s) => s.trim()).filter(Boolean);
+    // Always allow loopback addresses regardless of configuration.
+    return new Set(['127.0.0.1', '::1', '::ffff:127.0.0.1', ...parsed]);
+})();
+
+// Fail-fast in production if METRICS_SECRET is absent or is the known dev placeholder.
+if (config.env === 'production') {
+    const DEV_PLACEHOLDERS = ['', 'changeme', 'secret', 'metrics-secret'];
+    if (!METRICS_SECRET || DEV_PLACEHOLDERS.includes(METRICS_SECRET.toLowerCase())) {
+        // eslint-disable-next-line no-console
+        console.error('[FATAL] METRICS_SECRET must be set to a non-default value in production');
+        process.exit(1);
+    }
+}
+
+function metricsGuard(req, res, next) {
+    const ip = req.ip || (req.socket && req.socket.remoteAddress) || '';
+    if (METRICS_IP_ALLOWLIST.has(ip)) return next();
+
+    // Bearer token or ?token= query param.
+    if (METRICS_SECRET) {
+        const authHeader = req.headers['authorization'] || '';
+        const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
+        const queryToken = req.query && req.query.token ? String(req.query.token) : '';
+        const provided = bearer || queryToken;
+        if (provided && provided === METRICS_SECRET) return next();
+    }
+
+    return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } });
+}
+
+app.get('/metrics', metricsGuard, async (req, res) => {
     res.set('Content-Type', authMetrics.contentType);
     res.end(await authMetrics.metricsText());
 });
@@ -62,23 +99,17 @@ app.use(errorHandler);
 const startServer = async () => {
     try {
         await db.sequelize.authenticate();
-        console.log('DB connected');
     } catch (error) {
-        console.error('DB connection failed:', error.message);
         process.exit(1);
     }
 
     initializeSocketServer(server);
-    initializeQueues().catch((error) => {
-        console.error('Queue initialization skipped:', error.message);
-    });
+    initializeQueues().catch(() => {});
 
-    store.ensureSeed().catch((error) => {
-        console.error('Seed initialization failed:', error.message);
-    });
+    store.ensureSeed().catch(() => {});
 
     server.listen(config.port, () => {
-        console.log(`Baalvion NetStack API listening on port ${config.port}`);
+        // port is logged by the process manager / container runtime
     });
 };
 

@@ -1,5 +1,8 @@
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
+import { cmsGetSitePage } from "@/lib/cms";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
     title: "Privacy Policy | Baalvion",
@@ -13,15 +16,26 @@ export const metadata = {
     },
 };
 
-export default function PrivacyPage() {
+const FALLBACK_BODY =
+    "<p>This page describes how we collect, use, and protect your personal data. We are committed to transparency and strong data privacy protections.</p>";
+
+export default async function PrivacyPage() {
+    // Body is authored by platform admins in the central CMS console (first-party,
+    // trusted source — same trust level as hardcoded copy), falling back to the
+    // built-in text if the CMS is unreachable.
+    const page = await cmsGetSitePage("privacy");
+    const title = page?.title || "Privacy Policy";
+    const bodyHtml = page?.bodyHtml || FALLBACK_BODY;
+
     return (
         <div className="min-h-screen bg-white">
             <Navbar />
             <main className="max-w-4xl mx-auto p-8">
-                <h1 className="text-3xl font-bold mb-4">Privacy Policy</h1>
-                <p className="text-gray-600 leading-relaxed">
-                    This page describes how we collect, use, and protect your personal data. We are committed to transparency and strong data privacy protections.
-                </p>
+                <h1 className="text-3xl font-bold mb-4">{title}</h1>
+                <div
+                    className="prose prose-gray max-w-none text-gray-600 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                />
             </main>
             <Footer />
         </div>

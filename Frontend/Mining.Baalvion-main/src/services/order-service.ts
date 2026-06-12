@@ -1,5 +1,5 @@
 /**
- * @fileOverview Order Service for GeoTrade Nexus.
+ * @fileOverview Order Service for Baalvion Mining Inc.
  * Handles bulk purchase orders and escrow state.
  */
 

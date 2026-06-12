@@ -61,6 +61,7 @@ const K = {
     loginByEmail:  (email)    => `auth:login_em:${email}`,
     blacklist:     (jti)      => `auth:blacklist:${jti}`,  // Phase 9: canonical shared namespace (matches @baalvion/auth-node)
     familyRevoked: (familyId) => `auth:fam_rev:${familyId}`,
+    orgSuspended:  (orgId)    => `auth:org_suspended:${orgId}`, // tenant kill-switch (read by gateway + authMiddleware)
 };
 
 // ── TTL constants (seconds) ────────────────────────────────────────────────────
@@ -148,6 +149,26 @@ async function isFamilyRevoked(familyId) {
     return (await _get(K.familyRevoked(familyId))) === '1';
 }
 
+/**
+ * Organization kill-switch. When an org is suspended we set this flag so that EVERY
+ * in-flight access token bound to the org is rejected at the gateway / authMiddleware
+ * BEFORE its natural 15-minute expiry — closing the window that DB session revocation
+ * alone (which only stops refresh) would leave open. Re-set on each suspend; 30-day TTL
+ * is a safety net only — clearOrgSuspended() removes it on reactivation.
+ */
+async function setOrgSuspended(orgId) {
+    await _set(K.orgSuspended(orgId), '1', 30 * 24 * 60 * 60);
+}
+
+async function clearOrgSuspended(orgId) {
+    await _del(K.orgSuspended(orgId));
+}
+
+async function isOrgSuspended(orgId) {
+    if (!orgId) return false;
+    return (await _get(K.orgSuspended(orgId))) === '1';
+}
+
 module.exports = {
     connect,
     getClient,
@@ -160,4 +181,7 @@ module.exports = {
     isTokenBlacklisted,
     markFamilyRevoked,
     isFamilyRevoked,
+    setOrgSuspended,
+    clearOrgSuspended,
+    isOrgSuspended,
 };

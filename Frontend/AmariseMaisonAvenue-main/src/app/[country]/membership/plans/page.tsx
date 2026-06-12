@@ -4,6 +4,7 @@
 import React from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useAppStore } from '@/lib/store';
+import { getMembershipPlans, type MembershipPlanContent } from '@/lib/cms';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
@@ -18,8 +19,17 @@ import Link from 'next/link';
 export default function MembershipPlansPage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
-  const { paymentPlans } = useAppStore();
+  const { paymentPlans: fallbackPlans } = useAppStore();
   const router = useRouter();
+
+  // CMS-managed membership tiers (admin-editable); fall back to bundled plans if CMS is down.
+  const [cmsPlans, setCmsPlans] = React.useState<MembershipPlanContent[] | null>(null);
+  React.useEffect(() => {
+    let active = true;
+    getMembershipPlans().then((p) => { if (active && p.length) setCmsPlans(p); }).catch(() => {});
+    return () => { active = false; };
+  }, []);
+  const paymentPlans = cmsPlans ?? fallbackPlans;
 
   return (
     <div className="bg-ivory min-h-screen pb-40 animate-fade-in font-body">

@@ -1,11 +1,16 @@
 "use client";
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { boardOfDirectors } from '@/lib/data';
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Image from "next/image";
 
-type BoardMember = (typeof boardOfDirectors)[0];
+type BoardMember = {
+    name: string;
+    title: string;
+    bio?: string;
+    imageId?: string;
+    imageUrl?: string;
+};
 
 type BoardMemberBioDialogProps = {
     isOpen: boolean;
@@ -17,16 +22,15 @@ export default function BoardMemberBioDialog({ isOpen, onOpenChange, member }: B
     if (!member) {
         return null;
     }
-    const memberImage = PlaceHolderImages.find((p) => p.id === member.imageId);
+    const imageUrl = member.imageUrl || PlaceHolderImages.find((p) => p.id === member.imageId)?.imageUrl;
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-3xl bg-white text-black p-10 rounded-lg">
                 <div className="flex flex-col items-center text-center gap-6">
-                    {memberImage && (
+                    {imageUrl && (
                         <Image
-                            src={memberImage.imageUrl}
+                            src={imageUrl}
                             alt={`Photo of ${member.name}`}
-                            data-ai-hint={memberImage.imageHint}
                             width={200}
                             height={200}
                             className="size-40 rounded-full object-cover mb-4"

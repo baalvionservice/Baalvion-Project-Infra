@@ -110,6 +110,121 @@ describe('generateJobPostingStructuredData', () => {
     expect(result.url).toContain(customBaseUrl);
     expect(result.hiringOrganization.logo).toContain(customBaseUrl);
   });
+
+  test('hybrid roles set TELECOMMUTE plus a physical location', () => {
+    // mockJob is Hybrid
+    const result = generateJobPostingStructuredData(mockJob);
+
+    expect(result.jobLocationType).toBe('TELECOMMUTE');
+    expect(result.applicantLocationRequirements['@type']).toBe('Country');
+    expect(result.applicantLocationRequirements.name).toBe('India');
+    expect(result.jobLocation).toBeDefined();
+  });
+
+  test('fully remote roles set TELECOMMUTE and omit jobLocation', () => {
+    const remoteJob = { ...mockJob, workforceType: 'Remote' as const };
+    const result = generateJobPostingStructuredData(remoteJob);
+
+    expect(result.jobLocationType).toBe('TELECOMMUTE');
+    expect(result.applicantLocationRequirements.name).toBe('India');
+    expect(result.jobLocation).toBeUndefined();
+  });
+
+  test('onsite roles have neither TELECOMMUTE nor applicant requirements', () => {
+    const onsiteJob = { ...mockJob, workforceType: 'Onsite' as const };
+    const result = generateJobPostingStructuredData(onsiteJob);
+
+    expect(result.jobLocationType).toBeUndefined();
+    expect(result.applicantLocationRequirements).toBeUndefined();
+    expect(result.jobLocation).toBeDefined();
+  });
+
+  test('jobLocationType is a string, never a URL array (Google requirement)', () => {
+    const result = generateJobPostingStructuredData(mockJob);
+    expect(typeof result.jobLocationType).toBe('string');
+    expect(Array.isArray(result.jobLocationType)).toBe(false);
+  });
+
+  test('exposes salary for RangeOnly visibility', () => {
+    const rangeOnlyJob = {
+      ...mockJob,
+      salaryVisibility: 'RangeOnly' as const,
+    };
+    const result = generateJobPostingStructuredData(rangeOnlyJob);
+    expect(result.baseSalary).toBeDefined();
+    expect(result.baseSalary.value.minValue).toBe(120000);
+  });
+
+  test('validThrough present when publishEndDate set, absent otherwise', () => {
+    const withEnd = generateJobPostingStructuredData(mockJob);
+    expect(withEnd.validThrough).toBe(mockJob.publishEndDate);
+
+    const noEnd = { ...mockJob, publishEndDate: undefined };
+    const result = generateJobPostingStructuredData(noEnd);
+    expect(result.validThrough).toBeUndefined();
+  });
+
+  test('country context overrides the fallback country map', () => {
+    const result = generateJobPostingStructuredData(mockJob, undefined, {
+      country: { isoCode: 'AE', slug: 'uae', name: 'United Arab Emirates' },
+    });
+    expect(result.jobLocation.address.addressCountry).toBe('AE');
+    expect(result.applicantLocationRequirements.name).toBe(
+      'United Arab Emirates',
+    );
+    expect(result.url).toContain('/careers/countries/uae/jobs/');
+  });
+
+  test('maps Principal experience band to months of experience', () => {
+    const principalJob = { ...mockJob, experienceBand: 'Principal' as const };
+    const result = generateJobPostingStructuredData(principalJob);
+    expect(result.experienceRequirements.monthsOfExperience).toBe(144);
+  });
+
+  // ── Live backend shape (produced by mapBackendJob) ──────────────────────────
+  // Live jobs hardcode workforceType="Employee", use "Full-Time" / "range" /
+  // "0-2 Years" string variants, and carry remoteAllowed. The generator must
+  // tolerate both shapes.
+  const liveJob = {
+    ...mockJob,
+    employmentType: 'Full-Time' as any,
+    experienceBand: '5-10 Years' as any,
+    workforceType: 'Employee' as any,
+    salaryVisibility: 'range' as any,
+    remoteAllowed: false,
+  };
+
+  test('maps live "Full-Time" employment type to FULL_TIME', () => {
+    const result = generateJobPostingStructuredData(liveJob);
+    expect(result.employmentType).toBe('FULL_TIME');
+  });
+
+  test('exposes salary for live lowercase "range" visibility', () => {
+    const result = generateJobPostingStructuredData(liveJob);
+    expect(result.baseSalary).toBeDefined();
+    expect(result.baseSalary.value.minValue).toBe(120000);
+  });
+
+  test('maps live "5-10 Years" band to months of experience', () => {
+    const result = generateJobPostingStructuredData(liveJob);
+    expect(result.experienceRequirements.monthsOfExperience).toBe(60);
+  });
+
+  test('live "Employee" without remoteAllowed is treated as onsite', () => {
+    const result = generateJobPostingStructuredData(liveJob);
+    expect(result.jobLocationType).toBeUndefined();
+    expect(result.jobLocation).toBeDefined();
+  });
+
+  test('live "Employee" with remoteAllowed is treated as hybrid', () => {
+    const result = generateJobPostingStructuredData({
+      ...liveJob,
+      remoteAllowed: true,
+    });
+    expect(result.jobLocationType).toBe('TELECOMMUTE');
+    expect(result.applicantLocationRequirements).toBeDefined();
+    expect(result.jobLocation).toBeDefined(); // hybrid keeps the physical location
+  });
 });
 
 // Manual test function (uncomment to run)

@@ -25,7 +25,8 @@ async function publish(type, data, opts = {}) {
             'timestamp',     new Date().toISOString(),
         );
     } catch (err) {
-        console.warn(`[EventBus] Failed to publish "${type}":`, err.message);
+        // Non-fatal: event stream unavailable — log silently via stderr
+        process.stderr.write(`[EventBus] Failed to publish "${type}": ${err.message}\n`);
     }
 }
 

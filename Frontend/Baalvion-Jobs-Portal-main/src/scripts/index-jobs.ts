@@ -6,14 +6,16 @@
  * npx tsx src/scripts/index-jobs.ts
  */
 
-import { mockJobs } from '@/mocks/talent-platform/jobs.mock';
+import { talentService } from '@/services/talent.service';
+import { AppConfig } from '@/config/app.config';
 
 const API_ENDPOINT = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 const INDEXING_SECRET = process.env.GOOGLE_INDEXING_SECRET;
-const BASE_URL = 'https://www.jobs.baalvion.com';
+const BASE_URL = AppConfig.baseUrl;
 
-// Country ID to slug mapping
-const countrySlugMap: Record<string, string> = {
+// Fallback country ID → slug mapping (used only if a job references a country
+// that isn't returned by the live countries endpoint).
+const countrySlugFallback: Record<string, string> = {
   country_us: 'united-states',
   country_in: 'india',
   country_gb: 'united-kingdom',
@@ -21,6 +23,28 @@ const countrySlugMap: Record<string, string> = {
   country_au: 'australia',
   country_pl: 'poland',
 };
+
+// Pull every published, currently-indexable job from the live service, paging
+// the same way the sitemap does (jobs-service caps `limit` at 100).
+async function fetchPublishedJobs(): Promise<any[]> {
+  const PAGE_SIZE = 100;
+  const MAX_PAGES = 200;
+  const now = Date.now();
+  const all: any[] = [];
+  for (let page = 1; page <= MAX_PAGES; page++) {
+    const res = await talentService.getJobs({ status: 'published', page, limit: PAGE_SIZE });
+    const items = res.data ?? [];
+    all.push(...items);
+    const totalPages = res.totalPages ?? 1;
+    if (items.length < PAGE_SIZE || page >= totalPages) break;
+  }
+  return all.filter((job) => {
+    if (job.visibility && job.visibility !== 'public') return false;
+    if (job.publishEndDate && new Date(job.publishEndDate).getTime() < now) return false;
+    if (job.publishStartDate && new Date(job.publishStartDate).getTime() > now) return false;
+    return true;
+  });
+}
 
 interface IndexingResponse {
   success: boolean;
@@ -63,13 +87,15 @@ async function indexAllJobs() {
     process.exit(1);
   }
 
-  // Filter published jobs only
-  const publishedJobs = mockJobs.filter(
-    (job) =>
-      job.status === 'published' &&
-      job.visibility === 'public' &&
-      (!job.publishEndDate || new Date(job.publishEndDate) > new Date()),
-  );
+  // Resolve a live country ID → slug map so URLs match the canonical sitemap.
+  const countries = await talentService.getCountries({ isActive: true });
+  const countrySlugMap: Record<string, string> = { ...countrySlugFallback };
+  for (const country of countries) {
+    countrySlugMap[country.id] = country.slug;
+  }
+
+  // Fetch published, currently-indexable jobs from the live service.
+  const publishedJobs = await fetchPublishedJobs();
 
   console.log(`📊 Found ${publishedJobs.length} published jobs to index\n`);
 

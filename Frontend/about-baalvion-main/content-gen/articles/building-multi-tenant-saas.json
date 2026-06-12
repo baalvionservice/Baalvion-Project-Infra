@@ -1,0 +1,106 @@
+{
+  "slug": "building-multi-tenant-saas",
+  "title": "Building Multi-Tenant SaaS the Right Way",
+  "kind": "article",
+  "category": "tech",
+  "seo": {
+    "title": "Building Multi-Tenant SaaS the Right Way",
+    "description": "Pool vs silo, row-level security, tenant isolation, noisy neighbours, and metered billing — the multi-tenancy trade-offs from the team running BOS across 198 markets.",
+    "keywords": [
+      "multi-tenant SaaS",
+      "tenant isolation",
+      "pool vs silo",
+      "row-level security",
+      "noisy neighbour",
+      "RLS Postgres",
+      "SaaS architecture",
+      "usage-based billing",
+      "tenant context",
+      "multi-tenancy patterns"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "9 min read",
+  "heroImageSeed": "multitenant-8023",
+  "excerpt": "Multi-tenancy is an isolation problem before it is a feature. A concrete walk through pool vs silo, row-level security, noisy neighbours, and metered billing from the team running BOS.",
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Multi-tenancy is an isolation problem, not a feature" },
+    { "type": "paragraph", "text": "Multi-tenancy sounds like a deployment choice — run one application instance, serve many customers, save on infrastructure. In practice it is the single most consequential architectural decision a SaaS company makes, because it determines how strongly one customer's data is separated from another's, how a runaway query from one account affects everyone else, and how cleanly you can meter and bill what each tenant consumes. Get it right and a single platform serves a regulated bank and a small reseller from the same codebase with provable separation. Get it wrong and the first cross-tenant data leak is not a bug ticket — it is a breach disclosure, a failed SOC 2 audit, and a contract terminated for cause." },
+    { "type": "paragraph", "text": "At Baalvion we run the [Baalvion Operating System](/platform) — a multi-tenant trade infrastructure connecting commerce, finance, compliance, logistics, and intelligence across 198 markets and 180+ jurisdictions, handling 500K+ transactions for 125+ active partners. Every one of those partners is a tenant, and several of them are direct competitors who must never see a row of each other's data. This article walks through the patterns that decide whether a multi-tenant platform is safe at that scale — the pool-versus-silo spectrum, row-level security, the noisy-neighbour problem, and usage-based billing — with the trade-offs named rather than waved away." },
+    { "type": "heading", "level": 2, "text": "The pool–silo spectrum" },
+    { "type": "paragraph", "text": "Tenancy models are usually framed as a binary, pool versus silo, but the honest picture is a spectrum and most real platforms land somewhere in the middle. At the silo end, each tenant gets its own dedicated stack — separate database, sometimes separate compute and even a separate cloud account. At the pool end, all tenants share one database and one application fleet, separated only by a tenant identifier on every row. The bridge model in between gives each tenant its own schema or its own database inside a shared cluster: shared infrastructure, isolated data." },
+    { "type": "list", "ordered": false, "items": [
+      "Silo (dedicated stack): strongest isolation and the easiest story for a regulator or a security questionnaire, but cost scales linearly with tenant count and operating a thousand near-identical stacks is an automation and patching burden few teams sustain.",
+      "Bridge (schema- or database-per-tenant): a practical middle ground — one tenant's data is physically separate, migrations and connection pools must fan out across many schemas, which becomes its own scaling ceiling past a few hundred tenants.",
+      "Pool (shared everything): the most efficient model and the only one that scales to tens of thousands of small tenants, but every query is one missing predicate away from a cross-tenant leak, so isolation has to be enforced by the platform rather than trusted to developers."
+    ] },
+    { "type": "paragraph", "text": "The deciding question is rarely technical taste; it is the blast radius your customers and regulators will tolerate. A handful of large enterprise accounts paying for guaranteed isolation may justify silos. A long tail of self-service tenants only works economically in a pool. Many mature platforms deliberately run a tiered model — pooled for the long tail, dedicated databases for the regulated few — and expose the choice as a commercial tier rather than pretending one model fits everyone. We design that tiering decision into the architecture from the start in our [enterprise software](/services/enterprise-software) engagements, because retrofitting a silo option onto a pool-only design is a migration, not a configuration flag." },
+    { "type": "heading", "level": 2, "text": "Row-level security: enforcing isolation in the database" },
+    { "type": "paragraph", "text": "In a pooled model, the tenant identifier is the only thing standing between two customers' data, which means the discipline of always filtering by it cannot live in application code alone. Every developer, every reporting query, every background job, every hastily written admin script is a place where a forgotten WHERE clause becomes a breach. The defensive answer is to push isolation down into the database itself, where it is enforced regardless of which query arrives. In Postgres — the engine underneath most of BOS — that mechanism is row-level security (RLS)." },
+    { "type": "paragraph", "text": "With RLS, you enable a policy on each tenant-scoped table that restricts every read and write to rows matching the current tenant context, typically a session variable set at the start of each request. The application sets the tenant context once, near the connection boundary, and from that point the database refuses to return another tenant's rows even if the SQL itself contains a bug. This is the principle of defence in depth applied to data: the application should filter by tenant, and the database should guarantee it even when the application forgets. The trade-offs are real and worth stating. RLS adds a predicate to every query, so indexes must lead with the tenant column or the optimiser will scan more than it should. Policies have to be FORCE-enabled even for the table owner, or a privileged role silently bypasses them — a subtle misconfiguration that turns the whole control into theatre. And connection pooling has to reset the tenant context between checkouts, or a pooled connection leaks one tenant's scope into the next request. None of these are reasons to skip RLS; they are the operational details that separate a real control from a checkbox." },
+    { "type": "list", "ordered": false, "items": [
+      "Set tenant context at the connection boundary, not scattered through business logic, so every downstream query inherits it automatically.",
+      "FORCE row-level security so even table owners and privileged roles are subject to the policy — the default leaves owners exempt.",
+      "Lead composite indexes with the tenant column so the added predicate stays cheap rather than degrading every query plan.",
+      "Reset the session context on connection return so a pooled connection never carries one tenant's scope into another tenant's request.",
+      "Test isolation adversarially: probe with a deliberately wrong tenant context in CI and assert that zero rows come back, so a regression fails the build."
+    ] },
+    { "type": "paragraph", "text": "We treat that last point as non-negotiable. A cross-tenant isolation probe runs in the pipeline before any data-touching service ships, the same way we treat input validation and authentication checks as gating in every [secure software development](/news/tech/secure-software-development) workflow. Isolation that is asserted but never tested is a liability, because the failure mode is silent until the day it is catastrophic." },
+    { "type": "heading", "level": 2, "text": "Identity and the tenant context" },
+    { "type": "paragraph", "text": "RLS only works if the tenant context is trustworthy, which makes identity the foundation the whole model rests on. The tenant identifier must originate from an authenticated, tamper-proof source — a signed token claim, not a header a client can set or a query parameter a user can edit. In BOS the tenant is carried as a claim in a signed access token, verified on every request, and only then promoted into the database session context. The most dangerous class of multi-tenant bug is the one where a tenant is inferred from untrusted input: a path parameter, a referer, a client-supplied account ID that the server trusts without checking it against the authenticated principal. That is how an insecure-direct-object-reference vulnerability becomes a cross-tenant data exposure." },
+    { "type": "paragraph", "text": "Getting identity right is hard enough at scale that it is frequently the project that precedes everything else. We documented exactly that work — separating who you are from which tenants you may act within, and which roles you hold inside each — in our [multi-tenant identity platform](/case-studies/multi-tenant-identity-platform) case study. The core lesson generalises: authentication answers who, the tenant claim answers where, and role-based access control answers what — three separate questions that a robust platform never collapses into one." },
+    { "type": "heading", "level": 2, "text": "Noisy neighbours: when one tenant degrades everyone" },
+    { "type": "paragraph", "text": "Shared infrastructure means shared failure modes, and the noisy-neighbour problem is the one that catches teams by surprise. One tenant runs an unbounded report, a bulk import, or a pathological query, and because the database connections, CPU, and I/O are pooled, every other tenant's latency climbs. Isolation of data does not imply isolation of resources — a perfectly secure RLS setup still lets one tenant starve the rest. Containing this is a separate discipline, and it operates at several layers." },
+    { "type": "list", "ordered": false, "items": [
+      "Per-tenant rate limits and quotas so no single account can monopolise request capacity, API throughput, or background-job slots.",
+      "Bounded queries and statement timeouts so a runaway report is killed before it saturates the connection pool the whole fleet shares.",
+      "Work-queue fairness so one tenant's million-row import is interleaved with others' jobs rather than blocking the queue head-of-line.",
+      "Connection-pool partitioning or separate read replicas for heavy analytical workloads, keeping the transactional path responsive.",
+      "Per-tenant observability — latency, error rate, and resource consumption tagged by tenant — so you detect a noisy neighbour from a dashboard, not a support ticket."
+    ] },
+    { "type": "paragraph", "text": "The tiering decision resurfaces here. If a single tenant's workload is genuinely incompatible with shared resources — a high-frequency trading partner, say, or a tenant under a contractual latency guarantee — the right answer may be to promote them out of the pool into a dedicated stack rather than letting them degrade the commons. That is a commercial conversation as much as a technical one, and platforms that handle it gracefully expose dedicated capacity as a paid tier. Designing the observability to make noisy neighbours visible is itself a [cloud solutions](/services/cloud-solutions) discipline: you cannot manage what you do not measure per tenant." },
+    { "type": "heading", "level": 2, "text": "Metering and billing: turning usage into revenue" },
+    { "type": "paragraph", "text": "Multi-tenancy and billing are deeply entangled, because the same tenant boundary that isolates data is the boundary you meter for revenue. Flat per-seat pricing hides this, but the moment a platform charges by consumption — transactions processed, API calls, storage, compute minutes — the architecture must emit a reliable, per-tenant usage stream. The hard requirement is correctness under failure: a metering event that is dropped is lost revenue, and a metering event counted twice is an overcharge and a dispute. Both are unacceptable in a financial-grade platform, so usage events have to be captured with the same integrity guarantees as the transactions themselves." },
+    { "type": "paragraph", "text": "The pattern that holds up is to treat usage as an append-only event stream, emitted transactionally alongside the work it measures, then aggregated into billing periods downstream. Emitting the usage event in the same database transaction as the action — or via a transactional outbox if the meter lives in another system — is what guarantees that billing and reality cannot diverge. Idempotency keys on each event make retries safe, so a network blip does not double-count. We apply the same discipline to metering that we apply to money movement in our [real-time cross-border settlement](/case-studies/real-time-cross-border-settlement) work: an append-only ledger, idempotent writes, and reconciliation that proves the aggregate matches the events. Billing built on best-effort logging will eventually drift, and in a regulated context drift is not a rounding error — it is an audit finding." },
+    { "type": "heading", "level": 2, "text": "Putting the patterns together" },
+    { "type": "paragraph", "text": "These decisions are not independent; they constrain each other. The pool-versus-silo choice sets how hard isolation has to work — a pool demands RLS, a silo gets isolation for free but pays for it in cost. RLS only holds if identity supplies a trustworthy tenant context. Resource isolation is the layer that data isolation does not provide, and the tiering decision is the escape hatch when a tenant outgrows the pool. Metering rides on the same tenant boundary and demands the same integrity guarantees as the platform's core transactions. Remove any one and the others weaken: skip RLS in a pool and one bug leaks data; ignore noisy neighbours and one tenant degrades the rest; build billing on best-effort events and revenue silently drifts. This interdependence is why multi-tenancy is hard to bolt on after the fact and why we design it in from the architecture stage of every [technology consulting](/services/technology-consulting) engagement." },
+    { "type": "heading", "level": 2, "text": "The Baalvion view" },
+    { "type": "paragraph", "text": "Multi-tenancy done well is invisible to the people it protects: each tenant experiences a private platform, isolated, performant, and billed for exactly what it used, while the operator runs one codebase across all of them. Done poorly, it is the source of the worst incidents a SaaS company can have — a cross-tenant leak, a noisy neighbour outage, a billing dispute that erodes trust. The deciding factor is rarely the technology; Postgres RLS, signed tokens, rate limiters, and event streams are all well understood. It is whether the team treats isolation as a guarantee enforced at the lowest possible layer, tested adversarially, and never trusted to a developer remembering a WHERE clause. That is the standard BOS has to meet every day across 198 markets, for partners who are sometimes each other's fiercest competitors — and it is the standard any serious multi-tenant platform should hold itself to." }
+  ],
+  "faqs": [
+    {
+      "q": "What is the difference between pool and silo multi-tenancy?",
+      "a": "In a silo model each tenant gets a dedicated stack — separate database and often separate compute — giving the strongest isolation but with cost that scales linearly per tenant. In a pool model all tenants share one database and application fleet, separated only by a tenant identifier on every row, which is far more efficient but requires the platform to enforce isolation rigorously. Most mature platforms run a tiered mix: pooled for the long tail of small tenants, dedicated databases for the regulated few."
+    },
+    {
+      "q": "How does row-level security enforce tenant isolation?",
+      "a": "Row-level security (RLS) attaches a policy to each tenant-scoped table that restricts every read and write to rows matching the current tenant context, usually a session variable set at the connection boundary. The database then refuses to return another tenant's data even if the SQL contains a bug or a forgotten filter. It is defence in depth: the application filters by tenant and the database guarantees it. Crucially, policies must be FORCE-enabled so even privileged roles are subject to them, and pooled connections must reset the context between requests."
+    },
+    {
+      "q": "What is the noisy-neighbour problem and how do you contain it?",
+      "a": "Noisy neighbour describes one tenant degrading performance for everyone else on shared infrastructure — for example, an unbounded report saturating a pooled connection pool. Data isolation does not imply resource isolation. You contain it with per-tenant rate limits and quotas, statement timeouts on queries, fairness in work queues, separate replicas for heavy analytical workloads, and per-tenant observability so you spot the offender on a dashboard. When a tenant's workload is fundamentally incompatible with the pool, the right move is to promote them to a dedicated tier."
+    },
+    {
+      "q": "Where should the tenant identifier come from?",
+      "a": "From an authenticated, tamper-proof source — a claim in a signed access token verified on every request — never from a client-supplied header, query parameter, or path value. Trusting client-supplied tenant identifiers is how an insecure-direct-object-reference vulnerability becomes a cross-tenant data exposure. The server should derive the tenant from the authenticated principal and only then promote it into the database session context that RLS relies on."
+    },
+    {
+      "q": "How do you meter usage reliably for billing in a multi-tenant platform?",
+      "a": "Treat usage as an append-only event stream emitted transactionally alongside the work it measures — in the same database transaction or via a transactional outbox — so billing and reality cannot diverge. Attach idempotency keys to each event so retries do not double-count, and reconcile aggregated billing periods against the raw event log. Billing built on best-effort logging will eventually drift, which in a regulated context is an audit finding rather than a rounding error."
+    },
+    {
+      "q": "Can you add multi-tenancy to an existing single-tenant application?",
+      "a": "It is possible but rarely cheap, because isolation, identity, resource fairness, and metering all assume a tenant boundary that a single-tenant design never had. Retrofitting means adding a tenant column and RLS to every table, threading tenant context through every request and background job, partitioning resources, and building per-tenant metering — and adding a dedicated-tier option to a pool-only design is a migration, not a flag. It is far cheaper to design the tenant boundary in from the architecture stage than to discover its absence after the first cross-tenant incident."
+    }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" },
+    { "anchor": "secure software development", "href": "/news/tech/secure-software-development" },
+    { "anchor": "multi-tenant identity platform", "href": "/case-studies/multi-tenant-identity-platform" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" },
+    { "anchor": "real-time cross-border settlement", "href": "/case-studies/real-time-cross-border-settlement" },
+    { "anchor": "technology consulting", "href": "/services/technology-consulting" }
+  ],
+  "customFields": {}
+}

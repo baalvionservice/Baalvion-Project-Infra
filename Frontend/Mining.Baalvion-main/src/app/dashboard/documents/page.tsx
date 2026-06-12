@@ -275,7 +275,7 @@ export default function ExportDocuments() {
           </CardHeader>
           <CardContent className="space-y-4 relative z-10">
             <p className="text-sm text-slate-400 leading-relaxed">
-              GeoTrade Nexus now supports automated customs pre-clearance for major trade hubs in Rotterdam, Shanghai, and Durban. Ensure all Tier 3 documents are 'VERIFIED' to enable auto-filing.
+              Baalvion Mining Inc. now supports automated customs pre-clearance for major trade hubs in Rotterdam, Shanghai, and Durban. Ensure all Tier 3 documents are 'VERIFIED' to enable auto-filing.
             </p>
             <div className="flex gap-4 pt-2">
               <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-emerald-400">

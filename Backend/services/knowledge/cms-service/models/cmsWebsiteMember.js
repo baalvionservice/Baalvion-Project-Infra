@@ -5,7 +5,7 @@ module.exports = function (sequelize, DataTypes) {
         userId: { type: DataTypes.BIGINT, allowNull: false },
         role: {
             type: DataTypes.ENUM(
-                'cms_admin', 'cms_editor', 'cms_publisher', 'cms_reviewer',
+                'cms_admin', 'cms_editor', 'cms_publisher', 'cms_compliance', 'cms_reviewer',
                 'cms_seo_manager', 'cms_author', 'cms_contributor', 'cms_viewer'
             ),
             allowNull: false,

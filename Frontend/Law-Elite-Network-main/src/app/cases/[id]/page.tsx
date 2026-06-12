@@ -190,13 +190,13 @@ export default function CaseDetailPage() {
                 </TabsContent>
 
                 <TabsContent value="vault" className="animate-in fade-in duration-500">
-                  <DocumentVault caseId={id as string} userId={user?.id || ''} />
+                  <DocumentVault caseId={id as string} userId={user?.userId || ''} />
                 </TabsContent>
 
                 <TabsContent value="chat" className="animate-in fade-in duration-500">
                   <ChatWindow 
                     caseId={id as string} 
-                    userId={user?.id || ''} 
+                    userId={user?.userId || ''}
                     receiverId={isLawyer ? legalCase.clientId : (legalCase.assignedLawyerId || 'system')} 
                   />
                 </TabsContent>

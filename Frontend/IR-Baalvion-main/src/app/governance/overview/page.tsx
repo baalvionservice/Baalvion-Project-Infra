@@ -4,8 +4,15 @@ import { FileText, ShieldCheck, Scale, Gavel, UserCheck } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const metadata: Metadata = {
-  title: 'Governance Overview | Corporate Governance',
-  description: 'Baalvion’s corporate governance framework supports sustainable financial performance and long-term value creation.',
+  title: 'Governance Overview | Baalvion Corporate Governance',
+  description: 'Baalvion\'s corporate governance framework supports sustainable financial performance and long-term value creation for shareholders.',
+  alternates: { canonical: '/governance/overview' },
+  openGraph: {
+    title: 'Baalvion Corporate Governance Overview',
+    description: 'Baalvion\'s corporate governance framework supports sustainable financial performance and long-term value creation for shareholders.',
+    url: 'https://ir.baalvion.com/governance/overview',
+    type: 'website',
+  },
 };
 
 const documents = [

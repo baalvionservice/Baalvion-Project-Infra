@@ -354,10 +354,10 @@ export default function AdminDisputeResolutionPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                 {selectedDispute?.evidenceUrls?.map((url, i) => (
                   <div key={i} className="aspect-square rounded-2xl bg-slate-100 border border-slate-200 overflow-hidden relative group">
-                    <img src={url} className="w-full h-full object-cover" />
+                    <img src={url} alt="Dispute evidence" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Button variant="ghost" size="icon" className="text-white h-10 w-10" asChild>
-                        <a href={url} target="_blank"><ExternalLink className="h-5 w-5" /></a>
+                        <a href={url} target="_blank" rel="noopener noreferrer" aria-label="View evidence in new tab"><ExternalLink className="h-5 w-5" aria-hidden="true" /></a>
                       </Button>
                     </div>
                   </div>

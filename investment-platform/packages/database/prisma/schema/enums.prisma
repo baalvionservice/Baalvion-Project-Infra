@@ -1,0 +1,442 @@
+// ============================================================================
+//  Enums — shared controlled vocabularies across all domains.
+// ============================================================================
+
+// ── Identity & access ──────────────────────────────────────────────────────
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum MfaMethod {
+  TOTP
+  SMS
+  WEBAUTHN
+}
+
+enum OrgType {
+  INVESTOR_INDIVIDUAL
+  INVESTOR_ENTITY
+  COMPANY
+  PLATFORM
+}
+
+enum OrgStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+  COMPLIANCE
+}
+
+enum MembershipStatus {
+  INVITED
+  ACTIVE
+  REVOKED
+}
+
+// ── Investor ────────────────────────────────────────────────────────────────
+enum InvestorType {
+  ANGEL
+  VENTURE_CAPITAL
+  PRIVATE_EQUITY
+  FAMILY_OFFICE
+  INSTITUTIONAL
+  CORPORATE
+  SYNDICATE
+  RETAIL
+}
+
+enum RiskAppetite {
+  CONSERVATIVE
+  MODERATE
+  AGGRESSIVE
+}
+
+enum AccreditationStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
+}
+
+enum AccreditationMethod {
+  INCOME
+  NET_WORTH
+  PROFESSIONAL_CERT
+  THIRD_PARTY_LETTER
+  ENTITY
+}
+
+// ── Company ─────────────────────────────────────────────────────────────────
+enum CompanyStage {
+  IDEA
+  STARTUP
+  SME
+  GROWTH
+  ENTERPRISE
+}
+
+enum CompanyStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  SUSPENDED
+}
+
+// ── Compliance (KYC / AML) ──────────────────────────────────────────────────
+enum SubjectType {
+  INDIVIDUAL
+  BUSINESS
+}
+
+enum KycStatus {
+  NOT_STARTED
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  EXPIRED
+}
+
+enum AmlStatus {
+  CLEAR
+  PENDING
+  REVIEW
+  FLAGGED
+  BLOCKED
+}
+
+enum ComplianceCaseType {
+  ABUSE
+  DISPUTE
+  SANCTIONS_HIT
+  PEP_REVIEW
+  SOURCE_OF_FUNDS
+  MANUAL
+}
+
+enum ComplianceCaseStatus {
+  OPEN
+  INVESTIGATING
+  ESCALATED
+  RESOLVED
+  REJECTED
+}
+
+// ── Opportunities & deals ───────────────────────────────────────────────────
+enum OpportunityStage {
+  PRE_SEED
+  SEED
+  SERIES_A
+  SERIES_B
+  SERIES_C
+  GROWTH
+  BRIDGE
+  SECONDARY
+}
+
+enum OpportunityStatus {
+  DRAFT
+  LIVE
+  PAUSED
+  CLOSED
+  FUNDED
+  CANCELLED
+}
+
+enum OpportunityVisibility {
+  PRIVATE
+  INVITE_ONLY
+  PUBLIC
+}
+
+enum MatchStatus {
+  SUGGESTED
+  VIEWED
+  DISMISSED
+  ACTIONED
+}
+
+enum DealStatus {
+  OPEN
+  DUE_DILIGENCE
+  NEGOTIATING
+  TERM_SHEET
+  SIGNING
+  FUNDING
+  CLOSED
+  WITHDRAWN
+}
+
+enum DealMemberRole {
+  LEAD
+  PARTICIPANT
+  ADVISOR
+  LEGAL
+  OBSERVER
+}
+
+// ── Documents / data room ───────────────────────────────────────────────────
+enum DocumentCategory {
+  FINANCIAL
+  LEGAL
+  IP
+  BUSINESS_PLAN
+  CAP_TABLE
+  DECK
+  TAX
+  OPERATIONAL
+  COMPLIANCE
+  AGREEMENT
+  OTHER
+}
+
+enum DocumentVisibility {
+  PRIVATE
+  NDA_GATED
+  APPROVED
+  PUBLIC
+}
+
+enum AccessCondition {
+  NONE
+  KYC
+  NDA
+  VERIFIED
+  APPROVED
+}
+
+enum DocAccessAction {
+  VIEW
+  PREVIEW
+  DOWNLOAD
+}
+
+enum VirusScanStatus {
+  PENDING
+  CLEAN
+  INFECTED
+  FAILED
+}
+
+enum DueDiligenceCategory {
+  FINANCIAL
+  LEGAL
+  OPERATIONAL
+  COMPLIANCE
+  TECHNICAL
+  MARKET
+}
+
+enum DueDiligenceStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETE
+  FLAGGED
+}
+
+enum DocumentRequestStatus {
+  REQUESTED
+  UPLOADED
+  APPROVED
+  REJECTED
+}
+
+// ── Term sheets & signatures ────────────────────────────────────────────────
+enum TermSheetStatus {
+  DRAFT
+  SENT
+  COUNTERED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum TermSheetAction {
+  PROPOSE
+  COUNTER
+  ACCEPT
+  REJECT
+}
+
+enum SecurityType {
+  EQUITY
+  PREFERRED
+  SAFE
+  CONVERTIBLE_NOTE
+  DEBT
+  REVENUE_SHARE
+  WARRANT
+}
+
+enum SignatureProvider {
+  DOCUSIGN
+  ADOBE_SIGN
+  DROPBOX_SIGN
+  INTERNAL
+}
+
+enum SignatureStatus {
+  DRAFT
+  SENT
+  VIEWED
+  SIGNED
+  DECLINED
+  EXPIRED
+  COMPLETED
+}
+
+// ── Investment & cap table ──────────────────────────────────────────────────
+enum InvestmentStatus {
+  COMMITTED
+  FUNDING
+  FUNDED
+  ACTIVE
+  EXITED
+  CANCELLED
+}
+
+enum CapTableHolderType {
+  FOUNDER
+  INVESTOR
+  ESOP
+  OTHER
+}
+
+enum CapTableEventType {
+  ISSUE
+  TRANSFER
+  DILUTION
+  CONVERSION
+  BUYBACK
+}
+
+// ── Escrow & payments ───────────────────────────────────────────────────────
+enum EscrowStatus {
+  INITIATED
+  FUNDED
+  RELEASE_PENDING
+  RELEASED
+  REFUNDED
+  CLOSED
+}
+
+enum EscrowTxnType {
+  FUND
+  RELEASE
+  REFUND
+  FEE
+}
+
+enum PaymentProvider {
+  STRIPE
+  WISE
+  INTERNAL
+}
+
+enum PaymentMethodType {
+  CARD
+  BANK_ACCOUNT
+  WALLET
+}
+
+enum PaymentDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum PayoutType {
+  DIVIDEND
+  INTEREST
+  RETURN_OF_CAPITAL
+  CAPITAL_GAIN
+  EXIT_PROCEEDS
+}
+
+enum LedgerDirection {
+  DEBIT
+  CREDIT
+}
+
+// ── Portfolio, tax & secondary market ───────────────────────────────────────
+enum ValuationSource {
+  FUNDING_ROUND
+  COMPANY_REPORTED
+  PLATFORM_ESTIMATE
+  SECONDARY_TRADE
+  EXIT
+}
+
+enum TaxDocType {
+  FORM_1099
+  SCHEDULE_K1
+  FORM_1042S
+  CRS
+  FATCA
+  OTHER
+}
+
+enum TaxDocStatus {
+  PENDING
+  GENERATED
+  ISSUED
+  AMENDED
+}
+
+enum SecondaryListingStatus {
+  DRAFT
+  ACTIVE
+  MATCHED
+  SETTLED
+  CANCELLED
+  EXPIRED
+}
+
+enum SecondaryOrderSide {
+  BUY
+  SELL
+}
+
+enum SecondaryOrderStatus {
+  OPEN
+  MATCHED
+  FILLED
+  CANCELLED
+}
+
+// ── Notifications & audit ───────────────────────────────────────────────────
+enum NotificationChannel {
+  EMAIL
+  SMS
+  PUSH
+  IN_APP
+  WEBHOOK
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  DELIVERED
+  FAILED
+  READ
+}

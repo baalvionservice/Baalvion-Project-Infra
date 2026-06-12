@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: founderTitle(f),
     description: founderDesc(f),
     alternates: { canonical: `/founders/${f.slug}` },
-    openGraph: { title: founderTitle(f), description: founderDesc(f), url: `${SITE_URL}/founders/${f.slug}`, type: "profile" },
+    openGraph: { title: founderTitle(f), description: founderDesc(f), url: `${SITE_URL}/founders/${f.slug}`, type: "profile", siteName: "Baalvion Insiders" },
   };
 }
 
@@ -44,10 +44,21 @@ export default async function FounderProfile({ params }: { params: Promise<{ slu
           areaServed: f.region || undefined,
         }}
       />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+            { "@type": "ListItem", position: 2, name: "Founders", item: `${SITE_URL}/founders` },
+            { "@type": "ListItem", position: 3, name: f.company_name || f.full_name, item: `${SITE_URL}/founders/${f.slug}` },
+          ],
+        }}
+      />
       <div className="crumbs"><Link href="/">Home</Link> / <Link href="/founders">Founders</Link> / {f.company_name}</div>
 
       <div className="profile-head">
-        <Avatar src={f.avatar_url} alt={f.company_name || f.full_name || "Founder"} />
+        <Avatar src={f.avatar_url} alt={f.company_name || f.full_name || "Founder"} eager />
         <div>
           <h1>{f.company_name}</h1>
           <div className="muted">{[f.full_name && `Founded by ${f.full_name}`, f.sector, f.stage, f.region].filter(Boolean).join(" · ")}</div>
@@ -61,8 +72,8 @@ export default async function FounderProfile({ params }: { params: Promise<{ slu
         {f.sector ? <Badge accent>{f.sector}</Badge> : null}
         {f.stage ? <Badge>{f.stage}</Badge> : null}
         {f.region ? <Badge>{f.region}</Badge> : null}
-        {f.website ? <a href={f.website} rel="nofollow noopener" target="_blank"><Badge>Website</Badge></a> : null}
-        {f.linkedin_url ? <a href={f.linkedin_url} rel="nofollow noopener" target="_blank"><Badge>LinkedIn</Badge></a> : null}
+        {f.website ? <a href={f.website} rel="nofollow noopener noreferrer" target="_blank"><Badge>Website</Badge></a> : null}
+        {f.linkedin_url ? <a href={f.linkedin_url} rel="nofollow noopener noreferrer" target="_blank"><Badge>LinkedIn</Badge></a> : null}
       </div>
 
       <div className="cta">

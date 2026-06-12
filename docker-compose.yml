@@ -84,6 +84,9 @@ services:
       - JWT_AUDIENCE=baalvion-platform
       - JWT_ALLOW_HS256_FALLBACK=false
       - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      # IndexNow: instant search-engine recrawl on publish. Key file must be hosted at
+      # https://<site-domain>/<key>.txt (see Imperialpedia public/13c7ede615e8cf445c4e183a9894e9c4.txt).
+      - INDEXNOW_KEY=13c7ede615e8cf445c4e183a9894e9c4
     depends_on:
       postgres:
         condition: service_healthy
@@ -1295,38 +1298,6 @@ services:
     profiles:
       - backend
 
-  # ── Elite Circle Service (port 3051) — was a deployment gap; gateway: ecosystem/elite-circle ─
-  elite-circle-service:
-    build:
-      context: .
-      dockerfile: Backend/services/ecosystem/elite-circle-service/Dockerfile
-    container_name: baalvion-elite-circle
-    restart: unless-stopped
-    ports:
-      - "3051:3051"
-    environment:
-      - PORT=3051
-      - NODE_ENV=production
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_PRIVATE_KEY=${JWT_PRIVATE_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-    depends_on:
-      postgres:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-
   # ── ML Service (8000, Python/FastAPI) — HMAC-signed (NOT JWT), internal; gateway: knowledge/ml ─
   ml-service:
     build:
@@ -1349,7 +1320,7 @@ services:
     profiles:
       - backend
 
-  # ── Financial Services: Ledger (port 3014) ──────────────────────────────
+  # ── Financial Services: Ledger (host 3037 → container 3014; was 3014, collided with inventory-service R-R2) ──
   ledger-service:
     build:
       context: .
@@ -1357,7 +1328,7 @@ services:
     container_name: baalvion-ledger-service
     restart: unless-stopped
     ports:
-      - "3014:3014"
+      - "3037:3014"
     environment:
       - NODE_ENV=development
       - PORT=3014

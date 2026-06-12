@@ -3,12 +3,24 @@ import Link from 'next/link';
 import { ChevronRight, ArrowRight, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAppStore } from '@/lib/store';
+import { getEditorials, type EditorialContent } from '@/lib/cms';
 import React from 'react'
 
 const JournalComponent = ({countryCode}:{countryCode: string}) => {
     const { editorials } = useAppStore();
+    const [cmsEditorials, setCmsEditorials] = React.useState<EditorialContent[] | null>(null);
 
-    const filteredEditorials = editorials.filter(ed => ed.country === countryCode || ed.country === 'us');
+    React.useEffect(() => {
+        let active = true;
+        getEditorials().then((eds) => { if (active && eds.length) setCmsEditorials(eds); }).catch(() => {});
+        return () => { active = false; };
+    }, []);
+
+    // CMS-managed editorials are global (no per-country scoping); prefer them when present,
+    // otherwise fall back to the bundled per-country editorial set from the store.
+    const filteredEditorials = cmsEditorials
+        ? cmsEditorials.map((ed) => ({ id: ed.id, title: ed.title, excerpt: ed.excerpt, category: ed.category, date: ed.date, isVip: ed.category === 'VIP Exclusive' }))
+        : editorials.filter(ed => ed.country === countryCode || ed.country === 'us');
 
     return (
         <div className="container mx-auto px-6 py-20 animate-fade-in">

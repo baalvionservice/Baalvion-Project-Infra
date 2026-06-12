@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { BrandImage } from "@/components/ui/BrandImage";
 import Link from "next/link";
 import { SidebarNavItem, SubItem } from "@/lib/mock-category-data";
 
@@ -97,12 +97,12 @@ export function ShopByCategory({
               >
                 <div className={cn(cardWidth, "bg-white overflow-hidden")}>
                   <div className="aspect-[4/5] relative  bg-gray-50">
-                    <Image
+                    <BrandImage
                       src={`https://picsum.photos/seed/hermes-${item.id}/${imageSize}/${imageSize}`}
                       alt={item.label}
-                      width={100}
-                      height={100}
-                      className="object-cover absolute left-1/2 bottom-5 transform -translate-x-1/2"
+                      className="w-[100px] h-[100px] absolute left-1/2 bottom-5 transform -translate-x-1/2"
+                      variant="compact"
+                      label={item.label}
                     />
                   </div>
                   <h3

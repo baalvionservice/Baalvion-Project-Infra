@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SEOHead } from "@/components/SEOHead";
-import { CreditCard, FileText, Zap, CheckCircle, Loader2, ArrowRight, RefreshCw } from "lucide-react";
-import { useSubscription, usePlans, useInvoices, useUsageForecast, useChangePlan } from "@/hooks/usePlatform";
+import { CreditCard, FileText, Zap, CheckCircle, Loader2, ArrowRight, RefreshCw, Wallet } from "lucide-react";
+import { useSubscription, usePlans, useInvoices, useUsageForecast, useChangePlan, useCredit } from "@/hooks/usePlatform";
 import { format } from "date-fns";
 
 const PLAN_COLORS: Record<string, string> = {
@@ -21,11 +21,13 @@ export default function Billing() {
   const { data: plans, isLoading: loadingPlans } = usePlans();
   const { data: invoicesPage, isLoading: loadingInvoices } = useInvoices({ pageSize: 5 });
   const { data: forecast } = useUsageForecast();
+  const { data: credit } = useCredit();
   const changePlan = useChangePlan();
   const [upgrading, setUpgrading] = useState<string | null>(null);
 
   const recentInvoices = invoicesPage?.data ?? [];
   const currentPlan = plans?.find(p => p.slug === subscription?.planSlug);
+  const isPayg = subscription?.planSlug === "pay-as-you-go";
 
   const handleChangePlan = async (slug: string) => {
     setUpgrading(slug);
@@ -47,6 +49,36 @@ export default function Billing() {
           <Button variant="outline" asChild><Link to="/app/billing/history"><FileText className="w-4 h-4 mr-2" />Invoice History</Link></Button>
         </div>
       </div>
+
+      {/* Pay-As-You-Go prepaid credit wallet */}
+      {isPayg && (
+        <Card className="border-primary/30">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Wallet className="w-5 h-5 text-primary" />Prepaid Credit</CardTitle>
+            <CardDescription>Pay As You Go · billed at ${credit?.usdPerGb ?? 3}/GB</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div className="flex gap-8">
+                <div>
+                  <p className="text-sm text-muted-foreground">Balance</p>
+                  <p className="text-3xl font-bold">${(credit?.balanceUsd ?? 0).toFixed(2)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Bandwidth remaining</p>
+                  <p className="text-3xl font-bold">{(credit?.gbRemaining ?? 0).toFixed(1)} <span className="text-base font-normal text-muted-foreground">GB</span></p>
+                </div>
+              </div>
+              <Button asChild>
+                <Link to="/app/billing/checkout?plan=pay-as-you-go"><Wallet className="w-4 h-4 mr-2" />Top up credit</Link>
+              </Button>
+            </div>
+            {(credit?.balanceUsd ?? 0) <= 0 && (
+              <p className="text-sm text-warning mt-4">Your balance is empty — top up to keep using bandwidth.</p>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Current subscription */}
       <Card>

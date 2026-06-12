@@ -18,7 +18,13 @@ module.exports = {
     port: Number(process.env.PORT || 4000),
     apiVersion: 'v1',
     baseUrl: process.env.API_BASE_URL || 'http://localhost:4000',
-    corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:5173']),
+    // Dev defaults cover the Proxy/NetStack frontend however it's launched: Vite default (5173),
+    // its vite.config port (8080), and the pm2 fleet port (8090). Production sets CORS_ORIGINS.
+    corsOrigins: parseList(process.env.CORS_ORIGINS, [
+        'http://localhost:5173',
+        'http://localhost:8080',
+        'http://localhost:8090',
+    ]),
     refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'baalvion_refresh',
     jwt: {
         accessSecret: require('@baalvion/auth-node').requireEnv('JWT_ACCESS_SECRET'),

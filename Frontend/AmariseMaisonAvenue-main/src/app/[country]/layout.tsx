@@ -12,6 +12,8 @@ import Link from "next/link";
 
 import { useAppStore } from "@/lib/store";
 import { i18n } from "@/lib/i18n/engine";
+import { normalizeCountry, countryToLanguage } from "@/lib/i18n/countries";
+import type { SupportedLanguage } from "@/lib/i18n/config";
 import { VipEmailSignup } from "@/components/home/VipEmailSingup";
 import { MeowTrigger } from "@/components/layout/JudyTrigger";
 import { CookiePopup } from "@/components/layout/CookiePopup";
@@ -25,13 +27,14 @@ export default function CountryLayout({
 
   const [isMobile, setIsMobile] = React.useState<boolean>(true);
 
-  const { currentLanguage } = useAppStore();
+  const { setLanguage } = useAppStore();
+  const params = useParams();
+  const country = normalizeCountry(params?.country);
   const pathname = usePathname();
 
   const isCollectionPage = pathname?.includes("/category/") || pathname?.includes("/account/live");
   const isProductPage = pathname?.includes("/product/");
 
-  console.log(isCollectionPage, isProductPage)
   function checkMobile() {
     if (typeof window !== "undefined") {
       setIsMobile(window.innerWidth < 768);
@@ -40,10 +43,25 @@ export default function CountryLayout({
 
   useEffect(() => {
     checkMobile();
-    // Update directionality on load
+  }, []);
+
+  // Lead each market in its default language (AE → Arabic/RTL), while honouring
+  // a manual language switch made within the same country.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const stored = localStorage.getItem(
+      "maison_lang"
+    ) as SupportedLanguage | null;
+    const prevCountry = localStorage.getItem("maison_country");
+    const nextLang: SupportedLanguage =
+      prevCountry === country && stored ? stored : countryToLanguage(country);
+
+    i18n.setLanguage(nextLang); // persists maison_lang + sets <html lang/dir>
+    setLanguage(nextLang);
+    localStorage.setItem("maison_country", country);
     document.documentElement.dir = i18n.getDirection();
-    document.documentElement.lang = currentLanguage;
-  }, [currentLanguage]);
+    document.documentElement.lang = i18n.getLanguage();
+  }, [country, setLanguage]);
 
   return (
     <div dir={i18n.getDirection()}>

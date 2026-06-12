@@ -1,4 +1,5 @@
 'use strict';
+const crypto = require('node:crypto');
 const jwt = require('../config/jwt');
 const config = require('../config/appConfig');
 const { Errors } = require('../utils/errors');
@@ -24,9 +25,24 @@ const authenticate = (req, res, next) => {
     }
 };
 
+/**
+ * Constant-time comparison for the internal API key.
+ * Guards against timing-oracle attacks; also rejects if either value is empty
+ * (an unset key must never match an empty header, and vice-versa).
+ */
+function internalKeyMatch(candidate, expected) {
+    if (!candidate || !expected) return false;
+    // timingSafeEqual requires equal-length Buffers; length mismatch itself is not
+    // secret information, but we still reject immediately rather than leaking it.
+    const a = Buffer.from(candidate);
+    const b = Buffer.from(expected);
+    if (a.length !== b.length) return false;
+    return crypto.timingSafeEqual(a, b);
+}
+
 const internalOrUser = (req, res, next) => {
     const key = req.headers['x-internal-key'];
-    if (config.internalApiKey && key && key === config.internalApiKey) {
+    if (internalKeyMatch(key, config.internalApiKey)) {
         req.internal = true;
         req.auth = req.auth || { userId: 'service', roles: ['service'], permissions: [], orgId: null };
         return next();

@@ -11,9 +11,22 @@ async function authMiddleware(req, res, next) {
     const token = authHeader.slice(7);
     try {
         const decoded = verifyToken(token);
-        if (decoded.jti && redis.isAvailable()) {
-            const blacklisted = await redis.getClient()?.get(`auth:bl:${decoded.jti}`);
-            if (blacklisted) return next(new AppError('TOKEN_BLACKLISTED', 'Token has been revoked', 401));
+        // Canonical JTI revocation (key namespace owned by @baalvion/auth-node/blacklist.js:
+        // `auth:blacklist:<jti>`). FAIL CLOSED: a token carrying a jti must be checkable against
+        // the revocation store — if the store is unreachable we reject rather than let a possibly
+        // revoked token through (matches createJwksVerifier.assertValid). Previously this used the
+        // wrong key (`auth:bl:`) and skipped the check when Redis was down (fail-open) — a
+        // revocation bypass for logged-out/blacklisted tokens.
+        if (decoded.jti) {
+            let revoked;
+            try {
+                const client = redis.getClient();
+                if (!client || !redis.isAvailable()) throw new Error('revocation store unavailable');
+                revoked = await client.get(`auth:blacklist:${decoded.jti}`);
+            } catch {
+                return next(new AppError('REVOCATION_UNAVAILABLE', 'Token revocation check unavailable', 401));
+            }
+            if (revoked) return next(new AppError('TOKEN_BLACKLISTED', 'Token has been revoked', 401));
         }
         req.auth = {
             userId:     decoded.sub,

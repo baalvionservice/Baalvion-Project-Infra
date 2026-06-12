@@ -43,4 +43,27 @@ const deleteAddress = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
-module.exports = { listCustomers, getCustomer, upsertCustomer, updateCustomer, listAddresses, addAddress, updateAddress, deleteAddress };
+// ── /me-scoped saved addresses — customer resolved server-side from req.auth.userId ───────────
+// req.auth.email (verified JWT claim) is passed so resolveMyCustomer can email-claim a pre-existing
+// unlinked (userId=null) customer row on first authed access.
+const listMyAddresses = async (req, res, next) => {
+    try { return sendSuccess(req, res, await customerService.listMyAddresses(req.params.storeId, req.auth.userId, req.auth.email)); }
+    catch (err) { return next(err); }
+};
+
+const addMyAddress = async (req, res, next) => {
+    try { return sendSuccess(req, res, await customerService.addMyAddress(req.params.storeId, req.auth.userId, req.validated, req.auth.email), 201); }
+    catch (err) { return next(err); }
+};
+
+const updateMyAddress = async (req, res, next) => {
+    try { return sendSuccess(req, res, await customerService.updateMyAddress(req.params.storeId, req.auth.userId, req.params.addressId, req.validated, req.auth.email)); }
+    catch (err) { return next(err); }
+};
+
+const deleteMyAddress = async (req, res, next) => {
+    try { await customerService.deleteMyAddress(req.params.storeId, req.auth.userId, req.params.addressId, req.auth.email); return sendSuccess(req, res, null, 204); }
+    catch (err) { return next(err); }
+};
+
+module.exports = { listCustomers, getCustomer, upsertCustomer, updateCustomer, listAddresses, addAddress, updateAddress, deleteAddress, listMyAddresses, addMyAddress, updateMyAddress, deleteMyAddress };

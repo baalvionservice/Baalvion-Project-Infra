@@ -1,35 +1,46 @@
 import type { NextConfig } from 'next';
 
+// Production media host (S3 bucket / CloudFront / CDN) where real product photos live.
+// Set NEXT_PUBLIC_MEDIA_HOST (hostname only, e.g. "cdn.amarisemaisonavenue.com" or
+// "amarise-media.s3.amazonaws.com") and uploaded images load + pass CSP automatically.
+const MEDIA_HOST = (process.env.NEXT_PUBLIC_MEDIA_HOST || '').trim();
+
 const nextConfig: NextConfig = {
+  // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
+  // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
+  // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
+  // "Critical dependency: the request of a dependency is an expression" build warnings with no
+  // behaviour change — src/ai/* is `server-only`, reached only through flows / route handlers.
+  serverExternalPackages: [
+    'genkit',
+    '@genkit-ai/core',
+    '@genkit-ai/ai',
+    '@genkit-ai/google-genai',
+    'dotprompt',
+    'handlebars',
+    '@opentelemetry/sdk-node',
+    '@opentelemetry/api',
+    '@opentelemetry/instrumentation',
+    'require-in-the-middle',
+    'import-in-the-middle',
+    'protobufjs',
+    'express',
+  ],
+  // Self-contained server bundle for Docker/ECS/Amplify (.next/standalone + server.js).
+  // Standalone file-tracing recreates the pnpm symlink tree, which throws EPERM on Windows
+  // (symlink creation needs Admin/Developer Mode). Production images build on Linux where this
+  // works; skip it on win32 so local Windows builds succeed without changing the deploy artifact.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   eslint: {
     ignoreDuringBuilds: true,
   },
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'madisonavenuecouture.com',
-        port: '',
-        pathname: '/**',
-      },
+      { protocol: 'https', hostname: 'placehold.co', pathname: '/**' },
+      { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'picsum.photos', pathname: '/**' },
+      { protocol: 'https', hostname: 'madisonavenuecouture.com', pathname: '/**' },
+      ...(MEDIA_HOST ? [{ protocol: 'https' as const, hostname: MEDIA_HOST, pathname: '/**' }] : []),
     ],
   },
   async rewrites() {
@@ -40,18 +51,39 @@ const nextConfig: NextConfig = {
     return [{ source: '/auth-bff/:path*', destination: `${authTarget}/:path*` }];
   },
   async headers() {
+    const isDev = process.env.NODE_ENV !== 'production';
+
+    // The storefront's CLIENT code fetches the catalog directly from commerce-service
+    // (NEXT_PUBLIC_COMMERCE_URL). Whitelist that exact origin in connect-src so the browser
+    // doesn't CSP-block it. In dev we also allow any localhost origin (+ ws for HMR).
+    const originOf = (url?: string) => {
+      try { return url ? new URL(url).origin : ''; } catch { return ''; }
+    };
+    const connectSrc = [
+      "'self'",
+      'https://api.baalvion.com',
+      'https://*.googleapis.com',
+      'https://www.google-analytics.com',
+      'https://stats.g.doubleclick.net',
+      originOf(process.env.NEXT_PUBLIC_COMMERCE_URL),
+      originOf(process.env.NEXT_PUBLIC_ORDER_URL),
+      originOf(process.env.NEXT_PUBLIC_API_URL),
+      isDev ? 'http://localhost:* ws://localhost:*' : '',
+    ].filter(Boolean).join(' ');
+
+    // upgrade-insecure-requests would rewrite http://localhost:* to https in dev — only emit in prod.
     const cspHeader = `
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://madisonavenuecouture.com https://www.google-analytics.com https://www.googletagmanager.com;
+      img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://madisonavenuecouture.com https://www.google-analytics.com https://www.googletagmanager.com ${MEDIA_HOST ? `https://${MEDIA_HOST}` : ''};
       font-src 'self' data: https://fonts.gstatic.com;
       object-src 'none';
       base-uri 'self';
-      connect-src 'self' https://api.baalvion.com https://*.googleapis.com https://www.google-analytics.com https://stats.g.doubleclick.net;
+      connect-src ${connectSrc};
       form-action 'self';
       frame-ancestors 'none';
-      upgrade-insecure-requests;
+      ${isDev ? '' : 'upgrade-insecure-requests;'}
     `.replace(/\s{2,}/g, ' ').trim();
 
     return [

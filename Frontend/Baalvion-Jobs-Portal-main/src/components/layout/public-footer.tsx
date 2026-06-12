@@ -23,6 +23,12 @@ const footerLinkConfig = {
     { href: '/careers/hiring-process', label: 'Hiring Process' },
     { href: '/careers/open-positions', label: 'Open Positions' },
   ],
+  join: [
+    { href: '/onboarding', label: 'Join Baalvion' },
+    { href: '/onboarding/student', label: 'Students' },
+    { href: '/onboarding/college', label: 'Colleges' },
+    { href: '/placement', label: 'Campus Placement' },
+  ],
 };
 
 export function PublicFooter() {
@@ -39,13 +45,26 @@ export function PublicFooter() {
                 <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Subscribe to our newsletter</h3>
                 <p className="text-sm text-muted-foreground mt-1">Get the latest news on open roles and company updates.</p>
                 <form className="mt-4 flex w-full max-w-sm items-center space-x-2">
-                    <Input type="email" placeholder="Email" />
+                    <label htmlFor="newsletter-email" className="sr-only">Email address</label>
+                    <Input id="newsletter-email" type="email" placeholder="Email" aria-label="Email address" />
                     <Button type="submit">Subscribe</Button>
                 </form>
             </div>
           </div>
 
-          <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-8">
+          <div className="md:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-8">
+            <div>
+              <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Join Baalvion</h3>
+              <ul className="mt-4 space-y-3">
+                {footerLinkConfig.join.map((link) => (
+                  <li key={link.label}>
+                    <Link href={link.href} className="text-base text-muted-foreground hover:text-foreground">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
             <div>
               <h3 className="text-sm font-semibold text-foreground tracking-wider uppercase">Company</h3>
               <ul className="mt-4 space-y-3">

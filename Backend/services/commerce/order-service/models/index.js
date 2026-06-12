@@ -20,6 +20,7 @@ const OrdersOrderPayment = require('./ordersOrderPayment')(sequelize, DataTypes)
 const OrdersReturn       = require('./ordersReturn')(sequelize, DataTypes);
 const OrdersReturnItem   = require('./ordersReturnItem')(sequelize, DataTypes);
 const OrdersInvoice      = require('./ordersInvoice')(sequelize, DataTypes);
+const OrdersShipment     = require('./ordersShipment')(sequelize, DataTypes);
 
 // Associations
 OrdersCustomer.hasMany(OrdersAddress, { foreignKey: 'customerId', as: 'addresses' });
@@ -43,6 +44,9 @@ OrdersReturn.belongsTo(OrdersOrder, { foreignKey: 'orderId', as: 'order' });
 OrdersReturn.hasMany(OrdersReturnItem, { foreignKey: 'returnId', as: 'items' });
 OrdersReturnItem.belongsTo(OrdersReturn, { foreignKey: 'returnId', as: 'return' });
 
+OrdersOrder.hasMany(OrdersShipment, { foreignKey: 'orderId', as: 'shipments' });
+OrdersShipment.belongsTo(OrdersOrder, { foreignKey: 'orderId', as: 'order' });
+
 const db = {
     sequelize, Sequelize,
     Op: Sequelize.Op,
@@ -56,6 +60,7 @@ const db = {
     OrdersReturn,
     OrdersReturnItem,
     OrdersInvoice,
+    OrdersShipment,
 };
 
 module.exports = db;

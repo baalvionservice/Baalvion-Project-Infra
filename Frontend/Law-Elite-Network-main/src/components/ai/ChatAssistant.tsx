@@ -56,8 +56,8 @@ export default function ChatAssistant() {
     setIsTyping(true);
     
     try {
-      const aiRes = await askAssistant(textToSend);
-      
+      const aiRes = await askAssistant(textToSend) as { reply: string; quickQuestions?: string[]; suggestion?: string };
+
       const botMsg = {
         role: "bot",
         text: aiRes.reply,

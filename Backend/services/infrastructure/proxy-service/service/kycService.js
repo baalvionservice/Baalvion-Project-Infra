@@ -72,9 +72,35 @@ async function accessToken(orgId, ttlSecs = 600) {
   return data.token;
 }
 
-/** Verify a Sumsub webhook (x-payload-digest = HMAC-SHA256(rawBody, webhookSecret)). */
-function verifyWebhook(rawBody, digest) {
+// Maximum age (in milliseconds) we accept for a KYC webhook timestamp. Sumsub
+// sends X-Payload-Timestamp (Unix seconds) on every delivery — reject anything
+// older than 5 minutes to prevent replay attacks.
+const WEBHOOK_REPLAY_WINDOW_MS = Number(process.env.WEBHOOK_REPLAY_WINDOW_MS || 5 * 60 * 1000);
+
+/**
+ * Verify a Sumsub webhook.
+ *  - digest: x-payload-digest = HMAC-SHA256(rawBody, webhookSecret)
+ *  - timestampHeader: x-payload-timestamp (Unix epoch seconds, optional but
+ *    verified when present to prevent replay attacks)
+ *
+ * Returns false if the secret is missing, the HMAC is wrong, or the timestamp
+ * is outside the replay window.
+ */
+function verifyWebhook(rawBody, digest, timestampHeader) {
   if (!WEBHOOK_SECRET || !digest) return false;
+
+  // Replay-window check — only enforced when a timestamp header is present.
+  if (timestampHeader !== undefined && timestampHeader !== null && timestampHeader !== '') {
+    const ts = Number(timestampHeader);
+    if (!Number.isFinite(ts) || ts <= 0) return false; // malformed timestamp
+    const ageMs = Date.now() - ts * 1000;
+    if (ageMs > WEBHOOK_REPLAY_WINDOW_MS || ageMs < -60_000) {
+      // Reject stale (> replay window) or futuristic (> 1 min ahead) payloads.
+      logger.warn(`[kyc] webhook timestamp out of window age=${ageMs}ms`);
+      return false;
+    }
+  }
+
   const expected = crypto.createHmac('sha256', WEBHOOK_SECRET).update(rawBody).digest('hex');
   try {
     return crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(digest));

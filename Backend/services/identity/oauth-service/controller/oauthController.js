@@ -56,6 +56,19 @@ exports.authorize = async (req, res, next) => {
 
         const scopes = scope.split(' ').filter(s => config.oauth.supportedScopes.includes(s));
 
+        // PKCE is required for public (non-confidential) clients (RFC 7636 §4.3).
+        // Reject early so the error goes back as a query-param redirect (state preserved).
+        if (client.is_confidential === false || client.is_confidential === 0) {
+            if (!code_challenge) {
+                const params = new URLSearchParams({ error: 'invalid_request', error_description: 'code_challenge required for public clients', ...(state && { state }) });
+                return res.redirect(`${validRedirectUri}?${params}`);
+            }
+            if ((code_challenge_method || 'S256') !== 'S256') {
+                const params = new URLSearchParams({ error: 'invalid_request', error_description: 'code_challenge_method must be S256', ...(state && { state }) });
+                return res.redirect(`${validRedirectUri}?${params}`);
+            }
+        }
+
         // Resolve identity: Bearer (already on req.auth via the route middleware) OR — for browser
         // SSO redirects, which carry no Authorization header — the hub's first-party HttpOnly
         // access_token cookie. This is the keystone for silent cross-domain SSO: a satellite app
@@ -116,6 +129,17 @@ exports.authorizePost = async (req, res, next) => {
         const scopes = (typeof scope === 'string' ? scope.split(' ') : scope)
             .filter(s => config.oauth.supportedScopes.includes(s));
 
+        // PKCE is required for public (non-confidential) clients (RFC 7636 §4.3).
+        // Mirror the enforcement applied in the GET /authorize flow.
+        if (client.is_confidential === false || client.is_confidential === 0) {
+            if (!code_challenge) {
+                return next(new AppError('INVALID_REQUEST', 'code_challenge required for public clients', 400));
+            }
+            if ((code_challenge_method || 'S256') !== 'S256') {
+                return next(new AppError('INVALID_REQUEST', 'code_challenge_method must be S256', 400));
+            }
+        }
+
         const code = await oauthService.createAuthorizationCode({
             clientId: client_id, userId: req.auth.userId, orgId: req.auth.orgId,
             redirectUri: redirect_uri, scopes,
@@ -171,6 +195,11 @@ exports.token = async (req, res, next) => {
 
 exports.introspect = async (req, res, next) => {
     try {
+        // RFC 7662 §2.1: the introspection endpoint MUST be protected by client authentication.
+        // extractClientAuth middleware populates req.clientCredentials; reject unauthenticated callers.
+        if (!req.clientCredentials?.clientId) {
+            return next(new OAuthError('invalid_client', 'Client authentication required', 401));
+        }
         const { token } = req.body;
         if (!token) return res.json({ active: false });
         const result = await oauthService.introspectToken(token);
@@ -224,7 +253,7 @@ exports.endSession = async (req, res, next) => {
                 const r = redis.getClient();
                 if (r && redis.isAvailable()) {
                     const ttl = (cookieSession.exp || 0) - Math.floor(Date.now() / 1000);
-                    await r.set(`auth:bl:${cookieSession.jti}`, '1', 'EX', ttl > 0 ? ttl : 900);
+                    await r.set(`auth:blacklist:${cookieSession.jti}`, '1', 'EX', ttl > 0 ? ttl : 900);
                 }
             } catch { /* best-effort */ }
         }

@@ -1,0 +1,56 @@
+{
+  "slug": "technology-consulting",
+  "title": "Technology Consulting",
+  "kind": "service",
+  "heroImageSeed": "svc-consulting",
+  "excerpt": "Architecture, modernization, and technology strategy from a team that builds and operates platforms — advice grounded in production reality.",
+  "seo": {
+    "title": "Technology Consulting & Architecture | Baalvion",
+    "description": "Baalvion provides technology strategy, architecture review, and modernization consulting grounded in operating real platforms — not slideware.",
+    "keywords": ["technology consulting", "architecture review", "technology strategy", "modernization", "Baalvion services", "CTO advisory"]
+  },
+  "customFields": {
+    "benefits": [
+      "Strategy grounded in operating real systems",
+      "Architecture reviews that find real risk",
+      "Pragmatic modernization roadmaps",
+      "Stack and build-vs-buy decisions made with you"
+    ],
+    "process": [
+      { "step": "Listen", "desc": "Understand goals, constraints, and the current estate." },
+      { "step": "Assess", "desc": "Architecture, risks, costs, and team capability." },
+      { "step": "Recommend", "desc": "A prioritised, pragmatic roadmap — not a wish list." },
+      { "step": "Support", "desc": "Help execute, or hand over a plan your team can run." }
+    ],
+    "techStack": ["Architecture review", "Modernization roadmaps", "Stack selection", "Build-vs-buy analysis", "Due diligence", "Mentoring"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "The best technology advice comes from people who still build and operate systems. Baalvion's consulting is grounded in running the [Baalvion Operating System](/platform) at scale, so our recommendations account for the realities of production — cost, reliability, team capability, and change over time. We help you choose, modernise, and scale without the abstraction that plagues slide-deck consulting." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Grounded:** advice from a team that operates what it recommends.",
+      "**Honest architecture reviews** that surface real risk, not theatre.",
+      "**Pragmatic roadmaps** prioritised by value and risk.",
+      "**Clear decisions:** stack and build-vs-buy made with evidence."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We listen to your goals and constraints, assess your architecture, risks, and team capability, recommend a prioritised roadmap, and then either help execute or hand over a plan your team can own. For modernization-heavy engagements we draw on [enterprise modernization](/news/insights/enterprise-modernization) and the [digital transformation guide](/news/insights/digital-transformation-guide)." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "Architecture and security reviews, modernization roadmaps, stack selection, build-vs-buy analysis, technical due diligence, and team mentoring. Where execution follows, we bring our [custom software development](/services/custom-software-development), [cloud solutions](/services/cloud-solutions), and [DevOps](/services/devops) practices." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "We've made these decisions for our own platform and lived with the consequences, which keeps our advice honest. See the thinking in [choosing the right technology stack](/news/tech/choosing-the-right-technology-stack) and [scaling engineering teams](/news/insights/scaling-engineering-teams)." }
+  ],
+  "faqs": [
+    { "q": "What does an architecture review cover?", "a": "Scalability, security, reliability, cost, and maintainability of your current architecture — with prioritised, actionable findings rather than a generic checklist." },
+    { "q": "Do you only advise, or also build?", "a": "Both. We can hand over a plan your team executes, or deliver it with you through our engineering practices." },
+    { "q": "Can you help with build-vs-buy decisions?", "a": "Yes — we weigh cost, control, time-to-value, and lock-in with you. See [custom software vs SaaS](/news/insights/custom-software-vs-saas)." },
+    { "q": "Do you do technical due diligence?", "a": "Yes — for investors or acquirers, we assess architecture, risk, team, and scalability of a target's technology." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "enterprise modernization", "href": "/news/insights/enterprise-modernization" },
+    { "anchor": "choosing the right technology stack", "href": "/news/tech/choosing-the-right-technology-stack" },
+    { "anchor": "custom software development", "href": "/services/custom-software-development" }
+  ]
+}

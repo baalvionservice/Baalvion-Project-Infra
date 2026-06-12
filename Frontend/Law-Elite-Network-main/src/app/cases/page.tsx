@@ -31,7 +31,7 @@ function CasesContent() {
     refresh,
     totalCases,
     activeCases
-  } = useDashboardCases(user?.uid || user?.userId);
+  } = useDashboardCases(user?.userId);
 
   return (
     <div className="container mx-auto px-8 pt-8 pb-12 animate-in fade-in duration-700">
@@ -52,7 +52,7 @@ function CasesContent() {
           </p>
         </div>
         <div className="flex gap-3">
-          <CreateCaseModal userId={user?.uid || user?.userId || ''} onSuccess={refresh} />
+          <CreateCaseModal userId={user?.userId || ''} onSuccess={refresh} />
         </div>
       </header>
 

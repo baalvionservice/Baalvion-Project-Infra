@@ -123,7 +123,7 @@ export default function Pricing() {
               </ul>
 
               <Link
-                href="#"
+                href={plan.name === "Enterprise" ? "/contact" : "/signup/company"}
                 className={`w-full flex items-center justify-center px-[18px] py-[9px] text-sm font-semibold rounded-lg transition-all no-underline ${
                   plan.ctaStyle === "solid"
                     ? "bg-green-600 text-white hover:bg-green-700"

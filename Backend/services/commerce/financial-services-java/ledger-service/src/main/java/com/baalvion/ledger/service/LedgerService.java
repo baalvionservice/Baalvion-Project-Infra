@@ -3,24 +3,28 @@ package com.baalvion.ledger.service;
 import com.baalvion.ledger.domain.JournalEntry;
 import com.baalvion.ledger.domain.JournalEntry.EntryStatus;
 import com.baalvion.ledger.domain.JournalEntry.EntryType;
+import com.baalvion.ledger.domain.LedgerOutbox;
 import com.baalvion.ledger.dto.AccountBalanceResponse;
 import com.baalvion.ledger.dto.AccountStatementResponse;
 import com.baalvion.ledger.dto.EntryResponse;
 import com.baalvion.ledger.dto.PostEntryRequest;
 import com.baalvion.ledger.repository.JournalEntryRepository;
+import com.baalvion.ledger.repository.LedgerOutboxRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -29,20 +33,47 @@ import java.util.UUID;
 public class LedgerService {
 
   private final JournalEntryRepository repository;
-  private final KafkaTemplate<String, String> kafkaTemplate;
+  private final LedgerOutboxRepository outboxRepository;
   private final ObjectMapper objectMapper;
 
-  public LedgerService(JournalEntryRepository repository, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+  public LedgerService(JournalEntryRepository repository, LedgerOutboxRepository outboxRepository, ObjectMapper objectMapper) {
     this.repository = repository;
-    this.kafkaTemplate = kafkaTemplate;
+    this.outboxRepository = outboxRepository;
     this.objectMapper = objectMapper;
   }
 
-  private void publish(String topic, String key, Object payload) {
+  /**
+   * Enqueue an arbitrary domain/saga event to the transactional outbox in the CURRENT transaction.
+   *
+   * <p>Used by the Kafka saga listeners so their replies ({@code payments.ledger.posted} /
+   * {@code .failed}) commit atomically with the journal write they describe and are delivered via
+   * the same retrying relay — replacing the old fire-and-forget {@code kafkaTemplate.send} whose
+   * failures were swallowed, leaving the saga to stall forever. {@code @Transactional} on this
+   * class means a caller already inside a tx (e.g. {@code postEntry}) shares it (REQUIRED).
+   */
+  public void enqueueEvent(UUID tenantId, UUID aggregateId, String topic, String key, Object payload) {
+    enqueueOutbox(tenantId, aggregateId, topic, key, payload);
+  }
+
+  /**
+   * Persist the event to the transactional outbox in the CURRENT transaction, so it commits
+   * atomically with the journal entry. A separate relay ({@link LedgerOutboxRelay}) publishes
+   * it to Kafka synchronously and retries on failure — replacing the previous fire-and-forget
+   * {@code kafkaTemplate.send} whose async failures were silently swallowed.
+   */
+  private void enqueueOutbox(UUID tenantId, UUID aggregateId, String topic, String key, Object payload) {
     try {
-      kafkaTemplate.send(topic, key, objectMapper.writeValueAsString(payload));
-    } catch (Exception e) {
-      log.error("Failed to publish {} for key {}: {}", topic, key, e.getMessage());
+      String json = objectMapper.writeValueAsString(payload);
+      outboxRepository.save(LedgerOutbox.builder()
+        .tenantId(tenantId)
+        .aggregateId(aggregateId)
+        .topic(topic)
+        .msgKey(key)
+        .payload(json)
+        .build());
+    } catch (JsonProcessingException e) {
+      // Fail the whole transaction: an entry must never commit without its outbox event.
+      throw new IllegalStateException("Failed to serialize outbox payload for topic " + topic, e);
     }
   }
 
@@ -78,9 +109,32 @@ public class LedgerService {
     var saved = repository.save(entry);
     log.info("Journal entry posted: id={}, tenant={}, ref={}, amount={}", saved.getId(), tenantId, safeTransactionRef, request.getAmount());
 
-    publish("ledger.entry.posted", saved.getId().toString(), mapToResponse(saved));
+    enqueueOutbox(tenantId, saved.getId(), "ledger.entry.posted", saved.getId().toString(), mapToResponse(saved));
 
     return mapToResponse(saved);
+  }
+
+  /**
+   * Payment-saga step: post the journal entry AND enqueue the {@code payments.ledger.posted} reply
+   * in ONE transaction (this class is {@code @Transactional} = REQUIRED), so the saga reply commits
+   * atomically with the journal it reports and is delivered via the retrying outbox relay. If the
+   * broker is down when the relay later publishes, the reply is retried — it can never be silently
+   * dropped (the old fire-and-forget failure mode that stalled the saga permanently). Business
+   * validation failures propagate to the caller, which enqueues the terminal
+   * {@code payments.ledger.failed} reply instead.
+   *
+   * @param transactionId the payment transaction id (the saga correlation id and Kafka key)
+   * @param replyTopic    the success reply topic ({@code payments.ledger.posted})
+   */
+  public EntryResponse postPaymentSaga(UUID tenantId, UUID transactionId, PostEntryRequest request, String replyTopic) {
+    EntryResponse entry = postEntry(tenantId, request);
+    Map<String, Object> reply = new LinkedHashMap<>();
+    reply.put("transactionId", transactionId);
+    reply.put("tenantId", tenantId);
+    reply.put("journalId", entry.getId());
+    reply.put("transactionRef", entry.getTransactionRef());
+    enqueueOutbox(tenantId, entry.getId(), replyTopic, transactionId.toString(), reply);
+    return entry;
   }
 
   public EntryResponse getEntry(UUID tenantId, UUID entryId) {
@@ -137,7 +191,7 @@ public class LedgerService {
     repository.save(original);
 
     log.info("Entry reversed: original={}, reversal={}, tenant={}", entryId, savedReversal.getId(), tenantId);
-    publish("ledger.entry.reversed", savedReversal.getId().toString(), mapToResponse(savedReversal));
+    enqueueOutbox(tenantId, savedReversal.getId(), "ledger.entry.reversed", savedReversal.getId().toString(), mapToResponse(savedReversal));
 
     return mapToResponse(savedReversal);
   }

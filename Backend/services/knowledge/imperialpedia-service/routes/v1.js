@@ -11,4 +11,6 @@ router.use('/calculators', require('./calculatorRoutes'));
 router.use('/analytics', require('./analyticsRoutes'));
 router.use('/ai', require('./aiRoutes'));
 router.use('/portfolio', require('./portfolioRoutes'));
+router.use('/glossary', require('./glossaryRoutes'));
+router.use('/world-config', require('./worldConfigRoutes'));
 module.exports = router;

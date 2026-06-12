@@ -1,0 +1,55 @@
+{
+  "slug": "real-estate",
+  "title": "Baalvion for Real Estate",
+  "kind": "industry",
+  "heroImageSeed": "ind-realestate",
+  "excerpt": "Property, transactions, and asset platforms — high-value workflows with escrow, document integrity, and clean integrations.",
+  "seo": {
+    "title": "Real Estate & PropTech Solutions | Baalvion",
+    "description": "Baalvion builds proptech platforms for property, high-value transactions, and asset management — with escrow, document integrity, and trusted workflows.",
+    "keywords": ["real estate technology", "proptech", "property platform", "escrow", "asset management", "Baalvion industries"]
+  },
+  "customFields": {
+    "challenges": [
+      "High-value, multi-party transactions that need trust",
+      "Document-heavy workflows with integrity requirements",
+      "Fragmented listing, transaction, and finance systems",
+      "Long-lived records that must stay verifiable"
+    ],
+    "solutions": [
+      "Escrow-backed transaction settlement on one ledger",
+      "Tamper-evident document and audit records",
+      "Integrated listing-to-close workflows",
+      "Durable, verifiable record-keeping"
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Sector Overview" },
+    { "type": "paragraph", "text": "Real estate transactions are high-value, multi-party, and document-heavy — exactly the conditions where trust and integrity matter most and manual processes fail. Baalvion brings the escrow, ledgering, and document-integrity patterns it built for commerce and finance to property and asset platforms." },
+    { "type": "heading", "level": 2, "text": "Challenges" },
+    { "type": "list", "ordered": false, "items": [
+      "**Trust:** large sums move between parties who may not know each other.",
+      "**Documents:** contracts and records must be tamper-evident and traceable.",
+      "**Fragmentation:** listing, transaction, and finance tools rarely connect.",
+      "**Longevity:** property records must remain verifiable for years."
+    ] },
+    { "type": "heading", "level": 2, "text": "How Baalvion Helps" },
+    { "type": "paragraph", "text": "We apply escrow-backed settlement on a single ledger — the trust pattern from [our luxury commerce marketplace](/case-studies/luxury-commerce-marketplace) — add tamper-evident document and audit records, and integrate listing-to-close workflows the [API-first](/news/tech/api-first-architecture) way so the whole transaction lives in one coherent system." },
+    { "type": "heading", "level": 2, "text": "Relevant Services" },
+    { "type": "paragraph", "text": "Real estate engagements combine [custom software development](/services/custom-software-development), [enterprise software](/services/enterprise-software), and [web development](/services/web-development), with [automation](/services/automation) for document and approval workflows." },
+    { "type": "heading", "level": 2, "text": "Outcomes" },
+    { "type": "paragraph", "text": "Property platforms where high-value transactions are protected by escrow, documents are tamper-evident and traceable, the listing-to-close journey lives in one system, and records stay verifiable for the long term." }
+  ],
+  "faqs": [
+    { "q": "How do you make high-value property transactions safe?", "a": "Escrow-backed settlement on a single ledger holds funds until conditions are met, protecting all parties — the pattern from [our marketplace case study](/case-studies/luxury-commerce-marketplace)." },
+    { "q": "How is document integrity ensured?", "a": "Tamper-evident, append-only records mean contracts and documents can be verified and their history traced." },
+    { "q": "Can you integrate listing, transaction, and finance systems?", "a": "Yes — we build API-first so the full listing-to-close journey lives in one coherent platform." },
+    { "q": "Which services apply to real estate?", "a": "Typically [custom software development](/services/custom-software-development), [enterprise software](/services/enterprise-software), and [web development](/services/web-development)." }
+  ],
+  "internalLinks": [
+    { "anchor": "our luxury commerce marketplace", "href": "/case-studies/luxury-commerce-marketplace" },
+    { "anchor": "API-first architecture", "href": "/news/tech/api-first-architecture" },
+    { "anchor": "custom software development", "href": "/services/custom-software-development" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" }
+  ]
+}

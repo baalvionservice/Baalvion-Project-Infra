@@ -7,7 +7,7 @@ const verifier = require('../lib/verifier');
 const { createSession, getSession, revoke, updateSession } = require('../lib/redisSession');
 const { genToken, sha256 } = require('../lib/crypto');
 const { detectGeo } = require('../lib/geoDetect');
-const { requireSession } = require('../middleware/session');
+const { requireSession, requireCsrf } = require('../middleware/session');
 
 const router = Router();
 
@@ -31,7 +31,7 @@ async function establish(req, res, accessToken, refreshToken) {
   const csrfToken = genToken();
   const geo = detectGeo(req); // Phase 7 — record login-time country in session
   await createSession({
-    sid: c.sid, userId: c.sub, orgId: c.org_id, roles: c.roles, exp: c.exp,
+    sid: c.sid, userId: c.sub, orgId: c.org_id, orgType: c.org_type ?? null, roles: c.roles, exp: c.exp,
     csrfToken, uaHash: sha256(req.headers['user-agent']), ipHash: sha256(clientIp(req)),
     geo: { country: geo.country, source: geo.source },
   });
@@ -48,14 +48,30 @@ function clearCookies(res) {
 }
 
 // POST /auth/login → auth-service RS256 → cookies + SAFE profile + csrf (NO access token in body).
+// Three possible auth-service outcomes (all returned as success): a full token pair (establish the
+// session), `mfa_required` (already-enrolled second factor), or `mfa_enrollment_required` (force-MFA
+// — the user must enrol before a session exists). The latter two return 200 with the challenge token
+// and NO cookies (there is no session yet); the client drives the MFA step from there.
 router.post('/login', async (req, res) => {
   const { status, json } = await authService('/login', { email: req.body && req.body.email, password: req.body && req.body.password });
-  if (status !== 200 || !json || !json.success || !json.data || !json.data.accessToken) {
+  // Genuine auth failure: non-2xx, or a 2xx with no usable data payload.
+  if ((status !== 200 && status !== 201) || !json || !json.success || !json.data) {
     return res.status(status || 401).json({ error: (json && json.error) || { code: 'LOGIN_FAILED', message: 'Invalid credentials' } });
   }
-  const { accessToken, refreshToken, user } = json.data;
+  const data = json.data;
+  // MFA continuation paths — no session/cookies yet, just relay the challenge token.
+  if (data.mfa_required) {
+    return res.status(200).json({ mfaRequired: true, challengeToken: data.challengeToken });
+  }
+  if (data.mfa_enrollment_required) {
+    return res.status(200).json({ mfaEnrollmentRequired: true, challengeToken: data.challengeToken });
+  }
+  if (!data.accessToken) {
+    return res.status(401).json({ error: (json && json.error) || { code: 'LOGIN_FAILED', message: 'Invalid credentials' } });
+  }
+  const { accessToken, refreshToken, user } = data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshToken);
-  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null }, csrfToken });
+  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
 });
 
 // POST /auth/register → auth-service register (registers + auto-logs-in) → cookies + SAFE profile + csrf.
@@ -72,7 +88,7 @@ router.post('/register', async (req, res) => {
   }
   const { accessToken, refreshToken, user } = json.data;
   const { c, csrfToken } = await establish(req, res, accessToken, refreshToken);
-  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null }, csrfToken });
+  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
 });
 
 // POST /auth/invite → invite a member to the caller's org. Requires a valid session; forwards the
@@ -97,6 +113,115 @@ router.post('/invite', requireSession(), async (req, res) => {
   }
 });
 
+// ── Authenticated auth-service passthrough ─────────────────────────────────────
+// /auth/svc/* → forwards to auth-service /v1/auth/* with the session's access token as Bearer.
+// This is the single seam through which the frontend reaches the full self-service admin
+// surface (platform org management, members, invitations, user lifecycle, MFA enrolment, audit)
+// WITHOUT a bespoke gateway route per endpoint. Session is required + CSRF on unsafe methods.
+// auth-service still enforces org membership + capability checks on its side.
+router.all('/svc/*', requireSession(), requireCsrf, async (req, res) => {
+  const accessToken = req.cookies && req.cookies[config.cookie.accessName];
+  if (!accessToken) return res.status(401).json({ error: { code: 'NO_SESSION', message: 'No session' } });
+
+  // req.url inside this router looks like '/svc/platform/organizations?search=x'.
+  const rest = req.url.replace(/^\/svc/, '') || '/';
+  const target = `${config.authServiceUrl}${rest}`;
+  const method = req.method.toUpperCase();
+  const hasBody = !['GET', 'HEAD'].includes(method);
+
+  try {
+    const r = await fetch(target, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        authorization: `Bearer ${accessToken}`,
+      },
+      ...(hasBody ? { body: JSON.stringify(req.body || {}) } : {}),
+    });
+    let json = null; try { json = await r.json(); } catch { /* no body */ }
+    return res.status(r.status).json(json ?? { ok: r.ok });
+  } catch {
+    return res.status(502).json({ error: { code: 'AUTH_SVC_UNAVAILABLE', message: 'Auth service unavailable' } });
+  }
+});
+
+// ── Public (unauthenticated) auth-service passthroughs ─────────────────────────
+// Invitation discovery (no session — the invitee is not logged in yet).
+router.get('/validate-invite', async (req, res) => {
+  try {
+    const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    const r = await fetch(`${config.authServiceUrl}/validate-invite${q}`, { method: 'GET' });
+    let json = null; try { json = await r.json(); } catch { /* no body */ }
+    return res.status(r.status).json(json ?? { ok: r.ok });
+  } catch {
+    return res.status(502).json({ error: { code: 'AUTH_SVC_UNAVAILABLE', message: 'Auth service unavailable' } });
+  }
+});
+
+// Accept invite → auth-service creates/joins the user and returns a token pair; the gateway
+// establishes the session cookies (auto-login) exactly like /login. NO token in the body.
+router.post('/accept-invite', async (req, res) => {
+  const { status, json } = await authService('/accept-invite', req.body || {});
+  if ((status !== 200 && status !== 201) || !json || !json.success || !json.data || !json.data.accessToken) {
+    return res.status(status || 400).json({ error: (json && json.error) || { code: 'ACCEPT_INVITE_FAILED', message: 'Could not accept invitation' } });
+  }
+  const { accessToken, refreshToken, user } = json.data;
+  const { c, csrfToken } = await establish(req, res, accessToken, refreshToken);
+  return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+});
+
+// Onboarding intake — public (the applicant has no session yet). Forwards the
+// completed department-wizard submission to auth-service, which creates a
+// `pending` organization for the platform review queue. Never grants access.
+router.post('/onboarding-application', async (req, res) => {
+  const { status, json } = await authService('/onboarding-application', req.body || {});
+  return res.status(status || 502).json(json ?? { error: { code: 'ONBOARDING_SERVICE_ERROR', message: 'Onboarding service unavailable' } });
+});
+
+// Forgot / reset password — public, silent passthrough (no session).
+router.post('/forgot-password', async (req, res) => {
+  const { status, json } = await authService('/forgot-password', req.body || {});
+  return res.status(status || 200).json(json ?? { ok: true });
+});
+router.post('/reset-password', async (req, res) => {
+  const { status, json } = await authService('/reset-password', req.body || {});
+  return res.status(status || 200).json(json ?? { ok: true });
+});
+
+// MFA login challenge (second step after /login returns mfa_required) → establish cookies.
+router.post('/mfa-challenge', async (req, res) => {
+  const { status, json } = await authService('/mfa/challenge', req.body || {});
+  if (status !== 200 || !json || !json.success || !json.data || !json.data.accessToken) {
+    return res.status(status || 401).json({ error: (json && json.error) || { code: 'MFA_FAILED', message: 'MFA verification failed' } });
+  }
+  const { accessToken, refreshToken, user } = json.data;
+  const { c, csrfToken } = await establish(req, res, accessToken, refreshToken);
+  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+});
+
+// POST /auth/mfa-enroll/start (public) → fetch the provisioning material (QR + secret + recovery
+// codes) for the force-MFA enrolment challenge. NO cookies — the challenge is not yet consumed.
+router.post('/mfa-enroll/start', async (req, res) => {
+  const { status, json } = await authService('/mfa/enroll/start', { challengeToken: req.body && req.body.challengeToken });
+  if (status !== 200 || !json || !json.success || !json.data) {
+    return res.status(status || 400).json({ error: (json && json.error) || { code: 'MFA_ENROLL_FAILED', message: 'Could not start MFA enrolment' } });
+  }
+  const { qrCodeUrl, secret, recoveryCodes } = json.data;
+  return res.json({ qrCodeUrl, secret, recoveryCodes });
+});
+
+// POST /auth/mfa-enroll (public) → confirm the code, activate MFA, consume the challenge and
+// establish the session (auto-login) exactly like /mfa-challenge. NO token in the body.
+router.post('/mfa-enroll', async (req, res) => {
+  const { status, json } = await authService('/mfa/enroll', { challengeToken: req.body && req.body.challengeToken, code: req.body && req.body.code });
+  if ((status !== 200 && status !== 201) || !json || !json.success || !json.data || !json.data.accessToken) {
+    return res.status(status || 401).json({ error: (json && json.error) || { code: 'MFA_ENROLL_FAILED', message: 'MFA enrolment failed' } });
+  }
+  const { accessToken, refreshToken, user } = json.data;
+  const { c, csrfToken } = await establish(req, res, accessToken, refreshToken);
+  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+});
+
 // GET /auth/me → verify cookie + session; canonical user (NO token).
 router.get('/me', async (req, res) => {
   try {
@@ -105,7 +230,7 @@ router.get('/me', async (req, res) => {
     const c = await verifier.verify(token);
     const session = await getSession(c.sid);
     if (!session) return res.status(401).json({ error: { code: 'SESSION_REVOKED', message: 'Session revoked' } });
-    return res.json({ user: { userId: c.sub, email: c.email, orgId: c.org_id ?? null, roles: c.roles || [], permissions: c.permissions || [], sessionId: c.sid }, csrfToken: session.csrfToken });
+    return res.json({ user: { userId: c.sub, email: c.email, orgId: c.org_id ?? null, orgType: c.org_type ?? null, roles: c.roles || [], permissions: c.permissions || [], sessionId: c.sid }, csrfToken: session.csrfToken });
   } catch (err) {
     return res.status(401).json({ error: { code: err.code || 'INVALID_SESSION', message: err.message } });
   }
@@ -126,9 +251,18 @@ router.post('/refresh', async (req, res) => {
 });
 
 // POST /auth/logout → revoke (blacklist jti + delete session) + clear cookies.
+// SECURITY: revocation uses claims from the VERIFIED token only. If verification fails the token is
+// already expired/invalid/tampered — we skip revocation (nothing to revoke) but still clear cookies.
 router.post('/logout', async (req, res) => {
   const token = req.cookies && req.cookies[config.cookie.accessName];
-  if (token) { const c = decode(token); await revoke(c.sid, c.jti, c.exp); }
+  if (token) {
+    try {
+      const c = await verifier.verify(token);
+      if (c && c.sid) await revoke(c.sid, c.jti, c.exp);
+    } catch {
+      // Token invalid, expired, or tampered — skip revocation (no trusted claims to act on).
+    }
+  }
   clearCookies(res);
   try { await authService('/logout', {}, req.headers.cookie); } catch { /* best-effort */ }
   return res.json({ ok: true });

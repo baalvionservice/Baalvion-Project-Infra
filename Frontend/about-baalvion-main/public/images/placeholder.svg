@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800" role="img" aria-label="Baalvion">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A0A0A"/>
+      <stop offset="1" stop-color="#1b1b22"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <g opacity="0.10" stroke="#FF9900" stroke-width="1.5" fill="none">
+    <path d="M0 200 H1200 M0 400 H1200 M0 600 H1200 M200 0 V800 M400 0 V800 M600 0 V800 M800 0 V800 M1000 0 V800"/>
+    <circle cx="600" cy="400" r="180"/>
+    <circle cx="600" cy="400" r="280"/>
+  </g>
+  <text x="600" y="415" text-anchor="middle" fill="#FF9900" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="14">BAALVION</text>
+</svg>

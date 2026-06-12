@@ -1,6 +1,11 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
+  // Standalone file-tracing recreates the pnpm symlink tree, which throws EPERM on Windows
+  // (symlink creation needs Admin/Developer Mode). Production images build on Linux where this
+  // works; skip it on win32 so local Windows builds succeed without changing the deploy artifact.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   reactStrictMode: true,
   // Production build resilience: don't fail the build on pre-existing type/lint
   // issues in unrelated pages — the goal here is a stable, pre-compiled server.
@@ -33,6 +38,14 @@ const nextConfig: NextConfig = {
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+        ],
+      },
+      {
+        // Hashed build assets are immutable — cache them hard so repeat loads and
+        // page-to-page navigation pull JS/CSS from the browser cache instantly.
+        source: '/_next/static/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
         ],
       },
     ];

@@ -16,10 +16,10 @@ export class AuthService {
 
   async register(data: { email: string; fullName: string; roleId?: UserRole; password?: string }) {
     if (!data.email || !data.password) throw new Error('Email and password are required.');
-    const res = await authLawApi.register(data.email, data.password, data.fullName, data.roleId);
+    const res = await authLawApi.register(data.email, data.password, data.fullName, data.roleId ?? undefined);
     const { accessToken, userId } = res.data?.data || {};
     if (accessToken) setToken(accessToken);
-    if (this.analytics) this.analytics.logEvent('user_signup', { roleId: data.roleId || 'client' }, String(userId));
+    if (this.analytics) this.analytics.logEvent('user_signup', { roleId: data.roleId ?? 'client' }, userId ? String(userId) : undefined);
     return { userId, uid: String(userId) };
   }
 

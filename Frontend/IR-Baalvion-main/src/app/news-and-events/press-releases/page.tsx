@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Script from 'next/script';
 import { cmsGetPressReleases } from '@/lib/cms';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,15 +8,49 @@ import { FileText, Download, Share2, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 export const metadata: Metadata = {
-  title: 'Press Releases | Official News',
+  title: 'Press Releases | Baalvion Investor Relations',
   description: 'The latest official announcements, corporate news, and regulatory filings from Baalvion.',
+  alternates: { canonical: '/news-and-events/press-releases' },
+  openGraph: {
+    title: 'Baalvion Press Releases',
+    description: 'The latest official announcements, corporate news, and regulatory filings from Baalvion.',
+    url: 'https://ir.baalvion.com/news-and-events/press-releases',
+    type: 'website',
+  },
 };
 
 export default async function PressReleasesPage() {
   // Editorial content is managed centrally in the Baalvion CMS (admin-platform console).
   const pressReleases = await cmsGetPressReleases();
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: 'Baalvion Press Releases',
+    url: 'https://ir.baalvion.com/news-and-events/press-releases',
+    itemListElement: pressReleases.slice(0, 20).map((release, idx) => ({
+      '@type': 'ListItem',
+      position: idx + 1,
+      item: {
+        '@type': 'NewsArticle',
+        headline: release.title,
+        datePublished: release.date,
+        publisher: {
+          '@type': 'Organization',
+          name: 'Baalvion',
+          url: 'https://ir.baalvion.com',
+        },
+        url: release.link !== '#' ? release.link : `https://ir.baalvion.com/news-and-events/press-releases`,
+      },
+    })),
+  };
+
   return (
     <div className="animate-in fade-in duration-700">
+      <Script
+        id="press-releases-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="bg-black text-white py-16 md:py-24">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm font-bold text-primary tracking-[0.2em] mb-4 uppercase">News & Events</p>
@@ -41,14 +76,15 @@ export default async function PressReleasesPage() {
             </div>
             
             <div className="relative w-full md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-              <Input placeholder="Search releases..." className="pl-10 text-white rounded-none border-gray-300" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" aria-hidden="true" />
+              <label htmlFor="press-search" className="sr-only">Search press releases</label>
+              <Input id="press-search" placeholder="Search releases..." className="pl-10 text-white rounded-none border-gray-300" />
             </div>
           </div>
 
           <div className="space-y-16">
             {pressReleases.map((release, idx) => (
-              <article key={idx} className="group">
+              <article key={release.title || idx} className="group">
                 <div className="flex items-start gap-8">
                   <div className="hidden md:flex flex-col items-center pt-1 text-gray-300">
                     <span className="text-2xl font-bold leading-none">{release.date.split(' ')[1].replace(',', '')}</span>
@@ -70,8 +106,8 @@ export default async function PressReleasesPage() {
                           <FileText className="h-4 w-4" /> Webcast Summary
                         </Link>
                       )}
-                      <button className="ml-auto p-2 text-gray-300  hover:text-black transition-colors">
-                        <Share2 className="h-4 w-4" />
+                      <button className="ml-auto p-2 text-gray-300  hover:text-black transition-colors" aria-label={`Share: ${release.title}`}>
+                        <Share2 className="h-4 w-4" aria-hidden="true" />
                       </button>
                     </div>
                   </div>

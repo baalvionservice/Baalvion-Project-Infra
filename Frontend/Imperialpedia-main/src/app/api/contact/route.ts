@@ -35,9 +35,8 @@ export async function POST(request: Request) {
 
     const { name, email, subject, message } = parsed.data;
 
-    console.log(
-      `[CONTACT] ${subject} | ${name} <${email}>\n${message.slice(0, 500)}${message.length > 500 ? '…' : ''}`
-    );
+    // TODO: forward to email service (name, email, subject, message)
+    void name; void email; void subject; void message;
 
     return NextResponse.json({
       success: true,

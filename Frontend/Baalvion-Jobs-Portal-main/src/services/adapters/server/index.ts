@@ -35,10 +35,15 @@ const EXP_BAND_MAP: Record<string, string> = {
   lead: '10+ Years',
 };
 
+// Backend job status → canonical JobStatus enum (see workflow.types.ts).
+// MUST stay within the JobStatus union — the public job detail page, sitemap,
+// indexing script, and analytics all gate on `status === 'published'`. Mapping
+// to a non-enum value like "Active" silently 404s every live job page and keeps
+// JobPosting structured data from ever rendering.
 const STATUS_MAP: Record<string, string> = {
-  published: 'Active',
-  draft: 'Draft',
-  closed: 'Closed',
+  published: 'published',
+  draft: 'draft',
+  closed: 'closed',
 };
 
 // Normalizes { items, pagination } from jobs-service to PaginatedResponse<T>
@@ -78,7 +83,7 @@ function mapBackendJob(j: any) {
     equityEligible: false,
     relocationSupport: false,
     visaSponsorship: false,
-    status: (STATUS_MAP[j.status] ?? 'Active') as any,
+    status: (STATUS_MAP[j.status] ?? 'draft') as any,
     visibility: (j.status === 'published' ? 'public' : 'internal') as any,
     description: j.description ?? '',
     responsibilities: [],
@@ -335,6 +340,64 @@ const rawServerAdapter = ({
       Object.fromEntries(Object.entries(filters ?? {}).filter(([, v]) => v != null).map(([k, v]) => [k, String(v)])),
     ).toString();
     return apiClient.get(`/analytics/hiring${q ? `?${q}` : ''}`);
+  },
+
+  // Country-wise application breakdown. The `/analytics/hiring` endpoint does
+  // not return a country dimension, so we derive it from real data: every
+  // application → its job → the job's country. Aggregated client-side from the
+  // authenticated /applications + /jobs feeds and the country reference list.
+  getApplicationsByCountry: async (filters = {}) => {
+    try {
+      const from = filters?.dateRange?.from ? new Date(filters.dateRange.from).getTime() : null;
+      const to = filters?.dateRange?.to ? new Date(filters.dateRange.to).getTime() : null;
+
+      const countries = await talentServerService.getCountries({ isActive: true });
+      const countryNameById = {};
+      (countries ?? []).forEach((c) => { countryNameById[c.id] = c.name; });
+
+      const PAGE = 100;
+      const MAX_PAGES = 50; // safety bound: up to 5,000 jobs / 5,000 applications
+
+      // jobId → countryId for ALL jobs (any status — applications can target
+      // closed/archived jobs, so we must not filter by status here).
+      const countryIdByJobId = {};
+      for (let page = 1; page <= MAX_PAGES; page++) {
+        const res = await apiClient.get(`/jobs?page=${page}&limit=${PAGE}`);
+        const raw = res?.data ?? {};
+        const items = raw.items ?? raw.data ?? [];
+        items.forEach((j) => {
+          const mapped = mapBackendJob(j);
+          countryIdByJobId[mapped.id] = mapped.countryId;
+        });
+        const totalPages = raw.pagination?.totalPages ?? 1;
+        if (items.length < PAGE || page >= totalPages) break;
+      }
+
+      // Tally applications by resolved country, honouring the date range.
+      const counts = {};
+      for (let page = 1; page <= MAX_PAGES; page++) {
+        const res = await apiClient.get(`/applications?page=${page}&limit=${PAGE}`);
+        const raw = res?.data ?? {};
+        const items = raw.items ?? raw.data ?? [];
+        items.forEach((a) => {
+          const app = mapBackendApplication(a);
+          const ts = new Date(app.createdAt).getTime();
+          if (from != null && !Number.isNaN(ts) && ts < from) return;
+          if (to != null && !Number.isNaN(ts) && ts > to) return;
+          const countryId = countryIdByJobId[app.jobId];
+          const name = (countryId && countryNameById[countryId]) || 'Unknown';
+          counts[name] = (counts[name] || 0) + 1;
+        });
+        const totalPages = raw.pagination?.totalPages ?? 1;
+        if (items.length < PAGE || page >= totalPages) break;
+      }
+
+      return Object.entries(counts)
+        .map(([country, applications]) => ({ country, applications }))
+        .sort((a, b) => b.applications - a.applications);
+    } catch {
+      return [];
+    }
   },
 
   // ── Campus / Colleges ───────────────────────────────────────────────────────

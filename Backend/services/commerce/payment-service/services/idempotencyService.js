@@ -16,9 +16,8 @@ async function init() {
     db: config.redis.db,
   });
 
-  client.on('error', (err) => console.error('[idempotency] Redis error:', err));
+  client.on('error', () => { /* Redis errors surface via checkIdempotency/storeResult rejections */ });
   await client.connect();
-  console.log('[idempotency] Redis client connected');
   return client;
 }
 
@@ -56,7 +55,7 @@ async function storeResult(tenantId, idempotencyKey, result) {
     })
   );
 
-  console.log(`[idempotency] Stored result for ${key} (TTL: ${ttl}s)`);
+  // result stored; no per-key debug log in production
 }
 
 /**

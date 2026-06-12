@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import HomePageServer from "@/components/home-page-server";
+import { HomeExplore } from "@/components/home-explore";
 import {
   getHomePageData,
   getProjects,
@@ -12,6 +13,7 @@ export const metadata: Metadata = {
   title: "Baalvion — Global Trade Infrastructure Platform",
   description:
     "Baalvion builds global trade infrastructure connecting businesses, finance, compliance, and intelligence into one unified platform.",
+  alternates: { canonical: "https://about.baalvion.com" },
   openGraph: {
     title: "Baalvion — Global Trade Infrastructure Platform",
     description:
@@ -20,7 +22,7 @@ export const metadata: Metadata = {
     siteName: "Baalvion Operating System (BOS)",
     images: [
       {
-        url: "https://picsum.photos/seed/baalvion-home/1200/630",
+        url: "https://about.baalvion.com/api/og?title=Baalvion+Operating+System+(BOS)&eyebrow=Baalvion+Industries",
         width: 1200,
         height: 630,
         alt: "Baalvion Operating System (BOS) Home",
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
     title: "Baalvion — Global Trade Infrastructure Platform",
     description:
       "Baalvion builds global trade infrastructure connecting businesses, finance, compliance, and intelligence into one unified platform.",
-    images: ["https://picsum.photos/seed/baalvion-home/1200/630"],
+    images: ["https://about.baalvion.com/api/og?title=Baalvion+Operating+System+(BOS)&eyebrow=Baalvion+Industries"],
   },
 };
 
@@ -70,6 +72,7 @@ export default async function BaalvionHomePage() {
         projects={projects}
         ecoItems={ecoItems}
       />
+      <HomeExplore />
       <Footer />
     </>
   );

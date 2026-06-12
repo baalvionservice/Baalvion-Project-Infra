@@ -36,8 +36,8 @@ async function createCheckout({ amount, currency = 'USD', companyId, planName, i
                 },
                 quantity: 1,
             }],
-            success_url: successUrl || 'https://app.controlthemarket.com/company/billing?paid=1',
-            cancel_url: cancelUrl || 'https://app.controlthemarket.com/company/billing?canceled=1',
+            success_url: successUrl || process.env.PAYMENT_SUCCESS_URL || 'https://controlthemarket.com/company/billing?paid=1',
+            cancel_url: cancelUrl || process.env.PAYMENT_CANCEL_URL || 'https://controlthemarket.com/company/billing?canceled=1',
             customer_email: customerEmail,
             metadata: { companyId: companyId || '', invoiceId: invoiceId || '' },
         });

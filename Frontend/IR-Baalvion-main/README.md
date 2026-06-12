@@ -1,5 +1,7 @@
-# Firebase Studio
+# Baalvion Investor Relations
 
-This is a NextJS starter in Firebase Studio.
+Public-facing IR portal for Baalvion — press releases, governance documents, leadership profiles, and institutional resources.
 
-To get started, take a look at src/app/page.tsx.
+Built with Next.js 15 (App Router) and deployed at [ir.baalvion.com](https://ir.baalvion.com).
+
+Built with Claude.

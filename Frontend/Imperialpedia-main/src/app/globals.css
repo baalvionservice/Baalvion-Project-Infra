@@ -3,49 +3,55 @@
 @tailwind utilities;
 
 @layer base {
+  /* ── Investopedia-style editorial palette: clean white, royal blue, gold accent ── */
   :root {
-    --background: 264 17% 98%;
-    --foreground: 264 17% 10%;
+    --background: 0 0% 100%;
+    --foreground: 0 0% 13%; /* near-black editorial text #212121 */
     --card: 0 0% 100%;
-    --card-foreground: 264 17% 10%;
+    --card-foreground: 0 0% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 264 17% 10%;
-    --primary: 247 82% 55%; /* Slightly darker for better light-mode contrast */
+    --popover-foreground: 0 0% 13%;
+    --primary: 222 74% 44%; /* Investopedia royal blue ~#1d4fc4 (links, CTAs) */
     --primary-foreground: 0 0% 100%;
-    --secondary: 208 100% 45%; /* Improved contrast for accessibility */
-    --secondary-foreground: 264 17% 10%;
-    --muted: 264 10% 90%;
-    --muted-foreground: 264 5% 35%;
-    --accent: 208 100% 45%;
-    --accent-foreground: 264 17% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 264 10% 85%;
-    --input: 264 10% 85%;
-    --ring: 247 82% 55%;
-    --radius: 0.75rem;
+    --secondary: 0 0% 96%; /* light gray surfaces */
+    --secondary-foreground: 0 0% 18%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 40%; /* secondary gray text */
+    --accent: 45 100% 51%; /* signature gold/yellow #ffc107 */
+    --accent-foreground: 0 0% 12%;
+    --destructive: 4 74% 49%; /* editorial red for losses */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 89%; /* hairline gray rules #e3e3e3 */
+    --input: 0 0% 89%;
+    --ring: 222 74% 44%;
+    --radius: 0.25rem; /* squared editorial corners */
+    /* Semantic finance colors */
+    --positive: 145 63% 35%;
+    --negative: 4 74% 49%;
   }
 
   .dark {
-    --background: 264 17% 11%;
-    --foreground: 0 0% 98%;
-    --card: 264 17% 13%;
-    --card-foreground: 0 0% 98%;
-    --popover: 264 17% 11%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 247 82% 70%;
+    --background: 222 18% 9%;
+    --foreground: 0 0% 96%;
+    --card: 222 16% 12%;
+    --card-foreground: 0 0% 96%;
+    --popover: 222 18% 9%;
+    --popover-foreground: 0 0% 96%;
+    --primary: 218 90% 66%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 208 100% 71%;
-    --secondary-foreground: 264 17% 10%;
-    --muted: 264 17% 20%;
-    --muted-foreground: 264 10% 70%;
-    --accent: 208 100% 71%;
-    --accent-foreground: 264 17% 10%;
-    --destructive: 0 62.8% 30.6%;
+    --secondary: 222 14% 18%;
+    --secondary-foreground: 0 0% 96%;
+    --muted: 222 14% 18%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 45 100% 56%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 4 64% 48%;
     --destructive-foreground: 0 0% 98%;
-    --border: 264 17% 20%;
-    --input: 264 17% 20%;
-    --ring: 247 82% 70%;
+    --border: 222 12% 22%;
+    --input: 222 12% 22%;
+    --ring: 218 90% 66%;
+    --positive: 145 55% 50%;
+    --negative: 4 70% 60%;
   }
 }
 
@@ -61,22 +67,52 @@
   }
   body {
     @apply bg-background text-foreground antialiased selection:bg-primary/30;
-    font-family: var(--font-body), sans-serif;
+    /* Investopedia-style body: neutral Helvetica/Arial sans (no webfont) */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
     /* Mobile performance optimizations */
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeSpeed;
   }
+  /* Editorial serif headlines (Investopedia-style), tight tracking */
   h1,
   h2,
   h3,
-  h4,
+  h4 {
+    font-family: var(--font-headline), Georgia, "Times New Roman", serif !important;
+    letter-spacing: -0.012em;
+    line-height: 1.15;
+    font-weight: 700;
+    color: hsl(var(--foreground));
+  }
   h5,
-  h6,
-  p {
-    font-family: var(--font-ui), "Cabin", sans-serif !important;
-    letter-spacing: 0.055em;
+  h6 {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+    letter-spacing: 0.02em;
     line-height: 1.3;
+    font-weight: 700;
+  }
+  p {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    letter-spacing: 0;
+    line-height: 1.6;
+  }
+  /* Eyebrow / category kicker — small uppercase label */
+  .eyebrow {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    font-size: 0.6875rem;
+    color: hsl(var(--primary));
+  }
+  /* Editorial link underline-on-hover */
+  .link-editorial {
+    color: hsl(var(--foreground));
+    transition: color 0.15s ease;
+  }
+  .link-editorial:hover {
+    color: hsl(var(--primary));
   }
 
   :focus-visible {

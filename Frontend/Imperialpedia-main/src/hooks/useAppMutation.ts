@@ -55,7 +55,6 @@ export const useAppMutation = <TData, TResponse>(): UseMutationResult<
       }
 
       variables.onError?.(error);
-      console.log(error);
     },
     onSuccess(data, variables) {
       if (variables.invalidateTags?.length) {

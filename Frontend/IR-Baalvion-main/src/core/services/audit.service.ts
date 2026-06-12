@@ -22,7 +22,6 @@ export const auditService = {
 
     auditLogs = [entry, ...auditLogs];
     window.dispatchEvent(new CustomEvent('audit-updated', { detail: entry }));
-    console.log(`[Audit] ${params.action} on ${params.module} (${params.entityId})`);
   },
 
   getLogs: async (filters?: { 

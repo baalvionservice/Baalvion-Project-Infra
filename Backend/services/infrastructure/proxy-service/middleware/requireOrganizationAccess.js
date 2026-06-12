@@ -59,6 +59,14 @@ async function requireOrganizationAccess(req, res, next) {
       return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
     }
 
+    // Platform admins (e.g. the central admin console) operate ACROSS organizations;
+    // their own org/user may not exist in this service's DB. Skip per-org tenant
+    // isolation for them — admin routes still gate on requirePlatformAdmin.
+    const callerRoles = [auth.role, ...(Array.isArray(auth.roles) ? auth.roles : [])].filter(Boolean);
+    if (callerRoles.some((r) => r === 'super_admin' || r === 'platform_admin')) {
+      return next();
+    }
+
     const org = await loadOrganization(auth.organizationId);
     if (!org) return next(new AppError('ORG_NOT_FOUND', 'Organization not found', 404));
     if (org.status && org.status !== 'active') {

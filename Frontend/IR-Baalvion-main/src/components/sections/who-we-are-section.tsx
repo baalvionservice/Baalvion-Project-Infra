@@ -10,12 +10,12 @@ export default function WhoWeAreSection() {
             Who we are
           </h2>
           <p className="mt-4 text-gray-600 md:text-lg">
-            Baalvion is a global investment manager and our purpose is to help more and more people experience financial well-being. As a fiduciary to investors and a leading provider of financial technology, our clients turn to us for the solutions they need when planning for their most important goals.
+            Baalvion Industries Private Limited is building the foundational infrastructure for global B2B trade. We bring logistics, trade finance and regulatory compliance together into a single, transparent operating system — helping businesses move goods, capital and documentation across borders with greater speed, trust and efficiency. As a privately held company, we partner with qualified investors who share our long-term conviction in the future of global commerce.
           </p>
           <div className="mt-8">
             <Button asChild className="bg-black text-white hover:bg-gray-800 rounded-sm px-6 py-3">
               <Link href="#overview">
-                Learn more <span className="ml-2">&gt;</span>
+                Explore our strategy <span className="ml-2">&gt;</span>
               </Link>
             </Button>
           </div>

@@ -18,19 +18,31 @@
 const { QueryTypes } = require('sequelize');
 const { sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
+const markets = require('../config/markets');
 
-function computeAmount(type, value, subtotal, shippingAmount) {
+// Discount definitions are authored once in the BASE (USD) currency. When the order is in a
+// market currency, USD-authored monetary fields (fixed_amount value, min-purchase threshold,
+// max-discount cap) must be converted to that currency so a "$50 off" coupon discounts the
+// correct ₹/£/AED amount — not 50 of the foreign unit. Percentages are currency-agnostic.
+// For the legacy no-market path the value passes through unchanged.
+function toMarketAmount(usdValue, market) {
+    if (usdValue == null) return null;
+    return market ? markets.convertFromBase(usdValue, market) : Number(usdValue);
+}
+
+function computeAmount(type, value, subtotal, shippingAmount, market = null) {
     if (type === 'percentage') return subtotal * (Number(value) / 100);
-    if (type === 'fixed_amount') return Number(value);
+    if (type === 'fixed_amount') return toMarketAmount(value, market);
     if (type === 'free_shipping') return Number(shippingAmount) || 0;
     return null; // buy_x_get_y / unknown → caller rejects
 }
 
 /**
  * @param {Transaction} t  active order transaction
+ * @param {string|null} market  order market (us|uk|ae|in|sg) → converts USD-authored amounts
  * @returns {Promise<{discountId: string|null, code: string|null, type: string|null, discountAmount: number}>}
  */
-async function applyDiscount(t, storeId, code, subtotal, shippingAmount) {
+async function applyDiscount(t, storeId, code, subtotal, shippingAmount, market = null) {
     if (!code) return { discountId: null, code: null, type: null, discountAmount: 0 };
 
     const [d] = await sequelize.query(
@@ -50,17 +62,19 @@ async function applyDiscount(t, storeId, code, subtotal, shippingAmount) {
     const now = new Date();
     if (d.startsAt && new Date(d.startsAt) > now) throw new AppError('INVALID_DISCOUNT', `Discount '${code}' is not active yet`, 400);
     if (d.endsAt && new Date(d.endsAt) < now) throw new AppError('INVALID_DISCOUNT', `Discount code '${code}' has expired`, 400);
-    if (d.minPurchase != null && subtotal < Number(d.minPurchase)) {
+    const minPurchase = toMarketAmount(d.minPurchase, market);
+    if (minPurchase != null && subtotal < minPurchase) {
         throw new AppError('INVALID_DISCOUNT', `Order subtotal is below the minimum for '${code}'`, 400);
     }
     if (d.appliesTo && d.appliesTo !== 'all') {
         throw new AppError('UNSUPPORTED_DISCOUNT', `Discount '${code}' applies to specific items and is not supported at checkout yet`, 400);
     }
 
-    let amount = computeAmount(d.type, d.value, subtotal, shippingAmount);
+    let amount = computeAmount(d.type, d.value, subtotal, shippingAmount, market);
     if (amount == null) throw new AppError('UNSUPPORTED_DISCOUNT', `Discount type '${d.type}' is not supported at checkout yet`, 400);
 
-    if (d.maxDiscount != null) amount = Math.min(amount, Number(d.maxDiscount));
+    const maxDiscount = toMarketAmount(d.maxDiscount, market);
+    if (maxDiscount != null) amount = Math.min(amount, maxDiscount);
     const cap = d.type === 'free_shipping' ? (Number(shippingAmount) || 0) : subtotal;
     amount = Math.max(0, Math.min(amount, cap));
     amount = Number(amount.toFixed(2));

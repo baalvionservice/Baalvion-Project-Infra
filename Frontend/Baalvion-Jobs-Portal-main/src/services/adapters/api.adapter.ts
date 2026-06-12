@@ -2,6 +2,7 @@ import { TableQuery, PaginatedResponse } from '@/components/system/DataTable';
 import {
   AnalyticsData,
   AnalyticsFilters,
+  ApplicationsByCountryItem,
 } from '@/modules/analytics/domain/analytics.entity';
 import {
   Candidate,
@@ -134,6 +135,9 @@ export interface ApiAdapter {
 
   // Analytics
   getDashboardData(filters: AnalyticsFilters): Promise<AnalyticsData>;
+  getApplicationsByCountry(
+    filters: AnalyticsFilters,
+  ): Promise<ApplicationsByCountryItem[]>;
 
   // Audit
   getAuditLogs(

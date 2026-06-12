@@ -17,7 +17,9 @@ import {
   CheckCircle,
   ArrowRight
 } from 'lucide-react';
-import { CUSTOMER_SERVICE, COUNTRIES } from '@/lib/mock-data';
+import { CUSTOMER_SERVICE as CUSTOMER_SERVICE_FALLBACK, COUNTRIES } from '@/lib/mock-data';
+import { getCustomerService } from '@/lib/cms';
+import type { CountryCode } from '@/lib/types';
 
 type CustomerServicePageProps = {
   params: Promise<{
@@ -37,7 +39,10 @@ export async function generateMetadata({ params }: CustomerServicePageProps): Pr
 
 export default async function CustomerServicePage({ params }: CustomerServicePageProps) {
   const countryCode = ((await params).country as string) || 'us';
-  const info = CUSTOMER_SERVICE[countryCode] || CUSTOMER_SERVICE.us;
+  const info =
+    (await getCustomerService(countryCode as CountryCode)) ??
+    CUSTOMER_SERVICE_FALLBACK[countryCode] ??
+    CUSTOMER_SERVICE_FALLBACK.us;
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
 
   return (

@@ -29,9 +29,12 @@ export default function ContactForm() {
                             <SelectValue placeholder="Select Category" />
                         </SelectTrigger>
                         <SelectContent>
+                            <SelectItem value="investor">Investor Inquiry</SelectItem>
+                            <SelectItem value="partnership">Strategic Partnership Request</SelectItem>
+                            <SelectItem value="diligence">Due Diligence / Data Room Access</SelectItem>
                             <SelectItem value="financial">Financial Reporting</SelectItem>
                             <SelectItem value="governance">Governance & Voting</SelectItem>
-                            <SelectItem value="media">Media & Press</SelectItem>
+                            <SelectItem value="media">Media & Press Request</SelectItem>
                             <SelectItem value="career">Career Opportunities</SelectItem>
                         </SelectContent>
                     </Select>

@@ -1,0 +1,25 @@
+<svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Baalvion global logistics network">
+  <defs>
+    <radialGradient id="g" cx="50%" cy="45%" r="70%">
+      <stop offset="0" stop-color="#103a63"/>
+      <stop offset="1" stop-color="#0A1A2B"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#g)"/>
+  <g stroke="#21CEDD" stroke-opacity="0.5" stroke-width="2" fill="none">
+    <path d="M180 560 C400 200 820 220 1020 480"/>
+    <path d="M150 300 C480 520 760 560 1080 300"/>
+    <path d="M300 660 C520 420 720 420 980 640"/>
+  </g>
+  <g fill="#21CEDD">
+    <circle cx="180" cy="560" r="9"/><circle cx="1020" cy="480" r="9"/>
+    <circle cx="150" cy="300" r="7"/><circle cx="1080" cy="300" r="7"/>
+    <circle cx="600" cy="240" r="11" fill="#FFFFFF"/>
+    <circle cx="300" cy="660" r="7"/><circle cx="980" cy="640" r="7"/>
+  </g>
+  <g fill="#0E2E4E" opacity="0.55">
+    <ellipse cx="600" cy="430" rx="430" ry="180"/>
+  </g>
+  <text x="64" y="700" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" fill="#FFFFFF">Integrated Global Logistics</text>
+  <text x="64" y="738" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#9FC6D6">Sea · Rail · Road · Air corridors</text>
+</svg>

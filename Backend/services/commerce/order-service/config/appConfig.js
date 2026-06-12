@@ -1,5 +1,9 @@
+const path = require('path');
 const dotenv = require('dotenv');
-dotenv.config();
+// Load THIS service's .env with override so newly-added vars (e.g. CART_SESSION_SECRET) win
+// over a stale long-lived pm2-daemon environment that would otherwise shadow them. In
+// production no .env is shipped (env comes from Secrets Manager), so this is a safe no-op.
+dotenv.config({ path: path.resolve(__dirname, '..', '.env'), override: true });
 
 const parseList = (value, fallback = []) => {
     if (!value) return fallback;
@@ -72,6 +76,12 @@ module.exports = {
         opsEmail:    process.env.OPS_ALERT_EMAIL || '',
         timeoutMs:   Number(process.env.NOTIFICATION_TIMEOUT_MS || 4000),
         get enabled() { return !!this.internalKey && (!!this.opsUserId || !!this.opsEmail); },
+        // Transactional order emails (confirmation/paid) → notification-service. Independent of
+        // the ops-alert toggle above: only an internal key is required (recipient is the customer,
+        // not OPS_ALERT_*). Fail-open — a delivery failure never affects checkout.
+        get orderEmailsEnabled() { return !!this.internalKey; },
+        // Base URL used to build the {{orderUrl}} link in customer order emails.
+        storefrontUrl: process.env.STOREFRONT_URL || process.env.APP_URL || 'http://localhost:3000',
     },
     // Scheduled reconciliation sweep (BullMQ repeatable). Sweeps active stores, compares order
     // payments/refunds to the ledger, alerts on drift, and (optionally) auto-backfills missing entries.

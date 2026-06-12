@@ -183,7 +183,7 @@ export function CompanySignupForm() {
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>
-                  I agree to the <a href="#" className="underline">Terms & Conditions</a>
+                  I agree to the <a href="/terms" className="underline">Terms & Conditions</a>
                 </FormLabel>
                  <FormMessage />
               </div>

@@ -1,5 +1,5 @@
 /**
- * @fileOverview Inventory Service for GeoTrade Nexus.
+ * @fileOverview Inventory Service for Baalvion Mining Inc.
  * Manages mineral listings and stock levels.
  */
 

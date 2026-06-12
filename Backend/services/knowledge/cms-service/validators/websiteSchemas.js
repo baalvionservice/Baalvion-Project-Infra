@@ -23,7 +23,8 @@ const brandingSchema = z.object({
 
 const createWebsiteSchema = z.object({
     name: z.string().min(1).max(200),
-    slug: z.string().min(1).max(200).regex(/^[a-z0-9-]+$/, 'Slug must be lowercase alphanumeric with hyphens'),
+    // Allow domain-style slugs (e.g. ir.baalvion.com) in addition to plain kebab-case.
+    slug: z.string().min(1).max(200).regex(/^[a-z0-9.-]+$/, 'Slug must be lowercase alphanumeric with hyphens or dots'),
     domain: z.string().max(255).optional(),
     description: z.string().max(1000).optional(),
     plan: planEnum.default('basic'),
@@ -43,7 +44,7 @@ const updateWebsiteSchema = z.object({
     branding: brandingSchema.optional(),
 });
 
-const cmsRoleEnum = z.enum(['cms_admin', 'cms_editor', 'cms_author', 'cms_contributor', 'cms_reviewer', 'cms_publisher', 'cms_seo_manager', 'cms_viewer']);
+const cmsRoleEnum = z.enum(['cms_admin', 'cms_editor', 'cms_publisher', 'cms_compliance', 'cms_reviewer', 'cms_seo_manager', 'cms_author', 'cms_contributor', 'cms_viewer']);
 
 const addMemberSchema = z
     .object({

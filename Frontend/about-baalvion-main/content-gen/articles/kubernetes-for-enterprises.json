@@ -1,0 +1,113 @@
+{
+  "slug": "kubernetes-for-enterprises",
+  "title": "Kubernetes for Enterprises",
+  "kind": "article",
+  "category": "tech",
+  "seo": {
+    "title": "Kubernetes for Enterprises: Scale, Security, Cost",
+    "description": "How to run Kubernetes at enterprise scale: platform teams, multi-tenancy, security, cost control, and when not to use it — from the team behind BOS.",
+    "keywords": [
+      "kubernetes enterprise",
+      "platform engineering",
+      "multi-tenant kubernetes",
+      "kubernetes security",
+      "kubernetes cost optimization",
+      "internal developer platform",
+      "k8s namespaces vs clusters",
+      "kubernetes at scale",
+      "cloud native infrastructure",
+      "kubernetes governance"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "8 min read",
+  "heroImageSeed": "k8s-ent-9182",
+  "excerpt": "Kubernetes solves real problems at scale and creates new ones. A pragmatic view from the team running BOS across 198 markets on when to adopt it, how to keep it secure and affordable, and when to walk away.",
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Kubernetes is a platform, not a deployment target" },
+    { "type": "paragraph", "text": "Most enterprises adopt Kubernetes for the wrong reason: a team wanted container orchestration and a vendor sold them a control plane. Eighteen months later they own a distributed operating system they never staffed for, with seventeen Helm charts nobody can read and a cluster upgrade everyone is afraid to run. The technology is sound. The adoption model was wrong. Kubernetes is not where you deploy applications; it is the substrate on which you build an internal platform, and that distinction decides whether it pays off." },
+    { "type": "paragraph", "text": "At Baalvion we run the [Baalvion Operating System](/platform) — a multi-tenant trade infrastructure spanning commerce, finance, compliance, logistics, and intelligence — across 198 markets and 180+ jurisdictions. Kubernetes underpins large parts of that estate, but only because we treat it as an internal platform with a dedicated owner, a paved road, and explicit guardrails. The lessons below come from operating it under real regulatory load, not from a greenfield demo. They apply whether you are consolidating ten legacy VMs or, like us, orchestrating a [cloud-native infrastructure](/services/cloud-solutions) that has to satisfy SOC 2 Type II and ISO 27001 auditors." },
+    { "type": "heading", "level": 2, "text": "The platform team is the prerequisite, not the optimization" },
+    { "type": "paragraph", "text": "The single strongest predictor of whether Kubernetes succeeds in an enterprise is whether there is a platform team that owns it as a product. Not a rotation. Not a tiger team that disbands after go-live. A standing team with a roadmap, an on-call rotation, and internal customers — your application engineers — whose experience they are accountable for." },
+    { "type": "paragraph", "text": "The anti-pattern is making every product team learn Kubernetes. That spreads a steep, slow-moving operational discipline across people whose job is shipping business features. The result is inconsistent manifests, copy-pasted RBAC, and a security posture that varies by team. The platform-engineering model inverts this: the platform team builds a paved road — opinionated defaults, golden Helm or Kustomize bases, a CI/CD pipeline, and a thin self-service interface (often Backstage or an internal portal) — so that a product engineer deploys by filling in a handful of well-understood fields, never by hand-authoring a 400-line YAML file." },
+    { "type": "list", "ordered": false, "items": [
+      "A golden path: a templated service scaffold that wires in logging, metrics, tracing, health checks, and sane resource requests by default.",
+      "Policy as code: admission control (OPA Gatekeeper or Kyverno) that rejects non-compliant workloads at the API server, so security is enforced, not requested.",
+      "Progressive delivery: Argo CD or Flux for GitOps so the cluster state is a reviewed, version-controlled artefact and rollbacks are a git revert.",
+      "A clear support contract: what the platform owns (the substrate, upgrades, base images) versus what product teams own (their code, their SLOs)."
+    ] },
+    { "type": "paragraph", "text": "If you cannot fund this team, you are not ready for Kubernetes. A managed PaaS or serverless platform will give a small organisation more leverage per engineer than a self-managed control plane ever will." },
+    { "type": "heading", "level": 2, "text": "Multi-tenancy: namespaces, node pools, or clusters" },
+    { "type": "paragraph", "text": "Multi-tenancy is where most enterprise Kubernetes designs quietly fail, because the obvious choice — one big cluster with a namespace per team — is the weakest isolation boundary Kubernetes offers. Namespaces partition names and apply quotas and network policies, but they share one API server, one set of nodes, one kernel, and one control plane. A noisy neighbour, a CRD that crashes the scheduler, or a container escape is a blast radius across every tenant." },
+    { "type": "paragraph", "text": "We think about isolation as a spectrum and match it to the trust and regulatory profile of the workload. Soft multi-tenancy — namespaces with strict ResourceQuotas, LimitRanges, NetworkPolicies, and per-namespace RBAC — is fine for internal teams that already trust each other. Harder isolation puts hostile or regulated tenants on dedicated node pools (taints and tolerations, or a tool like Karpenter provisioning per-tenant capacity), and the hardest tier gives a tenant a dedicated cluster entirely." },
+    { "type": "paragraph", "text": "For BOS this maps directly onto data-residency obligations: a tenant whose data must remain inside a specific jurisdiction does not get a namespace, it gets infrastructure that is provably regional. This is the same isolation discipline that underpins our [multi-tenant identity platform](/case-studies/multi-tenant-identity-platform), where the cost of a cross-tenant leak is not an outage but a compliance breach. The rule we apply: namespaces isolate by convention and policy; clusters isolate by physics. Choose physics when the downside is regulatory." },
+    { "type": "heading", "level": 2, "text": "Security: the cluster is an attack surface" },
+    { "type": "paragraph", "text": "A default Kubernetes install is not secure, and the gap between the demo and a defensible production cluster is the work most teams underestimate. The control plane, the container runtime, the supply chain, and the network are four distinct surfaces, and a compliance-first posture has to address all of them." },
+    { "type": "list", "ordered": false, "items": [
+      "Least-privilege RBAC: no wildcard roles, no cluster-admin handed to CI, service accounts scoped per workload, and the default service account token not auto-mounted.",
+      "Pod and runtime hardening: enforce the restricted Pod Security Standard, run containers as non-root with read-only root filesystems and dropped Linux capabilities, and use a runtime sensor (Falco) for behavioural detection.",
+      "Network default-deny: start with a NetworkPolicy that denies all ingress and egress, then open paths explicitly. East-west traffic inside a cluster is invisible without this.",
+      "Supply chain integrity: scan images (Trivy or Grype), sign and verify them (Sigstore/cosign), and admit only signed artefacts. The 2021 attacks on build pipelines made this table stakes.",
+      "Secrets done properly: never a base64 Secret committed to git. Use an external manager (HashiCorp Vault or a cloud KMS) with the Secrets Store CSI driver, encrypt etcd at rest, and rotate.",
+      "mTLS and identity: a service mesh (Istio or Linkerd) for mutual TLS and workload identity when zero-trust east-west is required."
+    ] },
+    { "type": "paragraph", "text": "Every BOS workload encrypts data in transit and at rest with AES-256, and admission policy refuses anything that would weaken that baseline. The discipline that makes this scale is the same one we apply to our [enterprise software](/services/enterprise-software) generally: security is a property of the platform, enforced by automation at the API boundary, not a checklist a developer is asked to remember. If a non-compliant workload can be applied successfully, the policy has already failed." },
+    { "type": "heading", "level": 2, "text": "Cost: the bill that grows in the dark" },
+    { "type": "paragraph", "text": "Kubernetes makes provisioning frictionless, which is exactly why it is expensive. Frictionless provisioning plus unbounded resource requests plus the human habit of padding limits produces clusters that run at fifteen percent utilisation while the invoice climbs. The orchestrator is not the cost driver; the absence of feedback is." },
+    { "type": "paragraph", "text": "The first lever is right-sizing. Most teams set resource requests by guessing high and never revisiting them, which means the scheduler reserves capacity that is never used. The Vertical Pod Autoscaler in recommendation mode, or a tool like Goldilocks, surfaces the gap between requested and actual consumption — and the savings are routinely 30 to 50 percent. The Horizontal Pod Autoscaler then scales replicas to real demand, and a node autoscaler (Cluster Autoscaler or Karpenter) scales the underlying machines so you are not paying for idle nodes overnight." },
+    { "type": "list", "ordered": false, "items": [
+      "Bin-pack deliberately: consolidate workloads onto fewer, larger nodes rather than spreading thinly across many small ones.",
+      "Use spot or preemptible capacity for fault-tolerant, stateless workloads — often 60 to 90 percent cheaper, with pod disruption budgets to absorb reclaims.",
+      "Make cost visible per team: tools like OpenCost or Kubecost allocate spend back to namespaces and labels, which is the only thing that actually changes engineering behaviour.",
+      "Set ResourceQuotas per tenant so a single team cannot silently consume the cluster's headroom."
+    ] },
+    { "type": "paragraph", "text": "The cultural point matters more than any tool: cost has to be a number a team sees next to its own services. Until spend is attributed, every optimisation is somebody else's problem. We treat FinOps as part of [DevOps](/services/devops), not a quarterly finance exercise, because the decisions that drive the bill are made in pull requests." },
+    { "type": "heading", "level": 2, "text": "When not to use Kubernetes" },
+    { "type": "paragraph", "text": "The most senior engineering judgement is knowing when the answer is no. Kubernetes is a powerful, general-purpose abstraction, and general-purpose abstractions carry fixed overhead that small or simple systems never amortise." },
+    { "type": "list", "ordered": false, "items": [
+      "You have a handful of services and no platform team. The operational tax will dwarf any benefit; a managed PaaS, App Runner, or a serverless model is a better trade.",
+      "Your workload is a single monolith with predictable traffic. A VM or two behind a load balancer is cheaper, simpler, and easier to reason about.",
+      "Your workload is fundamentally serverless or event-driven. Managed functions and queues may eliminate the orchestration problem entirely.",
+      "You are adopting it for resume-driven reasons. 'Everyone uses Kubernetes' is not an architecture decision.",
+      "You need it for one stateful database. Run a managed database service; do not turn your team into accidental database operators on top of an orchestrator."
+    ] },
+    { "type": "paragraph", "text": "Kubernetes earns its complexity when you have many services, multiple teams shipping independently, real elasticity requirements, and the organisational maturity to run a platform. It is the right foundation for systems like ours that must scale across jurisdictions while staying auditable. It is the wrong foundation for a system that would run happily on three servers. Choosing it well is an exercise in [technology consulting](/services/technology-consulting) honesty: match the tool to the problem, not the problem to the tool you wanted to learn." },
+    { "type": "heading", "level": 2, "text": "The Baalvion view" },
+    { "type": "paragraph", "text": "Kubernetes is neither a silver bullet nor a trap. It is infrastructure-grade machinery that rewards a platform mindset and punishes a deployment-target one. Fund the platform team, enforce isolation by physics where regulation demands it, push security to the API boundary, attribute cost to the teams that create it, and keep the discipline to say no when a simpler tool wins. Do that, and Kubernetes becomes what it should be: an invisible substrate your engineers build on without thinking about it — exactly the standard we hold ourselves to across the BOS platform." }
+  ],
+  "faqs": [
+    {
+      "q": "Should we run one large cluster or many smaller ones?",
+      "a": "It depends on your isolation requirements. A single cluster with namespaces is simpler to operate and cheaper, and is fine for teams that trust each other. Reach for separate node pools or dedicated clusters when tenants are hostile, regulated, or bound by data-residency rules — namespaces isolate by policy, clusters isolate by physics. Many enterprises run a small fleet of clusters split by environment and regulatory domain rather than one monolith."
+    },
+    {
+      "q": "How big does a team need to be before Kubernetes makes sense?",
+      "a": "There is no headcount threshold, but there is a structural one: you need a standing platform team that owns Kubernetes as a product, with on-call and a roadmap. If you cannot fund that ownership, a managed PaaS or serverless platform will give you more leverage per engineer than a self-managed control plane."
+    },
+    {
+      "q": "Is managed Kubernetes (EKS, GKE, AKS) enough, or do we still need expertise?",
+      "a": "Managed offerings remove the burden of running the control plane and etcd, which is genuinely valuable. They do not remove the need to design RBAC, network policy, multi-tenancy, autoscaling, security hardening, and cost governance. Managed Kubernetes lowers the floor; it does not raise the ceiling of expertise you need to run it well."
+    },
+    {
+      "q": "What is the single biggest source of wasted Kubernetes spend?",
+      "a": "Over-provisioned resource requests. Teams guess high on CPU and memory and never revisit, so the scheduler reserves capacity that is never used and clusters run at low utilisation. Right-sizing with the Vertical Pod Autoscaler in recommendation mode plus per-team cost visibility (OpenCost or Kubecost) typically recovers 30 to 50 percent."
+    },
+    {
+      "q": "How do we keep a Kubernetes cluster compliant with SOC 2 or ISO 27001?",
+      "a": "Push controls to the API boundary so they are enforced, not requested. Use admission control (OPA Gatekeeper or Kyverno) to reject non-compliant workloads, enforce least-privilege RBAC and the restricted Pod Security Standard, default-deny network policy, signed images, and external secret management with encryption at rest. If a non-compliant workload can be applied successfully, your control has already failed."
+    },
+    {
+      "q": "When is Kubernetes the wrong choice?",
+      "a": "When you have only a few services and no platform team, when your workload is a single monolith with predictable traffic, when a serverless model would eliminate orchestration entirely, or when you only need it to host one stateful database. In those cases a VM, a managed PaaS, or managed serverless is simpler, cheaper, and easier to reason about."
+    }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "cloud-native infrastructure", "href": "/services/cloud-solutions" },
+    { "anchor": "multi-tenant identity platform", "href": "/case-studies/multi-tenant-identity-platform" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" },
+    { "anchor": "DevOps", "href": "/services/devops" },
+    { "anchor": "technology consulting", "href": "/services/technology-consulting" }
+  ],
+  "customFields": {}
+}

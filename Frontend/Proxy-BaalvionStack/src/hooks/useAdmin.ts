@@ -4,7 +4,7 @@ import {
   adminDashboardApi, adminTenantApi, adminUserApi, adminProviderApi,
   adminRoutingApi, adminSystemApi, adminAbuseApi, adminRevenueApi,
   adminFeatureFlagApi, adminAuditApi, adminSupportApi, adminOrchestrationApi, adminTrustApi,
-  adminEdgeApi, adminIntelligenceApi, adminFinanceApi, adminMarketplaceApi,
+  adminEdgeApi, adminIntelligenceApi, adminFinanceApi, adminMarketplaceApi, adminBillingApi,
   AdminProvider, AdminRoutingRule, AdminRateLimit, RoutingPolicy,
   EdgeRegion, AsnIntel, IpPool,
 } from "@/lib/adminApiClient";
@@ -594,4 +594,22 @@ export const useUpsertPromotion = () => {
   const { toast } = useToast();
   return useMutation({ mutationFn: (d: Record<string, unknown>) => adminMarketplaceApi.upsertPromotion(d),
     onSuccess: () => toast({ title: "Promotion saved" }), onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }) });
+};
+
+// ─── Pending bank/wire orders (offline settlement) ─────────────────────────────
+export const useAdminPendingOrders = () =>
+  useQuery({ queryKey: ["admin", "pending-orders"], queryFn: adminBillingApi.listPendingOrders, staleTime: 15_000 });
+
+export const useMarkOrderPaid = () => {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  return useMutation({
+    mutationFn: (invoiceId: string) => adminBillingApi.markOrderPaid(invoiceId),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["admin", "pending-orders"] });
+      qc.invalidateQueries({ queryKey: ["admin", "subscriptions"] });
+      toast({ title: r?.activated ? "Payment received — subscription activated" : "Order marked as paid" });
+    },
+    onError: (e: Error) => toast({ title: "Error", description: e.message, variant: "destructive" }),
+  });
 };

@@ -106,6 +106,20 @@ export const billingApi = {
     get<Paginated<Invoice>>("/billing/invoices", params as Record<string, number | undefined>),
   getInvoice: (id: string) => get<Invoice>(`/billing/invoices/${id}`),
   changePlan: (planSlug: string) => post<Subscription>("/billing/change-plan", { planSlug }),
+  // Activate the org's subscription for a plan AFTER a successful payment (trial → active).
+  // Optional amount/interval let the backend record an invoice with the exact charged total.
+  activate: (planSlug: string, amount?: number, interval?: "monthly" | "yearly") =>
+    post<Subscription>("/billing/activate", { planSlug, amount, interval }),
+  // Bank/wire: create a PENDING order (settled offline) — returns the pending invoice.
+  createOrder: (payload: { planSlug: string; method: "bank" | "wire"; interval?: "monthly" | "yearly"; amount?: number }) =>
+    post<{ invoice: Invoice; subscription: Subscription; method: string; planSlug: string }>("/billing/orders", payload),
+  // Server-generated invoice document (real data, for download).
+  getInvoiceDocument: (id: string) =>
+    get<{ filename: string; contentType: string; content: string }>(`/billing/invoices/${id}/document`),
+  // Pay-As-You-Go prepaid credit wallet.
+  getCredit: () => get<{ balanceUsd: number; gbRemaining: number; usdPerGb: number }>("/billing/credit"),
+  buyCredit: (amountUsd: number) =>
+    post<{ balanceUsd: number; gbRemaining: number; usdPerGb: number; planSlug: string }>("/billing/credit", { amountUsd }),
   getPaymentMethods: () => get<PaymentMethod[]>("/billing/payment-methods"),
   addPaymentMethod: (data: Partial<PaymentMethod>) => post<PaymentMethod>("/billing/payment-methods", data),
   deletePaymentMethod: (id: string) => del<void>(`/billing/payment-methods/${id}`),

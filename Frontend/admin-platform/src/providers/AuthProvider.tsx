@@ -23,6 +23,14 @@ export default function AuthProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
 
     (async () => {
+      // On public auth pages (/login, /mfa, …) there is never a session to restore —
+      // middleware redirects authenticated users away before this mounts. Skip the cookie
+      // refresh entirely; otherwise every login-page load fires a guaranteed-401
+      // /auth-bff/refresh, spamming the console and the auth-service rate limiter.
+      if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+        if (!cancelled) setHydrated(true);
+        return;
+      }
       // Skip if we already have a live token (e.g. just logged in this tab).
       if (useAuthStore.getState().isAuthenticated()) {
         if (!cancelled) setHydrated(true);

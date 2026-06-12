@@ -44,13 +44,13 @@ export function PublicFooter() {
                 <div className="space-y-4">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Follow Us</p>
                   <div className="flex items-center gap-6">
-                    <Link href="#" className="text-white hover:text-blue-400 transition-colors"><Facebook className="w-5 h-5" /></Link>
-                    <Link href="#" className="text-white hover:text-pink-400 transition-colors"><Instagram className="w-5 h-5" /></Link>
-                    <Link href="#" className="text-white hover:text-blue-300 transition-colors"><Linkedin className="w-5 h-5" /></Link>
-                    <Link href="#" className="text-white hover:text-white/80 transition-colors font-bold text-lg">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.83 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/></svg>
+                    <Link href="#" className="text-white hover:text-blue-400 transition-colors" aria-label="Law Elite Network on Facebook"><Facebook className="w-5 h-5" aria-hidden="true" /></Link>
+                    <Link href="#" className="text-white hover:text-pink-400 transition-colors" aria-label="Law Elite Network on Instagram"><Instagram className="w-5 h-5" aria-hidden="true" /></Link>
+                    <Link href="#" className="text-white hover:text-blue-300 transition-colors" aria-label="Law Elite Network on LinkedIn"><Linkedin className="w-5 h-5" aria-hidden="true" /></Link>
+                    <Link href="#" className="text-white hover:text-white/80 transition-colors font-bold text-lg" aria-label="Law Elite Network on TikTok">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.83 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z"/></svg>
                     </Link>
-                    <Link href="#" className="text-white hover:text-red-500 transition-colors"><Youtube className="w-6 h-6" /></Link>
+                    <Link href="#" className="text-white hover:text-red-500 transition-colors" aria-label="Law Elite Network on YouTube"><Youtube className="w-6 h-6" aria-hidden="true" /></Link>
                   </div>
                 </div>
               </div>

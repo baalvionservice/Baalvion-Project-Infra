@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
-import Image from 'next/image';
+import { BrandImage } from '@/components/ui/BrandImage';
 import { MAISON_SERVICES } from '@/lib/mock-monetization';
 import { Button } from '@/components/ui/button';
 import { InquiryModal } from '@/components/product/InquiryModal';
@@ -26,11 +26,12 @@ export default function ServicePage() {
 
       {/* Hero Header */}
       <section className="relative h-[60vh] w-full flex items-center justify-center overflow-hidden bg-black text-white">
-        <Image 
-          src={service.imageUrl} 
-          alt={service.name} 
-          fill 
-          className="object-cover opacity-40 grayscale-[50%]"
+        <BrandImage
+          src={service.imageUrl}
+          alt={service.name}
+          label={service.name}
+          className="absolute inset-0"
+          imgClassName="opacity-40 grayscale-[50%]"
           priority
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60" />

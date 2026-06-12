@@ -41,10 +41,12 @@ export default function QuickActionsFAB() {
                             ))}
                         </div>
                     )}
-                     <Button 
-                        size="icon" 
+                     <Button
+                        size="icon"
                         className="rounded-full w-16 h-16 shadow-lg"
                         onClick={() => setIsOpen(!isOpen)}
+                        aria-label={isOpen ? 'Close quick actions' : 'Open quick actions'}
+                        aria-expanded={isOpen}
                     >
                         <Plus className={cn("h-8 w-8 transition-transform", isOpen && "rotate-45")} />
                     </Button>

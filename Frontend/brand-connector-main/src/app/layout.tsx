@@ -18,12 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
+  const siteUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://connect.baalvion.com';
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: 'Baalvion Connect',
-    url: 'https://baalvion-connect.vercel.app',
-    logo: 'https://baalvion-connect.vercel.app/logo.png',
+    url: siteUrl,
+    logo: `${siteUrl}/logo.png`,
     sameAs: [
       'https://twitter.com/baalvion',
       'https://linkedin.com/company/baalvion',

@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Metadata } from "next";
 import Image from "next/image";
@@ -6,10 +7,12 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { cmsGetPosts, type MiningPost } from "@/lib/cms";
+import { BRAND_IMAGES } from "@/lib/brand-assets";
 
 export const metadata: Metadata = {
-  title: 'Trade Insights | GeoTrade Nexus Blog',
+  title: 'Trade Insights Blog',
   description: 'Expert analysis on global mineral markets, mining compliance trends, and industrial supply chain innovation.',
+  alternates: { canonical: '/blog' },
 };
 
 // Always reflect the latest published content from the central CMS.
@@ -19,10 +22,13 @@ const slugify = (s: string) =>
   s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 // Built-in seed content — used only when the central CMS has no posts / is offline.
+// NOTE: Seed fallback only — shown when the central CMS has no posts / is offline.
+// Authors are the in-house editorial desk (no invented bylines). Replace with real
+// published articles via the CMS.
 const FALLBACK_POSTS: MiningPost[] = [
-  { title: "The Rise of Critical Minerals in 2024", category: "Market Analysis", date: "May 12, 2024", author: "Dr. Sarah Chen", slug: "the-rise-of-critical-minerals-in-2024", excerpt: "Why lithium, cobalt, and rare earths are reshaping global supply chains.", image: "https://picsum.photos/seed/blog-0/1200/600", readTime: "5 min read", contentHtml: "" },
-  { title: "AI in Mining: Beyond the Hype", category: "Technology", date: "May 10, 2024", author: "Marc Holden", slug: "ai-in-mining-beyond-the-hype", excerpt: "Where machine learning is genuinely moving the needle in mineral extraction.", image: "https://picsum.photos/seed/blog-1/1200/600", readTime: "6 min read", contentHtml: "" },
-  { title: "Navigating Cross-Border Logistics", category: "Operations", date: "May 05, 2024", author: "James Miller", slug: "navigating-cross-border-logistics", excerpt: "A practical guide to customs, compliance, and clearing for mineral exporters.", image: "https://picsum.photos/seed/blog-2/1200/600", readTime: "4 min read", contentHtml: "" },
+  { title: "The Rise of Critical Minerals", category: "Market Analysis", date: "2026", author: "Baalvion Editorial Desk", slug: "the-rise-of-critical-minerals", excerpt: "Why lithium, cobalt, and rare earths are reshaping global supply chains.", image: BRAND_IMAGES.insight, readTime: "5 min read", contentHtml: "" },
+  { title: "AI in Mining: Beyond the Hype", category: "Technology", date: "2026", author: "Baalvion Editorial Desk", slug: "ai-in-mining-beyond-the-hype", excerpt: "Where machine learning is genuinely moving the needle in mineral extraction.", image: BRAND_IMAGES.insight, readTime: "6 min read", contentHtml: "" },
+  { title: "Navigating Cross-Border Logistics", category: "Operations", date: "2026", author: "Baalvion Editorial Desk", slug: "navigating-cross-border-logistics", excerpt: "A practical guide to customs, compliance, and clearing for mineral exporters.", image: BRAND_IMAGES.insight, readTime: "4 min read", contentHtml: "" },
 ];
 
 export default async function BlogPage() {
@@ -32,7 +38,7 @@ export default async function BlogPage() {
   const blogSchema = {
     "@context": "https://schema.org",
     "@type": "Blog",
-    "name": "GeoTrade Nexus Insights",
+    "name": "Baalvion Mining Inc. Insights",
     "description": "Mining industry analysis and trade insights.",
     "blogPost": posts.map(p => ({
       "@type": "BlogPosting",
@@ -63,7 +69,7 @@ export default async function BlogPage() {
                 <Card className="border-none shadow-sm overflow-hidden group hover:shadow-xl transition-all cursor-pointer h-full">
                   <div className="relative h-48 bg-muted">
                     <Image
-                      src={post.image || `https://picsum.photos/seed/blog-${i}/600/400`}
+                      src={post.image || BRAND_IMAGES.insight}
                       alt={post.title}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -90,6 +96,7 @@ export default async function BlogPage() {
           })}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

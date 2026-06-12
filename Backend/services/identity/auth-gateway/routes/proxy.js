@@ -16,11 +16,10 @@ const TARGETS = {
   imperialpedia: process.env.SVC_IMPERIALPEDIA || 'http://localhost:3004',
   ir:            process.env.SVC_IR            || 'http://localhost:3008',
   dashboard:     process.env.SVC_DASHBOARD     || 'http://localhost:3009',
-  ctm:           process.env.SVC_CTM           || 'http://localhost:3011',
+  ctm:           process.env.SVC_CTM           || 'http://localhost:3017',
   orders:        process.env.SVC_ORDERS        || 'http://localhost:3013',
   proxy:         process.env.SVC_PROXY         || 'http://localhost:4000',
   // Phase 6E-5 — island backends (dual-auth via bffBridge; gateway is the preferred path).
-  'elite-circle': process.env.SVC_ELITE_CIRCLE || 'http://localhost:3051',
   insiders:       process.env.SVC_INSIDERS     || 'http://localhost:3050',
   trade:          process.env.SVC_TRADE        || 'http://localhost:3025',
   // financial-services-java — system of record for money/KYC/risk (Spring resource servers,
@@ -51,6 +50,21 @@ const FINANCE = {
   bnpl:                process.env.SVC_CREDIT        || 'http://localhost:3037',
   fx:                  process.env.SVC_FX            || 'http://localhost:3038',
   wallets:             process.env.SVC_WALLET        || 'http://localhost:3039',
+  // Finance & Treasury sprint (2026-06-11): the system-of-record money services. Their Java
+  // @RequestMapping roots are /api/v1/<segment>, so the FINANCE rule (`/api/v1` + kept segment)
+  // hits them exactly — unlike the legacy TARGETS entries (payment/ledger/...) which strip the
+  // prefix and miss the Spring base path. These take precedence over TARGETS (router checks
+  // FINANCE first), so /finance-bff/ledger/entries → :13014/api/v1/ledger/entries, etc.
+  ledger:     process.env.SVC_LEDGER     || 'http://localhost:13014',
+  payments:   process.env.SVC_PAYMENT    || 'http://localhost:13015',
+  accounts:   process.env.SVC_ACCOUNT    || 'http://localhost:13016',
+  escrow:     process.env.SVC_ESCROW     || 'http://localhost:13017',
+  settlement: process.env.SVC_SETTLEMENT || 'http://localhost:13018',
+  // invoice-service (:13021) — Invoice Management + Accounts Receivable + Accounts Payable.
+  // Controller roots /api/v1/{invoices,receivables,payables}; all served by the one service.
+  invoices:    process.env.SVC_INVOICE || 'http://localhost:13021',
+  receivables: process.env.SVC_INVOICE || 'http://localhost:13021',
+  payables:    process.env.SVC_INVOICE || 'http://localhost:13021',
   // §3 trade microservices (financial-services-java, built+committed by a parallel session).
   // Gateway segment === the Java @RequestMapping root (verified from source) so the FINANCE
   // rule (`/api/v1` + path) hits the controller exactly. Confirmed roots:
@@ -74,12 +88,20 @@ const FINANCE = {
 
 const svcOf = (url) => (url.split('?')[0].split('/')[1] || '');
 
+// R3 cutover: order lifecycle is owned by the GTOS order-execution-service (schema `oms`,
+// money-truth + saga). Only the /trade/v1/orders subtree moves there; RFQ/quote/deal/listing/
+// escrow stay on the legacy trade-service. The standard /<svc>-strip rewrite still applies
+// (it produces /v1/orders..., which order-execution mounts), so only the target differs.
+const ORDER_EXECUTION = process.env.SVC_ORDER_EXECUTION || 'http://localhost:3052';
+const isTradeOrders = (url) => /^\/trade\/v1\/orders(\/|$)/.test(String(url).split('?')[0]);
+
 const proxy = createProxyMiddleware({
   changeOrigin: true,
   // mounted at /api → req.url is /<svc>/... ; resolve the per-service target.
-  router: (req) => FINANCE[svcOf(req.url)] || TARGETS[svcOf(req.url)],
+  router: (req) => (isTradeOrders(req.url) ? ORDER_EXECUTION : (FINANCE[svcOf(req.url)] || TARGETS[svcOf(req.url)])),
   // Legacy services: strip the /<svc> prefix (per-backend base path lives on the target).
   // Finance services: KEEP the segment and prepend /api/v1 (the Spring controller base path).
+  // Trade orders take the legacy strip branch → /v1/orders... (order-execution's mount).
   pathRewrite: (path) => (FINANCE[svcOf(path)] ? '/api/v1' + path : (path.replace(/^\/[^/?]+/, '') || '/')),
   // http-proxy-middleware v3: event handlers live under `on` (the v2 top-level
   // onProxyReq/onError are ignored, which silently disables the trust boundary).

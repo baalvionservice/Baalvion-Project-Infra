@@ -223,7 +223,7 @@ let articles: Article[] = [
     slug: "today",
     category: "updates",
     date: "March 24, 2026",
-    image: "https://picsum.photos/seed/news1/600/400",
+    image: "/images/placeholder.svg",
     author: "Baalvion Staff",
     readTime: "2 min read",
     status: "Published",

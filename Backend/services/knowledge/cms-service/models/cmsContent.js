@@ -3,6 +3,7 @@ module.exports = function (sequelize, DataTypes) {
         id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true },
         websiteId: { type: DataTypes.UUID, allowNull: false },
         categoryId: { type: DataTypes.UUID, allowNull: true },
+        categoryIds: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
         authorId: { type: DataTypes.BIGINT, allowNull: false },
         lastEditedBy: { type: DataTypes.BIGINT, allowNull: true },
         title: { type: DataTypes.STRING(500), allowNull: false },
@@ -22,7 +23,7 @@ module.exports = function (sequelize, DataTypes) {
         seoMetadata: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
         status: {
             type: DataTypes.ENUM(
-                'draft', 'pending_review', 'changes_requested',
+                'draft', 'pending_review', 'changes_requested', 'compliance_review',
                 'approved', 'scheduled', 'published', 'archived'
             ),
             allowNull: false,

@@ -15,6 +15,9 @@
 # Production
 /build
 
+# Runtime data store (onboarding applications persisted by API routes)
+/.data/
+
 # Miscellaneous
 .DS_Store
 *.pem

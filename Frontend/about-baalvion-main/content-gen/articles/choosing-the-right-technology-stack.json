@@ -1,0 +1,91 @@
+{
+  "slug": "choosing-the-right-technology-stack",
+  "title": "Choosing the Right Technology Stack",
+  "kind": "article",
+  "category": "tech",
+  "seo": {
+    "title": "Choosing the Right Technology Stack | Baalvion",
+    "description": "How to choose a durable technology stack: team fit, ecosystem maturity, performance, hiring, and longevity — plus the anti-patterns that quietly sink platforms.",
+    "keywords": [
+      "technology stack selection",
+      "choosing a tech stack",
+      "platform engineering",
+      "boring technology",
+      "ecosystem maturity",
+      "hiring and tech stack",
+      "total cost of ownership",
+      "polyglot architecture",
+      "enterprise software architecture",
+      "technical debt"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "9 min read",
+  "heroImageSeed": "techstack-bos-lattice",
+  "excerpt": "Choosing a technology stack is a multi-year financial and organisational commitment, not a preference poll. Here is the framework Baalvion uses to pick stacks that survive contact with scale.",
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "A stack is a commitment, not a preference" },
+    { "type": "paragraph", "text": "The phrase \"tech stack\" makes the decision sound like ordering from a menu. It is closer to choosing a foundation for a building you intend to occupy for a decade. The languages, frameworks, datastores, and runtimes you pick today decide who you can hire, how fast you can change, what you can prove to an auditor, and what your operating bill looks like at scale. At Baalvion we build and run the [Baalvion Operating System](/platform), which connects commerce, finance, compliance, logistics, and intelligence into one multi-tenant fabric spanning 198 markets and 180+ jurisdictions. Nothing in that sentence was decided by which framework had the nicest landing page. Every choice was made against a longevity horizon measured in years and a blast radius measured in regulated transactions." },
+    { "type": "paragraph", "text": "The most expensive stack mistakes are rarely the ones that fail in a demo. They are the ones that work beautifully for eighteen months and then quietly tax every future change — the ORM that cannot express the query your reporting team now needs, the framework whose maintainer abandoned it, the language no senior engineer in your hiring market wants to write. Choosing well means optimising for the curve, not the point. This article lays out the criteria we actually weigh and the anti-patterns that look like good engineering and are not." },
+    { "type": "heading", "level": 2, "text": "Start with the problem shape, not the trend" },
+    { "type": "paragraph", "text": "Before any tooling debate, characterise the workload honestly. Is this a CPU-bound numerical system, an IO-bound orchestration layer, a latency-sensitive trading path, or a throughput-oriented batch pipeline? The honest answer narrows the field faster than any benchmark blog post. A cross-border settlement engine that must reconcile ledgers deterministically has fundamentally different needs from an AI market-intelligence service that fans out to dozens of model calls. We do not run one language across the entire platform precisely because the workloads are not the same shape — we run a deliberate polyglot stack where each domain uses the tool that fits its constraints, bounded by shared contracts at the seams." },
+    { "type": "paragraph", "text": "Concretely: we lean on the JVM (Java and Kotlin with Spring Boot) for the financial and ledger services where strong typing, mature transaction support, and a deep operational toolchain matter most; on Node.js and TypeScript for IO-bound orchestration and edge services where developer velocity and a vast package ecosystem win; and on Go for high-throughput, low-overhead network services where predictable latency and small binaries pay off. Postgres is the default system of record because it is correct, well understood, and extensible; we reach for specialised stores — a columnar warehouse for analytics, a search index, a stream log like Kafka — only when the access pattern genuinely demands it. The discipline is not 'use one thing' or 'use everything'; it is to justify each addition against the problem shape and its operating cost." },
+    { "type": "heading", "level": 2, "text": "Team fit beats theoretical superiority" },
+    { "type": "paragraph", "text": "A stack is only as good as the team's ability to operate it at 3 a.m. during an incident. The most technically elegant language is a liability if your engineers cannot debug it under pressure, and a 'worse' technology your team has deep muscle memory for will frequently outperform a superior one they are learning on the job. When we evaluate a candidate technology we ask blunt questions: who here has run this in production, who can review a tricky pull request in it, and how long until a new hire is genuinely productive? If the honest answer to all three is 'nobody yet', that is not automatically disqualifying — but it converts the choice from a tooling decision into a hiring-and-training program, and it must be costed as such." },
+    { "type": "paragraph", "text": "This is why we are skeptical of resume-driven development: adopting a technology because it is exciting or strengthens an individual's CV rather than because it serves the system. The counterweight is equally real — never learning anything new ossifies a team and eventually makes it unhireable. The resolution is to spend novelty deliberately. Pick one or two strategic bets per horizon, contain them to a domain where failure is survivable, and keep the rest of the platform boring on purpose. Boring technology has a property exciting technology cannot: a long, public history of how it breaks and how to fix it." },
+    { "type": "heading", "level": 2, "text": "Ecosystem maturity and the bus factor" },
+    { "type": "paragraph", "text": "A language or framework is never adopted alone; you adopt its entire ecosystem — its libraries, its build tooling, its observability integrations, its security advisories, and its community. Before committing, we audit the supporting cast. Is there a battle-tested driver for our database? A maintained client for our message broker? First-class OpenTelemetry support so the new service is observable on day one rather than a black box? Are the critical libraries actively maintained, or is the most-starred option a single volunteer who last committed two years ago? Supply-chain risk is real engineering risk: a dependency with no maintainer is a future zero-day with no patch." },
+    { "type": "list", "ordered": false, "items": [
+      "Maintenance health: release cadence, issue response time, and the number of independent maintainers — a true bus factor, not a vanity star count.",
+      "Operational tooling: profilers, debuggers, package managers, and CI integrations that actually exist for the platforms you deploy to.",
+      "Security posture: how quickly the ecosystem ships CVE fixes, and whether automated dependency scanning understands the package format.",
+      "Talent gravity: whether the ecosystem is growing or shrinking, because a declining ecosystem makes both hiring and library support harder every year.",
+      "Licensing: permissive versus copyleft and any commercial-source clauses that could constrain a multi-tenant commercial platform."
+    ] },
+    { "type": "heading", "level": 2, "text": "Performance is a budget, not a bragging right" },
+    { "type": "paragraph", "text": "Benchmarks are seductive and mostly irrelevant in isolation. The question is never 'which language is fastest' but 'which stack meets our latency and throughput budget at an acceptable cost, with headroom to grow'. A framework that serves a million synthetic requests per second on a laptop tells you nothing if your real bottleneck is a database round trip, a downstream partner API, or a serialization boundary. Define the budget first — p99 latency for the critical path, sustained throughput, and cost per transaction — then evaluate candidates against it with a load profile that resembles production, not a hello-world endpoint." },
+    { "type": "paragraph", "text": "Most enterprise systems are IO-bound, which means raw language speed matters far less than concurrency model, connection pooling, and back-pressure handling. Where compute genuinely dominates, a runtime with predictable garbage-collection behaviour, or none at all, earns its place. We hold ourselves to concrete service-level objectives and treat performance as a property measured continuously, not a one-time selection criterion. A stack that is fast enough today but cannot be horizontally scaled, cached, or sharded later is a slower stack with extra steps — see how we think about this end to end in [building scalable software](/news/tech/how-baalvion-builds-scalable-software)." },
+    { "type": "heading", "level": 2, "text": "Hiring, longevity, and total cost of ownership" },
+    { "type": "paragraph", "text": "The cost of a stack is dominated by people, not licenses or compute. Salaries and the time to hire are the largest line items in any long-lived system, so the available talent pool for a technology is a first-class selection criterion, not an afterthought. A niche language can be the right call when it confers a decisive advantage and you can credibly hire or train for it — but you must enter that decision with eyes open about the smaller pool, the longer recruitment cycles, and the key-person risk it creates. The same logic applies to longevity: favour technologies with a clear stewardship model, whether a foundation, a major vendor, or a broad commercial base, over those dependent on a single company's continued enthusiasm." },
+    { "type": "paragraph", "text": "Total cost of ownership is the honest metric, and it includes the unglamorous parts: how much operational toil the stack imposes, how expensive it is to keep secure, how painful upgrades are, and what it costs to onboard the tenth engineer. For a platform under SOC 2 Type II, ISO 27001, GDPR, and KYC/AML obligations, that calculus also includes auditability — a stack where you cannot cleanly answer who did what, to which tenant, under what authorisation is a compliance liability regardless of its benchmarks. If you are weighing a build-versus-buy boundary inside the stack decision, our take on [custom software versus SaaS](/news/tech/custom-software-vs-saas) maps the trade-offs directly, and the architectural posture extends naturally into [cloud-native architecture](/news/tech/cloud-native-architecture)." },
+    { "type": "heading", "level": 2, "text": "The anti-patterns that quietly sink platforms" },
+    { "type": "paragraph", "text": "Most stack failures are not exotic. They are a handful of well-worn mistakes that each look reasonable in the moment. The first is resume-driven development, already named: choosing for novelty rather than fit. The second is its mirror image, cargo-culting a giant's architecture — adopting the toolchain of a company three orders of magnitude larger than you because they blogged about it, and inheriting their operational complexity without their operational team. The third is the distributed-monolith trap: splitting into microservices before you understand the domain boundaries, ending up with services that must be deployed together, share a database, and combine the operational pain of distribution with the coupling of a monolith." },
+    { "type": "paragraph", "text": "Two more are worth naming because they are slow-acting. Uncontrolled polyglot sprawl happens when every team picks its own language and datastore with no shared standards, until no one can move between teams and the on-call rotation has to know six runtimes. The cure is not forced monoculture but a curated, justified set of supported technologies — a paved road that is easy to stay on and possible to leave with cause. Finally, premature optimisation for hypothetical scale — building for a billion users you do not have — burns your runway on complexity you will not need, while the inverse, ignoring scale entirely until it is an emergency, forces a rewrite at the worst possible time. The mature position is to choose technologies that can scale when needed without paying the full complexity tax before then. This is the same reasoning we apply when we weigh a [microservices versus monolith](/news/tech/microservices-vs-monolith) split." },
+    { "type": "heading", "level": 2, "text": "A decision you can defend in a year" },
+    { "type": "paragraph", "text": "The test of a stack decision is not whether it felt exciting when you made it but whether you can defend it in a year to a new lead engineer who inherits the system. Write it down. Record what you chose, what you rejected, the constraints you were optimising for, and the conditions under which you would revisit it — a lightweight architecture decision record is enough. That artefact converts a stack choice from tribal memory into a reviewable, revisable engineering decision, which is exactly the posture a long-lived platform needs. Choose for the team you have and the one you can realistically hire, for the workload as it actually behaves, for an ecosystem that will still be maintained when you need a patch, and for a cost you can sustain. Do that, and the stack becomes the quiet foundation it is supposed to be rather than the thing every future change has to fight." }
+  ],
+  "faqs": [
+    {
+      "q": "Should we standardise on a single language and stack across the whole company?",
+      "a": "Not necessarily. A forced monoculture is simpler to operate but can force the wrong tool onto a workload it does not fit, while uncontrolled polyglot sprawl makes hiring and on-call painful. The durable middle path is a curated, justified set of supported technologies — a paved road that is easy to stay on and possible to leave with a documented reason. Each addition should be justified against the problem shape and the cost of operating it."
+    },
+    {
+      "q": "How much should the available talent pool influence the choice?",
+      "a": "A great deal, because the cost of a long-lived system is dominated by people, not licenses or compute. Salaries and time-to-hire are the largest line items, so the size of the hiring market for a technology is a first-class criterion. A niche stack can still be correct when it confers a decisive advantage and you can credibly hire or train for it, but you must cost in the smaller pool, longer recruitment cycles, and key-person risk."
+    },
+    {
+      "q": "Are framework and language benchmarks useful when choosing a stack?",
+      "a": "Only against a defined budget and a realistic load profile. Raw benchmark numbers in isolation are mostly irrelevant because most enterprise systems are IO-bound, where concurrency model, connection pooling, and back-pressure matter more than language speed. Define your p99 latency, sustained throughput, and cost-per-transaction targets first, then test candidates with traffic that resembles production rather than a hello-world endpoint."
+    },
+    {
+      "q": "What is resume-driven development and why is it dangerous?",
+      "a": "It is adopting a technology because it is exciting or strengthens an individual's CV rather than because it serves the system. It is dangerous because it spends your novelty budget on the wrong things and leaves you operating immature tooling no one else on the team can debug under pressure. The counterweight is real too — never adopting anything new ossifies a team — so spend novelty deliberately on one or two contained strategic bets."
+    },
+    {
+      "q": "How do we avoid the distributed-monolith trap?",
+      "a": "Do not split into microservices before you understand the domain boundaries. A distributed monolith — services that must deploy together, share a database, and still combine the operational pain of distribution with the coupling of a monolith — is worse than either pure option. Establish clear bounded contexts first, keep the contracts at the seams explicit, and split only where the boundary is genuinely independent."
+    },
+    {
+      "q": "How should a stack decision be recorded so it survives team changes?",
+      "a": "Write a lightweight architecture decision record capturing what you chose, what you rejected, the constraints you optimised for, and the conditions under which you would revisit the choice. That converts a stack decision from tribal memory into a reviewable, revisable artefact a new engineer can understand and challenge a year later, which is exactly what a long-lived platform needs."
+    }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "building scalable software", "href": "/news/tech/how-baalvion-builds-scalable-software" },
+    { "anchor": "custom software versus SaaS", "href": "/news/tech/custom-software-vs-saas" },
+    { "anchor": "cloud-native architecture", "href": "/news/tech/cloud-native-architecture" },
+    { "anchor": "microservices versus monolith", "href": "/news/tech/microservices-vs-monolith" }
+  ],
+  "customFields": {}
+}

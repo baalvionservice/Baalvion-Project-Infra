@@ -157,7 +157,7 @@ export function ContactFormClient({ countryCode, currentCountry }: ContactFormCl
                     </div>
 
                     <div className="pt-8">
-                        <Link href={currentCountry.office?.mapUrl || '#'} target="_blank">
+                        <Link href={currentCountry.office?.mapUrl || '#'} target="_blank" rel="noopener noreferrer">
                             <Button variant="outline" className="w-full rounded-none border-border hover:bg-ivory text-[10px] font-bold tracking-[0.3em] uppercase h-12">
                                 REQUEST DIRECTIONS
                             </Button>

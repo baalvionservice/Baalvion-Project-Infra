@@ -3,6 +3,8 @@ import React from "react";
 import { Metadata } from "next";
 import CategoryPageClient from "@/components/category/CategoryPageClient";
 import { getCategorySidebar } from "@/lib/mock-category-data";
+import { buildAlternates } from "@/lib/seo";
+import { normalizeCountry, getCountryConfig } from "@/lib/i18n/countries";
 
 // ── Category label map ────────────────────────────────────────────────────────
 
@@ -152,12 +154,15 @@ interface CategoryPageProps {
 
 export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
   const { id, country } = await params;
+  const cc = normalizeCountry(country);
   const pageTitle = getCategoryLabel(id);
   const brandName = getCategoryBrandName(id);
+  const countryData = getCountryConfig(cc);
 
   return {
     title: `${pageTitle} | ${brandName} | AMARISÉ MAISON`,
-    description: `Discover our curated collection of ${pageTitle.toLowerCase()} from ${brandName}. Shop authentic luxury items with expert authentication and concierge service.`,
+    description: `Discover our curated collection of ${pageTitle.toLowerCase()} from ${brandName} in ${countryData.name}. Shop authentic luxury items with expert authentication and concierge service.`,
+    alternates: buildAlternates(cc, `/category/${id}`),
   };
 }
 

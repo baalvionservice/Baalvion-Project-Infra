@@ -75,15 +75,16 @@ exports.updateShareholder = async (req, res, next) => {
         const shareholder = await db.Shareholder.findOne({ where: { id: req.params.id, org_id: req.user.orgId } });
         if (!shareholder) return next(new AppError('NOT_FOUND', 'Shareholder not found', 404));
 
+        const { name, role, equity_percentage, reason } = req.body;
         const oldPct = parseFloat(shareholder.equity_percentage);
-        await shareholder.update(req.body);
+        await shareholder.update({ name, role, equity_percentage });
 
-        if (req.body.equity_percentage !== undefined && parseFloat(req.body.equity_percentage) !== oldPct) {
+        if (equity_percentage !== undefined && parseFloat(equity_percentage) !== oldPct) {
             await db.EquityHistory.create({
                 shareholder_id: shareholder.id,
                 old_percentage: oldPct,
-                new_percentage: parseFloat(req.body.equity_percentage),
-                reason: req.body.reason || 'Updated',
+                new_percentage: parseFloat(equity_percentage),
+                reason: reason || 'Updated',
                 changed_by: req.user.id,
                 org_id: req.user.orgId,
             });

@@ -15,7 +15,9 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
-app.use(express.json({ limit: '10mb' }));
+// Capture the raw request bytes so the payment-webhook signature (paymentWebhookAuth) can verify
+// the HMAC over the EXACT body the gateway signed (a re-serialization could differ byte-for-byte).
+app.use(express.json({ limit: '10mb', verify: (req, _res, buf) => { req.rawBody = buf && buf.length ? buf.toString('utf8') : ''; } }));
 app.use(cookieParser());
 app.use(requestContext);
 app.use(createIpRateLimit());

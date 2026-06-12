@@ -3,7 +3,7 @@
     {
       "id": "hero-bg",
       "description": "Abstract global connectivity network",
-      "imageUrl": "https://picsum.photos/seed/baalvion-hero/1200/800",
+      "imageUrl": "/images/placeholder.svg",
       "imageHint": "global network"
     }
   ]

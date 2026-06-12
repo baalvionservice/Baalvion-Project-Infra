@@ -10,6 +10,7 @@
  *      every row by tenant; super_admin / migrations use bypass.
  */
 module.exports = {
+    ...require('./roles'),
     ...require('./sql'),
     ...require('./context'),
     ...require('./middleware'),

@@ -8,6 +8,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { cmsGetPost, type MiningPost } from "@/lib/cms";
+import { BRAND_IMAGES } from "@/lib/brand-assets";
 
 // Reflect the latest published content from the central CMS on every request.
 export const dynamic = 'force-dynamic';
@@ -26,10 +27,10 @@ function fallbackPost(slug: string): MiningPost {
     title,
     category: "Market Insights",
     author: "Baalvion Mining Desk",
-    date: "May 20, 2024",
+    date: "2026",
     readTime: "8 min read",
     excerpt: "",
-    image: `https://picsum.photos/seed/${slug}/1200/600`,
+    image: BRAND_IMAGES.insight,
     contentHtml: `
       <p>The global mineral trade is undergoing a major transformation driven by demand for critical energy-transition materials. In this deep dive we explore how ${topic} is impacting the industrial supply chain and what exporters need to prepare for in the next quarter.</p>
       <h2>Market Dynamics &amp; Trends</h2>
@@ -53,8 +54,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     "author": { "@type": "Person", "name": post.author },
     "publisher": {
       "@type": "Organization",
-      "name": "GeoTrade Nexus",
-      "logo": { "@type": "ImageObject", "url": "https://mining.baalvion.com/logo.png" },
+      "name": "Baalvion Mining Inc.",
+      "logo": { "@type": "ImageObject", "url": "https://mining.baalvion.com/logo.svg" },
     },
     "datePublished": post.date,
   };
@@ -129,7 +130,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {[1, 2].map((i) => (
               <Card key={i} className="border-none shadow-sm group hover:shadow-lg transition-all cursor-pointer overflow-hidden">
                 <div className="relative h-40 bg-slate-100">
-                  <Image src={`https://picsum.photos/seed/insight-${i}/600/400`} alt="Related analysis" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <Image src={BRAND_IMAGES.insight} alt="Related analysis" fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                 </div>
                 <CardContent className="p-6 space-y-3">
                   <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-widest">Industry Update</Badge>

@@ -58,7 +58,12 @@ module.exports = {
     // ── Public marketing endpoints (no auth) ──
     publicPlans: wrap(async (req, res) => {
         const plans = (await billingService.getPlans()) || [];
-        const sorted = [...plans].sort((a, b) => (a.monthlyPrice || 0) - (b.monthlyPrice || 0));
+        // Pay-As-You-Go is metered (prepaid credit), not a tiered subscription — the
+        // pricing page renders it as its own dedicated card, so keep it out of the
+        // main tier list here.
+        const sorted = [...plans]
+            .filter((p) => p.slug !== 'pay-as-you-go')
+            .sort((a, b) => (a.monthlyPrice || 0) - (b.monthlyPrice || 0));
         sendSuccess(req, res, sorted.map((p, i) => ({
             slug: p.slug,
             name: p.name,
@@ -181,6 +186,11 @@ module.exports = {
     getInvoices: wrap(async (req, res) => sendSuccess(req, res, await billingService.getInvoices(req.auth))),
     getInvoice: wrap(async (req, res) => sendSuccess(req, res, await billingService.getInvoice(req.auth, req.params.id))),
     changePlan: wrap(async (req, res) => sendSuccess(req, res, await billingService.changePlan(req.auth, req.body.planSlug))),
+    activatePlan: wrap(async (req, res) => sendSuccess(req, res, await billingService.activateSubscription(req.auth, req.body.planSlug, { amount: req.body.amount, interval: req.body.interval }))),
+    createOrder: wrap(async (req, res) => sendSuccess(req, res, await billingService.createPendingOrder(req.auth, req.body), 201)),
+    getInvoiceDocument: wrap(async (req, res) => sendSuccess(req, res, await billingService.getInvoiceDocument(req.auth, req.params.id))),
+    getCredit: wrap(async (req, res) => sendSuccess(req, res, await billingService.getCreditBalance(req.auth))),
+    buyCredit: wrap(async (req, res) => sendSuccess(req, res, await billingService.purchaseCredit(req.auth, req.body.amountUsd))),
     getPaymentMethods: wrap(async (req, res) => sendSuccess(req, res, await billingService.getPaymentMethods(req.auth))),
     addPaymentMethod: wrap(async (req, res) => sendSuccess(req, res, await billingService.addPaymentMethod(req.auth, req.body), 201)),
     deletePaymentMethod: wrap(async (req, res) => { await billingService.removePaymentMethod(req.auth, req.params.id); sendSuccess(req, res, null, 200); }),

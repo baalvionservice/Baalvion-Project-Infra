@@ -51,6 +51,54 @@ import { badges as mockBadges } from '@/lib/badges';
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { absoluteUrl } from "@/lib/site-url";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const candidate = await getUser(id).catch(() => null);
+
+  if (!candidate || candidate.role !== "candidate") {
+    return {
+      title: "Candidate Not Found",
+      description: "This candidate profile could not be found on ControlTheMarket.",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const canonical = absoluteUrl(`/candidate/${candidate.id}`);
+  const skills = candidate.profile?.skills?.slice(0, 5).join(", ");
+  const title = candidate.name;
+  const description =
+    candidate.profile?.bio?.trim() ||
+    `View ${candidate.name}'s verified, proof-of-skill profile on ControlTheMarket${
+      skills ? ` — skilled in ${skills}` : ""
+    }.`;
+  const avatarUrl = candidate.profile?.avatarUrl;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      type: "profile",
+      title: `${title} | ControlTheMarket`,
+      description,
+      url: canonical,
+      images: avatarUrl ? [{ url: avatarUrl, alt: candidate.name }] : undefined,
+    },
+    twitter: {
+      card: "summary",
+      title: `${title} | ControlTheMarket`,
+      description,
+      images: avatarUrl ? [avatarUrl] : undefined,
+    },
+  };
+}
 
 const badgeIcons: { [key: string]: React.ElementType } = {
   Trophy,
@@ -180,8 +228,8 @@ export default async function CandidateProfilePage({
         <Image
           src={`https://picsum.photos/seed/${candidate.id}/1200/300`}
           alt={`${candidate.name}'s banner`}
-          layout="fill"
-          objectFit="cover"
+          fill
+          style={{ objectFit: 'cover' }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
       </div>
@@ -217,8 +265,8 @@ export default async function CandidateProfilePage({
                 <div className="mt-4 flex justify-center gap-2">
                   {candidate.profile?.githubUrl && (
                     <Button asChild variant="outline" size="icon">
-                      <Link href={candidate.profile.githubUrl} target="_blank">
-                        <Github className="h-5 w-5" />
+                      <Link href={candidate.profile.githubUrl} target="_blank" rel="noopener noreferrer">
+                        <Github className="h-5 w-5" aria-label="GitHub profile" />
                       </Link>
                     </Button>
                   )}
@@ -227,8 +275,9 @@ export default async function CandidateProfilePage({
                       <Link
                         href={candidate.profile.linkedinUrl}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        <Linkedin className="h-5 w-5" />
+                        <Linkedin className="h-5 w-5" aria-label="LinkedIn profile" />
                       </Link>
                     </Button>
                   )}
@@ -237,12 +286,13 @@ export default async function CandidateProfilePage({
                       <Link
                         href={candidate.profile.portfolioLinks[0]}
                         target="_blank"
+                        rel="noopener noreferrer"
                       >
-                        <Globe className="h-5 w-5" />
+                        <Globe className="h-5 w-5" aria-label="Portfolio website" />
                       </Link>
                     </Button>
                   )}
-                  <Button variant="outline" size="icon">
+                  <Button variant="outline" size="icon" aria-label="Share profile">
                     <Share2 className="h-5 w-5" />
                   </Button>
                 </div>

@@ -2,13 +2,14 @@ import React from "react";
 import "./globals.css";
 import { Metadata } from "next";
 import { env } from "@/config/env";
-import Script from "next/script";
-import { Playfair_Display, PT_Sans, Cabin } from "next/font/google";
+import { Source_Serif_4 } from "next/font/google";
 import { cn } from "@/lib/utils";
 import RootLayoutClient from "@/components/common/RootLayoutClient";
+import { Analytics } from "@/components/common/Analytics";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
+  icons: { icon: 'data:,' },
   title: {
     default: 'Imperialpedia — The Financial Intelligence Network',
     template: '%s | Imperialpedia',
@@ -74,23 +75,15 @@ export const metadata: Metadata = {
 
 // (Client-side layout content is now in RootLayoutClient)
 
-const playfair = Playfair_Display({
+// Investopedia-style typography: a readable transitional serif for editorial
+// headlines, paired with a neutral Helvetica/Arial system sans for body + UI
+// (the body/UI stack lives in globals.css + tailwind.config — no webfont needed,
+// matching Investopedia's native Helvetica Neue / Arial rendering).
+const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
+  weight: ["400", "600", "700", "900"],
+  style: ["normal", "italic"],
   variable: "--font-headline",
-  display: "swap",
-});
-
-const cabin = Cabin({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-ui",
-  display: "swap",
-});
-
-const ptSans = PT_Sans({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  variable: "--font-body",
   display: "swap",
 });
 
@@ -105,36 +98,15 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(playfair.variable, ptSans.variable, cabin.variable)}
+      className={cn(sourceSerif.variable)}
     >
       <head>
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
-        <meta name="theme-color" content="#1C1822" />
+        <meta name="theme-color" content="#ffffff" />
         <link rel="preconnect" href="https://images.unsplash.com" />
-        <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8968452296456450"
-          crossOrigin="anonymous"
-        ></script>
-
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-IMP-INDEX-42"
-          strategy="afterInteractive"
-        />
-        <Script id="gtag-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-IMP-INDEX-42', {
-              page_path: window.location.pathname,
-            });
-          `}
-        </Script>
       </head>
 
       <body className="font-ui bg-background text-foreground antialiased min-h-screen flex flex-col">
@@ -166,6 +138,7 @@ export default function RootLayout({
         </a>
 
         <RootLayoutClient>{children}</RootLayoutClient>
+        <Analytics />
       </body>
     </html>
   );

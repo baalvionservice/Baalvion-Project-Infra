@@ -1,3 +1,14 @@
+import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/site-url';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy',
+  description:
+    'Learn how ControlTheMarket collects, uses, and protects your personal information. Your privacy is important to us.',
+  alternates: {
+    canonical: absoluteUrl('/privacy'),
+  },
+};
 
 export default function PrivacyPolicyPage() {
   const sections = [

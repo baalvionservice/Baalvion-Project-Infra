@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import Image from "next/image";
+import { BrandImage } from "@/components/ui/BrandImage";
 import Link from "next/link";
 import { useAppStore } from "@/lib/store";
 import {
@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product/ProductCard";
 import { generateBuyingGuideNarrative } from "@/ai/flows/generate-buying-guide-narrative";
 import { COUNTRIES } from "@/lib/mock-data";
+import { getBuyingGuide } from "@/lib/cms";
 
 /**
  * BuyingGuideDetailPage: High-authority editorial guide.
@@ -30,7 +31,27 @@ export default function BuyingGuideDetailPage() {
   const countryCode = (country as string) || "us";
   const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
 
-  const guide = buyingGuides.find((g) => g.id === id);
+  // CMS-first: editorial guide from the central CMS, overlaid onto the mock so mock-only
+  // fields (featuredProducts/featuredCollections/metaDescription) survive. Falls back to
+  // the mock lookup by id when the CMS returns null.
+  const mockGuide = buyingGuides.find((g) => g.id === id);
+  const [cmsGuide, setCmsGuide] = useState<Awaited<ReturnType<typeof getBuyingGuide>>>(null);
+  const guide =
+    mockGuide && cmsGuide
+      ? {
+          ...mockGuide,
+          title: cmsGuide.title,
+          excerpt: cmsGuide.excerpt,
+          content: cmsGuide.content,
+          tips: cmsGuide.tips,
+          imageUrl: cmsGuide.imageUrl,
+          category: cmsGuide.category,
+          author: cmsGuide.author,
+          date: cmsGuide.date,
+          ...(cmsGuide.investmentOutlook ? { investmentOutlook: cmsGuide.investmentOutlook } : {}),
+        }
+      : mockGuide;
+
   const featured = products.filter((p) =>
     guide?.featuredProducts.includes(p.id)
   );
@@ -41,6 +62,20 @@ export default function BuyingGuideDetailPage() {
   const [aiNarrative, setAiNarrative] = useState<string | null>(null);
   const [aiTips, setAiTips] = useState<string[]>([]);
   const [loadingAi, setLoadingAi] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    getBuyingGuide(id as string)
+      .then((g) => {
+        if (active) setCmsGuide(g);
+      })
+      .catch(() => {
+        if (active) setCmsGuide(null);
+      });
+    return () => {
+      active = false;
+    };
+  }, [id]);
 
   useEffect(() => {
     if (!guide) return;
@@ -95,13 +130,13 @@ export default function BuyingGuideDetailPage() {
 
       {/* Hero Header */}
       <section className="relative h-[70vh] w-full flex items-end overflow-hidden border-b border-border">
-        <Image
+        <BrandImage
           src={guide.imageUrl}
           alt={guide.title}
-          fill
-          className="object-cover opacity-80 animate-slow-zoom"
+          label={guide.title}
+          className="absolute inset-0"
+          imgClassName="opacity-80 animate-slow-zoom"
           priority
-          data-ai-hint="luxury tutorial"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-ivory via-ivory/10 to-transparent" />
         <div className="container mx-auto px-12 pb-24 relative z-10 max-w-[1600px]">

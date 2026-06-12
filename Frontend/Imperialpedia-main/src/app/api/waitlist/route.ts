@@ -17,10 +17,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // TODO: Connect to secure identity cluster (Firebase / PostgreSQL)
-    // TODO: AI-powered lead scoring based on domain authority
-    // For now, we simulate a successful registration handshake
-    console.log(`[WAITLIST] Enrollment detected: ${name || 'Anonymous'} <${email}>`);
+    // TODO: Connect to database (PostgreSQL)
+    // For now, simulate a successful registration
 
     return NextResponse.json({ 
       success: true, 

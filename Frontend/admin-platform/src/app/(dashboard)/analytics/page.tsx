@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { useKpis, useUserGrowth, useOrgGrowth, useRevenue } from '@/lib/queries/analytics.queries';
+import { useRevenueByCustomer } from '@/lib/queries/admin-billing.queries';
 import { analyticsApi } from '@/lib/api/analytics';
 import { useUIStore } from '@/lib/store/uiStore';
 import { formatCurrency, formatNumber, formatRelative } from '@/lib/utils/format';
@@ -231,12 +232,16 @@ export default function AnalyticsPage() {
   const { data: userGrowth }       = useUserGrowth(period);
   const { data: orgGrowth }        = useOrgGrowth(period);
   const { data: revenue }          = useRevenue(period);
+  const { data: realRevenue }      = useRevenueByCustomer(); // real MRR + per-plan from proxy billing
   const funnelSteps                = useFunnelData();
   const retentionRows              = useRetentionData();
 
   useEffect(() => { setBreadcrumbs([{ label: 'Analytics' }]); }, [setBreadcrumbs]);
 
-  const revVal = kpis?.monthlyRevenue ?? 0;
+  // Prefer the REAL MRR computed from live subscriptions; fall back to the KPI source.
+  const revVal = realRevenue?.totals?.mrr ?? kpis?.monthlyRevenue ?? 0;
+  const planColors = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-orange-500', 'bg-pink-500'];
+  const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
   return (
     <div className="space-y-6">
@@ -263,7 +268,7 @@ export default function AnalyticsPage() {
         <KpiCard title="Total Users"    value={kpis?.totalUsers ?? 0}            change={kpis?.userGrowth}         icon={Users}      iconColor="text-blue-500"   isLoading={isLoading} />
         <KpiCard title="Organizations"  value={kpis?.totalOrgs ?? 0}             change={kpis?.orgGrowth}          icon={Building2}  iconColor="text-purple-500" isLoading={isLoading} />
         <KpiCard title="Subscriptions"  value={kpis?.activeSubscriptions ?? 0}   change={kpis?.subscriptionGrowth} icon={Activity}   iconColor="text-green-500"  isLoading={isLoading} />
-        <KpiCard title="Revenue (MRR)"  value={revVal}                           change={kpis?.revenueGrowth}      format="currency" icon={TrendingUp} iconColor="text-orange-500" isLoading={isLoading} />
+        <KpiCard title="Revenue (MRR)"  value={`$${revVal.toLocaleString()}`}     change={kpis?.revenueGrowth}      format="raw"      icon={TrendingUp} iconColor="text-orange-500" isLoading={!realRevenue && isLoading} />
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
@@ -310,21 +315,22 @@ export default function AnalyticsPage() {
                 <CardTitle className="text-sm font-medium">Revenue by Plan</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                {[
-                  { plan: 'Enterprise', revenue: 68, color: 'bg-blue-500' },
-                  { plan: 'Pro',        revenue: 22, color: 'bg-purple-500' },
-                  { plan: 'Starter',    revenue: 10, color: 'bg-green-500' },
-                ].map(({ plan, revenue: rev, color }) => (
-                  <div key={plan}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span>{plan}</span>
-                      <span className="text-muted-foreground">{rev}%</span>
+                {(realRevenue?.byPlan ?? [])
+                  .filter((p) => p.mrr > 0 || p.lifetimeRevenue > 0)
+                  .map((p, i) => (
+                    <div key={p.planSlug}>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span>{titleCase(p.planSlug)}</span>
+                        <span className="text-muted-foreground">{p.sharePct}% · ${p.mrr.toLocaleString()}/mo</span>
+                      </div>
+                      <div className="h-2 bg-muted rounded overflow-hidden">
+                        <div className={cn('h-full rounded', planColors[i % planColors.length])} style={{ width: `${Math.max(2, p.sharePct)}%` }} />
+                      </div>
                     </div>
-                    <div className="h-2 bg-muted rounded overflow-hidden">
-                      <div className={cn('h-full rounded', color)} style={{ width: `${rev}%` }} />
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                {(realRevenue?.byPlan ?? []).filter((p) => p.mrr > 0 || p.lifetimeRevenue > 0).length === 0 && (
+                  <p className="text-xs text-muted-foreground">No revenue yet.</p>
+                )}
               </CardContent>
             </Card>
 

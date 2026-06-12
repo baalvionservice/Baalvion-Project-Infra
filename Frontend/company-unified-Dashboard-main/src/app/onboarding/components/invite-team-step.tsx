@@ -100,6 +100,7 @@ export default function InviteTeamStep({
                 variant="ghost"
                 size="icon"
                 onClick={() => handleRemoveInvite(index)}
+                aria-label="Remove invite"
               >
                 <X className="h-4 w-4" />
               </Button>

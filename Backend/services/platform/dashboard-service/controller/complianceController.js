@@ -61,7 +61,8 @@ exports.getComplianceByCountry = async (req, res, next) => {
 exports.createCompliance = async (req, res, next) => {
     try {
         const orgId = req.user.orgId;
-        const record = await db.ComplianceRecord.create({ ...req.body, org_id: orgId });
+        const { country_id, country, business_id, tax_status, tax_status_code, vat_gst, licenses, data_laws, employment_law, overall_score, action_items } = req.body;
+        const record = await db.ComplianceRecord.create({ country_id, country, business_id, tax_status, tax_status_code, vat_gst, licenses, data_laws, employment_law, overall_score, action_items, org_id: orgId });
         await _createAuditLog(req, 'CREATE_COMPLIANCE', 'compliance_record', String(record.id));
         return sendSuccess(req, res, record, 201);
     } catch (err) { return next(err); }
@@ -71,7 +72,8 @@ exports.updateCompliance = async (req, res, next) => {
     try {
         const record = await db.ComplianceRecord.findOne({ where: { id: req.params.id, org_id: req.user.orgId } });
         if (!record) return next(new AppError('NOT_FOUND', 'Compliance record not found', 404));
-        await record.update(req.body);
+        const { country_id, country, business_id, tax_status, tax_status_code, vat_gst, licenses, data_laws, employment_law, overall_score, action_items } = req.body;
+        await record.update({ country_id, country, business_id, tax_status, tax_status_code, vat_gst, licenses, data_laws, employment_law, overall_score, action_items });
         await _createAuditLog(req, 'UPDATE_COMPLIANCE', 'compliance_record', String(record.id));
         return sendSuccess(req, res, record);
     } catch (err) { return next(err); }

@@ -66,6 +66,13 @@ export interface MarketplaceHealth {
   avgTimeToSelection: number;
 }
 
+export interface ApplicationsByCountryItem {
+  /** Country display name (e.g. "India"). */
+  country: string;
+  /** Number of applications received for jobs in that country. */
+  applications: number;
+}
+
 export interface AnalyticsData {
   kpis?: KpiData;
 
@@ -84,4 +91,6 @@ export interface AnalyticsData {
   platformKpis?: PlatformMetrics;
 
   marketplaceHealth?: MarketplaceHealth;
+
+  applicationsByCountry?: ApplicationsByCountryItem[];
 }

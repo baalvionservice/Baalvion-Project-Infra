@@ -10,6 +10,10 @@
  * Everything is keyed by a `tenantSlug` (the CMS website slug, e.g. "baalvion-mining").
  */
 
+// Unified contract from @baalvion/types to prevent duplication & casing drift
+import type { IntegrationCategory } from '@baalvion/types';
+export type { IntegrationCategory };
+
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. TRACE CONTEXT — end-to-end request tracking
 // ─────────────────────────────────────────────────────────────────────────────
@@ -55,8 +59,6 @@ export interface SdkLogger {
 // ─────────────────────────────────────────────────────────────────────────────
 // 3. CONFIG RESOLVER — secrets/keys from the CMS Integrations & Keys hub
 // ─────────────────────────────────────────────────────────────────────────────
-
-export type IntegrationCategory = 'api' | 'payment' | 'sms' | 'ai' | 'webhook' | 'other';
 
 /** One resolved integration for a tenant (mirrors cms-service's internal resolver). */
 export interface IntegrationConfig {

@@ -402,7 +402,7 @@ const getById = async (name, id, orgId = null) => {
   }
 };
 
-const insert = async (name, payload) => {
+const insert = async (name, payload, opts = {}) => {
   if (isMemory(name)) {
     const item = { id: payload.id || makeId(name.slice(0, 3)), ...payload };
     (mem[name] || (mem[name] = [])).push(item);
@@ -414,7 +414,8 @@ const insert = async (name, payload) => {
 
   const data = prepareInsert(name, payload);
   try {
-    const row = await Model.create(data);
+    // opts.transaction threads a Sequelize transaction through for atomic multi-writes.
+    const row = await Model.create(data, opts.transaction ? { transaction: opts.transaction } : undefined);
     return convertRecord(name, row);
   } catch (err) {
     console.error(`insert(${name}) error:`, err.message, JSON.stringify(data));

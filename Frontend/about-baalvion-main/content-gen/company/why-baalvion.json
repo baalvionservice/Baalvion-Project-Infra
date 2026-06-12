@@ -1,0 +1,40 @@
+{
+  "slug": "why-baalvion",
+  "title": "Why Baalvion",
+  "kind": "company",
+  "heroImageSeed": "co-why",
+  "excerpt": "We build and operate the infrastructure we recommend — so our engineering, advice, and platforms are grounded in production reality.",
+  "seo": {
+    "title": "Why Baalvion | What Sets Us Apart",
+    "description": "Why work with Baalvion: we operate the infrastructure we build, put compliance and auditability first, and engineer for scale from day one.",
+    "keywords": ["why Baalvion", "differentiators", "enterprise engineering", "Baalvion advantage", "trade infrastructure"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "We Operate What We Build" },
+    { "type": "paragraph", "text": "The clearest reason to work with Baalvion is also the simplest: we run the infrastructure we recommend. The [Baalvion Operating System](/platform) moves real value across 198 markets, which means our engineering and our advice are grounded in production reality, not slideware. When we suggest an architecture, we've lived with its consequences." },
+    { "type": "heading", "level": 2, "text": "Compliance and Integrity First" },
+    { "type": "paragraph", "text": "We build for environments where being wrong has consequences. That shows up everywhere: a double-entry ledger so money always reconciles, append-only audit logs so every change is verifiable, and AI that advises but never silently acts — the philosophy behind [our compliance scoring platform](/case-studies/ai-compliance-scoring-platform). Compliance isn't a feature we add; it's a foundation we start from, as described in [trust and security](/trust)." },
+    { "type": "heading", "level": 2, "text": "Engineered for Scale" },
+    { "type": "list", "ordered": false, "items": [
+      "**Multi-tenant from day one** — strong isolation, proven adversarially.",
+      "**Event-driven foundations** that scale horizontally, not by heroics.",
+      "**Observable and recoverable** — failure is designed for, not feared.",
+      "**You own the outcome** — no lock-in to us."
+    ] },
+    { "type": "heading", "level": 2, "text": "Proof, Not Promises" },
+    { "type": "paragraph", "text": "We'd rather show than tell. Our [case studies](/case-studies) document real outcomes — faster settlement, fewer false positives, retired legacy systems — and our [services](/services) reflect capabilities we exercise daily. The approach is set out in [how Baalvion builds scalable software](/news/tech/how-baalvion-builds-scalable-software)." },
+    { "type": "paragraph", "text": "If that's the kind of partner you want, [get in touch](/contact) — or explore our [mission](/about/mission) and [vision](/about/vision) to see where we're headed." }
+  ],
+  "faqs": [
+    { "q": "What makes Baalvion different from a typical software vendor?", "a": "We operate the infrastructure we build, so our advice and engineering are proven in production rather than theoretical." },
+    { "q": "Will we be locked into Baalvion?", "a": "No. You own the code, architecture, and outcomes. We build to hand over cleanly or partner long-term, your choice." },
+    { "q": "How do you approach compliance and security?", "a": "As foundations, not features — double-entry ledgering, append-only audit logs, strong isolation, and AI that never silently acts. See [trust and security](/trust)." },
+    { "q": "Where can I see proof of your work?", "a": "Our [case studies](/case-studies) document real, measurable outcomes across trade, finance, commerce, and logistics." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "our compliance scoring platform", "href": "/case-studies/ai-compliance-scoring-platform" },
+    { "anchor": "how Baalvion builds scalable software", "href": "/news/tech/how-baalvion-builds-scalable-software" },
+    { "anchor": "services", "href": "/services" }
+  ]
+}

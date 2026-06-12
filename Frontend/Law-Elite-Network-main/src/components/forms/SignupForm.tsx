@@ -50,11 +50,13 @@ export default function SignupForm() {
       if (!accessToken) throw new Error(payload?.message || 'Registration failed.');
       setToken(accessToken);
       const claims = parseJwt(accessToken) || {};
+      const rawRole = (claims.role ?? payload.role ?? 'client') as string;
+      const role = (['client', 'lawyer', 'admin'].includes(rawRole) ? rawRole : 'client') as 'client' | 'lawyer' | 'admin';
       const user = {
         id: String(claims.id ?? payload.userId ?? payload.user?.id ?? ''),
         email: data.email,
         fullName: data.fullName,
-        role: (claims.role ?? payload.role) as string,
+        role,
       };
 
       // 1. Apply referral protocol if code exists

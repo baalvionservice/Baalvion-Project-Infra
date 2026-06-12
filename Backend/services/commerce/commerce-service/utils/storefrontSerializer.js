@@ -7,37 +7,112 @@
 // luxury attributes (isVip, regions, condition, colors, sizes, rating…) live in the
 // product's custom_fields jsonb. Read-only — used by the public storefront API only.
 
+const markets = require('../config/markets');
+
 const asObject = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
 
 const pickDefaultVariant = (variants = []) =>
     (variants.find((v) => v.isDefault) || variants[0] || null);
 
-const mediaUrls = (p) =>
+// A product is sellable in `country` when it is global, region-less, or explicitly tagged.
+function isAvailableInCountry(productJson, country) {
+    if (!country) return true;
+    const cf = asObject(productJson.customFields);
+    if (cf.isGlobal) return true;
+    const regions = Array.isArray(cf.regions) ? cf.regions : [];
+    if (regions.length === 0) return true;
+    return regions.includes(country);
+}
+
+// Ordered media rows (featured first, then sortOrder) — the source of truth for storefront
+// imagery. Each CommerceProductMedia.url is a real https URL produced by productMediaService
+// (local /uploads or S3/MinIO public URL); the storefront renders these directly.
+const orderedMedia = (p) =>
     (p.media || [])
         .slice()
-        .sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0))
-        .map((m) => m.url)
-        .filter(Boolean);
+        .sort((a, b) => (Number(b.isFeatured) - Number(a.isFeatured)) || ((a.sortOrder || 0) - (b.sortOrder || 0)));
 
-function serializeProductListItem(p) {
+const mediaUrls = (p) => orderedMedia(p).map((m) => m.url).filter(Boolean);
+
+// Rich media objects (url + thumbnail + alt) for galleries; same ordering as imageUrl.
+const mediaObjects = (p) =>
+    orderedMedia(p)
+        .filter((m) => m.url)
+        .map((m) => ({
+            url: m.url,
+            thumbnailUrl: m.thumbnailUrl || m.url,
+            altText: m.altText || '',
+            mediaType: m.mediaType || 'image',
+        }));
+
+// Server-side rating aggregate over ALL approved reviews. recomputeAggregate() (reviewService)
+// mirrors AVG(rating)/COUNT into custom_fields.rating/reviewsCount, so the serializer can surface
+// a GLOBAL average + count without a read join. Exposed as ratingAverage/ratingCount (the canonical
+// C4 fields) AND the legacy rating/reviewsCount aliases so existing consumers keep working.
+const ratingAverage = (cf) => {
+    const n = Number(cf.rating);
+    return Number.isFinite(n) && n >= 0 ? Math.round(n * 10) / 10 : 0;
+};
+const ratingCount = (cf) => {
+    const n = Number(cf.reviewsCount);
+    return Number.isFinite(n) && n >= 0 ? Math.trunc(n) : 0;
+};
+
+// opts.country (one of markets.SUPPORTED_MARKETS) → attach converted price + currency + tax.
+// opts.baseCurrency defaults to the store's authoring currency (USD).
+function serializeProductListItem(p, opts = {}) {
     const cf = asObject(p.customFields);
     const variant = pickDefaultVariant(p.variants);
     const basePrice = cf.basePrice != null ? Number(cf.basePrice) : variant ? Number(variant.price) : 0;
+    const safeBase = Number.isFinite(basePrice) ? basePrice : 0;
     const firstCollection = Array.isArray(p.collections) && p.collections[0] ? p.collections[0].slug : '';
+
+    // Per-country price + tax envelope (base + FX); absent when no/unknown country.
+    const pricing = opts.country
+        ? markets.priceFields(safeBase, opts.country, opts.baseCurrency)
+        : {};
+
+    // Department/brand taxonomy from real backend fields: prefer the resolved category's PARENT
+    // (root category = department/brand), fall back to the authored custom_fields.departmentId.
+    // This is what the storefront brand tabs / department pages key on — a real backend value,
+    // never a hardcoded slug.
+    const parentCat = asObject(p.category && p.category.parent);
+    const departmentId = parentCat.slug
+        || cf.departmentId
+        || (p.category && p.category.slug)
+        || '';
+    const department = parentCat.name || cf.department || '';
+
     return {
         id: p.id,
         name: p.name,
         slug: p.slug,
-        departmentId: cf.departmentId || '',
+        departmentId,
+        department,
         categoryId: cf.categoryId || (p.category && p.category.slug) || '',
+        categoryName: (p.category && p.category.name) || '',
         subcategoryId: cf.subcategoryId || '',
         collectionId: cf.collectionId || firstCollection || '',
-        basePrice: Number.isFinite(basePrice) ? basePrice : 0,
+        basePrice: safeBase,
+        // Country-resolved fields (undefined when no country context — client falls back to basePrice).
+        price: pricing.price,
+        currencyCode: pricing.currencyCode,
+        taxType: pricing.taxType,
+        taxRate: pricing.taxRate,
+        taxInclusive: pricing.taxInclusive,
         imageUrl: mediaUrls(p),
+        media: mediaObjects(p),
         isVip: cf.isVip != null ? !!cf.isVip : !!p.isFeatured,
-        rating: Number(cf.rating ?? 0),
-        reviewsCount: Number(cf.reviewsCount ?? 0),
-        stock: Number(cf.stock ?? 0),
+        // Server-computed rating aggregate over ALL approved reviews (C4). Canonical fields +
+        // legacy aliases so the PDP header reads a global average, not a page-scoped client mean.
+        ratingAverage: ratingAverage(cf),
+        ratingCount: ratingCount(cf),
+        rating: ratingAverage(cf),
+        reviewsCount: ratingCount(cf),
+        // Inventory: prefer the first-class column, fall back to legacy custom_fields.stock.
+        // inStock honors track_inventory (untracked products are always purchasable).
+        stock: Number(p.stockQuantity ?? cf.stock ?? 0),
+        inStock: p.trackInventory ? Number(p.stockQuantity ?? cf.stock ?? 0) > 0 : true,
         brandId: cf.brandId || 'amarise-luxe',
         isGlobal: cf.isGlobal != null ? !!cf.isGlobal : true,
         regions: Array.isArray(cf.regions) ? cf.regions : [],
@@ -49,11 +124,11 @@ function serializeProductListItem(p) {
     };
 }
 
-function serializeProductDetail(p) {
+function serializeProductDetail(p, opts = {}) {
     const cf = asObject(p.customFields);
     const seo = asObject(p.seoMetadata);
     return {
-        ...serializeProductListItem(p),
+        ...serializeProductListItem(p, opts),
         description: p.description || '',
         specialNotes: cf.specialNotes,
         condition: cf.condition,
@@ -112,4 +187,5 @@ module.exports = {
     serializeDepartments,
     serializeCategories,
     serializeCollection,
+    isAvailableInCountry,
 };

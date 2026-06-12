@@ -49,7 +49,8 @@ exports.updateKPI = async (req, res, next) => {
     try {
         const kpi = await db.KPI.findOne({ where: { id: req.params.id, org_id: req.user.orgId } });
         if (!kpi) return next(new AppError('NOT_FOUND', 'KPI not found', 404));
-        await kpi.update(req.body);
+        const { business_id, revenue_target, revenue_actual, profit_margin, profit_trend, customers_total, customers_change, return_rate, nps } = req.body;
+        await kpi.update({ business_id, revenue_target, revenue_actual, profit_margin, profit_trend, customers_total, customers_change, return_rate, nps });
         await _createAuditLog(req, 'UPDATE_KPI', 'kpi', String(kpi.id));
         return sendSuccess(req, res, kpi);
     } catch (err) { return next(err); }
@@ -58,7 +59,8 @@ exports.updateKPI = async (req, res, next) => {
 exports.createKPI = async (req, res, next) => {
     try {
         const orgId = req.user.orgId;
-        const kpi = await db.KPI.create({ ...req.body, org_id: orgId });
+        const { business_id, revenue_target, revenue_actual, profit_margin, profit_trend, customers_total, customers_change, return_rate, nps } = req.body;
+        const kpi = await db.KPI.create({ business_id, revenue_target, revenue_actual, profit_margin, profit_trend, customers_total, customers_change, return_rate, nps, org_id: orgId });
         await _createAuditLog(req, 'CREATE_KPI', 'kpi', String(kpi.id));
         return sendSuccess(req, res, kpi, 201);
     } catch (err) { return next(err); }

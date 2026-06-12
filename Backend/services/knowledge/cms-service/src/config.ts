@@ -88,3 +88,26 @@ export const appConfig: AppConfig = {
   eventTransport: (process.env.EVENT_TRANSPORT as EventTransport) ?? 'noop',
   logLevel: process.env.LOG_LEVEL ?? 'info',
 };
+
+// Fail fast in non-development if the internal service secret — which guards the
+// decrypted-keys resolver (GET /internal/integrations/:slug) — was left at the
+// insecure development default. Mirrors the guard in config/appConfig.js (CJS runtime)
+// so the Phase-F TypeScript build has the same protection when it becomes the runtime.
+if (
+  appConfig.env !== 'development' &&
+  (!process.env.INTERNAL_SERVICE_SECRET ||
+    appConfig.internalSecret === 'baalvion-internal-dev-secret')
+) {
+  throw new Error(
+    '[cms-service] INTERNAL_SERVICE_SECRET must be set in non-development environments — refusing to start with the dev default',
+  );
+}
+
+// The AES vault key encrypts ALL tenant provider credentials at rest. Fatal in
+// non-dev where the entire vault would be readable by anyone who knows the dev
+// default key. Mirrors the guard in config/appConfig.js (CJS runtime).
+if (appConfig.env !== 'development' && !process.env.CMS_SECRETS_KEY) {
+  throw new Error(
+    '[cms-service] CMS_SECRETS_KEY must be set in non-development environments — refusing to encrypt the vault with the dev default key',
+  );
+}

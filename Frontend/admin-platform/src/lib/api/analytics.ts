@@ -1,4 +1,4 @@
-import apiClient from './client';
+import { adminApiClient } from './client';
 import type { ApiResponse } from '@/lib/types/common.types';
 
 export interface KpiMetrics {
@@ -40,33 +40,33 @@ export interface ActivityEvent {
 
 export const analyticsApi = {
   kpis: (period?: '7d' | '30d' | '90d') =>
-    apiClient.get<ApiResponse<KpiMetrics>>('/admin/analytics/kpis', { params: { period } }),
+    adminApiClient.get<ApiResponse<KpiMetrics>>('/admin/analytics/kpis', { params: { period } }),
 
   userGrowth: (period?: '7d' | '30d' | '90d') =>
-    apiClient.get<ApiResponse<ChartDataPoint[]>>('/admin/analytics/users/growth', {
+    adminApiClient.get<ApiResponse<ChartDataPoint[]>>('/admin/analytics/users/growth', {
       params: { period },
     }),
 
   orgGrowth: (period?: '7d' | '30d' | '90d') =>
-    apiClient.get<ApiResponse<ChartDataPoint[]>>('/admin/analytics/orgs/growth', {
+    adminApiClient.get<ApiResponse<ChartDataPoint[]>>('/admin/analytics/orgs/growth', {
       params: { period },
     }),
 
   revenue: (period?: '7d' | '30d' | '90d') =>
-    apiClient.get<ApiResponse<ChartDataPoint[]>>('/admin/analytics/revenue', {
+    adminApiClient.get<ApiResponse<ChartDataPoint[]>>('/admin/analytics/revenue', {
       params: { period },
     }),
 
   serviceHealth: () =>
-    apiClient.get<ApiResponse<ServiceHealth[]>>('/admin/analytics/services/health'),
+    adminApiClient.get<ApiResponse<ServiceHealth[]>>('/admin/analytics/services/health'),
 
   recentActivity: (limit?: number) =>
-    apiClient.get<ApiResponse<ActivityEvent[]>>('/admin/analytics/activity', {
+    adminApiClient.get<ApiResponse<ActivityEvent[]>>('/admin/analytics/activity', {
       params: { limit },
     }),
 
   trafficByPage: (period?: '7d' | '30d') =>
-    apiClient.get<ApiResponse<Array<{ page: string; views: number; uniqueVisitors: number }>>>(
+    adminApiClient.get<ApiResponse<Array<{ page: string; views: number; uniqueVisitors: number }>>>(
       '/admin/analytics/traffic',
       { params: { period } },
     ),

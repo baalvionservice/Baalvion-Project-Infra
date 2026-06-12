@@ -28,6 +28,11 @@ const authMiddleware = async (req, res, next) => {
             jti:         decoded.jti,
         };
         req.user = { id: req.auth.userId, role: req.auth.role, orgId: req.auth.orgId };
+
+        // Tenant kill-switch: reject in-flight access tokens bound to a suspended org.
+        if (req.auth.orgId && await redis.isOrgSuspended(req.auth.orgId)) {
+            return next(new AppError('ORG_SUSPENDED', 'Organization is suspended', 403));
+        }
         return next();
     } catch {
         return next(new AppError('UNAUTHORIZED', 'Invalid or expired token', 401));

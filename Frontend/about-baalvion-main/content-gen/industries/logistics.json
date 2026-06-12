@@ -1,0 +1,55 @@
+{
+  "slug": "logistics",
+  "title": "Baalvion for Logistics",
+  "kind": "industry",
+  "heroImageSeed": "ind-logistics",
+  "excerpt": "Control towers, route optimisation, and automated customs — end-to-end visibility and lower cost across global corridors.",
+  "seo": {
+    "title": "Logistics & Supply Chain Technology | Baalvion",
+    "description": "Baalvion builds logistics platforms: real-time control towers, multi-leg route optimisation, and automated customs clearance across global corridors.",
+    "keywords": ["logistics technology", "supply chain", "route optimisation", "control tower", "customs", "Baalvion industries", "freight"]
+  },
+  "customFields": {
+    "challenges": [
+      "No single view of in-flight shipments",
+      "Sub-optimal, habit-based routing",
+      "Manual, fragile customs filing across corridors",
+      "Delays discovered too late to act"
+    ],
+    "solutions": [
+      "A real-time control tower with end-to-end visibility",
+      "Multi-leg route optimisation on a lane graph",
+      "Connector-based automated customs clearance",
+      "Event-driven milestone tracking and alerting"
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Sector Overview" },
+    { "type": "paragraph", "text": "Logistics is a coordination problem at planetary scale: shipments cross many carriers, corridors, and customs regimes, and a single blind spot cascades into delays and cost. Baalvion brings real-time visibility and optimisation to this, exactly as in [a logistics control tower for global corridors](/case-studies/logistics-control-tower)." },
+    { "type": "heading", "level": 2, "text": "Challenges" },
+    { "type": "list", "ordered": false, "items": [
+      "**Visibility:** no single view of where shipments actually are.",
+      "**Routing:** decided by habit rather than analysis, so cost and time suffer.",
+      "**Customs:** manual filing across incompatible national systems.",
+      "**Reactivity:** delays surface too late to do anything about them."
+    ] },
+    { "type": "heading", "level": 2, "text": "How Baalvion Helps" },
+    { "type": "paragraph", "text": "We build control towers with event-driven milestone tracking for end-to-end visibility, multi-leg route optimisation over a lane graph, and connector-based [automated customs clearance](/case-studies/automated-customs-clearance) to ICEGATE, ACE, and CDS — with retries and failover so a shipment never silently stalls." },
+    { "type": "heading", "level": 2, "text": "Relevant Services" },
+    { "type": "paragraph", "text": "Logistics engagements draw on [automation](/services/automation), [cloud solutions](/services/cloud-solutions), and [enterprise software](/services/enterprise-software), with [AI solutions](/services/ai-solutions) for forecasting and optimisation." },
+    { "type": "heading", "level": 2, "text": "Outcomes" },
+    { "type": "paragraph", "text": "Operators gain end-to-end shipment visibility, lower route cost through optimisation, automated clearance across corridors, and the ability to spot and reroute around delays in real time." }
+  ],
+  "faqs": [
+    { "q": "What is a logistics control tower?", "a": "A real-time, unified view of every in-flight shipment, fed by event-driven milestones, with optimisation and alerting — see [our control tower case study](/case-studies/logistics-control-tower)." },
+    { "q": "How does route optimisation reduce cost?", "a": "By modelling the corridor network as a lane graph and searching it for the cheapest, fastest, or balanced route using live carrier rates and transit times." },
+    { "q": "Can you automate customs clearance?", "a": "Yes — via connectors to national systems (ICEGATE, ACE, CDS) with async pipelines and automatic failure recovery. See [automated customs clearance](/case-studies/automated-customs-clearance)." },
+    { "q": "Which services apply to logistics?", "a": "Typically [automation](/services/automation), [cloud solutions](/services/cloud-solutions), and [enterprise software](/services/enterprise-software)." }
+  ],
+  "internalLinks": [
+    { "anchor": "a logistics control tower for global corridors", "href": "/case-studies/logistics-control-tower" },
+    { "anchor": "automated customs clearance", "href": "/case-studies/automated-customs-clearance" },
+    { "anchor": "automation", "href": "/services/automation" },
+    { "anchor": "AI solutions", "href": "/services/ai-solutions" }
+  ]
+}

@@ -2,6 +2,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../models');
 const { getTenantId } = require('../middleware/tenantContext');
 const { journalEntriesTotal } = require('../middleware/metrics');
+const { auditLedger } = require('../utils/audit');
 
 /**
  * POST /v1/ledger/entries
@@ -71,6 +72,17 @@ async function postEntry(req, res, next) {
     });
 
     journalEntriesTotal.labels(entryType, 'POSTED').inc();
+
+    auditLedger(req, 'ledger.entry.post', {
+      entryId: entry.id,
+      transactionRef,
+      debitAccountId,
+      creditAccountId,
+      amount,
+      currency,
+      entryType,
+      relatedTransactionId,
+    });
 
     res.status(201).json({
       success: true,
@@ -212,6 +224,17 @@ async function reverseEntry(req, res, next) {
     });
 
     journalEntriesTotal.labels('REVERSAL', 'POSTED').inc();
+
+    auditLedger(req, 'ledger.entry.reverse', {
+      originalEntryId: entry.id,
+      reversingEntryId: reversingEntry.id,
+      transactionRef: entry.transactionRef,
+      amount: entry.amount,
+      currency: entry.currency,
+      reason: reason || 'Not provided',
+      before: 'POSTED',
+      after: 'REVERSED',
+    });
 
     res.status(201).json({
       success: true,

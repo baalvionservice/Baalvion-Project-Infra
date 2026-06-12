@@ -1,0 +1,37 @@
+{
+  "slug": "vision",
+  "title": "Our Vision",
+  "kind": "company",
+  "heroImageSeed": "co-vision",
+  "excerpt": "A world where any business, anywhere, can trade across borders as easily as it operates at home.",
+  "seo": {
+    "title": "Our Vision | Baalvion",
+    "description": "Baalvion's vision: a world where any business can trade across borders as easily as it operates at home, on shared, open trade infrastructure.",
+    "keywords": ["Baalvion vision", "future of trade", "trade infrastructure", "global commerce"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Our Vision" },
+    { "type": "paragraph", "text": "We imagine a world where any business — a manufacturer in one country, a marketplace in another, a logistics operator spanning both — can trade across borders as easily as it operates at home. Where compliance is automatic, settlement is instant, and the infrastructure of trade is a shared utility rather than a moat held by a few incumbents." },
+    { "type": "heading", "level": 2, "text": "The next decade" },
+    { "type": "paragraph", "text": "Over the coming decade we expect trade infrastructure to follow the path that compute and payments already took: from bespoke, in-house, and brittle to shared, programmable, and reliable. The [Baalvion Operating System](/platform) is our contribution to that shift — a unified layer that businesses build on rather than rebuild." },
+    { "type": "list", "ordered": false, "items": [
+      "**Programmable trade:** compliance, settlement, and logistics available as composable building blocks.",
+      "**Real-time by default:** value and information moving without multi-day delays.",
+      "**Intelligence everywhere:** AI that makes the system safer and smarter, never less accountable.",
+      "**Open access:** capability that scales down to the smallest operator."
+    ] },
+    { "type": "heading", "level": 2, "text": "How we get there" },
+    { "type": "paragraph", "text": "Vision without execution is just a slogan. We make progress concretely — see how the [future of AI agents](/news/tech/future-of-ai-agents) and [digital transformation](/news/insights/digital-transformation-guide) shape our roadmap, and how it already shows up in our [case studies](/case-studies). The work is grounded in our [mission](/about/mission) and the reasons people choose us, set out in [why Baalvion](/about/why-baalvion)." }
+  ],
+  "faqs": [
+    { "q": "What is Baalvion's long-term vision?", "a": "A world where any business can trade across borders as easily as it operates at home, on shared, programmable trade infrastructure." },
+    { "q": "How does AI fit the vision?", "a": "AI makes the system safer and smarter while staying accountable — it advises and augments, but decisions remain explainable. See [the future of AI agents](/news/tech/future-of-ai-agents)." },
+    { "q": "Is the vision only for large enterprises?", "a": "No — a core aim is open access, bringing infrastructure-grade capability to operators of every size." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "the future of AI agents", "href": "/news/tech/future-of-ai-agents" },
+    { "anchor": "mission", "href": "/about/mission" },
+    { "anchor": "why Baalvion", "href": "/about/why-baalvion" }
+  ]
+}

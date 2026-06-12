@@ -1,0 +1,95 @@
+{
+  "slug": "secure-software-development",
+  "title": "Secure Software Development: A Practical Guide",
+  "kind": "article",
+  "category": "tech",
+  "seo": {
+    "title": "Secure Software Development: A Practical Guide",
+    "description": "How Baalvion builds secure software: a secure SDLC, threat modeling, the OWASP Top 10, secrets management, supply-chain security, and shift-left practices that hold up under audit.",
+    "keywords": [
+      "secure software development",
+      "secure SDLC",
+      "threat modeling",
+      "OWASP Top 10",
+      "secrets management",
+      "supply-chain security",
+      "shift-left security",
+      "DevSecOps",
+      "SBOM",
+      "application security"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "10 min read",
+  "heroImageSeed": "secure-sdlc-shield-31",
+  "excerpt": "How Baalvion treats security as a property of the development process, not a phase: a secure SDLC, threat modeling, the OWASP Top 10, secrets management, and supply-chain controls.",
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Security is a property of the process, not a final inspection" },
+    { "type": "paragraph", "text": "Most insecure software is not built by careless engineers. It is built by capable engineers working inside a process that treats security as a gate at the end — a penetration test two weeks before launch, a checklist signed off under deadline pressure, a vulnerability scan whose findings nobody has time to fix. By the time security is consulted, the architecture is frozen, the trust boundaries are implicit, and the only options left are expensive retrofits or accepted risk. Secure software development inverts that order. It treats security as a property that is designed in, verified continuously, and owned by the people writing the code." },
+    { "type": "paragraph", "text": "At Baalvion Industries we build and operate the [Baalvion Operating System](/platform), a multi-tenant trade infrastructure that moves regulated data and real money across 198 markets and 180+ jurisdictions. A single class of defect — a missing authorization check, a leaked credential, a poisoned dependency — can cross-contaminate tenants, expose one party's ledger to another, or break the SOC 2 Type II and ISO 27001 commitments our customers underwrite their own compliance on. That reality forces the discipline described here: a secure software development lifecycle in which threat modeling, the OWASP Top 10, secrets management, and supply-chain controls are not separate initiatives but the ordinary mechanics of shipping a feature." },
+    { "type": "heading", "level": 2, "text": "The secure SDLC: where security work actually happens" },
+    { "type": "paragraph", "text": "A secure SDLC is not a parallel process bolted onto delivery. It is the same lifecycle every team already runs — design, build, test, deploy, operate — with a specific security activity assigned to each phase and an owner accountable for it. The point is to distribute the work so that no single stage carries an impossible burden, and to make security feedback arrive while it is still cheap to act on. This is the structural backbone behind our broader [software development lifecycle](/news/tech/software-development-lifecycle)." },
+    { "type": "list", "ordered": false, "items": [
+      "Design: threat modeling and trust-boundary analysis, abuse-case definition, and a security review of the proposed architecture before code is written.",
+      "Build: secure-by-default frameworks, mandatory code review, IDE-level static analysis (SAST), and pre-commit secret scanning so problems are caught at the keyboard.",
+      "Test: automated SAST and DAST in the pipeline, dependency and container scanning, and security unit tests that assert authorization and input-handling behavior.",
+      "Deploy: signed and content-addressed artifacts, infrastructure policy-as-code, and a gate that blocks releases on unaddressed critical findings.",
+      "Operate: runtime monitoring, audit logging, anomaly detection, vulnerability management with defined remediation SLAs, and a coordinated disclosure path for external reports."
+    ]},
+    { "type": "paragraph", "text": "The unifying principle is shift-left: move each security activity as early as it can usefully run. A finding discovered during design costs a conversation; the same finding discovered in production costs an incident, a customer notification, and a patch cycle. Shifting left is not about doing less security work later — runtime defenses still matter — it is about refusing to defer work that could have been done cheaply up front." },
+    { "type": "heading", "level": 2, "text": "Threat modeling: deciding what you are defending against" },
+    { "type": "paragraph", "text": "You cannot secure a system you have not characterized. Threat modeling is the structured exercise of asking four questions about a design before it is built: What are we building? What can go wrong? What are we going to do about it? And did we do a good enough job? The output is not a document that gets filed away — it is a list of concrete threats mapped to concrete mitigations, each of which becomes a requirement, a test, or an explicitly accepted risk." },
+    { "type": "paragraph", "text": "We anchor sessions on a data-flow diagram that makes trust boundaries explicit: where untrusted input enters, where authentication happens, where a tenant's data crosses into shared infrastructure. Against that diagram we apply STRIDE — Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, and Elevation of privilege — as a prompt to systematically enumerate failure modes rather than relying on intuition. In a multi-tenant platform the dominant categories are usually information disclosure and elevation of privilege: the threats where one tenant reads or acts on another's data. Those map directly to the row-level isolation and identity controls we describe in our [multi-tenant identity platform](/case-studies/multi-tenant-identity-platform) case study." },
+    { "type": "paragraph", "text": "Threat modeling earns its keep when it is lightweight and repeated. A whiteboard hour at the start of a feature, revisited when the design changes materially, catches design-level flaws that no scanner will ever find — because scanners check code against known patterns, while a missing trust boundary is an absence, not a pattern. The discipline scales because the questions are the same every time; only the system under examination changes." },
+    { "type": "heading", "level": 2, "text": "The OWASP Top 10 as a working checklist" },
+    { "type": "paragraph", "text": "The OWASP Top 10 is the industry's consensus list of the most impactful web application security risks, and it is the most useful concrete starting point for any team. We treat it not as exam revision but as a set of controls wired into review and testing. The list's leading entry, Broken Access Control, is also the one that hurts a trade platform most: authorization must be enforced server-side on every request, default-deny, and checked against the authenticated tenant — never inferred from a client-supplied identifier, which is the classic insecure-direct-object-reference mistake." },
+    { "type": "list", "ordered": true, "items": [
+      "Broken access control: enforce authorization on the server for every object, default to deny, and bind every query to the caller's tenant rather than trusting an ID in the request.",
+      "Cryptographic failures: encrypt sensitive data in transit (TLS 1.2+) and at rest (AES-256), and never invent your own cryptography — use vetted libraries and managed key stores.",
+      "Injection: use parameterized queries and prepared statements, validate input against an allowlist, and contextually encode output to neutralize SQL, command, and cross-site scripting attacks.",
+      "Insecure design: counter with threat modeling and secure design patterns up front, because no amount of testing fixes a flawed trust model.",
+      "Security misconfiguration: harden defaults, remove unused features, and manage configuration as code so environments are reproducible and reviewable.",
+      "Vulnerable and outdated components: maintain an inventory of dependencies, scan continuously, and patch on a defined SLA — this is where supply-chain risk concentrates.",
+      "Identification and authentication failures: enforce MFA, rate-limit credential endpoints, and use strong, standards-based session and token handling.",
+      "Software and data integrity failures: verify the integrity of dependencies and CI/CD artifacts through signing and provenance.",
+      "Security logging and monitoring failures: log security-relevant events in a tamper-evident, auditable way so incidents are detectable and reconstructable.",
+      "Server-side request forgery: validate and restrict outbound requests so an attacker cannot coerce a server into reaching internal resources."
+    ]},
+    { "type": "paragraph", "text": "The value of the list is that it converts a vague mandate — be secure — into ten testable claims. Each item becomes a question a reviewer asks, a rule in a static analyzer, and ideally an automated test. A team that can demonstrate it handles all ten, with evidence, is far ahead of one chasing the latest headline vulnerability." },
+    { "type": "heading", "level": 2, "text": "Secrets management: stop committing credentials" },
+    { "type": "paragraph", "text": "The most common way credentials leak is the most mundane: an API key, database password, or signing key hardcoded into source and pushed to a repository. Once a secret reaches version control it must be treated as compromised forever, because git history is permanent and widely cloned. The fix is architectural, not exhortatory — you cannot solve this by telling engineers to be careful." },
+    { "type": "list", "ordered": false, "items": [
+      "Never store secrets in source code or in plaintext configuration files; the repository should contain references to secrets, never the secrets themselves.",
+      "Use a dedicated secret manager — HashiCorp Vault, AWS Secrets Manager, or an equivalent — as the single source of truth, with access governed by least-privilege policies.",
+      "Inject secrets at runtime through the environment or a sidecar, so the application reads them from memory rather than disk.",
+      "Prefer short-lived, dynamically issued credentials over long-lived static keys, so a leaked secret has a small blast radius and expires on its own.",
+      "Run automated secret scanning in pre-commit hooks and in the pipeline to catch accidental commits before they merge, and rotate any secret that is exposed."
+    ]},
+    { "type": "paragraph", "text": "Rotation is the discipline most teams skip and most regret. A secret that never changes is a secret that, once leaked, grants indefinite access. Building rotation into the platform — so that issuing a fresh credential and retiring the old one is routine and automated — turns a catastrophic exposure into a contained, recoverable event. This is part of the same operational rigor we apply to our [DevOps practice](/services/devops)." },
+    { "type": "heading", "level": 2, "text": "Supply-chain security: you ship your dependencies' risk" },
+    { "type": "paragraph", "text": "Modern applications are mostly other people's code. A typical service pulls in hundreds of transitive dependencies, any one of which can introduce a vulnerability or, worse, be deliberately compromised. Incidents ranging from poisoned package updates to backdoored build tooling have made software supply-chain security a board-level concern, and the defenses are concrete." },
+    { "type": "paragraph", "text": "The foundation is knowing what you ship. We generate a Software Bill of Materials (SBOM) for every artifact — a complete, machine-readable inventory of components and versions — so that when a new vulnerability is disclosed we can answer \"are we affected?\" in minutes rather than days. On top of the SBOM we layer continuous dependency scanning, pinned and verified versions to prevent silent substitution, and artifact signing with provenance (along the lines of the SLSA framework) so the binary running in production is provably the one our pipeline built." },
+    { "type": "paragraph", "text": "The build pipeline itself is part of the attack surface. A compromised CI system can inject malicious code into otherwise clean source, which is why we treat the pipeline as production infrastructure: hardened runners, least-privilege credentials, and integrity checks on every promotion. Securing the path from commit to deploy is the natural extension of designing robust [CI/CD pipelines](/news/tech/ci-cd-pipelines), where the same gates that protect quality also protect integrity." },
+    { "type": "heading", "level": 2, "text": "Making it culture, not ceremony" },
+    { "type": "paragraph", "text": "Tools and checklists are necessary but not sufficient. Secure development holds up over time only when engineers own the security of what they build, security specialists act as enablers rather than gatekeepers, and the organization measures security as a first-class outcome — mean time to remediate, percentage of services with current threat models, secret-scanning coverage — rather than as an annual audit scramble. The shift-left model works precisely because it gives ownership to the people closest to the code." },
+    { "type": "paragraph", "text": "This is the posture we operate the BOS platform under, and the same posture we bring to client work building large-scale, regulated systems. Security that is designed in, verified continuously, and owned broadly is not slower than insecure development — over any meaningful horizon it is dramatically faster, because the alternative is paying for the same defects again and again as incidents. You can read more about how this fits our wider engineering approach in [how Baalvion builds scalable software](/news/tech/how-baalvion-builds-scalable-software) and our [trust and compliance commitments](/trust)." }
+  ],
+  "faqs": [
+    { "q": "What is a secure SDLC and how is it different from a normal one?", "a": "A secure software development lifecycle is the ordinary lifecycle — design, build, test, deploy, operate — with a defined security activity and owner attached to each phase. It differs from a normal SDLC by distributing security work throughout rather than concentrating it in a single pre-launch test, so flaws are caught while they are still cheap to fix." },
+    { "q": "What does \"shift-left\" actually mean in practice?", "a": "Shift-left means moving each security activity as early as it can usefully run: threat modeling at design, static analysis and secret scanning at the keyboard, automated scans in the pipeline. A flaw found in design costs a conversation; the same flaw in production costs an incident. It does not replace runtime defenses — it refuses to defer work that could be done cheaply up front." },
+    { "q": "Is the OWASP Top 10 enough to secure an application?", "a": "It is the best concrete starting point, not a complete program. The Top 10 converts a vague mandate into ten testable risks — broken access control, injection, cryptographic failures, and so on — that can be wired into code review and automated testing. A mature program also adds threat modeling, supply-chain controls, secrets management, and runtime monitoring." },
+    { "q": "How should secrets like API keys and database passwords be handled?", "a": "Never in source code or plaintext config. Store them in a dedicated secret manager such as HashiCorp Vault or AWS Secrets Manager, inject them at runtime, prefer short-lived dynamically issued credentials, scan for accidental commits in pre-commit hooks and CI, and rotate on a schedule. Any secret pushed to version control must be treated as compromised and rotated immediately." },
+    { "q": "What is an SBOM and why does it matter for supply-chain security?", "a": "A Software Bill of Materials is a machine-readable inventory of every component and version in an artifact. It matters because when a new vulnerability is disclosed, an SBOM lets you answer \"are we affected?\" in minutes instead of days. Combined with dependency scanning and signed, provenance-verified artifacts, it forms the backbone of supply-chain defense." },
+    { "q": "How does Baalvion apply these practices on its own platform?", "a": "The Baalvion Operating System is multi-tenant infrastructure moving regulated data and money across 198 markets, so threat modeling focuses on tenant isolation and privilege escalation, data is encrypted with AES-256 and TLS, the pipeline blocks releases on unaddressed critical findings, and everything is auditable under SOC 2 Type II and ISO 27001. Security is owned by the engineers building each service, not a separate gate." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "software development lifecycle", "href": "/news/tech/software-development-lifecycle" },
+    { "anchor": "multi-tenant identity platform", "href": "/case-studies/multi-tenant-identity-platform" },
+    { "anchor": "DevOps practice", "href": "/services/devops" },
+    { "anchor": "CI/CD pipelines", "href": "/news/tech/ci-cd-pipelines" },
+    { "anchor": "how Baalvion builds scalable software", "href": "/news/tech/how-baalvion-builds-scalable-software" },
+    { "anchor": "trust and compliance commitments", "href": "/trust" }
+  ],
+  "customFields": {}
+}

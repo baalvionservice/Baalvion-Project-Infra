@@ -53,7 +53,14 @@ async function listPublicContent(websiteSlug, query = {}) {
 
     if (categorySlug) {
         const cat = await CmsCategory.findOne({ where: { websiteId: website.id, slug: categorySlug } });
-        if (cat) where.categoryId = cat.id;
+        if (cat) {
+            // Surface content whose primary OR additional categories include this one,
+            // so a multi-category article appears on every relevant topic page.
+            where[Op.and] = [
+                ...(where[Op.and] || []),
+                { [Op.or]: [{ categoryId: cat.id }, { categoryIds: { [Op.contains]: [cat.id] } }] },
+            ];
+        }
     }
 
     const { rows, count } = await CmsContent.findAndCountAll({

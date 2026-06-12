@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Secrets — real values live in the secret manager, never in git
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*

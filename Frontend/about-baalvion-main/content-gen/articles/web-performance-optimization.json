@@ -1,0 +1,86 @@
+{
+  "slug": "web-performance-optimization",
+  "title": "Web Performance Optimization for Scale",
+  "kind": "article",
+  "category": "tech",
+  "seo": {
+    "title": "Web Performance Optimization for Scale | Baalvion",
+    "description": "Core Web Vitals, rendering strategies, caching, CDN edge delivery, bundle budgets and continuous measurement — how Baalvion engineers fast web experiences at platform scale.",
+    "keywords": [
+      "web performance optimization",
+      "core web vitals",
+      "largest contentful paint",
+      "interaction to next paint",
+      "cumulative layout shift",
+      "bundle budgets",
+      "cdn edge caching",
+      "rendering strategies",
+      "real user monitoring",
+      "performance budgets"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "9 min read",
+  "heroImageSeed": "wpo-edge-vitals",
+  "excerpt": "Performance is a feature with a revenue line. Here is how Core Web Vitals, rendering strategy, caching, CDN delivery, bundle budgets and continuous measurement combine into fast web experiences — engineered at platform scale.",
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Performance is a product decision, not a polish step" },
+    { "type": "paragraph", "text": "A slow page is not a cosmetic problem; it is a conversion problem, an accessibility problem and, increasingly, a ranking problem. Every additional second before a customer can act compounds across abandonment, support load and search visibility. At Baalvion Industries we treat the web tier of the Baalvion Operating System (BOS) the same way we treat the ledger and settlement engines beneath it — as infrastructure with budgets, SLOs and regressions that block a release. BOS surfaces commerce, finance, compliance and intelligence to operators and partners across 198 markets and 180+ jurisdictions, on networks ranging from data-centre fibre to a congested mobile connection in an emerging market. A web experience that only feels fast on a developer's laptop is not actually fast." },
+    { "type": "paragraph", "text": "The discipline is straightforward to state and hard to sustain: define what fast means in user-perceived terms, measure it on real devices and networks, set budgets that fail the build when crossed, and attack the largest contributor first. This article walks the field-tested levers in the order they usually pay off — Core Web Vitals as the target, rendering strategy as the biggest single lever, caching and CDN delivery, bundle budgets, and the measurement loop that keeps all of it honest." },
+
+    { "type": "heading", "level": 2, "text": "Core Web Vitals: measure what the user feels" },
+    { "type": "paragraph", "text": "Server-side response time is necessary but not sufficient; users experience loading, interactivity and visual stability, which is exactly what Google's Core Web Vitals quantify. Largest Contentful Paint (LCP) measures when the main content becomes visible, with a good threshold at 2.5 seconds. Interaction to Next Paint (INP) replaced First Input Delay in 2024 and measures responsiveness across the whole session — the lag between a tap or click and the next visual update — with a good threshold of 200 milliseconds. Cumulative Layout Shift (CLS) measures unexpected movement of content as the page loads, with a good threshold of 0.1. Supporting metrics — Time to First Byte, First Contentful Paint and Total Blocking Time — help diagnose which phase is slow." },
+    { "type": "paragraph", "text": "The decisive nuance is the difference between lab and field data. Lab tools like Lighthouse give a controlled, reproducible score on a synthetic device, which is ideal for catching regressions in CI. Field data — Real User Monitoring collected from actual sessions, reported at the 75th percentile — is the truth of what customers experience. The two disagree constantly, and when they do, the field wins. We instrument the BOS front ends with the open-source web-vitals library, ship the readings to our observability pipeline, and segment by device class, geography and network type, because a p75 INP that looks healthy globally can hide a painful tail on low-end Android hardware in a specific region." },
+    { "type": "list", "ordered": false, "items": [
+      "LCP under 2.5s — driven by server response, render-blocking resources, resource load time and client-side rendering delay.",
+      "INP under 200ms — driven by long JavaScript tasks blocking the main thread between an interaction and its visual response.",
+      "CLS under 0.1 — driven by images and embeds without dimensions, injected banners and web fonts that reflow text.",
+      "Measure at p75 from field data, not the median from a lab run — the tail is where customers churn."
+    ] },
+
+    { "type": "heading", "level": 2, "text": "Rendering strategy: the largest single lever" },
+    { "type": "paragraph", "text": "Before micro-optimising assets, decide where and when HTML is produced, because that choice dominates LCP and time to interactivity more than any later tweak. A pure client-side rendered (CSR) single-page app ships a near-empty shell and a large JavaScript bundle that must download, parse and execute before anything meaningful paints — fine for a deeply interactive dashboard behind a login, poor for a content or marketing surface. Server-side rendering (SSR) produces HTML per request so content paints early and is crawlable, at the cost of server compute and a hydration step. Static site generation (SSG) renders at build time and serves cacheable HTML from the edge, which is the fastest path for content that does not change per request. Incremental Static Regeneration blends the two — serve static, revalidate in the background." },
+    { "type": "paragraph", "text": "The current frontier is reducing how much JavaScript ships at all. React Server Components, streaming SSR with Suspense, and islands architecture (Astro, Qwik's resumability) let a page render mostly static HTML and hydrate only the genuinely interactive parts, which directly attacks INP by shrinking main-thread work. Our rule of thumb maps the rendering mode to the surface: public, content-heavy pages such as [web development](/services/web-development) landing surfaces are SSG or ISR at the edge; authenticated operator consoles that are interaction-dense use SSR with selective hydration; and only the most dynamic, stateful panels remain client-rendered. The trade-off is always the same — moving work to the server cuts client cost but adds infrastructure and cache-invalidation complexity, which is a deliberate engineering choice rather than a default." },
+    { "type": "list", "ordered": false, "items": [
+      "CSR — minimal server cost, rich interactivity, but slow first paint and weak SEO; reserve for app-shell experiences behind auth.",
+      "SSR — fast, crawlable first paint at the cost of per-request compute and hydration; good for dynamic, personalised pages.",
+      "SSG / ISR — fastest delivery from cache for stable content; revalidate incrementally to avoid full rebuilds.",
+      "Islands / Server Components — ship HTML, hydrate only interactive regions, cut main-thread JavaScript to protect INP."
+    ] },
+
+    { "type": "heading", "level": 2, "text": "Caching and CDN: serve from the edge, compute once" },
+    { "type": "paragraph", "text": "The fastest request is the one that never reaches your origin. Layered caching is the highest-leverage infrastructure investment in any web stack, and it has to be reasoned about as a hierarchy rather than a single switch. At the browser, Cache-Control directives govern reuse: immutable, content-hashed static assets get a one-year max-age with the immutable flag, while HTML uses short or revalidated TTLs with ETags so a conditional request returns a cheap 304 instead of a full payload. At the edge, a Content Delivery Network terminates TLS close to the user and serves cached responses from points of presence worldwide, collapsing round-trip latency that no amount of code optimisation can recover. Behind the CDN, an application cache such as Redis holds rendered fragments, query results and session data so the origin computes each expensive result once." },
+    { "type": "paragraph", "text": "Modern CDNs are no longer dumb caches — they run compute at the edge (Cloudflare Workers, Lambda@Edge, Fastly Compute) so personalisation, A/B assignment, auth checks and even SSR can happen near the user rather than at a distant origin. The genuinely hard part is never the cache hit; it is invalidation. We favour key-based and tag-based invalidation — change the content hash or purge a cache tag when underlying data changes — over blunt time-based expiry, and we use the stale-while-revalidate pattern so users get an instant cached response while a fresh one is fetched in the background. For BOS, edge caching is also a governance decision: cache keys and purge boundaries respect tenant isolation and data-residency rules across our 180+ jurisdictions, so a cached fragment never leaks across a tenant or regulatory boundary. The same edge discipline underpins our [cloud solutions](/services/cloud-solutions) practice." },
+
+    { "type": "heading", "level": 2, "text": "Bundle budgets: ship less JavaScript" },
+    { "type": "paragraph", "text": "JavaScript is the most expensive resource a page can ship, byte for byte, because the browser must download it, then parse and execute it on the main thread — and execution cost lands hardest on the mid-range mobile devices most of your users actually own. The defining practice is the performance budget: a hard ceiling on bundle size, enforced in CI so a regression fails the build rather than reaching production unnoticed. We set explicit budgets per surface — a content landing page is held under roughly 150KB of gzipped JavaScript, an authenticated application page under 300KB — and we measure them on every pull request, because budgets that are merely aspirational are budgets that are quietly exceeded." },
+    { "type": "paragraph", "text": "Hitting the budget is a stack of well-understood techniques. Code splitting and route-based lazy loading defer code until a route or interaction needs it. Tree shaking and import-cost discipline remove dead exports and discourage pulling an entire utility library for one function. Heavy dependencies — a charting library, a rich-text editor, a date library — are dynamically imported on demand or replaced with lighter alternatives. Modern build tooling (esbuild, Vite, SWC, Rspack) compiles and bundles fast enough that these checks fit inside a normal CI cycle. Beyond JavaScript: serve images as AVIF or WebP at the rendered size with explicit width and height to prevent layout shift, subset and preload only the one critical font weight with font-display: swap, and preconnect to the origins on the critical path. These compound — disciplined assets plus a JavaScript budget are what keep [enterprise software](/services/enterprise-software) front ends responsive under real load." },
+    { "type": "list", "ordered": false, "items": [
+      "Set per-surface budgets (landing pages tighter than app pages) and fail CI when a bundle exceeds them.",
+      "Split by route and lazy-load on interaction; dynamically import heavy, rarely-used dependencies.",
+      "Tree-shake aggressively and audit import cost — never pull a whole library for a single helper.",
+      "Optimise non-JS assets too: next-gen image formats at rendered size, font subsetting, preconnect and preload on the critical path only."
+    ] },
+
+    { "type": "heading", "level": 2, "text": "The measurement loop: budgets, RUM and continuous regression" },
+    { "type": "paragraph", "text": "Optimisation without measurement is guesswork, and a one-time audit decays the moment the next feature ships. Performance is a property that has to be defended continuously, which means closing the loop between lab and field. In CI we run Lighthouse against representative pages and assert against budgets so a regression is caught before merge — the same gate philosophy we apply across our [DevOps](/services/devops) practice. In production we collect Real User Monitoring from genuine sessions, report Core Web Vitals at p75, and alert when a percentile crosses a threshold or a deploy moves a metric. When something is slow, distributed tracing and the browser's own performance APIs (the Long Tasks API, Element Timing, the Resource Timing buffer) tell us which phase and which resource is responsible, rather than leaving us to guess." },
+    { "type": "paragraph", "text": "This loop is the same observability discipline that makes BOS auditable end to end: the telemetry that flags a slow LCP in one market is part of the same pipeline that feeds our Governance layer and the SOC 2 Type II and ISO 27001 commitments the platform is built on. Performance, like security, is not a sprint you finish; it is an invariant you hold while the system keeps changing underneath you. That is the standard our [technology consulting](/services/technology-consulting) team brings to a performance engagement — start from user-perceived metrics and enforced budgets, attack the largest contributor first, and instrument everything so the gains survive the next hundred deploys. It is also how we ensure the [platform](/platform) stays fast while absorbing 500K+ transactions for 125+ active partners." }
+  ],
+  "faqs": [
+    { "q": "What are the Core Web Vitals and what are the target thresholds?", "a": "They are three user-perceived metrics. Largest Contentful Paint (LCP) measures load, target under 2.5 seconds. Interaction to Next Paint (INP), which replaced First Input Delay in 2024, measures responsiveness, target under 200 milliseconds. Cumulative Layout Shift (CLS) measures visual stability, target under 0.1. Google evaluates them at the 75th percentile of real-user sessions." },
+    { "q": "Should I optimise based on Lighthouse scores or real-user data?", "a": "Both, for different jobs. Lighthouse is lab data — reproducible and ideal for catching regressions in CI. Real User Monitoring is field data from actual sessions and is the truth of what customers experience. When the two disagree, trust the field and segment it by device, geography and network, because a healthy global average can hide a painful tail on low-end mobile hardware." },
+    { "q": "Which rendering strategy is fastest?", "a": "It depends on the surface. Static generation or incremental regeneration served from the edge is fastest for stable content. Server-side rendering gives a fast, crawlable first paint for dynamic pages at the cost of per-request compute. Client-side rendering suits interaction-dense app shells behind auth. Server Components and islands architecture reduce shipped JavaScript to protect INP. Match the mode to the page rather than defaulting to one." },
+    { "q": "Why is reducing JavaScript bundle size so important?", "a": "JavaScript is the most expensive resource byte for byte, because the browser must download it and then parse and execute it on the main thread — and that execution cost is highest on the mid-range mobile devices most users carry. Excess main-thread work directly harms INP. A performance budget enforced in CI, plus code splitting, tree shaking and lazy loading, keeps that cost in check." },
+    { "q": "How do caching and a CDN improve performance?", "a": "The fastest request never reaches your origin. A CDN serves cached responses from points of presence near the user, collapsing network latency, while browser Cache-Control and application caches like Redis avoid recomputing expensive results. The hard part is invalidation: prefer key-based or tag-based purging and stale-while-revalidate over blunt time-based expiry so users see fresh content without waiting." },
+    { "q": "How does Baalvion keep web performance from regressing over time?", "a": "We close the loop. Lighthouse runs in CI against enforced per-surface budgets so a regression fails the build, and Real User Monitoring reports Core Web Vitals at p75 in production with alerting on percentile and per-deploy movement. Distributed tracing and the browser performance APIs pinpoint the responsible phase. The same observability pipeline underpins the auditability behind our SOC 2 Type II and ISO 27001 posture." }
+  ],
+  "internalLinks": [
+    { "anchor": "web development", "href": "/services/web-development" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" },
+    { "anchor": "DevOps", "href": "/services/devops" },
+    { "anchor": "technology consulting", "href": "/services/technology-consulting" },
+    { "anchor": "platform", "href": "/platform" }
+  ],
+  "customFields": {}
+}

@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Projects | Strategic BOS Initiatives",
   description:
     "A curated landscape of high-impact infrastructure projects architected to resolve terminal fragmentation in global commerce and financial clearing.",
+  alternates: { canonical: "https://about.baalvion.com/projects" },
   openGraph: {
     title: "Projects | Strategic BOS Initiatives",
     description:
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
     siteName: "Baalvion Operating System (BOS)",
     images: [
       {
-        url: "https://picsum.photos/seed/baalvion-projects/1200/630",
+        url: "https://about.baalvion.com/api/og?title=Baalvion+Strategic+Portfolio&eyebrow=Baalvion+Industries",
         width: 1200,
         height: 630,
         alt: "Baalvion Strategic Projects",
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
     title: "Projects | Strategic BOS Initiatives",
     description:
       "A curated landscape of high-impact infrastructure projects architected to resolve terminal fragmentation in global commerce and financial clearing.",
-    images: ["https://picsum.photos/seed/baalvion-projects/1200/630"],
+    images: ["https://about.baalvion.com/api/og?title=Baalvion+Strategic+Portfolio&eyebrow=Baalvion+Industries"],
   },
 };
 

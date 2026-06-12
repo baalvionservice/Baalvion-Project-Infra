@@ -1,0 +1,16 @@
+<svg viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mineral commodity sample">
+  <defs>
+    <linearGradient id="mm" x1="0" y1="0" x2="800" y2="600" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B2540"/><stop offset="1" stop-color="#0A1A2B"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#mm)"/>
+  <g transform="translate(400 300)">
+    <polygon points="-120,40 -60,-90 60,-110 130,-10 80,110 -50,120" fill="#103a63" stroke="#21CEDD" stroke-width="2"/>
+    <polygon points="-60,-90 60,-110 20,10 -40,20" fill="#21CEDD" opacity="0.8"/>
+    <polygon points="60,-110 130,-10 60,30 20,10" fill="#1AA7B5" opacity="0.8"/>
+    <polygon points="-50,120 80,110 40,40 -40,20" fill="#0E2E4E"/>
+    <polygon points="20,10 60,30 40,40 -40,20" fill="#3FE0EE" opacity="0.7"/>
+  </g>
+  <text x="40" y="560" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#9FC6D6">Industrial Mineral Sample</text>
+</svg>

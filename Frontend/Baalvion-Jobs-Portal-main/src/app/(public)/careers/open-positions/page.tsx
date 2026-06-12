@@ -6,6 +6,14 @@ import { RecentlyViewedJobs } from '@/modules/jobs/components/RecentlyViewedJobs
 export const metadata: Metadata = {
     title: "Open Positions Worldwide | Baalvion Careers",
     description: "Explore your next challenge and join our global team. Search for open roles in Engineering, Design, Product, and more across our global hiring regions.",
+    alternates: {
+        canonical: '/careers/open-positions',
+    },
+    openGraph: {
+        title: "Open Positions Worldwide | TalentOS by Baalvion",
+        description: "Explore your next challenge and join our global team. Search for open roles in Engineering, Design, Product, and more.",
+        url: '/careers/open-positions',
+    },
 };
 
 export default async function OpenPositionsPage() {

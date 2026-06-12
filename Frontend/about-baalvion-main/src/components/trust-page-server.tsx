@@ -7,12 +7,40 @@ import {
   Activity,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { cmsGetSitePage } from "@/lib/cms";
+
+export const dynamic = "force-dynamic";
+
+const PILLAR_ICONS = [ShieldCheck, Lock, Scale, Activity];
+
+const FALLBACK_PILLARS = [
+  { title: "AES-256 Encryption", desc: "Military-grade encryption for all data in transit and at rest." },
+  { title: "Zero-Knowledge", desc: "Your trade data is private by design, visible only to authorized nodes." },
+  { title: "Global Compliance", desc: "Real-time mapping of trade laws across 180+ jurisdictions." },
+  { title: "Immutable Audit", desc: "Transparent, cryptographically signed logs for every transaction." },
+];
+
+const FALLBACK_BADGES = [
+  "GDPR & Data Privacy Excellence",
+  "SOC2 Type II Compliant Architecture",
+  "ISO 27001 Information Security",
+  "KYC/AML Global Standards",
+];
 
 /**
- * Server-side rendered trust page component
- * Optimized for SEO and Google indexing
+ * Server-side rendered trust page. Pillars and compliance badges are managed in
+ * the central CMS (admin-platform console) and read from the public delivery
+ * API, falling back to the built-in copy if the CMS is unreachable.
  */
-export default function TrustPageServer() {
+export default async function TrustPageServer() {
+  const page = await cmsGetSitePage("trust");
+  const cmsPillars = Array.isArray(page?.custom?.pillars) ? page!.custom.pillars : null;
+  const pillars = (cmsPillars && cmsPillars.length ? cmsPillars : FALLBACK_PILLARS).map(
+    (p: { title: string; desc: string }, i: number) => ({ ...p, icon: PILLAR_ICONS[i % PILLAR_ICONS.length] }),
+  );
+  const cmsBadges = Array.isArray(page?.custom?.badges) ? page!.custom.badges : null;
+  const badges: string[] = cmsBadges && cmsBadges.length ? cmsBadges : FALLBACK_BADGES;
+
   return (
     <main className="pt-32 sm:pt-40 lg:pt-56 pb-24 sm:pb-32 lg:pb-48">
       <div className="section-container">
@@ -30,28 +58,7 @@ export default function TrustPageServer() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 lg:gap-10 mb-24 sm:mb-32 lg:mb-56">
-          {[
-            {
-              icon: ShieldCheck,
-              title: "AES-256 Encryption",
-              desc: "Military-grade encryption for all data in transit and at rest.",
-            },
-            {
-              icon: Lock,
-              title: "Zero-Knowledge",
-              desc: "Your trade data is private by design, visible only to authorized nodes.",
-            },
-            {
-              icon: Scale,
-              title: "Global Compliance",
-              desc: "Real-time mapping of trade laws across 180+ jurisdictions.",
-            },
-            {
-              icon: Activity,
-              title: "Immutable Audit",
-              desc: "Transparent, cryptographically signed logs for every transaction.",
-            },
-          ].map((item, i) => (
+          {pillars.map((item, i) => (
             <Card
               key={i}
               className="bg-white border-gray-100 shadow-sm hover:shadow-md transition-all duration-500 rounded-xl group"
@@ -80,12 +87,7 @@ export default function TrustPageServer() {
               </h2>
             </div>
             <div className="grid gap-4 sm:gap-6">
-              {[
-                "GDPR & Data Privacy Excellence",
-                "SOC2 Type II Compliant Architecture",
-                "ISO 27001 Information Security",
-                "KYC/AML Global Standards",
-              ].map((item, i) => (
+              {badges.map((item, i) => (
                 <div
                   key={i}
                   className="flex items-center gap-4 sm:gap-6 lg:gap-8 p-4 sm:p-6 lg:p-8 bg-gray-50 border border-gray-100 rounded-xl sm:rounded-2xl hover:border-primary/20 transition-all duration-500"

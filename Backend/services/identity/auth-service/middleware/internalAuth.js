@@ -11,7 +11,7 @@ const { AppError } = require('../utils/errors');
 
 const SECRET = process.env.INTERNAL_SERVICE_SECRET || '';
 const MAX_SKEW_MS = Number(process.env.INTERNAL_MAX_SKEW_MS || 5 * 60 * 1000);
-const ALLOWED = (process.env.INTERNAL_SERVICE_ALLOWLIST || 'law,trade,elite-circle,insiders')
+const ALLOWED = (process.env.INTERNAL_SERVICE_ALLOWLIST || 'law,trade,insiders')
     .split(',').map((s) => s.trim()).filter(Boolean);
 
 function safeEqualHex(a, b) {

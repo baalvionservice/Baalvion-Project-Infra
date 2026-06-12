@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Metadata } from 'next';
-import { MAISON_STORY, COUNTRIES } from '@/lib/mock-data';
+import { MAISON_STORY as MAISON_STORY_FALLBACK } from '@/lib/mock-data';
+import { getMaisonStory } from '@/lib/cms';
 import { Sparkles, History, Gem, ShieldCheck, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -21,6 +22,9 @@ export async function generateMetadata({ params }: AboutPageProps): Promise<Meta
 export default async function AboutPage({ params }: AboutPageProps) {
   const country = (await params).country;
   const countryCode = (country as string) || 'us';
+
+  // Centrally-managed Maison story from the CMS; fall back to bundled copy if CMS is down.
+  const MAISON_STORY = (await getMaisonStory()) ?? MAISON_STORY_FALLBACK;
 
   return (
     <div className="animate-fade-in bg-ivory">

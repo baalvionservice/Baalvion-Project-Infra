@@ -26,7 +26,10 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+        <button
+          className="flex items-center gap-2 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label={`User menu for ${user.fullName}`}
+        >
           <Avatar className="h-8 w-8">
             <AvatarImage src={user.avatarUrl ?? undefined} alt={user.fullName} />
             <AvatarFallback className="text-xs">{initials(user.fullName)}</AvatarFallback>

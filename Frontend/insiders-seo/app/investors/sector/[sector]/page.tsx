@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getInvestors, SITE_URL } from "@/lib/api";
 import { sectorsFrom, investorsInSector, titleCase } from "@/lib/seo";
-import { Badge } from "@/components/ui";
+import { Badge, JsonLd } from "@/components/ui";
 
 export const revalidate = 300; // seconds — must be a static literal (Next segment config)
 export const dynamicParams = true;
@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: { params: Promise<{ sector: s
   const name = titleCase(sector);
   const title = `${name} Investors — Active Backers in ${name}`;
   const description = `Investors actively funding ${name} startups. See who recently invested in ${name} and connect on Baalvion to raise your round.`;
-  return { title, description, alternates: { canonical: `/investors/sector/${sector}` }, openGraph: { title, description, url: `${SITE_URL}/investors/sector/${sector}` } };
+  return { title, description, alternates: { canonical: `/investors/sector/${sector}` }, openGraph: { title, description, url: `${SITE_URL}/investors/sector/${sector}`, type: "website", siteName: "Baalvion Insiders" } };
 }
 
 export default async function SectorHub({ params }: { params: Promise<{ sector: string }> }) {
@@ -29,6 +29,17 @@ export default async function SectorHub({ params }: { params: Promise<{ sector: 
 
   return (
     <div className="container">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: `${SITE_URL}/` },
+            { "@type": "ListItem", position: 2, name: "Investors", item: `${SITE_URL}/investors` },
+            { "@type": "ListItem", position: 3, name: `${name} Investors`, item: `${SITE_URL}/investors/sector/${sector}` },
+          ],
+        }}
+      />
       <div className="crumbs"><Link href="/">Home</Link> / <Link href="/investors">Investors</Link> / {name}</div>
       <section className="hero" style={{ paddingTop: 24 }}>
         <h1 style={{ fontSize: 32 }}>Investors in {name}</h1>

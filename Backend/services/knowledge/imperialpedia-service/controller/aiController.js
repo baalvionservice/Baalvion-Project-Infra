@@ -4,6 +4,25 @@ const ai = require('../service/aiService');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 
+// Maximum characters allowed for client-supplied free-text context (prompt-injection guard).
+const CONTEXT_MAX_LEN = 500;
+
+/**
+ * Sanitize a client-supplied context string before embedding in a prompt.
+ * - Truncates to CONTEXT_MAX_LEN characters.
+ * - Strips null bytes and common control characters that can confuse tokenisers.
+ * - Does NOT allow the value to contain role/instruction override patterns.
+ */
+function sanitizeContext(raw) {
+    // Cast to string, strip null bytes and other control chars, trim whitespace.
+    const cleaned = String(raw || '')
+        .replace(/\x00/g, '')
+        .replace(/[\x01-\x1F\x7F]/g, ' ')
+        .trim()
+        .slice(0, CONTEXT_MAX_LEN);
+    return cleaned;
+}
+
 // GET /ai/status — is generative AI configured? (no secrets leaked)
 const status = (req, res) => sendSuccess(req, res, { enabled: ai.isEnabled(), provider: ai.provider, model: ai.model });
 
@@ -14,13 +33,17 @@ const assetSummary = async (req, res, next) => {
         const asset = symbol ? await db.AssetSummary.findOne({ where: { symbol } }) : null;
         if (symbol && !asset) return next(new AppError('NOT_FOUND', 'Asset not found', 404));
 
+        // When no DB asset is found, use the client-supplied context — sanitize and
+        // clearly delimit it as untrusted so the model cannot be instructed via it.
         const facts = asset
             ? `${asset.name} (${asset.symbol}), type ${asset.asset_type}, price $${asset.current_price}, 24h change ${asset.change_pct_24h}%, sentiment ${asset.sentiment}. Note: ${asset.ai_summary || ''}`
-            : String(req.body.context || '');
+            : sanitizeContext(req.body.context);
 
         const generated = await ai.generate({
             system: 'You are a concise sell-side financial research analyst. Respond with ONLY a JSON object: {"summary": string, "bull_case": string, "bear_case": string, "catalysts": string[3], "confidence_score": number between 0 and 1}. No text outside the JSON.',
-            prompt: `Produce an investment view for: ${facts}`,
+            // Untrusted client context is wrapped in explicit delimiters so the model
+            // treats it as data, not as additional instructions.
+            prompt: `Produce an investment view for the following asset description.\n\n<asset_description>\n${facts}\n</asset_description>`,
         });
 
         let insights = null;

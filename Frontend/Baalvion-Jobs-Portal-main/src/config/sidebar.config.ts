@@ -22,7 +22,8 @@ import {
   FileCheck,
   FileStack,
   BarChart2,
-  Trophy
+  Trophy,
+  UserPlus
 } from "lucide-react";
 import { UserRole } from "@/types/contracts";
 
@@ -113,6 +114,12 @@ export const ADMIN_SIDEBAR_CONFIG: SidebarItem[] = [
     href: "/campus",
     label: "Campus Dashboard",
     icon: School,
+    allowedRoles: ["ADMIN", "SUPER_ADMIN", "RECRUITER"],
+  },
+  {
+    href: "/campus/onboarding",
+    label: "Onboarding Requests",
+    icon: UserPlus,
     allowedRoles: ["ADMIN", "SUPER_ADMIN", "RECRUITER"],
   },
   {

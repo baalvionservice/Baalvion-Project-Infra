@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from "react";
 import { orgApi, Organization } from "@/lib/platformClient";
+import { useAuth } from "@/contexts/AuthContext";
 
 export type OrgPlan = "starter" | "growth" | "enterprise";
 
@@ -91,6 +92,11 @@ const FALLBACK_ORG: OrgData = {
 };
 
 export function OrgProvider({ children }: { children: ReactNode }) {
+  // The org fetch is authenticated. AuthContext restores the in-memory access token
+  // ASYNC on load (silent cookie refresh), so we MUST wait for it — otherwise this
+  // request races ahead of the token, 401s, and (having no retry) leaves the switcher
+  // stuck on "Loading…" forever. Re-runs when the token arrives or changes (login).
+  const { accessToken, isInitialized } = useAuth();
   const [orgs, setOrgs] = useState<OrgData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -99,6 +105,15 @@ export function OrgProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
+    // Hold until the silent auth restore has settled.
+    if (!isInitialized) return;
+    // Not authenticated → nothing to load; stop the spinner (route guard handles redirect).
+    if (!accessToken) {
+      setOrgs([]);
+      setIsLoading(false);
+      return;
+    }
+
     let cancelled = false;
 
     setIsLoading(true);
@@ -123,7 +138,7 @@ export function OrgProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isInitialized, accessToken]);
 
   const currentOrg: OrgData =
     orgs.find((o) => o.id === currentOrgId) ?? orgs[0] ?? FALLBACK_ORG;

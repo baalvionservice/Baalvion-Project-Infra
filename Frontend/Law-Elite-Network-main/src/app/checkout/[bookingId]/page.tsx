@@ -183,7 +183,7 @@ function CheckoutContent() {
 
           <div className="space-y-2">
             <h1 className="text-4xl font-bold text-slate-900 leading-tight">Secure Settlement</h1>
-            <p className="text-slate-500 text-sm font-medium">Authorize session fee for Engagement #{bookingId.toString().slice(-8)}.</p>
+            <p className="text-slate-500 text-sm font-medium">Authorize session fee for Engagement #{bookingId?.toString().slice(-8) ?? ''}.</p>
           </div>
 
           <div className="grid grid-cols-1 gap-8">

@@ -34,15 +34,49 @@ exports.suspendUser = async (req, res, next) => {
     try {
         const { userId } = req.params;
         if (userId === req.auth.userId) throw new AppError('INVALID_REQUEST', 'Cannot suspend yourself', 400);
-        await adminService.suspendUser(userId, req.auth.userId);
+        await adminService.suspendUser(userId, req.auth.userId, req.ip);
         sendSuccess(req, res, { message: 'User suspended' });
     } catch (err) { next(err); }
 };
 
 exports.unsuspendUser = async (req, res, next) => {
     try {
-        await adminService.unsuspendUser(req.params.userId, req.auth.userId);
+        await adminService.unsuspendUser(req.params.userId, req.auth.userId, req.ip);
         sendSuccess(req, res, { message: 'User unsuspended' });
+    } catch (err) { next(err); }
+};
+
+exports.updateUser = async (req, res, next) => {
+    try {
+        const { fullName, full_name, avatarUrl, avatar_url, status } = req.body || {};
+        const user = await adminService.updateUser(
+            req.params.userId,
+            { fullName, full_name, avatarUrl, avatar_url, status },
+            req.auth.userId,
+            req.ip,
+        );
+        sendSuccess(req, res, user);
+    } catch (err) { next(err); }
+};
+
+exports.deleteUser = async (req, res, next) => {
+    try {
+        const result = await adminService.deleteUser(req.params.userId, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+exports.sendUserVerification = async (req, res, next) => {
+    try {
+        const result = await adminService.sendVerification(req.params.userId, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+exports.revokeUserSessions = async (req, res, next) => {
+    try {
+        const result = await adminService.revokeUserSessions(req.params.userId, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
     } catch (err) { next(err); }
 };
 
@@ -59,10 +93,54 @@ exports.listOrgs = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
+exports.getOrgDetail = async (req, res, next) => {
+    try {
+        const org = await adminService.getOrgById(req.params.orgId);
+        sendSuccess(req, res, org);
+    } catch (err) { next(err); }
+};
+
+exports.createOrg = async (req, res, next) => {
+    try {
+        const { name, slug, plan, ownerId, owner_id } = req.body || {};
+        const org = await adminService.createOrg(
+            { name, slug, plan, ownerId: ownerId !== undefined ? ownerId : owner_id },
+            req.auth.userId,
+            req.ip,
+        );
+        sendSuccess(req, res, org, 201);
+    } catch (err) { next(err); }
+};
+
+exports.updateOrg = async (req, res, next) => {
+    try {
+        const { name, slug, plan } = req.body || {};
+        const org = await adminService.updateOrg(req.params.orgId, { name, slug, plan }, req.auth.userId, req.ip);
+        sendSuccess(req, res, org);
+    } catch (err) { next(err); }
+};
+
+exports.deleteOrg = async (req, res, next) => {
+    try {
+        // Accept confirm via body or query (?confirm=true) — destructive, so it must be explicit.
+        const confirm = req.body?.confirm === true || req.query?.confirm === 'true';
+        const result = await adminService.deleteOrg(req.params.orgId, { confirm }, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+exports.suspendOrg = async (req, res, next) => {
+    try {
+        const { reason } = req.body || {};
+        const result = await adminService.suspendOrg(req.params.orgId, reason, req.auth.userId, req.ip);
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
 exports.impersonate = async (req, res, next) => {
     try {
         const { userId: targetUserId } = req.params;
-        const result = await adminService.createImpersonationToken(req.auth.userId, targetUserId);
+        const result = await adminService.createImpersonationToken(req.auth.userId, targetUserId, req.ip);
         // Phase 9: frontend impersonation visibility. Non-httpOnly flag cookie + header so the
         // global banner can detect it; lifetime mirrors the (<=15m) impersonation token.
         res.cookie('baalvion_impersonation', '1', { httpOnly: false, sameSite: 'lax', secure: process.env.NODE_ENV === 'production', maxAge: (result.expiresIn || 900) * 1000 });
@@ -86,7 +164,7 @@ exports.listAllSessions = async (req, res, next) => {
 
 exports.revokeSession = async (req, res, next) => {
     try {
-        await adminService.revokeSessionAdmin(req.params.sessionId, req.auth.userId);
+        await adminService.revokeSessionAdmin(req.params.sessionId, req.auth.userId, req.ip);
         sendSuccess(req, res, { message: 'Session revoked' });
     } catch (err) { next(err); }
 };

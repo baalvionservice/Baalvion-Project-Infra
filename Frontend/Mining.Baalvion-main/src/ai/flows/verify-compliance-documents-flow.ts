@@ -89,7 +89,7 @@ const prompt = ai.definePrompt({
   name: 'verifyComplianceDocumentsPrompt',
   input: { schema: VerifyComplianceDocumentsInputSchema },
   output: { schema: VerifyComplianceDocumentsOutputSchema },
-  prompt: `You are an expert AI compliance officer for GeoTrade Nexus, specializing in verifying documents for the mining and mineral trade.
+  prompt: `You are an expert AI compliance officer for Baalvion Mining Inc., specializing in verifying documents for the mining and mineral trade.
 Your task is to analyze the provided document and determine its compliance status based on its type and any specified requirements.
 
 Document Type: {{{documentType}}}

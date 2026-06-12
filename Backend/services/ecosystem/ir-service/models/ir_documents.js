@@ -1,19 +1,22 @@
-﻿'use strict';
+'use strict';
+// Aligned to the live `ir.ir_documents` table (document_type not category; file_url not
+// document_url; file_size_bytes; uploaded_by; year; no tags column).
 module.exports = (sequelize, DataTypes) => {
     const IrDocument = sequelize.define('IrDocument', {
-        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
         org_id: { type: DataTypes.UUID, allowNull: false },
-        category: { type: DataTypes.STRING(100) },
+        uploaded_by: { type: DataTypes.BIGINT },
         title: { type: DataTypes.STRING(500), allowNull: false },
+        document_type: { type: DataTypes.STRING },
         description: { type: DataTypes.TEXT },
-        document_url: { type: DataTypes.STRING(500), allowNull: false },
-        file_size_kb: { type: DataTypes.INTEGER },
+        file_url: { type: DataTypes.TEXT, allowNull: false },
+        file_size_bytes: { type: DataTypes.BIGINT },
+        mime_type: { type: DataTypes.STRING(100) },
         language: { type: DataTypes.STRING(10), defaultValue: 'en' },
-        tags: { type: DataTypes.JSONB, defaultValue: [] },
+        year: { type: DataTypes.INTEGER },
         is_public: { type: DataTypes.BOOLEAN, defaultValue: true },
         downloads_count: { type: DataTypes.INTEGER, defaultValue: 0 },
         published_at: { type: DataTypes.DATE },
-        created_by: { type: DataTypes.INTEGER },
     }, {
         schema: 'ir',
         tableName: 'ir_documents',

@@ -1,0 +1,56 @@
+{
+  "slug": "web-development",
+  "title": "Web Development",
+  "kind": "service",
+  "heroImageSeed": "svc-web",
+  "excerpt": "Fast, accessible, server-rendered web platforms engineered for Core Web Vitals, SEO, and scale.",
+  "seo": {
+    "title": "Web Development Services | Baalvion",
+    "description": "Baalvion builds high-performance, server-rendered web platforms engineered for Core Web Vitals, accessibility, SEO, and scale. Explore our process and stack.",
+    "keywords": ["web development", "Next.js", "server-side rendering", "Core Web Vitals", "Baalvion services", "web performance"]
+  },
+  "customFields": {
+    "benefits": [
+      "Fast first paint and strong Core Web Vitals",
+      "Server-rendered for SEO and resilience",
+      "Accessible by default (WCAG-aligned)",
+      "Built to scale to high traffic"
+    ],
+    "process": [
+      { "step": "Define", "desc": "Audience, goals, and the metrics that matter (CWV, conversion, SEO)." },
+      { "step": "Design", "desc": "Intentional UI with a real design system, not a template." },
+      { "step": "Build", "desc": "Server-rendered, accessible, instrumented for performance." },
+      { "step": "Measure", "desc": "Lighthouse, real-user metrics, and iteration." }
+    ],
+    "techStack": ["Next.js", "React", "TypeScript", "Tailwind CSS", "Edge/CDN", "ISR & SSG"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "A web platform is often the first thing a customer experiences — and the slowest part of most stacks. Baalvion builds web platforms that are fast, accessible, and engineered for search. We default to server rendering for clean indexability and resilience, and we treat performance as a budget, not an afterthought. This very site is built the way we build for clients." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Speed:** strong Core Web Vitals through server rendering, caching, and disciplined bundles.",
+      "**Discoverability:** SSR/SSG/ISR and structured data for SEO — see [web performance optimization](/news/tech/web-performance-optimization).",
+      "**Accessibility:** WCAG-aligned semantics and keyboard support by default.",
+      "**Scale:** edge caching and incremental rendering for high traffic."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We define the metrics that matter, design an intentional interface with a real design system, build it server-rendered and instrumented, then measure with Lighthouse and real-user data and iterate. Performance and accessibility are acceptance criteria, not nice-to-haves." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "Next.js and React with TypeScript, Tailwind for a disciplined design system, edge/CDN delivery, and incremental static regeneration for content that stays fresh without rebuilds. The stack choice always follows the goals — see [choosing the right technology stack](/news/tech/choosing-the-right-technology-stack)." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "We run high-traffic, content-rich web properties across our ecosystem, so we know what breaks at scale and how to avoid it. See the storefront work in [launching a verified luxury commerce marketplace](/case-studies/luxury-commerce-marketplace), and pair this with [cloud solutions](/services/cloud-solutions) and [technology consulting](/services/technology-consulting)." }
+  ],
+  "faqs": [
+    { "q": "Why server-side rendering?", "a": "SSR gives fast first paint, clean indexability for SEO, and resilience. Combined with static generation and ISR, you get speed and freshness without rebuilds." },
+    { "q": "How do you keep sites fast as they grow?", "a": "Performance budgets, edge caching, code splitting, and real-user monitoring — covered in [web performance optimization](/news/tech/web-performance-optimization)." },
+    { "q": "Is accessibility included?", "a": "Yes. WCAG-aligned semantics, keyboard navigation, and contrast are built in by default, not added later." },
+    { "q": "Which frameworks do you use?", "a": "We favour Next.js and React with TypeScript, but choose based on your team and goals." }
+  ],
+  "internalLinks": [
+    { "anchor": "web performance optimization", "href": "/news/tech/web-performance-optimization" },
+    { "anchor": "choosing the right technology stack", "href": "/news/tech/choosing-the-right-technology-stack" },
+    { "anchor": "launching a verified luxury commerce marketplace", "href": "/case-studies/luxury-commerce-marketplace" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" }
+  ]
+}

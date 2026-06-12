@@ -57,7 +57,7 @@ export default function DashboardPage() {
 }
 
 function DashboardContent() {
-  const { user, profile } = useAuthContext();
+  const { user } = useAuthContext();
   const router = useRouter();
   
   const { 
@@ -68,7 +68,7 @@ function DashboardContent() {
     refresh,
     stats,
     error
-  } = useDashboardData(user?.uid || user?.userId);
+  } = useDashboardData(user?.userId);
 
   useEffect(() => {
     const handleStorageChange = () => refresh();
@@ -109,12 +109,12 @@ function DashboardContent() {
             <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
           </div>
           <h1 className="text-3xl font-bold text-slate-900">
-            Greetings, {profile?.fullName?.split(' ')[0] || user?.name?.split(' ')[0] || "Member"}
+            Greetings, {user?.name?.split(' ')[0] || "Member"}
           </h1>
           <p className="text-slate-500 text-sm font-medium italic">Platform Standing: <span className="font-bold text-slate-900 uppercase tracking-tighter">Premier Member</span></p>
         </div>
         <div className="flex gap-3">
-          <CreateCaseModal userId={user?.uid || user?.userId || ''} onSuccess={refresh} />
+          <CreateCaseModal userId={user?.userId || ''} onSuccess={refresh} />
           <Button 
             variant="outline"
             className="border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 rounded-lg px-6 font-semibold text-xs uppercase tracking-wider shadow-sm transition-all"
@@ -126,7 +126,7 @@ function DashboardContent() {
       </header>
 
       {!hasData ? (
-        <EmptyDashboard userId={user?.uid || user?.userId || ''} onRefresh={refresh} />
+        <EmptyDashboard userId={user?.userId || ''} onRefresh={refresh} />
       ) : (
         <div className="space-y-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -166,7 +166,7 @@ function DashboardContent() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
             <div className="lg:col-span-2 space-y-10">
-              <RecommendationFeed userId={user?.uid || user?.userId || ''} />
+              <RecommendationFeed userId={user?.userId || ''} />
               
               <section className="bg-blue-50/50 p-8 rounded-xl border border-blue-100 relative overflow-hidden group hover:bg-blue-50 transition-colors duration-500">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-blue-100/20 rounded-full -mr-16 -mt-16 blur-3xl group-hover:bg-blue-100/40 transition-all" />

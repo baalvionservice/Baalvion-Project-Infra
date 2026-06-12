@@ -1,0 +1,57 @@
+{
+  "slug": "ai-compliance-scoring-platform",
+  "title": "AI Compliance Scoring Across 180+ Jurisdictions",
+  "kind": "case_study",
+  "heroImageSeed": "cs-compliance-ai",
+  "excerpt": "Building real-time, explainable AI risk scoring for cross-border transactions — where AI advises but never silently blocks.",
+  "seo": {
+    "title": "Case Study: AI Compliance Scoring Platform | Baalvion",
+    "description": "How Baalvion built explainable, real-time AI compliance scoring for cross-border transactions across 180+ jurisdictions on the Baalvion Operating System.",
+    "keywords": ["AI compliance", "sanctions screening", "KYC AML", "risk scoring", "Baalvion case study", "cross-border compliance"]
+  },
+  "customFields": {
+    "client": "A cross-border payments and trade platform operating in 180+ jurisdictions",
+    "sector": "Compliance & RegTech",
+    "challenge": "Manual screening that missed list updates and could not explain its decisions to regulators.",
+    "solution": "A hybrid rules + AI scoring engine with full reasoning chains and human-in-the-loop review.",
+    "architecture": "Rule analyzer over canonical lists, pluggable AI detectors, evidence-based fusion, append-only audit.",
+    "techStack": ["Rules engine", "AI detectors", "Sanctions datasets", "Append-only audit log", "Event-driven triggers"],
+    "results": [
+      { "metric": "Screening", "value": "Real-time" },
+      { "metric": "False positives", "value": "-60%" },
+      { "metric": "Decision explainability", "value": "100%" },
+      { "metric": "Jurisdictions", "value": "180+" }
+    ],
+    "lessons": [
+      "AI should advise, not silently block.",
+      "Every decision needs an auditable reasoning chain.",
+      "Hybrid rules + AI beats either approach alone."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "The platform screened counterparties and transactions manually against sanctions and watch lists. Updates were missed, false positives buried analysts, and — most dangerously — the team could not explain to a regulator *why* a given transaction had been cleared or held. In a regulated business, an unexplainable decision is a liability." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We built a hybrid engine that combines deterministic rules with pluggable AI detectors. Rules handle the unambiguous cases — a sanctioned party is always blocked. AI detectors add nuance: jurisdiction risk, route anomalies, valuation mismatches, and document gaps, each producing a confidence score. A fusion layer corroborates signals across both, and crucially, AI alone can never silently block a transaction — it raises it for human review. This is the production philosophy described in [cross-border compliance AI](/news/finance/cross-border-compliance-ai)." },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "A rule analyzer evaluates each transaction against canonical, versioned lists. Pluggable AI detectors run in parallel, each emitting findings with confidence. The fusion stage combines them, applying corroboration boosts and data-gap discounts. Every step is written to an append-only audit log so the full reasoning chain is reconstructable. Screening is triggered by platform events, so it happens in real time as transactions flow." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "A deterministic rules engine, a registry of pluggable AI detectors, versioned sanctions datasets, an append-only audit store, and event-driven triggers. The work draws on our [AI solutions](/services/ai-solutions) and [AI agents](/services/ai-agents) practices and underpins the [real-time settlement](/case-studies/real-time-cross-border-settlement) path." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "Screening moved from batch to real time, false positives fell by roughly 60%, and every decision now carries a complete, exportable reasoning chain. Coverage spans more than 180 jurisdictions, with new rules and detectors added without redeploying the core." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "The single most important design rule was that AI advises but never silently blocks — it escalates to a human. Pairing deterministic rules with probabilistic detectors gave both certainty where it mattered and nuance where it helped. And an append-only audit log turned compliance from a defensive scramble into a routine export." }
+  ],
+  "faqs": [
+    { "q": "Can the AI block a transaction on its own?", "a": "No. Deterministic rules block unambiguous cases; AI detectors raise risk for human review but never silently block. This keeps decisions defensible." },
+    { "q": "How are decisions made auditable?", "a": "Every rule evaluation and AI finding is written to an append-only log, so the complete reasoning chain behind any decision can be reconstructed and exported." },
+    { "q": "How are new sanctions lists handled?", "a": "Lists are versioned datasets; updates flow in without code changes, and re-screening can be triggered for affected transactions." },
+    { "q": "What makes the hybrid approach better?", "a": "Rules give certainty for clear cases; AI adds nuance for ambiguous ones. Fusing both, with corroboration, reduces false positives without missing real risk." }
+  ],
+  "internalLinks": [
+    { "anchor": "cross-border compliance AI", "href": "/news/finance/cross-border-compliance-ai" },
+    { "anchor": "AI solutions", "href": "/services/ai-solutions" },
+    { "anchor": "AI agents", "href": "/services/ai-agents" },
+    { "anchor": "real-time settlement", "href": "/case-studies/real-time-cross-border-settlement" }
+  ]
+}

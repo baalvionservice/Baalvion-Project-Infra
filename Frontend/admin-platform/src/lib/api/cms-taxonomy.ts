@@ -19,22 +19,32 @@ const wid = (): string => {
 
 interface RawCategory {
   id: string; websiteId: string; parentId: string | null; name: string; slug: string;
-  description?: string | null; sortOrder?: number; depth?: number; contentCount?: number;
+  description?: string | null; seoMetadata?: WebsiteCategory['seoMetadata'] | null;
+  sortOrder?: number; depth?: number; contentCount?: number;
   createdAt: string; updatedAt: string;
+  children?: RawCategory[];
 }
 
 const toCategory = (c: RawCategory): WebsiteCategory => ({
   id: c.id, websiteId: c.websiteId, name: c.name, slug: c.slug,
-  description: c.description ?? undefined, parentId: c.parentId ?? null,
+  description: c.description ?? undefined, seoMetadata: c.seoMetadata ?? undefined,
+  parentId: c.parentId ?? null,
   depth: c.depth ?? 0, order: c.sortOrder ?? 0, contentCount: c.contentCount ?? 0,
   createdAt: c.createdAt, updatedAt: c.updatedAt,
 });
+
+// The backend returns categories as a nested tree (roots with `children`). Flatten it to
+// a single list (preserving parentId) so consumers get EVERY category — sub-categories
+// like "Board of Directors" included. useWebsiteCategoryTree rebuilds the nesting from
+// parentId, so flattening here also restores children in the category tree view.
+const flattenCategories = (nodes: RawCategory[]): RawCategory[] =>
+  nodes.flatMap((n) => [n, ...flattenCategories(n.children ?? [])]);
 
 export const cmsTaxonomyApi = {
   categories: {
     list: async (websiteId: string) => {
       const res = await cmsApiClient.get<ApiResponse<RawCategory[]>>(`/cms/websites/${websiteId}/categories`);
-      const items = (res.data.data ?? []).map(toCategory);
+      const items = flattenCategories(res.data.data ?? []).map(toCategory);
       return { ...res, data: { ...res.data, data: items } };
     },
 
@@ -50,6 +60,7 @@ export const cmsTaxonomyApi = {
         name: payload.name, slug: payload.slug,
         ...(payload.parentId ? { parentId: payload.parentId } : {}),
         ...(payload.description ? { description: payload.description } : {}),
+        ...(payload.seoMetadata ? { seoMetadata: payload.seoMetadata } : {}),
         ...(payload.order !== undefined ? { sortOrder: payload.order } : {}),
       });
       return { ...res, data: { ...res.data, data: toCategory(res.data.data) } };
@@ -60,6 +71,7 @@ export const cmsTaxonomyApi = {
         ...(payload.name !== undefined ? { name: payload.name } : {}),
         ...(payload.slug !== undefined ? { slug: payload.slug } : {}),
         ...(payload.description !== undefined ? { description: payload.description } : {}),
+        ...(payload.seoMetadata !== undefined ? { seoMetadata: payload.seoMetadata } : {}),
         ...(payload.parentId !== undefined ? { parentId: payload.parentId } : {}),
         ...(payload.order !== undefined ? { sortOrder: payload.order } : {}),
       });

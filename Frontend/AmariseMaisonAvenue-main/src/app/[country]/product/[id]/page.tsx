@@ -1,6 +1,11 @@
 import React from "react";
-import { COUNTRIES } from "@/lib/mock-data";
-import { getProductById } from "@/lib/catalog";
+import { getProductById, getProductReviews, getRelatedProducts } from "@/lib/catalog";
+import { buildAlternates } from "@/lib/seo";
+import {
+  normalizeCountry,
+  getCountryConfig,
+  countryToLocale,
+} from "@/lib/i18n/countries";
 import { ChevronRight } from "lucide-react";
 import { ProductGallery } from "@/components/product/ProductGallery";
 import Link from "next/link";
@@ -20,14 +25,17 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { id, country } = await params;
-  const product = await getProductById(id);
-  const countryData = COUNTRIES[country] || COUNTRIES.us;
+  const cc = normalizeCountry(country);
+  const product = await getProductById(id, cc);
+  const countryData = getCountryConfig(cc);
+  const alternates = buildAlternates(cc, `/product/${id}`);
 
   if (!product) {
     return {
       title: "Product Not Found | Amarisé Luxe",
       description:
         "The requested luxury artifact could not be found in our registry.",
+      alternates,
     };
   }
 
@@ -40,9 +48,11 @@ export async function generateMetadata({
   return {
     title: seoTitle,
     description: seoDescription,
+    alternates,
     openGraph: {
       title: seoTitle,
       description: seoDescription,
+      locale: countryToLocale(cc),
       images: [
         {
           url: product.imageUrl[0],
@@ -67,9 +77,9 @@ export async function generateMetadata({
  */
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id, country } = await params;
-  const countryCode = country || "us";
+  const countryCode = normalizeCountry(country);
 
-  const product = await getProductById(id);
+  const product = await getProductById(id, countryCode);
 
   if (!product)
     return (
@@ -77,6 +87,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
         Artifact not found in registry.
       </div>
     );
+
+  // SSR-fetch the supporting sections in parallel so the page paints with real
+  // reviews + related artifacts (no client waterfall). Both helpers fail soft to
+  // empty results, so a section never breaks the product page.
+  const [reviewsPage, related] = await Promise.all([
+    getProductReviews(id, { limit: 10 }),
+    getRelatedProducts(id, countryCode, 8),
+  ]);
 
   return (
     <div className="bg-white min-h-screen animate-fade-in font-body">
@@ -117,8 +135,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         {/* Additional Sections */}
         <div className="space-y-16 sm:space-y-20">
-          <YouMayAlsoLike />
-          <CustomerReviews />
+          <YouMayAlsoLike
+            productId={id}
+            country={countryCode}
+            initialRelated={related}
+          />
+          <CustomerReviews
+            productId={id}
+            country={countryCode}
+            initialReviews={reviewsPage}
+            ratingAverage={product.rating}
+            ratingCount={product.reviewsCount}
+          />
         </div>
       </div>
     </div>
