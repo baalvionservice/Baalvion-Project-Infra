@@ -141,7 +141,12 @@ jobs:
       - name: Extract App Directories from Config
         id: extract-apps
         run: |
-          DIRS=$(node -p "JSON.stringify(require('./frontends.config.js').apps.map(a => a.cwd.replace('D:/Baalvion Projects/Frontend/', '')))")
+          # Only include apps whose package.json is present in this checkout.
+          # Submodule-vendored frontends (e.g. Global-Trade-Infrastructure) are
+          # not checked out here; without this filter their empty dir makes the
+          # build step fall through to a root `pnpm run build` that builds the
+          # entire monorepo. Those apps are built by their own repo's CI.
+          DIRS=$(node -p "JSON.stringify(require('./frontends.config.js').apps.map(a => a.cwd.replace('D:/Baalvion Projects/Frontend/', '')).filter(d => require('fs').existsSync('Frontend/' + d + '/package.json')))")
           echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
 
   frontend-build:
