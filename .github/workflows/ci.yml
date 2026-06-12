@@ -252,7 +252,9 @@ jobs:
       - name: Create baalvion_app role (027)
         run: psql "postgresql://postgres:postgres@localhost:5432/baalvion_db" -v app_pw=ci_app_pw -f Backend/database/migrations/027_app_role.sql
       - name: Apply trade-service migrations (owner role)
-        run: DB_USER=postgres DB_PASSWORD=postgres node migrate.js
+        # --preserve-symlinks so the symlinked @baalvion/auth-node resolves its
+        # own deps (jsonwebtoken) from trade-service/node_modules where npm put them.
+        run: DB_USER=postgres DB_PASSWORD=postgres node --preserve-symlinks migrate.js
         working-directory: Backend/services/commerce/trade-service
       - name: Grant baalvion_app on freshly-created tables (027 re-run for defaults)
         run: psql "postgresql://postgres:postgres@localhost:5432/baalvion_db" -v app_pw=ci_app_pw -f Backend/database/migrations/027_app_role.sql
