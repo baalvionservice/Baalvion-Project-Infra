@@ -1,50 +1,69 @@
-# Baalvion code ownership — routes required PR review per bounded context.
-# Enforced via branch protection ("Require review from Code Owners").
+# ──────────────────────────────────────────────────────────────────────────────
+# Baalvion — CODEOWNERS
+# Routes required PR review per bounded context. Enforced via branch protection
+# ("Require review from Code Owners") on `main`.
 #
 # OWNERSHIP MODEL (current vs target)
 # -----------------------------------
-# This repository is currently owned by a single GitHub USER account
-# (@baalvionservice), NOT an organization. GitHub only resolves *team* handles
-# (e.g. @baalvion/platform-core) on organization-owned repos, so every rule
-# below is intentionally assigned to @baalvionservice today — that is the only
-# identity GitHub can route review to here.
+# This repository is owned by a single GitHub USER account (@baalvionservice),
+# NOT an organization. GitHub only resolves *team* handles (e.g.
+# @baalvion/platform-core) on organization-owned repos, so every rule below is
+# intentionally assigned to @baalvionservice today — that is the only identity
+# GitHub can route review to here.
 #
-# The TARGET structure, once this repo migrates to a GitHub Organization, is the
-# per-context team listed in the trailing `# team:` comment on each rule. Restore
-# those handles (and create the matching org teams) at migration time; the path
-# map below is already the intended layout. Teams should mirror
-# Backend/catalog/services/*.yaml `owner`.
+# The TARGET per-context owner (once this repo migrates to a GitHub Org) is the
+# team listed in the trailing `# team:` comment on each rule. At migration time:
+#   1. Create the matching org teams.
+#   2. Replace @baalvionservice with the `# team:` handle(s).
+#   3. Keep teams aligned with Backend/catalog/services/*.yaml `owner`.
+#
+# RULES OF THUMB
+#   - Later, more specific matches win — order matters; broad rules first.
+#   - A directory rule needs a trailing slash; it covers everything beneath it.
+#   - Every PR resolves to at least the root default below.
 #
 # Paths follow the federated layout: Backend/services/<domain>/<service>.
+# ──────────────────────────────────────────────────────────────────────────────
 
-# ── Default ──────────────────────────────────────────────────────────────────
+# ── Default (catch-all) ───────────────────────────────────────────────────────
 *                                               @baalvionservice   # team: @baalvion/platform-core
 
-# ── Shared platform packages (changes ripple everywhere — extra scrutiny) ──────
+# ══════════════════════════════════════════════════════════════════════════════
+#  SHARED PACKAGES  (Backend/packages/** — changes ripple platform-wide)
+# ══════════════════════════════════════════════════════════════════════════════
 /Backend/packages/                              @baalvionservice   # team: @baalvion/platform-core
 /Backend/packages/contracts/                    @baalvionservice   # team: @baalvion/platform-core @baalvion/architecture
 /Backend/packages/events/                       @baalvionservice   # team: @baalvion/platform-core @baalvion/architecture
 /Backend/packages/auth-node/                    @baalvionservice   # team: @baalvion/platform-core @baalvion/security-team
 /Backend/packages/auth-sdk/                     @baalvionservice   # team: @baalvion/platform-core
 /Backend/packages/rbac/                         @baalvionservice   # team: @baalvion/platform-core @baalvion/security-team
+/Backend/packages/commerce-rbac/                @baalvionservice   # team: @baalvion/commerce-division @baalvion/security-team
 /Backend/packages/security/                     @baalvionservice   # team: @baalvion/security-team
 /Backend/packages/crypto/                       @baalvionservice   # team: @baalvion/security-team
+/Backend/packages/tenancy/                      @baalvionservice   # team: @baalvion/platform-core @baalvion/security-team
 /Backend/packages/telemetry/                    @baalvionservice   # team: @baalvion/observability
+/Backend/packages/logger/                       @baalvionservice   # team: @baalvion/observability
 
-# ── Contracts are co-owned by producer + architecture (breaking-change gate) ───
+# ── Contracts co-owned by producer + architecture (breaking-change gate) ───────
 /Backend/packages/contracts/proto/baalvion/identity/   @baalvionservice   # team: @baalvion/platform-core @baalvion/architecture
 /Backend/packages/contracts/proto/baalvion/billing/    @baalvionservice   # team: @baalvion/commerce-division @baalvion/architecture
 /Backend/packages/contracts/proto/baalvion/proxy/      @baalvionservice   # team: @baalvion/proxy-division @baalvion/architecture
 
-# ── Identity domain (auth foundation) ──────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  BACKEND DOMAIN SERVICES  (Backend/services/<domain>/...)
+# ══════════════════════════════════════════════════════════════════════════════
+
+# ── Identity domain (auth foundation — highest scrutiny) ───────────────────────
 /Backend/services/identity/                     @baalvionservice   # team: @baalvion/platform-core @baalvion/security-team
 
-# ── Platform domain (admin / dashboard / realtime) ─────────────────────────────
+# ── Platform domain (admin / dashboard / realtime / tenant) ────────────────────
 /Backend/services/platform/                     @baalvionservice   # team: @baalvion/platform-core
+/Backend/services/platform/tenant-service/      @baalvionservice   # team: @baalvion/platform-core @baalvion/security-team
 
-# ── Commerce domain ─────────────────────────────────────────────────────────
+# ── Commerce domain ───────────────────────────────────────────────────────────
 /Backend/services/commerce/                     @baalvionservice   # team: @baalvion/commerce-division
 /Backend/services/commerce/financial-services-java/  @baalvionservice   # team: @baalvion/commerce-division @baalvion/architecture
+/Backend/services/commerce/trade-service/       @baalvionservice   # team: @baalvion/commerce-division @baalvion/architecture
 
 # ── Knowledge domain (cms / imperialpedia / law / ml) ──────────────────────────
 /Backend/services/knowledge/                    @baalvionservice   # team: @baalvion/knowledge-division
@@ -53,36 +72,77 @@
 # ── Ecosystem domain (vertical apps' backends) ─────────────────────────────────
 /Backend/services/ecosystem/                    @baalvionservice   # team: @baalvion/ecosystem-division
 /Backend/services/ecosystem/law-elite/          @baalvionservice   # team: @baalvion/legal-division
-/Backend/services/ecosystem/real-estate-service/ @baalvionservice   # team: @baalvion/real-estate-division
+/Backend/services/ecosystem/real-estate-service/ @baalvionservice  # team: @baalvion/real-estate-division
 /Backend/services/ecosystem/mining-service/     @baalvionservice   # team: @baalvion/mining-division
 /Backend/services/ecosystem/jobs-service/       @baalvionservice   # team: @baalvion/jobs-division
+/Backend/services/ecosystem/ir-service/         @baalvionservice   # team: @baalvion/ecosystem-division @baalvion/commerce-division
+/Backend/services/ecosystem/crm-service/        @baalvionservice   # team: @baalvion/ecosystem-division
 
-# ── Marketplace domain (investment marketplace) ───────────────────────────────
+# ── Marketplace domain (investment marketplace) ────────────────────────────────
 /Backend/services/marketplace/                  @baalvionservice   # team: @baalvion/commerce-division
 
 # ── Trade domain (GTOS — global trade operating system) ────────────────────────
 /Backend/services/trade/                        @baalvionservice   # team: @baalvion/commerce-division @baalvion/architecture
 
-# ── Infrastructure domain (proxy / notifications / realtime) ───────────────────
+# ── Infrastructure domain (proxy / notifications / realtime / audit / search) ──
 /Backend/services/infrastructure/               @baalvionservice   # team: @baalvion/sre @baalvion/platform-core
 /Backend/services/infrastructure/proxy-service/ @baalvionservice   # team: @baalvion/proxy-division
+/Backend/services/infrastructure/audit-service/ @baalvionservice   # team: @baalvion/sre @baalvion/security-team
 
-# ── Cross-cutting infrastructure ───────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  CROSS-CUTTING BACKEND INFRASTRUCTURE
+# ══════════════════════════════════════════════════════════════════════════════
 /Backend/gateway/                               @baalvionservice   # team: @baalvion/proxy-division @baalvion/platform-core
 /Backend/database/                              @baalvionservice   # team: @baalvion/platform-core @baalvion/sre
 /Backend/infra/                                 @baalvionservice   # team: @baalvion/sre
 /Backend/catalog/                               @baalvionservice   # team: @baalvion/architecture
 /Backend/platform/cli/                          @baalvionservice   # team: @baalvion/platform-core
+/Backend/platform/baalvion-os/                  @baalvionservice   # team: @baalvion/platform-core @baalvion/sre
+/Backend/scripts/                               @baalvionservice   # team: @baalvion/sre @baalvion/platform-core
 
-# ── Frontend applications ──────────────────────────────────────────────────────
+# ══════════════════════════════════════════════════════════════════════════════
+#  FRONTEND APPLICATIONS  (Frontend/<app>/)
+# ══════════════════════════════════════════════════════════════════════════════
 /Frontend/                                      @baalvionservice   # team: @baalvion/frontend-guild
 /Frontend/admin-platform/                       @baalvionservice   # team: @baalvion/frontend-guild @baalvion/platform-core
 /Frontend/Proxy-BaalvionStack/                  @baalvionservice   # team: @baalvion/proxy-division @baalvion/frontend-guild
 
-# ── Governance, CI, docs ───────────────────────────────────────────────────────
+# ── Isolated greenfield subtree (investment platform — NestJS + Prisma) ────────
+/investment-platform/                           @baalvionservice   # team: @baalvion/commerce-division @baalvion/architecture
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  ROOT-LEVEL OPERATIONAL & ORCHESTRATION FILES  (high blast radius)
+# ══════════════════════════════════════════════════════════════════════════════
+/docker/                                        @baalvionservice   # team: @baalvion/sre
+/scripts/                                       @baalvionservice   # team: @baalvion/sre @baalvion/platform-core
+/e2e/                                           @baalvionservice   # team: @baalvion/frontend-guild @baalvion/platform-core
+/docker-compose*.yml                            @baalvionservice   # team: @baalvion/sre
+/ecosystem.config.js                            @baalvionservice   # team: @baalvion/sre
+/extra-backends.config.js                       @baalvionservice   # team: @baalvion/sre
+/frontends.config.js                            @baalvionservice   # team: @baalvion/sre @baalvion/frontend-guild
+/bootstrap.sh                                   @baalvionservice   # team: @baalvion/sre
+/bootstrap.ps1                                  @baalvionservice   # team: @baalvion/sre
+/*.ps1                                          @baalvionservice   # team: @baalvion/sre
+/turbo.json                                     @baalvionservice   # team: @baalvion/platform-core
+/pnpm-workspace.yaml                            @baalvionservice   # team: @baalvion/platform-core
+/package.json                                   @baalvionservice   # team: @baalvion/platform-core
+/pnpm-lock.yaml                                 @baalvionservice   # team: @baalvion/platform-core
+/tsconfig.base.json                             @baalvionservice   # team: @baalvion/platform-core
+/.npmrc                                         @baalvionservice   # team: @baalvion/platform-core
+/.nvmrc                                         @baalvionservice   # team: @baalvion/platform-core
+
+# ══════════════════════════════════════════════════════════════════════════════
+#  GOVERNANCE, CI/CD, DOCS  (most specific — keep last so they win)
+# ══════════════════════════════════════════════════════════════════════════════
 /.github/                                       @baalvionservice   # team: @baalvion/platform-core @baalvion/sre
+/.github/workflows/                             @baalvionservice   # team: @baalvion/sre @baalvion/security-team
+/.github/dependabot.yml                         @baalvionservice   # team: @baalvion/security-team @baalvion/sre
 /docs/architecture/                             @baalvionservice   # team: @baalvion/architecture
-/docs/adr/                                       @baalvionservice   # team: @baalvion/architecture
-/CODEOWNERS                                      @baalvionservice   # team: @baalvion/architecture
-/LICENSE                                         @baalvionservice   # team: @baalvion/architecture
-/SECURITY.md                                     @baalvionservice   # team: @baalvion/security-team
+/docs/adr/                                      @baalvionservice   # team: @baalvion/architecture
+/docs/runbooks/                                 @baalvionservice   # team: @baalvion/sre
+/CODEOWNERS                                     @baalvionservice   # team: @baalvion/architecture
+/LICENSE                                        @baalvionservice   # team: @baalvion/architecture
+/SECURITY.md                                    @baalvionservice   # team: @baalvion/security-team
+/CONTRIBUTING.md                                @baalvionservice   # team: @baalvion/architecture
+/CODE_OF_CONDUCT.md                             @baalvionservice   # team: @baalvion/architecture
+/.env.example                                   @baalvionservice   # team: @baalvion/security-team @baalvion/sre
