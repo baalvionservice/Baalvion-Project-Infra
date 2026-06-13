@@ -234,6 +234,14 @@ exports.acceptInvite = async (req, res, next) => {
         const parsed = schemas.acceptInvite.safeParse(req.body);
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         const result = await authService.acceptInvite({ ...parsed.data, ...parseClientInfo(req) });
+        // Second-factor continuation — the invite is accepted (membership joined) but no
+        // session/cookie is issued until MFA clears. Relays the challenge exactly like login().
+        if (result.mfa_required) {
+            return sendSuccess(req, res, { mfa_required: true, challengeToken: result.challengeToken });
+        }
+        if (result.mfa_enrollment_required) {
+            return sendSuccess(req, res, { mfa_enrollment_required: true, challengeToken: result.challengeToken });
+        }
         res.cookie(config.refreshCookieName, result.refreshToken, {
             httpOnly: true,
             secure: config.env === 'production',
