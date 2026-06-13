@@ -1,6 +1,6 @@
 # Isolated legal sub-stack. The platform reaches it ONLY through the API gateway,
 # which routes /api/v1/ecosystem/law-elite → law-elite-gateway:8090 (see
-# Backend/infra/api-gateway/dynamic.yml). Internal services (user/case/payment)
+# Backend/infra/api-gateway/dynamic.yml). Internal services (user/case)
 # are NOT published to the host and live on the private `law-elite` network; only
 # the gateway joins `baalvion-net` so Traefik can reach it.
 #
@@ -17,9 +17,11 @@ services:
       - PORT=8090
       - USER_SERVICE_URL=http://user-service:3001
       - CASE_SERVICE_URL=http://case-service:3002
-      - PAYMENT_SERVICE_URL=http://payment-service:8080
+      # Payments now use the canonical Java payment-service (financial-services-java) PSP gateway
+      # on the host (:13015); the law-elite payment stub was removed in the finance consolidation.
+      - PAYMENT_SERVICE_URL=${PAYMENT_SERVICE_URL:-http://host.docker.internal:13015}
       - JWT_SECRET=${LAW_ELITE_JWT_SECRET:?LAW_ELITE_JWT_SECRET must be set}
-    depends_on: [user-service, case-service, payment-service]
+    depends_on: [user-service, case-service]
     networks: [law-elite, baalvion-net]
 
   user-service:
@@ -38,13 +40,8 @@ services:
       - PORT=3002
     networks: [law-elite]          # internal only — never published
 
-  payment-service:
-    build: ./services/payment-service
-    container_name: law-elite-payment
-    restart: unless-stopped
-    environment:
-      - SERVER_PORT=8080
-    networks: [law-elite]          # internal only — never published (Java/Spring)
+  # payment-service REMOVED (finance consolidation) — the law-elite payment stub was deleted;
+  # the gateway now proxies /api/payments to the canonical Java payment-service (PAYMENT_SERVICE_URL).
 
 networks:
   law-elite:
