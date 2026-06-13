@@ -133,3 +133,6 @@ Reports/
 PROJECT_STRUCTURE.txt
 error-report.json
 error-report.txt
+.audit_*.json
+.audit_*.json
+.audit_*.json

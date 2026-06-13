@@ -1,0 +1,27 @@
+# Dependencies / build output
+**/node_modules/**
+**/dist/**
+**/build/**
+**/.next/**
+**/.turbo/**
+**/coverage/**
+
+# AI / experimental sandbox
+**/_reconcile/**
+**/.claude/**
+
+# Planning / tracking docs
+**/PENDING_WORK*.md
+**/TASKS.md
+**/EXECUTION_BACKLOG.md
+**/REPAIR_PLAN.md
+**/GAP_ANALYSIS.md
+**/ARCHITECTURE_FINDINGS.md
+**/RECONSTRUCTION.md
+**/MIGRATION.md
+**/INTEGRATION_SUMMARY.md
+
+# Logs / changelogs / noise
+**/CHANGELOG.md
+**/History.md
+**/HISTORY.md
