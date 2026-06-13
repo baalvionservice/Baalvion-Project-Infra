@@ -136,3 +136,7 @@ error-report.txt
 .audit_*.json
 .audit_*.json
 .audit_*.json
+
+# security-alert exports (regenerable; never commit alert data)
+_codeql_alerts.json
+_dependabot_alerts.json
