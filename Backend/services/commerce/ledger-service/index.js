@@ -111,6 +111,13 @@ const start = async () => {
     server.listen(config.port, () => {
       console.log(`[ledger-service] ✓ Running on port ${config.port}`);
       console.log(`[ledger-service] Environment: ${config.env}`);
+      // ── DEPRECATION ─────────────────────────────────────────────────────────
+      // This Node double-entry ledger is SUPERSEDED by the canonical Java service
+      // (Backend/services/commerce/financial-services-java/ledger-service), which the
+      // service catalog and docs/architecture/PLATFORM-CONSOLIDATION-AND-GOVERNANCE-PLAN.md
+      // (§3.2 / §4.1) name as the system-of-record. Do not build new features here.
+      // Decommission is a human-gated staged process (freeze → shadow → reconcile → cut reads).
+      console.warn('[ledger-service] ⚠ DEPRECATED — canonical ledger is financial-services-java/ledger-service (catalog system-of-record). See DEPRECATED.md.');
     });
   } catch (err) {
     console.error('[ledger-service] Startup failed:', err.message);

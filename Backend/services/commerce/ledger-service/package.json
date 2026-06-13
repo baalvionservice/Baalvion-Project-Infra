@@ -1,7 +1,8 @@
 {
   "name": "@baalvion/ledger-service",
   "version": "1.0.0",
-  "description": "Double-entry ledger service for Global Trade Infrastructure",
+  "description": "[DEPRECATED — superseded by financial-services-java/ledger-service] Double-entry ledger service for Global Trade Infrastructure",
+  "deprecated": "Superseded by the canonical Java ledger-service (Backend/services/commerce/financial-services-java/ledger-service). See DEPRECATED.md. Staged decommission per docs/architecture/PLATFORM-CONSOLIDATION-AND-GOVERNANCE-PLAN.md §4.1.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",

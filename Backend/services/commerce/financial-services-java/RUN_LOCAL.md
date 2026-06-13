@@ -60,15 +60,32 @@ docker run --rm \
 
 > `risk-service` moved 3025 → **3035** to free `:3025` for the Node `trade-service`. Don't move it back.
 
-Self-contained infra (compose): Postgres on host **5433**→5432, Redis on host **6380**→6379, Kafka 9092,
-Zookeeper 2181. The non-standard host ports keep this stack from fighting the platform's shared
-`baalvion-postgres` (5432) / `baalvion-redis` (6379) when both run on one machine.
+Bundled infra (this compose): Kafka 9092, Zookeeper 2181 only. **Postgres and Redis are no longer
+bundled** — these services use the platform's single shared `baalvion-postgres` (host 5432) and
+`baalvion-redis` (host 6379). There is intentionally only ONE Postgres and ONE Redis for the whole
+platform. (Redis is used only by payment-service idempotency and the optional redis rate-limit
+backend, which fails open — so the suite still boots if Redis is absent.)
 
-## Option A — standalone (own Postgres/Kafka/Redis), simplest
+## Bring it up
+
+The shared `baalvion-postgres` + `baalvion-redis` must be running first (root `docker-compose.yml`
+exposes them on host 5432 / 6379; DB `baalvion_db` / user `baalvion` / pass `baalvion_dev_pass`).
+This stack reaches them via `host.docker.internal` (override with `DB_HOST` / `REDIS_HOST`) and
+brings up its own Kafka.
 
 ```bash
+# 1. shared platform Postgres + Redis (skip if your platform stack is already up):
+docker compose -f ../../../../docker-compose.yml up -d postgres redis
+
+# 2. ONE-TIME on an EXISTING baalvion-postgres volume — create the `postgres` role the finance
+#    Flyway migrations assign schema ownership to (fresh volumes get it from docker/init.sql):
+docker exec -e PGPASSWORD=baalvion_dev_pass baalvion-postgres \
+  psql -U baalvion -d baalvion_db -c \
+  "DO \$\$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='postgres') THEN CREATE ROLE postgres; END IF; END \$\$;"
+
+# 3. the finance stack (first build is slow — full Maven build per image):
 cd Backend/services/commerce/financial-services-java
-docker compose up --build           # first build is slow (full Maven build per image)
+docker compose up --build
 ```
 
 Each service exposes Spring Actuator. Smoke-test once healthy:
@@ -91,35 +108,22 @@ curl -s http://localhost:3014/api/v1/ledger/entries  -H 'X-Tenant-ID: 00000000-0
 curl -s http://localhost:3018/api/v1/settlement/batches -H 'X-Tenant-ID: 00000000-0000-0000-0000-000000000000'
 ```
 
-## Option B — consolidate onto the platform's shared Postgres/Redis
+## Pointing at a different Postgres
 
-Run the platform infra first (root `docker-compose.yml` provides `baalvion-postgres` on `baalvion-net`,
-DB `baalvion_db` / user `baalvion` / pass `baalvion_dev_pass`), then point this stack at it:
+The DB target is env-overridable — defaults `DB_HOST=host.docker.internal`, `DB_PORT=5432`,
+`DB_NAME=baalvion_db`, `DB_USER=baalvion`, `DB_PASSWORD=baalvion_dev_pass`. To target another
+instance, override them: `DB_HOST=10.0.0.5 DB_USER=svc DB_PASSWORD=… docker compose up`.
 
-```bash
-# 1. shared infra + network already up from the root compose (docker network: baalvion-net)
-# 2. start the finance stack against it:
-cd Backend/services/commerce/financial-services-java
-DB_HOST=baalvion-postgres DB_NAME=baalvion_db DB_USER=baalvion DB_PASSWORD=baalvion_dev_pass \
-REDIS_HOST=baalvion-redis \
-docker compose up --build payment-service ledger-service account-service escrow-service \
-  settlement-service reconciliation-service audit-service reporting-service risk-service
-```
+`host.docker.internal` resolves natively on Docker Desktop (macOS/Windows). On Linux Docker Engine
+either set `DB_HOST` to the host IP, or add `extra_hosts: ["host.docker.internal:host-gateway"]`.
 
-To make the services resolve `baalvion-postgres`/`baalvion-redis`, attach this compose to the external
-`baalvion-net` (add to `docker-compose.yml`):
-
-```yaml
-networks:
-  default:
-    name: baalvion-net
-    external: true
-```
-
-> **Flyway caveat for Option B:** the migrations `ALTER SCHEMA <svc> OWNER TO postgres`. The shared
-> instance's superuser is `baalvion`, not `postgres`. Either (a) create a `postgres` role on the shared
-> DB, or (b) change those `ALTER SCHEMA ... OWNER TO` statements to the connecting user. Verify on a
-> JDK17+Maven box before relying on Option B — it is **not** verifiable from the agent sandbox.
+> **Schema-ownership note:** the migrations run `ALTER SCHEMA <svc> OWNER TO postgres`, so whatever
+> DB you point at must have a `postgres` role. The shared `baalvion-postgres` gets it from
+> `docker/init.sql` on a fresh volume (step 2 above covers an existing volume); the connecting user
+> must be able to reassign ownership to it (superuser, or a member of `postgres`).
+>
+> Building/running this stack needs JDK17+Maven (or the Dockerized Maven flow above) and is **not**
+> verifiable from the agent sandbox — confirm a green build before relying on it.
 
 ## Security / identity
 

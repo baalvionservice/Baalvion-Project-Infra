@@ -17,9 +17,12 @@ The minimal set of services that move money and prove an order paid, end-to-end:
 | escrow-service | 3017 | 13017 | escrow hold / release |
 | settlement-service | 3018 | 13018 | settlement |
 
-Backing infra in the same compose project: `postgres` (host **5433**), `kafka` (host 9092),
-`redis` (host 6380). All services share one `baalvion` Postgres DB with per-service schemas and
-per-service Flyway history.
+Backing infra: only `kafka` (host 9092) + Zookeeper are bundled in this compose project. Postgres
+and Redis are **not** — these services use the platform's single shared `baalvion-postgres` (host
+**5432**) and `baalvion-redis` (host **6379**) from the root `docker-compose.yml`, reached via
+`host.docker.internal`. All services share that one `baalvion_db` Postgres DB with per-service
+schemas and per-service Flyway history. (The previously bundled self-contained postgres:16 on host
+5433 and redis:7 on host 6380 were removed to end the duplicate "two Postgres / two Redis" setup.)
 
 > The order-execution-service (oes) is a **Node host process** on **:3052** (not in this compose
 > project). It is the webhook sink that cascades the order to `payment_confirmed`.

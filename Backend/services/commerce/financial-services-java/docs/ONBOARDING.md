@@ -30,13 +30,19 @@ financial-services-java/
 
 ## 1. Start infrastructure
 
+Postgres and Redis are the platform's shared instances (root `docker-compose.yml`); this stack only
+bundles Kafka + Zookeeper.
+
 ```bash
+# shared Postgres + Redis (from the repo root compose):
+docker compose -f ../../../../docker-compose.yml up -d postgres redis
+# this stack's Kafka + Zookeeper:
 cd Backend/services/commerce/financial-services-java
-docker compose up -d postgres kafka zookeeper redis
+docker compose up -d kafka zookeeper
 ```
 
-The schemas are created by Flyway on first boot; the services share one database (`baalvion`) with
-one schema each.
+The schemas are created by Flyway on first boot; the services share one database (`baalvion_db`)
+with one schema each.
 
 ## 2. Build
 
