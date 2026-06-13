@@ -8,6 +8,7 @@ import com.baalvion.payment.gateway.repository.GatewayPaymentRepository;
 import com.baalvion.payment.gateway.spi.GatewayChargeRequest;
 import com.baalvion.payment.gateway.spi.GatewayChargeResponse;
 import com.baalvion.payment.gateway.spi.PaymentGateway;
+import com.baalvion.payment.gateway.spi.ProviderConfig;
 import com.baalvion.payment.gateway.spi.RefundRequest;
 import com.baalvion.payment.gateway.spi.RefundResult;
 import com.baalvion.payment.gateway.spi.WebhookResult;
@@ -36,29 +37,42 @@ import java.util.UUID;
 @Transactional
 public class GatewayService {
 
+  /** Tenant scope persisted for single-tenant / env-key (no {@code site}) charges. */
+  static final String GLOBAL_SLUG = "__global__";
+
   private final GatewayRegistry registry;
   private final GatewayPaymentRepository repository;
+  private final PspConfigResolver resolver;
   private final ObjectMapper objectMapper;
 
-  public GatewayService(GatewayRegistry registry, GatewayPaymentRepository repository, ObjectMapper objectMapper) {
+  public GatewayService(GatewayRegistry registry, GatewayPaymentRepository repository,
+                        PspConfigResolver resolver, ObjectMapper objectMapper) {
     this.registry = registry;
     this.repository = repository;
+    this.resolver = resolver;
     this.objectMapper = objectMapper;
   }
 
   /**
-   * Initiate a PSP charge. Enforces the Idempotency-Key: a repeated key returns the
-   * existing charge (idempotentReplay=true) instead of creating a second one.
+   * Initiate a PSP charge for an optional tenant ({@code site}). Enforces the Idempotency-Key
+   * PER SITE: a repeated key under the same site returns the existing charge
+   * (idempotentReplay=true) instead of creating a second one. When {@code site} is null/blank the
+   * behavior is identical to the legacy single-tenant path: global env keys, slug
+   * {@code "__global__"}, global idempotency.
+   *
+   * @param site optional tenant website slug; {@code null} → GLOBAL (env-key) mode
    */
-  public GatewayPaymentResponse initiate(String idempotencyKey, InitiateGatewayPaymentRequest request) {
+  public GatewayPaymentResponse initiate(String site, String idempotencyKey, InitiateGatewayPaymentRequest request) {
     if (idempotencyKey == null || idempotencyKey.isBlank()) {
       throw new IllegalArgumentException("Idempotency-Key header is required");
     }
 
-    var existing = repository.findByIdempotencyKey(idempotencyKey);
+    String slug = slugOf(site);
+
+    var existing = repository.findByWebsiteSlugAndIdempotencyKey(slug, idempotencyKey);
     if (existing.isPresent()) {
-      log.info("Idempotent gateway create: key={} already exists, returning charge id={}",
-        sanitizeForLog(idempotencyKey), existing.get().getId());
+      log.info("Idempotent gateway create: key={} already exists for site={}, returning charge id={}",
+        sanitizeForLog(idempotencyKey), sanitizeForLog(slug), existing.get().getId());
       GatewayPaymentResponse replay = GatewayPaymentResponse.from(existing.get());
       replay.setIdempotentReplay(true);
       return replay;
@@ -66,6 +80,7 @@ public class GatewayService {
 
     String provider = request.getProvider().toLowerCase(Locale.ROOT);
     PaymentGateway gateway = registry.resolve(provider);
+    ProviderConfig cfg = resolver.resolve(site, provider);
 
     GatewayChargeRequest chargeRequest = new GatewayChargeRequest(
       provider,
@@ -78,9 +93,10 @@ public class GatewayService {
       request.getMetadata()
     );
 
-    GatewayChargeResponse charge = gateway.initiate(chargeRequest);
+    GatewayChargeResponse charge = gateway.initiate(chargeRequest, cfg);
 
     GatewayPayment entity = GatewayPayment.builder()
+      .websiteSlug(slug)
       .provider(provider)
       .providerRef(charge.providerRef())
       .status(charge.status())
@@ -98,17 +114,18 @@ public class GatewayService {
     try {
       saved = repository.save(entity);
     } catch (DataIntegrityViolationException race) {
-      // Concurrent create with the same Idempotency-Key won the UNIQUE race; return theirs.
-      log.info("Idempotency-Key race on create: key={}, returning the winning charge", sanitizeForLog(idempotencyKey));
-      GatewayPayment winner = repository.findByIdempotencyKey(idempotencyKey)
+      // Concurrent create with the same (site, Idempotency-Key) won the UNIQUE race; return theirs.
+      log.info("Idempotency-Key race on create: key={}, site={}, returning the winning charge",
+        sanitizeForLog(idempotencyKey), sanitizeForLog(slug));
+      GatewayPayment winner = repository.findByWebsiteSlugAndIdempotencyKey(slug, idempotencyKey)
         .orElseThrow(() -> race);
       GatewayPaymentResponse replay = GatewayPaymentResponse.from(winner);
       replay.setIdempotentReplay(true);
       return replay;
     }
 
-    log.info("Gateway payment created: id={}, provider={}, providerRef={}, status={}",
-      saved.getId(), provider, saved.getProviderRef(), saved.getStatus());
+    log.info("Gateway payment created: id={}, site={}, provider={}, providerRef={}, status={}",
+      saved.getId(), sanitizeForLog(slug), provider, saved.getProviderRef(), saved.getStatus());
 
     GatewayPaymentResponse response = GatewayPaymentResponse.from(saved);
     response.setClientParams(charge.clientParams());
@@ -126,7 +143,8 @@ public class GatewayService {
       .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
 
     PaymentGateway gateway = registry.resolve(payment.getProvider());
-    GatewayChargeResponse charge = gateway.capture(payment.getProviderRef());
+    ProviderConfig cfg = resolver.resolve(siteOf(payment), payment.getProvider());
+    GatewayChargeResponse charge = gateway.capture(payment.getProviderRef(), cfg);
 
     payment.setStatus(charge.status());
     if (charge.rawResponse() != null) {
@@ -142,10 +160,11 @@ public class GatewayService {
       .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
 
     PaymentGateway gateway = registry.resolve(payment.getProvider());
+    ProviderConfig cfg = resolver.resolve(siteOf(payment), payment.getProvider());
     BigDecimal refundAmount = request != null ? request.getAmount() : null;
     String reason = request != null ? request.getReason() : null;
 
-    RefundResult result = gateway.refund(new RefundRequest(payment.getProviderRef(), refundAmount, reason));
+    RefundResult result = gateway.refund(new RefundRequest(payment.getProviderRef(), refundAmount, reason), cfg);
 
     payment.setStatus(result.status());
     if (result.rawResponse() != null) {
@@ -159,24 +178,40 @@ public class GatewayService {
 
   /**
    * Verify (delegated to the provider adapter — real signature check) and apply a webhook,
-   * transitioning the matching {@link GatewayPayment} to the event's normalized status.
+   * transitioning the matching {@link GatewayPayment} to the event's normalized status. The
+   * provider config (carrying the webhook secret) is resolved for the optional {@code site};
+   * the matching charge is looked up scoped to that same tenant.
    *
+   * @param site optional tenant website slug; {@code null} → GLOBAL (env-key) mode
    * @return the verified result so the controller can ack with the parsed event id
    */
-  public WebhookResult applyWebhook(String provider, byte[] rawBody, Map<String, String> headers) {
+  public WebhookResult applyWebhook(String provider, byte[] rawBody, Map<String, String> headers, String site) {
+    String slug = slugOf(site);
     PaymentGateway gateway = registry.resolve(provider);
-    WebhookResult result = gateway.verifyAndParseWebhook(rawBody, headers);
+    ProviderConfig cfg = resolver.resolve(site, provider);
+    WebhookResult result = gateway.verifyAndParseWebhook(rawBody, headers, cfg);
 
-    repository.findByProviderAndProviderRef(provider.toLowerCase(Locale.ROOT), result.providerRef())
+    repository.findByWebsiteSlugAndProviderAndProviderRef(slug, provider.toLowerCase(Locale.ROOT), result.providerRef())
       .ifPresentOrElse(payment -> {
         payment.setStatus(result.status());
         repository.save(payment);
-        log.info("Webhook applied: provider={}, eventId={}, providerRef={}, status={}",
-          provider, sanitizeForLog(result.providerEventId()), result.providerRef(), result.status());
-      }, () -> log.warn("Webhook for unknown charge: provider={}, providerRef={}, eventId={}",
-        provider, result.providerRef(), sanitizeForLog(result.providerEventId())));
+        log.info("Webhook applied: site={}, provider={}, eventId={}, providerRef={}, status={}",
+          sanitizeForLog(slug), provider, sanitizeForLog(result.providerEventId()), result.providerRef(), result.status());
+      }, () -> log.warn("Webhook for unknown charge: site={}, provider={}, providerRef={}, eventId={}",
+        sanitizeForLog(slug), provider, result.providerRef(), sanitizeForLog(result.providerEventId())));
 
     return result;
+  }
+
+  /** Normalize an optional site to the persisted slug ({@code "__global__"} when absent). */
+  private static String slugOf(String site) {
+    return (site == null || site.isBlank()) ? GLOBAL_SLUG : site;
+  }
+
+  /** Derive the resolver's site (null for global) from a persisted entity's slug. */
+  private static String siteOf(GatewayPayment payment) {
+    String slug = payment.getWebsiteSlug();
+    return (slug == null || GLOBAL_SLUG.equals(slug)) ? null : slug;
   }
 
   private String toJson(Map<String, String> map) {

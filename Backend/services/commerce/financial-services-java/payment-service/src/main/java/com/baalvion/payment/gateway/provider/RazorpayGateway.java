@@ -6,6 +6,7 @@ import com.baalvion.payment.gateway.spi.GatewayChargeRequest;
 import com.baalvion.payment.gateway.spi.GatewayChargeResponse;
 import com.baalvion.payment.gateway.spi.GatewayStatus;
 import com.baalvion.payment.gateway.spi.PaymentGateway;
+import com.baalvion.payment.gateway.spi.ProviderConfig;
 import com.baalvion.payment.gateway.spi.RefundRequest;
 import com.baalvion.payment.gateway.spi.RefundResult;
 import com.baalvion.payment.gateway.spi.WebhookResult;
@@ -67,10 +68,12 @@ import java.util.Objects;
  * {@code refund.processed}/{@code refund.created}/{@code payment.refunded} → REFUNDED;
  * unknown → FAILED.
  *
- * <p>Secrets ({@code keyId}, {@code keySecret}, {@code webhookSecret}), the base URL, the
- * replay window, and the mock flag are read from the injected {@link PspProperties} — never
- * hardcoded. {@code app.psp.mock=true} flips deterministic id generation on for non-prod,
- * mirroring the Node {@code mode !== 'live'} branch.
+ * <p>Secrets ({@code keyId}, {@code keySecret}, {@code webhookSecret}), the base URL, and the
+ * mock flag are read PER CALL from the passed {@link ProviderConfig} — never hardcoded. The
+ * resolver builds it from the global {@code app.psp.razorpay.*} env (single-tenant back-compat)
+ * or from the per-tenant CMS vault. The injected {@link PspProperties.Razorpay} supplies only
+ * non-secret static DEFAULTS (default base URL, replay window). {@code config.mock()} flips
+ * deterministic id generation on for non-prod, mirroring the Node {@code mode !== 'live'} branch.
  */
 @Slf4j
 @Component
@@ -85,14 +88,13 @@ public class RazorpayGateway implements PaymentGateway {
   private static final int CONNECT_TIMEOUT_MS = 5_000;
   private static final int READ_TIMEOUT_MS = 15_000;
 
-  private final PspProperties.Razorpay config;
-  private final boolean mock;
+  /** Non-secret static defaults only (default base URL, replay window). Secrets come per-call. */
+  private final PspProperties.Razorpay defaults;
   private final RestClient restClient;
   private final ObjectMapper objectMapper;
 
   public RazorpayGateway(PspProperties properties, ObjectMapper objectMapper) {
-    this.config = properties.getRazorpay();
-    this.mock = properties.isMock();
+    this.defaults = properties.getRazorpay();
     this.objectMapper = objectMapper;
     HttpClient httpClient = HttpClient.newBuilder()
       .followRedirects(HttpClient.Redirect.NORMAL)
@@ -100,8 +102,9 @@ public class RazorpayGateway implements PaymentGateway {
       .build();
     JdkClientHttpRequestFactory rf = new JdkClientHttpRequestFactory(httpClient);
     rf.setReadTimeout(Duration.ofMillis(READ_TIMEOUT_MS));
+    // No fixed baseUrl: the per-call ProviderConfig may carry a tenant-specific base URL, so
+    // requests pass an absolute URI (config.baseUrlOr(default) + path) which overrides any default.
     this.restClient = RestClient.builder()
-      .baseUrl(config.getBaseUrl())
       .requestFactory(rf)
       .build();
   }
@@ -114,16 +117,17 @@ public class RazorpayGateway implements PaymentGateway {
   // ---------------------------------------------------------------- initiate (create order)
 
   @Override
-  public GatewayChargeResponse initiate(GatewayChargeRequest request) {
+  public GatewayChargeResponse initiate(GatewayChargeRequest request, ProviderConfig config) {
     Objects.requireNonNull(request, "request");
+    Objects.requireNonNull(config, "config");
     long amount = toMinorUnits(request.amount());
     String currency = request.currency() == null ? null : request.currency().toUpperCase(Locale.ROOT);
     String receipt = request.orderRef();
 
-    if (mock) {
-      String orderId = "order_mock_" + mockHash(receipt + ":" + amount + ":" + currency);
+    if (config.mock()) {
+      String orderId = "order_mock_" + mockHash(config, receipt + ":" + amount + ":" + currency);
       Map<String, String> clientParams = clientParams(
-        mockOr(config.getKeyId(), "rzp_test_mock"), orderId, amount, currency);
+        mockOr(config.secret("keyId"), "rzp_test_mock"), orderId, amount, currency);
       return new GatewayChargeResponse(PROVIDER, orderId, GatewayStatus.CREATED, clientParams, "{\"mocked\":true}");
     }
 
@@ -135,20 +139,20 @@ public class RazorpayGateway implements PaymentGateway {
     body.put("receipt", receipt);
     body.put("notes", request.metadata() == null ? Map.of() : request.metadata());
 
-    String raw = postJson("/v1/orders", body, "order create");
+    String raw = postJson(config, "/v1/orders", body, "order create");
     JsonNode data = readTree(raw, "order create");
     String orderId = text(data, "id");
     long respAmount = data.path("amount").asLong(amount);
     String respCurrency = data.path("currency").asText(currency);
 
-    Map<String, String> clientParams = clientParams(config.getKeyId(), orderId, respAmount, respCurrency);
+    Map<String, String> clientParams = clientParams(config.secret("keyId"), orderId, respAmount, respCurrency);
     return new GatewayChargeResponse(PROVIDER, orderId, GatewayStatus.CREATED, clientParams, raw);
   }
 
   // ---------------------------------------------------------------- capture (auto-capture, no API call)
 
   @Override
-  public GatewayChargeResponse capture(String providerRef) {
+  public GatewayChargeResponse capture(String providerRef, ProviderConfig config) {
     // Razorpay captures automatically on payment completion (webhook payment.captured /
     // order.paid). The Node adapter issues no explicit capture call — capture is recorded
     // when the webhook arrives. We therefore transition to CAPTURED without an API round-trip.
@@ -162,13 +166,14 @@ public class RazorpayGateway implements PaymentGateway {
   // ---------------------------------------------------------------- refund
 
   @Override
-  public RefundResult refund(RefundRequest request) {
+  public RefundResult refund(RefundRequest request, ProviderConfig config) {
     Objects.requireNonNull(request, "request");
+    Objects.requireNonNull(config, "config");
     String providerPaymentId = request.providerRef();
     Long amount = request.amount() == null ? null : toMinorUnits(request.amount());
 
-    if (mock) {
-      String refundId = "rfnd_mock_" + mockHash(providerPaymentId + ":" + (amount == null ? "null" : amount));
+    if (config.mock()) {
+      String refundId = "rfnd_mock_" + mockHash(config, providerPaymentId + ":" + (amount == null ? "null" : amount));
       String raw = "{\"mocked\":true,\"providerPaymentId\":\"" + providerPaymentId + "\",\"amount\":"
         + (amount == null ? "null" : amount) + "}";
       return new RefundResult(PROVIDER, refundId, GatewayStatus.REFUNDED, request.amount(), raw);
@@ -188,7 +193,7 @@ public class RazorpayGateway implements PaymentGateway {
       body.put("notes", Map.of("reason", request.reason()));
     }
 
-    String raw = postJson("/v1/payments/" + providerPaymentId + "/refund", body, "refund");
+    String raw = postJson(config, "/v1/payments/" + providerPaymentId + "/refund", body, "refund");
     JsonNode data = readTree(raw, "refund");
     String refundId = text(data, "id");
     BigDecimal refunded = data.has("amount")
@@ -200,16 +205,17 @@ public class RazorpayGateway implements PaymentGateway {
   // ---------------------------------------------------------------- fetchStatus
 
   @Override
-  public GatewayChargeResponse fetchStatus(String providerRef) {
+  public GatewayChargeResponse fetchStatus(String providerRef, ProviderConfig config) {
     if (providerRef == null || providerRef.isBlank()) {
       throw new IllegalArgumentException("razorpay fetchStatus requires a providerRef (order id)");
     }
-    if (mock) {
+    Objects.requireNonNull(config, "config");
+    if (config.mock()) {
       return new GatewayChargeResponse(PROVIDER, providerRef, GatewayStatus.CREATED, Map.of(), "{\"mocked\":true}");
     }
 
     // Live: GET /v1/orders/{id}. Razorpay order status: created | attempted | paid.
-    String raw = getJson("/v1/orders/" + providerRef, "order fetch");
+    String raw = getJson(config, "/v1/orders/" + providerRef, "order fetch");
     JsonNode data = readTree(raw, "order fetch");
     GatewayStatus status = mapOrderStatus(data.path("status").asText(null));
     return new GatewayChargeResponse(PROVIDER, providerRef, status, Map.of(), raw);
@@ -218,11 +224,12 @@ public class RazorpayGateway implements PaymentGateway {
   // ---------------------------------------------------------------- webhook verify + parse
 
   @Override
-  public WebhookResult verifyAndParseWebhook(byte[] rawBody, Map<String, String> headers) {
+  public WebhookResult verifyAndParseWebhook(byte[] rawBody, Map<String, String> headers, ProviderConfig config) {
+    Objects.requireNonNull(config, "config");
     String raw = rawBody == null ? "" : new String(rawBody, StandardCharsets.UTF_8);
     String signature = header(headers, SIGNATURE_HEADER);
 
-    String webhookSecret = config.getWebhookSecret();
+    String webhookSecret = config.secret("webhookSecret");
     if (signature == null || signature.isBlank() || webhookSecret == null || webhookSecret.isBlank()) {
       throw new WebhookVerificationException("razorpay webhook missing signature or webhook secret");
     }
@@ -242,9 +249,9 @@ public class RazorpayGateway implements PaymentGateway {
     if (createdAtNode != null && createdAtNode.isNumber()) {
       long createdAt = createdAtNode.asLong();
       long skew = Math.abs(nowSeconds() - createdAt);
-      if (skew > config.getReplayWindowSeconds()) {
+      if (skew > defaults.getReplayWindowSeconds()) {
         throw new WebhookVerificationException(
-          "razorpay webhook outside replay window: skew=" + skew + "s > " + config.getReplayWindowSeconds() + "s");
+          "razorpay webhook outside replay window: skew=" + skew + "s > " + defaults.getReplayWindowSeconds() + "s");
       }
     }
 
@@ -312,12 +319,12 @@ public class RazorpayGateway implements PaymentGateway {
 
   // ---------------------------------------------------------------- HTTP helpers
 
-  private String postJson(String path, Map<String, Object> body, String label) {
+  private String postJson(ProviderConfig config, String path, Map<String, Object> body, String label) {
     String json = writeJson(body, label);
     try {
       String raw = restClient.post()
-        .uri(path)
-        .header("Authorization", basicAuth())
+        .uri(baseUrl(config) + path)
+        .header("Authorization", basicAuth(config))
         .contentType(MediaType.APPLICATION_JSON)
         .body(json)
         .retrieve()
@@ -336,11 +343,11 @@ public class RazorpayGateway implements PaymentGateway {
     }
   }
 
-  private String getJson(String path, String label) {
+  private String getJson(ProviderConfig config, String path, String label) {
     try {
       String raw = restClient.get()
-        .uri(path)
-        .header("Authorization", basicAuth())
+        .uri(baseUrl(config) + path)
+        .header("Authorization", basicAuth(config))
         .retrieve()
         .body(String.class);
       if (raw == null || raw.isBlank()) {
@@ -356,11 +363,16 @@ public class RazorpayGateway implements PaymentGateway {
     }
   }
 
-  private String basicAuth() {
-    String keyId = config.getKeyId();
-    String keySecret = config.getKeySecret();
+  /** Per-call base URL: tenant override from {@code config.baseUrl}, else the static default. */
+  private String baseUrl(ProviderConfig config) {
+    return config.baseUrlOr(defaults.getBaseUrl());
+  }
+
+  private String basicAuth(ProviderConfig config) {
+    String keyId = config.secret("keyId");
+    String keySecret = config.secret("keySecret");
     if (keyId == null || keyId.isBlank() || keySecret == null || keySecret.isBlank()) {
-      throw new IllegalStateException("razorpay live calls require keyId and keySecret (app.psp.razorpay.*)");
+      throw new IllegalStateException("razorpay live calls require keyId and keySecret");
     }
     String token = java.util.Base64.getEncoder()
       .encodeToString((keyId + ":" + keySecret).getBytes(StandardCharsets.UTF_8));
@@ -428,8 +440,8 @@ public class RazorpayGateway implements PaymentGateway {
   }
 
   /** Deterministic mock id suffix: first 14 hex chars of HMAC(data, keySecret||"mock"). */
-  private String mockHash(String data) {
-    return hmacSha256Hex(data, mockOr(config.getKeySecret(), "mock")).substring(0, MOCK_ID_HEX_LEN);
+  private String mockHash(ProviderConfig config, String data) {
+    return hmacSha256Hex(data, mockOr(config.secret("keySecret"), "mock")).substring(0, MOCK_ID_HEX_LEN);
   }
 
   private static long nowSeconds() {

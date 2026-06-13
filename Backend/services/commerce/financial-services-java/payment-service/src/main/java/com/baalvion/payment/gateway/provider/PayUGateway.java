@@ -1,11 +1,11 @@
 package com.baalvion.payment.gateway.provider;
 
-import com.baalvion.payment.gateway.config.PspProperties;
 import com.baalvion.payment.gateway.exception.WebhookVerificationException;
 import com.baalvion.payment.gateway.spi.GatewayChargeRequest;
 import com.baalvion.payment.gateway.spi.GatewayChargeResponse;
 import com.baalvion.payment.gateway.spi.GatewayStatus;
 import com.baalvion.payment.gateway.spi.PaymentGateway;
+import com.baalvion.payment.gateway.spi.ProviderConfig;
 import com.baalvion.payment.gateway.spi.RefundRequest;
 import com.baalvion.payment.gateway.spi.RefundResult;
 import com.baalvion.payment.gateway.spi.WebhookResult;
@@ -44,8 +44,10 @@ import java.util.Objects;
  * constant-time compared to the body's {@code hash} field. Status map: {@code success →
  * CAPTURED}, {@code failure|failed → FAILED}, {@code refunded → REFUNDED}, otherwise FAILED.
  *
- * <p>Secrets ({@code merchantKey}, {@code merchantSalt}) come from the injected
- * {@link PspProperties.Payu} (env-bound at deploy; never hardcoded).
+ * <p>Secrets ({@code merchantKey}, {@code merchantSalt}) and the mock flag come PER CALL from
+ * the passed {@link ProviderConfig} — resolved either from the global {@code app.psp.payu.*}
+ * env (single-tenant back-compat) or the per-tenant CMS vault; never hardcoded. PayU makes no
+ * server-to-server HTTP call here, so it has no runtime base-URL/timeout default to read.
  */
 @Component
 public class PayUGateway implements PaymentGateway {
@@ -61,14 +63,6 @@ public class PayUGateway implements PaymentGateway {
   /** txnid hash slice length (payu.js:38: {@code .slice(0, 16)}). */
   private static final int TXNID_HASH_LEN = 16;
 
-  private final PspProperties.Payu config;
-  private final boolean mock;
-
-  public PayUGateway(PspProperties properties) {
-    this.config = properties.getPayu();
-    this.mock = properties.isMock();
-  }
-
   @Override
   public String name() {
     return PROVIDER;
@@ -80,10 +74,12 @@ public class PayUGateway implements PaymentGateway {
    * {@link GatewayStatus#CREATED} charge: the order exists, awaiting the customer redirect.
    */
   @Override
-  public GatewayChargeResponse initiate(GatewayChargeRequest request) {
+  public GatewayChargeResponse initiate(GatewayChargeRequest request, ProviderConfig config) {
     Objects.requireNonNull(request, "charge request is required");
-    String key = requireSecret(config == null ? null : config.getMerchantKey(), "PayU merchantKey");
-    String salt = requireSecret(config == null ? null : config.getMerchantSalt(), "PayU merchantSalt");
+    Objects.requireNonNull(config, "config");
+    String key = requireSecret(config.secret("merchantKey"), "PayU merchantKey");
+    String salt = requireSecret(config.secret("merchantSalt"), "PayU merchantSalt");
+    boolean mock = config.mock();
 
     BigDecimal minorAmount = request.amount();
     if (minorAmount == null || minorAmount.signum() <= 0) {
@@ -133,7 +129,7 @@ public class PayUGateway implements PaymentGateway {
    * {@link #verifyAndParseWebhook}. Mirrors the Node module exporting no capture call.
    */
   @Override
-  public GatewayChargeResponse capture(String providerRef) {
+  public GatewayChargeResponse capture(String providerRef, ProviderConfig config) {
     throw new UnsupportedOperationException(
       "PayU does not support an explicit capture call; capture is confirmed via the success webhook");
   }
@@ -144,7 +140,7 @@ public class PayUGateway implements PaymentGateway {
    * integration not exposed through this SPI.
    */
   @Override
-  public RefundResult refund(RefundRequest request) {
+  public RefundResult refund(RefundRequest request, ProviderConfig config) {
     throw new UnsupportedOperationException(
       "PayU refunds are out-of-band (PayU dashboard); no in-band refund is exposed by this adapter");
   }
@@ -154,7 +150,7 @@ public class PayUGateway implements PaymentGateway {
    * driven exclusively by the inbound webhook.
    */
   @Override
-  public GatewayChargeResponse fetchStatus(String providerRef) {
+  public GatewayChargeResponse fetchStatus(String providerRef, ProviderConfig config) {
     throw new UnsupportedOperationException(
       "PayU does not expose a status-fetch API; status is driven by the inbound webhook");
   }
@@ -167,12 +163,13 @@ public class PayUGateway implements PaymentGateway {
    * {@link WebhookResult} therefore always represents an authenticated event.
    */
   @Override
-  public WebhookResult verifyAndParseWebhook(byte[] rawBody, Map<String, String> headers) {
+  public WebhookResult verifyAndParseWebhook(byte[] rawBody, Map<String, String> headers, ProviderConfig config) {
+    Objects.requireNonNull(config, "config");
     if (rawBody == null || rawBody.length == 0) {
       throw new WebhookVerificationException("PayU webhook body is empty");
     }
-    String key = config == null ? null : config.getMerchantKey();
-    String salt = config == null ? null : config.getMerchantSalt();
+    String key = config.secret("merchantKey");
+    String salt = config.secret("merchantSalt");
     if (isBlank(key) || isBlank(salt)) {
       throw new WebhookVerificationException("PayU merchant secrets are not configured");
     }

@@ -6,6 +6,7 @@ import com.baalvion.payment.gateway.spi.GatewayChargeRequest;
 import com.baalvion.payment.gateway.spi.GatewayChargeResponse;
 import com.baalvion.payment.gateway.spi.GatewayStatus;
 import com.baalvion.payment.gateway.spi.PaymentGateway;
+import com.baalvion.payment.gateway.spi.ProviderConfig;
 import com.baalvion.payment.gateway.spi.RefundRequest;
 import com.baalvion.payment.gateway.spi.RefundResult;
 import com.baalvion.payment.gateway.spi.WebhookResult;
@@ -76,17 +77,17 @@ public class StripeGateway implements PaymentGateway {
   private static final String SIGNATURE_HEADER = "stripe-signature";
   private static final int MOCK_ID_HEX_LEN = 14;
 
-  private final PspProperties.Stripe config;
-  private final boolean mock;
+  /** Non-secret static defaults only (default base URL, tolerance window). Secrets come per-call. */
+  private final PspProperties.Stripe defaults;
   private final ObjectMapper objectMapper;
   private final RestClient restClient;
 
   public StripeGateway(PspProperties properties, ObjectMapper objectMapper) {
-    this.config = properties.getStripe();
-    this.mock = properties.isMock();
+    this.defaults = properties.getStripe();
     this.objectMapper = objectMapper;
+    // No fixed baseUrl: the per-call ProviderConfig may carry a tenant-specific base URL, so
+    // requests pass an absolute URI (config.baseUrlOr(default) + path) which overrides any default.
     this.restClient = RestClient.builder()
-      .baseUrl(config.getBaseUrl())
       .build();
   }
 
@@ -100,34 +101,35 @@ public class StripeGateway implements PaymentGateway {
   // ---------------------------------------------------------------------------
 
   @Override
-  public GatewayChargeResponse initiate(GatewayChargeRequest request) {
+  public GatewayChargeResponse initiate(GatewayChargeRequest request, ProviderConfig config) {
     Objects.requireNonNull(request, "charge request must not be null");
+    Objects.requireNonNull(config, "config");
     long amount = toMinorUnits(request.amount());
     String currency = request.currency() == null ? "" : request.currency().toLowerCase(Locale.ROOT);
     String receipt = request.orderRef();
 
-    if (mock) {
-      return mockInitiate(amount, currency, receipt);
+    if (config.mock()) {
+      return mockInitiate(config, amount, currency, receipt);
     }
-    return liveInitiate(amount, currency, receipt);
+    return liveInitiate(config, amount, currency, receipt);
   }
 
-  private GatewayChargeResponse mockInitiate(long amount, String currency, String receipt) {
-    String seedSecret = secretOrDefault(config.getSecretKey(), "mock");
+  private GatewayChargeResponse mockInitiate(ProviderConfig config, long amount, String currency, String receipt) {
+    String seedSecret = secretOrDefault(config.secret("secretKey"), "mock");
     String id = "pi_mock_" + hmacSha256Hex(receipt + ":" + amount + ":" + currency, seedSecret)
       .substring(0, MOCK_ID_HEX_LEN);
 
     Map<String, String> clientParams = new LinkedHashMap<>();
     clientParams.put("clientSecret", id + "_secret_mock");
-    clientParams.put("publishableKey", publishableOrDefault());
+    clientParams.put("publishableKey", publishableOrDefault(config));
     clientParams.put("amount", String.valueOf(amount));
     clientParams.put("currency", currency);
 
     return new GatewayChargeResponse(PROVIDER, id, GatewayStatus.CREATED, clientParams, "{\"mocked\":true}");
   }
 
-  private GatewayChargeResponse liveInitiate(long amount, String currency, String receipt) {
-    requireSecretKey();
+  private GatewayChargeResponse liveInitiate(ProviderConfig config, long amount, String currency, String receipt) {
+    requireSecretKey(config);
 
     StringBuilder form = new StringBuilder()
       .append("amount=").append(formEncode(String.valueOf(amount)))
@@ -137,7 +139,7 @@ public class StripeGateway implements PaymentGateway {
       form.append("&metadata[receipt]=").append(formEncode(receipt));
     }
 
-    String responseBody = post(INTENTS_PATH, form.toString(), "intent create");
+    String responseBody = post(config, INTENTS_PATH, form.toString(), "intent create");
     JsonNode data = readTree(responseBody, "intent create");
 
     String providerRef = textOrNull(data, "id");
@@ -145,9 +147,10 @@ public class StripeGateway implements PaymentGateway {
       throw new IllegalStateException("Stripe intent create returned no id");
     }
 
+    String publishableKey = config.secret("publishableKey");
     Map<String, String> clientParams = new LinkedHashMap<>();
     clientParams.put("clientSecret", textOrEmpty(data, "client_secret"));
-    clientParams.put("publishableKey", config.getPublishableKey() == null ? "" : config.getPublishableKey());
+    clientParams.put("publishableKey", publishableKey == null ? "" : publishableKey);
     clientParams.put("amount", textOrEmpty(data, "amount"));
     clientParams.put("currency", textOrEmpty(data, "currency"));
 
@@ -160,11 +163,11 @@ public class StripeGateway implements PaymentGateway {
   // ---------------------------------------------------------------------------
 
   @Override
-  public GatewayChargeResponse capture(String providerRef) {
+  public GatewayChargeResponse capture(String providerRef, ProviderConfig config) {
     // Node note (stripe.js): "Service does not explicitly call capture endpoint; Stripe
     // manages it." Capture happens on the payment_intent.succeeded/charge.succeeded webhook.
     // We therefore surface the current intent status rather than calling a capture endpoint.
-    return fetchStatus(providerRef);
+    return fetchStatus(providerRef, config);
   }
 
   // ---------------------------------------------------------------------------
@@ -172,16 +175,17 @@ public class StripeGateway implements PaymentGateway {
   // ---------------------------------------------------------------------------
 
   @Override
-  public RefundResult refund(RefundRequest request) {
+  public RefundResult refund(RefundRequest request, ProviderConfig config) {
     Objects.requireNonNull(request, "refund request must not be null");
+    Objects.requireNonNull(config, "config");
     String intent = request.providerRef();
     if (intent == null || intent.isBlank()) {
       throw new IllegalArgumentException("Stripe refund requires a PaymentIntent id");
     }
     BigDecimal amount = request.amount();
 
-    if (mock) {
-      String seedSecret = secretOrDefault(config.getSecretKey(), "mock");
+    if (config.mock()) {
+      String seedSecret = secretOrDefault(config.secret("secretKey"), "mock");
       String amountSeed = amount == null ? "null" : String.valueOf(toMinorUnits(amount));
       String providerRefundId = "re_mock_"
         + hmacSha256Hex(intent + ":" + amountSeed, seedSecret).substring(0, MOCK_ID_HEX_LEN);
@@ -189,7 +193,7 @@ public class StripeGateway implements PaymentGateway {
         "{\"mocked\":true,\"paymentIntent\":\"" + jsonEscape(intent) + "\"}");
     }
 
-    requireSecretKey();
+    requireSecretKey(config);
     StringBuilder form = new StringBuilder()
       .append("payment_intent=").append(formEncode(intent));
     // null amount => full refund: Stripe refunds the entire charge when amount is omitted.
@@ -197,7 +201,7 @@ public class StripeGateway implements PaymentGateway {
       form.append("&amount=").append(formEncode(String.valueOf(toMinorUnits(amount))));
     }
 
-    String responseBody = post(REFUNDS_PATH, form.toString(), "refund");
+    String responseBody = post(config, REFUNDS_PATH, form.toString(), "refund");
     JsonNode data = readTree(responseBody, "refund");
     String providerRefundId = textOrNull(data, "id");
     if (providerRefundId == null) {
@@ -211,21 +215,22 @@ public class StripeGateway implements PaymentGateway {
   // ---------------------------------------------------------------------------
 
   @Override
-  public GatewayChargeResponse fetchStatus(String providerRef) {
+  public GatewayChargeResponse fetchStatus(String providerRef, ProviderConfig config) {
     if (providerRef == null || providerRef.isBlank()) {
       throw new IllegalArgumentException("Stripe fetchStatus requires a PaymentIntent id");
     }
-    if (mock) {
+    Objects.requireNonNull(config, "config");
+    if (config.mock()) {
       // No live intent to poll; the deterministic mock intent stays CREATED until a webhook arrives.
       return new GatewayChargeResponse(PROVIDER, providerRef, GatewayStatus.CREATED, Map.of(), "{\"mocked\":true}");
     }
 
-    requireSecretKey();
+    requireSecretKey(config);
     String responseBody;
     try {
       responseBody = restClient.get()
-        .uri(INTENTS_PATH + "/" + formEncodePathSegment(providerRef))
-        .header("Authorization", bearer())
+        .uri(baseUrl(config) + INTENTS_PATH + "/" + formEncodePathSegment(providerRef))
+        .header("Authorization", bearer(config))
         .retrieve()
         .body(String.class);
     } catch (RestClientResponseException ex) {
@@ -245,14 +250,16 @@ public class StripeGateway implements PaymentGateway {
   // ---------------------------------------------------------------------------
 
   @Override
-  public WebhookResult verifyAndParseWebhook(byte[] rawBody, Map<String, String> headers) {
+  public WebhookResult verifyAndParseWebhook(byte[] rawBody, Map<String, String> headers, ProviderConfig config) {
+    Objects.requireNonNull(config, "config");
     if (rawBody == null) {
       rawBody = new byte[0];
     }
     if (headers == null) {
       throw new WebhookVerificationException("Stripe webhook missing headers");
     }
-    if (config.getWebhookSecret() == null || config.getWebhookSecret().isBlank()) {
+    String webhookSecret = config.secret("webhookSecret");
+    if (webhookSecret == null || webhookSecret.isBlank()) {
       throw new WebhookVerificationException("Stripe webhook secret is not configured");
     }
 
@@ -273,14 +280,14 @@ public class StripeGateway implements PaymentGateway {
       throw new WebhookVerificationException("Stripe webhook timestamp is not numeric", ex);
     }
     long skew = Math.abs(nowSeconds() - ts);
-    if (skew > config.getToleranceSeconds()) {
+    if (skew > defaults.getToleranceSeconds()) {
       throw new WebhookVerificationException(
         "Stripe webhook timestamp outside tolerance window (" + skew + "s > "
-          + config.getToleranceSeconds() + "s)");
+          + defaults.getToleranceSeconds() + "s)");
     }
 
     String body = new String(rawBody, StandardCharsets.UTF_8);
-    String expected = hmacSha256Hex(parsed.timestamp() + "." + body, config.getWebhookSecret());
+    String expected = hmacSha256Hex(parsed.timestamp() + "." + body, webhookSecret);
     boolean matched = parsed.signatures().stream().anyMatch(sig -> constantTimeEquals(sig, expected));
     if (!matched) {
       throw new WebhookVerificationException("Stripe webhook signature mismatch");
@@ -369,11 +376,11 @@ public class StripeGateway implements PaymentGateway {
   // HTTP helpers
   // ---------------------------------------------------------------------------
 
-  private String post(String path, String formBody, String op) {
+  private String post(ProviderConfig config, String path, String formBody, String op) {
     try {
       return restClient.post()
-        .uri(path)
-        .header("Authorization", bearer())
+        .uri(baseUrl(config) + path)
+        .header("Authorization", bearer(config))
         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
         .body(formBody)
         .retrieve()
@@ -387,6 +394,11 @@ public class StripeGateway implements PaymentGateway {
     }
   }
 
+  /** Per-call base URL: tenant override from {@code config.baseUrl}, else the static default. */
+  private String baseUrl(ProviderConfig config) {
+    return config.baseUrlOr(defaults.getBaseUrl());
+  }
+
   private JsonNode readTree(String body, String op) {
     try {
       return objectMapper.readTree(body == null ? "{}" : body);
@@ -395,12 +407,13 @@ public class StripeGateway implements PaymentGateway {
     }
   }
 
-  private String bearer() {
-    return "Bearer " + config.getSecretKey();
+  private String bearer(ProviderConfig config) {
+    return "Bearer " + config.secret("secretKey");
   }
 
-  private void requireSecretKey() {
-    if (config.getSecretKey() == null || config.getSecretKey().isBlank()) {
+  private void requireSecretKey(ProviderConfig config) {
+    String secretKey = config.secret("secretKey");
+    if (secretKey == null || secretKey.isBlank()) {
       throw new IllegalStateException("Stripe secretKey is not configured");
     }
   }
@@ -510,8 +523,8 @@ public class StripeGateway implements PaymentGateway {
     return (secret == null || secret.isBlank()) ? fallback : secret;
   }
 
-  private String publishableOrDefault() {
-    String pk = config.getPublishableKey();
+  private static String publishableOrDefault(ProviderConfig config) {
+    String pk = config.secret("publishableKey");
     return (pk == null || pk.isBlank()) ? "pk_test_mock" : pk;
   }
 

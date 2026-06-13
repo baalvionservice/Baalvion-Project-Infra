@@ -16,8 +16,10 @@ import java.util.UUID;
  *
  * <p>Java port of the Node {@code GatewayPayment} model. Distinct from the legacy
  * interbank {@link com.baalvion.payment.domain.Transaction} (NIP/VISA/…); no fee/VAT
- * columns — gateway-checkout fees are provider-side. The {@code Idempotency-Key} is
- * unique (see {@code uk_gateway_idempotency_key}) so a retried create returns the
+ * columns — gateway-checkout fees are provider-side. Per-tenant scoped via
+ * {@code website_slug} ({@code "__global__"} for single-tenant/env-key deploys): the
+ * {@code Idempotency-Key} is unique PER SITE (see {@code uk_gateway_site_idem}) so the same
+ * key can be reused across tenants while a retried create within a tenant still returns the
  * existing charge instead of double-charging.
  */
 @Entity
@@ -27,10 +29,11 @@ import java.util.UUID;
   indexes = {
     @Index(name = "idx_gwpay_provider_ref", columnList = "provider,provider_ref"),
     @Index(name = "idx_gwpay_status", columnList = "status,created_at DESC"),
-    @Index(name = "idx_gwpay_order_ref", columnList = "order_ref")
+    @Index(name = "idx_gwpay_order_ref", columnList = "order_ref"),
+    @Index(name = "idx_gwpay_site_provider_ref", columnList = "website_slug,provider,provider_ref")
   },
   uniqueConstraints = {
-    @UniqueConstraint(name = "uk_gateway_idempotency_key", columnNames = {"idempotency_key"})
+    @UniqueConstraint(name = "uk_gateway_site_idem", columnNames = {"website_slug", "idempotency_key"})
   }
 )
 @Data
@@ -42,6 +45,10 @@ public class GatewayPayment {
   @Id
   @Column(columnDefinition = "uuid")
   private UUID id;
+
+  /** Tenant scope: the website slug whose CMS PSP keys this charge used; {@code "__global__"} for env-key deploys. */
+  @Column(name = "website_slug", length = 190, nullable = false)
+  private String websiteSlug;
 
   @Column(length = 40, nullable = false)
   private String provider;
@@ -101,6 +108,9 @@ public class GatewayPayment {
     }
     if (customerJson == null) {
       customerJson = "{}";
+    }
+    if (websiteSlug == null || websiteSlug.isBlank()) {
+      websiteSlug = "__global__";
     }
   }
 }

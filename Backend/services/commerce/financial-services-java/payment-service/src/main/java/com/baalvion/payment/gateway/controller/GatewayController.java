@@ -38,11 +38,12 @@ public class GatewayController {
   @PostMapping
   public ResponseEntity<GatewayPaymentResponse> initiate(
     @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
+    @RequestParam(value = "site", required = false) String site,
     @Valid @RequestBody InitiateGatewayPaymentRequest request
   ) {
-    log.info("POST /v1/gateway/payments: provider={}, amount={}, key={}",
-      sanitizeForLog(request.getProvider()), request.getAmount(), sanitizeForLog(idempotencyKey));
-    GatewayPaymentResponse response = gatewayService.initiate(idempotencyKey, request);
+    log.info("POST /v1/gateway/payments: site={}, provider={}, amount={}, key={}",
+      sanitizeForLog(site), sanitizeForLog(request.getProvider()), request.getAmount(), sanitizeForLog(idempotencyKey));
+    GatewayPaymentResponse response = gatewayService.initiate(site, idempotencyKey, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
   }
 

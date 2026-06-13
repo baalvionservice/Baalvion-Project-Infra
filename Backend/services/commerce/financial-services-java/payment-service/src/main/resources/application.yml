@@ -140,6 +140,14 @@ app:
       merchant-salt: ${PAYU_MERCHANT_SALT:}
       base-url: ${PAYU_BASE_URL:https://secure.payu.in}
 
+# CMS "Integrations & Keys" vault — source of PER-TENANT PSP provider keys (per website slug).
+# When base-url is blank the resolver stays GLOBAL (app.psp.* env keys) for single-tenant deploys.
+# Secrets injected at deploy time via env vars — NEVER hardcoded. Mirrors the Node SDK contract:
+#   GET {base-url}/internal/integrations/{slug}  with header x-internal-secret.
+cms:
+  base-url: ${CMS_BASE_URL:}
+  internal-secret: ${INTERNAL_SERVICE_SECRET:}
+
 # Resilience4j on the external scheme boundary (design §9.1)
 resilience4j:
   circuitbreaker:

@@ -43,13 +43,15 @@ public class WebhookController {
   )
   public ResponseEntity<Map<String, Object>> handle(
     @PathVariable String provider,
+    @RequestParam(value = "site", required = false) String site,
     @RequestBody(required = false) byte[] rawBody,
     HttpServletRequest httpRequest
   ) {
-    log.info("POST gateway webhook: provider={}, bytes={}", sanitizeForLog(provider), rawBody == null ? 0 : rawBody.length);
+    log.info("POST gateway webhook: site={}, provider={}, bytes={}",
+      sanitizeForLog(site), sanitizeForLog(provider), rawBody == null ? 0 : rawBody.length);
 
     Map<String, String> headers = collectHeaders(httpRequest);
-    WebhookResult result = gatewayService.applyWebhook(provider, rawBody == null ? new byte[0] : rawBody, headers);
+    WebhookResult result = gatewayService.applyWebhook(provider, rawBody == null ? new byte[0] : rawBody, headers, site);
 
     Map<String, Object> body = new LinkedHashMap<>();
     body.put("received", true);
