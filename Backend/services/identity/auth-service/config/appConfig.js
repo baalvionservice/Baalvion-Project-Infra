@@ -17,10 +17,12 @@ module.exports = {
     refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'baalvion_refresh',
 
     jwt: {
-        // RS256 keys loaded by config/vault.js — these secrets are only the HS256
-        // fallback kept for backward-compat; new code uses jwtRsa.js exclusively.
-        accessSecret:      require('@baalvion/auth-node').requireEnv('JWT_ACCESS_SECRET'),
-        refreshSecret:     require('@baalvion/auth-node').requireEnv('JWT_REFRESH_SECRET'),
+        // RS256 is the ONLY signing path (config/vault.js + utils/jwtRsa.js). These HS256
+        // secrets are deprecated and unused; read them OPTIONALLY so a missing value can never
+        // block startup. Do NOT reintroduce requireEnv() here — that crash-on-boot was the
+        // landmine that blocked clean redeploys (Phase 0). Locked by test/unit/publicContract.test.js.
+        accessSecret:      process.env.JWT_ACCESS_SECRET  || null,
+        refreshSecret:     process.env.JWT_REFRESH_SECRET || null,
         accessExpiresIn:   process.env.JWT_ACCESS_EXPIRES_IN  || '15m',
         refreshExpiresIn:  process.env.JWT_REFRESH_EXPIRES_IN || '7d',
         issuer:            process.env.JWT_ISSUER   || 'baalvion-auth',
@@ -46,6 +48,16 @@ module.exports = {
         bcryptRounds:  Number(process.env.BCRYPT_ROUNDS       || 12),
         ipRateLimit:   Number(process.env.RATE_LIMIT_IP_MAX   || 20),
         emailRateLimit:Number(process.env.RATE_LIMIT_EMAIL_MAX || 10),
+    },
+
+    // ── Session enrichment (Phase 2 — absorbed from the retired session-service) ──
+    // Computes geo / device / risk inline after a session is created. FAIL-SOFT:
+    // enrichment errors are swallowed and NEVER block login. Toggle off via
+    // SESSION_ENRICHMENT_ENABLED=false. Thresholds migrated from session-service.
+    sessionEnrichment: {
+        enabled:             (process.env.SESSION_ENRICHMENT_ENABLED || 'true') !== 'false',
+        impossibleTravelKmh: Number(process.env.IMPOSSIBLE_TRAVEL_KMH || 900),
+        highRiskScore:       Number(process.env.HIGH_RISK_SCORE       || 70),
     },
 
     email: {

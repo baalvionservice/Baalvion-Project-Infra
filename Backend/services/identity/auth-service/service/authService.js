@@ -1,6 +1,7 @@
 'use strict';
 const { v4: uuidv4 } = require('uuid');
 const mfaService    = require('./mfaService');
+const sessionEnrichment = require('./sessionEnrichmentService');
 
 const { userRepo, orgRepo, sessionRepo, rtRepo, inviteRepo, auditRepo } = require('../repositories');
 const password   = require('../utils/password');
@@ -18,6 +19,17 @@ const { assertNoRoleConfusion, isPlatformRole } = require('@baalvion/auth-node')
 // ── Rate-limit thresholds ──────────────────────────────────────────────────────
 const MAX_IP_ATTEMPTS    = config.security.ipRateLimit    || 20;
 const MAX_EMAIL_ATTEMPTS = config.security.emailRateLimit || 10;
+
+// ── Session enrichment (Phase 2) ────────────────────────────────────────────────
+// Annotate a freshly-created session with geo/device/risk. analyseLoginEvent is itself
+// fail-soft (returns null, never throws); this wrapper adds a second guard so a surprise
+// error can never affect the auth result. Awaited so the row is enriched before we respond,
+// but any failure is swallowed — enrichment must NEVER block or fail a login.
+async function enrichSessionSafe(sessionId, userId, ipAddress, userAgent) {
+    try {
+        await sessionEnrichment.analyseLoginEvent({ sessionId, userId, ipAddress, userAgent });
+    } catch (_) { /* never affect the auth result */ }
+}
 
 // ── Presentation helpers ───────────────────────────────────────────────────────
 
@@ -176,6 +188,7 @@ async function register({ email, password: plainPw, fullName, orgName, orgType, 
 
     const session = await sessionRepo.create({ userId: user.id, orgId: org.id, ipAddress, userAgent });
     const tokens  = await issueTokenPair(user, org.id, session.id, uuidv4());
+    await enrichSessionSafe(session.id, user.id, ipAddress, userAgent);
 
     await auditRepo.append({ userId: user.id, orgId: org.id, action: 'user.register', ipAddress });
 
@@ -256,6 +269,7 @@ async function login({ email, password: plainPw, ipAddress, userAgent }) {
     // 5 — No MFA — create session + issue tokens
     const session = await sessionRepo.create({ userId: user.id, orgId, ipAddress, userAgent });
     const tokens  = await issueTokenPair(user, orgId, session.id, uuidv4());
+    await enrichSessionSafe(session.id, user.id, ipAddress, userAgent);
 
     await userRepo.setLastLogin(user.id).catch(() => {});
     await auditRepo.append({ userId: user.id, orgId, action: 'user.login', ipAddress });
@@ -290,6 +304,7 @@ async function completeMfaLogin({ challengeToken, code, ipAddress, userAgent }) 
         userAgent: challenge.userAgent,
     });
     const tokens = await issueTokenPair(user, challenge.orgId, session.id, uuidv4());
+    await enrichSessionSafe(session.id, challenge.userId, challenge.ipAddress, challenge.userAgent);
 
     await userRepo.setLastLogin(user.id).catch(() => {});
     await auditRepo.append({ userId: user.id, orgId: challenge.orgId, action: 'user.login', ipAddress, metadata: { mfa: true } });
@@ -570,6 +585,7 @@ async function enrollMfaComplete({ challengeToken, code, ipAddress, userAgent })
     const fresh   = await userRepo.findById(user.id);
     const session = await sessionRepo.create({ userId: user.id, orgId, ipAddress, userAgent });
     const tokens  = await issueTokenPair(fresh, orgId, session.id, uuidv4());
+    await enrichSessionSafe(session.id, user.id, ipAddress, userAgent);
 
     await userRepo.setLastLogin(user.id).catch(() => {});
     await auditRepo.append({ userId: user.id, orgId, action: 'user.login', ipAddress, metadata: { mfa: true, enrollment: true } });
@@ -663,8 +679,25 @@ async function acceptInvite({ token, email, password: plainPw, fullName, ipAddre
     await inviteRepo.markAccepted(invitation.id);
     await auditRepo.append({ userId: user.id, orgId: invitation.org_id, action: 'member.invite_accepted', ipAddress });
 
+    // MFA gate — mirror login(): the invite joins the org, but a session is minted only after the
+    // second factor clears. A brand-new invited user has neither flag set, so this is a no-op for
+    // the common case; it ONLY bites an existing user who already has MFA (or an unmet force-MFA
+    // mandate), closing the acceptInvite MFA-bypass. Completion runs through the same
+    // /mfa-challenge and /mfa-enroll flows as login, which create the session against invitation.org_id.
+    if (user.mfa_enabled) {
+        const challengeToken = await mfaService.createChallenge({ userId: user.id, orgId: invitation.org_id, ipAddress, userAgent });
+        await auditRepo.append({ userId: user.id, orgId: invitation.org_id, action: 'user.invite_mfa_required', ipAddress });
+        return { mfa_required: true, challengeToken };
+    }
+    if (user.mfa_required && !user.mfa_enabled) {
+        const challengeToken = await mfaService.createChallenge({ userId: user.id, orgId: invitation.org_id, ipAddress, userAgent });
+        await auditRepo.append({ userId: user.id, orgId: invitation.org_id, action: 'user.invite_mfa_enrollment_required', ipAddress });
+        return { mfa_enrollment_required: true, challengeToken };
+    }
+
     const session = await sessionRepo.create({ userId: user.id, orgId: invitation.org_id, ipAddress, userAgent });
     const tokens  = await issueTokenPair(user, invitation.org_id, session.id, uuidv4());
+    await enrichSessionSafe(session.id, user.id, ipAddress, userAgent);
 
     return {
         accessToken:  tokens.accessToken,
