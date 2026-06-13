@@ -242,15 +242,8 @@ module.exports = {
       env: { NODE_ENV: "development" },
       log_date_format: 'HH:mm:ss',
     },
-    {
-      name: "order-service",
-      cwd: "./Backend/services/commerce/order-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      log_date_format: 'HH:mm:ss',
-    },
+    // order-service REMOVED (finance consolidation) — the Node order-service was deleted;
+    // order lifecycle is owned by trade/order-execution-service. Do not re-add from a PM2 dump.
     {
       name: "proxy-service",
       cwd: "./Backend/services/infrastructure/proxy-service",
