@@ -2,7 +2,7 @@ apiVersion: baalvion.io/v1
 kind: Service
 metadata:
   name: auth-service
-  description: TODO — describe this bounded context.
+  description: Centralized identity — JWT/JWKS, SSO/SAML, OAuth, SCIM, MFA, sessions, RBAC. The platform trust anchor every service verifies against. (Canonical; absorbed the former `identity-platform` alias descriptor 2026-06-13.)
   domain: identity
   division: platform-core
   context: auth
@@ -16,7 +16,13 @@ spec:
   datastores: [postgres, redis]
   dependsOn: []
   consumesEvents: []
-  producesEvents: []
-  apis: ["/v1/auth"]
-  slo: { availability: 0.99, latencyP95Ms: 400 }
-  deploy: { chart: baalvion-service, namespace: baalvion-identity, minReplicas: 2, maxReplicas: 10 }
+  producesEvents:
+    - org.created
+    - auth.login.success
+    - auth.session.revoked
+    - security.incident
+  apis:
+    - baalvion.identity.v1.IdentityService
+    - /v1/auth
+  slo: { availability: 0.9999, latencyP95Ms: 150 }
+  deploy: { chart: baalvion-service, namespace: baalvion-identity, minReplicas: 3, maxReplicas: 30 }

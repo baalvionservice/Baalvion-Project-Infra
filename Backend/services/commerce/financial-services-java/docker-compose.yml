@@ -77,29 +77,35 @@ services:
   ledger-service:
     build: { context: ., args: { SERVICE: ledger-service } }
     environment: { <<: *service-env, PORT: "3014" }
-    # Host port overridable (LEDGER_HOST_PORT) to coexist with a process already on 3014.
-    ports: ["${LEDGER_HOST_PORT:-3014}:3014"]
+    # Host default 13014 (not 3014): the canonical Java ledger publishes on 13014 to avoid colliding
+    # with inventory-service (3014) and the retired Node ledger twin. Matches auth-gateway proxy.js
+    # FINANCE.ledger (system of record). Override LEDGER_HOST_PORT if needed. Container stays 3014.
+    ports: ["${LEDGER_HOST_PORT:-13014}:3014"]
     depends_on:
       kafka: { condition: service_started }
 
   payment-service:
     build: { context: ., args: { SERVICE: payment-service } }
     environment: { <<: *service-env, PORT: "3015" }
-    ports: ["${PAYMENT_HOST_PORT:-3015}:3015"]
+    # Host default 13015 (not 3015): avoids colliding with law-service (3015) and the retired Node
+    # payment twin. Matches proxy.js FINANCE.payments + the consumers' PAYMENT_SERVICE_URL default.
+    ports: ["${PAYMENT_HOST_PORT:-13015}:3015"]
     depends_on:
       kafka: { condition: service_started }
 
   escrow-service:
     build: { context: ., args: { SERVICE: escrow-service } }
     environment: { <<: *service-env, PORT: "3017" }
-    ports: ["${ESCROW_HOST_PORT:-3017}:3017"]
+    # Host default 13017 (not 3017): avoids colliding with ctm-service (3017). Matches FINANCE.escrow.
+    ports: ["${ESCROW_HOST_PORT:-13017}:3017"]
     depends_on:
       kafka: { condition: service_started }
 
   settlement-service:
     build: { context: ., args: { SERVICE: settlement-service } }
     environment: { <<: *service-env, PORT: "3018" }
-    ports: ["${SETTLEMENT_HOST_PORT:-3018}:3018"]
+    # Host default 13018 (not 3018): keeps the money services in one 130xx band. Matches FINANCE.settlement.
+    ports: ["${SETTLEMENT_HOST_PORT:-13018}:3018"]
     depends_on:
       kafka: { condition: service_started }
 

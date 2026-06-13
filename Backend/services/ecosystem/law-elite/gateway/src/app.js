@@ -15,7 +15,8 @@ app.use(express.json());
 const services = {
   user: process.env.USER_SERVICE_URL || 'http://localhost:3001',
   case: process.env.CASE_SERVICE_URL || 'http://localhost:3002',
-  payment: process.env.PAYMENT_SERVICE_URL || 'http://localhost:8080'
+  // Canonical Java payment-service (financial-services-java) PSP gateway, host port 13015.
+  payment: process.env.PAYMENT_SERVICE_URL || 'http://localhost:13015'
 };
 
 // Health Check

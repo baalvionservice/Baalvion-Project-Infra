@@ -132,15 +132,8 @@ module.exports = {
             env: { NODE_ENV: 'development', PORT: 3012 },
             log_date_format: 'HH:mm:ss',
         },
-        // ── Order Service ────────────────────────────────────────────────────
-        {
-            name: 'order-service',
-            cwd: './Backend/services/commerce/order-service',
-            script: 'index.js',
-            watch: false,
-            env: { NODE_ENV: 'development', PORT: 3013 },
-            log_date_format: 'HH:mm:ss',
-        },
+        // ── Order Service: REMOVED (consolidated) — order lifecycle owned by
+        //    trade/order-execution-service; legacy Node order-service deleted 2026-06-13.
         // ── Inventory Service ────────────────────────────────────────────────
         {
             name: 'inventory-service',

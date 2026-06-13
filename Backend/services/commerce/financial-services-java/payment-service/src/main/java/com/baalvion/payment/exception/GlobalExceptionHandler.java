@@ -1,5 +1,6 @@
 package com.baalvion.payment.exception;
 
+import com.baalvion.payment.gateway.exception.WebhookVerificationException;
 import jakarta.persistence.OptimisticLockException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -41,6 +42,13 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
     log.warn("Access denied: {}", ex.getMessage());
     return envelope(HttpStatus.FORBIDDEN, "FORBIDDEN", ex.getMessage(), null);
+  }
+
+  @ExceptionHandler(WebhookVerificationException.class)
+  public ResponseEntity<Map<String, Object>> handleWebhookVerification(WebhookVerificationException ex) {
+    // Generic message so an attacker cannot distinguish bad-signature from unknown-provider.
+    log.warn("Webhook verification failed: {}", ex.getMessage());
+    return envelope(HttpStatus.BAD_REQUEST, "WEBHOOK_VERIFICATION_FAILED", "Webhook signature verification failed", null);
   }
 
   @ExceptionHandler({OptimisticLockingFailureException.class, OptimisticLockException.class})

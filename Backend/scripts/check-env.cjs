@@ -25,28 +25,15 @@ const MANIFEST = {
         required: ['JWT_PUBLIC_KEY', 'DB_HOST', 'DB_NAME', 'DB_USER'],
         recommended: ['REDIS_HOST', 'RBAC_BASE_URL', 'MEDIA_DRIVER'],
     },
-    'order-service': {
-        dir: 'Backend/services/commerce/order-service',
-        required: ['JWT_PUBLIC_KEY', 'DB_HOST', 'DB_NAME', 'DB_USER'],
-        // LEDGER_INTERNAL_KEY must equal ledger-service's; CART_SESSION_SECRET enables guest carts.
-        recommended: ['REDIS_HOST', 'CART_SESSION_SECRET', 'LEDGER_INTERNAL_KEY', 'RBAC_BASE_URL', 'INTERNAL_SERVICE_SECRET'],
-    },
     'inventory-service': {
         dir: 'Backend/services/commerce/inventory-service',
         required: ['JWT_PUBLIC_KEY', 'DB_HOST', 'DB_NAME', 'DB_USER'],
         recommended: ['REDIS_HOST', 'RBAC_BASE_URL'],
     },
-    'ledger-service': {
-        dir: 'Backend/services/commerce/ledger-service',
-        required: ['JWT_PUBLIC_KEY', 'DB_HOST', 'DB_NAME'],
-        // LEDGER_INTERNAL_KEY must equal order-service's for service-to-service posting.
-        recommended: ['LEDGER_INTERNAL_KEY', 'REDIS_HOST'],
-    },
-    'payment-service': {
-        dir: 'Backend/services/commerce/payment-service',
-        required: ['JWT_PUBLIC_KEY', 'DB_HOST', 'DB_NAME'],
-        recommended: ['INTERNAL_SERVICE_SECRET'],
-    },
+    // order-service, ledger-service & payment-service (Node) REMOVED (consolidated 2026-06-13) — the
+    // canonical money services are the Java financial-services-java suite (ledger 13014 / payment 13015,
+    // with Razorpay/Stripe/PayU PSP gateways ported in); order lifecycle moved to trade/order-execution-
+    // service. Their env is no longer part of the launch gate.
     'rbac-service': {
         dir: 'Backend/services/identity/rbac-service',
         required: ['JWT_PUBLIC_KEY', 'DB_HOST', 'DB_NAME'],
@@ -105,14 +92,9 @@ for (const name of services) {
     }
 }
 
-// Cross-service invariant: ledger key must be shared (both set or both unset).
-const orderEnv = parseEnvFile(path.join(ROOT, MANIFEST['order-service'].dir, '.env'));
-const ledgerEnv = parseEnvFile(path.join(ROOT, MANIFEST['ledger-service'].dir, '.env'));
-const orderKey = valueOf(orderEnv, 'LEDGER_INTERNAL_KEY');
-const ledgerKey = valueOf(ledgerEnv, 'LEDGER_INTERNAL_KEY');
-if ((orderKey || ledgerKey) && orderKey !== ledgerKey) {
-    crossWarnings.push('LEDGER_INTERNAL_KEY differs between order-service and ledger-service — ledger posting will be rejected.');
-}
+// Cross-service ledger-key invariant REMOVED — it coupled the (now-deprecated) Node order-service
+// and ledger-service via LEDGER_INTERNAL_KEY. The canonical ledger is the Java financial-services
+// suite (Kafka double-entry, RS256/X-Tenant-ID), which does not use this shared internal key.
 if (crossWarnings.length) {
     console.log('\nCross-service warnings:');
     crossWarnings.forEach((w) => console.log(`!  ${w}`));

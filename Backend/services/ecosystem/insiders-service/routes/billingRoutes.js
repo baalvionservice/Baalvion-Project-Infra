@@ -9,7 +9,9 @@ const express = require('express');
 const router = express.Router();
 const { authMiddleware } = require('../middleware/authMiddleware');
 
-const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://localhost:3915';
+// Canonical PSP gateway = Java payment-service (financial-services-java) on host 13015. It exposes
+// the same /v1/gateway/* contract as the retired Node twin, so this re-points by host only.
+const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://localhost:13015';
 const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret';
 // Fail-fast: refuse to boot with the committed dev inter-service secret in production
 // (matches payment-service/cms-service appConfig guards). A misconfig is caught at deploy,

@@ -104,9 +104,14 @@ Run `node Backend/scripts/check-env.cjs` until **RESULT: OK** before exposing se
 
 ## 6. Payments: mock → sandbox → production
 
-Default is **mock** (real adapter code + real signature crypto, no charge). To use a real
-provider sandbox or go live, see **`Backend/services/commerce/payment-service/docs/SANDBOX_GOLIVE.md`**.
-One-step flip: `node Backend/services/knowledge/cms-service/scripts/configureSandboxPayments.cjs --provider stripe --site <slug>` with test keys in the environment.
+Default is **mock** (real adapter code + real signature crypto, no charge): set `APP_PSP_MOCK=true`.
+Payments are served by the **Java `payment-service`** PSP gateways (Razorpay/Stripe/PayU) at
+`/v1/gateway/*` (host `:13015`). Configure provider credentials via `app.psp.{razorpay,stripe,payu}.*`
+(env `RAZORPAY_KEY_ID` / `RAZORPAY_KEY_SECRET` / `RAZORPAY_WEBHOOK_SECRET`, `STRIPE_SECRET_KEY` /
+`STRIPE_WEBHOOK_SECRET`, `PAYU_MERCHANT_KEY` / `PAYU_MERCHANT_SALT`, …) and set `APP_PSP_MOCK=false`
+to go live. NOTE: the prior per-site CMS-vault key resolution (`configureSandboxPayments.cjs --site
+<slug>`) was specific to the removed Node payment-service; per-tenant provider keys on the Java
+gateway are a tracked follow-up (today the gateway uses one key set per provider).
 
 ---
 

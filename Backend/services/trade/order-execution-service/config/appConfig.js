@@ -142,7 +142,9 @@ module.exports = {
     // confirm; payment-service posts the ledger double-entry via Kafka choreography.
     payment: {
         enabled: process.env.PAYMENT_INITIATE !== 'false',
-        url: process.env.PAYMENT_SERVICE_URL || 'http://127.0.0.1:3015',
+        // Canonical Java payment-service (financial-services-java) host port 13015 — replaces the
+        // retired Node payment twin (3015) which collided with law-service. Contract unchanged.
+        url: process.env.PAYMENT_SERVICE_URL || 'http://127.0.0.1:13015',
         timeoutMs: Number(process.env.PAYMENT_TIMEOUT_MS || 5000),
         // Rail selection. 'internal' = Java payment-service (Kafka -> ledger double-entry,
         // settled back via the signed /finance-events webhook). 'razorpayx' = REAL RazorpayX

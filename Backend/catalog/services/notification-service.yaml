@@ -14,7 +14,7 @@ spec:
   lifecycle: production
   language: node
   datastores: [postgres, redis]
-  dependsOn: [identity-platform]
+  dependsOn: [auth-service]
   consumesEvents: []
   producesEvents: []
   apis: ["/v1/notification"]

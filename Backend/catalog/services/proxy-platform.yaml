@@ -15,8 +15,8 @@ spec:
   language: node
   datastores: [postgres, timescaledb, clickhouse, redis]
   dependsOn:
-    - identity-platform   # token verification (JWKS)
-    - billing-platform    # usage ingestion + quota
+    - auth-service   # token verification (JWKS)
+    - commerce-service    # usage ingestion + quota
   consumesEvents:
     - org.created
   producesEvents:

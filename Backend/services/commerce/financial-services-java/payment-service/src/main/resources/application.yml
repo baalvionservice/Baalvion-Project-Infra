@@ -118,6 +118,27 @@ app:
   # Maker-checker (§7.1): reversals at/above this amount require a second approver.
   maker-checker:
     reversal-threshold: 100000
+  # PSP gateway-checkout providers (Razorpay / Stripe / PayU). Secrets are injected at
+  # deploy time via env vars — NEVER hardcoded. Mirrors the Node adapter credentials
+  # (resolved there from the CMS vault). mock=true gives deterministic create/refund ids.
+  psp:
+    mock: ${PSP_MOCK:false}
+    razorpay:
+      key-id: ${RAZORPAY_KEY_ID:}
+      key-secret: ${RAZORPAY_KEY_SECRET:}
+      webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+      base-url: ${RAZORPAY_BASE_URL:https://api.razorpay.com}
+      replay-window-seconds: ${RAZORPAY_REPLAY_WINDOW_SECONDS:600}
+    stripe:
+      secret-key: ${STRIPE_SECRET_KEY:}
+      publishable-key: ${STRIPE_PUBLISHABLE_KEY:}
+      webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+      base-url: ${STRIPE_BASE_URL:https://api.stripe.com}
+      tolerance-seconds: ${STRIPE_TOLERANCE_SECONDS:300}
+    payu:
+      merchant-key: ${PAYU_MERCHANT_KEY:}
+      merchant-salt: ${PAYU_MERCHANT_SALT:}
+      base-url: ${PAYU_BASE_URL:https://secure.payu.in}
 
 # Resilience4j on the external scheme boundary (design §9.1)
 resilience4j:

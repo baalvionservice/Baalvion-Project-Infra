@@ -127,50 +127,9 @@ services:
     profiles:
       - backend
 
-  # ── Order Service ─────────────────────────────────────────────────────────────
-  order-service:
-    build:
-      context: .
-      dockerfile: Backend/services/commerce/order-service/Dockerfile
-    container_name: baalvion-orders
-    restart: unless-stopped
-    # Join the shared gateway network so Traefik resolves http://order-service:3013.
-    # Keeps `default` for existing intra-compose connectivity (postgres/redis are on both).
-    networks:
-      - default
-      - baalvion-net
-    ports:
-      - "3013:3013"
-    environment:
-      - PORT=3013
-      - NODE_ENV=production
-      # Local/integration stack exercises prod code paths (RS256 enforcement) while using the
-      # backend-authoritative MOCK payment provider. A real deploy sets PAYMENT_PROVIDER + keys
-      # instead; this flag is the explicit, audited opt-in the provider guard requires.
-      - ALLOW_MOCK_PAYMENTS=true
-      # Commerce RBAC PDP (store-team roles / refund authorization) — containerized on baalvion-net.
-      - RBAC_BASE_URL=http://rbac-service:3055
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - JWT_PUBLIC_KEY=${JWT_PUBLIC_KEY}
-      - JWT_ISSUER=baalvion-auth
-      - JWT_AUDIENCE=baalvion-platform
-      - JWT_ALLOW_HS256_FALLBACK=false
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      rbac-service:
-        condition: service_healthy
-    profiles:
-      - backend
+  # ── Order Service: REMOVED (consolidated 2026-06-13) ──────────────────────────
+  #    Legacy Node order-service (order-service_DEPRECATED) deleted. Order lifecycle is
+  #    owned by trade/order-execution-service (oms schema, server-computed money-truth).
 
   # ── Inventory Service ─────────────────────────────────────────────────────────
   inventory-service:
@@ -1320,98 +1279,13 @@ services:
     profiles:
       - backend
 
-  # ── Financial Services: Ledger (host 3037 → container 3014; was 3014, collided with inventory-service R-R2) ──
-  ledger-service:
-    build:
-      context: .
-      dockerfile: Backend/services/commerce/ledger-service/Dockerfile
-    container_name: baalvion-ledger-service
-    restart: unless-stopped
-    ports:
-      - "3037:3014"
-    environment:
-      - NODE_ENV=development
-      - PORT=3014
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - KAFKA_BROKERS=kafka:9092
-      - KAFKA_ENABLED=true
-      - CORS_ORIGINS=http://localhost:3000,http://localhost:3025,http://localhost:8080
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3014/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # ── Financial Services: Payment (port 3015) ──────────────────────────────
-  payment-service:
-    build:
-      # Monorepo build (context = repo root) so the workspace deps @baalvion/sdk + @baalvion/auth-node
-      # are bundled into the image (they were a dev node_modules junction, unbuildable in Docker).
-      context: .
-      dockerfile: Backend/services/commerce/payment-service/Dockerfile
-    container_name: baalvion-payment-service
-    restart: unless-stopped
-    ports:
-      # Host 3015 is owned by law-service; payment-service publishes on host 3019 to avoid the
-      # collision. Internal callers use payment-service:3015 (container port) over baalvion-net.
-      - "3019:3015"
-    environment:
-      - NODE_ENV=development
-      - PORT=3015
-      - DB_HOST=postgres
-      - DB_PORT=5432
-      - DB_NAME=baalvion_db
-      - DB_USER=baalvion
-      - DB_PASSWORD=baalvion_dev_pass
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_DB=1
-      - KAFKA_BROKERS=kafka:9092
-      # No Kafka in the Limited-Beta stack; the gateway vertical uses Redis + the CMS vault.
-      - KAFKA_ENABLED=false
-      # Provider + decrypted keys are resolved per-tenant from the CMS vault (the only secret source).
-      - CMS_BASE_URL=http://cms-service:3011/api/v1
-      - CORS_ORIGINS=http://localhost:3000,http://localhost:3025,http://localhost:8080
-      - DAILY_LIMIT=1000000
-      - TX_MAX_LIMIT=500000
-      - TX_MIN_LIMIT=100
-      - FEE_PERCENTAGE=0.01
-      - FEE_FLAT=50
-      - VAT_RATE=0.05
-      - IDEMPOTENCY_TTL=86400
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      cms-service:
-        condition: service_started
-    networks:
-      - default
-      - baalvion-net
-    profiles:
-      - backend
-    healthcheck:
-      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3015/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+  # ── Financial Services (Ledger + Payment): REMOVED (consolidated 2026-06-13) ──
+  #    The Node ledger-service and payment-service were duplicates of the canonical Java
+  #    finance suite (Backend/services/commerce/financial-services-java). The Razorpay/Stripe/
+  #    PayU PSP gateways were ported into the Java payment-service (/v1/gateway/* + webhooks).
+  #    Run the finance stack from financial-services-java/docker-compose.yml (host ports 130xx:
+  #    ledger 13014, payment 13015, escrow 13017, settlement 13018, …). Consumers point at
+  #    PAYMENT_SERVICE_URL=:13015 and the auth-gateway FINANCE block routes /finance-bff → 130xx.
 
   # ── Migration Runner (one-shot job) ──────────────────────────────────────
   migrate:

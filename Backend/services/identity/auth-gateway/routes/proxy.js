@@ -17,7 +17,10 @@ const TARGETS = {
   ir:            process.env.SVC_IR            || 'http://localhost:3008',
   dashboard:     process.env.SVC_DASHBOARD     || 'http://localhost:3009',
   ctm:           process.env.SVC_CTM           || 'http://localhost:3017',
-  orders:        process.env.SVC_ORDERS        || 'http://localhost:3013',
+  // orders: REMOVED — order-service is deprecated (order-service_DEPRECATED). The /trade/v1/orders
+  // subtree is owned by the GTOS order-execution-service (see ORDER_EXECUTION below); all other
+  // order routing now lives in the trade domain. The bare :3013 Node default is gone so finance/
+  // commerce can never resolve back to the retired Node order-service.
   proxy:         process.env.SVC_PROXY         || 'http://localhost:4000',
   // Phase 6E-5 — island backends (dual-auth via bffBridge; gateway is the preferred path).
   insiders:       process.env.SVC_INSIDERS     || 'http://localhost:3050',
@@ -25,11 +28,11 @@ const TARGETS = {
   // financial-services-java — system of record for money/KYC/risk (Spring resource servers,
   // base path /api/v1/...). RS256-verified against auth-service when APP_SECURITY_ENABLED=true,
   // gateway-trusted (X-Tenant-ID) in dev. risk moved 3025→3035 to free :3025 for trade.
-  payment:        process.env.SVC_PAYMENT        || 'http://localhost:3015',
-  ledger:         process.env.SVC_LEDGER         || 'http://localhost:3014',
-  account:        process.env.SVC_ACCOUNT        || 'http://localhost:3016',
-  escrow:         process.env.SVC_ESCROW         || 'http://localhost:3017',
-  settlement:     process.env.SVC_SETTLEMENT     || 'http://localhost:3018',
+  // NOTE: payment/ledger/account/escrow/settlement are NOT defined here — they are owned solely by
+  // the FINANCE block below (Java suite, 130xx). Keeping legacy bare-port fallbacks (3014/3015/…)
+  // here risked finance resolving to the retired Node ledger/payment twins, so they were removed.
+  // The remaining money services below are Java-only (no Node twin) and keep their 30xx defaults,
+  // which the financial-services-java compose still publishes for them.
   reconciliation: process.env.SVC_RECONCILIATION || 'http://localhost:3019',
   'finance-audit':process.env.SVC_FIN_AUDIT      || 'http://localhost:3020',
   reporting:      process.env.SVC_REPORTING      || 'http://localhost:3024',
