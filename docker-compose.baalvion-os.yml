@@ -4,15 +4,23 @@
 # (requires the external network: docker network create baalvion-net)
 
 services:
-  # ── Keycloak (SSO IdP) — http://localhost:8088  (admin / admin) ─────────────
+  # ── Keycloak (SSO IdP) — http://localhost:8088 ──────────────────────────────
+  # HARDENED (cleanup/infra-hardening): this only backs the experimental
+  # `baalvion-os` subsystem — the live platform authenticates via the Node
+  # auth-service (RS256/JWKS, issuer `baalvion-auth`), NOT Keycloak. So it is
+  # now profile-gated (does not auto-start) and bound to loopback, and the
+  # bootstrap admin credentials come from env instead of being hardcoded admin/admin.
+  #   Start only when working on baalvion-os:
+  #       docker compose -f docker-compose.baalvion-os.yml --profile baalvion-os up -d
+  #   NOTE: `start-dev` + H2 is for local only — see KC_DB block for production.
   keycloak:
     image: quay.io/keycloak/keycloak:26.0
     container_name: baalvion-keycloak
     restart: unless-stopped
     command: ["start-dev", "--import-realm", "--http-port=8080"]
     environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USER:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-change-me-in-env}
       KC_HEALTH_ENABLED: "true"
       KC_HTTP_ENABLED: "true"
       # Confidential client secret for the baalvion-os client — substituted into
@@ -23,12 +31,14 @@ services:
       #   KC_DB_URL=jdbc:postgresql://postgres:5432/keycloak
       #   KC_DB_USERNAME / KC_DB_PASSWORD
     ports:
-      - "8088:8080"
+      - "127.0.0.1:8088:8080"
     volumes:
       - ./docker/keycloak/realm-baalvion.json:/opt/keycloak/data/import/realm-baalvion.json:ro
       - keycloak_data:/opt/keycloak/data
     networks:
       - baalvion-net
+    profiles:
+      - baalvion-os
 
   # ── MinIO (S3-compatible object storage) ────────────────────────────────────
   # API: http://localhost:9000   Console: http://localhost:9001 (baalvion / baalvion_dev_pass)

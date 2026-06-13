@@ -99,32 +99,45 @@ http:
     ecosystem-law-elite:       { rule: "PathPrefix(`/api/v1/ecosystem/law-elite`)",       entryPoints: [websecure], service: ecosystem-law-elite,       middlewares: [sp-ecosystem-law-elite, ratelimit, sec-headers], tls: {} }
 
   services:
-    identity-auth:              { loadBalancer: { servers: [{ url: "http://auth-service:3001" }] } }
-    identity-oauth:             { loadBalancer: { servers: [{ url: "http://oauth-service:3023" }] } }
-    identity-session:           { loadBalancer: { servers: [{ url: "http://session-service:3022" }] } }
-    commerce-trade:             { loadBalancer: { servers: [{ url: "http://trade-service:3025" }] } }
-    # commerce-order service REMOVED — pointed at the deprecated order-service:3013 (Node). Order
-    # routing is owned by the trade domain's order-execution-service now.
-    commerce-inventory:         { loadBalancer: { servers: [{ url: "http://inventory-service:3014" }] } }
-    commerce-fulfillment:       { loadBalancer: { servers: [{ url: "http://fulfillment-service:3016" }] } }
-    commerce-commerce:          { loadBalancer: { servers: [{ url: "http://commerce-service:3012" }] } }
-    commerce-market:            { loadBalancer: { servers: [{ url: "http://market-service:3007" }] } }
-    knowledge-imperialpedia:    { loadBalancer: { servers: [{ url: "http://imperialpedia-service:3004" }] } }
-    knowledge-cms:              { loadBalancer: { servers: [{ url: "http://cms-service:3011" }] } }
-    knowledge-law:              { loadBalancer: { servers: [{ url: "http://law-service:3015" }] } }
-    knowledge-ml:               { loadBalancer: { servers: [{ url: "http://ml-service:8000" }] } }
-    infrastructure-realtime:    { loadBalancer: { servers: [{ url: "http://realtime-service:3040" }] } }
-    infrastructure-notification: { loadBalancer: { servers: [{ url: "http://notification-service:3031" }] } }
-    infrastructure-proxy:       { loadBalancer: { servers: [{ url: "http://proxy-service:4000" }] } }
-    platform-admin:             { loadBalancer: { servers: [{ url: "http://admin-service:3021" }] } }
-    platform-dashboard:         { loadBalancer: { servers: [{ url: "http://dashboard-service:3009" }] } }
-    ecosystem-about:            { loadBalancer: { servers: [{ url: "http://about-service:3010" }] } }
-    ecosystem-brand-connector:  { loadBalancer: { servers: [{ url: "http://brand-connector-service:3006" }] } }
-    ecosystem-ctm:              { loadBalancer: { servers: [{ url: "http://ctm-service:3017" }] } }
-    ecosystem-insiders:         { loadBalancer: { servers: [{ url: "http://insiders-service:3050" }] } }
-    ecosystem-elite-circle:     { loadBalancer: { servers: [{ url: "http://elite-circle-service:3051" }] } }
-    ecosystem-ir:               { loadBalancer: { servers: [{ url: "http://ir-service:3008" }] } }
-    ecosystem-jobs:             { loadBalancer: { servers: [{ url: "http://jobs-service:3002" }] } }
-    ecosystem-mining:           { loadBalancer: { servers: [{ url: "http://mining-service:3003" }] } }
-    ecosystem-real-estate:      { loadBalancer: { servers: [{ url: "http://real-estate-service:3005" }] } }
-    ecosystem-law-elite:        { loadBalancer: { servers: [{ url: "http://law-elite-gateway:8090" }] } }
+    # ── Upstreams ─────────────────────────────────────────────────────────────
+    # HYBRID-DEPLOYMENT ROUTING (cleanup/infra-hardening, 2026-06-13): the gateway
+    # runs on an isolated Docker network while MOST services run on the HOST (pm2)
+    # and a few as containers — but ALL publish to host ports. Each upstream now
+    # targets host.docker.internal:<hostPort> (the host's published port), the one
+    # path that reaches the whole fleet. PREVIOUSLY these used in-container DNS names
+    # (e.g. auth-service:3001) that do NOT resolve from the gateway's network →
+    # every non-baalvion-net route was a silent 502 black hole. The port numbers are
+    # unchanged; only the host changed. Requires extra_hosts in docker-compose.gateway.yml.
+    # Reachability from the gateway verified 2026-06-13 except where marked NOT-RUNNING.
+    identity-auth:              { loadBalancer: { servers: [{ url: "http://host.docker.internal:3001" }] } }
+    identity-oauth:             { loadBalancer: { servers: [{ url: "http://host.docker.internal:3023" }] } }
+    identity-session:           { loadBalancer: { servers: [{ url: "http://host.docker.internal:3022" }] } }
+    commerce-trade:             { loadBalancer: { servers: [{ url: "http://host.docker.internal:3025" }] } }
+    # commerce-order service REMOVED (2026-06-13 consolidation) — pointed at the deprecated
+    # order-service:3013 (Node). Order routing is owned by the trade domain's order-execution-service.
+    commerce-inventory:         { loadBalancer: { servers: [{ url: "http://host.docker.internal:3014" }] } }
+    commerce-fulfillment:       { loadBalancer: { servers: [{ url: "http://host.docker.internal:3016" }] } }
+    commerce-commerce:          { loadBalancer: { servers: [{ url: "http://host.docker.internal:3012" }] } }
+    commerce-market:            { loadBalancer: { servers: [{ url: "http://host.docker.internal:3007" }] } }
+    knowledge-imperialpedia:    { loadBalancer: { servers: [{ url: "http://host.docker.internal:3004" }] } }
+    knowledge-cms:              { loadBalancer: { servers: [{ url: "http://host.docker.internal:3011" }] } }
+    knowledge-law:              { loadBalancer: { servers: [{ url: "http://host.docker.internal:3015" }] } }
+    # knowledge-ml: NOT RUNNING (no host listener on :8000) — resolves automatically once ml-service starts.
+    knowledge-ml:               { loadBalancer: { servers: [{ url: "http://host.docker.internal:8000" }] } }
+    infrastructure-realtime:    { loadBalancer: { servers: [{ url: "http://host.docker.internal:3040" }] } }
+    infrastructure-notification: { loadBalancer: { servers: [{ url: "http://host.docker.internal:3031" }] } }
+    infrastructure-proxy:       { loadBalancer: { servers: [{ url: "http://host.docker.internal:4000" }] } }
+    platform-admin:             { loadBalancer: { servers: [{ url: "http://host.docker.internal:3021" }] } }
+    platform-dashboard:         { loadBalancer: { servers: [{ url: "http://host.docker.internal:3009" }] } }
+    ecosystem-about:            { loadBalancer: { servers: [{ url: "http://host.docker.internal:3010" }] } }
+    ecosystem-brand-connector:  { loadBalancer: { servers: [{ url: "http://host.docker.internal:3006" }] } }
+    ecosystem-ctm:              { loadBalancer: { servers: [{ url: "http://host.docker.internal:3017" }] } }
+    ecosystem-insiders:         { loadBalancer: { servers: [{ url: "http://host.docker.internal:3050" }] } }
+    # ecosystem-elite-circle: NOT RUNNING (no host listener on :3051) — resolves once elite-circle-service starts.
+    ecosystem-elite-circle:     { loadBalancer: { servers: [{ url: "http://host.docker.internal:3051" }] } }
+    ecosystem-ir:               { loadBalancer: { servers: [{ url: "http://host.docker.internal:3008" }] } }
+    ecosystem-jobs:             { loadBalancer: { servers: [{ url: "http://host.docker.internal:3002" }] } }
+    ecosystem-mining:           { loadBalancer: { servers: [{ url: "http://host.docker.internal:3003" }] } }
+    ecosystem-real-estate:      { loadBalancer: { servers: [{ url: "http://host.docker.internal:3005" }] } }
+    # ecosystem-law-elite: NOT RUNNING (no host listener on :8090) — law-elite sub-gateway; resolves once up.
+    ecosystem-law-elite:        { loadBalancer: { servers: [{ url: "http://host.docker.internal:8090" }] } }

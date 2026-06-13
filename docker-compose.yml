@@ -41,22 +41,31 @@ services:
       - default
       - baalvion-net
 
-  # ── pgAdmin (DB GUI — http://localhost:5050) ──────────────────────────────
+  # ── pgAdmin (DB GUI) — DEV/OPS TOOL ONLY, not started by default ───────────
+  # HARDENED (cleanup/infra-hardening): this GUI talks to the PRIMARY baalvion_db,
+  # so it must never be a default-on, internet-exposed service.
+  #   • profile `tools`  → excluded from `docker compose up`; start explicitly:
+  #       docker compose --profile tools up -d pgadmin
+  #   • bound to 127.0.0.1 → reachable only from the host, never an external NIC.
+  #   • SERVER_MODE True   → real web login instead of passwordless desktop mode.
+  #   • credentials come from env (.env), with placeholder defaults — override them.
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: baalvion-pgadmin
     restart: unless-stopped
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@baalvion.com
-      PGADMIN_DEFAULT_PASSWORD: baalvion_admin
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@baalvion.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-change-me-in-env}
+      PGADMIN_CONFIG_SERVER_MODE: 'True'
     ports:
-      - "5050:80"
+      - "127.0.0.1:5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
       postgres:
         condition: service_healthy
+    profiles:
+      - tools
 
   # ── CMS Service ──────────────────────────────────────────────────────────────
   cms-service:
