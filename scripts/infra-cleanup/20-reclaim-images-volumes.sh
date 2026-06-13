@@ -51,18 +51,22 @@ echo "== Maven cache volumes (regenerate on next build) =="
 for v in baalvion-m2 baalvion_m2 fin-m2; do run docker volume rm "$v"; done
 
 echo
-echo "== orphan (dangling) anonymous volumes — with preserve guard =="
-# Protect anything that looks like real data or belongs to a *named* business volume.
-PRESERVE_RE='(_data$|pgdata|postgres|redis|keycloak|minio|grafana|prometheus|pgadmin|financial)'
+echo "== orphan (dangling) ANONYMOUS volumes only — NAMED volumes are always preserved =="
+# Only Docker-generated anonymous volumes (64-hex names) are eligible for removal. Any
+# NAMED volume (e.g. open-webui, *_data) is preserved even when dangling, so removing a
+# container never causes its named state to be pruned here.
+PRESERVE_RE='(_data$|pgdata|postgres|redis|keycloak|minio|grafana|prometheus|pgadmin|financial|open-webui)'
 mapfile -t DANGLING < <(docker volume ls -q -f dangling=true)
 for v in "${DANGLING[@]:-}"; do
   [ -z "$v" ] && continue
+  if ! echo "$v" | grep -qE '^[0-9a-f]{64}$'; then
+    echo "  PRESERVE (named volume, not anonymous): $v"
+    continue
+  fi
   if echo "$v" | grep -qiE "$PRESERVE_RE"; then
     echo "  PRESERVE (matched guard): $v"
     continue
   fi
-  # m2 caches handled above
-  case "$v" in baalvion-m2|baalvion_m2|fin-m2) continue;; esac
   run docker volume rm "$v"
 done
 
