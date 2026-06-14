@@ -70,7 +70,9 @@ services:
   account-service:
     build: { context: ., args: { SERVICE: account-service } }
     environment: { <<: *service-env, PORT: "3016" }
-    ports: ["3016:3016"]
+    # Host default 13016 (not 3016): avoids colliding with Node fulfillment-service (3016). Keeps the
+    # Java suite in the 130xx band (ledger 13014, payment 13015, escrow 13017). Container stays 3016.
+    ports: ["${ACCOUNT_HOST_PORT:-13016}:3016"]
     depends_on:
       kafka: { condition: service_started }
 
@@ -140,7 +142,8 @@ services:
   trade-finance-service:
     build: { context: ., args: { SERVICE: trade-finance-service } }
     environment: { <<: *service-env, PORT: "3036" }
-    ports: ["3036:3036"]
+    # Host default 13036 (not 3036): avoids colliding with Node search-service (3036). Container stays 3036.
+    ports: ["${TRADE_FINANCE_HOST_PORT:-13036}:3036"]
     depends_on:
       kafka: { condition: service_started }
 
@@ -170,7 +173,8 @@ services:
   deal-room-service:
     build: { context: ., args: { SERVICE: deal-room-service } }
     environment: { <<: *service-env, PORT: "3040" }
-    ports: ["3040:3040"]
+    # Host default 13040 (not 3040): avoids colliding with Node realtime-service (3040). Container stays 3040.
+    ports: ["${DEAL_ROOM_HOST_PORT:-13040}:3040"]
     depends_on:
       kafka: { condition: service_started }
 

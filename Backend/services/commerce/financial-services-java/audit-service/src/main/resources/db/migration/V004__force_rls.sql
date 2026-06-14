@@ -11,6 +11,6 @@
 -- the role + GUC are the runtime half. This migration is safe to apply now and
 -- becomes effective the moment the connection role is switched.
 
-ALTER TABLE audit.audit_logs FORCE ROW LEVEL SECURITY;
-ALTER TABLE audit.webhook_subscriptions FORCE ROW LEVEL SECURITY;
-ALTER TABLE audit.webhook_deliveries FORCE ROW LEVEL SECURITY;
+ALTER TABLE finance_audit.audit_logs FORCE ROW LEVEL SECURITY;
+ALTER TABLE finance_audit.webhook_subscriptions FORCE ROW LEVEL SECURITY;
+ALTER TABLE finance_audit.webhook_deliveries FORCE ROW LEVEL SECURITY;

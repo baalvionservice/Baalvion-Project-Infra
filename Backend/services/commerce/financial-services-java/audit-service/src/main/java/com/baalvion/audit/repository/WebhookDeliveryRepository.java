@@ -19,7 +19,7 @@ public interface WebhookDeliveryRepository extends JpaRepository<WebhookDelivery
    * Claims due PENDING deliveries with {@code FOR UPDATE SKIP LOCKED} so multiple dispatcher
    * replicas drain concurrently without double-sending. Held until the transaction commits.
    */
-  @Query(value = "SELECT * FROM audit.webhook_deliveries WHERE status = 'PENDING' "
+  @Query(value = "SELECT * FROM finance_audit.webhook_deliveries WHERE status = 'PENDING' "
     + "AND next_attempt_at <= :now ORDER BY next_attempt_at ASC LIMIT :limit FOR UPDATE SKIP LOCKED",
     nativeQuery = true)
   List<WebhookDelivery> lockDueBatch(@Param("now") LocalDateTime now, @Param("limit") int limit);

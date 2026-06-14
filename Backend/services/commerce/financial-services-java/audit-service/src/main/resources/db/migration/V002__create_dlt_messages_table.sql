@@ -1,5 +1,5 @@
 -- Dead-letter monitor store (design §4.3): captured poison messages + replay state.
-CREATE TABLE audit.dlt_messages (
+CREATE TABLE finance_audit.dlt_messages (
   id uuid PRIMARY KEY,
   dlt_topic varchar(160) NOT NULL,
   original_topic varchar(160) NOT NULL,
@@ -14,5 +14,5 @@ CREATE TABLE audit.dlt_messages (
   version bigint
 );
 
-CREATE INDEX idx_dlt_status_created ON audit.dlt_messages(status, created_at DESC);
-CREATE INDEX idx_dlt_original_topic ON audit.dlt_messages(original_topic);
+CREATE INDEX idx_dlt_status_created ON finance_audit.dlt_messages(status, created_at DESC);
+CREATE INDEX idx_dlt_original_topic ON finance_audit.dlt_messages(original_topic);

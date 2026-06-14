@@ -1,5 +1,5 @@
 -- Outbound webhook delivery (design §7.2): HMAC-SHA256-signed event callbacks with retry/DLQ.
-CREATE TABLE audit.webhook_subscriptions (
+CREATE TABLE finance_audit.webhook_subscriptions (
   id uuid PRIMARY KEY,
   tenant_id uuid NOT NULL,
   url varchar(512) NOT NULL,
@@ -11,14 +11,14 @@ CREATE TABLE audit.webhook_subscriptions (
   version bigint
 );
 
-CREATE INDEX idx_wh_sub_tenant_active ON audit.webhook_subscriptions(tenant_id, active);
+CREATE INDEX idx_wh_sub_tenant_active ON finance_audit.webhook_subscriptions(tenant_id, active);
 
-ALTER TABLE audit.webhook_subscriptions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY wh_sub_tenant_isolation ON audit.webhook_subscriptions
+ALTER TABLE finance_audit.webhook_subscriptions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY wh_sub_tenant_isolation ON finance_audit.webhook_subscriptions
   USING (tenant_id = current_setting('app.current_tenant_id')::uuid)
   WITH CHECK (tenant_id = current_setting('app.current_tenant_id')::uuid);
 
-CREATE TABLE audit.webhook_deliveries (
+CREATE TABLE finance_audit.webhook_deliveries (
   id uuid PRIMARY KEY,
   tenant_id uuid NOT NULL,
   subscription_id uuid NOT NULL,
@@ -37,10 +37,10 @@ CREATE TABLE audit.webhook_deliveries (
 );
 
 -- Drives the dispatcher's "due PENDING first" claim query (FOR UPDATE SKIP LOCKED).
-CREATE INDEX idx_wh_del_due ON audit.webhook_deliveries(status, next_attempt_at);
-CREATE INDEX idx_wh_del_sub ON audit.webhook_deliveries(subscription_id, created_at DESC);
+CREATE INDEX idx_wh_del_due ON finance_audit.webhook_deliveries(status, next_attempt_at);
+CREATE INDEX idx_wh_del_sub ON finance_audit.webhook_deliveries(subscription_id, created_at DESC);
 
-ALTER TABLE audit.webhook_deliveries ENABLE ROW LEVEL SECURITY;
-CREATE POLICY wh_del_tenant_isolation ON audit.webhook_deliveries
+ALTER TABLE finance_audit.webhook_deliveries ENABLE ROW LEVEL SECURITY;
+CREATE POLICY wh_del_tenant_isolation ON finance_audit.webhook_deliveries
   USING (tenant_id = current_setting('app.current_tenant_id')::uuid)
   WITH CHECK (tenant_id = current_setting('app.current_tenant_id')::uuid);

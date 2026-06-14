@@ -105,6 +105,9 @@ const ALLOWED_ACTIONS = new Set(['select', 'insert', 'upsert', 'update', 'delete
 // Reject keys that could pollute the prototype chain when used to index an object.
 const isUnsafeKey = (k) => k === '__proto__' || k === 'constructor' || k === 'prototype';
 
+// Allowlist for user-controlled column names used as object keys / SQL identifiers.
+const SAFE_COLUMN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
 const ctxFrom = (req) => {
     const roles = req.auth?.roles || [];
     return { userId: req.auth?.userId || null, roles, isAdmin: roles.includes('admin'), isMod: roles.includes('moderator') || roles.includes('admin') };
@@ -190,8 +193,11 @@ const buildWhere = (filters = []) => {
         const op = OPS[f.op];
         if (!op) continue;
         const col = f.col;
-        // f.col is user-controlled; reject prototype-polluting keys and non-string keys.
-        if (typeof col !== 'string' || isUnsafeKey(col)) continue;
+        // f.col is user-controlled and is used to index the where object, so it
+        // must be constrained to a plain SQL identifier. The allowlist rejects
+        // prototype-polluting keys (__proto__/constructor/prototype) and any
+        // other exotic property name before it can reach the where map.
+        if (typeof col !== 'string' || isUnsafeKey(col) || !SAFE_COLUMN.test(col)) continue;
         const cond = { [op]: f.val };
         where[col] = where[col] ? Object.assign({}, where[col], cond) : cond;
     }

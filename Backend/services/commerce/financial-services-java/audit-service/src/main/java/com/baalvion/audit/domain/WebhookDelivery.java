@@ -19,7 +19,7 @@ import java.util.UUID;
 @Entity
 @Table(
   name = "webhook_deliveries",
-  schema = "audit",
+  schema = "finance_audit",
   indexes = {
     @Index(name = "idx_wh_del_due", columnList = "status,next_attempt_at"),
     @Index(name = "idx_wh_del_sub", columnList = "subscription_id,created_at DESC")

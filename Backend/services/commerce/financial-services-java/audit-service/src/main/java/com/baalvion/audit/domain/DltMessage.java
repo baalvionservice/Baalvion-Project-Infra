@@ -18,7 +18,7 @@ import java.util.UUID;
 @Entity
 @Table(
   name = "dlt_messages",
-  schema = "audit",
+  schema = "finance_audit",
   indexes = {
     @Index(name = "idx_dlt_status_created", columnList = "status,created_at DESC"),
     @Index(name = "idx_dlt_original_topic", columnList = "original_topic")

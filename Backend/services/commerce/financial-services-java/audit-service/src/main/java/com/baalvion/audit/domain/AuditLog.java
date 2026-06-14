@@ -17,7 +17,7 @@ import java.util.UUID;
 @Entity
 @Table(
   name = "audit_logs",
-  schema = "audit",
+  schema = "finance_audit",
   indexes = {
     @Index(name = "idx_tenant_created", columnList = "tenant_id,created_at DESC"),
     @Index(name = "idx_tenant_event_type", columnList = "tenant_id,event_type,created_at DESC"),

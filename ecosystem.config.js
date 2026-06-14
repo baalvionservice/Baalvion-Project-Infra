@@ -341,12 +341,14 @@ module.exports = {
       name: "baalvion-com-web",
       cwd: "./Frontend/baalvion-com-main",
       script: "./node_modules/next/dist/bin/next",
-      args: "start -p 3040",
+      // Serves on :3043 (moved off :3040, which is the realtime-service contract port —
+      // gateway dynamic.yml, root docker-compose, openapi all map realtime to :3040).
+      args: "start -p 3043",
       interpreter: "node",
       watch: false,
       autorestart: true,
       max_memory_restart: "1500M",
-      env: { NODE_ENV: "production", PORT: "3040" },
+      env: { NODE_ENV: "production", PORT: "3043" },
       log_date_format: 'HH:mm:ss',
     },
     {
