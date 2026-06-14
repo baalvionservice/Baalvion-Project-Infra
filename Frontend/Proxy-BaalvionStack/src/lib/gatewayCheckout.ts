@@ -17,7 +17,12 @@
 
 const PLATFORM_BASE = import.meta.env.VITE_API_PLATFORM_BASE_URL ?? "http://localhost:4000/v1";
 
+export type GatewayProvider = "razorpay" | "stripe" | "payu";
+export type GatewayMethod = "CARD" | "UPI" | "NETBANKING" | "BANK";
+
 export interface CheckoutRequest {
+  provider: GatewayProvider; // the shopper's chosen gateway
+  method?: GatewayMethod;    // payment method (default CARD)
   amount: number;          // minor units (paise/cents)
   currency: string;        // 'INR' | 'USD' | ...
   idempotencyKey: string;  // dedup a double-click / retry
@@ -26,17 +31,23 @@ export interface CheckoutRequest {
 }
 
 export interface CheckoutInit {
-  provider: "razorpay" | "stripe" | "payu";
+  provider: GatewayProvider;
   mode: "live" | "mock";
   orderId: string;
   amount: number;
   currency: string;
   clientKey: string;       // razorpay key_id / stripe publishable key (PUBLIC, safe in browser)
   checkoutUrl?: string;    // stripe Checkout Session url (redirect flow)
+  // Full provider-public params: Razorpay {key,orderId,amount,name,currency};
+  // PayU {txnid,amount,firstname,email,productinfo,hash,key,currency}; Stripe {publishableKey,...}.
+  clientParams?: Record<string, string>;
 }
 
 export type CheckoutResult =
   | { status: "success"; provider: string; reference: string }
+  // The browser is leaving for a hosted page (Stripe redirect / PayU form-POST). NOT paid yet —
+  // settlement arrives via the provider webhook → ledger. Callers must NOT treat this as success.
+  | { status: "redirecting"; provider: string; reference: string }
   | { status: "cancelled" }
   | { status: "failed"; message: string };
 
@@ -46,7 +57,7 @@ async function createIntent(req: CheckoutRequest): Promise<CheckoutInit> {
     method: "POST",
     headers: { "content-type": "application/json" },
     credentials: "include", // BFF auth cookie/session; tenant comes from the verified session, not the browser
-    body: JSON.stringify(req),
+    body: JSON.stringify({ ...req, method: req.method ?? "CARD" }),
   });
   if (!res.ok) {
     const e = await res.json().catch(() => ({}));
@@ -93,7 +104,28 @@ export async function startGatewayCheckout(req: CheckoutRequest): Promise<Checko
 
   if (init.provider === "stripe" && init.checkoutUrl) {
     window.location.href = init.checkoutUrl; // hosted Stripe Checkout (redirect)
-    return { status: "success", provider: "stripe", reference: init.orderId };
+    return { status: "redirecting", provider: "stripe", reference: init.orderId };
+  }
+
+  if (init.provider === "payu") {
+    // PayU is a redirect/form-POST: build a signed form from the provider-public clientParams and
+    // submit it to PayU's hosted page. The action URL is env-configurable (test vs secure PayU).
+    const cp = init.clientParams || {};
+    const action = import.meta.env.VITE_PAYU_ACTION_URL ?? "https://test.payu.in/_payment";
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = action;
+    Object.entries(cp).forEach(([name, value]) => {
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = name;
+      input.value = String(value);
+      form.appendChild(input);
+    });
+    document.body.appendChild(form);
+    form.submit();
+    // The browser leaves this page for PayU; settlement returns via the provider webhook → ledger.
+    return { status: "redirecting", provider: "payu", reference: init.orderId };
   }
 
   if (init.provider === "razorpay") {

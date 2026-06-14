@@ -416,6 +416,18 @@ export interface PaymentIntent {
   keyId?: string;
   amount?: number;   // minor units (paise) from the provider
   currency?: string;
+  /** Bank transfer / concierge: wire instructions to show the shopper. Order is placed + reserved,
+   *  payment stays PENDING until finance confirms the transfer out-of-band (never auto-captured). */
+  instructions?: string;
+  /** Stripe (hosted Checkout): redirect the shopper here; on return we confirm against Stripe. */
+  redirectUrl?: string;
+  /** Stripe (Elements path, if ever used) — the PaymentIntent client secret. */
+  clientSecret?: string;
+  /** Stripe publishable key, when surfaced for a client-side SDK. */
+  publishableKey?: string;
+  /** PayU (international cards): a signed form the browser POSTs to PayU's hosted page. On return,
+   *  PayU posts the result to the order-service return route, which verifies the hash and settles. */
+  formPost?: { action: string; fields: Record<string, string> };
 }
 /** Razorpay Checkout handler result, verified SERVER-SIDE (HMAC) on confirm. */
 export interface RazorpayVerification {

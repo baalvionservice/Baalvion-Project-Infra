@@ -109,6 +109,8 @@ export default function CheckoutPage() {
   const [fraudBlocked, setFraudBlocked] = useState(false);
   // Optional gift note captured on the cart page (per market) → threaded into the order metadata.
   const [giftNote, setGiftNote] = useState("");
+  // Bank-transfer / concierge: wire instructions shown on the confirmation step (order reserved, unpaid).
+  const [bankInstructions, setBankInstructions] = useState<string | null>(null);
   // Stable per-checkout idempotency key — repeated submits/retries dedupe server-side.
   const idempotencyKeyRef = React.useRef(
     `amarise-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
@@ -455,6 +457,104 @@ export default function CheckoutPage() {
     toast({ title: "Order Confirmed", description: `Order ${order.id} confirmed.` });
   };
 
+  // Stripe (hosted Checkout) return: the shopper lands back on
+  // /checkout?stripe_session=cs_...&order=<id>. We restore the session, then verify the Checkout
+  // Session against Stripe SERVER-SIDE (confirmPayment) — success shows only on a real 'paid'.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const session = params.get("stripe_session");
+    const orderId = params.get("order");
+    const cancelled = params.get("stripe_cancelled");
+    const cleanUrl = () =>
+      window.history.replaceState({}, "", `/${countryCode}/checkout`);
+
+    if (cancelled) {
+      cleanUrl();
+      toast({
+        variant: "destructive",
+        title: "Payment Cancelled",
+        description: "Your card payment was cancelled. The order is unpaid — you can try again.",
+      });
+      return;
+    }
+
+    // PayU return: the order-service already verified the SHA-512 reverse hash and settled the order
+    // before redirecting here. We re-fetch to confirm 'paid' (restore the session first) before showing
+    // success — never trust the URL flag alone.
+    const payu = params.get("payu");
+    if (payu) {
+      cleanUrl();
+      if (payu === "success" && orderId) {
+        setIsSettling(true);
+        authClient
+          .bootstrap()
+          .catch(() => {})
+          .then(() => orderApi.get(orderId))
+          .then((r) => {
+            if (r.ok && r.data.paymentStatus === "paid") {
+              finalizeSuccess(r.data);
+            } else {
+              setIsSettling(false);
+              toast({
+                variant: "destructive",
+                title: "Payment Pending",
+                description:
+                  "We haven't confirmed your PayU payment yet. If you were charged, your order will update shortly — check My Orders.",
+              });
+            }
+          })
+          .catch(() => {
+            setIsSettling(false);
+            toast({ variant: "destructive", title: "Payment Error", description: "Could not verify your PayU payment." });
+          });
+      } else {
+        toast({
+          variant: "destructive",
+          title: payu === "cancelled" ? "Payment Cancelled" : "Payment Failed",
+          description: "Your PayU payment did not complete. The order is unpaid — you can try again.",
+        });
+      }
+      return;
+    }
+
+    if (!session || !orderId) return;
+
+    setIsSettling(true);
+    // The in-memory access token is lost across the full-page Stripe redirect — restore it from the
+    // httpOnly refresh cookie so the ownership check on confirm passes for a signed-in shopper.
+    authClient
+      .bootstrap()
+      .catch(() => {})
+      .then(() => orderApi.confirmPayment(orderId, session, { gateway: "stripe" }))
+      .then((confirmed) => {
+        cleanUrl();
+        if (confirmed.ok && confirmed.data.paymentStatus === "paid") {
+          finalizeSuccess(confirmed.data);
+        } else {
+          setIsSettling(false);
+          toast({
+            variant: "destructive",
+            title: "Payment Not Completed",
+            description: confirmed.ok
+              ? "We couldn't confirm your Stripe payment. If you were charged, contact our concierge."
+              : confirmed.error.message,
+          });
+        }
+      })
+      .catch((err) => {
+        cleanUrl();
+        setIsSettling(false);
+        toast({
+          variant: "destructive",
+          title: "Payment Error",
+          description: err instanceof Error ? err.message : "Could not verify the Stripe payment.",
+        });
+      });
+    // Runs once on mount to handle the Stripe return; deps intentionally empty.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handlePlaceOrder = async () => {
     setIsSettling(true);
 
@@ -524,16 +624,50 @@ export default function CheckoutPage() {
       const order = result.data.order;
       const intent = result.data.intent;
 
+      // ── Stripe (hosted Checkout): the order exists but is UNPAID. Redirect to the Stripe-hosted
+      // card page; on return we verify the session against Stripe SERVER-SIDE (see the stripe-return
+      // effect) and only then show success. Never a client-trusted "paid". ──────────────────────────
+      if (intent?.redirectUrl) {
+        window.location.href = intent.redirectUrl;
+        return;
+      }
+
+      // ── PayU (international cards): the order is UNPAID. Build the signed form and POST it to PayU's
+      // hosted page. PayU posts the result back to the order-service return route (SHA-512 reverse-hash
+      // verified) which settles the order and redirects here with ?payu=success|failed. ──────────────
+      if (intent?.formPost) {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = intent.formPost.action;
+        Object.entries(intent.formPost.fields).forEach(([name, value]) => {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = name;
+          input.value = String(value);
+          form.appendChild(input);
+        });
+        document.body.appendChild(form);
+        form.submit();
+        return;
+      }
+
+      // ── Bank transfer / concierge: the order is PLACED + RESERVED but intentionally UNPAID. Show the
+      // real wire instructions; finance confirms the transfer out-of-band. Never auto-confirm. This is
+      // also the clean path for high-value pieces that exceed a card gateway's limit. ────────────────
+      if (intent?.instructions || selectedGateway === "BANK_TRANSFER") {
+        setBankInstructions(
+          intent?.instructions ||
+            "Your order is reserved. Our concierge will email you the bank-transfer details and your payment reference shortly."
+        );
+        finalizeSuccess(order);
+        return;
+      }
+
       // ── Gateway path (Razorpay): the order exists but is UNPAID. Open the
       // provider checkout and finalize only after a SERVER-VERIFIED capture.
       // Bank transfer never carries an intent → it falls through to the
       // pending/mock success path below, unchanged. ──────────────────────────
-      if (
-        intent?.keyId &&
-        intent.amount != null &&
-        intent.currency &&
-        selectedGateway !== "BANK_TRANSFER"
-      ) {
+      if (intent?.keyId && intent.amount != null && intent.currency) {
         if (!window.Razorpay) {
           // Script not loaded yet — never silently swallow; let the shopper retry.
           setIsSettling(false);
@@ -1235,8 +1369,8 @@ export default function CheckoutPage() {
                 </div>
                 <p className="text-lg text-gray-500 font-light max-w-xl mx-auto leading-relaxed">
                   Your pieces have been secured.{" "}
-                  {selectedGateway === "BANK_TRANSFER"
-                    ? "Please complete the bank transfer using the instructions sent to your email to finalize your order."
+                  {bankInstructions
+                    ? "Your order is reserved — complete the bank transfer below to finalize it."
                     : "A private curator from our atelier will be in touch shortly to arrange your white-glove delivery."}
                 </p>
               </div>
@@ -1255,6 +1389,20 @@ export default function CheckoutPage() {
                     <BadgeCheck className="w-5 h-5" />
                   </div>
                 </div>
+
+                {bankInstructions && (
+                  <div className="bg-plum/5 border border-plum/20 p-7 text-left space-y-3">
+                    <span className="text-[9px] font-bold uppercase tracking-widest text-plum flex items-center gap-2">
+                      <Building2 className="w-4 h-4" /> Bank Transfer Instructions
+                    </span>
+                    <p className="text-sm text-gray-700 font-light leading-relaxed whitespace-pre-line">
+                      {bankInstructions}
+                    </p>
+                    <p className="text-[11px] text-gray-400 italic">
+                      Your pieces remain reserved until we confirm your transfer.
+                    </p>
+                  </div>
+                )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Button

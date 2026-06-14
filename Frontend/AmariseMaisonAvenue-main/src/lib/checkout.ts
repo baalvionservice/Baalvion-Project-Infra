@@ -156,12 +156,14 @@ export async function placeOrder(input: PlaceOrderInput): Promise<ApiResult<Plac
   if (!created.ok) return created;
   const order = created.data;
 
-  // Create a payment intent. Two provider shapes:
-  //  • mock (no keyId)   → auto-confirm server-side here (no user interaction), as before.
-  //  • gateway/Razorpay  → return the intent to the page so it can open the provider checkout;
-  //    DO NOT auto-confirm (the user must pay first, then the page confirms with the signed result).
-  // Non-fatal throughout: the order exists regardless; a failure leaves it unpaid for follow-up
-  // (never a fake "paid").
+  // Create a payment intent. Provider shapes the page must act on:
+  //  • Razorpay  → keyId/amount/currency (open the in-page popup)
+  //  • Stripe    → redirectUrl (redirect to the hosted Checkout page)
+  //  • PayU      → formPost (auto-submit a signed form to PayU's hosted page)
+  //  • bank      → instructions (show the wire instructions; order stays reserved/unpaid)
+  //  • mock      → none of the above → auto-confirm server-side here (no user interaction).
+  // An intent-creation FAILURE (unconfigured gateway / declined) is surfaced to the caller — we never
+  // fake a "paid" or a silent success.
   let paid = false;
   let paidOrder: Order | undefined;
   let payIntent: PaymentIntent | undefined;
@@ -169,20 +171,25 @@ export async function placeOrder(input: PlaceOrderInput): Promise<ApiResult<Plac
     try {
       const intent = await orderApi.createPaymentIntent(order.id, input.gateway);
       if (intent.ok && intent.data?.intentId) {
-        if (intent.data.keyId) {
-          payIntent = intent.data; // gateway → defer to interactive checkout on the page
+        const d = intent.data;
+        const needsClientAction = !!(d.keyId || d.redirectUrl || d.formPost || d.instructions);
+        if (needsClientAction) {
+          payIntent = d; // hand the full intent to the page (popup / redirect / form-post / instructions)
         } else {
-          // C1: confirmPayment returns the full updated Order; PAID iff paymentStatus === 'paid'.
-          const confirmed = await orderApi.confirmPayment(order.id, intent.data.intentId, {
-            gateway: input.gateway,
-          });
+          // Auto-confirm provider (mock): no client step. PAID iff paymentStatus === 'paid'.
+          const confirmed = await orderApi.confirmPayment(order.id, d.intentId, { gateway: input.gateway });
           if (confirmed.ok && confirmed.data?.paymentStatus === 'paid') {
             paid = true;
             paidOrder = confirmed.data;
           }
         }
+      } else if (!intent.ok) {
+        // The order exists but the gateway could not start payment — report it (no fake confirmation).
+        clearCartId();
+        setCartSessionToken(null);
+        return { ok: false, error: intent.error };
       }
-    } catch { /* leave unpaid; order already created */ }
+    } catch { /* network/unexpected → leave unpaid; order already created (caller shows generic error) */ }
   }
 
   // This cart/session is consumed once the order exists → start the next checkout fresh.

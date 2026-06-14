@@ -3,6 +3,7 @@ const router = require('express').Router();
 const { authMiddleware, requireRole } = require('../middleware/auth');
 const { tenant, requireTenant } = require('../middleware/tenant');
 const c = require('../controller/orderController');
+const pc = require('../controller/paymentIntentController');
 
 // F1: auth establishes req.auth BEFORE tenant resolves the tenant context.
 router.use(authMiddleware, tenant);
@@ -21,5 +22,10 @@ router.get('/:id', requireTenant, c.getOrder);
 router.get('/:id/timeline', requireTenant, c.getTimeline);
 router.post('/', requireTenant, c.createOrder);
 router.post('/:id/confirm-payment', requireTenant, canConfirmPayment, c.confirmPayment);
+
+// Consumer gateway checkout (Razorpay/Stripe/PayU/bank) — a direct settlement rail. Same spend-
+// authority gate as confirm-payment (only roles that may move org funds can start/capture a payment).
+router.post('/:id/payment-intent', requireTenant, canConfirmPayment, pc.createPaymentIntent);
+router.post('/:id/payment-capture', requireTenant, canConfirmPayment, pc.capturePayment);
 
 module.exports = router;

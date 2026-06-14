@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { usePlans } from "@/hooks/usePlatform";
 import { Plan, billingApi } from "@/lib/platformClient";
-import { startGatewayCheckout } from "@/lib/gatewayCheckout";
+import { startGatewayCheckout, type GatewayProvider } from "@/lib/gatewayCheckout";
 import { PaymentForms, emptyPayment, type PaymentState } from "@/components/billing/PaymentForms";
 import { validateCard } from "@/lib/payment/cards";
 import { cn } from "@/lib/utils";
@@ -72,6 +72,8 @@ export default function BillingCheckout() {
   const [interval, setInterval] = useState<"monthly" | "yearly">("monthly");
   const [creditAmount, setCreditAmount] = useState(30); // PAYG prepaid top-up (USD)
   const [payment, setPayment] = useState<PaymentState>(emptyPayment);
+  // Settlement gateway for card/wallet payments — the shopper's choice, forwarded to the PSP.
+  const [gateway, setGateway] = useState<GatewayProvider>("razorpay");
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [result, setResult] = useState<ResultType | null>(null);
@@ -192,6 +194,8 @@ export default function BillingCheckout() {
       let paid = false;
       try {
         const res = await startGatewayCheckout({
+          provider: gateway,
+          method: "CARD",
           amount: Math.round(total * 100), // minor units
           currency: "USD",
           idempotencyKey: `${selectedPlan.slug}-${interval}-${Date.now()}`,
@@ -199,6 +203,7 @@ export default function BillingCheckout() {
           customer: customerName ? { name: customerName } : undefined,
         });
         if (res.status === "success") paid = true;
+        else if (res.status === "redirecting") return; // browser is leaving for the hosted page; settle via webhook
         else if (res.status === "cancelled") return; // stay on confirm so they can retry
         // A genuine decline/failure is shown as a failure in ALL environments —
         // never auto-"paid" (that would let a declined card activate a plan).
@@ -490,6 +495,35 @@ Thank you for your business!
                   </div>
                 )}
                 <PaymentForms value={payment} onChange={setPayment} errors={payErrors} />
+                {(payment.method === "card" || payment.method === "wallet") && (
+                  <div className="mt-6 space-y-2">
+                    <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      Payment gateway
+                    </p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        { id: "razorpay", label: "Razorpay", desc: "Cards · UPI · Netbanking" },
+                        { id: "stripe", label: "Stripe", desc: "International cards" },
+                        { id: "payu", label: "PayU", desc: "Cards worldwide" },
+                      ] as const).map((g) => (
+                        <button
+                          key={g.id}
+                          type="button"
+                          onClick={() => setGateway(g.id)}
+                          aria-pressed={gateway === g.id}
+                          className={`rounded-lg border p-3 text-left transition-colors ${
+                            gateway === g.id
+                              ? "border-primary bg-primary/5 ring-1 ring-primary"
+                              : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          <span className="block text-sm font-semibold">{g.label}</span>
+                          <span className="block text-[11px] text-muted-foreground">{g.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           )}
