@@ -59,31 +59,41 @@ const nextConfig: NextConfig = {
     const originOf = (url?: string) => {
       try { return url ? new URL(url).origin : ''; } catch { return ''; }
     };
+    // When the canonical URL is localhost we are running the prod build locally over http — do NOT
+    // emit upgrade-insecure-requests (it would rewrite the http://localhost:* API calls to https and
+    // break them). In real prod APP_URL is the https domain, so the directive is emitted normally.
+    const isLocalhost = /localhost|127\.0\.0\.1/.test(process.env.NEXT_PUBLIC_APP_URL || '');
+
     const connectSrc = [
       "'self'",
       'https://api.baalvion.com',
       'https://*.googleapis.com',
       'https://www.google-analytics.com',
       'https://stats.g.doubleclick.net',
+      // Payment gateways the browser talks to directly (Razorpay popup, Stripe.js).
+      'https://api.razorpay.com',
+      'https://*.razorpay.com',
+      'https://api.stripe.com',
       originOf(process.env.NEXT_PUBLIC_COMMERCE_URL),
       originOf(process.env.NEXT_PUBLIC_ORDER_URL),
       originOf(process.env.NEXT_PUBLIC_API_URL),
-      isDev ? 'http://localhost:* ws://localhost:*' : '',
+      isDev || isLocalhost ? 'http://localhost:* ws://localhost:*' : '',
     ].filter(Boolean).join(' ');
 
     // upgrade-insecure-requests would rewrite http://localhost:* to https in dev — only emit in prod.
     const cspHeader = `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com;
+      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://js.stripe.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://madisonavenuecouture.com https://www.google-analytics.com https://www.googletagmanager.com ${MEDIA_HOST ? `https://${MEDIA_HOST}` : ''};
       font-src 'self' data: https://fonts.gstatic.com;
       object-src 'none';
       base-uri 'self';
       connect-src ${connectSrc};
-      form-action 'self';
+      frame-src https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com https://js.stripe.com https://hooks.stripe.com https://*.stripe.com;
+      form-action 'self' https://*.payu.in https://secure.payu.in https://test.payu.in https://checkout.stripe.com;
       frame-ancestors 'none';
-      ${isDev ? '' : 'upgrade-insecure-requests;'}
+      ${isDev || isLocalhost ? '' : 'upgrade-insecure-requests;'}
     `.replace(/\s{2,}/g, ' ').trim();
 
     return [
