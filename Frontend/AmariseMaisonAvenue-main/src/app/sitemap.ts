@@ -25,6 +25,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const routes: MetadataRoute.Sitemap = [];
 
+  // Key public, indexable static surfaces (private paths are intentionally excluded).
+  const STATIC_SUBPATHS = [
+    "/about",
+    "/collections",
+    "/journal",
+    "/contact",
+  ];
+
   // 1. Core Platform Pages
   countryCodes.forEach((code) => {
     routes.push({
@@ -33,6 +41,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "daily",
       priority: 1,
       alternates: sitemapAlternates(""),
+    });
+
+    // 1b. Static editorial/commerce landing pages
+    STATIC_SUBPATHS.forEach((subPath) => {
+      routes.push({
+        url: `${baseUrl}/${code}${subPath}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly",
+        priority: 0.8,
+        alternates: sitemapAlternates(subPath),
+      });
     });
 
     // 2. High-Authority City Pages

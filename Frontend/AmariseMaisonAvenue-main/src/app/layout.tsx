@@ -35,7 +35,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.amarisemaisonavenue.com/"),
-  icons: { icon: '/favicon.svg' },
+  alternates: { canonical: "/" },
+  icons: { icon: "/favicon.svg", shortcut: "/favicon.svg", apple: "/favicon.svg" },
   title: {
     default: "AMARISÉ MAISON AVENUE | The Pinnacle of Global Luxury",
     template: "%s | AMARISÉ MAISON AVENUE",
@@ -106,6 +107,54 @@ export default async function RootLayout({
       <head>
         <link rel="preconnect" href="https://picsum.photos" />
         <link rel="preconnect" href="https://madisonavenuecouture.com" />
+        {/* Organization + WebSite knowledge-graph entities (server-rendered, static). */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "@id": "https://www.amarisemaisonavenue.com/#organization",
+              name: "Amarisé Maison Avenue",
+              alternateName: "AMARISÉ MAISON AVENUE",
+              brand: "Amarisé Maison Avenue",
+              url: "https://www.amarisemaisonavenue.com/",
+              logo: "https://www.amarisemaisonavenue.com/favicon.svg",
+              foundingDate: "1924",
+              description:
+                "Ultra-luxury maison curating the world's most exquisite treasures in haute couture, high-end watches, and fine jewelry since 1924.",
+              sameAs: [
+                "https://www.instagram.com/amarisemaisonavenue",
+                "https://www.facebook.com/amarisemaisonavenue",
+                "https://www.linkedin.com/company/amarisemaisonavenue",
+              ],
+            }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "@id": "https://www.amarisemaisonavenue.com/#website",
+              name: "Amarisé Maison Avenue",
+              url: "https://www.amarisemaisonavenue.com/",
+              publisher: {
+                "@id": "https://www.amarisemaisonavenue.com/#organization",
+              },
+              potentialAction: {
+                "@type": "SearchAction",
+                target: {
+                  "@type": "EntryPoint",
+                  urlTemplate:
+                    "https://www.amarisemaisonavenue.com/us/search?q={search_term_string}",
+                },
+                "query-input": "required name=search_term_string",
+              },
+            }),
+          }}
+        />
       </head>
       <body className="font-body antialiased bg-background text-foreground overflow-x-hidden selection:bg-gold selection:text-white">
         <AppProvider>{children}</AppProvider>
