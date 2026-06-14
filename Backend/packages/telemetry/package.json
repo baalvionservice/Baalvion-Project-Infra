@@ -27,7 +27,7 @@
     "@opentelemetry/exporter-prometheus": "^0.217.0",
     "@opentelemetry/resources": "^2.7.1",
     "@opentelemetry/sdk-metrics": "^2.7.1",
-    "@opentelemetry/sdk-node": "^0.217.0",
+    "@opentelemetry/sdk-node": "^0.218.0",
     "@opentelemetry/sdk-trace-node": "^2.7.1",
     "@opentelemetry/semantic-conventions": "^1.37.0",
     "pino": "^9.7.0"

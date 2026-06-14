@@ -18,7 +18,7 @@
     "@opentelemetry/auto-instrumentations-node": "^0.75.0",
     "@opentelemetry/exporter-trace-otlp-http": "^0.217.0",
     "@opentelemetry/resources": "^2.7.1",
-    "@opentelemetry/sdk-node": "^0.217.0",
+    "@opentelemetry/sdk-node": "^0.218.0",
     "@opentelemetry/semantic-conventions": "^1.37.0",
     "opossum": "^8.1.4"
   },
