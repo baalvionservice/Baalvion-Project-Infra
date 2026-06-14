@@ -1,11 +1,14 @@
 'use strict';
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 let db = null;
 try { db = require('../models'); } catch (_) {}
 
 const DEMO_ORG_ID = 'a0000000-0000-0000-0000-000000000001';
-const DEMO_PASSWORD = 'Baalvion123!';
+// No committed credential: take the demo password from env, else generate a random
+// one per run (logged below) so a fixed password can never become a live backdoor.
+const DEMO_PASSWORD = process.env.DEMO_SEED_PASSWORD || `dev-${crypto.randomBytes(6).toString('hex')}`;
 
 const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const randFloat = (min, max) => parseFloat((Math.random() * (max - min) + min).toFixed(2));
@@ -23,6 +26,11 @@ let seeded = false;
 
 const run = async () => {
   if (seeded || !db) return;
+  // Defense-in-depth: never seed demo accounts outside development, even if called directly.
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('Dev seed: refusing to run in production.');
+    return;
+  }
   seeded = true;
 
   // Check if already seeded
@@ -38,6 +46,9 @@ const run = async () => {
   }
 
   console.log('Dev seed: seeding development data...');
+  if (!process.env.DEMO_SEED_PASSWORD) {
+    console.log(`Dev seed: generated demo user password = ${DEMO_PASSWORD} (set DEMO_SEED_PASSWORD to pin it)`);
+  }
   const hash = await bcrypt.hash(DEMO_PASSWORD, 12);
 
   // ── Organizations ──────────────────────────────────────────────────────────

@@ -132,15 +132,13 @@ public class GatewayService {
     return response;
   }
 
-  public GatewayPaymentResponse getById(UUID id) {
-    GatewayPayment payment = repository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
+  public GatewayPaymentResponse getById(String site, UUID id) {
+    GatewayPayment payment = loadScoped(site, id);
     return GatewayPaymentResponse.from(payment);
   }
 
-  public GatewayPaymentResponse capture(UUID id) {
-    GatewayPayment payment = repository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
+  public GatewayPaymentResponse capture(String site, UUID id) {
+    GatewayPayment payment = loadScoped(site, id);
 
     PaymentGateway gateway = registry.resolve(payment.getProvider());
     ProviderConfig cfg = resolver.resolve(siteOf(payment), payment.getProvider());
@@ -155,9 +153,8 @@ public class GatewayService {
     return GatewayPaymentResponse.from(saved);
   }
 
-  public GatewayPaymentResponse refund(UUID id, RefundGatewayPaymentRequest request) {
-    GatewayPayment payment = repository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
+  public GatewayPaymentResponse refund(String site, UUID id, RefundGatewayPaymentRequest request) {
+    GatewayPayment payment = loadScoped(site, id);
 
     PaymentGateway gateway = registry.resolve(payment.getProvider());
     ProviderConfig cfg = resolver.resolve(siteOf(payment), payment.getProvider());
@@ -201,6 +198,16 @@ public class GatewayService {
         sanitizeForLog(slug), provider, result.providerRef(), sanitizeForLog(result.providerEventId())));
 
     return result;
+  }
+
+  /**
+   * Load a charge by id SCOPED TO THE CALLER'S SITE. Using the inherited findById here would let a
+   * caller for site A read/capture/refund a charge owned by site B (cross-tenant IDOR on financial
+   * records). A mismatch surfaces as "not found" rather than leaking the charge's existence.
+   */
+  private GatewayPayment loadScoped(String site, UUID id) {
+    return repository.findByIdAndWebsiteSlug(id, slugOf(site))
+      .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
   }
 
   /** Normalize an optional site to the persisted slug ({@code "__global__"} when absent). */

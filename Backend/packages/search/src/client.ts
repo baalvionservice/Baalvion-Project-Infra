@@ -19,6 +19,11 @@ export const searchClient = new Client({
       }
     : undefined,
   ssl: {
-    rejectUnauthorized: process.env.NODE_ENV === 'production',
+    // SECURE BY DEFAULT: verify the server cert in ALL environments (the old
+    // `NODE_ENV === 'production'` gate silently disabled verification in
+    // staging/preprod/unset env → MITM). Opt out only via an explicit env, and
+    // pin a CA via OPENSEARCH_CA when the cluster uses a private/self-signed CA.
+    rejectUnauthorized: process.env.OPENSEARCH_TLS_REJECT_UNAUTHORIZED !== 'false',
+    ...(process.env.OPENSEARCH_CA ? { ca: process.env.OPENSEARCH_CA } : {}),
   },
 });
