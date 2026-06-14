@@ -200,7 +200,7 @@ Routes under `src/app/*`: ai, analytics, automation, businesses, compliance, cor
 
 ---
 
-## N. MarketUnderworld — **SPEC ONLY** (`AI Automation/marketunderworld-*.md`) (→ build-new)
+## N. MarketUnderworld — **SPEC ONLY** (spec removed — recover from git history) (→ build-new)
 
 66 spec'd admin modules across 4 phases (independent of CTM/market-service per the spec). Examples: auth + 2FA-gated admin, home dashboard, user management, investor list/enrichment, editorial/curation queue, duplicates, sources, lists, coupons, jobs, sectors/regions, SEO, campaigns, referrals, feature flags, API keys, cost dashboard, legal queue, reports/analytics, onboarding editor, pricing experiments, VA leaderboard, incidents, backups. Pervasive audit logging (actor/action/before/after/reason/ip/ua). Disposition: **build-new** as a product slice **after** deciding its relationship to CTM.
 

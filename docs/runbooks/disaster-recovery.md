@@ -51,7 +51,7 @@ pwsh -File scripts/db-restore.ps1 -TargetDb baalvion_db -IUnderstandThisDropsDat
 pwsh -File scripts/db-verify-restore.ps1 -TargetDb baalvion_db
 # 4. Restart the app tier
 docker compose up -d order-service rbac-service payment-service cms-service
-# 5. Re-run the regression harnesses (see LIMITED_BETA_SIGNOFF.md)
+# 5. Re-run the regression harnesses
 ```
 Pick a specific dump with `-DumpFile backups/<ts>_baalvion_db.dump` (default = newest).
 

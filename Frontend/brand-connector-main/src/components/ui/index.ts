@@ -21,8 +21,6 @@ export * from './accordion';
 export * from './tooltip';
 export * from './cards';
 export * from './Modal';
-export * from './DataTable';
 export * from './badges';
-export * from './loaders';
 export * from './skeletons';
 export * from './EmptyState';
