@@ -59,8 +59,13 @@ server:
     enabled: true
     min-response-size: 1024
   error:
-    include-message: always
-    include-binding-errors: always
+    # Production-safe defaults: do NOT echo exception messages or binding detail on the /error whitebox
+    # (avoids leaking internal state to clients). GlobalExceptionHandler still returns curated messages for
+    # handled exceptions. The `dev` profile below re-enables verbosity for local debugging.
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
 
 management:
   endpoints:
@@ -172,3 +177,16 @@ app:
       retry-backoff-ms: 2000
       min-refresh-interval-minutes: 120
       cron: ${UN_REFRESH_CRON:0 0 */4 * * *}        # every 4h (2–6h target)
+
+---
+# Dev-only verbosity: surface exception/binding detail on the /error whitebox ONLY under the `dev`
+# profile (SPRING_PROFILES_ACTIVE=dev). Never enabled in the default/prod configuration above.
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always
