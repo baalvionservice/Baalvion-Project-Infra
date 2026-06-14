@@ -61,9 +61,11 @@
     <postgresql.version>42.7.11</postgresql.version>
     <!-- Patch-bump two BOM-pinned transitives flagged by the container image scan (newer than the
          3.5.14 BOM): Tomcat 10.1.54 -> 10.1.55 (CVE-2026-41293/43512/43515 CRITICAL + 41284/42498/
-         43513 HIGH) and Netty 4.1.132 -> 4.1.133.Final (CVE-2026-42583 HIGH). Within-minor patches. -->
+         43513 HIGH) and Netty 4.1.132 -> 4.1.135.Final (CVE-2026-42583 + CVE-2026-45416 SNI 16MiB
+         pre-allocation + CVE-2026-44249 IPv6 subnet-filter bypass, all HIGH in netty-handler).
+         Netty reaches every service image transitively via the OTLP gRPC exporter. Within-minor. -->
     <tomcat.version>10.1.55</tomcat.version>
-    <netty.version>4.1.133.Final</netty.version>
+    <netty.version>4.1.135.Final</netty.version>
     <!-- Override the Spring Boot 3.5.14 BOM's spring-kafka 3.3.15 (CVE-2026-41731 HIGH: overly broad
          trusted-package deserialization). 3.3.16 is the within-minor patch; property is BOM-managed,
          so it overrides spring-kafka + spring-kafka-test for every module. -->
