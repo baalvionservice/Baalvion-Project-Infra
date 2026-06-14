@@ -5,7 +5,7 @@
 # runtime image copies that service jar.
 
 # ---- Build stage ----
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-17@sha256:e8ef73dbd33b69fe497fd96b3bbbd85aff84ac4c564a5784ab02ad941b32c12b AS build
 ARG SERVICE
 WORKDIR /workspace
 COPY . .
@@ -16,7 +16,7 @@ RUN test -n "$SERVICE" || (echo "ERROR: --build-arg SERVICE=<module> is required
 RUN mvn -B -ntp -DskipTests -pl "$SERVICE" -am clean package
 
 # ---- Runtime stage ----
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre@sha256:8016378253033ebd971c237f6580f108b4afac11a188d3fc3b982497bbe55c65
 ARG SERVICE
 ENV SERVICE=${SERVICE}
 WORKDIR /app
