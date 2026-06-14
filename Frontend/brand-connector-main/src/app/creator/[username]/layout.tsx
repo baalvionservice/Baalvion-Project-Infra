@@ -6,24 +6,26 @@ const BASE_URL =
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: { username: string };
+  params: Promise<{ username: string }>;
 }
 
 // The profile page is a 'use client' component that fetches its data client-side,
 // so per-creator metadata can only be templated from the URL slug here. This still
 // gives each profile a unique title + canonical instead of the duplicate root title.
-export function generateMetadata({ params }: LayoutProps): Metadata {
-  const username = decodeURIComponent(params.username);
+export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
+  const { username: rawUsername } = await params;
+  const username = decodeURIComponent(rawUsername);
   const handle = username.startsWith('@') ? username : `@${username}`;
   return buildMetadata({
     title: `${handle} | Creator on Baalvion Connect`,
     description: `View ${handle}'s creator profile on Baalvion Connect — audience reach, engagement metrics, content portfolio, and verified campaign history. Collaborate with secure escrow payments.`,
-    path: `/creator/${params.username}`,
+    path: `/creator/${rawUsername}`,
   });
 }
 
-export default function CreatorProfileLayout({ children, params }: LayoutProps) {
-  const username = decodeURIComponent(params.username);
+export default async function CreatorProfileLayout({ children, params }: LayoutProps) {
+  const { username: rawUsername } = await params;
+  const username = decodeURIComponent(rawUsername);
   const handle = username.startsWith('@') ? username : `@${username}`;
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
@@ -40,7 +42,7 @@ export default function CreatorProfileLayout({ children, params }: LayoutProps) 
         '@type': 'ListItem',
         position: 3,
         name: handle,
-        item: `${BASE_URL}/creator/${params.username}`,
+        item: `${BASE_URL}/creator/${rawUsername}`,
       },
     ],
   };

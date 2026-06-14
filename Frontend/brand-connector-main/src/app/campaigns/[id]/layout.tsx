@@ -6,22 +6,24 @@ const BASE_URL =
 
 interface LayoutProps {
   children: React.ReactNode;
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 // Campaign detail is a 'use client' page that fetches its data client-side, so the
 // per-campaign title/description can only be templated here. This still removes the
 // duplicate root title and gives each campaign a unique canonical URL.
-export function generateMetadata({ params }: LayoutProps): Metadata {
+export async function generateMetadata({ params }: LayoutProps): Promise<Metadata> {
+  const { id } = await params;
   return buildMetadata({
     title: 'Brand Campaign | Baalvion Connect',
     description:
       'Explore this brand campaign on Baalvion Connect — deliverables, budget, requirements, and timeline. Apply and collaborate with secure escrow payments.',
-    path: `/campaigns/${params.id}`,
+    path: `/campaigns/${id}`,
   });
 }
 
-export default function CampaignDetailLayout({ children, params }: LayoutProps) {
+export default async function CampaignDetailLayout({ children, params }: LayoutProps) {
+  const { id } = await params;
   const breadcrumbJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -37,7 +39,7 @@ export default function CampaignDetailLayout({ children, params }: LayoutProps) 
         '@type': 'ListItem',
         position: 3,
         name: 'Campaign',
-        item: `${BASE_URL}/campaigns/${params.id}`,
+        item: `${BASE_URL}/campaigns/${id}`,
       },
     ],
   };
