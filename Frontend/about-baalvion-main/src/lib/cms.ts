@@ -24,6 +24,20 @@ import type {
   SEOMetadata,
 } from '@/lib/db';
 
+// Strip HTML tags idempotently. A single regex pass is not sufficient because
+// removing an inner match can re-form a new tag from the surrounding characters
+// (e.g. `<<script>>` or `<scr<b>ipt>`). Re-apply until the output stabilizes so
+// no residual tag fragments remain.
+function stripHtmlTags(input: string): string {
+  let out = input;
+  let prev: string;
+  do {
+    prev = out;
+    out = out.replace(/<[^>]+>/g, '');
+  } while (out !== prev);
+  return out;
+}
+
 const CMS_BASE = process.env.CMS_PUBLIC_URL || 'http://localhost:3018/api/v1/public';
 const SITE = process.env.CMS_WEBSITE_SLUG || 'about-baalvion';
 const BASE = `${CMS_BASE}/${SITE}`;
@@ -102,7 +116,7 @@ function blocksToText(blocks?: Block[]): string {
     .sort((a, b) => (a.order || 0) - (b.order || 0))
     .map((b) => {
       const c = b.content || {};
-      if (b.type === 'html') return String(c.html || '').replace(/<[^>]+>/g, '');
+      if (b.type === 'html') return stripHtmlTags(String(c.html || ''));
       return String(c.text ?? '');
     })
     .filter(Boolean)
