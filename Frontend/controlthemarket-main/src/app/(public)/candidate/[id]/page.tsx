@@ -71,8 +71,13 @@ export async function generateMetadata({
   }
 
   const canonical = absoluteUrl(`/candidate/${candidate.id}`);
-  const skills = candidate.profile?.skills?.slice(0, 5).join(", ");
-  const title = candidate.name;
+  const skillsList = candidate.profile?.skills ?? [];
+  const topSkill = skillsList[0];
+  const headline =
+    topSkill || candidate.profile?.experienceLevel || "Verified Talent";
+  const skills = skillsList.slice(0, 5).join(", ");
+  // Data-driven, profile-specific title (e.g. "Jane Doe — React | ControlTheMarket")
+  const title = `${candidate.name} — ${headline}`;
   const description =
     candidate.profile?.bio?.trim() ||
     `View ${candidate.name}'s verified, proof-of-skill profile on ControlTheMarket${
@@ -84,6 +89,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical },
+    robots: { index: true, follow: true },
     openGraph: {
       type: "profile",
       title: `${title} | ControlTheMarket`,
@@ -92,7 +98,7 @@ export async function generateMetadata({
       images: avatarUrl ? [{ url: avatarUrl, alt: candidate.name }] : undefined,
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: `${title} | ControlTheMarket`,
       description,
       images: avatarUrl ? [avatarUrl] : undefined,
@@ -221,8 +227,55 @@ export default async function CandidateProfilePage({
   };
   const primaryRole = getPrimaryRole();
 
+  // --- SEO: server-rendered JSON-LD built from the real loaded candidate data ---
+  const profileUrl = absoluteUrl(`/candidate/${candidate.id}`);
+  const candidateSkills = candidate.profile?.skills ?? [];
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: candidate.name,
+    url: profileUrl,
+    ...(primaryRole ? { jobTitle: primaryRole } : {}),
+    ...(candidateSkills.length > 0 ? { knowsAbout: candidateSkills } : {}),
+    ...(candidate.profile?.avatarUrl
+      ? { image: candidate.profile.avatarUrl }
+      : {}),
+    ...(candidate.profile?.bio?.trim()
+      ? { description: candidate.profile.bio.trim() }
+      : {}),
+  };
+  const candidateBreadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Candidates",
+        item: absoluteUrl("/leaderboard"),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: candidate.name,
+        item: profileUrl,
+      },
+    ],
+  };
+
   return (
     <div className="flex-1 bg-muted/20 pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(candidateBreadcrumbJsonLd),
+        }}
+      />
       {/* Header with banner and avatar */}
       <div className="relative h-48 w-full bg-muted">
         <Image
