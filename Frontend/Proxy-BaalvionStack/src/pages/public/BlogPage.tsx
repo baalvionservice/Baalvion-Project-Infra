@@ -1,5 +1,5 @@
 import { SEOHead } from "@/components/SEOHead";
-import { Badge } from "@/components/ui/badge";
+import { Badge, type BadgeProps } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Calendar, Clock, User } from "lucide-react";
@@ -61,7 +61,7 @@ const posts = [
   },
 ];
 
-const categoryColors: Record<string, string> = {
+const categoryColors: Record<string, BadgeProps["variant"]> = {
   Engineering: "default",
   Guide: "info",
   Security: "secondary",
@@ -97,7 +97,7 @@ export default function BlogPage() {
             </div>
             <div className="p-8">
               <div className="flex items-center gap-3 mb-3">
-                <Badge variant={categoryColors[featured.category] as any || "default"}>{featured.category}</Badge>
+                <Badge variant={categoryColors[featured.category] || "default"}>{featured.category}</Badge>
                 <span className="text-xs text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{featured.date}</span>
                 <span className="text-xs text-muted-foreground flex items-center gap-1"><Clock className="w-3 h-3" />{featured.readTime}</span>
               </div>
@@ -122,7 +122,7 @@ export default function BlogPage() {
               <div className="h-32 bg-gradient-to-br from-secondary/50 via-secondary/20 to-transparent" />
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <Badge variant={categoryColors[post.category] as any || "default"} className="text-xs">{post.category}</Badge>
+                  <Badge variant={categoryColors[post.category] || "default"} className="text-xs">{post.category}</Badge>
                   <span className="text-xs text-muted-foreground">{post.readTime}</span>
                 </div>
                 <h3 className="font-semibold mb-2 group-hover:text-primary transition-colors line-clamp-2">{post.title}</h3>

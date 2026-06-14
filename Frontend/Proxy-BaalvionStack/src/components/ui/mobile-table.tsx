@@ -3,18 +3,20 @@ import { cn } from "@/lib/utils";
 import { Card, CardContent } from "./card";
 import { Badge } from "./badge";
 
+type RowData = Record<string, unknown>;
+
 interface MobileTableProps {
-  data: any[];
+  data: RowData[];
   columns: {
     key: string;
     label: string;
-    render?: (value: any, row: any) => React.ReactNode;
+    render?: (value: unknown, row: RowData) => React.ReactNode;
     primary?: boolean;
     badge?: boolean;
     hidden?: boolean;
   }[];
-  onRowClick?: (row: any) => void;
-  keyExtractor?: (row: any) => string;
+  onRowClick?: (row: RowData) => void;
+  keyExtractor?: (row: RowData) => string;
   className?: string;
 }
 
@@ -22,7 +24,7 @@ export function MobileTable({
   data,
   columns,
   onRowClick,
-  keyExtractor = (row) => row.id,
+  keyExtractor = (row) => String(row.id),
   className,
 }: MobileTableProps) {
   const primaryColumns = columns.filter((col) => col.primary);
@@ -45,7 +47,7 @@ export function MobileTable({
               <div className="flex-1 min-w-0">
                 {primaryColumns.map((col) => {
                   const value = row[col.key];
-                  const rendered = col.render ? col.render(value, row) : value;
+                  const rendered = col.render ? col.render(value, row) : (value as React.ReactNode);
                   
                   return (
                     <div key={col.key} className="mb-1 last:mb-0">
@@ -64,7 +66,7 @@ export function MobileTable({
             <div className="grid grid-cols-2 gap-x-4 gap-y-2">
               {secondaryColumns.map((col) => {
                 const value = row[col.key];
-                const rendered = col.render ? col.render(value, row) : value;
+                const rendered = col.render ? col.render(value, row) : (value as React.ReactNode);
 
                 return (
                   <div key={col.key} className="flex flex-col">

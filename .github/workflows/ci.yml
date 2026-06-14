@@ -49,11 +49,10 @@ jobs:
       # script only where it exists, with the package's own eslint + config).
       # A root `pnpm exec eslint` cannot work: the root has no eslint, and the
       # target packages use incompatible config styles.
-      # Advisory for now: pre-existing app-level lint debt is tracked as a
-      # follow-up; TypeScript Typecheck below is the hard correctness gate.
-      # Flip to blocking once the lint backlog is burned down.
-      - name: Run ESLint (advisory)
-        continue-on-error: true
+      # Blocking: the app-level lint debt for the two scoped apps has been
+      # burned down (proxy-baalvionstack-web + baalvion-admin-platform are
+      # clean — zero errors). Expand the --filter list as more apps are cleaned.
+      - name: Run ESLint
         run: pnpm exec turbo run lint --filter=proxy-baalvionstack-web --filter=baalvion-admin-platform
 
       - name: TypeScript Typecheck
