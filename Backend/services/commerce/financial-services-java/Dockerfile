@@ -17,6 +17,16 @@ RUN mvn -B -ntp -DskipTests -pl "$SERVICE" -am clean package
 
 # ---- Runtime stage ----
 FROM eclipse-temurin:17-jre@sha256:8016378253033ebd971c237f6580f108b4afac11a188d3fc3b982497bbe55c65
+
+# Apply the Ubuntu security patch for OpenSSL in-place. The pinned base still ships
+# openssl/libssl3t64 3.5.5-1ubuntu3 (CVE-2026-45447 HIGH: heap use-after-free in PKCS7_verify);
+# 3.5.5-1ubuntu3.2 fixes it. Upstream eclipse-temurin:17-jre had not yet republished a digest with
+# the patched package, so --only-upgrade pulls it from the Ubuntu archive without adding any new
+# packages. SERVICE-independent (placed before ARG SERVICE) so the layer is reused across builds.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends --only-upgrade openssl libssl3t64 openssl-provider-legacy \
+ && rm -rf /var/lib/apt/lists/*
+
 ARG SERVICE
 ENV SERVICE=${SERVICE}
 WORKDIR /app
