@@ -242,7 +242,7 @@ const stripeProvider = {
   async confirmPayment({ intentId, orderId }) {
     // Retrieve the session from Stripe and trust ONLY Stripe's verdict (never the client).
     const session = await stripeFetch(`/checkout/sessions/${encodeURIComponent(intentId)}`);
-    if (!session || session.metadata?.orderId !== String(orderId)) {
+    if (!session || session.id !== intentId || session.metadata?.orderId !== String(orderId)) {
       return { status: 'failed', transactionId: null, reason: 'order_mismatch' };
     }
     if (session.payment_status !== 'paid') {
