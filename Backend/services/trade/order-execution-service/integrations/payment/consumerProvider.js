@@ -13,6 +13,9 @@
  *   cancelPayment({ intentId })                            -> { status: 'voided' }
  */
 const crypto = require('crypto');
+// Central key vault — resolves PSP keys from the CMS "Integrations & Keys" store (managed in the
+// admin panel, encrypted at rest). Returns null → fall back to env, so a vault outage never breaks pay.
+const { getPaymentCreds } = require('./cmsVault');
 
 // In-memory intent store for the MOCK provider — NON-PRODUCTION (not durable, single-process).
 const mockIntents = new Map();
@@ -64,11 +67,12 @@ const mockProvider = {
 // a client can never self-mark an order paid by forging a confirm call.
 const RAZORPAY_API = 'https://api.razorpay.com/v1';
 
-function razorpayKeys() {
-  const keyId = process.env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+async function razorpayKeys() {
+  const v = await getPaymentCreds('razorpay');
+  const keyId = (v && v.secrets.keyId) || process.env.RAZORPAY_KEY_ID;
+  const keySecret = (v && v.secrets.keySecret) || process.env.RAZORPAY_KEY_SECRET;
   if (!keyId || !keySecret) {
-    throw new Error("payment provider 'razorpay' is not configured (set RAZORPAY_KEY_ID + RAZORPAY_KEY_SECRET)");
+    throw new Error("payment provider 'razorpay' is not configured (set keys in the admin panel, or RAZORPAY_KEY_ID + RAZORPAY_KEY_SECRET)");
   }
   return { keyId, keySecret };
 }
@@ -96,7 +100,7 @@ const razorpayProvider = {
   name: 'razorpay',
   PRODUCTION: true,
   async createPaymentIntent({ orderId, amount, currencyCode }) {
-    const keys = razorpayKeys();
+    const keys = await razorpayKeys();
     // Razorpay amount is in the smallest currency unit (paise/cents). receipt max 40 chars (orderId UUID fits).
     const minor = Math.round(Number(amount) * 100);
     if (!Number.isFinite(minor) || minor < 1) throw new Error('razorpay: invalid order amount');
@@ -113,7 +117,7 @@ const razorpayProvider = {
     return { intentId: order.id, status: 'requires_action', keyId: keys.keyId, amount: order.amount, currency: order.currency };
   },
   async confirmPayment({ intentId, orderId, verification }) {
-    const { keySecret } = razorpayKeys();
+    const { keySecret } = await razorpayKeys();
     const v = verification || {};
     if (!v.razorpay_payment_id || !v.razorpay_order_id || !v.razorpay_signature) {
       return { status: 'failed', transactionId: null, reason: 'missing_verification' };
@@ -137,7 +141,7 @@ const razorpayProvider = {
   async failPayment() { return { status: 'failed' }; },
   async cancelPayment() { return { status: 'voided' }; },
   async refundPayment({ transactionId, amount, reason }) {
-    const keys = razorpayKeys();
+    const keys = await razorpayKeys();
     if (!transactionId) throw new Error('razorpay: refund requires the captured payment id');
     const minor = amount != null ? Math.round(Number(amount) * 100) : undefined;
     const data = await razorpayFetch(`/payments/${transactionId}/refund`, keys, {
@@ -156,10 +160,12 @@ const razorpayProvider = {
 // is backend-authoritative (a client can never self-mark an order paid).
 const STRIPE_API = 'https://api.stripe.com/v1';
 
-function stripeSecret() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error("payment provider 'stripe' is not configured (set STRIPE_SECRET_KEY)");
-  return key;
+async function stripeCreds() {
+  const v = await getPaymentCreds('stripe');
+  const secretKey = (v && v.secrets.secretKey) || process.env.STRIPE_SECRET_KEY;
+  const publishableKey = (v && (v.secrets.publishableKey || (v.config && v.config.publishableKey))) || process.env.STRIPE_PUBLISHABLE_KEY || '';
+  if (!secretKey) throw new Error("payment provider 'stripe' is not configured (set keys in the admin panel, or STRIPE_SECRET_KEY)");
+  return { secretKey, publishableKey };
 }
 
 // Stripe's API is application/x-www-form-urlencoded with bracket notation for nested params.
@@ -177,7 +183,7 @@ async function stripeFetch(path, { method = 'GET', form } = {}) {
   const res = await fetch(`${STRIPE_API}${path}`, {
     method,
     headers: {
-      Authorization: `Bearer ${stripeSecret()}`,
+      Authorization: `Bearer ${(await stripeCreds()).secretKey}`,
       ...(form ? { 'Content-Type': 'application/x-www-form-urlencoded' } : {}),
     },
     ...(form ? { body: form.toString() } : {}),
@@ -225,11 +231,12 @@ const stripeProvider = {
       cancel_url: `${base}/${cc}/checkout?stripe_cancelled=1&order=${orderId}`,
     });
     const session = await stripeFetch('/checkout/sessions', { method: 'POST', form });
+    const { publishableKey } = await stripeCreds();
     return {
       intentId: session.id, // cs_... — the client echoes it back on confirm
       status: 'requires_action',
       redirectUrl: session.url,
-      ...(process.env.STRIPE_PUBLISHABLE_KEY ? { publishableKey: process.env.STRIPE_PUBLISHABLE_KEY } : {}),
+      ...(publishableKey ? { publishableKey } : {}),
     };
   },
   async confirmPayment({ intentId, orderId }) {
@@ -308,13 +315,14 @@ function timingSafeHex(a, b) {
   const bb = Buffer.from(String(b || ''), 'utf8');
   return ba.length === bb.length && crypto.timingSafeEqual(ba, bb);
 }
-function payuKeys() {
-  const key = process.env.PAYU_MERCHANT_KEY;
-  const salt = process.env.PAYU_MERCHANT_SALT;
-  if (!key || !salt) throw new Error("payment provider 'payu' is not configured (set PAYU_MERCHANT_KEY + PAYU_MERCHANT_SALT)");
-  return { key, salt };
+async function payuCreds() {
+  const v = await getPaymentCreds('payu');
+  const key = (v && v.secrets.merchantKey) || process.env.PAYU_MERCHANT_KEY;
+  const salt = (v && v.secrets.merchantSalt) || process.env.PAYU_MERCHANT_SALT;
+  const base = ((v && v.config && v.config.baseUrl) || process.env.PAYU_BASE_URL || 'https://secure.payu.in').replace(/\/+$/, '');
+  if (!key || !salt) throw new Error("payment provider 'payu' is not configured (set keys in the admin panel, or PAYU_MERCHANT_KEY + PAYU_MERCHANT_SALT)");
+  return { key, salt, base };
 }
-const payuBase = () => (process.env.PAYU_BASE_URL || 'https://secure.payu.in').replace(/\/+$/, '');
 const payuReturnUrl = () => process.env.PAYU_RETURN_URL || 'http://localhost:3013/api/v1/orders/webhooks/payu';
 
 // request hash:  sha512(key|txnid|amount|productinfo|firstname|email|||||||||||salt)
@@ -328,7 +336,7 @@ const payuProvider = {
   name: 'payu',
   PRODUCTION: true,
   async createPaymentIntent({ orderId, amount, currencyCode }) {
-    const { key, salt } = payuKeys();
+    const { key, salt, base } = await payuCreds();
     const amountStr = Number(amount).toFixed(2); // PayU uses major units, 2 decimals
     if (!(Number(amountStr) > 0)) throw new Error('payu: invalid order amount');
     const txnid = `txn${crypto.randomBytes(11).toString('hex')}`.slice(0, 25); // unique, ≤25 chars
@@ -342,7 +350,7 @@ const payuProvider = {
       intentId: txnid,
       status: 'requires_action',
       formPost: {
-        action: `${payuBase()}/_payment`,
+        action: `${base}/_payment`,
         fields: {
           key, txnid, amount: amountStr, productinfo, firstname, email,
           phone: process.env.PAYU_DEFAULT_PHONE || '9999999999',
@@ -363,10 +371,10 @@ const payuProvider = {
 };
 
 // PayU return-route helpers (used by orderService.settlePayuReturn). REAL reverse-hash verification.
-function payuVerifyReturn(body) {
+async function payuVerifyReturn(body) {
   if (!body || !body.hash) return false;
   let salt, key;
-  try { ({ salt, key } = payuKeys()); } catch { return false; } // unconfigured → fail closed
+  try { ({ salt, key } = await payuCreds()); } catch { return false; } // unconfigured → fail closed
   const expected = payuResponseHash({
     salt, status: body.status, email: body.email, firstname: body.firstname,
     productinfo: body.productinfo, amount: body.amount, txnid: body.txnid, key,
