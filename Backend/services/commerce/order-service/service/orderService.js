@@ -694,7 +694,7 @@ async function cancelPayment(storeId, orderId, intentId) {
 // provider-authoritative capture (reuses the webhook capture path, idempotent + order-row locked);
 // any other status → mark failed. Returns the orderId + market so the route can redirect the browser.
 async function settlePayuReturn(body) {
-    if (!payuVerifyReturn(body)) return { ok: false, reason: 'bad_signature' };
+    if (!(await payuVerifyReturn(body))) return { ok: false, reason: 'bad_signature' };
     const parsed = payuParseReturn(body);
     if (!parsed.txnid) return { ok: false, reason: 'missing_txnid' };
     const payment = await OrdersOrderPayment.findOne({ where: { transactionId: parsed.txnid }, attributes: ['orderId'] });

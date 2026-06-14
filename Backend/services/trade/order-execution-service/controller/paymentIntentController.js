@@ -122,7 +122,7 @@ async function capturePayment(req, res, next) {
 async function payuReturn(req, res) {
     const body = req.body || {};
     const bounce = (flag, orderId) => res.redirect(303, orderId ? `${STOREFRONT}/orders/${orderId}?payu=${flag}` : `${STOREFRONT}/orders?payu=${flag}`);
-    if (!payuVerifyReturn(body)) return bounce('failed');
+    if (!(await payuVerifyReturn(body))) return bounce('failed');
     const parsed = payuParseReturn(body);
     if (!parsed.txnid) return bounce('failed');
     try {
