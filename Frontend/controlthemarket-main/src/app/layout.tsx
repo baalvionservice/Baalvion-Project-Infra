@@ -29,6 +29,20 @@ export const metadata: Metadata = {
   },
   description:
     'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance — not paper.',
+  keywords: [
+    'skill-based hiring',
+    'proof of skill',
+    'verified talent',
+    'technical assessment',
+    'candidate evaluation',
+    'skill verification',
+    'hiring platform',
+    'real-world performance',
+    'ControlTheMarket',
+  ],
+  alternates: {
+    canonical: siteUrl,
+  },
   openGraph: {
     type: 'website',
     siteName: 'ControlTheMarket',
@@ -61,12 +75,27 @@ export const metadata: Metadata = {
 
 const jsonLd = {
   '@context': 'https://schema.org',
-  '@type': 'Organization',
-  name: 'ControlTheMarket',
-  url: siteUrl,
-  description:
-    'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance.',
-  sameAs: [siteUrl],
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${siteUrl}/#organization`,
+      name: 'ControlTheMarket',
+      url: siteUrl,
+      description:
+        'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance.',
+      logo: `${siteUrl}/opengraph-image`,
+      sameAs: [siteUrl],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${siteUrl}/#website`,
+      name: 'ControlTheMarket',
+      url: siteUrl,
+      description:
+        'The proof-of-skill hiring platform where top companies discover verified talent based on real-world performance.',
+      publisher: { '@id': `${siteUrl}/#organization` },
+    },
+  ],
 };
 
 export default function RootLayout({

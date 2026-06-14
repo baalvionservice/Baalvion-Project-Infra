@@ -1,4 +1,12 @@
+import type { Metadata } from 'next';
 import AdminLayout from '@/components/layout/AdminLayout';
+
+// Private admin console — never index or follow. robots.ts also disallows
+// /admin/, but this segment-level directive guarantees noindex even if a page
+// is reached via a non-disallowed path.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 // In-app admin panel. Renders the role-guarded admin shell (sidebar + topbar)
 // so administrators can see everything happening — recruitment pipeline, campus

@@ -25,6 +25,9 @@ import type { Product, ProductCategory } from "@/lib/content/types";
 import { BRAND_IMAGES } from "@/lib/brand-assets";
 import { PendingDisclosure } from "@/components/common/PendingDisclosure";
 import { ProductInquiryForm } from "@/components/products/ProductInquiryForm";
+import { JsonLd } from "@/components/seo/JsonLd";
+
+const SITE_URL = "https://mining.baalvion.com";
 
 type Params = { category: string; slug: string };
 
@@ -45,15 +48,30 @@ export async function generateMetadata({
   const { category, slug } = await params;
   const product = await getProduct(slug);
   const name = product?.name ?? humanizeSlug(slug);
+
+  // Build a specific, grade-aware title ONLY from real record data. When no
+  // record exists (store is empty in this environment) we fall back to a
+  // supplier-intent title from the humanized slug — never fabricated grade.
+  const grade = product?.grade?.trim();
+  const titleHead = grade ? `${name} (${grade})` : name;
+  const title = `${titleHead} Suppliers | Baalvion Mining`;
+
   const description =
     product?.description ??
-    `${name} — product details from Baalvion Mining Inc. Specifications are published once formally disclosed. Submit an inquiry for current availability.`;
+    `Source ${name} from Baalvion Mining Inc. — verified industrial-mineral supplier. Specifications and grade are published once formally disclosed; submit an inquiry for current availability and pricing.`;
 
   return {
-    title: `${name} | Products`,
+    title,
     description,
     alternates: {
       canonical: `https://mining.baalvion.com/products/${category}/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://mining.baalvion.com/products/${category}/${slug}`,
+      siteName: "Baalvion Mining Inc.",
+      type: "website",
     },
   };
 }
@@ -74,9 +92,59 @@ export default async function ProductDetailPage({
   const categoryName = category?.name ?? humanizeSlug(categorySlug);
   const heroImage = product?.gallery[0]?.url ?? BRAND_IMAGES.mineral;
   const heroAlt = product?.gallery[0]?.alt ?? `${displayName} sample`;
+  const productUrl = `${SITE_URL}/products/${categorySlug}/${slug}`;
+
+  // Structured grade/size/spec properties — emitted ONLY from real record data,
+  // never fabricated when the store is empty.
+  const additionalProperty = product
+    ? [
+        ...(product.grade
+          ? [{ "@type": "PropertyValue", "name": "Grade", "value": product.grade }]
+          : []),
+        ...(product.size
+          ? [{ "@type": "PropertyValue", "name": "Size", "value": product.size }]
+          : []),
+        ...product.specifications.map((spec) => ({
+          "@type": "PropertyValue",
+          "name": spec.label,
+          "value": spec.value,
+        })),
+      ]
+    : [];
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": displayName,
+    "image": heroImage,
+    "description":
+      product?.description ??
+      `${displayName} — product details from Baalvion Mining Inc.`,
+    "category": categoryName,
+    "url": productUrl,
+    "brand": { "@type": "Brand", "name": "Baalvion Mining Inc." },
+    "manufacturer": {
+      "@type": "Organization",
+      "name": "Baalvion Mining Inc.",
+      "url": SITE_URL,
+    },
+    ...(additionalProperty.length > 0 ? { additionalProperty } : {}),
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Products", "item": `${SITE_URL}/products` },
+      { "@type": "ListItem", "position": 2, "name": categoryName, "item": `${SITE_URL}/products/${categorySlug}` },
+      { "@type": "ListItem", "position": 3, "name": displayName, "item": productUrl },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <JsonLd data={productSchema} />
+      <JsonLd data={breadcrumbSchema} />
       <Navbar />
 
       <main className="flex-1">

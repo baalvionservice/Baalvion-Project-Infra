@@ -1,9 +1,21 @@
 
+import type { Metadata } from "next";
 import { DashboardSidebar } from "@/components/dashboard/Sidebar";
 import { NotificationPopover } from "@/components/dashboard/NotificationPopover";
 import { Search, Globe, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+
+// Private member workspace — must never be indexed or crawled.
+export const metadata: Metadata = {
+  title: "Dashboard",
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+    googleBot: { index: false, follow: false },
+  },
+};
 
 export default function DashboardLayout({
   children,

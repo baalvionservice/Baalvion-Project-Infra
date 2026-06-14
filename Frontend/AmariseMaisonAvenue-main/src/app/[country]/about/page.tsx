@@ -3,6 +3,8 @@ import React from 'react';
 import { Metadata } from 'next';
 import { MAISON_STORY as MAISON_STORY_FALLBACK } from '@/lib/mock-data';
 import { getMaisonStory } from '@/lib/cms';
+import { buildAlternates } from '@/lib/seo';
+import { normalizeCountry } from '@/lib/i18n/countries';
 import { Sparkles, History, Gem, ShieldCheck, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -13,9 +15,16 @@ type AboutPageProps = {
 };
 
 export async function generateMetadata({ params }: AboutPageProps): Promise<Metadata> {
+  const cc = normalizeCountry((await params).country);
   return {
     title: 'About AMARISÉ MAISON | Our Heritage Since 1924',
     description: 'Discover the centuries-old heritage and craftsmanship of AMARISÉ MAISON AVENUE. Explore our story of luxury and excellence.',
+    alternates: buildAlternates(cc, '/about'),
+    openGraph: {
+      title: 'About AMARISÉ MAISON | Our Heritage Since 1924',
+      description: 'The centuries-old heritage and craftsmanship of AMARISÉ MAISON AVENUE, est. 1924.',
+      type: 'website',
+    },
   };
 }
 

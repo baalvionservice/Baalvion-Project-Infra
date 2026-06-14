@@ -25,8 +25,9 @@ export async function generateMetadata(
   if (!l) return { title: 'Practitioner Not Found', robots: { index: false, follow: true } };
 
   const specs = (l.specializations || []).join(', ');
+  const primarySpec = (l.specializations || [])[0];
   const loc = [l.city, l.country].filter(Boolean).join(', ');
-  const title = `${l.name} — ${specs || 'Lawyer'}${loc ? ` in ${loc}` : ''}`;
+  const title = `${l.name} — ${primarySpec ? `${primarySpec} Attorney` : 'Attorney'}${loc ? ` in ${loc}` : ''} | Law Elite Network`;
   const description = String(
     l.bio || `${l.name} is a verified ${specs || 'legal'} practitioner${loc ? ` based in ${loc}` : ''} on Law Elite Network — connect with elite counsel worldwide.`,
   ).slice(0, 300);
@@ -37,6 +38,7 @@ export async function generateMetadata(
     description,
     keywords: [l.name, ...(l.specializations || []), l.country, l.city, 'lawyer', 'attorney', 'legal consultation'].filter(Boolean) as string[],
     alternates: { canonical: url },
+    robots: { index: true, follow: true },
     openGraph: {
       type: 'profile',
       url,
@@ -78,16 +80,34 @@ function attorneyJsonLd(l: any, id: string) {
   return node;
 }
 
+function breadcrumbJsonLd(l: any, id: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+      { '@type': 'ListItem', position: 2, name: 'Lawyers', item: `${SITE}/lawyers` },
+      { '@type': 'ListItem', position: 3, name: l.name, item: `${SITE}/lawyer/${id}` },
+    ],
+  };
+}
+
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const l = await fetchLawyer(id);
   return (
     <>
       {l && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(attorneyJsonLd(l, id)) }}
-        />
+        <>
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(attorneyJsonLd(l, id)) }}
+          />
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(l, id)) }}
+          />
+        </>
       )}
       <LawyerProfileClient id={id} />
     </>

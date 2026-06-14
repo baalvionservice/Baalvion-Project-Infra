@@ -1,6 +1,7 @@
 import React from "react";
 import { getProductById, getProductReviews, getRelatedProducts } from "@/lib/catalog";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, SITE_URL } from "@/lib/seo";
+import { productJsonLd, breadcrumbJsonLd } from "@/lib/structured-data";
 import {
   normalizeCountry,
   getCountryConfig,
@@ -96,8 +97,24 @@ export default async function ProductPage({ params }: ProductPageProps) {
     getRelatedProducts(id, countryCode, 8),
   ]);
 
+  const canonicalUrl = `${SITE_URL}/${countryCode}/product/${id}`;
+  const productSchema = productJsonLd(product, canonicalUrl);
+  const breadcrumbSchema = breadcrumbJsonLd([
+    { name: "Home", url: `${SITE_URL}/${countryCode}` },
+    { name: product.name, url: canonicalUrl },
+  ]);
+
   return (
     <div className="bg-white min-h-screen animate-fade-in font-body">
+      {/* Product + Breadcrumb structured data for rich product results (server-rendered). */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* Container with responsive max-width */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumbs */}
