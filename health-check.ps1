@@ -75,10 +75,9 @@ $backends = @(
   @('imperialpedia-service',   3004, '/health'),
   @('brand-connector-service', 3006, '/health'),
   @('insiders-service',        3050, '/health'),
-  @('elite-circle-service',    3051, '/health'),
   @('proxy-service',           4000, '/health'),
   @('cms-service',             3011, '/'),
-  @('realtime-service',        3026, '/health'),
+  @('realtime-service',        3040, '/health'),
   @('about-service',           3010, '/health'),
   @('mining-service',          3003, '/health'),
   @('market-service',          3007, '/health'),
@@ -99,8 +98,7 @@ $frontends = @(
   @('brand-connector',          3035, '/'),
   @('Global-Trade-Infra',       9003, '/'),
   @('For-Investors',            8080, '/'),
-  @('Proxy-BaalvionStack',      8090, '/'),
-  @('baalvion-elite-circle',    8081, '/')
+  @('Proxy-BaalvionStack',      8090, '/')
 )
 
 $up = 0; $down = 0

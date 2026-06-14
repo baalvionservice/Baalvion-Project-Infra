@@ -20,7 +20,6 @@
     "deal-room-service",
     "developer-service",
     "dispute-service",
-    "elite-circle-service",
     "escrow-service",
     "finance-audit-service",
     "fulfillment-service",
@@ -111,9 +110,6 @@
       "auth-service"
     ],
     "dispute-service": [
-      "auth-service"
-    ],
-    "elite-circle-service": [
       "auth-service"
     ],
     "escrow-service": [

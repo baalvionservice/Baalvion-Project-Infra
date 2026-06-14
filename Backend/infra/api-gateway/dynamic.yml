@@ -55,7 +55,6 @@ http:
     sp-ecosystem-brand-connector:  { stripPrefix: { prefixes: ["/api/v1/ecosystem/brand-connector"] } }
     sp-ecosystem-ctm:              { stripPrefix: { prefixes: ["/api/v1/ecosystem/ctm"] } }
     sp-ecosystem-insiders:         { stripPrefix: { prefixes: ["/api/v1/ecosystem/insiders"] } }
-    sp-ecosystem-elite-circle:     { stripPrefix: { prefixes: ["/api/v1/ecosystem/elite-circle"] } }
     sp-ecosystem-ir:               { stripPrefix: { prefixes: ["/api/v1/ecosystem/ir"] } }
     sp-ecosystem-jobs:             { stripPrefix: { prefixes: ["/api/v1/ecosystem/jobs"] } }
     sp-ecosystem-mining:           { stripPrefix: { prefixes: ["/api/v1/ecosystem/mining"] } }
@@ -90,7 +89,6 @@ http:
     ecosystem-brand-connector: { rule: "PathPrefix(`/api/v1/ecosystem/brand-connector`)", entryPoints: [websecure], service: ecosystem-brand-connector, middlewares: [sp-ecosystem-brand-connector, ratelimit, sec-headers], tls: {} }
     ecosystem-ctm:             { rule: "PathPrefix(`/api/v1/ecosystem/ctm`)",             entryPoints: [websecure], service: ecosystem-ctm,             middlewares: [sp-ecosystem-ctm, ratelimit, sec-headers], tls: {} }
     ecosystem-insiders:        { rule: "PathPrefix(`/api/v1/ecosystem/insiders`)",        entryPoints: [websecure], service: ecosystem-insiders,        middlewares: [sp-ecosystem-insiders, ratelimit, sec-headers], tls: {} }
-    ecosystem-elite-circle:    { rule: "PathPrefix(`/api/v1/ecosystem/elite-circle`)",    entryPoints: [websecure], service: ecosystem-elite-circle,    middlewares: [sp-ecosystem-elite-circle, ratelimit, sec-headers], tls: {} }
     ecosystem-ir:              { rule: "PathPrefix(`/api/v1/ecosystem/ir`)",              entryPoints: [websecure], service: ecosystem-ir,              middlewares: [sp-ecosystem-ir, ratelimit, sec-headers], tls: {} }
     ecosystem-jobs:            { rule: "PathPrefix(`/api/v1/ecosystem/jobs`)",            entryPoints: [websecure], service: ecosystem-jobs,            middlewares: [sp-ecosystem-jobs, ratelimit, sec-headers], tls: {} }
     ecosystem-mining:          { rule: "PathPrefix(`/api/v1/ecosystem/mining`)",          entryPoints: [websecure], service: ecosystem-mining,          middlewares: [sp-ecosystem-mining, ratelimit, sec-headers], tls: {} }
@@ -133,8 +131,6 @@ http:
     ecosystem-brand-connector:  { loadBalancer: { servers: [{ url: "http://host.docker.internal:3006" }] } }
     ecosystem-ctm:              { loadBalancer: { servers: [{ url: "http://host.docker.internal:3017" }] } }
     ecosystem-insiders:         { loadBalancer: { servers: [{ url: "http://host.docker.internal:3050" }] } }
-    # ecosystem-elite-circle: NOT RUNNING (no host listener on :3051) — resolves once elite-circle-service starts.
-    ecosystem-elite-circle:     { loadBalancer: { servers: [{ url: "http://host.docker.internal:3051" }] } }
     ecosystem-ir:               { loadBalancer: { servers: [{ url: "http://host.docker.internal:3008" }] } }
     ecosystem-jobs:             { loadBalancer: { servers: [{ url: "http://host.docker.internal:3002" }] } }
     ecosystem-mining:           { loadBalancer: { servers: [{ url: "http://host.docker.internal:3003" }] } }

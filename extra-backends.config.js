@@ -15,7 +15,6 @@ module.exports = {
     { ...base, name: 'ir-service',              cwd: `${B}/ecosystem/ir-service`,             script: 'index.js' },
     { ...base, name: 'brand-connector-service', cwd: `${B}/ecosystem/brand-connector-service`,script: 'index.js' },
     { ...base, name: 'insiders-service',        cwd: `${B}/ecosystem/insiders-service`,       script: 'index.js' },
-    { ...base, name: 'elite-circle-service',    cwd: `${B}/ecosystem/elite-circle-service`,   script: 'index.js' },
     { ...base, name: 'dashboard-service',       cwd: `${B}/platform/dashboard-service`,       script: 'index.js' },
     { ...base, name: 'trade-service',           cwd: `${B}/commerce/trade-service`,           script: 'index.js' },
     // order-service REMOVED (consolidated) — order lifecycle owned by trade/order-execution-service.
