@@ -255,7 +255,7 @@ function forecastLinear(ys, horizon) {
  * @returns {{forecast:number[], lower:number[], upper:number[], level:number, trend:number, seasonal:boolean}}
  */
 function holtWinters(series, opts = {}) {
-  const horizon = boundHorizon(opts.horizon ?? 7);
+  const horizon = Math.min(boundHorizon(opts.horizon ?? 7), MAX_FORECAST_HORIZON);
   const alpha = opts.alpha ?? 0.4;
   const beta = opts.beta ?? 0.1;
   const gamma = opts.gamma ?? 0.2;

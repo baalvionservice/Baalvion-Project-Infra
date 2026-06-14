@@ -185,13 +185,15 @@ async function stitch(rows, localTable, embeds) {
 // Reject keys that could pollute the prototype chain when used as object keys.
 const isUnsafeKey = (key) => key === '__proto__' || key === 'constructor' || key === 'prototype';
 
-const buildWhere = (filters = []) => {
+const buildWhere = (filters = [], model = null) => {
     const where = Object.create(null);
     for (const f of filters) {
         const op = OPS[f.op];
         if (!op) continue;
         // f.col is user-controlled; never let it index into the prototype chain.
         if (typeof f.col !== 'string' || isUnsafeKey(f.col)) continue;
+        // Allowlist: f.col must be a real column of the model, not an arbitrary key.
+        if (model && !Object.prototype.hasOwnProperty.call(model.rawAttributes, f.col)) continue;
         const cond = { [op]: f.val };
         where[f.col] = where[f.col] ? Object.assign({}, where[f.col], cond) : cond;
     }
@@ -308,7 +310,7 @@ async function handleQuery(req, res, next) {
 
         if (action === 'select') {
             const scope = await scopeRead(table, policy, ctx);
-            const where = mergeWhere(buildWhere(spec.filters), scope);
+            const where = mergeWhere(buildWhere(spec.filters, model), scope);
 
             if (spec.head) {
                 const count = await model.count({ where });
@@ -364,7 +366,7 @@ async function handleQuery(req, res, next) {
 
         if (action === 'update') {
             const scope = await authorizeWrite(table, policy, ctx, 'update', spec.values);
-            const where = mergeWhere(buildWhere(spec.filters), scope);
+            const where = mergeWhere(buildWhere(spec.filters, model), scope);
             const [, rows] = await model.update(spec.values, { where, returning: true });
             const plain = (rows || []).map((r) => r.get({ plain: true }));
             if (!spec.returning) return sendSuccess(req, res, { data: null, count: null });
@@ -374,7 +376,7 @@ async function handleQuery(req, res, next) {
 
         if (action === 'delete') {
             const scope = await authorizeWrite(table, policy, ctx, 'delete', spec.values);
-            const where = mergeWhere(buildWhere(spec.filters), scope);
+            const where = mergeWhere(buildWhere(spec.filters, model), scope);
             if (!Object.keys(where).length && !scope) throw new AppError('BAD_REQUEST', 'Refusing unfiltered delete', 400);
             const count = await model.destroy({ where });
             return sendSuccess(req, res, { data: null, count });

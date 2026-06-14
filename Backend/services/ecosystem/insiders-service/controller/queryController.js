@@ -319,7 +319,12 @@ async function handleQuery(req, res, next) {
             const childExtra = parsed.embeds.map((e) => localKeyFor(table, e));
             const findOpts = { where, attributes: attrsFor(model, parsed, childExtra) };
             if (Array.isArray(spec.order) && spec.order.length) {
-                findOpts.order = spec.order.map((o) => [o.col, o.ascending ? 'ASC' : 'DESC']);
+                // o.col is user-controlled and becomes a SQL identifier in ORDER BY.
+                // Constrain it to the model's real columns via the SAFE_COLUMN allowlist
+                // (rejects prototype-polluting / exotic names) before use.
+                findOpts.order = spec.order
+                    .filter((o) => o && typeof o.col === 'string' && !isUnsafeKey(o.col) && SAFE_COLUMN.test(o.col) && model.rawAttributes[o.col])
+                    .map((o) => [o.col, o.ascending ? 'ASC' : 'DESC']);
             }
             if (spec.limit != null) findOpts.limit = spec.limit;
             if (spec.offset != null) findOpts.offset = spec.offset;

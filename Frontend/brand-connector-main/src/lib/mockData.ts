@@ -48,10 +48,17 @@ const COUNTRIES = [
   "Singapore",
 ];
 
+// Cryptographically secure uniform float in [0, 1) (works in browser + Node 19+ via Web Crypto)
+const secureRandom = (): number => {
+  const buf = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(buf);
+  return buf[0] / 0x100000000;
+};
+
 // Helper to get random item from array
-const rand = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+const rand = <T>(arr: T[]): T => arr[Math.floor(secureRandom() * arr.length)];
 const randRange = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1) + min);
+  Math.floor(secureRandom() * (max - min + 1) + min);
 
 /**
  * Root Admin Configuration

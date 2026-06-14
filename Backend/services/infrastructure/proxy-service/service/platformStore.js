@@ -274,13 +274,18 @@ const convertRecord = (name, inst) => {
 
 // Convert camelCase payload → snake_case DB columns for insert
 const prepareInsert = (name, payload) => {
-  const p = {};
+  // Null-prototype map so a remote-controlled column name can never reach
+  // Object.prototype, and define the write as an own data property
+  // (remote-property-injection / prototype-pollution guard).
+  const p = Object.create(null);
   for (const [k, v] of Object.entries(payload)) {
     if (v === undefined) continue;
     if (FORBIDDEN_KEYS.has(k)) continue;
     const col = toSnake(k);
     if (FORBIDDEN_KEYS.has(col)) continue;
-    p[col] = v;
+    Object.defineProperty(p, col, {
+      value: v, writable: true, enumerable: true, configurable: true,
+    });
   }
   if (name === 'proxies') {
     if (p.host !== undefined) { p.ip = p.host; delete p.host; }

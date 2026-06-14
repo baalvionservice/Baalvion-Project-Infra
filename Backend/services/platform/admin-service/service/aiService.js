@@ -528,7 +528,10 @@ function extractVariables(template) {
 }
 
 function slugify(raw, fallbackName) {
-    const base = (raw != null && String(raw).trim() !== '') ? String(raw) : String(fallbackName || '');
+    const rawBase = (raw != null && String(raw).trim() !== '') ? String(raw) : String(fallbackName || '');
+    // Bound input length before regex to avoid polynomial ReDoS on pathological input.
+    // The output is capped at 200 chars, so trimming the source to 2000 chars is behavior-preserving.
+    const base = rawBase.slice(0, 2000);
     return base.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 200);
 }
 

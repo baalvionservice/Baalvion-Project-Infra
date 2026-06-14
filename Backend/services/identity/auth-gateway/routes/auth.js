@@ -292,7 +292,12 @@ router.post('/refresh', async (req, res) => {
 // already expired/invalid/tampered — we skip revocation (nothing to revoke) but still clear cookies.
 router.post('/logout', async (req, res) => {
   const token = req.cookies && req.cookies[config.cookie.accessName];
-  if (token) {
+  // SECURITY (js/user-controlled-bypass): the raw cookie is attacker-controlled, so it must NOT
+  // drive any security decision by itself. The only branch it gates here is whether to ATTEMPT
+  // revocation; the trust decision is delegated entirely to verifier.verify(), and revocation acts
+  // solely on the VERIFIED claims it returns. We additionally require a string token before calling
+  // verify so a non-string cookie value can never short-circuit validation.
+  if (typeof token === 'string' && token.length > 0) {
     try {
       const c = await verifier.verify(token);
       if (c && c.sid) await revoke(c.sid, c.jti, c.exp);

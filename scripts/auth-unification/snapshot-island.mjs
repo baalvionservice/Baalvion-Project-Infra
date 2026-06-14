@@ -53,7 +53,13 @@ if (!execute) { console.log('\n[dry-run] no files written. Re-run with --execute
 mkdirSync(outDir, { recursive: true });
 // keep dumps out of git
 const gi = path.join(outDir, '.gitignore');
-if (!existsSync(gi)) writeFileSync(gi, '*.sql\n*.manifest.json\n');
+// Atomic create-if-absent (flag 'wx') avoids a TOCTOU race between checking
+// existence and writing; EEXIST means an existing .gitignore is left untouched.
+try {
+  writeFileSync(gi, '*.sql\n*.manifest.json\n', { flag: 'wx' });
+} catch (err) {
+  if (err.code !== 'EEXIST') throw err;
+}
 
 // 1 — row counts (pre-dump)
 const counts = {};
