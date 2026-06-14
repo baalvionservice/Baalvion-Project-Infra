@@ -1,4 +1,4 @@
--- Grant the non-superuser runtime role baalvion_app DML on the audit schema so
+-- Grant the non-superuser runtime role baalvion_app DML on the finance_audit schema so
 -- RLS (layers 1+2) actually enforces at runtime (layer 3a). Postgres checks table
 -- privileges BEFORE RLS, so without these grants every query fails on permission.
 -- Run as the schema OWNER (the normal Flyway user). Idempotent. Role-guarded so it
@@ -7,12 +7,12 @@
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'baalvion_app') THEN
-    RAISE NOTICE 'baalvion_app role absent — skipping grants for schema audit; provision the role (027_app_role) and re-run.';
+    RAISE NOTICE 'baalvion_app role absent — skipping grants for schema finance_audit; provision the role (027_app_role) and re-run.';
     RETURN;
   END IF;
-  EXECUTE 'GRANT USAGE ON SCHEMA audit TO baalvion_app';
-  EXECUTE 'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA audit TO baalvion_app';
-  EXECUTE 'GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA audit TO baalvion_app';
-  EXECUTE 'ALTER DEFAULT PRIVILEGES IN SCHEMA audit GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO baalvion_app';
-  EXECUTE 'ALTER DEFAULT PRIVILEGES IN SCHEMA audit GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO baalvion_app';
+  EXECUTE 'GRANT USAGE ON SCHEMA finance_audit TO baalvion_app';
+  EXECUTE 'GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA finance_audit TO baalvion_app';
+  EXECUTE 'GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA finance_audit TO baalvion_app';
+  EXECUTE 'ALTER DEFAULT PRIVILEGES IN SCHEMA finance_audit GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO baalvion_app';
+  EXECUTE 'ALTER DEFAULT PRIVILEGES IN SCHEMA finance_audit GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO baalvion_app';
 END$$;
