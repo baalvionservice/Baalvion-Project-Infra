@@ -8,6 +8,7 @@
 // back to base (USD) behavior so existing callers are unaffected.
 const { Op, literal } = require('sequelize');
 const {
+    sequelize,
     CommerceStore, CommerceProduct, CommerceProductVariant, CommerceProductPricing,
     CommerceProductMedia, CommerceCategory, CommerceCollection,
 } = require('../models');
@@ -45,9 +46,14 @@ function regionWhere(country) {
         throw new AppError('BAD_REQUEST', `Unsupported country: ${country}`, 400);
     }
     const arr = JSON.stringify([country]); // e.g. ["us"]
+    // Let Sequelize's dialect escaper own the quoting of the value instead of
+    // concatenating it raw into SQL. sequelize.escape() returns a fully-quoted,
+    // injection-safe SQL string literal (equivalent to a bound parameter here),
+    // so the JSONB region value can never break out of its quotes.
+    const arrLiteral = sequelize.escape(arr);
     return literal(
         `(COALESCE((custom_fields->>'isGlobal')::boolean, false) = true`
-        + ` OR custom_fields->'regions' @> '${arr}'::jsonb`
+        + ` OR custom_fields->'regions' @> ${arrLiteral}::jsonb`
         + ` OR COALESCE(jsonb_array_length(custom_fields->'regions'), 0) = 0)`
     );
 }

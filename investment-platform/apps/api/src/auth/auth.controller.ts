@@ -147,10 +147,12 @@ export class AuthController {
       maxAge: this.config.getOrThrow<number>('jwt.refreshTtl') * 1000,
       path: '/api/v1/auth',
     });
+    // The refresh token is delivered only via the httpOnly, secure cookie above
+    // and is deliberately NOT returned in the JSON body, so client-side script
+    // (and any client storage it writes to) never sees this sensitive credential.
     return {
       success: true,
       accessToken: pair.accessToken,
-      refreshToken: pair.refreshToken,
       expiresIn: pair.expiresIn,
     };
   }

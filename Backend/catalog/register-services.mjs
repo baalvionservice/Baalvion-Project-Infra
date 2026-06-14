@@ -5,7 +5,7 @@
  * overwrites an existing catalog/services/*.yaml, so running it cannot change or
  * break anything already defined. Run: `node catalog/register-services.mjs`.
  */
-import { writeFileSync, existsSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -54,10 +54,10 @@ const S = [
 let created = 0, skipped = 0;
 for (const [name, path, domain, division, context, tier, language, datastores, dependsOn] of S) {
   const file = join(SERVICES, `${name}.yaml`);
-  if (existsSync(file)) { skipped++; console.log(`• skip (exists)  ${name}`); continue; }
   const ds = `[${datastores.join(', ')}]`;
   const deps = dependsOn.length ? `[${dependsOn.join(', ')}]` : '[]';
-  writeFileSync(file, `apiVersion: baalvion.io/v1
+  try {
+    writeFileSync(file, `apiVersion: baalvion.io/v1
 kind: Service
 metadata:
   name: ${name}
@@ -79,7 +79,11 @@ spec:
   apis: ["/v1/${context}"]
   slo: { availability: 0.99, latencyP95Ms: 400 }
   deploy: { chart: baalvion-service, namespace: baalvion-${domain}, minReplicas: 2, maxReplicas: 10 }
-`);
-  created++; console.log(`✓ created       ${name}  (${domain})`);
+`, { flag: 'wx' });
+    created++; console.log(`✓ created       ${name}  (${domain})`);
+  } catch (err) {
+    if (err && err.code === 'EEXIST') { skipped++; console.log(`• skip (exists)  ${name}`); continue; }
+    throw err;
+  }
 }
 console.log(`\n${created} created, ${skipped} skipped. Existing descriptors untouched.`);

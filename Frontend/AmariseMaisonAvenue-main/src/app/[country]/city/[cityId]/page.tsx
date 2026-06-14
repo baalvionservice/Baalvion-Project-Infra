@@ -24,6 +24,17 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Escape HTML-sensitive characters in a JSON-LD payload so CMS/AI-derived string
+// values cannot break out of the <script> element and inject markup (XSS).
+// JSON.stringify does not escape <, >, or & — encoding them as \uXXXX keeps the
+// JSON-LD semantically identical while preventing a </script> breakout.
+function safeJsonLd(data: unknown): string {
+  return JSON.stringify(data)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e")
+    .replace(/&/g, "\\u0026");
+}
+
 /**
  * CityPage: Programmatic SEO Authority Page.
  * Focuses on high-authority city-specific luxury content and local structured data.
@@ -105,7 +116,7 @@ export default function CityPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
+          __html: safeJsonLd({
             "@context": "https://schema.org",
             "@type": "Guide",
             name: `Luxury Shopping in ${city.name} | Amarisé Maison`,

@@ -30,7 +30,7 @@ function walk(dir) {
     const lines = fs.readFileSync(full, 'utf8').split('\n');
     lines.forEach((ln, i) => {
       if (/\bdecoded\.(id|orgId|sessionId)\b/.test(ln)) viol.push({ f: nf, n: i + 1, msg: 'legacy claim reader decoded.id/orgId/sessionId', ln: ln.trim() });
-      if (/jwtserver\.verifyAccessToken|jwt\.verify\s*\([^)]*\)\s*;?\s*$/.test(ln) && /middleware/i.test(nf)) viol.push({ f: nf, n: i + 1, msg: 'handwritten verify in middleware', ln: ln.trim() });
+      if (/(?:^|[^.\w])(?:jwtserver\.verifyAccessToken|jwt\.verify\s*\([^)]*\)\s*;?\s*$)/.test(ln) && /middleware/i.test(nf)) viol.push({ f: nf, n: i + 1, msg: 'handwritten verify in middleware', ln: ln.trim() });
     });
   }
 }

@@ -20,7 +20,7 @@
  * NEVER use these keys in production — provision real keys via your secret store.
  */
 import { generateKeyPairSync, createPublicKey, createHash } from 'node:crypto';
-import { mkdirSync, writeFileSync, readFileSync, existsSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
@@ -48,7 +48,15 @@ const envLines = {
 };
 
 const envPath = join(root, '.env');
-let env = existsSync(envPath) ? readFileSync(envPath, 'utf8') : '';
+// Read atomically: attempt the read directly and treat a missing file as empty,
+// instead of existsSync()-then-read() which opens a TOCTOU race (the file could
+// be created/removed between the check and the read/write).
+let env = '';
+try {
+  env = readFileSync(envPath, 'utf8');
+} catch (err) {
+  if (err.code !== 'ENOENT') throw err;
+}
 for (const [k, v] of Object.entries(envLines)) {
   const line = `${k}=${v}`;
   const re = new RegExp(`^${k}=.*$`, 'm');

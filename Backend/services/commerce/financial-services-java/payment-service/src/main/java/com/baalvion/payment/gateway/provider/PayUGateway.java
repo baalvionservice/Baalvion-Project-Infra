@@ -62,6 +62,12 @@ public class PayUGateway implements PaymentGateway {
   private static final String DEFAULT_CURRENCY = "INR";
   /** txnid hash slice length (payu.js:38: {@code .slice(0, 16)}). */
   private static final int TXNID_HASH_LEN = 16;
+  /**
+   * Upper bound for a webhook-supplied MAJOR-unit amount before it feeds arithmetic. Well above
+   * any real PayU transaction yet far below where {@code amount * 100} could lose integer
+   * precision in a double, so a hostile/oversized amount is rejected rather than computed on.
+   */
+  private static final double MAX_MAJOR_AMOUNT = 1_000_000_000_000d;
 
   @Override
   public String name() {
@@ -264,7 +270,11 @@ public class PayUGateway implements PaymentGateway {
     }
     try {
       double parsed = Double.parseDouble(amount.trim());
-      if (!Double.isFinite(parsed)) {
+      // Bound the tainted operand before arithmetic: reject NaN/Infinity and any
+      // out-of-range magnitude so a hostile webhook amount cannot drive a runaway
+      // multiply/round into a NUMERIC column. Negative and absurdly large values
+      // are treated as malformed → null (same contract as a non-numeric amount).
+      if (!Double.isFinite(parsed) || parsed < 0.0d || parsed > MAX_MAJOR_AMOUNT) {
         return null;
       }
       // Math.round(parsed * 100) — half-up rounding to a whole minor-unit count.
