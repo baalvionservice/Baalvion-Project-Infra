@@ -1,8 +1,11 @@
 package com.baalvion.risk.service;
 
+import com.baalvion.risk.config.SanctionsEnforcement;
 import com.baalvion.risk.config.SanctionsProperties;
 import com.baalvion.risk.domain.SanctionedEntity;
 import com.baalvion.risk.domain.SanctionedEntity.EntityType;
+import com.baalvion.risk.domain.SanctionedEntity.ListSource;
+import com.baalvion.risk.exception.SanctionsUnavailableException;
 import com.baalvion.risk.domain.SanctionsAliasIndex;
 import com.baalvion.risk.domain.SanctionsScreening;
 import com.baalvion.risk.domain.SanctionsScreening.Status;
@@ -37,11 +40,14 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Sanctions screening (gap G3): consolidated-watchlist ingestion + fuzzy name screening.
@@ -65,14 +71,17 @@ public class SanctionsService {
   private final NameMatcher matcher;
   private final SanctionsProperties props;
   private final List<SanctionsListProvider> providers;
+  private final SanctionsDatasetStatus datasetStatus;
   private final KafkaTemplate<String, String> kafkaTemplate;
   private final ObjectMapper objectMapper;
 
   // In-memory active-watchlist snapshot (the DB is the durable cache). Evicted on ingest, else
   // reloaded when older than app.sanctions.cache-ttl-seconds — so a full OFAC list (~17k rows) is not
-  // re-queried from Postgres on every screen request.
-  private volatile List<SanctionedEntity> activeSnapshot;
-  private volatile long activeSnapshotLoadedMs;
+  // re-queried from Postgres on every screen request. Held as a single immutable reference so the
+  // entities and their load time are always read/written atomically (no torn read across two volatiles).
+  private record Snapshot(List<SanctionedEntity> entities, long loadedMs) {}
+
+  private final AtomicReference<Snapshot> snapshotRef = new AtomicReference<>();
 
   public SanctionsService(SanctionedEntityRepository entityRepository,
                           SanctionsScreeningRepository screeningRepository,
@@ -81,6 +90,7 @@ public class SanctionsService {
                           NameMatcher matcher,
                           SanctionsProperties props,
                           List<SanctionsListProvider> providers,
+                          SanctionsDatasetStatus datasetStatus,
                           KafkaTemplate<String, String> kafkaTemplate,
                           ObjectMapper objectMapper) {
     this.entityRepository = entityRepository;
@@ -90,6 +100,7 @@ public class SanctionsService {
     this.matcher = matcher;
     this.props = props;
     this.providers = providers;
+    this.datasetStatus = datasetStatus;
     this.kafkaTemplate = kafkaTemplate;
     this.objectMapper = objectMapper;
   }
@@ -106,7 +117,7 @@ public class SanctionsService {
     for (SanctionsListProvider provider : providers) {
       total += ingestOne(provider);
     }
-    this.activeSnapshot = null;  // evict the screening cache once after the full refresh
+    snapshotRef.set(null);  // evict the screening cache once after the full refresh
     return total;
   }
 
@@ -119,16 +130,18 @@ public class SanctionsService {
       return 0;
     }
     int n = ingestOne(provider);
-    this.activeSnapshot = null;
+    snapshotRef.set(null);
     return n;
   }
 
   /** Fetch + normalize + upsert one provider. Never throws — fail-independent (last-known-good kept). */
   private int ingestOne(SanctionsListProvider provider) {
+    datasetStatus.recordAttempt(provider.name());
     List<SanctionsListRecord> records;
     try {
       records = provider.fetch();
     } catch (Exception e) {
+      datasetStatus.recordFailure(provider.name(), e.getMessage());
       log.error("Sanctions provider '{}' fetch FAILED — keeping last-known-good data: {}",
         provider.name(), e.getMessage());
       return 0;
@@ -148,6 +161,7 @@ public class SanctionsService {
           rec.getListSource(), rec.getExternalId(), e.getMessage());
       }
     }
+    datasetStatus.recordSuccess(provider.name(), count);
     log.info("Sanctions ingest from provider '{}': {} entities upserted, {} skipped",
       provider.name(), count, skipped);
     return count;
@@ -219,19 +233,71 @@ public class SanctionsService {
 
   /** Cached active-watchlist snapshot (TTL'd; evicted on ingest). Called within screen()'s transaction. */
   private List<SanctionedEntity> activeEntities() {
-    List<SanctionedEntity> snap = this.activeSnapshot;
-    long ageMs = System.currentTimeMillis() - this.activeSnapshotLoadedMs;
-    if (snap != null && ageMs < props.getCacheTtlSeconds() * 1000L) {
-      return snap;
+    Snapshot snap = snapshotRef.get();
+    if (snap != null && (System.currentTimeMillis() - snap.loadedMs()) < props.getCacheTtlSeconds() * 1000L) {
+      return snap.entities();
     }
     List<SanctionedEntity> loaded = entityRepository.findByActiveTrue();
-    this.activeSnapshot = loaded;
-    this.activeSnapshotLoadedMs = System.currentTimeMillis();
+    snapshotRef.set(new Snapshot(loaded, System.currentTimeMillis()));
     return loaded;
   }
 
+  @Transactional(readOnly = true)
   public long entityCount() {
     return entityRepository.countByActiveTrue();
+  }
+
+  /** Active entity count for one authoritative source (boot sanity + health). */
+  @Transactional(readOnly = true)
+  public long entityCount(ListSource source) {
+    return entityRepository.countByListSourceAndActiveTrue(source);
+  }
+
+  /** Newest {@code updatedAt} among a source's active entities — the dataset freshness signal. */
+  @Transactional(readOnly = true)
+  public Optional<LocalDateTime> latestUpdate(ListSource source) {
+    return entityRepository.findFirstByListSourceAndActiveTrueOrderByUpdatedAtDesc(source)
+      .map(SanctionedEntity::getUpdatedAt);
+  }
+
+  /** Active count + freshness for a source, read in ONE transaction so health never sees a torn view. */
+  public record SourceSnapshotInfo(long count, Optional<LocalDateTime> latestUpdate) {}
+
+  @Transactional(readOnly = true)
+  public SourceSnapshotInfo sourceInfo(ListSource source) {
+    long count = entityRepository.countByListSourceAndActiveTrue(source);
+    Optional<LocalDateTime> latest = entityRepository
+      .findFirstByListSourceAndActiveTrueOrderByUpdatedAtDesc(source)
+      .map(SanctionedEntity::getUpdatedAt);
+    return new SourceSnapshotInfo(count, latest);
+  }
+
+  /**
+   * Boot-time sample validation (gap G3): take up to {@code sampleSize} loaded entities and confirm each
+   * screens against its OWN primary name at/above the match threshold. This exercises the real
+   * normalize → match pipeline against real loaded data (not config, not a mock), proving the watchlist is
+   * actually screenable rather than merely "rows exist". Returns how many of the sampled entities matched.
+   */
+  @Transactional(readOnly = true)
+  public int sampleSelfMatch(int sampleSize) {
+    List<SanctionedEntity> snapshot = activeEntities();
+    if (snapshot.isEmpty()) {
+      return 0;
+    }
+    // Shuffle a copy so the sample spans sources/positions rather than only the first-inserted provider —
+    // a source-specific normalization bug can't hide behind whichever list happened to load first.
+    List<SanctionedEntity> pool = new ArrayList<>(snapshot);
+    Collections.shuffle(pool);
+    double threshold = props.getMatchThreshold().doubleValue();
+    int limit = Math.min(sampleSize, pool.size());
+    int matched = 0;
+    for (int i = 0; i < limit; i++) {
+      SanctionedEntity e = pool.get(i);
+      if (matcher.score(NameNormalizer.normalize(e.getPrimaryName()), e.getNormalizedName()) >= threshold) {
+        matched++;
+      }
+    }
+    return matched;
   }
 
   // --------------------------------------------------------------------------- screening
@@ -250,6 +316,14 @@ public class SanctionsService {
     // wrong subject type never silently hides a hit. The seed list is small; for full OFAC scale add a
     // pg_trgm candidate prefilter (see V002 migration note).
     List<SanctionedEntity> snapshot = activeEntities();
+    // Fail CLOSED: under STRICT enforcement an empty watchlist must NOT yield a (false) CLEAR. Refuse to
+    // evaluate so the caller sees a 503 rather than a misleading "no sanctions match". Boot validation
+    // makes this near-impossible, but a watchlist that empties at runtime must never fail open.
+    if (props.getEnforcement() == SanctionsEnforcement.STRICT && snapshot.isEmpty()) {
+      throw new SanctionsUnavailableException(
+        "Sanctions watchlist is empty — refusing to screen under STRICT enforcement (fail-closed). "
+          + "The authoritative lists are not loaded; investigate provider ingestion before screening resumes.");
+    }
     List<ScreeningHit> hits = new ArrayList<>();
     double rawTop = 0.0;  // unrounded — drives the verdict so a 0.9499 cannot round up into an auto-block
     for (SanctionedEntity entity : snapshot) {

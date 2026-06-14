@@ -66,7 +66,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: health,info,metrics,prometheus,sanctions
   endpoint:
     health:
       show-details: when-authorized
@@ -96,9 +96,27 @@ app:
     review-score: 40
     decline-score: 70
   sanctions:
-    # Dev/test default keeps the curated SEED provider on. Set provider to anything else (e.g. "live")
-    # to turn the seed OFF in production; enable the real jurisdictions via the per-source enabled flags.
+    # Compliance enforcement posture (SanctionsBootstrap), DECOUPLED from app.security.enabled.
+    #   strict      (DEFAULT): production. OFAC/UN/EU must be enabled, loaded, and non-empty at boot or the
+    #               service REFUSES TO START; the seed list is forbidden; screening fails closed on an empty
+    #               watchlist. There is NO seed/mock fallback in this flow.
+    #   permissive: local/dev/test ONLY. Allows the offline seed list and never fails boot on an empty list.
+    #               Must be set explicitly (SANCTIONS_ENFORCEMENT=permissive), e.g. in docker-compose / tests.
+    # Production simply runs with SPRING_PROFILES_ACTIVE=production (application-production.yml), which keeps
+    # strict and enables OFAC/UN/EU. Strict-by-default means a forgotten env var/profile FAILS the deploy.
+    enforcement: ${SANCTIONS_ENFORCEMENT:strict}
+    # The development seed list ('seed') is a DEV/OFFLINE convenience only — NOT AML/KYC compliant, and
+    # forbidden under strict. 'seed' loads it; any other value (e.g. "live") disables the seed bean.
     provider: ${SANCTIONS_PROVIDER:seed}
+    # Authoritative provider ids that strict enforcement requires loaded + non-empty at boot.
+    required-sources: ${SANCTIONS_REQUIRED_SOURCES:ofac,un,eu}
+    # Boot-time sanity floor per source — catches an empty/partially-parsed feed. Well below real sizes.
+    min-entities:
+      ofac: ${SANCTIONS_MIN_OFAC:1000}
+      un: ${SANCTIONS_MIN_UN:100}
+      eu: ${SANCTIONS_MIN_EU:500}
+    # Health marks a source STALE (and readiness DOWN under strict) once its data is older than this.
+    dataset-max-age-hours: ${SANCTIONS_DATASET_MAX_AGE_HOURS:48}
     # Name similarity (0-1) at/above which a watchlist entity is recorded as a hit (POTENTIAL_MATCH).
     match-threshold: 0.85
     # Similarity at/above which a hit is auto-escalated to CONFIRMED_MATCH (block without manual review).
