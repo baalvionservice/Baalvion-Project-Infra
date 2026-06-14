@@ -86,6 +86,31 @@ export function articleSchema(opts: {
   };
 }
 
+export function creativeWorkSchema(opts: {
+  name: string;
+  description?: string;
+  url: string;
+  image?: string;
+  datePublished?: string;
+  dateModified?: string;
+  about?: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'CreativeWork',
+    name: opts.name,
+    description: opts.description,
+    url: opts.url.startsWith('http') ? opts.url : `${BASE_URL}${opts.url}`,
+    image: opts.image ? [opts.image] : undefined,
+    datePublished: opts.datePublished,
+    dateModified: opts.dateModified || opts.datePublished,
+    about: opts.about,
+    creator: { '@type': 'Organization', name: ORG_NAME, url: BASE_URL },
+    publisher: { '@type': 'Organization', name: ORG_NAME, url: BASE_URL },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': opts.url.startsWith('http') ? opts.url : `${BASE_URL}${opts.url}` },
+  };
+}
+
 export function collectionSchema(opts: {
   name: string;
   description: string;

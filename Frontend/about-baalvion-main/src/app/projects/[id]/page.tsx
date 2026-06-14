@@ -1,6 +1,8 @@
 import { cmsGetProject, cmsGetProjects } from "@/lib/cms";
 import { Metadata } from "next";
 import ProjectDetailClient from "./project-detail-client";
+import { JsonLd } from "@/components/json-ld";
+import { breadcrumbSchema, creativeWorkSchema } from "@/lib/schema";
 
 const BASE_URL = "https://about.baalvion.com";
 
@@ -57,5 +59,31 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  return <ProjectDetailClient id={id} />;
+  const project = await cmsGetProject(id);
+
+  const schema = project
+    ? [
+        breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "Projects", url: "/projects" },
+          { name: project.name, url: `/projects/${id}` },
+        ]),
+        creativeWorkSchema({
+          name: project.name,
+          description: project.description,
+          url: `${BASE_URL}/projects/${id}`,
+          image: project.seo?.ogImage,
+          datePublished: project.createdAt,
+          dateModified: project.updatedAt,
+          about: project.category,
+        }),
+      ]
+    : null;
+
+  return (
+    <>
+      {schema && <JsonLd data={schema} />}
+      <ProjectDetailClient id={id} />
+    </>
+  );
 }
