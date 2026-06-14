@@ -54,5 +54,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|public).*)'],
+  // `.*\\..*` excludes any path with a file extension (e.g. /icons/crm.png, /og-image.png) so
+  // static public/ assets bypass middleware and are served directly instead of hitting route logic.
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)'],
 };

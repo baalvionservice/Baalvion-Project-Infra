@@ -12,7 +12,7 @@ import { BarChart4, Loader2, Sparkles, TrendingUp, Info, DollarSign, Target } fr
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 const marketSchema = z.object({

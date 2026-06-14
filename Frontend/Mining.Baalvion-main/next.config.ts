@@ -22,6 +22,9 @@ const nextConfig: NextConfig = {
     'protobufjs',
     'express',
   ],
+  typescript: {
+    ignoreBuildErrors: false,
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
