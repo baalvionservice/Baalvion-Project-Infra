@@ -86,11 +86,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       "logo": { "@type": "ImageObject", "url": "https://mining.baalvion.com/logo.svg" },
     },
     "datePublished": post.date,
+    "url": `https://mining.baalvion.com/blog/${slug}`,
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Insights", "item": "https://mining.baalvion.com/blog" },
+      { "@type": "ListItem", "position": 2, "name": post.title, "item": `https://mining.baalvion.com/blog/${slug}` },
+    ],
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <JsonLd data={blogSchema} />
+      <JsonLd data={breadcrumbSchema} />
       <Navbar />
 
       <div className="bg-white border-b py-6">

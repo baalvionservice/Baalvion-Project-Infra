@@ -48,15 +48,30 @@ export async function generateMetadata({
   const { category, slug } = await params;
   const product = await getProduct(slug);
   const name = product?.name ?? humanizeSlug(slug);
+
+  // Build a specific, grade-aware title ONLY from real record data. When no
+  // record exists (store is empty in this environment) we fall back to a
+  // supplier-intent title from the humanized slug — never fabricated grade.
+  const grade = product?.grade?.trim();
+  const titleHead = grade ? `${name} (${grade})` : name;
+  const title = `${titleHead} Suppliers | Baalvion Mining`;
+
   const description =
     product?.description ??
-    `${name} — product details from Baalvion Mining Inc. Specifications are published once formally disclosed. Submit an inquiry for current availability.`;
+    `Source ${name} from Baalvion Mining Inc. — verified industrial-mineral supplier. Specifications and grade are published once formally disclosed; submit an inquiry for current availability and pricing.`;
 
   return {
-    title: `${name} | Products`,
+    title,
     description,
     alternates: {
       canonical: `https://mining.baalvion.com/products/${category}/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `https://mining.baalvion.com/products/${category}/${slug}`,
+      siteName: "Baalvion Mining Inc.",
+      type: "website",
     },
   };
 }
@@ -79,6 +94,24 @@ export default async function ProductDetailPage({
   const heroAlt = product?.gallery[0]?.alt ?? `${displayName} sample`;
   const productUrl = `${SITE_URL}/products/${categorySlug}/${slug}`;
 
+  // Structured grade/size/spec properties — emitted ONLY from real record data,
+  // never fabricated when the store is empty.
+  const additionalProperty = product
+    ? [
+        ...(product.grade
+          ? [{ "@type": "PropertyValue", "name": "Grade", "value": product.grade }]
+          : []),
+        ...(product.size
+          ? [{ "@type": "PropertyValue", "name": "Size", "value": product.size }]
+          : []),
+        ...product.specifications.map((spec) => ({
+          "@type": "PropertyValue",
+          "name": spec.label,
+          "value": spec.value,
+        })),
+      ]
+    : [];
+
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -95,6 +128,7 @@ export default async function ProductDetailPage({
       "name": "Baalvion Mining Inc.",
       "url": SITE_URL,
     },
+    ...(additionalProperty.length > 0 ? { additionalProperty } : {}),
   };
 
   const breadcrumbSchema = {
