@@ -18,6 +18,13 @@ export default defineConfig(({ mode }) => {
     define: {
       "import.meta.env.VITE_API_URL": JSON.stringify(apiUrl),
     },
+    build: {
+      // Vite's default build target ('modules' = es2020 + browser mins) trips an
+      // esbuild transpile bug in CI ("Transforming destructuring to the configured
+      // target environment is not supported yet") on async/await + destructuring.
+      // esnext disables syntax downleveling, which both fixes it and fits a modern SPA.
+      target: "esnext",
+    },
     plugins: [react()],
     resolve: {
       alias: {

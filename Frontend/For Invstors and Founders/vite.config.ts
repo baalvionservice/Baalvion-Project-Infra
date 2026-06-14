@@ -48,6 +48,13 @@ export default defineConfig(({ mode }) => ({
     // Insiders backend base for anonymous/public reads + storage URLs (same-origin proxy in dev).
     "import.meta.env.VITE_INSIDERS_URL": JSON.stringify(process.env.VITE_INSIDERS_URL ?? "/insiders-api"),
   },
+  build: {
+    // Vite's default build target ('modules' = es2020 + browser mins) trips an
+    // esbuild transpile bug in CI ("Transforming destructuring to the configured
+    // target environment is not supported yet") on async/await + destructuring.
+    // esnext disables syntax downleveling, which both fixes it and fits a modern SPA.
+    target: "esnext",
+  },
   plugins: [react()],
   resolve: {
     alias: {
