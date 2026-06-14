@@ -1,6 +1,6 @@
 // All stopped frontends, booted in dev mode via pm2.
 // pm2 on Windows can't exec npm.cmd, so we run the next/vite binary directly.
-// Port clashes resolved: Jobs -> 3037 (3026 is realtime-service), Proxy -> 8090 (8080 is Insiders).
+// Port clashes resolved: Jobs -> 3026 (realtime-service moved to its contract port :3040), Proxy -> 8090 (8080 is Insiders).
 //
 //   pm2 start frontends.config.js
 //   pm2 status
@@ -25,12 +25,11 @@ module.exports = {
     next('ir-web',           'IR-Baalvion-main',                 3027),
     next('amarise-web',      'AmariseMaisonAvenue-main',         3033),
     next('gti-web',          'Global-Trade-Infrastructure-main', 9003),
-    next('jobs-web',         'Baalvion-Jobs-Portal-main',        3037, { NEXT_PUBLIC_APP_URL: 'http://localhost:3037' }),
+    next('jobs-web',         'Baalvion-Jobs-Portal-main',        3026, { NEXT_PUBLIC_APP_URL: 'http://localhost:3026' }),
     next('ctm-web',          'controlthemarket-main',            3034),
     next('dashboard-web',    'company-unified-Dashboard-main',   3024),
     next('law-web',          'Law-Elite-Network-main',           9002),
     next('brand-web',        'brand-connector-main',             3035),
-    next('insiders-seo-web', 'insiders-seo',                     3060),
     next('mining-web',       'Mining.Baalvion-main',             3028),
 
     // --- Vite SPAs ---

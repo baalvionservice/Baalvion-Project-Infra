@@ -105,6 +105,19 @@ module.exports = {
       log_date_format: 'HH:mm:ss',
     },
     {
+      name: "elite-circle-service",
+      cwd: "./Backend/services/ecosystem/elite-circle-service",
+      script: "./index.js",
+      interpreter: "node",
+      watch: false,
+      autorestart: true,
+      max_memory_restart: "500M",
+      // Backend for Frontend/baalvion-elite-circle-main (preview on :8081). Schema `elite_circle`
+      // in baalvion_db; auto-migrates on boot. .env (cwd-loaded by dotenv) sets DB + CORS(:8081).
+      env: { NODE_ENV: "development", PORT: "3051" },
+      log_date_format: 'HH:mm:ss',
+    },
+    {
       name: "ctm-service",
       cwd: "./Backend/services/ecosystem/ctm-service",
       script: "./index.js",
@@ -273,7 +286,10 @@ module.exports = {
       watch: false,
       autorestart: true,
       max_memory_restart: "500M",
-      env: { NODE_ENV: "development", NODE_PATH: require('path').join(__dirname, 'Backend/services/identity/session-service/node_modules') },
+      // PORT pinned to :3040 — the realtime contract port (gateway dynamic.yml, openapi,
+      // root docker-compose). The code default is 3026, which collided with jobs-web; pin
+      // it explicitly here so it binds its real port and leaves :3026 to the jobs portal.
+      env: { NODE_ENV: "development", PORT: "3040", NODE_PATH: require('path').join(__dirname, 'Backend/services/identity/session-service/node_modules') },
       log_date_format: 'HH:mm:ss',
     },
     {
@@ -435,18 +451,7 @@ module.exports = {
       autorestart: true,
       log_date_format: 'HH:mm:ss',
     },
-    {
-      name: "insiders-seo-web",
-      cwd: "./Frontend/insiders-seo",
-      script: "./node_modules/next/dist/bin/next",
-      args: "dev -p 3060",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "1500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
+    // insiders-seo-web REMOVED — the Frontend/insiders-seo SEO site was deleted permanently.
     // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
     {
       name: "ir-web",
@@ -463,7 +468,10 @@ module.exports = {
       name: "jobs-web",
       cwd: "./Frontend/Baalvion-Jobs-Portal-main",
       script: "./node_modules/next/dist/bin/next",
-      args: "dev -p 3037",
+      // :3026 is this app's own port (package.json). It used to sit on :3037 to dodge
+      // realtime-service (which was wrongly squatting :3026); realtime now runs on its
+      // contract port :3040, freeing :3026 here and freeing :3037 for the Java credit-service.
+      args: "dev -p 3026",
       interpreter: "node",
       watch: false,
       autorestart: true,
