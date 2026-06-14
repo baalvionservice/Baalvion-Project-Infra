@@ -3,8 +3,15 @@ import { Mail, Phone, MapPin, Globe } from 'lucide-react';
 import ContactForm from './ContactForm';
 
 export const metadata: Metadata = {
-  title: 'Contact Investor Relations | Institutional Support',
+  title: 'Contact Investor Relations | Baalvion',
   description: 'Reach out to the Baalvion Investor Relations team for institutional inquiries, shareholder services, and media requests.',
+  alternates: { canonical: '/resources/contact-ir' },
+  openGraph: {
+    title: 'Contact Baalvion Investor Relations',
+    description: 'Reach out to the Baalvion Investor Relations team for institutional inquiries, shareholder services, and media requests.',
+    url: 'https://ir.baalvion.com/resources/contact-ir',
+    type: 'website',
+  },
 };
 
 export default function ContactIrPage() {

@@ -1,5 +1,9 @@
 """Runtime configuration for the Baalvion ML service (env-driven, 12-factor)."""
 import os
+import sys
+
+# Known insecure dev-placeholder values that must never reach production.
+_DEV_SECRET_LITERALS = {"", "dev", "secret", "changeme", "ml_secret", "ml-secret", "test"}
 
 
 class Config:
@@ -25,3 +29,19 @@ class Config:
 
 
 config = Config()
+
+# --- Production secret fail-fast -------------------------------------------
+# APP_ENV / NODE_ENV (Node parity) / ENV are all accepted as the env indicator.
+_app_env = (
+    os.getenv("APP_ENV") or os.getenv("NODE_ENV") or os.getenv("ENV") or ""
+).strip().lower()
+
+if _app_env == "production":
+    if config.ML_SERVICE_SECRET.strip().lower() in _DEV_SECRET_LITERALS:
+        print(
+            "[ml-service] FATAL: ML_SERVICE_SECRET is unset or uses a known dev "
+            "placeholder. Set a strong secret before starting in production.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+# ---------------------------------------------------------------------------

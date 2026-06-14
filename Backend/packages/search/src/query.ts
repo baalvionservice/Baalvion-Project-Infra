@@ -1,5 +1,22 @@
 import { searchClient } from './client';
 
+// Validate a remote-supplied field name before using it as a dynamic object key.
+// Prevents remote property injection / prototype pollution (__proto__, constructor,
+// prototype) and rejects anything outside a safe field-path shape.
+const SAFE_FIELD_NAME = /^[A-Za-z0-9_][A-Za-z0-9_.-]*$/;
+const FORBIDDEN_FIELD_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
+
+function assertSafeFieldName(field: string): string {
+  if (
+    typeof field !== 'string' ||
+    !SAFE_FIELD_NAME.test(field) ||
+    FORBIDDEN_FIELD_KEYS.has(field)
+  ) {
+    throw new Error(`Invalid search field name: ${String(field)}`);
+  }
+  return field;
+}
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface SearchOptions {
@@ -129,17 +146,14 @@ export async function autocomplete<T = Record<string, unknown>>(
   prefix: string,
   size = 10,
 ): Promise<SearchResult<T>> {
-  // `field` is interpolated as an object key in the query body — restrict it to a safe
-  // field-name charset so a caller cannot inject arbitrary query structure (CWE-915).
-  if (!/^[A-Za-z0-9_.]+$/.test(field)) {
-    throw new Error('Invalid search field name');
-  }
+  const safeField = assertSafeFieldName(field);
+
   const response = await searchClient.search({
     index,
     body: {
       size,
       query: {
-        prefix: { [field]: { value: prefix.toLowerCase() } },
+        prefix: { [safeField]: { value: prefix.toLowerCase() } },
       },
     },
   });

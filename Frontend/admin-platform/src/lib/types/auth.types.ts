@@ -10,6 +10,7 @@ export type UserRole =
   | 'developer'
   | 'analyst'
   | 'finance'
+  | 'compliance'
   | 'moderator'
   | 'readonly';
 

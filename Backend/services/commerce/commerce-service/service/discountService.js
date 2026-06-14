@@ -36,8 +36,13 @@ async function validateDiscount(storeId, code, orderAmount) {
     const discount = await CommerceDiscount.findOne({
         where: {
             storeId, code: code.toUpperCase(), isActive: true,
-            [Op.or]: [{ startsAt: null }, { startsAt: { [Op.lte]: now } }],
-            [Op.or]: [{ endsAt: null }, { endsAt: { [Op.gte]: now } }],
+            // Two independent date windows. They MUST be combined under [Op.and] — two bare [Op.or]
+            // keys in one object literal collide (the second overwrites the first), silently dropping
+            // the start-date check and letting not-yet-started codes validate.
+            [Op.and]: [
+                { [Op.or]: [{ startsAt: null }, { startsAt: { [Op.lte]: now } }] },
+                { [Op.or]: [{ endsAt: null }, { endsAt: { [Op.gte]: now } }] },
+            ],
         },
     });
     if (!discount) throw new AppError('NOT_FOUND', 'Invalid or expired discount code', 404);

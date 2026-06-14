@@ -1,7 +1,7 @@
 'use strict';
 const router = require('express').Router();
 const ctrl   = require('../controller/notificationController');
-const { internalAuth, authMiddleware } = require('../middleware/authMiddleware');
+const { internalAuth, authMiddleware, requireAdmin } = require('../middleware/authMiddleware');
 
 // ── Internal (service-to-service) channel endpoints ────────────────────────────
 router.post('/email',     internalAuth, ctrl.enqueueEmail);
@@ -26,9 +26,10 @@ router.get('/inbox',           authMiddleware, ctrl.getInbox);
 router.post('/inbox/read',     authMiddleware, ctrl.markInboxAllRead);
 router.post('/inbox/:id/read', authMiddleware, ctrl.markInboxRead);
 
-// ── Admin (JWT) — queues + DLQ ──────────────────────────────────────────────────
-router.get('/queues/stats',               authMiddleware, ctrl.getQueueStats);
-router.get('/queues/dlq',                 authMiddleware, ctrl.getDlq);
-router.post('/queues/dlq/:entryId/retry', authMiddleware, ctrl.retryDlqItem);
+// ── Admin (JWT + admin/super_admin role) — queues + DLQ ───────────────────────
+// requireAdmin enforces admin or super_admin role (or internal service path).
+router.get('/queues/stats',               authMiddleware, requireAdmin, ctrl.getQueueStats);
+router.get('/queues/dlq',                 authMiddleware, requireAdmin, ctrl.getDlq);
+router.post('/queues/dlq/:entryId/retry', authMiddleware, requireAdmin, ctrl.retryDlqItem);
 
 module.exports = router;

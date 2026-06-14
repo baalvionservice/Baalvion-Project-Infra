@@ -118,4 +118,8 @@ export const analyticsMockService: AnalyticsService = {
     const tenantId = typeof window !== 'undefined' ? localStorage.getItem('talent-os-tenant-id') : 'org_acme';
     return generateAnalyticsData(filters, tenantId || 'org_acme');
   },
+  async getApplicationsByCountry() {
+    await delay(300);
+    return [];
+  },
 };

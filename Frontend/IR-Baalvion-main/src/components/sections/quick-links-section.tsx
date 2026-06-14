@@ -12,10 +12,14 @@ export default function QuickLinksSection() {
     setMounted(true);
   }, []);
 
+  // This bar renders globally on every page (root layout), including for
+  // logged-out visitors. It must only link to PUBLIC IR surfaces — never the
+  // gated investor-portal routes (/dashboard, /data-room), which exist behind
+  // the middleware session gate and should not be advertised publicly.
   const quickLinks = [
-    { name: "Investor Performance & Financial Reports", href: "/data-room" },
-    { name: "Capital Returns & Payouts", href: "/dashboard" },
-    { name: "Governance & Strategic Updates", href: "/#governance" },
+    { name: "Investor Performance & Financial Reports", href: "/financials" },
+    { name: "Capital Returns & Payouts", href: "/investment-thesis" },
+    { name: "Governance & Strategic Updates", href: "/governance/overview" },
   ];
 
   return (

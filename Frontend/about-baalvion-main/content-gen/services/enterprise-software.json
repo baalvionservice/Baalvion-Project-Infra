@@ -1,0 +1,56 @@
+{
+  "slug": "enterprise-software",
+  "title": "Enterprise Software",
+  "kind": "service",
+  "heroImageSeed": "svc-enterprise",
+  "excerpt": "Large-scale, multi-tenant, compliance-grade systems — the kind of software that runs a business and survives an audit.",
+  "seo": {
+    "title": "Enterprise Software Development | Baalvion",
+    "description": "Baalvion builds large-scale, multi-tenant, compliance-grade enterprise software with strong isolation, auditability, and reliability. Explore our process and stack.",
+    "keywords": ["enterprise software", "multi-tenant", "compliance", "enterprise architecture", "Baalvion services", "scalable systems"]
+  },
+  "customFields": {
+    "benefits": [
+      "Multi-tenant with strong data isolation",
+      "Auditable: every change recorded and verifiable",
+      "Compliance-grade security by design",
+      "Built to scale and integrate"
+    ],
+    "process": [
+      { "step": "Domain model", "desc": "Get the core entities and invariants right first." },
+      { "step": "Architecture", "desc": "Multi-tenancy, isolation, ledgering, and integration." },
+      { "step": "Build", "desc": "Tested, observable services with clear contracts." },
+      { "step": "Harden", "desc": "Security review, audit logging, and failure recovery." }
+    ],
+    "techStack": ["Multi-tenant Postgres (RLS)", "Event-driven services", "Double-entry ledger", "RBAC / RS256", "API gateway", "Audit logging"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "Enterprise software has to do more than work — it has to isolate tenants, survive audits, integrate with everything, and never lose track of money or state. This is Baalvion's home ground: the [Baalvion Operating System](/platform) is itself a large-scale, multi-tenant, compliance-grade system, and we build the same calibre of software for partners." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Isolation:** multi-tenant with row-level security, proven by [our identity platform](/case-studies/multi-tenant-identity-platform).",
+      "**Auditability:** append-only logs so every change is verifiable.",
+      "**Integrity:** double-entry ledgering where money or state must reconcile.",
+      "**Security:** RBAC, asymmetric tokens, and compliance built in."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We get the domain model and invariants right first, design for multi-tenancy and integration, build tested and observable services with clear contracts, then harden with security review, audit logging, and failure recovery. It draws directly on [how Baalvion builds scalable software](/news/tech/how-baalvion-builds-scalable-software) and [building multi-tenant SaaS](/news/tech/building-multi-tenant-saas)." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "Multi-tenant PostgreSQL with row-level security, event-driven services, a double-entry ledger, RBAC with RS256 tokens, an API gateway, and append-only audit logging. Delivered with our [cloud solutions](/services/cloud-solutions) and [DevOps](/services/devops) practices." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "We don't theorise about enterprise scale — we operate it across finance, trade, and commerce. See it in [unifying global trade operations](/case-studies/unifying-global-trade-operations), and explore sector fit in [finance](/industries/finance) and [manufacturing](/industries/manufacturing)." }
+  ],
+  "faqs": [
+    { "q": "What makes software 'enterprise-grade'?", "a": "Strong tenant isolation, auditability, security and compliance by design, integration readiness, and reliability under load — not just feature completeness." },
+    { "q": "How do you guarantee data integrity?", "a": "With a double-entry ledger for anything financial and append-only audit logs for state changes, so everything reconciles and is verifiable." },
+    { "q": "How is multi-tenancy handled?", "a": "Row-level security at the database, a shared identity and RBAC layer, and tenant-aware services — proven with adversarial isolation testing." },
+    { "q": "Can you integrate with our existing systems?", "a": "Yes — we build API-first with a governed gateway so enterprise systems interoperate cleanly. See [API-first architecture](/news/tech/api-first-architecture)." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "a canonical multi-tenant identity platform", "href": "/case-studies/multi-tenant-identity-platform" },
+    { "anchor": "how Baalvion builds scalable software", "href": "/news/tech/how-baalvion-builds-scalable-software" },
+    { "anchor": "unifying global trade operations", "href": "/case-studies/unifying-global-trade-operations" }
+  ]
+}

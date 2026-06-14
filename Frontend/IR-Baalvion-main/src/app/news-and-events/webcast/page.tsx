@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,8 +14,28 @@ import { countries } from '@/lib/countries';
 // Note: Metadata is typically handled in a parent layout or server-side page file
 // for pages marked with "use client".
 
+type LiveWebcast = { id: string; title: string; date: string; url: string };
+
 export default function WebcastPage() {
     const webcastImage = PlaceHolderImages.find(p => p.id === 'webcast-banner');
+    const [webcasts, setWebcasts] = React.useState<LiveWebcast[]>([]);
+
+    React.useEffect(() => {
+        let cancelled = false;
+        fetch('/api/v1/events')
+            .then((r) => r.json())
+            .then((json) => {
+                const items = json?.data?.items;
+                if (cancelled || !Array.isArray(items)) return;
+                setWebcasts(
+                    items
+                        .filter((e: any) => e.webcast_url)
+                        .map((e: any) => ({ id: String(e.id), title: e.title, date: e.scheduled_at, url: e.webcast_url }))
+                );
+            })
+            .catch(() => undefined);
+        return () => { cancelled = true; };
+    }, []);
 
     return (
         <>
@@ -24,6 +45,22 @@ export default function WebcastPage() {
                     <h1 className="text-4xl md:text-5xl font-bold">Webcast</h1>
                 </div>
             </section>
+            {webcasts.length > 0 && (
+                <section className="py-12 bg-gray-50 text-black border-b border-gray-200">
+                    <div className="container mx-auto px-4">
+                        <h2 className="text-2xl font-bold mb-6">Available Webcasts</h2>
+                        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                            {webcasts.map((w) => (
+                                <a key={w.id} href={w.url} target="_blank" rel="noopener noreferrer" className="group border border-gray-200 bg-white p-5 hover:border-primary transition-colors">
+                                    <p className="text-xs text-gray-500 mb-1">{w.date ? new Date(w.date).toLocaleDateString('en-US', { dateStyle: 'medium' } as any) : ''}</p>
+                                    <p className="font-bold group-hover:text-primary transition-colors">{w.title}</p>
+                                    <span className="mt-3 inline-flex items-center text-sm font-bold text-primary">&gt; Watch webcast</span>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
             <section className="py-16 md:py-24 bg-white text-black">
                 <div className="container mx-auto px-4">
                     <div className="grid lg:grid-cols-2 gap-x-16 gap-y-12 items-start">

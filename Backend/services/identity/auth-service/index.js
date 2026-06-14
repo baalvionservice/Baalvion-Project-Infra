@@ -49,8 +49,15 @@ const start = async () => {
         await db.sequelize.authenticate();
         console.log('[Auth] DB connected');
         await db.sequelize.query('CREATE SCHEMA IF NOT EXISTS auth');
+        // INVARIANT (identity-consolidation migration): models are DECLARED, never auto-ALTERed.
+        // auth.sessions gains columns (008a) and later RLS (008b) via explicit SQL migrations; an
+        // auto-ALTER here would race/clobber those. This is a hard `false` on purpose — do NOT wire
+        // it to an env var. If someone tries via env, refuse loudly but keep it false.
+        if (process.env.DB_SYNC_ALTER === 'true' || process.env.SEQUELIZE_ALTER === 'true') {
+            console.error('[Auth] REFUSING sync({alter:true}) — schema changes go through SQL migrations, not auto-alter.');
+        }
         await db.sequelize.sync({ alter: false });
-        console.log('[Auth] Models synced');
+        console.log('[Auth] Models synced (alter:false — schema owned by SQL migrations)');
     } catch (err) {
         console.error('[Auth] DB failed:', err.message);
         process.exit(1);

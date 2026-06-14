@@ -33,7 +33,9 @@ const settleBooking = async (payment) => {
 
 const listPayments = async (req, res, next) => {
     try {
-        const { page = 1, limit = 20, status } = req.query;
+        const { page = 1, status } = req.query;
+        // Cap pagination limit to prevent large data dumps.
+        const limit = Math.min(Number(req.query.limit) || 20, 100);
         const where = {};
         if (status) where.status = status;
 
@@ -43,12 +45,12 @@ const listPayments = async (req, res, next) => {
             const conditions = [];
             if (client) conditions.push({ client_id: client.id });
             if (lawyer) conditions.push({ lawyer_id: lawyer.id });
-            if (conditions.length === 0) return sendPaginated(req, res, { items: [], pagination: { total: 0, page: 1, limit: Number(limit), totalPages: 0 } });
+            if (conditions.length === 0) return sendPaginated(req, res, { items: [], pagination: { total: 0, page: 1, limit, totalPages: 0 } });
             if (conditions.length === 1) Object.assign(where, conditions[0]);
             else where[Op.or] = conditions;
         }
 
-        const offset = (Number(page) - 1) * Number(limit);
+        const offset = (Number(page) - 1) * limit;
         const { count, rows } = await db.Payment.findAndCountAll({
             where,
             include: [
@@ -56,12 +58,12 @@ const listPayments = async (req, res, next) => {
                 { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'email'], required: false },
             ],
             order: [['created_at', 'DESC']],
-            limit: Number(limit),
+            limit,
             offset,
         });
         return sendPaginated(req, res, {
             items: rows,
-            pagination: { total: count, page: Number(page), limit: Number(limit), totalPages: Math.ceil(count / Number(limit)) },
+            pagination: { total: count, page: Number(page), limit, totalPages: Math.ceil(count / limit) },
         });
     } catch (err) { return next(err); }
 };
@@ -128,11 +130,17 @@ const verifyPayment = async (req, res, next) => {
         // chosen by the server-side gateway state, NOT by whether the client supplied a signature.
         // A missing/empty client signature must fail verification, never fall through to settlement.
         if (razorpay.isConfigured()) {
-            const ok = razorpay_signature && razorpay.verifyPaymentSignature({
+            // Fail closed if the client did not supply the required, well-formed signature
+            // fields. The security decision below is made SOLELY by the server-side
+            // cryptographic check, not by the presence of a user-supplied signature.
+            const hasSignatureFields =
+                typeof razorpay_signature === 'string' && razorpay_signature.length > 0 &&
+                typeof razorpay_payment_id === 'string' && razorpay_payment_id.length > 0;
+            const ok = hasSignatureFields && razorpay.verifyPaymentSignature({
                 orderId: razorpay_order_id || payment.provider_tx_id,
                 paymentId: razorpay_payment_id,
                 signature: razorpay_signature,
-            });
+            }) === true;
             if (!ok) {
                 await payment.update({ status: 'failed' });
                 return next(new AppError('PAYMENT_VERIFICATION_FAILED', 'Payment signature verification failed', 400));
@@ -152,7 +160,13 @@ const webhookHandler = async (req, res) => {
     try {
         const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(JSON.stringify(req.body || {}));
         const signature = req.headers['x-razorpay-signature'];
-        if (razorpay.isConfigured() && process.env.RAZORPAY_WEBHOOK_SECRET) {
+        // When the gateway is configured, RAZORPAY_WEBHOOK_SECRET MUST be set.
+        // A missing secret is a misconfiguration — reject all webhook calls to prevent
+        // an unauthenticated attacker from triggering payment settlement.
+        if (razorpay.isConfigured()) {
+            if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+                return res.status(500).json({ error: 'webhook secret not configured' });
+            }
             if (!razorpay.verifyWebhookSignature(raw, signature)) {
                 return res.status(400).json({ error: 'invalid signature' });
             }
@@ -183,11 +197,19 @@ const getPayment = async (req, res, next) => {
     try {
         const payment = await db.Payment.findByPk(req.params.id, {
             include: [
-                { model: db.Client, as: 'client', attributes: ['id', 'name', 'email'] },
-                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'email'], required: false },
+                { model: db.Client, as: 'client', attributes: ['id', 'name', 'email', 'user_id'] },
+                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'email', 'user_id'], required: false },
             ],
         });
         if (!payment) return next(new AppError('NOT_FOUND', 'Payment not found', 404));
+        // IDOR: non-admin callers may only view their own payments (as client or lawyer).
+        if (!req.user.isAdmin) {
+            const uid = String(req.user.id);
+            const isParticipant =
+                (payment.client && String(payment.client.user_id) === uid) ||
+                (payment.lawyer && String(payment.lawyer.user_id) === uid);
+            if (!isParticipant) return next(new AppError('FORBIDDEN', 'Not authorised to view this payment', 403));
+        }
         return sendSuccess(req, res, payment);
     } catch (err) { return next(err); }
 };

@@ -1,0 +1,56 @@
+{
+  "slug": "automation",
+  "title": "Automation",
+  "kind": "service",
+  "heroImageSeed": "svc-automation",
+  "excerpt": "Business process and workflow automation that removes manual toil, reduces errors, and scales without adding headcount.",
+  "seo": {
+    "title": "Business Process & Workflow Automation | Baalvion",
+    "description": "Baalvion automates business processes and workflows — from reconciliation to clearing — with reliable, observable, idempotent systems. Explore our process and stack.",
+    "keywords": ["business process automation", "workflow automation", "RPA alternative", "Baalvion services", "process automation", "BPA"]
+  },
+  "customFields": {
+    "benefits": [
+      "Manual toil removed from repetitive processes",
+      "Fewer errors and faster cycle times",
+      "Idempotent, observable, and recoverable by design",
+      "Scales without adding headcount"
+    ],
+    "process": [
+      { "step": "Map", "desc": "Document the process, its inputs, exceptions, and cost." },
+      { "step": "Prioritise", "desc": "Target high-volume, high-error, rules-based steps first." },
+      { "step": "Automate", "desc": "Build reliable, idempotent workflows with clear failure handling." },
+      { "step": "Measure", "desc": "Track cycle time, error rate, and ROI; expand from there." }
+    ],
+    "techStack": ["Workflow engines", "Event-driven pipelines", "Message queues", "Idempotency", "Integrations", "Observability"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "Most organisations lose enormous time to manual, repetitive work — reconciliation, data entry, routing, approvals. Baalvion automates these processes with reliable, observable systems that handle exceptions gracefully. We automate the way we built [real-time cross-border settlement](/case-studies/real-time-cross-border-settlement) and [automated customs clearance](/case-studies/automated-customs-clearance): idempotent, queue-backed, and recoverable." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Less toil:** people stop doing what software should do.",
+      "**Fewer errors:** deterministic workflows beat manual steps.",
+      "**Resilient:** idempotent and recoverable, so retries are always safe.",
+      "**Scalable:** volume grows without proportional headcount."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We map the process and its real cost, prioritise the high-volume, rules-based steps, automate them with clear failure handling, then measure cycle time and error rate to prove ROI before expanding. It's the disciplined approach from [business process automation: strategy and ROI](/news/insights/business-process-automation)." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "Workflow engines, event-driven pipelines, message queues with retry and dead-letter handling, idempotency keys, system integrations, and observability. Where judgement is needed, we add AI via [AI agents](/services/ai-agents)." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "We run automation in financial and operational paths where failure is expensive, so reliability and recoverability are built in. Combine automation with [cloud solutions](/services/cloud-solutions) and [DevOps](/services/devops) for an end-to-end operational platform." }
+  ],
+  "faqs": [
+    { "q": "What processes are good automation candidates?", "a": "High-volume, repetitive, rules-based steps with measurable cost — reconciliation, routing, data entry, clearing. We prioritise these first for fastest ROI." },
+    { "q": "Is this the same as RPA?", "a": "We go beyond brittle screen-scraping RPA: we build robust, API-integrated, idempotent workflows that are observable and recoverable." },
+    { "q": "What happens when an automated step fails?", "a": "Transient failures retry automatically; persistent ones route to a dead-letter path for review — nothing is silently lost." },
+    { "q": "How do you measure success?", "a": "By tracking cycle time, error rate, and cost saved against a baseline, then expanding from proven wins. See [business process automation](/news/insights/business-process-automation)." }
+  ],
+  "internalLinks": [
+    { "anchor": "real-time cross-border settlement", "href": "/case-studies/real-time-cross-border-settlement" },
+    { "anchor": "business process automation: strategy and ROI", "href": "/news/insights/business-process-automation" },
+    { "anchor": "AI agents", "href": "/services/ai-agents" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" }
+  ]
+}

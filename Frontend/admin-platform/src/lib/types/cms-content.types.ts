@@ -15,6 +15,7 @@ export type ContentWorkflowStatus =
   | 'draft'
   | 'pending_review'
   | 'changes_requested'
+  | 'compliance_review'
   | 'approved'
   | 'scheduled'
   | 'published'
@@ -93,6 +94,7 @@ export interface ContentItem {
   scheduledAt: string | null;
   viewCount: number;
   revisionCount: number;
+  customFields: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -120,6 +122,7 @@ export interface CreateContentPayload {
   categoryIds?: string[];
   tagIds?: string[];
   scheduledAt?: string | null;
+  customFields?: Record<string, unknown>;
 }
 
 export interface UpdateContentPayload {
@@ -132,6 +135,7 @@ export interface UpdateContentPayload {
   categoryIds?: string[];
   tagIds?: string[];
   scheduledAt?: string | null;
+  customFields?: Record<string, unknown>;
   changeNote?: string;
 }
 

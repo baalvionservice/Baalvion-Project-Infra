@@ -1,49 +1,53 @@
 # Local stack for the Baalvion financial services (design §8).
-# Infra: PostgreSQL 16, Kafka (KRaft-less w/ Zookeeper), Redis 7.
+# Infra bundled here: Kafka (KRaft-less w/ Zookeeper). PostgreSQL and Redis are NOT bundled —
+# the whole platform runs ONE shared Postgres (`baalvion-postgres`, PostgreSQL 15, host 5432) and
+# ONE shared Redis (`baalvion-redis`, host 6379), both from the root docker-compose.yml. The
+# self-contained postgres:16 (host 5433) and redis:7 (host 6380) that used to live here were
+# removed to end the duplicate "two Postgres / two Redis servers" setup; these services now use the
+# one shared instance of each, like every other service in the monorepo.
 # Each service builds from the shared parametrized Dockerfile (SERVICE build-arg).
 #
+#   # 1. bring up the shared platform Postgres + Redis first (root compose, host 5432 / 6379):
+#   #      docker compose -f ../../../../docker-compose.yml up -d postgres redis
+#   # 2. then this stack (its own Kafka builds alongside):
 #   docker compose up --build
 #
 # Note: every service runs a full Maven build in its image; first build is slow.
-# All services share the `baalvion` database (separate schemas + per-service Flyway history).
+# All services share the `baalvion_db` database (separate schemas + per-service Flyway history).
 
 name: baalvion-financial
 
 x-service-env: &service-env
-  # Self-contained by default (the `postgres`/`redis` services below). To CONSOLIDATE onto the
-  # platform's shared instance instead, override these to the root docker-compose's baalvion-postgres
-  # and attach this stack to the external `baalvion-net` network (see RUN_LOCAL.md):
-  #   DB_HOST=baalvion-postgres  DB_NAME=baalvion_db  DB_USER=baalvion  DB_PASSWORD=baalvion_dev_pass
-  DB_HOST: ${DB_HOST:-postgres}
+  # These services connect to the platform's single shared Postgres (`baalvion-postgres`,
+  # root docker-compose.yml). They reach it via the host-published port (`host.docker.internal:5432`)
+  # rather than by service DNS on the external `baalvion-net`, because the root compose already
+  # defines services named `ledger-service`/`payment-service`/`redis` — joining that network would
+  # create colliding DNS aliases. Override DB_HOST for non-Docker-Desktop hosts (e.g. Linux Docker
+  # Engine: set DB_HOST to the host IP, or add `host.docker.internal:host-gateway` via extra_hosts).
+  DB_HOST: ${DB_HOST:-host.docker.internal}
   DB_PORT: ${DB_PORT:-5432}
-  DB_NAME: ${DB_NAME:-baalvion}
-  DB_USER: ${DB_USER:-postgres}
-  DB_PASSWORD: ${DB_PASSWORD:-postgres}
+  DB_NAME: ${DB_NAME:-baalvion_db}
+  DB_USER: ${DB_USER:-baalvion}
+  DB_PASSWORD: ${DB_PASSWORD:-baalvion_dev_pass}
   KAFKA_BROKERS: ${KAFKA_BROKERS:-kafka:9092}
-  REDIS_HOST: ${REDIS_HOST:-redis}
+  # Redis: the platform's single shared `baalvion-redis` (root docker-compose.yml, host 6379),
+  # reached via host.docker.internal like Postgres. The bundled redis:7 was removed too. Redis is
+  # used only by payment-service idempotency + the optional redis rate-limit backend (fails open).
+  REDIS_HOST: ${REDIS_HOST:-host.docker.internal}
   REDIS_PORT: ${REDIS_PORT:-6379}
   # Local dev has no IdP — run permissive. In real environments set APP_SECURITY_ENABLED=true
   # and OAUTH_ISSUER_URI / OAUTH_JWK_SET_URI to point at the platform's RS256 JWKS (auth-service).
   APP_SECURITY_ENABLED: ${APP_SECURITY_ENABLED:-false}
+  # Services share one Postgres (separate schemas); once any service has populated the
+  # default `public` schema, a sibling's first Flyway run refuses with "non-empty schema,
+  # no history table". Baseline-on-migrate lets each service initialize its own history
+  # against the shared DB. Safe: each service's migrations target its own schema.
+  SPRING_FLYWAY_BASELINE_ON_MIGRATE: ${SPRING_FLYWAY_BASELINE_ON_MIGRATE:-true}
+  # Baseline at v0 so a service's own V1+ migrations still apply (default baseline=1
+  # would mark V1 as already-applied and skip table creation on the shared DB).
+  SPRING_FLYWAY_BASELINE_VERSION: ${SPRING_FLYWAY_BASELINE_VERSION:-0}
 
 services:
-  postgres:
-    image: postgres:16
-    environment:
-      POSTGRES_DB: baalvion
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    # Host port 5433 (not 5432) so this self-contained DB never fights the platform's
-    # shared baalvion-postgres (root docker-compose, host 5432). Container port stays 5432.
-    ports: ["5433:5432"]
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d baalvion"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
     environment:
@@ -63,51 +67,48 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
-  redis:
-    image: redis:7
-    # Host port 6380 (not 6379) so this self-contained Redis never fights the platform's
-    # shared baalvion-redis (root docker-compose, host 6379). Container port stays 6379.
-    ports: ["6380:6379"]
-
   account-service:
     build: { context: ., args: { SERVICE: account-service } }
     environment: { <<: *service-env, PORT: "3016" }
-    ports: ["3016:3016"]
+    # Host default 13016 (not 3016): avoids colliding with Node fulfillment-service (3016). Keeps the
+    # Java suite in the 130xx band (ledger 13014, payment 13015, escrow 13017). Container stays 3016.
+    ports: ["${ACCOUNT_HOST_PORT:-13016}:3016"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   ledger-service:
     build: { context: ., args: { SERVICE: ledger-service } }
     environment: { <<: *service-env, PORT: "3014" }
-    ports: ["3014:3014"]
+    # Host default 13014 (not 3014): the canonical Java ledger publishes on 13014 to avoid colliding
+    # with inventory-service (3014) and the retired Node ledger twin. Matches auth-gateway proxy.js
+    # FINANCE.ledger (system of record). Override LEDGER_HOST_PORT if needed. Container stays 3014.
+    ports: ["${LEDGER_HOST_PORT:-13014}:3014"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   payment-service:
     build: { context: ., args: { SERVICE: payment-service } }
-    environment: { <<: *service-env, PORT: "3015", REDIS_HOST: redis, REDIS_PORT: "6379" }
-    ports: ["3015:3015"]
+    environment: { <<: *service-env, PORT: "3015" }
+    # Host default 13015 (not 3015): avoids colliding with law-service (3015) and the retired Node
+    # payment twin. Matches proxy.js FINANCE.payments + the consumers' PAYMENT_SERVICE_URL default.
+    ports: ["${PAYMENT_HOST_PORT:-13015}:3015"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
-      redis: { condition: service_started }
 
   escrow-service:
     build: { context: ., args: { SERVICE: escrow-service } }
     environment: { <<: *service-env, PORT: "3017" }
-    ports: ["3017:3017"]
+    # Host default 13017 (not 3017): avoids colliding with ctm-service (3017). Matches FINANCE.escrow.
+    ports: ["${ESCROW_HOST_PORT:-13017}:3017"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   settlement-service:
     build: { context: ., args: { SERVICE: settlement-service } }
     environment: { <<: *service-env, PORT: "3018" }
-    ports: ["3018:3018"]
+    # Host default 13018 (not 3018): keeps the money services in one 130xx band. Matches FINANCE.settlement.
+    ports: ["${SETTLEMENT_HOST_PORT:-13018}:3018"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   reconciliation-service:
@@ -115,38 +116,35 @@ services:
     environment: { <<: *service-env, PORT: "3019" }
     ports: ["3019:3019"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   audit-service:
     build: { context: ., args: { SERVICE: audit-service } }
     environment: { <<: *service-env, PORT: "3020" }
-    ports: ["3020:3020"]
+    ports: ["${AUDIT_HOST_PORT:-3020}:3020"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   reporting-service:
     build: { context: ., args: { SERVICE: reporting-service } }
     environment: { <<: *service-env, PORT: "3024" }
     ports: ["3024:3024"]
-    depends_on:
-      postgres: { condition: service_healthy }
 
   risk-service:
     build: { context: ., args: { SERVICE: risk-service } }
     environment: { <<: *service-env, PORT: "3035" }
-    ports: ["3035:3035"]
+    # Host port is overridable (RISK_HOST_PORT) so the suite can run alongside another
+    # process already bound to 3035 on the host. Container port stays 3035.
+    ports: ["${RISK_HOST_PORT:-3035}:3035"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   trade-finance-service:
     build: { context: ., args: { SERVICE: trade-finance-service } }
     environment: { <<: *service-env, PORT: "3036" }
-    ports: ["3036:3036"]
+    # Host default 13036 (not 3036): avoids colliding with Node search-service (3036). Container stays 3036.
+    ports: ["${TRADE_FINANCE_HOST_PORT:-13036}:3036"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   credit-service:
@@ -156,7 +154,6 @@ services:
     environment: { <<: *service-env, PORT: "3037" }
     ports: ["${CREDIT_HOST_PORT:-13037}:3037"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   fx-service:
@@ -164,7 +161,6 @@ services:
     environment: { <<: *service-env, PORT: "3038" }
     ports: ["3038:3038"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   wallet-service:
@@ -172,15 +168,14 @@ services:
     environment: { <<: *service-env, PORT: "3039" }
     ports: ["3039:3039"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   deal-room-service:
     build: { context: ., args: { SERVICE: deal-room-service } }
     environment: { <<: *service-env, PORT: "3040" }
-    ports: ["3040:3040"]
+    # Host default 13040 (not 3040): avoids colliding with Node realtime-service (3040). Container stays 3040.
+    ports: ["${DEAL_ROOM_HOST_PORT:-13040}:3040"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   smart-contract-service:
@@ -188,7 +183,6 @@ services:
     environment: { <<: *service-env, PORT: "3041" }
     ports: ["3041:3041"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   payment-rails-service:
@@ -196,7 +190,6 @@ services:
     environment: { <<: *service-env, PORT: "3042" }
     ports: ["3042:3042"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   # Read/compute service (no money movement) — depends on Postgres only, no Kafka.
@@ -204,15 +197,12 @@ services:
     build: { context: ., args: { SERVICE: trade-intelligence-service } }
     environment: { <<: *service-env, PORT: "3043" }
     ports: ["3043:3043"]
-    depends_on:
-      postgres: { condition: service_healthy }
 
   dispute-service:
     build: { context: ., args: { SERVICE: dispute-service } }
     environment: { <<: *service-env, PORT: "3044" }
     ports: ["3044:3044"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   aml-service:
@@ -220,7 +210,6 @@ services:
     environment: { <<: *service-env, PORT: "3045" }
     ports: ["3045:3045"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
 
   trust-score-service:
@@ -228,8 +217,4 @@ services:
     environment: { <<: *service-env, PORT: "3046" }
     ports: ["3046:3046"]
     depends_on:
-      postgres: { condition: service_healthy }
       kafka: { condition: service_started }
-
-volumes:
-  pgdata:

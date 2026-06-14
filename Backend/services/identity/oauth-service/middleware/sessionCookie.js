@@ -30,15 +30,18 @@ async function resolveSessionFromCookie(req) {
         return null; // tampered / expired / wrong issuer-audience → not authenticated
     }
 
-    // Honor logout/revocation via the same jti blacklist the Bearer path checks.
-    try {
-        if (decoded.jti && redis.isAvailable()) {
-            const blacklisted = await redis.getClient()?.get(`auth:bl:${decoded.jti}`);
+    // Honor logout/revocation via the canonical jti blacklist (auth:blacklist:<jti>) the Bearer
+    // path checks. Fail CLOSED: a jti that cannot be checked against the store is rejected,
+    // mirroring authMiddleware — a revoked SSO cookie must never resolve to an active session.
+    if (decoded.jti) {
+        try {
+            const client = redis.getClient();
+            if (!client || !redis.isAvailable()) throw new Error('revocation store unavailable');
+            const blacklisted = await client.get(`auth:blacklist:${decoded.jti}`);
             if (blacklisted) return null;
+        } catch {
+            return null;
         }
-    } catch {
-        // Redis unavailable → blacklist not enforceable; the token is still validly signed and
-        // unexpired (short-lived). Mirror authMiddleware, which also skips when Redis is down.
     }
 
     return {

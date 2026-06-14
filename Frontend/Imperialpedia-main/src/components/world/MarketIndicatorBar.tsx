@@ -1,16 +1,22 @@
-import { marketIndicators } from "@/lib/data/worldData";
+import type { Indicator } from "@/lib/data/worldRegions";
 
-export default function MarketIndicatorBar() {
-  const keyIndicators = marketIndicators.slice(0, 6);
+interface Props {
+  indicators: Indicator[];
+  asOf: string;
+  regionLabel: string;
+}
+
+export default function MarketIndicatorBar({ indicators, asOf, regionLabel }: Props) {
+  const keyIndicators = indicators.slice(0, 6);
 
   return (
     <div className="bg-[#002244] py-2 sm:py-3 px-2 sm:px-4">
       <div className="flex items-center gap-1 mb-1 sm:mb-2 overflow-hidden">
         <span className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#FF6B35] uppercase whitespace-nowrap">
-          Markets Overview
+          {regionLabel} Markets
         </span>
         <span className="text-[8px] sm:text-[10px] text-gray-500 ml-1 sm:ml-2 truncate">
-          • As of Apr 8, 2026 12:45 PM ET
+          • {asOf}
         </span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3">

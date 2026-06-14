@@ -42,7 +42,7 @@ export default async function Page({ params }: PageProps) {
     ['Headquarters', company.headquarters],
     ['Industry', <span className="capitalize">{company.industry}</span>],
     ['Employees', company.employees.toLocaleString()],
-    ['Website', <a href={company.website} target="_blank" className="text-primary hover:underline">{company.website.replace('https://', '')}</a>]
+    ['Website', <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">{company.website.replace('https://', '')}</a>]
   ];
 
   const quickStats = [

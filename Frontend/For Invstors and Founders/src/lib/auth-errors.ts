@@ -1,33 +1,22 @@
-/**
- * Map raw Supabase auth errors into friendly user-facing copy.
- * Frontend-only helper — no backend changes.
- */
-export function friendlyAuthError(err: unknown, fallback = "Something went wrong. Please try again."): string {
-  const raw =
-    typeof err === "string"
-      ? err
-      : (err as { message?: string } | null)?.message ?? "";
+// Centralized auth error formatter for UI
 
-  const msg = raw.toLowerCase();
+export function friendlyAuthError(error: any): string {
+  if (!error) return "Something went wrong";
 
-  if (!msg) return fallback;
+  const message =
+    error?.response?.data?.message ||
+    error?.message ||
+    error?.error ||
+    "Unknown error";
 
-  if (msg.includes("invalid login credentials")) return "Incorrect email or password.";
-  if (msg.includes("email not confirmed")) return "Please confirm your email before signing in.";
-  if (msg.includes("user already registered") || msg.includes("already registered"))
-    return "This email is already registered. Try signing in instead.";
-  if (msg.includes("user not found")) return "We couldn't find an account with that email.";
-  if (msg.includes("password should be") || msg.includes("password")) return "Password doesn't meet the requirements.";
-  if (msg.includes("rate limit") || msg.includes("too many requests"))
-    return "Too many attempts. Please wait a moment and try again.";
-  if (msg.includes("token has expired") || msg.includes("expired"))
-    return "This link has expired. Please request a new one.";
-  if (msg.includes("invalid token") || msg.includes("invalid otp"))
-    return "This link is invalid. Please request a new one.";
-  if (msg.includes("network") || msg.includes("fetch")) return "Network problem. Check your connection and try again.";
-  if (msg.includes("captcha")) return "Captcha verification failed. Please try again.";
-  if (msg.includes("signups not allowed") || msg.includes("signup is disabled"))
-    return "New sign-ups are currently disabled.";
+  // Map common backend errors to clean UI messages
+  const map: Record<string, string> = {
+    "Invalid credentials": "Incorrect email or password",
+    "User not found": "Account does not exist",
+    "Token expired": "Session expired, please login again",
+    "Unauthorized": "You are not authorized",
+    "Network Error": "Check your internet connection",
+  };
 
-  return raw || fallback;
+  return map[message] || message;
 }

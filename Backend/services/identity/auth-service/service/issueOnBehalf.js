@@ -7,8 +7,11 @@
 const { userRepo, orgRepo, sessionRepo, auditRepo } = require('../repositories');
 const jwt = require('../utils/jwtRsa');
 const eventBus = require('../utils/eventBus');
+const sessionEnrichment = require('./sessionEnrichmentService');
 const { AppError } = require('../utils/errors');
 const config = require('../config/appConfig');
+// C4: keep platform/tenant roles separate on this dual-issue path too.
+const { assertNoRoleConfusion, isPlatformRole } = require('@baalvion/auth-node');
 
 async function issueOnBehalf({ email, service, ipAddress, userAgent }) {
     const user = await userRepo.findByEmail(email);
@@ -23,10 +26,30 @@ async function issueOnBehalf({ email, service, ipAddress, userAgent }) {
     const serviceRoles = membership.service_roles || {};
     const permissions  = Object.keys(serviceRoles);
 
+    // Org-lifecycle gate: never mint a canonical token for a suspended org (mirrors login/refresh).
+    // The S2S bridge must not be a back door around the org kill-switch.
+    const org = await orgRepo.findById(orgId);
+    if (org && org.status === 'suspended') {
+        throw new AppError('ORG_SUSPENDED', 'Organization is suspended. Contact the platform administrator.', 403);
+    }
+
+    // Force-MFA gate: a user under an unmet mfa_required mandate must not receive a session via the
+    // S2S bridge either (mirrors login/refresh). Closes the issueOnBehalf MFA-bypass.
+    if (user.mfa_required && !user.mfa_enabled) {
+        throw new AppError('MFA_ENROLLMENT_REQUIRED', 'Multi-factor enrollment required before access can be issued.', 403);
+    }
+
+    // C4: org-membership role must not be a platform role; carry an explicit platform grant if any.
+    assertNoRoleConfusion(role);
+    const platformRole = isPlatformRole(user.platform_role) ? user.platform_role : null;
+    const roles = platformRole ? [platformRole, role] : [role];
+
     const session = await sessionRepo.create({ userId: user.id, orgId, ipAddress, userAgent });
+    // Fail-soft geo/device/risk enrichment (Phase 2); never affects token issuance.
+    try { await sessionEnrichment.analyseLoginEvent({ sessionId: session.id, userId: user.id, ipAddress, userAgent }); } catch (_) { /* best-effort */ }
 
     const accessToken = jwt.signAccessToken({
-        sub: user.id, email: user.email, orgId, role, permissions, sid: session.id,
+        sub: user.id, email: user.email, orgId, role, roles, permissions, sid: session.id,
     });
 
     await auditRepo.append({
@@ -46,7 +69,7 @@ async function issueOnBehalf({ email, service, ipAddress, userAgent }) {
         sub:       String(user.id),
         org_id:    orgId,
         sid:       session.id,
-        roles:     [role],
+        roles,
     };
 }
 

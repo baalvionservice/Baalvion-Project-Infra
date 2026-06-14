@@ -29,7 +29,9 @@ interface LawyerVerificationListProps {
  */
 export default function LawyerVerificationList({ pendingLawyers, onAction }: LawyerVerificationListProps) {
   const { toast } = useToast();
-  const { adminController, user } = useAuthContext();
+  const { user } = useAuthContext();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const adminController: any = null; // not yet wired to AuthContext
   const [processingId, setProcessingId] = useState<string | null>(null);
 
   const handleReview = async (targetUserId: string, action: 'approve' | 'reject') => {

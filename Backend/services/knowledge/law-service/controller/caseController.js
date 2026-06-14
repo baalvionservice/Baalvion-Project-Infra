@@ -7,7 +7,9 @@ const { ensureClient } = require('../utils/provision');
 
 const listCases = async (req, res, next) => {
     try {
-        const { page = 1, limit = 20, status, priority, category } = req.query;
+        const { page = 1, status, priority, category } = req.query;
+        // Cap pagination limit to prevent large data dumps.
+        const limit = Math.min(Number(req.query.limit) || 20, 100);
         const where = {};
         if (status) where.status = status;
         if (priority) where.priority = priority;
@@ -19,12 +21,12 @@ const listCases = async (req, res, next) => {
             const conditions = [];
             if (client) conditions.push({ client_id: client.id });
             if (lawyer) conditions.push({ lawyer_id: lawyer.id });
-            if (conditions.length === 0) return sendPaginated(req, res, { items: [], pagination: { total: 0, page: 1, limit: Number(limit), totalPages: 0 } });
+            if (conditions.length === 0) return sendPaginated(req, res, { items: [], pagination: { total: 0, page: 1, limit, totalPages: 0 } });
             if (conditions.length === 1) Object.assign(where, conditions[0]);
             else where[Op.or] = conditions;
         }
 
-        const offset = (Number(page) - 1) * Number(limit);
+        const offset = (Number(page) - 1) * limit;
         const { count, rows } = await db.Case.findAndCountAll({
             where,
             include: [
@@ -32,12 +34,12 @@ const listCases = async (req, res, next) => {
                 { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'email'], required: false },
             ],
             order: [['created_at', 'DESC']],
-            limit: Number(limit),
+            limit,
             offset,
         });
         return sendPaginated(req, res, {
             items: rows,
-            pagination: { total: count, page: Number(page), limit: Number(limit), totalPages: Math.ceil(count / Number(limit)) },
+            pagination: { total: count, page: Number(page), limit, totalPages: Math.ceil(count / limit) },
         });
     } catch (err) { return next(err); }
 };
@@ -46,11 +48,19 @@ const getCase = async (req, res, next) => {
     try {
         const legalCase = await db.Case.findByPk(req.params.id, {
             include: [
-                { model: db.Client, as: 'client', attributes: ['id', 'name', 'email'] },
-                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'email', 'specializations'], required: false },
+                { model: db.Client, as: 'client', attributes: ['id', 'name', 'email', 'user_id'] },
+                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'name', 'email', 'specializations', 'user_id'], required: false },
             ],
         });
         if (!legalCase) return next(new AppError('NOT_FOUND', 'Case not found', 404));
+        // IDOR: non-admin callers may only view cases they own as client or lawyer.
+        if (!req.user.isAdmin) {
+            const uid = String(req.user.id);
+            const isOwner =
+                (legalCase.client && String(legalCase.client.user_id) === uid) ||
+                (legalCase.lawyer && String(legalCase.lawyer.user_id) === uid);
+            if (!isOwner) return next(new AppError('FORBIDDEN', 'Not authorised to view this case', 403));
+        }
         return sendSuccess(req, res, legalCase);
     } catch (err) { return next(err); }
 };
@@ -75,10 +85,30 @@ const createCase = async (req, res, next) => {
 
 const updateCase = async (req, res, next) => {
     try {
-        const legalCase = await db.Case.findByPk(req.params.id);
+        const legalCase = await db.Case.findByPk(req.params.id, {
+            include: [
+                { model: db.Client, as: 'client', attributes: ['id', 'user_id'] },
+                { model: db.Lawyer, as: 'lawyer', attributes: ['id', 'user_id'], required: false },
+            ],
+        });
         if (!legalCase) return next(new AppError('NOT_FOUND', 'Case not found', 404));
-        delete req.body.client_id;
-        await legalCase.update(req.body);
+        // IDOR: non-admin callers may only update cases they own as client or lawyer.
+        if (!req.user.isAdmin) {
+            const uid = String(req.user.id);
+            const isOwner =
+                (legalCase.client && String(legalCase.client.user_id) === uid) ||
+                (legalCase.lawyer && String(legalCase.lawyer.user_id) === uid);
+            if (!isOwner) return next(new AppError('FORBIDDEN', 'Not authorised to update this case', 403));
+        }
+        // Mass-assignment guard: only allow safe client-editable fields.
+        const { title, description, category, priority, notes } = req.body;
+        const patch = {};
+        if (title      !== undefined) patch.title       = title;
+        if (description !== undefined) patch.description = description;
+        if (category   !== undefined) patch.category    = category;
+        if (priority   !== undefined) patch.priority    = priority;
+        if (notes      !== undefined) patch.notes       = notes;
+        await legalCase.update(patch);
         return sendSuccess(req, res, legalCase);
     } catch (err) { return next(err); }
 };
@@ -101,8 +131,16 @@ const updateCaseStatus = async (req, res, next) => {
 const assignLawyer = async (req, res, next) => {
     try {
         const { lawyer_id } = req.body;
-        const legalCase = await db.Case.findByPk(req.params.id);
+        const legalCase = await db.Case.findByPk(req.params.id, {
+            include: [{ model: db.Client, as: 'client', attributes: ['id', 'user_id'] }],
+        });
         if (!legalCase) return next(new AppError('NOT_FOUND', 'Case not found', 404));
+        // IDOR: only the owning client (or an admin) may assign/re-assign a lawyer.
+        if (!req.user.isAdmin) {
+            const uid = String(req.user.id);
+            const isOwningClient = legalCase.client && String(legalCase.client.user_id) === uid;
+            if (!isOwningClient) return next(new AppError('FORBIDDEN', 'Only the case owner may assign a lawyer', 403));
+        }
         const lawyer = await db.Lawyer.findOne({ where: { id: lawyer_id, status: 'active' } });
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found or not active', 404));
         await legalCase.update({ lawyer_id: lawyer.id, status: 'in_progress' });

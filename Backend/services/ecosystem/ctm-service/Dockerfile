@@ -20,8 +20,9 @@ RUN pnpm deploy --filter=baalvion-ctm-service --prod /out
 FROM node:20-alpine AS final
 RUN apk add --no-cache dumb-init
 ENV NODE_ENV=production
+ENV PORT=3017
 WORKDIR /app
 COPY --from=installer /out ./
-EXPOSE 3011
+EXPOSE 3017
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "index.js"]

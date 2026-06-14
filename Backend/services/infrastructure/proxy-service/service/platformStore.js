@@ -274,15 +274,18 @@ const convertRecord = (name, inst) => {
 
 // Convert camelCase payload → snake_case DB columns for insert
 const prepareInsert = (name, payload) => {
-  const p = {};
+  // Null-prototype map so a remote-controlled column name can never reach
+  // Object.prototype, and define the write as an own data property
+  // (remote-property-injection / prototype-pollution guard).
+  const p = Object.create(null);
   for (const [k, v] of Object.entries(payload)) {
     if (v === undefined) continue;
     if (FORBIDDEN_KEYS.has(k)) continue;
     const col = toSnake(k);
     if (FORBIDDEN_KEYS.has(col)) continue;
-    // col is user-controlled: only allow plain snake_case column names (no arbitrary property write).
-    if (!/^[a-z0-9_]+$/.test(col)) continue;
-    p[col] = v;
+    Object.defineProperty(p, col, {
+      value: v, writable: true, enumerable: true, configurable: true,
+    });
   }
   if (name === 'proxies') {
     if (p.host !== undefined) { p.ip = p.host; delete p.host; }
@@ -399,12 +402,12 @@ const getById = async (name, id, orgId = null) => {
     const row = await Model.findOne({ where });
     return convertRecord(name, row);
   } catch (err) {
-    console.error('getById(%s, %s) error:', logSafe(name), logSafe(id), logSafe(err.message));
+    console.error('getById(%s, %s) error:', logSafe(name), logSafe(id), err.message);
     return null;
   }
 };
 
-const insert = async (name, payload) => {
+const insert = async (name, payload, opts = {}) => {
   if (isMemory(name)) {
     const item = { id: payload.id || makeId(name.slice(0, 3)), ...payload };
     (mem[name] || (mem[name] = [])).push(item);
@@ -416,7 +419,8 @@ const insert = async (name, payload) => {
 
   const data = prepareInsert(name, payload);
   try {
-    const row = await Model.create(data);
+    // opts.transaction threads a Sequelize transaction through for atomic multi-writes.
+    const row = await Model.create(data, opts.transaction ? { transaction: opts.transaction } : undefined);
     return convertRecord(name, row);
   } catch (err) {
     console.error(`insert(${name}) error:`, err.message, JSON.stringify(data));

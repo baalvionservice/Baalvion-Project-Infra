@@ -1,14 +1,29 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Cormorant_Garamond } from "next/font/google";
+import { headers } from "next/headers";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 import { AppProvider } from "@/lib/store";
+import {
+  normalizeCountry,
+  countryToLocale,
+  directionForCountry,
+} from "@/lib/i18n/countries";
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
   weight: ["300", "400", "500", "600", "700"],
+});
+
+// Elegant high-contrast luxury serif for all headings (replaces the never-loaded "Ivy Ora").
+// Self-hosted by next/font — no external request, no CSP/ORB issue.
+const cormorant = Cormorant_Garamond({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-serif",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const viewport: Viewport = {
@@ -20,6 +35,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.amarisemaisonavenue.com/"),
+  icons: { icon: '/favicon.svg' },
   title: {
     default: "AMARISÉ MAISON AVENUE | The Pinnacle of Global Luxury",
     template: "%s | AMARISÉ MAISON AVENUE",
@@ -70,13 +86,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Country is resolved in middleware and forwarded via `x-amarise-country`,
+  // so the SSR HTML carries the correct lang + direction (e.g. ar/RTL for AE).
+  const country = normalizeCountry((await headers()).get("x-amarise-country"));
+  const htmlLang = countryToLocale(country);
+  const htmlDir = directionForCountry(country);
+
   return (
-    <html lang="en" className={`${inter.variable} light scroll-smooth`}>
+    <html
+      lang={htmlLang}
+      dir={htmlDir}
+      className={`${inter.variable} ${cormorant.variable} light scroll-smooth`}
+    >
       <head>
         <link rel="preconnect" href="https://picsum.photos" />
         <link rel="preconnect" href="https://madisonavenuecouture.com" />

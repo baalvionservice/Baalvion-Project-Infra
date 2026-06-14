@@ -90,7 +90,7 @@ export default function Hero() {
             Start hiring now →
           </Link>
           <Link
-            href="#"
+            href="/signup/candidate"
             className="inline-flex items-center justify-center px-[34px] py-[14px] text-[17px] font-semibold bg-transparent text-green-600 border-[1.5px] border-green-600 rounded-[14px] hover:bg-green-600 hover:text-white transition-all no-underline"
           >
             Prove your skills

@@ -1,0 +1,55 @@
+{
+  "slug": "saas",
+  "title": "Baalvion for SaaS Companies",
+  "kind": "industry",
+  "heroImageSeed": "ind-saas",
+  "excerpt": "Multi-tenant SaaS engineering and scale — isolation, metering, and reliability so you can grow without re-architecting.",
+  "seo": {
+    "title": "SaaS Engineering & Multi-Tenant Platforms | Baalvion",
+    "description": "Baalvion helps SaaS companies build and scale multi-tenant platforms with strong isolation, metering, billing, and reliability — without re-architecting later.",
+    "keywords": ["SaaS engineering", "multi-tenant", "platform scaling", "metering", "Baalvion industries", "SaaS architecture"]
+  },
+  "customFields": {
+    "challenges": [
+      "Tenant isolation without per-customer complexity",
+      "Noisy-neighbour and fair-usage problems",
+      "Metering and billing tied to real usage",
+      "Scaling without a costly re-architecture"
+    ],
+    "solutions": [
+      "Row-level security and a shared identity layer",
+      "Resource controls and fair-usage enforcement",
+      "Usage metering wired to billing",
+      "Event-driven foundations that scale horizontally"
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Sector Overview" },
+    { "type": "paragraph", "text": "Multi-tenancy is the defining engineering challenge of SaaS: serve many customers from one platform, keep their data perfectly isolated, meter usage fairly, and scale without rebuilding. Baalvion does this for its own platform and helps SaaS companies do it well from the start — the patterns are laid out in [building multi-tenant SaaS the right way](/news/tech/building-multi-tenant-saas)." },
+    { "type": "heading", "level": 2, "text": "Challenges" },
+    { "type": "list", "ordered": false, "items": [
+      "**Isolation:** tenants must never see each other's data — and you must be able to prove it.",
+      "**Noisy neighbours:** one heavy tenant can't be allowed to degrade the rest.",
+      "**Metering and billing:** revenue depends on accurately measuring usage.",
+      "**Scaling:** the architecture must grow without an expensive rewrite."
+    ] },
+    { "type": "heading", "level": 2, "text": "How Baalvion Helps" },
+    { "type": "paragraph", "text": "We implement row-level security and a shared identity layer for true isolation — proven adversarially, as in [our identity platform](/case-studies/multi-tenant-identity-platform) — add resource controls for fair usage, wire metering to billing, and build on event-driven foundations that scale horizontally, the approach in [how Baalvion builds scalable software](/news/tech/how-baalvion-builds-scalable-software)." },
+    { "type": "heading", "level": 2, "text": "Relevant Services" },
+    { "type": "paragraph", "text": "SaaS engagements draw on [enterprise software](/services/enterprise-software), [cloud solutions](/services/cloud-solutions), and [DevOps](/services/devops), with [technology consulting](/services/technology-consulting) for architecture reviews before you scale." },
+    { "type": "heading", "level": 2, "text": "Outcomes" },
+    { "type": "paragraph", "text": "SaaS platforms with provable tenant isolation, fair resource usage, accurate usage-based billing, and an architecture that scales with customer growth instead of forcing a painful re-architecture." }
+  ],
+  "faqs": [
+    { "q": "Pool or silo multi-tenancy — which is right?", "a": "It depends on your isolation, cost, and compliance needs. We help you choose and often blend the two — see [building multi-tenant SaaS](/news/tech/building-multi-tenant-saas)." },
+    { "q": "How do you guarantee tenant isolation?", "a": "Row-level security at the database plus a shared identity and RBAC layer, validated with adversarial cross-tenant testing — as in [our identity platform case study](/case-studies/multi-tenant-identity-platform)." },
+    { "q": "Can you help with usage metering and billing?", "a": "Yes — we wire accurate usage metering to billing so revenue tracks real consumption." },
+    { "q": "Which services apply to SaaS?", "a": "Typically [enterprise software](/services/enterprise-software), [cloud solutions](/services/cloud-solutions), and [DevOps](/services/devops)." }
+  ],
+  "internalLinks": [
+    { "anchor": "building multi-tenant SaaS the right way", "href": "/news/tech/building-multi-tenant-saas" },
+    { "anchor": "our identity platform", "href": "/case-studies/multi-tenant-identity-platform" },
+    { "anchor": "how Baalvion builds scalable software", "href": "/news/tech/how-baalvion-builds-scalable-software" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" }
+  ]
+}

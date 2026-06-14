@@ -30,6 +30,7 @@ import {
   ClipboardList,
   ShieldCheck,
   Lock,
+  Compass,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
@@ -104,6 +105,30 @@ const aboutItems = [
     icon: Target,
   },
   {
+    name: "About Baalvion",
+    href: "/about",
+    desc: "Mission, vision, story, & why us",
+    icon: Target,
+  },
+  {
+    name: "Company Structure",
+    href: "/structure",
+    desc: "One foundation, three layers, & governance",
+    icon: Layers,
+  },
+  {
+    name: "Philosophy",
+    href: "/philosophy",
+    desc: "The principles Baalvion builds against",
+    icon: Compass,
+  },
+  {
+    name: "Case Studies",
+    href: "/case-studies",
+    desc: "Proof of work & measurable outcomes",
+    icon: FileText,
+  },
+  {
     name: "Working at Baalvion",
     href: "/careers",
     desc: "Careers, team stories, & culture",
@@ -131,9 +156,10 @@ const aboutItems = [
 
 const mainLinks = [
   { name: "Platform", href: "/platform", icon: Cpu },
+  { name: "Services", href: "/services", icon: BrainCircuit },
+  { name: "Industries", href: "/industries", icon: Globe2 },
   { name: "Ecosystem", href: "/ecosystem", icon: Layers },
   { name: "Projects", href: "/projects", icon: Briefcase },
-  { name: "Updates Log", href: "/updates", icon: ClipboardList },
   { name: "Trust", href: "/trust", icon: ShieldCheck },
 ];
 

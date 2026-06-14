@@ -118,6 +118,23 @@ export const useBulkDeleteContent = () => {
   });
 };
 
+// Reschedule a single item by changing its scheduledAt — used by the content calendar's
+// drag-and-drop. Resolves the website from the cms store (set on page load), so callers
+// must have an active website selected.
+export const useRescheduleContent = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, scheduledAt }: { id: string; scheduledAt: string | null }) =>
+      cmsContentApi.update(id, { scheduledAt }),
+    onSuccess: (res) => {
+      qc.setQueryData(contentKeys.detail(res.data.data.id), res.data.data);
+      qc.invalidateQueries({ queryKey: contentKeys.all });
+      toast.success('Rescheduled');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
 // Autosave hook — debounced, silent (no toast)
 export const useAutosave = (id: string) => {
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);

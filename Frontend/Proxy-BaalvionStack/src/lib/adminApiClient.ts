@@ -593,3 +593,27 @@ export const adminMarketplaceApi = {
 export interface Reseller { id: string; org_id: string; parent_reseller_id?: string; tier: string; status: string; margin_pct: number; quota_gb?: number; kyb_status?: string; }
 export interface PayoutRow { id: string; party_type: string; party_id: string; amount: number; status: string; risk_score?: number; hold_reason?: string; created_at: string; }
 export interface LeaderboardRow { rank: number; resellerId: string; tier: string; revenue: number; customers: number; }
+
+// ─── Billing: pending bank/wire orders (offline settlement) ────────────────────
+export interface AdminPendingOrder {
+  invoiceId: string;
+  orgId: string;
+  orgName: string;
+  planSlug: string | null;
+  amount: number;
+  total: number;
+  status: string;
+  method: "bank" | "wire";
+  issuedAt: string;
+  dueAt: string;
+}
+
+export const adminBillingApi = {
+  // Pending bank/wire orders awaiting offline settlement.
+  listPendingOrders: () => get<AdminPendingOrder[]>("/admin/billing/orders"),
+  // Mark funds received → invoice paid + org subscription auto-activated.
+  markOrderPaid: (invoiceId: string) =>
+    post<{ invoiceId: string; status: string; activated: boolean; orgId: string; planSlug: string | null }>(
+      `/admin/billing/orders/${invoiceId}/mark-paid`,
+    ),
+};

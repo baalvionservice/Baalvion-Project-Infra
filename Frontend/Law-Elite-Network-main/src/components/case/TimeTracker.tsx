@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Timer, Play, Square, Loader2, Clock, History, IndianRupee } from 'lucide-react';
 import { mockAddTimeLog } from '@/services/cases/case.mock';

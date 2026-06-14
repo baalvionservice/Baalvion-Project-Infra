@@ -1,102 +1,155 @@
-
-'use client';
-
-import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { Navbar } from '@/components/navbar';
-import { Footer } from '@/components/footer';
-import { Share2, Globe, ArrowLeft, Loader2, Link2, Twitter, Facebook, Linkedin, Mail } from 'lucide-react';
-import { Article } from '@/lib/db';
-import { SubPageHero } from '@/components/sub-page-hero';
+import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { useToast } from '@/hooks/use-toast';
+import { Globe, ArrowLeft, ChevronRight } from 'lucide-react';
+import { Navbar } from '@/components/navbar';
+import { Footer } from '@/components/footer';
 import { Button } from '@/components/ui/button';
+import { cmsGetArticle, cmsGetArticles, cmsGetRichDoc } from '@/lib/cms';
+import { RichContent } from '@/components/rich-content';
+import { PageFaq } from '@/components/page-faq';
+import { JsonLd } from '@/components/json-ld';
+import { breadcrumbSchema, faqSchema } from '@/lib/schema';
+import { ArticleShare } from './article-share';
 
-export default function ArticleDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const slug = params?.slug as string;
-  const [article, setArticle] = useState<Article | null>(null);
-  const [moreNews, setMoreNews] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+const BASE_URL = 'https://about.baalvion.com';
+const SITE_NAME = 'Baalvion Operating System (BOS)';
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const res = await fetch(`/api/news?slug=${slug}`);
-        if (!res.ok) throw new Error('Not found');
-        const data = await res.json();
-        setArticle(data);
+// Incremental Static Regeneration: pages are statically generated and refreshed
+// from the CMS at most once per hour.
+export const revalidate = 3600;
 
-        const listRes = await fetch(`/api/news?category=${data.category}`);
-        const listData = await listRes.json();
-        setMoreNews(listData.filter((a: Article) => a.id !== data.id).slice(0, 4));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-    if (slug) fetchData();
-  }, [slug]);
+type Params = { category: string; slug: string };
 
-  const handleCopyLink = () => {
-    if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
-      toast({
-        title: "Strategic Link Copied",
-        description: "The article destination has been stored in your clipboard buffer.",
-      });
-    }
+function ogImageFor(title: string): string {
+  return `${BASE_URL}/api/og?title=${encodeURIComponent(title)}&eyebrow=${encodeURIComponent('Baalvion News')}`;
+}
+
+// Pre-render the known article URLs at build time; new articles render on demand
+// (dynamicParams defaults to true) and are then cached per `revalidate`.
+// Paths that have their own explicit (non-dynamic) page and must not be
+// prerendered by this dynamic route — otherwise they collide at the same output
+// path during static generation.
+const RESERVED_PATHS = new Set(['updates/today']);
+
+export async function generateStaticParams(): Promise<Params[]> {
+  const articles = await cmsGetArticles();
+  return articles
+    .filter((a) => a.category && a.slug)
+    .filter((a) => !RESERVED_PATHS.has(`${a.category}/${a.slug}`))
+    .map((a) => ({ category: a.category, slug: a.slug }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await cmsGetArticle(slug);
+
+  if (!article) {
+    return { title: 'Brief Not Found', robots: { index: false, follow: true } };
+  }
+
+  const title = article.seo?.title || article.title;
+  const description =
+    article.seo?.description ||
+    `${article.title} — strategic intelligence and analysis from Baalvion Industries.`;
+  const url = `${BASE_URL}/news/${article.category}/${article.slug}`;
+  const ogImage = article.seo?.ogImage || ogImageFor(article.title);
+
+  return {
+    title,
+    description,
+    keywords: article.seo?.keywords,
+    alternates: { canonical: url },
+    openGraph: {
+      type: 'article',
+      title,
+      description,
+      url,
+      siteName: SITE_NAME,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: article.title }],
+      locale: 'en_US',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
+    },
+  };
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  tech: 'Technology & AI',
+  insights: 'Insights',
+  finance: 'Finance & Compliance',
+  updates: 'Company Updates',
+  company: 'Company',
+  markets: 'Markets',
+  sustainability: 'Sustainability',
+  community: 'Community',
+  reports: 'Reports',
+};
+
+export default async function ArticleDetailPage({ params }: { params: Promise<Params> }) {
+  const { slug } = await params;
+  const [article, doc] = await Promise.all([cmsGetArticle(slug), cmsGetRichDoc(slug)]);
+
+  if (!article) notFound();
+
+  const moreNews = (await cmsGetArticles(article.category))
+    .filter((a) => a.id !== article.id)
+    .slice(0, 4);
+
+  const categoryLabel = CATEGORY_LABELS[article.category] || article.category;
+  const articleUrl = `${BASE_URL}/news/${article.category}/${article.slug}`;
+  const hasRichBody = !!doc && doc.blocks.length > 0;
+
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: article.seo?.title || article.title,
+    description: article.seo?.description,
+    image: [article.image],
+    datePublished: article.date,
+    dateModified: article.date,
+    author: [{ '@type': 'Person', name: article.author, url: 'https://baalvion.nexus' }],
+    publisher: {
+      '@type': 'Organization',
+      name: 'Baalvion Industries',
+      url: BASE_URL,
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': articleUrl,
+    },
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <Loader2 className="w-10 h-10 animate-spin text-primary" />
-        <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">Accessing Intelligence Registry...</p>
-      </div>
-    </div>
-  );
-
-  if (!article) return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center text-center p-8">
-      <h1 className="text-4xl font-bold mb-4 text-gray-900">404: Brief Missing</h1>
-      <p className="text-gray-500 mb-8">The requested intelligence brief does not exist in the registry node.</p>
-      <Link href="/news/updates" className="text-primary font-bold hover:underline">Return to News Nexus</Link>
-    </div>
-  );
-
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "NewsArticle",
-    "headline": article.seo?.title || article.title,
-    "image": [article.image],
-    "datePublished": article.date,
-    "author": [{
-      "@type": "Person",
-      "name": article.author,
-      "url": "https://baalvion.nexus"
-    }]
-  };
+  const schema: Record<string, unknown>[] = [
+    articleJsonLd,
+    breadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'News', url: '/news' },
+      { name: categoryLabel, url: `/news/${article.category}` },
+      { name: article.title, url: `/news/${article.category}/${article.slug}` },
+    ]),
+  ];
+  if (doc && doc.faqs.length > 0) schema.push(faqSchema(doc.faqs));
 
   return (
     <div className="min-h-screen bg-white">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
+      <JsonLd data={schema} />
       <Navbar />
       <main className="pt-48 pb-0">
         <div className="max-w-4xl mx-auto px-6 mb-24">
+          {/* Breadcrumb */}
+          <nav aria-label="Breadcrumb" className="mb-8">
+            <ol className="flex flex-wrap items-center gap-1 text-xs font-bold uppercase tracking-widest text-gray-400">
+              <li><Link href="/news" className="hover:text-primary transition-colors">News</Link></li>
+              <li className="flex items-center gap-1"><ChevronRight className="w-3 h-3" /><Link href={`/news/${article.category}`} className="hover:text-primary transition-colors">{categoryLabel}</Link></li>
+            </ol>
+          </nav>
+
           {/* Main Headline */}
           <div className="space-y-4 mb-12">
             <h1 className="text-4xl md:text-5xl font-bold text-[#111111] leading-tight tracking-tight">
@@ -109,36 +162,7 @@ export default function ArticleDetailPage() {
 
           {/* Share Button */}
           <div className="flex justify-end mb-8">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-sm hover:bg-gray-50 transition-colors text-xs font-bold text-gray-700 outline-none">
-                  <Share2 className="w-3 h-3 text-[#FF9900]" /> Share
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-white border-gray-100 shadow-2xl rounded-md p-1">
-                <DropdownMenuItem onClick={handleCopyLink} className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition-colors rounded-sm">
-                  <Link2 className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-bold text-gray-700">Copy Link</span>
-                </DropdownMenuItem>
-                <div className="h-px bg-gray-50 my-1" />
-                <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition-colors rounded-sm">
-                  <Twitter className="w-4 h-4 text-[#1DA1F2]" />
-                  <span className="text-sm font-bold text-gray-700">Twitter / X</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition-colors rounded-sm">
-                  <Facebook className="w-4 h-4 text-[#4267B2]" />
-                  <span className="text-sm font-bold text-gray-700">Facebook</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition-colors rounded-sm">
-                  <Linkedin className="w-4 h-4 text-[#0077B5]" />
-                  <span className="text-sm font-bold text-gray-700">LinkedIn</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem className="flex items-center gap-3 p-3 cursor-pointer hover:bg-gray-50 transition-colors rounded-sm">
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-bold text-gray-700">Email Brief</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ArticleShare />
           </div>
 
           {/* Author & Timestamp */}
@@ -148,7 +172,8 @@ export default function ArticleDetailPage() {
                 <Globe className="text-white w-5 h-5" />
               </div>
               <p className="text-sm font-bold text-gray-700">
-                Strategic Intelligence by <span className="text-[#007185] hover:underline cursor-pointer">{article.author}</span>
+                Strategic Intelligence by{' '}
+                <span className="text-[#007185]">{article.author}</span>
               </p>
             </div>
             <div className="text-right space-y-1">
@@ -161,21 +186,23 @@ export default function ArticleDetailPage() {
 
           {/* Article Image */}
           <div className="relative aspect-video rounded-xl overflow-hidden mb-12 bg-gray-100">
-            <Image 
-              src={article.image} 
-              alt={article.title} 
-              fill 
-              className="object-cover"
-              priority
-            />
+            <Image src={article.image} alt={article.title} fill className="object-cover" priority />
           </div>
 
           {/* Article Content */}
-          <div className="prose prose-lg max-w-none mb-20">
-            <div className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {article.content || 'Content for this strategic brief is currently being synchronized with the Baalvion Operating System (BOS).'}
-            </div>
+          <div className="mb-16">
+            {hasRichBody ? (
+              <RichContent blocks={doc!.blocks} />
+            ) : (
+              <div className="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {article.content ||
+                  'Content for this strategic brief is currently being synchronized with the Baalvion Operating System (BOS).'}
+              </div>
+            )}
           </div>
+
+          {/* FAQ */}
+          {doc && doc.faqs.length > 0 && <PageFaq faqs={doc.faqs} />}
 
           {/* Bottom Navigation */}
           <div className="mt-20 pt-10 border-t border-gray-100">
@@ -191,7 +218,7 @@ export default function ArticleDetailPage() {
         {moreNews.length > 0 && (
           <section className="bg-[#F2F2F2] py-20">
             <div className="max-w-[1200px] mx-auto px-6">
-              <h3 className="text-xl font-bold text-[#111111] mb-8 uppercase tracking-widest">Related Intelligence</h3>
+              <h2 className="text-xl font-bold text-[#111111] mb-8 uppercase tracking-widest">Related Intelligence</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {moreNews.map((news) => (
                   <Link key={news.id} href={`/news/${news.category}/${news.slug}`} className="group bg-white rounded-lg shadow-sm border border-gray-100 flex flex-col h-full overflow-hidden transition-transform hover:-translate-y-1">
@@ -205,12 +232,10 @@ export default function ArticleDetailPage() {
                     </div>
                     <div className="p-5 flex-1 flex flex-col justify-between">
                       <div className="space-y-3">
-                        <h4 className="text-sm font-bold leading-tight text-gray-900 group-hover:text-[#007185] transition-colors line-clamp-3">
+                        <h3 className="text-sm font-bold leading-tight text-gray-900 group-hover:text-[#007185] transition-colors line-clamp-3">
                           {news.title}
-                        </h4>
-                        <p className="text-[11px] text-gray-400 font-medium">
-                          {news.date}
-                        </p>
+                        </h3>
+                        <p className="text-[11px] text-gray-400 font-medium">{news.date}</p>
                       </div>
                     </div>
                   </Link>

@@ -288,6 +288,23 @@ export async function getPublishedNews(limit = 50): Promise<NewsArticle[]> {
   }
 }
 
+/**
+ * Published articles for a single category slug (e.g. "banking", "investing"),
+ * normalized to the News shape so topic pages can render them with the existing
+ * cards. Returns [] on any failure so callers fall back to static content.
+ */
+export async function getCategoryArticles(
+  categorySlug: string,
+  limit = 30,
+): Promise<NewsArticle[]> {
+  try {
+    const { items } = await listCmsContent({ categorySlug, limit });
+    return items.map(cmsContentToNews);
+  } catch {
+    return [];
+  }
+}
+
 export async function getPublishedNewsBySlug(slug: string): Promise<NewsArticle | null> {
   try {
     return cmsContentToNews(await getCmsContentBySlug(slug));

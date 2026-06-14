@@ -15,6 +15,9 @@
 secrets/
 credentials.json
 service-account.json
+# Local env backups & editor cruft (Phase 0 cleanup — keep these out of the tree)
+*.bak
+*.old
 
 # ──────────────────────────────────────────────
 # Node / Package managers
@@ -118,3 +121,22 @@ assets/.*
 backups/
 *.dump
 *.sql.gz
+.aider*
+
+# Reports
+Reports/
+
+# Generic cache
+.cache/
+
+# scratch artifacts (do not commit)
+PROJECT_STRUCTURE.txt
+error-report.json
+error-report.txt
+.audit_*.json
+.audit_*.json
+.audit_*.json
+
+# security-alert exports (regenerable; never commit alert data)
+_codeql_alerts.json
+_dependabot_alerts.json

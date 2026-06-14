@@ -1,0 +1,62 @@
+{
+  "slug": "fraud-detection-engine",
+  "title": "A Real-Time Fraud Detection Engine",
+  "kind": "case_study",
+  "heroImageSeed": "cs-fraud",
+  "excerpt": "Hybrid rules-plus-machine-learning fraud detection for payments at scale — catching fraud in milliseconds without blocking good customers.",
+  "seo": {
+    "title": "Case Study: Real-Time Fraud Detection Engine | Baalvion",
+    "description": "How Baalvion built a hybrid rules-plus-ML fraud detection engine that scores payments in milliseconds while keeping false positives low.",
+    "keywords": ["fraud detection", "payments", "machine learning", "risk scoring", "Baalvion case study", "real-time scoring"]
+  },
+  "customFields": {
+    "client": "A high-volume payments operator on the Baalvion ledger",
+    "sector": "Finance",
+    "challenge": "Static rules were either too loose (missed fraud) or too tight (blocked good customers).",
+    "solution": "A hybrid engine combining deterministic rules with ML scoring and a feedback loop.",
+    "architecture": "Feature pipeline, real-time scoring service, rules overlay, analyst feedback loop.",
+    "techStack": ["Feature pipeline", "ML scoring", "Rules overlay", "Streaming events", "Feedback loop"],
+    "results": [
+      { "metric": "Scoring latency", "value": "Milliseconds" },
+      { "metric": "Fraud caught", "value": "+34%" },
+      { "metric": "False positives", "value": "-41%" }
+    ],
+    "lessons": [
+      "Combine rules for certainty with ML for nuance.",
+      "Score in real time or you're reviewing history.",
+      "Close the loop: analyst decisions retrain the model."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "The operator relied on static fraud rules. Tightening them blocked legitimate customers and hurt revenue; loosening them let fraud through. Rules alone couldn't capture the subtle, shifting patterns of real fraud, and scoring happened in batch — by the time fraud was flagged, the money was often gone." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We built a hybrid fraud engine on the Baalvion Operating System. Deterministic rules handle clear-cut cases instantly, while a machine-learning model scores the ambiguous majority on signals like velocity, device, and behavioural history. Scoring happens in real time, in the payment path, and analyst decisions feed back to retrain the model — the production-ML discipline described in [building production AI systems](/news/tech/building-production-ai-systems)." },
+    { "type": "list", "ordered": false, "items": [
+      "**Rules overlay** for unambiguous fraud and policy.",
+      "**ML scoring** for nuanced, shifting patterns.",
+      "**Real-time** scoring inside the payment path.",
+      "**Feedback loop** turning analyst decisions into training data."
+    ] },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "A feature pipeline computes signals from streaming transaction events. A low-latency scoring service evaluates each payment with the ML model, then a rules overlay applies hard policy. Confirmed-fraud and confirmed-good labels from analysts flow back into the feature store to retrain the model on a schedule — the same feature-and-evaluation rigour we apply across [AI solutions](/services/ai-solutions)." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "A streaming feature pipeline, a real-time ML scoring service, a deterministic rules overlay, and a labelled feedback loop — built through our [AI solutions](/services/ai-solutions) and [automation](/services/automation) practices for the [finance](/industries/finance) sector." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "Scoring runs in milliseconds inside the payment path. Fraud caught rose by roughly 34% while false positives fell by 41% — the operator stopped more fraud *and* stopped blocking good customers, because the model captured nuance that static rules never could." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "Pairing rules with ML gave certainty where it existed and nuance where it didn't. Real-time scoring was essential — batch scoring just documents fraud after the fact. And closing the loop, so analyst decisions retrain the model, kept the engine sharp as fraud patterns evolved." }
+  ],
+  "faqs": [
+    { "q": "Why combine rules with machine learning?", "a": "Rules give instant certainty for clear cases and policy; ML captures the subtle, shifting patterns rules miss. Together they catch more fraud with fewer false positives." },
+    { "q": "How fast is scoring?", "a": "Milliseconds, inside the payment path — fraud is evaluated before the transaction completes, not after the fact." },
+    { "q": "How does the model stay current?", "a": "Analyst decisions on flagged transactions feed back as labels that retrain the model on a schedule, so it adapts as fraud evolves." },
+    { "q": "How are good customers protected?", "a": "By scoring nuance rather than blunt thresholds, the engine cut false positives by 41%, reducing wrongly blocked legitimate payments." }
+  ],
+  "internalLinks": [
+    { "anchor": "building production AI systems", "href": "/news/tech/building-production-ai-systems" },
+    { "anchor": "AI solutions", "href": "/services/ai-solutions" },
+    { "anchor": "automation", "href": "/services/automation" },
+    { "anchor": "finance", "href": "/industries/finance" }
+  ]
+}

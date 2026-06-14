@@ -125,7 +125,7 @@ export default function InvoiceDetailPage() {
                 <div className="space-y-1">
                   <p className="text-sm font-bold text-slate-900">Verified Member</p>
                   <p className="text-xs text-slate-500 font-medium">Recipient ID: {invoice.userId.slice(-8)}</p>
-                  <p className="text-xs text-slate-500 font-medium">Engagement Ref: #{invoice.bookingId.slice(-6)}</p>
+                  <p className="text-xs text-slate-500 font-medium">Engagement Ref: #{invoice.bookingId?.slice(-6) ?? 'N/A'}</p>
                 </div>
               </div>
               <div className="text-right space-y-2">
@@ -149,7 +149,7 @@ export default function InvoiceDetailPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {invoice.items.map((item, index) => (
+                  {invoice.items.map((item: any, index: number) => (
                     <tr key={index}>
                       <td className="py-6 text-sm font-semibold text-slate-900">{item.description}</td>
                       <td className="py-6 text-sm font-bold text-slate-900 text-right">₹{item.amount.toLocaleString()}</td>

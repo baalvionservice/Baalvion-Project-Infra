@@ -9,6 +9,7 @@ import Footer from '@/components/layout/footer';
 import QuickLinksSection from '@/components/sections/quick-links-section';
 import Script from 'next/script';
 import { AppConfig } from '@/config';
+import { Analytics } from '@/components/seo/Analytics';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -31,6 +32,7 @@ export const metadata: Metadata = {
   },
   description: 'The global operating system for B2B trade infrastructure. Access performance reports, board resolutions, and strategic materials.',
   metadataBase: new URL(AppConfig.baseUrl),
+  icons: { icon: 'data:,' },
   alternates: {
     canonical: '/',
   },
@@ -73,24 +75,51 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GSC_VERIFICATION,
+    other: process.env.NEXT_PUBLIC_BING_VERIFICATION
+      ? { 'msvalidate.01': process.env.NEXT_PUBLIC_BING_VERIFICATION }
+      : {},
+  },
 };
+
+// Render every route dynamically (no static caching) so content edited in the
+// central CMS console (admin-platform → /cms/websites/ir.baalvion.com) and other
+// live backends is always reflected on the next request. This route-segment config
+// cascades from the root layout to every page under app/.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
+  const orgJsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'FinancialService',
-    name: 'Baalvion Investor Relations',
+    '@type': ['Organization', 'FinancialService'],
+    '@id': `${AppConfig.baseUrl}/#organization`,
+    name: 'Baalvion',
+    alternateName: 'Baalvion Industries Pvt Ltd',
     url: AppConfig.baseUrl,
-    logo: 'https://baalvion.com/logo.png',
-    description: 'Institutional-grade investment and infrastructure management.',
-    parentOrganization: {
-      '@type': 'Organization',
-      name: 'Baalvion Group',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://baalvion.com/logo.png',
     },
+    description: 'Baalvion is an AI-native operating system for global B2B trade, unifying logistics, trade finance and compliance on a single platform.',
+    foundingDate: '2025',
+    slogan: 'The operating system for global trade.',
+    knowsAbout: [
+      'Artificial Intelligence',
+      'B2B trade infrastructure',
+      'Trade finance',
+      'Logistics technology',
+      'Trade compliance',
+      'AML and KYC automation',
+      'Fintech',
+      'Supply chain technology',
+    ],
+    areaServed: 'Worldwide',
     address: {
       '@type': 'PostalAddress',
       streetAddress: 'Yeshwant Avenue Building, NX',
@@ -104,7 +133,22 @@ export default function RootLayout({
       telephone: '+91-8951284770',
       contactType: 'Investor Relations',
       email: 'invrel@baalvion.com',
+      areaServed: 'Worldwide',
+      availableLanguage: ['English'],
     },
+    sameAs: [
+      'https://www.linkedin.com/company/baalvion',
+      'https://twitter.com/baalvion',
+    ],
+  };
+
+  const websiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${AppConfig.baseUrl}/#website`,
+    url: AppConfig.baseUrl,
+    name: 'Baalvion Investor Relations',
+    publisher: { '@id': `${AppConfig.baseUrl}/#organization` },
   };
 
   return (
@@ -117,9 +161,14 @@ export default function RootLayout({
           Skip to main content
         </a>
         <Script
-          id="structured-data"
+          id="structured-data-org"
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
+        <Script
+          id="structured-data-website"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
         <Header />
         <div id="main-content" className="flex min-h-screen  flex-col" role="main">
@@ -128,6 +177,7 @@ export default function RootLayout({
         <QuickLinksSection />
         <Footer />
         <Toaster />
+        <Analytics />
       </body>
     </html>
   );

@@ -1,0 +1,86 @@
+{
+  "slug": "microservices-vs-monolith",
+  "title": "Microservices vs Monolith: Choosing Wisely",
+  "kind": "article",
+  "category": "tech",
+  "seo": {
+    "title": "Microservices vs Monolith: Choosing Wisely",
+    "description": "A senior-engineer guide to microservices, monoliths, and the modular monolith — trade-offs, migration paths, and operational cost from the Baalvion engineering team.",
+    "keywords": [
+      "microservices",
+      "monolith",
+      "modular monolith",
+      "distributed systems",
+      "service decomposition",
+      "strangler fig",
+      "multi-tenant architecture",
+      "operational cost",
+      "domain-driven design",
+      "platform engineering"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "9 min read",
+  "heroImageSeed": "bos-arch-grid",
+  "excerpt": "Microservices are an organizational and operational decision, not a default. Here is how we reason about decomposition, the modular monolith, and migration paths on BOS.",
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The question behind the question" },
+    { "type": "paragraph", "text": "\"Should we use microservices or a monolith?\" is rarely the real question. The real question is how a team wants to manage coupling, change, and failure over the next five years. At Baalvion Industries, we run the [Baalvion Operating System (BOS)](/platform) across 198 markets and 180+ jurisdictions, and the architecture is neither a pure monolith nor a sprawl of nano-services. It is a deliberate split: high-cohesion modules where consistency matters, independently deployable services where blast-radius and scaling profiles diverge. The decision is engineering economics, not fashion." },
+    { "type": "paragraph", "text": "Both styles can ship the same product. The difference shows up in how the system behaves under organizational load: how many teams can touch it without colliding, how a single slow dependency degrades the whole, and how much undifferentiated operational work the platform demands before it returns business value. Choosing wisely means being honest about which of those pressures you actually face today versus the ones you imagine you will face." },
+    { "type": "heading", "level": 2, "text": "What a monolith actually buys you" },
+    { "type": "paragraph", "text": "A well-structured monolith is a single deployable unit with one process boundary, one database transaction scope, and one codebase. Its underrated strengths are concrete. Refactoring across module boundaries is a compiler-checked operation, not a coordinated multi-repo release. A function call is nanoseconds and cannot fail with a 503. ACID transactions span the whole domain for free, so you do not write saga orchestration to keep an order and its ledger entry consistent. Local development is one `run` command, and a stack trace tells the whole story." },
+    { "type": "paragraph", "text": "The classic failure mode is not the monolith itself — it is the big ball of mud, where every module reaches into every other and the dependency graph becomes a hairball. That is an internal-modularity failure, not an evidence that you needed network boundaries. A monolith with clear module seams, enforced by package boundaries and dependency rules, stays maintainable far longer than most teams assume. For most products under a handful of teams, a monolith is the correct, boring, profitable default." },
+    { "type": "heading", "level": 2, "text": "What microservices actually buy you" },
+    { "type": "paragraph", "text": "Microservices trade in-process simplicity for independent deployability, fault isolation, and divergent scaling. When BOS settles a cross-border payment, the sanctions-screening path, the foreign-exchange rate engine, and the double-entry ledger have genuinely different scaling curves, latency budgets, and compliance blast radii. Decomposing them lets a spike in screening volume scale screening alone, and lets a ledger incident fail closed without taking down market intelligence. That isolation is the real prize." },
+    { "type": "list", "ordered": false, "items": [
+      "Independent deployability: a team ships its service on its own cadence without a platform-wide release train.",
+      "Fault isolation: a circuit breaker around a failing dependency contains the blast radius instead of cascading.",
+      "Heterogeneous scaling: stateless screening workers scale horizontally while the ledger stays vertically consistent.",
+      "Technology fit: a latency-critical path can use a different runtime than a batch analytics job without infecting the whole codebase.",
+      "Organizational scaling: Conway's Law made deliberate — service boundaries that mirror team boundaries reduce cross-team coordination."
+    ]},
+    { "type": "paragraph", "text": "None of that is free. You inherit the eight fallacies of distributed computing the moment you put a network between two functions. Calls fail partially, latency is non-zero and variable, and a request that was one transaction becomes a distributed workflow that can succeed halfway. You now operate service discovery, retries with jitter, idempotency keys, distributed tracing, and a contract-testing discipline so that a producer change does not silently break three consumers. The complexity does not disappear; it moves from the codebase into the operational plane." },
+    { "type": "heading", "level": 2, "text": "The modular monolith: the option most teams skip" },
+    { "type": "paragraph", "text": "Between the two extremes sits the architecture we reach for most often early in a product's life: the modular monolith. It is a single deployable unit, but internally organized into strict modules with explicit public interfaces, owned data, and compile-time-enforced dependency rules. Modules communicate through in-process interfaces and domain events rather than reaching into each other's tables. You keep ACID transactions and single-process debugging, while building the seams along which you could later split." },
+    { "type": "paragraph", "text": "The discipline is enforced, not aspirational. We use module boundaries with dependency checks in CI (the same intent as Java's ArchUnit or the Spring Modulith verification model, or package-private boundaries in Go), a database schema where each module owns its tables and no module issues a cross-module join, and an internal event bus so that module A reacts to module B's events instead of calling its internals. Done well, a modular monolith gives you most of the organizational clarity of microservices with a fraction of the operational tax — and it makes a future extraction a mechanical refactor rather than an archaeology project. This is the same domain-driven discipline behind our [enterprise software](/services/enterprise-software) practice." },
+    { "type": "heading", "level": 2, "text": "How we decide" },
+    { "type": "paragraph", "text": "We do not start from the architecture; we start from forces. The honest inputs are team topology, the consistency requirements of the domain, the variance in scaling profiles, and the maturity of the platform you can stand behind it. A three-engineer team with one product and no platform team should not be running fifteen services — they will spend their quarters on YAML and pager rotations instead of features. Conversely, a regulated money-movement path with hard isolation requirements has a real case for its own service from day one." },
+    { "type": "list", "ordered": true, "items": [
+      "Map the domain first. Use bounded contexts to find where the language and consistency rules genuinely change — those seams are candidate boundaries whether or not you split today.",
+      "Count the teams. If one team owns everything, a network boundary mostly adds latency and incident surface; coordination is not your bottleneck.",
+      "Measure scaling variance. If two parts of the system scale identically, separating them buys nothing operationally.",
+      "Audit your platform readiness. Without CI/CD, observability, and on-call discipline, microservices amplify weaknesses instead of strengths.",
+      "Price the operational cost honestly before committing — the runtime is the cheap part."
+    ]},
+    { "type": "heading", "level": 2, "text": "Migration paths: the strangler fig, not the rewrite" },
+    { "type": "paragraph", "text": "When extraction is justified, the big-bang rewrite is the path that fails. The reliable pattern is the strangler fig: route traffic through a facade, carve out one bounded context at a time, and let the new service grow around the old code until the legacy path is dead and can be deleted. You keep shipping the whole time, and every step is independently reversible." },
+    { "type": "list", "ordered": true, "items": [
+      "Establish a seam — an API gateway or facade — so callers do not know whether they hit the monolith or a new service.",
+      "Extract the most volatile or most scaling-divergent context first, where the payoff is highest.",
+      "Split the data carefully: give the new service its own store, and use the outbox pattern with change data capture to keep state consistent during the transition without dual-writes.",
+      "Replace synchronous calls with asynchronous events where the business process tolerates eventual consistency.",
+      "Delete the strangled code path. Migrations that never finish leave you paying both the monolith's and the distributed system's costs at once."
+    ]},
+    { "type": "paragraph", "text": "Data is where most extractions get hard. A shared database silently re-couples \"independent\" services, so each service must own its schema. During transition we lean on the transactional outbox to publish events atomically with state changes, and saga-style compensation for workflows that span services — exactly the machinery behind our [real-time cross-border settlement](/case-studies/real-time-cross-border-settlement) work, where a payment, a ledger entry, and a compliance check must converge without a global transaction." },
+    { "type": "heading", "level": 2, "text": "The operational cost nobody budgets for" },
+    { "type": "paragraph", "text": "The runtime cost of a microservice is trivial. The standing cost is everything around it: a CI/CD pipeline per service, distributed tracing so a single request is legible across hops, centralized structured logging, contract tests in the pipeline, service-level objectives with error budgets, and an on-call rotation that understands cascading failure. In a multi-tenant platform like BOS the bar is higher still — every service must enforce tenant isolation, carry AES-256 encryption, and produce an auditable trail consistent with our SOC 2 Type II and ISO 27001 posture, described on our [trust](/trust) page. A service you cannot observe, secure, and roll back is a liability, not an asset." },
+    { "type": "paragraph", "text": "Our rule of thumb: do not extract a service until you can deploy, observe, and revert it without a human babysitting the release. If the platform cannot support that, the answer is to invest in the platform or stay in the modular monolith — not to ship distribution you cannot operate. Choosing wisely between these architectures is less about the diagram and more about whether your organization has earned the right to run the more expensive one. If you are weighing that decision, our [technology consulting](/services/technology-consulting) and [cloud solutions](/services/cloud-solutions) teams help enterprises make it with the operational cost in full view." }
+  ],
+  "faqs": [
+    { "q": "Should a new product start with microservices?", "a": "Almost never. Start with a modular monolith: one deployable unit with strict internal module boundaries and owned data. You keep ACID transactions and single-process debugging while building the seams you can later split along once team count or scaling variance actually demands it." },
+    { "q": "What is the difference between a modular monolith and a big ball of mud?", "a": "Both are single deployables, but a modular monolith enforces module boundaries with explicit interfaces, owned tables, and dependency checks in CI. A big ball of mud has no enforced seams, so every module reaches into every other and refactoring becomes archaeology. The discipline, not the deployment shape, is the difference." },
+    { "q": "What is the safest way to migrate a monolith to microservices?", "a": "The strangler fig pattern. Put a facade or API gateway in front, extract one bounded context at a time — starting with the most volatile or scaling-divergent one — give each new service its own data store, and use the transactional outbox plus change data capture to keep state consistent. Avoid big-bang rewrites; they routinely fail." },
+    { "q": "Why is a shared database a problem for microservices?", "a": "A shared database silently re-couples services that are supposed to be independent: a schema change in one breaks others, and you lose the fault isolation you paid for. Each service should own its schema and exchange state through events or APIs, not through cross-service joins or dual-writes." },
+    { "q": "How do I know my organization is ready for microservices?", "a": "When you can deploy, observe, and roll back a single service without a human babysitting the release. That means per-service CI/CD, distributed tracing, centralized logging, contract tests, and SLOs with error budgets. If the platform cannot support that, invest in the platform or stay in the modular monolith." },
+    { "q": "How does Baalvion decide between the two on BOS?", "a": "We start from forces, not diagrams: domain consistency needs, team topology, scaling variance, and platform readiness. High-cohesion domains stay in modules; paths with divergent scaling and hard isolation requirements — like sanctions screening or the ledger in cross-border settlement — become independent services with circuit breakers and saga-based consistency." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System (BOS)", "href": "/platform" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" },
+    { "anchor": "real-time cross-border settlement", "href": "/case-studies/real-time-cross-border-settlement" },
+    { "anchor": "trust", "href": "/trust" },
+    { "anchor": "technology consulting", "href": "/services/technology-consulting" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" }
+  ],
+  "customFields": {}
+}

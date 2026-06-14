@@ -22,11 +22,11 @@ export default function BlogNavbar() {
         <Link href="/blog" className="text-green-600 font-medium no-underline hidden sm:inline">
           Blog
         </Link>
-        <Link href="#" className="text-gray-500 font-medium no-underline hover:text-gray-900 transition-colors hidden sm:inline">
+        <Link href="/pricing" className="text-gray-500 font-medium no-underline hover:text-gray-900 transition-colors hidden sm:inline">
           Pricing
         </Link>
         <Link
-          href="#"
+          href="/signup"
           className="bg-green-600 text-white text-[13px] font-semibold px-4 py-[7px] rounded-lg no-underline hover:bg-green-700 transition-colors"
         >
           Get started free

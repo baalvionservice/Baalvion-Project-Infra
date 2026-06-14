@@ -1,6 +1,7 @@
 'use strict';
 const { v4: uuidv4 } = require('uuid');
 const mfaService    = require('./mfaService');
+const sessionEnrichment = require('./sessionEnrichmentService');
 
 const { userRepo, orgRepo, sessionRepo, rtRepo, inviteRepo, auditRepo } = require('../repositories');
 const password   = require('../utils/password');
@@ -11,10 +12,24 @@ const { generateToken, hashToken } = require('../utils/crypto');
 const { sendMail }  = require('../utils/mailer');
 const { AppError }  = require('../utils/errors');
 const config        = require('../config/appConfig');
+// C4: platform vs tenant role separation. assertNoRoleConfusion guarantees an org-membership
+// role is never a platform role; isPlatformRole validates an explicit platform grant.
+const { assertNoRoleConfusion, isPlatformRole } = require('@baalvion/auth-node');
 
 // ── Rate-limit thresholds ──────────────────────────────────────────────────────
 const MAX_IP_ATTEMPTS    = config.security.ipRateLimit    || 20;
 const MAX_EMAIL_ATTEMPTS = config.security.emailRateLimit || 10;
+
+// ── Session enrichment (Phase 2) ────────────────────────────────────────────────
+// Annotate a freshly-created session with geo/device/risk. analyseLoginEvent is itself
+// fail-soft (returns null, never throws); this wrapper adds a second guard so a surprise
+// error can never affect the auth result. Awaited so the row is enriched before we respond,
+// but any failure is swallowed — enrichment must NEVER block or fail a login.
+async function enrichSessionSafe(sessionId, userId, ipAddress, userAgent) {
+    try {
+        await sessionEnrichment.analyseLoginEvent({ sessionId, userId, ipAddress, userAgent });
+    } catch (_) { /* never affect the auth result */ }
+}
 
 // ── Presentation helpers ───────────────────────────────────────────────────────
 
@@ -27,6 +42,8 @@ function presentUser(user, extras = {}) {
         status:        user.status,
         emailVerified: !!user.email_verified_at,
         mfaEnabled:    user.mfa_enabled,
+        mfaRequired:   !!user.mfa_required,
+        lastLoginAt:   user.last_login_at || null,
         ...extras,
     };
 }
@@ -49,13 +66,20 @@ const ROLE_PERMISSIONS = {
                   'settings:manage', 'analytics:read'],
     admin:       ['users:read', 'users:write', 'staff:read', 'cms:read', 'cms:write', 'cms:manage',
                   'content:read', 'content:write', 'content:publish', 'media:read', 'media:write', 'analytics:read'],
+    // ── 7-tier trade-network capability model (see utils/orgConstants.js) ──────────
+    manager:     ['users:read', 'content:read', 'content:write', 'content:publish',
+                  'media:read', 'media:write', 'analytics:read', 'orders:approve'],
+    officer:     ['content:read', 'content:write', 'content:publish', 'media:read', 'analytics:read', 'orders:approve'],
+    operator:    ['content:read', 'content:write', 'media:read', 'media:write'],
+    analyst:     ['content:read', 'media:read', 'analytics:read'],
+    // ── Legacy roles (kept for backward compatibility with pre-existing seed rows) ─
     editor:      ['cms:read', 'content:read', 'content:write', 'content:publish', 'media:read', 'media:write'],
     member:      ['cms:read', 'content:read', 'media:read'],
     viewer:      ['cms:read', 'content:read'],
 };
 
 async function resolveTokenPayload(user, orgId) {
-    let role = 'member', serviceRoles = {};
+    let role = 'member', serviceRoles = {}, orgType = null;
 
     if (orgId) {
         const m = await orgRepo.getActiveMember(orgId, user.id);
@@ -63,7 +87,21 @@ async function resolveTokenPayload(user, orgId) {
             role         = m.role;
             serviceRoles = m.service_roles || {};
         }
+        // Embed the org's TYPE so downstream consumers can resolve dashboard access from
+        // (orgType, role) instead of superadmin persona impersonation.
+        const org = await orgRepo.findById(orgId);
+        if (org) orgType = org.type || null;
     }
+
+    // C4 role-confusion guard: an organization-membership role must never be a platform role.
+    // (Tenant principals carrying platform roles is what would re-open cross-tenant bypass.)
+    assertNoRoleConfusion(role);
+
+    // Platform grant is a SEPARATE dimension stored on the user (auth.users.platform_role), not an
+    // org membership. When present and valid, it is added to roles[] so platform operators retain
+    // their (now explicit) cross-tenant bypass; tenant principals never have it → fail-closed.
+    const platformRole = isPlatformRole(user.platform_role) ? user.platform_role : null;
+    const roles = platformRole ? [platformRole, role] : [role];
 
     // Permissions = role grants ∪ any explicit per-service grants on the membership.
     const permissions = Array.from(new Set([
@@ -71,19 +109,21 @@ async function resolveTokenPayload(user, orgId) {
         ...Object.keys(serviceRoles),
     ]));
 
-    return { userId: user.id, email: user.email, orgId, role, permissions, serviceRoles };
+    return { userId: user.id, email: user.email, orgId, orgType, role, roles, permissions, serviceRoles };
 }
 
 // ── Token issuance ─────────────────────────────────────────────────────────────
 
 async function issueTokenPair(user, orgId, sessionId, familyId) {
-    const { userId, email, role, permissions } = await resolveTokenPayload(user, orgId);
+    const { userId, email, role, roles, permissions, orgType } = await resolveTokenPayload(user, orgId);
 
     const accessToken  = jwt.signAccessToken({
         sub:         userId,
         email,
         orgId,
+        orgType,
         role,
+        roles,
         permissions,
         sid:         sessionId,
     });
@@ -108,19 +148,27 @@ async function issueTokenPair(user, orgId, sessionId, familyId) {
         refreshToken:  rawRefresh,
         expiresAt:     new Date(Date.now() + 15 * 60 * 1000).toISOString(),
         role,
+        orgType,
     };
 }
 
 // ── Auth flows ─────────────────────────────────────────────────────────────────
 
-async function register({ email, password: plainPw, fullName, orgName, ipAddress, userAgent }) {
+async function register({ email, password: plainPw, fullName, orgName, orgType, ipAddress, userAgent }) {
     const existing = await userRepo.findByEmail(email);
     if (existing) throw new AppError('EMAIL_TAKEN', 'Email already registered', 409);
 
     const passwordHash = await password.hash(plainPw);
     const user = await userRepo.create({ email, passwordHash, fullName });
 
-    const org = await orgRepo.create({ name: orgName || `${(fullName || email).split('@')[0]}'s Workspace`, ownerId: user.id });
+    // New self-service registrations default to a Buyer organization unless an explicit
+    // (validated) org type is supplied — buyers are the lowest-privilege market participant.
+    const ALLOWED_ORG_TYPES = new Set([
+        'buyer', 'seller', 'trade_agent', 'logistics_provider', 'customs_authority',
+        'bank', 'insurance_provider', 'compliance_agency', 'regulator', 'platform_owner',
+    ]);
+    const safeOrgType = ALLOWED_ORG_TYPES.has(orgType) ? orgType : 'buyer';
+    const org = await orgRepo.create({ name: orgName || `${(fullName || email).split('@')[0]}'s Workspace`, ownerId: user.id, type: safeOrgType });
     await orgRepo.addMember({ orgId: org.id, userId: user.id, role: 'owner' });
 
     // Email verification (fire-and-forget)
@@ -140,6 +188,7 @@ async function register({ email, password: plainPw, fullName, orgName, ipAddress
 
     const session = await sessionRepo.create({ userId: user.id, orgId: org.id, ipAddress, userAgent });
     const tokens  = await issueTokenPair(user, org.id, session.id, uuidv4());
+    await enrichSessionSafe(session.id, user.id, ipAddress, userAgent);
 
     await auditRepo.append({ userId: user.id, orgId: org.id, action: 'user.register', ipAddress });
 
@@ -164,8 +213,8 @@ async function register({ email, password: plainPw, fullName, orgName, ipAddress
         accessToken:  tokens.accessToken,
         refreshToken: tokens.refreshToken,
         expiresAt:    tokens.expiresAt,
-        user:         presentUser(user, { orgId: org.id, role: 'owner' }),
-        org:          { id: org.id, name: org.name, slug: org.slug },
+        user:         presentUser(user, { orgId: org.id, orgType: org.type, role: 'owner' }),
+        org:          { id: org.id, name: org.name, slug: org.slug, type: org.type },
     };
 }
 
@@ -195,6 +244,12 @@ async function login({ email, password: plainPw, ipAddress, userAgent }) {
     const membership = await orgRepo.getPrimaryMembership(user.id);
     const orgId      = membership?.org_id || null;
 
+    // 3b — Org lifecycle gate: a suspended organization cannot be operated by its members.
+    if (membership?.organization && membership.organization.status === 'suspended') {
+        await auditRepo.append({ userId: user.id, orgId, action: 'user.login_org_suspended', ipAddress });
+        throw new AppError('ORG_SUSPENDED', 'Your organization is suspended. Contact the platform administrator.', 403);
+    }
+
     // 4 — MFA gate: if enabled, issue a short-lived challenge instead of full tokens
     if (user.mfa_enabled) {
         const challengeToken = await mfaService.createChallenge({ userId: user.id, orgId, ipAddress, userAgent });
@@ -202,17 +257,28 @@ async function login({ email, password: plainPw, ipAddress, userAgent }) {
         return { mfa_required: true, challengeToken };
     }
 
+    // 4b — Force-MFA gate: an admin/platform set mfa_required but the user has not enrolled
+    // yet. Do NOT issue a session — issue an ENROLLMENT challenge instead. A normal session is
+    // granted only after the user sets up + verifies an authenticator via /mfa/enroll.
+    if (user.mfa_required && !user.mfa_enabled) {
+        const challengeToken = await mfaService.createChallenge({ userId: user.id, orgId, ipAddress, userAgent });
+        await auditRepo.append({ userId: user.id, orgId, action: 'user.mfa_enrollment_required', ipAddress });
+        return { mfa_enrollment_required: true, challengeToken };
+    }
+
     // 5 — No MFA — create session + issue tokens
     const session = await sessionRepo.create({ userId: user.id, orgId, ipAddress, userAgent });
     const tokens  = await issueTokenPair(user, orgId, session.id, uuidv4());
+    await enrichSessionSafe(session.id, user.id, ipAddress, userAgent);
 
+    await userRepo.setLastLogin(user.id).catch(() => {});
     await auditRepo.append({ userId: user.id, orgId, action: 'user.login', ipAddress });
 
     return {
         accessToken:  tokens.accessToken,
         refreshToken: tokens.refreshToken,
         expiresAt:    tokens.expiresAt,
-        user:         presentUser(user, { orgId, role: tokens.role }),
+        user:         presentUser(user, { orgId, orgType: tokens.orgType, role: tokens.role }),
     };
 }
 
@@ -238,14 +304,16 @@ async function completeMfaLogin({ challengeToken, code, ipAddress, userAgent }) 
         userAgent: challenge.userAgent,
     });
     const tokens = await issueTokenPair(user, challenge.orgId, session.id, uuidv4());
+    await enrichSessionSafe(session.id, challenge.userId, challenge.ipAddress, challenge.userAgent);
 
+    await userRepo.setLastLogin(user.id).catch(() => {});
     await auditRepo.append({ userId: user.id, orgId: challenge.orgId, action: 'user.login', ipAddress, metadata: { mfa: true } });
 
     return {
         accessToken:  tokens.accessToken,
         refreshToken: tokens.refreshToken,
         expiresAt:    tokens.expiresAt,
-        user:         presentUser(user, { orgId: challenge.orgId, role: tokens.role }),
+        user:         presentUser(user, { orgId: challenge.orgId, orgType: tokens.orgType, role: tokens.role }),
     };
 }
 
@@ -302,6 +370,28 @@ async function refresh(rawToken, ipAddress) {
 
     const user = await userRepo.findById(decoded.sub);
     if (!user || user.status !== 'active') throw new AppError('UNAUTHORIZED', 'Account not found or inactive', 401);
+
+    // Org suspension: a suspended organization cannot refresh. Kill the whole family + session.
+    if (session.org_id) {
+        const org = await orgRepo.findById(session.org_id);
+        if (org && org.status === 'suspended') {
+            await rtRepo.revokeFamily(familyId);
+            await redis.markFamilyRevoked(familyId);
+            await sessionRepo.revoke(session.id);
+            await auditRepo.append({ userId: user.id, orgId: session.org_id, action: 'security.refresh_denied_org_suspended', ipAddress });
+            throw new AppError('ORG_SUSPENDED', 'Organization is suspended. Contact the platform administrator.', 403);
+        }
+    }
+
+    // Force-MFA: a user under an mfa_required mandate who has not yet enrolled cannot keep a
+    // live session — deny the refresh and tear the session down so they must re-login + enrol.
+    if (user.mfa_required && !user.mfa_enabled) {
+        await rtRepo.revokeFamily(familyId);
+        await redis.markFamilyRevoked(familyId);
+        await sessionRepo.revoke(session.id);
+        await auditRepo.append({ userId: user.id, orgId: session.org_id, action: 'security.refresh_denied_mfa_required', ipAddress });
+        throw new AppError('MFA_ENROLLMENT_REQUIRED', 'Multi-factor enrollment required. Please log in again.', 403);
+    }
 
     const tokens = await issueTokenPair(user, session.org_id, session.id, familyId);
 
@@ -442,6 +532,73 @@ async function disableMfa(userId) {
     await userRepo.updateMfa(userId, { secret: null, pendingSecret: null, enabled: false, recoveryCodes: [] });
 }
 
+// ── Force-MFA enrollment (no session — driven by the login enrollment challenge) ──
+
+/**
+ * Step 1 of force-MFA enrollment. Keyed by the enrollment challengeToken returned from
+ * /login (mfa_enrollment_required). Generates + stores a pending TOTP secret and returns
+ * the QR/secret/recovery codes. Does NOT consume the challenge (step 2 does).
+ */
+async function enrollMfaStart(challengeToken) {
+    const data = await mfaService.peekChallenge(challengeToken);
+    if (!data) throw new AppError('MFA_CHALLENGE_EXPIRED', 'Enrollment challenge expired or invalid. Please log in again.', 401);
+
+    const user = await userRepo.findById(data.userId);
+    if (!user || user.status !== 'active') throw new AppError('UNAUTHORIZED', 'Account not found or inactive', 401);
+
+    const setup = await mfaService.initiateSetup(user);
+    await userRepo.updateMfa(user.id, { pendingSecret: setup.secret });
+    await auditRepo.append({ userId: user.id, orgId: data.orgId, action: 'user.mfa_enrollment_started' });
+    return setup; // { qrCodeUrl, secret, recoveryCodes }
+}
+
+/**
+ * Step 2 of force-MFA enrollment. Confirms the TOTP code against the pending secret,
+ * activates MFA, consumes the challenge, and ONLY THEN issues a full token pair. This is
+ * the single place a normal session is granted to a force-MFA user.
+ */
+async function enrollMfaComplete({ challengeToken, code, ipAddress, userAgent }) {
+    const data = await mfaService.peekChallenge(challengeToken);
+    if (!data) throw new AppError('MFA_CHALLENGE_EXPIRED', 'Enrollment challenge expired or invalid. Please log in again.', 401);
+
+    const user = await userRepo.findById(data.userId);
+    if (!user || user.status !== 'active') throw new AppError('UNAUTHORIZED', 'Account not found or inactive', 401);
+    if (!user.mfa_pending_secret) throw new AppError('MFA_NOT_INITIALIZED', 'MFA setup not started', 400);
+
+    // Throws INVALID_MFA_CODE on a wrong code.
+    mfaService.confirmSetup(user.mfa_pending_secret, code);
+
+    // Activate MFA, then burn the single-use enrollment challenge.
+    await userRepo.updateMfa(user.id, { secret: user.mfa_pending_secret, enabled: true, pendingSecret: null });
+    await mfaService.consumeChallenge(challengeToken);
+    await auditRepo.append({ userId: user.id, orgId: data.orgId, action: 'user.mfa_enabled', ipAddress });
+
+    // Defense-in-depth: if the org was suspended mid-enrollment, do not hand out a session.
+    const orgId = data.orgId || null;
+    if (orgId) {
+        const org = await orgRepo.findById(orgId);
+        if (org && org.status === 'suspended') {
+            throw new AppError('ORG_SUSPENDED', 'Organization is suspended. Contact the platform administrator.', 403);
+        }
+    }
+
+    const fresh   = await userRepo.findById(user.id);
+    const session = await sessionRepo.create({ userId: user.id, orgId, ipAddress, userAgent });
+    const tokens  = await issueTokenPair(fresh, orgId, session.id, uuidv4());
+    await enrichSessionSafe(session.id, user.id, ipAddress, userAgent);
+
+    await userRepo.setLastLogin(user.id).catch(() => {});
+    await auditRepo.append({ userId: user.id, orgId, action: 'user.login', ipAddress, metadata: { mfa: true, enrollment: true } });
+    eventBus.publish('auth.mfa_enabled', { userId: String(user.id), email: user.email }).catch(() => {});
+
+    return {
+        accessToken:  tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+        expiresAt:    tokens.expiresAt,
+        user:         presentUser(fresh, { orgId, orgType: tokens.orgType, role: tokens.role }),
+    };
+}
+
 // ── Session management ─────────────────────────────────────────────────────────
 
 async function listSessions(userId) {
@@ -522,8 +679,25 @@ async function acceptInvite({ token, email, password: plainPw, fullName, ipAddre
     await inviteRepo.markAccepted(invitation.id);
     await auditRepo.append({ userId: user.id, orgId: invitation.org_id, action: 'member.invite_accepted', ipAddress });
 
+    // MFA gate — mirror login(): the invite joins the org, but a session is minted only after the
+    // second factor clears. A brand-new invited user has neither flag set, so this is a no-op for
+    // the common case; it ONLY bites an existing user who already has MFA (or an unmet force-MFA
+    // mandate), closing the acceptInvite MFA-bypass. Completion runs through the same
+    // /mfa-challenge and /mfa-enroll flows as login, which create the session against invitation.org_id.
+    if (user.mfa_enabled) {
+        const challengeToken = await mfaService.createChallenge({ userId: user.id, orgId: invitation.org_id, ipAddress, userAgent });
+        await auditRepo.append({ userId: user.id, orgId: invitation.org_id, action: 'user.invite_mfa_required', ipAddress });
+        return { mfa_required: true, challengeToken };
+    }
+    if (user.mfa_required && !user.mfa_enabled) {
+        const challengeToken = await mfaService.createChallenge({ userId: user.id, orgId: invitation.org_id, ipAddress, userAgent });
+        await auditRepo.append({ userId: user.id, orgId: invitation.org_id, action: 'user.invite_mfa_enrollment_required', ipAddress });
+        return { mfa_enrollment_required: true, challengeToken };
+    }
+
     const session = await sessionRepo.create({ userId: user.id, orgId: invitation.org_id, ipAddress, userAgent });
     const tokens  = await issueTokenPair(user, invitation.org_id, session.id, uuidv4());
+    await enrichSessionSafe(session.id, user.id, ipAddress, userAgent);
 
     return {
         accessToken:  tokens.accessToken,
@@ -562,6 +736,8 @@ module.exports = {
     enableMfa,
     verifyMfa,
     disableMfa,
+    enrollMfaStart,
+    enrollMfaComplete,
     listSessions,
     revokeSession,
     revokeAllSessions,

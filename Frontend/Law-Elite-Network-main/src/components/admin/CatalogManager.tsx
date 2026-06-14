@@ -46,7 +46,9 @@ export default function CatalogManager() {
   const [selectedSub, setSelectedSub] = useState<any>(null);
 
   const { toast } = useToast();
-  const { adminController } = useAuthContext();
+  useAuthContext(); // auth context subscription
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const adminController: any = null; // not yet wired to AuthContext
 
   const loadData = async () => {
     setLoading(true);

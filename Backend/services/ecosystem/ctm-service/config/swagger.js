@@ -11,7 +11,7 @@ const options = {
             contact:     { name: 'Baalvion Engineering', email: 'infra.baalvion@gmail.com' },
         },
         servers: [
-            { url: 'http://localhost:3011/api/v1', description: 'Development' },
+            { url: 'http://localhost:3017/api/v1', description: 'Development' },
         ],
         components: {
             securitySchemes: {
@@ -19,7 +19,7 @@ const options = {
                     type:         'http',
                     scheme:       'bearer',
                     bearerFormat: 'JWT',
-                    description:  'HS256 JWT issued by proxy backend (port 4000)',
+                    description:  'RS256 JWT verified via JWKS (issuer baalvion-auth); obtain it by logging in through the auth-gateway / auth-service.',
                 },
             },
         },

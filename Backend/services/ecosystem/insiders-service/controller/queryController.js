@@ -105,6 +105,9 @@ const ALLOWED_ACTIONS = new Set(['select', 'insert', 'upsert', 'update', 'delete
 // Reject keys that could pollute the prototype chain when used to index an object.
 const isUnsafeKey = (k) => k === '__proto__' || k === 'constructor' || k === 'prototype';
 
+// Allowlist for user-controlled column names used as object keys / SQL identifiers.
+const SAFE_COLUMN = /^[A-Za-z_][A-Za-z0-9_]*$/;
+
 const ctxFrom = (req) => {
     const roles = req.auth?.roles || [];
     return { userId: req.auth?.userId || null, roles, isAdmin: roles.includes('admin'), isMod: roles.includes('moderator') || roles.includes('admin') };
@@ -190,9 +193,11 @@ const buildWhere = (filters = []) => {
         const op = OPS[f.op];
         if (!op) continue;
         const col = f.col;
-        // f.col is user-controlled: must be a plain column/relation name. Reject non-strings,
-        // prototype-polluting keys, and anything outside the safe column-name charset.
-        if (typeof col !== 'string' || isUnsafeKey(col) || !/^[A-Za-z0-9_.]+$/.test(col)) continue;
+        // f.col is user-controlled and is used to index the where object, so it
+        // must be constrained to a plain SQL identifier. The allowlist rejects
+        // prototype-polluting keys (__proto__/constructor/prototype) and any
+        // other exotic property name before it can reach the where map.
+        if (typeof col !== 'string' || isUnsafeKey(col) || !SAFE_COLUMN.test(col)) continue;
         const cond = { [op]: f.val };
         where[col] = where[col] ? Object.assign({}, where[col], cond) : cond;
     }
@@ -320,7 +325,12 @@ async function handleQuery(req, res, next) {
             const childExtra = parsed.embeds.map((e) => localKeyFor(table, e));
             const findOpts = { where, attributes: attrsFor(model, parsed, childExtra) };
             if (Array.isArray(spec.order) && spec.order.length) {
-                findOpts.order = spec.order.map((o) => [o.col, o.ascending ? 'ASC' : 'DESC']);
+                // o.col is user-controlled and becomes a SQL identifier in ORDER BY.
+                // Constrain it to the model's real columns via the SAFE_COLUMN allowlist
+                // (rejects prototype-polluting / exotic names) before use.
+                findOpts.order = spec.order
+                    .filter((o) => o && typeof o.col === 'string' && !isUnsafeKey(o.col) && SAFE_COLUMN.test(o.col) && model.rawAttributes[o.col])
+                    .map((o) => [o.col, o.ascending ? 'ASC' : 'DESC']);
             }
             if (spec.limit != null) findOpts.limit = spec.limit;
             if (spec.offset != null) findOpts.offset = spec.offset;

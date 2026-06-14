@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Search, 
@@ -14,8 +15,8 @@ import { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = {
-  title: 'Help Center | GeoTrade Nexus Support',
-  description: 'Find answers to frequently asked questions about mineral trading, compliance verification, escrow payments, and global logistics on GeoTrade Nexus.',
+  title: 'Help Center Support',
+  description: 'Find answers to frequently asked questions about mineral trading, compliance verification, escrow payments, and global logistics on Baalvion Mining Inc.',
 };
 
 export default function HelpCenter() {
@@ -28,7 +29,7 @@ export default function HelpCenter() {
         "name": "How does the escrow system work?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "GeoTrade Nexus uses a milestone-based escrow system where funds are held securely until delivery and inspection are confirmed by the buyer."
+          "text": "Baalvion Mining Inc. uses a milestone-based escrow system where funds are held securely until delivery and inspection are confirmed by the buyer."
         }
       },
       {
@@ -85,6 +86,7 @@ export default function HelpCenter() {
           ))}
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

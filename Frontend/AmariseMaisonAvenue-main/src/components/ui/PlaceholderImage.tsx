@@ -2,9 +2,8 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image';
-import { cn } from '@/lib/utils';
 import placeholderData from '@/app/lib/placeholder-images.json';
+import { BrandImage } from './BrandImage';
 
 interface PlaceholderImageProps {
   id?: string;
@@ -14,30 +13,21 @@ interface PlaceholderImageProps {
 }
 
 /**
- * PlaceholderImage: The Institutional Visual Hub.
- * Resolves high-fidelity assets from the Maison registry.
+ * PlaceholderImage: resolves a named asset from the Maison registry and renders it via
+ * BrandImage — so real uploaded photos show, and dev placeholders fall back to the
+ * elegant branded panel instead of a random stock image.
  */
-export function PlaceholderImage({ 
-  id = 'product-luxury-default', 
+export function PlaceholderImage({
+  id = 'product-luxury-default',
   alt = 'Amarisé Maison Artifact',
   className,
-  priority = false
+  priority = false,
 }: PlaceholderImageProps) {
-  const asset = placeholderData.placeholderImages.find(img => img.id === id) || 
-                placeholderData.placeholderImages.find(img => img.id === 'product-luxury-default');
-
-  if (!asset) return null;
+  const asset =
+    placeholderData.placeholderImages.find((img) => img.id === id) ||
+    placeholderData.placeholderImages.find((img) => img.id === 'product-luxury-default');
 
   return (
-    <div className={cn("relative overflow-hidden bg-[#fcfcfc]", className)}>
-      <Image
-        src={asset.imageUrl}
-        alt={alt}
-        fill
-        priority={priority}
-        className="object-cover"
-        data-ai-hint={asset.imageHint}
-      />
-    </div>
+    <BrandImage src={asset?.imageUrl} alt={alt} className={className} priority={priority} />
   );
 }

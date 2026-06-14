@@ -1,24 +1,34 @@
 'use strict';
-const { sendError } = require('../utils/response');
+
 const { AppError } = require('../utils/errors');
 
-const notFoundHandler = (req, res) =>
-    sendError(req, res, new AppError('NOT_FOUND', `Route ${req.method} ${req.path} not found`, 404));
-
-// eslint-disable-next-line no-unused-vars
+/**
+ * Handles all application errors
+ */
 const errorHandler = (err, req, res, next) => {
-    if (!(err instanceof AppError)) {
-        // Surface Sequelize validation/constraint errors as 400/409 instead of 500.
-        if (err.name === 'SequelizeUniqueConstraintError') {
-            err = new AppError('CONFLICT', err.errors?.[0]?.message || 'Resource already exists', 409);
-        } else if (err.name === 'SequelizeValidationError') {
-            err = new AppError('BAD_REQUEST', err.errors?.[0]?.message || 'Validation failed', 400);
-        } else {
-            console.error('[insiders-service] unhandled error:', err);
-            err = new AppError('INTERNAL_SERVER_ERROR', err.message || 'Something went wrong', 500);
-        }
-    }
-    return sendError(req, res, err);
+    console.error('[ERROR]', err);
+
+    const status = err.statusCode || 500;
+
+    res.status(status).json({
+        success: false,
+        code: err.code || 'INTERNAL_ERROR',
+        message: err.message || 'Unexpected error',
+    });
 };
 
-module.exports = { errorHandler, notFoundHandler };
+/**
+ * Handles unknown routes (404)
+ */
+const notFoundHandler = (req, res, next) => {
+    res.status(404).json({
+        success: false,
+        code: 'NOT_FOUND',
+        message: `Route not found: ${req.originalUrl}`,
+    });
+};
+
+module.exports = {
+    errorHandler,
+    notFoundHandler
+};

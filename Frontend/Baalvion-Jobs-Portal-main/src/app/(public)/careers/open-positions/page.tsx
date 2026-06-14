@@ -6,7 +6,19 @@ import { RecentlyViewedJobs } from '@/modules/jobs/components/RecentlyViewedJobs
 export const metadata: Metadata = {
     title: "Open Positions Worldwide | Baalvion Careers",
     description: "Explore your next challenge and join our global team. Search for open roles in Engineering, Design, Product, and more across our global hiring regions.",
+    alternates: {
+        canonical: '/careers/open-positions',
+    },
+    openGraph: {
+        title: "Open Positions Worldwide | TalentOS by Baalvion",
+        description: "Explore your next challenge and join our global team. Search for open roles in Engineering, Design, Product, and more.",
+        url: '/careers/open-positions',
+    },
 };
+
+// Live job data is fetched per request; opt out of build-time prerendering so
+// the build does not depend on the jobs API being reachable in CI.
+export const dynamic = 'force-dynamic';
 
 export default async function OpenPositionsPage() {
     // Fetch data needed for filters, but not the jobs themselves.

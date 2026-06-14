@@ -128,7 +128,7 @@ export default function CmsDashboardPage() {
                   {websites.map((w: Website) => (
                     <Link
                       key={w.id}
-                      href={`/cms/websites/${w.id}`}
+                      href={`/cms/websites/${w.slug}`}
                       className="flex items-center justify-between px-4 py-3 hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center gap-3 min-w-0">

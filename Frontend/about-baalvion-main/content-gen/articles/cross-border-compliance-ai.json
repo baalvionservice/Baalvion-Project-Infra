@@ -1,0 +1,151 @@
+{
+  "slug": "cross-border-compliance-ai",
+  "title": "AI for Cross-Border Compliance",
+  "kind": "article",
+  "category": "finance",
+  "seo": {
+    "title": "AI for Cross-Border Compliance",
+    "description": "How Baalvion uses AI for sanctions screening, KYC/AML and risk scoring across 180+ jurisdictions on BOS, with the patterns, trade-offs and controls that work.",
+    "keywords": [
+      "cross-border compliance",
+      "sanctions screening",
+      "KYC AML",
+      "transaction risk scoring",
+      "AI compliance",
+      "watchlist matching",
+      "fuzzy matching",
+      "multi-jurisdiction compliance",
+      "RegTech",
+      "Baalvion Operating System"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "9 min read",
+  "heroImageSeed": "xborder-compliance-3088",
+  "excerpt": "How Baalvion runs AI-driven sanctions screening, KYC/AML and risk scoring across 180+ jurisdictions on BOS — the patterns, trade-offs and controls that keep it auditable.",
+  "blocks": [
+    {
+      "type": "paragraph",
+      "text": "Cross-border compliance is, at its core, a string-matching and decision-making problem operating under adversarial conditions and conflicting law. A counterparty named in one alphabet must be matched against a watchlist maintained in another; a payment routed through three jurisdictions must satisfy the sanctions regimes of all three; and the whole thing must produce an immutable record that a regulator can interrogate years later. At Baalvion Industries we run this as part of the Governance layer of the Baalvion Operating System (BOS), across 198 markets and 180+ jurisdictions. This article describes how we apply AI to sanctions screening, KYC/AML and transaction risk scoring at that scale, and — just as importantly — where we deliberately do not let AI make the call."
+    },
+    {
+      "type": "paragraph",
+      "text": "The framing matters because compliance AI is mostly judged on its failures, not its successes. A missed sanctioned party is a regulatory and reputational catastrophe; a flood of false positives quietly destroys an operations team and, worse, trains them to click 'clear' without reading. Our entire design is an exercise in moving the false-positive/false-negative trade-off in the right direction without ever pretending it has been eliminated."
+    },
+    { "type": "heading", "level": 2, "text": "Sanctions screening: matching is the hard part" },
+    {
+      "type": "paragraph",
+      "text": "The naive view of sanctions screening is that you load OFAC, the EU consolidated list, the UN list, HM Treasury and a few dozen national lists, then check whether a name appears. The reality is that exact matching catches almost nothing. Sanctioned parties transliterate, abbreviate, reorder and misspell their names precisely to evade detection, and legitimate parties have names that collide with watchlist entries by sheer coincidence. The engineering problem is fuzzy matching at scale with calibrated confidence, not lookup."
+    },
+    {
+      "type": "paragraph",
+      "text": "We layer several techniques rather than betting on one. A deterministic normalisation pass handles transliteration (ICU-based Unicode folding, script detection, and language-aware romanisation) so that a name in Cyrillic, Arabic or Han script is compared on equal footing with its Latin rendering. On top of normalised tokens we run classical fuzzy scorers — Jaro-Winkler and token-set ratios for typo and word-order tolerance, Double Metaphone and Soundex for phonetic equivalence — because these are fast, explainable, and resistant to the kind of distribution shift that erodes pure-ML matchers. AI enters as a re-ranking and disambiguation layer: an embedding model scores semantic and entity-level similarity (is 'Acme Trading FZE, Dubai' the same legal entity as 'ACME Trd. Free Zone Est.'?) and a classifier weighs secondary identifiers — date of birth, nationality, registration number, address — to push borderline candidates above or below the alert threshold."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Normalisation first — Unicode folding, transliteration and script-aware tokenisation, so screening is not defeated by alphabet alone.",
+        "Layered scorers — phonetic, edit-distance and token-set algorithms produce explainable base scores that an embedding-based re-ranker refines.",
+        "Secondary-identifier corroboration — DOB, nationality, jurisdiction and registration numbers raise or lower confidence, sharply cutting the false positives that name-only matching generates.",
+        "Threshold tiers — high-confidence hits auto-block, mid-confidence hits route to human review, low-confidence hits are logged but cleared, with every tier configurable per jurisdiction and per risk appetite."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "The decisive design principle here is the one we apply across all of BOS: AI alone never blocks. A deterministic rule engine owns the binding decision; the AI layer supplies a calibrated score and an explanation that can raise a match into the review queue or corroborate a deterministic hit, but it cannot, by itself, freeze a payment or reject a counterparty. This keeps a probabilistic component from becoming a single point of failure in a regulated workflow, and it is the same pattern that underpins our [AI compliance scoring platform](/case-studies/ai-compliance-scoring-platform)."
+    },
+    { "type": "heading", "level": 2, "text": "KYC and AML: from onboarding identity to ongoing behaviour" },
+    {
+      "type": "paragraph",
+      "text": "Know-Your-Customer and Anti-Money-Laundering obligations span two very different time horizons, and conflating them is a common and costly mistake. KYC is largely an onboarding event: verify that an entity is who it claims to be, establish beneficial ownership, and assign an initial risk rating. AML is a perpetual surveillance problem: detect, over months and years, the patterns that indicate layering, structuring, or trade-based money laundering. The data, the latency requirements and the model types differ accordingly."
+    },
+    {
+      "type": "paragraph",
+      "text": "For KYC, AI does the heavy lifting on document and identity verification — extracting fields from passports and corporate registries with OCR, checking document authenticity, and matching a liveness-verified face to an identity document — but the output is always a structured, reviewable artefact rather than an opaque approve/deny. We resolve beneficial ownership through entity-resolution models that cluster records across registries and tenants, then map ownership graphs to surface the ultimate beneficial owner behind nested holding structures. Crucially, this all happens under strict tenant isolation: in a multi-tenant platform, one tenant's KYC evidence and graph must never leak into another's screening, so isolation is enforced at the data layer, not hoped for in application code."
+    },
+    {
+      "type": "paragraph",
+      "text": "For AML, the workload is anomaly detection over transaction streams. Pure unsupervised models — isolation forests, autoencoders, sequence models over transaction graphs — are excellent at surfacing the unexpected, but they are useless on their own because they cannot explain themselves to an investigator or a regulator. So we fuse them with explicit typology rules (rapid movement of funds, round-tripping, structuring just under reporting thresholds, geographic risk concentration). The rules give us defensible, regulator-legible coverage of known schemes; the models extend reach to novel ones. A case is opened only when the fused signal crosses a threshold, and every case carries the reasoning chain that produced it. This division of labour — deterministic coverage of the known, AI reach into the unknown — is the same philosophy described in our [enterprise AI adoption](/news/tech/enterprise-ai-adoption) framework."
+    },
+    { "type": "heading", "level": 2, "text": "Risk scoring across 180+ jurisdictions" },
+    {
+      "type": "paragraph",
+      "text": "A single risk score is meaningless without a frame of reference, and the frame of reference is jurisdiction-specific. The same transaction can be routine in one corridor and a red flag in another; a beneficial-ownership threshold that satisfies one regulator violates another; a document that is sufficient evidence in one country is not recognised in a second. Building a risk engine that operates across 180+ jurisdictions therefore is not about a smarter model — it is about a configuration and policy architecture that lets one engine express many regulatory realities."
+    },
+    {
+      "type": "paragraph",
+      "text": "We model risk as a composite of weighted, independently-sourced signals rather than a single black box: party risk (sanctions and adverse-media exposure), geographic risk (jurisdiction and corridor ratings, including FATF grey/black-list status), product risk (the financial instrument and its abuse potential), and behavioural risk (deviation from a counterparty's established pattern). Each signal is computed by a component that can be reasoned about and tested in isolation, and the weights and thresholds are themselves jurisdiction-aware policy, version-controlled and auditable. This is the architectural backbone behind our work [unifying global trade operations](/case-studies/unifying-global-trade-operations), where a single transaction may legitimately be subject to several overlapping regimes at once."
+    },
+    {
+      "type": "list",
+      "ordered": true,
+      "items": [
+        "Compute component signals — party, geographic, product and behavioural risk — each from its own data source and each independently explainable.",
+        "Apply jurisdiction-aware policy — weights, thresholds and mandatory checks are configuration keyed to the relevant regulatory regime, not hard-coded logic.",
+        "Fuse into a tiered score — low, standard, enhanced and prohibited tiers that map to concrete operational actions rather than an abstract number.",
+        "Attach the reasoning — the score is always accompanied by the factors that drove it, so an analyst sees why a counterparty is enhanced-diligence rather than merely that it is.",
+        "Recalculate on event — scores are not static; new sanctions data, adverse media or a behavioural shift triggers re-scoring, so risk reflects the present, not the moment of onboarding."
+      ]
+    },
+    { "type": "heading", "level": 2, "text": "Auditability is a feature, not a report" },
+    {
+      "type": "paragraph",
+      "text": "In regulated finance the question is never only 'did you screen this?' but 'prove what you screened, against which list version, with which model, and who decided what'. A compliance system that cannot answer that on demand is a liability regardless of how accurate it is. We treat the audit trail as a first-class product surface, not a log file generated as an afterthought."
+    },
+    {
+      "type": "list",
+      "ordered": false,
+      "items": [
+        "Versioned everything — every screening records the exact watchlist snapshot, model version, ruleset and thresholds in force at the moment of decision, so a result is reproducible years later.",
+        "Immutable, append-only decision records — alerts, dispositions, the inputs that produced them and any human override are written once and never mutated, satisfying SOC 2 Type II and ISO 27001 evidence requirements.",
+        "Explainable outputs — every block, clear or escalation carries a human-readable reasoning chain, because 'the model said so' is not a defensible disposition.",
+        "Encryption and access control — AES-256 at rest, strict tenant isolation, and least-privilege access, so sensitive identity and transaction data is protected end to end."
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "These controls are not bureaucratic overhead bolted onto the engine; they are what make aggressive automation safe. Because every decision is reproducible and explainable, we can let the system auto-clear the high-volume, low-risk majority of activity with confidence, and concentrate scarce human expertise on the genuinely ambiguous cases. That is the real return on compliance AI: not replacing analysts, but ensuring they spend their judgement where it changes the outcome. The same governance discipline runs through the broader [Baalvion platform](/platform) and is set out in our [trust and security posture](/trust)."
+    },
+    { "type": "heading", "level": 2, "text": "What we have learned" },
+    {
+      "type": "paragraph",
+      "text": "Three lessons recur. First, matching quality dominates everything — the gains from better normalisation and disambiguation dwarf the gains from a fancier classifier, because the data is messier than any model. Second, the false-positive problem is an organisational risk, not just a technical one: an engine that floods reviewers eventually gets ignored, so reducing noise with calibrated confidence and secondary identifiers is a safety control, not a convenience. Third, regulatory diversity is a software-architecture problem; teams that try to encode 180+ jurisdictions in branching logic drown, while those that treat jurisdiction as version-controlled policy keep one well-tested engine. For organisations building in this space, the work usually spans [AI solutions](/services/ai-solutions) and deep [finance-sector](/industries/finance) domain engineering at once — the model and the regulatory operating model have to be built together, or neither works."
+    }
+  ],
+  "faqs": [
+    {
+      "q": "Does AI make the final block-or-clear decision in sanctions screening?",
+      "a": "No. Across BOS we enforce a strict principle that AI alone never blocks. A deterministic rule engine owns the binding decision; the AI layer supplies a calibrated similarity score and an explanation that can raise a match into the human-review queue or corroborate a deterministic hit, but it cannot by itself freeze a payment or reject a counterparty. This prevents a probabilistic component from becoming a single point of failure in a regulated workflow."
+    },
+    {
+      "q": "How do you screen names that are transliterated or misspelled to evade detection?",
+      "a": "We normalise first — Unicode folding, script detection and language-aware romanisation put names in different alphabets on equal footing — then apply layered fuzzy scorers (Jaro-Winkler, token-set ratios, Double Metaphone) for typo, word-order and phonetic tolerance, and finally an embedding-based re-ranker plus secondary identifiers such as date of birth and nationality to disambiguate borderline candidates."
+    },
+    {
+      "q": "How is compliance kept consistent across 180+ jurisdictions?",
+      "a": "By treating jurisdictional difference as version-controlled policy rather than hard-coded logic. Risk weights, thresholds and mandatory checks are configuration keyed to the relevant regime, applied by a single well-tested engine. This lets one engine express many overlapping regulatory realities — essential when a single cross-border transaction is subject to several sanctions and reporting regimes at once."
+    },
+    {
+      "q": "What is the difference between how you handle KYC and AML?",
+      "a": "KYC is largely an onboarding event — verifying identity, establishing beneficial ownership and assigning an initial risk rating — where AI does document, identity and entity-resolution work that produces a reviewable artefact. AML is perpetual surveillance: anomaly detection over transaction streams fused with explicit typology rules, so known schemes are covered defensibly while models extend reach to novel patterns."
+    },
+    {
+      "q": "How do you keep false positives from overwhelming analysts?",
+      "a": "Name-only matching generates enormous noise, so we corroborate with secondary identifiers (date of birth, nationality, registration number, address) and calibrated confidence tiers. High-confidence hits auto-block, mid-confidence hits route to review and low-confidence hits are logged but cleared. Reducing noise is treated as a safety control, because an engine that floods reviewers trains them to clear alerts without reading them."
+    },
+    {
+      "q": "What makes the system auditable for regulators?",
+      "a": "Every screening records the exact watchlist snapshot, model version, ruleset and thresholds in force at decision time; alerts, dispositions and human overrides are written to immutable, append-only records; and every outcome carries a human-readable reasoning chain. Combined with AES-256 encryption and tenant isolation, this satisfies SOC 2 Type II and ISO 27001 evidence requirements and supports KYC/AML obligations."
+    }
+  ],
+  "internalLinks": [
+    { "anchor": "AI compliance scoring platform", "href": "/case-studies/ai-compliance-scoring-platform" },
+    { "anchor": "unifying global trade operations", "href": "/case-studies/unifying-global-trade-operations" },
+    { "anchor": "AI solutions", "href": "/services/ai-solutions" },
+    { "anchor": "finance-sector", "href": "/industries/finance" },
+    { "anchor": "Baalvion platform", "href": "/platform" },
+    { "anchor": "trust and security posture", "href": "/trust" }
+  ],
+  "customFields": {}
+}

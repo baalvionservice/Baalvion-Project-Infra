@@ -86,7 +86,7 @@ export default function CurrencyConverter() {
                     </SelectContent>
                 </Select>
             </div>
-            <Button variant="ghost" size="icon" className="mt-6" onClick={handleSwap}>
+            <Button variant="ghost" size="icon" className="mt-6" onClick={handleSwap} aria-label="Swap currencies">
                 <ArrowRightLeft className="h-4 w-4" />
             </Button>
             <div className="flex-1 space-y-1">

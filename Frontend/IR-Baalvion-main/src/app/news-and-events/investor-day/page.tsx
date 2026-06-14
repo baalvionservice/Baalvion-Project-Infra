@@ -5,14 +5,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Download, PlayCircle, Calendar, Users, Target, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { getPublicEvents, getPublicDocuments } from '@/lib/ir-public';
 
+export const revalidate = 120;
 export const metadata: Metadata = {
   title: '2025 Investor Day | Strategic Roadmap',
   description: 'Access recordings and presentations from Baalvion’s 2025 Investor Day, detailing our 5-year strategic vision.',
 };
 
-export default function InvestorDayPage() {
+export default async function InvestorDayPage() {
   const heroImg = PlaceHolderImages.find(p => p.id === 'news-3-image');
+  // Live: latest investor-day event + presentation documents from ir-service.
+  const [events, docs] = await Promise.all([getPublicEvents(), getPublicDocuments()]);
+  const investorDays = events.filter((e) => e.eventType === 'investor_day');
+  const presentations = docs.filter((d) => d.documentType === 'presentation' || d.documentType === 'factsheet');
 
   return (
     <div className="animate-in fade-in duration-700">
@@ -96,6 +102,44 @@ export default function InvestorDayPage() {
               </div>
             </div>
           </div>
+
+          {/* Live: presentations & upcoming investor days from ir-service */}
+          {(presentations.length > 0 || investorDays.length > 0) && (
+            <div className="mt-20 space-y-12">
+              {investorDays.length > 0 && (
+                <div>
+                  <h2 className="text-3xl font-bold tracking-tight border-b border-gray-200 pb-6 mb-8">Investor Day Events</h2>
+                  <div className="space-y-4">
+                    {investorDays.map((e) => (
+                      <div key={e.id} className="flex flex-wrap items-center justify-between gap-3 border border-gray-200 p-6">
+                        <div>
+                          <p className="text-xl font-bold">{e.title}</p>
+                          <p className="text-sm text-gray-500">{new Date(e.scheduledAt).toLocaleDateString('en-US', { dateStyle: 'long' } as any)}{e.location ? ` · ${e.location}` : ''}</p>
+                        </div>
+                        {e.webcastUrl && (
+                          <Button asChild className="rounded-none"><a href={e.webcastUrl} target="_blank" rel="noopener noreferrer"><PlayCircle className="mr-2 h-4 w-4" />Watch</a></Button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {presentations.length > 0 && (
+                <div>
+                  <h2 className="text-3xl font-bold tracking-tight border-b border-gray-200 pb-6 mb-8">Presentations &amp; Materials</h2>
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {presentations.map((d) => (
+                      <a key={d.id} href={d.fileUrl} target="_blank" rel="noopener noreferrer" className="group border border-gray-200 p-6 hover:border-primary transition-colors">
+                        <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-2">{d.documentType}{d.year ? ` · ${d.year}` : ''}</p>
+                        <p className="font-bold group-hover:text-primary transition-colors">{d.title}</p>
+                        <span className="mt-4 inline-flex items-center text-sm font-bold text-primary"><Download className="mr-2 h-4 w-4" />Download</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </section>
     </div>

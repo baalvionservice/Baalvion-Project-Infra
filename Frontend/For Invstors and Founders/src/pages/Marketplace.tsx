@@ -90,7 +90,7 @@ const Marketplace = () => {
                   className="pl-10 w-64 bg-secondary border-border"
                 />
               </div>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="icon" aria-label="Notifications">
                 <Bell className="w-5 h-5" />
               </Button>
               <Button variant="premium" asChild>

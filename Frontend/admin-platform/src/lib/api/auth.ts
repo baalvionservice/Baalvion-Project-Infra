@@ -1,4 +1,6 @@
 import { authClient } from './client';
+import { useAuthStore } from '@/lib/store/authStore';
+import { decodeJwtClaims } from '@/lib/utils/jwt';
 import type {
   LoginPayload,
   LoginResponse,
@@ -56,6 +58,25 @@ const toExpiresIn = (expiresAt?: string): number => {
   return Math.max(60, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
 };
 
+/**
+ * The `/me` profile endpoint returns identity fields but omits authorization claims
+ * (`role`, `orgId`, `permissions`). Those claims live in the access token, which is the
+ * source of truth for authz. Recover them from the token so role-gated UI (e.g. the
+ * sidebar nav) renders correctly after a silent session restore on page reload.
+ */
+const enrichFromToken = (user: AuthUser): AuthUser => {
+  const claims = decodeJwtClaims(useAuthStore.getState().accessToken);
+  if (!claims) return user;
+  const role = (user.role ?? claims.role ?? claims.roles?.[0]) as AuthUser['role'];
+  return {
+    ...user,
+    role,
+    orgId: user.orgId ?? claims.org_id ?? null,
+    permissions: user.permissions.length ? user.permissions : (claims.permissions ?? []),
+    sessionId: user.sessionId || (claims.sid ?? ''),
+  };
+};
+
 export const authApi = {
   login: async (payload: LoginPayload) => {
     const res = await authClient.post<ApiResponse<BackendLoginData>>('/login', payload);
@@ -87,7 +108,7 @@ export const authApi = {
 
   me: async () => {
     const res = await authClient.get<ApiResponse<BackendUser>>('/me');
-    const normalized = toAuthUser(res.data.data);
+    const normalized = enrichFromToken(toAuthUser(res.data.data));
     return { ...res, data: { ...res.data, data: normalized } } as typeof res & {
       data: ApiResponse<AuthUser>;
     };

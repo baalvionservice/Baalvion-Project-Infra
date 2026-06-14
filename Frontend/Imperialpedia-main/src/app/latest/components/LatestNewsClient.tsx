@@ -311,8 +311,8 @@ export function LatestNewsClient({
           return updated;
         });
       }
-    } catch (err) {
-      console.log("Polling error:", err);
+    } catch {
+      // polling errors are non-fatal; silently skip this cycle
     }
   }, []);
 

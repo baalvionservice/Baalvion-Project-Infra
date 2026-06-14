@@ -13,7 +13,7 @@ const config  = require('../config/appConfig');
  */
 function signAccessToken(payload) {
     const { privateKey, kid } = loadKeys();
-    const { sub, email, orgId, role, roles, permissions, sid, ...rest } = payload;
+    const { sub, email, orgId, orgType, role, roles, permissions, sid, ...rest } = payload;
 
     // ── Canonical claim contract enforcement (Phase 2) ──────────────────────────
     // The issuer refuses to mint a malformed token: sub is required, roles and
@@ -36,8 +36,9 @@ function signAccessToken(payload) {
             jti: uuidv4(),
             sub: String(sub),
             email,
-            org_id: orgId ?? null,
-            sid:    sid ?? null,
+            org_id:   orgId ?? null,
+            org_type: orgType ?? null,
+            sid:      sid ?? null,
             roles:  roleList,
             role:   roleList[0] ?? null,   // DEPRECATED scalar compat (one migration phase)
             permissions: permList,
@@ -81,9 +82,35 @@ function signRefreshToken(payload) {
 
 // ── Token verification ─────────────────────────────────────────────────────────
 
+/**
+ * Resolve the RS256 public PEM to verify a token against, honoring key rotation.
+ * Returns the active key for tokens with no kid or the active kid; for any other kid
+ * it consults JWT_ADDITIONAL_PUBLIC_KEYS (the SAME retiring-key set getJwks() publishes).
+ * This closes a rotation gap where auth-service's own verifier rejected still-valid tokens
+ * signed by the previous key — so old tokens remain valid during the rollover window here,
+ * not only at remote JWKS consumers. Unknown kid → falls back to the active key (jwt.verify
+ * then rejects the mismatched signature; never silently trusts an unverifiable token).
+ */
+function resolveVerifyKey(token) {
+    const { publicKey, kid: activeKid } = loadKeys();
+    let tokenKid;
+    try { tokenKid = (jwt.decode(token, { complete: true }) || {}).header?.kid; } catch { tokenKid = undefined; }
+    if (!tokenKid || tokenKid === activeKid) return publicKey;
+    if (process.env.JWT_ADDITIONAL_PUBLIC_KEYS) {
+        try {
+            const extra = JSON.parse(process.env.JWT_ADDITIONAL_PUBLIC_KEYS);
+            const pem = extra[tokenKid];
+            if (pem) return String(pem).replace(/\\n/g, '\n');
+        } catch (err) {
+            // Surface the misconfig instead of silently dropping rollover keys (was swallowed).
+            console.error('[jwtRsa] bad JWT_ADDITIONAL_PUBLIC_KEYS:', err.message);
+        }
+    }
+    return publicKey;
+}
+
 function verifyAccessToken(token) {
-    const { publicKey } = loadKeys();
-    return jwt.verify(token, publicKey, {
+    return jwt.verify(token, resolveVerifyKey(token), {
         algorithms: ['RS256'],
         issuer:     config.jwt.issuer,
         audience:   config.jwt.audience,
@@ -91,8 +118,7 @@ function verifyAccessToken(token) {
 }
 
 function verifyRefreshToken(token) {
-    const { publicKey } = loadKeys();
-    return jwt.verify(token, publicKey, {
+    return jwt.verify(token, resolveVerifyKey(token), {
         algorithms: ['RS256'],
         issuer:     config.jwt.issuer,
     });
@@ -126,7 +152,7 @@ function getJwks() {
             for (const [k, pem] of Object.entries(extra)) {
                 if (k !== kid) keys.push(toJwk(String(pem).replace(/\\n/g, '\n'), k));
             }
-        } catch (_) { /* malformed extra keys ignored — active key still published */ }
+        } catch (err) { console.error('[jwtRsa] bad JWT_ADDITIONAL_PUBLIC_KEYS (extra keys not published):', err.message); }
     }
 
     _jwksCache = { keys };

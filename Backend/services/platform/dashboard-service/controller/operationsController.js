@@ -62,7 +62,8 @@ exports.updateAlert = async (req, res, next) => {
     try {
         const alert = await db.OperationsAlert.findOne({ where: { id: req.params.id, org_id: req.user.orgId } });
         if (!alert) return next(new AppError('NOT_FOUND', 'Alert not found', 404));
-        await alert.update(req.body);
+        const { title, message, severity, status, business_id } = req.body;
+        await alert.update({ title, message, severity, status, business_id });
         await _createAuditLog(req, 'UPDATE_ALERT', 'operations_alert', String(alert.id));
         return sendSuccess(req, res, alert);
     } catch (err) { return next(err); }
@@ -98,7 +99,8 @@ exports.updateAlertRule = async (req, res, next) => {
     try {
         const rule = await db.AlertRule.findOne({ where: { id: req.params.id, org_id: req.user.orgId } });
         if (!rule) return next(new AppError('NOT_FOUND', 'Alert rule not found', 404));
-        await rule.update(req.body);
+        const { name, condition, threshold, metric, is_active, notification_channels } = req.body;
+        await rule.update({ name, condition, threshold, metric, is_active, notification_channels });
         await _createAuditLog(req, 'UPDATE_ALERT_RULE', 'alert_rule', String(rule.id));
         return sendSuccess(req, res, rule);
     } catch (err) { return next(err); }

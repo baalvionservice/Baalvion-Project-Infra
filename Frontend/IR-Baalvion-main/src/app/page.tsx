@@ -98,7 +98,7 @@ export default function Home() {
   }, [isLoading, pageData, userRole]);
 
   return (
-    <main className="w-full max-w-6xl mx-auto px-1 sm:px-6 lg:px-8">
+    <main className="w-full max-w-6xl mx-auto px-1 sm:px-6 lg:px-8 overflow-x-hidden">
       {renderedContent}
     </main>
   );

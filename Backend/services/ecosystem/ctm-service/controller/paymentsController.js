@@ -54,8 +54,18 @@ exports.createCheckout = async (req, res, next) => {
 
 exports.listPayments = async (req, res, next) => {
     try {
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
         const where = {};
-        if (req.query.company_id) where.company_id = req.query.company_id;
+        if (isAdmin) {
+            // Admins may filter by any company or see all.
+            if (req.query.company_id) where.company_id = req.query.company_id;
+        } else {
+            // Non-admins are locked to their own org; query param is ignored.
+            const callerOrgId = req.auth?.orgId;
+            if (!callerOrgId) throw new AppError('FORBIDDEN', 'Organization context required', 403);
+            where.company_id = callerOrgId;
+        }
         const rows = await db.payments.findAll({ where, order: [['created_at', 'DESC']], limit: 100 });
         sendSuccess(res, rows);
     } catch (err) { next(err); }

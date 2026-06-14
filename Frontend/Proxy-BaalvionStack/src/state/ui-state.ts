@@ -360,7 +360,7 @@ export const uiSelectors = {
 // TOAST HELPERS
 // ============================================
 
-let toastId = 0;
+const toastId = 0;
 
 export function createToast(
   type: Toast["type"],

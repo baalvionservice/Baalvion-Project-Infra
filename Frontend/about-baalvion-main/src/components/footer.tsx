@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Globe, ChevronUp, Lock } from "lucide-react";
+import { Globe, ChevronUp } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export function Footer() {
@@ -81,6 +81,42 @@ export function Footer() {
               </div>
               <div className="space-y-3">
                 <Link
+                  href="/services"
+                  className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
+                >
+                  Services
+                </Link>
+                <Link
+                  href="/industries"
+                  className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
+                >
+                  Industries
+                </Link>
+                <Link
+                  href="/case-studies"
+                  className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
+                >
+                  Case Studies
+                </Link>
+                <Link
+                  href="/about"
+                  className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
+                >
+                  About Baalvion
+                </Link>
+                <Link
+                  href="/structure"
+                  className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
+                >
+                  Structure
+                </Link>
+                <Link
+                  href="/philosophy"
+                  className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
+                >
+                  Philosophy
+                </Link>
+                <Link
                   href="/careers"
                   className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
                 >
@@ -88,18 +124,6 @@ export function Footer() {
                   <span className="inline-block text-[10px] ml-1 opacity-50">
                     ↗
                   </span>
-                </Link>
-                <Link
-                  href="#"
-                  className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
-                >
-                  Site Map
-                </Link>
-                <Link
-                  href="/platform"
-                  className="block text-sm font-bold text-gray-300 hover:text-[#FF9900] transition-colors"
-                >
-                  More from Baalvion
                 </Link>
               </div>
             </div>
@@ -189,12 +213,6 @@ export function Footer() {
                 </svg>
               </Link>
             </div>
-            <Link
-              href="/admin/login"
-              className="flex items-center gap-2 text-[9px] sm:text-[10px] font-bold text-gray-500 hover:text-[#FF9900] uppercase tracking-widest transition-colors"
-            >
-              <Lock className="w-3 h-3" /> Administrative Portal
-            </Link>
           </div>
 
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest">
@@ -215,7 +233,7 @@ export function Footer() {
                 Baalvion Privacy Policy
               </Link>
               <span className="text-gray-600">
-                © 1996-{currentYear} Baalvion Industries Private Limited.
+                © {currentYear} Baalvion Industries Private Limited.
               </span>
             </div>
           </div>

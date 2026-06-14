@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   description:
     "Browse active investors on Baalvion by sector, stage and region. See who recently funded businesses like yours and connect to raise faster.",
   alternates: { canonical: "/investors" },
+  openGraph: {
+    title: "Active Investors — Browse by Sector & Stage",
+    description: "Browse active investors on Baalvion by sector, stage and region. See who recently funded businesses like yours and connect to raise faster.",
+    url: "/investors",
+    type: "website",
+    siteName: "Baalvion Insiders",
+  },
 };
 
 export default async function InvestorsDirectory() {

@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../ui/accordion";
 import {
@@ -167,14 +169,6 @@ export function Footer() {
                                             className="text-black transition-colors"
                                         >
                                             Archive Registry
-                                        </Link>
-                                    </li>
-                                    <li>
-                                        <Link
-                                            href={`/${countryCode}/account/live`}
-                                            className="text-black transition-colors"
-                                        >
-                                            Live Shops
                                         </Link>
                                     </li>
                                     <li>
@@ -392,14 +386,6 @@ export function Footer() {
                                     className="text-black transition-colors"
                                 >
                                     Archive Registry
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href={`/${countryCode}/account/live`}
-                                    className="text-black transition-colors"
-                                >
-                                    Live Shops
                                 </Link>
                             </li>
                             <li>

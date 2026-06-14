@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Zap,
@@ -38,6 +38,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAppStore } from "@/lib/store";
+import { listCampaigns, listSegments, listVipClients } from "@/lib/crm-client";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -64,7 +65,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Campaign } from "@/lib/types";
+import { Campaign, CustomerSegment, VipClient } from "@/lib/types";
+import { CUSTOMER_SEGMENTS } from "@/lib/mock-data";
 
 type MarketingTab =
   | "dashboard"
@@ -80,13 +82,39 @@ type MarketingTab =
 export default function MarketingAdminPanel() {
   const [activeTab, setActiveTab] = useState<MarketingTab>("dashboard");
   const {
-    activeCampaigns,
+    activeCampaigns: storeCampaigns,
     affiliates,
-    vipClients,
+    vipClients: storeVipClients,
     verifyClient,
     upsertCampaign,
   } = useAppStore();
   const { toast } = useToast();
+
+  // Prefer live CRM data; fall back to the in-memory store when a CRM call is empty/unavailable.
+  const [crmCampaigns, setCrmCampaigns] = useState<Campaign[]>([]);
+  const [crmSegments, setCrmSegments] = useState<CustomerSegment[]>([]);
+  const [crmVipClients, setCrmVipClients] = useState<VipClient[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([listCampaigns(), listSegments(), listVipClients()]).then(
+      ([campaigns, segments, vips]) => {
+        if (cancelled) return;
+        setCrmCampaigns(campaigns);
+        setCrmSegments(segments);
+        setCrmVipClients(vips);
+      }
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const activeCampaigns =
+    crmCampaigns.length > 0 ? crmCampaigns : storeCampaigns;
+  const vipClients = crmVipClients.length > 0 ? crmVipClients : storeVipClients;
+  // Segments are not held in the app store; fall back to the mock dataset when CRM is empty.
+  const segments = crmSegments.length > 0 ? crmSegments : CUSTOMER_SEGMENTS;
+  void segments;
 
   const [isCampaignEditorOpen, setIsCampaignEditorOpen] = useState(false);
   const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);

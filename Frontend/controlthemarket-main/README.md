@@ -1,5 +1,3 @@
-cl# Firebase Studio
+# ControlTheMarket
 
-This is a NextJS starter in Firebase Studio.
-
-To get started, take a look at src/app/page.tsx.
+Proof-of-skill hiring platform — [controlthemarket.com](https://controlthemarket.com)

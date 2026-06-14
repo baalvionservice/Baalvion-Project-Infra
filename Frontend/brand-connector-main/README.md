@@ -1,5 +1,5 @@
-# Firebase Studio
+# Baalvion Connect
 
-This is a NextJS starter in Firebase Studio.
+AI-powered brand and creator marketplace built with Next.js App Router.
 
-To get started, take a look at src/app/page.tsx.
+To get started, take a look at `src/app/page.tsx`.

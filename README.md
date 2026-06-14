@@ -260,8 +260,9 @@ issue for security findings.
 ## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the branching model, Conventional
-Commit conventions, and the PR process. All changes are reviewed by the owning
-team per [CODEOWNERS](CODEOWNERS). Please also read our
+Commit conventions, and the PR process. All changes are reviewed by their
+code owner per [CODEOWNERS](CODEOWNERS) (per-context team ownership activates on
+migration to a GitHub organization). Please also read our
 [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License

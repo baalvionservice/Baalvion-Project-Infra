@@ -1,6 +1,9 @@
-'use client';
 /**
  * @baalvion/auth-sdk/react — React bindings over createAuthSession().
+ *
+ * NOTE: the "use client" directive is injected into the built output via
+ * tsup `banner` (see tsup.config.ts), not declared inline — esbuild strips
+ * module-level directives during bundling.
  *
  * Provides the single auth integration surface for Baalvion apps:
  *   <AuthProvider authUrl="/auth-bff" cookieRefresh mePath="/me"

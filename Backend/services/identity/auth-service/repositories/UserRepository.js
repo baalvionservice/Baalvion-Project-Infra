@@ -49,6 +49,20 @@ class UserRepository {
         if (!affected) return null;
         return db.User.findByPk(userId);
     }
+
+    // ── Lifecycle ────────────────────────────────────────────────────────────────
+
+    async setLastLogin(userId) {
+        return db.User.update({ last_login_at: new Date() }, { where: { id: userId } });
+    }
+
+    async setStatus(userId, status) {
+        return db.User.update({ status }, { where: { id: userId } });
+    }
+
+    async setMfaRequired(userId, required) {
+        return db.User.update({ mfa_required: !!required }, { where: { id: userId } });
+    }
 }
 
 module.exports = new UserRepository();

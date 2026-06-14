@@ -1,0 +1,38 @@
+// ============================================================================
+//  Notifications & audit — multi-channel notifications and an append-only
+//  audit trail spanning every domain.
+// ============================================================================
+
+model Notification {
+  id          String              @id @default(uuid()) @db.Uuid
+  userId      String              @db.Uuid
+  channel     NotificationChannel
+  template    String
+  subject     String?
+  payloadJson Json
+  status      NotificationStatus  @default(QUEUED)
+  sentAt      DateTime?
+  readAt      DateTime?
+  createdAt   DateTime            @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  orgId       String?  @db.Uuid
+  actorUserId String?  @db.Uuid
+  action      String // e.g. "investment.funded", "kyc.approved"
+  subjectType String
+  subjectId   String
+  metaJson    Json?
+  ipAddress   String?
+  createdAt   DateTime @default(now())
+
+  @@index([orgId])
+  @@index([subjectType, subjectId])
+  @@index([actorUserId])
+}

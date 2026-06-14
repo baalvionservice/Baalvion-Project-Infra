@@ -12,6 +12,11 @@ export const formatRelative = (date: string | Date) =>
 export const formatCurrency = (amount: number, currency = 'INR') =>
   new Intl.NumberFormat('en-IN', { style: 'currency', currency }).format(amount / 100);
 
+// Like formatCurrency but for values already stored as a whole-unit amount
+// (e.g. CRM totalSpend / walletBalance are plain numbers, not minor units).
+export const formatMoney = (amount: number, currency = 'USD') =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency, maximumFractionDigits: 2 }).format(amount ?? 0);
+
 export const formatNumber = (n: number) =>
   new Intl.NumberFormat('en-IN').format(n);
 

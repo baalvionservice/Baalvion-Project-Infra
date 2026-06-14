@@ -1,5 +1,5 @@
 "use client";
-import { latestNews } from "@/lib/data/worldData";
+import type { WorldData } from "@/lib/data/worldRegions";
 import { useState } from "react";
 
 const categoryColors: Record<string, string> = {
@@ -15,9 +15,9 @@ const categoryColors: Record<string, string> = {
   AUTO: "bg-indigo-100 text-indigo-700",
 };
 
-export default function LatestNews() {
+export default function LatestNews({ latest }: { latest: WorldData["latest"] }) {
   const [expanded, setExpanded] = useState(false);
-  const visible = expanded ? latestNews : latestNews.slice(0, 10);
+  const visible = expanded ? latest : latest.slice(0, 10);
 
   return (
     <div className="bg-white h-full">

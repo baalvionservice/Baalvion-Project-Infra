@@ -3,7 +3,6 @@ import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Navbar } from "@/components/common/Navbar";
 import Footer from "@/components/common/Footer";
-import { CookieConsent } from "@/components/common/CookieConsent";
 import ToastProvider from "@/components/common/ToastManager";
 import { Toaster as SonnerToaster } from "sonner";
 import { GlobalStoreProvider } from "@/lib/state";
@@ -37,10 +36,9 @@ export default function RootLayoutClient({ children }: RootLayoutClientProps) {
                             <ToastProvider>
                                 <TooltipProvider>
                                     {!isAdminPath && <Navbar />}
-                                    <CookieConsent />
                                     <main
                                         id="main-content"
-                                        className={cn("flex-grow outline-none", !isAdminPath && "mt-16")}
+                                        className={cn("flex-grow outline-none", !isAdminPath && "pt-16 lg:pt-[108px]")}
                                         tabIndex={-1}
                                     >
                                         {children}

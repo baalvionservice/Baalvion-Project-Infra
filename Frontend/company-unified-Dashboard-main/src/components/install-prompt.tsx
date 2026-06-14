@@ -35,10 +35,7 @@ export default function InstallPrompt() {
       deferredPrompt.prompt();
       deferredPrompt.userChoice.then((choiceResult: { outcome: string }) => {
         if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
           localStorage.setItem('app_installed', 'true');
-        } else {
-          console.log('User dismissed the install prompt');
         }
         setShowPrompt(false);
         setDeferredPrompt(null);

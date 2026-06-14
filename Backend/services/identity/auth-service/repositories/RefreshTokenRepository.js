@@ -69,6 +69,15 @@ class RefreshTokenRepository {
         );
     }
 
+    /** Revokes all tokens belonging to any of the given sessions (org suspension). */
+    async revokeBySessionIds(sessionIds) {
+        if (!sessionIds || !sessionIds.length) return [0];
+        return db.RefreshToken.update(
+            { revoked_at: new Date() },
+            { where: { session_id: sessionIds, revoked_at: null } }
+        );
+    }
+
     /** Revokes all tokens for a user (password reset, security wipe). */
     async revokeAllForUser(userId) {
         return db.RefreshToken.update(

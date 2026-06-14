@@ -1,12 +1,31 @@
 import { Mail, MapPin, ShieldCheck, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ContactFormClient from "./contact-form-client";
+import { cmsGetSitePage } from "@/lib/cms";
+
+export const dynamic = "force-dynamic";
+
+const FALLBACK_CONTACT = {
+  email: "intel@baalvion.nexus",
+  location: "New Delhi, NCR, IN",
+  pgpKey: "BAAL-2024-NX",
+  responseTime: "4-6 operational hours",
+};
 
 /**
- * Server-side rendered contact page component
- * Optimized for SEO and Google indexing
+ * Server-side rendered contact page. Contact channels and response time are
+ * managed in the central CMS (admin-platform console) and read from the public
+ * delivery API, falling back to the built-in details if the CMS is unreachable.
  */
-export default function ContactPageServer() {
+export default async function ContactPageServer() {
+  const page = await cmsGetSitePage("contact");
+  const c = { ...FALLBACK_CONTACT, ...(page?.custom?.contact || {}) };
+  const items = [
+    { icon: Mail, value: c.email, label: "Email Protocol" },
+    { icon: MapPin, value: c.location, label: "Physical Node" },
+    { icon: ShieldCheck, value: `PGP: ${c.pgpKey}`, label: "Encryption Key" },
+  ];
+
   return (
     <main className="flex-1 pt-32 sm:pt-40 lg:pt-48 pb-16 sm:pb-24 lg:pb-32">
       <div className="section-container">
@@ -27,23 +46,7 @@ export default function ContactPageServer() {
             </div>
 
             <div className="grid gap-4 sm:gap-6">
-              {[
-                {
-                  icon: Mail,
-                  value: "intel@baalvion.nexus",
-                  label: "Email Protocol",
-                },
-                {
-                  icon: MapPin,
-                  value: "New Delhi, NCR, IN",
-                  label: "Physical Node",
-                },
-                {
-                  icon: ShieldCheck,
-                  value: "PGP: BAAL-2024-NX",
-                  label: "Encryption Key",
-                },
-              ].map((item, i) => (
+              {items.map((item, i) => (
                 <div
                   key={i}
                   className={cn(
@@ -76,9 +79,7 @@ export default function ContactPageServer() {
                   </h4>
                 </div>
                 <p className="text-base sm:text-lg text-muted-foreground leading-relaxed italic font-light">
-                  "Our strategic response team typically reviews all inbound
-                  Baalvion Operating System (BOS) links within 4-6 operational
-                  hours. Global trade never sleeps."
+                  {`"Our strategic response team typically reviews all inbound Baalvion Operating System (BOS) links within ${c.responseTime}. Global trade never sleeps."`}
                 </p>
               </div>
             </div>

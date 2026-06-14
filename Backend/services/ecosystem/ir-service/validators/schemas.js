@@ -92,8 +92,60 @@ const createContactSchema = z.object({
 
 const updateContactSchema = createContactSchema.partial();
 
+const createEventSchema = z.object({
+    title: z.string().min(1).max(500),
+    event_type: z.enum(['earnings_call', 'agm', 'investor_day', 'roadshow', 'conference', 'webinar']).default('investor_day'),
+    scheduled_at: z.string(),
+    end_at: z.string().optional(),
+    location: z.string().max(300).optional(),
+    webcast_url: z.string().url().optional(),
+    description: z.string().optional(),
+    registration_url: z.string().url().optional(),
+    status: z.enum(['upcoming', 'live', 'completed', 'cancelled']).default('upcoming'),
+});
+
+const updateEventSchema = createEventSchema.partial();
+
+const marketSnapshotSchema = z.object({
+    symbol: z.string().max(20).optional(),
+    exchange: z.string().max(50).optional(),
+    price: z.number().optional(),
+    currency: z.string().max(10).optional(),
+    change_pct: z.number().optional(),
+    market_cap: z.number().optional(),
+    volume: z.number().int().optional(),
+    week52_high: z.number().optional(),
+    week52_low: z.number().optional(),
+    pe_ratio: z.number().optional(),
+    dividend_yield: z.number().optional(),
+    dividend_per_share: z.number().optional(),
+    as_of: z.string().optional(),
+}).partial();
+
+const createApplicationSchema = z.object({
+    full_name: z.string().min(2).max(200),
+    email: z.string().email().max(255),
+    entity: z.string().max(300).optional(),
+    investor_type: z.string().max(60).optional(),
+    accredited: z.boolean().default(false),
+    commitment: z.coerce.number().min(0).max(1e15).optional(),
+    message: z.string().max(5000).optional(),
+});
+
+const reviewApplicationSchema = z.object({
+    action: z.enum(['approve', 'reject']),
+    review_note: z.string().max(5000).optional(),
+});
+
+const applicationQuerySchema = paginationSchema.extend({
+    status: z.enum(['pending', 'approved', 'rejected']).optional(),
+});
+
 module.exports = {
     paginationSchema,
+    createApplicationSchema,
+    reviewApplicationSchema,
+    applicationQuerySchema,
     createReportSchema,
     updateReportSchema,
     createFilingSchema,
@@ -106,4 +158,7 @@ module.exports = {
     updateShareholderSchema,
     createContactSchema,
     updateContactSchema,
+    createEventSchema,
+    updateEventSchema,
+    marketSnapshotSchema,
 };

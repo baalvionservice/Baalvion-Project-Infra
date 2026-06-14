@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Ecosystem | Baalvion Operating System Architecture",
   description:
     "A standardized blueprint of the Baalvion Operating System (BOS), architected for transparency, scalability, and modular integration across global markets.",
+  alternates: { canonical: "https://about.baalvion.com/ecosystem" },
   openGraph: {
     title: "Ecosystem | Baalvion Operating System Architecture",
     description:
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
     siteName: "Baalvion Operating System (BOS)",
     images: [
       {
-        url: "https://picsum.photos/seed/baalvion-ecosystem/1200/630",
+        url: "https://about.baalvion.com/api/og?title=The+Baalvion+Ecosystem&eyebrow=Baalvion+Industries",
         width: 1200,
         height: 630,
         alt: "Baalvion Operating System Ecosystem",
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
     title: "Ecosystem | Baalvion Operating System Architecture",
     description:
       "A standardized blueprint of the Baalvion Operating System (BOS), architected for transparency, scalability, and modular integration across global markets.",
-    images: ["https://picsum.photos/seed/baalvion-ecosystem/1200/630"],
+    images: ["https://about.baalvion.com/api/og?title=The+Baalvion+Ecosystem&eyebrow=Baalvion+Industries"],
   },
 };
 

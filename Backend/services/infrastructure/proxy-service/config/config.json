@@ -1,16 +1,11 @@
 {
+    "_comment": "Local dev fallback ONLY — never put real/cloud credentials here. Real connections come from DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD env vars (see models/index.js), which take precedence over this block. A live Neon credential previously committed here was removed; it must be rotated on the provider side as it remains in git history.",
     "development": {
-        "username": "neondb_owner",
-        "password": "npg_oYUcnb1MhN2O",
-        "database": "neondb",
-        "host": "ep-jolly-water-amvut2wv-pooler.c-5.us-east-1.aws.neon.tech",
+        "username": "baalvion",
+        "password": "",
+        "database": "baalvion_db",
+        "host": "127.0.0.1",
         "port": 5432,
-        "dialect": "postgres",
-        "dialectOptions": {
-            "ssl": {
-                "require": true,
-                "rejectUnauthorized": false
-            }
-        }
+        "dialect": "postgres"
     }
 }

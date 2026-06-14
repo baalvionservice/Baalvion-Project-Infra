@@ -14,7 +14,7 @@ spec:
   lifecycle: production
   language: python
   datastores: [postgres, clickhouse]
-  dependsOn: [identity-platform]
+  dependsOn: [auth-service]
   consumesEvents: []
   producesEvents: []
   apis: ["/v1/ml"]

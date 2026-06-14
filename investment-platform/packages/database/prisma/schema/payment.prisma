@@ -1,0 +1,114 @@
+// ============================================================================
+//  Escrow & payments — escrow accounts and movements, payment methods,
+//  provider payments (Stripe/Wise), distributions/payouts, and a
+//  double-entry ledger for money-truth.
+// ============================================================================
+
+model EscrowAccount {
+  id          String       @id @default(uuid()) @db.Uuid
+  dealId      String       @db.Uuid
+  provider    PaymentProvider @default(STRIPE)
+  externalRef String?
+  currency    String       @default("USD") @db.VarChar(3)
+  balance     Decimal      @default(0) @db.Decimal(20, 4)
+  status      EscrowStatus @default(INITIATED)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  deal         Deal               @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  transactions EscrowTransaction[]
+
+  @@index([dealId])
+}
+
+model EscrowTransaction {
+  id                   String        @id @default(uuid()) @db.Uuid
+  escrowAccountId      String        @db.Uuid
+  type                 EscrowTxnType
+  amount               Decimal       @db.Decimal(20, 4)
+  currency             String        @default("USD") @db.VarChar(3)
+  status               PaymentStatus @default(PENDING)
+  releaseConditionsJson Json?
+  paymentId            String?       @db.Uuid
+  createdAt            DateTime      @default(now())
+
+  escrowAccount EscrowAccount @relation(fields: [escrowAccountId], references: [id], onDelete: Cascade)
+
+  @@index([escrowAccountId])
+}
+
+model PaymentMethod {
+  id          String            @id @default(uuid()) @db.Uuid
+  orgId       String            @db.Uuid
+  provider    PaymentProvider
+  type        PaymentMethodType
+  externalRef String // provider token (never raw PAN/account)
+  brand       String?
+  last4       String?           @db.VarChar(4)
+  currency    String?           @db.VarChar(3)
+  isDefault   Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+
+  @@index([orgId])
+}
+
+model Payment {
+  id             String           @id @default(uuid()) @db.Uuid
+  orgId          String           @db.Uuid
+  investmentId   String?          @db.Uuid
+  escrowAccountId String?         @db.Uuid
+  provider       PaymentProvider
+  direction      PaymentDirection
+  amount         Decimal          @db.Decimal(20, 4)
+  feeAmount      Decimal          @default(0) @db.Decimal(20, 4)
+  currency       String           @default("USD") @db.VarChar(3)
+  status         PaymentStatus    @default(PENDING)
+  externalRef    String?
+  idempotencyKey String           @unique
+  failureReason  String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([orgId])
+  @@index([investmentId])
+  @@index([status])
+}
+
+model Distribution {
+  id            String        @id @default(uuid()) @db.Uuid
+  companyOrgId  String        @db.Uuid
+  investorOrgId String        @db.Uuid
+  investmentId  String?       @db.Uuid
+  type          PayoutType
+  grossAmount   Decimal       @db.Decimal(20, 4)
+  taxWithheld   Decimal       @default(0) @db.Decimal(20, 4)
+  netAmount     Decimal       @db.Decimal(20, 4)
+  currency      String        @default("USD") @db.VarChar(3)
+  status        PaymentStatus @default(PENDING)
+  paymentId     String?       @db.Uuid
+  scheduledAt   DateTime?
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+
+  @@index([investorOrgId])
+  @@index([companyOrgId])
+  @@index([status])
+}
+
+// Append-only double-entry ledger. Every money movement posts balanced
+// DEBIT/CREDIT rows referencing a source object (refType/refId).
+model LedgerEntry {
+  id        String          @id @default(uuid()) @db.Uuid
+  orgId     String?         @db.Uuid
+  account   String // chart-of-accounts code, e.g. "escrow:hold", "investor:cash"
+  direction LedgerDirection
+  amount    Decimal         @db.Decimal(20, 4)
+  currency  String          @default("USD") @db.VarChar(3)
+  refType   String // "payment" | "escrow_txn" | "distribution" | ...
+  refId     String          @db.Uuid
+  memo      String?
+  createdAt DateTime        @default(now())
+
+  @@index([account])
+  @@index([refType, refId])
+}

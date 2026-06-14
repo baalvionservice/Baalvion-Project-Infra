@@ -1,0 +1,66 @@
+// ============================================================================
+//  Compliance — KYC verifications, AML screenings, compliance cases and
+//  consent records. Subject is referenced by org + optional user (scalar keys).
+// ============================================================================
+
+model KycCheck {
+  id            String      @id @default(uuid()) @db.Uuid
+  orgId         String      @db.Uuid
+  subjectType   SubjectType
+  subjectUserId String?     @db.Uuid
+  provider      String      @default("sumsub")
+  applicantId   String?
+  status        KycStatus   @default(PENDING)
+  levelName     String?
+  reviewResult  String?
+  riskCountry   Boolean     @default(false)
+  sanctionsHit  Boolean     @default(false)
+  pepHit        Boolean     @default(false)
+  rawPayload    Json?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@index([orgId])
+  @@index([applicantId])
+  @@index([status])
+}
+
+model AmlScreening {
+  id            String    @id @default(uuid()) @db.Uuid
+  orgId         String    @db.Uuid
+  subjectUserId String?   @db.Uuid
+  provider      String    @default("sumsub")
+  status        AmlStatus @default(PENDING)
+  riskScore     Int?
+  matchesJson   Json?
+  screenedAt    DateTime  @default(now())
+
+  @@index([orgId])
+  @@index([status])
+}
+
+model ComplianceCase {
+  id          String               @id @default(uuid()) @db.Uuid
+  orgId       String               @db.Uuid
+  type        ComplianceCaseType
+  status      ComplianceCaseStatus @default(OPEN)
+  summary     String?
+  assigneeId  String?              @db.Uuid
+  openedAt    DateTime             @default(now())
+  resolvedAt  DateTime?
+
+  @@index([orgId])
+  @@index([status])
+}
+
+model ConsentRecord {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  purpose   String
+  granted   Boolean  @default(true)
+  version   String
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}

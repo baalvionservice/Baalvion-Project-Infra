@@ -1,0 +1,104 @@
+# GTOS trade bounded-context services. Build context = REPO ROOT (turbo-prune).
+#   docker compose -f Backend/services/trade/docker-compose.gtos.yml up -d
+# Assumes shared postgres + redis already running (Backend/docker-compose.yml).
+services:
+  neo4j:
+    image: neo4j:5-community
+    environment:
+      NEO4J_AUTH: neo4j/neo4j_dev_password
+      NEO4J_PLUGINS: '["apoc"]'
+    ports: ['7474:7474', '7687:7687']
+    volumes: ['neo4j_data:/data']
+    healthcheck:
+      test: ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', 'neo4j_dev_password', 'RETURN 1']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  network-graph-service:
+    build: { context: ../../.., dockerfile: Backend/services/trade/network-graph-service/Dockerfile }
+    environment:
+      NODE_ENV: production
+      PORT: 3047
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: neo4j_dev_password
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      EVENT_TRANSPORT: redis
+      REDIS_URL: redis://redis:6379
+      CMS_BASE_URL: http://cms-service:3011
+    ports: ['3047:3047']
+    depends_on:
+      neo4j: { condition: service_healthy }
+
+  product-registry-service:
+    build: { context: ../../.., dockerfile: Backend/services/trade/product-registry-service/Dockerfile }
+    environment:
+      NODE_ENV: production
+      PORT: 3048
+      DB_HOST: postgres
+      DB_USER: baalvion_app
+      DB_SCHEMA: product
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      EVENT_TRANSPORT: redis
+      REDIS_URL: redis://redis:6379
+    ports: ['3048:3048']
+
+  trade-documentation-service:
+    build: { context: ../../.., dockerfile: Backend/services/trade/trade-documentation-service/Dockerfile }
+    environment:
+      NODE_ENV: production
+      PORT: 3049
+      DB_HOST: postgres
+      DB_USER: baalvion_app
+      DB_SCHEMA: tradedoc
+      SVC_PRODUCT_REGISTRY: http://product-registry-service:3048
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      EVENT_TRANSPORT: redis
+      REDIS_URL: redis://redis:6379
+    ports: ['3049:3049']
+
+  quality-inspection-service:
+    build: { context: ../../.., dockerfile: Backend/services/trade/quality-inspection-service/Dockerfile }
+    environment:
+      NODE_ENV: production
+      PORT: 3050
+      DB_HOST: postgres
+      DB_USER: baalvion_app
+      DB_SCHEMA: quality
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      EVENT_TRANSPORT: redis
+      REDIS_URL: redis://redis:6379
+    ports: ['3050:3050']
+
+  supplier-lifecycle-service:
+    build: { context: ../../.., dockerfile: Backend/services/trade/supplier-lifecycle-service/Dockerfile }
+    environment:
+      NODE_ENV: production
+      PORT: 3051
+      DB_HOST: postgres
+      DB_USER: baalvion_app
+      DB_SCHEMA: supplier
+      SVC_NETWORK_GRAPH: http://network-graph-service:3047
+      SVC_TRUST_SCORE: http://trust-score-service:3046
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      EVENT_TRANSPORT: redis
+      REDIS_URL: redis://redis:6379
+    ports: ['3051:3051']
+
+  order-execution-service:
+    build: { context: ../../.., dockerfile: Backend/services/trade/order-execution-service/Dockerfile }
+    environment:
+      NODE_ENV: production
+      PORT: 3052
+      DB_HOST: postgres
+      DB_USER: baalvion_app
+      DB_SCHEMA: trade
+      FINANCE_WEBHOOK_SECRET: ${FINANCE_WEBHOOK_SECRET}
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      EVENT_TRANSPORT: redis
+      REDIS_URL: redis://redis:6379
+    ports: ['3052:3052']
+
+volumes:
+  neo4j_data:

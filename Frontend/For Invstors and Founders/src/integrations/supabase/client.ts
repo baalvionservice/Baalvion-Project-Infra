@@ -254,7 +254,7 @@ const auth = {
     // Fire current (optimistic) state, then reconcile against the cookie session.
     Promise.resolve().then(() => cb(currentUser ? "SIGNED_IN" : "SIGNED_OUT", currentUser ? { user: currentUser } : null));
     bootstrap().then(() => cb(currentUser ? "SIGNED_IN" : "SIGNED_OUT", currentUser ? { user: currentUser } : null));
-    return { data: { subscription: { unsubscribe: () => listeners.delete(cb) } } };
+    return { data: { subscription: { unsubscribe: () => { listeners.delete(cb); } } } };
   },
   async signInWithPassword({ email, password }: { email: string; password: string }) {
     try {

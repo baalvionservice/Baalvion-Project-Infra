@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { subDays } from 'date-fns';
 import { RouteGuard } from '@/components/system/RouteGuard';
 import { useAnalytics } from '@/modules/analytics/hooks/useAnalytics';
+import { useApplicationsByCountry } from '@/modules/analytics/hooks/useApplicationsByCountry';
 import { AnalyticsFilters as IAnalyticsFilters } from '@/modules/analytics/domain/analytics.entity';
 import { AnalyticsFilters } from '@/modules/analytics/components/AnalyticsFilters';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,6 +12,7 @@ import { KPIGrid } from '@/modules/analytics/components/KPIGrid';
 import { ApplicationsTrendChart } from '@/modules/analytics/components/ApplicationsTrendChart';
 import { StatusDistributionChart } from '@/modules/analytics/components/StatusDistributionChart';
 import { DepartmentHiringChart } from '@/modules/analytics/components/DepartmentHiringChart';
+import { ApplicationsByCountryChart } from '@/modules/analytics/components/ApplicationsByCountryChart';
 
 function DashboardSkeleton() {
   return (
@@ -44,6 +46,7 @@ export default function AnalyticsPage() {
   });
 
   const { data, isLoading } = useAnalytics(filters);
+  const { data: applicationsByCountry } = useApplicationsByCountry(filters);
 
   if (isLoading || !data) {
     return (
@@ -92,7 +95,10 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        <DepartmentHiringChart data={data.departmentHiring || []} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <DepartmentHiringChart data={data.departmentHiring || []} />
+          <ApplicationsByCountryChart data={applicationsByCountry} />
+        </div>
 
       </div>
     </RouteGuard>

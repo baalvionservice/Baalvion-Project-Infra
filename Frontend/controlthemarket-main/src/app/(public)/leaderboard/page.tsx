@@ -1,5 +1,21 @@
-
+import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/site-url';
 import { getLeaderboard } from '@/lib/ranking-engine';
+
+export const metadata: Metadata = {
+  title: 'Skill Leaderboard',
+  description:
+    'See the top-ranked candidates on ControlTheMarket ranked by verified real-world skill performance. Discover who is leading the market.',
+  alternates: {
+    canonical: absoluteUrl('/leaderboard'),
+  },
+  openGraph: {
+    url: absoluteUrl('/leaderboard'),
+    title: 'Skill Leaderboard | ControlTheMarket',
+    description:
+      'See the top-ranked candidates ranked by verified real-world skill performance.',
+  },
+};
 import type { User, RoleCategory } from '@/lib/types';
 import { LeaderboardClientPage } from './leaderboard-client-page';
 

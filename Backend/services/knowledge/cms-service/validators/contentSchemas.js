@@ -25,6 +25,7 @@ const seoMetadataSchema = z.object({
 
 const createContentSchema = z.object({
     categoryId: z.string().uuid().optional().nullable(),
+    categoryIds: z.array(z.string().uuid()).optional(),
     title: z.string().min(1).max(500),
     slug: z.string().min(1).max(500).regex(/^[a-z0-9-]+$/).optional(),
     excerpt: z.string().max(2000).optional().nullable(),
@@ -40,6 +41,7 @@ const createContentSchema = z.object({
 
 const updateContentSchema = z.object({
     categoryId: z.string().uuid().optional().nullable(),
+    categoryIds: z.array(z.string().uuid()).optional(),
     title: z.string().min(1).max(500).optional(),
     slug: z.string().min(1).max(500).regex(/^[a-z0-9-]+$/).optional(),
     excerpt: z.string().max(2000).optional().nullable(),

@@ -11,6 +11,11 @@ const redis           = require('../config/redis');
 const ssoRegistry     = require('../lib/ssoRegistry');
 const backchannelLogout = require('../lib/backchannelLogout');
 
+// Normalize a request-supplied value to a trusted string. Express query/body parsing can
+// yield arrays or objects (e.g. ?response_type[]=code), which must never flow into an
+// auth/security branch — return undefined for any non-string so presence checks fail closed.
+const asString = (v) => (typeof v === 'string' ? v : undefined);
+
 // ── Discovery & JWKS ──────────────────────────────────────────────────────────
 
 exports.discovery = (_req, res) => {
@@ -25,8 +30,15 @@ exports.jwks = (_req, res) => {
 
 exports.authorize = async (req, res, next) => {
     try {
-        const { response_type, client_id, redirect_uri, scope = 'openid', state,
+        const { response_type: responseTypeRaw, client_id: clientIdRaw, redirect_uri: redirectUriRaw,
+                scope = 'openid', state,
                 code_challenge, code_challenge_method, nonce, prompt } = req.query;
+
+        // Coerce the security-relevant inputs to trusted strings before they decide any branch.
+        // Non-string (array/object) values from query parsing fail closed via the presence check.
+        const response_type = asString(responseTypeRaw);
+        const client_id     = asString(clientIdRaw);
+        const redirect_uri  = asString(redirectUriRaw);
 
         if (!client_id || !redirect_uri) {
             return next(new AppError('VALIDATION_ERROR', 'client_id and redirect_uri are required', 400));
@@ -55,6 +67,19 @@ exports.authorize = async (req, res, next) => {
         }
 
         const scopes = scope.split(' ').filter(s => config.oauth.supportedScopes.includes(s));
+
+        // PKCE is required for public (non-confidential) clients (RFC 7636 §4.3).
+        // Reject early so the error goes back as a query-param redirect (state preserved).
+        if (client.is_confidential === false || client.is_confidential === 0) {
+            if (!code_challenge) {
+                const params = new URLSearchParams({ error: 'invalid_request', error_description: 'code_challenge required for public clients', ...(state && { state }) });
+                return res.redirect(`${validRedirectUri}?${params}`);
+            }
+            if ((code_challenge_method || 'S256') !== 'S256') {
+                const params = new URLSearchParams({ error: 'invalid_request', error_description: 'code_challenge_method must be S256', ...(state && { state }) });
+                return res.redirect(`${validRedirectUri}?${params}`);
+            }
+        }
 
         // Resolve identity: Bearer (already on req.auth via the route middleware) OR — for browser
         // SSO redirects, which carry no Authorization header — the hub's first-party HttpOnly
@@ -116,6 +141,17 @@ exports.authorizePost = async (req, res, next) => {
         const scopes = (typeof scope === 'string' ? scope.split(' ') : scope)
             .filter(s => config.oauth.supportedScopes.includes(s));
 
+        // PKCE is required for public (non-confidential) clients (RFC 7636 §4.3).
+        // Mirror the enforcement applied in the GET /authorize flow.
+        if (client.is_confidential === false || client.is_confidential === 0) {
+            if (!code_challenge) {
+                return next(new AppError('INVALID_REQUEST', 'code_challenge required for public clients', 400));
+            }
+            if ((code_challenge_method || 'S256') !== 'S256') {
+                return next(new AppError('INVALID_REQUEST', 'code_challenge_method must be S256', 400));
+            }
+        }
+
         const code = await oauthService.createAuthorizationCode({
             clientId: client_id, userId: req.auth.userId, orgId: req.auth.orgId,
             redirectUri: redirect_uri, scopes,
@@ -171,6 +207,11 @@ exports.token = async (req, res, next) => {
 
 exports.introspect = async (req, res, next) => {
     try {
+        // RFC 7662 §2.1: the introspection endpoint MUST be protected by client authentication.
+        // extractClientAuth middleware populates req.clientCredentials; reject unauthenticated callers.
+        if (!req.clientCredentials?.clientId) {
+            return next(new OAuthError('invalid_client', 'Client authentication required', 401));
+        }
         const { token } = req.body;
         if (!token) return res.json({ active: false });
         const result = await oauthService.introspectToken(token);
@@ -207,7 +248,9 @@ exports.userinfo = async (req, res, next) => {
 exports.endSession = async (req, res, next) => {
     try {
         const p = { ...req.query, ...req.body };
-        const { id_token_hint, post_logout_redirect_uri, state, client_id } = p;
+        const { id_token_hint: idTokenHintRaw, post_logout_redirect_uri, state, client_id } = p;
+        // Only a string id_token_hint may gate the verifyToken()-based identity branch below.
+        const id_token_hint = asString(idTokenHintRaw);
 
         // Identify the session being ended: prefer the hub cookie; fall back to id_token_hint.
         let sid = null, sub = null;
@@ -224,7 +267,7 @@ exports.endSession = async (req, res, next) => {
                 const r = redis.getClient();
                 if (r && redis.isAvailable()) {
                     const ttl = (cookieSession.exp || 0) - Math.floor(Date.now() / 1000);
-                    await r.set(`auth:bl:${cookieSession.jti}`, '1', 'EX', ttl > 0 ? ttl : 900);
+                    await r.set(`auth:blacklist:${cookieSession.jti}`, '1', 'EX', ttl > 0 ? ttl : 900);
                 }
             } catch { /* best-effort */ }
         }

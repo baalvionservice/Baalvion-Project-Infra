@@ -27,20 +27,19 @@ export const leadershipTeam = [
 export const globalLeaders = [
   {
     name: "Parthamesh Pawer",
-    title: "Co-Head of the Global Partners Office",
+    title: "Head of Strategic Partnerships",
     imageId: "prathamesh-photo",
-    bio: "Prathamesh Pawer leads Baalvion's strategic execution and day-to-day operations. With a background in corporate strategy and finance, he is focused on scaling the company and delivering value to our stakeholders.",
+    bio: "Parthamesh Pawer leads Baalvion's partner ecosystem and strategic alliances. With a background in corporate strategy and finance, he is focused on building the relationships that extend Baalvion's platform and reach.",
   },
   {
     name: "Laxman Singh Champia",
-    title: "Co-Head of Aladdin Product Engineering",
+    title: "Co-Head of Product Engineering",
     imageId: "laxman-photo",
     bio: "Laxman Singh Champia oversees the development of Baalvion's core technology platform. With extensive experience in software engineering and product management, he ensures our solutions are innovative, reliable, and scalable.",
   },
   {
-
     name: "Rashmika Singh",
-    title: "Co-Head of Aladdin Product Engineering",
+    title: "Co-Head of Product Engineering",
     imageId: "rashmika-photo",
     bio: "Rashmika Singh oversees the development of Baalvion's core technology platform. With extensive experience in software engineering and product management, she ensures our solutions are innovative, reliable, and scalable.",
   },
@@ -50,18 +49,17 @@ export const globalLeaders = [
     imageId: "preeti-photo",
     bio: "Preeti Snigdha Mallick leads Baalvion's legal strategy and compliance efforts. With a strong background in corporate law and regulatory affairs, she ensures our operations adhere to the highest standards of integrity and governance.",
   },
-  { name: "Susan Chan", title: "Head of Asia Pacific",
-    bio: "Susan Chan's leadership and deep knowledge of the Asia Pacific markets are critical to our expansion and operational success in this key growth region.",
-
+  { name: "Sophia L. Marchetti", title: "Head of Asia Pacific",
+    bio: "Sophia L. Marchetti leads Baalvion's strategy, operations and growth across the Asia Pacific region, one of the world's most dynamic and fast-growing markets.",
    },
-  { name: "Tarek Chouman", title: "Global Head of Aladdin Client Business",
-    bio: "Tarek Chouman leads Baalvion's client engagement and business development efforts. With a focus on building strong relationships and delivering tailored solutions, he drives our global growth and market penetration strategies.",
+  { name: "Daniel K. Mercer", title: "Global Head of Client Solutions",
+    bio: "Daniel K. Mercer leads the teams that help clients adopt, integrate and realise value from Baalvion's platform, strengthening trust and partnership across the company's global client base.",
    },
-  { name: "Alex Claringbull", title: "Global Head of Index Investments",
-    bio: "Alex Claringbull oversees Baalvion's index investment strategies and product offerings. With deep expertise in financial markets and quantitative analysis, he ensures our clients have access to innovative and effective investment solutions.",
+  { name: "Marcus T. Hale", title: "Global Head of Platform & Technology",
+    bio: "Marcus T. Hale leads Baalvion's engineering, data and platform organisation, ensuring the company's technology foundation is robust, secure and built to scale with the business.",
    },
-  { name: "Samara Cohen", title: "Global Head of Market Development",
-    bio: "Samara Cohen leads Baalvion's market development initiatives, identifying new opportunities and fostering partnerships to expand our global footprint. Her strategic vision and industry insights are key to our continued growth and success.",
+  { name: "Olivia R. Bennett", title: "Global Head of Market Development",
+    bio: "Olivia R. Bennett leads Baalvion's market development initiatives, expanding the company's presence across markets and deepening relationships with clients and partners.",
    },
 ];
 export const VicePersidents = [
@@ -94,194 +92,102 @@ export const VicePersidents = [
     bio: "Jaid Alam oversees Baalvion's worldwide sales operations, driving revenue growth and client acquisition across global markets. With a proven track record in sales leadership and a deep understanding of the B2B commerce landscape, he is instrumental in expanding our customer base and strengthening our market position.",
   },
   {
-    name: "Joe DeVico",
+    name: "Nathan P. Cole",
     title: "Vice President",
-    position: "Marketing Communications",
-    bio: "Joe DeVico leads Baalvion's marketing communications strategy, crafting compelling narratives that resonate with our global audience. With a background in brand management and digital marketing, he drives our efforts to build a strong and recognizable brand in the global trade ecosystem.",
-  },
-  {
-    name: "Joe DeVico",
-    title: "Vice President",
-    position: "Marketing Communications",
-    bio: "Joe DeVico leads Baalvion's marketing communications strategy, crafting compelling narratives that resonate with our global audience. With a background in brand management and digital marketing, he drives our efforts to build a strong and recognizable brand in the global trade ecosystem.",
-  },
-  {
-    name: "Joe DeVico",
-    title: "Vice President",
-    position: "Marketing Communications",
-    bio: "Joe DeVico leads Baalvion's marketing communications strategy, crafting compelling narratives that resonate with our global audience. With a background in brand management and digital marketing, he drives our efforts to build a strong and recognizable brand in the global trade ecosystem.",
-  },
-  {
-    name: "Joe DeVico",
-    title: "Vice President",
-    position: "Marketing Communications",
-    bio: "Joe DeVico leads Baalvion's marketing communications strategy, crafting compelling narratives that resonate with our global audience. With a background in brand management and digital marketing, he drives our efforts to build a strong and recognizable brand in the global trade ecosystem.",
+    position: "Investor Relations",
+    bio: "Nathan P. Cole leads Baalvion's communications and engagement with the company's shareholders, analysts and the wider investment community, ensuring clear, consistent and transparent dialogue with investors.",
   },
 ];
 
 export const boardOfDirectors = [
   {
-    name: "Laurence D. Fink",
-    title: "Chairman and CEO of BlackRock",
+    name: "Jonathan R. Whitfield",
+    title: "Non-Executive Chairman of the Board",
     imageId: "bod-1",
-    bio: "Mr. Fink is founder, Chairman and Chief Executive Officer of BlackRock. He also leads the firm's Global Executive Committee. He is responsible for senior leadership development and succession planning, defining and reinforcing BlackRock's vision and culture, and engaging relationships with key strategic clients, industry leaders, regulators and policy makers. Mr. Fink co-founded BlackRock in 1988, and under his leadership, the firm has grown into a global leader in investment management, risk management and advisory services for institutional and retail clients.",
+    bio: "Jonathan R. Whitfield serves as Non-Executive Chairman of the Board of Baalvion Industries Private Limited. He brings more than three decades of leadership across global technology, infrastructure and financial services, and chairs the Board with a focus on long-term value creation, sound governance and disciplined oversight.",
   },
   {
-    name: "Pamela Daley",
-    title:
-      "Former Senior Vice President of Corporate Business Development of General Electric Company",
+    name: "Margaret A. Sinclair",
+    title: "Lead Independent Director",
     imageId: "bod-2",
-    bio: "Pamela Daley brings a wealth of experience in corporate governance and strategic transactions. Her expertise guides our approach to long-term value creation and sustainable business practices. She has served on multiple public company boards.",
+    bio: "Margaret A. Sinclair is the Lead Independent Director of Baalvion Industries Private Limited. A seasoned finance and operations executive, she provides independent oversight of management and serves as a key liaison between the Board and shareholders.",
   },
   {
-    name: "Gregory J. Fleming",
-    title: "President and CEO of Rockefeller Capital Management",
+    name: "David C. Harrington",
+    title: "Independent Director",
     imageId: "bod-3",
-    bio: "Gregory J. Fleming has a distinguished career in the financial services industry. His leadership in wealth and asset management provides invaluable insight into our strategic growth and client service initiatives.",
+    bio: "David C. Harrington is an Independent Director of Baalvion Industries Private Limited. With a distinguished career in capital markets and corporate strategy, he advises the Board on growth, capital allocation and value creation.",
   },
   {
-    name: "William E. Ford",
-    title: "Chairman and CEO of General Atlantic",
+    name: "Catherine E. Lawson",
+    title: "Independent Director",
     imageId: "bod-4",
-    bio: "As a leader in global growth equity, William E. Ford offers deep expertise in identifying and nurturing high-potential companies. His perspective is crucial for our technology and market expansion strategies.",
+    bio: "Catherine E. Lawson is an Independent Director of Baalvion Industries Private Limited. She brings deep expertise in operations, technology and organisational development, and supports the Board's oversight of strategy execution and talent.",
   },
   {
-    name: "Fabrizio Freda",
-    title: "Former President and CEO of the Estée Lauder Companies Inc",
+    name: "Richard P. Donnelly",
+    title: "Independent Director",
     imageId: "bod-5",
-    bio: "Fabrizio Freda's extensive background in global brand management and consumer markets provides critical insights into our customer-centric strategies and international growth ambitions.",
+    bio: "Richard P. Donnelly is an Independent Director of Baalvion Industries Private Limited. A veteran of global risk management and regulated industries, he provides the Board with independent counsel on risk, compliance and governance.",
   },
   {
-    name: "Murry S. Gerber",
-    title: "LEAD INDEPENDENT DIRECTOR, Former Chairman and CEO of EQT",
+    name: "Andrew S. Caldwell",
+    title: "Non-Executive Director",
     imageId: "bod-6",
-    bio: "As Lead Independent Director, Murry S. Gerber ensures robust governance and board oversight. His experience in the energy sector and as a public company CEO provides strong leadership for the board.",
+    bio: "Andrew S. Caldwell serves as a Non-Executive Director of Baalvion Industries Private Limited. With extensive experience in growth investing and company building, he advises the Board on long-term strategy, scaling and global expansion.",
   },
   {
-    name: 'Margaret "Peggy" L. Johnson',
-    title: "CEO of Agility Robotics",
+    name: "Eleanor M. Brooks",
+    title: "Non-Executive Director",
     imageId: "bod-7",
-    bio: "Margaret L. Johnson is at the forefront of technological innovation in robotics and AI. Her expertise helps steer our strategy in acquiring and integrating cutting-edge technologies into our platform.",
-  },
-  {
-    name: "Robert S. Kapito",
-    title: "President of BlackRock",
-    imageId: "bod-8",
-    bio: "Robert S. Kapito's deep understanding of global markets and risk management is fundamental to our firm's strategy. He plays a key role in our client relationships and operational excellence.",
-  },
-  {
-    name: "Bader M. Al-Saad",
-    title:
-      "Director General and Chairman of the Board of Arab Fund for Economic and Social Development",
-    imageId: "bod-9",
-    bio: "Bader M. Al-Saad's international experience in economic development and investment provides a global perspective on our market strategies and partnerships, particularly in emerging economies.",
-  },
-  {
-    name: "Mathis Cabiallavetta",
-    title: "Former Vice Chairman of Swiss Re Ltd.",
-    imageId: "bod-10",
-    bio: "Mathis Cabiallavetta's extensive experience in the insurance and risk management industries is invaluable to our comprehensive risk assessment and mitigation frameworks.",
-  },
-  {
-    name: "Susan Chan",
-    title: "Head of Asia Pacific",
-    imageId: "bod-11",
-    bio: "Susan Chan's leadership and deep knowledge of the Asia Pacific markets are critical to our expansion and operational success in this key growth region.",
-  },
-  {
-    name: "William C. Dudley",
-    title: "Former President and CEO of the Federal Reserve Bank of New York",
-    imageId: "bod-12",
-    bio: "William C. Dudley offers unparalleled expertise in economic policy and financial stability. His guidance helps us navigate complex regulatory and macroeconomic landscapes.",
-  },
-  {
-    name: "Kristin C. Peck",
-    title: "CEO of Zoetis Inc.",
-    imageId: "bod-13",
-    bio: "Kristin C. Peck's leadership in the global animal health industry brings a unique perspective on supply chains and international business operations.",
-  },
-  {
-    name: "Charles H. Robbins",
-    title: "Chairman and CEO of Cisco Systems, Inc.",
-    imageId: "bod-14",
-    bio: "Charles H. Robbins is a leader in digital transformation and networking technology. His insights are vital to building our secure and scalable global trade platform.",
-  },
-  {
-    name: "Hans E. Vestberg",
-    title: "Chairman and CEO of Verizon Communications Inc.",
-    imageId: "bod-15",
-    bio: "Hans E. Vestberg's expertise in telecommunications and technology infrastructure is crucial for developing the robust, connected ecosystem that underpins Baalvion's vision.",
-  },
-  {
-    name: "Susan Wagner",
-    title: "Co-founder of BlackRock, Inc.",
-    imageId: "bod-16",
-    bio: "As a co-founder of a leading global investment firm, Susan Wagner's entrepreneurial and strategic vision is a cornerstone of our board's advisory strength.",
-  },
-  {
-    name: "Mark Wilson",
-    title: "Former CEO of Aviva plc",
-    imageId: "bod-17",
-    bio: "Mark Wilson's experience leading a multinational insurance company provides deep insights into risk management, capital allocation, and international financial services.",
-  },
-  {
-    name: "Jessica Uhl",
-    title: "Former CFO of Shell plc",
-    imageId: "bod-18",
-    bio: "Jessica Uhl's background as CFO of a global energy company brings rigorous financial discipline and strategic capital management expertise to our board.",
-  },
-  {
-    name: "John S. Weinberg",
-    title: "Chairman and CEO of Evercore Inc.",
-    imageId: "bod-19",
-    bio: "John S. Weinberg's extensive career in investment banking provides expert guidance on our M&A strategy, capital markets activities, and long-term financial planning.",
+    bio: "Eleanor M. Brooks is a Non-Executive Director of Baalvion Industries Private Limited. She brings a strong record in technology, product and innovation leadership, and helps the Board oversee the company's long-term technology direction and market positioning.",
   },
 ];
 
 export const newsArticles = [
   {
     title:
-      "Baalvion Acquires FinTech 'VeriTrade' to Automate Trade Finance Compliance",
+      "Baalvion Sets Out Its Vision for a Unified Operating System for Global Trade",
     excerpt:
-      "The acquisition integrates VeriTrade's AI-powered AML and KYC technology directly into the Baalvion OS, reducing transaction friction and enhancing security for all platform participants. This move is central to our strategy of owning the complete compliance stack.",
-    date: "2024-07-15",
-    imageId: "news-1-image",
+      "Baalvion Industries outlines its long-term strategy to bring logistics, trade finance and compliance onto a single, transparent platform — reducing friction and unlocking efficiency across global B2B commerce.",
+    date: "2026-05-20",
+    category: "Vision",
   },
   {
     title:
-      "Strategic Partnership with 'PortLink Logistics' to Digitize Global Shipping Routes",
+      "Building a Compliance-First Standard for Cross-Border B2B Commerce",
     excerpt:
-      "This collaboration will onboard PortLink's extensive network of carriers and port operators onto the Baalvion platform, creating unprecedented visibility and efficiency in maritime logistics. We anticipate a 30% reduction in processing times for shared clients.",
-    date: "2024-06-28",
-    imageId: "news-2-image",
+      "Why Baalvion embeds AML, KYC and sanctions screening into the core of every transaction — making cross-border trade faster to underwrite and safer for every participant.",
+    date: "2026-04-28",
+    category: "Compliance",
   },
   {
     title:
-      "Founder Alexandros Vasilias Details Vision for a 'Unified Ledger for Global Trade' at Davos",
+      "Connecting Logistics, Trade Finance and Compliance on One Platform",
     excerpt:
-      "Speaking at the World Economic Forum, Mr. Vasilias outlined Baalvion's long-term vision to create a single, immutable source of truth for B2B transactions, aiming to unlock trillions in liquidity and eliminate fraud.",
-    date: "2024-06-10",
-    imageId: "news-3-image",
+      "A look at how Baalvion's integrated architecture replaces fragmented point solutions with a single, connected flow — and why that creates a compounding network effect.",
+    date: "2026-04-10",
+    category: "Platform",
   },
   {
     title:
-      "Baalvion Reports 150% YoY Growth in Platform Transaction Volume for Q2 2024",
+      "Baalvion Strengthens Governance with an Independent Board and Investor Reporting Framework",
     excerpt:
-      "The company has exceeded all financial projections, citing strong enterprise adoption of its integrated trade OS and the successful rollout of its automated customs clearance module in key APAC markets.",
-    date: "2024-07-20",
-    imageId: "news-1-image",
+      "The company formalises independent board oversight and a transparent investor-reporting cadence as it builds toward institutional-grade standards for qualified investors.",
+    date: "2026-03-22",
+    category: "Governance",
   },
 ];
 
 export const pressReleases = [
   {
     title:
-      "Baalvion's Martin S. Small to Present at the 2026 Bank of America Securities Financial Services Conference on February 10th",
+      "Baalvion Industries to Present at the 2026 Global B2B Commerce & Trade Finance Conference on February 10th",
     date: "Feb 02, 2026",
     link: "#",
   },
   {
-    title: "Baalvion Elects Gregg Lemkau to Board of Directors",
+    title: "Baalvion Industries Strengthens Board with New Independent Director Appointment",
     date: "Jan 27, 2026",
     link: "#",
   },
@@ -372,7 +278,7 @@ export const documents = [
 ];
 
 export const investorData = {
-  name: "Alexandros Vasilias",
+  name: "Qualified Investor",
   executiveOverview: {
     investedAmount: 750000,
     ownershipPercentage: 1.87,

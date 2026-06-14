@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/apiClient";
-import { AppError } from "@/lib/errors";
+import { AppError } from "@/lib/errors/errors";
 import { Country } from "@/lib/talent-acquisition";
 
 export const talentServerService = {

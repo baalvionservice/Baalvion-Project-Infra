@@ -160,8 +160,7 @@ export function FraudAlerts() {
         toast({ title: "Payouts Paused", description: "Financial clearance holds applied." });
       }
 
-      // Record logic would go here
-      console.log("Mock update for alert:", selectedAlert.id, updateData);
+      // TODO: Record logic would go here
 
       // Audit Log Entry
       await addDoc(collection(db!, 'audit_logs'), {

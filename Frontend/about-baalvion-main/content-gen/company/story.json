@@ -1,0 +1,33 @@
+{
+  "slug": "story",
+  "title": "The Baalvion Story",
+  "kind": "company",
+  "heroImageSeed": "co-story",
+  "excerpt": "How Baalvion grew from a single conviction — that one shared operating system could power an entire ecosystem — into a global enterprise.",
+  "seo": {
+    "title": "The Baalvion Story | Company History",
+    "description": "How Baalvion grew from a single conviction into a global federated enterprise operating the Baalvion Operating System across 198 markets.",
+    "keywords": ["Baalvion story", "company history", "about Baalvion", "Baalvion Group", "global trade"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "From a Single Conviction" },
+    { "type": "paragraph", "text": "Baalvion began with a simple, stubborn belief: that one shared operating system could power an entire ecosystem of businesses, instead of each one rebuilding the same foundations in isolation. Founded in New Delhi, the company set out to prove it — not with a whitepaper, but by building real infrastructure and running real businesses on it." },
+    { "type": "heading", "level": 2, "text": "Building the Platform" },
+    { "type": "paragraph", "text": "Rather than chase a single product, Baalvion built the [Baalvion Operating System](/platform): a multi-tenant layer providing identity, commerce, compliance, finance, and logistics as shared services. Each new property — trade, commerce, mining, intelligence, governance — became both a customer of the platform and proof that the shared-infrastructure thesis worked at scale." },
+    { "type": "heading", "level": 2, "text": "Growing into an Ecosystem" },
+    { "type": "paragraph", "text": "That approach compounded. Today the Baalvion Operating System spans 198 markets with 125+ active partners, organised into five layers — Infrastructure, Intelligence, Governance, Commerce, and Finance. The proof is in the work: consolidating [global trade operations](/case-studies/unifying-global-trade-operations), real-time [cross-border settlement](/case-studies/real-time-cross-border-settlement), and AI-driven [compliance scoring](/case-studies/ai-compliance-scoring-platform)." },
+    { "type": "heading", "level": 2, "text": "What Stays Constant" },
+    { "type": "paragraph", "text": "Through that growth, the founding discipline hasn't changed: build infrastructure-grade software, put compliance and auditability first, and earn trust by operating what we recommend. It's the same conviction, now running at the scale of global trade. Read more about [what we do](/company) and [why Baalvion](/about/why-baalvion), or [join the mission](/careers)." }
+  ],
+  "faqs": [
+    { "q": "When and where did Baalvion start?", "a": "Baalvion was founded in New Delhi, NCR, with the conviction that one shared operating system could power an entire ecosystem of businesses." },
+    { "q": "What does Baalvion do today?", "a": "It builds and operates the Baalvion Operating System across 198 markets, unifying commerce, finance, compliance, logistics, and intelligence — read [what Baalvion is](/news/insights/what-is-baalvion)." },
+    { "q": "How is the company organised?", "a": "Into five layers of the Baalvion Operating System: Infrastructure, Intelligence, Governance, Commerce, and Finance." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "unifying global trade operations", "href": "/case-studies/unifying-global-trade-operations" },
+    { "anchor": "what we do", "href": "/company" },
+    { "anchor": "why Baalvion", "href": "/about/why-baalvion" }
+  ]
+}

@@ -1,0 +1,94 @@
+// ============================================================================
+//  Identity — users, MFA, sessions, organizations (tenants), memberships.
+//  An Organization is the tenant boundary. A User authenticates; their
+//  authority within a tenant is expressed by Membership.role.
+// ============================================================================
+
+model User {
+  id            String     @id @default(uuid()) @db.Uuid
+  email         String     @unique
+  passwordHash  String
+  status        UserStatus @default(PENDING)
+  emailVerifiedAt DateTime?
+  fullName      String
+  phone         String?
+  country       String?    @db.VarChar(2) // ISO 3166-1 alpha-2
+  locale        String     @default("en")
+  timezone      String     @default("UTC")
+  lastLoginAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  mfaCredentials MfaCredential[]
+  sessions       Session[]
+  memberships    Membership[]
+  notifications  Notification[]
+
+  @@index([status])
+}
+
+model MfaCredential {
+  id          String    @id @default(uuid()) @db.Uuid
+  userId      String    @db.Uuid
+  method      MfaMethod
+  secret      String // encrypted at rest (TOTP secret / WebAuthn credential)
+  confirmedAt DateTime?
+  backupCodes String[] // hashed single-use recovery codes
+  createdAt   DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, method])
+}
+
+model Session {
+  id               String    @id @default(uuid()) @db.Uuid
+  userId           String    @db.Uuid
+  familyId         String    @db.Uuid // refresh-token rotation family
+  refreshTokenHash String
+  userAgent        String?
+  ipAddress        String?
+  expiresAt        DateTime
+  revokedAt        DateTime?
+  createdAt        DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model Organization {
+  id             String    @id @default(uuid()) @db.Uuid
+  type           OrgType
+  legalName      String
+  displayName    String?
+  registrationNo String?
+  country        String?   @db.VarChar(2)
+  status         OrgStatus @default(PENDING)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  memberships     Membership[]
+  investorProfile InvestorProfile?
+  company         Company?
+
+  @@index([type])
+  @@index([status])
+}
+
+model Membership {
+  id          String           @id @default(uuid()) @db.Uuid
+  orgId       String           @db.Uuid
+  userId      String           @db.Uuid
+  role        MembershipRole   @default(MEMBER)
+  status      MembershipStatus @default(ACTIVE)
+  invitedById String?          @db.Uuid
+  createdAt   DateTime         @default(now())
+
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+  @@index([userId])
+}

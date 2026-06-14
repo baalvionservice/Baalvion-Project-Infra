@@ -1,13 +1,14 @@
 'use client';
 
 import { use, useState, useEffect } from 'react';
-import { Plus, ArrowLeft, Tag } from 'lucide-react';
+import { Plus, ArrowLeft, Tag, Search } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import CategoryTree from '@/components/cms/CategoryTree';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,9 +46,24 @@ interface CategoryForm {
   slug: string;
   description: string;
   parentId: string;
+  seoTitle: string;
+  seoDescription: string;
+  keywords: string; // comma-separated in the form
+  ogImage: string;
+  noIndex: boolean;
 }
 
-const DEFAULT_FORM: CategoryForm = { name: '', slug: '', description: '', parentId: '' };
+const DEFAULT_FORM: CategoryForm = {
+  name: '',
+  slug: '',
+  description: '',
+  parentId: '',
+  seoTitle: '',
+  seoDescription: '',
+  keywords: '',
+  ogImage: '',
+  noIndex: false,
+};
 
 export default function WebsiteCategoriesPage({
   params,
@@ -90,11 +106,17 @@ export default function WebsiteCategoriesPage({
   };
 
   const openEdit = (node: CategoryTreeType) => {
+    const seo = node.seoMetadata ?? {};
     setForm({
       name: node.name,
       slug: node.slug,
       description: node.description ?? '',
       parentId: node.parentId ?? '',
+      seoTitle: seo.title ?? '',
+      seoDescription: seo.description ?? '',
+      keywords: (seo.keywords ?? []).join(', '),
+      ogImage: seo.ogImage ?? '',
+      noIndex: seo.noIndex ?? false,
     });
     setCatDialog({ open: true, editing: node });
   };
@@ -105,11 +127,23 @@ export default function WebsiteCategoriesPage({
   };
 
   const handleSave = () => {
+    const keywords = form.keywords
+      .split(',')
+      .map((k) => k.trim())
+      .filter(Boolean);
+    const seoMetadata = {
+      ...(form.seoTitle ? { title: form.seoTitle } : {}),
+      ...(form.seoDescription ? { description: form.seoDescription } : {}),
+      ...(keywords.length ? { keywords } : {}),
+      ...(form.ogImage ? { ogImage: form.ogImage } : {}),
+      ...(form.noIndex ? { noIndex: true } : {}),
+    };
     const payload = {
       name: form.name,
       slug: form.slug,
       description: form.description || undefined,
       parentId: form.parentId || null,
+      seoMetadata,
     };
     if (catDialog.editing) {
       updateCategory(
@@ -236,13 +270,13 @@ export default function WebsiteCategoriesPage({
 
       {/* Category dialog */}
       <Dialog open={catDialog.open} onOpenChange={(o) => !o && closeDialog()}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
               {catDialog.editing ? 'Edit Category' : 'New Category'}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
+          <div className="max-h-[65vh] space-y-3 overflow-y-auto pr-1">
             <div className="space-y-1.5">
               <Label className="text-xs">Name</Label>
               <Input
@@ -295,6 +329,62 @@ export default function WebsiteCategoriesPage({
                 value={form.description}
                 onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
               />
+            </div>
+
+            {/* Per-category SEO — drives how this topic page ranks and appears in search */}
+            <div className="rounded-md border bg-muted/20 p-2.5 space-y-3">
+              <div className="flex items-center gap-1.5">
+                <Search className="h-3.5 w-3.5 text-rose-500" />
+                <span className="text-xs font-semibold">Search engine (SEO)</span>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Page title</Label>
+                <Input
+                  className="h-8 text-xs"
+                  placeholder={form.name ? `${form.name} — News & Analysis` : 'SEO title'}
+                  value={form.seoTitle}
+                  onChange={(e) => setForm((f) => ({ ...f, seoTitle: e.target.value }))}
+                  maxLength={200}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Meta description</Label>
+                <textarea
+                  className="min-h-[56px] w-full resize-none rounded-md border bg-background px-2.5 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-ring"
+                  placeholder="Up to ~155 characters shown under the title in Google."
+                  value={form.seoDescription}
+                  onChange={(e) => setForm((f) => ({ ...f, seoDescription: e.target.value }))}
+                  maxLength={500}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Keywords</Label>
+                <Input
+                  className="h-8 text-xs"
+                  placeholder="banking, savings, loans (comma separated)"
+                  value={form.keywords}
+                  onChange={(e) => setForm((f) => ({ ...f, keywords: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">Social image URL (Open Graph)</Label>
+                <Input
+                  className="h-8 text-xs"
+                  placeholder="https://… (1200×630)"
+                  value={form.ogImage}
+                  onChange={(e) => setForm((f) => ({ ...f, ogImage: e.target.value }))}
+                />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label className="text-xs">Hide from search engines</Label>
+                  <p className="text-[10px] text-muted-foreground">Adds noindex to this category page</p>
+                </div>
+                <Switch
+                  checked={form.noIndex}
+                  onCheckedChange={(v) => setForm((f) => ({ ...f, noIndex: v }))}
+                />
+              </div>
             </div>
           </div>
           <DialogFooter>

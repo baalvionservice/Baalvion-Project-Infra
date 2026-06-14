@@ -67,6 +67,7 @@ export const AIAssistant = () => {
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
         size="icon"
+        aria-label="Open AI assistant"
       >
         <Sparkles className="w-6 h-6" />
       </Button>
@@ -84,6 +85,7 @@ export const AIAssistant = () => {
           variant="ghost"
           size="icon"
           onClick={() => setIsOpen(false)}
+          aria-label="Close AI assistant"
         >
           <X className="w-4 h-4" />
         </Button>
@@ -130,7 +132,7 @@ export const AIAssistant = () => {
               placeholder="Ask me anything..."
               disabled={loading}
             />
-            <Button type="submit" size="icon" disabled={loading || !input.trim()}>
+            <Button type="submit" size="icon" disabled={loading || !input.trim()} aria-label="Send message">
               <Send className="w-4 h-4" />
             </Button>
           </form>

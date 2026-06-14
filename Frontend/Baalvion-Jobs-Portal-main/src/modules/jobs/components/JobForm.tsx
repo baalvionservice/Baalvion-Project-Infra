@@ -58,9 +58,6 @@ export function JobForm({ user, existingJob, onSaveSuccess }: JobFormProps) {
         setIsSubmitting(true);
         const apiPayload = transformToApiPayload(values);
 
-        console.log("SUBMITTING FORM DATA:", values);
-        console.log("TRANSFORMED API PAYLOAD:", apiPayload);
-        
         // Mock API call
         await new Promise(resolve => setTimeout(resolve, 1500));
         

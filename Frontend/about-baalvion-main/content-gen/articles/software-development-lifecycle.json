@@ -1,0 +1,99 @@
+{
+  "slug": "software-development-lifecycle",
+  "title": "The Modern Software Development Lifecycle",
+  "kind": "article",
+  "category": "tech",
+  "seo": {
+    "title": "The Modern Software Development Lifecycle",
+    "description": "How the modern SDLC works at infrastructure scale — discovery, design, build, test, ship, and operate — from the engineering team behind the Baalvion Operating System.",
+    "keywords": [
+      "software development lifecycle",
+      "SDLC",
+      "modern SDLC",
+      "DevOps lifecycle",
+      "continuous delivery",
+      "trunk-based development",
+      "platform engineering",
+      "progressive delivery",
+      "observability",
+      "infrastructure scale"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "9 min read",
+  "heroImageSeed": "sdlc-loop-9",
+  "excerpt": "A concrete walk through the modern software development lifecycle — discovery, design, build, test, ship, operate — and how it actually works when you run a multi-tenant platform across 198 markets.",
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The lifecycle is a loop, not a relay race" },
+    { "type": "paragraph", "text": "The phrase 'software development lifecycle' still conjures the waterfall diagram: a tidy left-to-right baton pass from requirements to design to code to test to release, each phase handed off to a different team and a different document. That model has not described how serious software gets built for more than a decade. The modern SDLC is a loop — discovery, design, build, test, ship, operate, and back to discovery — traversed continuously by a single team that owns its service from idea to incident. At Baalvion Industries we build and operate the [Baalvion Operating System](/platform), a multi-tenant trade infrastructure spanning commerce, finance, compliance, logistics, and intelligence across 198 markets and 180+ jurisdictions. At that scale the difference between a relay race and a loop is not academic. It is the difference between a release cadence measured in quarters and one measured in hours." },
+    { "type": "paragraph", "text": "This article describes the modern SDLC as we actually practice it — the named stages, the patterns and tools that make each one work, and the trade-offs that come with them. The throughline is feedback: every stage exists to shorten the distance between a decision and the evidence that it was right or wrong." },
+    { "type": "heading", "level": 2, "text": "Discovery: deciding what is worth building" },
+    { "type": "paragraph", "text": "The most expensive code is the code that should never have been written. Discovery is the stage where that waste is prevented, and on an infrastructure platform it is heavier than most teams expect, because the constraints are real before a line of code exists. A new settlement feature is not just a user story; it is a regulatory surface across dozens of jurisdictions, a data-classification question (which fields are KYC-regulated?), and a tenant-isolation question (who is allowed to see this, and how is that enforced?)." },
+    { "type": "paragraph", "text": "Good discovery produces three artifacts and nothing more: a crisp problem statement, a set of measurable success criteria, and an explicit list of constraints and unknowns. We resist writing a full specification here, because a specification written before the problem is understood simply encodes the misunderstanding. Lightweight techniques carry most of the weight — event storming to map the domain, a one-page decision record for anything architecturally significant, and a deliberate spike to retire the riskiest unknown first. The output feeds directly into design; the constraints discovered here become the non-negotiables that design has to honour." },
+    { "type": "heading", "level": 2, "text": "Design: contracts, boundaries, and the decisions that are expensive to reverse" },
+    { "type": "paragraph", "text": "Design is where you spend cheap time to avoid expensive time later. The goal is not a complete blueprint — it is to make the decisions that are costly to reverse, and to defer the ones that are not. For a distributed platform the costly decisions cluster around boundaries: where one service ends and another begins, what contract they exchange, and how state is partitioned. Get the boundary wrong and you pay for it in every future change that has to cross it." },
+    { "type": "paragraph", "text": "Our design discipline leans on a few durable patterns. We define service boundaries around bounded contexts rather than technical layers, so a change to settlement logic stays inside the settlement service instead of rippling across the codebase. We favour an [API-first contract](/news/tech/api-first-architecture): the interface is specified — in OpenAPI for synchronous calls, in an explicit event schema for asynchronous ones — and agreed before implementation, so consumers and producers can build in parallel against a stable contract. And we record the significant choices in Architecture Decision Records, because the most useful thing about a decision six months later is the context that produced it." },
+    { "type": "list", "ordered": false, "items": [
+      "Threat-model the design while it is still cheap to change — the tenant boundary is treated as a first-class trust boundary, default-deny, enforced server-side.",
+      "Classify data at design time so encryption, field-level access control, and audit logging are designed in, not bolted on.",
+      "Decide synchronous versus event-driven integration deliberately; reach for asynchronous events when you need decoupling and resilience, and for direct calls when you need a simple, strongly-consistent answer.",
+      "Choose the architecture style for the problem, not the fashion — see [microservices versus monolith](/news/tech/microservices-vs-monolith) for the trade-off we weigh on every new service."
+    ]},
+    { "type": "heading", "level": 2, "text": "Build: small changes, integrated continuously" },
+    { "type": "paragraph", "text": "The build stage is where the modern SDLC diverges most sharply from its waterfall ancestor. The old model integrated rarely and painfully — long-lived feature branches merged in a big-bang at the end, producing a fortnight of conflict resolution and a release nobody trusted. The modern approach inverts this: integrate constantly, in small increments, behind feature flags. We practise trunk-based development, where changes land on the main line many times a day in small, reviewed, individually-shippable pieces. A change that is not yet ready for users ships dark behind a flag rather than living on a divergent branch." },
+    { "type": "paragraph", "text": "This only works because the cost of integrating is near zero, which is the entire point of continuous integration. Every commit triggers an automated pipeline that builds, runs the test suite, and reports back in minutes. The discipline is to keep the main line releasable at all times — a red build is treated as a stop-the-line event, because a broken trunk blocks the whole team. The trade-off is real: trunk-based development demands strong test coverage and good feature-flag hygiene, and teams that adopt the workflow without the safety net simply ship bugs faster. Done properly it eliminates the most reliably miserable event in software, the multi-week merge." },
+    { "type": "heading", "level": 2, "text": "Test: a pyramid, not a phase" },
+    { "type": "paragraph", "text": "In a loop, testing is not a gate you reach at the end — it is a property woven through every stage. The mental model we use is the test pyramid: a broad base of fast unit tests, a narrower band of integration tests that verify components talk to each other and to real dependencies like the database, and a thin top of end-to-end tests that exercise critical user journeys. The shape matters because cost and brittleness rise as you climb. A thousand unit tests run in seconds; a thousand end-to-end tests are a flaky, slow liability that teams eventually learn to ignore — the inverted pyramid is an anti-pattern, not an aspiration." },
+    { "type": "paragraph", "text": "For a multi-tenant system one category of test is non-negotiable: authorization and isolation tests that assert organization A can never read organization B's data. These encode the threat model into executable form. A threat without a corresponding test is a threat you have only documented, not addressed. Beyond functional correctness we run security testing in the pipeline — static analysis, dependency scanning, and secrets detection — and we treat performance regression as a test failure, not a surprise discovered in production. For the full treatment of how this fits together with build automation, see our piece on [CI/CD pipelines](/news/tech/ci-cd-pipelines)." },
+    { "type": "heading", "level": 2, "text": "Ship: deployment is a decision you make many times a day" },
+    { "type": "paragraph", "text": "Once the pipeline is green, shipping should be a routine, low-drama event — that is the whole reward for the rigour upstream. The decoupling that makes this safe is the separation of deploy from release: code is deployed to production continuously, but exposed to users progressively. We rely on a handful of progressive-delivery patterns to keep the blast radius small." },
+    { "type": "list", "ordered": false, "items": [
+      "Canary releases: route a small percentage of traffic to the new version, watch the metrics, and promote or roll back based on evidence rather than hope.",
+      "Blue-green deployments: keep two production environments and switch traffic atomically, so rollback is an instant traffic flip rather than a redeploy.",
+      "Feature flags: separate the act of deploying code from the act of turning a feature on, so a problematic feature is disabled in seconds without a new build.",
+      "Immutable, declarative infrastructure: every environment is built from version-controlled definitions, so deployments are reproducible and drift does not accumulate — the foundation our [DevOps practice](/news/tech/devops-best-practices) is built on."
+    ]},
+    { "type": "paragraph", "text": "The unifying principle is that every deployment must be reversible. A release you cannot roll back is a release you should not make. At infrastructure scale, where a single tenant boundary failure can expose another organization's ledger, the ability to revert in seconds is not a convenience — it is a control." },
+    { "type": "heading", "level": 2, "text": "Operate: production is the source of truth" },
+    { "type": "paragraph", "text": "The waterfall model ended at release; the modern loop treats release as the moment you finally get real signal. Operating a service is a first-class engineering activity, and the team that built the service runs it — the 'you build it, you run it' principle that makes the feedback from production land on the people who can act on it. The substrate for this is observability: not just monitoring known failure modes, but instrumenting the system with metrics, structured logs, and distributed traces so you can ask new questions of a system behaving in a way you did not predict." },
+    { "type": "paragraph", "text": "We make operational expectations explicit through Service Level Objectives and the error budget they imply. An SLO turns 'the system should be reliable' into a number — say, 99.95% of settlement requests succeed within a latency target — and the error budget is the permitted shortfall. When the budget is healthy the team ships features; when it is exhausted, reliability work takes priority automatically. This is the mechanism that keeps velocity and stability in tension rather than letting one quietly devour the other. Audit logging, anomaly detection, and a tested incident-response runbook complete the picture, because a compliance-first platform has to be able to prove what happened, not merely assert it." },
+    { "type": "paragraph", "text": "And then the loop closes. The incident that woke someone at three in the morning, the latency cliff a canary exposed, the feature-usage data that contradicted the original assumption — all of it flows back into discovery as the input to the next iteration. Production is not the end of the lifecycle. It is the richest source of the next round of decisions." },
+    { "type": "heading", "level": 2, "text": "Why the loop scales: platform engineering" },
+    { "type": "paragraph", "text": "Describing the loop for one team is straightforward. Making it work for many teams without each one reinventing the pipeline, the deployment strategy, and the observability stack is the real challenge of infrastructure scale — and the answer is platform engineering. We build the SDLC itself as a product: a paved road of golden-path templates, a shared pipeline, tenant-scoped authorization middleware, and observability that a new service inherits by default rather than assembling by hand. The economics are decisive. When the secure, observable, releasable path is also the path of least resistance, every team moves faster and the whole platform stays consistent. That is how the same lifecycle that serves one service serves the many services that make up the Baalvion ecosystem — and if you want to talk through how it would apply to your own platform, [reach out to us](/contact)." }
+  ],
+  "faqs": [
+    {
+      "q": "How is the modern SDLC different from the waterfall model?",
+      "a": "Waterfall is a linear, one-way sequence of phases handed between teams, with integration and testing concentrated at the end. The modern SDLC is a continuous loop — discovery, design, build, test, ship, operate — owned end to end by a single team. The defining difference is feedback speed: the loop is designed to shorten the distance between a decision and the evidence that it was right."
+    },
+    {
+      "q": "What is the difference between deploying and releasing?",
+      "a": "Deploying means putting new code into production; releasing means exposing it to users. Decoupling the two — using feature flags, canary releases, and blue-green deployments — lets you deploy continuously while controlling who sees a feature and when. It also makes rollback trivial, because turning a feature off is independent of redeploying code."
+    },
+    {
+      "q": "Why use trunk-based development instead of long-lived feature branches?",
+      "a": "Long-lived branches diverge from the main line and create painful big-bang merges. Trunk-based development integrates small changes many times a day behind feature flags, keeping the main line always releasable and eliminating the multi-week merge. It depends on strong automated testing and disciplined flag hygiene — without that safety net, it just ships bugs faster."
+    },
+    {
+      "q": "What does the test pyramid recommend?",
+      "a": "A broad base of fast unit tests, a narrower band of integration tests, and a thin top of end-to-end tests. Cost and flakiness rise as you climb, so most coverage should sit at the bottom. An inverted pyramid — many slow, brittle end-to-end tests and few unit tests — is an anti-pattern that teams eventually stop trusting."
+    },
+    {
+      "q": "What role do SLOs and error budgets play in the operate stage?",
+      "a": "A Service Level Objective turns 'be reliable' into a concrete number, and the error budget is the permitted shortfall against it. When the budget is healthy, teams ship features; when it is exhausted, reliability work takes priority. This keeps velocity and stability in deliberate tension instead of letting one silently override the other."
+    },
+    {
+      "q": "How does the SDLC stay consistent across many teams at scale?",
+      "a": "Through platform engineering — treating the lifecycle itself as a product. A paved road of shared pipelines, golden-path templates, tenant-scoped authorization, and default observability lets every team inherit the secure, releasable workflow rather than rebuilding it. The platform makes the correct path the easiest path, which is what keeps a large organization both fast and consistent."
+    }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "API-first contract", "href": "/news/tech/api-first-architecture" },
+    { "anchor": "microservices versus monolith", "href": "/news/tech/microservices-vs-monolith" },
+    { "anchor": "CI/CD pipelines", "href": "/news/tech/ci-cd-pipelines" },
+    { "anchor": "DevOps practice", "href": "/news/tech/devops-best-practices" },
+    { "anchor": "reach out to us", "href": "/contact" }
+  ],
+  "customFields": {}
+}

@@ -7,11 +7,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,18 +23,24 @@ import java.util.UUID;
  *
  * Transient/infrastructure exceptions propagate so the container's error handler retries
  * (1s/5s/25s) and finally routes the record to {@code payments.transaction.initiated.DLT}.
+ *
+ * <p>Both saga replies are written to the transactional outbox (NOT fire-and-forget
+ * {@code kafkaTemplate.send}), so a broker outage at reply time can no longer drop the reply and
+ * stall the saga forever: the success reply commits atomically with the journal entry, and the
+ * retrying relay ({@code LedgerOutboxRelay}) guarantees delivery.
  */
 @Slf4j
 @Component
 public class PaymentInitiatedListener {
 
+  private static final String TOPIC_POSTED = "payments.ledger.posted";
+  private static final String TOPIC_FAILED = "payments.ledger.failed";
+
   private final LedgerService ledgerService;
-  private final KafkaTemplate<String, String> kafkaTemplate;
   private final ObjectMapper objectMapper;
 
-  public PaymentInitiatedListener(LedgerService ledgerService, KafkaTemplate<String, String> kafkaTemplate, ObjectMapper objectMapper) {
+  public PaymentInitiatedListener(LedgerService ledgerService, ObjectMapper objectMapper) {
     this.ledgerService = ledgerService;
-    this.kafkaTemplate = kafkaTemplate;
     this.objectMapper = objectMapper;
   }
 
@@ -57,31 +62,18 @@ public class PaymentInitiatedListener {
         .description("Payment " + transactionId)
         .build();
 
-      EntryResponse entry = ledgerService.postEntry(tenantId, request);
+      // Posts the journal AND enqueues the success reply to the outbox in ONE tx (atomic, retried).
+      EntryResponse entry = ledgerService.postPaymentSaga(tenantId, transactionId, request, TOPIC_POSTED);
       log.info("Saga: journal posted for payment {} -> journal {}", transactionId, entry.getId());
-
-      publish("payments.ledger.posted", transactionId.toString(), Map.of(
-        "transactionId", transactionId,
-        "tenantId", tenantId,
-        "journalId", entry.getId(),
-        "transactionRef", entry.getTransactionRef()
-      ));
     } catch (IllegalArgumentException | IllegalStateException businessError) {
-      // Expected, non-retryable: tell Payment to compensate (mark FAILED).
+      // Expected, non-retryable: tell Payment to compensate (mark FAILED). Routed through the outbox
+      // (its own short tx via the service's @Transactional) so the failure reply is never dropped.
       log.warn("Saga: ledger posting rejected for payment {}: {}", transactionId, businessError.getMessage());
-      Map<String, Object> failure = new HashMap<>();
+      Map<String, Object> failure = new LinkedHashMap<>();
       failure.put("transactionId", transactionId);
       failure.put("tenantId", tenantId);
       failure.put("reason", businessError.getMessage());
-      publish("payments.ledger.failed", transactionId.toString(), failure);
-    }
-  }
-
-  private void publish(String topic, String key, Map<String, Object> payload) {
-    try {
-      kafkaTemplate.send(topic, key, objectMapper.writeValueAsString(payload));
-    } catch (Exception e) {
-      log.error("Failed to publish {} for {}: {}", topic, key, e.getMessage());
+      ledgerService.enqueueEvent(tenantId, transactionId, TOPIC_FAILED, transactionId.toString(), failure);
     }
   }
 }

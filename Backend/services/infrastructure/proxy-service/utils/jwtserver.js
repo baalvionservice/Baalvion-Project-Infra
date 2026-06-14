@@ -1,8 +1,8 @@
 'use strict';
 // Proxy identity issuer (RS256/JWKS) — delegates to the canonical authority
-// (packages/auth-node). See catalog/enforce.mjs C3. RS256 with kid + JWKS, HS256
-// migration fallback, issuer/audience enforced on RS256 verify — byte-equivalent
-// to the prior in-file implementation.
+// (packages/auth-node). See catalog/enforce.mjs C3. RS256 with kid + JWKS,
+// issuer/audience enforced on verify. R2: HS256 access tokens are rejected in ALL
+// environments (no dev fallback) — verifyAccessToken is unconditionally RS256-only.
 const path = require('path');
 const { createAuthServer } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
@@ -20,8 +20,11 @@ const auth = createAuthServer({
     issuer:                     process.env.JWT_ISSUER || 'baalvion-auth',
     audience:                   process.env.JWT_AUDIENCE || 'baalvion-platform',
     requireRs256InProduction:   true,
-    allowHs256Fallback:         false,  // Batch C: RS256-ONLY verify — HS256 tokens are rejected (when RS256 keys present)
-    hs256IncludeIssuerAudience: true,   // (legacy issuance fallback only; verify rejects HS256)
+    // R2: HS256 access tokens are rejected in EVERY environment (dev included). The
+    // central auth-service's RS256 tokens are verified via config/keys/<kid>.pub.
+    // `allowHs256Fallback`/`JWT_ALLOW_HS256_FALLBACK` are inert (verifyAccessToken is
+    // unconditionally RS256-only); pinned false so no env mistake can imply otherwise.
+    allowHs256Fallback:         false,
     refreshIncludeJti:          false,  // legacy refresh shape omits jti
 });
 

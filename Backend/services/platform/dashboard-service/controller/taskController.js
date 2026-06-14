@@ -66,7 +66,8 @@ exports.updateTask = async (req, res, next) => {
     try {
         const task = await db.Task.findOne({ where: { id: req.params.id, org_id: req.user.orgId } });
         if (!task) return next(new AppError('NOT_FOUND', 'Task not found', 404));
-        await task.update(req.body);
+        const { title, description, status, assignee_id, business_id, priority, due_date } = req.body;
+        await task.update({ title, description, status, assignee_id, business_id, priority, due_date });
         await _createAuditLog(req, 'UPDATE_TASK', 'task', String(task.id));
         return sendSuccess(req, res, task);
     } catch (err) { return next(err); }

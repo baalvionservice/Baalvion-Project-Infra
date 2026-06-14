@@ -24,6 +24,20 @@ import type {
   SEOMetadata,
 } from '@/lib/db';
 
+// Strip HTML tags idempotently. A single regex pass is not sufficient because
+// removing an inner match can re-form a new tag from the surrounding characters
+// (e.g. `<<script>>` or `<scr<b>ipt>`). Re-apply until the output stabilizes so
+// no residual tag fragments remain.
+function stripHtmlTags(input: string): string {
+  let out = input;
+  let prev: string;
+  do {
+    prev = out;
+    out = out.replace(/<[^>]+>/g, '');
+  } while (out !== prev);
+  return out;
+}
+
 const CMS_BASE = process.env.CMS_PUBLIC_URL || 'http://localhost:3018/api/v1/public';
 const SITE = process.env.CMS_WEBSITE_SLUG || 'about-baalvion';
 const BASE = `${CMS_BASE}/${SITE}`;
@@ -57,7 +71,10 @@ interface CmsContent {
 
 async function fetchJSON(url: string): Promise<any | null> {
   try {
-    const r = await fetch(url, { cache: 'no-store' });
+    // Time-based revalidation (ISR) rather than `no-store`: lets pages that read
+    // the CMS be statically generated at build time and refreshed hourly, which
+    // is what makes generateStaticParams / `export const revalidate` effective.
+    const r = await fetch(url, { next: { revalidate: 3600 } });
     if (!r.ok) return null;
     return await r.json();
   } catch {
@@ -99,14 +116,7 @@ function blocksToText(blocks?: Block[]): string {
     .sort((a, b) => (a.order || 0) - (b.order || 0))
     .map((b) => {
       const c = b.content || {};
-      if (b.type === 'html') {
-        // Strip tags repeatedly until stable so overlapping/nested constructs (e.g. "<<x>>")
-        // cannot reconstitute a tag after a single pass (incomplete-multi-character-sanitization).
-        let s = String(c.html || '');
-        let prev;
-        do { prev = s; s = s.replace(/<[^>]+>/g, ''); } while (s !== prev);
-        return s;
-      }
+      if (b.type === 'html') return stripHtmlTags(String(c.html || ''));
       return String(c.text ?? '');
     })
     .filter(Boolean)
@@ -148,7 +158,7 @@ function mapArticle(c: CmsContent): Article {
     slug: c.slug,
     category: cf.category || c.category?.slug || 'updates',
     date,
-    image: c.featuredImage || `https://picsum.photos/seed/${c.slug}/600/400`,
+    image: c.featuredImage || '/images/placeholder.svg',
     author: cf.author || 'Baalvion Staff',
     readTime: cf.readTime || '2 min read',
     content: blocksToText(c.contentBlocks),
@@ -244,4 +254,149 @@ export async function cmsGetPage(slug: string): Promise<PopulatedPage | null> {
 export async function cmsGetPages(): Promise<PopulatedPage[]> {
   const items = await listContent({ contentType: 'page', limit: 100 });
   return items.map(mapPage);
+}
+
+/**
+ * Lightweight reader for simple marketing / legal pages (company, trust,
+ * contact, privacy, terms). Exposes the raw customFields (pillars, badges,
+ * contact info, etc.) and a rendered HTML body so page components can hydrate
+ * from the CMS while keeping their existing markup, with a hardcoded fallback.
+ */
+export interface SitePage {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt?: string;
+  bodyHtml: string;
+  custom: Record<string, any>;
+  seo?: SEOMetadata;
+}
+
+function blocksToHtml(blocks?: Block[]): string {
+  if (!Array.isArray(blocks)) return '';
+  return blocks
+    .slice()
+    .sort((a, b) => (a.order || 0) - (b.order || 0))
+    .map((b) => {
+      const c = b.content || {};
+      if (b.type === 'heading') {
+        const level = Number(c.level) || 2;
+        return `<h${level}>${String(c.text ?? '')}</h${level}>`;
+      }
+      if (b.type === 'html') return String(c.html ?? '');
+      return `<p>${String(c.text ?? '')}</p>`;
+    })
+    .filter(Boolean)
+    .join('\n');
+}
+
+export async function cmsGetSitePage(slug: string): Promise<SitePage | null> {
+  const c = await getContent(slug);
+  if (!c) return null;
+  return {
+    id: c.id,
+    slug: c.slug,
+    title: c.title,
+    excerpt: c.excerpt ?? undefined,
+    bodyHtml: blocksToHtml(c.contentBlocks),
+    custom: c.customFields || {},
+    seo: mapSeo(c.seoMetadata),
+  };
+}
+
+// ── Rich documents (services, industries, case studies, about, rich articles) ──
+// A structured body (headings / paragraphs / lists / html) plus FAQ pairs and
+// arbitrary customFields, so the new authority pages render real formatted
+// content and emit FAQ / Service / CaseStudy schema. All of this is managed
+// centrally in the CMS — these readers simply map the delivery API shape.
+export interface RichBlock {
+  type: 'heading' | 'paragraph' | 'list' | 'html' | 'quote';
+  level?: number;
+  text?: string;
+  items?: string[];
+  ordered?: boolean;
+  html?: string;
+}
+
+export interface FaqItem {
+  q: string;
+  a: string;
+}
+
+export interface RichDoc {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt?: string;
+  kind: string;
+  category?: string;
+  author?: string;
+  readTime?: string;
+  image?: string;
+  blocks: RichBlock[];
+  faqs: FaqItem[];
+  custom: Record<string, any>;
+  seo?: SEOMetadata;
+  createdAt: string;
+  updatedAt: string;
+}
+
+function mapBlocks(blocks?: Block[]): RichBlock[] {
+  if (!Array.isArray(blocks)) return [];
+  return blocks
+    .slice()
+    .sort((a, b) => (a.order || 0) - (b.order || 0))
+    .map((b): RichBlock => {
+      const c = b.content || {};
+      if (b.type === 'heading') return { type: 'heading', level: Number(c.level) || 2, text: String(c.text ?? '') };
+      if (b.type === 'html') return { type: 'html', html: String(c.html ?? '') };
+      if (b.type === 'quote') return { type: 'quote', text: String(c.text ?? '') };
+      if (b.type === 'list' || Array.isArray(c.items)) {
+        return { type: 'list', ordered: !!c.ordered, items: (Array.isArray(c.items) ? c.items : []).map(String) };
+      }
+      return { type: 'paragraph', text: String(c.text ?? '') };
+    })
+    .filter((b) => (b.text && b.text.length > 0) || (b.html && b.html.length > 0) || (b.items && b.items.length > 0));
+}
+
+function mapRichDoc(c: CmsContent): RichDoc {
+  const cf = c.customFields || {};
+  return {
+    id: c.id,
+    slug: c.slug,
+    title: c.title,
+    excerpt: c.excerpt ?? undefined,
+    kind: cf.kind || c.contentType,
+    category: cf.category,
+    author: cf.author,
+    readTime: cf.readTime,
+    image: c.featuredImage || undefined,
+    blocks: mapBlocks(c.contentBlocks),
+    faqs: Array.isArray(cf.faqs) ? cf.faqs.filter((f: any) => f && f.q && f.a) : [],
+    custom: cf,
+    seo: mapSeo(c.seoMetadata),
+    createdAt: c.createdAt,
+    updatedAt: c.updatedAt,
+  };
+}
+
+async function listByType(contentType: string, kind?: string): Promise<RichDoc[]> {
+  const items = await listContent({ contentType, limit: 100 });
+  const docs = items.map(mapRichDoc);
+  return kind ? docs.filter((d) => (d.custom.kind || '') === kind) : docs;
+}
+
+// Service pages live as contentType `product` (kind=service).
+export const cmsGetServices = (): Promise<RichDoc[]> => listByType('product', 'service');
+// Industry pages live as contentType `doc` (kind=industry).
+export const cmsGetIndustries = (): Promise<RichDoc[]> => listByType('doc', 'industry');
+// Case studies live as contentType `event` (kind=case_study).
+export const cmsGetCaseStudies = (): Promise<RichDoc[]> => listByType('event', 'case_study');
+// About sub-pages (mission/vision/story/why) live as contentType `doc` (kind=company-about).
+export const cmsGetAboutPages = (): Promise<RichDoc[]> => listByType('doc', 'company-about');
+
+/** A single rich document by slug — used by service/industry/case-study/about/article detail pages. */
+export async function cmsGetRichDoc(slug: string): Promise<RichDoc | null> {
+  const c = await getContent(slug);
+  return c ? mapRichDoc(c) : null;
 }

@@ -2,7 +2,7 @@ apiVersion: baalvion.io/v1
 kind: Service
 metadata:
   name: deal-room-service
-  description: Real-time bilateral trade negotiation — deal room per buyer/seller pair, counter-offer engine, live WebSocket updates, and a term sheet both parties sign to reach an executed agreement. Part of financial-services-java (port 3040, schema `deal_room`).
+  description: Real-time bilateral trade negotiation — deal room per buyer/seller pair, counter-offer engine, live WebSocket updates, and a term sheet both parties sign to reach an executed agreement. Part of financial-services-java (host port 13040, container 3040, schema `deal_room`).
   domain: commerce
   division: commerce
   context: deal-room

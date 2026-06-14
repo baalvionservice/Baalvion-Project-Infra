@@ -42,8 +42,15 @@ async function authMiddleware(req, res, next) {
       return next(new AppError('UNAUTHORIZED', 'Token is missing organization context', 401));
     }
 
-    // Server-side session validation (revocation + token version).
-    if (claims.sessionId) {
+    // Server-side session validation applies ONLY to proxy-issued tokens (HS256),
+    // whose sessions live in this service's store. Central-authority tokens (RS256
+    // from auth-service — e.g. the admin console) are cryptographically verified
+    // (signature + issuer + audience + expiry) and their session lifecycle is owned
+    // by the central auth, which this service cannot introspect, so we trust them.
+    let tokenAlg = null;
+    try { tokenAlg = JSON.parse(Buffer.from(token.split('.')[0], 'base64').toString()).alg; } catch (_) { /* ignore */ }
+    const isCentralRs256 = tokenAlg === 'RS256';
+    if (claims.sessionId && !isCentralRs256) {
       const active = await sessionStore.isSessionActive(claims.sessionId, claims.tokenVersion, claims.userId);
       if (!active) return next(new AppError('SESSION_REVOKED', 'Session is no longer valid', 401));
     }

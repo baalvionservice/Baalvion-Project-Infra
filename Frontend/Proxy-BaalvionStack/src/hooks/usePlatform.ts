@@ -133,6 +133,9 @@ export const useSubscription = () =>
 export const usePlans = () =>
   useQuery({ queryKey: ["billing", "plans"], queryFn: billingApi.getPlans, staleTime: 300_000 });
 
+export const useCredit = () =>
+  useQuery({ queryKey: ["billing", "credit"], queryFn: billingApi.getCredit, staleTime: 30_000 });
+
 export const useInvoices = (params?: { page?: number; pageSize?: number }) =>
   useQuery({ queryKey: ["billing", "invoices", params], queryFn: () => billingApi.getInvoices(params), staleTime: 60_000 });
 

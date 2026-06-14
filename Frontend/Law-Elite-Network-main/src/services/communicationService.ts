@@ -15,10 +15,7 @@ import {
 export const sendEmail = async (type: string, data: any) => {
   const email = getEmailTemplate(type, data);
 
-  // Simulated delivery protocol
-  console.log("%c📧 [EXTERNAL EMAIL BROADCAST]", "color: #9475EF; font-weight: bold;");
-  console.log(`Subject: ${email.subject}`);
-  console.log(`Body: ${email.body}`);
+  // Simulated delivery protocol — email queued for SendGrid / AWS SES integration
   
   // Future: Integration with SendGrid / AWS SES
   return { success: true, message: "Email broadcasted to intelligence queue." };
@@ -30,9 +27,7 @@ export const sendEmail = async (type: string, data: any) => {
 export const sendWhatsApp = async (type: string, data: any) => {
   const msg = getWhatsAppMessage(type, data);
 
-  // Simulated delivery protocol
-  console.log("%c📱 [EXTERNAL WHATSAPP BROADCAST]", "color: #2E50B8; font-weight: bold;");
-  console.log(`Message: ${msg}`);
+  // Simulated delivery protocol — message queued for Twilio / WhatsApp Business API integration
 
   // Future: Integration with Twilio / WhatsApp Business API
   return { success: true, message: "WhatsApp notification queued." };

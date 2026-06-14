@@ -330,7 +330,7 @@ export default function UserManagementPage() {
                     <TableCell className="pr-8 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button variant="ghost" size="sm" className="h-9 px-3 rounded-lg font-bold text-xs" asChild>
-                          <a href={user.role === 'CREATOR' ? `/creator/${user.displayName?.toLowerCase().replace(' ', '_')}` : '#'} target="_blank">
+                          <a href={user.role === 'CREATOR' ? `/creator/${user.displayName?.toLowerCase().replace(' ', '_')}` : '#'} target="_blank" rel="noopener noreferrer">
                             <Eye className="h-4 w-4 mr-1.5" /> Profile
                           </a>
                         </Button>

@@ -179,9 +179,12 @@ export default function IdentityPage() {
 
   const { data: stats }         = useQuery({ queryKey: ['identity-stats'], queryFn: () => identityAdminApi.getStats().then((r) => r.data.data), refetchInterval: 30_000 });
   const { data: riskData, isLoading: riskLoading } = useQuery({ queryKey: ['risk-events', { resolved: false }], queryFn: () => identityApi.listRiskEvents({ page: 1, limit: 30, resolved: false }).then((r) => r.data.data) });
-  const { data: rolesData }     = useQuery({ queryKey: ['rbac-roles'], queryFn: () => identityApi.listRoles().then((r) => r.data.data) });
-  const { data: jwksData }      = useQuery({ queryKey: ['jwks-keys'], queryFn: () => identityApi.listJwksKeys().then((r) => r.data.data) });
-  const { data: apiKeysData }   = useQuery({ queryKey: ['api-keys', { search: searchKey }], queryFn: () => identityApi.listApiKeys({ page: 1, limit: 20 }).then((r) => r.data.data) });
+  const { data: rolesData, isLoading: rolesLoading } = useQuery({ queryKey: ['rbac-roles'], queryFn: () => identityApi.listRoles().then((r) => r.data.data) });
+  // Signing Keys (JWKS) and API Keys have NO backend yet — these calls error. We mark
+  // the queries non-retrying so the tabs can render an honest "not yet available" state
+  // instead of an indefinite loading skeleton (which would imply data is coming).
+  const { data: jwksData, isError: jwksError, isLoading: jwksLoading } = useQuery({ queryKey: ['jwks-keys'], queryFn: () => identityApi.listJwksKeys().then((r) => r.data.data), retry: false });
+  const { data: apiKeysData, isError: apiKeysError, isLoading: apiKeysLoading } = useQuery({ queryKey: ['api-keys', { search: searchKey }], queryFn: () => identityApi.listApiKeys({ page: 1, limit: 20 }).then((r) => r.data.data), retry: false });
 
   const resolveRisk = useMutation({
     mutationFn: (id: string) => identityApi.resolveRiskEvent(id),
@@ -345,8 +348,13 @@ export default function IdentityPage() {
               <CardDescription>Platform RBAC roles and their permission grants</CardDescription>
             </CardHeader>
             <CardContent>
-              {roles.length === 0 ? (
+              {rolesLoading ? (
                 <div className="space-y-3">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}</div>
+              ) : roles.length === 0 ? (
+                <div className="flex flex-col items-center py-10 gap-2 text-muted-foreground">
+                  <Shield className="h-8 w-8" />
+                  <p className="text-sm">No roles defined</p>
+                </div>
               ) : (
                 <div>{roles.map((r) => <RoleCard key={r.id} role={r} />)}</div>
               )}
@@ -370,7 +378,7 @@ export default function IdentityPage() {
                   variant="outline"
                   className="gap-1.5 text-xs"
                   onClick={() => rotateKey.mutate()}
-                  disabled={rotateKey.isPending}
+                  disabled={rotateKey.isPending || jwksError}
                 >
                   <RotateCcw className={cn('h-3.5 w-3.5', rotateKey.isPending && 'animate-spin')} />
                   Rotate Key
@@ -378,14 +386,27 @@ export default function IdentityPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {jwksKeys.length === 0 ? (
+              {jwksLoading ? (
                 <div className="space-y-3">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
+              ) : jwksError ? (
+                <div className="flex flex-col items-center py-10 gap-2 text-center text-muted-foreground">
+                  <Key className="h-8 w-8" />
+                  <p className="text-sm font-medium">Signing key management not yet available</p>
+                  <p className="text-xs max-w-md">No JWKS management endpoint is wired up in this console yet. Keys are managed directly by the auth service.</p>
+                </div>
+              ) : jwksKeys.length === 0 ? (
+                <div className="flex flex-col items-center py-10 gap-2 text-muted-foreground">
+                  <Key className="h-8 w-8" />
+                  <p className="text-sm">No signing keys</p>
+                </div>
               ) : (
-                <div>{jwksKeys.map((k) => <JwksKeyRow key={k.kid} jwk={k} onRetire={(kid) => retireKey.mutate(kid)} />)}</div>
+                <>
+                  <div>{jwksKeys.map((k) => <JwksKeyRow key={k.kid} jwk={k} onRetire={(kid) => retireKey.mutate(kid)} />)}</div>
+                  <p className="text-[11px] text-muted-foreground mt-3">
+                    Keys in <strong>retiring</strong> state are still accepted for 24h to allow token drain. Retired keys reject all tokens.
+                  </p>
+                </>
               )}
-              <p className="text-[11px] text-muted-foreground mt-3">
-                Keys in <strong>retiring</strong> state are still accepted for 24h to allow token drain. Retired keys reject all tokens.
-              </p>
             </CardContent>
           </Card>
         </TabsContent>
@@ -412,8 +433,19 @@ export default function IdentityPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {apiKeys.length === 0 ? (
+              {apiKeysLoading ? (
                 <div className="space-y-3">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-16 w-full" />)}</div>
+              ) : apiKeysError ? (
+                <div className="flex flex-col items-center py-10 gap-2 text-center text-muted-foreground">
+                  <Fingerprint className="h-8 w-8" />
+                  <p className="text-sm font-medium">API key management not yet available</p>
+                  <p className="text-xs max-w-md">No API-key service is wired up in this console yet.</p>
+                </div>
+              ) : apiKeys.length === 0 ? (
+                <div className="flex flex-col items-center py-10 gap-2 text-muted-foreground">
+                  <Fingerprint className="h-8 w-8" />
+                  <p className="text-sm">No API keys issued</p>
+                </div>
               ) : (
                 <div>{apiKeys.map((k) => <ApiKeyRow key={k.id} apiKey={k} onRevoke={(id) => revokeApiKey.mutate(id)} />)}</div>
               )}

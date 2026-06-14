@@ -3,17 +3,16 @@
 
 import React, { useMemo } from 'react';
 import { useParams } from 'next/navigation';
-import { formatPrice } from '@/lib/mock-data';
 import { useProducts, useDepartments, useCategories } from '@/lib/useCatalog';
 import { ProductCard } from '@/components/product/ProductCard';
 import { ChevronRight, Filter, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { BrandImage } from '@/components/ui/BrandImage';
 
 export default function SubcategoryPage() {
   const { country, department, category, subcategory } = useParams();
   const countryCode = (country as string) || 'us';
-  
+
   const { products } = useProducts({ categoryId: category as string, limit: 100 });
   const { departments } = useDepartments();
   const { categories } = useCategories();
@@ -29,7 +28,7 @@ export default function SubcategoryPage() {
   return (
     <div className="bg-ivory min-h-screen pb-40">
       <section className="relative h-[40vh] w-full flex items-end justify-center overflow-hidden">
-        <Image src={`https://picsum.photos/seed/amarise-${subcategory}/2560/1440`} alt={subcategory as string} fill className="object-cover opacity-50 grayscale-[20%]" />
+        <BrandImage src={undefined} alt={subcategory as string} className="absolute inset-0" imgClassName="opacity-50 grayscale-[20%]" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-ivory" />
         <div className="relative z-10 text-center space-y-4 pb-20">
           <h1 className="text-6xl font-headline font-bold text-gray-900 capitalize">{subcategory?.toString().replace(/-/g, ' ')}</h1>

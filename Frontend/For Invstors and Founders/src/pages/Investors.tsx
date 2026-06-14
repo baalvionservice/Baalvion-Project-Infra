@@ -33,6 +33,7 @@ export type Investor = {
   aum_usd: number | null;
   email: string | null;
   phone: string | null;
+  enrichment_confidence: string | null;
 };
 
 export const money = (n: number | null) => {

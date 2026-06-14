@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
@@ -41,6 +42,10 @@ import java.util.List;
 @AutoConfiguration
 @ConditionalOnClass(SecurityFilterChain.class)
 @EnableConfigurationProperties(SecurityProperties.class)
+// War Room 3: enable annotation-based method security platform-wide so money-moving
+// controllers can enforce role/permission with @PreAuthorize. Additive and safe — it
+// is a no-op until a method is annotated; nothing changes for existing endpoints.
+@EnableMethodSecurity(prePostEnabled = true)
 public class BaalvionSecurityAutoConfiguration {
 
   private final SecurityProperties properties;
@@ -104,6 +109,32 @@ public class BaalvionSecurityAutoConfiguration {
   @ConditionalOnMissingBean(MfaSecretStore.class)
   public MfaSecretStore mfaSecretStore() {
     return new MfaSecretStore.NotEnrolled();
+  }
+
+  // ---- RLS runtime enforcement (Tenant Isolation layer 3, see docs/TENANT_ISOLATION.md) ----
+  //
+  // These beans push the JWT's tenant into the Postgres session GUC `app.current_tenant_id` at the
+  // start of every @Transactional unit of work, so the RLS policies created by the Flyway
+  // migrations actually enforce. SECURITY-INERT until the runtime datasource connects as a
+  // non-superuser role (e.g. baalvion_app) — Postgres bypasses RLS for superusers/owner. See
+  // common-security/src/main/resources/rls/GRANTS_TEMPLATE.sql for the required grants and the
+  // Flyway-as-owner / runtime-as-baalvion_app split. Gated off entirely with
+  // app.security.rls.enabled=false (e.g. for services with no JPA datasource).
+
+  @Bean
+  @ConditionalOnClass(jakarta.persistence.EntityManager.class)
+  @ConditionalOnProperty(name = "app.security.rls.enabled", havingValue = "true", matchIfMissing = true)
+  @ConditionalOnMissingBean(RlsTenantSession.class)
+  public RlsTenantSession rlsTenantSession() {
+    return new RlsTenantSession();
+  }
+
+  @Bean
+  @ConditionalOnClass({jakarta.persistence.EntityManager.class, org.aspectj.lang.ProceedingJoinPoint.class})
+  @ConditionalOnProperty(name = "app.security.rls.enabled", havingValue = "true", matchIfMissing = true)
+  @ConditionalOnMissingBean(RlsTenantAspect.class)
+  public RlsTenantAspect rlsTenantAspect(RlsTenantSession rlsTenantSession) {
+    return new RlsTenantAspect(rlsTenantSession);
   }
 
   /**

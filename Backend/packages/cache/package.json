@@ -1,15 +1,20 @@
 {
   "name": "@baalvion/cache",
   "version": "1.0.0",
-  "description": "Shared Redis cache abstraction: read-through/write-through getOrSet with single-flight stampede protection, consistent TTL profiles (FX 30s), prefix invalidation, tenant-scoped keys, and fail-open behavior. Upstash-compatible.",
   "private": true,
-  "main": "index.js",
-  "files": ["index.js", "redis.js", "ttl.js", "keys.js", "cache.js"],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
-    "test": "node --test test.smoke.js"
+    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts --watch",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist"
   },
-  "dependencies": {
-    "@baalvion/tenancy": "workspace:*",
-    "ioredis": "^5.6.1"
+  "dependencies": {},
+  "devDependencies": {
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1",
+    "@types/node": "^22.10.0"
   }
 }

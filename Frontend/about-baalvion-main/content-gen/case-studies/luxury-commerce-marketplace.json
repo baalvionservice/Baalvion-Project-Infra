@@ -1,0 +1,62 @@
+{
+  "slug": "luxury-commerce-marketplace",
+  "title": "Launching a Verified Luxury Commerce Marketplace",
+  "kind": "case_study",
+  "heroImageSeed": "cs-luxury",
+  "excerpt": "A high-trust marketplace for verified luxury brands, with authenticated sellers, escrow settlement, and a premium storefront on the Baalvion ledger.",
+  "seo": {
+    "title": "Case Study: Verified Luxury Commerce Marketplace | Baalvion",
+    "description": "How Baalvion launched a high-trust luxury marketplace with seller verification, escrow settlement, and a premium storefront on the Baalvion Operating System.",
+    "keywords": ["luxury marketplace", "ecommerce", "seller verification", "escrow", "Baalvion case study", "commerce platform"]
+  },
+  "customFields": {
+    "client": "A luxury commerce network within the Baalvion ecosystem",
+    "sector": "Retail & Commerce",
+    "challenge": "Building buyer trust for high-value goods without slowing the purchase experience.",
+    "solution": "Verified sellers, escrow-backed settlement, and a premium, fast storefront on one ledger.",
+    "architecture": "Catalog and identity services, escrow ledger, payment rails, server-rendered storefront.",
+    "techStack": ["Catalog service", "Seller verification", "Escrow ledger", "Payment rails", "Server-side rendering"],
+    "results": [
+      { "metric": "Buyer dispute rate", "value": "Low single digit %" },
+      { "metric": "Checkout conversion", "value": "+22%" },
+      { "metric": "Seller onboarding", "value": "Verified" }
+    ],
+    "lessons": [
+      "Trust is a feature — design it explicitly.",
+      "Escrow removes the riskiest moment in high-value commerce.",
+      "Performance is part of the luxury experience."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "Selling high-value luxury goods online demands buyer trust that ordinary marketplaces don't provide. Buyers worry about authenticity and getting their money back; sellers worry about chargebacks and fraud. The network needed a marketplace where both sides felt protected — without burying the experience in friction." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We built a verified marketplace on the Baalvion Operating System where every seller is authenticated, every high-value order is backed by escrow, and the storefront is fast and premium. Funds are held in escrow on the Baalvion ledger until the buyer confirms receipt, removing the riskiest moment in the transaction for both parties." },
+    { "type": "list", "ordered": false, "items": [
+      "**Verified sellers** with an authentication step before listing.",
+      "**Escrow-backed settlement** holding funds until delivery is confirmed.",
+      "**Premium storefront** server-rendered for speed and SEO.",
+      "**One ledger** recording every order and escrow movement."
+    ] },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "A catalog service manages listings and media; an identity and verification service gates who can sell. The escrow ledger records funds held and released against each order, integrated with payment rails for capture and payout. The storefront is server-rendered for fast first paint and clean indexability — the same performance discipline we cover in [web performance optimization](/news/tech/web-performance-optimization)." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "A catalog service, seller verification, an escrow ledger, payment-rail integrations, and a server-rendered storefront — built with our [web development](/services/web-development) and [enterprise software](/services/enterprise-software) practices for the [retail](/industries/retail) sector." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "Buyer disputes stayed in the low single digits, checkout conversion rose by roughly 22% as escrow reassured high-value buyers, and every seller on the platform is verified. The premium storefront kept first paint fast even with rich media." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "Trust had to be designed explicitly — verification badges, escrow status, and clear delivery confirmation all visible in the flow. Escrow removed the moment buyers feared most. And treating performance as part of the luxury experience, not an afterthought, protected conversion." }
+  ],
+  "faqs": [
+    { "q": "How does escrow protect both buyer and seller?", "a": "Funds are held on the Baalvion ledger until the buyer confirms receipt, then released to the seller — protecting buyers from non-delivery and sellers from unwarranted chargebacks." },
+    { "q": "How are sellers verified?", "a": "Sellers pass an identity and authentication step before they can list, which is recorded against their account and surfaced to buyers." },
+    { "q": "Why server-render the storefront?", "a": "Server rendering gives fast first paint and clean indexability — important for both the premium experience and SEO. See [web performance optimization](/news/tech/web-performance-optimization)." },
+    { "q": "Can this model extend to other commerce verticals?", "a": "Yes. The verified-seller and escrow pattern applies to any high-trust marketplace — see [Baalvion for retail](/industries/retail)." }
+  ],
+  "internalLinks": [
+    { "anchor": "web performance optimization", "href": "/news/tech/web-performance-optimization" },
+    { "anchor": "web development", "href": "/services/web-development" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" },
+    { "anchor": "retail", "href": "/industries/retail" }
+  ]
+}

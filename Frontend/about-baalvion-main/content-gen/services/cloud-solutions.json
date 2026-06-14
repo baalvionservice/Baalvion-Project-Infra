@@ -1,0 +1,56 @@
+{
+  "slug": "cloud-solutions",
+  "title": "Cloud Solutions",
+  "kind": "service",
+  "heroImageSeed": "svc-cloud",
+  "excerpt": "Cloud architecture, migration, and FinOps — resilient, scalable infrastructure with costs you can actually see and control.",
+  "seo": {
+    "title": "Cloud Architecture & Migration Services | Baalvion",
+    "description": "Baalvion designs cloud-native architecture, runs safe migrations, and brings cloud costs under control with FinOps. Resilient, scalable, observable infrastructure.",
+    "keywords": ["cloud solutions", "cloud architecture", "cloud migration", "FinOps", "cloud-native", "Baalvion services", "Kubernetes"]
+  },
+  "customFields": {
+    "benefits": [
+      "Resilient, autoscaling infrastructure",
+      "Safe, incremental migration off legacy",
+      "Costs visible and controlled (FinOps)",
+      "Security and compliance built in"
+    ],
+    "process": [
+      { "step": "Assess", "desc": "Current estate, dependencies, cost, and risk." },
+      { "step": "Architect", "desc": "Cloud-native design for resilience and scale." },
+      { "step": "Migrate", "desc": "Incremental, low-risk moves with rollback." },
+      { "step": "Optimise", "desc": "FinOps, autoscaling, and continuous tuning." }
+    ],
+    "techStack": ["Kubernetes", "Containers", "Infrastructure as Code", "Multi-cloud", "Observability", "FinOps tooling"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "The cloud rewards good architecture and punishes bad habits — usually with a surprise bill. Baalvion designs cloud-native systems that are resilient and scalable, migrates legacy estates safely, and brings spend under control with FinOps. We apply the patterns from [cloud-native architecture explained](/news/tech/cloud-native-architecture) to real production workloads." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Resilient:** autoscaling, self-healing infrastructure.",
+      "**Safe migration:** incremental moves with rollback, not big-bang risk.",
+      "**Cost control:** FinOps so you can see and tune spend.",
+      "**Secure:** compliance and security designed in from the start."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We assess the current estate and its risks, architect a cloud-native target, migrate incrementally with rollback paths, then optimise continuously with FinOps and autoscaling. For legacy-heavy estates this follows [enterprise modernization](/news/insights/enterprise-modernization) and [legacy system migration](/news/insights/legacy-system-migration)." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "Kubernetes and containers, infrastructure as code, multi-cloud where it earns its keep, full observability, and FinOps tooling. We help you decide when Kubernetes is right — and when it isn't — in [Kubernetes for enterprises](/news/tech/kubernetes-for-enterprises) and [multi-cloud strategy](/news/tech/multi-cloud-strategy)." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "We operate multi-tenant infrastructure at scale, so our cloud advice is grounded in running real systems, not just designing them. Pair cloud with [DevOps](/services/devops) and [enterprise software](/services/enterprise-software) for a complete platform." }
+  ],
+  "faqs": [
+    { "q": "How do you keep cloud costs under control?", "a": "Through FinOps: cost visibility per service, right-sizing, autoscaling, and continuous tuning — so spend tracks value rather than surprising you." },
+    { "q": "Is migration risky?", "a": "We migrate incrementally with rollback paths rather than big-bang cutovers, keeping the business running throughout — see [legacy system migration](/news/insights/legacy-system-migration)." },
+    { "q": "Do we need Kubernetes?", "a": "Not always. We help you weigh the trade-offs — see [Kubernetes for enterprises](/news/tech/kubernetes-for-enterprises)." },
+    { "q": "Single cloud or multi-cloud?", "a": "It depends on your risk, portability needs, and complexity tolerance — explored in [multi-cloud strategy](/news/tech/multi-cloud-strategy)." }
+  ],
+  "internalLinks": [
+    { "anchor": "cloud-native architecture explained", "href": "/news/tech/cloud-native-architecture" },
+    { "anchor": "enterprise modernization", "href": "/news/insights/enterprise-modernization" },
+    { "anchor": "Kubernetes for enterprises", "href": "/news/tech/kubernetes-for-enterprises" },
+    { "anchor": "DevOps", "href": "/services/devops" }
+  ]
+}

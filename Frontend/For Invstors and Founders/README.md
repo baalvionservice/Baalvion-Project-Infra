@@ -14,7 +14,7 @@ their round faster. Part of the Baalvion platform. © Baalvion. All rights reser
 ## Run (dev)
 ```bash
 npm install
-npm run dev      # http://localhost:8080
+npm run dev      # http://localhost:8082
 ```
 Requires the backend (`insiders-service` on :3050), the auth-gateway (:3099), Postgres and Redis running.
 Dev proxies (`/auth-bff` → gateway, `/insiders-api` → insiders-service) keep the browser same-origin so the

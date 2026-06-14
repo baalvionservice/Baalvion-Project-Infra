@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import BodyBlock from "@/components/ui/body-block";
 import { getRelatedTerms } from "@/lib/data/utils";
 import { fetchTermBySlug } from "@/lib/data/term-live";
@@ -5,6 +6,7 @@ import { buildMetadata } from "@/lib/seo";
 import { terms } from "@/lib/data/terms";
 import TableOfContents from "./components/TableOfContents";
 import RelatedTerms from "./components/RelatedTerms";
+import { env } from "@/config/env";
 
 export async function generateStaticParams() {
   return terms.map((term) => {
@@ -23,12 +25,13 @@ export async function generateMetadata({
 }: {
   params: Promise<{ letter: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { letter, slug } = await params;
   const term = await fetchTermBySlug(slug);
   if (!term) return {};
   return buildMetadata({
     title: term.title,
-    description: term?.seoDescription?.slice(0, 160) || "", // use first 160 chars of description for SEO
+    description: term?.seoDescription?.slice(0, 160) || "",
+    canonical: `/terms/${letter}/${slug}`,
   });
 }
 
@@ -37,10 +40,10 @@ export default async function Page({
 }: {
   params: Promise<{ letter: string; slug: string }>;
 }) {
-  const { slug } = await params;
+  const { letter, slug } = await params;
   const term = await fetchTermBySlug(slug);
 
-  if (!term) return <div>Not found</div>;
+  if (!term) notFound();
 
   // Extract headings for table of contents
   const headings = term.content.filter((block) => block.type === "heading");
@@ -48,8 +51,37 @@ export default async function Page({
   // Get related terms
   const relatedTerms = getRelatedTerms(slug, 16);
 
+  const baseUrl = (env.siteUrl || 'https://imperialpedia.com').replace(/\/$/, '');
+  const termUrl = `${baseUrl}/terms/${letter}/${slug}`;
+  const articleSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: term.title,
+    description: term.seoDescription?.slice(0, 200) || term.title,
+    author: { '@type': 'Person', name: term.author },
+    publisher: { '@type': 'Organization', name: 'Imperialpedia', url: baseUrl },
+    url: termUrl,
+  };
+  const breadcrumbSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: baseUrl },
+      { '@type': 'ListItem', position: 2, name: 'Terms', item: `${baseUrl}/terms` },
+      { '@type': 'ListItem', position: 3, name: term.title, item: termUrl },
+    ],
+  };
+
   return (
     <div className="min-h-screen flex flex-col gap-8 mx-auto max-w-7xl p-4 mt-16">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       {/* Table of Contents - Left Side */}
       <div className="flex">
         <TableOfContents headings={headings} />

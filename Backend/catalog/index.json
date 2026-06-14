@@ -1,19 +1,15 @@
 {
-  "generatedAt": "2026-05-31T20:31:14.388Z",
+  "generatedAt": "2026-06-13T23:53:36.467Z",
   "services": [
     "about-service",
-    "abuse-platform",
     "account-service",
     "admin-service",
     "agent-service",
     "aml-service",
-    "analytics-platform",
-    "audit-platform",
     "audit-service",
     "auth-node",
     "auth-service",
     "baalvion-os",
-    "billing-platform",
     "brand-connector-service",
     "cache",
     "cms-service",
@@ -30,7 +26,6 @@
     "fulfillment-service",
     "fx-service",
     "gateway",
-    "identity-platform",
     "imperialpedia-service",
     "insiders-service",
     "inventory-service",
@@ -42,14 +37,10 @@
     "market-service",
     "mining-service",
     "ml-service",
-    "notification-platform",
     "notification-service",
     "oauth-service",
-    "order-service",
-    "organization-platform",
     "payment-rails-service",
     "payment-service",
-    "proxy-gateway",
     "proxy-platform",
     "rbac-service",
     "real-estate-service",
@@ -72,16 +63,13 @@
   ],
   "graph": {
     "about-service": [
-      "identity-platform"
-    ],
-    "abuse-platform": [
-      "identity-platform"
+      "auth-service"
     ],
     "account-service": [
       "auth-service"
     ],
     "admin-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "agent-service": [
       "auth-service"
@@ -89,26 +77,21 @@
     "aml-service": [
       "auth-service"
     ],
-    "analytics-platform": [],
-    "audit-platform": [],
     "audit-service": [
       "auth-service"
     ],
     "auth-node": [],
     "auth-service": [],
     "baalvion-os": [],
-    "billing-platform": [
-      "identity-platform"
-    ],
     "brand-connector-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "cache": [],
     "cms-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "commerce-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "credit-service": [
       "auth-service",
@@ -116,10 +99,10 @@
       "account-service"
     ],
     "ctm-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "dashboard-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "deal-room-service": [
       "auth-service"
@@ -131,7 +114,7 @@
       "auth-service"
     ],
     "elite-circle-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "escrow-service": [
       "auth-service"
@@ -140,7 +123,7 @@
       "auth-service"
     ],
     "fulfillment-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "fx-service": [
       "auth-service",
@@ -148,54 +131,44 @@
       "ledger-service"
     ],
     "gateway": [],
-    "identity-platform": [],
     "imperialpedia-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "insiders-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "inventory-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "ir-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "jobs-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "law-elite": [
-      "identity-platform"
+      "auth-service"
     ],
     "law-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "ledger-service": [
       "auth-service"
     ],
     "market-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "mining-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "ml-service": [
-      "identity-platform"
-    ],
-    "notification-platform": [
-      "identity-platform"
+      "auth-service"
     ],
     "notification-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "oauth-service": [
       "auth-service"
-    ],
-    "order-service": [
-      "identity-platform"
-    ],
-    "organization-platform": [
-      "identity-platform"
     ],
     "payment-rails-service": [
       "auth-service",
@@ -205,21 +178,18 @@
     "payment-service": [
       "auth-service"
     ],
-    "proxy-gateway": [
-      "proxy-platform"
-    ],
     "proxy-platform": [
-      "identity-platform",
-      "billing-platform"
+      "auth-service",
+      "commerce-service"
     ],
     "rbac-service": [
       "auth-service"
     ],
     "real-estate-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "realtime-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "reconciliation-service": [
       "auth-service"
@@ -259,7 +229,7 @@
       "ml-service"
     ],
     "trade-service": [
-      "identity-platform"
+      "auth-service"
     ],
     "trust-score-service": [
       "auth-service"
@@ -270,45 +240,8 @@
     ]
   },
   "eventConsumers": {
-    "proxy.session.started": [
-      "abuse-platform",
-      "analytics-platform",
-      "audit-platform"
-    ],
-    "provider.health.changed": [
-      "abuse-platform",
-      "analytics-platform",
-      "audit-platform",
-      "notification-platform"
-    ],
-    "proxy.session.ended": [
-      "analytics-platform",
-      "billing-platform"
-    ],
-    "billing.invoice.generated": [
-      "analytics-platform",
-      "audit-platform",
-      "notification-platform"
-    ],
-    "abuse.action.triggered": [
-      "analytics-platform",
-      "audit-platform",
-      "notification-platform"
-    ],
     "org.created": [
-      "audit-platform",
-      "billing-platform",
       "proxy-platform"
-    ],
-    "security.incident": [
-      "audit-platform",
-      "notification-platform"
-    ],
-    "admin.impersonation": [
-      "audit-platform"
-    ],
-    "billing.payment.failed": [
-      "notification-platform"
     ]
   }
 }

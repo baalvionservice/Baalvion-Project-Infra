@@ -2,13 +2,14 @@
 
 import { use, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import PageHeader from '@/components/common/PageHeader';
+import MediaManager from '@/components/cms/media/MediaManager';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useUIStore } from '@/lib/store/uiStore';
 
-// Re-uses the global media library page with website context
 export default function WebsiteMediaPage({
   params,
 }: {
@@ -17,6 +18,7 @@ export default function WebsiteMediaPage({
   const { websiteId } = use(params);
   const { setBreadcrumbs } = useUIStore();
   const { data: website } = useWebsite(websiteId);
+  const canonicalId = website?.id ?? '';
 
   useEffect(() => {
     setBreadcrumbs([
@@ -37,19 +39,21 @@ export default function WebsiteMediaPage({
         </Button>
         <PageHeader
           title="Media Library"
-          description={`Assets for ${website?.name ?? '...'}`}
+          description="Upload and manage images, videos and documents"
+          actions={
+            <Badge variant="outline" className="gap-1 text-[10px] text-muted-foreground">
+              <Info className="h-3 w-3" />
+              Shared across your organisation
+            </Badge>
+          }
         />
       </div>
 
-      {/* Redirect note — the global /media page handles all media */}
-      <div className="rounded-lg border bg-muted/30 p-6 text-center space-y-3">
-        <p className="text-sm text-muted-foreground">
-          Media for all websites is managed in the global Media Library.
-        </p>
-        <Button asChild>
-          <Link href="/media">Open Media Library</Link>
-        </Button>
-      </div>
+      {canonicalId ? (
+        <MediaManager canonicalId={canonicalId} plan={website?.plan ?? 'pro'} />
+      ) : (
+        <p className="text-sm text-muted-foreground">Loading…</p>
+      )}
     </div>
   );
 }

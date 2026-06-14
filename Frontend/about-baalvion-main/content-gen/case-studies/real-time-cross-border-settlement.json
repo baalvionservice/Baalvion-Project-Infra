@@ -1,0 +1,62 @@
+{
+  "slug": "real-time-cross-border-settlement",
+  "title": "Real-Time Cross-Border Settlement",
+  "kind": "case_study",
+  "heroImageSeed": "cs-settlement",
+  "excerpt": "Cutting settlement latency by 40% with automated multi-rail clearing and a double-entry ledger on the Baalvion Operating System.",
+  "seo": {
+    "title": "Case Study: Real-Time Cross-Border Settlement | Baalvion",
+    "description": "How automated multi-rail clearing and a double-entry ledger cut cross-border settlement latency by 40% on the Baalvion Operating System.",
+    "keywords": ["cross-border settlement", "payments", "multi-rail clearing", "trade finance", "Baalvion case study", "double-entry ledger"]
+  },
+  "customFields": {
+    "client": "A trade-finance operator clearing payments across India, the UAE, and the UK",
+    "sector": "Finance",
+    "challenge": "Manual, single-rail settlement with multi-day latency and frequent reconciliation breaks.",
+    "solution": "Automated multi-rail routing with idempotent settlement and an outbox-backed double-entry ledger.",
+    "architecture": "Outbox pattern for guaranteed delivery, idempotency keys, FX conversion at the ledger boundary.",
+    "techStack": ["Transactional outbox", "Idempotency keys", "FX engine", "Double-entry ledger", "Vendor payment rails"],
+    "results": [
+      { "metric": "Settlement latency", "value": "-40%" },
+      { "metric": "Reconciliation breaks", "value": "-95%" },
+      { "metric": "Rail failover", "value": "Automatic" }
+    ],
+    "lessons": [
+      "Idempotency is non-negotiable for money movement.",
+      "Convert FX at the ledger boundary, not in the UI.",
+      "Multi-rail failover removes single-provider downtime."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "The operator cleared payments across three jurisdictions using a single banking rail and a spreadsheet for reconciliation. Settlement took two to four days, FX was applied inconsistently, and roughly one in twenty transactions broke reconciliation — each break taking an analyst hours to resolve. A single provider outage could halt settlement entirely." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We rebuilt settlement on the Baalvion Operating System with automated multi-rail routing, server-computed FX, and a double-entry ledger that records every movement as a balanced transaction. Every payment carries an idempotency key, so a retried request can never double-settle. A transactional outbox guarantees that once a settlement is committed, it is delivered to the rail exactly once." },
+    { "type": "list", "ordered": false, "items": [
+      "**Multi-rail routing** with automatic failover between providers.",
+      "**Idempotent settlement** so retries are always safe.",
+      "**Server-side FX** applied at the ledger boundary for consistent valuation.",
+      "**Double-entry ledger** as the single financial source of truth."
+    ] },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "The settlement service writes the intent and the outbox entry in one database transaction. A relay then publishes to the chosen rail, retrying on failure and failing over to an alternate provider if needed. The ledger consumes settlement events and posts balanced entries, with FX conversion applied at the moment of posting. This pattern is detailed in [trade finance automation](/news/finance/trade-finance-automation) and [building multi-tenant SaaS](/news/tech/building-multi-tenant-saas)." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "A transactional outbox for guaranteed delivery, idempotency keys for safety, an FX engine for conversion, a double-entry ledger for integrity, and adapters for multiple payment rails. The capability is part of our [automation](/services/automation) and [cloud solutions](/services/cloud-solutions) practice." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "Average settlement latency fell by 40%, reconciliation breaks dropped by 95%, and a provider outage no longer stops the business — traffic fails over automatically. Finance closed its books in hours instead of days." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "Idempotency and the outbox pattern are the foundation of trustworthy money movement. Applying FX at the ledger boundary eliminated an entire class of valuation disputes. And multi-rail failover turned a fragile single point of failure into a resilient, self-healing path." }
+  ],
+  "faqs": [
+    { "q": "How is double-settlement prevented?", "a": "Every payment carries an idempotency key. A retried or duplicated request resolves to the same settlement, so funds can never move twice." },
+    { "q": "What happens if a payment provider goes down?", "a": "Routing fails over automatically to an alternate rail, so settlement continues without manual intervention." },
+    { "q": "Where is FX applied?", "a": "At the ledger boundary, when balanced entries are posted — not in the UI — which keeps valuation consistent across the platform." },
+    { "q": "Does this work across multiple currencies and jurisdictions?", "a": "Yes. The FX engine and ledger handle multi-currency settlement, and the compliance engine screens each transaction in real time." }
+  ],
+  "internalLinks": [
+    { "anchor": "trade finance automation", "href": "/news/finance/trade-finance-automation" },
+    { "anchor": "automation", "href": "/services/automation" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" },
+    { "anchor": "building multi-tenant SaaS", "href": "/news/tech/building-multi-tenant-saas" }
+  ]
+}

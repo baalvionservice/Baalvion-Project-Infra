@@ -1,21 +1,20 @@
-﻿'use strict';
+'use strict';
+// Aligned to the live `ir.filings` table (file_url not document_url; varchar status;
+// no accession_number column).
 module.exports = (sequelize, DataTypes) => {
     const Filing = sequelize.define('Filing', {
-        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+        id: { type: DataTypes.BIGINT, primaryKey: true, autoIncrement: true },
         org_id: { type: DataTypes.UUID, allowNull: false },
-        filing_type: { type: DataTypes.STRING(100), allowNull: false },
+        created_by: { type: DataTypes.BIGINT },
         title: { type: DataTypes.STRING(500), allowNull: false },
+        filing_type: { type: DataTypes.STRING, allowNull: false },
         regulator: { type: DataTypes.STRING(100) },
-        filing_date: { type: DataTypes.DATEONLY, allowNull: false },
+        filing_date: { type: DataTypes.DATEONLY },
         period_of_report: { type: DataTypes.DATEONLY },
-        document_url: { type: DataTypes.STRING(500) },
-        accession_number: { type: DataTypes.STRING(100) },
-        status: {
-            type: DataTypes.ENUM('filed', 'amended', 'withdrawn'),
-            defaultValue: 'filed',
-        },
+        status: { type: DataTypes.STRING, defaultValue: 'filed' },
+        file_url: { type: DataTypes.TEXT },
+        external_url: { type: DataTypes.TEXT },
         description: { type: DataTypes.TEXT },
-        created_by: { type: DataTypes.INTEGER },
     }, {
         schema: 'ir',
         tableName: 'filings',

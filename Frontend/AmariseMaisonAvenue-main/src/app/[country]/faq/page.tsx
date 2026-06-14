@@ -3,6 +3,8 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronRight, HelpCircle } from 'lucide-react';
 import { COUNTRIES } from '@/lib/mock-data';
+import { getCustomerService } from '@/lib/cms';
+import type { CountryCode } from '@/lib/types';
 
 type PageProps = { params: Promise<{ country: string }> };
 
@@ -48,6 +50,15 @@ const SECTIONS: { heading: string; items: { q: string; a: string }[] }[] = [
 export default async function FaqPage({ params }: PageProps) {
   const countryCode = (await params).country || 'us';
 
+  // CMS-first: per-country FAQs from the central CMS, grouped under one section.
+  // Falls back to the curated static SECTIONS when the CMS is empty/unavailable.
+  const cmsService = await getCustomerService(countryCode as CountryCode);
+  const cmsFaqs = cmsService?.faqs ?? [];
+  const sections =
+    cmsFaqs.length > 0
+      ? [{ heading: 'Client Services', items: cmsFaqs.map((f) => ({ q: f.question, a: f.answer })) }]
+      : SECTIONS;
+
   return (
     <div className="animate-fade-in bg-gradient-to-br from-ivory via-white to-ivory min-h-screen">
       <div className="container mx-auto px-6 py-24 max-w-4xl">
@@ -63,7 +74,7 @@ export default async function FaqPage({ params }: PageProps) {
         </div>
 
         <div className="space-y-16">
-          {SECTIONS.map((section) => (
+          {sections.map((section) => (
             <section key={section.heading} className="space-y-8">
               <h2 className="text-[11px] font-bold uppercase tracking-[0.4em] text-plum border-b border-border pb-4">
                 {section.heading}

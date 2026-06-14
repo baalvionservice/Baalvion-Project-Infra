@@ -4,4 +4,44 @@
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
-  maxInstances: 1
+  maxInstances: 3
+
+# Environment variables.
+# NEXT_PUBLIC_* values are baked into the client bundle at BUILD time, so they
+# must be available during the build (availability: BUILD).
+#
+# The API/auth values below mirror the production fallbacks already wired in code
+# (next.config.ts AUTH_PROXY_TARGET fallback and src/lib api client fallbacks), so
+# the deployed env and the code defaults agree on the same gateway host/path scheme.
+# CONFIRM the real production gateway host before launch and update in ONE place here
+# if it differs (currently the platform gateway api.baalvion.com).
+env:
+  # Canonical public origin — drives all SEO canonicals, robots.txt host, and
+  # sitemap.xml absolute URLs (src/lib/site-url.ts). This is the product apex domain.
+  - variable: NEXT_PUBLIC_APP_URL
+    value: https://controlthemarket.com
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Never ship mock mode to production.
+  - variable: NEXT_PUBLIC_USE_MOCK
+    value: "false"
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Production CTM API base (gateway-routed) — matches the fallback in src/lib/api.ts
+  # and src/lib/ctm-api-client.ts.
+  - variable: NEXT_PUBLIC_CTM_API_URL
+    value: https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1
+    availability:
+      - BUILD
+      - RUNTIME
+
+  # Server-side auth proxy target for /auth-bff/* rewrites — matches the production
+  # fallback in next.config.ts.
+  - variable: AUTH_PROXY_TARGET
+    value: https://api.baalvion.com/api/v1/identity/auth/v1/auth
+    availability:
+      - RUNTIME

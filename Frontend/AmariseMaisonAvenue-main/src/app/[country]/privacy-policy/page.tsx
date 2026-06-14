@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { COUNTRIES } from '@/lib/mock-data';
+import { getContent, toProse } from '@/lib/cms';
 
 type PageProps = { params: Promise<{ country: string }> };
 
@@ -45,6 +46,9 @@ export default async function PrivacyPolicyPage({ params }: PageProps) {
   const countryCode = (await params).country || 'us';
   const country = COUNTRIES[countryCode] || COUNTRIES.us;
 
+  // CMS-first: render the published legal copy when available, else the static fallback.
+  const blocks = toProse(await getContent('privacy-policy'));
+
   return (
     <div className="animate-fade-in bg-white min-h-screen">
       <div className="container mx-auto px-6 py-24 max-w-3xl">
@@ -60,14 +64,24 @@ export default async function PrivacyPolicyPage({ params }: PageProps) {
         </p>
 
         <div className="space-y-12">
-          {SECTIONS.map((s) => (
-            <section key={s.title} className="space-y-4">
-              <h2 className="text-lg font-bold uppercase tracking-widest text-gray-900">{s.title}</h2>
-              {s.body.map((p, i) => (
-                <p key={i} className="text-md text-gray-600 font-light leading-relaxed">{p}</p>
-              ))}
-            </section>
-          ))}
+          {blocks.length > 0 ? (
+            blocks.map((b, i) =>
+              b.type === 'heading' ? (
+                <h2 key={i} className="text-lg font-bold uppercase tracking-widest text-gray-900">{b.text}</h2>
+              ) : (
+                <p key={i} className="text-md text-gray-600 font-light leading-relaxed">{b.text}</p>
+              )
+            )
+          ) : (
+            SECTIONS.map((s) => (
+              <section key={s.title} className="space-y-4">
+                <h2 className="text-lg font-bold uppercase tracking-widest text-gray-900">{s.title}</h2>
+                {s.body.map((p, i) => (
+                  <p key={i} className="text-md text-gray-600 font-light leading-relaxed">{p}</p>
+                ))}
+              </section>
+            ))
+          )}
         </div>
 
         <p className="mt-16 pt-8 border-t border-border text-sm text-gray-400 font-light italic">

@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -61,6 +62,8 @@ public class EscrowController {
     return ResponseEntity.ok(escrowService.listEscrows(tenantId, status, page, size));
   }
 
+  // War Room 3: escrow release moves held funds to the beneficiary — restrict to finance/admin.
+  @PreAuthorize("hasAnyRole('ADMIN','OWNER','SUPER_ADMIN','FINANCE_OFFICER','COMPLIANCE_OFFICER','PLATFORM_ADMIN')")
   @PostMapping("/{id}/release")
   public ResponseEntity<EscrowResponse> release(
     @RequestHeader(value = "X-Tenant-ID", required = false) String tenantIdHeader,
@@ -73,6 +76,8 @@ public class EscrowController {
     return ResponseEntity.ok(escrowService.release(tenantId, id, action));
   }
 
+  // War Room 3: escrow refund returns held funds — restrict to finance/admin.
+  @PreAuthorize("hasAnyRole('ADMIN','OWNER','SUPER_ADMIN','FINANCE_OFFICER','COMPLIANCE_OFFICER','PLATFORM_ADMIN')")
   @PostMapping("/{id}/refund")
   public ResponseEntity<EscrowResponse> refund(
     @RequestHeader(value = "X-Tenant-ID", required = false) String tenantIdHeader,

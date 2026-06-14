@@ -15,8 +15,9 @@ function pkceChallenge(verifier) {
 }
 
 function verifyPkce(verifier, challenge, method) {
+    // Only S256 is accepted. 'plain' is insecure (verifier == challenge — trivially interceptable)
+    // and is no longer advertised in the discovery document.
     if (method === 'S256') return pkceChallenge(verifier) === challenge;
-    if (method === 'plain') return verifier === challenge;
     return false;
 }
 

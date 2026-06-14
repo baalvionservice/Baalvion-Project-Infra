@@ -38,10 +38,10 @@ export const metadata: Metadata = {
       "The foundational layer for the next century of international commerce.",
     images: [
       {
-        url: "https://picsum.photos/seed/baalvion-og/1200/630",
+        url: "https://about.baalvion.com/api/og?title=Baalvion%20Operating%20System%20(BOS)&eyebrow=Global%20Trade%20Infrastructure",
         width: 1200,
         height: 630,
-        alt: "Baalvion Operating System (BOS) Global Infrastructure Visualization",
+        alt: "Baalvion Operating System (BOS) Global Infrastructure",
       },
     ],
   },
@@ -50,7 +50,7 @@ export const metadata: Metadata = {
     title: "Baalvion Operating System (BOS) | Unified Global Trade",
     description:
       "The foundational layer for the next century of international commerce.",
-    images: ["https://picsum.photos/seed/baalvion-og/1200/630"],
+    images: ["https://about.baalvion.com/api/og?title=Baalvion%20Operating%20System%20(BOS)&eyebrow=Global%20Trade%20Infrastructure"],
     creator: "@BaalvionIndustries",
   },
   robots: {
@@ -63,6 +63,27 @@ export const metadata: Metadata = {
       "max-image-preview": "large",
       "max-snippet": -1,
     },
+  },
+};
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Baalvion Industries",
+  url: "https://about.baalvion.com",
+  sameAs: ["https://baalvion.nexus"],
+  description: "Baalvion Industries builds the unified global trade infrastructure connecting businesses, finance, compliance, and intelligence systems into a single Baalvion Operating System (BOS).",
+};
+
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Baalvion Industries",
+  url: "https://about.baalvion.com",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: { "@type": "EntryPoint", urlTemplate: "https://about.baalvion.com/news/search?q={search_term_string}" },
+    "query-input": "required name=search_term_string",
   },
 };
 
@@ -83,6 +104,14 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
           rel="stylesheet"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
         />
       </head>
       <body className="font-body antialiased min-h-screen bg-background text-foreground selection:bg-primary/20">

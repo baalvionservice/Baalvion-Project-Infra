@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { keepPreviousData } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import type { ColumnDef } from '@tanstack/react-table';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, RefreshCw } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import StatusBadge from '@/components/common/StatusBadge';
@@ -13,27 +12,40 @@ import DataTableColumnHeader from '@/components/data-table/DataTableColumnHeader
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 import { notificationsApi, type NotificationLog } from '@/lib/api/notifications';
 import { useUIStore } from '@/lib/store/uiStore';
 import { formatDate } from '@/lib/utils/format';
 
 export default function NotificationLogsPage() {
   const { setBreadcrumbs } = useUIStore();
+  const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState('');
   const [channelFilter, setChannelFilter] = useState('');
 
   const { data, isLoading } = useQuery({
-    queryKey: ['notification-logs', { page, status: statusFilter, channel: channelFilter }],
+    queryKey: ['notification-logs', { page, channel: channelFilter }],
     queryFn: () =>
       notificationsApi.logs
-        .list({ page, limit: 20, status: statusFilter || undefined, channel: channelFilter || undefined })
+        .list({ page, limit: 20, channel: channelFilter || undefined })
         .then((r) => r.data),
     placeholderData: keepPreviousData,
   });
 
+  const retryMutation = useMutation({
+    mutationFn: (entryId: string) => notificationsApi.logs.retry(entryId),
+    onSuccess: () => {
+      toast.success('The failed delivery was requeued for retry.');
+      queryClient.invalidateQueries({ queryKey: ['notification-logs'] });
+    },
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : 'Failed to requeue delivery';
+      toast.error(message);
+    },
+  });
+
   useEffect(() => {
-    setBreadcrumbs([{ label: 'Notifications', href: '/notifications' }, { label: 'Delivery Logs' }]);
+    setBreadcrumbs([{ label: 'Notifications', href: '/notifications' }, { label: 'Failed Deliveries' }]);
   }, [setBreadcrumbs]);
 
   const columns: ColumnDef<NotificationLog>[] = [
@@ -76,12 +88,26 @@ export default function NotificationLogsPage() {
       ),
     },
     {
-      accessorKey: 'sentAt',
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Sent" />,
+      accessorKey: 'createdAt',
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Failed At" />,
       cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
-          {row.original.sentAt ? formatDate(row.original.sentAt) : formatDate(row.original.createdAt)}
-        </span>
+        <span className="text-sm text-muted-foreground">{formatDate(row.original.createdAt)}</span>
+      ),
+    },
+    {
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 text-xs"
+          disabled={retryMutation.isPending}
+          onClick={() => retryMutation.mutate(row.original.id)}
+        >
+          <RefreshCw className="mr-1 h-3.5 w-3.5" />
+          Retry
+        </Button>
       ),
     },
   ];
@@ -93,7 +119,10 @@ export default function NotificationLogsPage() {
           <Link href="/notifications"><ArrowLeft className="mr-1 h-4 w-4" />Back</Link>
         </Button>
       </div>
-      <PageHeader title="Delivery Logs" description={`${data?.pagination?.total ?? 0} delivery events`} />
+      <PageHeader
+        title="Failed Deliveries"
+        description={`${data?.pagination?.total ?? 0} failed deliveries in the dead-letter queue`}
+      />
       <DataTable
         columns={columns}
         data={data?.data ?? []}
@@ -110,18 +139,8 @@ export default function NotificationLogsPage() {
                 <SelectItem value="email">Email</SelectItem>
                 <SelectItem value="push">Push</SelectItem>
                 <SelectItem value="sms">SMS</SelectItem>
+                <SelectItem value="webhook">Webhook</SelectItem>
                 <SelectItem value="in_app">In-app</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter || 'all'} onValueChange={(v) => setStatusFilter(v === 'all' ? '' : v)}>
-              <SelectTrigger className="h-8 w-32"><SelectValue placeholder="Status" /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All status</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="sent">Sent</SelectItem>
-                <SelectItem value="delivered">Delivered</SelectItem>
-                <SelectItem value="opened">Opened</SelectItem>
-                <SelectItem value="failed">Failed</SelectItem>
               </SelectContent>
             </Select>
           </div>

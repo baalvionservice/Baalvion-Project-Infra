@@ -28,7 +28,7 @@ jobs:
           - { name: session-service,         port: 3022, context: ., file: Backend/services/identity/session-service/Dockerfile }
           - { name: oauth-service,           port: 3023, context: ., file: Backend/services/identity/oauth-service/Dockerfile }
           - { name: jobs-service,            port: 3002, context: ., file: Backend/services/ecosystem/jobs-service/Dockerfile }
-          - { name: ctm-service,             port: 3011, context: ., file: Backend/services/ecosystem/ctm-service/Dockerfile }
+          - { name: ctm-service,             port: 3017, context: ., file: Backend/services/ecosystem/ctm-service/Dockerfile }
           - { name: mining-service,          port: 3003, context: ., file: Backend/services/ecosystem/mining-service/Dockerfile }
           - { name: imperialpedia-service,   port: 3004, context: ., file: Backend/services/knowledge/imperialpedia-service/Dockerfile }
           - { name: real-estate-service,     port: 3005, context: ., file: Backend/services/ecosystem/real-estate-service/Dockerfile }
@@ -88,6 +88,6 @@ jobs:
       - name: Health checks
         run: |
           sleep 20
-          for port in 3001 3021 3022 3023 3002 3011 3003 3004 3005 3006 3007 3008 3009 3010 3040; do
+          for port in 3001 3021 3022 3023 3002 3017 3003 3004 3005 3006 3007 3008 3009 3010 3040; do
             curl -sf "http://${{ secrets.STAGING_HOST }}:${port}/health" && echo "Port ${port} healthy" || echo "Port ${port} not responding (may not be deployed)"
           done

@@ -37,7 +37,7 @@ pnpm test
 - [ ] `pnpm run architecture:check` passes (if services/contracts changed)
 - [ ] No secrets, keys, or DB dumps added; `.env.example` updated if config changed
 - [ ] Docs / `CHANGELOG.md` updated where relevant
-- [ ] Cross-context contract changes have the owning team's approval (CODEOWNERS)
+- [ ] Cross-context contract changes have the code owner's approval (CODEOWNERS)
 
 ## Screenshots / notes
 

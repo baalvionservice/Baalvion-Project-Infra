@@ -1,0 +1,37 @@
+{
+  "slug": "leadership-overview",
+  "title": "Leadership & Governance",
+  "kind": "company",
+  "heroImageSeed": "co-leadership",
+  "excerpt": "How Baalvion is led and governed — a philosophy of accountable decisions, long-term thinking, and operator-led judgement.",
+  "seo": {
+    "title": "Leadership & Governance | Baalvion",
+    "description": "How Baalvion is led and governed: accountable decision-making, long-term thinking, and operator-led judgement across the Baalvion Group.",
+    "keywords": ["Baalvion leadership", "governance", "company management", "Baalvion Group", "corporate governance"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "How We Lead" },
+    { "type": "paragraph", "text": "Baalvion is led by operators — people who build and run the platform, not just oversee it. Our leadership brings together experience across technology, finance, and operations, and the same principle that shapes our engineering shapes our leadership: be accountable, decide for the long term, and stay close to how the work actually happens. You can meet the people steering the group on our [leadership page](/leadership)." },
+    { "type": "heading", "level": 2, "text": "How We Govern" },
+    { "type": "paragraph", "text": "Governance at Baalvion mirrors the platform we build: transparent, auditable, and compliance-first. Decisions that affect partners, finances, or data are recorded and reviewable, the same discipline we apply to the [Baalvion Operating System](/platform) itself. The Governance layer of the platform exists precisely so that policy, compliance, and accountability are first-class, not afterthoughts — explored further in [trust and security](/trust)." },
+    { "type": "list", "ordered": false, "items": [
+      "**Accountable:** decisions have owners and a record.",
+      "**Long-term:** we optimise for durable infrastructure, not quarterly optics.",
+      "**Operator-led:** those who run the systems shape the strategy.",
+      "**Compliance-first:** governance designed in, across every layer."
+    ] },
+    { "type": "heading", "level": 2, "text": "Why It Matters" },
+    { "type": "paragraph", "text": "When you operate trade infrastructure across 198 markets, governance isn't ceremony — it's how trust is maintained at scale. That's why it underpins everything from our [mission](/about/mission) to our day-to-day [services](/services). To work with a team that governs the way it engineers, [get in touch](/contact)." }
+  ],
+  "faqs": [
+    { "q": "Who leads Baalvion?", "a": "An operator-led team with experience across technology, finance, and operations — meet them on the [leadership page](/leadership)." },
+    { "q": "How does Baalvion approach governance?", "a": "Transparently and compliance-first: decisions affecting partners, finance, or data are recorded and reviewable, mirroring the platform's own auditability." },
+    { "q": "What does 'operator-led' mean?", "a": "The people who build and run the platform also shape its strategy, keeping leadership close to production reality." }
+  ],
+  "internalLinks": [
+    { "anchor": "leadership page", "href": "/leadership" },
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "trust and security", "href": "/trust" },
+    { "anchor": "mission", "href": "/about/mission" }
+  ]
+}

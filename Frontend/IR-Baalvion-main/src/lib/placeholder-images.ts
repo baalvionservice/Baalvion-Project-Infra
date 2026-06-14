@@ -1,10 +1,47 @@
-import data from './placeholder-images.json';
+export const placeholderImage = '/images/placeholder.png';
 
-export type ImagePlaceholder = {
-  id: string;
-  description: string;
-  imageUrl: string;
-  imageHint: string;
-};
+export const teamPlaceholder = (name: string) =>
+  `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`;
 
-export const PlaceHolderImages: ImagePlaceholder[] = data.placeholderImages;
+export const PlaceHolderImages = [
+  { id: 'founder-photo', imageUrl: placeholderImage, imageHint: 'founder portrait' },
+  { id: 'tamanna-photo', imageUrl: '/photos/tamannaShaaikh.png', imageHint: 'executive portrait' },
+  { id: 'dilip-photo', imageUrl: '/photos/DilipKuldeepYadav.jpeg', imageHint: 'executive portrait' },
+  { id: 'executive-1-photo', imageUrl: '/photos/aadarshPatra.jpeg', imageHint: 'executive portrait' },
+  { id: 'prathamesh-photo', imageUrl: '/photos/Prathamesh Pawer.jpeg', imageHint: 'leadership portrait' },
+  { id: 'laxman-photo', imageUrl: '/photos/Laxman Singh Champia.jpeg', imageHint: 'leadership portrait' },
+  { id: 'rashmika-photo', imageUrl: '/photos/Rashmika Singh.jpeg', imageHint: 'leadership portrait' },
+  { id: 'preeti-photo', imageUrl: '/photos/Preeti snigdha Mallick.jpeg', imageHint: 'leadership portrait' },
+  { id: 'sasmita-photo', imageUrl: '/photos/sasmitagamel.jpeg', imageHint: 'leadership portrait' },
+  { id: 'bishal-photo', imageUrl: '/photos/bishalkumarpingua.jpeg', imageHint: 'leadership portrait' },
+  { id: 'biswajeet-photo', imageUrl: '/photos/Biswajeet patra.jpeg', imageHint: 'leadership portrait' },
+  { id: 'jaid-photo', imageUrl: '/photos/Jaid Alam.jpeg', imageHint: 'leadership portrait' },
+  { id: 'webcast-banner', imageUrl: placeholderImage, imageHint: 'webcast banner' },
+  { id: 'news-1-image', imageUrl: placeholderImage, imageHint: 'news article' },
+  { id: 'news-2-image', imageUrl: placeholderImage, imageHint: 'news article' },
+  { id: 'news-3-image', imageUrl: placeholderImage, imageHint: 'news article' },
+  { id: 'roadmap-infographic', imageUrl: placeholderImage, imageHint: 'roadmap graphic' },
+  { id: 'quarterly-results-bg', imageUrl: placeholderImage, imageHint: 'results background' },
+  { id: 'thesis-chart-1', imageUrl: placeholderImage, imageHint: 'thesis chart' },
+  { id: 'thesis-chart-2', imageUrl: placeholderImage, imageHint: 'thesis chart' },
+  { id: 'executive-2-photo', imageUrl: placeholderImage, imageHint: 'executive portrait' },
+  { id: 'bod-1', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-2', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-3', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-4', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-5', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-6', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-7', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-8', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-9', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-10', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-11', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-12', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-13', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-14', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-15', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-16', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-17', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-18', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+  { id: 'bod-19', imageUrl: placeholderImage, imageHint: 'board member portrait' },
+];

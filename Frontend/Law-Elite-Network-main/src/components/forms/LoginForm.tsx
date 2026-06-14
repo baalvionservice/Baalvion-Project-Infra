@@ -39,7 +39,7 @@ export default function LoginForm() {
       });
 
       // Unified role-based redirection logic
-      const userRole = (user?.roleId || user?.role) as string | undefined;
+      const userRole = user?.role as string | undefined;
 
       if (userRole && ['admin', 'owner', 'super_admin'].includes(userRole)) {
         router.push('/admin');

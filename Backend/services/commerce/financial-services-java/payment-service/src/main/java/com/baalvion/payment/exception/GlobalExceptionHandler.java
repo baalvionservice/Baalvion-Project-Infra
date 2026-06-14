@@ -1,5 +1,7 @@
 package com.baalvion.payment.exception;
 
+import com.baalvion.payment.gateway.exception.PspConfigNotFoundException;
+import com.baalvion.payment.gateway.exception.WebhookVerificationException;
 import jakarta.persistence.OptimisticLockException;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -41,6 +43,21 @@ public class GlobalExceptionHandler {
   public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
     log.warn("Access denied: {}", ex.getMessage());
     return envelope(HttpStatus.FORBIDDEN, "FORBIDDEN", ex.getMessage(), null);
+  }
+
+  @ExceptionHandler(WebhookVerificationException.class)
+  public ResponseEntity<Map<String, Object>> handleWebhookVerification(WebhookVerificationException ex) {
+    // Generic message so an attacker cannot distinguish bad-signature from unknown-provider.
+    log.warn("Webhook verification failed: {}", ex.getMessage());
+    return envelope(HttpStatus.BAD_REQUEST, "WEBHOOK_VERIFICATION_FAILED", "Webhook signature verification failed", null);
+  }
+
+  @ExceptionHandler(PspConfigNotFoundException.class)
+  public ResponseEntity<Map<String, Object>> handlePspConfigNotFound(PspConfigNotFoundException ex) {
+    // Generic message so the response never reveals which slug/provider combination was missing.
+    log.warn("PSP config not found: {}", ex.getMessage());
+    return envelope(HttpStatus.UNPROCESSABLE_ENTITY, "PSP_CONFIG_NOT_FOUND",
+      "No payment provider is configured for this site", null);
   }
 
   @ExceptionHandler({OptimisticLockingFailureException.class, OptimisticLockException.class})

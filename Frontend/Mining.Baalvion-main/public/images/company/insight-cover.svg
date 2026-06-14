@@ -1,0 +1,13 @@
+<svg viewBox="0 0 1200 630" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Baalvion insight">
+  <defs>
+    <linearGradient id="i" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B2540"/><stop offset="1" stop-color="#103a63"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#i)"/>
+  <circle cx="1000" cy="120" r="240" fill="#21CEDD" opacity="0.08"/>
+  <path d="M0 470 L240 350 L420 430 L640 300 L860 410 L1080 330 L1200 380 L1200 630 L0 630 Z" fill="#0E2E4E"/>
+  <rect x="80" y="120" width="90" height="6" rx="3" fill="#21CEDD"/>
+  <text x="80" y="200" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="800" fill="#FFFFFF">Market Insight</text>
+  <text x="80" y="246" font-family="Arial, Helvetica, sans-serif" font-size="20" fill="#9FC6D6">Baalvion Mining — Editorial Desk</text>
+</svg>

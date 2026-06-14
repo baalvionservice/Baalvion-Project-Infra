@@ -1,0 +1,55 @@
+{
+  "slug": "healthcare",
+  "title": "Baalvion for Healthcare",
+  "kind": "industry",
+  "heroImageSeed": "ind-healthcare",
+  "excerpt": "Secure, compliant health technology — patient data protected by design, systems that integrate, and platforms that scale.",
+  "seo": {
+    "title": "Healthcare Technology Solutions | Baalvion",
+    "description": "Baalvion builds secure, compliant healthcare platforms with strong data protection, interoperability, and reliability. Explore how we serve the sector.",
+    "keywords": ["healthcare technology", "health data security", "interoperability", "HIPAA", "Baalvion industries", "digital health"]
+  },
+  "customFields": {
+    "challenges": [
+      "Protecting sensitive patient data under strict regulation",
+      "Integrating fragmented clinical and administrative systems",
+      "Auditability and traceability of every access",
+      "Reliability for systems people depend on"
+    ],
+    "solutions": [
+      "Encryption in transit and at rest, with strict access control",
+      "Interoperable, API-first integration across systems",
+      "Append-only audit logs for every data access",
+      "Resilient, observable infrastructure"
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Sector Overview" },
+    { "type": "paragraph", "text": "Healthcare technology operates under a unique combination of pressures: the data is among the most sensitive there is, the regulation is strict, the systems are fragmented, and the stakes — when something fails — are human. Baalvion brings infrastructure-grade engineering to this environment, with the security and auditability the sector demands built in from the foundation, as described in our [trust and security](/trust) approach." },
+    { "type": "heading", "level": 2, "text": "Challenges" },
+    { "type": "list", "ordered": false, "items": [
+      "**Data protection:** patient data must be encrypted, access-controlled, and provably handled correctly.",
+      "**Fragmentation:** clinical, administrative, and lab systems rarely speak the same language.",
+      "**Auditability:** every access and change must be traceable.",
+      "**Reliability:** downtime in healthcare is not an inconvenience, it's a risk."
+    ] },
+    { "type": "heading", "level": 2, "text": "How Baalvion Helps" },
+    { "type": "paragraph", "text": "We build health platforms with encryption everywhere, least-privilege access, and append-only audit logging — the same controls we describe in [secure software development](/news/tech/secure-software-development). We integrate fragmented systems the [API-first](/news/tech/api-first-architecture) way, and we run them on resilient, observable infrastructure so the platform stays up when it matters." },
+    { "type": "heading", "level": 2, "text": "Relevant Services" },
+    { "type": "paragraph", "text": "Healthcare engagements typically combine [custom software development](/services/custom-software-development), [enterprise software](/services/enterprise-software), and [cloud solutions](/services/cloud-solutions), with [AI solutions](/services/ai-solutions) applied carefully where they add clinical or operational value." },
+    { "type": "heading", "level": 2, "text": "Outcomes" },
+    { "type": "paragraph", "text": "The result is health technology that protects patients' data, connects systems that previously couldn't talk, makes every access auditable, and stays reliable under real-world load — a foundation clinical teams can trust." }
+  ],
+  "faqs": [
+    { "q": "How do you protect patient data?", "a": "Encryption in transit and at rest, least-privilege access control, and append-only audit logs so every access is traceable — the controls covered in [secure software development](/news/tech/secure-software-development)." },
+    { "q": "Can you integrate our existing clinical systems?", "a": "Yes. We build API-first integrations that connect fragmented clinical, lab, and administrative systems into a coherent whole." },
+    { "q": "How do you handle compliance and auditability?", "a": "Append-only audit logging records every data access and change, so compliance reporting becomes an export rather than a scramble." },
+    { "q": "Which services apply to healthcare?", "a": "Typically [enterprise software](/services/enterprise-software), [custom software development](/services/custom-software-development), and [cloud solutions](/services/cloud-solutions)." }
+  ],
+  "internalLinks": [
+    { "anchor": "trust and security", "href": "/trust" },
+    { "anchor": "secure software development", "href": "/news/tech/secure-software-development" },
+    { "anchor": "API-first architecture", "href": "/news/tech/api-first-architecture" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" }
+  ]
+}

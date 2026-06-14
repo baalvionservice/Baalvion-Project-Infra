@@ -17,9 +17,24 @@ export default function AlphabeticalListingPage() {
 
   useEffect(() => {
     setLoading(true);
-    articlesPublicApi.list({ alphabet: normalizedLetter, status: 'published', limit: 200 })
-      .then(res => setApiArticles(res.data?.data?.items || res.data?.data || []))
-      .catch(() => setApiArticles([]))
+    // Merge law-service articles with CMS-managed articles (added in the
+    // admin-platform console) so console publishes appear in the A–Z directly.
+    const law = articlesPublicApi
+      .list({ alphabet: normalizedLetter, status: 'published', limit: 200 })
+      .then((res) => res.data?.data?.items || res.data?.data || [])
+      .catch(() => []);
+    const cms = fetch(`/api/cms/articles?letter=${normalizedLetter}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => (Array.isArray(j?.data) ? j.data : []))
+      .catch(() => []);
+    Promise.all([law, cms])
+      .then(([lawArticles, cmsArticles]) => {
+        const bySlug = new Map<string, any>();
+        for (const a of [...lawArticles, ...cmsArticles]) {
+          if (a && a.slug) bySlug.set(a.slug, a);
+        }
+        setApiArticles(Array.from(bySlug.values()));
+      })
       .finally(() => setLoading(false));
   }, [normalizedLetter]);
 

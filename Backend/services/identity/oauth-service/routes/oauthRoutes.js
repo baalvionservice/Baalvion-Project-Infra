@@ -1,7 +1,19 @@
 'use strict';
-const router = require('express').Router();
-const ctrl   = require('../controller/oauthController');
+const router    = require('express').Router();
+const rateLimit = require('express-rate-limit');
+const ctrl      = require('../controller/oauthController');
 const { authMiddleware, extractClientAuth } = require('../middleware/authMiddleware');
+
+// Per-IP rate limiter applied to token-issuance, introspection, and revocation endpoints.
+// 60 requests/minute per IP is generous enough for legitimate clients (SDKs, server-side apps)
+// but curtails brute-force and enumeration attacks.
+const tokenEndpointLimiter = rateLimit({
+    windowMs: 60_000,
+    max: Number(process.env.TOKEN_RATE_LIMIT_MAX) || 60,
+    standardHeaders: true,
+    legacyHeaders:   false,
+    message: { error: 'rate_limit_exceeded', error_description: 'Too many requests, please retry later' },
+});
 
 // Authorization endpoint — GET shows consent, POST auto-approves (SPA/mobile flows)
 router.get('/authorize',  (req, res, next) => {
@@ -15,13 +27,13 @@ router.get('/authorize',  (req, res, next) => {
 router.post('/authorize', authMiddleware, ctrl.authorizePost);
 
 // Token endpoint — RFC 6749
-router.post('/token', extractClientAuth, ctrl.token);
+router.post('/token', tokenEndpointLimiter, extractClientAuth, ctrl.token);
 
 // Introspection — RFC 7662 (protected: requires client auth in production)
-router.post('/introspect', extractClientAuth, ctrl.introspect);
+router.post('/introspect', tokenEndpointLimiter, extractClientAuth, ctrl.introspect);
 
 // Revocation — RFC 7009
-router.post('/revoke', extractClientAuth, ctrl.revoke);
+router.post('/revoke', tokenEndpointLimiter, extractClientAuth, ctrl.revoke);
 
 // UserInfo — OIDC Core
 router.get('/userinfo',  authMiddleware, ctrl.userinfo);

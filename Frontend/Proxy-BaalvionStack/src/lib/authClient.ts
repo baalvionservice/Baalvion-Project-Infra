@@ -29,6 +29,12 @@ export interface AuthOrg {
 
 export interface RegisterResult extends AuthTokens {
   org: AuthOrg;
+  /** The plan the new org was provisioned on (slug + display + price). */
+  plan?: { slug: string; name: string; monthlyPrice: number } | null;
+  /** Subscription state created at signup (e.g. 'trialing' for paid plans). */
+  subscription?: { status: string; planSlug: string } | null;
+  /** True when the chosen plan is paid → the UI should route to checkout. */
+  requiresPayment: boolean;
 }
 
 async function post<T>(path: string, body: object, token?: string): Promise<T> {
@@ -89,15 +95,23 @@ export const authClient = {
     email: string,
     password: string,
     fullName: string,
+    plan?: string,
     orgName?: string,
   ): Promise<RegisterResult> => {
     const data = await post<Record<string, unknown>>('/register', {
       email,
       password,
       fullName,
-      orgName: orgName || fullName + "'s Org",
+      plan: plan || undefined,
+      orgName: orgName || fullName + "'s Workspace",
     });
-    return { ...normalizeTokens(data), org: data.org as AuthOrg };
+    return {
+      ...normalizeTokens(data),
+      org: data.org as AuthOrg,
+      plan: (data.plan as RegisterResult['plan']) ?? null,
+      subscription: (data.subscription as RegisterResult['subscription']) ?? null,
+      requiresPayment: Boolean(data.requiresPayment),
+    };
   },
 
   logout: (token: string) => post<void>('/logout', {}, token),

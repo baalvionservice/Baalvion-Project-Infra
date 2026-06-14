@@ -4,6 +4,14 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
     title: "Our Hiring Process | Baalvion Careers",
     description: "Learn about Baalvion's transparent, four-step hiring process designed to identify the best talent.",
+    alternates: {
+        canonical: '/careers/hiring-process',
+    },
+    openGraph: {
+        title: "Our Hiring Process | TalentOS by Baalvion",
+        description: "Learn about Baalvion's transparent, four-step hiring process designed to identify the best talent.",
+        url: '/careers/hiring-process',
+    },
 };
 
 const hiringProcessSteps = [

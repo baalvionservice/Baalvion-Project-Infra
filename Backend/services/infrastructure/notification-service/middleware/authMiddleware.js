@@ -53,4 +53,19 @@ function timingSafeEqual(provided, expected) {
     return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
-module.exports = { authMiddleware, internalAuth };
+// ── DLQ / queue-admin guard ────────────────────────────────────────────────────
+// Only platform admins or internal service callers may inspect/retry the DLQ.
+// req.internal covers service-to-service paths (internalAuth sets it upstream);
+// for JWT paths the caller must hold super_admin or admin role.
+const ADMIN_ROLES = ['super_admin', 'admin'];
+
+function requireAdmin(req, res, next) {
+    if (!req.auth) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
+    if (req.internal) return next();
+    const roles = req.auth.roles || [];
+    const perms = req.auth.permissions || [];
+    const ok = roles.some((r) => ADMIN_ROLES.includes(r)) || perms.includes('*') || perms.includes('notifications:admin');
+    return ok ? next() : next(new AppError('FORBIDDEN', 'Admin or super_admin role required', 403));
+}
+
+module.exports = { authMiddleware, internalAuth, requireAdmin };

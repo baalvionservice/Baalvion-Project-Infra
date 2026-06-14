@@ -18,12 +18,28 @@ const listRfqs = async (req, res, next) => {
 
 const createRfq = async (req, res, next) => {
     try {
-        if (req.body.listing_id) {
-            const listing = await db.MineralListing.findByPk(req.body.listing_id);
+        // Mass-assignment: explicit allowlist — identity fields always from server token
+        const {
+            listing_id,
+            quantity_mt,
+            target_price,
+            currency,
+            delivery_port,
+            required_by,
+            message,
+        } = req.body;
+        if (listing_id) {
+            const listing = await db.MineralListing.findByPk(listing_id);
             if (!listing) return next(new AppError('NOT_FOUND', 'Listing not found', 404));
         }
         const rfq = await db.Rfq.create({
-            ...req.body,
+            listing_id,
+            quantity_mt,
+            target_price,
+            currency,
+            delivery_port,
+            required_by,
+            message,
             buyer_id: req.user.id,
             org_id: req.user.orgId,
             buyer_org_id: req.user.orgId,
@@ -52,8 +68,20 @@ const submitBid = async (req, res, next) => {
         const rfq = await db.Rfq.findByPk(req.params.id);
         if (!rfq) return next(new AppError('NOT_FOUND', 'RFQ not found', 404));
         if (rfq.status !== 'open') return next(new AppError('CONFLICT', 'RFQ is not open for bids', 409));
+        // Mass-assignment: explicit allowlist — identity fields always from server token
+        const {
+            price_per_unit,
+            total_price,
+            currency,
+            delivery_days,
+            notes,
+        } = req.body;
         const bid = await db.Bid.create({
-            ...req.body,
+            price_per_unit,
+            total_price,
+            currency,
+            delivery_days,
+            notes,
             rfq_id: req.params.id,
             bidder_id: req.user.id,
             org_id: req.user.orgId,
@@ -67,6 +95,12 @@ const awardBid = async (req, res, next) => {
     try {
         const rfq = await db.Rfq.findByPk(req.params.id, { include: [{ model: db.Bid, as: 'bids' }] });
         if (!rfq) return next(new AppError('NOT_FOUND', 'RFQ not found', 404));
+        // IDOR: only the buyer who created the RFQ (or admin) may award a bid
+        const roles = req.auth.roles || [];
+        const isAdmin = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
+        if (!isAdmin && rfq.buyer_id !== req.user.id) {
+            return next(new AppError('FORBIDDEN', 'Not authorized to award bids on this RFQ', 403));
+        }
         const bid = rfq.bids.find(b => b.id == req.params.bidId);
         if (!bid) return next(new AppError('NOT_FOUND', 'Bid not found', 404));
         await bid.update({ status: 'accepted' });
@@ -93,6 +127,14 @@ const awardBid = async (req, res, next) => {
 
 const rejectBid = async (req, res, next) => {
     try {
+        const rfq = await db.Rfq.findByPk(req.params.id);
+        if (!rfq) return next(new AppError('NOT_FOUND', 'RFQ not found', 404));
+        // IDOR: only the buyer who created the RFQ (or admin) may reject a bid
+        const roles = req.auth.roles || [];
+        const isAdmin = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
+        if (!isAdmin && rfq.buyer_id !== req.user.id) {
+            return next(new AppError('FORBIDDEN', 'Not authorized to reject bids on this RFQ', 403));
+        }
         const bid = await db.Bid.findOne({ where: { id: req.params.bidId, rfq_id: req.params.id } });
         if (!bid) return next(new AppError('NOT_FOUND', 'Bid not found', 404));
         await bid.update({ status: 'rejected' });

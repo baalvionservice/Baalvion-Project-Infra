@@ -69,8 +69,7 @@ export default function GlobalBrandAnalytics() {
   ], []);
 
   const handleExport = useCallback(() => {
-    // Export logic implementation
-    console.log('Exporting analytics for range:', timeRange);
+    // TODO: Export logic implementation
   }, [timeRange]);
 
   return (

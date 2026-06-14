@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -70,6 +71,8 @@ public class SettlementController {
     return ResponseEntity.ok(settlementService.generateFile(tenantId, id));
   }
 
+  // War Room 3: submitting a settlement batch disburses funds — restrict to finance/admin.
+  @PreAuthorize("hasAnyRole('ADMIN','OWNER','SUPER_ADMIN','FINANCE_OFFICER','COMPLIANCE_OFFICER','PLATFORM_ADMIN')")
   @PostMapping("/batches/{id}/submit")
   public ResponseEntity<BatchResponse> submit(
     @RequestHeader(value = "X-Tenant-ID", required = false) String tenantIdHeader,

@@ -18,7 +18,7 @@ module.exports = {
     { ...base, name: 'elite-circle-service',    cwd: `${B}/ecosystem/elite-circle-service`,   script: 'index.js' },
     { ...base, name: 'dashboard-service',       cwd: `${B}/platform/dashboard-service`,       script: 'index.js' },
     { ...base, name: 'trade-service',           cwd: `${B}/commerce/trade-service`,           script: 'index.js' },
-    { ...base, name: 'order-service',           cwd: `${B}/commerce/order-service`,           script: 'index.js' },
+    // order-service REMOVED (consolidated) — order lifecycle owned by trade/order-execution-service.
     { ...base, name: 'inventory-service',       cwd: `${B}/commerce/inventory-service`,       script: 'index.js' },
     { ...base, name: 'proxy-service',           cwd: `${B}/infrastructure/proxy-service`,     script: 'index.js' },
     // ecosystem/commerce content services. localhost->::1 refuses Redis/PG on Windows, so pin IPv4.

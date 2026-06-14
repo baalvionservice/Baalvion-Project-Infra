@@ -31,7 +31,10 @@ app.use('/uploads', express.static(path.resolve(__dirname, 'uploads'), {
 }));
 
 app.use(express.json({ limit: '10mb' }));
-app.use(cookieParser());
+// Sign cookies so their integrity can be validated server-side (req.signedCookies).
+// Reuses the env-backed service secret, which is enforced to a non-default value
+// outside development by config/appConfig.js.
+app.use(cookieParser(config.internalSecret));
 app.use(requestContext);
 // SDK trace context: binds a traceId (+ tenant) to the request before any route,
 // so all logging / events / outbound HTTP downstream are correlated.

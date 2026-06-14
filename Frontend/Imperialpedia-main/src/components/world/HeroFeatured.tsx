@@ -1,14 +1,14 @@
-import { featuredNews } from "@/lib/data/worldData";
+import type { FeaturedStory } from "@/lib/data/worldRegions";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 
-export default function HeroFeatured() {
-  const [main, ...secondary] = featuredNews;
+export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }) {
+  const [main, ...secondary] = featured;
 
   return (
-    <div className="flex flex-col lg:grid lg:grid-cols-3 gap-px bg-gray-200 border-b border-gray-200">
+    <div className="flex flex-col md:grid md:grid-cols-3 gap-px bg-gray-200 border-b border-gray-200">
       {/* Main hero story */}
-      <div className="lg:col-span-2 bg-white group cursor-pointer">
-        <div className="relative overflow-hidden h-[250px] sm:h-[300px] lg:h-[400px]">
+      <div className="md:col-span-2 bg-white group cursor-pointer">
+        <div className="relative overflow-hidden h-[230px] sm:h-[300px] md:h-[340px] lg:h-[420px]">
           <OptimizedImage
             src={main.image}
             alt={main.headline}

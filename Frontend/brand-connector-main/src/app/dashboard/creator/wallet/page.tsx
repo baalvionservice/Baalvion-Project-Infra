@@ -396,7 +396,7 @@ export default function CreatorWalletPage() {
                 <div className="relative py-10">
                   <div className="absolute left-0 right-0 top-1/2 -translate-y-1/2 h-1 bg-slate-100 rounded-full" />
                   <div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary rounded-full transition-all duration-[2000ms] ease-out"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary rounded-full transition-all duration-[2s] ease-out"
                     style={{ width: `${(getPayoutStep(activePayout.status, activePayout.payoutMethod?.type) / 4) * 100}%` }}
                   />
 

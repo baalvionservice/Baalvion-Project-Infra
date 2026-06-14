@@ -26,7 +26,7 @@ export function useAppointments(userId: string | undefined) {
 
     try {
       const data = await getAppointmentsByClient(userId);
-      setAppointments(data);
+      setAppointments(data.filter(Boolean) as any);
     } catch (err: any) {
       console.error('Agenda sync error:', err);
       setError(err.message || 'Failed to sync professional agenda.');

@@ -16,6 +16,7 @@ export type CmsRole =
   | 'cms_author'
   | 'cms_contributor'
   | 'cms_reviewer'
+  | 'cms_compliance'
   | 'cms_publisher'
   | 'cms_seo_manager'
   | 'cms_viewer';
@@ -26,6 +27,7 @@ export const CMS_ROLE_LABELS: Record<CmsRole, string> = {
   cms_author: 'Author',
   cms_contributor: 'Contributor',
   cms_reviewer: 'Reviewer',
+  cms_compliance: 'Compliance',
   cms_publisher: 'Publisher',
   cms_seo_manager: 'SEO Manager',
   cms_viewer: 'Viewer',
@@ -35,6 +37,7 @@ export const CMS_ROLE_LEVEL: Record<CmsRole, number> = {
   cms_admin: 100,
   cms_editor: 80,
   cms_publisher: 70,
+  cms_compliance: 65,
   cms_reviewer: 60,
   cms_seo_manager: 50,
   cms_author: 40,

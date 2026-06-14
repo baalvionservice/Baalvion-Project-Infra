@@ -51,7 +51,7 @@ export function useLawyerDashboardData(userId: string | undefined) {
         .filter((a: any) => a.status === 'confirmed' || a.status === 'completed')
         .length * 5000;
 
-      setData(prev => ({
+      setData((prev: any) => ({
         ...prev,
         profile,
         cases,
@@ -65,7 +65,7 @@ export function useLawyerDashboardData(userId: string | undefined) {
       }));
     } catch (err: any) {
       console.error("Practitioner dashboard aggregation failure:", err);
-      setData(prev => ({ ...prev, loading: false, error: err.message }));
+      setData((prev: any) => ({ ...prev, loading: false, error: err.message }));
     }
   }, [userId]);
 
@@ -75,7 +75,7 @@ export function useLawyerDashboardData(userId: string | undefined) {
       
       // 3. Real-time Subscription for Alerts
       const unsubNotifications = subscribeToNotifications(userId, (notifications) => {
-        setData(prev => ({ ...prev, notifications }));
+        setData((prev: any) => ({ ...prev, notifications }));
       });
 
       return () => {

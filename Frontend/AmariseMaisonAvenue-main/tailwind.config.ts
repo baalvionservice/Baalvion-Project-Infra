@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -10,8 +11,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ["Avenir", "sans-serif"],
-        headline: ["Ivy Ora", "serif"],
+        body: ["var(--font-inter)", "Avenir", "system-ui", "sans-serif"],
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        // Luxury serif for all headings (loaded via next/font as --font-serif).
+        serif: ["var(--font-serif)", "Cormorant Garamond", "Georgia", "serif"],
+        headline: ["var(--font-serif)", "Cormorant Garamond", "Georgia", "serif"],
         mono: [
           "ui-monospace",
           "SFMono-Regular",
@@ -123,5 +127,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

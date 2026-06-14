@@ -25,12 +25,37 @@ const listListings = async (req, res, next) => {
 
 const createListing = async (req, res, next) => {
     try {
-        const { title, mineral_type, quantity_mt, price_per_unit } = req.body;
+        // Mass-assignment: explicit allowlist — identity/privilege fields always from server token
+        const {
+            title,
+            mineral_type,
+            grade,
+            quantity_mt,
+            unit,
+            price_per_unit,
+            currency,
+            origin_country,
+            origin_region,
+            certification,
+            images,
+            documents,
+        } = req.body;
         if (!title || !mineral_type || !quantity_mt || !price_per_unit) {
             return next(new AppError('VALIDATION_ERROR', 'title, mineral_type, quantity_mt, price_per_unit are required', 422));
         }
         const listing = await db.MineralListing.create({
-            ...req.body,
+            title,
+            mineral_type,
+            grade,
+            quantity_mt,
+            unit,
+            price_per_unit,
+            currency,
+            origin_country,
+            origin_region,
+            certification,
+            images,
+            documents,
             seller_id: req.user.id,
             org_id: req.user.orgId,
             seller_org_id: req.user.orgId,
@@ -55,7 +80,37 @@ const updateListing = async (req, res, next) => {
         if (listing.seller_id !== req.user.id && !(req.auth.roles || []).some((r) => ['admin', 'owner', 'super_admin'].includes(r))) {
             return next(new AppError('FORBIDDEN', 'Not authorized to update this listing', 403));
         }
-        await listing.update(req.body);
+        // Mass-assignment: explicit allowlist — strip identity/privilege fields from client input
+        const {
+            title,
+            mineral_type,
+            grade,
+            quantity_mt,
+            unit,
+            price_per_unit,
+            currency,
+            origin_country,
+            origin_region,
+            certification,
+            images,
+            documents,
+            status,
+        } = req.body;
+        await listing.update({
+            title,
+            mineral_type,
+            grade,
+            quantity_mt,
+            unit,
+            price_per_unit,
+            currency,
+            origin_country,
+            origin_region,
+            certification,
+            images,
+            documents,
+            status,
+        });
         return sendSuccess(req, res, listing);
     } catch (err) { return next(err); }
 };

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -66,6 +67,10 @@ public class EntryController {
     return ResponseEntity.ok(responses);
   }
 
+  // War Room 3: ledger reversal moves balances and is the highest-risk accounting
+  // operation. Restrict to finance/admin authorities (roles map to ROLE_* via the JWT
+  // roles claim). Reference pattern for the financial-services-java money-out rollout.
+  @PreAuthorize("hasAnyRole('ADMIN','OWNER','SUPER_ADMIN','FINANCE_OFFICER','COMPLIANCE_OFFICER','PLATFORM_ADMIN')")
   @PostMapping("/entries/{id}/reverse")
   public ResponseEntity<EntryResponse> reverseEntry(
     @RequestHeader(value = "X-Tenant-ID", required = false) String tenantIdHeader,

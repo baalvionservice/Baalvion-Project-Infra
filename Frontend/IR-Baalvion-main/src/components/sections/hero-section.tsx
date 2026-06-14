@@ -11,22 +11,27 @@ export default function HeroSection() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                     {/* Left Column */}
                     <div>
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
-                            <span className="text-primary">Investor</span>
-                            <br />
-                            Relations
+                        <p className="mb-4 text-xs font-bold uppercase tracking-[0.25em] text-primary">
+                            Baalvion Industries Private Limited
+                        </p>
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05]">
+                            Building the <span className="text-primary">operating system</span> for global trade.
                         </h1>
-                        <p className="mt-4 max-w-md text-base sm:text-lg text-muted-foreground">
-                            Latest information for interested parties of Baalvion stock.
+                        <p className="mt-5 max-w-md text-base sm:text-lg text-muted-foreground">
+                            Baalvion integrates logistics, trade finance and compliance into a single platform for global B2B commerce. This is the investor relations hub for our strategy, governance and reporting.
                         </p>
                         <div className="mt-8 space-y-3">
-                            <Link href="/dashboard" className="flex items-center text-sm font-semibold text-foreground hover:text-primary transition-colors group">
+                            <Link href="#results" className="flex items-center text-sm font-semibold text-foreground hover:text-primary transition-colors group">
                                 <span className="text-primary font-bold mr-3 group-hover:translate-x-1 transition-transform">{'>'}</span>
-                                See our latest quarterly results
+                                Review our latest financial results
                             </Link>
-                            <Link href="#press-releases" className="flex items-center text-sm font-semibold text-foreground hover:text-primary transition-colors group">
+                            <Link href="#thesis" className="flex items-center text-sm font-semibold text-foreground hover:text-primary transition-colors group">
                                 <span className="text-primary font-bold mr-3 group-hover:translate-x-1 transition-transform">{'>'}</span>
-                                See our latest press releases
+                                Understand our investment thesis
+                            </Link>
+                            <Link href="/onboarding" className="flex items-center text-sm font-semibold text-foreground hover:text-primary transition-colors group">
+                                <span className="text-primary font-bold mr-3 group-hover:translate-x-1 transition-transform">{'>'}</span>
+                                Request qualified investor access
                             </Link>
                         </div>
                     </div>
@@ -35,7 +40,7 @@ export default function HeroSection() {
                     <div className="flex justify-start lg:justify-end">
                        <div className="border border-border p-6 rounded-lg w-full max-w-sm bg-background/50 backdrop-blur-sm shadow-xl">
                             <div className="flex justify-between items-center mb-6">
-                                <h3 className="font-bold text-sm uppercase tracking-wider">Private Company (India)</h3>
+                                <h3 className="font-bold text-sm uppercase tracking-wider">Company Snapshot</h3>
                                 <div className="h-3 w-3 bg-primary rounded-full animate-pulse"></div>
                             </div>
 
@@ -45,16 +50,20 @@ export default function HeroSection() {
                                     <span className="font-mono text-[10px] sm:text-xs bg-muted px-2 py-1 rounded">U43121OD2025PTC048479</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-muted-foreground">Investor Access:</span>
-                                    <span className="font-semibold text-right">Accredited Only</span>
+                                    <span className="text-muted-foreground">Sector:</span>
+                                    <span className="font-semibold text-right">B2B Trade Infrastructure</span>
+                                </div>
+                                <div className="flex justify-between items-center text-sm">
+                                    <span className="text-muted-foreground">Headquarters:</span>
+                                    <span className="font-semibold text-right">Odisha, India</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
                                     <span className="text-muted-foreground">Capital Structure:</span>
-                                    <span className="font-semibold text-right">Privately Held</span>
+                                    <span className="font-semibold text-right">Privately Held · Unlisted</span>
                                 </div>
                                 <div className="flex justify-between items-center text-sm">
-                                    <span className="text-muted-foreground">Regulatory Status:</span>
-                                    <span className="font-semibold text-right">Unlisted</span>
+                                    <span className="text-muted-foreground">Investor Access:</span>
+                                    <span className="font-semibold text-right">Qualified / Accredited</span>
                                 </div>
                             </div>
                         </div>

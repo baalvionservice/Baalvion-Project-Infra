@@ -3,14 +3,26 @@
 import { useRef, useState, useEffect, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
-import Image from "next/image";
-import { formatPrice } from "@/lib/mock-data";
-import { useProducts } from "@/lib/useCatalog";
-import { Product } from "@/lib/types";
+import { BrandImage } from "@/components/ui/BrandImage";
+import { formatProductPrice, normalizeCountry } from "@/lib/i18n/countries";
+import { getRelatedProducts } from "@/lib/catalog";
+import { Product, CountryCode } from "@/lib/types";
 import Link from "next/link";
 
+interface YouMayAlsoLikeProps {
+  /** The product whose related artifacts to show. */
+  productId: string;
+  /** Active market (drives currency + region filtering). */
+  country?: CountryCode | string;
+  /**
+   * Related products fetched server-side and passed in (preferred, SSR-friendly).
+   * When omitted, the component fetches them client-side from `productId`.
+   */
+  initialRelated?: Product[];
+}
+
 // ─── Card ─────────────────────────────────────────────────────────────────────
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, country }: { product: Product; country: CountryCode }) {
   const [wishlisted, setWishlisted] = useState(false);
 
   return (
@@ -36,12 +48,13 @@ function ProductCard({ product }: { product: Product }) {
           />
         </button>
 
-        <Link href={`/us/product/${product.id}`}>
-          <Image
-            fill
-            src={product.imageUrl[0]}
+        <Link href={`/${country}/product/${product.id}`} className="absolute inset-0">
+          <BrandImage
+            src={product.imageUrl?.[0]}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+            label={product.name}
+            className="absolute inset-0"
+            imgClassName="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           />
         </Link>
       </div>
@@ -52,7 +65,7 @@ function ProductCard({ product }: { product: Product }) {
           {product.name}
         </p>
         <p className="text-[13px] font-semibold text-gray-900 tabular-nums tracking-tight">
-          {formatPrice(product.basePrice, "us")}
+          {formatProductPrice(product, country)}
         </p>
       </div>
     </div>
@@ -60,7 +73,7 @@ function ProductCard({ product }: { product: Product }) {
 }
 
 // ─── Mobile Card (compact, takes 50% width) ──────────────────────────────────
-function MobileProductCard({ product }: { product: Product }) {
+function MobileProductCard({ product, country }: { product: Product; country: CountryCode }) {
   const [wishlisted, setWishlisted] = useState(false);
 
   return (
@@ -85,12 +98,14 @@ function MobileProductCard({ product }: { product: Product }) {
           />
         </button>
 
-        <Link href={`/us/product/${product.id}`}>
-          <Image
-            fill
-            src={product.imageUrl[0]}
+        <Link href={`/${country}/product/${product.id}`} className="absolute inset-0">
+          <BrandImage
+            src={product.imageUrl?.[0]}
             alt={product.name}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+            label={product.name}
+            variant="compact"
+            className="absolute inset-0"
+            imgClassName="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
           />
         </Link>
       </div>
@@ -100,7 +115,7 @@ function MobileProductCard({ product }: { product: Product }) {
           {product.name}
         </p>
         <p className="text-[12px] font-semibold text-gray-900 tabular-nums tracking-tight">
-          {formatPrice(product.basePrice, "us")}
+          {formatProductPrice(product, country)}
         </p>
       </div>
     </div>
@@ -108,10 +123,37 @@ function MobileProductCard({ product }: { product: Product }) {
 }
 
 // ─── Main Carousel ────────────────────────────────────────────────────────────
-export default function YouMayAlsoLike() {
-  // Limit products for the carousel
-  const { products } = useProducts({ limit: 12 });
-  const carouselProducts = products.slice(0, 12);
+export default function YouMayAlsoLike({
+  productId,
+  country,
+  initialRelated,
+}: YouMayAlsoLikeProps) {
+  const countryCode = normalizeCountry(country);
+
+  // Real related artifacts for THIS product (curated → collection → category →
+  // featured, resolved by the storefront API). Seeded from the server fetch;
+  // re-fetched client-side only if the page did not provide them.
+  const [carouselProducts, setCarouselProducts] = useState<Product[]>(
+    () => initialRelated ?? []
+  );
+
+  useEffect(() => {
+    if (initialRelated !== undefined) {
+      setCarouselProducts(initialRelated);
+      return;
+    }
+    let cancelled = false;
+    getRelatedProducts(productId, countryCode, 8)
+      .then((items) => {
+        if (!cancelled) setCarouselProducts(items);
+      })
+      .catch(() => {
+        if (!cancelled) setCarouselProducts([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [productId, countryCode, initialRelated]);
 
   // ── Desktop state ──
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -135,7 +177,8 @@ export default function YouMayAlsoLike() {
       el.removeEventListener("scroll", updateArrows);
       window.removeEventListener("resize", updateArrows);
     };
-  }, []);
+    // Re-evaluate arrow affordances when the related set arrives/changes.
+  }, [carouselProducts.length]);
 
   const scroll = (dir: "left" | "right") => {
     const el = scrollRef.current;
@@ -180,6 +223,10 @@ export default function YouMayAlsoLike() {
     []
   );
 
+  // Honest empty state: no genuinely related artifacts → omit the section entirely
+  // rather than padding it with unrelated "newest" products.
+  if (carouselProducts.length === 0) return null;
+
   return (
     <section className="w-full py-10 md:py-16">
       {/* Centered serif heading */}
@@ -213,7 +260,7 @@ export default function YouMayAlsoLike() {
           <style>{`div::-webkit-scrollbar{display:none}`}</style>
           {carouselProducts.map((p) => (
             <div key={p.id} data-card>
-              <ProductCard product={p} />
+              <ProductCard product={p} country={countryCode} />
             </div>
           ))}
         </div>
@@ -251,7 +298,7 @@ export default function YouMayAlsoLike() {
             >
               <div className="grid grid-cols-2 gap-3">
                 {page.map((product) => (
-                  <MobileProductCard key={product.id} product={product} />
+                  <MobileProductCard key={product.id} product={product} country={countryCode} />
                 ))}
               </div>
             </div>

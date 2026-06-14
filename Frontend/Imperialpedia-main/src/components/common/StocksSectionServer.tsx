@@ -3,7 +3,6 @@ import { serverFetch } from "@/hooks/server-fetch";
 
 export default async function StocksSectionServer() {
     const stocks = (await serverFetch<StockCardProps[]>("stocks/latest")) || [];
-console.log(stocks)
     if (!stocks.length) {
         return <div className="py-4 text-sm text-muted-foreground">No stock data available</div>;
     }

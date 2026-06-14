@@ -43,6 +43,33 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
+    <!-- RLS runtime enforcement (Tenant Isolation layer 3): the AOP starter provides AspectJ
+         (org.aspectj.lang.*) for RlsTenantAspect. optional=true so it is on the compile classpath
+         here but is only pulled into a service when that service actually depends on it (every
+         JPA-backed financial service already does, via spring-boot-starter-data-jpa's transitive
+         AOP, but we declare it explicitly so the aspect compiles and is bean-eligible). -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-aop</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <!-- jakarta.persistence-api (EntityManager) for RlsTenantSession. provided/optional: the
+         consuming service supplies the real JPA implementation (spring-boot-starter-data-jpa).
+         RlsTenantSession + its bean are @ConditionalOnClass(EntityManager.class), so on a service
+         with no JPA the class is simply never instantiated. -->
+    <dependency>
+      <groupId>jakarta.persistence</groupId>
+      <artifactId>jakarta.persistence-api</artifactId>
+      <optional>true</optional>
+    </dependency>
+    <!-- spring-tx (TransactionSynchronizationManager / TransactionSynchronization) used by
+         RlsTenantSession to detect an active transaction. Brought in transitively by JPA on
+         consuming services; declared optional so it is available at compile time here. -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-tx</artifactId>
+      <optional>true</optional>
+    </dependency>
   </dependencies>
 
   <!-- Library module: do not run the Spring Boot repackage goal. -->

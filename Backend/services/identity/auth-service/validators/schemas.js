@@ -1,4 +1,10 @@
 const { z } = require('zod');
+const { ORG_TYPES, MEMBERSHIP_ROLES, ORG_STATUSES } = require('../utils/orgConstants');
+
+// The 7-tier membership model — replaces the legacy ['admin','member','viewer'] set everywhere.
+const roleEnum = z.enum(MEMBERSHIP_ROLES);
+const orgTypeEnum = z.enum(ORG_TYPES);
+const orgStatusEnum = z.enum(ORG_STATUSES);
 
 const register = z.object({
     email: z.string().email(),
@@ -31,16 +37,30 @@ const mfaChallenge  = z.object({
     challengeToken: z.string().min(1),
     code:           z.string().length(6),
 });
+const mfaEnrollStart = z.object({ challengeToken: z.string().min(1) });
+const mfaEnroll      = z.object({
+    challengeToken: z.string().min(1),
+    code:           z.string().length(6),
+});
 
 const createOrg = z.object({ name: z.string().min(2).max(200) });
 
 const inviteMember = z.object({
     email: z.string().email(),
-    role: z.enum(['admin', 'member', 'viewer']).default('member'),
+    role: roleEnum.default('viewer'),
+    fullName: z.string().max(200).optional(),
+});
+
+const bulkInvite = z.object({
+    invites: z.array(z.object({
+        email: z.string().email(),
+        role: roleEnum.default('viewer'),
+        fullName: z.string().max(200).optional(),
+    })).min(1).max(500),
 });
 
 const updateMemberRole = z.object({
-    role: z.enum(['admin', 'member', 'viewer']).optional(),
+    role: roleEnum.optional(),
     serviceRoles: z.record(z.string()).optional(),
 });
 
@@ -51,4 +71,43 @@ const acceptInvite = z.object({
     fullName: z.string().max(200).optional(),
 });
 
-module.exports = { register, login, forgotPassword, resetPassword, verifyEmail, updateMe, mfaVerify, mfaChallenge, createOrg, inviteMember, updateMemberRole, acceptInvite };
+const transferOwnership = z.object({
+    newOwnerUserId: z.union([z.string(), z.number()]).transform((v) => String(v)),
+});
+
+// ── Platform-owner organization administration ──────────────────────────────────
+const platformCreateOrg = z.object({
+    name: z.string().min(2).max(200),
+    type: orgTypeEnum,
+    slug: z.string().min(2).max(100).regex(/^[a-z0-9-]+$/i).optional(),
+    legalName: z.string().max(255).optional(),
+    displayName: z.string().max(255).optional(),
+    country: z.string().length(2).optional(),
+    jurisdiction: z.string().max(120).optional(),
+    contactEmail: z.string().email().optional().or(z.literal('')),
+    contactPhone: z.string().max(40).optional(),
+    status: orgStatusEnum.default('active'),
+    // Optionally seed the first owner by inviting them in the same call.
+    ownerEmail: z.string().email().optional(),
+    ownerFullName: z.string().max(200).optional(),
+});
+
+const updateOrg = z.object({
+    name: z.string().min(2).max(200).optional(),
+    legalName: z.string().max(255).optional(),
+    displayName: z.string().max(255).optional(),
+    country: z.string().length(2).optional(),
+    jurisdiction: z.string().max(120).optional(),
+    contactEmail: z.string().email().optional().or(z.literal('')),
+    contactPhone: z.string().max(40).optional(),
+    plan: z.string().max(50).optional(),
+});
+
+const setOrgStatus = z.object({ status: orgStatusEnum });
+
+module.exports = {
+    register, login, forgotPassword, resetPassword, verifyEmail, updateMe, mfaVerify, mfaChallenge,
+    mfaEnrollStart, mfaEnroll,
+    createOrg, inviteMember, bulkInvite, updateMemberRole, acceptInvite, transferOwnership,
+    platformCreateOrg, updateOrg, setOrgStatus,
+};

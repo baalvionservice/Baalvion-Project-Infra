@@ -44,6 +44,9 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|auth-bff|_next/static|_next/image|favicon.ico).*)',
+    // Exclude API/proxy internals, Next static assets, and crawler/SEO metadata
+    // routes (robots.txt, sitemap*.xml, manifest, opengraph/og images). Without
+    // these exclusions the auth gate 307-redirects crawlers to /login, breaking SEO.
+    '/((?!api|auth-bff|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemap-|manifest.webmanifest|opengraph-image|og-image).*)',
   ],
 };

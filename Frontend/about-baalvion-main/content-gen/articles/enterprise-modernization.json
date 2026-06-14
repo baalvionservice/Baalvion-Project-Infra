@@ -1,0 +1,105 @@
+{
+  "slug": "enterprise-modernization",
+  "title": "Enterprise Modernization Without the Big Bang",
+  "kind": "article",
+  "category": "insights",
+  "seo": {
+    "title": "Enterprise Modernization Without the Big Bang | Baalvion",
+    "description": "How Baalvion modernizes legacy estates incrementally with the strangler fig pattern, anti-corruption layers, and disciplined production risk management.",
+    "keywords": [
+      "enterprise modernization",
+      "legacy modernization",
+      "strangler fig pattern",
+      "anti-corruption layer",
+      "incremental migration",
+      "monolith decomposition",
+      "domain-driven design",
+      "risk management",
+      "platform engineering",
+      "legacy system migration"
+    ]
+  },
+  "author": "Baalvion Engineering",
+  "readTime": "9 min read",
+  "heroImageSeed": "modernization-strangler-grid",
+  "excerpt": "The big-bang rewrite is the most reliable way to fail at modernization. Here is how Baalvion retires legacy estates incrementally — strangler fig, anti-corruption layers, and risk managed in production.",
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The rewrite that never ships" },
+    { "type": "paragraph", "text": "Every few years a large organisation decides that its legacy core is beyond saving and commissions a clean-room replacement: a new system, built in parallel, that will switch on one weekend and render the old one obsolete. This is the big-bang rewrite, and it fails with depressing regularity. The reasons are structural. The legacy system encodes a decade of business rules that nobody fully remembers, the parallel build chases a moving target because the business does not freeze while engineering rebuilds, and the cutover concentrates all the risk into a single irreversible event. By the time the replacement is feature-complete enough to switch, it is already behind, over budget, and trusted by no one." },
+    { "type": "paragraph", "text": "At Baalvion we operate the [Baalvion Operating System](/platform) — a multi-tenant fabric connecting commerce, finance, compliance, logistics, and intelligence across 198 markets and 180+ jurisdictions, carrying 500K+ transactions for 125+ active partners. We did not arrive there by rewriting everything at once, and neither do the organisations we modernize. The discipline that works is incremental: keep the legacy system running and authoritative, peel functionality off it one bounded slice at a time, route traffic to the new implementation only once it has demonstrably earned the load, and keep the rollback path open until the old code path is genuinely dead. The headline pattern for this is the strangler fig." },
+    { "type": "heading", "level": 2, "text": "The strangler fig pattern" },
+    { "type": "paragraph", "text": "The pattern takes its name from the strangler fig, which grows along the trunk of a host tree until it can support itself and the original tree withers away inside it. Applied to software, a new system grows around the edges of the legacy one, intercepting requests and progressively taking over responsibilities, until the legacy core is no longer load-bearing and can be removed. Crucially, at every point you have a working system in production. There is no weekend where everything changes." },
+    { "type": "paragraph", "text": "The mechanical heart of a strangler migration is an interception point — a facade, proxy, or gateway — placed in front of the legacy system. Initially it forwards every request straight through. As you build replacement capabilities, you reroute specific endpoints, message types, or customer segments to the new implementation while everything else continues to hit the legacy path. The facade is where you control the migration: it is the lever you pull to shift one percent of traffic, then ten, then all of it, and the lever you reverse the instant something looks wrong." },
+    { "type": "list", "ordered": false, "items": [
+      "Place a routing facade in front of the legacy system so every request flows through a controllable seam — a gateway, reverse proxy, or event router.",
+      "Identify the first slice by business value and risk, not technical convenience: a bounded capability with clear inputs and a real reason to change.",
+      "Build the replacement behind the facade, run it in shadow mode against live traffic, and compare its output before it serves a single real response.",
+      "Shift traffic progressively with feature flags and percentage-based routing, watching error rates, latency, and business metrics at each step.",
+      "Decommission the legacy code path only once telemetry proves it is no longer reached — an unremoved old path is latent risk and confusion."
+    ] },
+    { "type": "paragraph", "text": "Choosing the first slice matters more than any other decision in the programme. The instinct is to start with something small to prove the mechanics, and there is merit in that for the first proof of concept. But the slice that builds organisational confidence is one that delivers visible business value while it migrates — a capability that was painful on the legacy system and is demonstrably better on the new one. Domain-driven design gives the vocabulary: look for a bounded context with a clean seam, where the data and rules cohere and the integration surface with the rest of the estate is narrow. A slice with a wide, tangled integration surface is the wrong place to start, however appealing it looks on a diagram." },
+    { "type": "heading", "level": 2, "text": "The anti-corruption layer" },
+    { "type": "paragraph", "text": "The danger in any incremental migration is that the legacy system's model leaks into the new one. Legacy schemas are full of accreted compromise: columns that mean different things depending on a status flag, identifiers that encode business logic, enums that grew organically and contradict themselves. If your new services speak the legacy data model directly, you have not modernized anything — you have rebuilt the same mess in a newer language. The [anti-corruption layer](/services/enterprise-software) is the defence against this. It is a deliberate translation boundary between the new bounded context and the legacy system, and its entire job is to keep the old model from contaminating the new one." },
+    { "type": "paragraph", "text": "Concretely, the anti-corruption layer (ACL) sits between your clean domain model and whatever the legacy system actually exposes — a SOAP endpoint, a database view, a flat-file drop, a message queue with a baroque envelope. Inbound, it translates the legacy representation into the new domain's language, rejecting or normalising the inconsistencies. Outbound, it translates the new model back into whatever shape the legacy system expects, so the old system keeps working unchanged while you migrate around it. The new code never imports a legacy type, never queries a legacy table directly, and never depends on a legacy quirk. It depends only on the clean interface the ACL presents." },
+    { "type": "paragraph", "text": "This is unglamorous, deliberately throwaway code — the ACL exists to be deleted once the legacy system it adapts is gone — and that is exactly why teams under pressure are tempted to skip it. They should not. The ACL is what lets the new system have its own correct model from day one rather than inheriting decades of compromise, and it concentrates the genuinely difficult work of understanding what the legacy data actually means. We treat the same discipline as foundational in our [AI compliance scoring platform](/case-studies/ai-compliance-scoring-platform), where downstream models are only as trustworthy as the boundary that normalises the data feeding them." },
+    { "type": "heading", "level": 2, "text": "Data: the migration inside the migration" },
+    { "type": "paragraph", "text": "Code is the easy part. Data is where modernization programmes quietly stall, because the legacy system is almost always the authoritative source of truth for records that cannot be lost, corrupted, or duplicated — financial ledgers, customer identities, regulatory filings. The strangler facade controls request routing, but behind it you must decide how the new and old systems share state during the months they coexist. There is no universal answer, but there are recognisable patterns." },
+    { "type": "list", "ordered": false, "items": [
+      "Legacy-authoritative with read replication: the new system reads a synchronised copy while the legacy system stays the system of record until the slice cuts over. Lowest risk, slowest to deliver new writes.",
+      "Dual-write with reconciliation: both systems are written on each change, with a continuous reconciliation job that detects and alerts on divergence. The reconciliation job is not optional; it is the safety net.",
+      "Change data capture: stream legacy database changes through a log (Debezium-style CDC onto an event backbone) so the new system stays current without intrusive dual-write logic in the old codebase.",
+      "Event-sourced cutover: for the highest-value slices, replay history into the new model and run both in parallel until output matches before flipping authority."
+    ] },
+    { "type": "paragraph", "text": "Whatever pattern fits, the non-negotiable is reconciliation. While two systems hold the same data, you need an automated, continuously running check that proves they agree — and an alert the moment they do not. In a financial context the cost of silent divergence is not a bug ticket; it is a misstated balance and a regulatory finding. This is why our approach to [real-time cross-border settlement](/case-studies/real-time-cross-border-settlement) treats the reconciliation job as a first-class system component with its own monitoring and on-call ownership, not an afterthought stapled on near go-live." },
+    { "type": "heading", "level": 2, "text": "Managing risk in production, not in a plan" },
+    { "type": "paragraph", "text": "The reason incremental modernization beats the big-bang rewrite is that it converts one enormous, untestable risk into a long sequence of small, observable ones. But that only pays off if you actually instrument and govern each step. Risk management here is operational, not a spreadsheet. Three techniques carry most of the weight: shadow traffic, progressive delivery, and a rehearsed rollback." },
+    { "type": "paragraph", "text": "Shadow traffic — sometimes called dark launching — means the new implementation receives a copy of real production requests and produces real responses, but those responses are discarded and the legacy system's answer is what the user sees. You compare the two outputs offline. This finds the cases where the new system disagrees with the old one under genuine load and genuine data, before a single customer is affected. The subtle business-rule defects that would have surfaced as production incidents in a big-bang cutover surface here instead, harmlessly. Once shadow comparison is clean, progressive delivery takes over: route a small percentage of live traffic to the new path behind a feature flag, watch the golden signals and business metrics, and increase the share only as confidence grows. If a metric moves the wrong way, the flag flips back in seconds." },
+    { "type": "paragraph", "text": "None of this works without observability that spans both systems. You need distributed tracing with a correlation id that follows a request across the facade and through whichever path serves it, RED metrics (rate, errors, duration) on every migrated surface, and dashboards that compare legacy and new side by side. We standardise on OpenTelemetry for exactly this reason — a migration you cannot see is a migration you cannot safely control. The same posture underpins how we approach [DevOps](/services/devops) for every modernization engagement: the deployment pipeline, the feature-flag system, and the telemetry are prerequisites, in place before the first slice moves, not bolted on once trouble appears." },
+    { "type": "list", "ordered": false, "items": [
+      "Shadow-launch every slice against live traffic and reconcile outputs before serving any real response from the new path.",
+      "Gate every cutover behind feature flags with percentage-based routing so traffic shifts are gradual and instantly reversible.",
+      "Keep the legacy path warm and the rollback rehearsed until telemetry confirms the old code is dead, then remove it deliberately.",
+      "Define measurable success criteria per slice — error budget, latency ceiling, business-metric parity — and do not advance until they are met."
+    ] },
+    { "type": "heading", "level": 2, "text": "Organisational gravity is the real constraint" },
+    { "type": "paragraph", "text": "The hardest problems in modernization are rarely technical. A strangler migration runs for months or years, so it competes with feature delivery for the same teams, and the legacy system does not stop needing maintenance while you migrate around it. Programmes fail when leadership expects modernization to be free and parallel to the roadmap rather than a deliberate, funded line of work with its own owners. They also fail when teams keep adding features to the legacy core, deepening the very debt they are trying to retire. A useful rule is to freeze net-new functionality on the legacy path: new capability is built only on the modern side, behind the facade, which gives the migration a constant tailwind instead of a treadmill." },
+    { "type": "paragraph", "text": "It also helps to be honest about what does not need to move. Not every legacy system is worth modernizing. Some are stable, rarely changed, and cheaper to leave behind an ACL indefinitely than to rebuild. The goal is not architectural purity; it is to reduce the cost of change where change is actually happening. Modernize the parts of the estate that are slowing the business down, wrap the parts that are merely old but stable, and retire only what genuinely blocks progress. That judgement — knowing which fights are worth having — is what separates a modernization programme that delivers from one that becomes a second legacy system in its own right. It is the same discipline that shaped how we approached [unifying global trade operations](/case-studies/unifying-global-trade-operations) across a sprawl of incompatible incumbent systems." },
+    { "type": "heading", "level": 2, "text": "Where to start" },
+    { "type": "paragraph", "text": "If you are staring at a legacy estate and a rewrite proposal, resist the rewrite. Instead, instrument what you have, pick one bounded slice that hurts and matters, and put a facade in front of it. Build the replacement behind an anti-corruption layer so it gets a clean model from the outset. Shadow-launch it, reconcile its output against the incumbent, then shift traffic a few percent at a time with the rollback path open. Prove that single loop end to end — facade, ACL, shadow, reconcile, progressive cutover, decommission — on something real, and you have a repeatable template for the whole estate. Modernization stops being a terrifying multi-year bet and becomes a steady, observable cadence of small wins. That is the only kind of modernization that actually finishes." }
+  ],
+  "faqs": [
+    {
+      "q": "Why is a big-bang rewrite so likely to fail?",
+      "a": "It concentrates all the risk into a single irreversible cutover while chasing a moving target — the business keeps evolving during the multi-year build. The legacy system also encodes undocumented rules that the replacement inevitably misses, so the new system is behind and untrusted by the time it is ready to switch. Incremental modernization spreads that risk across many small, observable, reversible steps instead."
+    },
+    {
+      "q": "What is the strangler fig pattern?",
+      "a": "It is an incremental migration approach where a new system grows around a legacy one behind a routing facade, progressively taking over responsibilities until the legacy core is no longer load-bearing and can be removed. At every point there is a working system in production, and traffic shifts to the new implementation only once it has earned the load."
+    },
+    {
+      "q": "What is an anti-corruption layer and why does it matter?",
+      "a": "An anti-corruption layer (ACL) is a translation boundary between a new bounded context and a legacy system. It converts the legacy data model into the new domain's clean language inbound, and back again outbound, so the new code never depends on legacy quirks. It is what lets the modern system have a correct model from day one rather than inheriting decades of accreted compromise."
+    },
+    {
+      "q": "How do you handle data while the old and new systems coexist?",
+      "a": "Options range from legacy-authoritative read replication, to dual-write with reconciliation, to change data capture streaming legacy changes onto an event backbone, to full event-sourced cutover for the highest-value slices. Whatever pattern you choose, an automated, continuously running reconciliation check that proves the two systems agree — and alerts the instant they diverge — is non-negotiable."
+    },
+    {
+      "q": "How do you reduce the risk of each migration step in production?",
+      "a": "Shadow-launch the new implementation against live traffic and compare its output to the legacy system before serving any real response; use feature flags and percentage-based routing so cutovers are gradual and instantly reversible; keep the legacy path warm and the rollback rehearsed until telemetry confirms the old code is dead; and span both systems with distributed tracing and RED metrics so the migration is observable end to end."
+    },
+    {
+      "q": "Does every legacy system need to be modernized?",
+      "a": "No. Some legacy systems are stable, rarely changed, and cheaper to leave behind an anti-corruption layer indefinitely than to rebuild. The goal is to reduce the cost of change where change is actually happening — modernize what slows the business down, wrap what is merely old but stable, and retire only what genuinely blocks progress."
+    }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "anti-corruption layer", "href": "/services/enterprise-software" },
+    { "anchor": "AI compliance scoring platform", "href": "/case-studies/ai-compliance-scoring-platform" },
+    { "anchor": "real-time cross-border settlement", "href": "/case-studies/real-time-cross-border-settlement" },
+    { "anchor": "DevOps", "href": "/services/devops" },
+    { "anchor": "unifying global trade operations", "href": "/case-studies/unifying-global-trade-operations" }
+  ],
+  "customFields": {}
+}

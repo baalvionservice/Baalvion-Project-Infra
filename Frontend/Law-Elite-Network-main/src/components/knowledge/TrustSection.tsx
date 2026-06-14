@@ -1,19 +1,39 @@
 "use client";
 
-import React from 'react';
-import { ShieldCheck, Award, Zap, Globe } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ShieldCheck, Award, Zap, Globe, type LucideIcon } from 'lucide-react';
+
+type Stat = { icon: string; label: string; value: string };
+
+const ICON_MAP: Record<string, LucideIcon> = { Globe, Award, ShieldCheck, Zap };
+
+const FALLBACK_STATS: Stat[] = [
+  { icon: "Globe", label: "Global Jurisdictions", value: "120+" },
+  { icon: "Award", label: "Expert Topics", value: "500+" },
+  { icon: "ShieldCheck", label: "Verified Dossiers", value: "12K+" },
+  { icon: "Zap", label: "Active Members", value: "50K+" }
+];
 
 /**
  * @fileOverview TrustSection
- * Building immediate platform authority with subtle statistics.
+ * Platform authority statistics. Stats are managed in the central CMS
+ * (admin-platform console) and read via the same-origin /api/cms/homepage route,
+ * falling back to the built-in figures if unavailable.
  */
 export function TrustSection() {
-  const stats = [
-    { icon: <Globe className="w-5 h-5 text-blue-600" />, label: "Global Jurisdictions", value: "120+" },
-    { icon: <Award className="w-5 h-5 text-blue-600" />, label: "Expert Topics", value: "500+" },
-    { icon: <ShieldCheck className="w-5 h-5 text-blue-600" />, label: "Verified Dossiers", value: "12K+" },
-    { icon: <Zap className="w-5 h-5 text-blue-600" />, label: "Active Members", value: "50K+" }
-  ];
+  const [stats, setStats] = useState<Stat[]>(FALLBACK_STATS);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/cms/homepage')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        const cms = j?.data?.trustStats;
+        if (active && Array.isArray(cms) && cms.length) setStats(cms);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   return (
     <div className="py-20 border-t border-slate-100 text-center space-y-12">
@@ -23,17 +43,20 @@ export function TrustSection() {
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-        {stats.map((stat, i) => (
+        {stats.map((stat, i) => {
+          const Icon = ICON_MAP[stat.icon] || Globe;
+          return (
           <div key={i} className="space-y-3 group">
             <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center mx-auto group-hover:bg-blue-600 group-hover:text-white transition-all duration-500 shadow-inner">
-              {stat.icon}
+              <Icon className="w-5 h-5 text-blue-600" />
             </div>
             <div>
               <p className="text-3xl font-bold text-slate-900 tracking-tighter">{stat.value}</p>
               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

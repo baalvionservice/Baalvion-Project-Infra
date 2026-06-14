@@ -26,6 +26,11 @@ module.exports = function (sequelize, DataTypes) {
         isFeatured: { type: DataTypes.BOOLEAN, defaultValue: false },
         isDigital: { type: DataTypes.BOOLEAN, defaultValue: false },
         requiresShipping: { type: DataTypes.BOOLEAN, defaultValue: true },
+        // First-class inventory (promoted from custom_fields.stock). Order-time decrement is owned
+        // by order-service; this is the catalog-side source of truth + storefront availability.
+        stockQuantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
+        trackInventory: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
+        allowBackorder: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
         downloadLimit: { type: DataTypes.INTEGER, allowNull: true },
         downloadExpiry: { type: DataTypes.INTEGER, allowNull: true },
         relatedProductIds: { type: DataTypes.ARRAY(DataTypes.UUID), defaultValue: [] },

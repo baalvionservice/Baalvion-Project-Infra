@@ -1,5 +1,4 @@
-const { v4: uuidv4 } = require('uuid');
-const { Op } = require('sequelize');
+'use strict';
 const db = require('../models');
 const { AppError } = require('../utils/errors');
 const { generateToken, hashToken } = require('../utils/crypto');
@@ -7,6 +6,20 @@ const { sendMail } = require('../utils/mailer');
 const config = require('../config/appConfig');
 const auditService = require('./auditService');
 const eventBus = require('../utils/eventBus');
+const { orgRepo, userRepo, inviteRepo } = require('../repositories');
+const { isValidRole, canManageOrganization, canManageUsers } = require('../utils/orgConstants');
+
+const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+
+// Legacy 'super_admin' grants are honoured for backward compat with pre-existing seed rows.
+function memberCanManageUsers(role) {
+    return role === 'super_admin' || canManageUsers(role);
+}
+function memberCanManageOrg(role) {
+    return role === 'super_admin' || canManageOrganization(role);
+}
+
+// ── Org membership listing ──────────────────────────────────────────────────────
 
 async function listOrgs(userId) {
     const memberships = await db.TeamMember.findAll({
@@ -17,53 +30,62 @@ async function listOrgs(userId) {
         id: m.organization.id,
         name: m.organization.name,
         slug: m.organization.slug,
+        type: m.organization.type,
+        status: m.organization.status,
         plan: m.organization.plan,
         role: m.role,
         serviceRoles: m.service_roles,
     }));
 }
 
+// Self-service org creation (any authenticated user becomes owner of a new buyer workspace).
 async function createOrg({ userId, name, ipAddress }) {
-    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').slice(0, 60) + '-' + uuidv4().slice(0, 6);
-    const org = await db.Organization.create({ name, slug, owner_id: userId });
+    const org = await orgRepo.create({ name, ownerId: userId, type: 'buyer' });
     await db.TeamMember.create({ org_id: org.id, user_id: userId, role: 'owner', joined_at: new Date(), status: 'active' });
     await auditService.log({ userId, orgId: org.id, action: 'org.create', ipAddress });
-    return { id: org.id, name: org.name, slug: org.slug, plan: org.plan };
+    return { id: org.id, name: org.name, slug: org.slug, type: org.type, plan: org.plan };
 }
 
-async function getMembers(orgId, requesterId) {
+async function getOrg(orgId, requesterId) {
     await assertMember(orgId, requesterId);
-    const members = await db.TeamMember.findAll({
-        where: { org_id: orgId, status: 'active' },
-        include: [{ model: db.User, as: 'user', attributes: ['id', 'email', 'full_name', 'avatar_url'] }],
-    });
-    return members.map(m => ({
-        id: m.id,
-        userId: m.user_id,
-        email: m.user?.email,
-        fullName: m.user?.full_name,
-        avatarUrl: m.user?.avatar_url,
-        role: m.role,
-        serviceRoles: m.service_roles,
-        joinedAt: m.joined_at,
-    }));
+    return presentOrg(await orgRepo.findById(orgId));
 }
 
-async function inviteMember({ orgId, email, role, requesterId, ipAddress }) {
-    await assertAdmin(orgId, requesterId);
+async function updateOrgProfile({ orgId, fields, requesterId, ipAddress }) {
+    await assertManageOrg(orgId, requesterId);
+    const org = await orgRepo.updateProfile(orgId, fields);
+    await auditService.log({ userId: requesterId, orgId, action: 'org.update', metadata: { fields: Object.keys(fields) }, ipAddress });
+    return presentOrg(org);
+}
+
+async function getMembers(orgId, requesterId, { includeInactive = false } = {}) {
+    await assertMember(orgId, requesterId);
+    const members = await orgRepo.listMembers(orgId, { includeInactive });
+    return members.map(presentMember);
+}
+
+// ── Invitations ───────────────────────────────────────────────────────────────
+
+/**
+ * Low-level invite issuance — NO authorization gate. Callers (org admins via inviteMember,
+ * or the platform console seeding a new org's first owner) are responsible for authz.
+ * Generates a single-use token, persists the invitation, sends the email, audits + emits.
+ */
+async function issueInvitation({ orgId, email, role, fullName = null, invitedBy, ipAddress }) {
+    if (!isValidRole(role)) throw new AppError('VALIDATION_ERROR', `Invalid role '${role}'`, 400);
 
     const token = generateToken();
     const token_hash = hashToken(token);
-    const expires_at = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const expires_at = new Date(Date.now() + INVITE_TTL_MS);
 
-    // Remove any existing pending invitation for same email+org
-    await db.Invitation.destroy({ where: { org_id: orgId, email, accepted_at: null } });
-    const invitation = await db.Invitation.create({ org_id: orgId, email, role, token_hash, expires_at, created_by: requesterId });
+    await inviteRepo.destroyPending(orgId, email);
+    const invitation = await inviteRepo.create({ orgId, email, role, tokenHash: token_hash, expiresAt: expires_at, createdBy: invitedBy, fullName });
 
-    const org = await db.Organization.findByPk(orgId);
+    const org = await orgRepo.findById(orgId);
     const frontendUrl = config.frontendUrl || 'http://localhost:8080';
     const inviteLink = `${frontendUrl}/accept-invite?inviteToken=${token}&email=${encodeURIComponent(email)}`;
-    await sendMail({
+
+    sendMail({
         to: email,
         subject: `You're invited to join ${org?.name} on Baalvion`,
         html: `
@@ -80,28 +102,94 @@ async function inviteMember({ orgId, email, role, requesterId, ipAddress }) {
               <p style="color:#999;font-size:12px">Baalvion · <a href="${frontendUrl}" style="color:#999">${frontendUrl}</a></p>
             </div>
         `,
-    });
+    }).catch(() => {});
 
-    await auditService.log({ userId: requesterId, orgId, action: 'member.invite', metadata: { email, role }, ipAddress });
+    await auditService.log({ userId: invitedBy, orgId, action: 'member.invite', resourceType: 'invitation', resourceId: invitation.id, metadata: { email, role }, ipAddress });
 
-    // Publish for notification-service to send the invite email via its template engine
     eventBus.publish('auth.invitation_created', {
         invitationId: invitation.id,
         orgId,
-        orgName:      org?.name || '',
+        orgName: org?.name || '',
         email,
         role,
         inviteLink,
-        expiresAt:    expires_at.toISOString(),
-        invitedBy:    requesterId,
+        expiresAt: expires_at.toISOString(),
+        invitedBy,
     }).catch(() => {});
 
-    return { id: invitation.id, email, role, expiresAt: expires_at };
+    return { id: invitation.id, email, role, fullName, expiresAt: expires_at, inviteLink };
 }
 
+async function inviteMember({ orgId, email, role = 'viewer', fullName, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    const result = await issueInvitation({ orgId, email, role, fullName, invitedBy: requesterId, ipAddress });
+    return { id: result.id, email: result.email, role: result.role, expiresAt: result.expiresAt };
+}
+
+async function bulkInvite({ orgId, invites, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    const results = { invited: [], failed: [] };
+    for (const inv of invites) {
+        try {
+            const r = await issueInvitation({ orgId, email: inv.email, role: inv.role || 'viewer', fullName: inv.fullName, invitedBy: requesterId, ipAddress });
+            results.invited.push({ email: r.email, role: r.role, id: r.id });
+        } catch (err) {
+            results.failed.push({ email: inv.email, reason: err.message || 'failed' });
+        }
+    }
+    await auditService.log({ userId: requesterId, orgId, action: 'member.bulk_invite', metadata: { invited: results.invited.length, failed: results.failed.length }, ipAddress });
+    return results;
+}
+
+async function listInvitations({ orgId, requesterId }) {
+    await assertManageUsers(orgId, requesterId);
+    const rows = await inviteRepo.listPending(orgId);
+    return rows.map(i => ({
+        id: i.id,
+        email: i.email,
+        role: i.role,
+        fullName: i.full_name,
+        expiresAt: i.expires_at,
+        createdAt: i.created_at,
+        expired: new Date() > i.expires_at,
+    }));
+}
+
+async function resendInvitation({ orgId, invitationId, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    const invitation = await inviteRepo.findById(invitationId);
+    if (!invitation || String(invitation.org_id) !== String(orgId)) throw new AppError('NOT_FOUND', 'Invitation not found', 404);
+    if (invitation.accepted_at) throw new AppError('INVALID_REQUEST', 'Invitation already accepted', 400);
+
+    const token = generateToken();
+    const expires_at = new Date(Date.now() + INVITE_TTL_MS);
+    await inviteRepo.refreshToken(invitationId, hashToken(token), expires_at);
+
+    const org = await orgRepo.findById(orgId);
+    const frontendUrl = config.frontendUrl || 'http://localhost:8080';
+    const inviteLink = `${frontendUrl}/accept-invite?inviteToken=${token}&email=${encodeURIComponent(invitation.email)}`;
+    sendMail({
+        to: invitation.email,
+        subject: `Reminder: you're invited to join ${org?.name} on Baalvion`,
+        html: `<p>You've been invited to join <strong>${org?.name}</strong> as <strong>${invitation.role}</strong>. <a href="${inviteLink}">Accept Invitation</a>. Expires in 7 days.</p>`,
+    }).catch(() => {});
+
+    await auditService.log({ userId: requesterId, orgId, action: 'member.invite_resent', resourceType: 'invitation', resourceId: invitationId, metadata: { email: invitation.email }, ipAddress });
+    return { id: invitationId, email: invitation.email, role: invitation.role, expiresAt: expires_at };
+}
+
+async function revokeInvitation({ orgId, invitationId, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    const invitation = await inviteRepo.findById(invitationId);
+    if (!invitation || String(invitation.org_id) !== String(orgId)) throw new AppError('NOT_FOUND', 'Invitation not found', 404);
+    await inviteRepo.revoke(invitationId);
+    await auditService.log({ userId: requesterId, orgId, action: 'member.invite_revoked', resourceType: 'invitation', resourceId: invitationId, metadata: { email: invitation.email }, ipAddress });
+}
+
+// User-initiated accept (already-logged-in user joining via token in URL).
 async function acceptInvitation({ token, userId, ipAddress }) {
     const token_hash = hashToken(token);
-    const invitation = await db.Invitation.findOne({ where: { token_hash, accepted_at: null } });
+    const invitation = await db.Invitation.findOne({ where: { token_hash, accepted_at: null, revoked_at: null } });
     if (!invitation) throw new AppError('INVALID_TOKEN', 'Invalid or expired invitation', 400);
     if (new Date() > invitation.expires_at) throw new AppError('TOKEN_EXPIRED', 'Invitation has expired', 400);
 
@@ -109,62 +197,170 @@ async function acceptInvitation({ token, userId, ipAddress }) {
     if (!user) throw new AppError('NOT_FOUND', 'User not found', 404);
     if (user.email !== invitation.email) throw new AppError('FORBIDDEN', 'Invitation is for a different email', 403);
 
-    const existing = await db.TeamMember.findOne({ where: { org_id: invitation.org_id, user_id: userId } });
-    if (existing) {
-        await existing.update({ status: 'active', role: invitation.role, joined_at: new Date() });
-    } else {
-        await db.TeamMember.create({ org_id: invitation.org_id, user_id: userId, role: invitation.role, invited_by: invitation.created_by, joined_at: new Date(), status: 'active' });
-    }
-
+    await orgRepo.addMember({ orgId: invitation.org_id, userId, role: invitation.role, invitedBy: invitation.created_by });
     await invitation.update({ accepted_at: new Date() });
     await auditService.log({ userId, orgId: invitation.org_id, action: 'member.join', ipAddress });
     return { orgId: invitation.org_id, role: invitation.role };
 }
 
-async function removeMember({ orgId, targetUserId, requesterId, ipAddress }) {
-    await assertAdmin(orgId, requesterId);
-    if (String(targetUserId) === String(requesterId)) throw new AppError('INVALID_REQUEST', 'Cannot remove yourself', 400);
+// ── Member lifecycle ────────────────────────────────────────────────────────────
 
-    const member = await db.TeamMember.findOne({ where: { org_id: orgId, user_id: targetUserId } });
+async function removeMember({ orgId, targetUserId, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    if (String(targetUserId) === String(requesterId)) throw new AppError('INVALID_REQUEST', 'Cannot remove yourself', 400);
+    const member = await orgRepo.getMember(orgId, targetUserId);
     if (!member) throw new AppError('NOT_FOUND', 'Member not found', 404);
     if (member.role === 'owner') throw new AppError('FORBIDDEN', 'Cannot remove the org owner', 403);
 
-    await member.update({ status: 'removed' });
+    await orgRepo.removeMember(orgId, targetUserId);
     await auditService.log({ userId: requesterId, orgId, action: 'member.remove', metadata: { targetUserId }, ipAddress });
 }
 
-async function updateMemberRole({ orgId, targetUserId, role, serviceRoles, requesterId, ipAddress }) {
-    await assertAdmin(orgId, requesterId);
-    const member = await db.TeamMember.findOne({ where: { org_id: orgId, user_id: targetUserId, status: 'active' } });
+async function suspendMember({ orgId, targetUserId, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    if (String(targetUserId) === String(requesterId)) throw new AppError('INVALID_REQUEST', 'Cannot suspend yourself', 400);
+    const member = await orgRepo.getMember(orgId, targetUserId);
     if (!member) throw new AppError('NOT_FOUND', 'Member not found', 404);
-    if (member.role === 'owner') throw new AppError('FORBIDDEN', 'Cannot change owner role', 403);
+    if (member.role === 'owner') throw new AppError('FORBIDDEN', 'Cannot suspend the org owner', 403);
+
+    await orgRepo.suspendMember(orgId, targetUserId, requesterId);
+    await auditService.log({ userId: requesterId, orgId, action: 'member.suspend', metadata: { targetUserId }, ipAddress });
+}
+
+async function reactivateMember({ orgId, targetUserId, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    const member = await orgRepo.getMember(orgId, targetUserId);
+    if (!member) throw new AppError('NOT_FOUND', 'Member not found', 404);
+    await orgRepo.reactivateMember(orgId, targetUserId);
+    await auditService.log({ userId: requesterId, orgId, action: 'member.reactivate', metadata: { targetUserId }, ipAddress });
+}
+
+async function updateMemberRole({ orgId, targetUserId, role, serviceRoles, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    if (role !== undefined && !isValidRole(role)) throw new AppError('VALIDATION_ERROR', `Invalid role '${role}'`, 400);
+    const member = await orgRepo.getActiveMember(orgId, targetUserId);
+    if (!member) throw new AppError('NOT_FOUND', 'Member not found', 404);
+    if (member.role === 'owner') throw new AppError('FORBIDDEN', 'Cannot change owner role — transfer ownership instead', 403);
 
     await member.update({ role: role ?? member.role, service_roles: serviceRoles ?? member.service_roles });
     await auditService.log({ userId: requesterId, orgId, action: 'member.role_update', metadata: { targetUserId, role }, ipAddress });
     return { role: member.role, serviceRoles: member.service_roles };
 }
 
+async function transferOwnership({ orgId, newOwnerUserId, requesterId, ipAddress }) {
+    await assertManageOrg(orgId, requesterId);  // only the current owner may transfer
+    const newOwner = await orgRepo.getActiveMember(orgId, newOwnerUserId);
+    if (!newOwner) throw new AppError('NOT_FOUND', 'Target user is not an active member', 404);
+    if (String(newOwnerUserId) === String(requesterId)) throw new AppError('INVALID_REQUEST', 'You are already the owner', 400);
+
+    // Promote new owner, demote the current owner to admin, repoint org.owner_id.
+    await newOwner.update({ role: 'owner' });
+    const current = await orgRepo.getActiveMember(orgId, requesterId);
+    if (current) await current.update({ role: 'admin' });
+    await orgRepo.setOwner(orgId, newOwnerUserId);
+    await auditService.log({ userId: requesterId, orgId, action: 'org.ownership_transfer', metadata: { newOwnerUserId }, ipAddress });
+    return { ownerId: String(newOwnerUserId) };
+}
+
+async function forcePasswordReset({ orgId, targetUserId, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    const member = await orgRepo.getMember(orgId, targetUserId);
+    if (!member) throw new AppError('NOT_FOUND', 'Member not found', 404);
+    const user = await userRepo.findById(targetUserId);
+    if (!user) throw new AppError('NOT_FOUND', 'User not found', 404);
+
+    // Lazy require to avoid any load-order coupling with authService.
+    const authService = require('./authService');
+    await authService.forgotPassword({ email: user.email, ipAddress });
+    await auditService.log({ userId: requesterId, orgId, action: 'member.force_password_reset', metadata: { targetUserId }, ipAddress });
+    return { email: user.email };
+}
+
+async function forceMfa({ orgId, targetUserId, required = true, requesterId, ipAddress }) {
+    await assertManageUsers(orgId, requesterId);
+    const member = await orgRepo.getMember(orgId, targetUserId);
+    if (!member) throw new AppError('NOT_FOUND', 'Member not found', 404);
+    await userRepo.setMfaRequired(targetUserId, required);
+    await auditService.log({ userId: requesterId, orgId, action: 'member.force_mfa', metadata: { targetUserId, required: !!required }, ipAddress });
+    return { mfaRequired: !!required };
+}
+
+// ── Audit ─────────────────────────────────────────────────────────────────────
+
 async function getAuditLogs({ orgId, userId, page = 1, limit = 50 }) {
     const offset = (page - 1) * limit;
     const where = {};
     if (orgId) where.org_id = orgId;
     if (userId) where.user_id = userId;
-
     const { count, rows } = await db.AuditLog.findAndCountAll({ where, order: [['created_at', 'DESC']], limit, offset });
     return { total: count, page, limit, logs: rows };
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Presenters ──────────────────────────────────────────────────────────────────
+
+function presentOrg(org) {
+    if (!org) return null;
+    return {
+        id: org.id,
+        name: org.name,
+        slug: org.slug,
+        type: org.type,
+        status: org.status,
+        plan: org.plan,
+        legalName: org.legal_name,
+        displayName: org.display_name,
+        country: org.country,
+        jurisdiction: org.jurisdiction,
+        contactEmail: org.contact_email,
+        contactPhone: org.contact_phone,
+        ownerId: org.owner_id != null ? String(org.owner_id) : null,
+        createdAt: org.created_at,
+    };
+}
+
+function presentMember(m) {
+    return {
+        id: m.id,
+        userId: String(m.user_id),
+        email: m.user?.email,
+        fullName: m.user?.full_name,
+        avatarUrl: m.user?.avatar_url,
+        role: m.role,
+        serviceRoles: m.service_roles,
+        status: m.status,
+        userStatus: m.user?.status,
+        mfaEnabled: m.user?.mfa_enabled,
+        mfaRequired: m.user?.mfa_required,
+        lastLoginAt: m.user?.last_login_at,
+        joinedAt: m.joined_at,
+    };
+}
+
+// ── Authorization helpers ─────────────────────────────────────────────────────
+
 async function assertMember(orgId, userId) {
-    const m = await db.TeamMember.findOne({ where: { org_id: orgId, user_id: userId, status: 'active' } });
+    const m = await orgRepo.getActiveMember(orgId, userId);
     if (!m) throw new AppError('FORBIDDEN', 'Not a member of this organization', 403);
     return m;
 }
 
-async function assertAdmin(orgId, userId) {
+async function assertManageUsers(orgId, userId) {
     const m = await assertMember(orgId, userId);
-    if (!['owner', 'admin'].includes(m.role)) throw new AppError('FORBIDDEN', 'Admin access required', 403);
+    if (!memberCanManageUsers(m.role)) throw new AppError('FORBIDDEN', 'User-management permission required', 403);
     return m;
 }
 
-module.exports = { listOrgs, createOrg, getMembers, inviteMember, acceptInvitation, removeMember, updateMemberRole, getAuditLogs };
+async function assertManageOrg(orgId, userId) {
+    const m = await assertMember(orgId, userId);
+    if (!memberCanManageOrg(m.role)) throw new AppError('FORBIDDEN', 'Organization-owner permission required', 403);
+    return m;
+}
+
+module.exports = {
+    listOrgs, createOrg, getOrg, updateOrgProfile, getMembers,
+    issueInvitation, inviteMember, bulkInvite, listInvitations, resendInvitation, revokeInvitation, acceptInvitation,
+    removeMember, suspendMember, reactivateMember, updateMemberRole, transferOwnership,
+    forcePasswordReset, forceMfa, getAuditLogs,
+    // exported for reuse/testing
+    presentOrg, presentMember,
+};

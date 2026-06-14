@@ -34,6 +34,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAppStore } from "@/lib/store";
+import { listVendors } from "@/lib/crm-client";
+import type { Vendor } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
 import {
   Table,
@@ -66,13 +68,26 @@ export default function VendorAdminPanel() {
   const {
     activeVendor,
     setActiveVendor,
-    vendors,
+    vendors: storeVendors,
     products,
     deleteProduct,
     currentUser,
     submitApproval,
   } = useAppStore();
   const { toast } = useToast();
+
+  // Prefer live CRM data; fall back to the in-memory store when the CRM call is empty/unavailable.
+  const [crmVendors, setCrmVendors] = useState<Vendor[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    listVendors().then((items) => {
+      if (!cancelled) setCrmVendors(items);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const vendors = crmVendors.length > 0 ? crmVendors : storeVendors;
 
   useEffect(() => {
     // Scoped Brand Isolation: Vendors cannot switch context manually if already set by session

@@ -29,14 +29,15 @@ import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import type { CommerceStore, CreateStorePayload } from '@/lib/types/commerce.types';
 
-const CURRENCIES = ['AED', 'INR', 'USD', 'GBP', 'EUR', 'SAR', 'QAR', 'KWD', 'BHD'];
+// The five supported storefront markets (aligned with the commerce-service market
+// registry and the Amarisé storefront). Singapore was previously missing.
+const CURRENCIES = ['USD', 'GBP', 'AED', 'INR', 'SGD'];
 const COUNTRIES = [
-  { code: 'AE', name: 'UAE' },
+  { code: 'US', name: 'United States' },
+  { code: 'GB', name: 'United Kingdom' },
+  { code: 'AE', name: 'United Arab Emirates' },
   { code: 'IN', name: 'India' },
-  { code: 'US', name: 'USA' },
-  { code: 'GB', name: 'UK' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'SA', name: 'Saudi Arabia' },
+  { code: 'SG', name: 'Singapore' },
 ];
 
 interface StoreForm {

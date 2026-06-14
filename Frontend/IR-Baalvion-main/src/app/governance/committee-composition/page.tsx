@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Committee Composition | Baalvion',
-    description: 'Information about the composition of our board committees.',
+    title: 'Committee Composition | Baalvion Governance',
+    description: 'Composition and membership of the Baalvion board committees — Audit, Compensation, Nominating & Governance, and Risk.',
+    alternates: { canonical: '/governance/committee-composition' },
 };
 
 export default function CommitteeCompositionPage() {

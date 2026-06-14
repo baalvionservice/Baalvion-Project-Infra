@@ -56,7 +56,6 @@ const careersSubItems = [
 
 const aboutSubItems = [
     { href: `/about`, label: 'About Us' },
-    { href: `/new-skills`, label: 'New Skills' },
     { href: `/about/team`, label: 'Meet the Team' },
     { href: `/about/diversity`, label: 'Diversity & Inclusion' },
 ];
@@ -65,6 +64,8 @@ const joinUsSubItems = [
     { href: `/careers/internship-program`, label: 'Internship Program' },
     { href: `/careers/full-time`, label: 'Full-Time Roles' },
     { href: `/careers/part-time`, label: 'Part-Time Roles' },
+    { href: `/onboarding/student`, label: 'Join as a Student' },
+    { href: `/onboarding/college`, label: 'Onboard Your College' },
 ];
 
 export function PublicHeader() {
@@ -146,6 +147,9 @@ export function PublicHeader() {
                             <Button variant="outline" asChild>
                                 <Link href="/login">Sign In</Link>
                             </Button>
+                            <Button asChild>
+                                <Link href="/onboarding">Join Baalvion</Link>
+                            </Button>
                         </div>
 
                         <div className="md:hidden">
@@ -220,7 +224,12 @@ export function PublicHeader() {
                                             </Link>
                                         </SheetClose>
                                         <SheetClose asChild>
-                                            <Button variant="outline" asChild className="w-full mt-4">
+                                            <Button asChild className="w-full mt-4">
+                                                <Link href="/onboarding">Join Baalvion</Link>
+                                            </Button>
+                                        </SheetClose>
+                                        <SheetClose asChild>
+                                            <Button variant="outline" asChild className="w-full">
                                                 <Link href="/login">Sign In</Link>
                                             </Button>
                                         </SheetClose>

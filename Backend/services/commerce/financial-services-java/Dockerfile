@@ -1,17 +1,22 @@
 # Multi-stage build for any financial service in the reactor.
 # Usage: docker build --build-arg SERVICE=payment-service -t baalvion/payment-service .
 #
-# The builder compiles the whole Maven reactor once (so the common-security library and
-# all modules resolve), then the runtime image copies only the selected service jar.
+# The builder compiles ONLY the selected service + its reactor dependencies, then the
+# runtime image copies that service jar.
 
 # ---- Build stage ----
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-17@sha256:e8ef73dbd33b69fe497fd96b3bbbd85aff84ac4c564a5784ab02ad941b32c12b AS build
+ARG SERVICE
 WORKDIR /workspace
 COPY . .
-RUN mvn -B -q -DskipTests clean package
+# Build only the selected module + its reactor deps (-pl <svc> -am). This isolates each
+# service image from unrelated sibling modules (a break in one module no longer fails
+# every image build) and is far faster than compiling all 22 modules per image.
+RUN test -n "$SERVICE" || (echo "ERROR: --build-arg SERVICE=<module> is required" >&2; exit 1)
+RUN mvn -B -ntp -DskipTests -pl "$SERVICE" -am clean package
 
 # ---- Runtime stage ----
-FROM eclipse-temurin:17-jre
+FROM eclipse-temurin:17-jre@sha256:8016378253033ebd971c237f6580f108b4afac11a188d3fc3b982497bbe55c65
 ARG SERVICE
 ENV SERVICE=${SERVICE}
 WORKDIR /app

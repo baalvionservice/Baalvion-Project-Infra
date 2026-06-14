@@ -12,9 +12,11 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ["var(--font-body)", "PT Sans", "sans-serif"],
-        headline: ["var(--font-headline)", "Playfair Display", "serif"],
-        ui: ["var(--font-ui)", "Cabin", "sans-serif"],
+        // Investopedia-style: neutral Helvetica/Arial sans for body + UI,
+        // editorial transitional serif for headlines.
+        body: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
+        headline: ["var(--font-headline)", "Georgia", "Times New Roman", "serif"],
+        ui: ["-apple-system", "BlinkMacSystemFont", "Segoe UI", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"],
         code: ["monospace"],
       },
       colors: {

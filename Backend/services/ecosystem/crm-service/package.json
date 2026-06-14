@@ -1,0 +1,31 @@
+{
+  "name": "crm-service",
+  "version": "1.0.0",
+  "description": "Baalvion CRM & Marketing Service — VIP clients, segments, campaigns, vendors, affiliates, appointments",
+  "license": "ISC",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express-rate-limit": "^7.5.0",
+    "@baalvion/auth-node": "workspace:*",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "pg": "^8.20.0",
+    "pg-hstore": "^2.3.4",
+    "prom-client": "^15.1.3",
+    "sequelize": "^6.37.8",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

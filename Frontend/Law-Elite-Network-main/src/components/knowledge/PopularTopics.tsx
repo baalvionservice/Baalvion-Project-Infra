@@ -1,23 +1,41 @@
 "use client";
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Tag, ArrowRight } from 'lucide-react';
 
+type Topic = { name: string; slug: string };
+
+const FALLBACK_TOPICS: Topic[] = [
+  { name: "Enterprise Contracts", slug: "contracts" },
+  { name: "Criminal Bail Laws", slug: "bail" },
+  { name: "Strategic Divorce", slug: "divorce" },
+  { name: "GST Compliance", slug: "tax" },
+  { name: "Global Trademarks", slug: "trademark" },
+  { name: "Startup Incorporation", slug: "business" },
+  { name: "Employment Rights", slug: "labor" }
+];
+
 /**
  * @fileOverview PopularTopics
- * Surfaces high-intent subcategories as tactical discovery pills with mobile scrolling.
+ * Surfaces high-intent topics as tactical discovery pills. Topics are managed in
+ * the central CMS (admin-platform console) and read via the same-origin
+ * /api/cms/homepage route, falling back to the built-in list if unavailable.
  */
 export function PopularTopics() {
-  const topics = [
-    { name: "Enterprise Contracts", slug: "contracts" },
-    { name: "Criminal Bail Laws", slug: "bail" },
-    { name: "Strategic Divorce", slug: "divorce" },
-    { name: "GST Compliance", slug: "tax" },
-    { name: "Global Trademarks", slug: "trademark" },
-    { name: "Startup Incorporation", slug: "business" },
-    { name: "Employment Rights", slug: "labor" }
-  ];
+  const [topics, setTopics] = useState<Topic[]>(FALLBACK_TOPICS);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/cms/homepage')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        const cms = j?.data?.popularTopics;
+        if (active && Array.isArray(cms) && cms.length) setTopics(cms);
+      })
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
 
   return (
     <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-xl border border-slate-100 rounded-2xl md:rounded-3xl p-4 md:p-6 shadow-sm px-4">

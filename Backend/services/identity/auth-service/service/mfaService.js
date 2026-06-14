@@ -85,6 +85,15 @@ async function peekChallenge(token) {
     return _loadChallenge(token);
 }
 
+/**
+ * Consumes (deletes) a challenge without TOTP verification. Used by the MFA-enrollment
+ * flow, where the code has already been confirmed against the pending secret via
+ * confirmSetup() and we just need to burn the single-use enrollment challenge.
+ */
+async function consumeChallenge(token) {
+    await _deleteChallenge(token);
+}
+
 // ── Public API ─────────────────────────────────────────────────────────────────
 
 /**
@@ -177,6 +186,7 @@ function confirmSetup(pendingSecret, totpCode) {
 module.exports = {
     createChallenge,
     peekChallenge,
+    consumeChallenge,
     verifyChallenge,
     initiateSetup,
     confirmSetup,

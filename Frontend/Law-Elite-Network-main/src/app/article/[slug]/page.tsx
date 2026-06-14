@@ -64,26 +64,35 @@ export default function ArticleDeepDivePage() {
   useEffect(() => {
     if (!slug) return;
     setArticleLoading(true);
-    // /articles/:slug resolves by slug; the ?slug= list filter is not applied server-side.
-    articlesPublicApi.get(slug as string)
-      .then(res => {
-        const item = res.data?.data || null;
-        if (item) {
-          setArticle(item);
-        } else {
-          const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug);
-          if (seedMatch) {
-            setArticle({
-              ...seedMatch,
-              content: seedMatch.content || generateFallbackContent(seedMatch.title),
-              updatedAt: "February 12, 2025",
-            });
-          }
+
+    // Try law-service first, then CMS-managed articles (admin-platform console),
+    // then the static seed — so console-published articles open correctly.
+    const fromCms = async () => {
+      try {
+        const r = await fetch(`/api/cms/articles/${slug}`);
+        if (r.ok) {
+          const j = await r.json();
+          if (j?.data) return j.data;
         }
+      } catch {
+        /* ignore */
+      }
+      return null;
+    };
+    const fromSeed = () => {
+      const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug);
+      return seedMatch
+        ? { ...seedMatch, content: seedMatch.content || generateFallbackContent(seedMatch.title), updatedAt: "February 12, 2025" }
+        : null;
+    };
+
+    articlesPublicApi.get(slug as string)
+      .then(async (res) => {
+        const item = res.data?.data || null;
+        setArticle(item || (await fromCms()) || fromSeed());
       })
-      .catch(() => {
-        const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug);
-        if (seedMatch) setArticle({ ...seedMatch });
+      .catch(async () => {
+        setArticle((await fromCms()) || fromSeed());
       })
       .finally(() => setArticleLoading(false));
   }, [slug]);

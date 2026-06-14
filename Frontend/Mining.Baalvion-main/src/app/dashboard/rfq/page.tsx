@@ -75,8 +75,7 @@ export default function RFQPage() {
 
   const onSubmit = (data: RfqFormValues) => {
     try {
-      console.log("RFQ Published:", data);
-      trackEvent('rfq_created', { 
+      trackEvent('rfq_created', {
         mineral: data.mineralType, 
         qty: data.quantity,
         visibility: data.visibility 

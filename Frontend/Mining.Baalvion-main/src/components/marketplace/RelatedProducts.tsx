@@ -7,6 +7,7 @@ import { Gem, ChevronRight, Loader2, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { marketplaceApi, type MineralProduct } from "@/lib/api-client";
+import { BRAND_IMAGES } from "@/lib/brand-assets";
 
 interface RelatedProductsProps {
   currentProductId: string;
@@ -98,7 +99,7 @@ export function RelatedProducts({ currentProductId, category: _category }: Relat
           <Card key={p.slug} className="border-none shadow-sm hover:shadow-md transition-all group overflow-hidden">
             <div className="relative h-32 bg-slate-100">
               <Image
-                src={p.imageUrl || `https://picsum.photos/seed/${p.slug}/400/300`}
+                src={p.imageUrl || BRAND_IMAGES.mineral}
                 alt={`Premium ${p.name} for industrial export`}
                 fill
                 className="object-cover group-hover:scale-105 transition-transform duration-500"

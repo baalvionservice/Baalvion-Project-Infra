@@ -6,8 +6,19 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const events = require('../service/events');
 const github = require('../service/github');
 const sandbox = require('../service/sandbox');
+const { assertSafeUrl } = require('../utils/safeUrl');
 
 const maskKey = (k) => (k ? `••••••••${String(k).slice(-4)}` : '');
+
+// IDOR guard helper: only the owning org (row.company_id === caller orgId) or an
+// admin may act on a tenant-owned integration/webhook record. Throws 403 otherwise.
+const assertOwnsOrAdmin = (req, row, label) => {
+    const callerRoles = req.auth?.roles || [];
+    const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+    if (!isAdmin && String(row.company_id || '') !== String(req.auth?.orgId || '')) {
+        throw new AppError('FORBIDDEN', `You do not have permission to modify this ${label}`, 403);
+    }
+};
 
 // ── Webhooks ────────────────────────────────────────────────────────────────────
 const mapWebhook = (w, includeSecret = false) => ({
@@ -19,7 +30,17 @@ const mapWebhook = (w, includeSecret = false) => ({
 exports.listWebhooks = async (req, res, next) => {
     try {
         const where = {};
-        if (req.query.company_id) where[Op.or] = [{ company_id: req.query.company_id }, { company_id: null }];
+        // Tenant scoping: non-admins see only their org's webhooks (+ global nulls);
+        // admins may target any company.
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (isAdmin) {
+            if (req.query.company_id) where[Op.or] = [{ company_id: req.query.company_id }, { company_id: null }];
+        } else {
+            const callerOrgId = req.auth?.orgId;
+            if (!callerOrgId) throw new AppError('FORBIDDEN', 'Organization context required', 403);
+            where[Op.or] = [{ company_id: callerOrgId }, { company_id: null }];
+        }
         const rows = await db.webhooks.findAll({ where, order: [['created_at', 'DESC']] });
         sendSuccess(res, rows.map((w) => mapWebhook(w)));
     } catch (err) { next(err); }
@@ -42,6 +63,7 @@ exports.updateWebhook = async (req, res, next) => {
     try {
         const w = await db.webhooks.findByPk(req.params.id);
         if (!w) throw new AppError('NOT_FOUND', 'Webhook not found', 404);
+        assertOwnsOrAdmin(req, w, 'webhook');
         ['name', 'url', 'status'].forEach((f) => { if (req.body[f] !== undefined) w[f] = req.body[f]; });
         if (req.body.events !== undefined) w.events = req.body.events;
         await w.save();
@@ -53,6 +75,7 @@ exports.deleteWebhook = async (req, res, next) => {
     try {
         const w = await db.webhooks.findByPk(req.params.id);
         if (!w) throw new AppError('NOT_FOUND', 'Webhook not found', 404);
+        assertOwnsOrAdmin(req, w, 'webhook');
         await w.destroy();
         sendSuccess(res, { id: req.params.id, deleted: true });
     } catch (err) { next(err); }
@@ -60,6 +83,14 @@ exports.deleteWebhook = async (req, res, next) => {
 
 exports.getWebhookDeliveries = async (req, res, next) => {
     try {
+        // IDOR guard: only the owning org (or an admin) may read a webhook's deliveries.
+        const w = await db.webhooks.findByPk(req.params.id);
+        if (!w) throw new AppError('NOT_FOUND', 'Webhook not found', 404);
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (!isAdmin && w.company_id && String(w.company_id) !== String(req.auth?.orgId || '')) {
+            throw new AppError('FORBIDDEN', 'You do not have permission to view these deliveries', 403);
+        }
         const rows = await db.webhook_deliveries.findAll({
             where: { webhook_id: req.params.id }, order: [['created_at', 'DESC']], limit: 100,
         });
@@ -77,6 +108,7 @@ exports.testWebhook = async (req, res, next) => {
     try {
         const w = await db.webhooks.findByPk(req.params.id);
         if (!w) throw new AppError('NOT_FOUND', 'Webhook not found', 404);
+        assertOwnsOrAdmin(req, w, 'webhook');
         const ok = await events.deliver(w, 'ping', { id: 'test', event: 'ping', created_at: new Date().toISOString(), data: { message: 'Test delivery from Baalvion CTM' } });
         sendSuccess(res, { delivered: ok });
     } catch (err) { next(err); }
@@ -97,7 +129,16 @@ const mapIntegration = (i) => {
 exports.listApiIntegrations = async (req, res, next) => {
     try {
         const where = {};
-        if (req.query.company_id) where[Op.or] = [{ company_id: req.query.company_id }, { company_id: null }];
+        // Tenant scoping: non-admins see only their org's integrations (+ global nulls).
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        if (isAdmin) {
+            if (req.query.company_id) where[Op.or] = [{ company_id: req.query.company_id }, { company_id: null }];
+        } else {
+            const callerOrgId = req.auth?.orgId;
+            if (!callerOrgId) throw new AppError('FORBIDDEN', 'Organization context required', 403);
+            where[Op.or] = [{ company_id: callerOrgId }, { company_id: null }];
+        }
         const rows = await db.api_integrations.findAll({ where, order: [['created_at', 'DESC']] });
         sendSuccess(res, rows.map(mapIntegration));
     } catch (err) { next(err); }
@@ -121,6 +162,7 @@ exports.updateApiIntegration = async (req, res, next) => {
     try {
         const i = await db.api_integrations.findByPk(req.params.id);
         if (!i) throw new AppError('NOT_FOUND', 'Integration not found', 404);
+        assertOwnsOrAdmin(req, i, 'integration');
         const b = req.body;
         if (b.name !== undefined) i.name = b.name;
         if (b.category !== undefined) i.category = b.category;
@@ -138,6 +180,7 @@ exports.deleteApiIntegration = async (req, res, next) => {
     try {
         const i = await db.api_integrations.findByPk(req.params.id);
         if (!i) throw new AppError('NOT_FOUND', 'Integration not found', 404);
+        assertOwnsOrAdmin(req, i, 'integration');
         await i.destroy();
         sendSuccess(res, { id: req.params.id, deleted: true });
     } catch (err) { next(err); }
@@ -147,12 +190,19 @@ exports.testApiIntegration = async (req, res, next) => {
     try {
         const i = await db.api_integrations.findByPk(req.params.id);
         if (!i) throw new AppError('NOT_FOUND', 'Integration not found', 404);
+        assertOwnsOrAdmin(req, i, 'integration');
         let ok = false, detail = 'No endpoint configured';
         if (i.endpoint_url) {
             try {
+                // SSRF guard: validate the stored endpoint_url before making the outbound
+                // request. Rejects private/loopback/link-local addresses and non-http(s) schemes.
+                // The stored api_key is intentionally NOT forwarded — sending secrets to an
+                // arbitrary URL is a credential-exfiltration risk.
+                await assertSafeUrl(i.endpoint_url);
                 const controller = new AbortController();
                 const timer = setTimeout(() => controller.abort(), 4000);
-                const r = await fetch(i.endpoint_url, { headers: i.api_key ? { Authorization: `Bearer ${i.api_key}` } : {}, signal: controller.signal });
+                // Ping without Authorization to avoid credential forwarding to unknown hosts.
+                const r = await fetch(i.endpoint_url, { signal: controller.signal });
                 clearTimeout(timer);
                 ok = r.status < 500; detail = `HTTP ${r.status}`;
             } catch (e) { detail = String(e.message); }
@@ -221,8 +271,24 @@ const mapTestCase = (t) => ({
     runtimeMs: t.runtime_ms ?? undefined,
 });
 
+// IDOR guard: only the submitter, the owning company, or an admin may view/attach
+// test cases for a submission. Loads + returns the submission so callers can reuse it.
+const assertSubmissionAccess = async (req) => {
+    const submission = await db.submissions.findByPk(req.params.id, { include: [{ association: 'task', attributes: ['company_id'] }] });
+    if (!submission) throw new AppError('NOT_FOUND', 'Submission not found', 404);
+    const callerRoles = req.auth?.roles || [];
+    const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+    const isOwner = String(submission.user_id) === String(req.auth?.userId || '');
+    const isCompany = req.auth?.orgId && submission.task && String(submission.task.company_id) === String(req.auth.orgId);
+    if (!isAdmin && !isOwner && !isCompany) {
+        throw new AppError('FORBIDDEN', 'You do not have permission to access this submission', 403);
+    }
+    return submission;
+};
+
 exports.listTestCases = async (req, res, next) => {
     try {
+        await assertSubmissionAccess(req);
         const rows = await db.test_cases.findAll({ where: { submission_id: req.params.id }, order: [['created_at', 'ASC']] });
         sendSuccess(res, rows.map(mapTestCase));
     } catch (err) { next(err); }
@@ -232,6 +298,7 @@ exports.createTestCase = async (req, res, next) => {
     try {
         const b = req.body;
         if (!b.name) throw new AppError('VALIDATION_ERROR', 'name is required', 400);
+        await assertSubmissionAccess(req);
         const t = await db.test_cases.create({
             submission_id: req.params.id, name: b.name, description: b.description,
             expected_outcome: b.expected_outcome ?? b.expectedOutcome,
@@ -248,6 +315,17 @@ exports.runTestCases = async (req, res, next) => {
     try {
         const submission = await db.submissions.findByPk(req.params.id, { include: [{ association: 'task' }] });
         if (!submission) throw new AppError('NOT_FOUND', 'Submission not found', 404);
+        // IDOR guard: running test cases mutates the submission's auto-score — restrict to
+        // the submitter, the owning company, or an admin.
+        {
+            const callerRoles = req.auth?.roles || [];
+            const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+            const isOwner = String(submission.user_id) === String(req.auth?.userId || '');
+            const isCompany = req.auth?.orgId && submission.task && String(submission.task.company_id) === String(req.auth.orgId);
+            if (!isAdmin && !isOwner && !isCompany) {
+                throw new AppError('FORBIDDEN', 'You do not have permission to run test cases on this submission', 403);
+            }
+        }
         const cases = Array.isArray(req.body.cases) ? req.body.cases : (submission.task?.metadata?.testCases || []);
         const language = req.body.language || submission.task?.metadata?.language || 'javascript';
         const sourceCode = req.body.sourceCode || submission.metadata?.sourceCode || '';

@@ -23,7 +23,20 @@ const SYSTEM_USER = Number(process.env.AMARISE_OWNER_ID || 67);
 const REGIONS = ['us', 'uk', 'ae', 'in', 'sg', 'ca'];
 
 const slugify = (s) => String(s).toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-const img = (seed) => `https://picsum.photos/seed/amarise-${seed}/800/1000`;
+
+// Product imagery base. Defaults to a dev placeholder (picsum) so a zero-config seed is browsable,
+// but is OVERRIDABLE via SEED_MEDIA_BASE_URL so real licensed photography can be wired without a
+// code change: set SEED_MEDIA_BASE_URL=https://cdn.amarise.com/products and drop files named
+// <product-slug>-1.jpg / <product-slug>-2.jpg there (or run scripts/attachProductMedia.js with a
+// manifest of real per-product URLs). BrandImage.isRealImage() treats only non-placeholder hosts
+// as real, so picsum URLs intentionally fall back to the branded monogram panel until real assets
+// are attached.
+const SEED_MEDIA_BASE_URL = (process.env.SEED_MEDIA_BASE_URL || '').replace(/\/$/, '');
+const SEED_MEDIA_EXT = process.env.SEED_MEDIA_EXT || 'jpg';
+const img = (seed) =>
+    SEED_MEDIA_BASE_URL
+        ? `${SEED_MEDIA_BASE_URL}/${seed}.${SEED_MEDIA_EXT}`
+        : `https://picsum.photos/seed/amarise-${seed}/800/1000`;
 
 // Brands → root categories (the storefront nav: HERMÈS / CHANEL / GOYARD / OTHER BRANDS / JEWELRY).
 const BRANDS = [

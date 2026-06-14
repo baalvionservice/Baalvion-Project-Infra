@@ -1,0 +1,55 @@
+{
+  "slug": "education",
+  "title": "Baalvion for Education",
+  "kind": "industry",
+  "heroImageSeed": "ind-education",
+  "excerpt": "Scalable learning and credentialing platforms — handling peak load, protecting learner data, and integrating cleanly.",
+  "seo": {
+    "title": "Education Technology Solutions | Baalvion",
+    "description": "Baalvion builds education platforms that scale through demand peaks, protect learner data, support verifiable credentials, and integrate with existing systems.",
+    "keywords": ["education technology", "edtech", "learning platform", "credentialing", "Baalvion industries", "LMS"]
+  },
+  "customFields": {
+    "challenges": [
+      "Spiky load around enrolment, exams, and deadlines",
+      "Protecting learner data and privacy",
+      "Trustworthy, verifiable credentials",
+      "Integrating with existing institutional systems"
+    ],
+    "solutions": [
+      "Autoscaling infrastructure for demand peaks",
+      "Strong data protection and access control",
+      "Verifiable, tamper-evident credential records",
+      "API-first integration with institutional systems"
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Sector Overview" },
+    { "type": "paragraph", "text": "Education technology faces a distinctive pattern: long quiet periods punctuated by intense spikes — enrolment windows, exam days, assignment deadlines — when the whole user base arrives at once. Add sensitive learner data and the need for credentials people can trust, and you have a demanding engineering problem. Baalvion builds learning platforms that handle all of it." },
+    { "type": "heading", "level": 2, "text": "Challenges" },
+    { "type": "list", "ordered": false, "items": [
+      "**Spiky load:** platforms must absorb sudden, predictable surges.",
+      "**Data privacy:** learner data, often including minors, must be protected.",
+      "**Credentials:** certificates and records must be verifiable and tamper-evident.",
+      "**Integration:** edtech rarely lives alone — it must connect to existing systems."
+    ] },
+    { "type": "heading", "level": 2, "text": "How Baalvion Helps" },
+    { "type": "paragraph", "text": "We build on autoscaling [cloud-native architecture](/news/tech/cloud-native-architecture) that absorbs demand peaks without falling over, protect learner data with the controls from [secure software development](/news/tech/secure-software-development), and use append-only records for tamper-evident credentials. Everything integrates the [API-first](/news/tech/api-first-architecture) way with institutional systems." },
+    { "type": "heading", "level": 2, "text": "Relevant Services" },
+    { "type": "paragraph", "text": "Education engagements combine [web development](/services/web-development), [cloud solutions](/services/cloud-solutions), and [custom software development](/services/custom-software-development), with [AI solutions](/services/ai-solutions) for personalisation where it genuinely helps learners." },
+    { "type": "heading", "level": 2, "text": "Outcomes" },
+    { "type": "paragraph", "text": "Education platforms that stay fast and available through every peak, keep learner data safe, issue credentials people can verify, and slot cleanly into the institutional landscape." }
+  ],
+  "faqs": [
+    { "q": "How do you handle exam-day and enrolment spikes?", "a": "Autoscaling, cloud-native architecture and caching absorb sudden surges, so the platform stays responsive when the whole user base arrives at once." },
+    { "q": "How is learner data protected?", "a": "Encryption, least-privilege access, and audit logging — the controls in [secure software development](/news/tech/secure-software-development) — with particular care where minors are involved." },
+    { "q": "Can credentials be verified?", "a": "Yes — we use append-only, tamper-evident records so certificates and achievements can be independently verified." },
+    { "q": "Which services apply to education?", "a": "Typically [web development](/services/web-development), [cloud solutions](/services/cloud-solutions), and [custom software development](/services/custom-software-development)." }
+  ],
+  "internalLinks": [
+    { "anchor": "cloud-native architecture", "href": "/news/tech/cloud-native-architecture" },
+    { "anchor": "secure software development", "href": "/news/tech/secure-software-development" },
+    { "anchor": "web development", "href": "/services/web-development" },
+    { "anchor": "API-first architecture", "href": "/news/tech/api-first-architecture" }
+  ]
+}

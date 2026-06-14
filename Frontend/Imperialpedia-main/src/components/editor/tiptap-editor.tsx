@@ -209,15 +209,13 @@ export default function TiptapEditor() {
       content: formData.content,
     };
 
-    console.log("Saving term:", termData);
-
     const data = mutate({
       endpoint: "terms/create",
       method: "post",
       data: termData,
     });
 
-    console.log(data, "res");
+    void data;
     // Here you would typically send to your API
     alert("Term saved successfully!");
   };

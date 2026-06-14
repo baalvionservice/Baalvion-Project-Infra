@@ -1,0 +1,57 @@
+{
+  "slug": "custom-software-development",
+  "title": "Custom Software Development",
+  "kind": "service",
+  "heroImageSeed": "svc-custom",
+  "excerpt": "Bespoke, production-grade software engineered to your domain — the capability that builds the Baalvion Operating System, available to you.",
+  "seo": {
+    "title": "Custom Software Development Services | Baalvion",
+    "description": "Baalvion designs and builds bespoke, production-grade software for enterprises — multi-tenant, secure, and built to scale. Explore our process and stack.",
+    "keywords": ["custom software development", "bespoke software", "enterprise software engineering", "Baalvion services", "product engineering", "scalable software"]
+  },
+  "customFields": {
+    "benefits": [
+      "Software shaped to your domain, not a generic template",
+      "Production-grade from day one: tested, observable, secure",
+      "Multi-tenant and built to scale",
+      "You own the code and the architecture"
+    ],
+    "process": [
+      { "step": "Discovery", "desc": "We map the domain, constraints, and the outcome that matters." },
+      { "step": "Architecture", "desc": "We design for scale, security, and change before writing code." },
+      { "step": "Build", "desc": "Iterative delivery with tests, reviews, and continuous integration." },
+      { "step": "Operate", "desc": "Observability, runbooks, and a clean handover or ongoing partnership." }
+    ],
+    "techStack": ["TypeScript", "Node.js", "PostgreSQL", "Event streaming", "Cloud-native infra", "CI/CD"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "Custom software is worth building when off-the-shelf tools can't express your domain or your edge. Baalvion builds exactly that kind of software — the same engineering capability behind the [Baalvion Operating System](/platform), applied to your problem. We don't ship prototypes dressed up as products; we deliver systems that are tested, observable, secure, and ready for production load." },
+    { "type": "paragraph", "text": "Whether you're replacing a brittle internal tool, building a new platform, or modernising a legacy estate, we start from your outcomes and work back to an architecture that will still make sense in three years." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Domain-fit:** software that models your business precisely, not a forced template.",
+      "**Production-grade:** automated tests, observability, and security built in from the start.",
+      "**Scalable:** multi-tenant, event-driven foundations that grow with you — see [building multi-tenant SaaS](/news/tech/building-multi-tenant-saas).",
+      "**Yours:** you own the code, the architecture, and the decisions."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We run a disciplined cycle: discovery to understand the domain, architecture to design for scale and change, iterative build with tests and reviews, and an operate phase with observability and runbooks. It's the [modern software development lifecycle](/news/tech/software-development-lifecycle) applied without ceremony — momentum over process for its own sake." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "We favour a pragmatic, well-supported stack — TypeScript and Node.js, PostgreSQL with row-level security, event streaming, and cloud-native infrastructure with CI/CD — but we choose tools to fit your team and constraints, as discussed in [choosing the right technology stack](/news/tech/choosing-the-right-technology-stack)." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "We build and operate large-scale infrastructure ourselves, so our advice is grounded in production reality, not slideware. See how it comes together in [unifying global trade operations](/case-studies/unifying-global-trade-operations), and explore related capabilities in [enterprise software](/services/enterprise-software) and [cloud solutions](/services/cloud-solutions)." }
+  ],
+  "faqs": [
+    { "q": "When should we build custom software instead of buying SaaS?", "a": "When the software is a differentiator or your domain doesn't fit off-the-shelf tools. We explore this in detail in [custom software vs SaaS](/news/insights/custom-software-vs-saas)." },
+    { "q": "Do we own the resulting code?", "a": "Yes. You own the code, the architecture, and the intellectual property — there's no lock-in to Baalvion." },
+    { "q": "How do you ensure quality?", "a": "Automated tests, code review, continuous integration, and observability are built into the process, not bolted on at the end." },
+    { "q": "Can you work with our existing team?", "a": "Yes. We embed with your engineers, transfer knowledge, and hand over cleanly — or partner long-term, whichever fits." }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "building multi-tenant SaaS", "href": "/news/tech/building-multi-tenant-saas" },
+    { "anchor": "custom software vs SaaS", "href": "/news/insights/custom-software-vs-saas" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" }
+  ]
+}

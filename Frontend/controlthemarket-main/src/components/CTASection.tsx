@@ -33,13 +33,13 @@ export default function CTASection() {
         </p>
         <div className="flex gap-3 justify-center flex-wrap">
           <Link
-            href="#"
+            href="/signup/candidate"
             className="inline-flex items-center justify-center px-[34px] py-[14px] text-[17px] font-semibold bg-green-600 text-white rounded-[14px] hover:bg-green-700 transition-all no-underline"
           >
             Prove your skills →
           </Link>
           <Link
-            href="#"
+            href="/signup/company"
             className="inline-flex items-center justify-center px-[32px] py-[13px] text-[17px] font-semibold rounded-[14px] border-[1.5px] border-white/25 text-white bg-white/12 hover:bg-white/22 backdrop-blur-md transition-all no-underline"
           >
             Find top talent

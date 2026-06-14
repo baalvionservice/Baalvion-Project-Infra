@@ -1,0 +1,138 @@
+// ============================================================================
+//  Investment — term-sheet negotiation, e-signatures, committed investments,
+//  investor positions, and the company cap table.
+// ============================================================================
+
+model TermSheet {
+  id             String          @id @default(uuid()) @db.Uuid
+  dealId         String          @db.Uuid
+  currentVersion Int             @default(1)
+  status         TermSheetStatus @default(DRAFT)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  deal     Deal               @relation(fields: [dealId], references: [id], onDelete: Cascade)
+  versions TermSheetVersion[]
+
+  @@index([dealId])
+}
+
+model TermSheetVersion {
+  id                 String          @id @default(uuid()) @db.Uuid
+  termSheetId        String          @db.Uuid
+  version            Int
+  amount             Decimal         @db.Decimal(20, 4)
+  currency           String          @default("USD") @db.VarChar(3)
+  equityPct          Decimal?        @db.Decimal(7, 4)
+  valuation          Decimal?        @db.Decimal(20, 4)
+  securityType       SecurityType    @default(EQUITY)
+  boardRightsJson    Json?
+  investorRightsJson Json?
+  exitRightsJson     Json?
+  action             TermSheetAction
+  authorUserId       String          @db.Uuid
+  createdAt          DateTime        @default(now())
+
+  termSheet TermSheet @relation(fields: [termSheetId], references: [id], onDelete: Cascade)
+
+  @@unique([termSheetId, version])
+}
+
+model SignatureEnvelope {
+  id          String            @id @default(uuid()) @db.Uuid
+  dealId      String?           @db.Uuid
+  documentId  String?           @db.Uuid
+  provider    SignatureProvider @default(INTERNAL)
+  externalRef String?
+  status      SignatureStatus   @default(DRAFT)
+  createdAt   DateTime          @default(now())
+  completedAt DateTime?
+
+  parties SignatureParty[]
+
+  @@index([dealId])
+}
+
+model SignatureParty {
+  id         String          @id @default(uuid()) @db.Uuid
+  envelopeId String          @db.Uuid
+  userId     String          @db.Uuid
+  orgId      String          @db.Uuid
+  order      Int             @default(1)
+  status     SignatureStatus @default(SENT)
+  signedAt   DateTime?
+
+  envelope SignatureEnvelope @relation(fields: [envelopeId], references: [id], onDelete: Cascade)
+
+  @@unique([envelopeId, userId])
+}
+
+model Investment {
+  id            String           @id @default(uuid()) @db.Uuid
+  dealId        String           @db.Uuid
+  investorOrgId String           @db.Uuid
+  companyOrgId  String           @db.Uuid
+  amount        Decimal          @db.Decimal(20, 4)
+  currency      String           @default("USD") @db.VarChar(3)
+  securityType  SecurityType     @default(EQUITY)
+  shares        Decimal?         @db.Decimal(24, 6)
+  pricePerShare Decimal?         @db.Decimal(20, 8)
+  ownershipPct  Decimal?         @db.Decimal(7, 4)
+  status        InvestmentStatus @default(COMMITTED)
+  committedAt   DateTime?
+  fundedAt      DateTime?
+  closedAt      DateTime?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  deal     Deal      @relation(fields: [dealId], references: [id])
+  position Position?
+
+  @@index([investorOrgId])
+  @@index([companyOrgId])
+  @@index([status])
+}
+
+model Position {
+  id            String       @id @default(uuid()) @db.Uuid
+  investmentId  String       @unique @db.Uuid
+  investorOrgId String       @db.Uuid
+  companyOrgId  String       @db.Uuid
+  securityType  SecurityType
+  shares        Decimal      @db.Decimal(24, 6)
+  costBasis     Decimal      @db.Decimal(20, 4)
+  currency      String       @default("USD") @db.VarChar(3)
+  openedAt      DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  investment Investment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+
+  @@index([investorOrgId])
+  @@index([companyOrgId])
+}
+
+model CapTableEntry {
+  id           String             @id @default(uuid()) @db.Uuid
+  companyId    String             @db.Uuid
+  holderType   CapTableHolderType
+  holderOrgId  String?            @db.Uuid
+  securityType SecurityType
+  shares       Decimal            @db.Decimal(24, 6)
+  ownershipPct Decimal            @db.Decimal(7, 4)
+  asOf         DateTime
+  createdAt    DateTime           @default(now())
+
+  @@index([companyId])
+}
+
+model CapTableEvent {
+  id          String            @id @default(uuid()) @db.Uuid
+  companyId   String            @db.Uuid
+  dealId      String?           @db.Uuid
+  type        CapTableEventType
+  deltaJson   Json
+  effectiveAt DateTime
+  createdAt   DateTime          @default(now())
+
+  @@index([companyId])
+}

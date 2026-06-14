@@ -16,11 +16,13 @@
 
 const db = require('../models');
 const { AppError } = require('../utils/errors');
+const { resolveWebsiteIdParam } = require('./resolveWebsite');
 
 const CMS_ROLE_LEVEL = {
     cms_admin: 100,
     cms_editor: 80,
     cms_publisher: 70,
+    cms_compliance: 65,
     cms_reviewer: 60,
     cms_seo_manager: 50,
     cms_author: 40,
@@ -37,6 +39,12 @@ const PLATFORM_BYPASS_ROLES = ['super_admin', 'owner', 'admin'];
 const loadCmsRole = async (req, res, next) => {
     try {
         if (!req.auth) return next(new AppError('UNAUTHORIZED', 'Authentication required', 401));
+
+        // Normalise a slug in :websiteId to the canonical UUID before anything
+        // (controllers, membership lookup, and the platform bypass below) reads
+        // it. Done here because loadCmsRole is the first handler on every
+        // website-scoped route, so the rewrite shares the route's param layer.
+        await resolveWebsiteIdParam(req);
 
         // Platform admins bypass website-level membership checks (canonical roles[]).
         const callerRoles = Array.isArray(req.auth.roles) ? req.auth.roles : (req.auth.role != null ? [req.auth.role] : []);

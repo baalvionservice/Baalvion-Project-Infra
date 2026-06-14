@@ -1,5 +1,6 @@
 'use strict';
 const express = require('express');
+const rateLimit = require('express-rate-limit');
 const keys = require('../controllers/keyController');
 const hooks = require('../controllers/webhookController');
 const catalog = require('../controllers/catalogController');
@@ -8,6 +9,24 @@ const { internalOrUser, requireInternal } = require('../middleware/authMiddlewar
 const { requireDeveloper } = require('../middleware/guards');
 
 const router = express.Router();
+
+// Per-org rate limit on event dispatch — prevents a single org from flooding the
+// fan-out queue.  Internal service principals (req.internal) are exempt so that
+// trusted platform services can dispatch events freely.
+const dispatchRateLimit = rateLimit({
+    windowMs: 60_000,          // 1-minute sliding window
+    max: 120,                  // 120 dispatches / minute / org  (≈ 2/s burst tolerance)
+    keyGenerator: (req) => {
+        // Internal callers bypass the limit entirely (return a constant key so
+        // they share one very high-ceiling bucket rather than org buckets).
+        if (req.internal) return '__internal__';
+        return req.auth?.orgId || req.ip;
+    },
+    skip: (req) => Boolean(req.internal),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: { code: 'RATE_LIMITED', message: 'Event dispatch rate limit exceeded. Retry after the Retry-After period.' } },
+});
 
 // ── internal hot-path (gateway → key verify): strictly service principal ──
 router.post('/keys/verify', requireInternal, asyncHandler(keys.verify));
@@ -38,7 +57,8 @@ router.get('/deliveries',                       asyncHandler(hooks.listDeliverie
 router.post('/deliveries/:deliveryId/redeliver', asyncHandler(hooks.redeliver));
 
 // Event dispatch (service-to-service: emit an event → fan out to subscribers)
-router.post('/events/dispatch', asyncHandler(hooks.dispatch));
+// Per-org rate limit applied before the handler.
+router.post('/events/dispatch', dispatchRateLimit, asyncHandler(hooks.dispatch));
 
 // OpenAPI specs
 router.post('/specs',           asyncHandler(catalog.upsertSpec));

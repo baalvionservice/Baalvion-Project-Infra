@@ -11,7 +11,7 @@
     "blacklist.js"
   ],
   "scripts": {
-    "test": "node test.smoke.js && node --test tests/"
+    "test": "node test.smoke.js && node --test \"tests/**/*.test.mjs\""
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.3"

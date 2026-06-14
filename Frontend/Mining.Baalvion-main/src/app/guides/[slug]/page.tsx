@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { RelatedProducts } from "@/components/marketplace/RelatedProducts";
+import { BRAND_IMAGES } from "@/lib/brand-assets";
 
 const getGuideData = (slug: string) => {
   return {
@@ -29,13 +30,13 @@ const getGuideData = (slug: string) => {
         <ul className="list-disc pl-6 space-y-2 text-sm text-slate-600">
           <li>Tier 3 Verified Mining License validation.</li>
           <li>Regional Sanctions cross-check via automated registry.</li>
-          <li>Authorized third-party lab inspection (SGS/BV).</li>
+          <li>Authorized third-party lab inspection by accredited agencies.</li>
         </ul>
       </div>
       <h2 className="text-2xl font-bold text-primary mb-4">Implementation Strategy</h2>
       <p className="mb-6">Strategic scaling in the ${slug.includes('lithium') ? 'Lithium' : 'Mineral'} market depends on maintaining consistent technical grades. Exporters should synchronize their production tracking with real-time marketplace demand heatmaps.</p>
     `,
-    imageUrl: `https://picsum.photos/seed/guide-${slug}/1200/600`
+    imageUrl: BRAND_IMAGES.guide
   };
 };
 
@@ -49,8 +50,8 @@ export default function GuideDetailPage() {
     "@type": "TechArticle",
     "headline": guide.title,
     "image": guide.imageUrl,
-    "author": { "@type": "Organization", "name": "GeoTrade Nexus" },
-    "publisher": { "@type": "Organization", "name": "GeoTrade Nexus" },
+    "author": { "@type": "Organization", "name": "Baalvion Mining Inc." },
+    "publisher": { "@type": "Organization", "name": "Baalvion Mining Inc." },
     "datePublished": "2024-05-21",
     "about": "Industrial mineral trade and export compliance"
   };

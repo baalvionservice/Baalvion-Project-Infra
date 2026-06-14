@@ -16,21 +16,23 @@ const TARGETS = {
   imperialpedia: process.env.SVC_IMPERIALPEDIA || 'http://localhost:3004',
   ir:            process.env.SVC_IR            || 'http://localhost:3008',
   dashboard:     process.env.SVC_DASHBOARD     || 'http://localhost:3009',
-  ctm:           process.env.SVC_CTM           || 'http://localhost:3011',
-  orders:        process.env.SVC_ORDERS        || 'http://localhost:3013',
+  ctm:           process.env.SVC_CTM           || 'http://localhost:3017',
+  // orders: REMOVED — order-service is deprecated (order-service_DEPRECATED). The /trade/v1/orders
+  // subtree is owned by the GTOS order-execution-service (see ORDER_EXECUTION below); all other
+  // order routing now lives in the trade domain. The bare :3013 Node default is gone so finance/
+  // commerce can never resolve back to the retired Node order-service.
   proxy:         process.env.SVC_PROXY         || 'http://localhost:4000',
   // Phase 6E-5 — island backends (dual-auth via bffBridge; gateway is the preferred path).
-  'elite-circle': process.env.SVC_ELITE_CIRCLE || 'http://localhost:3051',
   insiders:       process.env.SVC_INSIDERS     || 'http://localhost:3050',
   trade:          process.env.SVC_TRADE        || 'http://localhost:3025',
   // financial-services-java — system of record for money/KYC/risk (Spring resource servers,
   // base path /api/v1/...). RS256-verified against auth-service when APP_SECURITY_ENABLED=true,
   // gateway-trusted (X-Tenant-ID) in dev. risk moved 3025→3035 to free :3025 for trade.
-  payment:        process.env.SVC_PAYMENT        || 'http://localhost:3015',
-  ledger:         process.env.SVC_LEDGER         || 'http://localhost:3014',
-  account:        process.env.SVC_ACCOUNT        || 'http://localhost:3016',
-  escrow:         process.env.SVC_ESCROW         || 'http://localhost:3017',
-  settlement:     process.env.SVC_SETTLEMENT     || 'http://localhost:3018',
+  // NOTE: payment/ledger/account/escrow/settlement are NOT defined here — they are owned solely by
+  // the FINANCE block below (Java suite, 130xx). Keeping legacy bare-port fallbacks (3014/3015/…)
+  // here risked finance resolving to the retired Node ledger/payment twins, so they were removed.
+  // The remaining money services below are Java-only (no Node twin) and keep their 30xx defaults,
+  // which the financial-services-java compose still publishes for them.
   reconciliation: process.env.SVC_RECONCILIATION || 'http://localhost:3019',
   'finance-audit':process.env.SVC_FIN_AUDIT      || 'http://localhost:3020',
   reporting:      process.env.SVC_REPORTING      || 'http://localhost:3024',
@@ -45,12 +47,27 @@ const TARGETS = {
 //   /api/fx/rates/USD/EUR       → :3038/api/v1/fx/rates/USD/EUR
 //   /api/wallets (POST open)    → :3039/api/v1/wallets
 const FINANCE = {
-  'letters-of-credit': process.env.SVC_TRADE_FINANCE || 'http://localhost:3036',
-  'bank-guarantees':   process.env.SVC_TRADE_FINANCE || 'http://localhost:3036',
+  'letters-of-credit': process.env.SVC_TRADE_FINANCE || 'http://localhost:13036',
+  'bank-guarantees':   process.env.SVC_TRADE_FINANCE || 'http://localhost:13036',
   'invoice-finance':   process.env.SVC_CREDIT        || 'http://localhost:3037',
   bnpl:                process.env.SVC_CREDIT        || 'http://localhost:3037',
   fx:                  process.env.SVC_FX            || 'http://localhost:3038',
   wallets:             process.env.SVC_WALLET        || 'http://localhost:3039',
+  // Finance & Treasury sprint (2026-06-11): the system-of-record money services. Their Java
+  // @RequestMapping roots are /api/v1/<segment>, so the FINANCE rule (`/api/v1` + kept segment)
+  // hits them exactly — unlike the legacy TARGETS entries (payment/ledger/...) which strip the
+  // prefix and miss the Spring base path. These take precedence over TARGETS (router checks
+  // FINANCE first), so /finance-bff/ledger/entries → :13014/api/v1/ledger/entries, etc.
+  ledger:     process.env.SVC_LEDGER     || 'http://localhost:13014',
+  payments:   process.env.SVC_PAYMENT    || 'http://localhost:13015',
+  accounts:   process.env.SVC_ACCOUNT    || 'http://localhost:13016',
+  escrow:     process.env.SVC_ESCROW     || 'http://localhost:13017',
+  settlement: process.env.SVC_SETTLEMENT || 'http://localhost:13018',
+  // invoice-service (:13021) — Invoice Management + Accounts Receivable + Accounts Payable.
+  // Controller roots /api/v1/{invoices,receivables,payables}; all served by the one service.
+  invoices:    process.env.SVC_INVOICE || 'http://localhost:13021',
+  receivables: process.env.SVC_INVOICE || 'http://localhost:13021',
+  payables:    process.env.SVC_INVOICE || 'http://localhost:13021',
   // §3 trade microservices (financial-services-java, built+committed by a parallel session).
   // Gateway segment === the Java @RequestMapping root (verified from source) so the FINANCE
   // rule (`/api/v1` + path) hits the controller exactly. Confirmed roots:
@@ -60,7 +77,7 @@ const FINANCE = {
   //   dispute-service          /api/v1/disputes       :3044
   //   aml-service              /api/v1/aml            :3045
   //   trust-score-service      /api/v1/trust-scores   :3046
-  'deal-rooms':   process.env.SVC_DEAL_ROOM     || 'http://localhost:3040',
+  'deal-rooms':   process.env.SVC_DEAL_ROOM     || 'http://localhost:13040',
   contracts:      process.env.SVC_SMART_CONTRACT || 'http://localhost:3041',
   intelligence:   process.env.SVC_TRADE_INTEL   || 'http://localhost:3043',
   disputes:       process.env.SVC_DISPUTE       || 'http://localhost:3044',
@@ -74,12 +91,20 @@ const FINANCE = {
 
 const svcOf = (url) => (url.split('?')[0].split('/')[1] || '');
 
+// R3 cutover: order lifecycle is owned by the GTOS order-execution-service (schema `oms`,
+// money-truth + saga). Only the /trade/v1/orders subtree moves there; RFQ/quote/deal/listing/
+// escrow stay on the legacy trade-service. The standard /<svc>-strip rewrite still applies
+// (it produces /v1/orders..., which order-execution mounts), so only the target differs.
+const ORDER_EXECUTION = process.env.SVC_ORDER_EXECUTION || 'http://localhost:3052';
+const isTradeOrders = (url) => /^\/trade\/v1\/orders(\/|$)/.test(String(url).split('?')[0]);
+
 const proxy = createProxyMiddleware({
   changeOrigin: true,
   // mounted at /api → req.url is /<svc>/... ; resolve the per-service target.
-  router: (req) => FINANCE[svcOf(req.url)] || TARGETS[svcOf(req.url)],
+  router: (req) => (isTradeOrders(req.url) ? ORDER_EXECUTION : (FINANCE[svcOf(req.url)] || TARGETS[svcOf(req.url)])),
   // Legacy services: strip the /<svc> prefix (per-backend base path lives on the target).
   // Finance services: KEEP the segment and prepend /api/v1 (the Spring controller base path).
+  // Trade orders take the legacy strip branch → /v1/orders... (order-execution's mount).
   pathRewrite: (path) => (FINANCE[svcOf(path)] ? '/api/v1' + path : (path.replace(/^\/[^/?]+/, '') || '/')),
   // http-proxy-middleware v3: event handlers live under `on` (the v2 top-level
   // onProxyReq/onError are ignored, which silently disables the trust boundary).

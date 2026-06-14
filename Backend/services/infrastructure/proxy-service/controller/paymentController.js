@@ -5,6 +5,11 @@ const payuService = require('../service/providers/payuService');
 const razorpayXService = require('../service/razorpayXService');
 const models = require('../models');
 
+// Server-side validator: true only for a non-empty, non-whitespace string.
+// Used to gate security-relevant branches so user-controlled non-string
+// payloads cannot bypass presence checks via loose truthiness.
+const isNonEmptyString = (v) => typeof v === 'string' && v.trim().length > 0;
+
 // Strip CR/LF/tab from user-derived values before logging (prevents log injection).
 const sanitizeForLog = (v) => String(v).replace(/[\r\n\t]/g, ' ');
 
@@ -26,7 +31,11 @@ const verifyPayment = async (req, res) => {
     try {
         const userId = req.user.id;
         const { razorpay_order_id, razorpay_payment_id, razorpay_signature, plan_id } = req.body;
-        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !plan_id) {
+        // Validate server-side: each field must be a non-empty string so a
+        // user-controlled value cannot bypass this security branch with a
+        // truthy-but-malformed payload (object/array). Signature is then
+        // cryptographically verified inside paymentService.verifyPayment.
+        if (!isNonEmptyString(razorpay_order_id) || !isNonEmptyString(razorpay_payment_id) || !isNonEmptyString(razorpay_signature) || !isNonEmptyString(plan_id)) {
             return res.status(400).json({ success: false, message: 'razorpay_order_id, razorpay_payment_id, razorpay_signature and plan_id are required' });
         }
         const result = await paymentService.verifyPayment(userId, razorpay_order_id, razorpay_payment_id, razorpay_signature, plan_id);

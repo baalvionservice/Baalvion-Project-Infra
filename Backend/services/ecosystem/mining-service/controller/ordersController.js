@@ -35,6 +35,13 @@ const getOrder = async (req, res, next) => {
             include: [{ model: db.LogisticsShipment, as: 'shipment' }],
         });
         if (!order) return next(new AppError('NOT_FOUND', 'Order not found', 404));
+        // IDOR: scope to caller — buyer, seller, or admin
+        const roles = req.auth.roles || [];
+        const isAdmin = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
+        const callerId = req.user.id;
+        if (!isAdmin && order.buyer_id !== callerId && order.seller_id !== callerId) {
+            return next(new AppError('FORBIDDEN', 'Not authorized to view this order', 403));
+        }
         return sendSuccess(req, res, order);
     } catch (err) { return next(err); }
 };
@@ -43,6 +50,12 @@ const confirmOrder = async (req, res, next) => {
     try {
         const order = await db.Order.findByPk(req.params.id);
         if (!order) return next(new AppError('NOT_FOUND', 'Order not found', 404));
+        // IDOR: only the seller (or admin) may confirm an order
+        const roles = req.auth.roles || [];
+        const isAdmin = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
+        if (!isAdmin && order.seller_id !== req.user.id) {
+            return next(new AppError('FORBIDDEN', 'Not authorized to confirm this order', 403));
+        }
         await order.update({ status: 'confirmed' });
         return sendSuccess(req, res, order);
     } catch (err) { return next(err); }
@@ -53,6 +66,12 @@ const cancelOrder = async (req, res, next) => {
         const order = await db.Order.findByPk(req.params.id);
         if (!order) return next(new AppError('NOT_FOUND', 'Order not found', 404));
         if (order.status !== 'pending') return next(new AppError('CONFLICT', 'Only pending orders can be cancelled', 409));
+        // IDOR: only the buyer or seller (or admin) may cancel their own order
+        const roles = req.auth.roles || [];
+        const isAdmin = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
+        if (!isAdmin && order.buyer_id !== req.user.id && order.seller_id !== req.user.id) {
+            return next(new AppError('FORBIDDEN', 'Not authorized to cancel this order', 403));
+        }
         await order.update({ status: 'cancelled' });
         return sendSuccess(req, res, order);
     } catch (err) { return next(err); }
@@ -62,6 +81,12 @@ const updatePayment = async (req, res, next) => {
     try {
         const order = await db.Order.findByPk(req.params.id);
         if (!order) return next(new AppError('NOT_FOUND', 'Order not found', 404));
+        // IDOR: only the buyer (who pays) or admin may update payment status
+        const roles = req.auth.roles || [];
+        const isAdmin = roles.some((r) => ['admin', 'owner', 'super_admin'].includes(r));
+        if (!isAdmin && order.buyer_id !== req.user.id) {
+            return next(new AppError('FORBIDDEN', 'Not authorized to update payment on this order', 403));
+        }
         const { payment_status } = req.body;
         if (!payment_status) return next(new AppError('VALIDATION_ERROR', 'payment_status is required', 422));
         await order.update({ payment_status });

@@ -19,8 +19,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:baalvion}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    username: ${DB_APP_USER:${DB_USER:postgres}}
+    password: ${DB_APP_PASSWORD:${DB_PASSWORD:postgres}}
     hikari:
       # Send String params with an unspecified OID so Postgres casts them to the target
       # column type (notably String fields mapped onto jsonb columns). URL-independent, so it
@@ -45,6 +45,8 @@ spring:
       max-poll-records: 500
 
   flyway:
+    user: ${DB_MIGRATION_USER:${DB_USER:postgres}}
+    password: ${DB_MIGRATION_PASSWORD:${DB_PASSWORD:postgres}}
     enabled: true
     table: flyway_history_credit
 

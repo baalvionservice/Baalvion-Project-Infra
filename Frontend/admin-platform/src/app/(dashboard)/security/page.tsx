@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import { useUIStore } from '@/lib/store/uiStore';
 import { identityAdminApi } from '@/lib/api/identity-admin';
 import { identityApi } from '@/lib/api/identity';
@@ -152,31 +151,6 @@ function RiskEventCard({ event, onResolve }: { event: RiskEvent; onResolve: (id:
   );
 }
 
-// ── Blocked IP table ──────────────────────────────────────────────────────────
-
-const MOCK_BLOCKED_IPS = [
-  { ip: '45.142.212.100', reason: 'brute_force',      country: 'RU', blockedAt: new Date(Date.now() - 3600000).toISOString(),  attempts: 847 },
-  { ip: '103.21.244.0',   reason: 'credential_stuffing', country: 'CN', blockedAt: new Date(Date.now() - 7200000).toISOString(), attempts: 1203 },
-  { ip: '192.241.218.10', reason: 'rate_limit',        country: 'US', blockedAt: new Date(Date.now() - 1800000).toISOString(), attempts: 312 },
-  { ip: '77.88.55.66',    reason: 'token_reuse',       country: 'DE', blockedAt: new Date(Date.now() - 900000).toISOString(),  attempts: 44  },
-  { ip: '198.54.117.200', reason: 'geo_anomaly',       country: 'BR', blockedAt: new Date(Date.now() - 14400000).toISOString(), attempts: 189 },
-];
-
-// ── Compliance checks ─────────────────────────────────────────────────────────
-
-const COMPLIANCE_CHECKS = [
-  { label: 'MFA required for admin roles',          pass: true  },
-  { label: 'Password policy enforced (12+ chars)',  pass: true  },
-  { label: 'Session idle timeout < 8h',             pass: true  },
-  { label: 'Audit logging enabled',                 pass: true  },
-  { label: 'Refresh token rotation active',         pass: true  },
-  { label: 'JWKS key rotation < 90 days',           pass: false },
-  { label: 'OAuth PKCE enforced on all clients',    pass: false },
-  { label: 'IP allowlist configured for API keys',  pass: false },
-  { label: 'SOC2 evidence exported this quarter',   pass: true  },
-  { label: 'Passkeys/WebAuthn available',           pass: false },
-];
-
 // ── Main page ─────────────────────────────────────────────────────────────────
 
 export default function SecurityPage() {
@@ -218,8 +192,6 @@ export default function SecurityPage() {
 
   const criticalEvents  = riskEvents.filter((e) => e.severity === 'critical' && !e.resolvedAt).length;
   const tokenReuseCount = securityEvents.filter((e) => e.action === 'security.refresh_reuse_detected').length;
-  const passChecks      = COMPLIANCE_CHECKS.filter((c) => c.pass).length;
-  const compliancePct   = Math.round((passChecks / COMPLIANCE_CHECKS.length) * 100);
 
   return (
     <div className="space-y-6">
@@ -339,7 +311,6 @@ export default function SecurityPage() {
                     { label: 'Brute force attempts (24h)',     value: stats?.last24h?.failedLogins ?? 0, color: 'text-orange-400' },
                     { label: 'Token reuse detections',         value: tokenReuseCount,                    color: 'text-red-400' },
                     { label: 'Impersonations (24h)',            value: securityEvents.filter((e) => e.action.includes('impersonation')).length, color: 'text-yellow-400' },
-                    { label: 'Blocked IPs (total)',             value: MOCK_BLOCKED_IPS.length,            color: 'text-muted-foreground' },
                   ].map(({ label, value, color }) => (
                     <div key={label} className="flex items-center justify-between py-2 border-b last:border-0">
                       <span className="text-xs">{label}</span>
@@ -452,31 +423,13 @@ export default function SecurityPage() {
               <CardDescription>Automatically blocked addresses from WAF and risk engine</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs">
-                  <thead>
-                    <tr className="border-b">
-                      {['IP Address', 'Country', 'Reason', 'Attempts', 'Blocked'].map((h) => (
-                        <th key={h} className="text-left pb-2 pr-4 font-medium text-muted-foreground">{h}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {MOCK_BLOCKED_IPS.map((row) => (
-                      <tr key={row.ip} className="border-b last:border-0">
-                        <td className="py-2.5 pr-4 font-mono">{row.ip}</td>
-                        <td className="py-2.5 pr-4">{row.country}</td>
-                        <td className="py-2.5 pr-4">
-                          <Badge variant="outline" className="text-[10px] h-4 px-1 capitalize">
-                            {row.reason.replace(/_/g, ' ')}
-                          </Badge>
-                        </td>
-                        <td className="py-2.5 pr-4 font-medium text-red-400">{formatNumber(row.attempts)}</td>
-                        <td className="py-2.5 pr-4 text-muted-foreground">{formatRelative(row.blockedAt)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="flex flex-col items-center py-12 gap-2 text-center text-muted-foreground">
+                <XCircle className="h-8 w-8" />
+                <p className="text-sm font-medium">No data source configured</p>
+                <p className="text-xs max-w-md">
+                  Blocked IP / CIDR data is not yet wired to a WAF or risk-engine feed. This view will
+                  populate once a blocklist source is connected.
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -484,56 +437,24 @@ export default function SecurityPage() {
 
         {/* Compliance */}
         <TabsContent value="compliance">
-          <div className="grid lg:grid-cols-3 gap-6">
-            <Card>
-              <CardContent className="pt-6 text-center">
-                <div className="relative inline-flex items-center justify-center mb-3">
-                  <svg className="h-24 w-24 -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="hsl(var(--muted))" strokeWidth="2.5" />
-                    <circle
-                      cx="18" cy="18" r="15.9"
-                      fill="none"
-                      stroke={compliancePct >= 80 ? 'hsl(142.1 76.2% 36.3%)' : compliancePct >= 60 ? 'hsl(47.9 95.8% 53.1%)' : 'hsl(0 72.2% 50.6%)'}
-                      strokeWidth="2.5"
-                      strokeDasharray={`${compliancePct} ${100 - compliancePct}`}
-                      strokeLinecap="round"
-                    />
-                  </svg>
-                  <span className="absolute text-2xl font-bold">{compliancePct}%</span>
-                </div>
-                <p className="text-sm font-medium">Compliance Score</p>
-                <p className="text-xs text-muted-foreground">{passChecks}/{COMPLIANCE_CHECKS.length} checks passed</p>
-              </CardContent>
-            </Card>
-
-            <div className="lg:col-span-2">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <FileText className="h-4 w-4" /> SOC2 / Security Checklist
-                  </CardTitle>
-                  <CardDescription>Real-time platform security posture checks</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-1.5">
-                    {COMPLIANCE_CHECKS.map(({ label, pass }) => (
-                      <div key={label} className="flex items-center gap-3 py-1.5 border-b last:border-0">
-                        {pass
-                          ? <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
-                          : <XCircle className="h-4 w-4 text-red-400 shrink-0" />}
-                        <span className={cn('text-sm', !pass && 'text-muted-foreground')}>{label}</span>
-                        {!pass && (
-                          <Badge variant="outline" className="ml-auto text-[10px] h-4 px-1 text-red-400 border-red-400/50 shrink-0">
-                            Action needed
-                          </Badge>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4" /> SOC2 / Security Checklist
+              </CardTitle>
+              <CardDescription>Automated platform security posture checks</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center py-12 gap-2 text-center text-muted-foreground">
+                <FileText className="h-8 w-8" />
+                <p className="text-sm font-medium">No data source configured</p>
+                <p className="text-xs max-w-md">
+                  Compliance posture checks are not yet wired to an evidence/controls source. This view
+                  will populate once a compliance evaluation feed is connected.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

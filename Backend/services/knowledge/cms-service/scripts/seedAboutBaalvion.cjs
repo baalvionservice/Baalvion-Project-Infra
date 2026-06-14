@@ -124,6 +124,48 @@ const COMPANY_PAGES = [
     blocks: [ para(0, 'We are always looking for exceptional engineers, designers, and operators to join the mission.') ] },
 ];
 
+// ── Marketing & legal pages (page) — migrate the frontend's hardcoded copy so the
+//    /company, /trust, /contact, /privacy, /terms routes become CMS-managed. ──
+const SITE_PAGES = [
+  { title: 'What We Do', slug: 'company', cat: 'company',
+    excerpt: 'Baalvion operates the unified infrastructure for global commerce, finance, and compliance.',
+    seo: { title: 'What We Do | Baalvion', description: 'Baalvion operates the unified infrastructure for global commerce, finance, and compliance.' },
+    cf: { kind: 'page', pillars: [
+      { title: 'Unmatched Reach', desc: 'Operating across 180+ jurisdictions with a single execution layer.' },
+      { title: 'Integrity First', desc: 'A culture rooted in transparency, auditability, and trust.' },
+      { title: 'Strategic Scale', desc: 'Focusing on deep infrastructure that compounds over time.' },
+    ] },
+    blocks: [ head(0, 'What We Do'), para(1, 'Baalvion builds and operates the Baalvion Operating System (BOS) — the unified layer that connects commerce, finance, logistics, and compliance across global markets.') ] },
+  { title: 'Trust & Security', slug: 'trust', cat: 'company',
+    excerpt: 'Security, compliance, and auditability are foundational to the Baalvion Operating System.',
+    seo: { title: 'Trust & Security | Baalvion', description: 'Security, compliance, and auditability at Baalvion.' },
+    cf: { kind: 'page',
+      pillars: [
+        { title: 'AES-256 Encryption', desc: 'Data encrypted in transit and at rest.' },
+        { title: 'Zero-Knowledge', desc: 'Sensitive operations isolated by design.' },
+        { title: 'Global Compliance', desc: 'Mapped to 180+ regulatory regimes.' },
+        { title: 'Immutable Audit', desc: 'Every state change is recorded and verifiable.' },
+      ],
+      badges: ['GDPR', 'SOC 2 Type II', 'ISO 27001', 'KYC/AML'] },
+    blocks: [ head(0, 'Trust & Security'), para(1, 'Security and compliance are not features bolted onto Baalvion — they are the foundation the platform is built on.') ] },
+  { title: 'Contact Baalvion', slug: 'contact', cat: 'company',
+    excerpt: 'Reach the Baalvion strategy and operations teams.',
+    seo: { title: 'Contact | Baalvion', description: 'Get in touch with Baalvion.' },
+    cf: { kind: 'page', contact: {
+      email: 'intel@baalvion.nexus', location: 'New Delhi, NCR, IN', pgpKey: 'BAAL-2024-NX', responseTime: '4-6 operational hours' } },
+    blocks: [ head(0, 'Contact'), para(1, 'For partnership and strategy enquiries, reach our team and we will respond within 4–6 operational hours.') ] },
+  { title: 'Privacy Policy', slug: 'privacy', cat: 'company',
+    excerpt: 'How Baalvion collects, uses, and protects information.',
+    seo: { title: 'Privacy Policy | Baalvion', description: 'Baalvion privacy practices and data rights.' },
+    cf: { kind: 'page' },
+    blocks: [ head(0, 'Privacy Policy'), para(1, 'This policy explains how Baalvion collects, uses, secures, and shares information across the Baalvion Operating System.'), head(2, 'Data We Collect'), para(3, 'We collect only the data required to operate the platform and meet our regulatory obligations.') ] },
+  { title: 'Terms of Service', slug: 'terms', cat: 'company',
+    excerpt: 'The terms governing use of the Baalvion platform.',
+    seo: { title: 'Terms of Service | Baalvion', description: 'Terms governing use of the Baalvion platform.' },
+    cf: { kind: 'page' },
+    blocks: [ head(0, 'Terms of Service'), para(1, 'By accessing the Baalvion platform you agree to these terms.'), head(2, 'Acceptable Use'), para(3, 'Use of the platform must comply with applicable law and the obligations set out here.') ] },
+];
+
 // ── Projects (portfolio_item) ──
 const PROJECTS = [
   { title: 'Baalvion Trade Platform', slug: 'baalvion-trade-platform', cat: 'proj-core-platform',
@@ -315,19 +357,20 @@ async function main() {
 
   const pages   = await ensureContent(token, cats.map, PAGES,         'page',           { kind: 'page' });
   const company = await ensureContent(token, cats.map, COMPANY_PAGES, 'page',           { kind: 'page' });
+  const sitePages = await ensureContent(token, cats.map, SITE_PAGES,  'page',           { kind: 'page' });
   const proj    = await ensureContent(token, cats.map, PROJECTS,      'portfolio_item', { kind: 'project' });
   const news    = await ensureContent(token, cats.map, NEWS,          'news',           { kind: 'article' });
   const updates = await ensureContent(token, cats.map, UPDATES,       'post',           { kind: 'operational-update' });
   const eco     = await ensureContent(token, cats.map, ECOSYSTEM,     'post',           { kind: 'ecosystem' });
 
-  const allSlugs = [pages, company, proj, news, updates, eco].flatMap((r) => r.touched);
+  const allSlugs = [pages, company, sitePages, proj, news, updates, eco].flatMap((r) => r.touched);
   const pub = await publishAll(token, allSlugs);
 
   console.log(JSON.stringify({
     ok: true,
     website: WEBSITE_ID,
     categories: { created: cats.created, skipped: cats.skipped, total: Object.keys(cats.map).length },
-    content: { pages: pages.created, company: company.created, projects: proj.created, news: news.created, updates: updates.created, ecosystem: eco.created,
+    content: { pages: pages.created, company: company.created, sitePages: sitePages.created, projects: proj.created, news: news.created, updates: updates.created, ecosystem: eco.created,
                totalTouched: allSlugs.length },
     publish: pub,
   }, null, 2));

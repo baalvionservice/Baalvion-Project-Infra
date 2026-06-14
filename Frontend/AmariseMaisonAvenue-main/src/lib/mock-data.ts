@@ -220,7 +220,7 @@ const generateSEOContent = () => {
     },
   ];
 
-  const countryCodes: CountryCode[] = ["us", "uk", "ae", "in", "sg", "ca"];
+  const countryCodes: CountryCode[] = ["us", "uk", "ae", "in", "sg"];
 
   for (let i = 1; i <= 100; i++) {
     const country = countryCodes[i % countryCodes.length];
@@ -685,15 +685,6 @@ export const TAX_RULES: TaxRule[] = [
     taxType: "GST",
     category: "general",
     rate: 9,
-    isInclusive: true,
-    lastUpdated: "2024-03-15T12:00:00Z",
-  },
-  {
-    id: "tax-ca-gen",
-    country: "ca",
-    taxType: "GST",
-    category: "general",
-    rate: 13,
     isInclusive: true,
     lastUpdated: "2024-03-15T12:00:00Z",
   },

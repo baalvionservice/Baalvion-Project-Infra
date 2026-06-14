@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet, Link, Navigate } from "react-router-dom";
+import { Outlet, Link, Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { AppSidebar } from "./AppSidebar";
 import { AppHeader } from "./AppHeader";
@@ -35,7 +35,11 @@ function MaintenanceBanner() {
 export function AppLayout() {
   const { isAuthenticated, isInitialized } = useAuth();
   const { onboarding } = useEnterprise();
-  const showOnboarding = !onboarding.completed && !onboarding.skipped;
+  const location = useLocation();
+  // The onboarding overlay must NOT block deliberate destinations like checkout
+  // (a new paid signup is routed straight here to pay) — suppress it there.
+  const onCheckout = location.pathname.includes("/billing/checkout");
+  const showOnboarding = !onboarding.completed && !onboarding.skipped && !onCheckout;
 
   if (!isInitialized) return null;
   if (!isAuthenticated) return <Navigate to="/login" replace />;

@@ -33,13 +33,14 @@ export const authService = {
   getCurrentUser: async (): Promise<{ role: UserRole }> => {
     if (typeof window === "undefined") return { role: "public" as UserRole };
 
-    if (irAuthClient.isAuthenticated()) {
-      try {
-        const user = await irAuthClient.getCurrentUser();
-        if (user?.role) return { role: user.role as UserRole };
-      } catch {
-        /* fall through to guest */
-      }
+    // Resolve from the in-memory access token, transparently refreshing via the httpOnly
+    // refresh cookie when needed. This keeps the session alive across full-page navigations
+    // (the in-memory token is lost on navigation; the cookie is the source of truth).
+    try {
+      const user = await irAuthClient.getCurrentUser();
+      if (user?.role) return { role: user.role as UserRole };
+    } catch {
+      /* fall through to guest */
     }
     return { role: "public" as UserRole };
   },

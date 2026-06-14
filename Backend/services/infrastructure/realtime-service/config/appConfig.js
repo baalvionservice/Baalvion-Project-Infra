@@ -22,6 +22,12 @@ module.exports = {
   serviceName:   'realtime-service',
   allowedOrigins,
 
+  // Shared secret for internal service-to-service calls (e.g. /metrics from
+  // a non-localhost Prometheus scraper).  Optional: if unset, only
+  // localhost/private-network IPs are admitted.  In production this should be
+  // a long random string injected via the secret manager.
+  internalServiceSecret: process.env.INTERNAL_SERVICE_SECRET || null,
+
   redis: {
     host:     process.env.REDIS_HOST     || 'localhost',
     port:     Number(process.env.REDIS_PORT || 6379),

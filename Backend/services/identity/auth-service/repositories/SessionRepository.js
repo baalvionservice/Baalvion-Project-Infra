@@ -35,6 +35,21 @@ class SessionRepository {
         return db.Session.update({ revoked_at: new Date() }, { where: { user_id: userId, revoked_at: null } });
     }
 
+    /**
+     * Revokes every active session BOUND TO a given org (org_id match). Returns the list
+     * of revoked session ids so the caller can also revoke their refresh tokens.
+     * Org-scoped on purpose: a user who belongs to multiple orgs keeps their sessions in
+     * the other (non-suspended) orgs.
+     */
+    async revokeByOrg(orgId) {
+        const sessions = await db.Session.findAll({ where: { org_id: orgId, revoked_at: null }, attributes: ['id'] });
+        const ids = sessions.map((s) => s.id);
+        if (ids.length) {
+            await db.Session.update({ revoked_at: new Date() }, { where: { id: ids } });
+        }
+        return ids;
+    }
+
     async listActive(userId) {
         return db.Session.findAll({
             where:  { user_id: userId, revoked_at: null },

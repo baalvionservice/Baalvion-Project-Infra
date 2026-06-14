@@ -1,0 +1,62 @@
+{
+  "slug": "enterprise-data-lakehouse",
+  "title": "Building an Enterprise Data Lakehouse",
+  "kind": "case_study",
+  "heroImageSeed": "cs-lakehouse",
+  "excerpt": "Unifying analytics across the ecosystem with a governed lakehouse — one trusted place for every metric, model, and report.",
+  "seo": {
+    "title": "Case Study: Enterprise Data Lakehouse | Baalvion",
+    "description": "How Baalvion unified analytics across its ecosystem with a governed data lakehouse, replacing conflicting reports with one trusted source of metrics.",
+    "keywords": ["data lakehouse", "analytics", "data governance", "data platform", "Baalvion case study", "data warehouse"]
+  },
+  "customFields": {
+    "client": "The Baalvion Group data and analytics function",
+    "sector": "Data & Analytics",
+    "challenge": "Every team had its own extracts and dashboards, and no two agreed on the numbers.",
+    "solution": "A governed lakehouse with a single semantic layer, lineage, and access controls.",
+    "architecture": "Ingestion into a lake, curated tables, a semantic layer, lineage and access governance.",
+    "techStack": ["Lakehouse storage", "ELT pipelines", "Semantic layer", "Data lineage", "Access governance"],
+    "results": [
+      { "metric": "Conflicting reports", "value": "Eliminated" },
+      { "metric": "Time to a new metric", "value": "-65%" },
+      { "metric": "Governed datasets", "value": "One catalog" }
+    ],
+    "lessons": [
+      "A semantic layer is what makes 'one number' real.",
+      "Govern access and lineage from day one.",
+      "Self-serve only works on trusted, documented data."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "Across the ecosystem, every team built its own data extracts and dashboards. The result was predictable: no two reports agreed, executives received conflicting numbers, and analysts spent more time reconciling sources than analysing them. There was no governed, trusted place to ask a question of the data." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We built a governed data lakehouse that ingests data from across the platform into one store, curates it into trusted tables, and exposes it through a single semantic layer — so 'active customers' or 'cleared volume' means exactly one thing everywhere. Lineage and access controls make the data both trustworthy and safe to self-serve. The approach connects directly to [data-driven decision making](/news/insights/data-driven-decision-making)." },
+    { "type": "list", "ordered": false, "items": [
+      "**One lakehouse** ingesting data from every domain.",
+      "**Curated tables** that are tested and documented.",
+      "**A semantic layer** so every metric is defined once.",
+      "**Lineage and governance** for trust and safe access."
+    ] },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "ELT pipelines land raw data in the lake, then build curated, tested tables. A semantic layer sits on top, defining metrics and dimensions centrally so every dashboard and model reads the same definitions. Lineage tracks each field back to its source, and access governance controls who can see what — the data-platform foundation behind our [AI solutions](/services/ai-solutions) work." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "Lakehouse storage, ELT pipelines, a semantic layer, data lineage, and access governance — delivered through our [cloud solutions](/services/cloud-solutions) and [enterprise software](/services/enterprise-software) practices." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "Conflicting reports were eliminated — there is now one trusted source. Time to define and ship a new metric fell by roughly 65%, and the whole organisation works from a single governed catalog instead of a sprawl of private extracts." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "The semantic layer is what turns 'one source of truth' from a slogan into reality — without it, you just centralise the disagreement. Governing access and lineage from day one avoided a painful retrofit. And self-serve analytics only earns trust when the underlying data is documented and tested." }
+  ],
+  "faqs": [
+    { "q": "What is a lakehouse?", "a": "It combines the low-cost, flexible storage of a data lake with the structured, governed tables of a warehouse — one platform for both raw and curated analytics data." },
+    { "q": "Why is a semantic layer important?", "a": "It defines each metric once, so every report and model uses the same definition. Without it, teams centralise their data but still disagree on the numbers." },
+    { "q": "How is data trust established?", "a": "Through tested, documented curated tables plus lineage that traces every field to its source, and access governance that controls who sees what." },
+    { "q": "How does this support AI work?", "a": "A governed lakehouse is the foundation for reliable models and features — see [AI solutions](/services/ai-solutions) and [building production AI systems](/news/tech/building-production-ai-systems)." }
+  ],
+  "internalLinks": [
+    { "anchor": "data-driven decision making", "href": "/news/insights/data-driven-decision-making" },
+    { "anchor": "AI solutions", "href": "/services/ai-solutions" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" },
+    { "anchor": "building production AI systems", "href": "/news/tech/building-production-ai-systems" }
+  ]
+}

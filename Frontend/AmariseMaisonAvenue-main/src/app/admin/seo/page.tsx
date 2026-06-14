@@ -189,7 +189,7 @@ export default function SEOAdminHub() {
                       Edit Path: {currentMeta.path}
                     </CardTitle>
                   </div>
-                  <Link href={currentMeta.path} target="_blank">
+                  <Link href={currentMeta.path} target="_blank" rel="noopener noreferrer">
                     <Button
                       variant="ghost"
                       size="icon"

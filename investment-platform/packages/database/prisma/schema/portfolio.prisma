@@ -1,0 +1,83 @@
+// ============================================================================
+//  Portfolio — valuations over time, return snapshots (IRR/MOIC), tax
+//  documents, and the secondary market (listings + orders).
+// ============================================================================
+
+model Valuation {
+  id           String          @id @default(uuid()) @db.Uuid
+  companyOrgId String          @db.Uuid
+  investmentId String?         @db.Uuid
+  navPerShare  Decimal?        @db.Decimal(20, 8)
+  totalValue   Decimal         @db.Decimal(20, 4)
+  currency     String          @default("USD") @db.VarChar(3)
+  source       ValuationSource @default(PLATFORM_ESTIMATE)
+  asOf         DateTime
+  createdAt    DateTime        @default(now())
+
+  @@index([companyOrgId])
+  @@index([investmentId])
+}
+
+model ReturnSnapshot {
+  id              String   @id @default(uuid()) @db.Uuid
+  investorOrgId   String   @db.Uuid
+  investmentId    String?  @db.Uuid
+  irr             Decimal? @db.Decimal(10, 6)
+  moic            Decimal? @db.Decimal(10, 4)
+  unrealizedValue Decimal  @db.Decimal(20, 4)
+  realizedValue   Decimal  @default(0) @db.Decimal(20, 4)
+  currency        String   @default("USD") @db.VarChar(3)
+  asOf            DateTime
+  createdAt       DateTime @default(now())
+
+  @@index([investorOrgId])
+  @@index([investmentId])
+}
+
+model TaxDocument {
+  id            String       @id @default(uuid()) @db.Uuid
+  investorOrgId String       @db.Uuid
+  taxYear       Int
+  type          TaxDocType
+  jurisdiction  String       @db.VarChar(2)
+  documentId    String?      @db.Uuid // -> Document
+  status        TaxDocStatus @default(PENDING)
+  createdAt     DateTime     @default(now())
+
+  @@index([investorOrgId, taxYear])
+}
+
+model SecondaryListing {
+  id               String                 @id @default(uuid()) @db.Uuid
+  positionId       String                 @db.Uuid
+  sellerOrgId      String                 @db.Uuid
+  companyOrgId     String                 @db.Uuid
+  sharesOffered    Decimal                @db.Decimal(24, 6)
+  askPricePerShare Decimal                @db.Decimal(20, 8)
+  currency         String                 @default("USD") @db.VarChar(3)
+  status           SecondaryListingStatus @default(DRAFT)
+  expiresAt        DateTime?
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+
+  orders SecondaryOrder[]
+
+  @@index([status])
+  @@index([companyOrgId])
+}
+
+model SecondaryOrder {
+  id            String               @id @default(uuid()) @db.Uuid
+  listingId     String               @db.Uuid
+  buyerOrgId    String               @db.Uuid
+  side          SecondaryOrderSide
+  shares        Decimal              @db.Decimal(24, 6)
+  pricePerShare Decimal              @db.Decimal(20, 8)
+  currency      String               @default("USD") @db.VarChar(3)
+  status        SecondaryOrderStatus @default(OPEN)
+  createdAt     DateTime             @default(now())
+
+  listing SecondaryListing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
+}

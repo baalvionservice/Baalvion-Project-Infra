@@ -3,6 +3,7 @@
 import { useState, Suspense, useEffect, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -334,6 +335,7 @@ function SearchContent() {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

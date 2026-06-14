@@ -1,0 +1,62 @@
+{
+  "slug": "logistics-control-tower",
+  "title": "A Logistics Control Tower for Global Corridors",
+  "kind": "case_study",
+  "heroImageSeed": "cs-control-tower",
+  "excerpt": "Real-time multi-leg route optimisation and end-to-end shipment visibility across global trade corridors on the Baalvion Operating System.",
+  "seo": {
+    "title": "Case Study: Logistics Control Tower | Baalvion",
+    "description": "How Baalvion built a logistics control tower with multi-leg route optimisation and real-time shipment visibility across global corridors.",
+    "keywords": ["logistics control tower", "route optimisation", "shipment visibility", "supply chain", "Baalvion case study", "logistics"]
+  },
+  "customFields": {
+    "client": "A freight and logistics operator spanning multiple global corridors",
+    "sector": "Logistics",
+    "challenge": "No single view of in-flight shipments and no systematic way to optimise multi-leg routes.",
+    "solution": "A control tower with live shipment tracking and a multi-leg route optimiser.",
+    "architecture": "Event-driven milestone tracking, a lane graph, bounded route search with fallback rules.",
+    "techStack": ["Event tracking", "Lane graph", "Route optimiser", "Carrier rate providers", "Real-time dashboard"],
+    "results": [
+      { "metric": "Shipment visibility", "value": "End-to-end" },
+      { "metric": "Route cost", "value": "-18%" },
+      { "metric": "On-time delivery", "value": "+12pp" }
+    ],
+    "lessons": [
+      "Model the network as a graph, then optimise on it.",
+      "Always have a fallback route when constraints can't be met.",
+      "Visibility is the prerequisite for optimisation."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "The operator moved freight across many corridors but had no unified view of where shipments were. Routing was decided by habit, not analysis, so multi-leg journeys were often more expensive and slower than necessary. When a leg was delayed, no one knew until a customer complained." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We built a logistics control tower on the Baalvion Operating System. Every shipment milestone publishes an event, giving end-to-end live visibility. A multi-leg route optimiser models the corridor network as a lane graph and searches it for the cheapest, fastest, or balanced route — with fallback rules that relax constraints rather than failing when an ideal route doesn't exist. It builds on the same event backbone as our [automated customs clearance](/case-studies/automated-customs-clearance)." },
+    { "type": "list", "ordered": false, "items": [
+      "**Live tracking** from event-driven shipment milestones.",
+      "**Lane graph** modelling carriers, legs, and corridors.",
+      "**Route optimiser** producing cheapest / fastest / balanced options.",
+      "**Fallback rules** that relax constraints instead of failing."
+    ] },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "Shipment milestones flow in as events and update a live tracking view. The optimiser represents the network as a lane graph — nodes are hubs, edges carry carrier rates and transit times — and runs a bounded search to produce ranked route options. When constraints can't all be satisfied, fallback rules synthesise a relaxed route rather than returning nothing. This is the multi-leg counterpart to single-leg quoting, and feeds the [logistics](/industries/logistics) sector solution." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "Event-driven milestone tracking, a lane graph, a bounded route optimiser, pluggable carrier-rate providers, and a real-time dashboard — built through our [automation](/services/automation) and [cloud solutions](/services/cloud-solutions) practices." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "The operator gained end-to-end shipment visibility for the first time. Optimised routing cut route cost by roughly 18%, and on-time delivery improved by 12 percentage points as delays were spotted and rerouted around in real time." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "Modelling the network as a graph made optimisation tractable and explainable. Fallback rules mattered as much as the optimiser — in the real world an ideal route often doesn't exist, and returning a good-enough one beats returning nothing. And visibility had to come first: you can't optimise what you can't see." }
+  ],
+  "faqs": [
+    { "q": "How does the route optimiser work?", "a": "It models the corridor network as a lane graph and runs a bounded search to rank routes by cost, speed, or a balance of both, using live carrier rates and transit times." },
+    { "q": "What happens when no route meets all constraints?", "a": "Fallback rules relax constraints and synthesise a good-enough route rather than failing, so a shipment always has a viable path." },
+    { "q": "How is shipment visibility achieved?", "a": "Every milestone publishes an event that updates a live tracking view, giving end-to-end visibility across all corridors." },
+    { "q": "Which sector does this serve?", "a": "Freight, supply chain, and trade logistics — see [Baalvion for logistics](/industries/logistics)." }
+  ],
+  "internalLinks": [
+    { "anchor": "automated customs clearance", "href": "/case-studies/automated-customs-clearance" },
+    { "anchor": "logistics", "href": "/industries/logistics" },
+    { "anchor": "automation", "href": "/services/automation" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" }
+  ]
+}

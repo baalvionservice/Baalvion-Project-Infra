@@ -149,8 +149,31 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Shipping',    href: '/commerce/shipping',    iconName: 'Truck'           },
           { title: 'Returns',     href: '/commerce/returns',     iconName: 'RotateCcw'       },
           { title: 'Analytics',   href: '/commerce/analytics',   iconName: 'BarChart3'       },
+          { title: 'Revenue',     href: '/commerce/revenue',     iconName: 'DollarSign', roles: ['super_admin', 'owner', 'admin'] },
+          { title: 'Markets',     href: '/commerce/markets',     iconName: 'Globe2'          },
           { title: 'Reviews',     href: '/commerce/reviews',     iconName: 'Star'            },
           { title: 'Settings',    href: '/commerce/settings',    iconName: 'Settings'        },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'CRM & Marketing',
+    items: [
+      {
+        title: 'CRM & Marketing',
+        href: '/crm',
+        iconName: 'Heart',
+        roles: ['super_admin', 'owner', 'admin', 'manager'],
+        children: [
+          { title: 'Overview',     href: '/crm',              iconName: 'LayoutDashboard' },
+          { title: 'VIP Clients',  href: '/crm/vip-clients',  iconName: 'Crown'           },
+          { title: 'Segments',     href: '/crm/segments',     iconName: 'Layers'          },
+          { title: 'Campaigns',    href: '/crm/campaigns',    iconName: 'Megaphone'       },
+          { title: 'Vendors',      href: '/crm/vendors',      iconName: 'Store'           },
+          { title: 'Affiliates',   href: '/crm/affiliates',   iconName: 'Share2'          },
+          { title: 'Appointments', href: '/crm/appointments', iconName: 'CalendarClock'   },
+          { title: 'Support Tickets', href: '/crm/support-tickets', iconName: 'LifeBuoy'   },
         ],
       },
     ],
@@ -169,11 +192,64 @@ export const NAVIGATION: NavGroup[] = [
     ],
   },
   {
+    label: 'Investor Relations',
+    items: [
+      {
+        title: 'Investor Relations',
+        href: '/ir',
+        iconName: 'TrendingUp',
+        roles: ['super_admin', 'owner', 'admin'],
+        children: [
+          { title: 'Overview',          href: '/ir',                            iconName: 'LayoutDashboard' },
+          { title: 'Investor Applications', href: '/ir/applications',           iconName: 'UserCheck'       },
+          { title: 'Financial Reports', href: '/ir/financials',                 iconName: 'FileBarChart'    },
+          { title: 'Earnings',          href: '/ir/earnings',                   iconName: 'Mic'             },
+          { title: 'Events & Calendar', href: '/ir/events',                     iconName: 'CalendarDays'    },
+          { title: 'Regulatory Filings',href: '/ir/filings',                    iconName: 'FileCheck'       },
+          { title: 'Documents',         href: '/ir/documents',                  iconName: 'FolderArchive'   },
+          { title: 'Shareholders',      href: '/ir/shareholders',               iconName: 'Users2'          },
+          { title: 'Performance',       href: '/ir/performance',                iconName: 'LineChart'       },
+          { title: 'Stock & Market',    href: '/ir/market',                     iconName: 'CandlestickChart'},
+          { title: 'Analytics',         href: '/ir/analytics',                  iconName: 'BarChart3'       },
+          { title: 'Newsroom',          href: '/cms/websites/ir.baalvion.com',  iconName: 'Newspaper'       },
+          { title: 'SEO',               href: '/cms/websites/ir.baalvion.com/seo',     iconName: 'Search'   },
+          { title: 'Team & Access',     href: '/cms/websites/ir.baalvion.com/members', iconName: 'UsersRound' },
+        ],
+      },
+    ],
+  },
+  {
+    label: 'Marketplace',
+    items: [
+      {
+        title: 'Baalvion Invest',
+        href: '/marketplace/companies',
+        iconName: 'Handshake',
+        roles: ['super_admin', 'owner', 'admin', 'compliance'],
+        children: [
+          { title: 'Companies',     href: '/marketplace/companies',     iconName: 'Building2'    },
+          { title: 'Investors',     href: '/marketplace/investors',     iconName: 'Users2'       },
+          { title: 'Opportunities', href: '/marketplace/opportunities', iconName: 'Megaphone'    },
+          { title: 'Deals',         href: '/marketplace/deals',         iconName: 'Handshake'    },
+        ],
+      },
+    ],
+  },
+  {
     label: 'Ecosystem',
     items: [
       { title: 'Law Elite',         href: '/law',           iconName: 'Scale'   },
       { title: 'ControlTheMarket',  href: '/ctm',           iconName: 'Trophy'  },
-      { title: 'Imperialpedia',     href: '/imperialpedia', iconName: 'BookOpen' },
+      {
+        title: 'Imperialpedia',
+        href: '/imperialpedia',
+        iconName: 'BookOpen',
+        children: [
+          { title: 'Overview',  href: '/imperialpedia',          iconName: 'LayoutDashboard' },
+          { title: 'Glossary',  href: '/imperialpedia/glossary', iconName: 'FileText'        },
+          { title: 'Entities',  href: '/imperialpedia/entities', iconName: 'Building2'        },
+        ],
+      },
     ],
   },
   {
@@ -190,6 +266,12 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Invoices',      href: '/payments/invoices',      iconName: 'Receipt'        },
           { title: 'Webhooks',      href: '/payments/webhooks',      iconName: 'Webhook'        },
         ],
+      },
+      {
+        title: 'Billing',
+        href: '/billing',
+        iconName: 'Wallet',
+        roles: ['super_admin', 'owner', 'admin'],
       },
       {
         title: 'Notifications',

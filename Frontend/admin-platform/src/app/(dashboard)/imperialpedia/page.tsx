@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -30,6 +31,37 @@ export default function ImperialpediaAdminPage() {
   return (
     <div className="space-y-6">
       <PageHeader title="Imperialpedia" description="Structured entities & editorial content (imperialpedia-service)" />
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <Link
+          href="/imperialpedia/glossary"
+          className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-accent"
+        >
+          <div className="font-semibold">Glossary →</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Investopedia-style financial terms — definitions, formulas, examples, related terms.
+          </p>
+        </Link>
+        <Link
+          href="/imperialpedia/entities"
+          className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-accent"
+        >
+          <div className="font-semibold">Entities →</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Structured knowledge-graph entities — companies, people, places keyed by type and slug.
+          </p>
+        </Link>
+        <Link
+          href="/imperialpedia/world"
+          className="rounded-lg border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-accent"
+        >
+          <div className="font-semibold">World Control →</div>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Control the live /world markets &amp; news page — indices, watchlist, news source and
+            regions.
+          </p>
+        </Link>
+      </div>
       <Card>
         <CardHeader><CardTitle>Entities ({entities.length})</CardTitle></CardHeader>
         <CardContent>

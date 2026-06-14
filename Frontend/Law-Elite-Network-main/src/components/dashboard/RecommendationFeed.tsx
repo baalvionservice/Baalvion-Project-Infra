@@ -35,8 +35,8 @@ export default function RecommendationFeed({ userId }: RecommendationFeedProps) 
       try {
         const data = await generateRecommendations(userId);
         const sorted = [...data].sort((a, b) => {
-          const priorityMap = { high: 3, medium: 2, low: 1 };
-          return priorityMap[b.priority] - priorityMap[a.priority];
+          const priorityMap: Record<string, number> = { high: 3, medium: 2, low: 1 };
+          return (priorityMap[b.priority] ?? 0) - (priorityMap[a.priority] ?? 0);
         });
         setRecommendations(sorted);
       } catch (err) {

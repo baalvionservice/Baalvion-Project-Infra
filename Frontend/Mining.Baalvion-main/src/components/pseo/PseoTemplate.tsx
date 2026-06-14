@@ -64,7 +64,7 @@ export function PseoTemplate({ data }: PseoTemplateProps) {
         name: `Who are the top ${productName} ${role} in ${location}?`,
         acceptedAnswer: {
           "@type": "Answer",
-          text: `GeoTrade Nexus features ${supplierCount} verified ${productName} ${role} in ${location}, all of whom have passed Tier 2 KYC verification and maintain industrial-grade standards.`,
+          text: `Baalvion Mining Inc. features ${supplierCount} verified ${productName} ${role} in ${location}, all of whom have passed Tier 2 KYC verification and maintain industrial-grade standards.`,
         },
       },
       {
@@ -317,7 +317,7 @@ export function PseoTemplate({ data }: PseoTemplateProps) {
                   },
                   {
                     q: `Which ${role.toLowerCase()} are Tier 3 verified?`,
-                    a: `GeoTrade Nexus lists ${supplierCount} ${role.toLowerCase()} in ${location} who have passed the Tier 3 industrial audit, including mining license boundary verification and on-site purity testing.`,
+                    a: `Baalvion Mining Inc. lists ${supplierCount} ${role.toLowerCase()} in ${location} who have passed the Tier 3 industrial audit, including mining license boundary verification and on-site purity testing.`,
                   },
                 ].map((faq, i) => (
                   <Card

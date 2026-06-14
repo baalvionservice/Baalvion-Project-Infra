@@ -1,26 +1,46 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAppStore } from '@/lib/store';
-import { 
-  Heart, 
-  ChevronRight, 
-  ArrowRight, 
-  Sparkles, 
-  Share2,
-  Lock,
-  Package
-} from 'lucide-react';
-import { Card } from "@/components/ui/card";
+import { Heart, ChevronRight, Share2, Check } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { ProductCard } from '@/components/product/ProductCard';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
 
 export default function PrivateArchivePage() {
   const { country } = useParams();
   const countryCode = (country as string) || 'us';
   const { wishlist } = useAppStore();
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  // Share the archive: native Web Share API when available, else copy the page link.
+  const handleShare = async () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    const shareData = {
+      title: 'My Amarisé Private Archive',
+      text: 'A curated selection of artifacts from Amarisé Maison Avenue.',
+      url,
+    };
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share(shareData);
+        return;
+      }
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        toast({ title: 'Link copied', description: 'Your archive link is on the clipboard.' });
+        return;
+      }
+      toast({ variant: 'destructive', title: 'Unable to share', description: 'Sharing is not supported on this device.' });
+    } catch {
+      // User dismissed the native share sheet — not an error.
+    }
+  };
 
   return (
     <div className="space-y-12">
@@ -34,9 +54,24 @@ export default function PrivateArchivePage() {
           <h1 className="text-4xl font-headline font-bold italic tracking-tight text-gray-900 uppercase">Archive</h1>
           <p className="text-sm text-gray-500 font-light italic">A curated selection of artifacts reserved for your future acquisition.</p>
         </div>
-        <Button variant="outline" className="h-12 border-border text-[9px] font-bold uppercase tracking-widest px-8 rounded-none">
-           <Share2 className="w-3.5 h-3.5 mr-2" /> SHARE SELECTION
-        </Button>
+        {wishlist.length > 0 && (
+          <Button
+            type="button"
+            onClick={handleShare}
+            variant="outline"
+            className="h-12 border-border text-[9px] font-bold uppercase tracking-widest px-8 rounded-none"
+          >
+            {copied ? (
+              <>
+                <Check className="w-3.5 h-3.5 mr-2 text-emerald-600" /> LINK COPIED
+              </>
+            ) : (
+              <>
+                <Share2 className="w-3.5 h-3.5 mr-2" /> SHARE SELECTION
+              </>
+            )}
+          </Button>
+        )}
       </header>
 
       {wishlist.length > 0 ? (
@@ -54,33 +89,11 @@ export default function PrivateArchivePage() {
               <p className="text-xl font-headline font-bold italic text-gray-900">Your Archive is Empty</p>
               <p className="text-xs text-gray-500 font-light uppercase tracking-widest">Reserve artifacts while browsing the registry.</p>
            </div>
-           <Link href={`/${countryCode}/category/hermes`}>
-              <Button className="h-12 bg-black text-white hover:bg-plum rounded-none text-[9px] font-bold tracking-widest uppercase px-12">EXPLORE ATELIERS</Button>
+           <Link href={`/${countryCode}`}>
+              <Button className="h-12 bg-black text-white hover:bg-plum rounded-none text-[9px] font-bold tracking-widest uppercase px-12">EXPLORE THE MAISON</Button>
            </Link>
         </div>
       )}
-
-      {/* VIP Access Push */}
-      <section className="bg-black text-white p-12 relative overflow-hidden rounded-none shadow-2xl">
-         <div className="absolute top-0 right-0 p-12 opacity-10 pointer-events-none"><Lock className="w-40 h-40" /></div>
-         <div className="relative z-10 flex flex-col md:row items-center justify-between gap-12 text-center md:text-left">
-            <div className="space-y-4 max-w-2xl">
-               <div className="flex items-center space-x-3 text-gold">
-                  <Sparkles className="w-5 h-5" />
-                  <span className="text-[10px] font-bold uppercase tracking-[0.4em]">Private Collection Strategy</span>
-               </div>
-               <h3 className="text-3xl font-headline font-bold italic">Optimize your archive.</h3>
-               <p className="text-sm font-light italic opacity-60 leading-relaxed">
-                 "Our senior curators can analyze your archived artifacts to suggest a synergistic collection strategy based on historical appreciation and heritage value."
-               </p>
-            </div>
-            <Link href={`/${countryCode}/account/curation`}>
-               <Button className="h-16 px-12 bg-white text-black hover:bg-gold rounded-none text-[10px] font-bold tracking-[0.3em] uppercase transition-all shadow-xl">
-                  CONSULT SENIOR CURATOR
-               </Button>
-            </Link>
-         </div>
-      </section>
     </div>
   );
 }

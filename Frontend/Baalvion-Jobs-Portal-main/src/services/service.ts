@@ -201,7 +201,6 @@ export const reviewService = {
     review: Omit<ProjectReview, 'id' | 'createdAt'>,
   ): Promise<ApiResponse<ProjectReview>> {
     await delay(400);
-    console.log('Submitting review:', review);
     const newReview: ProjectReview = {
       ...review,
       id: `rev-${Date.now()}`,

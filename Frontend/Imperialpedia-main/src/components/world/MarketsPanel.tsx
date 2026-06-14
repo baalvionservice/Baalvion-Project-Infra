@@ -1,8 +1,13 @@
 "use client";
 import { useState } from "react";
-import { worldMarkets, watchlistItems } from "@/lib/data/worldData";
+import type { WorldData } from "@/lib/data/worldRegions";
 
-export default function MarketsPanel() {
+interface Props {
+  markets: WorldData["markets"];
+  watchlist: WorldData["watchlist"];
+}
+
+export default function MarketsPanel({ markets, watchlist }: Props) {
   const [activeTab, setActiveTab] = useState<"markets" | "watchlist">(
     "markets"
   );
@@ -33,7 +38,7 @@ export default function MarketsPanel() {
 
       {activeTab === "markets" && (
         <div>
-          {worldMarkets.map((region) => (
+          {markets.map((region) => (
             <div key={region.region}>
               <div className="px-3 py-2 bg-gray-50 border-b border-gray-100">
                 <span className="text-[10px] font-black tracking-widest text-gray-500 uppercase">
@@ -84,7 +89,7 @@ export default function MarketsPanel() {
             <span className="text-right">Change</span>
           </div>
           <div className="divide-y divide-gray-50">
-            {watchlistItems.map((item) => (
+            {watchlist.map((item) => (
               <div
                 key={item.ticker}
                 className="grid grid-cols-3 items-center px-2 sm:px-3 py-2 sm:py-2.5 hover:bg-gray-50 cursor-pointer transition-colors"

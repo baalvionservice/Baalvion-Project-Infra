@@ -59,8 +59,11 @@ function RelatedLinks({ links }: { links: RelatedLink[] }) {
         Related
       </span>
       <ul className="flex flex-col gap-2">
-        {links.map((link) => (
-          <li key={link.href}>
+        {links.map((link, i) => (
+          // Related links frequently share a placeholder href ("#"), so the
+          // label+index pair is the only stable unique key here. Keying on href
+          // alone produced duplicate keys that broke production hydration.
+          <li key={`${link.label}-${i}`}>
             <Link
               href={link.href}
               className="flex items-start gap-2 text-[13px] text-foreground/80 hover:text-blue-700 leading-snug"

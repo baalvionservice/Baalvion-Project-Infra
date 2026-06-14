@@ -1,6 +1,7 @@
+'use client';
+
 import React from 'react';
-import { Metadata } from 'next';
-import Image from 'next/image';
+import { BrandImage } from '@/components/ui/BrandImage';
 import { Button } from '@/components/ui/button';
 import {
   Gift,
@@ -14,28 +15,17 @@ import {
 import { useAppStore } from '@/lib/store';
 import { ProductCard } from '@/components/product/ProductCard';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
-type GiftRegistryPageProps = {
-  params: Promise<{
-    country: string;
-  }>;
-};
-
-export async function generateMetadata({ params }: GiftRegistryPageProps): Promise<Metadata> {
-  return {
-    title: 'Private Gift Registry | AMARISÉ MAISON - Create Your Wishlist',
-    description: 'Create and share your luxury gift registry with friends and family. Curate your collection of fine artifacts for special occasions.',
-  };
-}
-
-export default async function GiftRegistryPage({ params }: GiftRegistryPageProps) {
-  const countryCode = ((await params).country as string) || 'us';
+export default function GiftRegistryPage() {
+  const params = useParams();
+  const countryCode = (params?.country as string) || 'us';
   const { wishlist } = useAppStore();
 
   return (
     <div className="animate-fade-in bg-ivory pb-32">
       <section className="relative h-[40vh] w-full flex items-center justify-center overflow-hidden border-b border-border">
-        <Image src="https://picsum.photos/seed/amarise-gift/2560/1440" alt="Maison Gifting" fill className="object-cover opacity-60 grayscale-[50%]" />
+        <BrandImage src="https://picsum.photos/seed/amarise-gift/2560/1440" alt="Maison Gifting" className="absolute inset-0" imgClassName="opacity-60 grayscale-[50%]" />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ivory/20 to-ivory" />
         <div className="relative z-10 text-center space-y-4 px-6">
           <span className="text-primary text-[10px] font-bold tracking-[0.5em] uppercase">Heritage Gifting</span>

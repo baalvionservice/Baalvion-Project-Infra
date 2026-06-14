@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { BrandImage } from "@/components/ui/BrandImage";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
@@ -52,14 +52,13 @@ export default function HowToSellPage() {
 
         {/* Right Panel: Visual Resonance */}
         <div className="w-full md:w-[55%] relative h-[400px] md:h-auto overflow-hidden">
-          <Image
+          <BrandImage
             src="https://picsum.photos/seed/amarise-consign/1440/960"
             alt="Maison Amarisé Heritage Collection - Hermès Series"
-            fill
-            className="object-cover transition-transform duration-[5s] hover:scale-105"
+            className="absolute inset-0"
+            imgClassName="transition-transform duration-[5s] hover:scale-105"
             priority
             sizes="60vw"
-            data-ai-hint="luxury fashion"
           />
           <div className="absolute inset-0 bg-black/5" />
         </div>

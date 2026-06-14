@@ -1,0 +1,56 @@
+{
+  "slug": "ai-agents",
+  "title": "AI Agents",
+  "kind": "service",
+  "heroImageSeed": "svc-agents",
+  "excerpt": "Autonomous and assistive AI agents with tool use, orchestration, and guardrails — built to do real work, safely.",
+  "seo": {
+    "title": "AI Agent Development Services | Baalvion",
+    "description": "Baalvion builds autonomous and assistive AI agents with tool use, orchestration, evaluation, and guardrails — agents that do real work without going off the rails.",
+    "keywords": ["AI agents", "autonomous agents", "tool use", "agent orchestration", "Baalvion services", "LLM agents"]
+  },
+  "customFields": {
+    "benefits": [
+      "Agents that take action, not just answer questions",
+      "Safe tool use with permissioning and guardrails",
+      "Human-in-the-loop where stakes are high",
+      "Evaluated and observable, like any production system"
+    ],
+    "process": [
+      { "step": "Scope", "desc": "Define the agent's job, its tools, and its boundaries." },
+      { "step": "Design", "desc": "Tool contracts, orchestration, and escalation paths." },
+      { "step": "Guardrail", "desc": "Permissions, validation, and human-in-the-loop for risky actions." },
+      { "step": "Evaluate", "desc": "Trajectory evals, observability, and iteration." }
+    ],
+    "techStack": ["LLM orchestration", "Tool / function calling", "Guardrails", "Evaluation", "Event-driven workflows", "Observability"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "An AI agent doesn't just answer — it acts: calling tools, querying systems, and completing multi-step tasks. That power needs discipline. Baalvion builds agents with explicit tool contracts, permissioning, and guardrails, so they do useful work without going off the rails. Our perspective on where this is heading is in [the future of AI agents in the enterprise](/news/tech/future-of-ai-agents)." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Action, not just answers:** agents that complete tasks end to end.",
+      "**Safe tool use:** every tool is permissioned and its inputs validated.",
+      "**Human-in-the-loop:** risky actions escalate rather than auto-execute.",
+      "**Observable:** every step is logged and evaluable, like any production system."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We scope the agent's job and boundaries, design tool contracts and orchestration with clear escalation, add guardrails and human-in-the-loop for high-stakes actions, then evaluate trajectories and iterate. The same advise-don't-silently-act principle that governs our [fraud detection engine](/case-studies/fraud-detection-engine) and compliance work applies here." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "LLM orchestration, tool and function calling, guardrails, trajectory evaluation, event-driven workflows, and observability. Agents build on the same applied-AI foundations as our [AI solutions](/services/ai-solutions) practice." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "We design agents for environments where mistakes have real cost, so safety, permissioning, and explainability are non-negotiable. Combine agents with [automation](/services/automation) to take repetitive work off your team, and see the strategy in [AI automation for businesses](/news/tech/ai-automation-for-businesses)." }
+  ],
+  "faqs": [
+    { "q": "How do you keep an autonomous agent safe?", "a": "Through scoped tool contracts, input validation, least-privilege permissions, and human-in-the-loop escalation for high-stakes actions — agents advise or request approval rather than acting unchecked." },
+    { "q": "What can an AI agent actually do?", "a": "Call tools, query systems, and complete multi-step workflows — for example triaging, drafting, reconciling, or routing — within boundaries you define." },
+    { "q": "How are agents evaluated?", "a": "With trajectory evaluations that score the whole sequence of steps, plus observability so every action is logged and reviewable." },
+    { "q": "How is this different from AI solutions?", "a": "[AI solutions](/services/ai-solutions) cover applied models and retrieval; agents add autonomous, multi-step action with tool use." }
+  ],
+  "internalLinks": [
+    { "anchor": "the future of AI agents in the enterprise", "href": "/news/tech/future-of-ai-agents" },
+    { "anchor": "fraud detection engine", "href": "/case-studies/fraud-detection-engine" },
+    { "anchor": "AI solutions", "href": "/services/ai-solutions" },
+    { "anchor": "automation", "href": "/services/automation" }
+  ]
+}

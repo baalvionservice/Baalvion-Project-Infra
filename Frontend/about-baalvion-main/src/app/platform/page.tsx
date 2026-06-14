@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Platform | Baalvion Operating System Core Architecture",
   description:
     "Architecting the foundational layer for global trade with enterprise-grade reliability and modular scalability.",
+  alternates: { canonical: "https://about.baalvion.com/platform" },
   openGraph: {
     title: "Platform | Baalvion Operating System Core Architecture",
     description:
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
     siteName: "Baalvion Operating System (BOS)",
     images: [
       {
-        url: "https://picsum.photos/seed/baalvion-platform/1200/630",
+        url: "https://about.baalvion.com/api/og?title=The+Baalvion+Platform&eyebrow=Baalvion+Industries",
         width: 1200,
         height: 630,
         alt: "Baalvion Operating System Platform",
@@ -30,7 +31,7 @@ export const metadata: Metadata = {
     title: "Platform | Baalvion Operating System Core Architecture",
     description:
       "Architecting the foundational layer for global trade with enterprise-grade reliability and modular scalability.",
-    images: ["https://picsum.photos/seed/baalvion-platform/1200/630"],
+    images: ["https://about.baalvion.com/api/og?title=The+Baalvion+Platform&eyebrow=Baalvion+Industries"],
   },
 };
 

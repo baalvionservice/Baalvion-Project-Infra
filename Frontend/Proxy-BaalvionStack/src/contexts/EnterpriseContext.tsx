@@ -1,11 +1,20 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { tokenStore } from "@/lib/tokenStore";
+import { useAuth } from "@/contexts/AuthContext";
+import { billingApi } from "@/lib/platformClient";
 
 // User Roles — extended for RBAC
 export type UserRole = "owner" | "admin" | "support" | "finance" | "viewer" | "restricted";
 
 // Plan Types
 export type PlanType = "free" | "starter" | "pro" | "enterprise";
+
+// Backend plan slugs (starter/growth/enterprise) → client PlanType used for UX gating.
+const PLAN_SLUG_TO_TYPE: Record<string, PlanType> = {
+  free: "free", starter: "starter", growth: "pro", pro: "pro", enterprise: "enterprise",
+};
+const planSlugToType = (slug?: string | null): PlanType =>
+  (slug && PLAN_SLUG_TO_TYPE[slug]) || "starter";
 
 // Demo Mode State
 export interface DemoModeState {
@@ -87,6 +96,7 @@ const planLimits: Record<PlanType, { bandwidth: number; subUsers: number; proxie
 };
 
 export function EnterpriseProvider({ children }: { children: ReactNode }) {
+  const { accessToken } = useAuth();
   const [currentRole, setCurrentRole] = useState<UserRole>(() => {
     // P0: role comes from the VERIFIED session (JWT claim), NEVER localStorage. Least-privilege
     // default until the backend membership role is known. API authorization remains authoritative;
@@ -98,7 +108,7 @@ export function EnterpriseProvider({ children }: { children: ReactNode }) {
 
   const [currentPlan, setCurrentPlan] = useState<PlanType>(() => {
     const saved = localStorage.getItem("baalvion_user_plan");
-    return (saved as PlanType) || "pro";
+    return (saved as PlanType) || "starter";
   });
 
   const [demoMode, setDemoMode] = useState<DemoModeState>(() => {
@@ -125,6 +135,22 @@ export function EnterpriseProvider({ children }: { children: ReactNode }) {
 
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
+
+  // Source the effective plan from the VERIFIED backend subscription (authoritative),
+  // not a localStorage default. Falls back to the persisted/default value when the
+  // user is unauthenticated or the request fails.
+  useEffect(() => {
+    if (!accessToken) return;
+    let cancelled = false;
+    billingApi
+      .getSubscription()
+      .then((sub) => {
+        const slug = (sub as { planSlug?: string } | null)?.planSlug;
+        if (!cancelled && slug) setCurrentPlan(planSlugToType(slug));
+      })
+      .catch(() => { /* keep current/default plan */ });
+    return () => { cancelled = true; };
+  }, [accessToken]);
 
   // (Removed: the role is never persisted to localStorage — it is derived from the verified session.)
   useEffect(() => {

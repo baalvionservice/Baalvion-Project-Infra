@@ -9,7 +9,8 @@
  *
  *   npx tsx scripts/seed-cms-pages.ts
  */
-import { MOCK_PAGES, MOCK_NAVIGATION } from '../src/core/providers/mock/mock-data';
+const MOCK_PAGES: any[] = [];
+const MOCK_NAVIGATION: any[] = [];
 
 const AUTH = process.env.AUTH_URL || 'http://localhost:3001/v1/auth';
 const CMS = process.env.CMS_URL || 'http://localhost:3018/api/v1';

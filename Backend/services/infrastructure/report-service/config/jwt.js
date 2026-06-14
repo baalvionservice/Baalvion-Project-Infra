@@ -1,6 +1,7 @@
 'use strict';
 // Verify-only token adapter via @baalvion/auth-node (the single JWT authority — no
-// second issuer). RS256 when JWT_PUBLIC_KEY is set, HS256 dev fallback otherwise.
+// second issuer). RS256-ONLY: verifyAccessToken rejects any non-RS256 alg (R2); in
+// production the verifier fails closed if no RS256 public key is configured.
 const { createAuthServer } = require('@baalvion/auth-node');
 const config = require('./appConfig');
 

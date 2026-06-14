@@ -4,10 +4,14 @@ const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { createContactSchema, updateContactSchema } = require('../validators/schemas');
 
+// Single-tenant IR service: derive orgId exclusively from the verified token;
+// unauthenticated public reads fall back to the configured default — never trust
+// a client-supplied org_id.
+const DEFAULT_ORG_ID = process.env.IR_DEFAULT_ORG_ID || '11111111-1111-1111-1111-111111111111';
+
 const listContacts = async (req, res, next) => {
     try {
-        const orgId = req.user?.orgId || req.query.org_id;
-        if (!orgId) return next(new AppError('BAD_REQUEST', 'org_id required', 400));
+        const orgId = req.user?.orgId || DEFAULT_ORG_ID;
         const data = await contactService.listContacts(orgId);
         return sendSuccess(req, res, data);
     } catch (err) { return next(err); }

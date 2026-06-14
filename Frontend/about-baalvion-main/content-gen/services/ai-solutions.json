@@ -1,0 +1,56 @@
+{
+  "slug": "ai-solutions",
+  "title": "AI Solutions",
+  "kind": "service",
+  "heroImageSeed": "svc-ai",
+  "excerpt": "Applied AI that ships — models, retrieval, and evaluation engineered for production reliability, not demos.",
+  "seo": {
+    "title": "AI Solutions & Applied AI Services | Baalvion",
+    "description": "Baalvion designs and ships production-grade AI: retrieval, evaluation, guardrails, and cost control. From prototype to reliable, observable systems.",
+    "keywords": ["AI solutions", "applied AI", "RAG", "machine learning", "Baalvion services", "production AI", "LLM"]
+  },
+  "customFields": {
+    "benefits": [
+      "AI that reaches production, not just a demo",
+      "Evaluation and guardrails for reliable behaviour",
+      "Retrieval grounded in your own data",
+      "Cost and latency under control"
+    ],
+    "process": [
+      { "step": "Frame", "desc": "Pick a use case with clear value and a measurable success metric." },
+      { "step": "Prototype", "desc": "Prove feasibility fast against real data." },
+      { "step": "Harden", "desc": "Add evaluation, guardrails, observability, and cost control." },
+      { "step": "Operate", "desc": "Monitor quality and drift; iterate on the eval set." }
+    ],
+    "techStack": ["LLMs", "RAG / vector search", "Evaluation harnesses", "Guardrails", "Feature pipelines", "Observability"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "Most AI projects stall between an impressive demo and a reliable product. Baalvion specialises in closing that gap. We build applied AI grounded in your data, wrapped in the evaluation, guardrails, and observability that make it trustworthy in production. We've shipped this in regulated contexts — see [AI compliance scoring across 180+ jurisdictions](/case-studies/ai-compliance-scoring-platform)." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Production-ready:** systems that survive real users, covered in [building production AI systems](/news/tech/building-production-ai-systems).",
+      "**Grounded:** retrieval over your own data to reduce hallucination.",
+      "**Measured:** evaluation harnesses so quality is a number, not a vibe.",
+      "**Controlled:** cost and latency budgets, with guardrails on behaviour."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We frame a use case with a measurable success metric, prototype against real data to prove feasibility, harden with evaluation and guardrails, then operate with monitoring for quality and drift. The framework mirrors [enterprise AI adoption](/news/tech/enterprise-ai-adoption)." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "Large language models, retrieval-augmented generation with vector search, evaluation harnesses, behavioural guardrails, feature pipelines, and full observability. A governed [data lakehouse](/case-studies/enterprise-data-lakehouse) is often the foundation that makes the AI reliable." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "We run AI in production where being wrong has consequences, so reliability and explainability are first principles for us. Explore autonomous variants in [AI agents](/services/ai-agents) and the strategy in [AI automation for businesses](/news/tech/ai-automation-for-businesses)." }
+  ],
+  "faqs": [
+    { "q": "How do you stop AI from hallucinating?", "a": "We ground responses in your own data via retrieval, constrain behaviour with guardrails, and measure quality with an evaluation harness — covered in [building production AI systems](/news/tech/building-production-ai-systems)." },
+    { "q": "How is AI quality measured?", "a": "With evaluation sets that turn 'is it good?' into a tracked metric, so changes can be assessed objectively before they ship." },
+    { "q": "Can you control AI cost and latency?", "a": "Yes — we set explicit cost and latency budgets, cache where possible, and choose model tiers to fit the task." },
+    { "q": "What's the difference between AI solutions and AI agents?", "a": "AI solutions cover applied models and retrieval; [AI agents](/services/ai-agents) add autonomous tool use and multi-step workflows." }
+  ],
+  "internalLinks": [
+    { "anchor": "AI compliance scoring across 180+ jurisdictions", "href": "/case-studies/ai-compliance-scoring-platform" },
+    { "anchor": "building production AI systems", "href": "/news/tech/building-production-ai-systems" },
+    { "anchor": "enterprise AI adoption", "href": "/news/tech/enterprise-ai-adoption" },
+    { "anchor": "AI agents", "href": "/services/ai-agents" }
+  ]
+}

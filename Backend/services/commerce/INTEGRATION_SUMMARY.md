@@ -93,8 +93,8 @@ payments.transaction.failed.v1      → notification-service (alert user)
 
 ## What's Left (Next Phase)
 
-- ✅ Ledger Service (complete)
-- ✅ Payment Service (complete)
+- ✅ Ledger Service — canonical **Java** `financial-services-java/ledger-service` (Node copy removed 2026-06-13)
+- ✅ Payment Service — canonical **Java** `financial-services-java/payment-service`, incl. Razorpay/Stripe/PayU PSP gateways ported from the (removed) Node copy
 - 🔄 **Settlement Service** (T+0/T+1 batching, scheme file generation)
 - 🔄 **Escrow Service** (conditional holds, disputes, auto-release)
 - 🔄 **Reconciliation Service** (inbound file matching, exceptions)
@@ -108,9 +108,10 @@ payments.transaction.failed.v1      → notification-service (alert user)
 # 1. Start infrastructure
 docker-compose up -d postgres redis kafka
 
-# 2. Start services
-cd Backend/services/commerce/ledger-service && npm install && npm run migrate && npm start
-cd Backend/services/commerce/payment-service && npm install && npm run migrate && npm start
+# 2. Start the finance stack — canonical Java suite (Node ledger/payment removed 2026-06-13)
+#    See Backend/services/commerce/financial-services-java/RUN_LOCAL.md
+cd Backend/services/commerce/financial-services-java && docker compose up --build
+#    Ledger → host 13014; Payment (incl. Razorpay/Stripe/PayU PSP gateways at /v1/gateway/*) → host 13015
 
 # 3. Frontend
 cd Frontend/Global-Trade-Infrastructure-main && npm run dev

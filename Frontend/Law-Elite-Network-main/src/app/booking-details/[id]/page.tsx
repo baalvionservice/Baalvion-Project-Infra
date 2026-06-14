@@ -44,7 +44,7 @@ export default function BookingDetailPage() {
         const bookingData = await getBookingById(id as string);
         if (bookingData) {
           setBooking(bookingData);
-          const lawyerData = await getLawyerById(bookingData.lawyerId);
+          const lawyerData = await getLawyerById(bookingData.lawyerId as string);
           setLawyer(lawyerData);
         }
       } finally {

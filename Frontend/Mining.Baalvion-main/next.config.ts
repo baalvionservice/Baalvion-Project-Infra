@@ -2,6 +2,26 @@ import type {NextConfig} from 'next';
 
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
+  // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
+  // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
+  // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
+  // "Critical dependency: the request of a dependency is an expression" build warnings with no
+  // behaviour change — src/ai/* is `server-only`, reached only through flows / route handlers.
+  serverExternalPackages: [
+    'genkit',
+    '@genkit-ai/core',
+    '@genkit-ai/ai',
+    '@genkit-ai/google-genai',
+    'dotprompt',
+    'handlebars',
+    '@opentelemetry/sdk-node',
+    '@opentelemetry/api',
+    '@opentelemetry/instrumentation',
+    'require-in-the-middle',
+    'import-in-the-middle',
+    'protobufjs',
+    'express',
+  ],
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -22,12 +42,6 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
     ],
   },
   async rewrites() {
@@ -42,11 +56,11 @@ const nextConfig: NextConfig = {
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://www.google-analytics.com https://www.googletagmanager.com;
+      img-src 'self' blob: data: https://images.unsplash.com https://placehold.co https://www.google-analytics.com https://www.googletagmanager.com;
       font-src 'self' data: https://fonts.gstatic.com;
       object-src 'none';
       base-uri 'self';
-      connect-src 'self' https://api.baalvion.com https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://picsum.photos https://www.google-analytics.com https://stats.g.doubleclick.net;
+      connect-src 'self' https://api.baalvion.com https://*.firebaseio.com https://*.googleapis.com https://*.firebase.com https://www.google-analytics.com https://stats.g.doubleclick.net;
       form-action 'self';
       frame-ancestors 'none';
       upgrade-insecure-requests;

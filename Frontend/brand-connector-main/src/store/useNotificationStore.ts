@@ -49,7 +49,6 @@ export const useNotificationStore = create<NotificationState>((set, get) => ({
   },
 
   triggerEvent: async (event, payload) => {
-    console.log(`Triggering automation: ${event}`);
     await automationApi.trigger(event, payload);
     // Refresh notifications after a small delay to show the effect of automation
     setTimeout(() => get().fetchNotifications(), 1000);

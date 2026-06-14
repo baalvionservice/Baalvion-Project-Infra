@@ -1,0 +1,62 @@
+{
+  "slug": "automated-customs-clearance",
+  "title": "Automating Customs Clearance Across Corridors",
+  "kind": "case_study",
+  "heroImageSeed": "cs-customs",
+  "excerpt": "A connector architecture to ICEGATE, ACE, and CDS with asynchronous pipelines, retries, and failure recovery — clearing goods without manual filing.",
+  "seo": {
+    "title": "Case Study: Automated Customs Clearance | Baalvion",
+    "description": "How Baalvion automated customs clearance across India, the US, and the EU with a connector architecture, async pipelines, and resilient failure recovery.",
+    "keywords": ["customs clearance", "ICEGATE", "ACE", "CDS", "trade automation", "Baalvion case study", "logistics"]
+  },
+  "customFields": {
+    "client": "A logistics and trade operator clearing goods across India, the US, and the EU",
+    "sector": "Logistics & Trade",
+    "challenge": "Manual customs filing across incompatible national systems, with no recovery when a submission failed.",
+    "solution": "A connector abstraction over national customs gateways with async pipelines and automatic retry.",
+    "architecture": "Connector base class per gateway, queue-backed pipeline, in-process and queued retry, normalised responses.",
+    "techStack": ["Connector architecture", "Message queue", "Retry & DLQ", "Response normalisation", "Event triggers"],
+    "results": [
+      { "metric": "Manual filings", "value": "-85%" },
+      { "metric": "Failed submissions recovered", "value": "Automatic" },
+      { "metric": "Corridors", "value": "India / US / EU" }
+    ],
+    "lessons": [
+      "Abstract the gateway, normalise the response.",
+      "Every external call needs a retry and a dead-letter path.",
+      "Make failure recovery a first-class feature."
+    ]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "The Challenge" },
+    { "type": "paragraph", "text": "Clearing goods meant filing into a different national system per corridor — ICEGATE in India, ACE in the US, CDS in the EU — each with its own format and quirks. Filing was manual, error-prone, and when a submission failed there was no systematic recovery; shipments simply stalled until someone noticed." },
+    { "type": "heading", "level": 2, "text": "The Solution" },
+    { "type": "paragraph", "text": "We built a connector abstraction on the Baalvion Operating System: one base interface with a concrete connector per national gateway. Submissions run through an asynchronous, queue-backed pipeline that retries transient failures and routes persistent ones to a dead-letter queue for review — so a single gateway hiccup never silently strands a shipment." },
+    { "type": "list", "ordered": false, "items": [
+      "**Connector per gateway** (ICEGATE, ACE, CDS) behind one interface.",
+      "**Async pipeline** so filings don't block the order flow.",
+      "**Automatic retry** with a dead-letter path for persistent failures.",
+      "**Normalised responses** so downstream systems see one shape."
+    ] },
+    { "type": "heading", "level": 2, "text": "Architecture" },
+    { "type": "paragraph", "text": "Each connector implements a shared base contract, translating the platform's canonical submission into the gateway's native format and normalising the response back. A message queue decouples submission from clearing; a relay processes the queue with retry and failover, and persistent failures land in a dead-letter queue with full context. Clearing is triggered by shipment events, the same event-driven pattern behind our [logistics control tower](/case-studies/logistics-control-tower)." },
+    { "type": "heading", "level": 2, "text": "Technology Stack" },
+    { "type": "paragraph", "text": "A connector architecture, a message queue with retry and dead-letter handling, response normalisation, and event triggers — built through our [automation](/services/automation) and [cloud solutions](/services/cloud-solutions) practices for the [logistics](/industries/logistics) sector." },
+    { "type": "heading", "level": 2, "text": "Results" },
+    { "type": "paragraph", "text": "Manual filings dropped by roughly 85%, failed submissions now recover automatically instead of stranding shipments, and the same platform clears goods across three very different national systems through one consistent interface." },
+    { "type": "heading", "level": 2, "text": "Lessons Learned" },
+    { "type": "paragraph", "text": "Abstracting the gateway and normalising responses meant adding a new country was a connector, not a rewrite. Every external call needed an explicit retry and dead-letter path — assuming success is how shipments get stuck. And treating failure recovery as a first-class feature, not an edge case, was what made the system trustworthy in production." }
+  ],
+  "faqs": [
+    { "q": "How are different national customs systems supported?", "a": "Each gateway has a connector implementing one shared interface, translating to and from the gateway's native format. Adding a country means adding a connector, not changing the core." },
+    { "q": "What happens when a submission fails?", "a": "Transient failures are retried automatically; persistent failures route to a dead-letter queue with full context for review — shipments never silently stall." },
+    { "q": "Does customs filing block the rest of the order flow?", "a": "No. Filing runs through an asynchronous, queue-backed pipeline, so it never blocks order processing or settlement." },
+    { "q": "Which sectors benefit most?", "a": "Any cross-border trade or logistics operation — see [Baalvion for logistics](/industries/logistics)." }
+  ],
+  "internalLinks": [
+    { "anchor": "logistics control tower", "href": "/case-studies/logistics-control-tower" },
+    { "anchor": "automation", "href": "/services/automation" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" },
+    { "anchor": "logistics", "href": "/industries/logistics" }
+  ]
+}

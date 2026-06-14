@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Save, Search, Clock, History, Settings2, Tag as TagIcon } from 'lucide-react';
+import { Save, Search, Clock, History, Settings2, Tag as TagIcon, Eye, Pencil, Send, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,11 +10,15 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import BlockBuilder from './BlockBuilder';
+import ContentPreview from './ContentPreview';
 import SeoPanel from './SeoPanel';
 import RevisionHistory from './RevisionHistory';
 import WorkflowPanel from './WorkflowPanel';
+import ContentClassificationPanel from './ContentClassificationPanel';
+import CustomFieldsPanel from './CustomFieldsPanel';
 import ContentWorkflowBadge from './ContentWorkflowBadge';
 import { useUpdateContent, useAutosave } from '@/lib/queries/cms-content.queries';
+import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import type { ContentItem, ContentBlock } from '@/lib/types/cms-content.types';
 import type { SeoMeta } from '@/lib/types/cms.types';
@@ -28,7 +32,9 @@ interface Props {
 
 export default function ContentEditor({ content, userRole, websiteTitleSuffix }: Props) {
   const { mutate: save, isPending: isSaving } = useUpdateContent(content.id);
+  const { mutate: runTransition, isPending: isTransitioning } = useWorkflowTransition();
   const autosave = useAutosave(content.id);
+  const isPublished = content.status === 'published';
   const { hasUnsavedChanges, lastAutosaveAt, markUnsaved, activeSidePanel, toggleSidePanel } =
     useCmsStore();
 
@@ -37,6 +43,12 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
   const [excerpt, setExcerpt] = useState(content.excerpt ?? '');
   const [blocks, setBlocks] = useState<ContentBlock[]>(content.blocks);
   const [seo, setSeo] = useState<SeoMeta>(content.seo ?? {});
+  // Classification — one or more categories (first = primary) plus any number of tags.
+  // Drives the article's section + which topic pages it lands on.
+  const [categoryIds, setCategoryIds] = useState<string[]>(content.categoryIds ?? []);
+  const [tagIds, setTagIds] = useState<string[]>(content.tagIds ?? []);
+  const [customFields, setCustomFields] = useState<Record<string, unknown>>(content.customFields ?? {});
+  const [mode, setMode] = useState<'edit' | 'preview'>('edit');
 
   const autoSlug = (val: string) =>
     val.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -59,7 +71,28 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
   );
 
   const handleSave = () => {
-    save({ title, slug, excerpt, blocks, seo });
+    save({
+      title,
+      slug,
+      excerpt,
+      blocks,
+      seo,
+      categoryIds,
+      tagIds,
+      customFields,
+    });
+  };
+
+  // One-click publish/unpublish from the toolbar — saves current edits first, then runs
+  // the workflow transition so what goes live is exactly what's on screen.
+  const handlePublish = () => {
+    save(
+      { title, slug, excerpt, blocks, seo, categoryIds, tagIds, customFields },
+      {
+        onSuccess: () =>
+          runTransition({ contentId: content.id, action: isPublished ? 'unpublish' : 'publish' }),
+      },
+    );
   };
 
   return (
@@ -81,6 +114,16 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
             )}
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant={mode === 'preview' ? 'default' : 'ghost'}
+              size="sm"
+              className="h-7 gap-1.5 text-xs"
+              onClick={() => setMode((m) => (m === 'edit' ? 'preview' : 'edit'))}
+            >
+              {mode === 'edit' ? <Eye className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
+              {mode === 'edit' ? 'Preview' : 'Edit'}
+            </Button>
+            <Separator orientation="vertical" className="h-5" />
             <Button
               variant="ghost"
               size="sm"
@@ -109,15 +152,31 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
               Settings
             </Button>
             <Separator orientation="vertical" className="h-5" />
-            <Button size="sm" className="h-7 text-xs gap-1.5" onClick={handleSave} disabled={isSaving}>
+            <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5" onClick={handleSave} disabled={isSaving}>
               <Save className="h-3.5 w-3.5" />
               {isSaving ? 'Saving...' : 'Save'}
             </Button>
+            {isPublished ? (
+              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs" onClick={handlePublish} disabled={isSaving || isTransitioning} title="Take this off the public site">
+                <Globe className="h-3.5 w-3.5" />
+                {isTransitioning ? 'Working…' : 'Unpublish'}
+              </Button>
+            ) : (
+              <Button size="sm" className="h-7 gap-1.5 text-xs" onClick={handlePublish} disabled={isSaving || isTransitioning} title="Save and publish — goes live on the site">
+                <Send className="h-3.5 w-3.5" />
+                {isSaving || isTransitioning ? 'Publishing…' : 'Save & Publish'}
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Content area */}
         <ScrollArea className="flex-1">
+          {mode === 'preview' ? (
+            <div className="bg-white">
+              <ContentPreview title={title} blocks={blocks} />
+            </div>
+          ) : (
           <div className="max-w-3xl mx-auto px-8 py-8 space-y-6">
             {/* Title */}
             <div>
@@ -152,6 +211,7 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
             {/* Block builder */}
             <BlockBuilder blocks={blocks} onChange={handleBlocksChange} />
           </div>
+          )}
         </ScrollArea>
       </div>
 
@@ -180,13 +240,26 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
               />
             )}
             {activeSidePanel === 'settings' && (
-              <div className="p-4 space-y-4">
-                <WorkflowPanel
-                  contentId={content.id}
-                  currentStatus={content.status}
-                  userRole={userRole}
-                  scheduledAt={content.scheduledAt}
+              <div className="divide-y">
+                <ContentClassificationPanel
+                  websiteId={content.websiteId}
+                  categoryIds={categoryIds}
+                  tagIds={tagIds}
+                  onCategoriesChange={(ids) => { setCategoryIds(ids); markUnsaved(); }}
+                  onTagsChange={(ids) => { setTagIds(ids); markUnsaved(); }}
                 />
+                <CustomFieldsPanel
+                  value={customFields}
+                  onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                />
+                <div className="p-4 space-y-4">
+                  <WorkflowPanel
+                    contentId={content.id}
+                    currentStatus={content.status}
+                    userRole={userRole}
+                    scheduledAt={content.scheduledAt}
+                  />
+                </div>
               </div>
             )}
           </ScrollArea>

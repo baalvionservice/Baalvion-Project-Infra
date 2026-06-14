@@ -24,7 +24,7 @@ export default function SubscriptionOverview() {
       if (!user) return;
       setLoading(true);
       try {
-        const data = await getUserSubscription(user.id);
+        const data = await getUserSubscription(user.userId);
         setSub(data);
       } finally {
         setLoading(false);

@@ -529,7 +529,7 @@ export default function HomePageServer({
 
             <div className="relative aspect-[16/9] sm:aspect-[21/9] bg-[#151B24] rounded-2xl sm:rounded-[3rem] border border-gray-800 p-4 sm:p-8 flex items-center justify-center group overflow-hidden shadow-2xl shadow-black/20">
               <div
-                className="absolute inset-0 opacity-20 bg-[url('https://picsum.photos/seed/darkmap/1200/800')] bg-cover bg-center grayscale brightness-50"
+                className="absolute inset-0 opacity-20 bg-[url('/images/placeholder.svg')] bg-cover bg-center grayscale brightness-50"
                 aria-hidden="true"
               />
 

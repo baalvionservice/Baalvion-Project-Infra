@@ -3,6 +3,7 @@
 const verifier = require('../lib/verifier');
 const { getSession } = require('../lib/redisSession');
 const { sha256 } = require('../lib/crypto');
+const redis = require('../lib/redis');
 const config = require('../config/appConfig');
 
 const UNSAFE = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
@@ -15,8 +16,16 @@ const clientIp = (req) => ((req.headers['x-forwarded-for'] || '').split(',')[0].
 function requireSession(opts = {}) {
   return async (req, res, next) => {
     try {
+      // The optional-auth bypass is gated on the SERVER-SIDE opts.optional flag
+      // (fixed at route-registration time), never on the user-controlled cookie
+      // value alone. Evaluate the fixed flag first so a missing/forged cookie
+      // cannot, by itself, steer the request down the auth-skipping branch.
+      const allowAnonymous = opts.optional === true;
       const token = req.cookies && req.cookies[config.cookie.accessName];
-      if (!token) { if (opts.optional) return next(); return res.status(401).json({ error: { code: 'NO_SESSION', message: 'No session cookie' } }); }
+      if (!token) {
+        if (allowAnonymous) return next();
+        return res.status(401).json({ error: { code: 'NO_SESSION', message: 'No session cookie' } });
+      }
 
       const claims = await verifier.verify(token);            // RS256 + JWKS + blacklist + exp + requiredClaims
       const session = await getSession(claims.sid);           // session must still exist (revocable)
@@ -25,6 +34,13 @@ function requireSession(opts = {}) {
       // org binding — session.orgId must match the token's org_id
       if (String(session.orgId ?? '') !== String(claims.org_id ?? '')) {
         return res.status(401).json({ error: { code: 'ORG_BINDING_MISMATCH', message: 'Session/token org mismatch' } });
+      }
+
+      // tenant kill-switch — block even an otherwise-valid session if the org is suspended.
+      // A suspended org is blocked regardless of opts.optional. redis.isOrgSuspended fails open
+      // (treats a Redis outage as "not suspended") so an outage can't lock every tenant out.
+      if (claims.org_id && await redis.isOrgSuspended(claims.org_id)) {
+        return res.status(403).json({ error: { code: 'ORG_SUSPENDED', message: 'Organization is suspended' } });
       }
 
       // fingerprint binding — UA hard (reject in prod), IP soft (warn)

@@ -2,8 +2,9 @@
 
 import React, { useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { formatPrice, COUNTRIES } from '@/lib/mock-data';
+import { BrandImage } from '@/components/ui/BrandImage';
+import { COUNTRIES } from '@/lib/mock-data';
+import { formatProductPrice, normalizeCountry } from '@/lib/i18n/countries';
 import { useProduct } from '@/lib/useCatalog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -88,8 +89,9 @@ export default function PrivateOrderPage() {
             "offers": {
               "@type": "Offer",
               "availability": "https://schema.org/LimitedAvailability",
-              "priceCurrency": COUNTRIES[countryCode]?.currency || "USD",
-              "price": product.basePrice
+              "priceCurrency":
+                product.currencyCode || COUNTRIES[countryCode]?.currency || "USD",
+              "price": product.price ?? product.basePrice
             }
           })
         }}
@@ -97,13 +99,12 @@ export default function PrivateOrderPage() {
 
       {/* Cinematic Hero Header */}
       <section className="relative h-[55vh] w-full flex items-center justify-center overflow-hidden border-b border-border">
-        <Image 
-          src="https://picsum.photos/seed/amarise-private/2560/1440" 
-          alt="Maison Private Salon Exclusive Environment" 
-          fill 
-          className="object-cover opacity-40 grayscale-[50%]" 
+        <BrandImage
+          src="https://picsum.photos/seed/amarise-private/2560/1440"
+          alt="Maison Private Salon Exclusive Environment"
+          className="absolute inset-0"
+          imgClassName="opacity-40 grayscale-[50%]"
           priority
-          data-ai-hint="exclusive interior"
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ivory/20 to-ivory" />
         <div className="relative z-10 text-center space-y-6 px-6">
@@ -125,11 +126,12 @@ export default function PrivateOrderPage() {
           {/* Left Narrative Column */}
           <div className="lg:w-3/5 space-y-16">
             <div className="relative aspect-[4/5] bg-white border border-border shadow-luxury group overflow-hidden">
-              <Image
-                src={product.imageUrl[0]}
+              <BrandImage
+                src={product.imageUrl?.[0]}
                 alt={product.name}
-                fill 
-                className="object-contain p-12 transition-transform duration-[3s] group-hover:scale-105" 
+                label={product.name}
+                className="absolute inset-0"
+                imgClassName="object-contain p-12 transition-transform duration-[3s] group-hover:scale-105"
               />
               <div className="absolute top-8 left-8">
                 <div className="bg-black/90 backdrop-blur-md px-6 py-2 border border-white/10 shadow-2xl">
@@ -172,7 +174,7 @@ export default function PrivateOrderPage() {
               </div>
               <h2 className="text-4xl font-headline font-bold italic text-gray-900 leading-tight">{product.name}</h2>
               <div className="flex items-center space-x-6">
-                <div className="text-5xl font-light tracking-tighter text-gray-900 tabular-nums">{formatPrice(product.basePrice, countryCode)}</div>
+                <div className="text-5xl font-light tracking-tighter text-gray-900 tabular-nums">{formatProductPrice(product, normalizeCountry(countryCode))}</div>
                 <Badge variant="outline" className="text-[8px] uppercase tracking-widest border-plum/20 text-plum px-3 py-1">Inquire Only</Badge>
               </div>
             </div>

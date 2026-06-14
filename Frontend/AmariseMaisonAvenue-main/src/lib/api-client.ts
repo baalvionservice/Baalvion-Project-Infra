@@ -18,10 +18,22 @@ import { getStoreId } from './store-context';
 import { unwrapResponse, ApiEnvelopeError } from './unwrap';
 import { getAccessToken, authClient } from './auth';
 
-// ── Base URLs (gateway namespaces; each service mounts /api/v1) ──────────────
-const COMMERCE_URL  = process.env.NEXT_PUBLIC_COMMERCE_URL  || 'https://api.baalvion.com/api/v1/commerce/commerce/api/v1';
-const ORDER_URL     = process.env.NEXT_PUBLIC_ORDER_URL     || 'https://api.baalvion.com/api/v1/commerce/order/api/v1';
-const INVENTORY_URL = process.env.NEXT_PUBLIC_INVENTORY_URL || 'https://api.baalvion.com/api/v1/commerce/inventory/api/v1';
+// ── Base URLs (each service mounts its routes under /api/v1) ─────────────────
+// IMPORTANT — TWO commerce base URLs, by design:
+//   • NEXT_PUBLIC_COMMERCE_URL      → the PUBLIC storefront base (no auth). Owned by
+//     catalog.ts, which appends `/commerce/storefront/:storeId/...`. Do NOT use it here.
+//   • NEXT_PUBLIC_COMMERCE_API_URL  → the AUTHED/admin commerce base used below for
+//     store-scoped routes (`/commerce/stores/:storeId/...`). Falls back to
+//     NEXT_PUBLIC_COMMERCE_URL so a single local var still works (both point at
+//     `http://localhost:3012/api/v1`), then to the gateway default.
+// Each base already ends at `/api/v1` — route helpers append the service path with no
+// doubled `/commerce/commerce` or `/api/v1...api/v1` segments.
+const COMMERCE_URL  =
+  process.env.NEXT_PUBLIC_COMMERCE_API_URL ||
+  process.env.NEXT_PUBLIC_COMMERCE_URL ||
+  'https://api.baalvion.com/api/v1/commerce';
+const ORDER_URL     = process.env.NEXT_PUBLIC_ORDER_URL     || 'https://api.baalvion.com/api/v1/order';
+const INVENTORY_URL = process.env.NEXT_PUBLIC_INVENTORY_URL || 'https://api.baalvion.com/api/v1/inventory';
 
 // ── Shared Types ─────────────────────────────────────────────────────────────
 
@@ -75,13 +87,34 @@ function authHeaders(): HeadersInit {
   return headers;
 }
 
+// ── Guest cart session (signed X-Cart-Session) ───────────────────────────────
+// order-service binds a guest's cart + order to a server-signed session token (returned by
+// cart-create). Persisted so the same anonymous shopper can create → read → pay for their
+// order without an account. Authenticated callers use the bearer token instead.
+const CART_SESSION_KEY = 'amarise.cartSession';
+export function getCartSessionToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  try { return window.localStorage.getItem(CART_SESSION_KEY); } catch { return null; }
+}
+export function setCartSessionToken(token: string | null): void {
+  if (typeof window === 'undefined') return;
+  try {
+    if (token) window.localStorage.setItem(CART_SESSION_KEY, token);
+    else window.localStorage.removeItem(CART_SESSION_KEY);
+  } catch { /* storage unavailable — guest checkout degrades to a single request */ }
+}
+function sessionHeaders(): Record<string, string> {
+  const t = getCartSessionToken();
+  return t ? { 'X-Cart-Session': t } : {};
+}
+
 // ── Core Fetch Wrapper ─────────────────────────────────────────────────────
 
 async function apiFetch<T>(url: string, options: RequestInit = {}, retry = true): Promise<ApiResult<T>> {
   try {
     const res = await fetch(url, {
       ...options,
-      headers: { ...authHeaders(), ...(options.headers ?? {}) },
+      headers: { ...authHeaders(), ...sessionHeaders(), ...(options.headers ?? {}) },
     });
 
     // Expired access token → one silent cookie refresh, then retry once.
@@ -128,6 +161,8 @@ export interface ProductListItem {
   isVip: boolean;
   rating: number;
   reviewsCount: number;
+  /** Real availability (commerce-service: trackInventory ? stockQuantity>0 : true). Optional for back-compat. */
+  inStock?: boolean;
 }
 
 export interface ProductDetail extends ProductListItem {
@@ -154,6 +189,10 @@ export interface ProductFilters {
   status?: 'draft' | 'published';
   page?: number;
   pageSize?: number;
+  /** Free-text query → commerce-service ILIKE on name/sku (used by searchApi). */
+  search?: string;
+  /** Page size as the backend product-list parser names it (alias of pageSize for search). */
+  limit?: number;
 }
 
 // ── productApi (store-scoped: /commerce/stores/:storeId/products) ────────────
@@ -246,10 +285,10 @@ export const collectionsApi = {
 };
 
 // ── categoriesApi (store-scoped: /commerce/stores/:storeId/categories) ────────
-// TODO(nav): backend categories are available here, but the storefront NAV still reads
-// static category constants from mock-data (not the store). Wiring the nav to this API
-// means editing the navigation components' data source — deferred to avoid a nav redesign.
-// (Backend categories are a parentId tree; building the FE subcategory list is a follow-up.)
+// commerce-service categoryController.list returns the category TREE as a BARE ARRAY via
+// sendSuccess(req,res,tree) — NOT a paginated envelope — so BackendCategory[] is the correct
+// return type (verified against the controller). The storefront category pages resolve their
+// heading from this live taxonomy (see CategoryPageClient) instead of hardcoded slug→label maps.
 export interface BackendCategory {
   id: string;
   name: string;
@@ -321,6 +360,14 @@ export interface OrderLineItem {
   quantity: number;
   unitPrice: number;
   lockId?: string;
+  // Present on order-detail responses (order-service serializes the full item row).
+  // `id` IS the orderItemId required to request a return on this line.
+  id?: string;
+  name?: string;
+  sku?: string;
+  variantName?: string;
+  price?: number;
+  total?: number;
 }
 
 /** Matches order-service createOrderSchema (items-based — there is NO cart→order endpoint;
@@ -345,23 +392,78 @@ export interface CreateOrderPayload {
   shippingAmount?: number;
   discountCode?: string;
   notes?: string;
+  // 5-market context (audit metadata; line money stays server-authoritative).
+  country?: string;
+  market?: string;
+  taxType?: string;
+  taxRate?: number;
+  taxInclusive?: boolean;
   shippingAddress?: Record<string, unknown>;
   billingAddress?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
   idempotencyKey?: string;
 }
 
+/** Settlement gateway slug persisted on the order/payment (C1). The provider stays the existing
+ *  mock in non-production; the selected gateway is still recorded. */
+export type PaymentGatewaySlug = 'stripe' | 'razorpay' | 'payu' | 'bank';
+
+export interface PaymentIntent {
+  intentId: string;
+  status: string;
+  /** Present for gateway providers (Razorpay) — the client opens the provider checkout with these.
+   *  Absent for the mock provider, which is the branch signal to auto-confirm server-side. */
+  keyId?: string;
+  amount?: number;   // minor units (paise) from the provider
+  currency?: string;
+}
+/** Razorpay Checkout handler result, verified SERVER-SIDE (HMAC) on confirm. */
+export interface RazorpayVerification {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
+/** Mirrors order-service's raw model.toJSON() (orders_orders). Money lives in `totalAmount`
+ *  (currency `currencyCode`); ownership is `customerId` → customer.userId (no top-level userId).
+ *  paymentStatus is the full backend enum. `total`/`currency` are NOT returned by the backend. */
+export type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'processing'
+  | 'shipped'
+  | 'delivered'
+  | 'cancelled'
+  | 'refunded';
+
+export type OrderPaymentStatus =
+  | 'pending'
+  | 'authorized'
+  | 'paid'
+  | 'partially_paid'
+  | 'refunded'
+  | 'voided'
+  | 'failed';
+
 export interface Order {
   id: string;
-  userId: string;
+  orderNumber?: string;
+  customerId?: string | null;
   items: OrderLineItem[];
-  currency: string;
-  country: string;
+  currencyCode: string;
+  country?: string;
+  /** Persisted market column (us|uk|ae|in|sg) — group/report by this, not shipping country. */
+  market?: string;
   subtotal: number;
   taxAmount: number;
-  total: number;
-  status: 'pending' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'refunded';
-  paymentStatus: 'unpaid' | 'pending' | 'paid' | 'failed' | 'refunded';
+  taxInclusive?: boolean;
+  discountAmount?: number;
+  shippingAmount?: number;
+  totalAmount: number;
+  status: OrderStatus;
+  paymentStatus: OrderPaymentStatus;
+  /** Recorded settlement gateway (C1) — present once a payment intent/confirm carries one. */
+  gateway?: PaymentGatewaySlug | string | null;
   createdAt: string;
   updatedAt: string;
   shippingAddress?: Record<string, string>;
@@ -372,6 +474,28 @@ export interface OrderFilters {
   status?: Order['status'];
   page?: number;
   pageSize?: number;
+}
+
+// ── Shipment / tracking (order-service orders_shipments) ──────────────────────
+export interface ShipmentEvent {
+  status: string;
+  message?: string | null;
+  location?: string | null;
+  at: string;
+}
+export interface Shipment {
+  id: string;
+  orderId: string;
+  status: 'pending' | 'in_transit' | 'out_for_delivery' | 'delivered' | 'failed' | 'returned';
+  carrier?: string | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  shippedAt?: string | null;
+  deliveredAt?: string | null;
+  estimatedDelivery?: string | null;
+  events: ShipmentEvent[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 // ── orderApi (store-scoped: /orders/stores/:storeId/orders) ──────────────────
@@ -392,6 +516,39 @@ export const orderApi = {
     return apiFetch<Order>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}`);
   },
 
+  // Payment: create a provider intent, then confirm it (backend-authoritative capture —
+  // a client can never mark itself paid). Mock provider in non-prod; real adapters when configured.
+  // `gateway` (stripe|razorpay|payu|bank) is persisted on the order/payment per C1 — non-prod stays
+  // mocked but records the choice.
+  createPaymentIntent(orderId: string, gateway?: PaymentGatewaySlug): Promise<ApiResult<PaymentIntent>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<PaymentIntent>();
+    return apiFetch<PaymentIntent>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}/payments/intent`, {
+      method: 'POST',
+      body: JSON.stringify(gateway ? { gateway } : {}),
+    });
+  },
+
+  // For the mock provider, send only { intentId } (server captures). For Razorpay, pass the
+  // Checkout handler result as `verification` — the server verifies the HMAC signature before capture.
+  // C1: confirmPayment returns the FULL updated Order (top-level id + paymentStatus). A confirmation
+  // is PAID iff response.paymentStatus === 'paid' — there is NO 'captured' field or separate envelope.
+  confirmPayment(
+    orderId: string,
+    intentId: string,
+    opts: { verification?: RazorpayVerification; gateway?: PaymentGatewaySlug } = {},
+  ): Promise<ApiResult<Order>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<Order>();
+    const body: Record<string, unknown> = { intentId };
+    if (opts.verification) body.verification = opts.verification;
+    if (opts.gateway) body.gateway = opts.gateway;
+    return apiFetch<Order>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}/payments/confirm`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
+
   list(filters: OrderFilters = {}): Promise<ApiResult<PaginatedResponse<Order>>> {
     const storeId = getStoreId();
     if (!storeId) return missingStore<PaginatedResponse<Order>>();
@@ -401,6 +558,27 @@ export const orderApi = {
     });
     const qs = params.toString();
     return apiFetch<PaginatedResponse<Order>>(`${ORDER_URL}/orders/stores/${storeId}/orders${qs ? `?${qs}` : ''}`);
+  },
+
+  // Customer-facing: the authenticated shopper's OWN orders (order-service GET /orders/mine).
+  // Unlike list() (store-admin scoped), this requires only a logged-in user.
+  mine(filters: { page?: number; pageSize?: number } = {}): Promise<ApiResult<PaginatedResponse<Order>>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<PaginatedResponse<Order>>();
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v !== undefined) params.set(k, String(v));
+    });
+    const qs = params.toString();
+    return apiFetch<PaginatedResponse<Order>>(`${ORDER_URL}/orders/stores/${storeId}/orders/mine${qs ? `?${qs}` : ''}`);
+  },
+
+  // Customer-readable shipment/tracking timeline for one of the shopper's orders.
+  // Ownership is enforced server-side (owner OR guest-session OR staff) — never trust the client.
+  shipments(orderId: string): Promise<ApiResult<Shipment[]>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<Shipment[]>();
+    return apiFetch<Shipment[]>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}/shipments`);
   },
 
   cancel(orderId: string, reason?: string): Promise<ApiResult<Order>> {
@@ -414,6 +592,175 @@ export const orderApi = {
 
   getByUser(userId: string, page = 1, pageSize = 20): Promise<ApiResult<PaginatedResponse<Order>>> {
     return orderApi.list({ userId, page, pageSize });
+  },
+};
+
+// ── Customer ─────────────────────────────────────────────────────────────────
+
+export interface Customer {
+  id: string;
+  userId?: number | null;
+  storeId: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+}
+
+// customerApi (store-scoped: /orders/stores/:storeId/customers)
+export const customerApi = {
+  /**
+   * Find-or-create the AUTHENTICATED caller's customer record. The backend upsert is
+   * idempotent by (store, email) and stamps `userId` SERVER-SIDE from the bearer token
+   * (never trusted from the client). Returns the canonical customer — its UUID `id` is
+   * what links an order to the shopper (so it surfaces in GET /orders/mine).
+   */
+  ensure(input: { email: string; firstName: string; lastName: string; phone?: string }): Promise<ApiResult<Customer>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<Customer>();
+    return apiFetch<Customer>(`${ORDER_URL}/orders/stores/${storeId}/customers`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    });
+  },
+};
+
+// ── Saved addresses (order-service orders_addresses, /me self-resolved) ───────
+// Every route resolves the customer SERVER-SIDE from the bearer token — the client
+// never supplies a customerId, so there is no IDOR surface.
+export interface SavedAddress {
+  id: string;
+  addressType: 'shipping' | 'billing' | 'both';
+  firstName: string;
+  lastName: string;
+  company?: string | null;
+  address1: string;
+  address2?: string | null;
+  city: string;
+  state?: string | null;
+  zip?: string | null;
+  countryCode: string;
+  phone?: string | null;
+  isDefault: boolean;
+}
+export type AddressInput = Omit<SavedAddress, 'id' | 'isDefault'> & { isDefault?: boolean };
+
+export const addressApi = {
+  listMine(): Promise<ApiResult<SavedAddress[]>> {
+    const s = getStoreId();
+    if (!s) return missingStore<SavedAddress[]>();
+    return apiFetch<SavedAddress[]>(`${ORDER_URL}/orders/stores/${s}/customers/me/addresses`);
+  },
+  create(body: AddressInput): Promise<ApiResult<SavedAddress>> {
+    const s = getStoreId();
+    if (!s) return missingStore<SavedAddress>();
+    return apiFetch<SavedAddress>(`${ORDER_URL}/orders/stores/${s}/customers/me/addresses`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
+  update(id: string, body: Partial<AddressInput>): Promise<ApiResult<SavedAddress>> {
+    const s = getStoreId();
+    if (!s) return missingStore<SavedAddress>();
+    return apiFetch<SavedAddress>(`${ORDER_URL}/orders/stores/${s}/customers/me/addresses/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
+  },
+  remove(id: string): Promise<ApiResult<null>> {
+    const s = getStoreId();
+    if (!s) return missingStore<null>();
+    return apiFetch<null>(`${ORDER_URL}/orders/stores/${s}/customers/me/addresses/${id}`, { method: 'DELETE' });
+  },
+};
+
+// ── Returns / RMA (order-service orders_returns) ──────────────────────────────
+export interface ReturnItemInput {
+  orderItemId: string;
+  quantity: number;
+  reason?: string;
+  condition?: 'new' | 'like_new' | 'good' | 'fair' | 'poor';
+}
+export interface CreateReturnPayload {
+  orderId: string;
+  reason: string;
+  notes?: string;
+  items: ReturnItemInput[];
+}
+export interface ReturnRecordItem {
+  id: string;
+  orderItemId: string;
+  quantity: number;
+  reason?: string | null;
+  condition: string;
+  refundAmount: string | number;
+}
+export interface ReturnRecord {
+  id: string;
+  orderId: string;
+  returnNumber: string;
+  status: 'requested' | 'approved' | 'rejected' | 'received' | 'refunded' | 'closed';
+  reason: string;
+  notes?: string | null;
+  totalRefund: string | number;
+  refundMethod?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  items?: ReturnRecordItem[];
+}
+
+export const returnApi = {
+  // The authenticated shopper requests a return on an order they own (server-enforced ownership;
+  // only delivered/shipped orders are eligible).
+  create(payload: CreateReturnPayload): Promise<ApiResult<ReturnRecord>> {
+    const s = getStoreId();
+    if (!s) return missingStore<ReturnRecord>();
+    return apiFetch<ReturnRecord>(`${ORDER_URL}/orders/stores/${s}/returns`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+  // The shopper's OWN returns (scoped to their customer ids by userId — never store-wide).
+  mine(filters: { page?: number; pageSize?: number; status?: ReturnRecord['status'] } = {}): Promise<ApiResult<PaginatedResponse<ReturnRecord>>> {
+    const s = getStoreId();
+    if (!s) return missingStore<PaginatedResponse<ReturnRecord>>();
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => { if (v !== undefined) params.set(k, String(v)); });
+    const qs = params.toString();
+    return apiFetch<PaginatedResponse<ReturnRecord>>(`${ORDER_URL}/orders/stores/${s}/returns/mine${qs ? `?${qs}` : ''}`);
+  },
+};
+
+// ── Product reviews (commerce-service; authed write — public read is in catalog.ts) ──
+export interface ProductReview {
+  id: string;
+  rating: number;
+  title?: string | null;
+  body?: string | null;
+  author: string;
+  isVerifiedPurchase: boolean;
+  status?: 'pending' | 'approved' | 'rejected';
+  createdAt: string;
+  reply?: string | null;
+  replyAt?: string | null;
+}
+
+export const reviewApi = {
+  // Submit (or update) the signed-in shopper's review for a product. `isVerifiedPurchase`
+  // is computed server-side against paid orders — never sent by the client.
+  submit(productId: string, body: { rating: number; title?: string; body?: string }): Promise<ApiResult<ProductReview>> {
+    const s = getStoreId();
+    if (!s) return missingStore<ProductReview>();
+    return apiFetch<ProductReview>(`${COMMERCE_URL}/commerce/stores/${s}/products/${productId}/reviews`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
+  // The caller's existing review for a product (for prefill/edit), or null.
+  mine(productId: string): Promise<ApiResult<ProductReview | null>> {
+    const s = getStoreId();
+    if (!s) return missingStore<ProductReview | null>();
+    return apiFetch<ProductReview | null>(`${COMMERCE_URL}/commerce/stores/${s}/products/${productId}/reviews/mine`);
   },
 };
 
@@ -435,6 +782,8 @@ export interface Cart {
   subtotal: number;
   currency: string;
   updatedAt: string;
+  /** Signed guest session returned by cart-create (only for anonymous shoppers). */
+  sessionToken?: string;
 }
 
 // ── cartApi (store-scoped, CART-ID keyed: /orders/stores/:storeId/carts) ──────
@@ -445,13 +794,16 @@ export interface CreateCartPayload { currencyCode?: string; customerId?: string;
 export interface CartItemInput { productId: string; variantId: string; quantity: number; }
 
 export const cartApi = {
-  create(payload: CreateCartPayload = {}): Promise<ApiResult<Cart>> {
+  async create(payload: CreateCartPayload = {}): Promise<ApiResult<Cart>> {
     const storeId = getStoreId();
     if (!storeId) return missingStore<Cart>();
-    return apiFetch<Cart>(`${ORDER_URL}/orders/stores/${storeId}/carts`, {
+    const res = await apiFetch<Cart>(`${ORDER_URL}/orders/stores/${storeId}/carts`, {
       method: 'POST',
       body: JSON.stringify({ currencyCode: 'USD', ...payload }),
     });
+    // Persist the signed guest session so subsequent order/payment calls are recognised as the owner.
+    if (res.ok && res.data?.sessionToken) setCartSessionToken(res.data.sessionToken);
+    return res;
   },
 
   get(cartId: string): Promise<ApiResult<Cart>> {
@@ -516,13 +868,13 @@ export interface SearchPayload {
 // ── searchApi — backed by commerce-service product listing (?search= ILIKE on name/sku) ──────
 export const searchApi = {
   async semantic(payload: SearchPayload): Promise<ApiResult<SearchResult>> {
-    const filters = {
+    const filters: ProductFilters = {
       ...(payload.filters || {}),
       search: payload.query,
       status: 'published',
       ...(payload.page ? { page: payload.page } : {}),
       ...(payload.pageSize ? { limit: payload.pageSize } : {}),
-    } as unknown as ProductFilters;
+    };
     const res = await productApi.list(filters);
     if (!res.ok) return res as ApiResult<SearchResult>;
     const products = res.data.items || [];
@@ -538,7 +890,7 @@ export const searchApi = {
   },
   async autocomplete(query: string): Promise<ApiResult<string[]>> {
     if (!query.trim()) return { ok: true, data: [] };
-    const res = await productApi.list({ search: query, status: 'published', limit: 8 } as unknown as ProductFilters);
+    const res = await productApi.list({ search: query, status: 'published', limit: 8 });
     if (!res.ok) return res as ApiResult<string[]>;
     return { ok: true, data: (res.data.items || []).map((p) => p.name).filter(Boolean).slice(0, 8) };
   },

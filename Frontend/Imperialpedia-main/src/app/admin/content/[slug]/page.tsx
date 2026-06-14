@@ -46,11 +46,9 @@ export default function PageContentManager() {
 
   useEffect(() => {
     const slug = params.slug as string;
-    console.log("Slug from params:", slug);
 
     // Get page info
     const page = adminKernel.getPageBySlug(slug);
-    console.log("Found page:", page);
 
     if (!page) {
       toast({
@@ -66,7 +64,6 @@ export default function PageContentManager() {
 
     // Get articles for this page
     const pageArticles = adminKernel.getArticlesByPageSlug(slug);
-    console.log("Found articles:", pageArticles);
     setArticles(pageArticles);
     setLoading(false);
   }, [params.slug, router]);
@@ -259,7 +256,7 @@ export default function PageContentManager() {
                           className="h-8 w-8 rounded-lg hover:text-primary"
                           asChild
                         >
-                          <Link href={`/${article.slug}`} target="_blank">
+                          <Link href={`/${article.slug}`} target="_blank" rel="noopener noreferrer">
                             <Eye className="h-3.5 w-3.5" />
                           </Link>
                         </Button>

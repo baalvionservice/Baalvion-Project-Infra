@@ -14,15 +14,20 @@ const { parsePagination, buildPaginated } = require('../utils/pagination');
 const TRANSITIONS = {
     submit_for_review:  { from: ['draft', 'changes_requested'],          to: 'pending_review',      requiredLevel: 20 },
     approve:            { from: ['pending_review'],                       to: 'approved',             requiredLevel: 60 },
-    request_changes:    { from: ['pending_review', 'approved'],           to: 'changes_requested',    requiredLevel: 60, requiresNote: true },
+    request_changes:    { from: ['pending_review', 'approved', 'compliance_review'], to: 'changes_requested', requiredLevel: 60, requiresNote: true },
+    // Compliance gate (regulated content e.g. IR): a Reviewer routes an approved item to
+    // Compliance, who signs off (→approved, publishable) or rejects (→changes_requested).
+    submit_for_compliance: { from: ['approved', 'pending_review'],        to: 'compliance_review',    requiredLevel: 60 },
+    compliance_approve: { from: ['compliance_review'],                    to: 'approved',             requiredLevel: 65 },
+    compliance_reject:  { from: ['compliance_review'],                    to: 'changes_requested',    requiredLevel: 65, requiresNote: true },
     publish:            { from: ['approved', 'draft'],                    to: 'published',            requiredLevel: 70 },
     schedule:           { from: ['approved'],                             to: 'scheduled',            requiredLevel: 70, requiresScheduledAt: true },
     unpublish:          { from: ['published'],                            to: 'draft',                requiredLevel: 70 },
-    archive:            { from: ['published', 'draft', 'changes_requested', 'approved', 'scheduled'], to: 'archived', requiredLevel: 80 },
+    archive:            { from: ['published', 'draft', 'changes_requested', 'approved', 'scheduled', 'compliance_review'], to: 'archived', requiredLevel: 80 },
     restore_to_draft:   { from: ['archived', 'changes_requested'],       to: 'draft',                requiredLevel: 40 },
 };
 
-const CMS_ROLE_LEVEL = { cms_admin: 100, cms_editor: 80, cms_publisher: 70, cms_reviewer: 60, cms_seo_manager: 50, cms_author: 40, cms_contributor: 20, cms_viewer: 10 };
+const CMS_ROLE_LEVEL = { cms_admin: 100, cms_editor: 80, cms_publisher: 70, cms_compliance: 65, cms_reviewer: 60, cms_seo_manager: 50, cms_author: 40, cms_contributor: 20, cms_viewer: 10 };
 
 function resolveLevel(req) {
     // Platform admins bypass — assigned max level
@@ -95,8 +100,13 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
         const eventType = action === 'publish' ? CmsEvents.CONTENT_PUBLISHED : CmsEvents.CONTENT_UNPUBLISHED;
         const content = result.content;
         void (async () => {
-            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug'] });
+            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
             const websiteSlug = website ? website.slug : null;
+            // Bust the public delivery cache so published edits appear immediately on the
+            // live site instead of waiting out the 10-minute public TTL.
+            if (websiteSlug) {
+                try { await cache.delPattern(`cms:public:${websiteSlug}:*`); } catch { /* fail-open */ }
+            }
             emitSafe(eventType, {
                 websiteId,
                 websiteSlug,
@@ -106,6 +116,10 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
                 state: result.workflow.currentState,
                 action,
             }, { tenantId: websiteSlug });
+            // SEO indexing trigger: notify search engines immediately on publish.
+            if (action === 'publish') {
+                try { require('./seoPingService').pingForWebsite(website); } catch { /* fail-open */ }
+            }
         })().catch((err) => {
             // Event emission must never affect the request, but a dropped event
             // (e.g. the slug lookup hit a DB error) should still be observable.

@@ -35,3 +35,20 @@ GRANT ALL PRIVILEGES ON DATABASE baalvion_db TO baalvion;
 
 -- Set search path
 ALTER ROLE baalvion SET search_path TO public, auth, jobs, mining, imperialpedia, real_estate, brand, market, ir, dashboard, about, cms, commerce, orders, inventory, fulfillment;
+
+-- ── 'postgres' role for the financial-services-java stack ─────────────────────
+-- The financial services (ledger, payments, accounts, escrow, settlement,
+-- reconciliation, audit, reporting, risk, …) run on this single shared database now
+-- that their bundled postgres:16 has been removed. Their Flyway migrations do
+-- `ALTER SCHEMA <svc> OWNER TO postgres`, but this DB's superuser is `baalvion` and
+-- there is no `postgres` role by default. Create it (idempotent, NOLOGIN) so those
+-- migrations succeed; `baalvion` (superuser) can reassign schema ownership to it and
+-- still has full access at runtime. This runs only on a fresh volume — for an existing
+-- baalvion-postgres volume, run the same statement once via docker exec (see RUN_LOCAL.md).
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'postgres') THEN
+    CREATE ROLE postgres;
+  END IF;
+END
+$$;

@@ -165,11 +165,16 @@ async function issueTokens({ userId, orgId, clientId, scopes, nonce }) {
 async function introspectToken(token) {
     try {
         const decoded = verifyToken(token);
-        // Check JTI blacklist
-        const r = redis.getClient();
-        if (decoded.jti && r && redis.isAvailable()) {
-            const revoked = await r.get(`auth:bl:${decoded.jti}`);
-            if (revoked) return { active: false };
+        // Canonical JTI revocation namespace (auth:blacklist:<jti>, see @baalvion/auth-node).
+        // Fail CLOSED: if the revocation store is unreachable, report the token inactive rather
+        // than active — a revoked token must never introspect as active.
+        if (decoded.jti) {
+            try {
+                const r = redis.getClient();
+                if (!r || !redis.isAvailable()) throw new Error('revocation store unavailable');
+                const revoked = await r.get(`auth:blacklist:${decoded.jti}`);
+                if (revoked) return { active: false };
+            } catch { return { active: false }; }
         }
         return {
             active:     true,
@@ -211,7 +216,7 @@ async function revokeToken(token, tokenTypeHint) {
             const r = redis.getClient();
             if (r && redis.isAvailable()) {
                 const ttl = decoded.exp - Math.floor(Date.now() / 1000);
-                if (ttl > 0) await r.set(`auth:bl:${decoded.jti}`, '1', 'EX', ttl);
+                if (ttl > 0) await r.set(`auth:blacklist:${decoded.jti}`, '1', 'EX', ttl);
             }
         }
     } catch { /* ignore */ }
@@ -262,7 +267,7 @@ function buildDiscoveryDocument() {
         scopes_supported:                      config.oauth.supportedScopes,
         token_endpoint_auth_methods_supported: ['client_secret_basic', 'client_secret_post', 'none'],
         claims_supported:                      ['sub', 'email', 'email_verified', 'name', 'picture'],
-        code_challenge_methods_supported:      ['S256', 'plain'],
+        code_challenge_methods_supported:      ['S256'],
     };
 }
 

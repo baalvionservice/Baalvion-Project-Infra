@@ -1,0 +1,12 @@
+# Documentation Rules
+
+Do not index or summarize all documentation.
+
+Open only documents directly relevant to the current task.
+
+Prefer:
+- ADRs
+- Architecture docs
+- Runbooks
+
+Ignore historical planning and launch-readiness documents unless requested.

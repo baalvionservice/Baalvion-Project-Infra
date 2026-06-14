@@ -1,0 +1,98 @@
+{
+  "slug": "custom-software-vs-saas",
+  "title": "Custom Software vs SaaS: A Decision Framework",
+  "kind": "article",
+  "category": "insights",
+  "seo": {
+    "title": "Custom Software vs SaaS: A Decision Framework | Baalvion",
+    "description": "A build-vs-buy decision framework weighing cost, control, time-to-value, and lock-in, with a decision matrix from the team behind the Baalvion Operating System.",
+    "keywords": [
+      "custom software vs saas",
+      "build vs buy",
+      "decision framework",
+      "total cost of ownership",
+      "vendor lock-in",
+      "time to value",
+      "enterprise software strategy",
+      "core differentiator",
+      "saas evaluation",
+      "platform engineering"
+    ]
+  },
+  "author": "Baalvion Strategy",
+  "readTime": "9 min read",
+  "heroImageSeed": "buildbuy-bos-matrix",
+  "excerpt": "Build-vs-buy is not a religious war, it is a portfolio decision. Here is the framework Baalvion uses to weigh cost, control, time-to-value, and lock-in, with a decision matrix you can apply per capability.",
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Build vs buy is a portfolio decision, not a doctrine" },
+    { "type": "paragraph", "text": "Most build-vs-buy debates go wrong in the first sentence, because they are framed as a single company-wide verdict: \"we are a build shop\" or \"we buy everything off the shelf.\" Neither posture survives contact with reality. The right unit of analysis is the individual capability, not the organisation. Baalvion runs the [Baalvion Operating System](/platform) — a multi-tenant fabric connecting commerce, finance, compliance, logistics, and intelligence across 198 markets and 180+ jurisdictions — and even at that scale the decision is made capability by capability. We built our own cross-border ledger and settlement engine because it is a core differentiator; we buy our email delivery, our observability backend, and our identity provider's lower layers because reinventing them would be value-destroying." },
+    { "type": "paragraph", "text": "So the first reframe is this: stop asking \"should we build or buy?\" and start asking \"for this specific capability, what does building or buying cost us across its full lifetime, and which option protects the things we cannot afford to outsource?\" That question has a structured answer. The rest of this article lays out the five dimensions that actually move the decision — cost, control, time-to-value, lock-in, and strategic fit — and ends with a decision matrix you can apply to any capability on your roadmap." },
+    { "type": "heading", "level": 2, "text": "Dimension one: total cost of ownership, not sticker price" },
+    { "type": "paragraph", "text": "The most common costing error is comparing a SaaS subscription against a developer's salary for the build sprint. That comparison is wrong on both sides. SaaS has costs beyond the line-item subscription: per-seat or per-transaction pricing that scales non-linearly with success, integration and data-migration effort, the engineering time to operate around the product's limitations, and the eventual cost of egress if you ever leave. Custom software has costs far beyond the initial build: ongoing maintenance, security patching, on-call burden, dependency upgrades, and the opportunity cost of the engineers who now own it forever rather than working on something new." },
+    { "type": "paragraph", "text": "A useful discipline is to model total cost of ownership over a three-to-five year horizon for both options, including a deliberately pessimistic operating cost for the build path. As a rule of thumb, the initial build is often the smallest fraction of lifetime cost — maintenance and operation routinely dwarf it. SaaS converts a large, uncertain capital and operating commitment into a predictable operating expense, which is genuinely valuable for capabilities that are not differentiating. The honest version of the cost question is therefore: \"buy is usually cheaper for commodity capabilities, and build only wins on cost when the commodity option forces you into pricing or scale economics that punish your specific usage pattern.\"" },
+    { "type": "list", "ordered": false, "items": [
+      "SaaS hidden costs: usage-based pricing at scale, integration glue, data egress, and engineering effort spent working around feature gaps.",
+      "Build hidden costs: perpetual maintenance, security and compliance upkeep, on-call ownership, and the opportunity cost of tied-up engineers.",
+      "Model both over 3–5 years; the initial build is usually the cheapest part of a custom system's life.",
+      "Be honest that buy normally wins on cost for commodity capabilities — build is justified by differentiation, not by spreadsheet savings alone."
+    ] },
+    { "type": "heading", "level": 2, "text": "Dimension two: control and the core-versus-context test" },
+    { "type": "paragraph", "text": "Geoffrey Moore's core-versus-context distinction is the single most useful lens here. Core activities are the things that differentiate you — the capabilities customers pay you for and competitors cannot easily copy. Context activities are everything else that has to work but creates no competitive separation. The strategic rule is blunt: own your core, outsource your context. You build custom software for the parts of the value chain where control is the point, and you buy for the parts where control is overhead." },
+    { "type": "paragraph", "text": "For Baalvion, compliance scoring is core — it is why we built an [AI compliance scoring platform](/case-studies/ai-compliance-scoring-platform) rather than wiring together a third-party rules engine, because the scoring logic, the auditability, and the ability to evolve it under 180+ jurisdictions is the differentiator itself. Our customs automation is core for the same reason, which is why we built [automated customs clearance](/case-studies/automated-customs-clearance) end to end. But our help-desk ticketing, our marketing analytics, and our internal CRM are context: we buy them, and we would consider it a failure of focus to have a team maintaining a bespoke ticketing system. Control matters most where it protects a differentiator or a regulatory obligation you must be able to defend in an audit; everywhere else, control is a liability you are paying to carry." },
+    { "type": "heading", "level": 2, "text": "Dimension three: time-to-value and the cost of waiting" },
+    { "type": "paragraph", "text": "Time-to-value is where SaaS is structurally advantaged and where build is structurally penalised, and it is the dimension teams most often underweight. A SaaS product can be live in days; a custom build of equivalent capability is measured in quarters. When you are validating a hypothesis, entering a market, or racing a competitor, the discounted value of being live now versus in nine months frequently dominates every other factor. We have repeatedly bought a SaaS tool to establish a capability fast, learned exactly what we needed from operating it, and only then decided whether the eventual custom version was justified." },
+    { "type": "paragraph", "text": "This points to a powerful third path that the binary framing hides: buy first, build later. Treat SaaS as a way to de-risk the build decision. You get to market quickly, you learn the real requirements from production usage rather than from a requirements document written in ignorance, and you defer the irreversible commitment of a custom system until you have evidence. The mirror-image risk is real too — a too-early build locks you into a v1 design before you understand the problem — so the question is not only \"can we build it?\" but \"do we yet know enough to build the right thing?\" Often the answer is no, and the disciplined move is to buy, learn, and revisit." },
+    { "type": "heading", "level": 2, "text": "Dimension four: lock-in cuts both ways" },
+    { "type": "paragraph", "text": "Lock-in is the dimension most likely to be discussed emotionally and analysed poorly. SaaS lock-in is real: proprietary data formats, APIs you have built dependencies against, pricing power the vendor accrues once you cannot easily leave, and the existential risk of the vendor being acquired, pivoting, or sunsetting the product. These are genuine, and the mitigation is to evaluate exit cost before you sign — can you export your data in an open format, are the integration points behind an abstraction you own, and how concentrated is your dependency on this single vendor?" },
+    { "type": "paragraph", "text": "But custom software has its own lock-in, and it is frequently worse precisely because it is invisible. A bespoke system locks you into the team that built it, the architectural decisions they made years ago, the framework that is now two major versions behind, and the institutional knowledge that walks out the door when a key engineer leaves. \"We built it ourselves so we control it\" is only true while the people who understand it remain and the dependencies stay maintained. The mature position treats both as forms of dependency to be managed deliberately: for SaaS, you own the abstraction layer and the exit plan; for custom, you own the documentation, the tests, and the bus-factor. We design our own systems behind clean internal interfaces for exactly this reason, the same [API-first architecture](/news/tech/api-first-architecture) discipline that lets us swap an implementation without rewriting its consumers." },
+    { "type": "heading", "level": 2, "text": "The decision matrix" },
+    { "type": "paragraph", "text": "Pull the dimensions together into a scoring exercise applied per capability. Score each capability on the criteria below, weighted to your context, and let the pattern of scores — not a single gut call — drive the verdict. The matrix is not an oracle; its value is forcing an explicit, defensible answer to each question rather than letting the loudest opinion in the room win." },
+    { "type": "list", "ordered": true, "items": [
+      "Differentiation: Is this core (a reason customers choose us) or context (necessary plumbing)? Core leans build; context leans buy.",
+      "Total cost of ownership over 3–5 years: which option is genuinely cheaper once maintenance, operation, and scaling are modelled honestly?",
+      "Time-to-value: how much does it cost us to wait quarters for a build instead of going live in days? High urgency leans buy.",
+      "Fit: does an existing product meet 80%+ of requirements without contorting our process around it? Good fit leans buy; poor fit erodes buy's advantage.",
+      "Lock-in and exit: for buy, what is the data-export and switching cost; for build, what is the bus-factor and maintenance burden?",
+      "Regulatory and control needs: does compliance, auditability, or data sovereignty demand ownership we cannot delegate? If yes, build weight rises."
+    ] },
+    { "type": "paragraph", "text": "Three patterns emerge reliably. When a capability is context, has good off-the-shelf fit, and is needed soon, buy — and do not let engineering pride relitigate it. When a capability is core, differentiating, and no product fits without you reshaping your business to match someone else's model, build, and resource it as a long-lived owned asset. When a capability is plausibly core but the requirements are still uncertain, buy first to learn, then build deliberately once you have earned the knowledge to build the right thing. The fourth pattern — extending or integrating a commercial platform rather than fully building or fully buying — is increasingly the pragmatic middle, and it is where most real architectures end up." },
+    { "type": "heading", "level": 2, "text": "How Baalvion applies this in practice" },
+    { "type": "paragraph", "text": "We are, structurally, a build company — the [Baalvion Operating System](/platform) exists because no off-the-shelf product unifies commerce, finance, compliance, logistics, and intelligence into one auditable multi-tenant platform spanning 180+ jurisdictions. That is the clearest possible \"build\" verdict: it is our entire differentiator, no product fits, and the regulatory and control requirements are non-negotiable. But the same discipline tells us to buy aggressively everywhere that capability is context, so our engineers spend their finite attention on the trade ledger, the compliance engine, and the settlement rails rather than on yet another bespoke version of a solved problem." },
+    { "type": "paragraph", "text": "When we build [custom software](/services/custom-software-development) for clients, the first deliverable is rarely code — it is this decision applied honestly to their roadmap, capability by capability. Frequently the most valuable thing we tell a client is that a chunk of their proposed build should be bought, so that the budget concentrates on the two or three capabilities that genuinely differentiate them. That advice is consistent with how we think about [enterprise software](/services/enterprise-software) generally: the goal is not maximal custom code, it is maximal leverage on the things that matter and minimal ownership of the things that do not. Build-vs-buy done well is ultimately a focus mechanism — it is how you decide where your scarce engineering capacity earns its keep." }
+  ],
+  "faqs": [
+    {
+      "q": "Should build-vs-buy be decided once for the whole company?",
+      "a": "No. The right unit of decision is the individual capability, not the organisation. Even a company that builds a major platform should buy commodity capabilities like email delivery, observability, and ticketing. Apply the framework per capability and expect a mix of build, buy, and integrate verdicts across your roadmap."
+    },
+    {
+      "q": "Is custom software always more expensive than SaaS?",
+      "a": "For commodity capabilities, buying is usually cheaper once you model total cost of ownership over three to five years, because maintenance, security upkeep, and on-call ownership dwarf the initial build. Custom wins on cost only when a product's pricing or scale economics punish your specific usage pattern, or when differentiation justifies the spend regardless of the spreadsheet."
+    },
+    {
+      "q": "How do I tell whether a capability is core or context?",
+      "a": "Core capabilities differentiate you — they are reasons customers choose you that competitors cannot easily copy. Context capabilities must work but create no competitive separation. Own your core and outsource your context. Compliance scoring is core for Baalvion; help-desk ticketing is context, so we built the former and buy the latter."
+    },
+    {
+      "q": "Isn't building in-house the safest way to avoid lock-in?",
+      "a": "Not necessarily. Custom software has its own lock-in — to the team that built it, the architecture chosen years ago, aging frameworks, and institutional knowledge that leaves with key engineers. SaaS lock-in is data and API dependency. Both are dependencies to manage: own your exit plan and abstraction layer for SaaS, and your documentation, tests, and bus-factor for custom."
+    },
+    {
+      "q": "What is the 'buy first, build later' approach?",
+      "a": "It treats SaaS as a way to de-risk a build decision. You go live in days, learn the real requirements from production usage rather than a speculative spec, and defer the irreversible commitment of a custom system until you have evidence. It is the disciplined move when a capability is plausibly core but you do not yet know enough to build the right thing."
+    },
+    {
+      "q": "What if no SaaS product fits and a full custom build is too slow?",
+      "a": "That middle ground — extending, configuring, or integrating a commercial platform rather than fully building or fully buying — is where most real enterprise architectures land. The decision matrix still applies: keep custom code on the differentiating seams and lean on the bought platform for the commodity scaffolding around them."
+    }
+  ],
+  "internalLinks": [
+    { "anchor": "Baalvion Operating System", "href": "/platform" },
+    { "anchor": "AI compliance scoring platform", "href": "/case-studies/ai-compliance-scoring-platform" },
+    { "anchor": "automated customs clearance", "href": "/case-studies/automated-customs-clearance" },
+    { "anchor": "API-first architecture", "href": "/news/tech/api-first-architecture" },
+    { "anchor": "custom software", "href": "/services/custom-software-development" },
+    { "anchor": "enterprise software", "href": "/services/enterprise-software" }
+  ],
+  "customFields": {}
+}

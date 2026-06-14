@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, usePathname } from "next/navigation";
 import {
   Search,
   ShoppingBag,
@@ -12,8 +12,13 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { COUNTRIES } from "@/lib/mock-data";
+import {
+  normalizeCountry,
+  getCountryConfig,
+  SUPPORTED_COUNTRIES,
+} from "@/lib/i18n/countries";
 import { useAppStore } from "@/lib/store";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -28,7 +33,7 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import { BrandImage } from "@/components/ui/BrandImage";
 import placeholderData from "@/app/lib/placeholder-images.json";
 
 interface NavLink {
@@ -36,13 +41,6 @@ interface NavLink {
   href: string;
   id: string;
 }
-
-const CURRENCIES = [
-  { code: "USD", label: "USD", flag: "🇺🇸" },
-  { code: "EUR", label: "EUR", flag: "🇪🇺" },
-  { code: "GBP", label: "GBP", flag: "🇬🇧" },
-  { code: "CHF", label: "CHF", flag: "🇨🇭" },
-];
 
 const MEGA_MENU_DATA: Record<string, any> = {
   new: {
@@ -244,11 +242,11 @@ export const Header = () => {
   const [mounted, setMounted] = useState(false);
   const params = useParams();
   const router = useRouter();
+  const pathname = usePathname();
   const { cart, wishlist, currentUser } = useAppStore();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-  const [activeCurrency, setActiveCurrency] = useState("USD");
   const [searchQuery, setSearchQuery] = useState("");
   const megaMenuRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -265,15 +263,30 @@ export const Header = () => {
     return () => clearInterval(timer);
   }, []);
 
-  const countryCode = (params?.country as string) || "us";
-  const currentCountry = COUNTRIES[countryCode] || COUNTRIES.us;
+  const countryCode = normalizeCountry(params?.country as string);
+  const activeCountry = getCountryConfig(countryCode);
 
   const cartCount = mounted ? cart.reduce((acc, i) => acc + i.quantity, 0) : 0;
   const wishlistCount = mounted ? wishlist.length : 0;
 
+  // Switch market while keeping the shopper on the same page: replace the first
+  // path segment (the country) and navigate (e.g. /in/category/x → /uk/category/x).
   const handleCountryChange = (code: string) => {
-    router.push(`/${code}`);
+    if (code === countryCode) return;
+    const segments = (pathname || `/${countryCode}`).split("/").filter(Boolean);
+    segments[0] = code;
+    router.push(`/${segments.join("/")}`);
   };
+
+  const goToSearch = (term: string) => {
+    const query = term.trim();
+    if (!query) return;
+    router.push(`/${countryCode}/search?q=${encodeURIComponent(query)}`);
+    setIsSearchOpen(false);
+    setSearchQuery("");
+  };
+
+  const handleSearchSubmit = () => goToSearch(searchQuery);
 
   const isAdmin =
     currentUser?.role === "super_admin" ||
@@ -391,35 +404,52 @@ export const Header = () => {
               Contact
             </a>
 
-            {/* Currency switcher */}
+            {/* Country / currency selector */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 text-[11px] tracking-[0.14em] uppercase text-white/70 hover:text-white transition-colors font-medium pl-5 bg-transparent border-none outline-none cursor-pointer">
-                  <span className="text-sm leading-none">
-                    {CURRENCIES.find((c) => c.code === activeCurrency)?.flag}
-                  </span>
-                  <span>{activeCurrency}</span>
+                <button
+                  aria-label="Select market and currency"
+                  className="flex items-center gap-1.5 text-[11px] tracking-[0.14em] uppercase text-white/70 hover:text-white transition-colors font-medium pl-5 bg-transparent border-none outline-none cursor-pointer"
+                >
+                  <span className="font-semibold">{activeCountry.code}</span>
+                  <span className="text-white/40">·</span>
+                  <span>{activeCountry.symbol}</span>
+                  <span>{activeCountry.currency}</span>
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="bg-white border border-gray-100 rounded-none shadow-lg min-w-[110px] p-1"
+                className="bg-white border border-gray-100 rounded-none shadow-lg min-w-[200px] p-1"
               >
-                {CURRENCIES.map((c) => (
-                  <DropdownMenuItem
-                    key={c.code}
-                    onClick={() => setActiveCurrency(c.code)}
-                    className={cn(
-                      "cursor-pointer rounded-none text-[11px] font-medium tracking-wider uppercase flex items-center gap-2 py-2",
-                      activeCurrency === c.code
-                        ? "bg-black text-white"
-                        : "hover:bg-gray-50"
-                    )}
-                  >
-                    <span>{c.flag}</span>
-                    <span>{c.code}</span>
-                  </DropdownMenuItem>
-                ))}
+                {SUPPORTED_COUNTRIES.map((code) => {
+                  const market = getCountryConfig(code);
+                  const isActive = code === countryCode;
+                  return (
+                    <DropdownMenuItem
+                      key={code}
+                      onClick={() => handleCountryChange(code)}
+                      className={cn(
+                        "cursor-pointer rounded-none text-[11px] font-medium tracking-wider uppercase flex items-center justify-between gap-3 py-2",
+                        isActive ? "bg-black text-white" : "hover:bg-gray-50"
+                      )}
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="font-semibold w-6">{market.code}</span>
+                        <span
+                          className={cn(
+                            "normal-case tracking-normal",
+                            isActive ? "text-white/70" : "text-gray-500"
+                          )}
+                        >
+                          {market.name}
+                        </span>
+                      </span>
+                      <span className="tabular-nums">
+                        {market.symbol} {market.currency}
+                      </span>
+                    </DropdownMenuItem>
+                  );
+                })}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -546,10 +576,12 @@ export const Header = () => {
 
             {/* CENTER: Logo */}
             <div className="absolute left-1/2 -translate-x-1/2">
-              <Link href={`/${countryCode}`} className="block text-center">
-                <span className="text-[14px] sm:text-[22px] lg:text-[28px] font-bold tracking-[0.1em] uppercase text-black leading-none font-serif">
-                Amarisé Maison
-                </span>
+              <Link
+                href={`/${countryCode}`}
+                aria-label="Amarisé Maison — Home"
+                className="block hover:opacity-80 transition-opacity"
+              >
+                <BrandLogo wordmark size={36} />
               </Link>
             </div>
 
@@ -693,19 +725,17 @@ export const Header = () => {
 
                     {/* Featured image column */}
                     <div className="flex flex-col gap-4">
-                      <div className="relative aspect-[4/3] w-full bg-gray-50 overflow-hidden">
-                        <Image
-                          src={
-                            placeholderData.placeholderImages.find(
-                              (i) =>
-                                i.id === MEGA_MENU_DATA[hoveredLink].imageId
-                            )?.imageUrl || ""
-                          }
-                          alt={MEGA_MENU_DATA[hoveredLink].title}
-                          fill
-                          className="object-cover hover:scale-105 transition-transform duration-500"
-                        />
-                      </div>
+                      <BrandImage
+                        src={
+                          placeholderData.placeholderImages.find(
+                            (i) => i.id === MEGA_MENU_DATA[hoveredLink].imageId
+                          )?.imageUrl || ""
+                        }
+                        alt={MEGA_MENU_DATA[hoveredLink].title}
+                        className="aspect-[4/3] w-full bg-gray-50"
+                        imgClassName="hover:scale-105 transition-transform duration-500"
+                        variant="default"
+                      />
                       <div>
                         <h5 className="text-[13px] font-bold uppercase tracking-[0.15em] text-gray-900 leading-snug">
                           {MEGA_MENU_DATA[hoveredLink].title}
@@ -741,8 +771,20 @@ export const Header = () => {
             className="fixed inset-0 z-[100] bg-white flex flex-col"
           >
             {/* Search header */}
-            <div className="flex items-center border-b border-gray-100 px-6 lg:px-12 h-16 lg:h-20 gap-4">
-              <Search className="w-5 h-5 text-gray-400 shrink-0" />
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSearchSubmit();
+              }}
+              className="flex items-center border-b border-gray-100 px-6 lg:px-12 h-16 lg:h-20 gap-4"
+            >
+              <button
+                type="submit"
+                aria-label="Search"
+                className="shrink-0 text-gray-400 hover:text-black transition-colors"
+              >
+                <Search className="w-5 h-5" />
+              </button>
               <input
                 autoFocus
                 type="text"
@@ -752,6 +794,7 @@ export const Header = () => {
                 className="flex-1 bg-transparent text-base lg:text-xl font-medium text-gray-900 placeholder:text-gray-300 outline-none"
               />
               <button
+                type="button"
                 onClick={() => {
                   setIsSearchOpen(false);
                   setSearchQuery("");
@@ -760,7 +803,7 @@ export const Header = () => {
               >
                 <X className="w-5 h-5 text-gray-400 hover:text-black" />
               </button>
-            </div>
+            </form>
 
             {/* Search body */}
             <div className="flex-1 overflow-y-auto px-6 lg:px-12 py-8 max-w-[800px] mx-auto w-full">
@@ -773,7 +816,7 @@ export const Header = () => {
                   {popularSearches.map((term) => (
                     <button
                       key={term}
-                      onClick={() => setSearchQuery(term)}
+                      onClick={() => goToSearch(term)}
                       className="px-4 py-2 border border-gray-200 text-[12px] font-medium tracking-wider uppercase text-gray-600 hover:border-black hover:text-black transition-colors rounded-sm"
                     >
                       {term}
@@ -800,7 +843,7 @@ export const Header = () => {
                   ].map((item) => (
                     <button
                       key={item}
-                      onClick={() => setSearchQuery(item)}
+                      onClick={() => goToSearch(item)}
                       className="text-left group"
                     >
                       <div className="aspect-square bg-gray-50 mb-2 group-hover:bg-gray-100 transition-colors" />

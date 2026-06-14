@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { Footer } from "@/components/layout/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Metadata } from "next";
@@ -8,10 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { BookOpen, ArrowRight, FileText, Globe, ShieldCheck } from "lucide-react";
 import { guides } from "@/lib/sitemap-data";
+import { BRAND_IMAGES } from "@/lib/brand-assets";
 
 export const metadata: Metadata = {
-  title: 'Industrial Knowledge Hub | GeoTrade Nexus Guides',
+  title: 'Industrial Knowledge Hub Guides',
   description: 'Expert guides on mineral export compliance, purity standards, and global trade logistics. Stay informed with technical industry knowledge.',
+  alternates: { canonical: '/guides' },
 };
 
 export default function GuidesPage() {
@@ -24,7 +27,7 @@ export default function GuidesPage() {
   const hubSchema = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    "name": "GeoTrade Nexus Knowledge Hub",
+    "name": "Baalvion Mining Inc. Knowledge Hub",
     "description": "A collection of industrial guides and market reports for the mining sector.",
     "mainEntity": {
       "@type": "ItemList",
@@ -60,9 +63,9 @@ export default function GuidesPage() {
             <Link key={guide.slug} href={`/guides/${guide.slug}`}>
               <Card className="border-none shadow-sm hover:shadow-xl transition-all h-full group overflow-hidden bg-white">
                 <div className="relative h-40 bg-muted">
-                  <Image 
-                    src={`https://picsum.photos/seed/${guide.slug}/600/400`} 
-                    alt={guide.title} 
+                  <Image
+                    src={BRAND_IMAGES.guide}
+                    alt={guide.title}
                     fill 
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -89,13 +92,15 @@ export default function GuidesPage() {
           ))}
         </div>
 
-        {/* Pagination Placeholder */}
         <div className="flex justify-center pt-16">
-          <Button variant="outline" className="px-12 border-slate-200 font-bold text-slate-500">
-            View More Reports
-          </Button>
+          <Link href="/contact">
+            <Button variant="outline" className="px-12 border-slate-200 font-bold text-slate-500">
+              Request a Custom Report
+            </Button>
+          </Link>
         </div>
       </main>
+      <Footer />
     </div>
   );
 }

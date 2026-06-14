@@ -185,7 +185,7 @@ export default function CampaignExecutionDetail() {
                           {del.status === 'submitted' && (
                             <div className="flex gap-2">
                               <Button size="sm" variant="ghost" asChild className="h-8 text-primary">
-                                <a href={del.submissionUrl} target="_blank"><ExternalLink className="h-4 w-4" /></a>
+                                <a href={del.submissionUrl} target="_blank" rel="noopener noreferrer" aria-label="View submission"><ExternalLink className="h-4 w-4" aria-hidden="true" /></a>
                               </Button>
                               <Button size="sm" onClick={() => handleApprove(del.id)} className="h-8 bg-emerald-500 hover:bg-emerald-600 font-bold text-xs text-white">Approve</Button>
                             </div>

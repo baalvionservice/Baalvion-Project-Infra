@@ -12,6 +12,7 @@ export const ROLES: Record<UserRole, { label: string; color: string; level: numb
   developer: { label: 'Developer', color: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-200', level: 35 },
   analyst: { label: 'Analyst', color: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200', level: 30 },
   finance: { label: 'Finance', color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200', level: 30 },
+  compliance: { label: 'Compliance', color: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200', level: 35 },
   moderator: { label: 'Moderator', color: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200', level: 35 },
   readonly: { label: 'Read Only', color: 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300', level: 5 },
 };

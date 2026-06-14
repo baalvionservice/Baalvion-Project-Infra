@@ -26,8 +26,7 @@ export function useDocumentDownload() {
     // 2. Mock Download Trigger
     toast({ title: "Download Started", description: `Preparing ${title}...` });
     
-    // In future: const { url } = await fetch(`/api/v1/documents/${docId}/sign`)
-    console.log(`[Future API] Initiating download for ${docId}`);
+    // TODO: replace with signed URL: const { url } = await fetch(`/api/v1/documents/${docId}/sign`)
   };
 
   return {

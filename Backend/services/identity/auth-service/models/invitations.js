@@ -7,6 +7,8 @@ module.exports = function (sequelize, DataTypes) {
         token_hash: { type: DataTypes.TEXT, allowNull: false },
         expires_at: { type: DataTypes.DATE, allowNull: false },
         accepted_at: { type: DataTypes.DATE, allowNull: true },
+        revoked_at: { type: DataTypes.DATE, allowNull: true },
+        full_name: { type: DataTypes.STRING(200), allowNull: true },
         created_by: { type: DataTypes.BIGINT, allowNull: false },
     }, {
         sequelize,

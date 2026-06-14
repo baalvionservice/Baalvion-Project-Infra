@@ -1,0 +1,56 @@
+{
+  "slug": "devops",
+  "title": "DevOps",
+  "kind": "service",
+  "heroImageSeed": "svc-devops",
+  "excerpt": "CI/CD, infrastructure as code, SRE, and platform engineering — ship faster and more safely, with the metrics to prove it.",
+  "seo": {
+    "title": "DevOps & Platform Engineering Services | Baalvion",
+    "description": "Baalvion builds CI/CD pipelines, infrastructure as code, observability, and SRE practices that improve DORA metrics and let teams ship safely.",
+    "keywords": ["DevOps", "CI/CD", "platform engineering", "SRE", "infrastructure as code", "Baalvion services", "DORA metrics"]
+  },
+  "customFields": {
+    "benefits": [
+      "Faster, safer releases (better DORA metrics)",
+      "Reproducible infrastructure via code",
+      "Reliability through SRE and observability",
+      "Developer experience that removes friction"
+    ],
+    "process": [
+      { "step": "Assess", "desc": "Current pipeline, lead time, change-failure rate, and toil." },
+      { "step": "Pipeline", "desc": "Robust CI/CD with testing, scanning, and progressive delivery." },
+      { "step": "Codify", "desc": "Infrastructure as code with policy and GitOps." },
+      { "step": "Operate", "desc": "Observability, SLOs, and on-call that doesn't burn people out." }
+    ],
+    "techStack": ["CI/CD", "Terraform / IaC", "Kubernetes", "Observability", "GitOps", "SLOs"]
+  },
+  "blocks": [
+    { "type": "heading", "level": 2, "text": "Overview" },
+    { "type": "paragraph", "text": "DevOps is less about tools than about flow: how quickly and safely a change goes from commit to production. Baalvion builds the pipelines, infrastructure-as-code, and observability that make shipping routine rather than risky, and we measure progress with DORA metrics. It's the discipline distilled in [DevOps best practices that actually matter](/news/tech/devops-best-practices)." },
+    { "type": "heading", "level": 2, "text": "Benefits" },
+    { "type": "list", "ordered": false, "items": [
+      "**Speed and safety:** better lead time and lower change-failure rate.",
+      "**Reproducibility:** infrastructure defined as code, not clicks.",
+      "**Reliability:** SLOs, observability, and humane on-call.",
+      "**Developer experience:** less friction, more flow."
+    ] },
+    { "type": "heading", "level": 2, "text": "Our Process" },
+    { "type": "paragraph", "text": "We assess the current pipeline and toil, build robust CI/CD with testing and progressive delivery, codify infrastructure with policy and GitOps, and operate with observability and SLOs. The pipeline craft is detailed in [designing robust CI/CD pipelines](/news/tech/ci-cd-pipelines) and [infrastructure as code](/news/tech/infrastructure-as-code)." },
+    { "type": "heading", "level": 2, "text": "Technologies" },
+    { "type": "paragraph", "text": "CI/CD systems, Terraform and other IaC, Kubernetes, observability stacks, GitOps workflows, and SLO tooling. DevOps pairs naturally with our [cloud solutions](/services/cloud-solutions) practice." },
+    { "type": "heading", "level": 2, "text": "Why Baalvion" },
+    { "type": "paragraph", "text": "We run our own platform with these practices, so we know what reliable delivery looks like under real load — see [observability for distributed systems](/news/tech/observability-for-distributed-systems). Combine DevOps with [enterprise software](/services/enterprise-software) and [technology consulting](/services/technology-consulting)." }
+  ],
+  "faqs": [
+    { "q": "What are DORA metrics?", "a": "Deployment frequency, lead time for changes, change-failure rate, and time to restore — the four research-backed measures of software delivery performance we use to track progress." },
+    { "q": "What is platform engineering?", "a": "Building an internal platform (pipelines, IaC, golden paths) so product teams ship safely without reinventing infrastructure each time." },
+    { "q": "Do you do SRE and on-call?", "a": "Yes — we define SLOs, build observability, and design on-call that's sustainable rather than burnout-inducing." },
+    { "q": "How does this relate to cloud?", "a": "Closely — DevOps practices run best on well-architected [cloud solutions](/services/cloud-solutions)." }
+  ],
+  "internalLinks": [
+    { "anchor": "DevOps best practices that actually matter", "href": "/news/tech/devops-best-practices" },
+    { "anchor": "designing robust CI/CD pipelines", "href": "/news/tech/ci-cd-pipelines" },
+    { "anchor": "infrastructure as code", "href": "/news/tech/infrastructure-as-code" },
+    { "anchor": "cloud solutions", "href": "/services/cloud-solutions" }
+  ]
+}

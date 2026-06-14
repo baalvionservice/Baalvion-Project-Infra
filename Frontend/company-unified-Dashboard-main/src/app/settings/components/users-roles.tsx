@@ -188,7 +188,7 @@ export default function UsersRoles() {
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
+                            <Button variant="ghost" size="icon" aria-label="User options">
                               <MoreHorizontal />
                             </Button>
                           </DropdownMenuTrigger>

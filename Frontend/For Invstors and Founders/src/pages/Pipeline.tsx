@@ -62,7 +62,7 @@ export default function Pipeline() {
                         <CardContent className="p-3">
                           <Link to={`/founders/${r.founder?.id}`} className="block">
                             <div className="flex items-center gap-2">
-                              {r.founder?.avatar_url ? <img src={r.founder.avatar_url} className="w-7 h-7 rounded-full object-cover" /> : <div className="w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-semibold flex items-center justify-center">{initials(r.founder?.company_name || r.founder?.full_name)}</div>}
+                              {r.founder?.avatar_url ? <img src={r.founder.avatar_url} alt={r.founder?.company_name || r.founder?.full_name || "Founder"} className="w-7 h-7 rounded-full object-cover" /> : <div className="w-7 h-7 rounded-full bg-primary/15 text-primary text-[10px] font-semibold flex items-center justify-center">{initials(r.founder?.company_name || r.founder?.full_name)}</div>}
                               <div className="min-w-0"><div className="text-sm font-medium truncate hover:text-primary">{r.founder?.company_name || r.founder?.full_name}</div><div className="text-[11px] text-muted-foreground truncate">{r.founder?.sector}</div></div>
                             </div>
                           </Link>

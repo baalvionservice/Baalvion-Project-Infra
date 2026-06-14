@@ -14,6 +14,33 @@
 
 const ROLE_HIERARCHY = ['viewer', 'member', 'editor', 'manager', 'admin', 'owner', 'super_admin'];
 
+// ── Platform roles (C4) ─────────────────────────────────────────────────────────
+// Global operator roles, a SEPARATE dimension from the per-organization ROLE_HIERARCHY above.
+// A platform role is never an org-membership role and vice-versa (no dual-purpose names).
+// Only PLATFORM_BYPASS_ROLES may bypass tenant (RLS) isolation; platform_support_admin is a
+// platform role but intentionally gets no blanket data bypass. Mirrors @baalvion/tenancy roles.js.
+const PLATFORM_ROLES = ['platform_admin', 'platform_security_admin', 'platform_support_admin'];
+const PLATFORM_BYPASS_ROLES = ['platform_admin', 'platform_security_admin'];
+
+const isPlatformRole = (role) => PLATFORM_ROLES.includes(role);
+
+/** True if any of the caller's roles is a platform role allowed to bypass tenant isolation. */
+function hasTenantBypass(roles) {
+  const list = Array.isArray(roles) ? roles : (roles != null ? [roles] : []);
+  return list.some((r) => PLATFORM_BYPASS_ROLES.includes(r));
+}
+
+/**
+ * Issuance guard against role confusion: an organization-membership role must never be a
+ * platform role. Throws if a tenant-scoped principal's role collides with the platform namespace.
+ */
+function assertNoRoleConfusion(membershipRole) {
+  if (isPlatformRole(membershipRole)) {
+    throw err(400, 'role_confusion', `Organization membership role must not be a platform role: '${membershipRole}'`);
+  }
+  return membershipRole;
+}
+
 const ROLE_PERMISSIONS = {
   viewer:      ['read:self'],
   member:      ['read:self', 'read:org', 'write:self'],
@@ -85,8 +112,27 @@ function requirePermission(...permissions) {
 const requireSuperAdmin = requireRole('super_admin');
 const requireOrgAdmin = requireRole('admin', 'owner', 'super_admin');
 
+/**
+ * Express guard for platform operations — evaluated INDEPENDENTLY of the org hierarchy.
+ * A tenant role (no matter how high, including super_admin) never satisfies this; the caller
+ * must explicitly hold one of the named platform roles.
+ */
+function requirePlatformRole(...roles) {
+  const required = roles.length ? roles : PLATFORM_ROLES;
+  return (req, _res, next) => {
+    if (!req.auth) return next(err(401, 'unauthorized', 'Authentication required'));
+    const userRoles = authRoles(req);
+    if (!userRoles.some((r) => required.includes(r))) {
+      return next(err(403, 'forbidden', `Requires platform role: ${required.join(' or ')}`));
+    }
+    return next();
+  };
+}
+
 module.exports = {
   ROLE_HIERARCHY, ROLE_PERMISSIONS,
+  PLATFORM_ROLES, PLATFORM_BYPASS_ROLES,
   roleLevel, isRoleAtLeast, hasPermission,
-  requireRole, requirePermission, requireSuperAdmin, requireOrgAdmin,
+  isPlatformRole, hasTenantBypass, assertNoRoleConfusion,
+  requireRole, requirePermission, requireSuperAdmin, requireOrgAdmin, requirePlatformRole,
 };

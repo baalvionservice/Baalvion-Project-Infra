@@ -1,5 +1,5 @@
-# Firebase Studio
+# Law Elite Network
 
-This is a NextJS starter in Firebase Studio.
+Law Elite Network — the global legal knowledge and practitioner discovery platform, built with Next.js App Router.
 
 To get started, take a look at src/app/page.tsx.

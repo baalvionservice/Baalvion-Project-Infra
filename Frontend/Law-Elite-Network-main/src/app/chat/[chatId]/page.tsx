@@ -108,9 +108,9 @@ function ChatDetailContent() {
         ) : (
           <div className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
             <ChatWindow
-              chat={chat}
-              onSend={handleSend}
+              caseId={chat?.caseId || (chatId as string)}
               userId={user?.id || ""}
+              receiverId={chat?.participants?.find((p: string) => p !== user?.id) || ""}
             />
           </div>
         )}
