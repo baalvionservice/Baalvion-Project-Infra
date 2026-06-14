@@ -75,14 +75,7 @@ Focus on these paths first:
 
 The following files are archival, reporting, planning, compliance, or historical documentation and should be ignored during normal development tasks:
 
-- Baalvion_Master_Project_Plan.pdf
-- PROJECT_TREE.txt
-- DEADCODE_SWEEP_REPORT.md
-- FINAL_LAUNCH_READINESS.md
-- LIMITED_BETA_SIGNOFF.md
-- COMMERCE_LAUNCH_READINESS.md
 - RELEASE_NOTES.md
-- SYSTEM_STATE.md
 - CHANGELOG.md
 - CODE_OF_CONDUCT.md
 - SUPPORT.md
