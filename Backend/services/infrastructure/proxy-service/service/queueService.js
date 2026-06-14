@@ -15,6 +15,12 @@ const initializeQueues = async () => {
     }
 
     connection = new IORedis(config.redis.url, { maxRetriesPerRequest: null });
+    // Without an 'error' listener an ioredis connection failure emits an UNHANDLED 'error' event,
+    // which crashes the whole process (pm2 restart loop). Log it and let ioredis reconnect instead —
+    // the BullMQ jobs are non-critical to request serving and degrade safely.
+    connection.on('error', (err) => {
+        try { require('./logger').error('[queue][redis]', err && err.message); } catch { /* logger optional */ }
+    });
     queues = {
         providerHealth: new Queue('provider-health', { connection }),
         usageAggregation: new Queue('usage-aggregation', { connection }),
