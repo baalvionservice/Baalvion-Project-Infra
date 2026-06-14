@@ -49,6 +49,17 @@ public class GlobalExceptionHandler {
     return envelope(HttpStatus.CONFLICT, "CONSTRAINT_VIOLATION", "Resource already exists or violates a constraint", null);
   }
 
+  @ExceptionHandler(SanctionsUnavailableException.class)
+  public ResponseEntity<Map<String, Object>> handleSanctionsUnavailable(SanctionsUnavailableException ex) {
+    // Fail CLOSED: screening could not run safely. 503 (not a CLEAR) so callers retry/hold rather than
+    // treating the subject as un-sanctioned. The internal reason (e.g. "watchlist empty") is logged
+    // server-side ONLY — never returned to the caller, so an adversary cannot detect that screening is
+    // down and time transactions to a coverage gap.
+    log.error("Sanctions screening unavailable (fail-closed): {}", ex.getMessage());
+    return envelope(HttpStatus.SERVICE_UNAVAILABLE, "SANCTIONS_UNAVAILABLE",
+      "Sanctions screening is temporarily unavailable; the request was not evaluated. Retry later.", null);
+  }
+
   @ExceptionHandler(AccessDeniedException.class)
   public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException ex) {
     log.warn("Access denied: {}", ex.getMessage());

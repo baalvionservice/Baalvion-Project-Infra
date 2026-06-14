@@ -1,0 +1,21 @@
+# Production profile (SPRING_PROFILES_ACTIVE=production): wires the AUTHORITATIVE sanctions watchlists
+# and pins STRICT enforcement. Activating this profile makes seed-only / empty screening impossible:
+#   - enforcement: strict          -> boot fails unless OFAC/UN/EU are loaded + non-empty; screening fails closed
+#   - provider: live               -> disables the dev 'seed' bean (it only loads when provider=seed)
+#   - ofac/un/eu enabled: true      -> ingest the official OFAC SDN, UN consolidated, and EU CFSP feeds
+#
+# strict is already the default in application.yml, so a deployment that forgets this profile still fails
+# safe (it just won't have the feeds enabled, and boot will abort). This profile is the one-switch happy path.
+#
+# Feed URLs, timeouts, retry, rate-limit guards, and refresh crons keep their hardened defaults; override a
+# specific source via its env var (OFAC_SDN_URL / OFAC_ALT_URL / OFAC_ADD_URL / UN_SANCTIONS_URL / EU_SANCTIONS_URL).
+app:
+  sanctions:
+    enforcement: ${SANCTIONS_ENFORCEMENT:strict}
+    provider: ${SANCTIONS_PROVIDER:live}
+    ofac:
+      enabled: ${SANCTIONS_OFAC_ENABLED:true}
+    un:
+      enabled: ${SANCTIONS_UN_ENABLED:true}
+    eu:
+      enabled: ${SANCTIONS_EU_ENABLED:true}

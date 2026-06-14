@@ -26,7 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(properties = {
   "spring.kafka.listener.auto-startup=false",
-  "app.security.enabled=false"
+  "app.security.enabled=false",
+  // Seed-list screening test — explicitly permissive (the production default is strict).
+  "app.sanctions.enforcement=permissive"
 })
 @Testcontainers
 class SanctionsScreeningIntegrationTest {

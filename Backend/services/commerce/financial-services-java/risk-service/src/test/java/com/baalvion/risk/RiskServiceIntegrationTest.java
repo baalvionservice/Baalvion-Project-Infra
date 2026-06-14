@@ -24,7 +24,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(properties = {
   "spring.kafka.listener.auto-startup=false",
-  "app.security.enabled=false"
+  "app.security.enabled=false",
+  // Not a sanctions test; run permissive so the strict-by-default watchlist gate doesn't require live feeds.
+  "app.sanctions.enforcement=permissive"
 })
 @Testcontainers
 class RiskServiceIntegrationTest {
