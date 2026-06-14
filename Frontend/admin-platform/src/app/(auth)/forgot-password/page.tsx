@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import * as z from 'zod';
 import Link from 'next/link';
 import { ArrowLeft, Mail } from 'lucide-react';
 import { useMutation } from '@tanstack/react-query';

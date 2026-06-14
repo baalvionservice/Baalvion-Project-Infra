@@ -47,6 +47,8 @@ export const config = {
     // Exclude API/proxy internals, Next static assets, and crawler/SEO metadata
     // routes (robots.txt, sitemap*.xml, manifest, opengraph/og images). Without
     // these exclusions the auth gate 307-redirects crawlers to /login, breaking SEO.
-    '/((?!api|auth-bff|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemap-|manifest.webmanifest|opengraph-image|og-image).*)',
+    // `.*\\..*` excludes any path with a file extension (mock PDFs, og-image.png, icons…) so every
+    // static public/ asset bypasses the auth gate and is served directly.
+    '/((?!api|auth-bff|_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|sitemap-|manifest.webmanifest|opengraph-image|og-image|.*\\..*).*)',
   ],
 };

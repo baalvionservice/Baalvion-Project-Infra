@@ -23,7 +23,6 @@ const nextConfig: NextConfig = {
     'express',
   ],
   typescript: {
-    // tsc --noEmit is clean (exit 0), so type errors now fail the build.
     ignoreBuildErrors: false,
   },
   eslint: {

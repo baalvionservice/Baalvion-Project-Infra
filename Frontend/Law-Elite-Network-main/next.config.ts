@@ -105,7 +105,7 @@ const nextConfig: NextConfig = {
   output: undefined,
 
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
 
   eslint: {

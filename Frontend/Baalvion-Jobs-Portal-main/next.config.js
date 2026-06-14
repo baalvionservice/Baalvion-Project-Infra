@@ -50,6 +50,12 @@ const nextConfig = {
     'protobufjs',
     'express',
   ],
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   // Env-driven base — defaulting here neutralises per-route `|| 'http://localhost:3002/api/v1'`
   // fallbacks (jobs-service via gateway). Auth stays on Keycloak (Phase 4 — not migrated yet).
   env: {

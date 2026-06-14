@@ -66,8 +66,11 @@ export function middleware(request: NextRequest) {
   const rawFirst = seg[0] ?? '';
   const first = rawFirst.toLowerCase();
 
-  // Asset / metadata paths (sitemap.xml, robots.txt, manifest…) carry a dot — leave them alone.
-  const isAsset = rawFirst.includes('.');
+  // Asset / metadata paths carry a file extension in their final segment — sitemap.xml & robots.txt
+  // at the root, but also nested static files like /placeholder/hermes.jpg. Checking only the first
+  // segment missed nested assets, so they were wrongly country-redirected and never served. Detect a
+  // dot in the LAST segment so every public/ asset (root or nested) passes straight through.
+  const isAsset = (seg[seg.length - 1] ?? '').includes('.');
 
   // Missing or invalid country segment → normalize to the preferred market.
   if (!isAsset && !isSupportedCountry(first)) {
