@@ -44,7 +44,8 @@ export async function generateMetadata({
   }
 
   const canonical = absoluteUrl(`/company/${company.id}`);
-  const title = company.name;
+  // Data-driven, profile-specific title.
+  const title = `${company.name} — Hiring by Proven Skill`;
   const description =
     company.description?.trim() ||
     `Discover ${company.name}'s open roles and skill-based hiring challenges on ControlTheMarket${
@@ -55,6 +56,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: { canonical },
+    robots: { index: true, follow: true },
     openGraph: {
       type: "website",
       title: `${title} | ControlTheMarket`,
@@ -63,7 +65,7 @@ export async function generateMetadata({
       images: company.logoUrl ? [{ url: company.logoUrl, alt: company.name }] : undefined,
     },
     twitter: {
-      card: "summary",
+      card: "summary_large_image",
       title: `${title} | ControlTheMarket`,
       description,
       images: company.logoUrl ? [company.logoUrl] : undefined,
@@ -93,8 +95,51 @@ export default async function CompanyProfilePage({
     .filter((u) => u.role === "candidate")
     .slice(0, 3);
 
+  // --- SEO: server-rendered JSON-LD built from the real loaded company data ---
+  const profileUrl = absoluteUrl(`/company/${company.id}`);
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: company.name,
+    url: profileUrl,
+    ...(company.logoUrl ? { logo: company.logoUrl } : {}),
+    ...(company.description?.trim()
+      ? { description: company.description.trim() }
+      : {}),
+    ...(company.industry ? { industry: company.industry } : {}),
+  };
+  const companyBreadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: absoluteUrl("/") },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: "Companies",
+        item: absoluteUrl("/companies"),
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name: company.name,
+        item: profileUrl,
+      },
+    ],
+  };
+
   return (
     <div className="flex-1 bg-muted/20 pb-20">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(companyBreadcrumbJsonLd),
+        }}
+      />
       {/* Header section */}
       <div className="relative h-48 w-full bg-muted">
         <Image

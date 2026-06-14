@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMockNewsById } from "@/data/mockNews";
+import { env } from "@/config/env";
 import {
   ArrowLeftIcon,
   CalendarIcon,
@@ -57,8 +58,39 @@ export default async function NewsDetailPage({ params }: NewsDetailPageProps) {
     );
   };
 
+  const baseUrl = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.title,
+    description: article.description || "",
+    image: article.image ? [article.image] : [],
+    author: { "@type": "Organization", name: article.source || "Imperialpedia" },
+    publisher: { "@type": "Organization", name: "Imperialpedia", url: baseUrl },
+    datePublished: article.publishedAt || "",
+    dateModified: article.publishedAt || "",
+    url: `${baseUrl}/news/${article.id}`,
+  };
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+      { "@type": "ListItem", position: 2, name: "News", item: `${baseUrl}/news` },
+      { "@type": "ListItem", position: 3, name: article.title, item: `${baseUrl}/news/${article.id}` },
+    ],
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Link

@@ -69,17 +69,27 @@ interface CmsContent {
   updatedAt: string;
 }
 
-async function fetchJSON(url: string): Promise<any | null> {
-  try {
-    // Time-based revalidation (ISR) rather than `no-store`: lets pages that read
-    // the CMS be statically generated at build time and refreshed hourly, which
-    // is what makes generateStaticParams / `export const revalidate` effective.
-    const r = await fetch(url, { next: { revalidate: 3600 } });
-    if (!r.ok) return null;
-    return await r.json();
-  } catch {
-    return null;
+async function fetchJSON(url: string, attempts = 3): Promise<any | null> {
+  // Retry transient failures (network errors / 5xx) with small backoff so a brief
+  // CMS hiccup at build or revalidation time doesn't surface as a hard null. A 4xx
+  // (e.g. 404) is a genuine "not found" and returns null immediately without retry.
+  for (let i = 0; i < attempts; i++) {
+    try {
+      // Time-based revalidation (ISR) rather than `no-store`: lets pages that read
+      // the CMS be statically generated at build time and refreshed hourly, which
+      // is what makes generateStaticParams / `export const revalidate` effective.
+      const r = await fetch(url, { next: { revalidate: 3600 } });
+      if (r.ok) return await r.json();
+      if (r.status >= 400 && r.status < 500) return null; // not-found / client error → don't retry
+      // 5xx → fall through and retry
+    } catch {
+      // network error → fall through and retry
+    }
+    if (i < attempts - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 150 * (i + 1)));
+    }
   }
+  return null;
 }
 
 async function listContent(params: Record<string, string | number | undefined> = {}): Promise<CmsContent[]> {
