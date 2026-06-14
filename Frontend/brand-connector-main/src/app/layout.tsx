@@ -33,6 +33,23 @@ export default function RootLayout({
     description: 'The premier marketplace connecting innovative brands with creative talent using AI-powered matching.',
   };
 
+  // WebSite schema enables sitelinks + a leaderboard-backed search box in Google results.
+  const webSiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'Baalvion Connect',
+    url: siteUrl,
+    description: 'AI-powered brand and creator marketplace with secure escrow payments.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteUrl}/leaderboard?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <html lang="en">
       <head>
@@ -42,6 +59,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
       </head>
       <body className="font-body antialiased bg-background text-foreground min-h-screen">
