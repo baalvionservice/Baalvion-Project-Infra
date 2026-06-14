@@ -18,6 +18,7 @@ db.OutboxEvent = require('./outbox_events')(sequelize, Sequelize.DataTypes);
 db.ProcessedWebhook = require('./processed_webhooks')(sequelize, Sequelize.DataTypes);
 db.OrderSagaState = require('./order_saga_state')(sequelize, Sequelize.DataTypes);
 db.KycVerification = require('./kyc_verifications')(sequelize, Sequelize.DataTypes);
+db.OrderPayment = require('./order_payments')(sequelize, Sequelize.DataTypes);
 
 Object.values(db).forEach((m) => { if (m && m.associate) m.associate(db); });
 
