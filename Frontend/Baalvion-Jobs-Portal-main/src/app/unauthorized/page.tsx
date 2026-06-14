@@ -1,5 +1,12 @@
+import type { Metadata } from 'next';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+
+// Error / access-denied page — not content. robots.ts also disallows
+// /unauthorized/; this directive enforces noindex.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default function UnauthorizedPage() {
     return (
