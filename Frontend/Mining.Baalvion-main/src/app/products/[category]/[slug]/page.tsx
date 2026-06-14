@@ -25,6 +25,9 @@ import type { Product, ProductCategory } from "@/lib/content/types";
 import { BRAND_IMAGES } from "@/lib/brand-assets";
 import { PendingDisclosure } from "@/components/common/PendingDisclosure";
 import { ProductInquiryForm } from "@/components/products/ProductInquiryForm";
+import { JsonLd } from "@/components/seo/JsonLd";
+
+const SITE_URL = "https://mining.baalvion.com";
 
 type Params = { category: string; slug: string };
 
@@ -74,9 +77,40 @@ export default async function ProductDetailPage({
   const categoryName = category?.name ?? humanizeSlug(categorySlug);
   const heroImage = product?.gallery[0]?.url ?? BRAND_IMAGES.mineral;
   const heroAlt = product?.gallery[0]?.alt ?? `${displayName} sample`;
+  const productUrl = `${SITE_URL}/products/${categorySlug}/${slug}`;
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": displayName,
+    "image": heroImage,
+    "description":
+      product?.description ??
+      `${displayName} — product details from Baalvion Mining Inc.`,
+    "category": categoryName,
+    "url": productUrl,
+    "brand": { "@type": "Brand", "name": "Baalvion Mining Inc." },
+    "manufacturer": {
+      "@type": "Organization",
+      "name": "Baalvion Mining Inc.",
+      "url": SITE_URL,
+    },
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Products", "item": `${SITE_URL}/products` },
+      { "@type": "ListItem", "position": 2, "name": categoryName, "item": `${SITE_URL}/products/${categorySlug}` },
+      { "@type": "ListItem", "position": 3, "name": displayName, "item": productUrl },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
+      <JsonLd data={productSchema} />
+      <JsonLd data={breadcrumbSchema} />
       <Navbar />
 
       <main className="flex-1">
