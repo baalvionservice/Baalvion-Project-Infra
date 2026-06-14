@@ -75,6 +75,8 @@ class SanctionsProductionBootIntegrationTest {
   private static volatile String ofacAdd;
   private static volatile String unXml;
   private static volatile String euXml;
+  // HTTP status the feed server returns; set != 200 to simulate an upstream OFAC/UN/EU outage.
+  private static volatile int feedStatus = 200;
 
   // ----- OFAC SDN feeds (headerless CSV; "-0- " is the empty sentinel) -----
   private static final String OFAC_SDN =
@@ -153,14 +155,16 @@ class SanctionsProductionBootIntegrationTest {
     ofacAdd = OFAC_ADD;
     unXml = UN_XML;
     euXml = EU_XML;
+    feedStatus = 200;
   }
 
   private static void context(String path, Supplier<String> body) {
     feeds.createContext(path, exchange -> {
-      byte[] bytes = body.get().getBytes(StandardCharsets.UTF_8);
+      int status = feedStatus;
+      byte[] bytes = (status == 200 ? body.get() : "upstream " + status).getBytes(StandardCharsets.UTF_8);
       exchange.getResponseHeaders().add("Content-Type", "text/plain; charset=utf-8");
       // length 0 => no body (the providers treat a blank feed as a hard fetch failure).
-      exchange.sendResponseHeaders(200, bytes.length == 0 ? -1 : bytes.length);
+      exchange.sendResponseHeaders(status, bytes.length == 0 ? -1 : bytes.length);
       try (OutputStream os = exchange.getResponseBody()) {
         os.write(bytes);
       }
@@ -198,6 +202,10 @@ class SanctionsProductionBootIntegrationTest {
     // Fail fast on an unreachable/empty feed instead of retrying for seconds.
     p.put("app.sanctions.ofac.max-retries", 1);
     p.put("app.sanctions.ofac.retry-backoff-ms", 0);
+    p.put("app.sanctions.un.max-retries", 1);
+    p.put("app.sanctions.un.retry-backoff-ms", 0);
+    p.put("app.sanctions.eu.max-retries", 1);
+    p.put("app.sanctions.eu.retry-backoff-ms", 0);
     return p;
   }
 
@@ -217,6 +225,15 @@ class SanctionsProductionBootIntegrationTest {
         postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
          Statement s = c.createStatement()) {
       s.execute("TRUNCATE risk.sanctioned_entities CASCADE");
+    }
+  }
+
+  /** Backdate all watchlist rows so the data is older than dataset-max-age-hours (simulates stale data). */
+  private static void ageWatchlist(int hours) throws Exception {
+    try (Connection c = DriverManager.getConnection(
+        postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
+         Statement s = c.createStatement()) {
+      s.execute("UPDATE risk.sanctioned_entities SET updated_at = now() - interval '" + hours + " hours'");
     }
   }
 
@@ -258,6 +275,38 @@ class SanctionsProductionBootIntegrationTest {
 
   @Test
   @Order(2)
+  void warmRestartServesLastKnownGoodWhenAllFeedsAreDown() throws Exception {
+    // Downtime handling: @Order(1) loaded the lists. Backdate them so they are STALE (forcing a refresh
+    // attempt on boot), then take EVERY feed down (HTTP 503). The service must still boot on the durable
+    // last-known-good data — NOT seed, NOT empty — and keep screening, while health flags the data stale so
+    // the outage is visible to operators. This is the "feed outage" resilience path, distinct from a cold
+    // start with no data (which correctly fails fast, below).
+    ageWatchlist(100);              // older than dataset-max-age-hours (48) => isWarm() false => refresh tried
+    feedStatus = 503;              // OFAC + UN + EU all unreachable
+
+    try (ConfigurableApplicationContext ctx = boot(Map.of())) {
+      SanctionsService svc = ctx.getBean(SanctionsService.class);
+
+      // Last-known-good retained for every required source despite all feeds being down.
+      assertThat(svc.entityCount(ListSource.OFAC_SDN)).isGreaterThan(0);
+      assertThat(svc.entityCount(ListSource.UN_CONSOLIDATED)).isGreaterThan(0);
+      assertThat(svc.entityCount(ListSource.EU_CFSP)).isGreaterThan(0);
+
+      // Screening still works on last-known-good (non-empty list => not fail-closed).
+      ScreenRequest req = new ScreenRequest();
+      req.setName("Vladimir Putin");
+      req.setType("INDIVIDUAL");
+      assertThat(svc.screen(UUID.randomUUID(), req).getStatus()).isIn("CONFIRMED_MATCH", "POTENTIAL_MATCH");
+
+      // Health is DEGRADED (stale) so the feed outage is alertable even though screening continues.
+      SanctionsStatusReporter.Report report = ctx.getBean(SanctionsStatusReporter.class).build();
+      assertThat(report.healthy()).isFalse();
+      assertThat(report.sources()).allSatisfy(s -> assertThat(s.stale()).isTrue());
+    }
+  }
+
+  @Test
+  @Order(3)
   void strictBootFailsFastWhenRequiredFeedIsEmpty() throws Exception {
     truncateWatchlist();            // cold DB => no last-known-good to fall back on
     ofacSdn = "";                   // OFAC feed returns empty => provider load fails
@@ -270,7 +319,7 @@ class SanctionsProductionBootIntegrationTest {
   }
 
   @Test
-  @Order(3)
+  @Order(4)
   void strictBootFailsFastWhenRequiredProviderIsDisabled() {
     // Required source 'un' present in config but its provider left disabled (missing env) => deploy fails.
     assertThatThrownBy(() -> boot(Map.of("app.sanctions.un.enabled", false)))
