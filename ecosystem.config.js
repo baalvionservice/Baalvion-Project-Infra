@@ -105,19 +105,6 @@ module.exports = {
       log_date_format: 'HH:mm:ss',
     },
     {
-      name: "elite-circle-service",
-      cwd: "./Backend/services/ecosystem/elite-circle-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      // Backend for Frontend/baalvion-elite-circle-main (preview on :8081). Schema `elite_circle`
-      // in baalvion_db; auto-migrates on boot. .env (cwd-loaded by dotenv) sets DB + CORS(:8081).
-      env: { NODE_ENV: "development", PORT: "3051" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
       name: "ctm-service",
       cwd: "./Backend/services/ecosystem/ctm-service",
       script: "./index.js",
@@ -401,19 +388,6 @@ module.exports = {
       autorestart: true,
       max_memory_restart: "1500M",
       env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
-    {
-      name: "elite-circle-web",
-      cwd: "./Frontend/baalvion-elite-circle-main",
-      script: "./node_modules/vite/bin/vite.js",
-      args: "preview --port 8081 --host",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "800M",
-      env: { NODE_ENV: "production" },
       log_date_format: 'HH:mm:ss',
     },
     // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
