@@ -48,20 +48,13 @@ export default async function BaalvionHomePage() {
     getEcosystemItems(),
   ]);
 
-  // Handle error cases gracefully
+  // If the CMS genuinely can't supply the home content (after the fetch layer's
+  // retries), THROW rather than returning a cacheable 200 "maintenance" page.
+  // Under ISR this makes Next serve the last successfully-generated page (stale
+  // but real content) while it retries in the background, and routes the no-cache
+  // case to error.tsx — so a transient blip can never get cached and "stick".
   if (!homePageData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
-            Service Temporarily Unavailable
-          </h1>
-          <p className="text-gray-600">
-            The Baalvion Operating System is currently undergoing maintenance.
-          </p>
-        </div>
-      </div>
-    );
+    throw new Error("Home page content is temporarily unavailable from the CMS");
   }
 
   return (
