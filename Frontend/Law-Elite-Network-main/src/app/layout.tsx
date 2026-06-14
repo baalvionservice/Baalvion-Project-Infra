@@ -94,6 +94,24 @@ const organizationJsonLd = {
   sameAs: ['https://twitter.com/lawelitenetwork'],
 };
 
+const webSiteJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'Law Elite Network',
+  url: SITE_URL,
+  description:
+    "The world's most distinguished legal knowledge and practitioner discovery platform.",
+  publisher: { '@type': 'Organization', name: 'Law Elite Network', url: SITE_URL },
+  potentialAction: {
+    '@type': 'SearchAction',
+    target: {
+      '@type': 'EntryPoint',
+      urlTemplate: `${SITE_URL}/search?q={search_term_string}`,
+    },
+    'query-input': 'required name=search_term_string',
+  },
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -112,6 +130,10 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
       </head>
       <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-white text-slate-900 overflow-x-hidden">
