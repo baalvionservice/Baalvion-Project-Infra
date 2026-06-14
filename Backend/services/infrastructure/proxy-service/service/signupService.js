@@ -28,8 +28,14 @@ const { generateToken } = require('../utils/crypto');
 const DEFAULT_PLAN_SLUG = 'starter';
 const TRIAL_DAYS = 14;
 
+// Bound slug input length before regex processing to prevent polynomial ReDoS
+// on attacker-controlled fields (orgName/fullName/email). The final output is
+// still sliced to 40 chars; this just caps regex work to a constant.
+const SLUG_INPUT_MAX = 256;
+
 const slugify = (value) =>
   String(value || '')
+    .slice(0, SLUG_INPUT_MAX)
     .toLowerCase()
     .trim()
     .replace(/[^a-z0-9]+/g, '-')
