@@ -2,7 +2,7 @@ apiVersion: baalvion.io/v1
 kind: Service
 metadata:
   name: trade-finance-service
-  description: Documentary credits (UCP 600 Letters of Credit) and independent bank guarantees (URDG 758) — issuance, amendment, document presentation, demand/claim, and ledger settlement of contingent liabilities. Part of financial-services-java (port 3036, schema `trade_finance`).
+  description: Documentary credits (UCP 600 Letters of Credit) and independent bank guarantees (URDG 758) — issuance, amendment, document presentation, demand/claim, and ledger settlement of contingent liabilities. Part of financial-services-java (host port 13036, container 3036, schema `trade_finance`).
   domain: commerce
   division: commerce
   context: trade-finance

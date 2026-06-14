@@ -2,7 +2,7 @@ apiVersion: baalvion.io/v1
 kind: Service
 metadata:
   name: account-service
-  description: Account lifecycle + balances + KYC state machine and encrypted KYC document vault (AES-256-GCM). Part of financial-services-java (port 3016, schema `accounts`).
+  description: Account lifecycle + balances + KYC state machine and encrypted KYC document vault (AES-256-GCM). Part of financial-services-java (host port 13016, container 3016, schema `accounts`).
   domain: commerce
   division: commerce
   context: accounts

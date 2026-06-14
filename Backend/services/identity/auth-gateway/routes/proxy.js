@@ -47,8 +47,8 @@ const TARGETS = {
 //   /api/fx/rates/USD/EUR       → :3038/api/v1/fx/rates/USD/EUR
 //   /api/wallets (POST open)    → :3039/api/v1/wallets
 const FINANCE = {
-  'letters-of-credit': process.env.SVC_TRADE_FINANCE || 'http://localhost:3036',
-  'bank-guarantees':   process.env.SVC_TRADE_FINANCE || 'http://localhost:3036',
+  'letters-of-credit': process.env.SVC_TRADE_FINANCE || 'http://localhost:13036',
+  'bank-guarantees':   process.env.SVC_TRADE_FINANCE || 'http://localhost:13036',
   'invoice-finance':   process.env.SVC_CREDIT        || 'http://localhost:3037',
   bnpl:                process.env.SVC_CREDIT        || 'http://localhost:3037',
   fx:                  process.env.SVC_FX            || 'http://localhost:3038',
@@ -77,7 +77,7 @@ const FINANCE = {
   //   dispute-service          /api/v1/disputes       :3044
   //   aml-service              /api/v1/aml            :3045
   //   trust-score-service      /api/v1/trust-scores   :3046
-  'deal-rooms':   process.env.SVC_DEAL_ROOM     || 'http://localhost:3040',
+  'deal-rooms':   process.env.SVC_DEAL_ROOM     || 'http://localhost:13040',
   contracts:      process.env.SVC_SMART_CONTRACT || 'http://localhost:3041',
   intelligence:   process.env.SVC_TRADE_INTEL   || 'http://localhost:3043',
   disputes:       process.env.SVC_DISPUTE       || 'http://localhost:3044',
