@@ -1,18 +1,32 @@
 
 'use server';
 
+import { cookies } from 'next/headers';
 import * as mockApi from './mock-api';
 import * as dataLayer from './data-layer';
+import { buildCtmAuthHeader, CTM_ACCESS_COOKIE } from './ctm-auth-header';
 import type { User, UserRole, Company, Task, Submission, Evaluation, Plan, Subscription, TaskDifficulty, TaskStatus, SubmissionStatus, Notification, TaskTemplate, Invoice, Team, Activity, SystemMetric, ServiceStatus, ServiceLoad, ScalingEvent, SystemIncident, SystemLog, SystemError, PlanUsage, UsageMetric, RevenueMetric, PlanDistribution, RevenueSource, TestCase, GitHubRepository, Webhook, WebhookTriggerLog, ApiIntegration, IntegrationLog } from './types';
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 // ctm-service is /api/v1/ecosystem/ctm at the gateway (was wrongly pointed at :3011 = cms-service).
 const CTM_BASE = process.env.NEXT_PUBLIC_CTM_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1';
 
-// ── Server-side fetch helper (no auth — optionalAuth endpoints) ──────────────
+// ── Server-side fetch helper — forwards the caller's session (Phase 2) ───────
+// Reads the httpOnly `baalvion_access` cookie from the incoming request and forwards it to
+// ctm-service as a Bearer token, so authMiddleware-gated reads (analytics, teams, submissions,
+// invoices, …) run AS the logged-in user. Public/optionalAuth reads still work; an anonymous
+// request carries no token and the gated endpoints reject with 401 (caught below).
+async function ctmAuthHeader(): Promise<Record<string, string>> {
+  try {
+    return buildCtmAuthHeader((await cookies()).get(CTM_ACCESS_COOKIE)?.value);
+  } catch {
+    return {}; // no request scope (e.g. at build time) → anonymous
+  }
+}
+
 async function ctmGet<T>(path: string): Promise<T> {
   const res = await fetch(`${CTM_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(await ctmAuthHeader()) },
     cache: 'no-store',
   });
   if (!res.ok) throw new Error(`CTM API ${res.status} on ${path}`);
