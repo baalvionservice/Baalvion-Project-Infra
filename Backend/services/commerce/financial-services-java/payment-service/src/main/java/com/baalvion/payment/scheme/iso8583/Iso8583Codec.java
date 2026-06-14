@@ -139,12 +139,20 @@ public class Iso8583Codec {
         case LLVAR -> {
           int len = Integer.parseInt(raw.substring(pos, pos + 2));
           pos += 2;
+          // len is parsed from the (untrusted) wire message; bound it before indexing.
+          if (len < 0 || pos + len > raw.length()) {
+            throw new IllegalArgumentException("LLVAR length out of bounds");
+          }
           value = raw.substring(pos, pos + len);
           pos += len;
         }
         case LLLVAR -> {
           int len = Integer.parseInt(raw.substring(pos, pos + 3));
           pos += 3;
+          // len is parsed from the (untrusted) wire message; bound it before indexing.
+          if (len < 0 || pos + len > raw.length()) {
+            throw new IllegalArgumentException("LLLVAR length out of bounds");
+          }
           value = raw.substring(pos, pos + len);
           pos += len;
         }

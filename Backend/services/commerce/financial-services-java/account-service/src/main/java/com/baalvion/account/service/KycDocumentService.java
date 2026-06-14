@@ -76,7 +76,8 @@ public class KycDocumentService {
 
     var saved = repository.save(doc);
     log.info("KYC document stored: id={}, tenant={}, account={}, type={}, bytes={}",
-      saved.getId(), tenantId, accountId, sanitizeForLog(saved.getDocumentType()), saved.getSizeBytes());
+      saved.getId(), sanitizeForLog(String.valueOf(tenantId)), sanitizeForLog(String.valueOf(accountId)),
+      sanitizeForLog(saved.getDocumentType()), saved.getSizeBytes());
     return metadata(saved);
   }
 
@@ -104,7 +105,7 @@ public class KycDocumentService {
     KycDocument doc = load(tenantId, id);
     doc.setStatus(KycDocumentStatus.valueOf(status));
     var saved = repository.save(doc);
-    log.info("KYC document {} status -> {} by {}", id, sanitizeForLog(status), sanitizeForLog(reviewedBy));
+    log.info("KYC document {} status -> {} by {}", sanitizeForLog(String.valueOf(id)), sanitizeForLog(status), sanitizeForLog(reviewedBy));
     return metadata(saved);
   }
 

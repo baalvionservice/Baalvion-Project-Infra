@@ -53,7 +53,7 @@ public class ApprovalController {
   ) {
     UUID tenantId = com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
     String checker = actor(actorHeader);
-    log.info("POST /payments/approvals/{}/approve by {}", id, sanitizeForLog(checker));
+    log.info("POST /payments/approvals/{}/approve by {}", sanitizeForLog(String.valueOf(id)), sanitizeForLog(checker));
     return ResponseEntity.ok(approvalService.approve(tenantId, id, checker));
   }
 
@@ -66,7 +66,7 @@ public class ApprovalController {
   ) {
     UUID tenantId = com.baalvion.common.security.TenantContext.resolve(tenantIdHeader);
     String checker = actor(actorHeader);
-    log.info("POST /payments/approvals/{}/reject by {}", id, sanitizeForLog(checker));
+    log.info("POST /payments/approvals/{}/reject by {}", sanitizeForLog(String.valueOf(id)), sanitizeForLog(checker));
     return ResponseEntity.ok(approvalService.reject(tenantId, id, checker, reason));
   }
 

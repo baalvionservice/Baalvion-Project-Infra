@@ -66,7 +66,7 @@ export class GoogleIndexingService {
       });
 
       console.log('Google Indexing API notification sent for %s:', sanitizeForLog(url), {
-        type,
+        type: sanitizeForLog(type),
         status: response.status,
         data: response.data,
       });

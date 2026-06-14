@@ -136,7 +136,7 @@ export default function CityPage() {
               "@type": "Product",
               name: p.name,
             })),
-          }),
+          }).replace(/</g, '\\u003c'),
         }}
       />
 

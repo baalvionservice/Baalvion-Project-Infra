@@ -55,7 +55,7 @@ public class ApprovalService {
       .makerId(makerId != null ? makerId : "unknown")
       .build();
     var saved = repository.save(request);
-    log.info("Maker-checker: reversal approval {} raised by {} for txn {}", saved.getId(), sanitizeForLog(makerId), transactionId);
+    log.info("Maker-checker: reversal approval {} raised by {} for txn {}", saved.getId(), sanitizeForLog(makerId), sanitizeForLog(String.valueOf(transactionId)));
     return mapToResponse(saved);
   }
 
@@ -75,7 +75,7 @@ public class ApprovalService {
     approval.setCheckerId(checkerId);
     approval.setDecidedAt(LocalDateTime.now());
     var saved = repository.save(approval);
-    log.info("Maker-checker: approval {} approved by {} (op={})", approvalId, sanitizeForLog(checkerId), approval.getOperation());
+    log.info("Maker-checker: approval {} approved by {} (op={})", sanitizeForLog(String.valueOf(approvalId)), sanitizeForLog(checkerId), approval.getOperation());
     return mapToResponse(saved);
   }
 
