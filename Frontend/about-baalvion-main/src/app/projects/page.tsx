@@ -3,6 +3,11 @@ import { Navbar } from "@/components/navbar";
 import { Footer } from "@/components/footer";
 import ProjectsPageServer from "@/components/projects-page-server";
 import { getProjects } from "@/lib/server-data";
+import { JsonLd } from "@/components/json-ld";
+import { BASE_URL, breadcrumbSchema, collectionSchema } from "@/lib/schema";
+
+const PROJECTS_DESCRIPTION =
+  "A curated landscape of high-impact infrastructure projects architected to resolve terminal fragmentation in global commerce and financial clearing.";
 
 export const metadata: Metadata = {
   title: "Projects | Strategic BOS Initiatives",
@@ -39,8 +44,24 @@ export default async function Page() {
   // Fetch projects data on the server for SEO optimization
   const projects = await getProjects();
 
+  const schema = [
+    breadcrumbSchema([
+      { name: "Home", url: "/" },
+      { name: "Projects", url: "/projects" },
+    ]),
+    collectionSchema({
+      name: "Projects",
+      description: PROJECTS_DESCRIPTION,
+      url: `${BASE_URL}/projects`,
+      items: projects
+        .filter((p) => p.id)
+        .map((p) => ({ name: p.name, url: `/projects/${p.id}` })),
+    }),
+  ];
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
+      <JsonLd data={schema} />
       <Navbar />
       <ProjectsPageServer projects={projects} />
       <Footer />
