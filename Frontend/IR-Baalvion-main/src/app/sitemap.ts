@@ -4,6 +4,7 @@ import { pageService } from "@/core/services/page.service";
 import { boardMaterialsService } from "@/core/services/board-materials.service";
 import { navigationService } from "@/core/services/navigation.service";
 import { contentService } from "@/core/services/content.service";
+import { IR_PAGES } from "@/lib/ir-pages";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = AppConfig.baseUrl;
@@ -128,6 +129,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     },
   ];
+
+  // Canonical institutional IR marketing pages (why-invest, thesis, market,
+  // use-of-proceeds, story, financials, governance framework, FAQ, resources).
+  // Sourced from the single source of truth in src/lib/ir-pages.ts so the
+  // sitemap stays in sync with what is rendered + seeded into the CMS, and
+  // these high-value pages are listed even if the dynamic CMS fetch fails.
+  const irMarketingRoutes = IR_PAGES.map((page) => ({
+    url: `${baseUrl}${page.slug}`,
+    lastModified: currentDate,
+    changeFrequency: "weekly" as const,
+    priority: page.slug === "/why-invest" ? 0.9 : 0.8,
+  }));
 
   // Resources section routes
   const resourcesRoutes = [
@@ -345,6 +358,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Combine all routes and remove duplicates
   const allRoutes = [
     ...staticRoutes,
+    ...irMarketingRoutes,
     ...governanceRoutes,
     ...newsEventsRoutes,
     ...resourcesRoutes,

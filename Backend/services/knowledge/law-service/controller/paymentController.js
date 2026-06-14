@@ -108,10 +108,10 @@ const createPayment = async (req, res, next) => {
             }, 201);
         }
 
-        // No gateway configured -> simulated settlement so the full flow is testable now.
-        await payment.update({ status: 'succeeded' });
-        await settleBooking(payment);
-        return sendSuccess(req, res, { ...payment.toJSON(), gateway: 'simulated' }, 201);
+        // No gateway configured -> fail closed. Never fabricate a settlement; the payment row stays
+        // recorded (as failed) for audit and the caller gets a clear "gateway unavailable" error.
+        await payment.update({ status: 'failed' });
+        return next(new AppError('PAYMENT_GATEWAY_UNAVAILABLE', 'Payment gateway is not configured', 503));
     } catch (err) { return next(err); }
 };
 
@@ -147,8 +147,9 @@ const verifyPayment = async (req, res, next) => {
             }
             await payment.update({ status: 'succeeded', provider_tx_id: razorpay_payment_id || payment.provider_tx_id });
         } else {
-            // Simulated path (no keys) — settle.
-            await payment.update({ status: 'succeeded' });
+            // No gateway configured -> fail closed. Never settle without a verified gateway callback.
+            await payment.update({ status: 'failed' });
+            return next(new AppError('PAYMENT_GATEWAY_UNAVAILABLE', 'Payment gateway is not configured', 503));
         }
         await settleBooking(payment);
         return sendSuccess(req, res, payment);
@@ -170,6 +171,9 @@ const webhookHandler = async (req, res) => {
             if (!razorpay.verifyWebhookSignature(raw, signature)) {
                 return res.status(400).json({ error: 'invalid signature' });
             }
+        } else {
+            // No gateway configured -> reject. There is no unauthenticated settlement path.
+            return res.status(503).json({ error: 'payment gateway not configured' });
         }
         const event = JSON.parse(raw.toString('utf8') || '{}');
         const type = event.event;

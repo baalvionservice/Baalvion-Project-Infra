@@ -18,6 +18,28 @@ const PUBLIC_PREFIXES = [
   '/leaderboard', '/pricing', '/privacy', '/terms', '/about',
 ];
 
+// `(public)/candidate/[id]` and `(public)/company/[id]` are PUBLIC, crawlable profile
+// pages — but they share the `/candidate/` and `/company/` URL prefixes with the gated
+// `(app)/candidate/*` and `(app)/company/*` workspaces. We therefore allow ONLY a single
+// non-reserved segment (the profile id) and keep every named private subpath gated.
+// This fails CLOSED: anything not provably a public profile id stays behind the auth gate.
+const RESERVED_PRIVATE_SEGMENTS: Record<'candidate' | 'company', readonly string[]> = {
+  candidate: ['dashboard', 'profile', 'rankings', 'submissions', 'tasks', 'live-session'],
+  company: [
+    'analytics', 'billing', 'compare', 'dashboard', 'feedback', 'invoices',
+    'live-session', 'onboarding', 'recordings', 'settings', 'submissions',
+    'subscription', 'tasks', 'usage',
+  ],
+};
+
+function isPublicEntityProfile(pathname: string): boolean {
+  const match = pathname.match(/^\/(candidate|company)\/([^/]+)\/?$/);
+  if (!match) return false; // deeper paths (e.g. /candidate/submissions/[id]) stay gated
+  const kind = match[1] as 'candidate' | 'company';
+  const segment = match[2];
+  return !RESERVED_PRIVATE_SEGMENTS[kind].includes(segment);
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -28,7 +50,8 @@ export function middleware(request: NextRequest) {
 
   const isPublic =
     pathname === '/' ||
-    PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'));
+    PUBLIC_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/')) ||
+    isPublicEntityProfile(pathname);
   if (isPublic) {
     return NextResponse.next();
   }

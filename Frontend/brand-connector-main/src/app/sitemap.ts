@@ -4,25 +4,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl =
     process.env.NEXT_PUBLIC_APP_URL || "https://connect.baalvion.com";
 
-  // Static routes that are always indexable
+  // Static routes that are always indexable.
+  // NOTE: /auth/* (login, signup, password, verify) are intentionally excluded —
+  // they are noindex transactional pages, so listing them in the sitemap would
+  // contradict their robots directives.
   const staticRoutes: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}`,
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/auth/login`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/auth/signup`,
-      lastModified: new Date(),
-      changeFrequency: "monthly",
-      priority: 0.9,
     },
     {
       url: `${baseUrl}/pricing`,
@@ -41,6 +32,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/status`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.5,
     },
   ];
 

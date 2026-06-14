@@ -1,4 +1,42 @@
+# Baalvion Insiders — invite-only founder/investor network.
+# The public landing pages are crawlable; the gated members area is not.
+
 User-agent: *
 Allow: /
+Disallow: /auth
+Disallow: /dashboard
+Disallow: /forums
+Disallow: /marketplace
+Disallow: /profile
+Disallow: /checkout
+Disallow: /leaderboard
+Disallow: /admin
+Disallow: /reset-password
 
-Sitemap: https://www.marketunderworld.com/sitemap.xml
+# Explicit allow for major AI / LLM crawlers so the public landing can be
+# discovered and summarized by AI search engines.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+Sitemap: https://insiders.baalvion.com/sitemap.xml

@@ -219,7 +219,7 @@ async function matchInvestors(req, res, next) {
 }
 
 // ── Payments: tiers, proration quote, create-order, confirm ───────────────────
-const { getProvider } = require('../payments');
+const { getProvider, PROVIDERS } = require('../payments');
 const TIER_LABEL = { founder: 'Founder', investor_partner: 'Investor Partner' };
 
 // Quote the amount due to move to `targetTier`, applying the upgrade-within-grace rule.
@@ -250,7 +250,9 @@ async function paymentTiers(req, res, next) {
             current: membership?.status === 'active' && membership.plan === t,
             quote: quoteTier(membership, t),
         }));
-        return sendSuccess(req, res, { tiers, membership, grace_days: config.upgradeGraceDays, providers: ['razorpay', 'payu', 'stripe', 'crypto'] });
+        // Only advertise gateways that are actually configured — never offer a provider that will fail closed.
+        const providers = Object.values(PROVIDERS).filter((p) => p.configured()).map((p) => p.name);
+        return sendSuccess(req, res, { tiers, membership, grace_days: config.upgradeGraceDays, providers });
     } catch (err) { return next(err); }
 }
 
@@ -260,6 +262,7 @@ async function paymentOrder(req, res, next) {
         const { provider: providerName, tier } = req.body || {};
         const provider = getProvider(providerName);
         if (!provider) throw new AppError('BAD_REQUEST', 'Unknown payment provider', 400);
+        if (!provider.configured()) throw new AppError('PAYMENT_GATEWAY_UNAVAILABLE', 'Payment gateway is not configured', 503);
         if (!config.tiers[tier]) throw new AppError('BAD_REQUEST', 'Unknown tier', 400);
         const membership = await db.Membership.findOne({ where: { user_id: req.auth.userId } });
         const q = quoteTier(membership, tier);
@@ -273,7 +276,7 @@ async function paymentOrder(req, res, next) {
             meta: { tier, name: profile?.full_name, email: req.auth.email },
         });
         await payment.update({ provider_order_id: order.order_id });
-        return sendSuccess(req, res, { payment_id: payment.id, provider: providerName, amount: q.amount, proration: q.proration, note: q.note, order, demo: !!order.demo });
+        return sendSuccess(req, res, { payment_id: payment.id, provider: providerName, amount: q.amount, proration: q.proration, note: q.note, order });
     } catch (err) { return next(err); }
 }
 
@@ -285,10 +288,11 @@ async function paymentConfirm(req, res, next) {
         if (!payment) throw new AppError('NOT_FOUND', 'Payment not found', 404);
         if (payment.status === 'paid') return sendSuccess(req, res, { already: true });
         const provider = getProvider(payment.provider);
+        if (!provider || !provider.configured()) throw new AppError('PAYMENT_GATEWAY_UNAVAILABLE', 'Payment gateway is not configured', 503);
         const ok = provider.verify({ payment, payload });
         if (!ok) { await payment.update({ status: 'failed' }); throw new AppError('PAYMENT_FAILED', 'Payment verification failed', 402); }
 
-        await payment.update({ status: 'paid', provider_ref: payload?.payment_id || payload?.id || `demo_${Date.now()}` });
+        await payment.update({ status: 'paid', provider_ref: payload?.payment_id || payload?.id || payment.provider_order_id });
         const now = new Date();
         const [m] = await db.Membership.findOrCreate({
             where: { user_id: req.auth.userId },

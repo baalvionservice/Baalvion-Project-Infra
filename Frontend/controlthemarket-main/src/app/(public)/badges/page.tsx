@@ -1,4 +1,5 @@
-
+import type { Metadata } from 'next';
+import { absoluteUrl } from '@/lib/site-url';
 import {
   Card,
   CardContent,
@@ -11,6 +12,21 @@ import { badges as mockBadges } from '@/lib/badges';
 import type { Badge } from '@/lib/types';
 import { Trophy, ShieldCheck, Rocket, Award, BrainCircuit } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+export const metadata: Metadata = {
+  title: 'Skill Badges',
+  description:
+    'Explore the verifiable skill badges candidates earn on ControlTheMarket by proving real-world performance — recognised credentials that signal proven ability, not paper.',
+  alternates: {
+    canonical: absoluteUrl('/badges'),
+  },
+  openGraph: {
+    url: absoluteUrl('/badges'),
+    title: 'Skill Badges | ControlTheMarket',
+    description:
+      'Verifiable skill badges candidates earn by proving real-world performance — recognised credentials that signal proven ability.',
+  },
+};
 
 const badgeIcons: { [key: string]: React.ElementType } = {
   Trophy, ShieldCheck, Rocket, Award, BrainCircuit

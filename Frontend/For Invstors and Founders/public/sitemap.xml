@@ -2,18 +2,15 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
   <url>
-    <loc>https://www.marketunderworld.com/</loc>
+    <loc>https://insiders.baalvion.com/</loc>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
-    <loc>https://www.marketunderworld.com/blog</loc>
+    <loc>https://insiders.baalvion.com/elite</loc>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
-  </url>
-
-  <url>
-    <loc>https://www.marketunderworld.com/contact</loc>
-    <priority>0.7</priority>
   </url>
 
 </urlset>

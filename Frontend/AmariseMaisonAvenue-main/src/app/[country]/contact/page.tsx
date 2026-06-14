@@ -1,6 +1,8 @@
 import React from 'react';
 import { Metadata } from 'next';
 import { COUNTRIES } from '@/lib/mock-data';
+import { buildAlternates } from '@/lib/seo';
+import { normalizeCountry } from '@/lib/i18n/countries';
 import { ContactFormClient, GlobalAtelier } from './contact-form-client';
 import {
   Phone,
@@ -26,6 +28,12 @@ export async function generateMetadata({ params }: ContactPageProps): Promise<Me
   return {
     title: `Contact AMARISÉ MAISON | Concierge Services in ${currentCountry.office?.city}`,
     description: 'Reach out to our private client concierge team for bespoke requests, appointments, and inquiries. Available worldwide.',
+    alternates: buildAlternates(normalizeCountry(countryCode), '/contact'),
+    openGraph: {
+      title: 'Contact AMARISÉ MAISON | Private Client Concierge',
+      description: 'Reach our private client concierge for bespoke requests, appointments, and inquiries worldwide.',
+      type: 'website',
+    },
   };
 }
 
