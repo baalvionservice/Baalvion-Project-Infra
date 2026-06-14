@@ -11,9 +11,11 @@ const db = require('../models');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { auditPayment } = require('../utils/audit');
-const { getProvider } = require('../integrations/payment/consumerProvider');
+const { getProvider, payuVerifyReturn, payuParseReturn } = require('../integrations/payment/consumerProvider');
+const { runWithTenant } = require('@baalvion/tenancy');
 
 const tenantOf = (req) => (req.auth && (req.auth.tenantId || req.auth.orgId)) || null;
+const STOREFRONT = (process.env.STOREFRONT_URL || 'http://localhost:9003').replace(/\/+$/, '');
 const GATEWAYS = ['razorpay', 'stripe', 'payu', 'bank'];
 
 const intentSchema = z.object({ gateway: z.enum(GATEWAYS) });
@@ -113,4 +115,41 @@ async function capturePayment(req, res, next) {
     } catch (err) { return next(err); }
 }
 
-module.exports = { createPaymentIntent, capturePayment };
+// POST /v1/webhooks/payu — PayU form-POST return. PayU posts the result (form-encoded) here after
+// its hosted page. We verify the SHA-512 REVERSE hash (the provider's auth — NOT user auth), settle
+// the order CROSS-TENANT under bypass (the same trusted-writer pattern as the razorpay webhook), then
+// 303-redirect the browser back to the order. Idempotent + order-row locked.
+async function payuReturn(req, res) {
+    const body = req.body || {};
+    const bounce = (flag, orderId) => res.redirect(303, orderId ? `${STOREFRONT}/orders/${orderId}?payu=${flag}` : `${STOREFRONT}/orders?payu=${flag}`);
+    if (!payuVerifyReturn(body)) return bounce('failed');
+    const parsed = payuParseReturn(body);
+    if (!parsed.txnid) return bounce('failed');
+    try {
+        const out = await runWithTenant({ tenantId: null, bypass: true }, () =>
+            db.sequelize.transaction(async (t) => {
+                const payment = await db.OrderPayment.findOne({ where: { intent_id: parsed.txnid }, transaction: t });
+                if (!payment) return { ok: false };
+                const order = await db.Order.findByPk(payment.order_id, { transaction: t, lock: t.LOCK.UPDATE });
+                if (!order) return { ok: false };
+                if (order.payment_status === 'confirmed') return { ok: true, orderId: order.id, settled: 'paid' };
+                if (parsed.status === 'captured') {
+                    await payment.update({ status: 'captured', paid_at: new Date(), metadata: { ...(payment.metadata || {}), transactionId: parsed.mihpayid, capturedVia: 'payu_return' } }, { transaction: t });
+                    order.payment_status = 'confirmed';
+                    if (order.status === 'placed' || order.status === 'draft') order.status = 'payment_confirmed';
+                    await order.save({ transaction: t });
+                    return { ok: true, orderId: order.id, settled: 'paid' };
+                }
+                await payment.update({ status: 'failed', metadata: { ...(payment.metadata || {}), reason: `payu_${String(body.status || 'failed')}` } }, { transaction: t });
+                order.payment_status = 'failed';
+                await order.save({ transaction: t });
+                return { ok: true, orderId: order.id, settled: 'failed' };
+            }));
+        if (!out.ok) return bounce('failed');
+        return bounce(out.settled === 'paid' ? 'success' : 'failed', out.orderId);
+    } catch (e) {
+        return bounce('failed');
+    }
+}
+
+module.exports = { createPaymentIntent, capturePayment, payuReturn };
