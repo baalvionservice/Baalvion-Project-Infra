@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import { toast } from "@/hooks/use-toast";
+import type { ToastActionElement } from "@/components/ui/toast";
 
 interface UndoOptions {
   description: string;
@@ -37,7 +38,7 @@ export function useUndoAction() {
         >
           Undo
         </button>
-      ) as any,
+      ) as ToastActionElement,
     });
 
     timerRef.current = setTimeout(() => {

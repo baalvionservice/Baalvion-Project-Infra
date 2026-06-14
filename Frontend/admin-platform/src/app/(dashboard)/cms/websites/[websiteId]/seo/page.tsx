@@ -111,7 +111,7 @@ export default function WebsiteSeoPage({
                   onChange={(e) => setTitleSuffix(e.target.value)}
                 />
                 <p className="text-[11px] text-muted-foreground">
-                  Appended to every page title. Example: "Page Title | Your Brand"
+                  Appended to every page title. Example: &quot;Page Title | Your Brand&quot;
                 </p>
               </div>
 

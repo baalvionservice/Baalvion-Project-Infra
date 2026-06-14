@@ -117,7 +117,7 @@ export function userReducer(
     case "USER_FETCH_ERROR":
       return { ...state, isLoading: false };
       
-    case "USER_UPDATE_PROFILE":
+    case "USER_UPDATE_PROFILE": {
       if (!state.user) return state;
       const updatedUser = { ...state.user, ...action.payload };
       return {
@@ -126,6 +126,7 @@ export function userReducer(
         profileComplete: calculateProfileComplete(updatedUser),
         profileCompletion: calculateProfileCompletion(updatedUser),
       };
+    }
       
     case "USER_UPDATE_PREFERENCES":
       return {

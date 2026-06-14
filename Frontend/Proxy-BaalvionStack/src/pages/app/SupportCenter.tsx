@@ -46,7 +46,7 @@ export default function SupportCenter() {
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => setSelectedTicket(null)}>← Back</Button>
           <h1 className="text-xl font-bold">{ticket.id}: {ticket.subject}</h1>
-          <Badge variant={statusColor(ticket.status) as any}>{ticket.status.replace("_", " ")}</Badge>
+          <Badge variant={statusColor(ticket.status)}>{ticket.status.replace("_", " ")}</Badge>
         </div>
         <Card>
           <CardContent className="p-6 space-y-4">
@@ -103,7 +103,7 @@ export default function SupportCenter() {
                       <TableCell className="font-medium">{t.subject}</TableCell>
                       <TableCell><Badge variant="outline">{t.category}</Badge></TableCell>
                       <TableCell><Badge variant={t.priority === "High" ? "destructive" : t.priority === "Medium" ? "warning" : "secondary"}>{t.priority}</Badge></TableCell>
-                      <TableCell><Badge variant={statusColor(t.status) as any}>{t.status.replace("_", " ")}</Badge></TableCell>
+                      <TableCell><Badge variant={statusColor(t.status)}>{t.status.replace("_", " ")}</Badge></TableCell>
                       <TableCell className="text-muted-foreground text-sm">{t.updated}</TableCell>
                     </TableRow>
                   ))}
