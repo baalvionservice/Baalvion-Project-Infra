@@ -45,6 +45,9 @@ export interface CheckoutInit {
 
 export type CheckoutResult =
   | { status: "success"; provider: string; reference: string }
+  // The browser is leaving for a hosted page (Stripe redirect / PayU form-POST). NOT paid yet —
+  // settlement arrives via the provider webhook → ledger. Callers must NOT treat this as success.
+  | { status: "redirecting"; provider: string; reference: string }
   | { status: "cancelled" }
   | { status: "failed"; message: string };
 
@@ -101,7 +104,7 @@ export async function startGatewayCheckout(req: CheckoutRequest): Promise<Checko
 
   if (init.provider === "stripe" && init.checkoutUrl) {
     window.location.href = init.checkoutUrl; // hosted Stripe Checkout (redirect)
-    return { status: "success", provider: "stripe", reference: init.orderId };
+    return { status: "redirecting", provider: "stripe", reference: init.orderId };
   }
 
   if (init.provider === "payu") {
@@ -122,7 +125,7 @@ export async function startGatewayCheckout(req: CheckoutRequest): Promise<Checko
     document.body.appendChild(form);
     form.submit();
     // The browser leaves this page for PayU; settlement returns via the provider webhook → ledger.
-    return { status: "success", provider: "payu", reference: init.orderId };
+    return { status: "redirecting", provider: "payu", reference: init.orderId };
   }
 
   if (init.provider === "razorpay") {

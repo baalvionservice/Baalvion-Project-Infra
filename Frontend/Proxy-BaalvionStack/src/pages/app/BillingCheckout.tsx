@@ -203,6 +203,7 @@ export default function BillingCheckout() {
           customer: customerName ? { name: customerName } : undefined,
         });
         if (res.status === "success") paid = true;
+        else if (res.status === "redirecting") return; // browser is leaving for the hosted page; settle via webhook
         else if (res.status === "cancelled") return; // stay on confirm so they can retry
         // A genuine decline/failure is shown as a failure in ALL environments —
         // never auto-"paid" (that would let a declined card activate a plan).

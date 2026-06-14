@@ -35,7 +35,8 @@ async function createPaymentIntent(req, res, next) {
         const body = intentSchema.parse(req.body || {});
         const tenantId = tenantOf(req);
         const result = await db.sequelize.transaction(async (t) => {
-            const order = await db.Order.findByPk(req.params.id, { transaction: t });
+            // Tenant-scoped lookup (defence-in-depth atop RLS) — never resolve another tenant's order.
+            const order = await db.Order.findOne({ where: { id: req.params.id, tenant_id: tenantId }, transaction: t });
             if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
             if (order.payment_status === 'confirmed') throw new AppError('CONFLICT', 'Order is already paid', 409);
             const provider = getProvider(body.gateway);
@@ -82,8 +83,9 @@ async function createPaymentIntent(req, res, next) {
 async function capturePayment(req, res, next) {
     try {
         const body = captureSchema.parse(req.body || {});
+        const tenantId = tenantOf(req);
         const out = await db.sequelize.transaction(async (t) => {
-            const order = await db.Order.findByPk(req.params.id, { transaction: t, lock: t.LOCK.UPDATE });
+            const order = await db.Order.findOne({ where: { id: req.params.id, tenant_id: tenantId }, transaction: t, lock: t.LOCK.UPDATE });
             if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
             const payment = await db.OrderPayment.findOne({ where: { order_id: order.id, intent_id: body.intentId }, transaction: t });
             if (!payment) throw new AppError('CONFLICT', 'No matching payment intent for this order', 409);
@@ -133,6 +135,10 @@ async function payuReturn(req, res) {
                 const order = await db.Order.findByPk(payment.order_id, { transaction: t, lock: t.LOCK.UPDATE });
                 if (!order) return { ok: false };
                 if (order.payment_status === 'confirmed') return { ok: true, orderId: order.id, settled: 'paid' };
+                // Defence-in-depth atop the reverse-hash: settled amount MUST match the order total.
+                if (Math.abs(parseFloat(parsed.amount) - Number(order.total_value)) > 0.01) {
+                    return { ok: true, orderId: order.id, settled: 'failed' };
+                }
                 if (parsed.status === 'captured') {
                     await payment.update({ status: 'captured', paid_at: new Date(), metadata: { ...(payment.metadata || {}), transactionId: parsed.mihpayid, capturedVia: 'payu_return' } }, { transaction: t });
                     order.payment_status = 'confirmed';

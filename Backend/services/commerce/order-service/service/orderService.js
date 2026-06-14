@@ -699,8 +699,13 @@ async function settlePayuReturn(body) {
     if (!parsed.txnid) return { ok: false, reason: 'missing_txnid' };
     const payment = await OrdersOrderPayment.findOne({ where: { transactionId: parsed.txnid }, attributes: ['orderId'] });
     if (!payment) return { ok: false, reason: 'unknown_order' };
-    const order = await OrdersOrder.findOne({ where: { id: payment.orderId }, attributes: ['id', 'storeId', 'market'] });
+    const order = await OrdersOrder.findOne({ where: { id: payment.orderId }, attributes: ['id', 'storeId', 'market', 'totalAmount'] });
     if (!order) return { ok: false, reason: 'order_not_found' };
+    // Defence-in-depth (beyond the reverse-hash): the settled amount MUST match the order total, so a
+    // leaked salt alone can't capture a tampered/short amount. PayU echoes the amount we submitted.
+    if (Math.abs(parseFloat(parsed.amount) - Number(order.totalAmount)) > 0.01) {
+        return { ok: true, orderId: order.id, market: order.market, settled: 'failed' };
+    }
     if (parsed.status === 'captured') {
         await capturePaymentFromWebhook({ providerOrderId: parsed.txnid, providerPaymentId: parsed.mihpayid });
         return { ok: true, orderId: order.id, market: order.market, settled: 'paid' };

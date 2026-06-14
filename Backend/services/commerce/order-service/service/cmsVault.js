@@ -18,6 +18,18 @@ const DEFAULT_SLUG = process.env.PAYMENT_SITE_SLUG || '';
 const TTL_MS = Number(process.env.CMS_VAULT_TTL_MS || 60000);
 const SERVICE = process.env.SERVICE_NAME || 'order-payments';
 
+// Never authenticate to the vault with the publicly-known dev secret in production (matches the
+// platform-wide internal-secret guard in billingRoutes / cms-service / payment-service appConfig).
+if (process.env.NODE_ENV === 'production'
+  && (!process.env.INTERNAL_SERVICE_SECRET || INTERNAL_SECRET === 'baalvion-internal-dev-secret')) {
+  throw new Error('INTERNAL_SERVICE_SECRET must be set to a non-default value (CMS vault auth)');
+}
+// SSRF guard: the vault host comes from env (privileged) but must never resolve to link-local /
+// cloud-metadata addresses — a misconfigured value would exfiltrate the internal secret + PSP keys.
+if (/(^|\/\/)(169\.254\.|127\.|0\.0\.0\.0|metadata|169\.254\.169\.254)/i.test(CMS_URL) && process.env.NODE_ENV === 'production') {
+  throw new Error('CMS_INTERNAL_URL must not point at a link-local/metadata host');
+}
+
 const cache = new Map(); // `${slug}|${provider}` -> { at, value }
 
 async function fetchVault(slug, provider) {
