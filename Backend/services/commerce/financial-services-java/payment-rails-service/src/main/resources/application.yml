@@ -77,5 +77,6 @@ app:
     high-value-threshold: 100000
     # UPI per-transaction ceiling (INR); above it, fall back to SWIFT/wire.
     upi-max-amount: 100000
-    # Active rail provider: "simulated" (default, self-contained) | "psp" (real adapters, needs creds).
-    rail-provider: ${RAIL_PROVIDER:simulated}
+    # Rail clearing is fail-closed by default: with no real PSP adapter wired, instructions are
+    # refused (recorded FAILED) rather than fake-settled. Add a real PaymentRailProvider bean to
+    # enable production clearing.

@@ -6,9 +6,9 @@ import java.math.BigDecimal;
 
 /**
  * Port to the rail/PSP that actually clears the payment (SWIFT correspondent, SEPA gateway,
- * UPI/PSP aggregator, etc.). Selected by {@code app.payment-rails.rail-provider}; the default
- * {@link SimulatedRailProvider} is self-contained for local/dev, and real PSP adapters can be
- * dropped in without touching the routing/domain logic.
+ * UPI/PSP aggregator, etc.). When no real adapter is wired, {@link FailClosedRailProvider} is the
+ * default fallback ({@link RailProviderConfig}) and refuses instructions rather than fabricating a
+ * settlement. Real PSP adapters can be dropped in without touching the routing/domain logic.
  */
 public interface PaymentRailProvider {
 
