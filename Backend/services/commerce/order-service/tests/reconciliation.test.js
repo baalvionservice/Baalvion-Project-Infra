@@ -16,6 +16,14 @@ const ledgerClient = require('../service/ledgerClient');
 const orderService = require('../service/orderService');
 const reconciliation = require('../service/reconciliationService');
 
+// Force the deterministic, non-production MOCK payment provider so the refund lifecycle is exercised
+// offline. config/appConfig loads .env with { override: true }, which sets PAYMENT_PROVIDER=razorpay;
+// left as-is, getProvider() would resolve the REAL Razorpay adapter and refundPayment() would make a
+// live api.razorpay.com call (404 for a synthetic payment id). getProvider() reads this env var fresh
+// on every call, and dotenv has already run by this point, so setting it here is authoritative.
+// This is the "provider stubbed" the test header refers to — the mock refund always succeeds locally.
+process.env.PAYMENT_PROVIDER = 'mock';
+
 const STORE = '11111111-1111-1111-1111-111111111111';
 const ledgerCalls = [];
 async function code(fn) { try { await fn(); return 200; } catch (e) { return e.statusCode || 500; } }
