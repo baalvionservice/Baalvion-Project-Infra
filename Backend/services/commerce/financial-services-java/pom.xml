@@ -64,6 +64,10 @@
          43513 HIGH) and Netty 4.1.132 -> 4.1.133.Final (CVE-2026-42583 HIGH). Within-minor patches. -->
     <tomcat.version>10.1.55</tomcat.version>
     <netty.version>4.1.133.Final</netty.version>
+    <!-- Override the Spring Boot 3.5.14 BOM's spring-kafka 3.3.15 (CVE-2026-41731 HIGH: overly broad
+         trusted-package deserialization). 3.3.16 is the within-minor patch; property is BOM-managed,
+         so it overrides spring-kafka + spring-kafka-test for every module. -->
+    <spring-kafka.version>3.3.16</spring-kafka.version>
   </properties>
 
   <dependencyManagement>
