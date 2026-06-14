@@ -385,10 +385,12 @@ public class SanctionsService {
     log.info("Sanctions screening: id={}, tenant={}, status={}, topScore={}, hits={}, sources={}, breakdown={}",
       saved.getId(), tenantId, status, topScore, hits.size(), sourcesChecked, sourceBreakdown(hits));
 
+    // PII policy: the screened subject name is NOT published on Kafka. It is persisted on the
+    // tenant-scoped sanctions_screenings row only; consumers that need it must read it from the DB by
+    // (screeningId, tenantId). The event carries identifiers + verdict, never the raw name.
     Map<String, Object> event = new HashMap<>();
     event.put("screeningId", saved.getId());
     event.put("tenantId", tenantId);
-    event.put("subjectName", req.getName());
     event.put("status", status.name());
     event.put("topScore", topScore);
     event.put("hitCount", hits.size());
