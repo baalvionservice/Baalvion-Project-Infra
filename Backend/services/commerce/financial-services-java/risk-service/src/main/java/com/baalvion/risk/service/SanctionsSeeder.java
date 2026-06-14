@@ -1,5 +1,6 @@
 package com.baalvion.risk.service;
 
+import com.baalvion.risk.config.SanctionsEnforcement;
 import com.baalvion.risk.config.SanctionsProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -25,6 +26,12 @@ public class SanctionsSeeder {
 
   @EventListener(ApplicationReadyEvent.class)
   public void seedOnStartup() {
+    // Under STRICT, the authoritative watchlist load is owned by SanctionsBootstrap, which runs BEFORE the
+    // web server binds and fails the boot if the lists are missing. This post-bind seeder must not run a
+    // second (or fallback) ingest in production — it exists only for the PERMISSIVE seed-list path.
+    if (props.getEnforcement() == SanctionsEnforcement.STRICT) {
+      return;
+    }
     if (!props.isAutoSeedOnStartup()) {
       return;
     }

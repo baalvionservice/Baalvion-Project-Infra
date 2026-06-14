@@ -6,6 +6,7 @@ import com.baalvion.risk.dto.ScreeningResponse;
 import com.baalvion.risk.service.SanctionsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,6 +20,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
 
 /**
  * Sanctions screening against a real PostgreSQL: seed ingestion, an exact-alias hit escalating to
@@ -26,7 +31,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @SpringBootTest(properties = {
   "spring.kafka.listener.auto-startup=false",
-  "app.security.enabled=false"
+  "app.security.enabled=false",
+  // Seed-list screening test — explicitly permissive (the production default is strict).
+  "app.sanctions.enforcement=permissive"
 })
 @Testcontainers
 class SanctionsScreeningIntegrationTest {
@@ -118,5 +125,23 @@ class SanctionsScreeningIntegrationTest {
 
     // Tenant isolation: another tenant cannot see this screening.
     assertThat(sanctions.list(UUID.randomUUID(), null, 0, 20).getTotalElements()).isZero();
+  }
+
+  @Test
+  void screeningEventsDoNotCarrySubjectNamePii() {
+    UUID tenant = UUID.randomUUID();
+    ScreenRequest req = new ScreenRequest();
+    req.setName("Usama Bin Ladin");      // a real (would-be PII) subject name
+    req.setType("INDIVIDUAL");
+    sanctions.screen(tenant, req);
+
+    // The published event must carry identifiers + verdict only — never the raw screened name. Consumers
+    // that need the name read it from the tenant-scoped DB row by (screeningId, tenantId).
+    ArgumentCaptor<String> payload = ArgumentCaptor.forClass(String.class);
+    verify(kafkaTemplate, atLeastOnce())
+      .send(eq("sanctions.screening.completed"), anyString(), payload.capture());
+    String json = payload.getValue();
+    assertThat(json).contains("screeningId").contains("tenantId").contains("status");
+    assertThat(json).doesNotContain("subjectName").doesNotContain("Usama");
   }
 }
