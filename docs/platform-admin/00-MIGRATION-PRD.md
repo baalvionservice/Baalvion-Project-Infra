@@ -27,7 +27,7 @@ The single most important finding: **this is a consolidation, not a greenfield b
 | **Baalvion Connect** | `brand-connector-main` (`brand-connector-web`) | brand-connector-service | ~28 | Refactor → `/admin/products/connect/*` |
 | **LawEliteNetwork** | `Law-Elite-Network-main` | law-service, ecosystem/law-elite | ~6 | Refactor → `/admin/products/law/*` |
 | **ControlTheMarket (CTM)** | `controlthemarket-main` | ctm-service, market-service | ~33 | Refactor → `/admin/products/ctm/*` — **reconcile vs MarketUnderworld** |
-| **MarketUnderworld** | *spec only* (`AI Automation/marketunderworld-*.md`) | to build | 66 (spec) | **Build-new** → `/admin/products/marketunderworld/*` (decide vs CTM first) |
+| **MarketUnderworld** | *spec only* (removed — recover from git history) | to build | 66 (spec) | **Build-new** → `/admin/products/marketunderworld/*` (decide vs CTM first) |
 | **Amarise (Commerce)** | `AmariseMaisonAvenue-main` | commerce-service, order/payment/inventory | ~30 | **Merge** commerce into central `/admin/commerce`; brand-specific bits scoped |
 | **Baalvion IR** | `IR-Baalvion-main` | ir-service, cms-service | ~13 | Refactor → `/admin/products/ir/*` |
 | **Mining** | `Mining.Baalvion-main` | mining-service, cms-service | ~26 | Refactor → `/admin/products/mining/*` |

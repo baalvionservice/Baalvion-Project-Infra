@@ -40,8 +40,7 @@ node warroom/enforcement_e2e.cjs
 node warroom/security_e2e.cjs
 node warroom/payment_e2e.cjs       # leave INTERNAL_SERVICE_SECRET unset locally
 ```
-All four should print `PASS ✅` / end with `DONE`. See `LIMITED_BETA_SIGNOFF.md` for the
-last green run.
+All four should print `PASS ✅` / end with `DONE`.
 
 ---
 
