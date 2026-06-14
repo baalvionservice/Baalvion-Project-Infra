@@ -14,9 +14,11 @@ const authed = [authMiddleware, ex.ensureUserProfile];
 // single candidate profile) stay `optionalAuth` so Next server actions can render them
 // without the browser-held token; the single profile is returned through a public-safe
 // projection. SENSITIVE reads that expose PII / billing / candidate work / tenant data
-// (users list, submissions, invoices, subscriptions, evaluations, activities, notifications,
-// webhooks, integrations, test-cases) now require `authMiddleware` and are tenant-scoped in
-// their controllers. Every mutation (POST/PATCH/DELETE) is hard-authed + ownership-checked.
+// (users list, submissions, invoices, subscriptions, evaluations, evaluation-schemas,
+// activities, analytics, teams, notifications, webhooks, integrations incl. GitHub,
+// test-cases) require `authMiddleware` and are tenant-scoped in their controllers. These
+// back admin-only surfaces ((app)/admin/*) and must never be anonymously readable. Every
+// mutation (POST/PATCH/DELETE) is hard-authed + ownership-checked.
 // Phase 2: route authenticated reads through the BFF so server actions forward identity.
 
 // ── Companies ─────────────────────────────────────────────────────────────────
@@ -45,7 +47,8 @@ router.patch('/submissions/:id/status',  authMiddleware, ctrl.updateSubmissionSt
 // ── Evaluations ───────────────────────────────────────────────────────────────
 router.get('/evaluations',         authMiddleware, ctrl.listEvaluations);
 router.post('/evaluations',        authed, ctrl.createEvaluation);
-router.get('/evaluation-schemas',  optionalAuth,   ctrl.getEvaluationSchemas);
+// Scoring rubrics are internal admin config (reveal how candidates are graded) → require auth.
+router.get('/evaluation-schemas',  authMiddleware, ctrl.getEvaluationSchemas);
 
 // ── Users / Profiles ────────────────────────────────────────────────────────────
 // The directory list exposes emails/PII across tenants → require auth (handler still
@@ -63,7 +66,8 @@ router.get('/leaderboard',           optionalAuth,   ex.getLeaderboard);
 router.get('/badges',  optionalAuth, ctrl.listBadges);
 
 // ── Teams ─────────────────────────────────────────────────────────────────────
-router.get('/teams',  optionalAuth, ctrl.listTeams);
+// Org team rosters expose internal structure ((app)/admin/teams) → require auth.
+router.get('/teams',  authMiddleware, ctrl.listTeams);
 
 // ── Notifications ─────────────────────────────────────────────────────────────
 // `?scope=all` (admin firehose) requires a real session; the default per-user view
@@ -95,7 +99,8 @@ router.post('/invoices',     authed,         ex.createInvoice);
 router.get('/activities',  authMiddleware, ctrl.listActivities);
 
 // ── Analytics ─────────────────────────────────────────────────────────────────
-router.get('/analytics',  optionalAuth, ctrl.getAnalytics);
+// Business analytics ((app)/admin/analytics) — aggregate tenant data, not a public read.
+router.get('/analytics',  authMiddleware, ctrl.getAnalytics);
 
 // ── Observability (admin) — real metrics from prom-client/process/DB ────────────
 // These endpoints expose internal infrastructure data; restrict to admin/super_admin.
@@ -135,9 +140,10 @@ router.post('/api-integrations/:id/test', authMiddleware, integ.testApiIntegrati
 // this global log, so restrict to admins in the controller).
 router.get('/integration-logs',          adminOnly,      integ.listIntegrationLogs);
 
-// ── GitHub (real public-repo metadata; GITHUB_TOKEN optional) ───────────────────
-router.get('/integrations/github/repos', optionalAuth, integ.listGitHubRepositories);
-router.get('/integrations/github/repo',  optionalAuth, integ.getGitHubRepo);
+// ── GitHub (real repo metadata; GITHUB_TOKEN optional) ──────────────────────────
+// Integration reads expose which repos an org wires up ((app)/admin/integrations) → require auth.
+router.get('/integrations/github/repos', authMiddleware, integ.listGitHubRepositories);
+router.get('/integrations/github/repo',  authMiddleware, integ.getGitHubRepo);
 
 // ── Test cases / auto-validation (Judge0 sandbox when configured) ────────────────
 router.get('/submissions/:id/test-cases',     authMiddleware, integ.listTestCases);
