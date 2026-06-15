@@ -62,7 +62,11 @@ export async function startCheckout(args: StartCheckoutArgs): Promise<{ status: 
 
   if (provider === 'stripe') {
     const url = (cp.checkoutUrl as string) ?? data?.checkoutUrl;
-    if (!url) throw new Error('Stripe did not return a checkout URL');
+    // Defense-in-depth: only ever redirect to Stripe's own hosted checkout, never an arbitrary
+    // URL — so a tampered response can't turn this into an open redirect.
+    if (!url || !String(url).startsWith('https://checkout.stripe.com/')) {
+      throw new Error('Invalid Stripe checkout URL');
+    }
     window.location.assign(url);
     return { status: 'redirecting' };
   }

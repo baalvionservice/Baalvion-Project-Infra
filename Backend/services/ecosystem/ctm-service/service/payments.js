@@ -27,7 +27,12 @@ async function fetchVaultPayments(slug) {
     if (hit && now - hit.at < VAULT_TTL_MS) return hit.list;
     try {
         const url = `${CMS_BASE_URL.replace(/\/$/, '')}/internal/integrations/${encodeURIComponent(slug)}?category=payment`;
-        const res = await fetch(url, { headers: { 'x-internal-secret': INTERNAL_SECRET } });
+        // Bounded timeout so a slow/unresponsive CMS can't hang every checkout (DoS guard); on
+        // timeout we fall through to the last-known list / env fallback.
+        const controller = new AbortController();
+        const tid = setTimeout(() => controller.abort(), 5000);
+        const res = await fetch(url, { headers: { 'x-internal-secret': INTERNAL_SECRET }, signal: controller.signal })
+            .finally(() => clearTimeout(tid));
         if (!res.ok) return hit ? hit.list : [];
         const body = await res.json().catch(() => ({}));
         const list = Array.isArray(body) ? body : Array.isArray(body.data) ? body.data : [];
@@ -148,7 +153,11 @@ async function verifyWebhook({ rawBody, headers }) {
         if (!secret) throw new Error('Stripe webhook secret not configured');
         const cfg = await resolveConfig('stripe');
         const Stripe = require('stripe');
-        const stripe = Stripe(cfg?.secretKey || process.env.STRIPE_SECRET_KEY || 'sk_webhook_only');
+        // The SDK key is only needed to construct the client for constructEvent(), which performs a
+        // purely LOCAL HMAC check using `secret` (already verified non-empty above) — the key is
+        // never used for a network call here, so a placeholder is safe when only the webhook secret
+        // is vaulted (it does NOT weaken signature verification).
+        const stripe = Stripe(cfg?.secretKey || process.env.STRIPE_SECRET_KEY || 'sk_placeholder_unused_for_hmac');
         const evt = stripe.webhooks.constructEvent(rawBody, h['stripe-signature'], secret);
         const obj = evt.data?.object || {};
         const paid = evt.type === 'checkout.session.completed' || evt.type === 'payment_intent.succeeded';

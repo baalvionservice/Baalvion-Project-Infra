@@ -150,9 +150,15 @@ exports.upsertUser = async (req, res, next) => {
         // admin-only — a user can never self-elevate role, move orgs, or self-verify.
         const selfFields = {
             name: req.body.name,
-            email: req.body.email,
             avatar_url: req.body.avatar_url ?? req.body.avatarUrl,
         };
+        // Email mirror: a non-admin may only set the email that matches their VERIFIED token claim
+        // (or set it once when the token carries no email) — never redirect it to an arbitrary
+        // address. Admins may set any email.
+        const claimEmail = req.auth?.email;
+        if (req.body.email !== undefined && (isAdmin || !claimEmail || String(req.body.email) === String(claimEmail))) {
+            selfFields.email = req.body.email;
+        }
         const adminFields = isAdmin ? {
             role: req.body.role,
             company_id: req.body.company_id ?? req.body.companyId,
@@ -309,8 +315,19 @@ exports.updateNotification = async (req, res, next) => {
 
 exports.listTemplates = async (req, res, next) => {
     try {
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const callerOrgId = req.auth?.orgId;
         const where = {};
         if (req.query.company_id) where.company_id = req.query.company_id;
+        // Private templates are visible ONLY to their owning org (or an admin); everyone else —
+        // including anonymous callers — sees public templates only. Closes cross-tenant enumeration.
+        if (!isAdmin) {
+            where[Op.or] = [
+                { is_private: false },
+                ...(callerOrgId ? [{ is_private: true, company_id: callerOrgId }] : []),
+            ];
+        }
         const templates = await db.task_templates.findAll({ where, order: [['created_at', 'DESC']] });
         sendSuccess(res, templates);
     } catch (err) { next(err); }
@@ -412,12 +429,16 @@ exports.createInvoice = async (req, res, next) => {
         const subtotal = Number(b.subtotal ?? b.amount ?? 0);
         const tax = Number(b.tax ?? 0);
         const amount = Number(b.amount ?? subtotal + tax);
+        // Non-admins cannot manufacture a settled or zero-amount invoice: status is forced to
+        // 'Pending' and the amount must be positive. Only admins may set an explicit status.
+        if (!isAdmin && !(amount > 0)) throw new AppError('VALIDATION_ERROR', 'amount must be greater than 0', 400);
+        const status = isAdmin ? (b.status ?? 'Pending') : 'Pending';
         const inv = await db.invoices.create({
             company_id,
             subscription_id: b.subscription_id ?? b.subscriptionId,
             amount, subtotal, tax,
             currency: b.currency ?? 'USD',
-            status: b.status ?? 'Pending',
+            status,
             plan_name: b.plan_name ?? b.planName,
             issued_at: b.issued_at ?? b.date ?? new Date(),
             due_date: b.due_date ?? b.dueDate,
