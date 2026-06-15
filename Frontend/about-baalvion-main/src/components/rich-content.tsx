@@ -1,3 +1,4 @@
+import DOMPurify from 'isomorphic-dompurify';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { RichBlock } from '@/lib/cms';
@@ -112,7 +113,7 @@ export function RichContent({ blocks }: { blocks: RichBlock[] }) {
           );
         }
         if (b.type === 'html' && b.html) {
-          return <div key={key} className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: b.html }} />;
+          return <div key={key} className="prose prose-lg max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(b.html) }} />;
         }
         return (
           <p key={key} className="text-lg text-gray-700 leading-relaxed">

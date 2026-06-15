@@ -1,3 +1,4 @@
+import DOMPurify from "isomorphic-dompurify";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { cmsGetSitePage } from "@/lib/cms";
@@ -34,7 +35,7 @@ export default async function PrivacyPage() {
                 <h1 className="text-3xl font-bold mb-4">{title}</h1>
                 <div
                     className="prose prose-gray max-w-none text-gray-600 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(bodyHtml) }}
                 />
             </main>
             <Footer />
