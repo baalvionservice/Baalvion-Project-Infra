@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -65,19 +65,44 @@ const plans: Plan[] = [
   },
 ];
 
-const comparisonColumns = ['Basic', 'Pro', 'Business', 'Enterprise'] as const;
-
-const featureComparison: { feature: string; values: (string | boolean)[] }[] = [
-  { feature: 'Active Tasks', values: ['50', '50', 'Unlimited', 'Unlimited'] },
-  { feature: 'Candidates per month', values: ['100', '1,000', '5,000', 'Unlimited'] },
-  { feature: 'Advanced Analytics', values: [false, true, true, true] },
-  { feature: 'AI Task Assistant', values: [false, true, true, true] },
-  { feature: 'Team collaboration & roles', values: [false, false, true, true] },
-  { feature: 'API access', values: [false, false, true, true] },
-  { feature: 'Custom Integrations', values: [false, false, false, true] },
-  { feature: 'Dedicated Account Manager', values: [false, false, false, true] },
-  { feature: 'Support', values: ['Email', 'Priority Email', 'Priority', '24/7 Phone & Email'] },
+// Feature comparison, grouped by category. Column order matches `plans` (Basic, Pro, Business,
+// Enterprise) so the table headers + the popular-column highlight derive straight from `plans`.
+const comparisonGroups: { category: string; rows: { feature: string; values: (string | boolean)[] }[] }[] = [
+  {
+    category: 'Tasks & candidates',
+    rows: [
+      { feature: 'Active tasks', values: ['50', '50', 'Unlimited', 'Unlimited'] },
+      { feature: 'Candidates per month', values: ['100', '1,000', '5,000', 'Unlimited'] },
+    ],
+  },
+  {
+    category: 'Analytics & AI',
+    rows: [
+      { feature: 'Advanced analytics', values: [false, true, true, true] },
+      { feature: 'Custom reports', values: [false, false, true, true] },
+      { feature: 'AI Task Assistant', values: [false, true, true, true] },
+    ],
+  },
+  {
+    category: 'Collaboration',
+    rows: [
+      { feature: 'Team members', values: ['3', '10', '50', 'Unlimited'] },
+      { feature: 'Roles & permissions', values: [false, false, true, true] },
+      { feature: 'API access', values: [false, false, true, true] },
+      { feature: 'Custom integrations', values: [false, false, false, true] },
+    ],
+  },
+  {
+    category: 'Support',
+    rows: [
+      { feature: 'Support', values: ['Email', 'Priority Email', 'Priority', '24/7 Phone & Email'] },
+      { feature: 'Dedicated account manager', values: [false, false, false, true] },
+      { feature: 'SLA & uptime guarantee', values: [false, false, false, true] },
+    ],
+  },
 ];
+
+const POPULAR_COL = 1; // Pro — tinted across the whole comparison column.
 
 export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(false);
@@ -223,36 +248,81 @@ export default function PricingPage() {
         })}
       </div>
 
-      <div className="mx-auto mt-20 max-w-6xl">
-        <h2 className="text-center font-headline text-3xl font-bold">Compare all features</h2>
-        <Card className="mt-8 overflow-hidden">
+      <div className="mx-auto mt-24 max-w-6xl">
+        <div className="text-center">
+          <h2 className="font-headline text-3xl font-bold">Compare all features</h2>
+          <p className="mt-3 text-muted-foreground">Everything in each plan, side by side.</p>
+        </div>
+        <Card className="mt-10 overflow-hidden">
           <CardContent className="p-0">
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[280px]">Features</TableHead>
-                  {comparisonColumns.map((col) => (
-                    <TableHead key={col} className="text-center">{col}</TableHead>
+                <TableRow className="hover:bg-transparent">
+                  <TableHead className="w-[280px] align-bottom py-5">Plans</TableHead>
+                  {plans.map((p, i) => (
+                    <TableHead
+                      key={p.name}
+                      className={cn('py-5 text-center align-bottom', i === POPULAR_COL && 'bg-primary/5')}
+                    >
+                      <div className="flex flex-col items-center gap-1">
+                        {p.isPopular && (
+                          <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary-foreground">
+                            Popular
+                          </span>
+                        )}
+                        <span className="text-base font-semibold text-foreground">{p.name}</span>
+                        <span className="text-xs text-muted-foreground">{p.isCustom ? 'Custom' : `$${p.price.monthly}/mo`}</span>
+                      </div>
+                    </TableHead>
                   ))}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {featureComparison.map((feat) => (
-                  <TableRow key={feat.feature}>
-                    <TableCell className="font-medium">{feat.feature}</TableCell>
-                    {feat.values.map((value, i) => (
-                      <TableCell key={`${feat.feature}-${comparisonColumns[i]}`} className="text-center">
-                        {typeof value === 'boolean' ? (
-                          value
-                            ? <Check className="mx-auto h-5 w-5 text-primary" />
-                            : <X className="mx-auto h-5 w-5 text-muted-foreground/40" />
-                        ) : (
-                          <span className="text-sm">{value}</span>
-                        )}
+                {comparisonGroups.map((group) => (
+                  <Fragment key={group.category}>
+                    <TableRow className="hover:bg-transparent">
+                      <TableCell
+                        colSpan={plans.length + 1}
+                        className="bg-muted/40 py-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+                      >
+                        {group.category}
                       </TableCell>
+                    </TableRow>
+                    {group.rows.map((row) => (
+                      <TableRow key={row.feature}>
+                        <TableCell className="font-medium">{row.feature}</TableCell>
+                        {row.values.map((value, i) => (
+                          <TableCell
+                            key={`${row.feature}-${i}`}
+                            className={cn('text-center', i === POPULAR_COL && 'bg-primary/5')}
+                          >
+                            {typeof value === 'boolean' ? (
+                              value
+                                ? <Check className="mx-auto h-5 w-5 text-primary" />
+                                : <X className="mx-auto h-5 w-5 text-muted-foreground/40" />
+                            ) : (
+                              <span className="text-sm">{value}</span>
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
                     ))}
-                  </TableRow>
+                  </Fragment>
                 ))}
+                <TableRow className="hover:bg-transparent">
+                  <TableCell />
+                  {plans.map((p, i) => (
+                    <TableCell key={p.name} className={cn('py-4 text-center', i === POPULAR_COL && 'bg-primary/5')}>
+                      <Button
+                        size="sm"
+                        variant={p.isPopular ? 'default' : 'outline'}
+                        onClick={() => handleChoosePlan(p)}
+                      >
+                        {p.isCustom ? 'Contact' : 'Choose'}
+                      </Button>
+                    </TableCell>
+                  ))}
+                </TableRow>
               </TableBody>
             </Table>
           </CardContent>
