@@ -22,7 +22,8 @@ import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 
 const TENANT_COLUMNS = ['tenant_id', 'org_id', 'organization_id'];
-const IGNORE_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', 'coverage']);
+// `target` = Maven build output (a stale duplicate of src/main/resources migrations).
+const IGNORE_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', 'coverage', 'target']);
 
 /** Recursively collect *.sql files under a directory. */
 async function collectSql(dir, out = []) {
@@ -64,6 +65,35 @@ const ALTER_TENANT_RE = new RegExp(
 const norm = (t) => t.replace(/"/g, '').split('.').pop().toLowerCase();
 
 /**
+ * Strip SQL comments before matching so a COMMENTED-OUT `FORCE ROW LEVEL SECURITY`
+ * (or a commented CREATE POLICY) can never be miscounted as real coverage — that
+ * false negative would let a silent cross-tenant leak pass the gate. Removes `--`
+ * line comments and `/* … *\/` block comments; leaves `--` inside single-quoted
+ * string literals intact (RLS DDL has none, but be conservative).
+ */
+function stripSqlComments(sql) {
+  let out = '';
+  let inSingle = false;
+  for (let i = 0; i < sql.length; i += 1) {
+    const ch = sql[i];
+    const two = sql.slice(i, i + 2);
+    if (inSingle) {
+      out += ch;
+      if (ch === "'") {
+        // A doubled '' inside a string is an escaped quote, not the terminator.
+        if (sql[i + 1] === "'") { out += "'"; i += 1; } else inSingle = false;
+      }
+      continue;
+    }
+    if (ch === "'") { inSingle = true; out += ch; continue; }
+    if (two === '--') { while (i < sql.length && sql[i] !== '\n') i += 1; out += '\n'; continue; }
+    if (two === '/*') { i += 2; while (i < sql.length && sql.slice(i, i + 2) !== '*/') i += 1; i += 1; out += ' '; continue; }
+    out += ch;
+  }
+  return out;
+}
+
+/**
  * Find every tenant-scoped table in a service's combined SQL — whether the
  * tenant column was declared inline in CREATE TABLE or added later via ALTER.
  * @returns {Map<string, string>} table name → file it was first defined in
@@ -94,7 +124,10 @@ function rlsCoverage(sql) {
   };
   grab(/alter\s+table\s+(?:if\s+exists\s+)?([a-z0-9_."]+)\s+enable\s+row\s+level\s+security/gi, enabled);
   grab(/alter\s+table\s+(?:if\s+exists\s+)?([a-z0-9_."]+)\s+force\s+row\s+level\s+security/gi, forced);
-  grab(/create\s+policy\s+[a-z0-9_."]+\s+on\s+([a-z0-9_."]+)/gi, policied);
+  // Require a *_tenant_isolation policy by NAME — a leftover permissive policy
+  // (e.g. USING (true) under an unrelated name) must not count as coverage. Accepts
+  // both platform conventions: `tenant_isolation` and `<table>_tenant_isolation`.
+  grab(/create\s+policy\s+"?[a-z0-9_]*tenant_isolation"?\s+on\s+([a-z0-9_."]+)/gi, policied);
   return { enabled, forced, policied };
 }
 
@@ -122,7 +155,9 @@ async function audit(roots) {
       let combined = '';
       for (const f of svcFiles) {
         spans.push({ start: combined.length, file: f });
-        combined += (await readFile(f, 'utf8')) + '\n';
+        // Strip comments per file so commented-out RLS is never counted as coverage,
+        // while keeping byte offsets aligned for fileOf() attribution.
+        combined += stripSqlComments(await readFile(f, 'utf8')) + '\n';
       }
       const fileOf = (index) => {
         let file = svcFiles[0];

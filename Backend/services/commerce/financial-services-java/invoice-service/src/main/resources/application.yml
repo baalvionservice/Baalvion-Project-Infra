@@ -98,3 +98,13 @@ app:
   name: Baalvion Invoice Service
   version: 1.0.0
   description: Multi-tenant invoicing, accounts receivable and accounts payable for Global Trade Infrastructure
+  # Transactional-outbox relay (OutboxRelay): drains invoice events to Kafka with retry + backoff +
+  # dead-letter, replacing the old fire-and-forget publish. Defaults mirror ledger-service.
+  outbox:
+    poll-ms: ${OUTBOX_POLL_MS:2000}
+    batch-size: ${OUTBOX_BATCH_SIZE:100}
+    max-attempts: ${OUTBOX_MAX_ATTEMPTS:10}
+    send-timeout-ms: ${OUTBOX_SEND_TIMEOUT_MS:10000}
+    backoff-base-ms: ${OUTBOX_BACKOFF_BASE_MS:2000}
+    backoff-max-ms: ${OUTBOX_BACKOFF_MAX_MS:300000}
+    lease-ms: ${OUTBOX_LEASE_MS:60000}

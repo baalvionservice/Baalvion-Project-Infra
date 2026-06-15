@@ -48,24 +48,31 @@ public class GatewayController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<GatewayPaymentResponse> get(@PathVariable UUID id) {
-    log.info("GET /v1/gateway/payments/{}", id);
-    return ResponseEntity.ok(gatewayService.getById(id));
+  public ResponseEntity<GatewayPaymentResponse> get(
+    @PathVariable UUID id,
+    @RequestParam(value = "site", required = false) String site
+  ) {
+    log.info("GET /v1/gateway/payments/{}: site={}", id, sanitizeForLog(site));
+    return ResponseEntity.ok(gatewayService.getById(site, id));
   }
 
   @PostMapping("/{id}/capture")
-  public ResponseEntity<GatewayPaymentResponse> capture(@PathVariable UUID id) {
-    log.info("POST /v1/gateway/payments/{}/capture", id);
-    return ResponseEntity.ok(gatewayService.capture(id));
+  public ResponseEntity<GatewayPaymentResponse> capture(
+    @PathVariable UUID id,
+    @RequestParam(value = "site", required = false) String site
+  ) {
+    log.info("POST /v1/gateway/payments/{}/capture: site={}", id, sanitizeForLog(site));
+    return ResponseEntity.ok(gatewayService.capture(site, id));
   }
 
   @PostMapping("/{id}/refund")
   public ResponseEntity<GatewayPaymentResponse> refund(
     @PathVariable UUID id,
+    @RequestParam(value = "site", required = false) String site,
     @Valid @RequestBody(required = false) RefundGatewayPaymentRequest request
   ) {
-    log.info("POST /v1/gateway/payments/{}/refund: partial={}", id, request != null && request.getAmount() != null);
-    return ResponseEntity.ok(gatewayService.refund(id, request));
+    log.info("POST /v1/gateway/payments/{}/refund: site={}, partial={}", id, sanitizeForLog(site), request != null && request.getAmount() != null);
+    return ResponseEntity.ok(gatewayService.refund(site, id, request));
   }
 
   /** Strip CR/LF/tab from user-derived values before logging to prevent log injection. */

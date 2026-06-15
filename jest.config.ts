@@ -5,9 +5,9 @@ import type { Config } from 'jest';
  */
 const config: Config = {
   projects: [
-    '<rootDir>/packages/security/jest.config.ts',
-    '<rootDir>/packages/upload/jest.config.ts',
-    '<rootDir>/packages/search/jest.config.ts',
+    '<rootDir>/Backend/packages/security/jest.config.ts',
+    '<rootDir>/Backend/packages/upload/jest.config.ts',
+    '<rootDir>/Backend/packages/search/jest.config.ts',
   ],
 };
 

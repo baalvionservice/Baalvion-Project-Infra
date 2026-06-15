@@ -25,7 +25,9 @@ function recordFailure() {
     if (failureCount >= MAX_FAILURES) cooldownUntil = Date.now() + COOLDOWN_MS;
 }
 
-function generateTxnId() { return 'payu_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6); }
+// CSPRNG transaction id (≤25 chars for PayU). Math.random() gave only ~4 chars of
+// predictable entropy → collision/prediction risk on a financial identifier.
+function generateTxnId() { return 'payu_' + Date.now().toString(36) + '_' + crypto.randomBytes(5).toString('hex'); }
 
 function generateHash({ key, txnid, amount, productinfo, firstname, email, salt }) {
     const str = `${key}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;

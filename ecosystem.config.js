@@ -1,491 +1,189 @@
 // ============================================================================
-// Baalvion local stack — PM2 process definitions
+// Baalvion stack — PM2 process definitions (PRODUCTION / launch posture)
 // ----------------------------------------------------------------------------
-// Source of truth for the FULL local fleet (43 processes), regenerated from the
-// live running fleet (`~/.pm2/dump.pm2`) on 2026-06-13 so it matches reality.
+// Source of truth for the FULL fleet. This config is hardened for external
+// customers:
 //
-//   pm2 start ecosystem.config.js          # cold-start everything
-//   pm2 start ecosystem.config.js --only X # start one app
-//   pm2 save                               # persist to dump (what `pm2 resurrect` restores on reboot)
+//   * Every backend service runs with NODE_ENV=production.
+//   * Every frontend serves a PRODUCTION build — Next apps run `next start`
+//     and Vite SPAs run `vite preview`. No app runs a dev/HMR server.
+//   * No service borrows another service's dependencies via NODE_PATH — each
+//     package resolves from its own installed node_modules.
+//   * Restart hardening (see `harden` below) makes a crash or port race
+//     self-heal with exponential backoff instead of crash-looping.
+//
+//   pm2 start ecosystem.config.js           # cold-start everything
+//   pm2 start ecosystem.config.js --only X  # start one app
+//   pm2 save                                # persist (what `pm2 resurrect` restores)
 //
 // IMPORTANT NOTES
+//  * Frontends require a valid build BEFORE start (`pnpm build` → .next/ or
+//    dist/). Without one, `next start` / `vite preview` exit immediately. Use
+//    start-prod.ps1, which builds then starts in the correct order.
 //  * Datastores run in DOCKER, not here: postgres (:5432), redis (:6379), the
-//    financial postgres/redis (:5433/:6380), pgadmin. Start them first via the
-//    compose files and wait for (healthy).
+//    financial postgres/redis (:5433/:6380), pgadmin. Start them first (and
+//    wait for healthy) — start-prod.ps1 does this and avoids the startup storm
+//    where every DB-backed service hammers Postgres at once.
 //  * Docker-OWNED services are intentionally ABSENT here (single owner = Docker):
 //    cms-service (:3011), law-service, payment-service, rbac-service. Do NOT add
 //    them — a PM2 copy races Docker for the port and crash-loops.
-//  * Frontends vary by mode: those running `start` (Next) or `preview` (Vite)
-//    serve a PRODUCTION build — run `pnpm build` first (valid .next/ or dist/) or
-//    they crash-loop. Those running `dev` compile on the fly (no prebuild needed).
-//  * STARTUP STORM WARNING: `pm2 start ecosystem.config.js` launches every app at
-//    once. The DB-backed services will hammer Postgres simultaneously and can
-//    crash-loop on "the database system is starting up". If that happens, bring
-//    them back one at a time (`pm2 restart <name>` sequentially), not all at once.
 // ============================================================================
+
+const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
+
+// ── Fleet-wide production secrets ──────────────────────────────────────────
+// auth-gateway fail-fasts under production unless INTERNAL_SERVICE_SECRET and
+// GATEWAY_SIGNING_SECRET are real (non-dev) values, and downstream services must
+// share the SAME GATEWAY_SIGNING_SECRET to trust gateway-signed requests. Rather
+// than scatter (and desync) these across ~30 service .env files, they live in one
+// gitignored file and are injected into every backend service below.
+//
+// The file is auto-generated with strong random secrets on first use (and by
+// start-prod.ps1), so a cold `pm2 start` always boots production cleanly instead
+// of crash-looping the gateway. It is gitignored (secrets/) — never committed.
+const SHARED_KEYS = ['INTERNAL_SERVICE_SECRET', 'GATEWAY_SIGNING_SECRET', 'FINANCE_WEBHOOK_SECRET'];
+
+function loadFleetSecrets() {
+  const file = path.join(__dirname, 'secrets', 'fleet.prod.env');
+  const out = {};
+  try {
+    for (const line of fs.readFileSync(file, 'utf8').split(/\r?\n/)) {
+      const t = line.trim();
+      if (!t || t.startsWith('#')) continue;
+      const eq = t.indexOf('=');
+      if (eq === -1) continue;
+      out[t.slice(0, eq).trim()] = t.slice(eq + 1).trim().replace(/^["']|["']$/g, '');
+    }
+  } catch {
+    // File absent — generate strong secrets once so production can boot.
+    try {
+      SHARED_KEYS.forEach((k) => { out[k] = crypto.randomBytes(32).toString('hex'); });
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      const body =
+        '# Auto-generated fleet-wide production S2S secrets — gitignored, never commit.\n' +
+        '# Injected into every backend service by ecosystem.config.js so the gateway\n' +
+        '# signing/internal secrets are identical across the fleet.\n' +
+        SHARED_KEYS.map((k) => `${k}=${out[k]}`).join('\n') + '\n';
+      fs.writeFileSync(file, body, { mode: 0o600 });
+    } catch {
+      /* read-only FS — fall back to process.env values, if any */
+    }
+  }
+  return out;
+}
+
+const SHARED = loadFleetSecrets();
+
+// Shared restart-hardening. After a crash (e.g. an EADDRINUSE port race on
+// restart, or "the database system is starting up" during a cold boot), PM2
+// waits with exponential backoff (250ms → 500 → 1000 …) before retrying, so the
+// socket frees / the DB finishes booting and the next start succeeds. A start
+// must stay up 10s to count as stable; give up after 15 unstable restarts.
+const harden = {
+  interpreter: 'node',
+  exec_mode: 'fork',
+  watch: false,
+  autorestart: true,
+  kill_timeout: 8000,
+  min_uptime: 10000,
+  max_restarts: 15,
+  exp_backoff_restart_delay: 250,
+  log_date_format: 'HH:mm:ss',
+};
+
+// Backend Node service — production runtime, resolves its own node_modules,
+// inherits the fleet-wide S2S secrets. Per-service env (e.g. PORT) wins last.
+const svc = (name, cwd, env = {}) => ({
+  ...harden,
+  name,
+  cwd,
+  script: './index.js',
+  max_memory_restart: '600M',
+  env: { NODE_ENV: 'production', ...SHARED, ...env },
+});
+
+// Next.js frontend serving a production build (`next start`). Build first.
+const nextApp = (name, cwd, port, env = {}) => ({
+  ...harden,
+  name,
+  cwd,
+  script: './node_modules/next/dist/bin/next',
+  args: `start -p ${port}`,
+  max_memory_restart: '1500M',
+  env: { NODE_ENV: 'production', PORT: String(port), ...env },
+});
+
+// Vite SPA serving a production build (`vite preview`). Build first.
+const viteApp = (name, cwd, port) => ({
+  ...harden,
+  name,
+  cwd,
+  script: './node_modules/vite/bin/vite.js',
+  args: `preview --port ${port} --host`,
+  max_memory_restart: '500M',
+  env: { NODE_ENV: 'production' },
+});
 
 module.exports = {
   apps: [
-    // ── Backend services ────────────────────────────────────────────────
-    {
-      name: "about-service",
-      cwd: "./Backend/services/ecosystem/about-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "admin-service",
-      cwd: "./Backend/services/platform/admin-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "auth-gateway",
-      cwd: "./Backend/services/identity/auth-gateway",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "600M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "auth-service",
-      cwd: "./Backend/services/identity/auth-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "brand-connector-service",
-      cwd: "./Backend/services/ecosystem/brand-connector-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "600M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "commerce-service",
-      cwd: "./Backend/services/commerce/commerce-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    // No own node_modules — borrows ir-service via NODE_PATH. Schema `crm`, brand-scoped (amarise-luxe).
-    {
-      name: "crm-service",
-      cwd: "./Backend/services/ecosystem/crm-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      env: { NODE_ENV: "development", PORT: "3063", NODE_PATH: require('path').join(__dirname, 'Backend/services/ecosystem/ir-service/node_modules') },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "ctm-service",
-      cwd: "./Backend/services/ecosystem/ctm-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "600M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "dashboard-service",
-      cwd: "./Backend/services/platform/dashboard-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "600M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "fulfillment-service",
-      cwd: "./Backend/services/commerce/fulfillment-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      env: { NODE_ENV: "development", PORT: "3016" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "imperialpedia-service",
-      cwd: "./Backend/services/knowledge/imperialpedia-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "insiders-service",
-      cwd: "./Backend/services/ecosystem/insiders-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "600M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "inventory-service",
-      cwd: "./Backend/services/commerce/inventory-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "600M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "ir-service",
-      cwd: "./Backend/services/ecosystem/ir-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "600M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "jobs-service",
-      cwd: "./Backend/services/ecosystem/jobs-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "600M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "market-service",
-      cwd: "./Backend/services/commerce/market-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    // No own node_modules — borrows ir-service via NODE_PATH (same precedent as crm-service).
-    {
-      name: "marketplace-service",
-      cwd: "./Backend/services/marketplace/marketplace-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      env: { NODE_ENV: "production", NODE_PATH: require('path').join(__dirname, 'Backend/services/ecosystem/ir-service/node_modules') },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "mining-service",
-      cwd: "./Backend/services/ecosystem/mining-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "notification-service",
-      cwd: "./Backend/services/infrastructure/notification-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "oauth-service",
-      cwd: "./Backend/services/identity/oauth-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    // order-service REMOVED (finance consolidation) — the Node order-service was deleted;
-    // order lifecycle is owned by trade/order-execution-service. Do not re-add from a PM2 dump.
-    {
-      name: "proxy-service",
-      cwd: "./Backend/services/infrastructure/proxy-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "real-estate-service",
-      cwd: "./Backend/services/ecosystem/real-estate-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    // Borrows pg/ioredis/jsonwebtoken from session-service via NODE_PATH (no own node_modules).
-    {
-      name: "realtime-service",
-      cwd: "./Backend/services/platform/realtime-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      // PORT pinned to :3040 — the realtime contract port (gateway dynamic.yml, openapi,
-      // root docker-compose). The code default is 3026, which collided with jobs-web; pin
-      // it explicitly here so it binds its real port and leaves :3026 to the jobs portal.
-      env: { NODE_ENV: "development", PORT: "3040", NODE_PATH: require('path').join(__dirname, 'Backend/services/identity/session-service/node_modules') },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "session-service",
-      cwd: "./Backend/services/identity/session-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "trade-service",
-      cwd: "./Backend/services/commerce/trade-service",
-      script: "./index.js",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "600M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
+    // ── Backend services (production) ───────────────────────────────────
+    svc('about-service', './Backend/services/ecosystem/about-service'),
+    svc('admin-service', './Backend/services/platform/admin-service'),
+    svc('auth-gateway', './Backend/services/identity/auth-gateway'),
+    svc('auth-service', './Backend/services/identity/auth-service'),
+    svc('brand-connector-service', './Backend/services/ecosystem/brand-connector-service'),
+    svc('commerce-service', './Backend/services/commerce/commerce-service'),
+    // Schema `crm`, brand-scoped (amarise-luxe). Now resolves its own node_modules
+    // (pnpm install), so no NODE_PATH borrow from ir-service.
+    svc('crm-service', './Backend/services/ecosystem/crm-service', { PORT: '3063' }),
+    svc('ctm-service', './Backend/services/ecosystem/ctm-service'),
+    svc('dashboard-service', './Backend/services/platform/dashboard-service'),
+    svc('fulfillment-service', './Backend/services/commerce/fulfillment-service', { PORT: '3016' }),
+    svc('imperialpedia-service', './Backend/services/knowledge/imperialpedia-service'),
+    svc('insiders-service', './Backend/services/ecosystem/insiders-service'),
+    svc('inventory-service', './Backend/services/commerce/inventory-service'),
+    svc('ir-service', './Backend/services/ecosystem/ir-service'),
+    svc('jobs-service', './Backend/services/ecosystem/jobs-service'),
+    svc('market-service', './Backend/services/commerce/market-service'),
+    // Now resolves its own node_modules (pnpm install) — no NODE_PATH borrow.
+    svc('marketplace-service', './Backend/services/marketplace/marketplace-service'),
+    svc('mining-service', './Backend/services/ecosystem/mining-service'),
+    svc('notification-service', './Backend/services/infrastructure/notification-service'),
+    svc('oauth-service', './Backend/services/identity/oauth-service'),
+    // order-service REMOVED (finance consolidation) — order lifecycle is owned by
+    // trade/order-execution-service. Do not re-add from a PM2 dump.
+    svc('proxy-service', './Backend/services/infrastructure/proxy-service'),
+    svc('real-estate-service', './Backend/services/ecosystem/real-estate-service'),
+    // PORT pinned to :3040 — the realtime contract port (gateway dynamic.yml,
+    // openapi, root docker-compose). Code default is 3026, which collided with
+    // jobs-web. Now resolves its own node_modules — no NODE_PATH borrow.
+    svc('realtime-service', './Backend/services/platform/realtime-service', { PORT: '3040' }),
+    svc('session-service', './Backend/services/identity/session-service'),
+    svc('trade-service', './Backend/services/commerce/trade-service'),
 
-    // ── Frontends ───────────────────────────────────────────────────────
-    // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
-    {
-      name: "about-web",
-      cwd: "./Frontend/about-baalvion-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "start -p 3020",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      env: { NODE_ENV: "production", PORT: "3020" },
-      log_date_format: 'HH:mm:ss',
-    },
-    // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
-    {
-      name: "admin-platform",
-      cwd: "./Frontend/admin-platform",
-      script: "./node_modules/next/dist/bin/next",
-      args: "start --port 3030",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      env: { NODE_ENV: "production" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "amarise-web",
-      cwd: "./Frontend/AmariseMaisonAvenue-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "dev -p 3033",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "1500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
-    {
-      name: "baalvion-com-web",
-      cwd: "./Frontend/baalvion-com-main",
-      script: "./node_modules/next/dist/bin/next",
-      // Serves on :3043 (moved off :3040, which is the realtime-service contract port —
-      // gateway dynamic.yml, root docker-compose, openapi all map realtime to :3040).
-      args: "start -p 3043",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "1500M",
-      env: { NODE_ENV: "production", PORT: "3043" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "brand-web",
-      cwd: "./Frontend/brand-connector-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "dev -p 3035",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "1500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "ctm-web",
-      cwd: "./Frontend/controlthemarket-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "dev -p 3034",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "1500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "dashboard-web",
-      cwd: "./Frontend/company-unified-Dashboard-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "dev -p 3024",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "1500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
-    {
-      name: "founders-web",
-      cwd: "./Frontend/For Invstors and Founders",
-      script: "./node_modules/vite/bin/vite.js",
-      args: "preview --port 8082 --host",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "gti-web",
-      cwd: "./Frontend/Global-Trade-Infrastructure-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "dev -p 9003",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "1500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
-    {
-      name: "imperialpedia-web",
-      cwd: "./Frontend/Imperialpedia-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "start -p 3029",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      log_date_format: 'HH:mm:ss',
-    },
-    // insiders-seo-web REMOVED — the Frontend/insiders-seo SEO site was deleted permanently.
-    // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
-    {
-      name: "ir-web",
-      cwd: "./Frontend/IR-Baalvion-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "start -p 3027",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      env: { NODE_ENV: "production", PORT: "3027" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "jobs-web",
-      cwd: "./Frontend/Baalvion-Jobs-Portal-main",
-      script: "./node_modules/next/dist/bin/next",
-      // :3026 is this app's own port (package.json). It used to sit on :3037 to dodge
-      // realtime-service (which was wrongly squatting :3026); realtime now runs on its
-      // contract port :3040, freeing :3026 here and freeing :3037 for the Java credit-service.
-      args: "dev -p 3026",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "1500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "law-web",
-      cwd: "./Frontend/Law-Elite-Network-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "dev -p 9002",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "1500M",
-      env: { NODE_ENV: "development" },
-      log_date_format: 'HH:mm:ss',
-    },
-    {
-      name: "mining-web",
-      cwd: "./Frontend/Mining.Baalvion-main",
-      script: "./node_modules/next/dist/bin/next",
-      args: "dev -p 3028",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      log_date_format: 'HH:mm:ss',
-    },
-    // Production build — run `pnpm build` (valid .next/dist) BEFORE start, or it crash-loops.
-    {
-      name: "proxy-web",
-      cwd: "./Frontend/Proxy-BaalvionStack",
-      script: "./node_modules/vite/bin/vite.js",
-      args: "preview --port 8080 --host",
-      interpreter: "node",
-      watch: false,
-      autorestart: true,
-      max_memory_restart: "500M",
-      log_date_format: 'HH:mm:ss',
-    },
+    // ── Frontends (production builds) ───────────────────────────────────
+    // Next.js apps — `next start` against a prebuilt .next/. Run `pnpm build` first.
+    nextApp('about-web', './Frontend/about-baalvion-main', 3020),
+    nextApp('admin-platform', './Frontend/admin-platform', 3030),
+    nextApp('amarise-web', './Frontend/AmariseMaisonAvenue-main', 3033),
+    // :3043 (moved off :3040, the realtime-service contract port).
+    nextApp('baalvion-com-web', './Frontend/baalvion-com-main', 3043),
+    nextApp('brand-web', './Frontend/brand-connector-main', 3035),
+    nextApp('ctm-web', './Frontend/controlthemarket-main', 3034),
+    nextApp('dashboard-web', './Frontend/company-unified-Dashboard-main', 3024),
+    nextApp('gti-web', './Frontend/Global-Trade-Infrastructure-main', 9003),
+    nextApp('imperialpedia-web', './Frontend/Imperialpedia-main', 3029),
+    nextApp('ir-web', './Frontend/IR-Baalvion-main', 3027),
+    // :3026 is this app's own port (package.json).
+    nextApp('jobs-web', './Frontend/Baalvion-Jobs-Portal-main', 3026),
+    nextApp('law-web', './Frontend/Law-Elite-Network-main', 9002),
+    nextApp('mining-web', './Frontend/Mining.Baalvion-main', 3028),
+    // insiders-seo-web REMOVED — the Frontend/insiders-seo SEO site was deleted.
+
+    // Vite SPAs — `vite preview` against a prebuilt dist/. Run `pnpm build` first.
+    viteApp('founders-web', './Frontend/For Invstors and Founders', 8082),
+    viteApp('proxy-web', './Frontend/Proxy-BaalvionStack', 8080),
   ],
 };

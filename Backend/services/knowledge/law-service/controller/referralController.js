@@ -1,12 +1,15 @@
 'use strict';
+const crypto = require('crypto');
 const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 
+// Referral codes are single-use bearer tokens that confer a reward — use a CSPRNG.
+// crypto.randomInt is unbiased and unpredictable (Math.random was guessable).
 const generateCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    return Array.from({ length: 8 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    return Array.from({ length: 8 }, () => chars[crypto.randomInt(chars.length)]).join('');
 };
 
 const getMyCode = async (req, res, next) => {

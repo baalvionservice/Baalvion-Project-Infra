@@ -140,11 +140,26 @@ async function getClientLogoutConfig(clientId) {
 
 async function setClientLogoutConfig(clientId, { backchannelLogoutUri, postLogoutRedirectUris } = {}) {
     const db = getDb();
+    const { assertSafeHttpUrl } = require('../lib/safeUrl');
+    // SSRF guard: the OP fetches backchannel_logout_uri server-side on every logout, so an
+    // attacker-controlled URI could reach internal services / cloud metadata. Validate at
+    // write time and require https.
+    const safeBackchannel = backchannelLogoutUri ? assertSafeHttpUrl(backchannelLogoutUri) : null;
+    // Browser-redirect targets: reject non-http(s) schemes (e.g. javascript:) — these are not
+    // server-fetched, so any public host is fine; we only block dangerous schemes.
+    const safeRedirects = (postLogoutRedirectUris || []).map((u) => {
+        let parsed;
+        try { parsed = new URL(String(u)); } catch { throw new Error('post_logout_redirect_uri is not a valid URL'); }
+        if (parsed.protocol !== 'https:' && parsed.protocol !== 'http:') {
+            throw new Error('post_logout_redirect_uri must use http(s)');
+        }
+        return String(u);
+    });
     await db.sequelize.query(
         `UPDATE auth.oauth_clients
            SET backchannel_logout_uri = $1, post_logout_redirect_uris = $2, updated_at = NOW()
          WHERE client_id = $3`,
-        { bind: [backchannelLogoutUri || null, JSON.stringify(postLogoutRedirectUris || []), clientId] }
+        { bind: [safeBackchannel, JSON.stringify(safeRedirects), clientId] }
     );
 }
 

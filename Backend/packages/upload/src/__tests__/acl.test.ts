@@ -50,9 +50,11 @@ describe('buildKey', () => {
     const longFilename = 'a'.repeat(200) + '.pdf';
     const longPath: UploadPath = { tenant: 'org-xyz', module: 'docs', filename: longFilename };
     const key = buildKey(owner, longPath);
-    // Extract just the filename part after the last /
-    const parts = key.split('/');
-    const filenamePart = parts[parts.length - 1].split('-').slice(1).join('-');
+    // Key shape is `.../{uuid}-{sanitizedFilename}`. The mocked uuid is
+    // `test-uuid-1234` (which itself contains hyphens), so strip the exact
+    // `{uuid}-` prefix to measure just the sanitized filename's length.
+    const lastSegment = key.split('/').pop()!;
+    const filenamePart = lastSegment.slice('test-uuid-1234-'.length);
     expect(filenamePart.length).toBeLessThanOrEqual(128);
   });
 

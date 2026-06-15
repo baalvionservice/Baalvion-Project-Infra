@@ -75,8 +75,9 @@ server:
     enabled: true
     min-response-size: 1024
   error:
-    include-message: always
-    include-binding-errors: always
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
 
 management:
   endpoints:
@@ -175,3 +176,17 @@ resilience4j:
       scheme:
         timeout-duration: 30s        # external scheme calls must complete within 30s (§9.1)
         cancel-running-future: true
+
+---
+# Dev-only verbosity: surface exception/binding detail on the /error whitebox ONLY under the `dev`
+# profile (SPRING_PROFILES_ACTIVE=dev). Never enabled in the default/prod configuration above —
+# stack traces / exception messages must not leak to payment-service API clients in prod.
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+server:
+  error:
+    include-message: always
+    include-binding-errors: always

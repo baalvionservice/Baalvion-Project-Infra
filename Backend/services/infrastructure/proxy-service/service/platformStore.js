@@ -606,7 +606,6 @@ const ensureSeed = async () => {
 };
 
 module.exports = {
-  DEMO_PASSWORD: 'Baalvion123!',
   ensureSeed,
   paginate,
   getCollection,

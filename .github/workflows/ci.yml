@@ -266,6 +266,72 @@ jobs:
         run: BAALVION_APP_PASSWORD=ci_app_pw node --test tests/rls-cross-tenant.test.mjs
         working-directory: Backend/services/commerce/trade-service
 
+  # Static, DB-free guardrail: every tenant-scoped table (a table with a
+  # tenant_id / org_id / organization_id column) across ALL services must ship
+  # ENABLE + FORCE ROW LEVEL SECURITY + a tenant-isolation policy. A new tenant
+  # table without RLS is a silent cross-tenant leak — this fails the build on it.
+  tenant-rls-audit:
+    name: Security — Tenant RLS Coverage Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      # trade-service is a submodule; its migrations are part of the coverage set.
+      # Init it directly (NOT submodules: recursive — the GTI submodule gitlink is
+      # an unpushed commit that fails checkout).
+      - name: Check out trade-service submodule
+        run: git submodule update --init --depth=1 Backend/services/commerce/trade-service
+      - name: Static tenant-isolation audit (fail-closed RLS on every tenant table)
+        run: node Backend/scripts/tenant-isolation-audit.mjs
+      - name: Audit guard + RLS SQL builder unit tests
+        run: node --test Backend/scripts/tenant-isolation-audit.test.mjs Backend/packages/tenancy/test.smoke.js
+
+  # Live proof on a real Postgres that the canonical enableRlsSql() policy (the
+  # exact text every per-service RLS migration is generated from) fail-closed
+  # isolates tenants and that the CR-8 bypass hardening holds for baalvion_app.
+  tenant-rls-live:
+    name: Security — Tenant RLS Live Probe
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: baalvion_db
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Create baalvion_app role (027)
+        run: psql "postgresql://postgres:postgres@localhost:5432/baalvion_db" -v app_pw=ci_app_pw -f Backend/database/migrations/027_app_role.sql
+      # The tenancy package does not declare pg (it ships only policy-builder SQL);
+      # the live probe needs a driver. Install it out-of-band so the lockfile and
+      # the package's dependency surface stay untouched.
+      - name: Install pg for the probe
+        working-directory: Backend/packages/tenancy
+        run: npm install pg --no-save --no-audit --no-fund
+      - name: Run live RLS isolation probe (as baalvion_app)
+        working-directory: Backend/packages/tenancy
+        env:
+          DB_HOST: localhost
+          DB_PORT: '5432'
+          DB_NAME: baalvion_db
+          DB_USER: postgres
+          DB_PASSWORD: postgres
+          BAALVION_APP_USER: baalvion_app
+          BAALVION_APP_PASSWORD: ci_app_pw
+        run: node --test tests/rls-live.test.mjs
+
   integration-test:
     name: Integration Tests
     needs: [backend-go, backend-java, frontend-build]
@@ -295,6 +361,8 @@ jobs:
       - discover-frontends
       - frontend-build
       - security-cross-tenant
+      - tenant-rls-audit
+      - tenant-rls-live
       - integration-test
     runs-on: ubuntu-latest
     steps:
