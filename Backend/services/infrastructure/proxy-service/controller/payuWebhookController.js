@@ -36,13 +36,19 @@ function timingSafeEqual(a, b) {
     return crypto.timingSafeEqual(ba, bb);
 }
 function parseForm(raw) {
-    const out = {};
+    // Null-prototype accumulator + reject prototype-polluting keys so a crafted
+    // form key (e.g. __proto__) in the webhook body cannot pollute Object.prototype.
+    const out = Object.create(null);
     String(raw || '').trim().split('&').forEach((pair) => {
         if (!pair) return;
         const i = pair.indexOf('=');
         const k = i >= 0 ? pair.slice(0, i) : pair;
         const v = i >= 0 ? pair.slice(i + 1) : '';
-        try { out[decodeURIComponent(k.replace(/\+/g, ' '))] = decodeURIComponent(v.replace(/\+/g, ' ')); } catch { /* skip malformed pair */ }
+        try {
+            const key = decodeURIComponent(k.replace(/\+/g, ' '));
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') return;
+            out[key] = decodeURIComponent(v.replace(/\+/g, ' '));
+        } catch { /* skip malformed pair */ }
     });
     return out;
 }
