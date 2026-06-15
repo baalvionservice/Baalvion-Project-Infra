@@ -42,6 +42,11 @@ const GATEWAY_PROVIDERS = ['razorpay', 'stripe', 'payu', 'cashfree'];
 const GATEWAY_METHODS = ['CARD', 'UPI', 'NETBANKING', 'BANK'];
 // Public app origin — Cashfree orders carry return_url (SPA landing) + notify_url (our webhook).
 const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || 'http://localhost:8080').replace(/\/$/, '');
+// All plans are priced in USD, so the charge currency is pinned SERVER-SIDE — the browser's currency
+// is ignored. This guarantees the amount (computed from the USD plan price) is always charged in the
+// right currency regardless of gateway (e.g. an INR-defaulting account can't turn $199 into ₹199).
+// International cards are accepted; the card network/bank performs any FX. Override via BILLING_CURRENCY.
+const CHARGE_CURRENCY = (process.env.BILLING_CURRENCY || 'USD').toUpperCase();
 
 router.post('/checkout', authMiddleware, async (req, res) => {
     const body = req.body || {};
@@ -54,8 +59,8 @@ router.post('/checkout', authMiddleware, async (req, res) => {
     if (!GATEWAY_METHODS.includes(method)) {
         return res.status(400).json({ error: { code: 'VALIDATION', message: 'method must be CARD, UPI, NETBANKING, or BANK' } });
     }
-    if (!currency || !idempotencyKey) {
-        return res.status(400).json({ error: { code: 'VALIDATION', message: 'currency and idempotencyKey are required' } });
+    if (!idempotencyKey) {
+        return res.status(400).json({ error: { code: 'VALIDATION', message: 'idempotencyKey is required' } });
     }
     try {
         // SECURITY: the charge amount is computed SERVER-SIDE from the plan price — never trusted from
@@ -114,7 +119,7 @@ router.post('/checkout', authMiddleware, async (req, res) => {
                 provider,
                 method,
                 amount: serverAmount, // server-computed, not the browser's claim
-                currency: String(currency),
+                currency: CHARGE_CURRENCY, // pinned server-side (USD); browser currency ignored
                 ...(receipt ? { orderRef: String(receipt) } : {}),
                 // Stamp the VERIFIED user email (never the browser's) onto the order. PayU echoes it
                 // back in its (hash-signed) callback, which is how that redirect flow maps the payment
