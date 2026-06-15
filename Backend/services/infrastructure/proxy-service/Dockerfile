@@ -13,7 +13,9 @@ FROM base AS installer
 COPY .npmrc ./
 COPY --from=pruner /repo/out/json/ ./
 COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install --frozen-lockfile --filter proxy-service...
+# turbo prune drops the root uuid@11 override snapshot from the pruned lockfile, so a frozen
+# install fails (ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY); --no-frozen lets pnpm repair it in-image.
+RUN pnpm install --no-frozen-lockfile --filter proxy-service...
 COPY --from=pruner /repo/out/full/ ./
 RUN pnpm deploy --filter=proxy-service --prod /out
 
