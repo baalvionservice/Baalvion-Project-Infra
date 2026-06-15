@@ -44,6 +44,8 @@ export default defineConfig(({ mode }) => {
   const RAZORPAY_IMG = "https://*.razorpay.com";
   // PayU is a form-POST redirect to its hosted page → allow it as a form-action target.
   const PAYU_FORM = "https://*.payu.in";
+  // Cashfree loads its v3 SDK + redirects/iframes to its hosted checkout.
+  const CASHFREE = "https://*.cashfree.com";
 
   // Same-origin auth proxy — forward /auth-bff/* to the auth gateway so the httpOnly cookie is set
   // against localhost:8080 and flows on every request. No CORS, no cross-site cookies. Shared by the
@@ -66,14 +68,14 @@ export default defineConfig(({ mode }) => {
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
     "Content-Security-Policy": [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' ${RAZORPAY_SCRIPT}`,
+      `script-src 'self' 'unsafe-inline' ${RAZORPAY_SCRIPT} ${CASHFREE}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      `img-src 'self' data: blob: https://placehold.co https://images.unsplash.com ${RAZORPAY_IMG}`,
+      `img-src 'self' data: blob: https://placehold.co https://images.unsplash.com ${RAZORPAY_IMG} ${CASHFREE}`,
       "font-src 'self' data: https://fonts.gstatic.com",
-      `connect-src 'self' ${AUTH_ORIGIN} ${PLATFORM_ORIGIN} ${RAZORPAY_CONNECT}`,
-      `frame-src ${RAZORPAY_FRAME}`,
+      `connect-src 'self' ${AUTH_ORIGIN} ${PLATFORM_ORIGIN} ${RAZORPAY_CONNECT} ${CASHFREE}`,
+      `frame-src ${RAZORPAY_FRAME} ${CASHFREE}`,
       "frame-ancestors 'none'",
-      `form-action 'self' ${PAYU_FORM}`,
+      `form-action 'self' ${PAYU_FORM} ${CASHFREE}`,
       "base-uri 'self'",
       "object-src 'none'",
     ].join("; "),

@@ -62,12 +62,25 @@ function buildPayu() {
   return { secrets: { merchantKey, merchantSalt }, config: { mode: 'live', baseUrl: process.env.PAYU_TEST_BASE_URL || 'https://test.payu.in' } };
 }
 
+function buildCashfree() {
+  const clientId = process.env.CASHFREE_TEST_CLIENT_ID;
+  const clientSecret = process.env.CASHFREE_TEST_CLIENT_SECRET;
+  if (!clientId || !clientSecret) die('CASHFREE_TEST_CLIENT_ID and CASHFREE_TEST_CLIENT_SECRET are required');
+  // Cashfree test creds carry no fixed prefix to assert on; a TEST-mode app is what makes them
+  // sandbox. baseUrl=sandbox here; flip to https://api.cashfree.com (and prod creds) for live.
+  return {
+    secrets: { clientId, clientSecret },
+    config: { mode: 'live', baseUrl: process.env.CASHFREE_TEST_BASE_URL || 'https://sandbox.cashfree.com' },
+  };
+}
+
 function die(msg) { console.error(`[sandbox] ERROR: ${msg}`); process.exit(1); }
 
 (async () => {
   const built = PROVIDER === 'razorpay' ? buildRazorpay()
     : PROVIDER === 'stripe' ? buildStripe()
     : PROVIDER === 'payu' ? buildPayu()
+    : PROVIDER === 'cashfree' ? buildCashfree()
     : die(`unknown provider "${PROVIDER}"`);
   await connectDB();
   const w = await CmsWebsite.findOne({ where: { slug: SITE } });

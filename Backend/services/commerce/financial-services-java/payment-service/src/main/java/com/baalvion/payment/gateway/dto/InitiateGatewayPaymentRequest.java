@@ -23,7 +23,7 @@ import java.util.Map;
 public class InitiateGatewayPaymentRequest {
 
   @NotBlank(message = "Provider required")
-  @Pattern(regexp = "(?i)razorpay|stripe|payu", message = "Provider must be razorpay, stripe, or payu")
+  @Pattern(regexp = "(?i)razorpay|stripe|payu|cashfree", message = "Provider must be razorpay, stripe, payu, or cashfree")
   private String provider;
 
   @NotNull(message = "Amount required")

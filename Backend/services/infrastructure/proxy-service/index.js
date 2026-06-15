@@ -40,6 +40,14 @@ app.post(
     require('./controller/payuWebhookController').payuWebhook,
 );
 
+// Cashfree S2S webhook — needs the RAW body for base64(HMAC-SHA256(timestamp + body)) verification.
+app.post(
+    ['/v1/billing/webhook/cashfree', '/api/v1/billing/webhook/cashfree'],
+    rateLimit(),
+    express.raw({ type: '*/*' }),
+    require('./controller/cashfreeWebhookController').cashfreeWebhook,
+);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());

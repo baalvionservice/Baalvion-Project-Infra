@@ -38,8 +38,10 @@ const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'proxy-baalvionstack';
 // (which holds the keys + resolves the per-tenant vault). Contract (payment-service /v1/gateway/payments):
 //   header  Idempotency-Key: <key>   (REQUIRED — dedups a double-click/retry)
 //   body    { provider, method, amount(integer minor units), currency, orderRef?, customer?, metadata? }
-const GATEWAY_PROVIDERS = ['razorpay', 'stripe', 'payu'];
+const GATEWAY_PROVIDERS = ['razorpay', 'stripe', 'payu', 'cashfree'];
 const GATEWAY_METHODS = ['CARD', 'UPI', 'NETBANKING', 'BANK'];
+// Public app origin — Cashfree orders carry return_url (SPA landing) + notify_url (our webhook).
+const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || 'http://localhost:8080').replace(/\/$/, '');
 
 router.post('/checkout', authMiddleware, async (req, res) => {
     const body = req.body || {};
@@ -131,6 +133,12 @@ router.post('/checkout', authMiddleware, async (req, res) => {
                     // The webhook reads this to decide what a captured payment means: a PAYG prepaid
                     // 'credit' top-up vs a 'subscription' activation.
                     kind: isPayg ? 'credit' : 'subscription',
+                    // Cashfree order_meta: where to redirect the shopper back (return_url) and where to
+                    // POST the S2S webhook (notify_url → our same-origin Cashfree callback).
+                    ...(provider === 'cashfree' ? {
+                        returnUrl: `${PUBLIC_APP_URL}/app/billing/checkout?cf=success`,
+                        notifyUrl: `${PUBLIC_APP_URL}/v1/billing/webhook/cashfree`,
+                    } : {}),
                 },
             }),
         });

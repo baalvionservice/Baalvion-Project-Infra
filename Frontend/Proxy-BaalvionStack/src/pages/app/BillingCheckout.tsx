@@ -510,6 +510,7 @@ Thank you for your business!
                         { id: "razorpay", label: "Razorpay", desc: "Cards · UPI · Netbanking" },
                         { id: "stripe", label: "Stripe", desc: "International cards" },
                         { id: "payu", label: "PayU", desc: "Cards worldwide" },
+                        { id: "cashfree", label: "Cashfree", desc: "Cards · UPI · Netbanking" },
                       ] as const).map((g) => (
                         <button
                           key={g.id}

@@ -19,7 +19,7 @@ import { tokenStore } from "@/lib/tokenStore";
 
 const PLATFORM_BASE = import.meta.env.VITE_API_PLATFORM_BASE_URL ?? "http://localhost:4000/v1";
 
-export type GatewayProvider = "razorpay" | "stripe" | "payu";
+export type GatewayProvider = "razorpay" | "stripe" | "payu" | "cashfree";
 export type GatewayMethod = "CARD" | "UPI" | "NETBANKING" | "BANK";
 
 export interface CheckoutRequest {
@@ -91,6 +91,21 @@ function loadRazorpay(): Promise<void> {
     document.body.appendChild(s);
   });
   return razorpayScript;
+}
+
+let cashfreeScript: Promise<void> | null = null;
+function loadCashfree(): Promise<void> {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if ((window as unknown as { Cashfree?: unknown }).Cashfree) return Promise.resolve();
+  if (cashfreeScript) return cashfreeScript;
+  cashfreeScript = new Promise<void>((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+    s.onload = () => resolve();
+    s.onerror = () => { cashfreeScript = null; reject(new Error("failed to load Cashfree SDK")); };
+    document.body.appendChild(s);
+  });
+  return cashfreeScript;
 }
 
 /**
@@ -168,6 +183,18 @@ export async function startGatewayCheckout(req: CheckoutRequest): Promise<Checko
       });
       rzp.open();
     });
+  }
+
+  if (init.provider === "cashfree") {
+    // Cashfree v3 SDK: hand the payment_session_id to cashfree.checkout(), which redirects to the
+    // hosted page. Settlement returns via the S2S webhook → ledger; return_url lands the shopper back.
+    await loadCashfree();
+    const cp = init.clientParams || {};
+    const mode = cp.mode === "production" ? "production" : "sandbox";
+    const Cashfree = (window as unknown as { Cashfree: (o: unknown) => { checkout: (o: unknown) => void } }).Cashfree;
+    const cf = Cashfree({ mode });
+    cf.checkout({ paymentSessionId: cp.paymentSessionId, redirectTarget: "_self" });
+    return { status: "redirecting", provider: "cashfree", reference: init.orderId };
   }
 
   throw new Error(`Unsupported provider: ${init.provider}`);
