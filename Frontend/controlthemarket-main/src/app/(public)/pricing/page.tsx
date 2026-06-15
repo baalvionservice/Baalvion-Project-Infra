@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -15,8 +15,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
+import { getAllPlans } from '@/lib/api';
+import { startCheckout, type CheckoutProvider } from '@/lib/checkout';
+import { useToast } from '@/hooks/use-toast';
 
 type Plan = {
   name: string;
@@ -75,17 +81,55 @@ export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
+
+  // Resolve the server-trusted plan id by plan name. Displayed prices are illustrative; the
+  // BACKEND prices the charge from this id, so we never check out a plan the catalog lacks.
+  const [planIdByName, setPlanIdByName] = useState<Record<string, string>>({});
+  useEffect(() => {
+    let active = true;
+    getAllPlans()
+      .then((backendPlans) => {
+        if (!active) return;
+        const map: Record<string, string> = {};
+        for (const p of backendPlans) if (p?.id && p?.name) map[p.name.toLowerCase()] = String(p.id);
+        setPlanIdByName(map);
+      })
+      .catch(() => { /* checkout surfaces "plan unavailable" if the catalog can't load */ });
+    return () => { active = false; };
+  }, []);
+
+  const [checkoutPlan, setCheckoutPlan] = useState<string | null>(null);
+  const [isStarting, setIsStarting] = useState(false);
 
   const handleChoosePlan = (planName: string) => {
     if (planName === 'Enterprise') {
       router.push('/contact');
       return;
     }
+    if (!user || user.role !== 'company') {
+      router.push(`/signup/company?plan=${encodeURIComponent(planName)}&cycle=${isYearly ? 'annual' : 'monthly'}`);
+      return;
+    }
+    // Logged-in company → pick a payment provider, then start a real checkout.
+    setCheckoutPlan(planName);
+  };
 
-    if (user && user.role === 'company') {
-      router.push('/company/billing');
-    } else {
-      router.push('/signup/company');
+  const handlePay = async (provider: CheckoutProvider) => {
+    if (!checkoutPlan) return;
+    const planId = planIdByName[checkoutPlan.toLowerCase()];
+    if (!planId) {
+      toast({ variant: 'destructive', title: 'Plan unavailable', description: 'This plan is not available for checkout yet. Please contact support.' });
+      return;
+    }
+    setIsStarting(true);
+    try {
+      await startCheckout({ planId, provider, billingCycle: isYearly ? 'annual' : 'monthly' });
+      // Success → Stripe is redirecting, or the Razorpay modal is now open.
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Checkout failed', description: err instanceof Error ? err.message : 'Could not start checkout.' });
+    } finally {
+      setIsStarting(false);
     }
   };
 
@@ -210,6 +254,28 @@ export default function PricingPage() {
             </CardContent>
         </Card>
       </div>
+
+      <Dialog open={checkoutPlan !== null} onOpenChange={(open) => { if (!open) setCheckoutPlan(null); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Choose how to pay</DialogTitle>
+            <DialogDescription>
+              {checkoutPlan} plan · {isYearly ? 'billed annually' : 'billed monthly'}. You&apos;ll be taken to a secure checkout.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-3 py-2">
+            <Button onClick={() => handlePay('stripe')} disabled={isStarting}>
+              Pay with Card (Stripe)
+            </Button>
+            <Button variant="outline" onClick={() => handlePay('razorpay')} disabled={isStarting}>
+              Pay with Razorpay (UPI / Cards / Netbanking)
+            </Button>
+          </div>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCheckoutPlan(null)} disabled={isStarting}>Cancel</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
