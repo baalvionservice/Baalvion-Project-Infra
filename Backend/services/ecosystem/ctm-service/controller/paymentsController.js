@@ -136,3 +136,8 @@ exports.providerStatus = async (req, res, next) => {
         sendSuccess(res, { providers, default: providers[0] || null, configured: providers.length > 0 });
     } catch (err) { next(err); }
 };
+
+// Admin pre-flight: are the vault keys + webhook secrets all resolvable before taking real money?
+exports.health = async (req, res, next) => {
+    try { sendSuccess(res, await pay.healthCheck()); } catch (err) { next(err); }
+};

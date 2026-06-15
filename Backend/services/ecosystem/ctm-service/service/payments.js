@@ -192,4 +192,18 @@ async function verifyWebhook({ rawBody, headers }) {
     throw new Error('Unrecognized webhook: no Stripe or Razorpay signature header');
 }
 
-module.exports = { configuredProviders, resolveProvider, isConfigured, createCheckout, verifyWebhook, resolveConfig, resolveWebhookSecret };
+// Pre-flight self-check for go-live: confirms, WITHOUT exposing any secret, that each provider's
+// checkout keys + webhook secret are actually resolvable (from the vault or env) right now.
+async function healthCheck() {
+    const out = { vault: { configured: Boolean(CMS_BASE_URL && INTERNAL_SECRET), slug: SITE_SLUG }, providers: [] };
+    for (const p of ['stripe', 'razorpay']) {
+        const cfg = await resolveConfig(p);
+        const wsec = await resolveWebhookSecret(p);
+        out[p] = { checkout: Boolean(cfg), webhook: Boolean(wsec), source: cfg?.source || (wsec ? 'webhook-only' : 'none') };
+        if (cfg) out.providers.push(p);
+    }
+    out.ready = out.providers.length > 0 && out.providers.every((p) => out[p].webhook);
+    return out;
+}
+
+module.exports = { configuredProviders, resolveProvider, isConfigured, createCheckout, verifyWebhook, resolveConfig, resolveWebhookSecret, healthCheck };

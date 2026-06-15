@@ -433,6 +433,9 @@ exports.createInvoice = async (req, res, next) => {
         // 'Pending' and the amount must be positive. Only admins may set an explicit status.
         if (!isAdmin && !(amount > 0)) throw new AppError('VALIDATION_ERROR', 'amount must be greater than 0', 400);
         const status = isAdmin ? (b.status ?? 'Pending') : 'Pending';
+        // Non-admins can't back-date or forward-date billing records — dates are server-set.
+        const issued_at = isAdmin ? (b.issued_at ?? b.date ?? new Date()) : new Date();
+        const due_date = isAdmin ? (b.due_date ?? b.dueDate ?? null) : new Date(Date.now() + 7 * 86400000);
         const inv = await db.invoices.create({
             company_id,
             subscription_id: b.subscription_id ?? b.subscriptionId,
@@ -440,8 +443,8 @@ exports.createInvoice = async (req, res, next) => {
             currency: b.currency ?? 'USD',
             status,
             plan_name: b.plan_name ?? b.planName,
-            issued_at: b.issued_at ?? b.date ?? new Date(),
-            due_date: b.due_date ?? b.dueDate,
+            issued_at,
+            due_date,
             billing_period_start: b.billing_period_start ?? b.billingPeriod?.start,
             billing_period_end: b.billing_period_end ?? b.billingPeriod?.end,
             line_items: b.line_items ?? b.lineItems ?? [],
