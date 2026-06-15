@@ -1,33 +1,25 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { CompanySignupForm } from './company-signup-form';
 import Link from 'next/link';
+import { AuthShell } from '@/components/auth/auth-shell';
+import { CompanySignupForm } from './company-signup-form';
 
 export default function CompanySignupPage() {
   return (
-    <div className="container flex min-h-[calc(100vh-8rem)] items-center justify-center py-10">
-      <Card className="mx-auto w-full max-w-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline">Create Your Company Account</CardTitle>
-          <CardDescription>
-            Hire talent based on real skills, not resumes.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CompanySignupForm />
-          <div className="mt-4 text-center text-sm">
-            Already have an account?{' '}
-            <Link href="/login" className="underline">
-              Log in
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthShell
+      variant="company"
+      title="Create your company account"
+      subtitle="Hire on proven skill, not résumés."
+      backHref="/signup"
+      backLabel="Choose a different path"
+      footer={
+        <>
+          Already have an account?{' '}
+          <Link href="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+            Log in
+          </Link>
+        </>
+      }
+    >
+      <CompanySignupForm />
+    </AuthShell>
   );
 }

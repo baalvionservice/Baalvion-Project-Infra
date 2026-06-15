@@ -1,4 +1,3 @@
-
 'use client';
 
 import { cn } from '@/lib/utils';
@@ -11,48 +10,48 @@ interface OnboardingStepperProps {
 
 export function OnboardingStepper({ steps, currentStep }: OnboardingStepperProps) {
   return (
-    <nav aria-label="Progress">
-      <ol role="list" className="flex items-center">
-        {steps.map((stepName, stepIdx) => (
-          <li key={stepName} className={cn('relative', stepIdx !== steps.length - 1 ? 'pr-8 sm:pr-12 md:pr-20 flex-1' : '')}>
-            {stepIdx < currentStep ? (
-              <>
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="h-0.5 w-full bg-primary" />
-                </div>
-                <div
-                  className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary"
+    <nav aria-label="Progress" className="w-full">
+      <ol role="list" className="flex items-start">
+        {steps.map((stepName, stepIdx) => {
+          const isComplete = stepIdx < currentStep;
+          const isCurrent = stepIdx === currentStep;
+          const isLast = stepIdx === steps.length - 1;
+
+          return (
+            <li key={stepName} className={cn('relative flex flex-col items-center', !isLast && 'flex-1')}>
+              <div className="flex w-full items-center">
+                {/* node */}
+                <span
+                  className={cn(
+                    'relative z-10 grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 text-sm font-semibold transition-colors',
+                    isComplete && 'border-primary bg-primary text-primary-foreground',
+                    isCurrent && 'border-primary bg-background text-primary shadow-[0_0_0_4px_hsl(var(--primary)/0.12)]',
+                    !isComplete && !isCurrent && 'border-border bg-background text-muted-foreground',
+                  )}
+                  aria-current={isCurrent ? 'step' : undefined}
                 >
-                  <Check className="h-5 w-5 text-white" aria-hidden="true" />
-                </div>
-              </>
-            ) : stepIdx === currentStep ? (
-              <>
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="h-0.5 w-full bg-border" />
-                </div>
-                <div
-                  className="relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-primary bg-background"
-                  aria-current="step"
-                >
-                  <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                  <div className="h-0.5 w-full bg-border" />
-                </div>
-                <div
-                  className="group relative flex h-8 w-8 items-center justify-center rounded-full border-2 border-border bg-background"
-                >
-                   <span className="h-2.5 w-2.5 rounded-full bg-transparent" />
-                </div>
-              </>
-            )}
-             <p className="absolute -bottom-7 w-max text-center text-xs text-muted-foreground">{stepName}</p>
-          </li>
-        ))}
+                  {isComplete ? <Check className="h-4 w-4" strokeWidth={3} /> : stepIdx + 1}
+                </span>
+                {/* connector */}
+                {!isLast && (
+                  <span className="mx-2 h-0.5 flex-1 overflow-hidden rounded-full bg-border" aria-hidden="true">
+                    <span
+                      className={cn('block h-full bg-primary transition-all duration-300', isComplete ? 'w-full' : 'w-0')}
+                    />
+                  </span>
+                )}
+              </div>
+              <span
+                className={cn(
+                  'mt-2 w-max max-w-[7rem] text-center text-xs font-medium leading-tight sm:max-w-none',
+                  isCurrent ? 'text-foreground' : 'text-muted-foreground',
+                )}
+              >
+                {stepName}
+              </span>
+            </li>
+          );
+        })}
       </ol>
     </nav>
   );
