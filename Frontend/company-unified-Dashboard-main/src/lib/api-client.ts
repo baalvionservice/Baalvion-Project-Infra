@@ -301,6 +301,7 @@ export const dashboardApi = {
   billing: () => get('/billing'),
   sync: () => get('/sync'),
   ai: () => get('/ai'),
+  aiSummary: (businessId: string) => get<{ summary: string }>(`/ai/summary?businessId=${encodeURIComponent(businessId)}`),
   docs: () => get('/docs'),
   permissionMatrix: () => get('/permissions/matrix'),
   markNotificationRead: (id: string) => post(`/notifications/${id}/read`),
