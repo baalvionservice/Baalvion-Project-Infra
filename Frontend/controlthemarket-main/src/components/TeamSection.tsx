@@ -55,7 +55,7 @@ export default function TeamSection() {
             Built by people who've been there
           </h2>
           <p className="text-[15px] text-gray-500 leading-[1.65] max-w-[500px] mx-auto">
-            We've been on both sides of the hiring table. We built SkillMatch Pro to fix it.
+            We've been on both sides of the hiring table. We built ControlTheMarket to fix it.
           </p>
         </motion.div>
 

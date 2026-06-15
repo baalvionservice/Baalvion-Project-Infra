@@ -129,7 +129,7 @@ export default async function BlogArticlePage({
             <span className="w-[3px] h-[3px] rounded-full bg-gray-200" />
             <span>⏱ {article.read} read</span>
             <span className="w-[3px] h-[3px] rounded-full bg-gray-200" />
-            <span>✍️ SkillMatch Pro Editorial Team</span>
+            <span>✍️ ControlTheMarket Editorial Team</span>
           </div>
         </header>
 

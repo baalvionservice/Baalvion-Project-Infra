@@ -13,7 +13,7 @@ export const mockBadges: Badge[] = [
   {
     id: 'badge-2',
     name: 'Verified Talent',
-    description: 'Manually verified by the SkillMatch Pro team for exceptional skill.',
+    description: 'Manually verified by the ControlTheMarket team for exceptional skill.',
     icon: 'ShieldCheck',
     rarity: 'Elite',
   },
@@ -676,7 +676,7 @@ POST   /api/nda/accept         (Protected: Investor)</code></pre><h3>WORKLOAD EX
   {
     id: 'task-18',
     title: 'Build a Role-Based Task Assignment System',
-    description: "You are building a core platform feature for SkillMatch Pro. The goal is to create a secure backend system where companies can create tasks and assign them to specific developers, ensuring only assigned developers can access and submit their work.",
+    description: "You are building a core platform feature for ControlTheMarket. The goal is to create a secure backend system where companies can create tasks and assign them to specific developers, ensuring only assigned developers can access and submit their work.",
     instructions: `<h3>Objective</h3>
 <p>Build a backend system where a company can create a job/task, assign it to specific developers, and only those assigned developers can view the task and submit their work. The system must include robust access control and activity logging.</p>
 

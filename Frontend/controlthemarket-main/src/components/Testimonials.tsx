@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 const testimonials = [
   {
-    quote: "SkillMatch Pro transformed our hiring process completely. We now hire faster and with more confidence. The quality of candidates is unlike anything we've seen.",
+    quote: "ControlTheMarket transformed our hiring process completely. We now hire faster and with more confidence. The quality of candidates is unlike anything we've seen.",
     name: "Jane Doe",
     role: "Head of Talent, TechCorp",
     initials: "JD",

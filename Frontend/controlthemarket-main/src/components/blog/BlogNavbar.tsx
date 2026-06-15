@@ -12,7 +12,7 @@ export default function BlogNavbar() {
         <div className="w-[26px] h-[26px] bg-green-600 rounded-[7px] flex items-center justify-center text-white text-xs font-black">
           ✓
         </div>
-        SkillMatch Pro
+        ControlTheMarket
       </Link>
 
       <div className="flex items-center gap-4 text-[13px]">

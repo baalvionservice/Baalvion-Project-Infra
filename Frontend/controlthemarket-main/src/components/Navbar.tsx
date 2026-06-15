@@ -25,7 +25,7 @@ export default function Navbar() {
           <div className="w-7 h-7 bg-green-600 rounded-lg flex items-center justify-center text-white text-sm font-black">
             ✓
           </div>
-          SkillMatch Pro
+          ControlTheMarket
         </Link>
 
         {/* Nav Links */}

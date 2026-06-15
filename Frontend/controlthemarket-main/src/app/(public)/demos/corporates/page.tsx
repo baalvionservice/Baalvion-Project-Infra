@@ -55,7 +55,7 @@ export default function CorporatesValuePropDemoPage() {
           The Solution for Modern Corporate Hiring
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Traditional hiring is slow, biased, and unreliable. SkillMatch Pro solves these pain points by providing a centralized platform for real-time, verified skill assessments with data-driven insights. See how it works below.
+          Traditional hiring is slow, biased, and unreliable. ControlTheMarket solves these pain points by providing a centralized platform for real-time, verified skill assessments with data-driven insights. See how it works below.
         </p>
       </div>
 

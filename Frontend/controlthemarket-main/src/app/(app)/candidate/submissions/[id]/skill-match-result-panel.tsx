@@ -16,7 +16,7 @@ import type { Submission } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { useSubmissions } from '@/contexts/submissions-context';
 
-export function SkillMatchResultPanel({ submission }: { submission: Submission }) {
+export function ControlTheMarketResultPanel({ submission }: { submission: Submission }) {
     const { toast } = useToast();
     const { updateSubmission } = useSubmissions();
     const [isUpdating, setIsUpdating] = useState(false);
@@ -45,7 +45,7 @@ export function SkillMatchResultPanel({ submission }: { submission: Submission }
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Award className="h-5 w-5 text-primary" />
-                    SkillMatch Pro Result
+                    ControlTheMarket Result
                 </CardTitle>
                 <CardDescription>
                     Your final assessment and any badges awarded.

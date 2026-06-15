@@ -16,7 +16,7 @@ export default function SignupPage() {
     <div className="container flex h-[calc(100vh-8rem)] items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Join SkillMatch Pro</CardTitle>
+          <CardTitle className="text-2xl font-headline">Join ControlTheMarket</CardTitle>
           <CardDescription>
             Choose your path. Are you here to prove your skills or find the best talent?
           </CardDescription>

@@ -301,7 +301,7 @@ export default async function CompanyProfilePage({
               <CardHeader>
                 <CardTitle>Top Hires (Mock)</CardTitle>
                 <CardDescription>
-                  A showcase of talent hired through SkillMatch Pro.
+                  A showcase of talent hired through ControlTheMarket.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
