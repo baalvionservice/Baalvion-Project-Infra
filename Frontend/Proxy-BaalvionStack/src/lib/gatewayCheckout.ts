@@ -15,6 +15,8 @@
  *    resolves websiteSlug from the authenticated org — never from the browser.)
  */
 
+import { tokenStore } from "@/lib/tokenStore";
+
 const PLATFORM_BASE = import.meta.env.VITE_API_PLATFORM_BASE_URL ?? "http://localhost:4000/v1";
 
 export type GatewayProvider = "razorpay" | "stripe" | "payu";
@@ -23,11 +25,16 @@ export type GatewayMethod = "CARD" | "UPI" | "NETBANKING" | "BANK";
 export interface CheckoutRequest {
   provider: GatewayProvider; // the shopper's chosen gateway
   method?: GatewayMethod;    // payment method (default CARD)
-  amount: number;          // minor units (paise/cents)
+  amount: number;          // minor units (paise/cents) — DISPLAY only; the BFF recomputes the real charge
   currency: string;        // 'INR' | 'USD' | ...
   idempotencyKey: string;  // dedup a double-click / retry
   receipt?: string;
   customer?: { name?: string; email?: string; contact?: string };
+  // The BFF prices the charge server-side from these (it never trusts `amount`); planSlug + interval
+  // also flow into the provider order `notes` so the webhook can activate the right subscription.
+  planSlug?: string;
+  interval?: "monthly" | "yearly";
+  promoCode?: string;
 }
 
 export interface CheckoutInit {
@@ -53,10 +60,15 @@ export type CheckoutResult =
 
 /** Ask our backend to create a payment intent (it proxies to payment-service). */
 async function createIntent(req: CheckoutRequest): Promise<CheckoutInit> {
+  // /billing/checkout is guarded by authMiddleware, which requires the Bearer ACCESS token (it does
+  // not read the refresh cookie). Attach it from the in-memory tokenStore exactly like platformClient.
+  const token = tokenStore.getAccess();
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${PLATFORM_BASE}/billing/checkout`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
-    credentials: "include", // BFF auth cookie/session; tenant comes from the verified session, not the browser
+    headers,
+    credentials: "include", // also send the refresh cookie (same-origin host) for completeness
     body: JSON.stringify({ ...req, method: req.method ?? "CARD" }),
   });
   if (!res.ok) {

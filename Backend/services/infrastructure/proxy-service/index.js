@@ -23,6 +23,15 @@ app.use(cors({ origin: config.corsOrigins, credentials: true }));
 // KYC webhook needs the RAW body for HMAC verification — mount before json parser.
 app.post('/v1/webhooks/kyc', rateLimit(), express.raw({ type: '*/*' }), require('./controller/privacyController').kycWebhook);
 
+// Razorpay billing webhook (authoritative subscription activation) — also needs the RAW body for
+// HMAC verification, so mount before the json parser. No JWT; authenticity is the provider signature.
+app.post(
+    ['/v1/billing/webhook/razorpay', '/api/v1/billing/webhook/razorpay'],
+    rateLimit(),
+    express.raw({ type: '*/*' }),
+    require('./controller/billingWebhookController').razorpayWebhook,
+);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());

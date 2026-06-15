@@ -11,6 +11,14 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
+const billingService = require('../service/billingService');
+const logger = require('../service/logger');
+
+// Server-authoritative promo codes. The browser's discount display is cosmetic; the ACTUAL
+// discount is applied here only for codes in this map (unknown codes → 0% off). The Razorpay
+// modal shows the server-computed order amount, so the shopper always sees the true charge.
+const PROMOS = { WELCOME10: 0.10, LAUNCH20: 0.20 };
+const VALID_INTERVALS = new Set(['monthly', 'yearly']);
 
 // Canonical PSP gateway = Java payment-service (financial-services-java) on host 13015. It exposes
 // the same /v1/gateway/* contract as the retired Node twin, so this re-points by host only.
@@ -44,14 +52,55 @@ router.post('/checkout', authMiddleware, async (req, res) => {
     if (!GATEWAY_METHODS.includes(method)) {
         return res.status(400).json({ error: { code: 'VALIDATION', message: 'method must be CARD, UPI, NETBANKING, or BANK' } });
     }
-    if (!Number.isInteger(Number(amount)) || Number(amount) <= 0) {
-        return res.status(400).json({ error: { code: 'VALIDATION', message: 'amount must be a positive whole number in minor units' } });
-    }
     if (!currency || !idempotencyKey) {
         return res.status(400).json({ error: { code: 'VALIDATION', message: 'currency and idempotencyKey are required' } });
     }
     try {
-        const r = await fetch(`${PAYMENT_SERVICE_URL}/v1/gateway/payments`, {
+        // SECURITY: the charge amount is computed SERVER-SIDE from the plan price — never trusted from
+        // the browser (which previously sent `amount` directly). Resolve the plan from the explicit
+        // planSlug, else from the caller's own subscription; price by interval; apply only validated
+        // promo codes. The client `amount` is used solely to log a tamper attempt.
+        const interval = VALID_INTERVALS.has(String(body.interval)) ? String(body.interval) : 'monthly';
+        const promoCode = body.promoCode ? String(body.promoCode).trim().toUpperCase() : '';
+        let plan = body.planSlug ? await billingService.getPlan(String(body.planSlug)) : null;
+        if (!plan) {
+            const sub = await billingService.getSubscription(req.auth);
+            if (sub && sub.planSlug) plan = await billingService.getPlan(sub.planSlug);
+        }
+        if (!plan) {
+            return res.status(400).json({ error: { code: 'PLAN_REQUIRED', message: 'no resolvable plan for this checkout' } });
+        }
+        // Pay-As-You-Go is a prepaid CREDIT top-up: the charge is the shopper's chosen amount
+        // (range-checked), NOT a fixed monthly price — so we accept the client amount here. Every
+        // other plan is a subscription priced SERVER-SIDE from the plan (browser amount ignored).
+        const isPayg = String(plan.slug) === 'pay-as-you-go' || Number(plan.monthlyPrice || 0) === 0;
+        let serverAmount;
+        let expectedMajor;
+        if (isPayg) {
+            const reqAmount = Number(amount);
+            const MIN_TOPUP = 500;       // $5.00 — matches creditService MIN_TOPUP (never charge what the ledger rejects)
+            const MAX_TOPUP = 1000000;   // $10,000.00 — matches creditService MAX_TOPUP
+            if (!Number.isInteger(reqAmount) || reqAmount < MIN_TOPUP || reqAmount > MAX_TOPUP) {
+                return res.status(400).json({ error: { code: 'INVALID_TOPUP', message: 'top-up must be a whole number of minor units between 500 ($5) and 1000000 ($10,000)' } });
+            }
+            serverAmount = reqAmount;
+            expectedMajor = reqAmount / 100;
+        } else {
+            const unitPrice = Number(plan.monthlyPrice || 0) * (interval === 'yearly' ? 10 : 1);
+            const promoRate = promoCode && PROMOS[promoCode] ? PROMOS[promoCode] : 0;
+            expectedMajor = Math.max(0, Math.round(unitPrice * (1 - promoRate) * 100) / 100);
+            serverAmount = Math.round(expectedMajor * 100); // provider minor units (cents)
+            if (serverAmount <= 0) {
+                return res.status(400).json({ error: { code: 'NOTHING_TO_CHARGE', message: 'plan price resolves to zero — no payment needed' } });
+            }
+            if (Number.isInteger(Number(amount)) && Number(amount) !== serverAmount) {
+                logger.warn(`[billing] checkout amount override: client=${Number(amount)} server=${serverAmount} org=${req.auth.orgId} plan=${plan.slug} interval=${interval} promo=${promoCode || 'none'}`);
+            }
+        }
+        // payment-service reads the tenant slug from the `site` QUERY PARAM (@RequestParam), not from
+        // body.metadata — passing it here selects CMS-vault (per-tenant keys) mode over the global
+        // env-key fallback. metadata.websiteSlug is also kept in the body for logging/forward-compat.
+        const r = await fetch(`${PAYMENT_SERVICE_URL}/v1/gateway/payments?site=${encodeURIComponent(SITE_SLUG)}`, {
             method: 'POST',
             headers: {
                 'content-type': 'application/json',
@@ -62,11 +111,24 @@ router.post('/checkout', authMiddleware, async (req, res) => {
             body: JSON.stringify({
                 provider,
                 method,
-                amount: Number(amount),
+                amount: serverAmount, // server-computed, not the browser's claim
                 currency: String(currency),
                 ...(receipt ? { orderRef: String(receipt) } : {}),
                 ...(customer ? { customer } : {}),
-                metadata: { websiteSlug: SITE_SLUG },
+                // metadata → Razorpay order `notes` (the RazorpayGateway forwards it verbatim). These
+                // SERVER-TRUSTED fields (orgId/userId from the verified JWT) let the provider webhook
+                // map the payment back to the tenant + plan and activate idempotently. Never from the browser.
+                metadata: {
+                    websiteSlug: SITE_SLUG,
+                    orgId: String(req.auth.orgId || ''),
+                    userId: String(req.auth.userId || ''),
+                    planSlug: String(plan.slug),
+                    interval,
+                    amountMajor: expectedMajor.toFixed(2),
+                    // The webhook reads this to decide what a captured payment means: a PAYG prepaid
+                    // 'credit' top-up vs a 'subscription' activation.
+                    kind: isPayg ? 'credit' : 'subscription',
+                },
             }),
         });
         const d = await r.json().catch(() => ({}));
@@ -90,7 +152,14 @@ router.post('/checkout', authMiddleware, async (req, res) => {
             clientParams: cp,
         });
     } catch (e) {
-        return res.status(502).json({ error: { code: 'PAYMENT_UPSTREAM', message: 'payment-service unreachable' } });
+        // Distinguish a genuine upstream/transport failure from a logic error so we don't mislabel
+        // (and so the real cause is logged instead of swallowed).
+        logger.error('[billing] checkout failed:', e && e.message);
+        const isUpstream = /fetch failed|ECONNREFUSED|ENOTFOUND|EAI_AGAIN|network|timeout/i.test(String(e && e.message));
+        if (isUpstream) {
+            return res.status(502).json({ error: { code: 'PAYMENT_UPSTREAM', message: 'payment-service unreachable' } });
+        }
+        return res.status(500).json({ error: { code: 'CHECKOUT_ERROR', message: e && e.message ? e.message : 'checkout failed' } });
     }
 });
 
