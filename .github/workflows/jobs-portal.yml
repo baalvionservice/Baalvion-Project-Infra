@@ -35,6 +35,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      # Workspace packages (e.g. @baalvion/auth-sdk) compile to dist/; build them
+      # so the app typecheck can resolve their published types (mirrors ci.yml).
+      - name: Build workspace packages
+        run: pnpm --filter "./Backend/packages/*" run build
+
       - name: Type check
         run: pnpm --filter baalvion-jobs-portal-web run typecheck
 
@@ -72,6 +77,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Build workspace packages
+        run: pnpm --filter "./Backend/packages/*" run build
 
       - name: Build
         run: pnpm --filter baalvion-jobs-portal-web run build
