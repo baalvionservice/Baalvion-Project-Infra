@@ -53,10 +53,22 @@ function buildRazorpay() {
   return { secrets: { keyId, keySecret, webhookSecret }, config: { mode: 'live', baseUrl: 'https://api.razorpay.com' } };
 }
 
+function buildPayu() {
+  const merchantKey = process.env.PAYU_TEST_MERCHANT_KEY;
+  const merchantSalt = process.env.PAYU_TEST_MERCHANT_SALT;
+  if (!merchantKey || !merchantSalt) die('PAYU_TEST_MERCHANT_KEY and PAYU_TEST_MERCHANT_SALT are required');
+  // PayU test keys carry no standard prefix to assert on (unlike sk_test_ / rzp_test_); a test vs
+  // production merchant is what makes them sandbox. The Java PayUGateway reads merchantKey/merchantSalt.
+  return { secrets: { merchantKey, merchantSalt }, config: { mode: 'live', baseUrl: process.env.PAYU_TEST_BASE_URL || 'https://test.payu.in' } };
+}
+
 function die(msg) { console.error(`[sandbox] ERROR: ${msg}`); process.exit(1); }
 
 (async () => {
-  const built = PROVIDER === 'razorpay' ? buildRazorpay() : PROVIDER === 'stripe' ? buildStripe() : die(`unknown provider "${PROVIDER}"`);
+  const built = PROVIDER === 'razorpay' ? buildRazorpay()
+    : PROVIDER === 'stripe' ? buildStripe()
+    : PROVIDER === 'payu' ? buildPayu()
+    : die(`unknown provider "${PROVIDER}"`);
   await connectDB();
   const w = await CmsWebsite.findOne({ where: { slug: SITE } });
   if (!w) die(`no CMS website with slug "${SITE}" (run the website seed/bootstrap first)`);

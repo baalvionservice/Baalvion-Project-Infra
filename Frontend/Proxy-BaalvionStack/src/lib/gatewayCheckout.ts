@@ -124,10 +124,15 @@ export async function startGatewayCheckout(req: CheckoutRequest): Promise<Checko
     // submit it to PayU's hosted page. The action URL is env-configurable (test vs secure PayU).
     const cp = init.clientParams || {};
     const action = import.meta.env.VITE_PAYU_ACTION_URL ?? "https://test.payu.in/_payment";
+    // PayU browser-POSTs the result to surl (success) / furl (failure). Point both at our same-origin
+    // callback, which verifies PayU's reverse-hash, activates, and redirects back to the app. surl/furl
+    // are NOT part of the PayU request hash, so adding them here doesn't affect verification.
+    const callbackUrl = `${window.location.origin}/v1/billing/webhook/payu`;
+    const params: Record<string, string> = { ...cp, surl: callbackUrl, furl: callbackUrl };
     const form = document.createElement("form");
     form.method = "POST";
     form.action = action;
-    Object.entries(cp).forEach(([name, value]) => {
+    Object.entries(params).forEach(([name, value]) => {
       const input = document.createElement("input");
       input.type = "hidden";
       input.name = name;

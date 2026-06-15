@@ -32,6 +32,14 @@ app.post(
     require('./controller/billingWebhookController').razorpayWebhook,
 );
 
+// PayU callback (surl/furl) — form-encoded browser POST; needs the RAW body for the reverse-hash.
+app.post(
+    ['/v1/billing/webhook/payu', '/api/v1/billing/webhook/payu'],
+    rateLimit(),
+    express.raw({ type: '*/*' }),
+    require('./controller/payuWebhookController').payuWebhook,
+);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());

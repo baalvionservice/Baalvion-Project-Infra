@@ -114,7 +114,10 @@ router.post('/checkout', authMiddleware, async (req, res) => {
                 amount: serverAmount, // server-computed, not the browser's claim
                 currency: String(currency),
                 ...(receipt ? { orderRef: String(receipt) } : {}),
-                ...(customer ? { customer } : {}),
+                // Stamp the VERIFIED user email (never the browser's) onto the order. PayU echoes it
+                // back in its (hash-signed) callback, which is how that redirect flow maps the payment
+                // to the tenant; harmless prefill for the other providers.
+                customer: { ...(customer || {}), email: req.auth.email },
                 // metadata → Razorpay order `notes` (the RazorpayGateway forwards it verbatim). These
                 // SERVER-TRUSTED fields (orgId/userId from the verified JWT) let the provider webhook
                 // map the payment back to the tenant + plan and activate idempotently. Never from the browser.

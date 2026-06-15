@@ -42,6 +42,8 @@ export default defineConfig(({ mode }) => {
   const RAZORPAY_FRAME = "https://*.razorpay.com";
   const RAZORPAY_CONNECT = "https://*.razorpay.com";
   const RAZORPAY_IMG = "https://*.razorpay.com";
+  // PayU is a form-POST redirect to its hosted page → allow it as a form-action target.
+  const PAYU_FORM = "https://*.payu.in";
 
   // Same-origin auth proxy — forward /auth-bff/* to the auth gateway so the httpOnly cookie is set
   // against localhost:8080 and flows on every request. No CORS, no cross-site cookies. Shared by the
@@ -71,7 +73,7 @@ export default defineConfig(({ mode }) => {
       `connect-src 'self' ${AUTH_ORIGIN} ${PLATFORM_ORIGIN} ${RAZORPAY_CONNECT}`,
       `frame-src ${RAZORPAY_FRAME}`,
       "frame-ancestors 'none'",
-      "form-action 'self'",
+      `form-action 'self' ${PAYU_FORM}`,
       "base-uri 'self'",
       "object-src 'none'",
     ].join("; "),
