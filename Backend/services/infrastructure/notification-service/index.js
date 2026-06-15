@@ -17,6 +17,10 @@ const { startSmsWorker }     = require('./workers/smsWorker');
 const { startPushWorker }    = require('./workers/pushWorker');
 const { startNotificationWorker } = require('./workers/notificationWorker');
 const { startEventConsumer, stopEventConsumer } = require('./workers/eventConsumer');
+const { validateConfig } = require('./config/validateConfig');
+
+// Fail-closed: refuse to boot in production without a real email provider (no silent log-only mail).
+validateConfig();
 
 const app = express();
 
