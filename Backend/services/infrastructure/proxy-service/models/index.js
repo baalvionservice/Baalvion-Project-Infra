@@ -16,7 +16,17 @@ const dbOptions = process.env.DB_HOST
         dialect: 'postgres',
         dialectOptions: process.env.DB_SSL === 'false'
             ? {}
-            : { ssl: { require: true, rejectUnauthorized: false } },
+            : {
+                ssl: {
+                    require: true,
+                    // Verify the server certificate by default — prevents a MITM from
+                    // presenting any cert (the previous hardcoded `false` accepted any cert,
+                    // even in production). Set DB_SSL_REJECT_UNAUTHORIZED=false ONLY for a
+                    // trusted self-signed dev cert; pin a CA via DB_SSL_CA for managed PG/RDS.
+                    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+                    ...(process.env.DB_SSL_CA ? { ca: process.env.DB_SSL_CA } : {}),
+                },
+            },
     }
     : fileConfig.development;
 

@@ -32,7 +32,10 @@ const start = async () => {
     try {
         await db.sequelize.authenticate();
         await db.sequelize.query('CREATE SCHEMA IF NOT EXISTS crm');
-        await db.sequelize.sync({ alter: true });
+        // alter:false — never auto-mutate the schema at runtime (alter:true can silently DROP/ALTER
+        // columns and lose data, with no version tracking or rollback). Schema changes go through
+        // explicit migrations. This only creates missing tables on a fresh DB.
+        await db.sequelize.sync({ alter: false });
         console.log('[CRM] DB connected and synced');
     } catch (err) { console.error('[CRM] DB error:', err.message); process.exit(1); }
     server.listen(config.port, () => console.log(`[CRM] Service running on port ${config.port}`));
