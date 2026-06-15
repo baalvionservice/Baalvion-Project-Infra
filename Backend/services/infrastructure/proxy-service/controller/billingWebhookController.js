@@ -22,10 +22,9 @@ const crypto = require('crypto');
 const billingService = require('../service/billingService');
 const logger = require('../service/logger');
 
-const WEBHOOK_SECRET = process.env.RAZORPAY_WEBHOOK_SECRET || 'whsec_proxy_local_test';
-if (process.env.NODE_ENV === 'production' && !process.env.RAZORPAY_WEBHOOK_SECRET) {
-    throw new Error('RAZORPAY_WEBHOOK_SECRET must be set in production (billing webhook verification)');
-}
+const cmsVault = require('../service/cmsVault');
+// Secret comes from the CMS vault (the central admin panel) first; env is a local/dev fallback.
+const WEBHOOK_SECRET_ENV = process.env.RAZORPAY_WEBHOOK_SECRET || '';
 
 const ACTIONABLE = new Set(['payment.captured', 'order.paid']);
 const processedPaymentIds = new Set(); // in-process idempotency (see note above)
@@ -44,7 +43,12 @@ async function razorpayWebhook(req, res) {
         if (!signature) {
             return res.status(400).json({ error: { code: 'NO_SIGNATURE', message: 'missing x-razorpay-signature' } });
         }
-        const expected = crypto.createHmac('sha256', WEBHOOK_SECRET).update(raw).digest('hex');
+        const secret = (await cmsVault.getSecret('razorpay', 'webhookSecret')) || WEBHOOK_SECRET_ENV;
+        if (!secret) {
+            logger.error('[billing-webhook] no Razorpay webhook secret (vault or env)');
+            return res.status(503).json({ error: { code: 'NOT_CONFIGURED', message: 'webhook secret not configured' } });
+        }
+        const expected = crypto.createHmac('sha256', secret).update(raw).digest('hex');
         if (!timingSafeEqual(signature, expected)) {
             logger.warn('[billing-webhook] razorpay signature verification failed');
             return res.status(400).json({ error: { code: 'BAD_SIGNATURE', message: 'signature verification failed' } });

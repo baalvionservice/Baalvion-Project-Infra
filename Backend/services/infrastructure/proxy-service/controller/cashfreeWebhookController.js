@@ -16,10 +16,9 @@ const billingService = require('../service/billingService');
 const store = require('../service/platformStore');
 const logger = require('../service/logger');
 
-const CASHFREE_SECRET = process.env.CASHFREE_CLIENT_SECRET || '';
-if (process.env.NODE_ENV === 'production' && !process.env.CASHFREE_CLIENT_SECRET) {
-    throw new Error('CASHFREE_CLIENT_SECRET must be set in production (Cashfree webhook verification)');
-}
+const cmsVault = require('../service/cmsVault');
+// Cashfree's webhook secret IS the client secret. Vault (central admin panel) first; env fallback.
+const CASHFREE_SECRET_ENV = process.env.CASHFREE_CLIENT_SECRET || '';
 
 const processedEventIds = new Set(); // in-proc idempotency; durable dedup also via credit ref + invoice window
 
@@ -32,8 +31,9 @@ function timingSafeEqual(a, b) {
 
 async function cashfreeWebhook(req, res) {
     try {
+        const CASHFREE_SECRET = (await cmsVault.getSecret('cashfree', 'clientSecret')) || CASHFREE_SECRET_ENV;
         if (!CASHFREE_SECRET) {
-            logger.error('[cashfree-webhook] CASHFREE_CLIENT_SECRET not configured');
+            logger.error('[cashfree-webhook] no Cashfree client secret (vault or env)');
             return res.status(503).json({ error: { code: 'CASHFREE_NOT_CONFIGURED', message: 'Cashfree not configured' } });
         }
         const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || '');

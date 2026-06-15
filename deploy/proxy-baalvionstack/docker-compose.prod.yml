@@ -142,7 +142,12 @@ services:
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
       PAYMENT_SERVICE_URL: ${PAYMENT_SERVICE_URL}
       PAYMENT_SITE_SLUG: ${PAYMENT_SITE_SLUG}
-      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      # The webhook handlers read each provider's secret from the CMS vault (set in the admin panel);
+      # CMS_BASE_URL lets proxy-service reach the internal resolver. RAZORPAY_WEBHOOK_SECRET is an
+      # optional env fallback only — the other providers' secrets come solely from the vault.
+      CMS_BASE_URL: ${CMS_BASE_URL}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL}
       CORS_ORIGINS: ${CORS_ORIGINS}
     volumes:
       # RS256 signing keypair (generate per runbook §5). Read-only.

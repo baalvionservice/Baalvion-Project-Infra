@@ -17,11 +17,10 @@ const billingService = require('../service/billingService');
 const store = require('../service/platformStore');
 const logger = require('../service/logger');
 
-const STRIPE_WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET || '';
+const cmsVault = require('../service/cmsVault');
+// Secret comes from the CMS vault (the central admin panel) first; env is a local/dev fallback.
+const STRIPE_WEBHOOK_SECRET_ENV = process.env.STRIPE_WEBHOOK_SECRET || '';
 const TOLERANCE_SECONDS = Number(process.env.STRIPE_TOLERANCE_SECONDS || 300);
-if (process.env.NODE_ENV === 'production' && !process.env.STRIPE_WEBHOOK_SECRET) {
-    throw new Error('STRIPE_WEBHOOK_SECRET must be set in production (Stripe webhook verification)');
-}
 
 const processedEventIds = new Set(); // in-proc idempotency; durable dedup also via credit ref + invoice window
 
@@ -49,8 +48,9 @@ function parseSigHeader(header) {
 
 async function stripeWebhook(req, res) {
     try {
+        const STRIPE_WEBHOOK_SECRET = (await cmsVault.getSecret('stripe', 'webhookSecret')) || STRIPE_WEBHOOK_SECRET_ENV;
         if (!STRIPE_WEBHOOK_SECRET) {
-            logger.error('[stripe-webhook] STRIPE_WEBHOOK_SECRET not configured');
+            logger.error('[stripe-webhook] no Stripe webhook secret (vault or env)');
             return res.status(503).json({ error: { code: 'STRIPE_NOT_CONFIGURED', message: 'Stripe not configured' } });
         }
         const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || '');

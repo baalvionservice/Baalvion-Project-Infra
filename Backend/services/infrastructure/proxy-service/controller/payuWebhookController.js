@@ -19,11 +19,10 @@ const store = require('../service/platformStore');
 const config = require('../config/appConfig');
 const logger = require('../service/logger');
 
-const PAYU_KEY = process.env.PAYU_MERCHANT_KEY || '';
-const PAYU_SALT = process.env.PAYU_MERCHANT_SALT || '';
-if (process.env.NODE_ENV === 'production' && (!PAYU_KEY || !PAYU_SALT)) {
-    throw new Error('PAYU_MERCHANT_KEY and PAYU_MERCHANT_SALT must be set in production (PayU callback verification)');
-}
+const cmsVault = require('../service/cmsVault');
+// merchantKey/salt come from the CMS vault (the central admin panel) first; env is a dev fallback.
+const PAYU_KEY_ENV = process.env.PAYU_MERCHANT_KEY || '';
+const PAYU_SALT_ENV = process.env.PAYU_MERCHANT_SALT || '';
 const APP_URL = process.env.PUBLIC_APP_URL || (config.corsOrigins && config.corsOrigins[0]) || 'http://localhost:8080';
 
 const processedTxnIds = new Set(); // in-proc idempotency; durable dedup also via credit ref + invoice window
@@ -51,8 +50,11 @@ const landing = (outcome) => `${APP_URL.replace(/\/$/, '')}/app/billing/checkout
 
 async function payuWebhook(req, res) {
     try {
+        const payu = await cmsVault.getProvider('payu');
+        const PAYU_KEY = (payu && payu.secrets && payu.secrets.merchantKey) || PAYU_KEY_ENV;
+        const PAYU_SALT = (payu && payu.secrets && payu.secrets.merchantSalt) || PAYU_SALT_ENV;
         if (!PAYU_KEY || !PAYU_SALT) {
-            logger.error('[payu-webhook] PayU merchant key/salt not configured');
+            logger.error('[payu-webhook] no PayU merchant key/salt (vault or env)');
             return res.status(503).json({ error: { code: 'PAYU_NOT_CONFIGURED', message: 'PayU not configured' } });
         }
         const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || '');
