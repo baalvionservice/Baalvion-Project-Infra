@@ -111,7 +111,65 @@ public class StripeGateway implements PaymentGateway {
     if (config.mock()) {
       return mockInitiate(config, amount, currency, receipt);
     }
+    // Hosted Stripe Checkout when the caller supplies a return_url (the proxy site uses this — best
+    // for international cards + many methods, and matches the SPA's checkoutUrl-redirect branch).
+    // Otherwise fall back to the existing PaymentIntent flow (back-compat for other consumers).
+    String returnUrl = request.metadata().get("returnUrl");
+    if (returnUrl != null && !returnUrl.isBlank()) {
+      return liveCheckoutSession(config, amount, currency, request);
+    }
     return liveInitiate(config, amount, currency, receipt);
+  }
+
+  /**
+   * Create a hosted Stripe Checkout Session ({@code POST /v1/checkout/sessions}) and return its
+   * {@code url} as {@code clientParams.checkoutUrl} for the SPA to redirect to. Our server-trusted
+   * mapping fields (orgId/userId/planSlug/kind) are echoed into the session metadata so the webhook
+   * can map {@code checkout.session.completed} back to the tenant; customer_email is set too.
+   */
+  private GatewayChargeResponse liveCheckoutSession(ProviderConfig config, long amount, String currency, GatewayChargeRequest request) {
+    requireSecretKey(config);
+    Map<String, String> md = request.metadata();
+    String returnUrl = md.get("returnUrl");
+    String cancelUrl = md.getOrDefault("cancelUrl", returnUrl);
+    String email = request.customer() == null ? null : request.customer().get("email");
+    String planSlug = md.getOrDefault("planSlug", "subscription");
+
+    StringBuilder form = new StringBuilder()
+      .append("mode=payment")
+      .append("&success_url=").append(formEncode(returnUrl))
+      .append("&cancel_url=").append(formEncode(cancelUrl))
+      .append("&line_items[0][quantity]=1")
+      .append("&line_items[0][price_data][currency]=").append(formEncode(currency))
+      .append("&line_items[0][price_data][unit_amount]=").append(formEncode(String.valueOf(amount)))
+      .append("&line_items[0][price_data][product_data][name]=").append(formEncode("Baalvion " + planSlug));
+    if (email != null && !email.isBlank()) {
+      form.append("&customer_email=").append(formEncode(email));
+    }
+    for (Map.Entry<String, String> e : md.entrySet()) {
+      if (e.getKey() == null || e.getValue() == null) {
+        continue;
+      }
+      // url fields aren't useful as metadata and can exceed Stripe's 500-char value limit.
+      if (e.getKey().equals("returnUrl") || e.getKey().equals("cancelUrl") || e.getKey().equals("notifyUrl")) {
+        continue;
+      }
+      form.append("&metadata[").append(formEncode(e.getKey())).append("]=").append(formEncode(e.getValue()));
+    }
+
+    String responseBody = post(config, "/v1/checkout/sessions", form.toString(), "checkout session create");
+    JsonNode data = readTree(responseBody, "checkout session create");
+    String sessionId = textOrNull(data, "id");
+    if (sessionId == null) {
+      throw new IllegalStateException("Stripe checkout session returned no id");
+    }
+    String publishableKey = config.secret("publishableKey");
+    Map<String, String> clientParams = new LinkedHashMap<>();
+    clientParams.put("checkoutUrl", textOrEmpty(data, "url"));
+    clientParams.put("publishableKey", publishableKey == null ? "" : publishableKey);
+    clientParams.put("amount", String.valueOf(amount));
+    clientParams.put("currency", currency);
+    return new GatewayChargeResponse(PROVIDER, sessionId, GatewayStatus.CREATED, clientParams, responseBody);
   }
 
   private GatewayChargeResponse mockInitiate(ProviderConfig config, long amount, String currency, String receipt) {

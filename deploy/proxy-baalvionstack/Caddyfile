@@ -1,0 +1,40 @@
+# Caddy v2 — TLS termination, static SPA, and same-origin reverse-proxy for proxy.baalvionstack.com.
+# Caddy auto-provisions + renews a Let's Encrypt cert for {$DOMAIN} and redirects HTTP→HTTPS.
+# In production Caddy (not Vite) serves the built SPA, so it OWNS the security headers / CSP here.
+
+{$DOMAIN} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Frame-Options "SAMEORIGIN"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		# Same-origin API now (SPA + /v1 + /auth-bff all on this host) → connect-src 'self'.
+		# *.razorpay.com is required for the hosted Checkout modal (script/frame/connect/img).
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://*.razorpay.com https://*.cashfree.com https://*.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://*.razorpay.com https://*.cashfree.com https://*.stripe.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://*.razorpay.com https://*.cashfree.com https://*.stripe.com; frame-src https://*.razorpay.com https://*.cashfree.com https://*.stripe.com; frame-ancestors 'none'; form-action 'self' https://*.payu.in https://*.cashfree.com https://*.stripe.com; base-uri 'self'; object-src 'none'"
+		-Server
+	}
+
+	# Customer auth: the SPA calls /auth-bff/* same-origin; strip the prefix and forward to
+	# proxy-service's customer auth at /v1/auth/* (register provisions the tenant, etc.).
+	handle_path /auth-bff/* {
+		rewrite * /v1/auth{path}
+		reverse_proxy proxy-service:4000
+	}
+
+	# Platform + billing API AND the Razorpay webhook (/v1/billing/webhook/razorpay).
+	# reverse_proxy forwards the raw body unchanged so the webhook HMAC still verifies.
+	handle /v1/* {
+		reverse_proxy proxy-service:4000
+	}
+
+	# Static SPA build with client-side routing fallback.
+	handle {
+		root * /srv/www
+		try_files {path} /index.html
+		file_server
+	}
+}

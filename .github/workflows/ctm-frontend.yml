@@ -10,6 +10,7 @@ on:
     branches: [main]
     paths:
       - 'Frontend/controlthemarket-main/**'
+      - '.github/workflows/ctm-frontend.yml'
 
 defaults:
   run:
@@ -34,7 +35,13 @@ jobs:
 
       - name: Install dependencies
         working-directory: .
-        run: pnpm install --frozen-lockfile --filter controlthemarket-web...
+        run: pnpm install --frozen-lockfile
+
+      # Workspace packages (e.g. @baalvion/auth-sdk) compile to dist/; build them
+      # so the app typecheck can resolve their published types (mirrors ci.yml).
+      - name: Build workspace packages
+        working-directory: .
+        run: pnpm --filter "./Backend/packages/*" run build
 
       - name: Type check
         # tsc --noEmit is clean (next.config no longer ignores build type errors),
@@ -70,7 +77,11 @@ jobs:
 
       - name: Install dependencies
         working-directory: .
-        run: pnpm install --frozen-lockfile --filter controlthemarket-web...
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace packages
+        working-directory: .
+        run: pnpm --filter "./Backend/packages/*" run build
 
       - name: Build
         working-directory: .

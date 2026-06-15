@@ -90,6 +90,7 @@ export const PROVIDER_CATALOG: ProviderDef[] = [
     secretFields: [
       { key: 'keyId', label: 'Key ID', placeholder: 'rzp_test_…' },
       { key: 'keySecret', label: 'Key Secret', placeholder: 'secret' },
+      { key: 'webhookSecret', label: 'Webhook Secret', placeholder: 'whsec_… (dashboard webhook)' },
     ],
   },
   {
@@ -115,6 +116,20 @@ export const PROVIDER_CATALOG: ProviderDef[] = [
     secretFields: [
       { key: 'merchantKey', label: 'Merchant Key' },
       { key: 'merchantSalt', label: 'Merchant Salt' },
+    ],
+  },
+  {
+    provider: 'cashfree',
+    category: 'payment',
+    label: 'Cashfree',
+    description: 'Cashfree Payments (PG) — cards / UPI / netbanking.',
+    fields: [
+      { key: 'mode', label: 'Mode', type: 'select', options: ['test', 'live'] },
+      { key: 'baseUrl', label: 'Base URL', placeholder: 'sandbox.cashfree.com (test) / api.cashfree.com (live)' },
+    ],
+    secretFields: [
+      { key: 'clientId', label: 'Client ID', placeholder: 'x-client-id' },
+      { key: 'clientSecret', label: 'Client Secret', placeholder: 'x-client-secret (also the webhook secret)' },
     ],
   },
   {

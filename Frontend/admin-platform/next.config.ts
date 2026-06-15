@@ -21,10 +21,18 @@ const nextConfig: NextConfig = {
     const authTarget =
       process.env.AUTH_PROXY_TARGET ||
       'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+    // Generic API-gateway proxy target. Fall back to the public gateway so the
+    // rewrite destination is ALWAYS a valid absolute URL. A missing env var here
+    // yields `undefined/:path*`, which Next.js rejects — failing the build on
+    // Vercel, where .env.local is absent. Never let an unset var break the build.
+    const apiTarget =
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.NEXT_PUBLIC_GATEWAY_URL ||
+      'https://api.baalvion.com/v1';
     return [
       {
         source: '/api/proxy/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/:path*`,
+        destination: `${apiTarget}/:path*`,
       },
       // Same-origin auth proxy so the httpOnly refresh cookie flows in dev and prod.
       { source: '/auth-bff/:path*', destination: `${authTarget}/:path*` },

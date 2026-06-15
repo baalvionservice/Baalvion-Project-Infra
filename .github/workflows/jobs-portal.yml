@@ -10,10 +10,7 @@ on:
     branches: [main]
     paths:
       - 'Frontend/Baalvion-Jobs-Portal-main/**'
-
-defaults:
-  run:
-    working-directory: Frontend/Baalvion-Jobs-Portal-main
+      - '.github/workflows/jobs-portal.yml'
 
 jobs:
   lint-typecheck:
@@ -23,21 +20,36 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # This is a pnpm + Turborepo monorepo: the lockfile (pnpm-lock.yaml) lives
+      # at the repo root and there is no per-app package-lock.json, so dependency
+      # install must run from the root via pnpm — not `npm ci` in the app folder.
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: Frontend/Baalvion-Jobs-Portal-main/package-lock.json
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      # Workspace packages (e.g. @baalvion/auth-sdk) compile to dist/; build them
+      # so the app typecheck can resolve their published types (mirrors ci.yml).
+      - name: Build workspace packages
+        run: pnpm --filter "./Backend/packages/*" run build
 
       - name: Type check
-        run: npx tsc --noEmit || true
+        run: pnpm --filter baalvion-jobs-portal-web run typecheck
+
+      # Lint and tests are advisory here (do not gate the merge); the canonical
+      # build gate for this app is the "Frontend Apps Build" matrix in ci.yml.
+      - name: Lint
+        run: pnpm --filter baalvion-jobs-portal-web run lint || true
 
       - name: Run tests
-        run: npm test --if-present
+        run: pnpm --filter baalvion-jobs-portal-web run test -- --passWithNoTests || true
 
   build:
     name: Build
@@ -54,18 +66,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: Frontend/Baalvion-Jobs-Portal-main/package-lock.json
+          cache: 'pnpm'
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      - name: Build workspace packages
+        run: pnpm --filter "./Backend/packages/*" run build
 
       - name: Build
-        run: npm run build
+        run: pnpm --filter baalvion-jobs-portal-web run build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

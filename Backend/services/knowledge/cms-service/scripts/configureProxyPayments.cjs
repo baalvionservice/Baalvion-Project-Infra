@@ -43,6 +43,11 @@ const PROVIDERS = [
         secrets: { merchantKey: 'payu_test_proxy', merchantSalt: 'payu_salt_proxy' },
         config: { mode: 'mock' },
     },
+    {
+        provider: 'cashfree',
+        secrets: { clientId: 'cf_test_proxy', clientSecret: 'cfsk_test_proxy' },
+        config: { mode: 'mock', baseUrl: 'https://sandbox.cashfree.com' },
+    },
 ];
 
 (async () => {
