@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "generate-keys": "node scripts/generateKeys.js",
-    "migrate": "psql $DATABASE_URL -f migrations/001_auth_schema.sql && psql $DATABASE_URL -f migrations/002_add_family_id.sql && psql $DATABASE_URL -f migrations/003_auth_audit_log.sql && psql $DATABASE_URL -f migrations/004_org_type.sql",
+    "migrate": "psql $DATABASE_URL -f migrations/001_auth_schema.sql && psql $DATABASE_URL -f migrations/002_add_family_id.sql && psql $DATABASE_URL -f migrations/003_auth_audit_log.sql && psql $DATABASE_URL -f migrations/004_org_type.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/009_rls_tenant_isolation.sql",
     "seed:gti": "node scripts/seedGtiOrganizations.js"
   },
   "dependencies": {

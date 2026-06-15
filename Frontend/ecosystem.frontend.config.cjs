@@ -60,7 +60,7 @@ module.exports = {
     next('ctm-web', 'controlthemarket-main', 3034),
     next('brand-web', 'brand-connector-main', 3035),
     next('mining-web', 'Mining.Baalvion-main', 3028),
-    next('jobs-web', 'Baalvion-Jobs-Portal-main', 3026, 'dev'), // currently runs the dev server
+    next('jobs-web', 'Baalvion-Jobs-Portal-main', 3026), // production `next start`
     next('admin-platform', 'admin-platform', 3030),
     next('dashboard-web', 'company-unified-Dashboard-main', 3024),
     vite('founders-web', 'For Invstors and Founders', 8082),

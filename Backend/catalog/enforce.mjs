@@ -39,9 +39,13 @@ const JWT_ALLOWLIST = [
   ['Backend/services/ecosystem/jobs-service/middleware/authMiddleware.js', 'jwt.decode() only to read the email claim — verification is via @baalvion/auth-node createAuthMiddleware'],
   ['Backend/services/platform/realtime-service/index.js', 'WebSocket upgrade auth — RS256 jwt.verify at the handshake; Express auth-node middleware does not apply to WS upgrades'],
   ['Backend/services/knowledge/cms-service/scripts/', 'dev seed scripts mint a local token for seeding — not a request-path auth surface'],
+  ['Backend/services/ecosystem/ctm-service/tests/auth-denial.test.js', 'test-only: jwt.sign mints RS256 tokens to assert authMiddleware GRANTS valid / DENIES forged — not a request-path auth surface'],
 ];
-// C2: sub-stacks that are their own bounded monorepo (internal cross-imports are fine).
-const CROSS_SERVICE_EXEMPT_PREFIXES = ['Backend/services/ecosystem/law-elite/'];
+// C2: sub-stacks that are their own bounded monorepo (internal cross-imports are fine),
+// plus Backend/scripts/ which is repo-level tooling (migration generators, seeders) — not a
+// deployable service, so it may import shared @baalvion/* packages (e.g. the RLS generator
+// sources its policy SQL from @baalvion/tenancy, the single source of truth).
+const CROSS_SERVICE_EXEMPT_PREFIXES = ['Backend/services/ecosystem/law-elite/', 'Backend/scripts/'];
 // Backend dirs that are not deployable services (no descriptor required).
 const NON_SERVICE_DIRS = new Set(['migrations', 'clickhouse', 'timeseries', 'gateway', 'catalog', 'packages', 'platform', 'infra', 'database', 'services', '_reconcile']);
 
