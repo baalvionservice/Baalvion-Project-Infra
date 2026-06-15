@@ -1,0 +1,207 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Production stack for the Company Unified Dashboard — single EC2 host, Docker Compose.
+# SELF-CONTAINED identity slice: this deploy runs its OWN auth (auth-service MINTS RS256 tokens),
+# the BFF cookie gateway, session-service, and dashboard-service. No dependency on a central
+# api.baalvion.com. Only Caddy publishes ports (80/443); everything else is internal.
+#
+#   Request path:
+#     browser ─443→ Caddy ─ /* → web:3024 (Next.js SSR dashboard)
+#                                  ├─ /auth-bff/* ─(Next rewrite)→ auth-gateway:3099 /auth/*
+#                                  └─ /api-bff/*  ─(Next rewrite)→ auth-gateway:3099 /api/*
+#     auth-gateway ─→ auth-service:3001 (login/refresh/me/jwks) · dashboard-service:3009 (data)
+#                  └─ session-service:3022 (session records)
+#     postgres + redis  (internal compose network; no public port)
+#
+#   Run from the REPO ROOT:
+#     docker compose --env-file deploy/company-dashboard/.env.prod \
+#       -f deploy/company-dashboard/docker-compose.prod.yml up -d --build
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-jwt: &jwt
+  JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+  JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+  JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+  JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+  JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+  JWT_ALLOW_HS256_FALLBACK: "false"
+
+x-db: &db
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${POSTGRES_DB}
+  DB_USER: ${POSTGRES_USER}
+  DB_PASSWORD: ${POSTGRES_PASSWORD}
+
+x-redis: &redis
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── Identity: auth-service MINTS RS256 tokens (needs the PRIVATE key) ─────────
+  auth-service:
+    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/company-dashboard-auth-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/identity/auth-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis, *jwt]
+      NODE_ENV: production
+      PORT: "3001"
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      # Dev SMTP catcher would go here; transactional email is optional for the dashboard slice.
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@baalvion.com}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  # NOTE: session-service (:3022) is intentionally NOT in this slice. The BFF session is created and
+  # read by the auth-gateway directly in Redis (createSession/getSession in routes/auth.js), so login,
+  # /me, refresh, and the dashboard all work without it. Add it later only if you want the standalone
+  # session-management / anomaly-detection surface.
+
+  dashboard-service:
+    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/company-dashboard-dashboard-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/platform/dashboard-service/Dockerfile
+    restart: unless-stopped
+    # NOTE: deliberately NO GATEWAY_SIGNING_SECRET here. With it, dashboard-service would take the
+    # gateway-trust header path (roles only, empty permissions) and never read the Bearer. Leaving it
+    # unset routes auth through the RS256 Bearer the gateway forwards in hybrid mode → full
+    # roles + permissions. (See auth-gateway BFF_ENFORCEMENT_MODE=hybrid below.)
+    environment:
+      <<: [*db, *redis, *jwt]
+      NODE_ENV: production
+      PORT: "3009"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3009/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  # ── BFF cookie gateway: HttpOnly cookies ↔ RS256, forwards Bearer in hybrid mode ─
+  auth-gateway:
+    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/company-dashboard-auth-gateway:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/identity/auth-gateway/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *redis
+      NODE_ENV: production
+      PORT: "3099"
+      AUTH_SERVICE_URL: http://auth-service:3001/v1/auth
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      CORS_ORIGINS: https://${DOMAIN}
+      # hybrid: forward the RS256 Bearer (full roles+permissions) so dashboard-service authorizes,
+      # AND send signed identity headers. strict would send headers only (backends would 401).
+      BFF_ENFORCEMENT_MODE: hybrid
+      GATEWAY_SIGNING_SECRET: ${GATEWAY_SIGNING_SECRET}
+      # Cookie names MUST match the web image's NEXT_PUBLIC_REFRESH_COOKIE_NAME build arg.
+      COOKIE_ACCESS_NAME: baalvion_access
+      COOKIE_REFRESH_NAME: baalvion_refresh
+      CSRF_COOKIE_NAME: csrf_token
+      COOKIE_SAMESITE: lax
+      SVC_DASHBOARD: http://dashboard-service:3009
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3099/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      auth-service: { condition: service_started }
+      dashboard-service: { condition: service_started }
+      redis: { condition: service_healthy }
+
+  # ── Next.js dashboard (standalone). NEXT_PUBLIC_* are baked at BUILD (build.args). The
+  #    /auth-bff + /api-bff rewrite target (NEXT_PUBLIC_GATEWAY_URL) is read by next.config at
+  #    server start → RUNTIME env, pointed at the internal gateway. ──────────────
+  web:
+    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/company-dashboard-web:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Frontend/company-unified-Dashboard-main/Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: https://${DOMAIN}
+        NEXT_PUBLIC_REALTIME_WS_URL: ${NEXT_PUBLIC_REALTIME_WS_URL:-}
+        NEXT_PUBLIC_REFRESH_COOKIE_NAME: baalvion_refresh
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3024"
+      HOSTNAME: 0.0.0.0
+      # Server-side rewrites proxy /auth-bff + /api-bff to the internal gateway (keeps the HttpOnly
+      # session cookie first-party to this origin).
+      NEXT_PUBLIC_GATEWAY_URL: http://auth-gateway:3099
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3024/auth/login"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      auth-gateway: { condition: service_started }
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
+  redisdata:
+  caddy_data:
+  caddy_config:

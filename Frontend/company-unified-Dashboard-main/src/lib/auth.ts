@@ -20,6 +20,8 @@ export interface User {
 function mapToUser(authUser: DashAuthUser): User {
   const roleMap: Record<string, Role> = {
     // Platform owner / super-admin → the full Admin panel.
+    platform_admin: 'ADMIN',
+    platform_owner: 'ADMIN',
     owner: 'ADMIN',
     super_admin: 'ADMIN',
     superadmin: 'ADMIN',
