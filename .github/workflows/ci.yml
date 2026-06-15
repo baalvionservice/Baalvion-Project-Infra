@@ -348,6 +348,66 @@ jobs:
           # (docker-compose / testcontainers) is wired up.
           echo "Integration test harness pending — per-service checks run in backend-go / backend-java."
 
+  node-package-tests:
+    name: Node Package Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+      # Runs each shared package's own test script (jest + node:test). @baalvion/upload
+      # enforces a coverage threshold via its jest config — the gate to roll out per package
+      # toward the 80% workspace target. Blocking: a failing or below-threshold package fails CI.
+      - name: Run Package Tests (with coverage gates)
+        run: pnpm --filter "./Backend/packages/*" run test
+
+  dockerfile-lint:
+    name: Dockerfile Lint (hadolint)
+    runs-on: ubuntu-latest
+    # Informational for now: surfaces Dockerfile issues without blocking (existing lint debt).
+    # Promote into ci-success once the findings are burned down.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - name: Hadolint all Dockerfiles (report-only)
+        run: |
+          find Backend Frontend -name Dockerfile \
+            -not -path "*/node_modules/*" \
+            -not -path "*/trade-service/*" | while read -r df; do
+            echo "::group::$df"
+            docker run --rm -i hadolint/hadolint hadolint --no-fail - < "$df" || true
+            echo "::endgroup::"
+          done
+
+  deploy-compose-validate:
+    name: Deploy Compose Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate deploy docker-compose files
+        run: |
+          set -e
+          for dir in deploy/*/; do
+            compose="${dir}docker-compose.prod.yml"
+            envfile="${dir}.env.prod.example"
+            [ -f "$compose" ] || continue
+            echo "Validating $compose"
+            if [ -f "$envfile" ]; then
+              docker compose --env-file "$envfile" -f "$compose" config -q
+            else
+              docker compose -f "$compose" config -q
+            fi
+          done
+
   # Aggregate gate required by branch protection on `main`.
   # A single stable context that turns red if ANY required job failed or was
   # cancelled — set this as the required status check in branch protection.
@@ -364,6 +424,8 @@ jobs:
       - tenant-rls-audit
       - tenant-rls-live
       - integration-test
+      - node-package-tests
+      - deploy-compose-validate
     runs-on: ubuntu-latest
     steps:
       - name: Verify all required jobs succeeded
