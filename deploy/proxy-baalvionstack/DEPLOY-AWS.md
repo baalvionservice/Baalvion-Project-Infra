@@ -11,10 +11,12 @@ site — when you add more sites, graduate to the Kubernetes platform in `Backen
 
 ## Architecture (one host)
 ```
-Internet ──443──> Caddy ─┬─ /            → static SPA (Frontend/Proxy-BaalvionStack/dist)
-  (TLS, Let's Encrypt)   ├─ /auth-bff/*  → proxy-service:4000 /v1/auth/*
-                         └─ /v1/*         → proxy-service:4000  (billing/checkout, webhook, …)
-                                              └─> payment-service:3015 (Java PSP) ─> CMS vault ─> Razorpay
+proxy.baalvionstack.com ─443─> Caddy ─┬─ /            → static SPA (Frontend/Proxy-BaalvionStack/dist)
+  (TLS, Let's Encrypt)                ├─ /auth-bff/*  → proxy-service:4000 /v1/auth/*
+                                      └─ /v1/*         → proxy-service:4000  (billing/checkout, webhook, …)
+                                                           └─> payment-service:3015 (Java PSP) ─> CMS vault ─> Razorpay
+cms.baalvion.com        ─443─> Caddy ──── /api/v1/public/* → cms-service:3011  (read-only content API)
+  (feeds the Vercel sites: about.baalvion.com, … at build + ISR time)
             postgres · redis · kafka+zookeeper  (internal compose network; no public ports)
 ```
 
@@ -154,6 +156,81 @@ derives `<owner>` from the repo automatically; the `.env.prod.example` default a
 > The workflow assumes §1–9 are already done on the EC2 (repo at `/opt/baalvion`, `.env.prod`
 > present, RS256 keys mounted, DB migrated, vault seeded). It updates code/images — it does not
 > bootstrap a fresh host.
+
+## 14. Serve the CMS publicly for the Vercel sites (about.baalvion.com)
+
+`about.baalvion.com` (and the other Next.js sites) are hosted on **Vercel**, but their pages are
+built from the **central CMS** at build + ISR time. The CMS already runs in this compose
+(`cms-service`, internal-only); these steps expose its **read-only** public API at `cms.baalvion.com`
+so Vercel can reach it. Without this, the Vercel build can't fetch content and bakes a permanent
+"Service Temporarily Unavailable" page (which is exactly what about.baalvion.com shows today).
+
+> Only the unauthenticated `/api/v1/public/*` routes are exposed (the Caddyfile `{$CMS_DOMAIN}`
+> block). The admin/write API and the internal key-vault resolver stay on the compose network.
+
+### 14a. DNS
+- `A` record: `cms.baalvion.com` → the **same** Elastic IP. Verify: `dig +short cms.baalvion.com`.
+  (Caddy's TLS issuance for this host fails until it resolves publicly. Port 443 is already open.)
+
+### 14b. Env + restart
+Add to `deploy/proxy-baalvionstack/.env.prod` (template values are in `.env.prod.example`):
+```bash
+CMS_DOMAIN=cms.baalvion.com
+CMS_CORS_ORIGINS=https://about.baalvion.com
+# Single-line PEM of proxy-service's RS256 public half (generated in §5) — cms-service
+# requires JWT_PUBLIC_KEY at boot even though the public read API is unauthenticated:
+CMS_JWT_PUBLIC_KEY="$(awk 'NF {printf "%s\\n", $0}' deploy/proxy-baalvionstack/secrets/keys/baalvion-key-1.pub)"
+```
+Then restart the two affected services:
+```bash
+docker compose --env-file deploy/proxy-baalvionstack/.env.prod \
+  -f deploy/proxy-baalvionstack/docker-compose.prod.yml up -d cms-service caddy
+```
+Verify the API is live and TLS issued:
+```bash
+curl -sS https://cms.baalvion.com/api/v1/health                  # {"status":"ok",...}
+curl -sS https://cms.baalvion.com/api/v1/public/about-baalvion   # website info, or 404 until seeded (14c)
+```
+
+### 14c. Seed the about-baalvion content into the prod CMS
+The prod CMS DB is fresh — it has no `about-baalvion` website yet, so the public API 404s and the
+homepage stays on the maintenance shell. Get the content in by ONE of:
+
+- **(Recommended) Run the maintained seed script via the admin API.** `scripts/seedAboutBaalvion.cjs`
+  logs in to `auth-service`, then POSTs to the CMS admin API — so this path needs `auth-service`
+  reachable and `cms-service`'s `JWT_PUBLIC_KEY` matching its issuer. If you aren't running the full
+  identity stack on this host, bring `auth-service` up temporarily (or point `AUTH_URL`/`CMS_URL` at a
+  host where the admin stack runs) and run:
+  ```bash
+  AUTH_URL=<auth>/v1/auth CMS_URL=<cms>/api/v1 \
+    SUPERADMIN_EMAIL=… SUPERADMIN_PASSWORD=… ABOUT_WEBSITE_ID=<uuid> \
+    node Backend/services/knowledge/cms-service/scripts/seedAboutBaalvion.cjs
+  ```
+  It is idempotent (re-running updates in place). Also run `seedAboutAuthority.cjs` for the
+  /services, /industries, /case-studies, /about pages.
+
+- **(Alternative) Copy the content rows from your local CMS DB.** `pg_dump` the `about-baalvion`
+  website + its `cms` content/category/section rows from local and load them into the prod DB. Scope
+  it to that website's rows — do **NOT** wholesale-replace the `cms` schema, or you'll clobber the
+  `proxy-baalvionstack` payment-vault rows already there.
+
+After seeding, confirm the home content resolves:
+```bash
+curl -sS https://cms.baalvion.com/api/v1/public/about-baalvion/content/home   # title/sections JSON
+```
+
+### 14d. Point Vercel at the CMS and redeploy
+In the Vercel **about-baalvion-web** project → Settings → Environment Variables (Production):
+```
+CMS_PUBLIC_URL   = https://cms.baalvion.com/api/v1/public
+CMS_WEBSITE_SLUG = about-baalvion
+```
+Then **Redeploy with build cache cleared** (uncheck "Use existing Build Cache") so `/` is rebuilt and
+prerendered from the live CMS. The maintenance page disappears once the build's `getHomePageData()`
+succeeds; ISR (`revalidate: 3600`) keeps it fresh hourly thereafter.
+
+> Repeat 14c–14d per site (IR, Law-Elite, …): seed its website slug into the CMS, then set that
+> Vercel project's `CMS_PUBLIC_URL` to the same host with its own `CMS_WEBSITE_SLUG`.
 
 ## Hardening backlog (post-launch)
 - Move Postgres → **RDS** and Redis → **ElastiCache** (point `DB_HOST`/`REDIS_HOST` at them; drop
