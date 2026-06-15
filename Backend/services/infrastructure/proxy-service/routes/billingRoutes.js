@@ -144,6 +144,12 @@ router.post('/checkout', authMiddleware, async (req, res) => {
                         returnUrl: `${PUBLIC_APP_URL}/app/billing/checkout?cf=success`,
                         notifyUrl: `${PUBLIC_APP_URL}/v1/billing/webhook/cashfree`,
                     } : {}),
+                    // Stripe: a return_url switches the adapter to hosted Checkout (returns checkoutUrl).
+                    // The Stripe webhook URL is set in the Stripe dashboard, not per-order.
+                    ...(provider === 'stripe' ? {
+                        returnUrl: `${PUBLIC_APP_URL}/app/billing/checkout?stripe=success`,
+                        cancelUrl: `${PUBLIC_APP_URL}/app/billing/checkout?stripe=cancel`,
+                    } : {}),
                 },
             }),
         });

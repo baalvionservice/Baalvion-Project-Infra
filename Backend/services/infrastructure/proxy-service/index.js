@@ -48,6 +48,14 @@ app.post(
     require('./controller/cashfreeWebhookController').cashfreeWebhook,
 );
 
+// Stripe S2S webhook — needs the RAW body for the t=,v1= signed-payload (HMAC over `t.body`) check.
+app.post(
+    ['/v1/billing/webhook/stripe', '/api/v1/billing/webhook/stripe'],
+    rateLimit(),
+    express.raw({ type: '*/*' }),
+    require('./controller/stripeWebhookController').stripeWebhook,
+);
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());

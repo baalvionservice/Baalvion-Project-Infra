@@ -46,6 +46,8 @@ export default defineConfig(({ mode }) => {
   const PAYU_FORM = "https://*.payu.in";
   // Cashfree loads its v3 SDK + redirects/iframes to its hosted checkout.
   const CASHFREE = "https://*.cashfree.com";
+  // Stripe: hosted Checkout redirect + Stripe.js / API.
+  const STRIPE = "https://*.stripe.com";
 
   // Same-origin auth proxy — forward /auth-bff/* to the auth gateway so the httpOnly cookie is set
   // against localhost:8080 and flows on every request. No CORS, no cross-site cookies. Shared by the
@@ -68,14 +70,14 @@ export default defineConfig(({ mode }) => {
     "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
     "Content-Security-Policy": [
       "default-src 'self'",
-      `script-src 'self' 'unsafe-inline' ${RAZORPAY_SCRIPT} ${CASHFREE}`,
+      `script-src 'self' 'unsafe-inline' ${RAZORPAY_SCRIPT} ${CASHFREE} ${STRIPE}`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      `img-src 'self' data: blob: https://placehold.co https://images.unsplash.com ${RAZORPAY_IMG} ${CASHFREE}`,
+      `img-src 'self' data: blob: https://placehold.co https://images.unsplash.com ${RAZORPAY_IMG} ${CASHFREE} ${STRIPE}`,
       "font-src 'self' data: https://fonts.gstatic.com",
-      `connect-src 'self' ${AUTH_ORIGIN} ${PLATFORM_ORIGIN} ${RAZORPAY_CONNECT} ${CASHFREE}`,
-      `frame-src ${RAZORPAY_FRAME} ${CASHFREE}`,
+      `connect-src 'self' ${AUTH_ORIGIN} ${PLATFORM_ORIGIN} ${RAZORPAY_CONNECT} ${CASHFREE} ${STRIPE}`,
+      `frame-src ${RAZORPAY_FRAME} ${CASHFREE} ${STRIPE}`,
       "frame-ancestors 'none'",
-      `form-action 'self' ${PAYU_FORM} ${CASHFREE}`,
+      `form-action 'self' ${PAYU_FORM} ${CASHFREE} ${STRIPE}`,
       "base-uri 'self'",
       "object-src 'none'",
     ].join("; "),
