@@ -10,6 +10,7 @@ const { errorHandler } = require('./middleware/errorMiddleware');
 const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
 const { startReconciliationWorker } = require('./queues/reconciliationQueue');
+const { startLedgerOutboxRelay } = require('./service/ledgerOutbox');
 
 const app = express();
 
@@ -51,6 +52,9 @@ async function start() {
         await sequelize.query('CREATE SCHEMA IF NOT EXISTS orders;');
         // Scheduled financial reconciliation sweep (no-op if disabled / ledger unconfigured).
         await startReconciliationWorker().catch((e) => console.error('[Reconcile] worker failed to start:', e.message));
+        // Transactional-outbox relay: durably delivers captured-payment / refund ledger mirrors to
+        // ledger-service with retry + dead-letter (replaces the old fire-and-forget safeLedger path).
+        startLedgerOutboxRelay();
         app.listen(config.port, () => {
             console.log(`[Order Service] Running on port ${config.port} (${config.env})`);
         });

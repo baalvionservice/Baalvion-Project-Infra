@@ -15,6 +15,7 @@ const config = require('../config/appConfig');
 const ledgerClient = require('../service/ledgerClient');
 const orderService = require('../service/orderService');
 const reconciliation = require('../service/reconciliationService');
+const ledgerOutbox = require('../service/ledgerOutbox');
 
 // Force the deterministic, non-production MOCK payment provider so the refund lifecycle is exercised
 // offline. config/appConfig loads .env with { override: true }, which sets PAYMENT_PROVIDER=razorpay;
@@ -43,6 +44,12 @@ beforeEach(() => {
 
     ledgerClient.recordRefund = async (storeId, args) => { ledgerCalls.push({ type: 'REFUND', storeId, args }); return { ok: true }; };
     ledgerClient.recordPaymentCapture = async (storeId, args) => { ledgerCalls.push({ type: 'PAYMENT', storeId, args }); return { ok: true }; };
+
+    // The money paths now mirror to the ledger via the TRANSACTIONAL OUTBOX (committed in the same
+    // tx as the refund/capture, then delivered by the relay) rather than calling the ledger client
+    // inline. Stub the enqueue so these unit tests assert the durable mirror was recorded.
+    ledgerOutbox.enqueueRefund = async (args) => { ledgerCalls.push({ type: 'REFUND', storeId: args.storeId, args }); };
+    ledgerOutbox.enqueuePaymentCapture = async (args) => { ledgerCalls.push({ type: 'PAYMENT', storeId: args.storeId, args }); };
 });
 
 // ════════════════════ REFUND LIFECYCLE ════════════════════
