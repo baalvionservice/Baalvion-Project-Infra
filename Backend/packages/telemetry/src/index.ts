@@ -181,4 +181,8 @@ export function createServiceMetrics(serviceName: string) {
   };
 }
 
+// ── Error tracking (Sentry, DI) + alerting hooks ──────────────────────────────
+export { registerSentry, captureException, notifyAlert } from './alerts';
+export type { SentryLike } from './alerts';
+
 export { trace, metrics, context, propagation, SpanStatusCode };
