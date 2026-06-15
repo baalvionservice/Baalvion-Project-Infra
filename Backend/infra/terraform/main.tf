@@ -174,6 +174,95 @@ module "edge" {
   regions         = var.edge_regions
 }
 
+# ── S3 buckets (uploads / assets / backups) ──────────────────────────────────
+module "s3" {
+  source = "./modules/s3"
+  count  = var.enable_s3 ? 1 : 0
+
+  project     = var.project
+  environment = var.environment
+  kms_key_arn = var.s3_kms_key_arn
+  buckets     = var.s3_buckets
+}
+
+# ── CloudFront CDN in front of the S3 assets bucket ──────────────────────────
+# Requires enable_s3 so the origin bucket exists. The CloudFront module owns the
+# origin bucket policy (OAC read), so do not also point another policy at it.
+module "cloudfront" {
+  source = "./modules/cloudfront"
+  count  = var.enable_cloudfront && var.enable_s3 ? 1 : 0
+
+  project     = var.project
+  environment = var.environment
+
+  origin_bucket_id    = module.s3[0].bucket_ids[var.cloudfront_origin_bucket_key]
+  origin_bucket_arn   = module.s3[0].bucket_arns[var.cloudfront_origin_bucket_key]
+  origin_domain_name  = module.s3[0].bucket_regional_domain_names[var.cloudfront_origin_bucket_key]
+  aliases             = var.cloudfront_aliases
+  acm_certificate_arn = var.cloudfront_acm_certificate_arn
+}
+
+# ── Application Load Balancer (internet-facing) ───────────────────────────────
+module "alb" {
+  source = "./modules/alb"
+  count  = var.enable_alb ? 1 : 0
+
+  project             = var.project
+  environment         = var.environment
+  vpc_id              = module.vpc.vpc_id
+  public_subnet_ids   = module.vpc.public_subnet_ids
+  acm_certificate_arn = var.alb_acm_certificate_arn
+  ingress_cidrs       = var.alb_ingress_cidrs
+}
+
+# ── WAFv2 web ACL (regional) attached to the ALB ──────────────────────────────
+module "waf" {
+  source = "./modules/waf"
+  count  = var.enable_waf ? 1 : 0
+
+  project      = var.project
+  environment  = var.environment
+  rate_limit   = var.waf_rate_limit
+  resource_arn = var.enable_alb ? module.alb[0].alb_arn : ""
+}
+
+# ── ECR repositories (one per service) ────────────────────────────────────────
+module "ecr" {
+  source = "./modules/ecr"
+  count  = var.enable_ecr ? 1 : 0
+
+  project              = var.project
+  environment          = var.environment
+  repositories         = var.ecr_repositories
+  keep_last_images     = var.ecr_keep_last_images
+  image_tag_mutability = var.ecr_image_tag_mutability
+}
+
+# ── Secrets Manager + SSM Parameter Store ─────────────────────────────────────
+module "secrets" {
+  source = "./modules/secrets"
+  count  = var.enable_secrets ? 1 : 0
+
+  project     = var.project
+  environment = var.environment
+  secrets     = var.secrets
+  parameters  = var.ssm_parameters
+  kms_key_arn = var.secrets_kms_key_arn
+}
+
+# ── VPC endpoints (S3 gateway + interface endpoints to cut NAT egress) ────────
+module "vpc_endpoints" {
+  source = "./modules/vpc-endpoints"
+  count  = var.enable_vpc_endpoints ? 1 : 0
+
+  project                 = var.project
+  environment             = var.environment
+  region                  = var.region
+  vpc_id                  = module.vpc.vpc_id
+  private_subnet_ids      = module.vpc.private_subnet_ids
+  private_route_table_ids = module.vpc.private_route_table_ids
+}
+
 # ── SNS topic for alerts ──────────────────────────────────────────────────────
 resource "aws_sns_topic" "alerts" {
   name = "${var.project}-${var.environment}-alerts"

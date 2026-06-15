@@ -52,6 +52,42 @@ output "edge_zone_name_servers" {
   value       = length(module.edge) > 0 ? module.edge[0].proxy_zone_name_servers : []
 }
 
+# ── S3 / CloudFront / ALB / WAF / ECR (feature-flagged modules) ───────────────
+output "s3_bucket_ids" {
+  description = "Map of logical key -> S3 bucket name (empty when enable_s3 = false)"
+  value       = length(module.s3) > 0 ? module.s3[0].bucket_ids : {}
+}
+
+output "cloudfront_domain_name" {
+  description = "CloudFront distribution domain (null when enable_cloudfront = false)"
+  value       = length(module.cloudfront) > 0 ? module.cloudfront[0].domain_name : null
+}
+
+output "alb_dns_name" {
+  description = "Public ALB DNS name (null when enable_alb = false)"
+  value       = length(module.alb) > 0 ? module.alb[0].alb_dns_name : null
+}
+
+output "alb_arn" {
+  description = "ALB ARN (null when enable_alb = false)"
+  value       = length(module.alb) > 0 ? module.alb[0].alb_arn : null
+}
+
+output "waf_web_acl_arn" {
+  description = "WAFv2 web ACL ARN (null when enable_waf = false)"
+  value       = length(module.waf) > 0 ? module.waf[0].web_acl_arn : null
+}
+
+output "ecr_repository_urls" {
+  description = "Map of service -> ECR repo URL (empty when enable_ecr = false)"
+  value       = length(module.ecr) > 0 ? module.ecr[0].repository_urls : {}
+}
+
+output "secret_arns" {
+  description = "Map of logical secret name -> Secrets Manager ARN (empty when enable_secrets = false)"
+  value       = length(module.secrets) > 0 ? module.secrets[0].secret_arns : {}
+}
+
 # ── kubectl config command ────────────────────────────────────────────────────
 output "kubeconfig_command" {
   description = "Run this command to update your local kubeconfig"
