@@ -26,9 +26,9 @@ jobs:
   build-spa:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: pnpm
@@ -41,7 +41,7 @@ jobs:
           EOF
           pnpm install --frozen-lockfile
           pnpm build
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: proxy-spa-dist
           path: Frontend/Proxy-BaalvionStack/dist
@@ -59,23 +59,23 @@ jobs:
           - { name: cms-service,     context: ".",                                            file: Backend/services/knowledge/cms-service/Dockerfile,           args: "" }
           - { name: payment-service, context: Backend/services/commerce/financial-services-java, file: Backend/services/commerce/financial-services-java/Dockerfile, args: "SERVICE=payment-service" }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Log in to GHCR
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.IMAGE_PREFIX }}/proxy-baalvionstack-${{ matrix.service.name }}
           tags: |
             type=raw,value=${{ env.IMAGE_TAG }}
             type=sha,prefix=
       - name: Build and push
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.service.context }}
           file: ${{ matrix.service.file }}
@@ -92,13 +92,13 @@ jobs:
     environment: production
     steps:
       - name: Fetch built SPA
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: proxy-spa-dist
           path: dist
       # Ship the static SPA to the path Caddy mounts (the repo's Frontend/.../dist on the host).
       - name: Upload SPA to EC2
-        uses: appleboy/scp-action@v0.1.7
+        uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.PROD_HOST }}
           username: ${{ secrets.PROD_USER }}
