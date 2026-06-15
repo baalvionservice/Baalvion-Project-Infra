@@ -35,8 +35,10 @@ exports.createCheckout = async (req, res, next) => {
         const subscriptionId = b.subscription_id ?? b.subscriptionId;
 
         // Fail closed in production: never create a "successful-looking" checkout with no real
-        // gateway behind it. Manual mode is allowed only outside production (dev/demo).
-        const provider = pay.resolveProvider(b.provider);
+        // gateway behind it. Manual mode is allowed only outside production (dev/demo). The
+        // provider config is resolved from the central CMS vault (admin panel), so this reflects
+        // whatever keys are pasted in the console.
+        const provider = await pay.resolveProvider(b.provider);
         if (provider === 'manual' && process.env.NODE_ENV === 'production') {
             throw new AppError('PAYMENTS_UNAVAILABLE', 'No payment provider is configured', 503);
         }
@@ -96,7 +98,7 @@ exports.listPayments = async (req, res, next) => {
 exports.handleWebhook = async (req, res) => {
     try {
         const raw = req.rawBody || (req.body ? Buffer.from(JSON.stringify(req.body)) : Buffer.alloc(0));
-        const evt = pay.verifyWebhook({ rawBody: raw, headers: req.headers });
+        const evt = await pay.verifyWebhook({ rawBody: raw, headers: req.headers });
         if (evt.status === 'succeeded' && evt.ref) {
             const payment = await db.payments.findOne({ where: { provider_ref: evt.ref } });
             if (payment) {
@@ -128,6 +130,9 @@ exports.handleWebhook = async (req, res) => {
     }
 };
 
-exports.providerStatus = async (req, res) => {
-    sendSuccess(res, { providers: pay.configuredProviders(), default: pay.activeProvider(), configured: pay.isConfigured() });
+exports.providerStatus = async (req, res, next) => {
+    try {
+        const providers = await pay.configuredProviders();
+        sendSuccess(res, { providers, default: providers[0] || null, configured: providers.length > 0 });
+    } catch (err) { next(err); }
 };
