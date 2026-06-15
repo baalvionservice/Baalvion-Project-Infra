@@ -1,7 +1,8 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Card,
   CardContent,
@@ -44,26 +45,28 @@ const getStatusVariant = (status: InvoiceStatus): 'default' | 'destructive' | 'w
 };
 
 export function BillingDashboard({ initialInvoices }: { initialInvoices: Invoice[] }) {
-    const [invoices, setInvoices] = useState(initialInvoices);
+    const [invoices] = useState(initialInvoices);
     const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
     const { toast } = useToast();
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const nextBillingDate = new Date(new Date().setMonth(new Date().getMonth() + 1));
     const amountDue = invoices.find(inv => inv.status === 'Due')?.amount || 0;
 
-    const handlePayNow = (invoiceId: string) => {
-        toast({
-            title: 'Processing Payment...',
-            description: `Paying invoice ${invoiceId}. This is a mock action.`,
-        });
-        setTimeout(() => {
-            setInvoices(prev => prev.map(inv => inv.id === invoiceId ? {...inv, status: 'Paid'} : inv));
-            toast({
-                title: 'Payment Successful',
-                description: `Invoice ${invoiceId} has been marked as paid.`
-            });
-        }, 1500);
-    };
+    // Checkout return: the gateway redirects back here after a hosted checkout. Activation is
+    // driven server-side by the signature-verified webhook, so we just confirm and clean the URL —
+    // no client-side "marking paid".
+    useEffect(() => {
+        if (searchParams.get('paid')) {
+            toast({ title: 'Payment received', description: 'Your subscription is being activated — this can take a few moments to reflect.' });
+            router.replace('/company/billing');
+        } else if (searchParams.get('canceled')) {
+            toast({ variant: 'destructive', title: 'Checkout canceled', description: 'No payment was taken.' });
+            router.replace('/company/billing');
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
 
     return (
         <>
@@ -116,7 +119,7 @@ export function BillingDashboard({ initialInvoices }: { initialInvoices: Invoice
                                 <Download className="mr-2 h-4 w-4" /> Download
                                 </Button>
                                 {invoice.status === 'Due' && (
-                                    <Button size="sm" onClick={() => handlePayNow(invoice.id)}>
+                                    <Button size="sm" onClick={() => setIsPaymentDialogOpen(true)}>
                                         Pay Now
                                     </Button>
                                 )}
@@ -146,7 +149,7 @@ export function BillingDashboard({ initialInvoices }: { initialInvoices: Invoice
                     </CardContent>
                     {amountDue > 0 && (
                         <CardFooter>
-                        <Button className="w-full" onClick={() => handlePayNow(invoices.find(inv => inv.status === 'Due')!.id)}>
+                        <Button className="w-full" onClick={() => setIsPaymentDialogOpen(true)}>
                             <Banknote className="mr-2 h-4 w-4" /> Pay Now
                         </Button>
                         </CardFooter>
@@ -161,13 +164,13 @@ export function BillingDashboard({ initialInvoices }: { initialInvoices: Invoice
                     <div className="flex items-center gap-4 rounded-md border p-4">
                         <CreditCard className="h-8 w-8 text-muted-foreground" />
                         <div>
-                        <p className="font-semibold">Visa ending in 1234</p>
-                        <p className="text-sm text-muted-foreground">Expires 12/2026</p>
+                        <p className="font-semibold">Secure checkout</p>
+                        <p className="text-sm text-muted-foreground">Payments are processed by Stripe &amp; Razorpay. No card is stored here.</p>
                         </div>
                     </div>
                     </CardContent>
                     <CardFooter>
-                        <Button variant="outline" className="w-full" onClick={() => setIsPaymentDialogOpen(true)}>Update Payment Method</Button>
+                        <Button variant="outline" className="w-full" onClick={() => setIsPaymentDialogOpen(true)}>Choose plan &amp; pay</Button>
                     </CardFooter>
                 </Card>
                 </div>
