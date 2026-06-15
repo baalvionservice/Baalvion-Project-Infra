@@ -1,0 +1,11 @@
+{
+  // Cloudflare Workers Static Assets — serves the Next.js static export in `out/`.
+  // Deploy:  npx wrangler deploy   (after `next build` produces `out/`)
+  // Preview: npx wrangler dev
+  "name": "baalvion",
+  "compatibility_date": "2024-11-01",
+  "assets": {
+    "directory": "./out",
+    "not_found_handling": "404-page"
+  }
+}
