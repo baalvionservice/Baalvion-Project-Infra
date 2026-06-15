@@ -1,0 +1,177 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Production stack for proxy.baalvionstack.com — single EC2 host, Docker Compose.
+# Mirrors the locally-verified purchase chain: SPA → Caddy → proxy-service (BFF/auth/billing)
+# → payment-service (Java PSP gateway) → CMS vault → Razorpay. Postgres/Redis/Kafka run in-compose;
+# swap to RDS/ElastiCache/MSK later by changing the host envs in .env.prod.
+#
+#   Run from the REPO ROOT:
+#     docker compose --env-file deploy/proxy-baalvionstack/.env.prod \
+#       -f deploy/proxy-baalvionstack/docker-compose.prod.yml up -d --build
+#
+# Only Caddy publishes ports (80/443). Every backend is internal to the compose network.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    restart: unless-stopped
+    depends_on: [zookeeper]
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  cms-service:
+    # image: pulled on the EC2 (CI builds+pushes it to GHCR); build: used by CI and by a manual
+    # `up --build`. Both paths produce the same tag.
+    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/proxy-baalvionstack-cms-service:${IMAGE_TAG:-prod-latest}
+    build:
+      # Repo-root context: the Dockerfile runs `turbo prune` over the whole pnpm workspace.
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: "3011"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      CMS_SECRETS_KEY: ${CMS_SECRETS_KEY}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  payment-service:
+    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/proxy-baalvionstack-payment-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../../Backend/services/commerce/financial-services-java
+      args:
+        SERVICE: payment-service
+    restart: unless-stopped
+    environment:
+      PORT: "3015"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      KAFKA_BROKERS: kafka:9092
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      CMS_BASE_URL: ${CMS_BASE_URL}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      PSP_MOCK: "${PSP_MOCK}"
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      RAZORPAY_BASE_URL: ${RAZORPAY_BASE_URL}
+      APP_SECURITY_ENABLED: "${APP_SECURITY_ENABLED}"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "${SPRING_FLYWAY_BASELINE_ON_MIGRATE}"
+      SPRING_FLYWAY_BASELINE_VERSION: "${SPRING_FLYWAY_BASELINE_VERSION}"
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_started }
+      redis: { condition: service_healthy }
+      cms-service: { condition: service_started }
+
+  proxy-service:
+    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/proxy-baalvionstack-proxy-service:${IMAGE_TAG:-prod-latest}
+    build:
+      # Repo-root context: the Dockerfile runs `turbo prune` over the whole pnpm workspace.
+      context: ../..
+      dockerfile: Backend/services/infrastructure/proxy-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: "4000"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_URL: redis://${REDIS_HOST}:${REDIS_PORT}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      JWT_ACTIVE_KID: ${JWT_ACTIVE_KID}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      JWT_KEYS_DIR: /app/config/keys
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      PAYMENT_SERVICE_URL: ${PAYMENT_SERVICE_URL}
+      PAYMENT_SITE_SLUG: ${PAYMENT_SITE_SLUG}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+    volumes:
+      # RS256 signing keypair (generate per runbook §5). Read-only.
+      - ./secrets/keys:/app/config/keys:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      payment-service: { condition: service_started }
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      # The SPA is built on the host (runbook §6) into dist/ and served as static files.
+      - ../../Frontend/Proxy-BaalvionStack/dist:/srv/www:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - proxy-service
+
+volumes:
+  pgdata:
+  redisdata:
+  caddy_data:
+  caddy_config:
