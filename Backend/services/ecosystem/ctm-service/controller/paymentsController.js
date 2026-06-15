@@ -4,50 +4,69 @@ const { AppError } = require('../utils/errors');
 const { sendSuccess } = require('../utils/response');
 const pay = require('../service/payments');
 
-// Create an invoice + payment + (provider) checkout in one call. Provider-agnostic:
-// with no provider configured it still produces a real DB invoice/payment (status pending).
+// Create an invoice + payment + (provider) checkout in one call. The buyer picks the provider
+// (Stripe/Razorpay); the price is SERVER-AUTHORITATIVE (computed from the plan, never trusted
+// from the client) and the charge is pinned to the caller's own org.
 exports.createCheckout = async (req, res, next) => {
     try {
         const b = req.body;
-        const companyId = b.company_id ?? b.companyId;
-        if (!companyId) throw new AppError('VALIDATION_ERROR', 'company_id is required', 400);
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
 
-        let amount = Number(b.amount ?? 0);
-        let planName = b.plan_name ?? b.planName;
-        let subscriptionId = b.subscription_id ?? b.subscriptionId;
+        // Tenant scoping: the charge is ALWAYS attributed to the caller's own org. Admins may
+        // bill another company explicitly; everyone else is pinned to req.auth.orgId — a
+        // client-supplied company_id is ignored. (Closes the cross-tenant billing IDOR.)
+        const callerOrgId = req.auth?.orgId;
+        const companyId = isAdmin ? (b.company_id ?? b.companyId ?? callerOrgId) : callerOrgId;
+        if (!companyId) throw new AppError('FORBIDDEN', 'Organization context required', 403);
 
-        // Derive amount/plan from a plan id if provided.
-        if (b.plan_id ?? b.planId) {
-            const plan = await db.plans.findByPk(b.plan_id ?? b.planId, { raw: true });
-            if (plan) {
-                planName = planName || plan.name;
-                const annual = (b.billing_cycle ?? b.billingCycle) === 'annual';
-                amount = amount || Number(annual ? (plan.annual_price ?? plan.monthly_price * 10) : plan.monthly_price);
-            }
+        // Plan + price are server-authoritative: we NEVER trust a client-sent amount. The charge
+        // is computed from the plan row by billing cycle.
+        const planId = b.plan_id ?? b.planId;
+        if (!planId) throw new AppError('VALIDATION_ERROR', 'plan_id is required', 400);
+        const plan = await db.plans.findByPk(planId, { raw: true });
+        if (!plan || plan.is_active === false) throw new AppError('NOT_FOUND', 'Plan not found', 404);
+
+        const annual = (b.billing_cycle ?? b.billingCycle) === 'annual';
+        const amount = Number(annual ? (plan.annual_price ?? Number(plan.monthly_price) * 10) : plan.monthly_price);
+        if (!(amount > 0)) throw new AppError('VALIDATION_ERROR', 'Selected plan is not purchasable', 400);
+        const currency = String(plan.currency || b.currency || 'USD').toUpperCase();
+        const planName = plan.name;
+        const subscriptionId = b.subscription_id ?? b.subscriptionId;
+
+        // Fail closed in production: never create a "successful-looking" checkout with no real
+        // gateway behind it. Manual mode is allowed only outside production (dev/demo).
+        const provider = pay.resolveProvider(b.provider);
+        if (provider === 'manual' && process.env.NODE_ENV === 'production') {
+            throw new AppError('PAYMENTS_UNAVAILABLE', 'No payment provider is configured', 503);
         }
 
         const invoice = await db.invoices.create({
             company_id: companyId, subscription_id: subscriptionId, plan_name: planName,
-            amount, subtotal: amount, tax: 0, currency: b.currency || 'USD',
+            amount, subtotal: amount, tax: 0, currency,
             status: 'Pending', issued_at: new Date(),
             due_date: new Date(Date.now() + 7 * 86400000),
-            line_items: [{ id: 'li-1', description: `${planName || 'Plan'} subscription`, quantity: 1, unitPrice: amount, total: amount }],
+            line_items: [{ id: 'li-1', description: `${planName} subscription`, quantity: 1, unitPrice: amount, total: amount }],
         });
 
         const checkout = await pay.createCheckout({
-            amount, currency: invoice.currency, companyId, planName, invoiceId: invoice.id,
-            successUrl: b.successUrl, cancelUrl: b.cancelUrl, customerEmail: b.customerEmail ?? b.email,
+            provider, amount, currency, companyId, planName, invoiceId: invoice.id,
+            // Return URLs are server-controlled (never a client-supplied open redirect).
+            successUrl: process.env.PAYMENT_SUCCESS_URL || 'https://controlthemarket.com/company/billing?paid=1',
+            cancelUrl: process.env.PAYMENT_CANCEL_URL || 'https://controlthemarket.com/company/billing?canceled=1',
+            customerEmail: req.auth?.email || b.email || b.customerEmail,
         });
 
         const payment = await db.payments.create({
             company_id: companyId, subscription_id: subscriptionId, invoice_id: invoice.id,
-            provider: checkout.provider, provider_ref: checkout.ref, amount, currency: invoice.currency,
+            provider: checkout.provider, provider_ref: checkout.ref, amount, currency,
             status: checkout.status, checkout_url: checkout.checkoutUrl, raw: checkout.raw || {},
         });
 
         sendSuccess(res, {
             invoiceId: invoice.id, paymentId: payment.id, provider: checkout.provider,
-            checkoutUrl: checkout.checkoutUrl, status: payment.status, amount, currency: invoice.currency,
+            checkoutUrl: checkout.checkoutUrl, clientParams: checkout.clientParams,
+            status: payment.status, amount, currency,
         }, 201);
     } catch (err) { next(err); }
 };
@@ -71,15 +90,31 @@ exports.listPayments = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-// Provider webhook receiver (Stripe/Razorpay). Verifies signature off the RAW body
-// (captured in index.js), marks the payment + invoice paid, activates the subscription.
-exports.handleWebhook = async (req, res, next) => {
+// Provider webhook receiver (Stripe/Razorpay). The provider is auto-detected from the signature
+// header and verified off the RAW body (captured in index.js). It then marks the payment +
+// invoice paid and activates the subscription — idempotently and with amount-integrity checks.
+exports.handleWebhook = async (req, res) => {
     try {
-        if (!pay.isConfigured()) return res.status(200).json({ received: true, note: 'no provider configured' });
-        const evt = pay.verifyWebhook({ rawBody: req.rawBody || Buffer.from(JSON.stringify(req.body || {})), headers: req.headers });
+        const raw = req.rawBody || (req.body ? Buffer.from(JSON.stringify(req.body)) : Buffer.alloc(0));
+        const evt = pay.verifyWebhook({ rawBody: raw, headers: req.headers });
         if (evt.status === 'succeeded' && evt.ref) {
             const payment = await db.payments.findOne({ where: { provider_ref: evt.ref } });
             if (payment) {
+                // Idempotency: an already-succeeded payment short-circuits, so a replayed or
+                // redelivered (still signature-valid) event can never double-activate.
+                if (payment.status === 'succeeded') {
+                    return res.status(200).json({ received: true, idempotent: true });
+                }
+                // Amount/currency integrity: the event MUST match what we recorded at checkout
+                // (server-authoritative). A mismatch is a tamper/misroute signal → do not activate.
+                if (evt.amountMinor != null) {
+                    const expectedMinor = Math.round(Number(payment.amount) * 100);
+                    const currencyOk = !evt.currency || String(evt.currency).toUpperCase() === String(payment.currency).toUpperCase();
+                    if (Number(evt.amountMinor) !== expectedMinor || !currencyOk) {
+                        await db.integration_logs.create({ source: 'Payments', event_type: evt.type, status: 'Failed', description: `Webhook amount/currency mismatch for ${evt.ref} (got ${evt.amountMinor} ${evt.currency}, expected ${expectedMinor} ${payment.currency})`, related_entity: { type: 'Company', id: payment.company_id } }).catch(() => {});
+                        return res.status(400).json({ error: 'amount mismatch' });
+                    }
+                }
                 payment.status = 'succeeded'; payment.raw = evt.raw || payment.raw; await payment.save();
                 if (payment.invoice_id) await db.invoices.update({ status: 'Paid' }, { where: { id: payment.invoice_id } });
                 if (payment.subscription_id) await db.subscriptions.update({ status: 'active' }, { where: { id: payment.subscription_id } });
@@ -88,11 +123,11 @@ exports.handleWebhook = async (req, res, next) => {
         }
         res.status(200).json({ received: true });
     } catch (err) {
-        // Signature failures must surface as 400 so the provider retries appropriately.
+        // Signature/verification failures surface as 400 so the provider retries appropriately.
         res.status(400).json({ error: String(err.message || err) });
     }
 };
 
 exports.providerStatus = async (req, res) => {
-    sendSuccess(res, { provider: pay.activeProvider(), configured: pay.isConfigured() });
+    sendSuccess(res, { providers: pay.configuredProviders(), default: pay.activeProvider(), configured: pay.isConfigured() });
 };
