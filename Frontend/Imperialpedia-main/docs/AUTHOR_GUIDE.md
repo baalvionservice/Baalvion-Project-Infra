@@ -34,7 +34,7 @@ this guide walks through each.
 3. After login you land on the dashboard. Everything below is reached from the
    left sidebar.
 
-> Demo super-admin (local only): `superadmin@baalvion.com` / `Sup3rAdmin!2026`.
+> Demo super-admin (local only): `superadmin@baalvion.com` / `<set-by-your-admin>`.
 
 ---
 

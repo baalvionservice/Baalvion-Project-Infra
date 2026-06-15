@@ -5,7 +5,7 @@ const { chromium } = require('@playwright/test');
 const BASE = process.env.BASE || 'http://localhost:9003';
 const ORDER = process.env.ORDER || '4481d6f2-adbd-425a-8d7a-0cc10a328b1e';
 const EMAIL = 'superadmin@baalvion.com';
-const PASS = 'Sup3rAdmin!2026';
+const PASS = process.env.SUPERADMIN_PASSWORD;
 const SHOT = process.env.SHOT_DIR || 'd:/_baalvion_scratch/gti-e2e';
 const fs = require('fs');
 try { fs.mkdirSync(SHOT, { recursive: true }); } catch {}

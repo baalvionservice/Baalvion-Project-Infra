@@ -54,7 +54,7 @@ Make sure the backend fleet is up (Docker infra + services + pm2), then:
 
 Open:
 - **http://imperialpedia.local**
-- **http://admin.baalvion.local**  (login: `superadmin@baalvion.com` / `Sup3rAdmin!2026`)
+- **http://admin.baalvion.local**  (login: `superadmin@baalvion.com` / `<set-by-your-admin>`)
 - **http://ir.baalvion.local**  (login: `admin@baalvion.com` / `Admin123!`)
 
 > If port 80 is unavailable, run with `$env:PROXY_PORT='8080'` and use

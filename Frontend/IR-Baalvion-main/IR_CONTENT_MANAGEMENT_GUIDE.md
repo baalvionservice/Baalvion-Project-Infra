@@ -7,7 +7,7 @@ Parts 1–3 — you do it all in the admin console and it goes live automaticall
 
 - **Admin console (where you manage everything):** http://localhost:3030
 - **Public investor site (what visitors see):** http://localhost:3027
-- **Login:** `superadmin@baalvion.com` / `Sup3rAdmin!2026`
+- **Login:** `superadmin@baalvion.com` / `<set-by-your-admin>`
   *(Ask your administrator for your own login — see Part 5 for roles.)*
 
 > 💡 After publishing, changes appear on the public site within about **2 minutes**. If you don't see
