@@ -71,7 +71,7 @@ async function getMembers(orgId, requesterId, { includeInactive = false } = {}) 
  * or the platform console seeding a new org's first owner) are responsible for authz.
  * Generates a single-use token, persists the invitation, sends the email, audits + emits.
  */
-async function issueInvitation({ orgId, email, role, fullName = null, invitedBy, ipAddress }) {
+async function issueInvitation({ orgId, email, role, fullName = null, invitedBy, ipAddress, frontendUrl }) {
     if (!isValidRole(role)) throw new AppError('VALIDATION_ERROR', `Invalid role '${role}'`, 400);
 
     const token = generateToken();
@@ -82,8 +82,10 @@ async function issueInvitation({ orgId, email, role, fullName = null, invitedBy,
     const invitation = await inviteRepo.create({ orgId, email, role, tokenHash: token_hash, expiresAt: expires_at, createdBy: invitedBy, fullName });
 
     const org = await orgRepo.findById(orgId);
-    const frontendUrl = config.frontendUrl || 'http://localhost:8080';
-    const inviteLink = `${frontendUrl}/accept-invite?inviteToken=${token}&email=${encodeURIComponent(email)}`;
+    // Per-site branding: callers (e.g. the CTM bulk-invite script) may override the accept-link
+    // base so invites point at the right product domain; default to the platform frontend.
+    const baseUrl = frontendUrl || config.frontendUrl || 'http://localhost:8080';
+    const inviteLink = `${baseUrl}/accept-invite?inviteToken=${token}&email=${encodeURIComponent(email)}`;
 
     sendMail({
         to: email,
@@ -99,7 +101,7 @@ async function issueInvitation({ orgId, email, role, fullName = null, invitedBy,
               </p>
               <p style="color:#666;font-size:13px">This invitation expires in 7 days. If you didn't expect this, you can safely ignore it.</p>
               <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-              <p style="color:#999;font-size:12px">Baalvion · <a href="${frontendUrl}" style="color:#999">${frontendUrl}</a></p>
+              <p style="color:#999;font-size:12px">Baalvion · <a href="${baseUrl}" style="color:#999">${baseUrl}</a></p>
             </div>
         `,
     }).catch(() => {});
@@ -126,12 +128,12 @@ async function inviteMember({ orgId, email, role = 'viewer', fullName, requester
     return { id: result.id, email: result.email, role: result.role, expiresAt: result.expiresAt };
 }
 
-async function bulkInvite({ orgId, invites, requesterId, ipAddress }) {
+async function bulkInvite({ orgId, invites, requesterId, ipAddress, frontendUrl }) {
     await assertManageUsers(orgId, requesterId);
     const results = { invited: [], failed: [] };
     for (const inv of invites) {
         try {
-            const r = await issueInvitation({ orgId, email: inv.email, role: inv.role || 'viewer', fullName: inv.fullName, invitedBy: requesterId, ipAddress });
+            const r = await issueInvitation({ orgId, email: inv.email, role: inv.role || 'viewer', fullName: inv.fullName, invitedBy: requesterId, ipAddress, frontendUrl });
             results.invited.push({ email: r.email, role: r.role, id: r.id });
         } catch (err) {
             results.failed.push({ email: inv.email, reason: err.message || 'failed' });
