@@ -44,5 +44,7 @@ COPY --from=installer --chown=nextjs:nodejs /app/Frontend/company-unified-Dashbo
 COPY --from=installer --chown=nextjs:nodejs /app/Frontend/company-unified-Dashboard-main/public ./Frontend/company-unified-Dashboard-main/public
 USER nextjs
 EXPOSE 3024
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3024),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # Standalone server entrypoint is nested under the app path in a monorepo build.
 CMD ["node", "Frontend/company-unified-Dashboard-main/server.js"]
