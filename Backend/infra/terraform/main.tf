@@ -59,14 +59,16 @@ module "vpc" {
 module "eks" {
   source = "./modules/eks"
 
-  project            = var.project
-  environment        = var.environment
-  k8s_version        = var.k8s_version
-  vpc_id             = module.vpc.vpc_id
-  private_subnet_ids = module.vpc.private_subnet_ids
-  node_pool_min      = var.node_pool_min
-  node_pool_max      = var.node_pool_max
-  node_instance_type = var.node_instance_type
+  project             = var.project
+  environment         = var.environment
+  k8s_version         = var.k8s_version
+  vpc_id              = module.vpc.vpc_id
+  private_subnet_ids  = module.vpc.private_subnet_ids
+  node_pool_min       = var.node_pool_min
+  node_pool_max       = var.node_pool_max
+  node_instance_type  = var.node_instance_type
+  public_access_cidrs = var.eks_public_access_cidrs
+  log_retention_days  = var.log_retention_days
 }
 
 # ── PostgreSQL (RDS) ──────────────────────────────────────────────────────────
@@ -77,7 +79,9 @@ module "postgres" {
   environment        = var.environment
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
-  eks_sg_id          = module.eks.node_security_group_id
+  # Use the EKS-managed cluster security group (actually attached to the managed
+  # node group), not the standalone nodes SG which is never attached to the nodes.
+  eks_sg_id = module.eks.cluster_primary_security_group_id
 
   db_instance_class = var.db_instance_class
   db_name           = var.db_name
@@ -95,7 +99,7 @@ module "redis" {
   environment        = var.environment
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
-  eks_sg_id          = module.eks.node_security_group_id
+  eks_sg_id          = module.eks.cluster_primary_security_group_id
   node_type          = var.redis_node_type
   auth_token         = var.redis_auth_token
 }
@@ -183,6 +187,10 @@ module "s3" {
   environment = var.environment
   kms_key_arn = var.s3_kms_key_arn
   buckets     = var.s3_buckets
+
+  # CloudFront owns the origin bucket's policy (OAC read + TLS-only deny), so the
+  # S3 module must NOT also create a policy on it — a bucket can hold only one.
+  unmanaged_policy_bucket_keys = var.enable_cloudfront ? [var.cloudfront_origin_bucket_key] : []
 }
 
 # ── CloudFront CDN in front of the S3 assets bucket ──────────────────────────
@@ -272,4 +280,23 @@ resource "aws_sns_topic_subscription" "email_alert" {
   topic_arn = aws_sns_topic.alerts.arn
   protocol  = "email"
   endpoint  = var.alert_email
+}
+
+# ── Observability: CloudWatch log groups + dashboard + alarms ──────────────────
+# Retention-enforced application/gateway log groups, a single platform dashboard,
+# and SNS-wired alarms for RDS / ElastiCache / ALB. EKS control-plane logging and
+# Container Insights are owned by the eks module.
+module "monitoring" {
+  source = "./modules/monitoring"
+
+  project            = var.project
+  environment        = var.environment
+  region             = var.region
+  log_retention_days = var.log_retention_days
+
+  eks_cluster_name           = module.eks.cluster_name
+  db_instance_id             = module.postgres.instance_id
+  redis_replication_group_id = module.redis.replication_group_id
+  alb_arn_suffix             = var.enable_alb ? module.alb[0].arn_suffix : ""
+  sns_topic_arn              = aws_sns_topic.alerts.arn
 }

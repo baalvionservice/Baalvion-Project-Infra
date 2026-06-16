@@ -7,6 +7,17 @@ variable "kms_key_arn" {
   default     = ""
 }
 
+variable "unmanaged_policy_bucket_keys" {
+  description = <<-EOT
+    Bucket keys whose aws_s3_bucket_policy is managed by another module (e.g. the
+    CloudFront module's OAC read policy). The in-module TLS-only policy is skipped
+    for these so two aws_s3_bucket_policy resources don't fight over one bucket.
+    The owning module MUST include a DenyInsecureTransport statement itself.
+  EOT
+  type        = list(string)
+  default     = []
+}
+
 variable "buckets" {
   description = <<-EOT
     Map of logical bucket name -> settings. The physical bucket name is

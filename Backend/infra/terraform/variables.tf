@@ -44,6 +44,12 @@ variable "node_instance_type" {
   default     = "t3.medium" # 2 vCPU / 4 GiB
 }
 
+variable "eks_public_access_cidrs" {
+  description = "CIDRs allowed to reach the public EKS API endpoint. Restrict to office/VPN/CI ranges in production (default is open)."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
 # ── PostgreSQL ────────────────────────────────────────────────────────────────
 variable "db_instance_class" {
   description = "RDS / Cloud SQL instance class"
@@ -123,6 +129,13 @@ variable "alert_email" {
   description = "Email address for operational alerts"
   type        = string
   default     = "infra.baalvion@gmail.com"
+}
+
+# ── Observability ───────────────────────────────────────────────────────────────
+variable "log_retention_days" {
+  description = "CloudWatch log retention (days) for EKS control-plane + application/gateway log groups."
+  type        = number
+  default     = 90
 }
 
 # ── Global edge network ─────────────────────────────────────────────────────────

@@ -63,6 +63,9 @@ resource "aws_cloudfront_distribution" "this" {
 }
 
 # Allow this distribution (and only this distribution) to read from the origin.
+# This module OWNS the origin bucket's policy (the S3 module is told to skip its
+# TLS-only policy for this bucket via unmanaged_policy_bucket_keys), so the
+# DenyInsecureTransport statement is carried here to keep TLS-only enforcement.
 data "aws_iam_policy_document" "oac_read" {
   statement {
     sid       = "AllowCloudFrontOACRead"
@@ -77,6 +80,22 @@ data "aws_iam_policy_document" "oac_read" {
       test     = "StringEquals"
       variable = "AWS:SourceArn"
       values   = [aws_cloudfront_distribution.this.arn]
+    }
+  }
+
+  statement {
+    sid       = "DenyInsecureTransport"
+    effect    = "Deny"
+    actions   = ["s3:*"]
+    resources = [var.origin_bucket_arn, "${var.origin_bucket_arn}/*"]
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
     }
   }
 }

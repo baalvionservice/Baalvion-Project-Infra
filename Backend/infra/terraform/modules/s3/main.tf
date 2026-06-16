@@ -7,6 +7,16 @@ locals {
   name     = "${var.project}-${var.environment}"
   use_kms  = var.kms_key_arn != ""
   sse_algo = local.use_kms ? "aws:kms" : "AES256"
+
+  # Buckets whose aws_s3_bucket_policy is owned by another module (e.g. the
+  # CloudFront module's OAC read policy). A bucket can hold only ONE policy, so we
+  # skip the in-module TLS-only policy for these to avoid two resources fighting
+  # over the same bucket on every apply. The owning module MUST include the
+  # DenyInsecureTransport (TLS-only) statement in its policy instead.
+  tls_only_buckets = {
+    for k, v in var.buckets : k => v
+    if !contains(var.unmanaged_policy_bucket_keys, k)
+  }
 }
 
 resource "aws_s3_bucket" "this" {
@@ -125,9 +135,10 @@ resource "aws_s3_bucket_lifecycle_configuration" "this" {
   }
 }
 
-# Deny any non-TLS access to every managed bucket.
+# Deny any non-TLS access to every managed bucket (except buckets whose policy is
+# owned by another module — see local.tls_only_buckets).
 data "aws_iam_policy_document" "tls_only" {
-  for_each = var.buckets
+  for_each = local.tls_only_buckets
 
   statement {
     sid     = "DenyInsecureTransport"
@@ -150,7 +161,7 @@ data "aws_iam_policy_document" "tls_only" {
 }
 
 resource "aws_s3_bucket_policy" "tls_only" {
-  for_each = var.buckets
+  for_each = local.tls_only_buckets
 
   bucket = aws_s3_bucket.this[each.key].id
   policy = data.aws_iam_policy_document.tls_only[each.key].json

@@ -73,6 +73,11 @@ output "alb_arn" {
   value       = length(module.alb) > 0 ? module.alb[0].alb_arn : null
 }
 
+output "alb_zone_id" {
+  description = "ALB hosted zone ID for Route53 alias records (null when enable_alb = false)"
+  value       = length(module.alb) > 0 ? module.alb[0].alb_zone_id : null
+}
+
 output "waf_web_acl_arn" {
   description = "WAFv2 web ACL ARN (null when enable_waf = false)"
   value       = length(module.waf) > 0 ? module.waf[0].web_acl_arn : null
@@ -86,6 +91,21 @@ output "ecr_repository_urls" {
 output "secret_arns" {
   description = "Map of logical secret name -> Secrets Manager ARN (empty when enable_secrets = false)"
   value       = length(module.secrets) > 0 ? module.secrets[0].secret_arns : {}
+}
+
+output "ssm_parameter_arns" {
+  description = "Map of logical name -> SSM parameter ARN (empty when enable_secrets = false)"
+  value       = length(module.secrets) > 0 ? module.secrets[0].parameter_arns : {}
+}
+
+output "secrets_read_policy_json" {
+  description = "IAM policy JSON granting read access to the managed secrets/parameters — attach to the IRSA / task role (null when enable_secrets = false or nothing managed)"
+  value       = length(module.secrets) > 0 ? module.secrets[0].read_policy_json : null
+}
+
+output "eks_node_security_group_id" {
+  description = "EKS cluster security group attached to managed nodes (for adding data-store ingress rules)"
+  value       = module.eks.cluster_primary_security_group_id
 }
 
 # ── kubectl config command ────────────────────────────────────────────────────

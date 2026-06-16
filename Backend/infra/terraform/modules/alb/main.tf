@@ -100,4 +100,11 @@ resource "aws_lb_listener" "https" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.default.arn
   }
+
+  lifecycle {
+    precondition {
+      condition     = var.acm_certificate_arn != ""
+      error_message = "acm_certificate_arn is required when the ALB is enabled: an HTTPS (443) listener cannot be created without an ACM certificate. Set alb_acm_certificate_arn (a regional ACM cert in the deploy region)."
+    }
+  }
 }

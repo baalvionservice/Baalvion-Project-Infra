@@ -77,6 +77,13 @@ resource "aws_elasticache_replication_group" "redis" {
   engine_version = "7.1"
 
   tags = { Name = "${local.name}-redis" }
+
+  lifecycle {
+    precondition {
+      condition     = !local.in_production || local.use_auth
+      error_message = "redis_auth_token must be set in production: it gates transit_encryption_enabled (TLS). Without it, production Redis traffic is unencrypted."
+    }
+  }
 }
 
 output "primary_endpoint" {
@@ -84,4 +91,8 @@ output "primary_endpoint" {
 }
 output "reader_endpoint" {
   value = aws_elasticache_replication_group.redis.reader_endpoint_address
+}
+# CacheClusterId/ReplicationGroupId dimension for AWS/ElastiCache metrics + alarms.
+output "replication_group_id" {
+  value = aws_elasticache_replication_group.redis.id
 }
