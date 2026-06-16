@@ -252,10 +252,17 @@ const confirmPayment = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// F2: both reads run inside ONE tenant transaction so the RLS GUC (app.current_tenant)
+// is set on the connection (models/index.js patches sequelize.transaction); otherwise
+// FORCE RLS on oms.order_saga_state / oms.outbox_events returns zero rows on the pooled
+// connection and the timeline is silently always empty.
 const getTimeline = async (req, res, next) => {
     try {
-        const saga = await db.OrderSagaState.findByPk(String(req.params.id));
-        const events = await db.OutboxEvent.findAll({ where: { aggregate_id: String(req.params.id) }, order: [['created_at', 'ASC']] });
+        const { saga, events } = await db.sequelize.transaction(async (t) => {
+            const sagaRow = await db.OrderSagaState.findByPk(String(req.params.id), { transaction: t });
+            const eventRows = await db.OutboxEvent.findAll({ where: { aggregate_id: String(req.params.id) }, order: [['created_at', 'ASC']], transaction: t });
+            return { saga: sagaRow, events: eventRows };
+        });
         return sendSuccess(req, res, { saga, events });
     } catch (err) { return next(err); }
 };

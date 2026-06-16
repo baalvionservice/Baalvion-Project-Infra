@@ -109,15 +109,24 @@ async function scanOrdersForDrift({ fetchOrdersPage, fetchSagaStates, batchSize 
  * provided, each drift is emitted. Returns a structured result for callers/tests.
  */
 async function reconcileOnce(publish, now = Date.now()) {
-    return runWithTenant({ tenantId: null, bypass: true }, async () => {
+    // The whole sweep MUST run inside ONE sequelize transaction so the tenant-bypass GUC
+    // is applied: models/index.js patches sequelize.transaction to emit SET LOCAL
+    // app.tenant_bypass from the ALS context (set here by runWithTenant). Without the
+    // transaction, SET LOCAL never fires and FORCE RLS on oms.orders / oms.order_saga_state /
+    // oms.outbox_events returns ZERO rows on the pooled connection — reconciliation would
+    // silently see an empty order book and never detect drift. Detection-only: no writes.
+    return runWithTenant({ tenantId: null, bypass: true }, () =>
+        db.sequelize.transaction(async (t) => {
         const { drifts, scannedOrders, truncated } = await scanOrdersForDrift({
             fetchOrdersPage: (lastId, limit) => db.Order.findAll({
                 where: lastId == null ? {} : { id: { [db.Sequelize.Op.gt]: lastId } },
                 order: [['id', 'ASC']],
                 limit,
+                transaction: t,
             }),
             fetchSagaStates: (ids) => db.OrderSagaState.findAll({
                 where: { order_id: { [db.Sequelize.Op.in]: ids } },
+                transaction: t,
             }),
         });
         if (truncated) {
@@ -128,13 +137,14 @@ async function reconcileOnce(publish, now = Date.now()) {
         const cutoff = new Date(now - STUCK_OUTBOX_MS);
         const stuckOutbox = await db.OutboxEvent.findAll({
             where: { status: 'PENDING', available_at: { [db.Sequelize.Op.lt]: cutoff } },
+            transaction: t,
         });
         // NOTE: failedOutboxCount can briefly read low during a redrive lease — a FAILED
         // row is normalised to status=PENDING while it is being retried (see outboxRedrive
         // claim), so a row still under retry is temporarily not counted here. Operators
         // should alert on the redrive-exhausted event (oms.outbox.redrive.exhausted.v1),
         // not solely on this count.
-        const failedOutbox = await db.OutboxEvent.findAll({ where: { status: 'FAILED' } });
+        const failedOutbox = await db.OutboxEvent.findAll({ where: { status: 'FAILED' }, transaction: t });
 
         const result = {
             scannedOrders,
@@ -158,7 +168,7 @@ async function reconcileOnce(publish, now = Date.now()) {
                 + `${stuckOutbox.length} stuck + ${failedOutbox.length} failed outbox row(s)`);
         }
         return result;
-    });
+    }));
 }
 
 /**

@@ -18,11 +18,13 @@ const store = require('../service/platformStore');
 const logger = require('../service/logger');
 
 const cmsVault = require('../service/cmsVault');
+const dedup = require('../service/webhookDedup');
 // Secret comes from the CMS vault (the central admin panel) first; env is a local/dev fallback.
 const STRIPE_WEBHOOK_SECRET_ENV = process.env.STRIPE_WEBHOOK_SECRET || '';
 const TOLERANCE_SECONDS = Number(process.env.STRIPE_TOLERANCE_SECONDS || 300);
-
-const processedEventIds = new Set(); // in-proc idempotency; durable dedup also via credit ref + invoice window
+// Idempotency is now DURABLE + instance-shared via public.payment_webhook_events
+// (dedup.claimEvent / markApplied). The old per-process in-memory Set lost all dedup
+// state on restart and could not coordinate across instances → double-credit on redelivery.
 
 function timingSafeEqual(a, b) {
     const ba = Buffer.from(String(a || ''));
@@ -82,9 +84,6 @@ async function stripeWebhook(req, res) {
             return res.status(200).json({ received: true, ignored: `unpaid-${obj.payment_status}` });
         }
         const eventId = event.id || obj.id || null;
-        if (eventId && processedEventIds.has(String(eventId))) {
-            return res.status(200).json({ received: true, idempotent: true });
-        }
 
         const md = obj.metadata || {};
         // amount_total (checkout.session) / amount_received (payment_intent) are in MINOR units.
@@ -116,10 +115,22 @@ async function stripeWebhook(req, res) {
             const sub = await billingService.getSubscription(auth);
             planSlug = planSlug || (sub && sub.planSlug) || null;
         }
+        const currency = obj.currency ? String(obj.currency).toUpperCase() : null;
+
+        // Durable idempotency gate: atomically claim this signature-verified event id. A replay,
+        // a concurrent redelivery, or a post-restart redelivery loses the INSERT race and no-ops.
+        // (Throws on DB error → outer catch → 5xx → Stripe retries; i.e. fails closed, never an
+        // unguarded apply.) A missing event id falls through to the credit-ref dedup backstop.
+        if (eventId) {
+            const claim = await dedup.claimEvent('stripe', eventId, { eventType: type, orgId, amount: amountMajor, currency });
+            if (!claim.fresh) {
+                return res.status(200).json({ received: true, idempotent: true });
+            }
+        }
 
         if (kind === 'credit' || planSlug === 'pay-as-you-go') {
             const bal = await billingService.purchaseCredit(auth, amountMajor, { ref });
-            if (eventId) processedEventIds.add(String(eventId));
+            if (eventId) await dedup.markApplied('stripe', eventId, { status: 'applied', orgId, amount: amountMajor, currency });
             logger.info(`[stripe-webhook] credited org=${orgId} amount=${amountMajor} event=${eventId}`);
             return res.status(200).json({ received: true, credited: true, balanceUsd: bal && bal.balanceUsd });
         }
@@ -127,7 +138,7 @@ async function stripeWebhook(req, res) {
             return res.status(200).json({ received: true, ignored: 'no-subscription' });
         }
         const activated = await billingService.activateSubscription(auth, planSlug, { amount: amountMajor, paymentRef: ref });
-        if (eventId) processedEventIds.add(String(eventId));
+        if (eventId) await dedup.markApplied('stripe', eventId, { status: 'applied', orgId, amount: amountMajor, currency });
         logger.info(`[stripe-webhook] activated org=${orgId} plan=${planSlug} event=${eventId}`);
         return res.status(200).json({ received: true, activated: true, status: activated && activated.status });
     } catch (e) {

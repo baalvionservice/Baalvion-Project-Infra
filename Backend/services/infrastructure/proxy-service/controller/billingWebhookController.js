@@ -23,11 +23,14 @@ const billingService = require('../service/billingService');
 const logger = require('../service/logger');
 
 const cmsVault = require('../service/cmsVault');
+const dedup = require('../service/webhookDedup');
 // Secret comes from the CMS vault (the central admin panel) first; env is a local/dev fallback.
 const WEBHOOK_SECRET_ENV = process.env.RAZORPAY_WEBHOOK_SECRET || '';
 
 const ACTIONABLE = new Set(['payment.captured', 'order.paid']);
-const processedPaymentIds = new Set(); // in-process idempotency (see note above)
+// Idempotency is now DURABLE + instance-shared via public.payment_webhook_events keyed on the
+// signature-verified Razorpay payment id (resolving the in-process-Set note above). This persists
+// processed event ids across restarts and instances so a redelivery can never double-credit.
 
 function timingSafeEqual(a, b) {
     const ba = Buffer.from(String(a || ''));
@@ -70,9 +73,6 @@ async function razorpayWebhook(req, res) {
         }
 
         const paymentId = payment.id || null;
-        if (paymentId && processedPaymentIds.has(paymentId)) {
-            return res.status(200).json({ received: true, idempotent: true });
-        }
 
         const notes = payment.notes || {};
         const orgId = notes.orgId;
@@ -88,6 +88,17 @@ async function razorpayWebhook(req, res) {
 
         const amountMajor = typeof payment.amount === 'number' ? payment.amount / 100 : undefined;
         const auth = { orgId, userId };
+        const currency = payment.currency ? String(payment.currency).toUpperCase() : null;
+
+        // Durable idempotency gate: atomically claim this signature-verified Razorpay payment id. A
+        // redelivery / concurrent / post-restart delivery loses the INSERT race and no-ops. Throws on
+        // DB error → outer catch → 5xx → Razorpay retries (fails closed, never an unguarded apply).
+        if (paymentId) {
+            const claim = await dedup.claimEvent('razorpay', paymentId, { eventType: type, orgId, amount: amountMajor, currency });
+            if (!claim.fresh) {
+                return res.status(200).json({ received: true, idempotent: true });
+            }
+        }
 
         if (kind === 'credit') {
             // PAYG: add prepaid credit, keyed to this payment id (idempotent — the client convenience
@@ -96,7 +107,7 @@ async function razorpayWebhook(req, res) {
                 return res.status(200).json({ received: true, ignored: 'no-amount' });
             }
             const bal = await billingService.purchaseCredit(auth, amountMajor, { ref: paymentId });
-            if (paymentId) processedPaymentIds.add(paymentId);
+            if (paymentId) await dedup.markApplied('razorpay', paymentId, { status: 'applied', orgId, amount: amountMajor, currency });
             logger.info(`[billing-webhook] credited org=${orgId} amount=${amountMajor} via payment=${paymentId} balance=${bal && bal.balanceUsd}`);
             return res.status(200).json({ received: true, credited: true, balanceUsd: bal && bal.balanceUsd });
         }
@@ -111,7 +122,7 @@ async function razorpayWebhook(req, res) {
             interval,
             paymentRef: paymentId,
         });
-        if (paymentId) processedPaymentIds.add(paymentId);
+        if (paymentId) await dedup.markApplied('razorpay', paymentId, { status: 'applied', orgId, amount: amountMajor, currency });
         logger.info(`[billing-webhook] activated org=${orgId} plan=${planSlug} via payment=${paymentId} status=${sub && sub.status}`);
         return res.status(200).json({ received: true, activated: true, status: sub && sub.status });
     } catch (e) {

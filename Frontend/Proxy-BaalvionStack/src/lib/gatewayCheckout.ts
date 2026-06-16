@@ -17,7 +17,12 @@
 
 import { tokenStore } from "@/lib/tokenStore";
 
-const PLATFORM_BASE = import.meta.env.VITE_API_PLATFORM_BASE_URL ?? "http://localhost:4000/v1";
+// In production builds the localhost fallback MUST NOT ship: an unset env var
+// must fail loudly / resolve relative, never silently route checkout to a dev
+// machine. Localhost is a DEV-ONLY default (guarded by import.meta.env.PROD).
+const PLATFORM_BASE =
+  import.meta.env.VITE_API_PLATFORM_BASE_URL?.trim() ||
+  (import.meta.env.PROD ? "" : "http://localhost:4000/v1");
 
 export type GatewayProvider = "razorpay" | "stripe" | "payu" | "cashfree";
 export type GatewayMethod = "CARD" | "UPI" | "NETBANKING" | "BANK";

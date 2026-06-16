@@ -20,12 +20,14 @@ const config = require('../config/appConfig');
 const logger = require('../service/logger');
 
 const cmsVault = require('../service/cmsVault');
+const dedup = require('../service/webhookDedup');
 // merchantKey/salt come from the CMS vault (the central admin panel) first; env is a dev fallback.
 const PAYU_KEY_ENV = process.env.PAYU_MERCHANT_KEY || '';
 const PAYU_SALT_ENV = process.env.PAYU_MERCHANT_SALT || '';
 const APP_URL = process.env.PUBLIC_APP_URL || (config.corsOrigins && config.corsOrigins[0]) || 'http://localhost:8080';
-
-const processedTxnIds = new Set(); // in-proc idempotency; durable dedup also via credit ref + invoice window
+// Idempotency + replay protection is now DURABLE + instance-shared via
+// public.payment_webhook_events keyed on the (hash-verified) txnid. PayU carries no
+// timestamp, so this DB dedup IS the replay guard; the old in-memory Set lost it on restart.
 
 const sha512Hex = (s) => crypto.createHash('sha512').update(String(s), 'utf8').digest('hex');
 const orEmpty = (v) => (v == null ? '' : v);
@@ -82,10 +84,6 @@ async function payuWebhook(req, res) {
         if (status !== 'success') {
             return res.redirect(302, landing('failed'));
         }
-        if (txnid && processedTxnIds.has(txnid)) {
-            return res.redirect(302, landing('success'));
-        }
-
         const email = body.email ? String(body.email).toLowerCase() : '';
         const user = email ? await store.findUserByEmail(email) : null;
         if (!user || !user.orgId) {
@@ -100,10 +98,21 @@ async function payuWebhook(req, res) {
         const sub = await billingService.getSubscription(auth);
         const planSlug = sub && sub.planSlug ? sub.planSlug : null;
         const ref = `payu:${txnid}`;
+        const currency = body.currency ? String(body.currency).toUpperCase() : null;
+
+        // Durable idempotency + replay gate: atomically claim this (hash-verified) txnid. A
+        // redelivery / replay / post-restart redelivery loses the INSERT race and no-ops. Throws
+        // on DB error → outer catch → 5xx, so a money mutation never proceeds unguarded.
+        if (txnid) {
+            const claim = await dedup.claimEvent('payu', txnid, { eventType: 'payment', orgId: auth.orgId, amount: amountMajor, currency });
+            if (!claim.fresh) {
+                return res.redirect(302, landing('success'));
+            }
+        }
 
         if (planSlug === 'pay-as-you-go') {
             await billingService.purchaseCredit(auth, amountMajor, { ref });
-            if (txnid) processedTxnIds.add(txnid);
+            if (txnid) await dedup.markApplied('payu', txnid, { status: 'applied', orgId: auth.orgId, amount: amountMajor, currency });
             logger.info(`[payu-webhook] credited org=${auth.orgId} amount=${amountMajor} txnid=${txnid}`);
             return res.redirect(302, landing('success'));
         }
@@ -112,7 +121,7 @@ async function payuWebhook(req, res) {
             return res.redirect(302, landing('error'));
         }
         await billingService.activateSubscription(auth, planSlug, { amount: amountMajor, paymentRef: ref });
-        if (txnid) processedTxnIds.add(txnid);
+        if (txnid) await dedup.markApplied('payu', txnid, { status: 'applied', orgId: auth.orgId, amount: amountMajor, currency });
         logger.info(`[payu-webhook] activated org=${auth.orgId} plan=${planSlug} txnid=${txnid}`);
         return res.redirect(302, landing('success'));
     } catch (e) {
