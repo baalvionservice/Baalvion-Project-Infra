@@ -10,7 +10,7 @@ import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { cmsGetPost, type MiningPost } from "@/lib/cms";
 import { BRAND_IMAGES } from "@/lib/brand-assets";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 
 // Reflect the latest published content from the central CMS on every request.
 export const dynamic = 'force-dynamic';
@@ -144,7 +144,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
           <div className="prose prose-slate max-w-none prose-headings:text-primary prose-headings:font-headline">
             {/* Body is admin-authored in the central Baalvion CMS (trusted source). */}
-            <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.contentHtml) }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(post.contentHtml) }} />
           </div>
 
           <footer className="pt-12 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6">

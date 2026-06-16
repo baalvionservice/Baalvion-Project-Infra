@@ -12,7 +12,7 @@ import Link from "next/link";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { RelatedProducts } from "@/components/marketplace/RelatedProducts";
 import { BRAND_IMAGES } from "@/lib/brand-assets";
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 
 const getGuideData = (slug: string) => {
   return {
@@ -101,7 +101,7 @@ export default function GuideDetailPage() {
             </div>
 
             <div className="prose prose-slate max-w-none prose-headings:text-primary prose-headings:font-headline prose-p:leading-relaxed prose-p:text-slate-600">
-              <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(guide.content) }} />
+              <div dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(guide.content) }} />
             </div>
 
             <footer className="pt-12 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6">

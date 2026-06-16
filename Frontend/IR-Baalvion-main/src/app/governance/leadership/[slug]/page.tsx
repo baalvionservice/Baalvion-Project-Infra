@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Mail, Building2, Briefcase, ArrowUpRight } from 'lucide-react';
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeRichHtml } from '@/lib/sanitize';
 
 import { cmsGetLeadershipMember } from '@/lib/cms';
 import { AppConfig } from '@/config';
@@ -164,7 +164,7 @@ export default async function SingleLeaderPage({ params }: SingleLeaderPageParam
                 [&_figcaption]:mt-2 [&_figcaption]:text-center [&_figcaption]:text-xs [&_figcaption]:text-[#6e6e73]
                 [&_blockquote]:my-6 [&_blockquote]:border-l-4 [&_blockquote]:border-[#0066cc] [&_blockquote]:pl-5 [&_blockquote]:italic [&_blockquote]:text-[#444]
                 [&_hr]:my-10 [&_hr]:border-gray-200"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(leader.bodyHtml) }}
+              dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(leader.bodyHtml) }}
             />
           ) : (
             <div className="space-y-5 text-[16px] leading-[1.85] text-[#333]">
