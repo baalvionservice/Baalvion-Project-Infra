@@ -54,7 +54,7 @@ export default function DataProof() {
             The data speaks for itself
           </h2>
           <p className="text-[15px] text-gray-500 leading-[1.65] max-w-[500px] mx-auto">
-            Real metrics from companies using SkillMatch Pro vs traditional methods.
+            Real metrics from companies using ControlTheMarket vs traditional methods.
           </p>
         </motion.div>
 
@@ -72,7 +72,7 @@ export default function DataProof() {
               bars={[
                 { label: "Traditional", widthPct: 97, color: "hsl(220,10%,78%)", value: "41d" },
                 { label: "Resume-based", widthPct: 29, color: "hsl(221,83%,70%)", value: "12d" },
-                { label: "SkillMatch Pro", widthPct: 15, color: "hsl(142,76%,36%)", value: "6d", valueColor: "hsl(142,76%,36%)" },
+                { label: "ControlTheMarket", widthPct: 15, color: "hsl(142,76%,36%)", value: "6d", valueColor: "hsl(142,76%,36%)" },
               ]}
               miniStats={[
                 { value: "85%", valueColor: "hsl(142,76%,36%)", label: "Faster than industry avg.", trend: "↑ vs traditional hiring", trendUp: true },
@@ -93,7 +93,7 @@ export default function DataProof() {
               Fill roles in <span className="text-green-600">6 days</span>, not 6 weeks.
             </h2>
             <p className="text-sm text-gray-500 leading-[1.7] mb-[18px]">
-              Traditional hiring drags on for 41+ days. Resume screening, mismatched interviews, and gut-feel decisions waste everyone's time. SkillMatch Pro cuts through with real performance data.
+              Traditional hiring drags on for 41+ days. Resume screening, mismatched interviews, and gut-feel decisions waste everyone's time. ControlTheMarket cuts through with real performance data.
             </p>
             <CheckList
               items={[
@@ -120,11 +120,11 @@ export default function DataProof() {
               Hire people who actually <span className="text-green-600">deliver results.</span>
             </h2>
             <p className="text-sm text-gray-500 leading-[1.7] mb-[18px]">
-              An impressive resume is not the same as impressive work. SkillMatch Pro's verified performance data means you always know what you're getting before making an offer.
+              An impressive resume is not the same as impressive work. ControlTheMarket's verified performance data means you always know what you're getting before making an offer.
             </p>
             <CheckList
               items={[
-                "92% of SkillMatch hires still with company at 12 months",
+                "92% of ControlTheMarket hires still with company at 12 months",
                 "3.2× higher quality vs traditional job boards",
                 "Verified badges eliminate resume inflation completely",
                 "Objective data reduces unconscious hiring bias",
@@ -146,7 +146,7 @@ export default function DataProof() {
                 { label: "Job boards", widthPct: 31, color: "hsl(0,60%,72%)", value: "31" },
                 { label: "Recruiter", widthPct: 54, color: "hsl(221,83%,70%)", value: "54" },
                 { label: "Referrals", widthPct: 78, color: "hsl(40,90%,60%)", value: "78" },
-                { label: "SkillMatch Pro", widthPct: 97, color: "hsl(142,76%,36%)", value: "97", valueColor: "hsl(142,76%,36%)" },
+                { label: "ControlTheMarket", widthPct: 97, color: "hsl(142,76%,36%)", value: "97", valueColor: "hsl(142,76%,36%)" },
               ]}
               miniStats={[
                 { value: "97/100", valueColor: "hsl(142,76%,36%)", label: "Avg. quality score", trend: "↑ vs 31 on job boards", trendUp: true },
@@ -171,7 +171,7 @@ export default function DataProof() {
                 { label: "Executive search", widthPct: 95, color: "hsl(0,60%,72%)", value: "$28K" },
                 { label: "Agency recruiter", widthPct: 70, color: "hsl(30,80%,65%)", value: "$18K" },
                 { label: "Job boards", widthPct: 42, color: "hsl(221,83%,70%)", value: "$8.4K" },
-                { label: "SkillMatch Pro", widthPct: 22, color: "hsl(142,76%,36%)", value: "$2.9K", valueColor: "hsl(142,76%,36%)" },
+                { label: "ControlTheMarket", widthPct: 22, color: "hsl(142,76%,36%)", value: "$2.9K", valueColor: "hsl(142,76%,36%)" },
               ]}
               miniStats={[
                 { value: "$2,900", valueColor: "hsl(142,76%,36%)", label: "Average cost per hire", trend: "↓ 68% vs industry avg.", trendUp: true },
@@ -192,7 +192,7 @@ export default function DataProof() {
               Hire better for <span className="text-green-600">68% less money.</span>
             </h2>
             <p className="text-sm text-gray-500 leading-[1.7] mb-[18px]">
-              Agency fees, subscriptions, and weeks of recruiter time add up fast. SkillMatch Pro automates the heavy lifting so your team only spends time on the very best performers.
+              Agency fees, subscriptions, and weeks of recruiter time add up fast. ControlTheMarket automates the heavy lifting so your team only spends time on the very best performers.
             </p>
             <CheckList
               items={[

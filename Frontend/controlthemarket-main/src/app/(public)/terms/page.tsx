@@ -14,7 +14,7 @@ export default function TermsOfServicePage() {
   const sections = [
     {
       title: "1. Acceptance of Terms",
-      content: "By accessing or using the SkillMatch Pro platform, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the service."
+      content: "By accessing or using the ControlTheMarket platform, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, you may not access the service."
     },
     {
       title: "2. Platform Usage",
@@ -22,7 +22,7 @@ export default function TermsOfServicePage() {
     },
     {
       title: "3. Intellectual Property",
-      content: "Candidates retain intellectual property rights to their submissions. By submitting work, you grant companies a license to review and evaluate your work for hiring purposes. You also grant SkillMatch Pro a license to host, display, and use the submission for platform operations."
+      content: "Candidates retain intellectual property rights to their submissions. By submitting work, you grant companies a license to review and evaluate your work for hiring purposes. You also grant ControlTheMarket a license to host, display, and use the submission for platform operations."
     },
     {
       title: "4. User Conduct",
@@ -30,7 +30,7 @@ export default function TermsOfServicePage() {
     },
     {
       title: "5. Limitation of Liability",
-      content: "SkillMatch Pro is provided 'as is'. We make no warranties regarding the outcomes of the hiring process. Our liability is limited to the maximum extent permitted by law."
+      content: "ControlTheMarket is provided 'as is'. We make no warranties regarding the outcomes of the hiring process. Our liability is limited to the maximum extent permitted by law."
     },
     {
       title: "6. Termination",

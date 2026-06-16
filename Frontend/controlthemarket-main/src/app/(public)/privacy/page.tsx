@@ -14,7 +14,7 @@ export default function PrivacyPolicyPage() {
   const sections = [
     {
       title: "1. Introduction",
-      content: "Welcome to SkillMatch Pro. We are committed to protecting your privacy and handling your data in an open and transparent manner. This privacy policy sets out how we collect, use, and protect your personal information."
+      content: "Welcome to ControlTheMarket. We are committed to protecting your privacy and handling your data in an open and transparent manner. This privacy policy sets out how we collect, use, and protect your personal information."
     },
     {
       title: "2. Information We Collect",

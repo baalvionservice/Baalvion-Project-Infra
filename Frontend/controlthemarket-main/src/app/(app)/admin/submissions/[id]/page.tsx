@@ -25,7 +25,7 @@ import { SandboxWorkspacePanel } from './sandbox-workspace-panel';
 import { LiveCodingWorkspacePanel } from './live-coding-workspace-panel';
 import { AntiCheatingIndicatorPanel } from './anti-cheating-panel';
 import { RecordingPanel } from './recording-panel';
-import { SkillMatchResultPanel } from './skill-match-result-panel';
+import { ControlTheMarketResultPanel } from './skill-match-result-panel';
 import { DomainAccessPanel } from '@/app/(app)/company/submissions/[id]/domain-access-panel';
 
 
@@ -113,7 +113,7 @@ export default function AdminManageSubmissionPage() {
         </div>
         <div className="space-y-6">
             <DomainAccessPanel submission={submission} />
-            <SkillMatchResultPanel submission={submission} />
+            <ControlTheMarketResultPanel submission={submission} />
             <AiEvaluationPanel submission={submission} />
             <AntiCheatingIndicatorPanel submission={submission} />
             <SandboxWorkspacePanel submission={submission} />

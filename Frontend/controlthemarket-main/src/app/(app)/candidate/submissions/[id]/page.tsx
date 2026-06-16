@@ -24,7 +24,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useAuth } from '@/contexts';
 import { ActivityLog } from '@/components/activity-log';
 import type { SubmissionStatus, Company } from '@/lib/types';
-import { SkillMatchResultPanel } from './skill-match-result-panel';
+import { ControlTheMarketResultPanel } from './skill-match-result-panel';
 import { DomainAccessCard } from './domain-access-card';
 
 
@@ -222,7 +222,7 @@ export default function SubmissionDetailPage() {
                 </Card>
             )}
 
-             <SkillMatchResultPanel submission={submission} />
+             <ControlTheMarketResultPanel submission={submission} />
 
         </div>
         <div className="space-y-6">

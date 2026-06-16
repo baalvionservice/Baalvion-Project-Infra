@@ -147,7 +147,7 @@ export default async function AdminAnalyticsPage() {
                     Platform Analytics
                     </h2>
                     <p className="text-muted-foreground">
-                        An overview of all activity across the SkillMatch Pro platform.
+                        An overview of all activity across the ControlTheMarket platform.
                     </p>
                 </div>
             </div>

@@ -138,24 +138,48 @@ exports.getUser = async (req, res, next) => {
 // mirror the identity user into CTM with name/email the token does not carry).
 exports.upsertUser = async (req, res, next) => {
     try {
-        const id = req.body.id || req.body.user_id || req.auth?.userId;
-        if (!id) throw new AppError('VALIDATION_ERROR', 'id is required', 400);
-        const fields = {
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        // Identity comes from the VERIFIED token, not the body: a non-admin can only ever upsert
+        // their OWN profile. Admins may target an explicit id. (Closes the profile-takeover IDOR
+        // where any caller could write an arbitrary user_id.)
+        const targetId = isAdmin ? (req.body.id ?? req.body.user_id ?? req.auth?.userId) : req.auth?.userId;
+        if (!targetId) throw new AppError('UNAUTHORIZED', 'Authentication required', 401);
+
+        // Self-writable fields only. Privileged fields (role, company_id, is_verified) are
+        // admin-only — a user can never self-elevate role, move orgs, or self-verify.
+        const selfFields = {
             name: req.body.name,
-            email: req.body.email,
+            avatar_url: req.body.avatar_url ?? req.body.avatarUrl,
+        };
+        // Email mirror: a non-admin may only set the email that matches their VERIFIED token claim
+        // (or set it once when the token carries no email) — never redirect it to an arbitrary
+        // address. Admins may set any email.
+        const claimEmail = req.auth?.email;
+        if (req.body.email !== undefined && (isAdmin || !claimEmail || String(req.body.email) === String(claimEmail))) {
+            selfFields.email = req.body.email;
+        }
+        const adminFields = isAdmin ? {
             role: req.body.role,
             company_id: req.body.company_id ?? req.body.companyId,
-            avatar_url: req.body.avatar_url ?? req.body.avatarUrl,
             is_verified: req.body.is_verified ?? req.body.isVerified,
-        };
+        } : {};
+        const fields = { ...selfFields, ...adminFields };
         Object.keys(fields).forEach((k) => fields[k] === undefined && delete fields[k]);
+
+        // On first create for a non-admin, pin role + company_id from the VERIFIED claims so the
+        // mirror lands in the right tenant with the right role (never from the body).
+        const claimRole = callerRoles.includes('candidate') ? 'candidate' : (isAdmin ? 'admin' : 'company');
+        const defaults = { user_id: targetId, ...fields };
+        if (!isAdmin) { defaults.role = claimRole; defaults.company_id = req.auth?.orgId ?? null; }
+
         const [profile, created] = await db.user_profiles.findOrCreate({
-            where: { user_id: id },
-            defaults: { user_id: id, ...fields },
+            where: { user_id: targetId },
+            defaults,
         });
-        if (Object.keys(fields).length) { Object.assign(profile, fields); await profile.save(); }
-        _seen.add(String(id));
-        if (created) events.emit('user.created', { id: String(id), name: profile.name, email: profile.email, role: profile.role }, { companyId: profile.company_id, related: { type: 'User', id: String(id) } });
+        if (!created && Object.keys(fields).length) { Object.assign(profile, fields); await profile.save(); }
+        _seen.add(String(targetId));
+        if (created) events.emit('user.created', { id: String(targetId), name: profile.name, email: profile.email, role: profile.role }, { companyId: profile.company_id, related: { type: 'User', id: String(targetId) } });
         sendSuccess(res, profile, 201);
     } catch (err) { next(err); }
 };
@@ -291,8 +315,19 @@ exports.updateNotification = async (req, res, next) => {
 
 exports.listTemplates = async (req, res, next) => {
     try {
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const callerOrgId = req.auth?.orgId;
         const where = {};
         if (req.query.company_id) where.company_id = req.query.company_id;
+        // Private templates are visible ONLY to their owning org (or an admin); everyone else —
+        // including anonymous callers — sees public templates only. Closes cross-tenant enumeration.
+        if (!isAdmin) {
+            where[Op.or] = [
+                { is_private: false },
+                ...(callerOrgId ? [{ is_private: true, company_id: callerOrgId }] : []),
+            ];
+        }
         const templates = await db.task_templates.findAll({ where, order: [['created_at', 'DESC']] });
         sendSuccess(res, templates);
     } catch (err) { next(err); }
@@ -302,8 +337,13 @@ exports.createTemplate = async (req, res, next) => {
     try {
         const userId = req.auth?.userId;
         const b = req.body;
-        const company_id = b.company_id ?? b.createdBy;
-        if (!company_id || !b.title) throw new AppError('VALIDATION_ERROR', 'company_id and title are required', 400);
+        // Templates are org-owned — pin to the caller's own org; admins may target an explicit
+        // company. A client-supplied company_id is ignored for non-admins (closes the IDOR).
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const callerOrgId = req.auth?.orgId;
+        const company_id = isAdmin ? (b.company_id ?? b.createdBy ?? callerOrgId) : callerOrgId;
+        if (!company_id || !b.title) throw new AppError('VALIDATION_ERROR', 'organization context and title are required', 400);
         const t = await db.task_templates.create({
             company_id, created_by: userId,
             title: b.title, description: b.description,
@@ -379,20 +419,32 @@ exports.getInvoice = async (req, res, next) => {
 exports.createInvoice = async (req, res, next) => {
     try {
         const b = req.body;
-        const company_id = b.company_id ?? b.companyId;
-        if (!company_id) throw new AppError('VALIDATION_ERROR', 'company_id is required', 400);
+        // Invoices bill a tenant — pin to the caller's own org; admins may bill an explicit
+        // company. A client-supplied company_id is ignored for non-admins (closes the IDOR).
+        const callerRoles = req.auth?.roles || [];
+        const isAdmin = callerRoles.includes('admin') || callerRoles.includes('super_admin');
+        const callerOrgId = req.auth?.orgId;
+        const company_id = isAdmin ? (b.company_id ?? b.companyId ?? callerOrgId) : callerOrgId;
+        if (!company_id) throw new AppError('FORBIDDEN', 'Organization context required', 403);
         const subtotal = Number(b.subtotal ?? b.amount ?? 0);
         const tax = Number(b.tax ?? 0);
         const amount = Number(b.amount ?? subtotal + tax);
+        // Non-admins cannot manufacture a settled or zero-amount invoice: status is forced to
+        // 'Pending' and the amount must be positive. Only admins may set an explicit status.
+        if (!isAdmin && !(amount > 0)) throw new AppError('VALIDATION_ERROR', 'amount must be greater than 0', 400);
+        const status = isAdmin ? (b.status ?? 'Pending') : 'Pending';
+        // Non-admins can't back-date or forward-date billing records — dates are server-set.
+        const issued_at = isAdmin ? (b.issued_at ?? b.date ?? new Date()) : new Date();
+        const due_date = isAdmin ? (b.due_date ?? b.dueDate ?? null) : new Date(Date.now() + 7 * 86400000);
         const inv = await db.invoices.create({
             company_id,
             subscription_id: b.subscription_id ?? b.subscriptionId,
             amount, subtotal, tax,
             currency: b.currency ?? 'USD',
-            status: b.status ?? 'Pending',
+            status,
             plan_name: b.plan_name ?? b.planName,
-            issued_at: b.issued_at ?? b.date ?? new Date(),
-            due_date: b.due_date ?? b.dueDate,
+            issued_at,
+            due_date,
             billing_period_start: b.billing_period_start ?? b.billingPeriod?.start,
             billing_period_end: b.billing_period_end ?? b.billingPeriod?.end,
             line_items: b.line_items ?? b.lineItems ?? [],

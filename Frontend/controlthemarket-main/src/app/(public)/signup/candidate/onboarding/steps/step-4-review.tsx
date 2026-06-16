@@ -82,7 +82,7 @@ export function Step4Review({ onNext, data }: Step4Props) {
                 </FormControl>
                 <div className="space-y-1 leading-none">
                 <FormLabel>
-                    I confirm that the information provided is accurate and I agree to the SkillMatch Pro Privacy Policy and Data Consent terms.
+                    I confirm that the information provided is accurate and I agree to the ControlTheMarket Privacy Policy and Data Consent terms.
                 </FormLabel>
                 <FormMessage />
                 </div>

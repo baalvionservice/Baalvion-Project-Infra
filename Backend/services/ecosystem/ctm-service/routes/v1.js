@@ -153,7 +153,10 @@ router.post('/submissions/:id/test-cases/run', authMiddleware, integ.runTestCase
 // ── Payments (provider-agnostic: Stripe/Razorpay env-gated) ─────────────────────
 // Payment records contain financial PII; require auth and scope by caller's org.
 router.get('/payments',          authMiddleware,  payments.listPayments);
-router.get('/payments/provider', optionalAuth,    payments.providerStatus);
+// Require auth: don't disclose which providers are configured to anonymous callers (L1).
+router.get('/payments/provider', authMiddleware,  payments.providerStatus);
+// Admin pre-flight self-check (vault keys + webhook secrets resolvable) — no secrets exposed.
+router.get('/payments/health',   adminOnly,       payments.health);
 router.post('/payments/checkout', authMiddleware, payments.createCheckout);
 router.post('/payments/webhook', payments.handleWebhook); // no auth — verified by provider signature
 

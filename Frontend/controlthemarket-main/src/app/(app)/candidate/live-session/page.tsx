@@ -25,7 +25,7 @@ import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/auth-context";
 import { useSubmissions } from "@/contexts/submissions-context";
 import type { LiveSessionStatus } from "@/lib/types";
-import { SkillMatchResultPanel } from "../../company/submissions/[id]/skill-match-result-panel";
+import { ControlTheMarketResultPanel } from "../../company/submissions/[id]/skill-match-result-panel";
 
 const getStatusVariant = (
   status?: LiveSessionStatus
@@ -284,7 +284,7 @@ export default function CandidateLiveSessionPage() {
         </div>
         <div className="space-y-6">
           {sessionStatus === "Completed" && submission && (
-            <SkillMatchResultPanel submission={submission} />
+            <ControlTheMarketResultPanel submission={submission} />
           )}
         </div>
       </div>

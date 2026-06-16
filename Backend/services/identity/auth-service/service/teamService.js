@@ -66,12 +66,23 @@ async function getMembers(orgId, requesterId, { includeInactive = false } = {}) 
 
 // ── Invitations ───────────────────────────────────────────────────────────────
 
+// HTML-escape any dynamic value before it is interpolated into an email body, so an org name,
+// email, or branded base URL containing markup can't inject into the message.
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 /**
  * Low-level invite issuance — NO authorization gate. Callers (org admins via inviteMember,
  * or the platform console seeding a new org's first owner) are responsible for authz.
  * Generates a single-use token, persists the invitation, sends the email, audits + emits.
  */
-async function issueInvitation({ orgId, email, role, fullName = null, invitedBy, ipAddress }) {
+async function issueInvitation({ orgId, email, role, fullName = null, invitedBy, ipAddress, frontendUrl }) {
     if (!isValidRole(role)) throw new AppError('VALIDATION_ERROR', `Invalid role '${role}'`, 400);
 
     const token = generateToken();
@@ -82,24 +93,33 @@ async function issueInvitation({ orgId, email, role, fullName = null, invitedBy,
     const invitation = await inviteRepo.create({ orgId, email, role, tokenHash: token_hash, expiresAt: expires_at, createdBy: invitedBy, fullName });
 
     const org = await orgRepo.findById(orgId);
-    const frontendUrl = config.frontendUrl || 'http://localhost:8080';
-    const inviteLink = `${frontendUrl}/accept-invite?inviteToken=${token}&email=${encodeURIComponent(email)}`;
+    // Per-site branding: callers (e.g. the CTM bulk-invite script) may override the accept-link
+    // base so invites point at the right product domain; default to the platform frontend. ONLY
+    // http(s) is accepted — never a javascript:/data: scheme in the email href.
+    const rawBase = frontendUrl || config.frontendUrl || 'http://localhost:8080';
+    const baseUrl = /^https?:\/\//i.test(rawBase) ? rawBase.replace(/\/$/, '') : (config.frontendUrl || 'http://localhost:8080');
+    const inviteLink = `${baseUrl}/accept-invite?inviteToken=${token}&email=${encodeURIComponent(email)}`;
+    // Every dynamic value is HTML-escaped before going into the email body (token is hex-safe).
+    const orgName = escapeHtml(org?.name);
+    const roleText = escapeHtml(role);
+    const inviteHref = escapeHtml(inviteLink);
+    const baseHref = escapeHtml(baseUrl);
 
     sendMail({
         to: email,
-        subject: `You're invited to join ${org?.name} on Baalvion`,
+        subject: `You're invited to join ${org?.name || 'Baalvion'} on Baalvion`,
         html: `
             <div style="font-family:sans-serif;max-width:520px;margin:0 auto">
               <h2 style="color:#1a1a2e">You're invited!</h2>
-              <p>You've been invited to join <strong>${org?.name}</strong> as <strong>${role}</strong>.</p>
+              <p>You've been invited to join <strong>${orgName}</strong> as <strong>${roleText}</strong>.</p>
               <p style="margin:24px 0">
-                <a href="${inviteLink}" style="background:#6c63ff;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
+                <a href="${inviteHref}" style="background:#6c63ff;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600">
                   Accept Invitation
                 </a>
               </p>
               <p style="color:#666;font-size:13px">This invitation expires in 7 days. If you didn't expect this, you can safely ignore it.</p>
               <hr style="border:none;border-top:1px solid #eee;margin:24px 0"/>
-              <p style="color:#999;font-size:12px">Baalvion · <a href="${frontendUrl}" style="color:#999">${frontendUrl}</a></p>
+              <p style="color:#999;font-size:12px">Baalvion · <a href="${baseHref}" style="color:#999">${baseHref}</a></p>
             </div>
         `,
     }).catch(() => {});
@@ -126,12 +146,12 @@ async function inviteMember({ orgId, email, role = 'viewer', fullName, requester
     return { id: result.id, email: result.email, role: result.role, expiresAt: result.expiresAt };
 }
 
-async function bulkInvite({ orgId, invites, requesterId, ipAddress }) {
+async function bulkInvite({ orgId, invites, requesterId, ipAddress, frontendUrl }) {
     await assertManageUsers(orgId, requesterId);
     const results = { invited: [], failed: [] };
     for (const inv of invites) {
         try {
-            const r = await issueInvitation({ orgId, email: inv.email, role: inv.role || 'viewer', fullName: inv.fullName, invitedBy: requesterId, ipAddress });
+            const r = await issueInvitation({ orgId, email: inv.email, role: inv.role || 'viewer', fullName: inv.fullName, invitedBy: requesterId, ipAddress, frontendUrl });
             results.invited.push({ email: r.email, role: r.role, id: r.id });
         } catch (err) {
             results.failed.push({ email: inv.email, reason: err.message || 'failed' });

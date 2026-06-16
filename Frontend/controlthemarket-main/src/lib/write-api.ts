@@ -302,12 +302,13 @@ export async function testApiIntegration(id: string) {
   return { data: await ctmClient.post<any>(`/api-integrations/${id}/test`, {}) };
 }
 
-// Provider-agnostic checkout: returns { checkoutUrl, provider, invoiceId, paymentId, status }.
-export async function createPaymentCheckout(data: { companyId: string; planId?: string; amount?: number; planName?: string; billingCycle?: string; currency?: string; email?: string }) {
-  if (USE_MOCK) return { data: { provider: 'manual', status: 'pending', amount: data.amount ?? 0 } };
+// Provider-agnostic checkout. The PRICE and the billed org are server-authoritative: the client
+// sends only the plan id, billing cycle, and chosen provider — never an amount or company_id.
+// Returns { invoiceId, paymentId, provider, checkoutUrl, clientParams, status, amount, currency }.
+export async function createPaymentCheckout(data: { planId: string; provider?: string; billingCycle?: string; email?: string }) {
+  if (USE_MOCK) return { data: { provider: 'manual', status: 'pending', clientParams: { provider: 'manual' } } };
   return { data: await ctmClient.post<any>('/payments/checkout', {
-    company_id: data.companyId, plan_id: data.planId, amount: data.amount,
-    plan_name: data.planName, billing_cycle: data.billingCycle, currency: data.currency, email: data.email,
+    plan_id: data.planId, provider: data.provider, billing_cycle: data.billingCycle, email: data.email,
   }) };
 }
 
