@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 // Route-segment error boundary. Self-contained (no app-specific imports) so it
 // always renders even when the failure is in shared UI. Stack traces are sent to
@@ -46,12 +47,12 @@ export default function Error({
           >
             Try again
           </button>
-          <a
+          <Link
             href="/"
             style={{ background: 'transparent', color: '#0f172a', border: '1px solid #cbd5e1', borderRadius: 10, padding: '0.8rem 1.5rem', fontWeight: 700, textDecoration: 'none' }}
           >
             Go home
-          </a>
+          </Link>
         </div>
         {error?.digest ? (
           <p style={{ marginTop: 24, fontSize: 11, color: '#94a3b8', letterSpacing: '0.1em' }}>REF: {error.digest}</p>
