@@ -1,0 +1,37 @@
+# Caddy v2 — TLS termination + same-origin reverse proxy for controlthemarket.com.
+# Caddy auto-provisions + renews a Let's Encrypt cert for {$DOMAIN} and redirects HTTP→HTTPS.
+# CTM's frontend is a Next.js SSR server (web:3000), so Caddy proxies to it; the CTM API
+# (ctm-service:3017) is reached same-origin under /api/*. Next.js (not Caddy) handles the
+# /auth-bff/* → central-identity rewrite, so /auth-bff flows through the `web` proxy below.
+#
+# CTM's next.config sets NO HTTP headers, so Caddy is the SINGLE owner of the security headers /
+# CSP here (no duplicate-header conflict). The CSP allows the Razorpay hosted-checkout modal.
+
+{$DOMAIN} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Frame-Options "DENY"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		# Same-origin app (SPA assets + /api + /auth-bff all on this host) → 'self' covers the API.
+		# *.razorpay.com is required for the hosted Checkout modal (script/frame/connect/img).
+		Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' https://checkout.razorpay.com https://*.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos https://*.razorpay.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.razorpay.com https://*.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com; frame-ancestors 'none'; form-action 'self'; base-uri 'self'; object-src 'none'"
+		-Server
+	}
+
+	# CTM API + the Razorpay webhook (POST /api/v1/payments/webhook). reverse_proxy forwards the raw
+	# body unchanged so the webhook HMAC still verifies. ctm-service mounts routes at /api/v1 (and /v1).
+	handle /api/* {
+		reverse_proxy ctm-service:3017
+	}
+
+	# Everything else → the Next.js server: pages, _next assets, and the /auth-bff/* auth proxy
+	# (Next rewrites /auth-bff/* to the central identity per AUTH_PROXY_TARGET).
+	handle {
+		reverse_proxy web:3000
+	}
+}

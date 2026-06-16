@@ -22,6 +22,11 @@ const nextConfig: NextConfig = {
     'protobufjs',
     'express',
   ],
+  // Self-contained server bundle for Docker/ECS (.next/standalone + server.js).
+  // Standalone file-tracing recreates the pnpm symlink tree, which throws EPERM on Windows
+  // (symlink creation needs Admin/Developer Mode). Production images build on Linux where this
+  // works; skip it on win32 so local Windows builds succeed without changing the deploy artifact.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   typescript: {
     ignoreBuildErrors: false,
   },

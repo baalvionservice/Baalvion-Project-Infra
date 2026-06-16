@@ -1,0 +1,21 @@
+# Caddy v2 — TLS termination + reverse proxy for the Company Dashboard.
+# Caddy auto-provisions + renews a Let's Encrypt cert for {$DOMAIN} and redirects HTTP→HTTPS.
+#
+# The dashboard is a Next.js SSR server (web:3024). It handles the /auth-bff/* and /api-bff/*
+# rewrites itself (server-side → internal auth-gateway:3099), so EVERYTHING goes to `web` — Caddy
+# does not need per-path routing.
+#
+# IMPORTANT: the dashboard's next.config.ts sets its OWN security headers + a strict CSP. Caddy must
+# NOT also set CSP/HSTS/X-Frame-Options here, or the browser receives duplicate (conflicting)
+# headers. Caddy only terminates TLS, compresses, and strips the Server banner.
+
+{$DOMAIN} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+
+	header {
+		-Server
+	}
+
+	reverse_proxy web:3024
+}

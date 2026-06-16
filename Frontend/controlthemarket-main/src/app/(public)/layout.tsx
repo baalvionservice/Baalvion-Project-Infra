@@ -1,17 +1,11 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import { PublicChrome } from '@/components/public-chrome';
 
 export default function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">{children}</main>
-      <Footer />
-
-    </div>
-  );
+  // Marketing chrome (Navbar/Footer) is applied here, EXCEPT on the full-bleed auth
+  // surfaces (/login, /signup/*) where the branded AuthShell owns the whole screen.
+  return <PublicChrome>{children}</PublicChrome>;
 }

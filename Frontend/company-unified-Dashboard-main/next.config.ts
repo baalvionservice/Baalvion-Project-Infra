@@ -41,6 +41,12 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle for Docker/AWS (.next/standalone + server.js). Standalone
+  // file-tracing recreates the pnpm symlink tree, which throws EPERM on Windows (symlink creation
+  // needs Admin/Developer Mode). Production images build on Linux where this works; skip it on
+  // win32 so local Windows `next build` (e.g. the pm2 dev host) still succeeds — same source, the
+  // deploy artifact is only ever built in the Linux Docker image.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   // Server-side BFF base — defaulting here makes process.env.DASHBOARD_API_URL always
   // defined, so the per-route `|| 'http://localhost:3009'` fallbacks are never reached.
   // BFF routes call ${DASHBOARD_API_URL}/api/v1/<resource>, which the gateway strips to

@@ -80,6 +80,15 @@ services:
       REDIS_PORT: ${REDIS_PORT}
       CMS_SECRETS_KEY: ${CMS_SECRETS_KEY}
       INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      # cms-service requires JWT_PUBLIC_KEY at boot (config/appConfig.js) even though the
+      # public read API (/api/v1/public/*) is unauthenticated — without it the service
+      # crash-loops and the public content API never comes up. Reuse proxy-service's RS256
+      # public half (secrets/keys/baalvion-key-1.pub) as a single-line PEM (see runbook §14).
+      JWT_PUBLIC_KEY: ${CMS_JWT_PUBLIC_KEY}
+      # Browser origins allowed to read the CMS directly. Server-side (Next.js SSR/ISR)
+      # fetches carry no Origin header and are unaffected; this only matters for any
+      # client-side CMS reads from the Vercel sites.
+      CORS_ORIGINS: ${CMS_CORS_ORIGINS}
     depends_on:
       postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
@@ -165,6 +174,9 @@ services:
       - "443:443"
     environment:
       DOMAIN: ${DOMAIN}
+      # Public hostname for the read-only CMS content API consumed by the Vercel sites
+      # (about.baalvion.com, …). Point its DNS A record at this same EC2 Elastic IP.
+      CMS_DOMAIN: ${CMS_DOMAIN}
       ACME_EMAIL: ${ACME_EMAIL}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
