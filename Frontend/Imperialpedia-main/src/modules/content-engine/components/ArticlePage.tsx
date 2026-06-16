@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 import { Container } from "@/design-system/layout/container";
 import { Article } from "../types";
 import { getArticleBySlug } from "../services/content-service";
@@ -121,7 +122,7 @@ export const ArticlePage = ({
                 className="article-body prose prose-lg dark:prose-invert max-w-none mb-12"
                 // Body is rendered from CMS content blocks (cms-public.blocksToHtml).
                 // Source is internal, editor-authored content published via the CMS.
-                dangerouslySetInnerHTML={{ __html: article.body }}
+                dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(article.body) }}
               />
             ) : (
               <ArticleBody sections={[]} />

@@ -10,7 +10,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    }
+    },
+    "./bootstrap": "./bootstrap.js",
+    "./bootstrap.js": "./bootstrap.js",
+    "./package.json": "./package.json"
   },
   "scripts": {
     "build": "tsup",

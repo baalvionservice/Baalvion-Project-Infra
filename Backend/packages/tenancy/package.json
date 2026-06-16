@@ -6,6 +6,6 @@
   "main": "index.js",
   "files": ["index.js", "roles.js", "sql.js", "context.js", "middleware.js", "sequelize.js", "pg.js"],
   "scripts": {
-    "test": "node --test test.smoke.js \"tests/**/*.test.mjs\""
+    "test": "node --test test.smoke.js tests/*.test.mjs"
   }
 }

@@ -44,6 +44,14 @@ resource "aws_db_parameter_group" "postgres" {
   name   = "${local.name}-pg17"
   family = "postgres17"
 
+  # Reject any non-TLS connection at the server. Combined with DB_SSL=true +
+  # DB_SSL_REJECT_UNAUTHORIZED=true on the clients, this enforces in-transit
+  # encryption end-to-end.
+  parameter {
+    name  = "rds.force_ssl"
+    value = "1"
+  }
+
   parameter {
     name  = "log_connections"
     value = "1"
@@ -98,3 +106,5 @@ resource "aws_db_instance" "postgres" {
 
 output "endpoint" { value = aws_db_instance.postgres.endpoint }
 output "db_name"  { value = aws_db_instance.postgres.db_name }
+# DBInstanceIdentifier dimension for AWS/RDS CloudWatch metrics + alarms.
+output "instance_id" { value = aws_db_instance.postgres.identifier }

@@ -83,7 +83,7 @@ const nextConfig: NextConfig = {
     // upgrade-insecure-requests would rewrite http://localhost:* to https in dev — only emit in prod.
     const cspHeader = `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://js.stripe.com;
+      script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://js.stripe.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://madisonavenuecouture.com https://www.google-analytics.com https://www.googletagmanager.com ${MEDIA_HOST ? `https://${MEDIA_HOST}` : ''};
       font-src 'self' data: https://fonts.gstatic.com;

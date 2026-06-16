@@ -97,8 +97,34 @@ both use the dev default `baalvion-internal-dev-secret`.
 | `INTERNAL_API_KEY` | rbac-service | service-to-service key |
 | DB password | postgres + all services | replace `baalvion_dev_pass` |
 | `NODE_ENV` | all | `production` |
+| `DB_JDBC_PARAMS` | financial-services-java stack | **must be set when DB enforces TLS** — e.g. `?sslmode=require`; empty default → Java services refused at connect time |
+| `UPLOAD_SCAN_URL` | cms / commerce / law | HTTP malware-scan endpoint; unset + `UPLOAD_SCAN_REQUIRED=true` → uploads **503 (fail-closed)** |
+| `UPLOAD_SCAN_REQUIRED` | cms / commerce / law | defaults `true` in prod; set `false` to accept uploads with magic-byte validation only |
 
 Run `node Backend/scripts/check-env.cjs` until **RESULT: OK** before exposing services.
+
+### 5.1 Production-hardening env vars (fail-closed — must be reviewed before launch)
+
+These three controls are **fail-closed by design**. If left at their dev defaults in a
+TLS-enforcing / production environment they cause hard, service-down failures — set them
+deliberately:
+
+- **`DB_JDBC_PARAMS`** — appended verbatim to every `financial-services-java` JDBC URL
+  (`jdbc:postgresql://…/db${DB_JDBC_PARAMS}`). Empty by default. When the database enforces
+  TLS (e.g. AWS RDS `rds.force_ssl=1`), an empty value means **every Java payment/finance
+  service is refused at connection time and never becomes ready**. Set `?sslmode=require`
+  (add `&sslrootcert=…` to pin the CA).
+- **`UPLOAD_SCAN_URL` / `UPLOAD_SCAN_REQUIRED`** — `@baalvion/upload` validates uploads by
+  magic bytes and routes bytes through a pluggable HTTP scanner. In production
+  `UPLOAD_SCAN_REQUIRED` defaults `true`; with no `UPLOAD_SCAN_URL` wired, **cms-service,
+  commerce-service and law-service return 503 on every upload**. Either wire a scanner
+  (ClamAV-over-HTTP / AV API) via `UPLOAD_SCAN_URL`, or set `UPLOAD_SCAN_REQUIRED=false` to
+  accept uploads with magic-byte validation only.
+- **Node Postgres TLS** — Node services derive TLS from `@baalvion/auth-node` `buildPgSsl()`:
+  `DB_SSL` (`require` to force on), `DB_SSL_REJECT_UNAUTHORIZED`, `DB_SSL_CA` / `DB_SSL_CA_PATH`.
+
+The production override `docker-compose.prod.yml` wires these for the media services; the
+Java stack is deployed separately and reads `DB_JDBC_PARAMS` from its own environment.
 
 ---
 

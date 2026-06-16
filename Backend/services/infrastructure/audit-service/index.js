@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const http = require('http');
@@ -14,6 +15,7 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware'
 const { startEventConsumer, stopEventConsumer } = require('./consumers/eventConsumer');
 const db = require('./models');
 const logger = require('./utils/logger');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,9 +61,11 @@ const start = async () => {
 
     server.listen(config.port, () => logger.info(`[Audit] running on port ${config.port} (RS256=${jwt.isRs256Enabled()})`));
 
-    const shutdown = async () => { await stopEventConsumer(); server.close(() => process.exit(0)); };
-    process.on('SIGTERM', shutdown);
-    process.on('SIGINT', shutdown);
+    // Graceful shutdown: drain HTTP, then clean up event consumer / Redis / DB.
+    registerShutdown('event-consumer', async () => { await stopEventConsumer(); });
+    registerShutdown('redis', async () => { const c = redis.getClient && redis.getClient(); if (c && c.quit) await c.quit(); });
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 if (require.main === module) start();

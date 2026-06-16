@@ -1,6 +1,7 @@
 package com.baalvion.payment.exception;
 
 import com.baalvion.payment.gateway.exception.PspConfigNotFoundException;
+import com.baalvion.payment.gateway.exception.WebhookAmountMismatchException;
 import com.baalvion.payment.gateway.exception.WebhookVerificationException;
 import jakarta.persistence.OptimisticLockException;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,15 @@ public class GlobalExceptionHandler {
     // Generic message so an attacker cannot distinguish bad-signature from unknown-provider.
     log.warn("Webhook verification failed: {}", ex.getMessage());
     return envelope(HttpStatus.BAD_REQUEST, "WEBHOOK_VERIFICATION_FAILED", "Webhook signature verification failed", null);
+  }
+
+  @ExceptionHandler(WebhookAmountMismatchException.class)
+  public ResponseEntity<Map<String, Object>> handleWebhookAmountMismatch(WebhookAmountMismatchException ex) {
+    // The signature was valid but the amount is not — refuse the transition. Generic client
+    // message; the specific expected/actual amounts are logged server-side only.
+    log.error("Webhook amount mismatch — status transition refused: {}", ex.getMessage());
+    return envelope(HttpStatus.BAD_REQUEST, "WEBHOOK_AMOUNT_MISMATCH",
+      "Webhook amount did not match the recorded charge", null);
   }
 
   @ExceptionHandler(PspConfigNotFoundException.class)

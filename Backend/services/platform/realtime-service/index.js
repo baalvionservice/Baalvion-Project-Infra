@@ -56,6 +56,26 @@ const HEALTH_TARGETS = [
     { name: 'ledger-service',    url: `http://localhost:${process.env.LEDGER_HEALTH_PORT || 3014}/health` },
 ];
 
+// Postgres TLS (in-transit). Mirrors the canonical @baalvion/auth-node/dbSsl
+// helper (buildPgPoolSsl); inlined here because this service does not carry the
+// auth-node dependency. RDS enforces rds.force_ssl=1 in prod, so a plaintext pool
+// is refused there. Secure-by-default: TLS engages in production unless DB_SSL is
+// explicitly set; off in dev/test to preserve localhost-without-TLS behaviour.
+function buildPoolSsl() {
+    const flag = String(process.env.DB_SSL == null ? '' : process.env.DB_SSL).trim().toLowerCase();
+    if (['false', '0', 'disable', 'off', 'no'].includes(flag)) return false;
+    const forceOn = ['true', '1', 'require', 'on', 'yes'].includes(flag);
+    if (!forceOn && process.env.NODE_ENV !== 'production') return false;
+    let ca;
+    if (process.env.DB_SSL_CA) {
+        ca = process.env.DB_SSL_CA.includes('-----BEGIN')
+            ? process.env.DB_SSL_CA.replace(/\\n/g, '\n') : process.env.DB_SSL_CA;
+    } else if (process.env.DB_SSL_CA_PATH) {
+        try { ca = fs.readFileSync(process.env.DB_SSL_CA_PATH, 'utf8'); } catch { /* fall through */ }
+    }
+    return { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false', ...(ca ? { ca } : {}) };
+}
+
 const pool = new Pool({
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT || 5432),
@@ -63,6 +83,7 @@ const pool = new Pool({
     user: process.env.DB_USER || 'baalvion',
     password: process.env.DB_PASSWORD || 'baalvion_dev_pass',
     max: 4,
+    ssl: buildPoolSsl(),
 });
 const pgQuery = (text, params) => pool.query(text, params);
 const redis = new Redis({ host: process.env.REDIS_HOST || 'localhost', port: Number(process.env.REDIS_PORT || 6379), lazyConnect: false, maxRetriesPerRequest: 2 });

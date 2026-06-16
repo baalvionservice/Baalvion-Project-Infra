@@ -17,10 +17,12 @@ const store = require('../service/platformStore');
 const logger = require('../service/logger');
 
 const cmsVault = require('../service/cmsVault');
+const dedup = require('../service/webhookDedup');
 // Cashfree's webhook secret IS the client secret. Vault (central admin panel) first; env fallback.
 const CASHFREE_SECRET_ENV = process.env.CASHFREE_CLIENT_SECRET || '';
-
-const processedEventIds = new Set(); // in-proc idempotency; durable dedup also via credit ref + invoice window
+// Idempotency + replay protection is now DURABLE + instance-shared via
+// public.payment_webhook_events keyed on the signature-verified Cashfree payment id. The
+// signature covers (timestamp+body) but is replayable verbatim, so this DB dedup is the replay guard.
 
 function timingSafeEqual(a, b) {
     const ba = Buffer.from(String(a || ''));
@@ -63,9 +65,6 @@ async function cashfreeWebhook(req, res) {
         const payment = data.payment || {};
         const cust = data.customer_details || {};
         const eventId = payment.cf_payment_id || payment.payment_id || order.order_id || null;
-        if (eventId && processedEventIds.has(String(eventId))) {
-            return res.status(200).json({ received: true, idempotent: true });
-        }
 
         const email = cust.customer_email ? String(cust.customer_email).toLowerCase() : '';
         if (!email) {
@@ -84,10 +83,21 @@ async function cashfreeWebhook(req, res) {
         const sub = await billingService.getSubscription(auth);
         const planSlug = sub && sub.planSlug ? sub.planSlug : null;
         const ref = `cashfree:${eventId}`;
+        const currency = order.order_currency ? String(order.order_currency).toUpperCase() : null;
+
+        // Durable idempotency + replay gate: atomically claim this signature-verified payment id.
+        // A replay / concurrent / post-restart redelivery loses the INSERT race and no-ops. Throws
+        // on DB error → outer catch → 5xx, so a money mutation never proceeds unguarded.
+        if (eventId) {
+            const claim = await dedup.claimEvent('cashfree', eventId, { eventType: type, orgId: auth.orgId, amount: amountMajor, currency });
+            if (!claim.fresh) {
+                return res.status(200).json({ received: true, idempotent: true });
+            }
+        }
 
         if (planSlug === 'pay-as-you-go') {
             const bal = await billingService.purchaseCredit(auth, amountMajor, { ref });
-            if (eventId) processedEventIds.add(String(eventId));
+            if (eventId) await dedup.markApplied('cashfree', eventId, { status: 'applied', orgId: auth.orgId, amount: amountMajor, currency });
             logger.info(`[cashfree-webhook] credited org=${auth.orgId} amount=${amountMajor} event=${eventId}`);
             return res.status(200).json({ received: true, credited: true, balanceUsd: bal && bal.balanceUsd });
         }
@@ -96,7 +106,7 @@ async function cashfreeWebhook(req, res) {
             return res.status(200).json({ received: true, ignored: 'no-subscription' });
         }
         const activated = await billingService.activateSubscription(auth, planSlug, { amount: amountMajor, paymentRef: ref });
-        if (eventId) processedEventIds.add(String(eventId));
+        if (eventId) await dedup.markApplied('cashfree', eventId, { status: 'applied', orgId: auth.orgId, amount: amountMajor, currency });
         logger.info(`[cashfree-webhook] activated org=${auth.orgId} plan=${planSlug} event=${eventId}`);
         return res.status(200).json({ received: true, activated: true, status: activated && activated.status });
     } catch (e) {

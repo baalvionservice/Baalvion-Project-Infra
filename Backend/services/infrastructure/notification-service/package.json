@@ -9,6 +9,8 @@
     "worker": "node workers/index.js"
   },
   "dependencies": {
+    "@baalvion/telemetry": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "bullmq": "^5.56.0",

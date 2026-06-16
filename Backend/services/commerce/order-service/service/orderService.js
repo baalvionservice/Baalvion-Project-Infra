@@ -24,7 +24,8 @@ const { sendOrderEmail } = require('./orderNotifications');
 
 function generateOrderNumber(storeCode = 'ORD') {
     const ts = Date.now().toString(36).toUpperCase();
-    const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+    // CSPRNG (not Math.random) so order numbers are not predictable/enumerable.
+    const rand = crypto.randomBytes(3).toString('hex').toUpperCase();
     return `${storeCode}-${ts}-${rand}`;
 }
 
@@ -737,7 +738,7 @@ async function handlePaymentWebhook({ event, orderId, intentId, reason }) {
 // {client confirm, webhook} acquires the lock first captures; the other sees paymentStatus='paid' and
 // no-ops. So it is idempotent AND never double-fulfills / double-ledgers / double-emails — even if
 // the webhook is delivered more than once or races the client confirm.
-async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId }) {
+async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, amount, currencyCode }) {
     if (!providerOrderId) return { ok: false, reason: 'missing_order_id' };
     const intentPayment = await OrdersOrderPayment.findOne({ where: { transactionId: providerOrderId } });
     if (!intentPayment) {
@@ -755,6 +756,25 @@ async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId })
         const order = await OrdersOrder.findOne({ where: { id: orderId, storeId }, lock: t.LOCK.UPDATE, transaction: t });
         if (!order) return { ok: false };
         if (order.paymentStatus === 'paid') return { ok: true, replay: true }; // confirm or a prior webhook already captured
+        // Defence-in-depth amount/currency validation (beyond the HMAC signature) — mirrors the PayU
+        // return path (settlePayuReturn) and the Java payment-service reference so a leaked webhook
+        // secret alone cannot capture an order for a tampered/short amount. Razorpay amounts are in the
+        // minor unit (paise/cents); the order total is the major unit. Validated only when the provider
+        // sent an amount (payment.captured/order.paid always do). Strict by default (reject mismatch);
+        // RAZORPAY_WEBHOOK_STRICT_AMOUNT=false downgrades to warn-and-continue.
+        if (amount != null) {
+            const expectedMinor = Math.round(Number(order.totalAmount) * 100);
+            const seenMinor = Math.round(Number(amount));
+            const currencyOk = !currencyCode || String(currencyCode).toUpperCase() === String(order.currencyCode).toUpperCase();
+            if (!Number.isFinite(seenMinor) || seenMinor !== expectedMinor || !currencyOk) {
+                const detail = { evt: 'razorpay_webhook_amount_mismatch', orderId, providerOrderId, expectedMinor, seenMinor, expectedCurrency: order.currencyCode, seenCurrency: currencyCode || null };
+                console.error(JSON.stringify(detail));
+                securityAudit.payment('captured', 'deny', { storeId, resource: { type: 'order', id: orderId }, metadata: { via: 'webhook', reason: 'amount_mismatch', expectedMinor, seenMinor } });
+                if (process.env.RAZORPAY_WEBHOOK_STRICT_AMOUNT !== 'false') {
+                    return { ok: false, reason: 'amount_mismatch' };
+                }
+            }
+        }
         const payment = await OrdersOrderPayment.findOne({ where: { orderId, transactionId: providerOrderId }, transaction: t });
         if (payment) await payment.update({ status: 'captured', paidAt: new Date(), metadata: { ...(payment.metadata || {}), transactionId: providerPaymentId, capturedVia: 'webhook' } }, { transaction: t });
         await order.update({ paymentStatus: 'paid', status: order.status === 'pending' ? 'confirmed' : order.status }, { transaction: t });

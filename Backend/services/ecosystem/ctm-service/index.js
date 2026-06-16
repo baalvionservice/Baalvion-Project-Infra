@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express      = require('express');
 const cors         = require('cors');
 const helmet       = require('helmet');
@@ -12,6 +13,7 @@ const db           = require('./models');
 const { metricsMiddleware, metricsHandler } = require('./middleware/metrics');
 const swaggerUi    = require('swagger-ui-express');
 const swaggerSpec  = require('./config/swagger');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 
@@ -48,11 +50,13 @@ const start = async () => {
         console.error('[DB] Failed to connect:', err.message);
         process.exit(1);
     }
-    app.listen(config.port, () =>
+    const server = app.listen(config.port, () =>
         console.log(`Baalvion CTM Service running on port ${config.port}`)
     );
     // Begin periodic real-metric snapshots (telemetry; unref'd so it never blocks exit).
     try { require('./service/observability').startCollector(60000); } catch (e) { console.warn('[obs] collector not started:', e.message); }
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 start();

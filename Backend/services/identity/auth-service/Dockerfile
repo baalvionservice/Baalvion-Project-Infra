@@ -20,10 +20,14 @@ COPY --from=pruner /repo/out/full/ ./
 RUN pnpm deploy --filter=auth-service --prod /out
 
 FROM node:20-alpine AS final
-RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init \
+    && addgroup -S app && adduser -S app -G app
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=installer /out ./
 EXPOSE 3001
+USER app
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3001),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "index.js"]

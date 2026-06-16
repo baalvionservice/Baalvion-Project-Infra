@@ -1,5 +1,6 @@
 "use client";
 
+import { sanitizeRichHtml } from "@/lib/sanitize";
 import { motion } from "framer-motion";
 import { ARTICLES, POSTS, CAT_STYLES, CAT_LABELS } from "./data";
 
@@ -89,7 +90,7 @@ export default function ArticleView({ articleId, onClose, onOpenArticle }: Artic
       {/* Article body */}
       <div
         className="article-body"
-        dangerouslySetInnerHTML={{ __html: article.body }}
+        dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(article.body) }}
       />
 
       {/* Related articles */}

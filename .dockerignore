@@ -5,6 +5,8 @@
 **/build
 **/.turbo
 **/coverage
+**/.terraform
+**/*.tfstate*
 .git
 .github
 **/*.log

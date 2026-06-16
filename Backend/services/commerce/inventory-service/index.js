@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -9,6 +10,7 @@ const v1Router = require('./routes/v1');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 
@@ -46,9 +48,11 @@ async function start() {
     try {
         await connectDB();
         await sequelize.query('CREATE SCHEMA IF NOT EXISTS inventory;');
-        app.listen(config.port, () => {
+        const server = app.listen(config.port, () => {
             console.log(`[Inventory Service] Running on port ${config.port} (${config.env})`);
         });
+        registerShutdown('db', async () => { if (sequelize && sequelize.close) await sequelize.close(); });
+        initGracefulShutdown(server);
     } catch (err) {
         console.error('[Inventory Service] Startup failed:', err.message);
         process.exit(1);

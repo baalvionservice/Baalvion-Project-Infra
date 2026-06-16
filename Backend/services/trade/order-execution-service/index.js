@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -10,6 +11,7 @@ const rateLimit = require('./middleware/rateLimit');
 const v1Routes = require('./routes/v1');
 const { notFoundHandler, errorHandler } = require('./middleware/error');
 const db = require('./models');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -59,7 +61,17 @@ const start = async () => {
     } catch (err) {
         console.warn(`[${config.service}] SDK/background init degraded:`, err.message);
     }
-    app.listen(config.port, () => console.log(`[${config.service}] running on port ${config.port}`));
+    const server = app.listen(config.port, () => console.log(`[${config.service}] running on port ${config.port}`));
+    registerShutdown('event-consumer', async () => {
+        const { stopEventConsumer } = require('./workers/eventConsumer');
+        if (typeof stopEventConsumer === 'function') await stopEventConsumer();
+    });
+    registerShutdown('payment-simulator', async () => {
+        const { stopPaymentSimulator } = require('./workers/paymentSimulator');
+        if (typeof stopPaymentSimulator === 'function') await stopPaymentSimulator();
+    });
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 if (require.main === module) start();

@@ -1,5 +1,6 @@
 'use client';
 
+import DOMPurify from 'isomorphic-dompurify';
 import type { ContentBlock } from '@/lib/types/cms-content.types';
 
 // Renders content blocks the way the public site does, with real typography — so authors
@@ -14,7 +15,7 @@ function Block({ block }: { block: ContentBlock }) {
   const c = block.content as Record<string, unknown>;
   switch (block.type) {
     case 'paragraph':
-      return <div className={`leading-[1.8] text-[15px] text-gray-800 ${proseChild}`} dangerouslySetInnerHTML={{ __html: (c.text as string) || '' }} />;
+      return <div className={`leading-[1.8] text-[15px] text-gray-800 ${proseChild}`} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize((c.text as string) || '') }} />;
     case 'heading': {
       const lvl = Math.min(6, Math.max(1, Number(c.level) || 2));
       const Tag = (`h${lvl}` as keyof JSX.IntrinsicElements);
@@ -56,7 +57,7 @@ function Block({ block }: { block: ContentBlock }) {
         </div>
       );
     case 'html':
-      return <div className={proseChild} dangerouslySetInnerHTML={{ __html: (c.html as string) || '' }} />;
+      return <div className={proseChild} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize((c.html as string) || '') }} />;
     case 'video':
     case 'embed': {
       const url = (c.src as string) || (c.url as string);

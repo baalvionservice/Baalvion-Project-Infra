@@ -1,3 +1,4 @@
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -8,6 +9,7 @@ const rateLimit = require('./middleware/rateLimit');
 const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -39,7 +41,10 @@ const start = async () => {
         process.stderr.write(`[DB] ${err.message}\n`);
         process.exit(1);
     }
-    app.listen(config.port, () => { /* dashboard-service listening */ });
+    const server = app.listen(config.port, () => { /* dashboard-service listening */ });
+
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 start();

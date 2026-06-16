@@ -10,6 +10,8 @@
     "test": "node --test"
   },
   "dependencies": {
+    "@baalvion/telemetry": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
     "@baalvion/auth-node": "workspace:*",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

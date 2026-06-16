@@ -1,9 +1,11 @@
 'use strict';
 const { Sequelize, DataTypes } = require('sequelize');
+const { buildPgSsl } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
 
 const sequelize = new Sequelize(config.db.name, config.db.user, config.db.password, {
     host: config.db.host, port: config.db.port, dialect: 'postgres',
+    dialectOptions: { ssl: buildPgSsl() },
     logging: config.env === 'development' ? (sql) => console.log('[Commerce SQL]', sql) : false,
     define: { underscored: true, timestamps: true },
 });

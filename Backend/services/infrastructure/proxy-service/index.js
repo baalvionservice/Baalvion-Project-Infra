@@ -13,6 +13,7 @@ const { initializeSocketServer } = require('./service/socketService');
 const { initializeQueues } = require('./service/queueService');
 const store = require('./service/platformStore');
 const db = require('./models');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 const server = http.createServer(app);
@@ -144,6 +145,9 @@ const startServer = async () => {
     server.listen(config.port, () => {
         // port is logged by the process manager / container runtime
     });
+
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 startServer();
