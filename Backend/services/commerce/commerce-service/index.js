@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -10,9 +11,10 @@ const storefrontRoutes = require('./routes/storefrontRoutes');
 const { errorHandler } = require('./middleware/errorMiddleware');
 const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
-const { startProductWorker } = require('./queues/productQueue');
+const { startProductWorker, productQueue } = require('./queues/productQueue');
 const { UPLOAD_DIR } = require('./service/productMediaService');
 const fxRateProvider = require('./service/fxRateProvider');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 
@@ -66,9 +68,13 @@ async function start() {
         // every read gracefully falls back to the static markets.js rate if the feed is unavailable).
         const fx = fxRateProvider.startBackgroundRefresh();
         if (fx.started) console.log('[Commerce Service] Live FX feed enabled (background refresh started)');
-        app.listen(config.port, () => {
+        const server = app.listen(config.port, () => {
             console.log(`[Commerce Service] Running on port ${config.port} (${config.env})`);
         });
+        registerShutdown('product-queue', async () => { if (productQueue && productQueue.close) await productQueue.close(); });
+        registerShutdown('redis', async () => { const r = require('./service/cacheService'); const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null); if (c && c.quit) await c.quit(); });
+        registerShutdown('db', async () => { if (sequelize && sequelize.close) await sequelize.close(); });
+        initGracefulShutdown(server);
     } catch (err) {
         console.error('[Commerce Service] Startup failed:', err.message);
         process.exit(1);

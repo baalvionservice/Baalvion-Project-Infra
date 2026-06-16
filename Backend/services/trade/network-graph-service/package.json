@@ -12,6 +12,8 @@
     "test": "jest --forceExit --runInBand"
   },
   "dependencies": {
+    "@baalvion/telemetry": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/tenancy": "workspace:*",
     "@baalvion/sdk": "workspace:*",

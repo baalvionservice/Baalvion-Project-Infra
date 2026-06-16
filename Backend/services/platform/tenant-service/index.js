@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const http = require('http');
@@ -13,6 +14,7 @@ const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
 const logger = require('./utils/logger');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 const server = http.createServer(app);
@@ -50,9 +52,9 @@ const start = async () => {
     await redis.connect();
     server.listen(config.port, () => logger.info(`[tenant-service] running on port ${config.port} (RS256=${jwt.isRs256Enabled()})`));
 
-    const shutdown = async () => { server.close(() => process.exit(0)); };
-    process.on('SIGTERM', shutdown);
-    process.on('SIGINT', shutdown);
+    registerShutdown('redis', async () => { const r = require('./config/redis'); const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null); if (c && c.quit) await c.quit(); });
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 if (require.main === module) start();

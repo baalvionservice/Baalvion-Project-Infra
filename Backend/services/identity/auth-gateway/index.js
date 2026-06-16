@@ -12,6 +12,7 @@ const authTrace = require('./observability/authTrace');
 const burnIn    = require('./observability/burnIn');
 const { requireSession, attachUser, requireCsrf } = require('./middleware/session');
 const { geoFence } = require('./middleware/geoFence');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 // Internal-only endpoints: callers must present the INTERNAL_SERVICE_SECRET header value
 // (constant-time comparison) or originate from a trusted loopback/private IP.
@@ -142,10 +143,19 @@ app.use('/api', requireSession(), attachUser, requireCsrf, geoFence(), apiProxy)
 app.use((_req, res) => res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Route not found' } }));
 
 if (require.main === module) {
-  app.listen(config.port, '0.0.0.0', () => {
+  const server = app.listen(config.port, '0.0.0.0', () => {
     console.log(`[auth-gateway] :${config.port} (${config.env}, mode=${config.enforcementMode})`);
     burnIn.init(redis); // no-op when BURN_IN_MODE != true
   });
+
+  // Graceful shutdown (drains HTTP, then runs cleanup handlers in parallel).
+  // Gateway is a reverse proxy with no ./models DB — only the shared Redis client needs closing.
+  registerShutdown('redis', async () => {
+    const r = require('./lib/redis');
+    const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null);
+    if (c && c.quit) await c.quit();
+  });
+  initGracefulShutdown(server);
 }
 
 module.exports = app;

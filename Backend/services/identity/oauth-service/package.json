@@ -8,6 +8,9 @@
     "dev": "nodemon index.js"
   },
   "dependencies": {
+    "@baalvion/telemetry": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
+    "@baalvion/auth-node": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
