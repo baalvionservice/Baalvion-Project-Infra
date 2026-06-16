@@ -12,7 +12,7 @@
     "dbSsl.js"
   ],
   "scripts": {
-    "test": "node test.smoke.js && node --test \"tests/**/*.test.mjs\""
+    "test": "node test.smoke.js && node --test"
   },
   "dependencies": {
     "jsonwebtoken": "^9.0.3"
