@@ -1,4 +1,25 @@
-# Imperialpedia — Enterprise Admin Panel & CMS Architecture
+<div align="center">
+
+<img src="assets/banner.svg" alt="Imperialpedia Admin CMS — Baalvion Platform" width="100%">
+
+<br/>
+<br/>
+
+**Specification for Imperialpedia's enterprise Admin Panel and CMS — grounded in the existing Baalvion platform, designed to power an Investopedia × Britannica × Wikipedia-scale knowledge property without a greenfield rebuild.**
+
+<p>
+  <img alt="Documentation" src="https://img.shields.io/badge/Documentation-38BDF8?style=for-the-badge&logo=readthedocs&logoColor=white">
+  <img alt="Specification v1.0" src="https://img.shields.io/badge/Spec-v1.0-4F46E5?style=for-the-badge">
+  <img alt="Status: Grounded" src="https://img.shields.io/badge/Status-Grounded%20in%20platform-22D3EE?style=for-the-badge">
+</p>
+
+<sub><a href="#overview">Overview</a> · <a href="#the-framing-decision">Framing decision</a> · <a href="#document-set">Document set</a> · <a href="#platform-building-blocks">Building blocks</a> · <a href="#how-to-read-this">How to read</a></sub>
+
+</div>
+
+---
+
+## Overview
 
 > **Audience:** Product, Engineering, Editorial, SEO, Security.
 > **Status:** Specification v1.0 — grounded in the existing Baalvion platform (does **not** propose a greenfield rebuild).
@@ -6,9 +27,10 @@
 
 Imperialpedia is a knowledge base + encyclopedia + financial-education publishing platform
 (Investopedia × Britannica × Wikipedia) targeting **100M+ monthly visitors**. This spec defines the
-complete Admin Panel and CMS that powers it.
+complete Admin Panel and CMS that powers it. It is the documentation companion to the
+[Imperialpedia application](../../README.md).
 
-## The one decision that frames everything
+## The framing decision
 
 The codebase already contains **two overlapping content stores**:
 
@@ -37,7 +59,9 @@ This reuses ~70% of what's already built and avoids a second CMS.
 | 6 | [06-security-database-api.md](./06-security-database-api.md) | Security (§12), Database Architecture + ER (§13), API Architecture (§14) |
 | 7 | [07-uiux-roadmap-scaling.md](./07-uiux-roadmap-scaling.md) | UI/UX + wireframes (§15), Roadmap, Feature Priority Matrix, 100M-user Scaling Plan |
 
-## Platform building blocks this spec reuses
+## Platform building blocks
+
+The spec reuses, rather than reinvents, the platform's existing primitives:
 
 - **Auth:** RS256 via `@baalvion/auth-node`; role rank `viewer < member < editor < manager < admin < owner < super_admin`.
 - **Authorization:** `rbac-service` (:3005) — hybrid RBAC + ABAC PDP, `/v1/authorize` deny-overrides.
@@ -56,3 +80,9 @@ Each document is self-contained and < ~800 lines. Schemas are written as `CREATE
 Sequelize/SQL so they map directly onto the existing migration style in
 `Backend/services/knowledge/*/migrations/`. Wireframes are ASCII so they live in version control.
 Permission rules use the canonical role ranks above, not invented role strings.
+
+---
+
+<div align="center">
+<sub>Part of the <a href="https://github.com/baalvionservice/Baalvion-Project-Infra">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>
+</div>

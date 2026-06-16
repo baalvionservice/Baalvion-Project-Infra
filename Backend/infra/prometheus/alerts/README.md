@@ -1,17 +1,39 @@
-# Prometheus SLO Alert Rules
+<div align="center">
 
-This directory contains Prometheus alerting rules for the Baalvion enterprise platform.
+<img src="assets/banner.svg" alt="Prometheus Alerts — Baalvion Platform" width="100%">
 
-## File: `slo.yml`
+<br/>
+<br/>
 
-| Alert | SLO | Severity |
-|---|---|---|
-| `AuthServiceErrorRateTooHigh` | Auth routes < 0.5% error rate (5m) | critical |
-| `APILatencyP95High` | Per-route p95 < 500 ms (5m) | warning |
-| `APILatencyP95HighAggregate` | Aggregate p95 < 500 ms (5m) | warning |
-| `RealtimeConnectionsDrop` | Active connections must not drop >30% in 5m | critical |
-| `RealtimeServiceConnectionsDrop` | Realtime-service connections must not drop >30% in 5m | critical |
-| `WorkerJobFailureRateHigh` | Worker health endpoint < 10% error rate | warning |
+**Prometheus SLO alerting rules for the Baalvion platform — auth availability, API p95 latency, realtime-connection health, and worker job failures.**
+
+![Prometheus](https://img.shields.io/badge/Prometheus-alerting_rules-E6522C?style=for-the-badge&logo=prometheus&logoColor=white)
+![YAML](https://img.shields.io/badge/Rules-promtool_validated-CB171E?style=for-the-badge&logo=yaml&logoColor=white)
+
+<sub>[Overview](#overview) · [Rules](#rules-sloyml) · [Loading](#loading-the-rules-into-prometheus) · [Verifying](#verifying-the-rules) · [Metric Sources](#metric-sources)</sub>
+
+</div>
+
+---
+
+## Overview
+
+This directory contains the Prometheus alerting rules for the Baalvion enterprise
+platform. All rules live in `slo.yml` under the group `baalvion_slo`
+(`interval: 30s`).
+
+## Rules (`slo.yml`)
+
+| Alert | SLO | `for` | Severity |
+|---|---|---|---|
+| `AuthServiceErrorRateTooHigh` | Auth routes < 0.5% error rate (5m) | 2m | critical |
+| `APILatencyP95High` | Per-route p95 < 500 ms (5m) | 3m | warning |
+| `APILatencyP95HighAggregate` | Aggregate p95 < 500 ms (5m) | 3m | warning |
+| `RealtimeConnectionsDrop` | Active connections must not drop >30% in 5m | 2m | critical |
+| `RealtimeServiceConnectionsDrop` | Realtime-service connections must not drop >30% in 5m | 2m | critical |
+| `WorkerJobFailureRateHigh` | Worker health endpoint < 10% error rate | 5m | warning |
+
+All rules carry `team: platform` labels and a `runbook_url` annotation.
 
 ## Loading the rules into Prometheus
 
@@ -55,12 +77,6 @@ spec:
   groups: []                       # paste the contents of slo.yml here
 ```
 
-Apply with:
-
-```bash
-kubectl apply -f infra/prometheus/alerts/slo-prometheusrule.yml
-```
-
 ## Verifying the rules
 
 ```bash
@@ -79,3 +95,9 @@ promtool test rules infra/prometheus/alerts/slo_test.yml
 | `http_request_duration_seconds` | `proxy-backend` (`observability/metrics.js`) | Histogram with standard buckets |
 | `http_active_connections` | `proxy-backend` (`observability/metrics.js`) | Gauge |
 | `realtime_active_connections` | `realtime-service` | Export this gauge from the realtime-service when it is instrumented |
+
+---
+
+<div align="center">
+<sub>Part of the <a href="https://github.com/baalvionservice/Baalvion-Project-Infra">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>
+</div>

@@ -1,0 +1,68 @@
+<svg width="1280" height="300" viewBox="0 0 1280 300" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Agent Service — Baalvion Platform">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0A0E1A"/>
+      <stop offset="0.55" stop-color="#180C22"/>
+      <stop offset="1" stop-color="#220A2E"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.80" cy="0.40" r="0.62" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#F472B6" stop-opacity="0.30"/>
+      <stop offset="0.5" stop-color="#A855F7" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#0A0E1A" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#A855F7"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </linearGradient>
+    <radialGradient id="core" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F472B6"/>
+    </radialGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#FFFFFF" stroke-opacity="0.035" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect x="0" y="0" width="1280" height="300" rx="26" fill="url(#bg)"/>
+  <rect x="0" y="0" width="1280" height="300" rx="26" fill="url(#grid)"/>
+  <rect x="0" y="0" width="1280" height="300" rx="26" fill="url(#glow)"/>
+  <rect x="0.75" y="0.75" width="1278.5" height="298.5" rx="25.25" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="1.5"/>
+
+  <g transform="translate(1052,150)" opacity="0.95">
+    <circle r="124" fill="none" stroke="#F472B6" stroke-opacity="0.10" stroke-width="1"/>
+    <circle r="80" fill="none" stroke="#A855F7" stroke-opacity="0.18" stroke-width="1"/>
+    <g stroke="url(#accent)" stroke-opacity="0.55" stroke-width="1.5">
+      <line x1="0" y1="0" x2="0" y2="-82"/>
+      <line x1="0" y1="-82" x2="58" y2="-30"/>
+      <line x1="0" y1="-82" x2="-58" y2="-30"/>
+      <line x1="58" y1="-30" x2="40" y2="62"/>
+      <line x1="58" y1="-30" x2="92" y2="40"/>
+      <line x1="-58" y1="-30" x2="-40" y2="62"/>
+      <line x1="-58" y1="-30" x2="-92" y2="40"/>
+    </g>
+    <g fill="#180C22" stroke="url(#accent)" stroke-width="2">
+      <circle cx="0" cy="-82" r="9"/>
+      <circle cx="58" cy="-30" r="8"/>
+      <circle cx="-58" cy="-30" r="8"/>
+      <circle cx="40" cy="62" r="6"/>
+      <circle cx="92" cy="40" r="6"/>
+      <circle cx="-40" cy="62" r="6"/>
+      <circle cx="-92" cy="40" r="6"/>
+    </g>
+    <g fill="#F472B6">
+      <circle cx="0" cy="-82" r="3.5"/>
+      <circle cx="58" cy="-30" r="3"/>
+      <circle cx="-58" cy="-30" r="3"/>
+      <circle cx="40" cy="62" r="2.5"/>
+      <circle cx="92" cy="40" r="2.5"/>
+      <circle cx="-40" cy="62" r="2.5"/>
+      <circle cx="-92" cy="40" r="2.5"/>
+    </g>
+  </g>
+
+  <text x="82" y="84" font-family="'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="14" font-weight="600" letter-spacing="3.5" fill="#F472B6">BAALVION&#160;&#183;&#160;ECOSYSTEM</text>
+  <text x="78" y="170" font-family="'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="46" font-weight="800" letter-spacing="0.5" fill="#FFFFFF">Agent Service</text>
+  <rect x="82" y="192" width="128" height="5" rx="2.5" fill="url(#accent)"/>
+  <text x="82" y="232" font-family="'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="19" font-weight="500" fill="#E2E8F0">Sales agents &#183; commission tracker &#183; leaderboards &#183; training</text>
+  <text x="82" y="268" font-family="'Segoe UI',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif" font-size="12.5" font-weight="600" letter-spacing="2" fill="#8B95B2">BAALVION&#160;&#160;PLATFORM</text>
+</svg>

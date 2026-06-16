@@ -1,8 +1,21 @@
-# Vendor Integration Contracts
+<div align="center">
 
-This directory makes the platform's **"INTEGRATION REQUIRED"** external boundaries
-explicit, typed (JSDoc), and testable — **without faking any real external
-integration**.
+<img src="assets/banner.svg" alt="Order Execution Integrations — Baalvion Platform" width="100%">
+
+<br/>
+<br/>
+
+**Makes the platform's "INTEGRATION REQUIRED" external boundaries explicit, typed (JSDoc), and testable — without faking any real external integration. Each domain is a swappable seam.**
+
+<p>
+  <img alt="Node.js" src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white">
+  <img alt="Jest" src="https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white">
+  <img alt="Seams only" src="https://img.shields.io/badge/Status-Seams%20%2B%20Tests-34D399?style=for-the-badge">
+</p>
+
+</div>
+
+---
 
 Each domain is a swappable seam with four files:
 
@@ -55,3 +68,9 @@ node integrations/run-conformance.js
 4. **File a customs declaration** — a legal act requiring a licensed broker / accredited single-window.
 5. **Issue/transfer an eB/L** — title transfer is only valid on an MLETR-compliant registry; a PDF is not a negotiable instrument.
 6. **Real carrier positions** — require carrier/visibility-network feeds (EDI/AIS).
+
+---
+
+<div align="center">
+<sub>Part of the <a href="../../../../../README.md">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>
+</div>

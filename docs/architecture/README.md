@@ -1,8 +1,24 @@
-# Baalvion Group — Enterprise Architecture Blueprint
+<div align="center">
 
-> The permanent architecture + operational scaling model for Baalvion Group.
+<img src="assets/banner.svg" alt="Architecture — Baalvion Platform" width="100%">
+
+<br/>
+<br/>
+
+**The permanent architecture and operational scaling model for Baalvion Group — a federated monorepo of independently deployable bounded contexts on a shared platform core.**
+
+![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=markdown&logoColor=white)
+![Mermaid](https://img.shields.io/badge/Mermaid-FF3670?style=for-the-badge&logo=mermaid&logoColor=white)
+![DDD](https://img.shields.io/badge/model-DDD-38BDF8?style=for-the-badge)
+
+<sub>[Thesis](#1-the-thesis) · [Platform layer](#2-the-platform-layer-already-real) · [Communication](#3-communication-model) · [Data](#4-data-model) · [Isolation](#5-operational-isolation) · [Lifecycle](#6-how-a-new-service-comes-to-life) · [Index](#document-index)</sub>
+
+</div>
+
 > This document is the map; the code under `packages/`, `catalog/`, `infra/` and
-> the ADRs in `docs/adr/` are the territory.
+> the ADRs in [`docs/adr/`](../adr/) are the territory.
+
+---
 
 ## 1. The thesis
 
@@ -22,19 +38,17 @@ The chosen model is **federated monorepo + strangler-fig extraction**:
   keeps running while we peel services off one at a time. Nothing is moved until
   its contract + event integration exists and is green in CI.
 
+```mermaid
+graph TD
+  G["BAALVION GROUP — federated monorepo"]
+  G --> C["Platform Core (shared, tier-0/1)<br/>identity · billing · organization<br/>notification · audit · analytics · gateway"]
+  G --> P["Proxy Infrastructure Division (tier-0)<br/>gateway network · metering · orchestration<br/>abuse · enterprise APIs · edge"]
+  G --> D["Commerce · Mining · Legal<br/>Real-Estate · Jobs Divisions"]
+  G --> S["Shared Developer Platform<br/>packages/* · infra/* · catalog/* · platform/cli"]
 ```
-BAALVION GROUP (federated monorepo)
-│
-├── Platform Core (shared, tier-0/1)
-│   identity · billing · organization · notification · audit · analytics · gateway
-│
-├── Proxy Infrastructure Division (tier-0)        ← furthest-along, the beachhead
-│   gateway network · metering · orchestration · abuse · enterprise APIs · edge
-│
-├── Commerce · Mining · Legal · Real-Estate · Jobs Divisions
-│
-└── Shared Developer Platform  (packages/*, infra/*, catalog/*, platform/cli)
-```
+
+The Proxy Infrastructure Division is the furthest-along division — the beachhead
+for the extraction pattern.
 
 ## 2. The platform layer (already real)
 
@@ -94,5 +108,24 @@ baalctl new service payments-platform --division platform-core --owner @baalvion
   → merge → ArgoCD ApplicationSet provisions + deploys it
 ```
 
-See [`ddd-map.md`](./ddd-map.md) for bounded contexts, [`migration-roadmap.md`](./migration-roadmap.md)
-for the phased extraction, and [`../adr/`](../adr/) for the decisions.
+## Document index
+
+| Document | Scope |
+|----------|-------|
+| [`ddd-map.md`](./ddd-map.md) | Bounded contexts and the domain model |
+| [`migration-roadmap.md`](./migration-roadmap.md) | The phased strangler-fig extraction |
+| [`PLATFORM-ARCHITECTURE-REFERENCE.md`](./PLATFORM-ARCHITECTURE-REFERENCE.md) | Platform architecture reference |
+| [`BAALVION-OS-MIGRATION.md`](./BAALVION-OS-MIGRATION.md) | Platform OS migration |
+| [`GROUP-ECOSYSTEM-ARCHITECTURE.md`](./GROUP-ECOSYSTEM-ARCHITECTURE.md) | Group-wide ecosystem architecture |
+| [`PLATFORM-CONSOLIDATION-AND-GOVERNANCE-PLAN.md`](./PLATFORM-CONSOLIDATION-AND-GOVERNANCE-PLAN.md) | Consolidation and governance plan |
+| [`ARCHITECTURE-RECOMMENDATIONS.md`](./ARCHITECTURE-RECOMMENDATIONS.md) | Architecture recommendations |
+| [`CORPORATE-PRODUCT-STRATEGY.md`](./CORPORATE-PRODUCT-STRATEGY.md) | Corporate product strategy |
+| [`EXECUTIVE-DECISION-DOCUMENT.md`](./EXECUTIVE-DECISION-DOCUMENT.md) | Executive decision document |
+| [`CONFLICT-IMPACT-REPORT.md`](./CONFLICT-IMPACT-REPORT.md) | Conflict and impact report |
+| [`../adr/`](../adr/) | Architecture Decision Records (the *why*) |
+
+---
+
+<div align="center">
+<sub>Part of the <a href="https://github.com/baalvionservice/Baalvion-Project-Infra">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>
+</div>
