@@ -87,7 +87,7 @@ export default function AdminSettingsPage() {
                     Platform Settings
                 </h2>
                 <p className="text-muted-foreground">
-                    Configure global settings for the SkillMatch Pro platform.
+                    Configure global settings for the ControlTheMarket platform.
                 </p>
             </div>
              <div className="flex items-center space-x-2">
@@ -143,7 +143,7 @@ export default function AdminSettingsPage() {
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="welcome-message">Platform Welcome Message</Label>
-                        <Input id="welcome-message" placeholder="Welcome to SkillMatch Pro!" />
+                        <Input id="welcome-message" placeholder="Welcome to ControlTheMarket!" />
                     </div>
                 </CardContent>
             </Card>

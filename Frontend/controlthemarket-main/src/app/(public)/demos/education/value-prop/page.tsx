@@ -30,7 +30,7 @@ export default function EducationValuePropDemoPage() {
           The Solution for Modern Education
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          SkillMatch Pro offers a secure, scalable, and data-driven platform to manage online assessments, ensure academic integrity, and issue credible, employer-trusted skill certifications. Explore how our features address the key challenges faced by educational institutions today.
+          ControlTheMarket offers a secure, scalable, and data-driven platform to manage online assessments, ensure academic integrity, and issue credible, employer-trusted skill certifications. Explore how our features address the key challenges faced by educational institutions today.
         </p>
       </div>
 

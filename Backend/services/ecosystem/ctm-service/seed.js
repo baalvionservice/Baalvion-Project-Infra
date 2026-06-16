@@ -6,6 +6,9 @@
 //   node seed.js
 const db = require('./models');
 
+// NOTE: plan names + prices here are the SERVER-AUTHORITATIVE source for checkout — they must
+// match the tiers shown on the /pricing page (the page resolves a plan_id by name and the charge
+// is computed from these prices). 'free' stays as the implicit auto-provisioned signup tier.
 const PLANS = [
     {
         slug: 'free', name: 'Free',
@@ -15,11 +18,25 @@ const PLANS = [
         max_tasks: 1, max_team_size: 1, is_active: true,
     },
     {
+        slug: 'basic', name: 'Basic',
+        description: 'For individuals and small teams getting started.',
+        monthly_price: 29, annual_price: 290, currency: 'USD',
+        features: ['50 Active Tasks', '100 Candidates per month', 'Basic Analytics', 'Email Support'],
+        max_tasks: 50, max_team_size: 3, is_active: true,
+    },
+    {
         slug: 'pro', name: 'Pro',
         description: 'For growing teams that hire often.',
         monthly_price: 79, annual_price: 790, currency: 'USD',
-        features: ['10 Active Tasks', 'Unlimited Submissions', 'Advanced Analytics', 'AI Task Assistant'],
-        max_tasks: 10, max_team_size: 10, is_active: true,
+        features: ['50 Active Tasks', '1,000 Candidates per month', 'Advanced Analytics', 'Priority Email Support', 'AI Task Assistant'],
+        max_tasks: 50, max_team_size: 10, is_active: true,
+    },
+    {
+        slug: 'business', name: 'Business',
+        description: 'For scaling teams that need collaboration, API access and priority support.',
+        monthly_price: 185, annual_price: 1850, currency: 'USD',
+        features: ['Unlimited Active Tasks', '5,000 Candidates per month', 'Advanced Analytics & custom reports', 'AI Task Assistant', 'Team collaboration & roles', 'API access', 'Priority support'],
+        max_tasks: null, max_team_size: 50, is_active: true,
     },
     {
         slug: 'enterprise', name: 'Enterprise',

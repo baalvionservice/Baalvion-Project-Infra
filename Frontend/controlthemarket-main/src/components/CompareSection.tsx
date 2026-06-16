@@ -28,7 +28,7 @@ export default function CompareSection() {
             Comparison
           </div>
           <h2 className="text-[clamp(26px,4vw,40px)] font-black tracking-[-1px] leading-[1.15] mb-2.5 text-gray-900">
-            SkillMatch Pro vs the rest
+            ControlTheMarket vs the rest
           </h2>
           <p className="text-[15px] text-gray-500 leading-[1.65] max-w-[500px] mx-auto">
             How we stack up against traditional hiring methods.
@@ -48,7 +48,7 @@ export default function CompareSection() {
               Feature
             </div>
             <div className="px-[18px] py-3.5 text-xs font-bold uppercase tracking-[0.5px] bg-green-50 text-green-800 border-l-2 border-r-2 border-green-600 text-center">
-              ✓ SkillMatch Pro
+              ✓ ControlTheMarket
             </div>
             <div className="px-[18px] py-3.5 text-xs font-bold text-gray-500 uppercase tracking-[0.5px]">
               Traditional hiring

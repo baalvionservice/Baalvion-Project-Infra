@@ -24,7 +24,7 @@ import type { Submission, Task, User as Candidate, Evaluation, SubmissionContent
 import { ActivityLog } from '@/components/activity-log';
 import { Progress } from '@/components/ui/progress';
 import { AiEvaluationPanel } from './ai-evaluation-panel';
-import { SkillMatchResultPanel } from './skill-match-result-panel';
+import { ControlTheMarketResultPanel } from './skill-match-result-panel';
 import { RecordingPanel } from './recording-panel';
 import { DomainAccessPanel } from './domain-access-panel';
 
@@ -221,7 +221,7 @@ export default function SubmissionReviewPage() {
                 </CardContent>
             </Card>
             <DomainAccessPanel submission={submission} />
-            <SkillMatchResultPanel submission={submission} />
+            <ControlTheMarketResultPanel submission={submission} />
             <AiEvaluationPanel submission={submission} />
             <Card>
                 <CardHeader>

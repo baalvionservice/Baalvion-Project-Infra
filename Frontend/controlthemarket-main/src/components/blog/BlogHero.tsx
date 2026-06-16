@@ -36,7 +36,7 @@ export default function BlogHero({ search, onSearch }: BlogHeroProps) {
         className="relative z-10 max-w-[600px] mx-auto"
       >
         <div className="text-[10px] font-black uppercase tracking-[2px] text-green-600 mb-2.5">
-          SkillMatch Pro Blog
+          ControlTheMarket Blog
         </div>
         <h1 className="text-[clamp(30px,5vw,52px)] font-black tracking-[-1.5px] mb-3 text-gray-900 leading-tight">
           Insights on{" "}
