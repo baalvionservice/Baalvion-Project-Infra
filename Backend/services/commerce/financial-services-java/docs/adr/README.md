@@ -1,8 +1,23 @@
-# Architecture Decision Records — Financial Services
+<div align="center">
 
-Short records of the significant decisions for the Baalvion financial platform. Each ADR
-states the context, the decision, and the consequences (including what is deliberately
-deferred and how to adopt it later).
+<img src="assets/banner.svg" alt="Financial ADRs — Baalvion Platform" width="100%">
+
+<br/>
+<br/>
+
+**Architecture Decision Records for the Baalvion financial platform — each ADR states the context, the decision, and the consequences (including what is deliberately deferred and how to adopt it later).**
+
+<p>
+  <img alt="ADR" src="https://img.shields.io/badge/Architecture-Decision%20Records-38BDF8?style=for-the-badge">
+  <img alt="Java" src="https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white">
+  <img alt="Spring Boot" src="https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white">
+</p>
+
+</div>
+
+---
+
+## Records
 
 | ADR | Decision |
 |-----|----------|
@@ -18,3 +33,11 @@ deferred and how to adopt it later).
 | [0010](0010-sftp-settlement-transport.md) | Production SFTP settlement-file transport (sshj) with mandatory host-key verification |
 | [0011](0011-kyc-document-vault.md) | Encrypted KYC document vault (Postgres + AES-256-GCM); Mongo/S3 as drop-in store |
 | [0012](0012-inbound-advice-ingestion.md) | Inbound advice ingestion via scheduled poller + AdviceSource (local/SFTP); Camel evaluated, deferred |
+
+> Operational procedures live in [../runbooks/](../runbooks/).
+
+---
+
+<div align="center">
+<sub>Part of the <a href="../../../../../../README.md">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>
+</div>

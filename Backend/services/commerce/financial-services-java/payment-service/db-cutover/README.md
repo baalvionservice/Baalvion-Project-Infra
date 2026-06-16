@@ -1,7 +1,21 @@
-# Shared-DB cutover — `payments` schema → Java payment-service
+<div align="center">
 
-One-time operational step to run **before the first boot of the Java
-`payment-service` against the shared `baalvion_db`**.
+<img src="assets/banner.svg" alt="Payment DB Cutover — Baalvion Platform" width="100%">
+
+<br/>
+<br/>
+
+**One-time operational step to run _before the first boot_ of the Java `payment-service` against the shared `baalvion_db` — archives the orphaned Node `payments` tables so Java Flyway can build the canonical schema cleanly.**
+
+<p>
+  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white">
+  <img alt="Flyway" src="https://img.shields.io/badge/Flyway-CC0200?style=for-the-badge&logo=flyway&logoColor=white">
+  <img alt="One-time" src="https://img.shields.io/badge/Run-Once%20%C2%B7%20Reversible-34D399?style=for-the-badge">
+</p>
+
+</div>
+
+---
 
 ## Why this exists
 
@@ -95,3 +109,9 @@ Then boot the Java payment-service and confirm Flyway applied `V001..V010`:
   `payments`.
 - Fresh databases (no `payments` schema) don't need this script; Java Flyway
   creates the schema from scratch. The script detects that and no-ops.
+
+---
+
+<div align="center">
+<sub>Part of the <a href="../../../../../../README.md">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>
+</div>

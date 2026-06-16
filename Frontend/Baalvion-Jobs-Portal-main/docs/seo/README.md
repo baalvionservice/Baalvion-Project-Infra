@@ -1,6 +1,28 @@
+<div align="center">
+
+<img src="assets/banner.svg" alt="Jobs Portal SEO — Baalvion Platform" width="100%">
+
+<br/>
+<br/>
+
+**An implementation-ready SEO growth blueprint for jobs.baalvion.com — technical foundation, schema, programmatic scale, landing pages, and a month-by-month roadmap.**
+
+<p>
+  <img alt="SEO" src="https://img.shields.io/badge/SEO-Blueprint-38BDF8?style=for-the-badge">
+  <img alt="Google for Jobs" src="https://img.shields.io/badge/Google%20for%20Jobs-4285F4?style=for-the-badge&logo=google&logoColor=white">
+  <img alt="JSON-LD Schema" src="https://img.shields.io/badge/JSON--LD-Schema.org-000000?style=for-the-badge">
+  <img alt="Next.js 15" src="https://img.shields.io/badge/Next.js%2015-000000?style=for-the-badge&logo=nextdotjs&logoColor=white">
+</p>
+
+<sub><a href="#how-to-use-this-blueprint">How to use</a> · <a href="#contents">Contents</a> · <a href="#the-three-things-that-make-or-break-job-board-seo-read-first">Read first</a> · <a href="#key-configuration-set-once-used-everywhere">Key config</a></sub>
+
+</div>
+
+---
+
 # SEO Growth Blueprint — jobs.baalvion.com
 
-A complete, implementation-ready SEO foundation for **Baalvion Jobs** — an online job board connecting employers and job seekers in India, focused on technology, software, remote, startup, and professional jobs.
+A complete, implementation-ready SEO foundation for **Baalvion Jobs** — an online job board connecting employers and job seekers in India, focused on technology, software, remote, startup, and professional jobs. It is the SEO companion to the [Jobs Portal](../../README.md) application.
 
 **Audience:** the engineering and content team. Everything here is meant to be implemented as written — real content, templates, metadata, schema, and code examples.
 
@@ -58,3 +80,9 @@ INDEX_THRESHOLD = 3   // min live jobs for an aggregation page to be indexable
 - **skills** (slug, name) — for `/skills/[skill]` bridge pages.
 
 > All metrics and salary ranges in the content are written to be filled/verified from real data. Replace placeholder figures with values from your listings before publishing, and keep salary claims grounded (EEAT — see `phase-1` §10).
+
+---
+
+<div align="center">
+<sub>Part of the <a href="https://github.com/baalvionservice/Baalvion-Project-Infra">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>
+</div>

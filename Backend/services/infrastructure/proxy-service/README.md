@@ -1,999 +1,215 @@
-# Baalvion NetStack Backend API
+<div align="center">
 
-Production-ready multi-tenant backend for Baalvion NetStack.
+<img src="assets/banner.svg" alt="Proxy Service — Baalvion Platform Infrastructure" width="100%">
 
-## Stack
+<br/>
+<br/>
 
-- Node.js + Express
-- PostgreSQL 15+ (RLS schema included)
-- Redis + BullMQ (optional runtime integration)
-- Socket.io
-- JWT auth (access 15m, refresh 7d cookie)
-- Stripe billing
-- Zod validation
+**Baalvion NetStack — the production multi-tenant backend for the enterprise proxy SaaS: auth, organizations & RBAC, proxy/preset management, usage & analytics, billing across five payment providers, enterprise SSO/SCIM, and white-label.**
 
-## Base URLs
+<p>
+  <img alt="Node.js" src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white">
+  <img alt="Express 5" src="https://img.shields.io/badge/Express%205-000000?style=for-the-badge&logo=express&logoColor=white">
+  <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL%2015%2B-4169E1?style=for-the-badge&logo=postgresql&logoColor=white">
+  <img alt="Redis + BullMQ" src="https://img.shields.io/badge/Redis%20%2B%20BullMQ-DC382D?style=for-the-badge&logo=redis&logoColor=white">
+  <img alt="Socket.IO" src="https://img.shields.io/badge/Socket.IO-010101?style=for-the-badge&logo=socketdotio&logoColor=white">
+  <img alt="Sequelize" src="https://img.shields.io/badge/Sequelize-52B0E7?style=for-the-badge&logo=sequelize&logoColor=white">
+  <img alt="OpenTelemetry" src="https://img.shields.io/badge/OpenTelemetry-425CC7?style=for-the-badge&logo=opentelemetry&logoColor=white">
+</p>
 
-- Primary: `/v1`
-- Backward compatible: `/api/v1`
+<sub><a href="#overview">Overview</a> · <a href="#architecture">Architecture</a> · <a href="#capabilities">Capabilities</a> · <a href="#api-surface">API</a> · <a href="#getting-started">Getting started</a> · <a href="#environment-variables">Env</a> · <a href="#security">Security</a> · <a href="#notes--gotchas">Notes</a></sub>
 
-## Quick Start
+</div>
 
-1. Install dependencies:
+---
 
-```bash
-cd Backend
-npm install
+## Overview
+
+**proxy-service** is the **Baalvion NetStack** backend — a production-ready, multi-tenant
+backend for the enterprise proxy SaaS (formerly `backend-Proxy-BaalvionStack`). It owns tenant
+auth, organizations & RBAC, proxy/preset management, usage metering & analytics, billing across
+multiple payment providers, enterprise SSO/SCIM, white-label, and a realtime usage stream.
+
+- **Domain:** `infrastructure`
+- **Port:** `4000` (`PORT`)
+- **API versions:** `/v1` (primary) and `/api/v1` (backward compatible)
+- **WebSocket path:** `/v1/ws` (Socket.IO)
+- **Datastore:** PostgreSQL 15+ (RLS schema in [`sql/`](sql/)); Redis + BullMQ; Socket.IO
+
+> **Issuer status.** proxy-service is a **sanctioned temporary RS256 self-issuer** (its own
+> kid-based keys in `config/keys`, its own login / SSO / API-key planes) *and* a consumer of its
+> own tokens, slated for later retirement. Verification is **RS256-only**
+> (`allowHs256Fallback:false`). See [`RBAC.md`](RBAC.md) for the full auth contract.
+
+## Architecture
+
+```mermaid
+flowchart LR
+    UI["NetStack dashboard / API clients"] -->|"Bearer JWT · /v1/*"| API["Express API<br/><i>:4000</i>"]
+    IDP["Enterprise IdP"] -->|"SAML / OIDC"| SSO["/v1/sso"]
+    IDP -->|"SCIM 2.0"| SCIM["/scim/v2"]
+    PSP["Razorpay · Stripe · PayU · Cashfree"] -->|"signed webhooks (raw body)"| WH["/v1/billing/webhook/*"]
+    UI <-->|"WebSocket /v1/ws"| WS["Socket.IO (org rooms)"]
+
+    API --> DB["PostgreSQL 15+<br/><i>RLS · sql/schema.sql</i>"]
+    API --> RC["Redis + BullMQ<br/><i>queues · cache</i>"]
+    API -->|".well-known/jwks.json"| CONS["other services verify RS256"]
+    API -->|"/metrics (gated)"| OTEL["Prometheus / OTLP"]
+
+    classDef store fill:#FBBF24,stroke:#B45309,color:#1A1203;
+    classDef svc fill:#0C1228,stroke:#FBBF24,color:#E2E8F0;
+    class DB,RC store;
+    class API,WS,SSO,SCIM,WH svc;
 ```
 
-2. Create env file:
+### Request & response model
+
+A consistent envelope is used across the surface:
+
+```jsonc
+// success
+{ "success": true, "data": { /* … */ }, "meta": { "requestId": "uuid", "timestamp": "ISO-8601", "latency": 12, "version": "v1" } }
+// error
+{ "success": false, "error": { "code": "VALIDATION_ERROR", "message": "…", "details": {}, "requestId": "uuid" } }
+// paginated → data: { data: [], total, page, pageSize, totalPages, hasNext, hasPrev }
+```
+
+Tenant context is taken from the JWT (`org_id`); the `x-org-id` header is only a compatibility
+fallback.
+
+## Capabilities
+
+| Cluster | Mount | What it does |
+|---------|-------|--------------|
+| **Auth** | `/v1/auth` | register, login, logout, refresh, forgot/reset/verify-email, TOTP MFA (enable/verify/disable) |
+| **Users** | `/v1/users` | profile, change-password, list, invite, update, role change, suspend/delete |
+| **Organizations & RBAC** | `/v1/org`, `/v1/org/members`, `/v1/org/roles` | org profile, members, invites, member roles, activity |
+| **Proxies & presets** | `/v1/proxies`, `/v1/presets` | CRUD, test, export, rotate, per-proxy logs; reusable presets |
+| **Usage & analytics** | `/v1/usage/*`, `/v1/analytics/*` | summary/history/realtime/stream, bandwidth, success-rate, geo heatmap, latency, anomalies, forecasts, SLA risk, export |
+| **Billing** | `/v1/billing/*`, `/v1/payment` | subscription, plans, invoices, change/activate plan, orders, credit, payment methods, usage forecast |
+| **Developer** | `/v1/developer` | per-tenant API keys (now generalized by [`developer-service`](../developer-service/)) |
+| **Enterprise** | `/v1/enterprise/*` | SSO config, SCIM tokens, custom roles, policies, org-units, SLA, white-label + domains, audit export / SIEM sinks |
+| **Marketplace / partner** | `/v1/marketplace/quote`, `/v1/partner/*` | reseller self-service: customers, sub-resellers, commissions, payouts |
+| **Trust / privacy / KYC** | `/v1/account/*`, `/v1/kyc/*` | trust status, consent, GDPR export/delete, KYC start / access token |
+| **Uploads** | `/v1/upload` | file upload (S3 via `@aws-sdk/client-s3` + presigned URLs) |
+| **SSO (public)** | `/v1/sso` | enterprise SAML / OIDC login |
+| **SCIM 2.0** | `/scim/v2` | user/group provisioning (own bearer auth + `scim+json` parser) |
+| **Admin** | `/v1/admin` | platform-admin console operations |
+| **Webhooks** | `/v1/billing/webhook/*`, `/v1/webhooks/kyc` | provider webhooks — verified against the **raw** request body |
+| **Ops** | `/health`, `/.well-known/jwks.json`, `/metrics` | health, public JWKS, gated Prometheus metrics |
+
+## Payments
+
+Five providers are integrated, each with a webhook that verifies the **raw** request body before
+the JSON parser runs:
+
+| Provider | Webhook | Verification |
+|----------|---------|--------------|
+| Razorpay | `/v1/billing/webhook/razorpay` | HMAC signature (authoritative subscription activation) |
+| Stripe | `/v1/billing/webhook/stripe` | `t=,v1=` signed payload (HMAC over `t.body`) |
+| PayU | `/v1/billing/webhook/payu` | reverse-hash on the form-encoded callback |
+| Cashfree | `/v1/billing/webhook/cashfree` | `base64(HMAC-SHA256(timestamp + body))` |
+| KYC provider | `/v1/webhooks/kyc` | HMAC over the raw body |
+
+## Tech Stack
+
+| Concern | Choice |
+|---------|--------|
+| Runtime / framework | Node.js + Express `^5` |
+| Data | PostgreSQL 15+ via Sequelize `^6` + `pg` `^8` (RLS in `sql/`) |
+| Cache / queues | `ioredis` + `bullmq` |
+| Realtime | `socket.io` (path `/v1/ws`, org rooms) |
+| Auth | `@baalvion/auth-node` + own RS256 keys (`jsonwebtoken`); RS256-only verify |
+| Enterprise SSO | `@node-saml/node-saml`, `openid-client` |
+| MFA | `speakeasy` + `qrcode` (TOTP) |
+| Payments | `stripe`, `razorpay` (+ PayU / Cashfree webhook handlers) |
+| Storage | `@aws-sdk/client-s3` + `@aws-sdk/s3-request-presigner` |
+| Email | `nodemailer` |
+| Validation | `zod` |
+| Resilience / observability | `opossum` (circuit breaker), `prom-client`, OpenTelemetry SDK |
+| Lifecycle | `@baalvion/graceful-shutdown` |
+
+## API surface
+
+The exhaustive contract lives in:
+
+- **[`openapi.yaml`](openapi.yaml)** — full OpenAPI 3 spec
+- **[`Baalvion-API.postman_collection.json`](Baalvion-API.postman_collection.json)** — Postman collection
+- **[`IMPLEMENTATION_GUIDE.md`](IMPLEMENTATION_GUIDE.md)** — endpoint-by-endpoint request/response reference
+- **[`RBAC.md`](RBAC.md)** — auth contract, claims, and the role hierarchy
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js + **pnpm** (workspace package)
+- PostgreSQL 15+ (`DATABASE_URL`) and Redis
+- RS256 keypair in `config/keys` — generate one for local dev
+
+### Install, keys, migrate, run
 
 ```bash
 cp .env.example .env
+pnpm install                              # from the monorepo root (preferred)
+pnpm --filter proxy-service keys:generate # local RS256 keypair (config/keys)
+pnpm --filter proxy-service migrate       # sql/schema.sql + sql/002_rls_tenant_isolation.sql
+pnpm --filter proxy-service dev           # nodemon → :4000
+
+# production / checks
+pnpm --filter proxy-service start         # node index.js
+pnpm --filter proxy-service lint          # node --check index.js
+pnpm --filter proxy-service test          # node --test
 ```
 
-3. Start server:
-
-```bash
-npm run dev
-```
-
-4. Health check:
-
-```bash
-GET /health
-```
-
-## Current Runtime Model
-
-- The API surface is fully wired.
-- Tenant-safe behavior is enforced through `orgId` scoping in service logic.
-- `sql/netstack_schema.sql` contains production PostgreSQL tables, indexes, and RLS policies.
-- Platform feature routes currently use seeded in-memory store for fast integration testing.
-
-## Authentication
-
-### Login
-
-`POST /v1/auth/login`
-
-Request:
-
-```json
-{
-  "email": "admin@baalvion.com",
-  "password": "Baalvion123!"
-}
-```
-
-Response data:
-
-```json
-{
-  "token": "<jwt-access-token>",
-  "refreshToken": "<jwt-refresh-token>",
-  "user": {
-    "id": "user_owner",
-    "orgId": "org_demo",
-    "email": "admin@baalvion.com",
-    "role": "owner"
-  }
-}
-```
-
-Notes:
-
-- Access token expires in 15 minutes.
-- Refresh token expires in 7 days and is set in httpOnly cookie.
-
-### Refresh
-
-`POST /v1/auth/refresh`
-
-- Uses refresh cookie (or body fallback).
-- Returns new access token and expiration.
-
-### MFA
-
-- `POST /v1/auth/mfa/enable`
-- `POST /v1/auth/mfa/verify`
-- `POST /v1/auth/mfa/disable`
-
-## Auth Header
-
-All protected endpoints require:
-
-```http
-Authorization: Bearer <access_token>
-```
-
-Default request headers:
-
-```http
-Content-Type: application/json
-Accept: application/json
-Authorization: Bearer <access_token>   # required for protected routes
-```
-
-Optional tenant header fallback:
-
-```http
-x-org-id: org_demo
-```
-
-`x-org-id` is only used as fallback in compatibility flows. Primary tenant context is extracted from JWT.
-
-## Response Format
-
-### Success
-
-```json
-{
-  "success": true,
-  "data": {},
-  "meta": {
-    "requestId": "uuid",
-    "timestamp": "ISO-8601",
-    "latency": 12,
-    "version": "v1"
-  }
-}
-```
-
-### Error
-
-```json
-{
-  "success": false,
-  "error": {
-    "code": "VALIDATION_ERROR",
-    "message": "Request validation failed",
-    "details": {},
-    "requestId": "uuid"
-  }
-}
-```
-
-### Paginated
-
-```json
-{
-  "success": true,
-  "data": {
-    "data": [],
-    "total": 1250,
-    "page": 1,
-    "pageSize": 20,
-    "totalPages": 63,
-    "hasNext": true,
-    "hasPrev": false
-  },
-  "meta": {
-    "requestId": "uuid",
-    "timestamp": "ISO-8601",
-    "latency": 10,
-    "version": "v1"
-  }
-}
-```
-
-## Endpoint Reference
-
-All examples below use the standard envelope format from the Response Format section.
-
-### Auth Endpoints
-
-#### POST /v1/auth/register
-- Headers: `Content-Type: application/json`
-- Req Body:
-```json
-{ "email": "user@acme.com", "password": "StrongPass123!", "name": "User Name", "role": "viewer", "orgId": "org_demo" }
-```
-- Response `data`:
-```json
-{ "id": "user_x", "orgId": "org_demo", "email": "user@acme.com", "name": "User Name", "role": "viewer", "status": "active", "mfaEnabled": false, "emailVerified": false }
-```
-
-#### POST /v1/auth/login
-- Headers: `Content-Type: application/json`
-- Req Body:
-```json
-{ "email": "admin@baalvion.com", "password": "Baalvion123!" }
-```
-- Response `data`:
-```json
-{ "token": "<jwt>", "refreshToken": "<refresh>", "user": { "id": "user_owner", "orgId": "org_demo", "email": "admin@baalvion.com", "role": "owner" } }
-```
-
-#### POST /v1/auth/logout
-- Headers: none
-- Req Body: none
-- Response `data`: `null`
-
-#### POST /v1/auth/refresh
-- Headers: `Content-Type: application/json` (refresh cookie preferred)
-- Req Body:
-```json
-{ "refreshToken": "optional-if-cookie-exists" }
-```
-- Response `data`:
-```json
-{ "token": "<jwt>", "expiresAt": "ISO-8601" }
-```
-
-#### POST /v1/auth/forgot-password
-- Headers: `Content-Type: application/json`
-- Req Body:
-```json
-{ "email": "user@acme.com" }
-```
-- Response `data`: `null`
-
-#### POST /v1/auth/reset-password
-- Headers: `Content-Type: application/json`
-- Req Body:
-```json
-{ "email": "user@acme.com", "newPassword": "NewStrongPass123!" }
-```
-- Response `data`: `null`
-
-#### POST /v1/auth/verify-email
-- Headers: `Content-Type: application/json`
-- Req Body:
-```json
-{ "email": "user@acme.com" }
-```
-- Response `data`: `null`
-
-#### POST /v1/auth/mfa/enable
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`:
-```json
-{ "qrCodeUrl": "data:image/png;base64,...", "secret": "BASE32SECRET", "recoveryCodes": ["code1", "code2"] }
-```
-
-#### POST /v1/auth/mfa/verify
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "code": "123456" }
-```
-- Response `data`:
-```json
-{ "token": "<jwt>" }
-```
-
-#### POST /v1/auth/mfa/disable
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-### User Endpoints
-
-#### GET /v1/users/me
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: user profile object
-
-#### POST /v1/users/change-password
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "oldPassword": "OldPass123!", "newPassword": "NewPass123!" }
-```
-- Response `data`: `null`
-
-#### GET /v1/users?page=1&pageSize=20
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: paginated users object
-
-#### POST /v1/users/invite
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "email": "new@acme.com", "name": "New User", "role": "viewer" }
-```
-- Response `data`: user object
-
-#### PUT /v1/users/:id
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body: partial user fields
-- Response `data`: updated user object
-
-#### DELETE /v1/users/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-#### PUT /v1/users/:id/role
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "role": "admin" }
-```
-- Response `data`: updated user object
-
-#### POST /v1/users/:id/suspend
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-#### POST /v1/users/:id/reactivate
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-### Proxy Endpoints
-
-#### GET /v1/proxies
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: paginated proxies object
-
-#### GET /v1/proxies/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: proxy object
-
-#### POST /v1/proxies
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "name": "US Pool", "host": "res-us-01.baalvion.net", "port": 9001, "username": "u", "password": "p", "country": "US", "type": "residential", "protocol": "http", "providerId": "provider_brightdata" }
-```
-- Response `data`: created proxy object
-
-#### PUT /v1/proxies/:id
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body: proxy patch object
-- Response `data`: updated proxy object
-
-#### DELETE /v1/proxies/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-#### POST /v1/proxies/:id/rotate
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: rotated proxy object
-
-#### GET /v1/proxies/:id/logs
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: paginated proxy logs object
-
-#### POST /v1/proxies/test
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body: proxy test payload
-- Response `data`:
-```json
-{ "statusCode": 200, "latency": 145, "ip": "198.51.100.10", "location": "US-edge", "headers": { "x-baalvion-proxy": "ok" } }
-```
-
-#### POST /v1/proxies/export
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`:
-```json
-{ "downloadUrl": "/downloads/proxies-export.csv" }
-```
-
-### Preset Endpoints
-
-#### GET /v1/presets
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: preset array
-
-#### POST /v1/presets
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "name": "US Residential HTTP", "country": "US", "type": "residential", "protocol": "http" }
-```
-- Response `data`: created preset
-
-#### PUT /v1/presets/:id
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body: preset patch
-- Response `data`: updated preset
-
-#### DELETE /v1/presets/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-### Usage and Analytics Endpoints
-
-#### GET /v1/usage/summary
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `{ orgId, bandwidthUsed, bandwidthLimit, requests, successRate, avgLatency }`
-
-#### GET /v1/usage/history?days=30
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: usage array
-
-#### GET /v1/analytics/bandwidth
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `[{ date, value }]`
-
-#### GET /v1/analytics/success-rate
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `[{ date, value }]`
-
-#### GET /v1/analytics/top-countries
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `[{ country, code, requests, bandwidth }]`
-
-#### GET /v1/analytics/top-domains
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `[{ domain, requests, bandwidth }]`
-
-#### GET /v1/analytics/latency-distribution
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `[{ bucket, count }]`
-
-#### GET /v1/analytics/anomalies
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `[{ date, metric, value, deviation }]`
-
-#### GET /v1/analytics/export?format=csv
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `{ downloadUrl }`
-
-### Billing Endpoints
-
-#### GET /v1/billing/subscription
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: subscription object
-
-#### GET /v1/billing/plans
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: plan array
-
-#### GET /v1/billing/invoices
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: invoice array
-
-#### GET /v1/billing/invoices/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: invoice object
-
-#### POST /v1/billing/change-plan
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "planSlug": "enterprise" }
-```
-- Response `data`:
-```json
-{ "checkoutUrl": "https://..." }
-```
-
-#### GET /v1/billing/payment-methods
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: payment method array
-
-#### POST /v1/billing/payment-methods
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "type": "card", "brand": "visa", "last4": "4242", "expiry": "12/29", "isDefault": true }
-```
-- Response `data`: payment method object
-
-#### DELETE /v1/billing/payment-methods/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-#### GET /v1/billing/usage-forecast
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `{ predicted, limit, trend }`
-
-#### POST /v1/billing/webhook
-- Headers: `Content-Type: application/json` (plus provider signature header)
-- Req Body: Stripe event payload
-- Response `data`: `{ received: true }`
-
-### Organization Endpoints
-
-#### GET /v1/org
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: organization object
-
-#### PUT /v1/org
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body: organization patch
-- Response `data`: updated organization object
-
-#### GET /v1/org/members
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: membership array
-
-#### POST /v1/org/members/invite
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "email": "member@acme.com", "name": "Member", "role": "viewer" }
-```
-- Response `data`: membership object
-
-#### PUT /v1/org/members/:id/role
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "role": "admin" }
-```
-- Response `data`: membership object
-
-#### DELETE /v1/org/members/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-#### GET /v1/org/roles
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: role array
-
-#### GET /v1/org/activity
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: audit/activity array
-
-### API Key Endpoints
-
-#### GET /v1/api-keys
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: api key array
-
-#### POST /v1/api-keys
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "name": "CI Key" }
-```
-- Response `data`:
-```json
-{ "apiKey": { "id": "...", "keyPrefix": "bns_..." }, "rawKey": "bns_..." }
-```
-
-#### DELETE /v1/api-keys/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-#### POST /v1/api-keys/:id/revoke
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-### Security Endpoints
-
-#### GET /v1/security/sessions
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: session array
-
-#### DELETE /v1/security/sessions/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-#### GET /v1/security/login-history
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: login event array
-
-#### GET /v1/security/ip-allowlist
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: string array
-
-#### POST /v1/security/ip-allowlist
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "ip": "203.0.113.10" }
-```
-- Response `data`: string array
-
-#### DELETE /v1/security/ip-allowlist/:ip
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: string array
-
-### Notification Endpoints
-
-#### GET /v1/notifications
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: notification array
-
-#### PUT /v1/notifications/:id/read
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-#### POST /v1/notifications/mark-all-read
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `null`
-
-### Audit Log Endpoints
-
-#### GET /v1/audit-logs
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: paginated audit logs
-
-#### GET /v1/audit-logs/export
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `{ downloadUrl }`
-
-### Support Endpoints
-
-#### GET /v1/support/tickets
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: ticket array
-
-#### POST /v1/support/tickets
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "subject": "Proxy issue", "priority": "high", "description": "Timeout spikes" }
-```
-- Response `data`: created ticket
-
-#### GET /v1/support/tickets/:id
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: ticket with messages
-
-#### POST /v1/support/tickets/:id/reply
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "message": "Please investigate route US-EAST" }
-```
-- Response `data`: ticket message
-
-#### PUT /v1/support/tickets/:id/close
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: closed ticket
-
-### Dashboard / Export / Feature Flag Endpoints
-
-#### GET /v1/dashboard/summary
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: dashboard summary object
-
-#### POST /v1/exports/usage-logs
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `{ downloadUrl, expiresAt }`
-
-#### POST /v1/exports/api-logs
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `{ downloadUrl, expiresAt }`
-
-#### POST /v1/exports/account-data
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `{ downloadUrl, expiresAt }`
-
-#### DELETE /v1/account
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `{ requestId, estimatedCompletion }`
-
-#### GET /v1/feature-flags/evaluate?orgId=<id>&planSlug=<slug>
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: `{ "flagKey": true/false }`
-
-### Admin Endpoints (platform_admin role)
-
-All below require `Authorization: Bearer <platform_admin_token>`.
-
-#### GET /v1/admin/dashboard
-- Req Body: none
-- Response `data`: platform dashboard stats
-
-#### GET /v1/admin/tenants
-- Req Body: none
-- Response `data`: paginated tenant list
-
-#### GET /v1/admin/tenants/:orgId
-- Req Body: none
-- Response `data`: tenant detail
-
-#### PUT /v1/admin/tenants/:orgId/suspend
-- Req Body: none
-- Response `data`: `null`
-
-#### PUT /v1/admin/tenants/:orgId/reactivate
-- Req Body: none
-- Response `data`: `null`
-
-#### POST /v1/admin/tenants/:orgId/override-bandwidth
-- Req Body:
-```json
-{ "bandwidthLimitGb": 8000 }
-```
-- Response `data`: updated tenant
-
-#### POST /v1/admin/tenants/:orgId/override-credits
-- Req Body:
-```json
-{ "credits": 5000 }
-```
-- Response `data`: updated tenant
-
-#### GET /v1/admin/users
-- Req Body: none
-- Response `data`: paginated user list
-
-#### PUT /v1/admin/users/:id/ban
-- Req Body: none
-- Response `data`: `null`
-
-#### PUT /v1/admin/users/:id/suspend
-- Req Body: none
-- Response `data`: `null`
-
-#### PUT /v1/admin/users/:id/reactivate
-- Req Body: none
-- Response `data`: `null`
-
-#### GET /v1/admin/providers
-- Req Body: none
-- Response `data`: provider array
-
-#### GET /v1/admin/providers/:id
-- Req Body: none
-- Response `data`: provider + health history
-
-#### POST /v1/admin/providers
-- Req Body: provider object
-- Response `data`: created provider
-
-#### PUT /v1/admin/providers/:id
-- Req Body: provider patch
-- Response `data`: updated provider
-
-#### DELETE /v1/admin/providers/:id
-- Req Body: none
-- Response `data`: `null`
-
-#### GET /v1/admin/providers/:id/health
-- Req Body: none
-- Response `data`: health points array
-
-#### GET /v1/admin/providers/:id/incidents
-- Req Body: none
-- Response `data`: incidents array
-
-#### GET /v1/admin/routing-rules
-- Req Body: none
-- Response `data`: routing rule array
-
-#### POST /v1/admin/routing-rules
-- Req Body: routing rule object
-- Response `data`: created rule
-
-#### PUT /v1/admin/routing-rules/:id
-- Req Body: routing rule patch
-- Response `data`: updated rule
-
-#### DELETE /v1/admin/routing-rules/:id
-- Req Body: none
-- Response `data`: `null`
-
-#### POST /v1/admin/routing-rules/reorder
-- Req Body: reorder payload
-- Response `data`: reorder result
-
-#### GET /v1/admin/system/services
-- Req Body: none
-- Response `data`: service status array
-
-#### GET /v1/admin/system/metrics
-- Req Body: none
-- Response `data`: `{ cpu, memory, rps, errorRate }`
-
-#### GET /v1/admin/abuse/logs
-- Req Body: none
-- Response `data`: paginated abuse logs
-
-#### PUT /v1/admin/abuse/logs/:id/resolve
-- Req Body: none
-- Response `data`: `null`
-
-#### GET /v1/admin/abuse/rate-limits
-- Req Body: none
-- Response `data`: rate limit config array
-
-#### PUT /v1/admin/abuse/rate-limits/:id
-- Req Body: rate limit patch
-- Response `data`: updated rate limit config
-
-#### GET /v1/admin/revenue/summary?period=30d
-- Req Body: none
-- Response `data`: `{ mrr, arr, churn, ltv, arpu }`
-
-#### GET /v1/admin/revenue/cohort-retention
-- Req Body: none
-- Response `data`: `{ cohorts: [...] }`
-
-#### GET /v1/admin/feature-flags
-- Req Body: none
-- Response `data`: feature flag array
-
-#### PUT /v1/admin/feature-flags/:key
-- Req Body: feature flag patch
-- Response `data`: updated feature flag
-
-#### GET /v1/admin/audit-logs
-- Req Body: none
-- Response `data`: paginated audit logs
-
-#### POST /v1/admin/audit-logs/export
-- Req Body: optional export filter payload
-- Response `data`: `{ downloadUrl }`
-
-### Legacy Payment Compatibility Endpoints
-
-#### GET /v1/payment/plans
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: plan array
-
-#### GET /v1/payment/payment-methods
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: payment method array
-
-#### POST /v1/payment/order
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "plan_id": "plan_enterprise" }
-```
-- Response `data`: order payload
-
-#### POST /v1/payment/verify
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body:
-```json
-{ "razorpay_order_id": "...", "razorpay_payment_id": "...", "razorpay_signature": "...", "plan_id": "plan_enterprise" }
-```
-- Response `data`: verification result
-
-#### GET /v1/payment/transactions
-- Headers: `Authorization: Bearer <token>`
-- Req Body: none
-- Response `data`: transaction array
-
-#### POST /v1/payment/orchestrate
-- Headers: `Content-Type: application/json`
-- Req Body:
-```json
-{ "plan_id": 1, "provider": "razorpay" }
-```
-- Response `data`: provider order orchestration payload
-
-#### POST /v1/payment/orchestrator-verify
-- Headers: `Content-Type: application/json`
-- Req Body: provider verification payload
-- Response `data`: verification status
-
-#### POST /v1/payment/validate-fund-account
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body: `{ account_type, fund_account }`
-- Response `data`: provider validation result
-
-#### POST /v1/payment/payout
-- Headers: `Authorization: Bearer <token>`, `Content-Type: application/json`
-- Req Body: payout payload
-- Response `data`: payout result
-
-#### POST /v1/payment/webhook
-- Headers: provider signature header + `Content-Type: application/json`
-- Req Body: provider webhook payload
-- Response `data`: webhook result
-
-#### GET /v1/payment/provider-health
-- Headers: none
-- Req Body: none
-- Response `data`: provider health object
-
-## WebSocket
-
-- URL: `ws://<host>/v1/ws`
-- Auth: `token` in socket auth or query
-- On connect, user joins org channel `org:<orgId>`
-
-Event shape:
-
-```json
-{
-  "type": "event.name",
-  "orgId": "org-uuid",
-  "payload": {},
-  "timestamp": "ISO-8601"
-}
-```
+Health check: `GET /health` → `{ "status": "ok", "timestamp": "…" }`.
 
 ## Environment Variables
 
-See `.env.example` for full list. Key vars:
+> `.env*` is gitignored. **Never commit secrets.** Per-environment files exist
+> (`.env.development`, `.env.production`); see `.env.example` for the full list.
 
-- `PORT`
-- `API_BASE_URL`
-- `JWT_ACCESS_SECRET`
-- `JWT_REFRESH_SECRET`
-- `JWT_ACCESS_EXPIRES_IN`
-- `JWT_REFRESH_EXPIRES_IN`
-- `REFRESH_COOKIE_NAME`
-- `CORS_ORIGINS`
-- `REDIS_URL`
-- `STRIPE_SECRET_KEY`
-- `STRIPE_WEBHOOK_SECRET`
-- `BCRYPT_ROUNDS`
-- `RAZORPAY_KEY_ID`
-- `RAZORPAY_KEY_SECRET`
+| Variable | Purpose |
+|----------|---------|
+| `PORT` | HTTP port (default `4000`) |
+| `NODE_ENV` | gates production fail-fasts (e.g. `METRICS_SECRET` enforcement) |
+| `DATABASE_URL` | PostgreSQL connection (RLS schema); also used by the `migrate` script |
+| `REDIS_URL` / Redis settings | cache + BullMQ queues |
+| `CORS_ORIGINS` | comma-separated allowlist of browser origins |
+| `METRICS_SECRET` | bearer/`?token=` secret guarding `/metrics` (required, non-default, in prod) |
+| `METRICS_IP_ALLOWLIST` | additional IPs allowed to scrape `/metrics` (loopback always allowed) |
+| Provider keys | Razorpay / Stripe / PayU / Cashfree API keys + webhook secrets |
+| AWS S3 settings | bucket/region/credentials for uploads + presigned URLs |
+| SSO settings | SAML / OIDC issuer, certs, client config |
 
-## Security Checklist
+## Security
 
-- JWT auth with short-lived access token
-- Refresh token in httpOnly cookie
-- Zod validation on input
-- Permission middleware per route
-- Tenant scoping by orgId
-- Rate limiting middleware
-- Security headers via Helmet
-- Standardized error envelopes
+- **RS256-only verification** across all JWT paths *and* the WebSocket handshake
+  (`allowHs256Fallback:false`); HS256 tokens are rejected when RS256 keys are present.
+- **DB-authoritative roles** — the effective role is resolved from `org_memberships` on each
+  request, never trusting a stale token role (see [`RBAC.md`](RBAC.md)). Hierarchy:
+  `viewer < member < editor < manager < admin < owner < super_admin`.
+- **Raw-body webhook verification** — every PSP/KYC webhook is mounted *before* the JSON parser
+  and verifies the provider signature over the unparsed body.
+- **`/metrics` is gated** — loopback or a valid `METRICS_SECRET`; production refuses to boot with
+  a missing or placeholder secret.
+- **Public JWKS** at `/.well-known/jwks.json` lets other services verify tokens with no shared secret.
+- **Fail-closed tenancy** — `sql/002_rls_tenant_isolation.sql` enforces row-level tenant isolation.
+- Standard hardening: `helmet`, CORS allowlist, per-route rate limiting, Zod validation.
 
-## Database
+## Notes / Gotchas
 
-- Base schema and legacy tables: `sql/schema.sql`
-- Multi-tenant RLS schema: `sql/netstack_schema.sql`
+- **Platform feature routes** currently use a seeded in-memory store for fast integration
+  testing; the production PostgreSQL tables, indexes, and RLS policies live in `sql/schema.sql`.
+- **Self-issuer scope.** proxy verifies its *own* canonical tokens, so the consumer-oriented
+  `createAuthMiddleware`/JWKS model and a full `organizationId`→`orgId` property rename are
+  **deferred** to its eventual issuer-retirement (documented in [`RBAC.md`](RBAC.md)); the
+  JWT-claim-level requirements (canonical claims, RS256-only) are met today.
+- The per-tenant API-key/webhook capability has been generalized into
+  [`developer-service`](../developer-service/) (Cluster 9, *Developer Platform*).
+- This folder ships its own `observability/`, `docs/`, `test/`, `seeders/`, and `workers/`.
 
-To apply RLS schema:
+---
 
-```bash
-psql "$DATABASE_URL" -f sql/netstack_schema.sql
-```
-
-## Notes
-
-- This README documents implemented behavior in code today.
-- If you want, next step is generating a Postman collection from these routes with sample payloads and auth pre-scripts.
+<div align="center">
+<sub>Part of the <a href="https://github.com/baalvionservice/Baalvion-Project-Infra">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>
+</div>

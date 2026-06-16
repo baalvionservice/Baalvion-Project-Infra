@@ -1,17 +1,37 @@
-# Baalvion Global Edge Network
+<div align="center">
+
+<img src="assets/banner.svg" alt="Edge — Baalvion Platform" width="100%">
+
+<br/>
+<br/>
+
+**The proxy data plane as a fleet of global edge PoPs — fronted by Anycast (AWS Global Accelerator) and GeoDNS (Route53 geolocation), so every client lands on the nearest healthy gateway.**
+
+![AWS Global Accelerator](https://img.shields.io/badge/AWS-Global_Accelerator-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)
+![Route53](https://img.shields.io/badge/Route53-GeoDNS-8C4FFF?style=for-the-badge&logo=amazonroute53&logoColor=white)
+![Kubernetes](https://img.shields.io/badge/Kubernetes-multi--region-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white)
+![Terraform](https://img.shields.io/badge/Terraform-IaC-7B42BC?style=for-the-badge&logo=terraform&logoColor=white)
+
+<sub>[Overview](#overview) · [Steering](#steering-how-a-client-reaches-the-nearest-pop) · [Region Matrix](#8-region-matrix) · [PoP Topology](#pop-component-topology-per-region) · [Rollout Runbook](#rollout--expansion-runbook)</sub>
+
+</div>
+
+---
+
+## Overview
 
 The proxy data plane runs as a fleet of **edge PoPs** (Points of Presence) fronted
 by **Anycast (AWS Global Accelerator)** and **GeoDNS (Route53 geolocation)**. A
 client always lands on the nearest healthy gateway; the gateway then egresses
 through residential / mobile / datacenter / dedicated owned-IP pools.
 
-This directory documents the topology. The deployable pieces live in:
+This directory documents the topology. The deployable pieces live elsewhere:
 
 | Concern | Path |
 | --- | --- |
 | Anycast + GeoDNS | [`infra/terraform/modules/edge/main.tf`](../terraform/modules/edge/main.tf) |
 | Region K8s overlays | [`infra/k8s/overlays/`](../k8s/overlays/) (`us-east`, `eu`, `india`, `sea`) |
-| Gateway data plane | [`Backend/gateway/`](../../Backend/gateway/) |
+| Gateway data plane | [`Backend/gateway/`](../../gateway/) |
 | Edge control plane | `Backend/backend-Proxy-BaalvionStack/service/{edgeRegionService,asnIntelService,dedicatedPoolService}.js` |
 
 ---
@@ -39,9 +59,9 @@ This directory documents the topology. The deployable pieces live in:
 - **Anycast (primary):** lowest latency + sub-10s failover at the network layer.
   A dead region is drained by GA health checks; clients keep one anycast IP.
 - **GeoDNS (secondary / explicit):** `eu.proxy.baalvion.com` style hostnames pin a
-  customer to a region for **GDPR / data-residency**; `geo.<zone>` is a
-  DNS-level fallback for clients that can't use Global Accelerator. Each record
-  carries a Route53 health check so a failed region falls through to the default.
+  customer to a region for **GDPR / data-residency**; `geo.<zone>` is a DNS-level
+  fallback for clients that can't use Global Accelerator. Each record carries a
+  Route53 health check so a failed region falls through to the default.
 
 ---
 
@@ -49,10 +69,10 @@ This directory documents the topology. The deployable pieces live in:
 
 | # | Region key | AWS region | Continents served (Route53) | K8s overlay | Gateway min/max | Role |
 |---|------------|------------|------------------------------|-------------|-----------------|------|
-| 1 | `us-east` | `us-east-1` | NA, SA | ✅ `overlays/us-east` | 6 / 150 | Primary NA + LatAm, highest traffic |
-| 2 | `eu` | `eu-west-1` | EU, AF | ✅ `overlays/eu` | 4 / (HPA) | GDPR / data-residency, Africa overflow |
-| 3 | `india` | `ap-south-1` | AS (in/subcontinent) | ✅ `overlays/india` | 4 / 100 | India residential/mobile growth, **TF default region** |
-| 4 | `sea` | `ap-southeast-1` | OC, AS (sea) | ✅ `overlays/sea` | 3 / 80 | SG/ID/TH/VN/MY hub + Oceania |
+| 1 | `us-east` | `us-east-1` | NA, SA | `overlays/us-east` | 6 / 150 | Primary NA + LatAm, highest traffic |
+| 2 | `eu` | `eu-west-1` | EU, AF | `overlays/eu` | 4 / (HPA) | GDPR / data-residency, Africa overflow |
+| 3 | `india` | `ap-south-1` | AS (in/subcontinent) | `overlays/india` | 4 / 100 | India residential/mobile growth, **TF default region** |
+| 4 | `sea` | `ap-southeast-1` | OC, AS (sea) | `overlays/sea` | 3 / 80 | SG/ID/TH/VN/MY hub + Oceania |
 | 5 | `sa` | `sa-east-1` | SA | _planned_ | — | LatAm dedicated (offloads us-east) |
 | 6 | `me` | `me-central-1` | AS (gulf) | _planned_ | — | UAE/SA/TR, mobile carriers |
 | 7 | `af` | `af-south-1` | AF | _planned_ | — | ZA/NG/EG (offloads eu) |
@@ -98,6 +118,7 @@ Each region is a self-contained edge cell:
 ```
 
 ### Egress pools available at every PoP
+
 | Kind | Source | Exit IP | Sticky |
 |------|--------|---------|--------|
 | `residential` | upstream provider (templated `customer-…-country-…-session-…`) | discovered | session-keyed |
@@ -122,9 +143,15 @@ exit IPs (datacenter / dedicated-static / ISP).
    `terraform.tfvars` (ARN, DNS, continents). `terraform apply` adds a GA endpoint
    group + GeoDNS records + a health check. No application redeploy.
 4. **Seed the control plane:** `POST /v1/admin/edge/regions` with the region code,
-   continent, gateway endpoint, and weight so `pickRegion()` includes it for
-   egress routing; health is reported via `POST /v1/admin/edge/regions/:code/health`.
+   continent, gateway endpoint, and weight so `pickRegion()` includes it for egress
+   routing; health is reported via `POST /v1/admin/edge/regions/:code/health`.
 
 Failover is automatic at both layers (GA health check + Route53 health check);
 `recordHealth()` additionally marks a region `degraded`/`offline` in Postgres and
 lowers its routing weight.
+
+---
+
+<div align="center">
+<sub>Part of the <a href="https://github.com/baalvionservice/Baalvion-Project-Infra">Baalvion Platform</a> · centralized identity · domain-driven monorepo</sub>
+</div>
