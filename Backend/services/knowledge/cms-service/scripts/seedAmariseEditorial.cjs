@@ -26,7 +26,7 @@
 const AUTH = process.env.AUTH_URL || 'http://localhost:3001/v1/auth';
 const CMS  = process.env.CMS_URL  || 'http://localhost:3011/api/v1';
 const EMAIL = process.env.SUPERADMIN_EMAIL || 'superadmin@baalvion.com';
-const PW    = process.env.SUPERADMIN_PASSWORD || 'Sup3rAdmin!2026';
+const PW    = process.env.SUPERADMIN_PASSWORD;
 
 const WEBSITE_ID = process.env.AMARISE_WEBSITE_ID || 'f5649580-30b0-4335-aff1-9e3ee2b5c6fc';
 const BASE = `${CMS}/cms/websites/${WEBSITE_ID}`;

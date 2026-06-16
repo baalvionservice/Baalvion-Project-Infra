@@ -19,14 +19,19 @@ export default function CompanyOnboardingPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-muted/40">
+    <div className="flex min-h-screen flex-col bg-gradient-to-b from-muted/30 via-background to-background">
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className="container flex h-16 items-center">
+            <div className="container flex h-16 items-center justify-between">
                 <Logo />
+                <span className="text-sm text-muted-foreground">Set up your workspace</span>
             </div>
         </header>
         <main className="flex-1">
-            <div className="container py-8 md:py-12">
+            <div className="container py-10 md:py-14">
+                <div className="mx-auto mb-8 max-w-3xl text-center">
+                    <h1 className="font-headline text-3xl font-bold tracking-tight">Let&apos;s get your team set up</h1>
+                    <p className="mt-2 text-muted-foreground">A few steps to verify your company and post your first challenge.</p>
+                </div>
                 <OnboardingFlow />
             </div>
         </main>

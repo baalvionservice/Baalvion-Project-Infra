@@ -35,6 +35,7 @@ http:
     sp-identity-auth:              { stripPrefix: { prefixes: ["/api/v1/identity/auth"] } }
     sp-identity-oauth:             { stripPrefix: { prefixes: ["/api/v1/identity/oauth"] } }
     sp-identity-session:           { stripPrefix: { prefixes: ["/api/v1/identity/session"] } }
+    sp-identity-rbac:              { stripPrefix: { prefixes: ["/api/v1/identity/rbac"] } }
     sp-commerce-trade:             { stripPrefix: { prefixes: ["/api/v1/commerce/trade"] } }
     # sp-commerce-order REMOVED — order-service is deprecated (order-service_DEPRECATED). Order
     # lifecycle moved to the GTOS order-execution-service (trade domain). No commerce/order route.
@@ -48,12 +49,14 @@ http:
     sp-knowledge-ml:               { stripPrefix: { prefixes: ["/api/v1/knowledge/ml"] } }
     sp-infrastructure-realtime:    { stripPrefix: { prefixes: ["/api/v1/infrastructure/realtime"] } }
     sp-infrastructure-notification: { stripPrefix: { prefixes: ["/api/v1/infrastructure/notification"] } }
+    sp-infrastructure-audit:       { stripPrefix: { prefixes: ["/api/v1/infrastructure/audit"] } }
     sp-infrastructure-proxy:       { stripPrefix: { prefixes: ["/api/v1/infrastructure/proxy"] } }
     sp-platform-admin:             { stripPrefix: { prefixes: ["/api/v1/platform/admin"] } }
     sp-platform-dashboard:         { stripPrefix: { prefixes: ["/api/v1/platform/dashboard"] } }
     sp-ecosystem-about:            { stripPrefix: { prefixes: ["/api/v1/ecosystem/about"] } }
     sp-ecosystem-brand-connector:  { stripPrefix: { prefixes: ["/api/v1/ecosystem/brand-connector"] } }
     sp-ecosystem-ctm:              { stripPrefix: { prefixes: ["/api/v1/ecosystem/ctm"] } }
+    sp-ecosystem-crm:              { stripPrefix: { prefixes: ["/api/v1/ecosystem/crm"] } }
     sp-ecosystem-insiders:         { stripPrefix: { prefixes: ["/api/v1/ecosystem/insiders"] } }
     sp-ecosystem-ir:               { stripPrefix: { prefixes: ["/api/v1/ecosystem/ir"] } }
     sp-ecosystem-jobs:             { stripPrefix: { prefixes: ["/api/v1/ecosystem/jobs"] } }
@@ -67,6 +70,7 @@ http:
     identity-oauth:   { rule: "PathPrefix(`/api/v1/identity/oauth`)",   entryPoints: [websecure], service: identity-oauth,   middlewares: [sp-identity-oauth, ratelimit, sec-headers], tls: {} }
     # PROTECTED (jwt-auth)
     identity-session: { rule: "PathPrefix(`/api/v1/identity/session`)", entryPoints: [websecure], service: identity-session, middlewares: [sp-identity-session, ratelimit, sec-headers], tls: {} }
+    identity-rbac:    { rule: "PathPrefix(`/api/v1/identity/rbac`)",    entryPoints: [websecure], service: identity-rbac,    middlewares: [sp-identity-rbac, ratelimit, sec-headers], tls: {} }
     commerce-trade:       { rule: "PathPrefix(`/api/v1/commerce/trade`)",       entryPoints: [websecure], service: commerce-trade,       middlewares: [sp-commerce-trade, ratelimit, sec-headers], tls: {} }
     # commerce-order router REMOVED — order-service deprecated; order lifecycle is the trade domain's
     # order-execution-service. (Removed with sp-commerce-order middleware + commerce-order service.)
@@ -82,12 +86,14 @@ http:
     # realtime: NO jwt-auth (WS upgrade passthrough; service self-verifies via JWKS)
     infrastructure-realtime:     { rule: "PathPrefix(`/api/v1/infrastructure/realtime`)",     entryPoints: [websecure], service: infrastructure-realtime,     middlewares: [sp-infrastructure-realtime, sec-headers], tls: {} }
     infrastructure-notification: { rule: "PathPrefix(`/api/v1/infrastructure/notification`)", entryPoints: [websecure], service: infrastructure-notification, middlewares: [sp-infrastructure-notification, ratelimit, sec-headers], tls: {} }
+    infrastructure-audit:        { rule: "PathPrefix(`/api/v1/infrastructure/audit`)",        entryPoints: [websecure], service: infrastructure-audit,        middlewares: [sp-infrastructure-audit, ratelimit, sec-headers], tls: {} }
     infrastructure-proxy:        { rule: "PathPrefix(`/api/v1/infrastructure/proxy`)",        entryPoints: [websecure], service: infrastructure-proxy,        middlewares: [sp-infrastructure-proxy, ratelimit, sec-headers], tls: {} }
     platform-admin:     { rule: "PathPrefix(`/api/v1/platform/admin`)",     entryPoints: [websecure], service: platform-admin,     middlewares: [sp-platform-admin, ratelimit, sec-headers], tls: {} }
     platform-dashboard: { rule: "PathPrefix(`/api/v1/platform/dashboard`)", entryPoints: [websecure], service: platform-dashboard, middlewares: [sp-platform-dashboard, ratelimit, sec-headers], tls: {} }
     ecosystem-about:           { rule: "PathPrefix(`/api/v1/ecosystem/about`)",           entryPoints: [websecure], service: ecosystem-about,           middlewares: [sp-ecosystem-about, ratelimit, sec-headers], tls: {} }
     ecosystem-brand-connector: { rule: "PathPrefix(`/api/v1/ecosystem/brand-connector`)", entryPoints: [websecure], service: ecosystem-brand-connector, middlewares: [sp-ecosystem-brand-connector, ratelimit, sec-headers], tls: {} }
     ecosystem-ctm:             { rule: "PathPrefix(`/api/v1/ecosystem/ctm`)",             entryPoints: [websecure], service: ecosystem-ctm,             middlewares: [sp-ecosystem-ctm, ratelimit, sec-headers], tls: {} }
+    ecosystem-crm:             { rule: "PathPrefix(`/api/v1/ecosystem/crm`)",             entryPoints: [websecure], service: ecosystem-crm,             middlewares: [sp-ecosystem-crm, ratelimit, sec-headers], tls: {} }
     ecosystem-insiders:        { rule: "PathPrefix(`/api/v1/ecosystem/insiders`)",        entryPoints: [websecure], service: ecosystem-insiders,        middlewares: [sp-ecosystem-insiders, ratelimit, sec-headers], tls: {} }
     ecosystem-ir:              { rule: "PathPrefix(`/api/v1/ecosystem/ir`)",              entryPoints: [websecure], service: ecosystem-ir,              middlewares: [sp-ecosystem-ir, ratelimit, sec-headers], tls: {} }
     ecosystem-jobs:            { rule: "PathPrefix(`/api/v1/ecosystem/jobs`)",            entryPoints: [websecure], service: ecosystem-jobs,            middlewares: [sp-ecosystem-jobs, ratelimit, sec-headers], tls: {} }
@@ -110,6 +116,7 @@ http:
     identity-auth:              { loadBalancer: { servers: [{ url: "http://host.docker.internal:3001" }] } }
     identity-oauth:             { loadBalancer: { servers: [{ url: "http://host.docker.internal:3023" }] } }
     identity-session:           { loadBalancer: { servers: [{ url: "http://host.docker.internal:3022" }] } }
+    identity-rbac:              { loadBalancer: { servers: [{ url: "http://host.docker.internal:3055" }] } }
     commerce-trade:             { loadBalancer: { servers: [{ url: "http://host.docker.internal:3025" }] } }
     # commerce-order service REMOVED (2026-06-13 consolidation) — pointed at the deprecated
     # order-service:3013 (Node). Order routing is owned by the trade domain's order-execution-service.
@@ -124,12 +131,14 @@ http:
     knowledge-ml:               { loadBalancer: { servers: [{ url: "http://host.docker.internal:8000" }] } }
     infrastructure-realtime:    { loadBalancer: { servers: [{ url: "http://host.docker.internal:3040" }] } }
     infrastructure-notification: { loadBalancer: { servers: [{ url: "http://host.docker.internal:3031" }] } }
+    infrastructure-audit:       { loadBalancer: { servers: [{ url: "http://host.docker.internal:3032" }] } }
     infrastructure-proxy:       { loadBalancer: { servers: [{ url: "http://host.docker.internal:4000" }] } }
     platform-admin:             { loadBalancer: { servers: [{ url: "http://host.docker.internal:3021" }] } }
     platform-dashboard:         { loadBalancer: { servers: [{ url: "http://host.docker.internal:3009" }] } }
     ecosystem-about:            { loadBalancer: { servers: [{ url: "http://host.docker.internal:3010" }] } }
     ecosystem-brand-connector:  { loadBalancer: { servers: [{ url: "http://host.docker.internal:3006" }] } }
     ecosystem-ctm:              { loadBalancer: { servers: [{ url: "http://host.docker.internal:3017" }] } }
+    ecosystem-crm:              { loadBalancer: { servers: [{ url: "http://host.docker.internal:3063" }] } }
     ecosystem-insiders:         { loadBalancer: { servers: [{ url: "http://host.docker.internal:3050" }] } }
     ecosystem-ir:               { loadBalancer: { servers: [{ url: "http://host.docker.internal:3008" }] } }
     ecosystem-jobs:             { loadBalancer: { servers: [{ url: "http://host.docker.internal:3002" }] } }

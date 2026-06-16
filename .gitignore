@@ -13,6 +13,10 @@
 *.p12
 *.pfx
 secrets/
+# Exception: the Terraform "secrets" MODULE is IaC (resource definitions referencing
+# variables), not actual secret material — keep it tracked.
+!Backend/infra/terraform/modules/secrets/
+!Backend/infra/terraform/modules/secrets/**
 credentials.json
 service-account.json
 # Local env backups & editor cruft (Phase 0 cleanup — keep these out of the tree)

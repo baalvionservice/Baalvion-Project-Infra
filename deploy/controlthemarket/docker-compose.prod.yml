@@ -1,0 +1,131 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Production stack for controlthemarket.com — single EC2 host, Docker Compose.
+# CTM runs its OWN backend (ctm-service). It does NOT use the central admin panel / CMS vault:
+# payments (Razorpay) are handled directly by ctm-service from env keys. Login/refresh proxy to the
+# central identity (SSO) — see AUTH_PROXY_TARGET + JWT_PUBLIC_KEY below and the runbook §0.
+#
+#   Request path:
+#     browser ─443→ Caddy ─┬─ /api/*      → ctm-service:3017   (CTM API + Razorpay webhook)
+#       (TLS, LE)          └─ /*           → web:3000           (Next.js SSR; /auth-bff/* it
+#                                                                rewrites to the central auth)
+#                          postgres (schema `ctm`; internal compose network, no public port)
+#
+#   Run from the REPO ROOT:
+#     docker compose --env-file deploy/controlthemarket/.env.prod \
+#       -f deploy/controlthemarket/docker-compose.prod.yml up -d --build
+#
+# Only Caddy publishes ports (80/443). Postgres + both app services stay internal.
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  ctm-service:
+    # image: pulled on the EC2 (CI builds+pushes to GHCR); build: used by CI and a manual
+    # `up --build`. Both paths produce the same tag. Repo-root context — the Dockerfile runs
+    # `turbo prune` over the pnpm workspace.
+    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/controlthemarket-ctm-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/ecosystem/ctm-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      PORT: "3017"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Only the public site origin in prod (browser → same-origin /api is not CORS, but the
+      # access token is sent as a Bearer header, and any direct cross-origin reads need this).
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      # ── Central SSO via the shared adapter (@baalvion/auth-node) ──────────────
+      # ctm-service VERIFIES RS256 access tokens minted by the central auth-service — the same adapter
+      # every platform site uses. PREFERRED: JWT_JWKS_URI → the central auth's /.well-known/jwks.json,
+      # so the signing key is fetched live and key rotation needs NO redeploy. JWT_PUBLIC_KEY (static
+      # single-line PEM) is an OPTIONAL fallback, used only if the JWKS endpoint is briefly unreachable.
+      # issuer/audience MUST match what the central auth signs. Fail-closed: the service refuses to
+      # boot if NEITHER is set.
+      BAALVION_JWKS_URI: ${JWT_JWKS_URI:-}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
+      JWT_ISSUER: ${JWT_ISSUER}
+      JWT_AUDIENCE: ${JWT_AUDIENCE}
+      # ── Razorpay LIVE (real money) — handled by ctm-service directly, no CMS vault ───────────
+      PAYMENT_PROVIDER: ${PAYMENT_PROVIDER}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      PAYMENT_SUCCESS_URL: ${PAYMENT_SUCCESS_URL}
+      PAYMENT_CANCEL_URL: ${PAYMENT_CANCEL_URL}
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3017/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  web:
+    # Next.js 15 standalone server. NEXT_PUBLIC_* are baked at BUILD time (build.args below); the
+    # /auth-bff rewrite target (AUTH_PROXY_TARGET) is read at server start, so it is a RUNTIME env.
+    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/controlthemarket-web:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Frontend/controlthemarket-main/Dockerfile
+      args:
+        NEXT_PUBLIC_CTM_API_URL: ${NEXT_PUBLIC_CTM_API_URL}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_USE_MOCK: ${NEXT_PUBLIC_USE_MOCK}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      # Same-origin auth proxy: the browser hits controlthemarket.com/auth-bff/*, Next forwards it
+      # server-side to the central identity so the httpOnly refresh cookie flows. Point this at the
+      # LIVE central auth endpoint (see runbook §0).
+      AUTH_PROXY_TARGET: ${AUTH_PROXY_TARGET}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      ctm-service: { condition: service_started }
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+      - ctm-service
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:

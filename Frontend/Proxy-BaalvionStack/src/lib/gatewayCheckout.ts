@@ -15,19 +15,31 @@
  *    resolves websiteSlug from the authenticated org — never from the browser.)
  */
 
-const PLATFORM_BASE = import.meta.env.VITE_API_PLATFORM_BASE_URL ?? "http://localhost:4000/v1";
+import { tokenStore } from "@/lib/tokenStore";
 
-export type GatewayProvider = "razorpay" | "stripe" | "payu";
+// In production builds the localhost fallback MUST NOT ship: an unset env var
+// must fail loudly / resolve relative, never silently route checkout to a dev
+// machine. Localhost is a DEV-ONLY default (guarded by import.meta.env.PROD).
+const PLATFORM_BASE =
+  import.meta.env.VITE_API_PLATFORM_BASE_URL?.trim() ||
+  (import.meta.env.PROD ? "" : "http://localhost:4000/v1");
+
+export type GatewayProvider = "razorpay" | "stripe" | "payu" | "cashfree";
 export type GatewayMethod = "CARD" | "UPI" | "NETBANKING" | "BANK";
 
 export interface CheckoutRequest {
   provider: GatewayProvider; // the shopper's chosen gateway
   method?: GatewayMethod;    // payment method (default CARD)
-  amount: number;          // minor units (paise/cents)
+  amount: number;          // minor units (paise/cents) — DISPLAY only; the BFF recomputes the real charge
   currency: string;        // 'INR' | 'USD' | ...
   idempotencyKey: string;  // dedup a double-click / retry
   receipt?: string;
   customer?: { name?: string; email?: string; contact?: string };
+  // The BFF prices the charge server-side from these (it never trusts `amount`); planSlug + interval
+  // also flow into the provider order `notes` so the webhook can activate the right subscription.
+  planSlug?: string;
+  interval?: "monthly" | "yearly";
+  promoCode?: string;
 }
 
 export interface CheckoutInit {
@@ -53,10 +65,15 @@ export type CheckoutResult =
 
 /** Ask our backend to create a payment intent (it proxies to payment-service). */
 async function createIntent(req: CheckoutRequest): Promise<CheckoutInit> {
+  // /billing/checkout is guarded by authMiddleware, which requires the Bearer ACCESS token (it does
+  // not read the refresh cookie). Attach it from the in-memory tokenStore exactly like platformClient.
+  const token = tokenStore.getAccess();
+  const headers: Record<string, string> = { "content-type": "application/json" };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
   const res = await fetch(`${PLATFORM_BASE}/billing/checkout`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
-    credentials: "include", // BFF auth cookie/session; tenant comes from the verified session, not the browser
+    headers,
+    credentials: "include", // also send the refresh cookie (same-origin host) for completeness
     body: JSON.stringify({ ...req, method: req.method ?? "CARD" }),
   });
   if (!res.ok) {
@@ -79,6 +96,21 @@ function loadRazorpay(): Promise<void> {
     document.body.appendChild(s);
   });
   return razorpayScript;
+}
+
+let cashfreeScript: Promise<void> | null = null;
+function loadCashfree(): Promise<void> {
+  if (typeof window === "undefined") return Promise.reject(new Error("no window"));
+  if ((window as unknown as { Cashfree?: unknown }).Cashfree) return Promise.resolve();
+  if (cashfreeScript) return cashfreeScript;
+  cashfreeScript = new Promise<void>((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = "https://sdk.cashfree.com/js/v3/cashfree.js";
+    s.onload = () => resolve();
+    s.onerror = () => { cashfreeScript = null; reject(new Error("failed to load Cashfree SDK")); };
+    document.body.appendChild(s);
+  });
+  return cashfreeScript;
 }
 
 /**
@@ -112,10 +144,15 @@ export async function startGatewayCheckout(req: CheckoutRequest): Promise<Checko
     // submit it to PayU's hosted page. The action URL is env-configurable (test vs secure PayU).
     const cp = init.clientParams || {};
     const action = import.meta.env.VITE_PAYU_ACTION_URL ?? "https://test.payu.in/_payment";
+    // PayU browser-POSTs the result to surl (success) / furl (failure). Point both at our same-origin
+    // callback, which verifies PayU's reverse-hash, activates, and redirects back to the app. surl/furl
+    // are NOT part of the PayU request hash, so adding them here doesn't affect verification.
+    const callbackUrl = `${window.location.origin}/v1/billing/webhook/payu`;
+    const params: Record<string, string> = { ...cp, surl: callbackUrl, furl: callbackUrl };
     const form = document.createElement("form");
     form.method = "POST";
     form.action = action;
-    Object.entries(cp).forEach(([name, value]) => {
+    Object.entries(params).forEach(([name, value]) => {
       const input = document.createElement("input");
       input.type = "hidden";
       input.name = name;
@@ -151,6 +188,18 @@ export async function startGatewayCheckout(req: CheckoutRequest): Promise<Checko
       });
       rzp.open();
     });
+  }
+
+  if (init.provider === "cashfree") {
+    // Cashfree v3 SDK: hand the payment_session_id to cashfree.checkout(), which redirects to the
+    // hosted page. Settlement returns via the S2S webhook → ledger; return_url lands the shopper back.
+    await loadCashfree();
+    const cp = init.clientParams || {};
+    const mode = cp.mode === "production" ? "production" : "sandbox";
+    const Cashfree = (window as unknown as { Cashfree: (o: unknown) => { checkout: (o: unknown) => void } }).Cashfree;
+    const cf = Cashfree({ mode });
+    cf.checkout({ paymentSessionId: cp.paymentSessionId, redirectTarget: "_self" });
+    return { status: "redirecting", provider: "cashfree", reference: init.orderId };
   }
 
   throw new Error(`Unsupported provider: ${init.provider}`);

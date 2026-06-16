@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 require('dotenv').config();
 const express      = require('express');
 const rateLimit = require('express-rate-limit');
@@ -12,6 +13,8 @@ const logger       = require('./utils/logger');
 const { buildJwks }   = require('./utils/keys');
 const oauthCtrl       = require('./controller/oauthController');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
+const db              = require('./models');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 
@@ -48,9 +51,20 @@ app.use(errorHandler);
 
 async function start() {
     await redis.connect();
-    app.listen(config.port, () => {
+    const server = app.listen(config.port, () => {
         logger.info({ port: config.port }, 'oauth-service started');
     });
+
+    // Graceful shutdown (drains HTTP, then runs cleanup handlers in parallel)
+    registerShutdown('redis', async () => {
+        const r = require('./config/redis');
+        const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null);
+        if (c && c.quit) await c.quit();
+    });
+    registerShutdown('db', async () => {
+        if (db.sequelize && db.sequelize.close) await db.sequelize.close();
+    });
+    initGracefulShutdown(server);
 }
 
 start().catch((err) => {

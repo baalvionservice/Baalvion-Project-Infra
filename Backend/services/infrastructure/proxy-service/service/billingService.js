@@ -128,9 +128,23 @@ const activateSubscription = async (auth, planSlug, opts = {}) => {
     if (planSlug !== 'pay-as-you-go' && activeSub && !opts.skipInvoice) {
         const charged = opts.amount != null ? Number(opts.amount) : (targetPlan.monthlyPrice || 0);
         if (charged > 0) {
+            // Idempotency: the client (/billing/activate) AND the provider webhook can both fire for a
+            // single payment. Skip creating a second paid invoice if a matching one (same org + amount)
+            // was already recorded in the last 15 minutes, so one payment → one invoice.
+            let duplicate = false;
             try {
-                await createInvoiceRecord(auth, { subscriptionId: activeSub.id, amount: charged, status: 'paid' });
-            } catch (e) { /* non-fatal: the subscription is active even if the invoice row fails */ }
+                const recent = (await getInvoices(auth)) || [];
+                const cutoff = Date.now() - 15 * 60 * 1000;
+                duplicate = recent.some((inv) =>
+                    inv.status === 'paid' &&
+                    round2(inv.amount) === round2(charged) &&
+                    inv.issuedAt && new Date(inv.issuedAt).getTime() >= cutoff);
+            } catch (_) { /* if the lookup fails, fall through and create the invoice */ }
+            if (!duplicate) {
+                try {
+                    await createInvoiceRecord(auth, { subscriptionId: activeSub.id, amount: charged, status: 'paid' });
+                } catch (e) { /* non-fatal: the subscription is active even if the invoice row fails */ }
+            }
         }
     }
 
@@ -216,8 +230,10 @@ const getInvoiceDocument = async (auth, id) => {
 
 // PAYG prepaid top-up: credit the wallet (after a settled payment) and ensure the
 // org is on the Pay-As-You-Go plan. Returns the new balance + GB remaining.
-const purchaseCredit = async (auth, amountUsd) => {
-    const balance = await creditService.addCredit(auth.orgId, amountUsd, 'prepaid-topup');
+const purchaseCredit = async (auth, amountUsd, opts = {}) => {
+    // opts.ref = the settled gateway payment id. Keying the credit to it makes the top-up idempotent
+    // so the client convenience call AND the authoritative provider webhook can't double-credit.
+    const balance = await creditService.addCredit(auth.orgId, amountUsd, 'prepaid-topup', { ref: opts.ref });
     const payg = await getPlan('pay-as-you-go');
     if (payg) {
         try { await activateSubscription(auth, 'pay-as-you-go'); } catch (_) { /* non-fatal: balance still added */ }
@@ -264,6 +280,7 @@ module.exports = {
     getSubscription,
     getInvoices,
     getPlans,
+    getPlan,
     getInvoice,
     getPaymentMethods,
     changePlan,

@@ -58,7 +58,21 @@ router.use('/operations', require('./operations'));
 // ── Analytics (aggregated) ───────────────────────────────────────────────────
 router.use('/analytics', require('./analytics'));
 
-// ── Reference panels (countries / corporate-actions / fx-rates) ──────────────
+// ── Real-data feature modules (formerly inline reference handlers) ───────────
+router.use('/corporate-actions', require('./corporateActions'));
+router.use('/fx-rates', require('./fxRates'));
+router.use('/finance-reports', require('./financeReports'));
+router.use('/domain-analytics', require('./domainAnalytics'));
+router.use('/gdpr', require('./gdpr'));
+router.use('/docs', require('./docs'));
+router.use('/ai', require('./ai'));
+router.use('/sync', require('./sync'));
+router.use('/billing', require('./billing'));
+router.use('/marketplace', require('./marketplace'));
+router.use('/automation', require('./automation'));
+router.use('/portals', require('./portals'));
+
+// ── Reference panels (countries — derived from the org's businesses) ─────────
 router.use('/', require('./extras'));
 
 module.exports = router;

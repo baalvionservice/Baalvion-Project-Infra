@@ -1,3 +1,4 @@
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -10,6 +11,7 @@ const rateLimit = require('./middleware/rateLimit');
 const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 const server = http.createServer(app);
@@ -46,6 +48,8 @@ const start = async () => {
         process.exit(1);
     }
     server.listen(config.port, () => console.log(`[BrandConnector] Service running on port ${config.port}`));
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 start();

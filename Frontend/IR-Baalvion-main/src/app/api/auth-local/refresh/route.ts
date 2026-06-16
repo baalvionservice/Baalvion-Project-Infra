@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import {
   REFRESH_COOKIE,
+  isLocalAuthEnabled,
   mintAccessToken,
   publicUser,
   userFromRefresh,
@@ -12,8 +13,15 @@ export const dynamic = 'force-dynamic';
 /**
  * POST /api/auth-local/refresh — re-mint an access token from the httpOnly refresh cookie.
  * Lets the in-memory access token survive full-page navigations (the cookie is the source of truth).
+ * Fail-closed: returns 404 unless local auth is explicitly enabled (never in production).
  */
 export async function POST() {
+  if (!isLocalAuthEnabled()) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Not found.' } },
+      { status: 404 },
+    );
+  }
   const store = await cookies();
   const user = userFromRefresh(store.get(REFRESH_COOKIE)?.value);
 

@@ -35,3 +35,18 @@ export type {
   AllowedVideoType,
   AllowedMimeType,
 } from './acl';
+
+// Magic-byte content validation, malware-scan hooks, and production fail-fast guards
+export {
+  sniffType,
+  validateContent,
+  scanContent,
+  assertS3ConfiguredForProduction,
+  requireScannerInProduction,
+} from './validate';
+export type {
+  DetectedType,
+  ContentValidationResult,
+  ScanResult,
+  FileScanner,
+} from './validate';

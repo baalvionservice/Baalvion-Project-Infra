@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -10,7 +11,8 @@ const { errorHandler } = require('./middleware/errorMiddleware');
 const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
 const { startReconciliationWorker } = require('./queues/reconciliationQueue');
-const { startLedgerOutboxRelay } = require('./service/ledgerOutbox');
+const { startLedgerOutboxRelay, stopLedgerOutboxRelay } = require('./service/ledgerOutbox');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 
@@ -55,9 +57,12 @@ async function start() {
         // Transactional-outbox relay: durably delivers captured-payment / refund ledger mirrors to
         // ledger-service with retry + dead-letter (replaces the old fire-and-forget safeLedger path).
         startLedgerOutboxRelay();
-        app.listen(config.port, () => {
+        const server = app.listen(config.port, () => {
             console.log(`[Order Service] Running on port ${config.port} (${config.env})`);
         });
+        registerShutdown('ledger-outbox-relay', async () => { await stopLedgerOutboxRelay(); });
+        registerShutdown('db', async () => { if (sequelize && sequelize.close) await sequelize.close(); });
+        initGracefulShutdown(server);
     } catch (err) {
         console.error('[Order Service] Startup failed:', err.message);
         process.exit(1);

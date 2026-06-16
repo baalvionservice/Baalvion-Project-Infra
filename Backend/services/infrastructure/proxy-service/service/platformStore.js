@@ -402,7 +402,7 @@ const getById = async (name, id, orgId = null) => {
     const row = await Model.findOne({ where });
     return convertRecord(name, row);
   } catch (err) {
-    console.error('getById(%s, %s) error:', logSafe(name), logSafe(id), err.message);
+    console.error('getById(%s, %s) error:', logSafe(name), logSafe(id), logSafe(err.message));
     return null;
   }
 };
@@ -454,7 +454,7 @@ const update = async (name, id, updater, orgId = null) => {
     await Model.update(data, { where });
     return await getById(name, id, orgId);
   } catch (err) {
-    console.error('update(%s, %s) error:', logSafe(name), logSafe(id), err.message);
+    console.error('update(%s, %s) error:', logSafe(name), logSafe(id), logSafe(err.message));
     return null;
   }
 };
@@ -480,7 +480,7 @@ const remove = async (name, id, orgId = null) => {
     const count = await Model.destroy({ where });
     return count > 0;
   } catch (err) {
-    console.error('remove(%s, %s) error:', logSafe(name), logSafe(id), err.message);
+    console.error('remove(%s, %s) error:', logSafe(name), logSafe(id), logSafe(err.message));
     return false;
   }
 };

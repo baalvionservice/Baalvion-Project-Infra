@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -12,9 +13,10 @@ const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
 const { runMigrations } = require('./db/migrate');
-const { startBillingWorker } = require('./service/billingWorker');
+const { startBillingWorker, stopBillingWorker } = require('./service/billingWorker');
 const realtime = require('./service/realtime');
 const { metricsMiddleware, metricsHandler } = require('./middleware/metrics');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 const server = http.createServer(app);
@@ -59,6 +61,12 @@ const start = async () => {
     realtime.attach(server);
     server.listen(config.port, () => console.log(`[law-service] running on port ${config.port}`));
     startBillingWorker();
+
+    registerShutdown('billing-worker', async () => { stopBillingWorker(); });
+    registerShutdown('db', async () => {
+        if (db.sequelize && db.sequelize.close) await db.sequelize.close();
+    });
+    initGracefulShutdown(server);
 };
 
 start();

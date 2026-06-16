@@ -1,20 +1,14 @@
 'use client';
 
 import { useAuth } from '@/contexts/auth-context';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Loader2, Mail, Lock } from 'lucide-react';
+import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { AuthShell } from '@/components/auth/auth-shell';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -23,6 +17,7 @@ export default function LoginPage() {
   // Email + password auth — wired to the real auth context (→ auth-gateway → auth-service).
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isEmailSubmitting, setIsEmailSubmitting] = useState(false);
 
   const handleEmailLogin = async (e: React.FormEvent) => {
@@ -32,7 +27,7 @@ export default function LoginPage() {
     const result = await login({ email, password });
     if (!result.success) {
       toast({
-        title: 'Login Failed',
+        title: 'Login failed',
         description: result.message || 'Invalid email or password.',
         variant: 'destructive',
       });
@@ -42,59 +37,75 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container flex h-[calc(100vh-8rem)] items-center justify-center">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-headline">Welcome Back</CardTitle>
-          <CardDescription>Sign in to your account to continue.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <form onSubmit={handleEmailLogin} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="you@example.com"
-                  className="pl-9"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  id="password"
-                  type="password"
-                  autoComplete="current-password"
-                  placeholder="••••••••"
-                  className="pl-9"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-            <Button type="submit" className="w-full" disabled={isEmailSubmitting}>
-              {isEmailSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
-            </Button>
-          </form>
-        </CardContent>
-        <div className="p-6 pt-0 text-center text-sm">
+    <AuthShell
+      variant="default"
+      title="Welcome back"
+      subtitle="Sign in to pick up where you left off."
+      footer={
+        <>
           Don&apos;t have an account?{' '}
-          <Link href="/signup" className="underline">
-            Sign up
+          <Link href="/signup" className="font-medium text-primary underline-offset-4 hover:underline">
+            Create one
           </Link>
+        </>
+      }
+    >
+      <form onSubmit={handleEmailLogin} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
+          <div className="relative">
+            <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              className="h-11 pl-9"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
         </div>
-      </Card>
-    </div>
+
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
+          <div className="relative">
+            <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              placeholder="••••••••"
+              className="h-11 pl-9 pr-10"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground transition-colors hover:text-foreground"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+        </div>
+
+        <Button type="submit" size="lg" className="h-11 w-full text-[15px] font-semibold" disabled={isEmailSubmitting}>
+          {isEmailSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Sign in
+        </Button>
+      </form>
+    </AuthShell>
   );
 }

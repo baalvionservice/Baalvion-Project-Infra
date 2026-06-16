@@ -13,10 +13,13 @@
  *    websiteSlug = 'baalvion-elite-circle', from server config — never the browser.)
  */
 
+// In production builds the localhost fallback MUST NOT ship: an unset env var
+// must fail loudly / resolve relative, never silently route checkout to a dev
+// machine. Localhost is a DEV-ONLY default (guarded by import.meta.env.PROD).
 const BASE =
-  import.meta.env.VITE_API_BASE_URL ??
-  import.meta.env.VITE_GATEWAY_URL ??
-  "http://localhost:4000/v1";
+  import.meta.env.VITE_API_BASE_URL?.trim() ||
+  import.meta.env.VITE_GATEWAY_URL?.trim() ||
+  (import.meta.env.PROD ? "" : "http://localhost:4000/v1");
 
 export interface CheckoutRequest {
   amount: number;          // minor units (paise/cents)

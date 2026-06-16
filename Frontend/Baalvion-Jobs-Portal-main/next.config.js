@@ -1,7 +1,31 @@
 
 /** @type {import('next').NextConfig} */
 
+const isDev = process.env.NODE_ENV !== 'production';
+
+// Content-Security-Policy. `unsafe-eval` is gated to development only (Next's dev
+// runtime needs it); production drops it. `unsafe-inline` is retained for Next's
+// inline bootstrap/styles. The dangerous sinks (object/base-uri/frame-ancestors)
+// are locked down. img/connect allow https: because the app pulls media + talks to
+// the env-driven jobs-service gateway / Keycloak over TLS.
+const cspHeader = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "img-src 'self' data: blob: https:",
+  "font-src 'self' https://fonts.gstatic.com data:",
+  "connect-src 'self' https: wss:",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+].join('; ');
+
 const securityHeaders = [
+  {
+    key: 'Content-Security-Policy',
+    value: cspHeader
+  },
   {
     key: 'X-DNS-Prefetch-Control',
     value: 'on'

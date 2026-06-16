@@ -1,0 +1,131 @@
+name: Deploy proxy.baalvionstack.com
+
+# One git push → build the SPA + the 3 backend images (GHCR) → SSH the EC2 and roll it.
+# Triggers only when the proxy purchase stack changes (or manually). Matches the GHCR + appleboy/
+# ssh-action convention from deploy-staging.yml.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Frontend/Proxy-BaalvionStack/**'
+      - 'Backend/services/infrastructure/proxy-service/**'
+      - 'Backend/services/knowledge/cms-service/**'
+      - 'Backend/services/commerce/financial-services-java/**'
+      - 'Backend/packages/**'
+      - 'deploy/proxy-baalvionstack/**'
+      - '.github/workflows/deploy-proxy-baalvionstack.yml'
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  # Must match IMAGE_PREFIX in the EC2's .env.prod and the compose image: refs.
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/baalvion
+  IMAGE_TAG: prod-latest
+
+jobs:
+  build-spa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: pnpm
+      - name: Build SPA (production)
+        working-directory: Frontend/Proxy-BaalvionStack
+        run: |
+          cat > .env.production <<EOF
+          VITE_API_PLATFORM_BASE_URL=https://proxy.baalvionstack.com/v1
+          VITE_APP_URL=https://proxy.baalvionstack.com
+          EOF
+          pnpm install --frozen-lockfile
+          pnpm build
+      - uses: actions/upload-artifact@v7
+        with:
+          name: proxy-spa-dist
+          path: Frontend/Proxy-BaalvionStack/dist
+          retention-days: 3
+
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        service:
+          - { name: proxy-service,   context: ".",                                            file: Backend/services/infrastructure/proxy-service/Dockerfile,    args: "" }
+          - { name: cms-service,     context: ".",                                            file: Backend/services/knowledge/cms-service/Dockerfile,           args: "" }
+          - { name: payment-service, context: Backend/services/commerce/financial-services-java, file: Backend/services/commerce/financial-services-java/Dockerfile, args: "SERVICE=payment-service" }
+    steps:
+      - uses: actions/checkout@v6
+      - name: Log in to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Metadata
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE_PREFIX }}/proxy-baalvionstack-${{ matrix.service.name }}
+          tags: |
+            type=raw,value=${{ env.IMAGE_TAG }}
+            type=sha,prefix=
+      - name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ matrix.service.context }}
+          file: ${{ matrix.service.file }}
+          build-args: ${{ matrix.service.args }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.service.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service.name }}
+
+  deploy:
+    needs: [build-spa, build-push]
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Fetch built SPA
+        uses: actions/download-artifact@v8
+        with:
+          name: proxy-spa-dist
+          path: dist
+      # Ship the static SPA to the path Caddy mounts (the repo's Frontend/.../dist on the host).
+      - name: Upload SPA to EC2
+        uses: appleboy/scp-action@v1.0.0
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          source: "dist/*"
+          strip_components: 1
+          target: /opt/baalvion/Frontend/Proxy-BaalvionStack/dist
+          rm: true
+      - name: Pull images + roll the stack
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/baalvion
+            git pull --ff-only
+            # The EC2 must already be able to pull from GHCR: either the packages are public, or run
+            # `docker login ghcr.io` once on the host with a read:packages PAT (see DEPLOY-AWS.md §13).
+            COMPOSE="docker compose --env-file deploy/proxy-baalvionstack/.env.prod -f deploy/proxy-baalvionstack/docker-compose.prod.yml"
+            $COMPOSE pull proxy-service cms-service payment-service
+            $COMPOSE up -d --no-build
+            $COMPOSE restart caddy   # pick up the freshly uploaded SPA
+            docker system prune -f
+      - name: Smoke test
+        run: |
+          sleep 15
+          curl -sf https://proxy.baalvionstack.com/v1/public/plans > /dev/null && echo "plans OK" || echo "plans NOT responding"
+          curl -s -o /dev/null -w 'home: %{http_code}\n' https://proxy.baalvionstack.com/

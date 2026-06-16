@@ -12,6 +12,8 @@
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
+    "@baalvion/telemetry": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "cors": "^2.8.6",

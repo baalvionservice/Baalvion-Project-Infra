@@ -13,16 +13,25 @@ FROM base AS installer
 COPY .npmrc ./
 COPY --from=pruner /repo/out/json/ ./
 COPY --from=pruner /repo/out/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install --frozen-lockfile --filter baalvion-ctm-service...
+# NOTE: --no-frozen-lockfile (not --frozen) is required. The root package.json pins a version-selector
+# pnpm override ("uuid@11": "11.1.1"); `turbo prune` keeps the override line but drops the matching
+# uuid@11.1.1 package snapshot from the pruned lockfile, so a frozen install fails with
+# ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY. Non-frozen lets pnpm repair the pruned-lockfile gap in-image.
+# (The root lockfile itself is consistent — `pnpm install --frozen-lockfile` passes on the host.)
+RUN pnpm install --no-frozen-lockfile --filter baalvion-ctm-service...
 COPY --from=pruner /repo/out/full/ ./
 RUN pnpm deploy --filter=baalvion-ctm-service --prod /out
 
 FROM node:20-alpine AS final
-RUN apk add --no-cache dumb-init
+RUN apk add --no-cache dumb-init \
+    && addgroup -S app && adduser -S app -G app
 ENV NODE_ENV=production
 ENV PORT=3017
 WORKDIR /app
 COPY --from=installer /out ./
 EXPOSE 3017
+USER app
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3017),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "index.js"]

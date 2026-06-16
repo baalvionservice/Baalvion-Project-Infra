@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+// The retired per-app /admin panel redirects to the central admin-platform
+// console. The console URL is env-driven so production points at the real CMS;
+// the hardcoded localhost is a DEV-ONLY fallback (guarded by NODE_ENV). In
+// production with no env set we SKIP the redirect rather than bounce users to
+// a developer's localhost.
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const ADMIN_CONSOLE_URL =
+  process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL ||
+  (IS_PRODUCTION ? '' : 'http://localhost:3030/law');
+
 /**
  * Law-Elite edge middleware.
  *
@@ -16,10 +26,14 @@ import { NextRequest, NextResponse } from 'next/server';
  * island backend work), an edge presence-gate on that cookie can be reinstated here.
  */
 export async function middleware(request: NextRequest): Promise<NextResponse> {
-  // Per-app admin RETIRED → central admin-platform console.
+  // Per-app admin RETIRED → central admin-platform console. Only redirect when
+  // the console URL is configured; in production with no env set we fall through
+  // rather than send users to localhost.
   const { pathname } = request.nextUrl;
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-    return NextResponse.redirect(new URL(process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL || 'http://localhost:3030/law'));
+    if (ADMIN_CONSOLE_URL) {
+      return NextResponse.redirect(new URL(ADMIN_CONSOLE_URL));
+    }
   }
 
   const response = NextResponse.next();

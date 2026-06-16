@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -10,6 +11,7 @@ const rateLimit = require('./middleware/rateLimit');
 const v1Routes = require('./routes/v1');
 const { notFoundHandler, errorHandler } = require('./middleware/error');
 const neo = require('./config/neo4j');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -42,7 +44,13 @@ const start = async () => {
         await initSdk();
         if (config.startEventConsumer) await require('./workers/eventConsumer').startEventConsumer();
     } catch (err) { console.warn(`[${config.service}] SDK/consumer degraded:`, err.message); }
-    app.listen(config.port, () => console.log(`[${config.service}] running on port ${config.port}`));
+    const server = app.listen(config.port, () => console.log(`[${config.service}] running on port ${config.port}`));
+    registerShutdown('event-consumer', async () => {
+        const { stopEventConsumer } = require('./workers/eventConsumer');
+        if (typeof stopEventConsumer === 'function') await stopEventConsumer();
+    });
+    registerShutdown('neo4j', async () => { if (neo.close) await neo.close(); });
+    initGracefulShutdown(server);
 };
 
 if (require.main === module) start();

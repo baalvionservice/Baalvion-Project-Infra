@@ -14,10 +14,13 @@
     "test": "node --test"
   },
   "dependencies": {
+    "@baalvion/telemetry": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@aws-sdk/client-s3": "^3.1053.0",
     "@aws-sdk/s3-request-presigner": "^3.1053.0",
     "@baalvion/auth-node": "workspace:*",
+    "@baalvion/upload": "workspace:*",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",

@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const http = require('http');
@@ -12,6 +13,7 @@ const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const searchService = require('./services/searchService');
 const logger = require('./utils/logger');
+const { initGracefulShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 const server = http.createServer(app);
@@ -52,9 +54,7 @@ const start = async () => {
         logger.warn({ err: err.message }, '[Search] index bootstrap skipped');
     }
     server.listen(config.port, () => logger.info(`[Search] running on port ${config.port} (RS256=${jwt.isRs256Enabled()})`));
-    const shutdown = () => server.close(() => process.exit(0));
-    process.on('SIGTERM', shutdown);
-    process.on('SIGINT', shutdown);
+    initGracefulShutdown(server);
 };
 
 if (require.main === module) start();

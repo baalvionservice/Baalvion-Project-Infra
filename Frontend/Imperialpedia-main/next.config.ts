@@ -72,6 +72,9 @@ const nextConfig: NextConfig = {
     ];
   },
   async headers() {
+    // Next.js dev (webpack HMR + react-refresh) runs on eval(); a prod CSP without
+    // 'unsafe-eval' is correct, but dev needs it or the client bundle won't hydrate.
+    const isDev = process.env.NODE_ENV !== 'production';
     return [
       {
         source: '/(.*)',
@@ -91,7 +94,7 @@ const nextConfig: NextConfig = {
               // Google Analytics / Tag Manager + AdSense hosts are allow-listed so analytics
               // works when NEXT_PUBLIC_GA_ID / NEXT_PUBLIC_ADSENSE_CLIENT are set; the scripts
               // themselves only render when those env vars are configured (see Analytics.tsx).
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com",
+              `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com`,
               "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com",
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https://picsum.photos https://images.unsplash.com https://placehold.co https://imperialpedia.com https://www.investopedia.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net",

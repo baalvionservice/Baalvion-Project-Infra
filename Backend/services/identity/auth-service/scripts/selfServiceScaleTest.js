@@ -17,7 +17,7 @@
  * Override defaults via env:
  *   GATEWAY_URL=http://localhost:3099 \
  *   PLATFORM_OWNER_EMAIL=superadmin@baalvion.com \
- *   PLATFORM_OWNER_PASSWORD='Sup3rAdmin!2026' \
+ *   PLATFORM_OWNER_PASSWORD=process.env.SUPERADMIN_PASSWORD \
  *   node scripts/selfServiceScaleTest.js
  *
  * Steps that require an emailed invite token are logged as
@@ -29,7 +29,7 @@
 
 const GATEWAY_URL = process.env.GATEWAY_URL || 'http://localhost:3099';
 const PLATFORM_OWNER_EMAIL = process.env.PLATFORM_OWNER_EMAIL || 'superadmin@baalvion.com';
-const PLATFORM_OWNER_PASSWORD = process.env.PLATFORM_OWNER_PASSWORD || 'Sup3rAdmin!2026';
+const PLATFORM_OWNER_PASSWORD = process.env.PLATFORM_OWNER_PASSWORD;
 
 // ─── Result tracking ─────────────────────────────────────────────────────────
 

@@ -25,7 +25,7 @@ const path = require('path');
 const AUTH = process.env.AUTH_URL || 'http://localhost:3001/v1/auth';
 const CMS = process.env.CMS_URL || 'http://localhost:3011/api/v1';
 const EMAIL = process.env.SUPERADMIN_EMAIL || 'superadmin@baalvion.com';
-const PW = process.env.SUPERADMIN_PASSWORD || 'Sup3rAdmin!2026';
+const PW = process.env.SUPERADMIN_PASSWORD;
 const WEBSITE_ID = process.env.ABOUT_WEBSITE_ID || 'cf2d3583-7247-48a6-9fd2-0959043c7a8b';
 const BASE = `${CMS}/cms/websites/${WEBSITE_ID}`;
 

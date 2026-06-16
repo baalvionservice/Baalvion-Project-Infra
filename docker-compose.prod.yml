@@ -1,0 +1,48 @@
+# Production override — apply ON TOP of docker-compose.yml:
+#
+#     docker compose -f docker-compose.yml -f docker-compose.prod.yml --profile backend up -d
+#
+# It does NOT redefine services; it only layers the production-hardening
+# environment variables that MUST be present in a real deployment. Compose
+# merges these `environment` maps into the base service definitions by key.
+#
+# Required production environment variables (see .env.example for full notes):
+#
+#   UPLOAD_SCAN_URL        HTTP malware-scan endpoint for @baalvion/upload. When a
+#                          media service starts in production with UPLOAD_SCAN_REQUIRED
+#                          true and NO scanner wired, it FAILS CLOSED (503 on upload).
+#   UPLOAD_SCAN_REQUIRED   Defaults true here (fail-closed). Set "false" to opt out.
+#   DB_JDBC_PARAMS         Appended verbatim to the JDBC URL of the
+#                          financial-services-java stack (deployed separately — NOT in
+#                          this compose). Required when the database enforces TLS, e.g.
+#                          DB_JDBC_PARAMS=?sslmode=require — otherwise every Java
+#                          payment/finance service is refused at connect time.
+#   DB_SSL / DB_SSL_*      Node services derive Postgres TLS from these (buildPgSsl).
+
+services:
+  cms-service:
+    environment:
+      - NODE_ENV=production
+      - UPLOAD_SCAN_URL=${UPLOAD_SCAN_URL}
+      - UPLOAD_SCAN_REQUIRED=${UPLOAD_SCAN_REQUIRED:-true}
+      - UPLOAD_SCAN_TIMEOUT_MS=${UPLOAD_SCAN_TIMEOUT_MS:-8000}
+      - DB_SSL=${DB_SSL:-require}
+      - DB_SSL_REJECT_UNAUTHORIZED=${DB_SSL_REJECT_UNAUTHORIZED:-true}
+
+  commerce-service:
+    environment:
+      - NODE_ENV=production
+      - UPLOAD_SCAN_URL=${UPLOAD_SCAN_URL}
+      - UPLOAD_SCAN_REQUIRED=${UPLOAD_SCAN_REQUIRED:-true}
+      - UPLOAD_SCAN_TIMEOUT_MS=${UPLOAD_SCAN_TIMEOUT_MS:-8000}
+      - DB_SSL=${DB_SSL:-require}
+      - DB_SSL_REJECT_UNAUTHORIZED=${DB_SSL_REJECT_UNAUTHORIZED:-true}
+
+  law-service:
+    environment:
+      - NODE_ENV=production
+      - UPLOAD_SCAN_URL=${UPLOAD_SCAN_URL}
+      - UPLOAD_SCAN_REQUIRED=${UPLOAD_SCAN_REQUIRED:-true}
+      - UPLOAD_SCAN_TIMEOUT_MS=${UPLOAD_SCAN_TIMEOUT_MS:-8000}
+      - DB_SSL=${DB_SSL:-require}
+      - DB_SSL_REJECT_UNAUTHORIZED=${DB_SSL_REJECT_UNAUTHORIZED:-true}

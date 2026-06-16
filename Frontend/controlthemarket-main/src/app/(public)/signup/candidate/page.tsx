@@ -1,34 +1,25 @@
-
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { CandidateSignupForm } from './candidate-signup-form';
 import Link from 'next/link';
+import { AuthShell } from '@/components/auth/auth-shell';
+import { CandidateSignupForm } from './candidate-signup-form';
 
 export default function CandidateSignupPage() {
   return (
-    <div className="container flex min-h-[calc(100vh-8rem)] items-center justify-center py-10">
-      <Card className="mx-auto w-full max-w-lg">
-        <CardHeader>
-          <CardTitle className="text-2xl font-headline">Create Your Candidate Account</CardTitle>
-          <CardDescription>
-            Show your skills. Get hired based on what you can do.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <CandidateSignupForm />
-          <div className="mt-4 text-center text-sm">
-            Already have an account?{' '}
-            <Link href="/login" className="underline">
-              Log in
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <AuthShell
+      variant="candidate"
+      title="Create your candidate account"
+      subtitle="Show what you can build. Get hired on what you can do."
+      backHref="/signup"
+      backLabel="Choose a different path"
+      footer={
+        <>
+          Already have an account?{' '}
+          <Link href="/login" className="font-medium text-primary underline-offset-4 hover:underline">
+            Log in
+          </Link>
+        </>
+      }
+    >
+      <CandidateSignupForm />
+    </AuthShell>
   );
 }

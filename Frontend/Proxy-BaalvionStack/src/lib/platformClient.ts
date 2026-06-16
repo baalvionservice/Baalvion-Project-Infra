@@ -118,8 +118,10 @@ export const billingApi = {
     get<{ filename: string; contentType: string; content: string }>(`/billing/invoices/${id}/document`),
   // Pay-As-You-Go prepaid credit wallet.
   getCredit: () => get<{ balanceUsd: number; gbRemaining: number; usdPerGb: number }>("/billing/credit"),
-  buyCredit: (amountUsd: number) =>
-    post<{ balanceUsd: number; gbRemaining: number; usdPerGb: number; planSlug: string }>("/billing/credit", { amountUsd }),
+  // paymentRef = the settled gateway payment id → the server keys the top-up to it so it can't be
+  // double-credited (client call + provider webhook net one top-up).
+  buyCredit: (amountUsd: number, paymentRef?: string) =>
+    post<{ balanceUsd: number; gbRemaining: number; usdPerGb: number; planSlug: string }>("/billing/credit", { amountUsd, paymentRef }),
   getPaymentMethods: () => get<PaymentMethod[]>("/billing/payment-methods"),
   addPaymentMethod: (data: Partial<PaymentMethod>) => post<PaymentMethod>("/billing/payment-methods", data),
   deletePaymentMethod: (id: string) => del<void>(`/billing/payment-methods/${id}`),

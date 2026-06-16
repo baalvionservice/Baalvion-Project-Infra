@@ -37,17 +37,29 @@ const listLedger = async (orgId, limit = 50) => {
     return rows || [];
 };
 
-// Append a credit top-up. `amount` is USD; idempotency is the caller's concern
-// (in production this is keyed to a settled payment).
-const addCredit = async (orgId, amount, reason = 'topup') => {
+// Append a credit top-up. `amount` is USD. When `opts.ref` (a settled gateway payment id) is given,
+// the top-up is IDEMPOTENT: the ref is embedded in `reason` and a credit already carrying it is a
+// no-op. This is how a payment becomes the authoritative trigger — the provider webhook and the
+// client convenience call both pass the same payment id, so they net exactly ONE top-up.
+// (Production hardening: a partial unique index on (org_id, reason) WHERE entry_type='credit' would
+// also close the sub-millisecond race between two concurrent inserts.)
+const addCredit = async (orgId, amount, reason = 'topup', opts = {}) => {
     const usd = Number(amount);
     if (!(usd >= MIN_TOPUP) || usd > MAX_TOPUP) {
         throw new AppError('VALIDATION', `Top-up must be between $${MIN_TOPUP} and $${MAX_TOPUP}`, 400);
     }
+    const ledgerReason = opts.ref ? `${reason}:${opts.ref}` : reason;
+    if (opts.ref) {
+        const [dupe] = await db.sequelize.query(
+            `SELECT 1 FROM credit_ledger WHERE org_id = :orgId AND entry_type = 'credit' AND reason = :ledgerReason LIMIT 1`,
+            { replacements: { orgId, ledgerReason } }
+        );
+        if (dupe && dupe.length) return getBalance(orgId); // already credited for this payment
+    }
     await db.sequelize.query(
         `INSERT INTO credit_ledger (org_id, amount, reason, entry_type, currency, created_at)
          VALUES (:orgId, :amount, :reason, 'credit', 'USD', now())`,
-        { replacements: { orgId, amount: usd, reason } }
+        { replacements: { orgId, amount: usd, reason: ledgerReason } }
     );
     return getBalance(orgId);
 };

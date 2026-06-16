@@ -1,3 +1,4 @@
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -9,6 +10,7 @@ const rateLimit = require('./middleware/rateLimit');
 const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 // BullMQ workers — started after DB connects
 let workersStarted = false;
@@ -84,9 +86,19 @@ const start = async () => {
         console.error('[DB] Failed:', err.message);
         process.exit(1);
     }
-    app.listen(config.port, () =>
+    const server = app.listen(config.port, () =>
         console.log(`Baalvion Jobs Service (TalentOS) running on port ${config.port}`)
     );
+
+    // Graceful shutdown: drain HTTP, then close BullMQ queues, Redis, and DB.
+    registerShutdown('queues', async () => {
+        const q = require('./queues');
+        await Promise.all(['emailQueue', 'scoringQueue', 'indexingQueue', 'resumeQueue']
+            .map((k) => (q[k] && q[k].close ? q[k].close() : null)));
+    });
+    registerShutdown('redis', async () => { const c = require('./config/redis'); if (c && c.quit) await c.quit(); });
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 start();

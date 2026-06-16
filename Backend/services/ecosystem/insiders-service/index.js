@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 
 const fs = require('fs');
 const path = require('path');
@@ -14,6 +15,7 @@ const authTrace = require('./observability/authTrace');
 const rateLimit = require('./middleware/rateLimit');
 const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 
@@ -101,11 +103,14 @@ const start = async () => {
         process.exit(1);
     }
 
-    app.listen(config.port, () => {
+    const server = app.listen(config.port, () => {
         console.log(
             `[insiders-service] running on http://localhost:${config.port}`
         );
     });
+
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 // ─────────────────────────────
