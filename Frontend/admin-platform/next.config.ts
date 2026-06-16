@@ -1,5 +1,25 @@
 import type { NextConfig } from 'next';
 
+// Next.js dev (webpack HMR + react-refresh) runs on eval() and a localhost websocket; a prod-grade
+// CSP that omits 'unsafe-eval'/ws breaks the client bundle in dev (nothing hydrates). Relax in dev
+// only; prod stays strict. 'unsafe-inline' stays for inline JSON-LD / Next bootstrap.
+const isDev = process.env.NODE_ENV !== 'production';
+
+// The admin console talks to many backend services through the same-origin /api/proxy rewrite, so
+// connect-src stays permissive (https: + self) rather than enumerating every microservice origin.
+const cspHeader = `
+  default-src 'self';
+  script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''};
+  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+  img-src 'self' data: https: blob:;
+  font-src 'self' https://fonts.gstatic.com data:;
+  connect-src 'self' https:${isDev ? ' http://localhost:* ws://localhost:* ws://127.0.0.1:*' : ''};
+  frame-ancestors 'none';
+  base-uri 'self';
+  object-src 'none';
+  form-action 'self';
+`.replace(/\s{2,}/g, ' ').trim();
+
 const nextConfig: NextConfig = {
   // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
   // Standalone file-tracing recreates the pnpm symlink tree, which throws EPERM on Windows
@@ -43,9 +63,14 @@ const nextConfig: NextConfig = {
       {
         source: '/(.*)',
         headers: [
+          { key: 'Content-Security-Policy', value: cspHeader },
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains',
+          },
         ],
       },
       {

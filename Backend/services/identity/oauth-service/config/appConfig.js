@@ -1,6 +1,20 @@
 'use strict';
 require('dotenv').config();
 
+// Fail-closed: oauth-service signs RS256 tokens, so a production deploy MUST have a
+// private key source. Booting without one would defer the failure to the first
+// /token request (a runtime 500 in front of users) — refuse to start instead.
+if ((process.env.NODE_ENV || 'development') === 'production') {
+    const hasPrivateKey = process.env.JWT_PRIVATE_KEY_PATH
+        || process.env.JWT_PRIVATE_KEY_B64
+        || process.env.JWT_PRIVATE_KEY;
+    if (!hasPrivateKey) {
+        console.error('[oauth-service] FATAL: no JWT private key configured '
+            + '(set JWT_PRIVATE_KEY_PATH | JWT_PRIVATE_KEY_B64 | JWT_PRIVATE_KEY)');
+        process.exit(1);
+    }
+}
+
 module.exports = {
     port:    parseInt(process.env.PORT || '3023', 10),
     nodeEnv: process.env.NODE_ENV || 'development',

@@ -55,9 +55,12 @@ const nextConfig: NextConfig = {
     return [{ source: '/auth-bff/:path*', destination: `${authTarget}/:path*` }];
   },
   async headers() {
+    // Next.js dev (webpack HMR + react-refresh) runs on eval(); a prod CSP without
+    // 'unsafe-eval' is correct, but dev needs it or the client bundle won't hydrate.
+    const isDev = process.env.NODE_ENV !== 'production';
     const cspHeader = `
       default-src 'self';
-      script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com;
+      script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       img-src 'self' blob: data: https://images.unsplash.com https://placehold.co https://www.google-analytics.com https://www.googletagmanager.com;
       font-src 'self' data: https://fonts.gstatic.com;

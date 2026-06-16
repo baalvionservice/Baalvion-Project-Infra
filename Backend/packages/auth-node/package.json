@@ -8,7 +8,8 @@
     "index.js",
     "requireEnv.js",
     "rbac.js",
-    "blacklist.js"
+    "blacklist.js",
+    "dbSsl.js"
   ],
   "scripts": {
     "test": "node test.smoke.js && node --test \"tests/**/*.test.mjs\""
