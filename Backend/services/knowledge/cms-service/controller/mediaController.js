@@ -3,6 +3,7 @@ const media = require('../service/mediaService');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 const { readRawBody, parseMultipart } = require('../utils/multipart');
+const { guardUpload } = require('@baalvion/upload/validate.js');
 
 const orgOf = (req) => req.auth && req.auth.orgId;
 const userOf = (req) => req.auth && req.auth.userId;
@@ -28,6 +29,15 @@ exports.upload = async (req, res, next) => {
         const raw = await readRawBody(req);
         const parts = parseMultipart(raw, req.headers['content-type']);
         const filePart = parts.find((p) => p.name === 'file' && p.filename) || parts.find((p) => p.filename);
+        if (!filePart || !filePart.data) {
+            return res.status(400).json({ error: { code: 'NO_FILE', message: 'no file part in upload' } });
+        }
+        // Upload security enforcement: magic-byte (polyglot) validation + malware scan. Fails CLOSED in
+        // production (UPLOAD_SCAN_REQUIRED defaults true → 503 if no scanner wired). See @baalvion/upload.
+        const guard = await guardUpload(filePart.data, { declaredMime: filePart.contentType, filename: filePart.filename });
+        if (!guard.ok) {
+            return res.status(guard.status).json({ error: { code: guard.code, message: guard.message } });
+        }
         const folderField = parts.find((p) => p.name === 'folderId' && !p.filename);
         const file = await media.saveUpload({
             filePart,
