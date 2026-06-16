@@ -18,16 +18,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       # This is a pnpm + Turborepo monorepo: the lockfile (pnpm-lock.yaml) lives
       # at the repo root and there is no per-app package-lock.json, so dependency
       # install must run from the root via pnpm — not `npm ci` in the app folder.
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -64,13 +64,13 @@ jobs:
       NEXT_PUBLIC_APP_URL: ${{ secrets.JOBS_APP_URL || 'http://localhost:3026' }}
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '20'
           cache: 'pnpm'
@@ -85,7 +85,7 @@ jobs:
         run: pnpm --filter baalvion-jobs-portal-web run build
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: jobs-portal-build
           path: Frontend/Baalvion-Jobs-Portal-main/.next
