@@ -1,29 +1,22 @@
 {
   "name": "@baalvion/graceful-shutdown",
   "version": "1.0.0",
-  "description": "Graceful HTTP server shutdown with registered cleanup handlers",
+  "description": "Graceful HTTP server shutdown with registered cleanup handlers (committed plain CommonJS — no build step, resolves in pruned production images)",
   "private": true,
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./index.js",
+  "types": "./index.d.ts",
   "exports": {
     ".": {
-      "types":   "./dist/index.d.ts",
-      "import":  "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./package.json": "./package.json"
   },
-  "files": ["dist"],
+  "files": ["index.js", "index.d.ts"],
   "scripts": {
-    "build":      "tsup",
-    "dev":        "tsup --watch",
-    "type-check": "tsc --noEmit",
-    "clean":      "rimraf dist"
+    "build": "node -e \"process.exit(0)\"",
+    "test": "node --test test/*.test.mjs"
   },
   "dependencies": {},
-  "devDependencies": {
-    "tsup":       "^8.3.0",
-    "typescript": "^5.7.2",
-    "rimraf":     "^6.0.1",
-    "@types/node": "^20.0.0"
-  }
+  "devDependencies": {}
 }

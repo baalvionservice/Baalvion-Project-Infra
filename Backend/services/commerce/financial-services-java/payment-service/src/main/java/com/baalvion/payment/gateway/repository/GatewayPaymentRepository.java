@@ -26,4 +26,15 @@ public interface GatewayPaymentRepository extends JpaRepository<GatewayPayment, 
     @Param("provider") String provider,
     @Param("providerRef") String providerRef
   );
+
+  /**
+   * Charge id lookup SCOPED TO THE TENANT. get/capture/refund must use this instead of the
+   * inherited {@code findById}, otherwise a caller for site A could read/capture/refund a charge
+   * owned by site B (cross-tenant IDOR on financial records).
+   */
+  @Query("SELECT g FROM GatewayPayment g WHERE g.id = :id AND g.websiteSlug = :websiteSlug")
+  Optional<GatewayPayment> findByIdAndWebsiteSlug(
+    @Param("id") UUID id,
+    @Param("websiteSlug") String websiteSlug
+  );
 }

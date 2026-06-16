@@ -235,7 +235,15 @@ function DomainManager() {
   );
 }
 
-function WhiteLabelForm({ wl, onSave, saving }: { wl: any; onSave: (c: Record<string, unknown>) => void; saving: boolean }) {
+interface WhiteLabelConfig {
+  domain?: string;
+  brand_name?: string;
+  primary_color?: string;
+  support_email?: string;
+  enabled?: boolean;
+}
+
+function WhiteLabelForm({ wl, onSave, saving }: { wl: WhiteLabelConfig | null | undefined; onSave: (c: Record<string, unknown>) => void; saving: boolean }) {
   const [f, setF] = useState({ domain: wl?.domain || "", brandName: wl?.brand_name || "", primaryColor: wl?.primary_color || "#6d28d9", supportEmail: wl?.support_email || "", enabled: wl?.enabled ?? false });
   return (
     <>

@@ -39,7 +39,7 @@ const proxySchema = z.object({
 }).passthrough();
 const presetSchema = z.object({ name: z.string().min(2), country: z.string().min(2).max(2), type: z.string(), protocol: z.string() }).passthrough();
 const planChangeSchema = z.object({ planSlug: z.string().min(2) });
-const creditPurchaseSchema = z.object({ amountUsd: z.coerce.number().positive().max(10000) });
+const creditPurchaseSchema = z.object({ amountUsd: z.coerce.number().positive().max(10000), paymentRef: z.string().max(128).optional() });
 // Activation may carry the exact charged total + interval so the invoice reflects the real amount.
 const activateSchema = z.object({
     planSlug: z.string().min(2),

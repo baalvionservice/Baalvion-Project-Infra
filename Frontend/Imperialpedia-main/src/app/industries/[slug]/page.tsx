@@ -8,6 +8,8 @@ import { DataTable } from "@/components/knowledge/DataTable";
 import { RelatedEntities } from "@/components/knowledge/RelatedEntities";
 import { getIndustryBySlug } from "@/lib/data/loaders";
 import { generateEntityMetadata } from "@/lib/utils/seo";
+import { structuredData } from "@/lib/seo/structuredData";
+import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
 import { QuickStats } from "@/components/entity/QuickStats";
 import { RelatedHighlights } from "@/components/entity/RelatedHighlights";
 import { AIInsight } from "@/components/ai/AIInsight";
@@ -51,8 +53,11 @@ export default async function Page({ params }: PageProps) {
     { label: "Active Hubs", value: industry.top_countries.length },
   ];
 
+  const schema = structuredData.entity(industry, "industry");
+
   return (
     <main className="min-h-screen bg-background pt-20 pb-32">
+      <JsonLd data={schema} />
       <Container>
         <EntityHeader
           name={industry.name}

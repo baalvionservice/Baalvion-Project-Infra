@@ -20,7 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +56,7 @@ public class InvoiceService {
   private final InvoiceRepository repository;
   private final InvoiceLineItemRepository lineItemRepository;
   private final InvoiceEventRepository eventRepository;
-  private final KafkaTemplate<String, String> kafkaTemplate;
+  private final OutboxService outboxService;
   private final ObjectMapper objectMapper;
   private final SecureRandom random = new SecureRandom();
 
@@ -84,21 +83,22 @@ public class InvoiceService {
   public InvoiceService(InvoiceRepository repository,
                         InvoiceLineItemRepository lineItemRepository,
                         InvoiceEventRepository eventRepository,
-                        KafkaTemplate<String, String> kafkaTemplate,
+                        OutboxService outboxService,
                         ObjectMapper objectMapper) {
     this.repository = repository;
     this.lineItemRepository = lineItemRepository;
     this.eventRepository = eventRepository;
-    this.kafkaTemplate = kafkaTemplate;
+    this.outboxService = outboxService;
     this.objectMapper = objectMapper;
   }
 
-  private void publish(String topic, String key, Object payload) {
-    try {
-      kafkaTemplate.send(topic, key, objectMapper.writeValueAsString(payload));
-    } catch (Exception e) {
-      log.error("Failed to publish {} for key {}: {}", topic, key, e.getMessage());
-    }
+  /**
+   * Enqueue a domain event onto the transactional outbox. Runs inside the caller's @Transactional
+   * method, so the event row commits atomically with the invoice mutation and is then delivered to
+   * Kafka by {@link OutboxRelay} with retry + dead-letter — no more fire-and-forget event loss.
+   */
+  private void publish(UUID tenantId, String topic, String key, Object payload) {
+    outboxService.enqueue(tenantId, topic, key, payload);
   }
 
   // ---- Create ----
@@ -166,7 +166,7 @@ public class InvoiceService {
       saved.getId(), tenantId, saved.getInvoiceNumber(), direction, total);
 
     InvoiceResponse response = mapToResponse(saved, lineItems);
-    publish("invoice.created", saved.getId().toString(), response);
+    publish(tenantId, "invoice.created", saved.getId().toString(), response);
     return response;
   }
 
@@ -224,7 +224,7 @@ public class InvoiceService {
     }
     Invoice saved = repository.save(invoice);
     recordEvent(saved, "INVOICE_ISSUED", from, Status.ISSUED, actor, null);
-    publish("invoice.issued", saved.getId().toString(), mapToResponseWithoutLines(saved));
+    publish(tenantId, "invoice.issued", saved.getId().toString(), mapToResponseWithoutLines(saved));
     return mapToResponse(saved, lineItemRepository.findByInvoice(invoiceId, tenantId));
   }
 
@@ -234,7 +234,7 @@ public class InvoiceService {
     transition(invoice, Status.CANCELLED, actor, "CANCELLED");
     Invoice saved = repository.save(invoice);
     recordEvent(saved, "INVOICE_CANCELLED", from, Status.CANCELLED, actor, null);
-    publish("invoice.cancelled", saved.getId().toString(), mapToResponseWithoutLines(saved));
+    publish(tenantId, "invoice.cancelled", saved.getId().toString(), mapToResponseWithoutLines(saved));
     return mapToResponse(saved, lineItemRepository.findByInvoice(invoiceId, tenantId));
   }
 
@@ -244,7 +244,7 @@ public class InvoiceService {
     transition(invoice, Status.DISPUTED, actor, "DISPUTED");
     Invoice saved = repository.save(invoice);
     recordEvent(saved, "INVOICE_DISPUTED", from, Status.DISPUTED, actor, null);
-    publish("invoice.disputed", saved.getId().toString(), mapToResponseWithoutLines(saved));
+    publish(tenantId, "invoice.disputed", saved.getId().toString(), mapToResponseWithoutLines(saved));
     return mapToResponse(saved, lineItemRepository.findByInvoice(invoiceId, tenantId));
   }
 
@@ -301,7 +301,7 @@ public class InvoiceService {
     event.put("amount", request.getAmount());
     event.put("amountPaid", newPaid);
     event.put("status", target.name());
-    publish("invoice.payment.recorded", invoiceId.toString(), event);
+    publish(tenantId, "invoice.payment.recorded", invoiceId.toString(), event);
 
     return mapToResponse(saved, lineItemRepository.findByInvoice(invoiceId, tenantId));
   }

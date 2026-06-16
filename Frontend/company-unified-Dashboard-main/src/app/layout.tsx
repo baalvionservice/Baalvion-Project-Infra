@@ -6,6 +6,7 @@ import PwaLoader from '@/components/pwa-loader';
 import InstallPrompt from '@/components/install-prompt';
 import Script from 'next/script';
 import { RoleProvider } from '@/hooks/use-view-role';
+import { AuthGate } from '@/components/auth-gate';
 
 export const metadata: Metadata = {
   icons: { icon: 'data:,' },
@@ -48,7 +49,9 @@ export default function RootLayout({
           'min-h-screen bg-background font-body antialiased'
         )}
       >
-        <RoleProvider>{children}</RoleProvider>
+        <RoleProvider>
+          <AuthGate>{children}</AuthGate>
+        </RoleProvider>
         <PwaLoader />
         <Toaster />
         <InstallPrompt />

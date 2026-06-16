@@ -23,7 +23,7 @@ export async function generateMetadata(
   const { categorySlug } = await params;
   const cat = await fetchCategory(categorySlug);
   const name = cat?.name || titleCase(categorySlug);
-  const title = `${name} Lawyers & Legal Resources`;
+  const title = `${name} Attorneys & Legal Services | Law Elite Network`;
   const description = cat?.description
     || `Find verified ${name} lawyers across 188 countries and read expert ${name} guides on Law Elite Network.`;
   const url = `${SITE}/law/${categorySlug}`;
@@ -32,6 +32,7 @@ export async function generateMetadata(
     description,
     keywords: [name, `${name} lawyer`, `${name} attorney`, 'legal advice', 'find a lawyer'],
     alternates: { canonical: url },
+    robots: { index: true, follow: true },
     openGraph: { type: 'website', url, title, description },
     twitter: { card: 'summary_large_image', title, description },
   };
@@ -51,9 +52,18 @@ export default async function CategoryLayout(
     url: `${SITE}/law/${categorySlug}`,
     isPartOf: { '@type': 'WebSite', name: 'Law Elite Network', url: SITE },
   };
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE },
+      { '@type': 'ListItem', position: 2, name, item: `${SITE}/law/${categorySlug}` },
+    ],
+  };
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {children}
     </>
   );

@@ -3,6 +3,7 @@ const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const storage = require('../service/storage');
+const { guardUpload } = require('@baalvion/upload/validate.js');
 
 const listDocuments = async (req, res, next) => {
     try {
@@ -74,6 +75,10 @@ const uploadDocument = async (req, res, next) => {
 const uploadFile = async (req, res, next) => {
     try {
         if (!req.file) return next(new AppError('BAD_REQUEST', 'file is required (multipart field "file")', 400));
+        // Upload security enforcement: magic-byte (polyglot) validation + malware scan, fail-closed in
+        // production (UPLOAD_SCAN_REQUIRED defaults true). req.file.mimetype is client-declared → not trusted.
+        const guard = await guardUpload(req.file.buffer, { declaredMime: req.file.mimetype, filename: req.file.originalname });
+        if (!guard.ok) return next(new AppError(guard.code, guard.message, guard.status));
         const { case_id, category } = req.body;
         const safeName = (req.file.originalname || 'file').replace(/[^\w.\-]+/g, '_');
         const key = `${req.user.id}/${Date.now()}-${safeName}`;

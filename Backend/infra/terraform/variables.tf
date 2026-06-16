@@ -16,7 +16,7 @@ variable "environment" {
 variable "region" {
   description = "Cloud provider region"
   type        = string
-  default     = "ap-south-1"   # Mumbai — primary region
+  default     = "ap-south-1" # Mumbai — primary region
 }
 
 # ── Kubernetes ────────────────────────────────────────────────────────────────
@@ -41,7 +41,13 @@ variable "node_pool_max" {
 variable "node_instance_type" {
   description = "Instance type / machine type for worker nodes"
   type        = string
-  default     = "t3.medium"  # 2 vCPU / 4 GiB
+  default     = "t3.medium" # 2 vCPU / 4 GiB
+}
+
+variable "eks_public_access_cidrs" {
+  description = "CIDRs allowed to reach the public EKS API endpoint. Restrict to office/VPN/CI ranges in production (default is open)."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
 }
 
 # ── PostgreSQL ────────────────────────────────────────────────────────────────
@@ -125,6 +131,13 @@ variable "alert_email" {
   default     = "infra.baalvion@gmail.com"
 }
 
+# ── Observability ───────────────────────────────────────────────────────────────
+variable "log_retention_days" {
+  description = "CloudWatch log retention (days) for EKS control-plane + application/gateway log groups."
+  type        = number
+  default     = 90
+}
+
 # ── Global edge network ─────────────────────────────────────────────────────────
 variable "proxy_dns_zone" {
   description = "Public DNS zone for proxy edge endpoints"
@@ -156,4 +169,146 @@ variable "edge_regions" {
     is_default   = optional(bool, false)
   }))
   default = []
+}
+
+# ── Feature flags (all default OFF — adding these modules must not disrupt an
+#    existing `terraform apply`) ────────────────────────────────────────────────
+variable "enable_s3" {
+  type    = bool
+  default = false
+}
+variable "enable_cloudfront" {
+  type    = bool
+  default = false
+}
+variable "enable_alb" {
+  type    = bool
+  default = false
+}
+variable "enable_waf" {
+  type    = bool
+  default = false
+}
+variable "enable_ecr" {
+  type    = bool
+  default = false
+}
+variable "enable_secrets" {
+  type    = bool
+  default = false
+}
+variable "enable_vpc_endpoints" {
+  type    = bool
+  default = false
+}
+
+# ── S3 ────────────────────────────────────────────────────────────────────────
+variable "s3_kms_key_arn" {
+  description = "Optional KMS key ARN for S3 SSE. Empty = AES256 (SSE-S3)."
+  type        = string
+  default     = ""
+}
+
+variable "s3_buckets" {
+  description = "Logical bucket name -> lifecycle/versioning settings (see modules/s3)."
+  type = map(object({
+    versioning_enabled         = optional(bool, true)
+    force_destroy              = optional(bool, false)
+    noncurrent_expiration_days = optional(number, 90)
+    expiration_days            = optional(number, 0)
+    transition_ia_days         = optional(number, 0)
+    transition_glacier_days    = optional(number, 0)
+    abort_multipart_days       = optional(number, 7)
+  }))
+  default = {
+    uploads = { versioning_enabled = true, noncurrent_expiration_days = 90 }
+    assets  = { versioning_enabled = true, noncurrent_expiration_days = 30 }
+    backups = { versioning_enabled = true, transition_glacier_days = 30, expiration_days = 365 }
+  }
+}
+
+# ── CloudFront ──────────────────────────────────────────────────────────────────
+variable "cloudfront_origin_bucket_key" {
+  description = "Which s3_buckets key serves as the CloudFront origin (requires enable_s3)."
+  type        = string
+  default     = "assets"
+}
+
+variable "cloudfront_aliases" {
+  description = "Custom domain CNAMEs for the CloudFront distribution."
+  type        = list(string)
+  default     = []
+}
+
+variable "cloudfront_acm_certificate_arn" {
+  description = "ACM cert ARN for CloudFront custom domain (MUST be in us-east-1). Empty = default cert."
+  type        = string
+  default     = ""
+}
+
+# ── ALB ─────────────────────────────────────────────────────────────────────────
+variable "alb_acm_certificate_arn" {
+  description = "ACM cert ARN for the ALB HTTPS (443) listener (regional)."
+  type        = string
+  default     = ""
+}
+
+variable "alb_ingress_cidrs" {
+  description = "CIDRs permitted to reach the ALB on 80/443."
+  type        = list(string)
+  default     = ["0.0.0.0/0"]
+}
+
+# ── WAF ─────────────────────────────────────────────────────────────────────────
+variable "waf_rate_limit" {
+  description = "Requests per 5-min window per IP before the WAF rate rule blocks."
+  type        = number
+  default     = 2000
+}
+
+# ── ECR ─────────────────────────────────────────────────────────────────────────
+variable "ecr_repositories" {
+  description = "Service names to create ECR repositories for (one repo each)."
+  type        = set(string)
+  default     = []
+}
+
+variable "ecr_keep_last_images" {
+  description = "Number of most-recent images each ECR repo retains."
+  type        = number
+  default     = 20
+}
+
+variable "ecr_image_tag_mutability" {
+  description = "IMMUTABLE (recommended) or MUTABLE for ECR repos."
+  type        = string
+  default     = "IMMUTABLE"
+}
+
+# ── Secrets Manager / SSM ─────────────────────────────────────────────────────────
+variable "secrets" {
+  description = "Logical secret name -> settings (see modules/secrets)."
+  type = map(object({
+    description   = optional(string, "")
+    initial_value = optional(string, "")
+    recovery_days = optional(number, 7)
+  }))
+  default   = {}
+  sensitive = true
+}
+
+variable "ssm_parameters" {
+  description = "Logical name -> non-secret SecureString SSM parameter (see modules/secrets)."
+  type = map(object({
+    value       = string
+    description = optional(string, "")
+  }))
+  default   = {}
+  sensitive = true
+}
+
+variable "secrets_kms_key_arn" {
+  description = "Optional KMS key ARN for Secrets Manager / SSM. Empty = AWS-managed key."
+  type        = string
+  default     = ""
 }

@@ -8,7 +8,7 @@
  * ONE membership with role='super_admin' to guarantee a clean super-admin token.
  *
  *   Email:    superadmin@baalvion.com   (override: SUPERADMIN_EMAIL)
- *   Password: Sup3rAdmin!2026           (override: SUPERADMIN_PASSWORD)
+ *   Password: REQUIRED via SUPERADMIN_PASSWORD env var (no default is shipped)
  *
  * Usage:  node scripts/bootstrapSuperAdmin.js
  */
@@ -16,7 +16,12 @@ const { Client } = require('pg');
 const password   = require('../utils/password');
 
 const EMAIL = process.env.SUPERADMIN_EMAIL    || 'superadmin@baalvion.com';
-const PW    = process.env.SUPERADMIN_PASSWORD || 'Sup3rAdmin!2026';
+// No default password is shipped — it must be provided explicitly (fail-closed).
+const PW    = process.env.SUPERADMIN_PASSWORD;
+if (!PW) {
+    console.error('Refusing to bootstrap: set the SUPERADMIN_PASSWORD env var (no default password is shipped).');
+    process.exit(1);
+}
 const NAME  = 'Platform Super Admin';
 const ORG_NAME = 'Baalvion Platform';
 const ORG_SLUG = 'baalvion-platform';

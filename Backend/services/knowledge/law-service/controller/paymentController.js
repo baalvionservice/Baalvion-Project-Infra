@@ -130,11 +130,17 @@ const verifyPayment = async (req, res, next) => {
         // chosen by the server-side gateway state, NOT by whether the client supplied a signature.
         // A missing/empty client signature must fail verification, never fall through to settlement.
         if (razorpay.isConfigured()) {
-            const ok = razorpay_signature && razorpay.verifyPaymentSignature({
+            // Fail closed if the client did not supply the required, well-formed signature
+            // fields. The security decision below is made SOLELY by the server-side
+            // cryptographic check, not by the presence of a user-supplied signature.
+            const hasSignatureFields =
+                typeof razorpay_signature === 'string' && razorpay_signature.length > 0 &&
+                typeof razorpay_payment_id === 'string' && razorpay_payment_id.length > 0;
+            const ok = hasSignatureFields && razorpay.verifyPaymentSignature({
                 orderId: razorpay_order_id || payment.provider_tx_id,
                 paymentId: razorpay_payment_id,
                 signature: razorpay_signature,
-            });
+            }) === true;
             if (!ok) {
                 await payment.update({ status: 'failed' });
                 return next(new AppError('PAYMENT_VERIFICATION_FAILED', 'Payment signature verification failed', 400));

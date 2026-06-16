@@ -1,6 +1,7 @@
 
 'use client';
 
+import { sanitizeRichHtml } from '@/lib/sanitize';
 import { useState, useEffect, useMemo } from 'react';
 import { getTask, getCompany } from '@/lib/api';
 import { notFound, useRouter, useParams } from 'next/navigation';
@@ -139,11 +140,11 @@ export default function TaskDetailPage() {
                 </AccordionTrigger>
                 <AccordionContent className="border-l-2 border-primary/20 ml-6 pl-10 space-y-8 pt-6 pb-2">
                     <div className="space-y-4">
-                        <div className="prose prose-lg max-w-none text-muted-foreground dark:prose-invert" dangerouslySetInnerHTML={{ __html: round.instructions }} />
+                        <div className="prose prose-lg max-w-none text-muted-foreground dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(round.instructions) }} />
                     </div>
                      <div className="space-y-4">
                         <h4 className="font-semibold flex items-center gap-2 text-primary"><Target className="h-5 w-5" /> Expected Outputs</h4>
-                        <div className="prose prose-lg max-w-none text-muted-foreground dark:prose-invert" dangerouslySetInnerHTML={{ __html: round.expectedOutputs }} />
+                        <div className="prose prose-lg max-w-none text-muted-foreground dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(round.expectedOutputs) }} />
                     </div>
                     {round.timeLimitMinutes && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -163,11 +164,11 @@ export default function TaskDetailPage() {
         <div className="space-y-8">
             <div className="space-y-4">
                 <h3 className="font-semibold flex items-center gap-2 text-xl"><BookOpen className="h-5 w-5 text-primary" /> Instructions</h3>
-                <div className="prose prose-lg max-w-none text-muted-foreground dark:prose-invert" dangerouslySetInnerHTML={{ __html: task.instructions }} />
+                <div className="prose prose-lg max-w-none text-muted-foreground dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(task.instructions) }} />
             </div>
             <div className="space-y-4">
                 <h3 className="font-semibold flex items-center gap-2 text-xl"><Target className="h-5 w-5 text-primary" /> Expected Outputs</h3>
-                <div className="prose prose-lg max-w-none text-muted-foreground dark:prose-invert" dangerouslySetInnerHTML={{ __html: task.expectedOutputs }} />
+                <div className="prose prose-lg max-w-none text-muted-foreground dark:prose-invert" dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(task.expectedOutputs) }} />
             </div>
         </div>
     );

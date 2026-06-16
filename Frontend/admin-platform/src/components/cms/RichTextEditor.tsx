@@ -36,14 +36,29 @@ export default function RichTextEditor({ value, onChange, placeholder }: Props) 
     const text = e.clipboardData.getData('text/plain');
     let clean: string;
     if (html) {
-      clean = html
-        .replace(/<!--[\s\S]*?-->/g, '')
-        .replace(/<\/?(?:html|head|body|meta|link|style|script|o:p|xml)[^>]*>/gi, '')
-        .replace(/\s(?:style|class|lang|dir|align|id)="[^"]*"/gi, '')
-        .replace(/\s(?:style|class|lang|dir|align|id)='[^']*'/gi, '')
-        .replace(/\sdata-[\w-]+="[^"]*"/gi, '')
-        .replace(/\sdata-[\w-]+='[^']*'/gi, '')
-        .replace(/<\/?(?:span|font)[^>]*>/gi, ''); // unwrap span/font (keep their text)
+      // Run the structural strips to a fixpoint: removing a tag/comment can re-form a
+      // new one from the surrounding text (e.g. `<sp<span>an>`), so a single pass is not
+      // idempotent. Loop until the string stops changing so partial/nested matches are
+      // fully removed.
+      const stripStructural = (input: string): string => {
+        let prev: string;
+        let out = input;
+        do {
+          prev = out;
+          out = out
+            .replace(/<!--[\s\S]*?-->/g, '')
+            .replace(/<\/?(?:html|head|body|meta|link|style|script|o:p|xml)\b[^>]*>/gi, '')
+            .replace(/<\/?(?:span|font)\b[^>]*>/gi, ''); // unwrap span/font (keep their text)
+        } while (out !== prev);
+        return out;
+      };
+      clean = stripStructural(
+        html
+          .replace(/\s(?:style|class|lang|dir|align|id)="[^"]*"/gi, '')
+          .replace(/\s(?:style|class|lang|dir|align|id)='[^']*'/gi, '')
+          .replace(/\sdata-[\w-]+="[^"]*"/gi, '')
+          .replace(/\sdata-[\w-]+='[^']*'/gi, ''),
+      );
     } else {
       clean = text
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')

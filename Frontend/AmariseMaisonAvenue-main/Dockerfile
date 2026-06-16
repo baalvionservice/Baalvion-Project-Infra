@@ -12,11 +12,15 @@ FROM base AS pruner
 COPY . .
 RUN npx turbo prune amarise-maison-avenue-web --docker
 
-# 2) Install pruned deps (frozen lockfile)
+# 2) Install pruned deps.
+# --no-frozen-lockfile (not --frozen): the root pins a version-selector pnpm override
+# ("uuid@11": "11.1.1") and `turbo prune` drops the matching package snapshot from the pruned
+# lockfile, so a frozen install fails (ERR_PNPM_LOCKFILE_MISSING_DEPENDENCY). Non-frozen lets pnpm
+# repair the gap in-image. The root lockfile itself is consistent (frozen install passes on the host).
 FROM base AS installer
 COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/pnpm-lock.yaml ./pnpm-lock.yaml
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # 3) Build (NEXT_PUBLIC_* must be present here)
 ARG NEXT_PUBLIC_COMMERCE_URL
@@ -39,5 +43,7 @@ COPY --from=installer --chown=nextjs:nodejs /app/Frontend/AmariseMaisonAvenue-ma
 COPY --from=installer --chown=nextjs:nodejs /app/Frontend/AmariseMaisonAvenue-main/public ./Frontend/AmariseMaisonAvenue-main/public
 USER nextjs
 EXPOSE 3033
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3033),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
 # Standalone server entrypoint is nested under the app path in a monorepo build.
 CMD ["node", "Frontend/AmariseMaisonAvenue-main/server.js"]

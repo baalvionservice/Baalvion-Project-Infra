@@ -132,7 +132,10 @@ services:
 
   risk-service:
     build: { context: ., args: { SERVICE: risk-service } }
-    environment: { <<: *service-env, PORT: "3035" }
+    # SANCTIONS_ENFORCEMENT=permissive: this local stack has no egress to the OFAC/UN/EU feeds, so it runs
+    # the offline seed list. STRICT (the production default) would correctly refuse to boot here. Production
+    # runs SPRING_PROFILES_ACTIVE=production instead, which keeps strict and enables the real feeds.
+    environment: { <<: *service-env, PORT: "3035", SANCTIONS_ENFORCEMENT: "permissive" }
     # Host port is overridable (RISK_HOST_PORT) so the suite can run alongside another
     # process already bound to 3035 on the host. Container port stays 3035.
     ports: ["${RISK_HOST_PORT:-3035}:3035"]

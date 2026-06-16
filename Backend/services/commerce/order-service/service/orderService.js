@@ -9,23 +9,23 @@ const config = require('../config/appConfig');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 const ownership = require('./ownership');
 const securityAudit = require('./securityAudit');
-const ledgerClient = require('./ledgerClient');
+const ledgerOutbox = require('./ledgerOutbox');
 const discountService = require('./discountService');
 const markets = require('../config/markets');
 const pricing = require('./pricing');
 const fxRateProvider = require('./fxRateProvider');
 const { sendOrderEmail } = require('./orderNotifications');
 
-// Mirror a money movement into the double-entry ledger without ever letting a ledger
-// problem break the payment path (the client already fails-open + logs internally).
-async function safeLedger(fn, ctx) {
-    try { await fn(); }
-    catch (e) { console.error(JSON.stringify({ evt: 'ledger.mirror_error', ...ctx, error: e.message })); }
-}
+// Money movements are mirrored into the double-entry ledger via the TRANSACTIONAL OUTBOX
+// (service/ledgerOutbox.js): the ledger event is committed in the same DB transaction as the
+// payment mutation and delivered by a retrying relay, so a ledger outage/crash can no longer
+// silently drop it (the old fire-and-forget `safeLedger` could). The ledger client is idempotent
+// on transactionRef, so at-least-once delivery is safe.
 
 function generateOrderNumber(storeCode = 'ORD') {
     const ts = Date.now().toString(36).toUpperCase();
-    const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+    // CSPRNG (not Math.random) so order numbers are not predictable/enumerable.
+    const rand = crypto.randomBytes(3).toString('hex').toUpperCase();
     return `${storeCode}-${ts}-${rand}`;
 }
 
@@ -455,13 +455,16 @@ async function recordPayment(storeId, orderId, body) {
     await cache.del(cache.keys.order(orderId));
     securityAudit.payment('recorded', 'allow', { storeId, resource: { type: 'order', id: orderId }, metadata: { provider: body.provider, status: body.status, transactionId: body.transactionId } });
 
-    // Only a real capture moves money → mirror it to the ledger (idempotent, fail-open).
+    // Only a real capture moves money → mirror it to the ledger via the durable outbox (retried +
+    // dead-lettered) instead of a swallowed best-effort call. This admin/finance path is not wrapped
+    // in a DB transaction, so the enqueue is its own write; the reconciliation sweep is the backstop
+    // for the small window between the order update and the enqueue.
     if (body.status === 'captured') {
-        await safeLedger(() => ledgerClient.recordPaymentCapture(storeId, {
-            paymentId: payment.id, orderId, orderNumber: order.orderNumber,
+        await ledgerOutbox.enqueuePaymentCapture({
+            storeId, paymentId: payment.id, orderId, orderNumber: order.orderNumber,
             amount: body.amount, currencyCode: body.currencyCode || order.currencyCode,
             provider: body.provider, transactionId: body.transactionId,
-        }), { storeId, orderId, phase: 'record_capture' });
+        });
         // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
         OrdersOrderItem.findAll({ where: { orderId } })
             .then((items) => sendOrderEmail('orderPaid', order.toJSON(), items))
@@ -516,16 +519,18 @@ async function refundPayment(storeId, orderId, body = {}) {
             paymentStatus: isFull ? 'refunded' : 'partially_paid',
             status: isFull ? 'refunded' : order.status,
         }, { transaction: t });
+        // Mirror the refund to the ledger IN THE SAME TRANSACTION (transactional outbox): committed
+        // atomically with the refund row, then delivered by the retrying relay. Replaces the old
+        // post-commit fire-and-forget safeLedger() that could silently drop the REFUND entry.
+        await ledgerOutbox.enqueueRefund({
+            storeId, refundId: row.id, orderId, orderNumber: order.orderNumber,
+            amount, currencyCode: order.currencyCode, provider: provider.name,
+            transactionId: refundTxnId, reason: body.reason,
+        }, t);
         return row;
     });
     await cache.del(cache.keys.order(orderId));
     securityAudit.payment('refunded', 'allow', { storeId, resource: { type: 'order', id: orderId }, metadata: { amount, full: isFull, transactionId: refundTxnId } });
-
-    await safeLedger(() => ledgerClient.recordRefund(storeId, {
-        refundId: refundRow.id, orderId, orderNumber: order.orderNumber,
-        amount, currencyCode: order.currencyCode, provider: provider.name,
-        transactionId: refundTxnId, reason: body.reason,
-    }), { storeId, orderId, phase: 'refund' });
 
     return refundRow.toJSON();
 }
@@ -627,6 +632,13 @@ async function confirmPayment(storeId, orderId, intentId, actor, verification, s
             if (payment) await payment.update({ status: 'captured', paidAt: new Date(), metadata: { ...(payment.metadata || {}), transactionId: result.transactionId, ...(gateway ? { gateway } : {}) } }, { transaction: t });
             await order.update({ paymentStatus: 'paid', status: order.status === 'pending' ? 'confirmed' : order.status, ...(gateway ? { metadata: { ...(order.metadata || {}), selectedGateway: gateway } } : {}) }, { transaction: t });
             await unwindReservation(t, storeId, orderId, 'fulfill'); // reserved → deducted on capture
+            // Mirror the capture to the ledger IN THE SAME TRANSACTION (transactional outbox):
+            // committed atomically with the capture, then delivered by the retrying ledger relay.
+            await ledgerOutbox.enqueuePaymentCapture({
+                storeId, paymentId: intentPayment.id, orderId, orderNumber: order.orderNumber,
+                amount: order.totalAmount, currencyCode: order.currencyCode,
+                provider: intentPayment.provider, transactionId: result.transactionId,
+            }, t);
             return { ok: true };
         }
         if (payment) await payment.update({ status: 'failed', metadata: { ...(payment.metadata || {}), reason: result.reason } }, { transaction: t });
@@ -641,13 +653,9 @@ async function confirmPayment(storeId, orderId, intentId, actor, verification, s
     securityAudit.payment('captured', 'allow', { userId: actor && actor.userId, storeId, resource: { type: 'order', id: orderId }, requestId: actor && actor.requestId, metadata: { intentId, replay: !!out.replay } });
     const fresh = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
 
-    // Mirror the captured payment into the double-entry ledger (idempotent, fail-open, post-commit).
+    // The ledger mirror is now enqueued transactionally inside the capture above (no post-commit
+    // fire-and-forget). Only the payment-received email remains best-effort here.
     if (!out.replay) {
-        await safeLedger(() => ledgerClient.recordPaymentCapture(storeId, {
-            paymentId: intentPayment.id, orderId, orderNumber: fresh.orderNumber,
-            amount: fresh.totalAmount, currencyCode: fresh.currencyCode,
-            provider: intentPayment.provider, transactionId: result.transactionId,
-        }), { storeId, orderId, phase: 'confirm_capture' });
         // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
         OrdersOrderItem.findAll({ where: { orderId } })
             .then((items) => sendOrderEmail('orderPaid', fresh.toJSON(), items))
@@ -730,7 +738,7 @@ async function handlePaymentWebhook({ event, orderId, intentId, reason }) {
 // {client confirm, webhook} acquires the lock first captures; the other sees paymentStatus='paid' and
 // no-ops. So it is idempotent AND never double-fulfills / double-ledgers / double-emails — even if
 // the webhook is delivered more than once or races the client confirm.
-async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId }) {
+async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, amount, currencyCode }) {
     if (!providerOrderId) return { ok: false, reason: 'missing_order_id' };
     const intentPayment = await OrdersOrderPayment.findOne({ where: { transactionId: providerOrderId } });
     if (!intentPayment) {
@@ -748,21 +756,42 @@ async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId })
         const order = await OrdersOrder.findOne({ where: { id: orderId, storeId }, lock: t.LOCK.UPDATE, transaction: t });
         if (!order) return { ok: false };
         if (order.paymentStatus === 'paid') return { ok: true, replay: true }; // confirm or a prior webhook already captured
+        // Defence-in-depth amount/currency validation (beyond the HMAC signature) — mirrors the PayU
+        // return path (settlePayuReturn) and the Java payment-service reference so a leaked webhook
+        // secret alone cannot capture an order for a tampered/short amount. Razorpay amounts are in the
+        // minor unit (paise/cents); the order total is the major unit. Validated only when the provider
+        // sent an amount (payment.captured/order.paid always do). Strict by default (reject mismatch);
+        // RAZORPAY_WEBHOOK_STRICT_AMOUNT=false downgrades to warn-and-continue.
+        if (amount != null) {
+            const expectedMinor = Math.round(Number(order.totalAmount) * 100);
+            const seenMinor = Math.round(Number(amount));
+            const currencyOk = !currencyCode || String(currencyCode).toUpperCase() === String(order.currencyCode).toUpperCase();
+            if (!Number.isFinite(seenMinor) || seenMinor !== expectedMinor || !currencyOk) {
+                const detail = { evt: 'razorpay_webhook_amount_mismatch', orderId, providerOrderId, expectedMinor, seenMinor, expectedCurrency: order.currencyCode, seenCurrency: currencyCode || null };
+                console.error(JSON.stringify(detail));
+                securityAudit.payment('captured', 'deny', { storeId, resource: { type: 'order', id: orderId }, metadata: { via: 'webhook', reason: 'amount_mismatch', expectedMinor, seenMinor } });
+                if (process.env.RAZORPAY_WEBHOOK_STRICT_AMOUNT !== 'false') {
+                    return { ok: false, reason: 'amount_mismatch' };
+                }
+            }
+        }
         const payment = await OrdersOrderPayment.findOne({ where: { orderId, transactionId: providerOrderId }, transaction: t });
         if (payment) await payment.update({ status: 'captured', paidAt: new Date(), metadata: { ...(payment.metadata || {}), transactionId: providerPaymentId, capturedVia: 'webhook' } }, { transaction: t });
         await order.update({ paymentStatus: 'paid', status: order.status === 'pending' ? 'confirmed' : order.status }, { transaction: t });
         await unwindReservation(t, storeId, orderId, 'fulfill'); // reserved → deducted on capture
+        // Mirror the capture to the ledger IN THE SAME TRANSACTION (transactional outbox), so a
+        // webhook-driven capture can't lose its ledger entry on a ledger outage/crash post-commit.
+        await ledgerOutbox.enqueuePaymentCapture({
+            storeId, paymentId: intentPayment.id, orderId, orderNumber: order.orderNumber,
+            amount: order.totalAmount, currencyCode: order.currencyCode,
+            provider: intentPayment.provider, transactionId: providerPaymentId,
+        }, t);
         return { ok: true };
     });
     await cache.del(cache.keys.order(orderId));
     if (out.ok && !out.replay) {
         securityAudit.payment('captured', 'allow', { storeId, resource: { type: 'order', id: orderId }, metadata: { via: 'webhook', providerPaymentId } });
         const fresh = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
-        await safeLedger(() => ledgerClient.recordPaymentCapture(storeId, {
-            paymentId: intentPayment.id, orderId, orderNumber: fresh.orderNumber,
-            amount: fresh.totalAmount, currencyCode: fresh.currencyCode,
-            provider: intentPayment.provider, transactionId: providerPaymentId,
-        }), { storeId, orderId, phase: 'webhook_capture' });
         OrdersOrderItem.findAll({ where: { orderId } })
             .then((items) => sendOrderEmail('orderPaid', fresh.toJSON(), items))
             .catch(() => {});

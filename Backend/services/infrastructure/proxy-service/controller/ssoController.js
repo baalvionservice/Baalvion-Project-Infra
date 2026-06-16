@@ -6,6 +6,7 @@
  * the SPA is redirected with tokens (refresh also set as an httpOnly cookie).
  */
 
+const crypto = require('crypto');
 const sso = require('../service/ssoService');
 const metrics = require('../observability/enterpriseMetrics');
 const logger = require('../service/logger');
@@ -41,7 +42,9 @@ module.exports = {
   },
   oidcLogin: async (req, res) => {
     try {
-      const state = `${req.params.orgId}.${Math.random().toString(36).slice(2)}`;
+      // CSPRNG state — sole CSRF protection for the OIDC flow. Math.random() is
+      // not cryptographically secure (predictable → forged callbacks).
+      const state = `${req.params.orgId}.${crypto.randomBytes(24).toString('hex')}`;
       res.cookie('sso_state', state, { httpOnly: true, maxAge: 600000, sameSite: 'lax' });
       res.redirect(await sso.oidcAuthUrl(req.params.orgId, state));
     } catch (e) { res.status(400).json({ success: false, error: { message: e.message } }); }

@@ -3,8 +3,10 @@ import React from "react";
 import { Metadata } from "next";
 import CategoryPageClient from "@/components/category/CategoryPageClient";
 import { getCategorySidebar } from "@/lib/mock-category-data";
-import { buildAlternates } from "@/lib/seo";
+import { buildAlternates, SITE_URL } from "@/lib/seo";
 import { normalizeCountry, getCountryConfig } from "@/lib/i18n/countries";
+import { getProducts } from "@/lib/catalog";
+import { breadcrumbJsonLd, itemListJsonLd } from "@/lib/structured-data";
 
 // ── Category label map ────────────────────────────────────────────────────────
 
@@ -168,17 +170,53 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
 
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { id, country } = await params;
+  const cc = normalizeCountry(country);
   const pageTitle = getCategoryLabel(id);
   const brandName = getCategoryBrandName(id);
   const sidebarSections = getCategorySidebar(id);
 
+  // Server-fetch the listing so the ItemList structured data reflects real products.
+  // Fails soft to an empty page (no schema emitted) so the listing never breaks the render.
+  const { items: products } = await getProducts({
+    categoryId: id,
+    country: cc,
+    limit: 48,
+  });
+
+  const categoryUrl = `${SITE_URL}/${cc}/category/${id}`;
+  const breadcrumbSchema = breadcrumbJsonLd([
+    { name: "Home", url: `${SITE_URL}/${cc}` },
+    { name: pageTitle, url: categoryUrl },
+  ]);
+  const listSchema =
+    products.length > 0
+      ? itemListJsonLd(
+          pageTitle,
+          products,
+          (productId) => `${SITE_URL}/${cc}/product/${productId}`
+        )
+      : null;
+
   return (
-    <CategoryPageClient
-      id={id}
-      country={country}
-      pageTitle={pageTitle}
-      brandName={brandName}
-      sidebarSections={sidebarSections}
-    />
+    <>
+      {/* Breadcrumb + ItemList structured data (server-rendered). */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      {listSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(listSchema) }}
+        />
+      )}
+      <CategoryPageClient
+        id={id}
+        country={country}
+        pageTitle={pageTitle}
+        brandName={brandName}
+        sidebarSections={sidebarSections}
+      />
+    </>
   );
 }

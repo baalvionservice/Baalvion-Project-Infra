@@ -6,12 +6,41 @@ import { Button } from "@/components/ui/button";
 import { Calendar, User, Clock, ArrowLeft, ArrowRight, Share2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { cmsGetPost, type MiningPost } from "@/lib/cms";
 import { BRAND_IMAGES } from "@/lib/brand-assets";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 
 // Reflect the latest published content from the central CMS on every request.
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug: rawSlug } = await params;
+  const slug = rawSlug || "article";
+  const post = (await cmsGetPost(slug)) ?? fallbackPost(slug);
+  const description =
+    post.excerpt ||
+    `${post.title} — market insight and analysis from Baalvion Mining Inc.`;
+
+  return {
+    title: post.title,
+    description,
+    alternates: { canonical: `https://mining.baalvion.com/blog/${slug}` },
+    openGraph: {
+      title: post.title,
+      description,
+      url: `https://mining.baalvion.com/blog/${slug}`,
+      siteName: "Baalvion Mining Inc.",
+      type: "article",
+      images: post.image ? [{ url: post.image }] : undefined,
+    },
+  };
+}
 
 // Fallback when the central CMS has no matching post (or is offline): synthesize
 // a readable article from the slug so any URL still renders, preserving prior behavior.
@@ -58,11 +87,22 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
       "logo": { "@type": "ImageObject", "url": "https://mining.baalvion.com/logo.svg" },
     },
     "datePublished": post.date,
+    "url": `https://mining.baalvion.com/blog/${slug}`,
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Insights", "item": "https://mining.baalvion.com/blog" },
+      { "@type": "ListItem", "position": 2, "name": post.title, "item": `https://mining.baalvion.com/blog/${slug}` },
+    ],
   };
 
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <JsonLd data={blogSchema} />
+      <JsonLd data={breadcrumbSchema} />
       <Navbar />
 
       <div className="bg-white border-b py-6">
@@ -104,7 +144,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
           <div className="prose prose-slate max-w-none prose-headings:text-primary prose-headings:font-headline">
             {/* Body is admin-authored in the central Baalvion CMS (trusted source). */}
-            <div dangerouslySetInnerHTML={{ __html: post.contentHtml }} />
+            <div dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(post.contentHtml) }} />
           </div>
 
           <footer className="pt-12 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6">

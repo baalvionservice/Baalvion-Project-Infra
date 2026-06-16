@@ -1,6 +1,7 @@
 /**
  * @fileOverview Specialized service for generating pSEO-optimized JSON-LD schemas.
  */
+import { entityRouteSegment } from '@/lib/utils/seo';
 
 export const structuredData = {
   organization: () => ({
@@ -20,7 +21,7 @@ export const structuredData = {
       '@context': 'https://schema.org',
       name: entity.name,
       description: entity.description,
-      url: `https://imperialpedia.com/${type}s/${entity.slug}`,
+      url: `https://imperialpedia.com/${entityRouteSegment(type)}/${entity.slug}`,
     };
 
     switch (type) {
@@ -34,11 +35,13 @@ export const structuredData = {
           numberOfEmployees: entity.employees,
         };
       case 'technology':
-        return { ...base, '@type': 'Technology' };
+        // schema.org has no "Technology" type; "Thing" is the valid generic
+        // supertype so the block is not silently dropped by crawlers.
+        return { ...base, '@type': 'Thing' };
       case 'industry':
         return { ...base, '@type': 'Service' };
       default:
-        return base;
+        return { ...base, '@type': 'Thing' };
     }
   }
 };

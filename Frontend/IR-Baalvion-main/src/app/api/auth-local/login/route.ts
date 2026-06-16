@@ -3,6 +3,7 @@ import {
   REFRESH_COOKIE,
   encodeRefresh,
   findUser,
+  isLocalAuthEnabled,
   mintAccessToken,
   publicUser,
 } from '@/lib/auth/local-auth';
@@ -13,8 +14,17 @@ export const dynamic = 'force-dynamic';
  * POST /api/auth-local/login — local (dev/standalone) credential exchange.
  * Sets the httpOnly `baalvion_refresh` cookie the middleware gates on and returns an
  * access token + user, matching the shape lib/auth-client.ts expects.
+ *
+ * Fail-closed: returns 404 unless the local auth backend is explicitly enabled
+ * (never in production).
  */
 export async function POST(req: Request) {
+  if (!isLocalAuthEnabled()) {
+    return NextResponse.json(
+      { success: false, error: { message: 'Not found.' } },
+      { status: 404 },
+    );
+  }
   let body: { email?: string; password?: string } = {};
   try {
     body = await req.json();

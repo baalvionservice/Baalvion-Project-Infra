@@ -13,7 +13,10 @@ jest.mock('../client', () => ({
 import { search, autocomplete, facetedSearch } from '../query';
 import { searchClient } from '../client';
 
-const mockSearch = searchClient.search as jest.MockedFunction<typeof searchClient.search>;
+// Loosely typed: the OpenSearch client's overloaded return type makes the strict
+// MockedFunction signature resolve mock args to `never` / possibly-undefined under
+// noUncheckedIndexedAccess. A jest.Mock keeps the assertions readable in this test.
+const mockSearch = searchClient.search as unknown as jest.Mock;
 
 function makeResponse(overrides: Record<string, unknown> = {}) {
   return {
@@ -119,9 +122,10 @@ describe('search()', () => {
     expect(result.total).toBe(1);
     expect(result.took).toBe(5);
     expect(result.hits).toHaveLength(1);
-    expect(result.hits[0].id).toBe('doc1');
-    expect(result.hits[0].score).toBe(1.5);
-    expect(result.hits[0].source.title).toBe('Dev');
+    // Length asserted above, so [0] is present; `!` satisfies noUncheckedIndexedAccess.
+    expect(result.hits[0]!.id).toBe('doc1');
+    expect(result.hits[0]!.score).toBe(1.5);
+    expect(result.hits[0]!.source.title).toBe('Dev');
   });
 
   it('handles numeric total (older ES format)', async () => {

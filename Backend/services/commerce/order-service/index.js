@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -10,6 +11,8 @@ const { errorHandler } = require('./middleware/errorMiddleware');
 const requestContext = require('./middleware/requestContext');
 const createIpRateLimit = require('./middleware/rateLimit');
 const { startReconciliationWorker } = require('./queues/reconciliationQueue');
+const { startLedgerOutboxRelay, stopLedgerOutboxRelay } = require('./service/ledgerOutbox');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 
@@ -51,9 +54,15 @@ async function start() {
         await sequelize.query('CREATE SCHEMA IF NOT EXISTS orders;');
         // Scheduled financial reconciliation sweep (no-op if disabled / ledger unconfigured).
         await startReconciliationWorker().catch((e) => console.error('[Reconcile] worker failed to start:', e.message));
-        app.listen(config.port, () => {
+        // Transactional-outbox relay: durably delivers captured-payment / refund ledger mirrors to
+        // ledger-service with retry + dead-letter (replaces the old fire-and-forget safeLedger path).
+        startLedgerOutboxRelay();
+        const server = app.listen(config.port, () => {
             console.log(`[Order Service] Running on port ${config.port} (${config.env})`);
         });
+        registerShutdown('ledger-outbox-relay', async () => { await stopLedgerOutboxRelay(); });
+        registerShutdown('db', async () => { if (sequelize && sequelize.close) await sequelize.close(); });
+        initGracefulShutdown(server);
     } catch (err) {
         console.error('[Order Service] Startup failed:', err.message);
         process.exit(1);

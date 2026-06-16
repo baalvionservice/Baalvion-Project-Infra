@@ -5,16 +5,27 @@
  * frontend can authenticate against this self-contained seed-user store so the full
  * institutional experience (gated dashboards, governance, capital-ops) is usable offline.
  *
- * SECURITY: this path is ONLY mounted when NEXT_PUBLIC_AUTH_BFF_PATH points at /api/auth-local
- * (set in .env.local for local dev). In production the auth client talks to the real /auth-bff
- * gateway and none of this code is reachable. The minted token is intentionally UNSIGNED — IR's
- * internal route guards do an unverified decode by design; decisive verification lives upstream
- * at auth-service. Do NOT enable this path against a public deployment.
+ * SECURITY (fail-closed): this backend is PERMANENTLY DISABLED in production. It activates only
+ * when BOTH (a) NODE_ENV !== 'production' AND (b) IR_LOCAL_AUTH_ENABLED === 'true'. Seed accounts
+ * are NEVER hardcoded — they are read from the server-only IR_LOCAL_SEED_USERS env var (JSON),
+ * which is set in a developer's .env.local. The minted token is unsigned and is meaningless to any
+ * real verifier; decisive verification lives upstream at auth-service. The route handlers under
+ * /api/auth-local additionally return 404 whenever isLocalAuthEnabled() is false.
  */
 import type { AppRole } from '@/lib/rbac/roles';
 
 export const REFRESH_COOKIE =
   process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
+
+/**
+ * Whether the local (dev/standalone) auth backend is permitted to run.
+ * Fail-closed: production ALWAYS returns false regardless of any other env var, so the
+ * /api/auth-local routes and seed accounts cannot exist in a production deployment.
+ */
+export function isLocalAuthEnabled(): boolean {
+  if (process.env.NODE_ENV === 'production') return false;
+  return process.env.IR_LOCAL_AUTH_ENABLED === 'true';
+}
 
 export interface SeedUser {
   id: string;
@@ -25,45 +36,40 @@ export interface SeedUser {
 }
 
 /**
- * Seed institutional accounts — one per access tier. These are the local login credentials.
+ * Seed institutional accounts for local dev — loaded from the server-only IR_LOCAL_SEED_USERS
+ * env var (a JSON array of SeedUser). Never hardcoded, never shipped to the browser. Empty in
+ * production and whenever local auth is disabled.
  */
-export const SEED_USERS: SeedUser[] = [
-  {
-    id: 'usr_admin',
-    email: 'admin@baalvion.com',
-    password: 'Admin123!',
-    name: 'Platform Administrator',
-    role: 'admin',
-  },
-  {
-    id: 'usr_p1',
-    email: 'institutional@baalvion.com',
-    password: 'Investor123!',
-    name: 'Institutional Investor',
-    role: 'p1_institutional',
-  },
-  {
-    id: 'usr_p2',
-    email: 'spv@baalvion.com',
-    password: 'Spv123!',
-    name: 'Private SPV Partner',
-    role: 'p2_spv',
-  },
-  {
-    id: 'usr_p3',
-    email: 'operator@baalvion.com',
-    password: 'Operator123!',
-    name: 'Strategic Operator',
-    role: 'p3_operator',
-  },
-  {
-    id: 'usr_compliance',
-    email: 'compliance@baalvion.com',
-    password: 'Compliance123!',
-    name: 'Compliance Officer',
-    role: 'compliance',
-  },
-];
+function loadSeedUsers(): SeedUser[] {
+  if (!isLocalAuthEnabled()) return [];
+  const raw = process.env.IR_LOCAL_SEED_USERS;
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (u): u is SeedUser =>
+          !!u &&
+          typeof (u as SeedUser).id === 'string' &&
+          typeof (u as SeedUser).email === 'string' &&
+          typeof (u as SeedUser).password === 'string' &&
+          typeof (u as SeedUser).name === 'string' &&
+          typeof (u as SeedUser).role === 'string',
+      )
+      .map((u) => ({
+        id: u.id,
+        email: u.email,
+        password: u.password,
+        name: u.name,
+        role: u.role,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+export const SEED_USERS: SeedUser[] = loadSeedUsers();
 
 export interface AuthClaims {
   sub: string;
@@ -113,7 +119,7 @@ export function encodeRefresh(user: SeedUser): string {
 }
 
 export function userFromRefresh(cookieValue: string | undefined): SeedUser | null {
-  if (!cookieValue) return null;
+  if (!isLocalAuthEnabled() || !cookieValue) return null;
   try {
     const parsed = JSON.parse(base64UrlDecode(cookieValue)) as { uid?: string };
     if (!parsed?.uid) return null;
@@ -124,6 +130,7 @@ export function userFromRefresh(cookieValue: string | undefined): SeedUser | nul
 }
 
 export function findUser(email: string, password: string): SeedUser | null {
+  if (!isLocalAuthEnabled()) return null;
   const normalized = email.trim().toLowerCase();
   return (
     SEED_USERS.find(

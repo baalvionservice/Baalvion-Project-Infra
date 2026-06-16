@@ -312,11 +312,14 @@ const decodeEntities = (s: string): string =>
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
     .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
     .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCharCode(parseInt(h, 16)))
-    .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
     .replace(/&apos;/g, "'")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
+    // &amp; must be decoded LAST so ampersands produced by the replacements
+    // above are not re-interpreted as the start of another entity (e.g. the
+    // literal text "&amp;lt;" must decode to "&lt;", not "<").
+    .replace(/&amp;/g, "&")
     .trim();
 
 async function googleNews(query: string, max: number): Promise<RawArticle[]> {

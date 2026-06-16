@@ -13,7 +13,6 @@
       "properties": {
         "screeningId": { "type": "string", "format": "uuid" },
         "tenantId": { "type": "string", "format": "uuid" },
-        "subjectName": { "type": "string" },
         "status": { "type": "string", "enum": ["CLEAR", "POTENTIAL_MATCH", "CONFIRMED_MATCH", "FALSE_POSITIVE", "BLOCKED"] },
         "topScore": { "type": "number" },
         "hitCount": { "type": "integer" },

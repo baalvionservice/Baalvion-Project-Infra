@@ -34,6 +34,7 @@ import AboutPage from "@/pages/public/AboutPage";
 import PrivacyPolicyPage from "@/pages/public/PrivacyPolicyPage";
 import AcceptableUsePolicyPage from "@/pages/public/AcceptableUsePolicyPage";
 import RefundPolicyPage from "@/pages/public/RefundPolicyPage";
+import TermsOfServicePage from "@/pages/public/TermsOfServicePage";
 import ContactPage from "@/pages/public/ContactPage";
 import SecurityPage from "@/pages/public/SecurityPage";
 import SLAPage from "@/pages/public/SLAPage";
@@ -159,6 +160,7 @@ const App = () => (
                   <Route path="/privacy" element={<PrivacyPolicyPage />} />
                   <Route path="/aup" element={<AcceptableUsePolicyPage />} />
                   <Route path="/refund" element={<RefundPolicyPage />} />
+                  <Route path="/terms" element={<TermsOfServicePage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/security" element={<SecurityPage />} />
                   <Route path="/sla" element={<SLAPage />} />

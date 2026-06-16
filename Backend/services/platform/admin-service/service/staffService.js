@@ -227,7 +227,7 @@ async function listInvitations(orgId, { page = 1, limit = 20, status } = {}) {
 }
 
 async function sendInvitation(orgId, { email, role = 'member', departmentId = null, teamId = null }, invitedBy = {}) {
-    if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new AppError('VALIDATION_ERROR', 'A valid email is required', 400);
+    if (!email || email.length > 254 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new AppError('VALIDATION_ERROR', 'A valid email is required', 400);
 
     // Block duplicate pending invites for the same email in this org.
     const dupe = await sel(

@@ -18,8 +18,9 @@ import { IR_PAGES } from '../src/lib/ir-pages';
 const AUTH = process.env.AUTH_URL || 'http://localhost:3001/v1/auth';
 const CMS = process.env.CMS_URL || 'http://localhost:3011/api/v1';
 const EMAIL = process.env.SUPERADMIN_EMAIL || 'superadmin@baalvion.com';
-const PW = process.env.SUPERADMIN_PASSWORD || 'Sup3rAdmin!2026';
-const WEBSITE_ID = process.env.IR_WEBSITE_ID || '7bced69e-a861-4530-9660-e0ddb955d72b';
+const PW = process.env.SUPERADMIN_PASSWORD;
+const WEBSITE_ID =
+  process.env.NEXT_PUBLIC_CMS_WEBSITE_ID || process.env.IR_WEBSITE_ID || '7bced69e-a861-4530-9660-e0ddb955d72b';
 const BASE = `${CMS}/cms/websites/${WEBSITE_ID}`;
 
 // CMS slugs are [a-z0-9-]; map the route path to a flat slug ("/company/story" -> "company-story").

@@ -1,3 +1,4 @@
+import { sanitizeRichHtml } from '@/lib/sanitize';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -63,9 +64,48 @@ export default async function BlogArticlePage({
 
   const { article } = entry;
   const related = (article.related || []).slice(0, 3);
+  const canonical = absoluteUrl(`/blog/${slug}`);
+
+  const articleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: article.title,
+    description: article.excerpt,
+    datePublished: article.date,
+    articleSection: article.catLabel,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+    author: {
+      '@type': 'Organization',
+      name: 'ControlTheMarket Editorial Team',
+      url: absoluteUrl('/'),
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'ControlTheMarket',
+      url: absoluteUrl('/'),
+    },
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: absoluteUrl('/') },
+      { '@type': 'ListItem', position: 2, name: 'Blog', item: absoluteUrl('/blog') },
+      { '@type': 'ListItem', position: 3, name: article.title, item: canonical },
+    ],
+  };
 
   return (
     <div className="min-h-screen bg-[hsl(220,20%,96%)]">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
       <article className="max-w-[820px] mx-auto px-4 sm:px-6 py-10">
         <Link
           href="/blog"
@@ -103,7 +143,7 @@ export default async function BlogArticlePage({
         {/* Article body — trusted, hand-authored static HTML from the data module. */}
         <div
           className="article-body"
-          dangerouslySetInnerHTML={{ __html: article.body }}
+          dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(article.body) }}
         />
 
         {/* Related articles */}

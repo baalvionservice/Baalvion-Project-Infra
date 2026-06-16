@@ -415,9 +415,13 @@ const ALLOWED_PLANS = ['free', 'starter', 'pro', 'business', 'enterprise'];
 
 // Normalize/validate a slug. Accepts an explicit slug or derives one from the name.
 function normalizeSlug(rawSlug, name) {
-    const base = (rawSlug != null && String(rawSlug).trim() !== '')
+    const rawBase = (rawSlug != null && String(rawSlug).trim() !== '')
         ? String(rawSlug)
         : String(name || '');
+    // Bound input length before regex work to avoid polynomial backtracking (ReDoS).
+    // The final slug is rejected above 100 chars anyway, so 512 is a safe upper bound
+    // that preserves behavior for all valid inputs.
+    const base = rawBase.slice(0, 512);
     const slug = base.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
     if (!slug || slug.length > 100 || !SLUG_RE.test(slug)) {
         throw new AppError('VALIDATION_ERROR', 'Invalid slug: use lowercase letters, numbers and hyphens (max 100 chars)', 400);

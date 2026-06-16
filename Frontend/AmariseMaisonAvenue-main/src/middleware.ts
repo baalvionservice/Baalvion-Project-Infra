@@ -21,6 +21,16 @@ const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_
 const ACCOUNT_PUBLIC = new Set(['login', 'register', 'reset-password', 'forgot-password']);
 const COUNTRY_COOKIE = 'maison_country';
 
+// The retired per-app /admin panel redirects to the central admin-platform
+// console. The console URL is env-driven so production points at the real CMS;
+// the hardcoded localhost is a DEV-ONLY fallback (guarded by NODE_ENV). In
+// production with no env set we SKIP the redirect rather than bounce users to
+// a developer's localhost.
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const ADMIN_CONSOLE_URL =
+  process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL ||
+  (IS_PRODUCTION ? '' : 'http://localhost:3030/commerce');
+
 function applyHeaders(res: NextResponse): NextResponse {
   res.headers.set('X-Content-Type-Options', 'nosniff');
   res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -51,8 +61,12 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Per-app admin RETIRED → bounce /admin straight to the central admin-platform console.
+  // Only redirect when the console URL is configured; in production with no env
+  // set we fall through rather than send users to localhost.
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-    return NextResponse.redirect(new URL(process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL || 'http://localhost:3030/commerce'));
+    if (ADMIN_CONSOLE_URL) {
+      return NextResponse.redirect(new URL(ADMIN_CONSOLE_URL));
+    }
   }
 
   const preferred = resolvePreferredCountry(request);
@@ -66,8 +80,11 @@ export function middleware(request: NextRequest) {
   const rawFirst = seg[0] ?? '';
   const first = rawFirst.toLowerCase();
 
-  // Asset / metadata paths (sitemap.xml, robots.txt, manifest…) carry a dot — leave them alone.
-  const isAsset = rawFirst.includes('.');
+  // Asset / metadata paths carry a file extension in their final segment — sitemap.xml & robots.txt
+  // at the root, but also nested static files like /placeholder/hermes.jpg. Checking only the first
+  // segment missed nested assets, so they were wrongly country-redirected and never served. Detect a
+  // dot in the LAST segment so every public/ asset (root or nested) passes straight through.
+  const isAsset = (seg[seg.length - 1] ?? '').includes('.');
 
   // Missing or invalid country segment → normalize to the preferred market.
   if (!isAsset && !isSupportedCountry(first)) {

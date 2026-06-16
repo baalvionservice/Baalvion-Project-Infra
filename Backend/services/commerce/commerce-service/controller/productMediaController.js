@@ -3,6 +3,7 @@ const mediaService = require('../service/productMediaService');
 const { sendSuccess } = require('../utils/response');
 const { readRawBody, parseMultipart } = require('../utils/multipart');
 const { AppError } = require('../utils/errors');
+const { guardUpload } = require('@baalvion/upload/validate.js');
 
 const MEDIA_TYPES = new Set(['image', 'video', 'document']);
 
@@ -11,6 +12,12 @@ async function readUpload(req) {
     const raw = await readRawBody(req);
     const parts = parseMultipart(raw, req.headers['content-type']);
     const filePart = parts.find((p) => p.name === 'file' && p.filename) || parts.find((p) => p.filename);
+    // Upload security enforcement (shared by upload + replace): magic-byte (polyglot) validation +
+    // malware scan, fail-closed in production. @baalvion/upload — declared MIME is not trusted.
+    if (filePart && filePart.data) {
+        const guard = await guardUpload(filePart.data, { declaredMime: filePart.contentType, filename: filePart.filename });
+        if (!guard.ok) throw new AppError(guard.code, guard.message, guard.status);
+    }
     const fields = {};
     for (const p of parts) {
         if (!p.filename && p.name) fields[p.name] = p.data.toString('utf8').trim();

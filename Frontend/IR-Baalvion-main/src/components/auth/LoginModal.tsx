@@ -27,14 +27,30 @@ const LANDING_BY_ROLE: Record<string, string> = {
   compliance: "/dashboard",
 };
 
-/** Dev-only quick-login seed accounts (mirror src/lib/auth/local-auth.ts). */
-const QUICK_ACCOUNTS: { label: string; email: string; password: string }[] = [
-  { label: "Admin", email: "admin@baalvion.com", password: "Admin123!" },
-  { label: "Institutional", email: "institutional@baalvion.com", password: "Investor123!" },
-  { label: "Private SPV", email: "spv@baalvion.com", password: "Spv123!" },
-  { label: "Operator", email: "operator@baalvion.com", password: "Operator123!" },
-  { label: "Compliance", email: "compliance@baalvion.com", password: "Compliance123!" },
-];
+/**
+ * Dev-only quick-login accounts. NEVER hardcoded — supplied via the
+ * NEXT_PUBLIC_IR_DEV_QUICK_ACCOUNTS env var (JSON array) in a developer's .env.local.
+ * Unset in production, so no credentials are ever shipped in the bundle.
+ */
+function loadQuickAccounts(): { label: string; email: string; password: string }[] {
+  const raw = process.env.NEXT_PUBLIC_IR_DEV_QUICK_ACCOUNTS;
+  if (!raw) return [];
+  try {
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter(
+      (a): a is { label: string; email: string; password: string } =>
+        !!a &&
+        typeof a.label === "string" &&
+        typeof a.email === "string" &&
+        typeof a.password === "string",
+    );
+  } catch {
+    return [];
+  }
+}
+
+const QUICK_ACCOUNTS = loadQuickAccounts();
 
 interface LoginModalProps {
   open: boolean;
@@ -148,7 +164,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
           </Button>
         </form>
 
-        {isDev && (
+        {isDev && QUICK_ACCOUNTS.length > 0 && (
           <div className="border-t pt-4">
             <p className="text-[10px] uppercase font-bold tracking-[0.15em] text-muted-foreground pb-2">
               Dev quick login
@@ -169,7 +185,7 @@ export function LoginModal({ open, onOpenChange }: LoginModalProps) {
               ))}
             </div>
             <p className="text-[10px] text-muted-foreground pt-2">
-              e.g. institutional@baalvion.com / Investor123!
+              Accounts configured via NEXT_PUBLIC_IR_DEV_QUICK_ACCOUNTS (dev only).
             </p>
           </div>
         )}

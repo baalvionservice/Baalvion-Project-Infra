@@ -9,7 +9,11 @@ const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 // ctm-service is /api/v1/ecosystem/ctm at the gateway (was wrongly pointed at :3011 = cms-service).
 const CTM_BASE = process.env.NEXT_PUBLIC_CTM_API_URL || 'https://api.baalvion.com/api/v1/ecosystem/ctm/api/v1';
 
-// ── Server-side fetch helper (no auth — optionalAuth endpoints) ──────────────
+// ── Server-side fetch helper ─────────────────────────────────────────────────
+// Anonymous by design: in the auth-service JWT model the access token is held in memory on the
+// client, so a server component has no credential to forward. Public / optionalAuth reads return
+// data here; authMiddleware-gated reads (analytics, teams, submissions, invoices, …) must be
+// fetched CLIENT-side with the in-memory Bearer token (ctm-api-client), not through this helper.
 async function ctmGet<T>(path: string): Promise<T> {
   const res = await fetch(`${CTM_BASE}${path}`, {
     headers: { 'Content-Type': 'application/json' },

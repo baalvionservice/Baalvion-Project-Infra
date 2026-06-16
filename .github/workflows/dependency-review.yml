@@ -13,9 +13,9 @@ jobs:
     name: Review dependency changes
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Dependency Review
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
           comment-summary-in-pr: on-failure
@@ -28,4 +28,9 @@ jobs:
           # @mapbox/node-pre-gyp@1.0.11 (install-time prebuilt-binary fetch, not runtime code).
           # Still tracked by Dependabot. Remediate by upgrading node-pre-gyp to v2 (uses tar@7),
           # then drop this allow-list.
-          allow-ghsas: GHSA-8qq5-rm4j-mr97,GHSA-r6q2-hw4h-h46w,GHSA-34x7-hfp2-rc4v,GHSA-83g3-92jg-28cx,GHSA-qffp-2rhf-9h96,GHSA-9ppj-qmqm-q256
+          #
+          # GHSA-5xrq-8626-4rwp — vitest <…: arbitrary file read/RCE ONLY while the Vitest UI
+          # server (`vitest --ui` / API server) is listening on a dev machine. It is dev-tooling
+          # only: CI/prod test runs never start the UI server, so there is no runtime exposure.
+          # Still tracked by Dependabot; remediate by bumping vitest, then drop this entry.
+          allow-ghsas: GHSA-8qq5-rm4j-mr97,GHSA-r6q2-hw4h-h46w,GHSA-34x7-hfp2-rc4v,GHSA-83g3-92jg-28cx,GHSA-qffp-2rhf-9h96,GHSA-9ppj-qmqm-q256,GHSA-5xrq-8626-4rwp

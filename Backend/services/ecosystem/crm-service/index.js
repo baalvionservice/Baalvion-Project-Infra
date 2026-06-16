@@ -1,3 +1,4 @@
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -10,6 +11,7 @@ const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
 const { metricsMiddleware, metricsHandler } = require('./middleware/metrics');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 const app = express();
 const server = http.createServer(app);
 app.set('trust proxy', 1);
@@ -32,10 +34,15 @@ const start = async () => {
     try {
         await db.sequelize.authenticate();
         await db.sequelize.query('CREATE SCHEMA IF NOT EXISTS crm');
-        await db.sequelize.sync({ alter: true });
+        // alter:false — never auto-mutate the schema at runtime (alter:true can silently DROP/ALTER
+        // columns and lose data, with no version tracking or rollback). Schema changes go through
+        // explicit migrations. This only creates missing tables on a fresh DB.
+        await db.sequelize.sync({ alter: false });
         console.log('[CRM] DB connected and synced');
     } catch (err) { console.error('[CRM] DB error:', err.message); process.exit(1); }
     server.listen(config.port, () => console.log(`[CRM] Service running on port ${config.port}`));
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 start();
 module.exports = app;

@@ -126,12 +126,13 @@ export default function BillingCheckout() {
   // We only show "Payment Successful" when the backend confirms an ACTIVE
   // subscription — never on a swallowed error (a customer must not see success
   // while getting nothing).
-  const activateAndFinish = async () => {
+  const activateAndFinish = async (paymentRef?: string) => {
     if (!selectedPlan) return;
     try {
       if (isPayg) {
-        // PAYG: add the prepaid credit (server also ensures the PAYG subscription).
-        const res = await billingApi.buyCredit(creditAmount);
+        // PAYG: add the prepaid credit, keyed to the settled payment id so the server can't
+        // double-credit (this client call + the provider webhook net exactly one top-up).
+        const res = await billingApi.buyCredit(creditAmount, paymentRef);
         queryClient.invalidateQueries({ queryKey: ["billing"] });
         if (res && typeof res.balanceUsd === "number") {
           setResult("success");
@@ -192,17 +193,21 @@ export default function BillingCheckout() {
       // the client-confirmed success too (idempotent).
       const customerName = payment.card.name || payment.companyName;
       let paid = false;
+      let paymentRef: string | undefined;
       try {
         const res = await startGatewayCheckout({
           provider: gateway,
           method: "CARD",
-          amount: Math.round(total * 100), // minor units
+          amount: Math.round(total * 100), // display only — the BFF recomputes the real charge server-side
           currency: "USD",
+          planSlug: selectedPlan.slug,
+          interval,
+          promoCode: couponApplied && coupon.trim() ? coupon.trim() : undefined,
           idempotencyKey: `${selectedPlan.slug}-${interval}-${Date.now()}`,
           receipt: orderId,
           customer: customerName ? { name: customerName } : undefined,
         });
-        if (res.status === "success") paid = true;
+        if (res.status === "success") { paid = true; paymentRef = res.reference; }
         else if (res.status === "redirecting") return; // browser is leaving for the hosted page; settle via webhook
         else if (res.status === "cancelled") return; // stay on confirm so they can retry
         // A genuine decline/failure is shown as a failure in ALL environments —
@@ -215,7 +220,7 @@ export default function BillingCheckout() {
         if (import.meta.env.DEV) paid = true;
         else throw e;
       }
-      if (paid) await activateAndFinish();
+      if (paid) await activateAndFinish(paymentRef);
     } catch (e: unknown) {
       setErrorMessage(e instanceof Error ? e.message : "Could not start checkout");
       setResult("failure");
@@ -505,6 +510,7 @@ Thank you for your business!
                         { id: "razorpay", label: "Razorpay", desc: "Cards · UPI · Netbanking" },
                         { id: "stripe", label: "Stripe", desc: "International cards" },
                         { id: "payu", label: "PayU", desc: "Cards worldwide" },
+                        { id: "cashfree", label: "Cashfree", desc: "Cards · UPI · Netbanking" },
                       ] as const).map((g) => (
                         <button
                           key={g.id}

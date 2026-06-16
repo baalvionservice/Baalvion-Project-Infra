@@ -62,7 +62,7 @@ export default function RevisionHistory({ contentId, currentVersion }: Props) {
                 </p>
                 {rev.changeNote && (
                   <p className="text-[11px] text-muted-foreground italic mt-0.5 truncate">
-                    "{rev.changeNote}"
+                    &quot;{rev.changeNote}&quot;
                   </p>
                 )}
               </div>

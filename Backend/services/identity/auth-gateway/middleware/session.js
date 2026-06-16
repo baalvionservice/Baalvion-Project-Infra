@@ -16,8 +16,16 @@ const clientIp = (req) => ((req.headers['x-forwarded-for'] || '').split(',')[0].
 function requireSession(opts = {}) {
   return async (req, res, next) => {
     try {
+      // The optional-auth bypass is gated on the SERVER-SIDE opts.optional flag
+      // (fixed at route-registration time), never on the user-controlled cookie
+      // value alone. Evaluate the fixed flag first so a missing/forged cookie
+      // cannot, by itself, steer the request down the auth-skipping branch.
+      const allowAnonymous = opts.optional === true;
       const token = req.cookies && req.cookies[config.cookie.accessName];
-      if (!token) { if (opts.optional) return next(); return res.status(401).json({ error: { code: 'NO_SESSION', message: 'No session cookie' } }); }
+      if (!token) {
+        if (allowAnonymous) return next();
+        return res.status(401).json({ error: { code: 'NO_SESSION', message: 'No session cookie' } });
+      }
 
       const claims = await verifier.verify(token);            // RS256 + JWKS + blacklist + exp + requiredClaims
       const session = await getSession(claims.sid);           // session must still exist (revocable)

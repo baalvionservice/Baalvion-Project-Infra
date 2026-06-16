@@ -4,13 +4,17 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,6 +31,34 @@ public class SanctionsProperties {
   /** Active list provider id ("seed" by default; "ofac"/"un"/"eu" for live downloaders). */
   @NotBlank
   private String provider = "seed";
+
+  /**
+   * Compliance safety posture (decoupled from {@code app.security.enabled}). {@code STRICT} (default) is
+   * production: authoritative OFAC/UN/EU lists must be loaded and non-empty at boot or the service refuses
+   * to start, the seed list is forbidden, and screening fails closed on an empty watchlist. {@code
+   * PERMISSIVE} (must be set explicitly) is for local/dev/test and allows the offline seed list.
+   */
+  @NotNull
+  private SanctionsEnforcement enforcement = SanctionsEnforcement.STRICT;
+
+  /**
+   * Authoritative provider ids that MUST be enabled, loaded, and non-empty under {@code STRICT}
+   * enforcement. Boot fails if any is missing or empty. (Provider ids, not jurisdiction codes.)
+   */
+  @NotEmpty
+  private List<@NotBlank String> requiredSources = new ArrayList<>(List.of("ofac", "un", "eu"));
+
+  /**
+   * Per-source minimum active-entity count for the boot-time sanity check (catches a feed that returned
+   * empty or parsed to near-nothing). Keyed by provider id. Conservative defaults sit well below real list
+   * sizes (OFAC ~17k, UN ~700, EU ~2k) yet well above a broken/partial parse.
+   */
+  private Map<String, Integer> minEntities = new HashMap<>(Map.of(
+    "ofac", 1000, "un", 100, "eu", 500, "uk", 50, "au", 50));
+
+  /** Max age (hours) of a source's data before it is considered STALE by the health check. */
+  @Min(value = 1, message = "dataset-max-age-hours must be >= 1")
+  private long datasetMaxAgeHours = 48;
 
   /** Names scoring at/above this are recorded as hits and flag a POTENTIAL_MATCH (0–1). */
   @DecimalMin(value = "0.0", message = "match-threshold must be >= 0")

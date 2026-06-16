@@ -116,14 +116,29 @@ export interface PublisherLogger {
   debug(obj: object, msg: string): void;
 }
 
+export interface RedisPublisherOptions {
+  /**
+   * Re-throw on publish failure instead of swallowing it. REQUIRED when this publisher backs an
+   * outbox relay: the relay must observe the failure to retry it. Defaults to false to preserve
+   * the legacy fire-and-forget call sites — but those are exactly the silent-loss paths the outbox
+   * replaces, so new code should set `rethrow: true` (or use a broker bus).
+   */
+  rethrow?: boolean;
+}
+
 export function createRedisPublisher(
   client: RedisClient | null,
   logger: PublisherLogger,
+  options: RedisPublisherOptions = {},
 ): EventPublisher {
   const STREAM_KEY = 'baalvion:event_stream';
+  const rethrow = options.rethrow ?? false;
 
   async function publishOne<T>(event: PlatformEvent<T>): Promise<void> {
-    if (!client) return;
+    if (!client) {
+      if (rethrow) throw new Error('[events] redis client unavailable — cannot publish');
+      return;
+    }
 
     const serialized = JSON.stringify(event);
     try {
@@ -134,6 +149,7 @@ export function createRedisPublisher(
       logger.debug({ eventId: event.id, type: event.type }, 'Event published');
     } catch (err) {
       logger.error({ err, eventId: event.id, type: event.type }, 'Failed to publish event');
+      if (rethrow) throw err;
     }
   }
 
@@ -156,6 +172,7 @@ export function createNoopPublisher(): EventPublisher {
 export * from './domain';
 export * from './broker';
 export * from './outbox';
+export * from './pgOutboxStore';
 
 // Re-export core types
 export type { PlatformEvent, EventType };

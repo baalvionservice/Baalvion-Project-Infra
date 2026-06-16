@@ -64,7 +64,7 @@ engineering only.
 
 ---
 
-## Known limitations (Limited-Beta posture — see LIMITED_BETA_SIGNOFF.md)
+## Known limitations (Limited-Beta posture)
 
 - **Payments run in mock mode** until real provider keys are supplied (flip is one step + documented).
 - **Dev-grade secrets** in `.env` / `baalvion_dev_pass`; production requires real RS256 keys,

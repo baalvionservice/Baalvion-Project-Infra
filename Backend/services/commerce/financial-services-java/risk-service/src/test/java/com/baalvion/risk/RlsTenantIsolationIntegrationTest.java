@@ -50,7 +50,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 @SpringBootTest(properties = {
   "spring.kafka.listener.auto-startup=false",
-  "app.security.enabled=false"
+  "app.security.enabled=false",
+  // RLS test, not a sanctions test; run permissive so the strict watchlist gate doesn't require live feeds.
+  "app.sanctions.enforcement=permissive"
 })
 @Testcontainers
 @Import(RlsTenantIsolationIntegrationTest.TenantReaderConfig.class)

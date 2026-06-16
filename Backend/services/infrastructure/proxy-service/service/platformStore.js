@@ -274,13 +274,18 @@ const convertRecord = (name, inst) => {
 
 // Convert camelCase payload → snake_case DB columns for insert
 const prepareInsert = (name, payload) => {
-  const p = {};
+  // Null-prototype map so a remote-controlled column name can never reach
+  // Object.prototype, and define the write as an own data property
+  // (remote-property-injection / prototype-pollution guard).
+  const p = Object.create(null);
   for (const [k, v] of Object.entries(payload)) {
     if (v === undefined) continue;
     if (FORBIDDEN_KEYS.has(k)) continue;
     const col = toSnake(k);
     if (FORBIDDEN_KEYS.has(col)) continue;
-    p[col] = v;
+    Object.defineProperty(p, col, {
+      value: v, writable: true, enumerable: true, configurable: true,
+    });
   }
   if (name === 'proxies') {
     if (p.host !== undefined) { p.ip = p.host; delete p.host; }
@@ -397,7 +402,7 @@ const getById = async (name, id, orgId = null) => {
     const row = await Model.findOne({ where });
     return convertRecord(name, row);
   } catch (err) {
-    console.error('getById(%s, %s) error:', logSafe(name), logSafe(id), err.message);
+    console.error('getById(%s, %s) error:', logSafe(name), logSafe(id), logSafe(err.message));
     return null;
   }
 };
@@ -449,7 +454,7 @@ const update = async (name, id, updater, orgId = null) => {
     await Model.update(data, { where });
     return await getById(name, id, orgId);
   } catch (err) {
-    console.error('update(%s, %s) error:', logSafe(name), logSafe(id), err.message);
+    console.error('update(%s, %s) error:', logSafe(name), logSafe(id), logSafe(err.message));
     return null;
   }
 };
@@ -475,7 +480,7 @@ const remove = async (name, id, orgId = null) => {
     const count = await Model.destroy({ where });
     return count > 0;
   } catch (err) {
-    console.error('remove(%s, %s) error:', logSafe(name), logSafe(id), err.message);
+    console.error('remove(%s, %s) error:', logSafe(name), logSafe(id), logSafe(err.message));
     return false;
   }
 };
@@ -601,7 +606,6 @@ const ensureSeed = async () => {
 };
 
 module.exports = {
-  DEMO_PASSWORD: 'Baalvion123!',
   ensureSeed,
   paginate,
   getCollection,

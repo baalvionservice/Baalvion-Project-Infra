@@ -1,3 +1,4 @@
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const http = require('http');
 const cors = require('cors');
@@ -10,6 +11,7 @@ const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
 const { metricsMiddleware, metricsHandler } = require('./middleware/metrics');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 const app = express();
 const server = http.createServer(app);
 app.set('trust proxy', 1);
@@ -36,6 +38,10 @@ const start = async () => {
         console.log('[Imperialpedia] DB connected and synced');
     } catch (err) { console.error('[Imperialpedia] DB error:', err.message); process.exit(1); }
     server.listen(config.port, () => console.log(`[Imperialpedia] Service running on port ${config.port}`));
+    registerShutdown('db', async () => {
+        if (db.sequelize && db.sequelize.close) await db.sequelize.close();
+    });
+    initGracefulShutdown(server);
 };
 start();
 module.exports = app;

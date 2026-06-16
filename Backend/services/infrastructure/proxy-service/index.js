@@ -13,6 +13,7 @@ const { initializeSocketServer } = require('./service/socketService');
 const { initializeQueues } = require('./service/queueService');
 const store = require('./service/platformStore');
 const db = require('./models');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 const server = http.createServer(app);
@@ -22,6 +23,39 @@ app.use(cors({ origin: config.corsOrigins, credentials: true }));
 
 // KYC webhook needs the RAW body for HMAC verification — mount before json parser.
 app.post('/v1/webhooks/kyc', rateLimit(), express.raw({ type: '*/*' }), require('./controller/privacyController').kycWebhook);
+
+// Razorpay billing webhook (authoritative subscription activation) — also needs the RAW body for
+// HMAC verification, so mount before the json parser. No JWT; authenticity is the provider signature.
+app.post(
+    ['/v1/billing/webhook/razorpay', '/api/v1/billing/webhook/razorpay'],
+    rateLimit(),
+    express.raw({ type: '*/*' }),
+    require('./controller/billingWebhookController').razorpayWebhook,
+);
+
+// PayU callback (surl/furl) — form-encoded browser POST; needs the RAW body for the reverse-hash.
+app.post(
+    ['/v1/billing/webhook/payu', '/api/v1/billing/webhook/payu'],
+    rateLimit(),
+    express.raw({ type: '*/*' }),
+    require('./controller/payuWebhookController').payuWebhook,
+);
+
+// Cashfree S2S webhook — needs the RAW body for base64(HMAC-SHA256(timestamp + body)) verification.
+app.post(
+    ['/v1/billing/webhook/cashfree', '/api/v1/billing/webhook/cashfree'],
+    rateLimit(),
+    express.raw({ type: '*/*' }),
+    require('./controller/cashfreeWebhookController').cashfreeWebhook,
+);
+
+// Stripe S2S webhook — needs the RAW body for the t=,v1= signed-payload (HMAC over `t.body`) check.
+app.post(
+    ['/v1/billing/webhook/stripe', '/api/v1/billing/webhook/stripe'],
+    rateLimit(),
+    express.raw({ type: '*/*' }),
+    require('./controller/stripeWebhookController').stripeWebhook,
+);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '1mb' }));
@@ -111,6 +145,9 @@ const startServer = async () => {
     server.listen(config.port, () => {
         // port is logged by the process manager / container runtime
     });
+
+    registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });
+    initGracefulShutdown(server);
 };
 
 startServer();

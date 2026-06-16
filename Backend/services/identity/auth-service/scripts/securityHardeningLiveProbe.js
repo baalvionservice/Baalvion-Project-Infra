@@ -20,7 +20,7 @@ const redis = require('../config/redis');
 
 const GATEWAY = process.env.GATEWAY_URL || 'http://localhost:3099';
 const PLATFORM_EMAIL = process.env.PLATFORM_OWNER_EMAIL || 'superadmin@baalvion.com';
-const PLATFORM_PW = process.env.PLATFORM_OWNER_PASSWORD || 'Sup3rAdmin!2026';
+const PLATFORM_PW = process.env.PLATFORM_OWNER_PASSWORD;
 const STAMP = `${process.pid}${Date.now().toString(36)}`;
 const PW = 'Pr0bePass!2026';
 

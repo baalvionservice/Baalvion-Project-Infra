@@ -1,11 +1,13 @@
 'use strict';
 const { Sequelize } = require('sequelize');
+const { buildPgSsl } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
 
 const sequelize = new Sequelize(config.db.name, config.db.user, config.db.password, {
     host:    config.db.host,
     port:    config.db.port,
     dialect: 'postgres',
+    dialectOptions: { ssl: buildPgSsl() },
     schema:  'ctm',
     logging: config.env === 'development' ? (sql) => console.log('[SQL]', sql) : false,
     pool:    { max: 10, min: 1, acquire: 30000, idle: 10000 },

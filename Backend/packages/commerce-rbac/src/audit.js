@@ -2,16 +2,68 @@
 // Structured audit emission for the commerce RBAC PEP. Two sinks, both non-blocking and
 // fail-open (auditing must NEVER break or slow a request):
 //   1. stdout as a single-line JSON record — the guaranteed, log-aggregation-friendly sink.
-//   2. best-effort publish to the `baalvion:events` Redis stream, consumed by audit-service.
+//   2. durable-ish publish to the `baalvion:events` Redis stream, consumed by audit-service.
+//
+// The stream path used to be a single `xadd().catch(() => {})`: one transient Redis blip and the
+// audit-service's queryable record was lost SILENTLY. It now retries with bounded backoff, and if
+// it still can't deliver, it logs a LOUD structured `auditDeliveryFailed` line carrying the FULL
+// event — so the record is still recoverable from the log pipeline and the drop is observable
+// (alertable), never silent. The request path is still never blocked or failed.
 //
 // Event types: commerce.access_denied, commerce.cross_scope_attempt, commerce.rbac_breakglass.
 // (Role changes are audited at the source of truth — rbac-service — not here.)
 
 const STREAM_KEY = 'baalvion:events';
+const DEFAULT_STREAM_RETRIES = 3;
+const DEFAULT_STREAM_BACKOFF_MS = 50;
+const MAX_STREAM_BACKOFF_MS = 2000;
 
 function nowIso(clock) {
     // `clock` is injectable so tests are deterministic (no Date.now in the hot path otherwise).
     return clock ? clock() : new Date().toISOString();
+}
+
+function defaultSleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Deliver one audit event to the Redis stream with bounded exponential-backoff retry. Resolves to
+ * true on success, false once retries are exhausted (after logging a loud, log-recoverable line).
+ * NEVER rejects — auditing must not throw into the caller. Exported for tests.
+ *
+ * @param {object} args
+ * @param {object} args.redis      ioredis-like client (xadd)
+ * @param {object} args.event      the audit event (already includes type/timestamp/etc.)
+ * @param {object} [args.logger]   logger with .error/.warn (defaults to console)
+ * @param {number} [args.maxAttempts]
+ * @param {number} [args.baseDelayMs]
+ * @param {function} [args.sleep]  (ms) => Promise, injectable for tests
+ */
+async function deliverToStream({ redis, event, logger = console, maxAttempts = DEFAULT_STREAM_RETRIES, baseDelayMs = DEFAULT_STREAM_BACKOFF_MS, sleep = defaultSleep } = {}) {
+    let lastErr;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        try {
+            await redis.xadd(STREAM_KEY, '*', 'type', event.type, 'payload', JSON.stringify(event));
+            return true;
+        } catch (err) {
+            lastErr = err;
+            if (attempt < maxAttempts) {
+                await sleep(Math.min(baseDelayMs * Math.pow(2, attempt - 1), MAX_STREAM_BACKOFF_MS));
+            }
+        }
+    }
+    // Exhausted: loud + structured + log-recoverable (the full event rides on this line).
+    try {
+        (logger.error || logger.warn || console.error).call(logger, JSON.stringify({
+            audit: true,
+            auditDeliveryFailed: true,
+            attempts: maxAttempts,
+            error: String((lastErr && lastErr.message) || lastErr),
+            ...event,
+        }));
+    } catch { /* never throw from audit */ }
+    return false;
 }
 
 /**
@@ -22,17 +74,17 @@ function nowIso(clock) {
  * @param {function} [opts.clock]      () => ISO string, for tests
  * @param {boolean} [opts.stream=true] publish to the Redis stream
  */
-function createAuditEmitter({ service, redis = null, logger = console, clock } = {}) {
+function createAuditEmitter({ service, redis = null, logger = console, clock, streamRetries = DEFAULT_STREAM_RETRIES, streamBackoffMs = DEFAULT_STREAM_BACKOFF_MS, sleep } = {}) {
     function emit(record) {
         // `timestamp` matches the audit field contract (userId, role, scope, action, decision, timestamp).
         const event = { service, timestamp: nowIso(clock), ...record };
         // 1. stdout (guaranteed)
         try { (logger.warn || logger.info || console.warn).call(logger, JSON.stringify({ audit: true, ...event })); } catch { /* never throw from audit */ }
-        // 2. Redis stream (best-effort, non-blocking)
+        // 2. Redis stream — non-blocking, but now retried with backoff and loudly reported on
+        //    final failure instead of silently swallowed. deliverToStream never rejects, so `void`
+        //    is safe and the request path is never blocked or failed.
         if (redis && typeof redis.xadd === 'function') {
-            Promise.resolve()
-                .then(() => redis.xadd(STREAM_KEY, '*', 'type', event.type, 'payload', JSON.stringify(event)))
-                .catch(() => { /* swallow — audit-service may be down; never fail the request */ });
+            void deliverToStream({ redis, event, logger, maxAttempts: streamRetries, baseDelayMs: streamBackoffMs, sleep });
         }
         return event;
     }
@@ -69,4 +121,4 @@ const NOOP_AUDIT = {
     breakglass: () => undefined,
 };
 
-module.exports = { createAuditEmitter, NOOP_AUDIT, STREAM_KEY };
+module.exports = { createAuditEmitter, NOOP_AUDIT, STREAM_KEY, deliverToStream };

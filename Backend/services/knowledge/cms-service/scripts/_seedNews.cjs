@@ -9,7 +9,7 @@ const crypto = require('crypto');
 
 // Strip CR/LF/tab from values that originate outside this script before logging,
 // so network-derived text cannot forge or split log lines (log injection).
-const sanitizeForLog = (v) => String(v).replace(/[\r\n\t]/g, ' ');
+const sanitizeForLog = (v) => (v === undefined || v === null ? v : String(v).replace(/[\r\n\t]/g, ' '));
 
 // Resolve the fixed output file to a constant path inside this script directory and
 // reject anything that escapes it, so a tainted value can never redirect the write.

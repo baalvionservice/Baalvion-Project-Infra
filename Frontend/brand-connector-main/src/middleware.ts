@@ -12,10 +12,19 @@ import type { NextRequest } from "next/server";
 const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
 const PROTECTED_PREFIXES = ['/dashboard', '/admin', '/campaigns', '/onboarding', '/settings'];
 
+// `/campaigns/<id>` campaign DETAIL pages are public & crawlable; the `/campaigns`
+// index and any deeper management routes (e.g. `/campaigns/<id>/edit`) stay gated.
+// Fails closed: only a single non-empty segment after `/campaigns` is treated as public.
+function isPublicCampaignDetail(pathname: string): boolean {
+  return /^\/campaigns\/[^/]+\/?$/.test(pathname);
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isProtected = PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'));
+  const isProtected =
+    PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/')) &&
+    !isPublicCampaignDetail(pathname);
   if (!isProtected) {
     return NextResponse.next();
   }

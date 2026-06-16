@@ -16,7 +16,8 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 router.post('/subscribe', async (req, res, next) => {
     try {
         const { email, preferences } = req.body || {};
-        if (!email || !EMAIL_RE.test(String(email))) {
+        const emailStr = String(email);
+        if (!email || emailStr.length > 254 || !EMAIL_RE.test(emailStr)) {
             return next(new AppError('VALIDATION_ERROR', 'A valid email address is required', 400));
         }
         const orgId = req.user?.orgId || DEFAULT_ORG_ID;

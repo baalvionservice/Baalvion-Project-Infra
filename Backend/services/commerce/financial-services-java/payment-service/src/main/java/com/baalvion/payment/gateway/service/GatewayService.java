@@ -1,12 +1,16 @@
 package com.baalvion.payment.gateway.service;
 
 import com.baalvion.payment.gateway.domain.GatewayPayment;
+import com.baalvion.payment.gateway.domain.GatewayWebhookEvent;
 import com.baalvion.payment.gateway.dto.GatewayPaymentResponse;
 import com.baalvion.payment.gateway.dto.InitiateGatewayPaymentRequest;
 import com.baalvion.payment.gateway.dto.RefundGatewayPaymentRequest;
+import com.baalvion.payment.gateway.exception.WebhookAmountMismatchException;
 import com.baalvion.payment.gateway.repository.GatewayPaymentRepository;
+import com.baalvion.payment.gateway.repository.GatewayWebhookEventRepository;
 import com.baalvion.payment.gateway.spi.GatewayChargeRequest;
 import com.baalvion.payment.gateway.spi.GatewayChargeResponse;
+import com.baalvion.payment.gateway.spi.GatewayStatus;
 import com.baalvion.payment.gateway.spi.PaymentGateway;
 import com.baalvion.payment.gateway.spi.ProviderConfig;
 import com.baalvion.payment.gateway.spi.RefundRequest;
@@ -15,6 +19,7 @@ import com.baalvion.payment.gateway.spi.WebhookResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,15 +47,27 @@ public class GatewayService {
 
   private final GatewayRegistry registry;
   private final GatewayPaymentRepository repository;
+  private final GatewayWebhookEventRepository webhookEventRepository;
   private final PspConfigResolver resolver;
   private final ObjectMapper objectMapper;
 
+  /**
+   * When true (default), a webhook whose amount does not match the recorded charge is REFUSED for
+   * money-positive transitions. Set {@code app.psp.webhook-strict-amount=false} only to relax this
+   * for a provider that legitimately omits amounts in its event payloads (logged loudly).
+   */
+  private final boolean webhookStrictAmount;
+
   public GatewayService(GatewayRegistry registry, GatewayPaymentRepository repository,
-                        PspConfigResolver resolver, ObjectMapper objectMapper) {
+                        GatewayWebhookEventRepository webhookEventRepository,
+                        PspConfigResolver resolver, ObjectMapper objectMapper,
+                        @Value("${app.psp.webhook-strict-amount:true}") boolean webhookStrictAmount) {
     this.registry = registry;
     this.repository = repository;
+    this.webhookEventRepository = webhookEventRepository;
     this.resolver = resolver;
     this.objectMapper = objectMapper;
+    this.webhookStrictAmount = webhookStrictAmount;
   }
 
   /**
@@ -132,15 +149,13 @@ public class GatewayService {
     return response;
   }
 
-  public GatewayPaymentResponse getById(UUID id) {
-    GatewayPayment payment = repository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
+  public GatewayPaymentResponse getById(String site, UUID id) {
+    GatewayPayment payment = loadScoped(site, id);
     return GatewayPaymentResponse.from(payment);
   }
 
-  public GatewayPaymentResponse capture(UUID id) {
-    GatewayPayment payment = repository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
+  public GatewayPaymentResponse capture(String site, UUID id) {
+    GatewayPayment payment = loadScoped(site, id);
 
     PaymentGateway gateway = registry.resolve(payment.getProvider());
     ProviderConfig cfg = resolver.resolve(siteOf(payment), payment.getProvider());
@@ -155,14 +170,22 @@ public class GatewayService {
     return GatewayPaymentResponse.from(saved);
   }
 
-  public GatewayPaymentResponse refund(UUID id, RefundGatewayPaymentRequest request) {
-    GatewayPayment payment = repository.findById(id)
-      .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
+  public GatewayPaymentResponse refund(String site, UUID id, RefundGatewayPaymentRequest request) {
+    GatewayPayment payment = loadScoped(site, id);
+
+    BigDecimal refundAmount = request != null ? request.getAmount() : null;
+    String reason = request != null ? request.getReason() : null;
+
+    // A (partial) refund amount, when given, must be positive and cannot exceed the charge amount.
+    // A full refund is requested with a null amount.
+    if (refundAmount != null
+        && (refundAmount.signum() <= 0 || refundAmount.compareTo(payment.getAmount()) > 0)) {
+      throw new IllegalArgumentException(
+        "Refund amount must be > 0 and <= the charge amount (" + payment.getAmount() + ")");
+    }
 
     PaymentGateway gateway = registry.resolve(payment.getProvider());
     ProviderConfig cfg = resolver.resolve(siteOf(payment), payment.getProvider());
-    BigDecimal refundAmount = request != null ? request.getAmount() : null;
-    String reason = request != null ? request.getReason() : null;
 
     RefundResult result = gateway.refund(new RefundRequest(payment.getProviderRef(), refundAmount, reason), cfg);
 
@@ -187,20 +210,138 @@ public class GatewayService {
    */
   public WebhookResult applyWebhook(String provider, byte[] rawBody, Map<String, String> headers, String site) {
     String slug = slugOf(site);
+    String providerKey = provider.toLowerCase(Locale.ROOT);
     PaymentGateway gateway = registry.resolve(provider);
     ProviderConfig cfg = resolver.resolve(site, provider);
+
+    // REAL signature + replay-window verification happens inside the adapter; it THROWS on failure
+    // (WebhookVerificationException → 400). A returned result is always an authenticated event.
     WebhookResult result = gateway.verifyAndParseWebhook(rawBody, headers, cfg);
 
-    repository.findByWebsiteSlugAndProviderAndProviderRef(slug, provider.toLowerCase(Locale.ROOT), result.providerRef())
-      .ifPresentOrElse(payment -> {
-        payment.setStatus(result.status());
-        repository.save(payment);
-        log.info("Webhook applied: site={}, provider={}, eventId={}, providerRef={}, status={}",
-          sanitizeForLog(slug), provider, sanitizeForLog(result.providerEventId()), result.providerRef(), result.status());
-      }, () -> log.warn("Webhook for unknown charge: site={}, provider={}, providerRef={}, eventId={}",
-        sanitizeForLog(slug), provider, result.providerRef(), sanitizeForLog(result.providerEventId())));
+    String eventKey = dedupKey(result, providerKey);
 
+    // Persistent, restart-surviving dedup: a provider redelivery or a replay beyond the adapter's
+    // signature-timestamp window is acknowledged WITHOUT re-applying the status transition.
+    if (webhookEventRepository.existsByWebsiteSlugAndProviderAndProviderEventId(slug, providerKey, eventKey)) {
+      log.info("Duplicate webhook ignored (already processed): site={}, provider={}, eventId={}",
+        sanitizeForLog(slug), providerKey, sanitizeForLog(eventKey));
+      return result;
+    }
+
+    var chargeOpt = repository.findByWebsiteSlugAndProviderAndProviderRef(slug, providerKey, result.providerRef());
+    if (chargeOpt.isEmpty()) {
+      log.warn("Webhook for unknown charge: site={}, provider={}, providerRef={}, eventId={}",
+        sanitizeForLog(slug), providerKey, result.providerRef(), sanitizeForLog(eventKey));
+      return result;
+    }
+    GatewayPayment payment = chargeOpt.get();
+
+    // STRICT amount validation BEFORE the status transition. A verified-but-tampered/replayed event
+    // claiming a money-positive status for an amount that differs from the recorded charge is
+    // refused — the charge is NOT marked paid and nothing is persisted (the transaction rolls back).
+    boolean amountValidated = validateWebhookAmount(slug, providerKey, eventKey, payment, result);
+
+    payment.setStatus(result.status());
+    repository.save(payment);
+
+    // Record the processed event. The UNIQUE(website_slug, provider, provider_event_id) constraint
+    // is the backstop against the concurrent-delivery race (the loser's tx fails the INSERT and the
+    // provider's retry then short-circuits on the exists check above).
+    webhookEventRepository.save(GatewayWebhookEvent.builder()
+      .websiteSlug(slug)
+      .provider(providerKey)
+      .providerEventId(eventKey)
+      .providerRef(result.providerRef())
+      .eventType(result.eventType())
+      .status(result.status())
+      .amount(result.amount())
+      .currency(stringOrNull(result.payload().get("currency")))
+      .amountValidated(amountValidated)
+      .applied(true)
+      .build());
+
+    log.info("Webhook applied: site={}, provider={}, eventId={}, providerRef={}, status={}",
+      sanitizeForLog(slug), providerKey, sanitizeForLog(eventKey), result.providerRef(), result.status());
     return result;
+  }
+
+  /**
+   * Validate the event amount against the recorded charge for money-positive transitions.
+   *
+   * <ul>
+   *   <li>CAPTURED / AUTHORIZED — event amount MUST equal the charge amount.</li>
+   *   <li>REFUNDED — event amount, when present, must be in (0, charge amount].</li>
+   *   <li>CREATED / FAILED — no amount check.</li>
+   * </ul>
+   *
+   * @return whether the event amount was present and validated
+   * @throws WebhookAmountMismatchException when strict validation fails (and strict mode is on)
+   */
+  private boolean validateWebhookAmount(String slug, String providerKey, String eventKey,
+                                        GatewayPayment payment, WebhookResult result) {
+    GatewayStatus status = result.status();
+    BigDecimal eventAmount = result.amount();
+    BigDecimal chargeAmount = payment.getAmount();
+
+    if (status == GatewayStatus.CAPTURED || status == GatewayStatus.AUTHORIZED) {
+      boolean matches = eventAmount != null && eventAmount.compareTo(chargeAmount) == 0;
+      if (!matches) {
+        log.error("Webhook amount mismatch — {} transition: site={}, provider={}, charge={}, expected={}, event={}, eventId={}",
+          status, sanitizeForLog(slug), providerKey, payment.getId(), chargeAmount, eventAmount, sanitizeForLog(eventKey));
+        if (webhookStrictAmount) {
+          throw new WebhookAmountMismatchException(
+            "Webhook amount " + eventAmount + " != charge amount " + chargeAmount + " for charge " + payment.getId());
+        }
+        log.warn("app.psp.webhook-strict-amount=false — applying {} despite amount mismatch (charge={})",
+          status, payment.getId());
+        return false;
+      }
+      return true;
+    }
+
+    if (status == GatewayStatus.REFUNDED && eventAmount != null) {
+      boolean inBounds = eventAmount.signum() > 0 && eventAmount.compareTo(chargeAmount) <= 0;
+      if (!inBounds) {
+        log.error("Refund webhook amount out of bounds: site={}, charge={}, captured={}, refund={}, eventId={}",
+          sanitizeForLog(slug), payment.getId(), chargeAmount, eventAmount, sanitizeForLog(eventKey));
+        if (webhookStrictAmount) {
+          throw new WebhookAmountMismatchException(
+            "Refund amount " + eventAmount + " out of bounds (0, " + chargeAmount + "] for charge " + payment.getId());
+        }
+        return false;
+      }
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Non-null dedup key. Prefer the body-derived provider event id; when an adapter cannot supply
+   * one, fall back to a deterministic key so duplicate deliveries of the same charge+status still
+   * dedup (distinct statuses, e.g. captured then refunded, remain distinct events).
+   */
+  private static String dedupKey(WebhookResult result, String providerKey) {
+    String id = result.providerEventId();
+    if (id != null && !id.isBlank()) {
+      return id;
+    }
+    return providerKey + ":" + result.providerRef() + ":"
+      + (result.status() == null ? "?" : result.status().name());
+  }
+
+  private static String stringOrNull(Object value) {
+    return value == null ? null : value.toString();
+  }
+
+  /**
+   * Load a charge by id SCOPED TO THE CALLER'S SITE. Using the inherited findById here would let a
+   * caller for site A read/capture/refund a charge owned by site B (cross-tenant IDOR on financial
+   * records). A mismatch surfaces as "not found" rather than leaking the charge's existence.
+   */
+  private GatewayPayment loadScoped(String site, UUID id) {
+    return repository.findByIdAndWebsiteSlug(id, slugOf(site))
+      .orElseThrow(() -> new IllegalArgumentException("Gateway payment not found: " + id));
   }
 
   /** Normalize an optional site to the persisted slug ({@code "__global__"} when absent). */

@@ -29,6 +29,9 @@
     "ci:auth:algorithms": "node scripts/ci/check-jwt-algorithms.mjs Backend",
     "ci:auth:middleware": "node scripts/ci/check-auth-middleware.mjs Backend/services",
     "ci:auth:guards": "npm run ci:auth:jwt-imports && npm run ci:auth:localstorage && npm run ci:auth:algorithms && npm run ci:auth:middleware",
+    "ci:rls:audit": "node Backend/scripts/tenant-isolation-audit.mjs",
+    "ci:rls:test": "node --test Backend/scripts/tenant-isolation-audit.test.mjs Backend/packages/tenancy/test.smoke.js",
+    "ci:rls": "npm run ci:rls:audit && npm run ci:rls:test",
     "clean": "turbo run clean && rimraf node_modules",
     "db:up": "docker compose up -d postgres redis",
     "db:down": "docker compose down",
@@ -68,7 +71,7 @@
       "@types/react-dom": "18.3.7",
       "next": "15.5.18",
       "handlebars": "4.7.9",
-      "protobufjs": "7.5.8",
+      "protobufjs": "7.6.1",
       "@protobufjs/utf8": "1.1.1",
       "fast-uri": "3.1.2",
       "follow-redirects": "1.16.0",
@@ -94,7 +97,7 @@
       "picomatch@4": "4.0.4",
       "path-to-regexp@<0.1.13": "0.1.13",
       "ajv@8": "8.18.0",
-      "nodemailer": "8.0.5",
+      "nodemailer": "8.0.11",
       "dompurify@3": "3.4.0",
       "tar@7": "7.5.11",
       "glob@10": "10.5.0",
@@ -102,7 +105,7 @@
       "@modelcontextprotocol/sdk": "1.26.0",
       "ip-address": "10.1.1",
       "uuid@11": "11.1.1",
-      "esbuild": "0.25.0"
+      "esbuild": "0.28.1"
     }
   }
 }

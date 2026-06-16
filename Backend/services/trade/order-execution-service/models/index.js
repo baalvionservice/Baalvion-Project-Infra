@@ -1,5 +1,6 @@
 'use strict';
 const { Sequelize } = require('sequelize');
+const { buildPgSsl } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
 const { setTenantOnTransaction } = require('@baalvion/tenancy');
 const { getTenantContext } = require('@baalvion/tenancy');
@@ -8,6 +9,7 @@ const sequelize = new Sequelize(config.db.name, config.db.user, config.db.passwo
     host: config.db.host,
     port: config.db.port,
     dialect: 'postgres',
+    dialectOptions: { ssl: buildPgSsl() },
     logging: config.env === 'development' ? console.log : false,
     define: { underscored: true, freezeTableName: true, schema: config.schema },
 });

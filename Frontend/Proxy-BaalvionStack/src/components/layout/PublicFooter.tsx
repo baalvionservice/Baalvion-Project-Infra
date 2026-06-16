@@ -30,6 +30,7 @@ const footerLinks = {
     { label: "Changelog", path: "/changelog" },
   ],
   Legal: [
+    { label: "Terms & Conditions", path: "/terms" },
     { label: "Privacy Policy", path: "/privacy" },
     { label: "Acceptable Use", path: "/aup" },
     { label: "Refund Policy", path: "/refund" },

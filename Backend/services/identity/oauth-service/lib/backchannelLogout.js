@@ -1,5 +1,6 @@
 'use strict';
 const { buildLogoutToken } = require('./logoutToken');
+const { isSafeHttpUrl } = require('./safeUrl');
 const logger = require('../utils/logger');
 
 /**
@@ -12,7 +13,16 @@ const logger = require('../utils/logger');
 async function notifyClients({ sid, sub, targets }) {
     if (!Array.isArray(targets) || targets.length === 0) return { sent: 0, failed: 0 };
 
-    const results = await Promise.allSettled(targets.map(async ({ clientId, uri }) => {
+    // Defense-in-depth SSRF guard (config is already validated at write time): never
+    // POST to a loopback/private/link-local/metadata host even if a stale row exists.
+    const safeTargets = targets.filter((t) => {
+        if (t && isSafeHttpUrl(t.uri)) return true;
+        logger.warn({ clientId: t && t.clientId }, 'back-channel logout: skipping unsafe/internal target uri');
+        return false;
+    });
+    if (safeTargets.length === 0) return { sent: 0, failed: 0, skipped: targets.length };
+
+    const results = await Promise.allSettled(safeTargets.map(async ({ clientId, uri }) => {
         const logoutToken = buildLogoutToken({ clientId, sub, sid });
         const controller  = new AbortController();
         const timer       = setTimeout(() => controller.abort(), 3000);
@@ -27,10 +37,11 @@ async function notifyClients({ sid, sub, targets }) {
         } finally { clearTimeout(timer); }
     }));
 
-    const sent   = results.filter(r => r.status === 'fulfilled').length;
-    const failed = results.length - sent;
+    const sent    = results.filter(r => r.status === 'fulfilled').length;
+    const failed  = results.length - sent;
+    const skipped = targets.length - safeTargets.length;
     if (failed) logger.warn({ sid, failed, total: targets.length }, 'back-channel logout: some RPs failed');
-    return { sent, failed };
+    return { sent, failed, skipped };
 }
 
 module.exports = { notifyClients };

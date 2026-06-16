@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { getAiSummaryAction } from "@/app/dashboard/actions";
+import { dashboardApi } from "@/lib/api-client";
 import { useDashboardRefs } from "@/hooks/use-dashboard-refs";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 
@@ -36,13 +36,20 @@ export default function AiInsightsCard() {
     setLoading(true);
     setError("");
     setSummary("");
-    const result = await getAiSummaryAction(selectedBusiness);
-    if (result.summary) {
-      setSummary(result.summary);
-    } else if (result.error) {
-      setError(result.error);
+    try {
+      const result = await dashboardApi.aiSummary(selectedBusiness);
+      if (result?.summary) {
+        setSummary(result.summary);
+      } else {
+        setError("No insights available for this business yet.");
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "Failed to generate AI insights.",
+      );
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

@@ -19,23 +19,42 @@ const SESSION = Object.freeze({
 });
 
 const ident = (s) => `"${String(s).replace(/"/g, '""')}"`;
+const lit = (s) => `'${String(s).replace(/'/g, "''")}'`;
 
 /**
  * SQL to enable tenant-isolation RLS on a table.
+ *
+ * The bypass escape hatch (`app.tenant_bypass='on'`) is, by default, HARDENED so it
+ * only works for roles OTHER than the runtime application role (CR-8): a SQL injection
+ * that flips `app.tenant_bypass` on the app connection can no longer defeat isolation,
+ * because the policy additionally requires `current_user <> '<appRole>'`. Only out-of-band
+ * admin/superuser tooling (a different login role) can use the bypass. Set
+ * `hardenBypass: false` to emit the legacy unconditional bypass.
+ *
  * @param {string} schema
  * @param {string} table
  * @param {object} [opts]
  * @param {string} [opts.tenantColumn='tenant_id']
  * @param {string} [opts.policyName='tenant_isolation']
+ * @param {string} [opts.appRole='baalvion_app']  runtime app role the bypass is denied to
+ * @param {boolean} [opts.hardenBypass=true]       require a non-app role to use the bypass
  * @returns {string} runnable SQL
  */
 function enableRlsSql(schema, table, opts = {}) {
-    const { tenantColumn = 'tenant_id', policyName = 'tenant_isolation' } = opts;
+    const {
+        tenantColumn = 'tenant_id',
+        policyName = 'tenant_isolation',
+        appRole = 'baalvion_app',
+        hardenBypass = true,
+    } = opts;
     const tbl = `${ident(schema)}.${ident(table)}`;
     const tenant = `current_setting('${SESSION.tenant}', true)`;
-    const bypass = `current_setting('${SESSION.bypass}', true) = 'on'`;
+    const bypassOn = `current_setting('${SESSION.bypass}', true) = 'on'`;
+    // CR-8: the runtime app role must NOT be able to bypass isolation even if it sets
+    // app.tenant_bypass (e.g. via SQL injection); only other login roles may.
+    const bypass = hardenBypass ? `(${bypassOn} AND current_user <> ${lit(appRole)})` : `(${bypassOn})`;
     // Cast the column to text so the policy works for uuid / bigint / varchar alike.
-    const match = `((${bypass}) OR (${tenant} IS NOT NULL AND ${tenant} <> '' AND ${ident(tenantColumn)}::text = ${tenant}))`;
+    const match = `(${bypass} OR (${tenant} IS NOT NULL AND ${tenant} <> '' AND ${ident(tenantColumn)}::text = ${tenant}))`;
     return [
         `ALTER TABLE ${tbl} ENABLE ROW LEVEL SECURITY;`,
         `ALTER TABLE ${tbl} FORCE ROW LEVEL SECURITY;`,

@@ -11,6 +11,11 @@ const redis           = require('../config/redis');
 const ssoRegistry     = require('../lib/ssoRegistry');
 const backchannelLogout = require('../lib/backchannelLogout');
 
+// Normalize a request-supplied value to a trusted string. Express query/body parsing can
+// yield arrays or objects (e.g. ?response_type[]=code), which must never flow into an
+// auth/security branch — return undefined for any non-string so presence checks fail closed.
+const asString = (v) => (typeof v === 'string' ? v : undefined);
+
 // ── Discovery & JWKS ──────────────────────────────────────────────────────────
 
 exports.discovery = (_req, res) => {
@@ -25,8 +30,15 @@ exports.jwks = (_req, res) => {
 
 exports.authorize = async (req, res, next) => {
     try {
-        const { response_type, client_id, redirect_uri, scope = 'openid', state,
+        const { response_type: responseTypeRaw, client_id: clientIdRaw, redirect_uri: redirectUriRaw,
+                scope = 'openid', state,
                 code_challenge, code_challenge_method, nonce, prompt } = req.query;
+
+        // Coerce the security-relevant inputs to trusted strings before they decide any branch.
+        // Non-string (array/object) values from query parsing fail closed via the presence check.
+        const response_type = asString(responseTypeRaw);
+        const client_id     = asString(clientIdRaw);
+        const redirect_uri  = asString(redirectUriRaw);
 
         if (!client_id || !redirect_uri) {
             return next(new AppError('VALIDATION_ERROR', 'client_id and redirect_uri are required', 400));
@@ -236,7 +248,9 @@ exports.userinfo = async (req, res, next) => {
 exports.endSession = async (req, res, next) => {
     try {
         const p = { ...req.query, ...req.body };
-        const { id_token_hint, post_logout_redirect_uri, state, client_id } = p;
+        const { id_token_hint: idTokenHintRaw, post_logout_redirect_uri, state, client_id } = p;
+        // Only a string id_token_hint may gate the verifyToken()-based identity branch below.
+        const id_token_hint = asString(idTokenHintRaw);
 
         // Identify the session being ended: prefer the hub cookie; fall back to id_token_hint.
         let sid = null, sub = null;

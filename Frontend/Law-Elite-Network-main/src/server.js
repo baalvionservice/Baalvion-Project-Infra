@@ -1,7 +1,11 @@
 /**
  * @fileOverview Next.js Bootstrapper
- * This file satisfies the environment's entry point requirement while 
- * correctly proxying startup to the Next.js dev server.
+ * This file satisfies the environment's entry point requirement while
+ * correctly proxying startup to the Next.js PRODUCTION server.
+ *
+ * Customer-facing launch posture: this serves a prebuilt `.next/` via
+ * `next start` in production mode. Run `next build` before starting (the
+ * deploy/start pipeline handles this). It does NOT run a dev/HMR server.
  */
 
 const { spawn } = require('child_process');
@@ -20,20 +24,20 @@ for (let i = 0; i < args.length; i++) {
   }
 }
 
-console.log(`[SYSTEM] Initializing Law Elite Network Dashboard...`);
+console.log(`[SYSTEM] Initializing Law Elite Network Dashboard (production)...`);
 console.log(`[SYSTEM] Target: http://${host}:${port}`);
 
 /**
- * We use 'npx next dev' to ensure the local project binary is 
- * used even if the global environment path is incomplete.
+ * We use the local Next binary in production mode (`next start`) so customers
+ * are served the optimized build, never the dev server.
  */
-const nextProcess = spawn('npx', ['next', 'dev', '-p', port, '-H', host], {
+const nextProcess = spawn('npx', ['next', 'start', '-p', port, '-H', host], {
   stdio: 'inherit',
   shell: true,
   cwd: path.join(__dirname, '..'),
-  env: { 
-    ...process.env, 
-    NODE_ENV: 'development',
+  env: {
+    ...process.env,
+    NODE_ENV: 'production',
     NEXT_TELEMETRY_DISABLED: '1'
   }
 });

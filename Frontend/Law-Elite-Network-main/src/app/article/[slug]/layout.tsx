@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 const API = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3015/v1';
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
+const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+
 async function fetchArticle(slug: string): Promise<any | null> {
   try {
     // /articles/:slug resolves by slug (the ?slug= list filter is not applied server-side).
@@ -21,14 +23,22 @@ export async function generateMetadata(
   const { slug } = await params;
   const a = await fetchArticle(slug);
   const url = `${SITE}/article/${slug}`;
-  if (!a) return { title: 'Article', alternates: { canonical: url } };
+  // No server-side record: humanize the slug so the title is still specific (not bare "Article").
+  if (!a) {
+    const humanized = `${titleCase(slug)} | Law Elite Network`;
+    return { title: humanized, alternates: { canonical: url }, openGraph: { type: 'article', url, title: humanized } };
+  }
   const title = a.title;
   const description = String(a.excerpt || a.title).slice(0, 300);
+  const authorName = a.author?.name || a.author_name || undefined;
+  const ogImage = a.cover_image || a.image_url || `https://picsum.photos/seed/${a.id || slug}/1200/630`;
   return {
     title,
     description,
     keywords: [...(a.tags || []), 'legal guide', 'law', 'legal advice'].filter(Boolean),
     alternates: { canonical: url },
+    robots: { index: true, follow: true },
+    authors: authorName ? [{ name: authorName }] : undefined,
     openGraph: {
       type: 'article',
       url,
@@ -36,8 +46,10 @@ export async function generateMetadata(
       description,
       publishedTime: a.published_at || undefined,
       modifiedTime: a.updated_at || undefined,
+      authors: authorName ? [authorName] : undefined,
+      images: [{ url: ogImage, alt: title }],
     },
-    twitter: { card: 'summary_large_image', title, description },
+    twitter: { card: 'summary_large_image', title, description, images: [ogImage] },
   };
 }
 
@@ -57,11 +69,27 @@ export default async function ArticleLayout(
     author: { '@type': 'Organization', name: 'Law Elite Network' },
     publisher: { '@type': 'Organization', name: 'Law Elite Network', logo: { '@type': 'ImageObject', url: `${SITE}/logo.png` } },
   };
+  // Breadcrumb trail: Home → (category hub, when known) → Article.
+  const cat = a?.category;
+  const crumbs: Array<{ name: string; item: string }> = [{ name: 'Home', item: SITE }];
+  if (cat?.name && cat?.slug) crumbs.push({ name: cat.name, item: `${SITE}/law/${cat.slug}` });
+  crumbs.push({ name: a?.title || titleCase(slug), item: `${SITE}/article/${slug}` });
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: c.item,
+    })),
+  };
   return (
     <>
       {jsonLd && (
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       )}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
       {children}
     </>
   );

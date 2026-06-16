@@ -10,10 +10,12 @@
     "dev": "nodemon index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "migrate": "psql $DATABASE_URL -f migrations/001_rbac_schema.sql",
+    "migrate": "psql $DATABASE_URL -f migrations/001_rbac_schema.sql && psql $DATABASE_URL -f migrations/002_permissions.sql && psql $DATABASE_URL -f migrations/003_policies.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/004_rls_tenant_isolation.sql",
     "seed": "node scripts/seed.js"
   },
   "dependencies": {
+    "@baalvion/telemetry": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "cookie-parser": "^1.4.7",

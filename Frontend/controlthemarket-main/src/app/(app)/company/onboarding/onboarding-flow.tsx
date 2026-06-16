@@ -72,34 +72,46 @@ export function OnboardingFlow() {
       }
   }
 
+  const isLastStep = currentStep === steps.length - 1;
+
   return (
-    <div className="mx-auto max-w-4xl space-y-8">
+    <div className="mx-auto max-w-3xl">
+      <div className="mb-3 flex items-center justify-between">
+        <p className="text-sm font-medium text-muted-foreground">
+          Step <span className="text-foreground">{currentStep + 1}</span> of {steps.length}
+        </p>
+        <p className="text-sm text-muted-foreground">{Math.round(((currentStep + 1) / steps.length) * 100)}% complete</p>
+      </div>
+
+      <div className="mb-10">
         <OnboardingStepper steps={steps} currentStep={currentStep} />
-        <Card>
-            <CardHeader>
-                <CardTitle className="text-2xl">{steps[currentStep]}</CardTitle>
-                <CardDescription>
-                    {
-                        currentStep === 0 ? "Let's start with the basics. Tell us about your company." :
-                        currentStep === 1 ? 'Please provide the required documents for verification.' :
-                        currentStep === 2 ? "Invite your team members to collaborate." :
-                        currentStep === 3 ? "Let's create your first task to attract candidates." :
-                        "Please review the information below before completing your setup."
-                    }
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {renderStep()}
-            </CardContent>
-            <CardFooter className="flex justify-between">
-                <Button variant="ghost" onClick={handlePrev} disabled={currentStep === 0}>
-                    Previous
-                </Button>
-                 <Button type="submit" form={`step-${currentStep}-form`}>
-                    {currentStep === steps.length - 1 ? 'Finish Setup' : 'Next'}
-                </Button>
-            </CardFooter>
-        </Card>
+      </div>
+
+      <Card className="border-border/80 shadow-sm">
+        <CardHeader>
+          <CardTitle className="font-headline text-2xl">{steps[currentStep]}</CardTitle>
+          <CardDescription className="text-[15px]">
+            {currentStep === 0
+              ? "Let's start with the basics. Tell us about your company."
+              : currentStep === 1
+                ? 'Provide the required documents so we can verify your organization.'
+                : currentStep === 2
+                  ? 'Invite your team members to collaborate.'
+                  : currentStep === 3
+                    ? 'Create your first task to start attracting candidates.'
+                    : 'Review everything below before completing your setup.'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>{renderStep()}</CardContent>
+        <CardFooter className="flex justify-between border-t bg-muted/30 py-4">
+          <Button variant="ghost" onClick={handlePrev} disabled={currentStep === 0}>
+            Previous
+          </Button>
+          <Button type="submit" form={`step-${currentStep}-form`} size="lg" className="min-w-32 font-semibold">
+            {isLastStep ? 'Finish setup' : 'Continue'}
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

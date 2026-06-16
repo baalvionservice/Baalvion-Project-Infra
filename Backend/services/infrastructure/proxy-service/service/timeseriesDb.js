@@ -29,7 +29,19 @@ function buildConfig() {
 }
 
 function sslOpt() {
-  return process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: false };
+  // SECURE BY DEFAULT: TLS on and the server cert verified. The old default
+  // ({ rejectUnauthorized: false }) accepted ANY cert (MITM) and was only
+  // "secure" by turning TLS OFF (DB_SSL=false) — backwards. Now:
+  //   - DB_SSL=false               → no TLS (trusted private networks only)
+  //   - DB_SSL_REJECT_UNAUTHORIZED=false → TLS on, cert NOT verified (last resort)
+  //   - DB_SSL_CA                  → pin the CA PEM for a private/self-signed CA
+  //   - otherwise                  → TLS on, cert verified
+  if (process.env.DB_SSL === 'false') return false;
+  const ca = process.env.DB_SSL_CA || undefined;
+  return {
+    rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false',
+    ...(ca ? { ca } : {}),
+  };
 }
 
 const pool = new Pool({ ...buildConfig(), max: Number(process.env.TIMESERIES_POOL_MAX || 10) });

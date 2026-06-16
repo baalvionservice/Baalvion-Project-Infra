@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express      = require('express');
 const http         = require('http');
 const cors         = require('cors');
@@ -15,6 +16,7 @@ const wellKnown      = require('./routes/wellKnownRoutes');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const { auditMiddleware } = require('./services/auditService');
 const db             = require('./models');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app    = express();
 const server = http.createServer(app);
@@ -70,6 +72,17 @@ const start = async () => {
     server.listen(config.port, () =>
         console.log(`[Auth] Service running on port ${config.port} (RS256 + Redis=${redis.isAvailable()})`)
     );
+
+    // 4 — Graceful shutdown (drains HTTP, then runs cleanup handlers in parallel)
+    registerShutdown('redis', async () => {
+        const r = require('./config/redis');
+        const c = (r.getClient && r.getClient()) || r.client || (typeof r.quit === 'function' ? r : null);
+        if (c && c.quit) await c.quit();
+    });
+    registerShutdown('db', async () => {
+        if (db.sequelize && db.sequelize.close) await db.sequelize.close();
+    });
+    initGracefulShutdown(server);
 };
 
 start();

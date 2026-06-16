@@ -17,6 +17,7 @@
     "build":      "tsup",
     "dev":        "tsup --watch",
     "type-check": "tsc --noEmit",
+    "test":       "node --test test/*.test.mjs",
     "clean":      "rimraf dist"
   },
   "dependencies": {

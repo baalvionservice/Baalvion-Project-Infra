@@ -14,6 +14,26 @@ test('enableRlsSql emits FORCE RLS + fail-closed policy', () => {
     assert.match(sql, /WITH CHECK/);                                // blocks cross-tenant inserts
 });
 
+test('enableRlsSql HARDENS the bypass against the app role by default (CR-8)', () => {
+    const sql = enableRlsSql('rbac', 'roles', { tenantColumn: 'tenant_id' });
+    // bypass must require a NON-app role, so an injection flipping app.tenant_bypass on
+    // the runtime baalvion_app connection cannot defeat isolation.
+    assert.match(sql, /current_user <> 'baalvion_app'/);
+});
+
+test('enableRlsSql honours a custom appRole and can opt out of hardening', () => {
+    const custom = enableRlsSql('rbac', 'roles', { appRole: 'svc_app' });
+    assert.match(custom, /current_user <> 'svc_app'/);
+    const legacy = enableRlsSql('rbac', 'roles', { hardenBypass: false });
+    assert.doesNotMatch(legacy, /current_user <>/);                 // unconditional bypass
+    assert.match(legacy, /app\.tenant_bypass.*=.*'on'/);
+});
+
+test('enableRlsSql escapes a single-quote in appRole (no SQL break)', () => {
+    const sql = enableRlsSql('rbac', 'roles', { appRole: "o'brien" });
+    assert.match(sql, /current_user <> 'o''brien'/);
+});
+
 test('disableRlsSql reverses it', () => {
     const sql = disableRlsSql('rbac', 'roles');
     assert.match(sql, /DROP POLICY IF EXISTS/);

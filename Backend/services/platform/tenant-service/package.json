@@ -8,10 +8,12 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "migrate": "psql $DATABASE_URL -f migrations/001_tenant_schema.sql",
+    "migrate": "psql $DATABASE_URL -f migrations/001_tenant_schema.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/002_rls_tenant_isolation.sql",
     "smoke": "node scripts/smoke.mjs"
   },
   "dependencies": {
+    "@baalvion/telemetry": "workspace:*",
+    "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "cors": "^2.8.6",

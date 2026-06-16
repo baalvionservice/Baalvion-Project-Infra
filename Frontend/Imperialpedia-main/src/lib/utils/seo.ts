@@ -7,6 +7,22 @@ import { BaseEntity } from '@/types/entity';
  * Supports Countries, Companies, Industries, and Technologies.
  */
 
+/**
+ * Maps an entity type to its actual route segment. A naive `${type}s` produces
+ * broken plurals (e.g. "technologys", "companys") that 404 — which is fatal for
+ * canonical tags. Keep this aligned with the `src/app/<segment>/[slug]` routes.
+ */
+const ENTITY_ROUTE_SEGMENT: Record<string, string> = {
+  country: 'countries',
+  company: 'companies',
+  industry: 'industries',
+  technology: 'technologies',
+};
+
+export function entityRouteSegment(type: string): string {
+  return ENTITY_ROUTE_SEGMENT[type] || `${type}s`;
+}
+
 export function generateEntityMetadata(entity: any, type: string): Metadata {
   const name = entity.name || 'Unknown Entity';
   const description = entity.description || '';
@@ -42,7 +58,7 @@ export function generateEntityMetadata(entity: any, type: string): Metadata {
     title: seoTitle,
     description: seoDescription,
     keywords: [...tags, type, 'intelligence', 'analytics'],
-    canonical: `/${type}s/${entity.slug}`,
+    canonical: `/${entityRouteSegment(type)}/${entity.slug}`,
     ogType: 'article',
   });
 }

@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const http                           = require('http');
 const https                          = require('https');
 const crypto                         = require('crypto');
@@ -8,6 +9,7 @@ const { createClient }               = require('redis');
 const { createJwksVerifier }         = require('@baalvion/auth-node');
 const config                         = require('./config/appConfig');
 const { collectServiceHealth, collectPlatformStats } = require('./metrics/collector');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const PORT = config.port;
 
@@ -467,23 +469,17 @@ app.get('/metrics', (req, res) => {
 });
 
 // ── Graceful shutdown ─────────────────────────────────────────────────────────
-process.on('SIGTERM', async () => {
-  console.log('[realtime-service] SIGTERM received — shutting down gracefully');
-  io.emit('server:shutdown', { reconnectIn: 5000 });
-  await new Promise((r) => setTimeout(r, 1000));
-  server.close(async () => {
-    if (publisher)  await publisher.quit().catch(() => {});
-    if (subscriber) await subscriber.quit().catch(() => {});
-    console.log('[realtime-service] Shutdown complete');
-    process.exit(0);
-  });
-});
-
-process.on('SIGINT', async () => {
-  console.log('[realtime-service] SIGINT received — shutting down');
+// HTTP draining (incl. the socket.io server bound to it) is handled by
+// initGracefulShutdown(server) below. Registered handlers run after the drain:
+// notify connected clients to reconnect, then quit the Redis pub/sub clients.
+registerShutdown('socket.io', async () => {
   io.emit('server:shutdown', { reconnectIn: 5000 });
   await new Promise((r) => setTimeout(r, 500));
-  server.close(() => process.exit(0));
+  await new Promise((resolve) => io.close(() => resolve()));
+});
+registerShutdown('redis', async () => {
+  if (publisher)  await publisher.quit().catch(() => {});
+  if (subscriber) await subscriber.quit().catch(() => {});
 });
 
 // ── Startup ───────────────────────────────────────────────────────────────────
@@ -508,6 +504,8 @@ server.listen(PORT, '0.0.0.0', () => {
     console.warn('[realtime-service] WARNING: JWT_BYPASS_AUTH=true — all connections accepted without verification');
   }
 });
+
+initGracefulShutdown(server);
 
 // ── Publisher helper (for other services to import or call via HTTP) ──────────
 // Other services publish events via Redis:

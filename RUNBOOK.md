@@ -40,8 +40,7 @@ node warroom/enforcement_e2e.cjs
 node warroom/security_e2e.cjs
 node warroom/payment_e2e.cjs       # leave INTERNAL_SERVICE_SECRET unset locally
 ```
-All four should print `PASS ✅` / end with `DONE`. See `LIMITED_BETA_SIGNOFF.md` for the
-last green run.
+All four should print `PASS ✅` / end with `DONE`.
 
 ---
 
@@ -52,6 +51,14 @@ last green run.
 2. Postgres healthy? `docker inspect --format='{{.State.Health.Status}}' baalvion-postgres`.
 3. Missing env? `node Backend/scripts/check-env.cjs`.
 4. Schema missing on a fresh volume? Re-run `./bootstrap.sh` (idempotent).
+5. **Java finance service refused at DB connect** (logs show SSL/`pg_hba`/connection-refused):
+   the DB enforces TLS but `DB_JDBC_PARAMS` is empty. Set `DB_JDBC_PARAMS=?sslmode=require`
+   (these are fail-closed; see DEPLOYMENT_GUIDE §5.1).
+
+### Uploads returning 503
+- `@baalvion/upload` fails **closed** in production: `UPLOAD_SCAN_REQUIRED` defaults `true`
+  and no `UPLOAD_SCAN_URL` is wired → cms / commerce / law reject every upload with 503.
+  Wire a scanner (`UPLOAD_SCAN_URL`) or set `UPLOAD_SCAN_REQUIRED=false` to opt out.
 
 ### Payments failing
 - `401` on create-intent from a client: internal-auth secret mismatch. payment-service uses

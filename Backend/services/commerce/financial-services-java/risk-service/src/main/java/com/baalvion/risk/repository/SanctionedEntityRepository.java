@@ -20,4 +20,10 @@ public interface SanctionedEntityRepository extends JpaRepository<SanctionedEnti
   long countByActiveTrue();
 
   long countByListSource(ListSource listSource);
+
+  /** Active entities loaded from one authoritative source (used by the boot-time sanity + health checks). */
+  long countByListSourceAndActiveTrue(ListSource listSource);
+
+  /** Most recently updated active entity for a source — its {@code updatedAt} is the dataset freshness signal. */
+  Optional<SanctionedEntity> findFirstByListSourceAndActiveTrueOrderByUpdatedAtDesc(ListSource listSource);
 }

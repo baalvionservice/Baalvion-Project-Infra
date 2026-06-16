@@ -33,6 +33,7 @@ const jwt = require('jsonwebtoken');
 const { requireEnv } = require('./requireEnv');
 const rbac = require('./rbac');
 const blacklist = require('./blacklist');
+const dbSsl = require('./dbSsl');
 
 function readFileSafe(p) {
   try { return fs.readFileSync(p, 'utf8'); } catch (_) { return null; }
@@ -495,4 +496,7 @@ module.exports = {
   ...blacklist,
   // Hierarchical, roles[]-aware RBAC guards (see ./rbac.js)
   ...rbac,
+  // Canonical Postgres TLS (in-transit) config — buildPgSsl / buildPgPoolSsl /
+  // buildPgDialectOptions / isDbTlsEnabled (see ./dbSsl.js)
+  ...dbSsl,
 };

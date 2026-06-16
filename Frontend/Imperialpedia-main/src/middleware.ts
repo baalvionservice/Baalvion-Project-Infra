@@ -14,12 +14,27 @@ import type { NextRequest } from 'next/server';
 const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
 const PROTECTED_PREFIXES = ['/admin', '/creator/dashboard', '/editor', '/writer', '/premium'];
 
+// The retired per-app /admin panel redirects to the central admin-platform
+// console. The console URL is env-driven so production points at the real CMS;
+// the hardcoded localhost is a DEV-ONLY fallback (guarded by NODE_ENV). In
+// production with no env set we SKIP the redirect rather than bounce users to
+// a developer's localhost.
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+const ADMIN_CONSOLE_URL =
+  process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL ||
+  (IS_PRODUCTION ? '' : 'http://localhost:3030/imperialpedia');
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Per-app admin RETIRED → central admin-platform console (before the auth gate).
+  // Only redirect when the console URL is configured; in production with no env
+  // set we fall through to the coarse auth gate below rather than send users to
+  // localhost.
   if (pathname === '/admin' || pathname.startsWith('/admin/')) {
-    return NextResponse.redirect(new URL(process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL || 'http://localhost:3030/imperialpedia'));
+    if (ADMIN_CONSOLE_URL) {
+      return NextResponse.redirect(new URL(ADMIN_CONSOLE_URL));
+    }
   }
 
   // 1) Legacy terms URL structure redirect

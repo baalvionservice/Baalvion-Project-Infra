@@ -1,11 +1,13 @@
 'use strict';
 const { Sequelize } = require('sequelize');
+const { buildPgSsl } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
 
 const sequelize = new Sequelize(config.db.name, config.db.user, config.db.password, {
     host: config.db.host,
     port: config.db.port,
     dialect: 'postgres',
+    dialectOptions: { ssl: buildPgSsl() },
     logging: config.env === 'development' ? console.log : false,
     define: { underscored: true, timestamps: true },
 });
@@ -39,6 +41,32 @@ db.PortalAccess = require('./portal_access')(sequelize);
 db.Notification = require('./notifications')(sequelize);
 db.OperationsAlert = require('./operations_alerts')(sequelize);
 db.AlertRule = require('./alert_rules')(sequelize);
+
+// ── Real-data models (replace the former inline reference endpoints in extras.js) ──
+db.CorporateDeal = require('./corporate_deals')(sequelize);
+db.DueDiligenceItem = require('./due_diligence_items')(sequelize);
+db.GdprStatusCard = require('./gdpr_status_cards')(sequelize);
+db.GdprSubjectRequest = require('./gdpr_subject_requests')(sequelize);
+db.GdprCookieConsent = require('./gdpr_cookie_consent')(sequelize);
+db.GdprRetentionPolicy = require('./gdpr_retention_policies')(sequelize);
+db.DocApiCategory = require('./doc_api_categories')(sequelize);
+db.DocHelpCategory = require('./doc_help_categories')(sequelize);
+db.DocHelpArticle = require('./doc_help_articles')(sequelize);
+db.DocFaq = require('./doc_faqs')(sequelize);
+db.FinanceReport = require('./finance_reports')(sequelize);
+db.BillingSubscription = require('./billing_subscriptions')(sequelize);
+db.BillingInvoice = require('./billing_invoices')(sequelize);
+db.MarketplaceApp = require('./marketplace_apps')(sequelize);
+db.MarketplaceInstall = require('./marketplace_installs')(sequelize);
+db.AutomationCronJob = require('./automation_cron_jobs')(sequelize);
+db.AutomationWebhook = require('./automation_webhooks')(sequelize);
+db.InvestorPortal = require('./investor_portals')(sequelize);
+db.FxRate = require('./fx_rates')(sequelize);
+db.DomainAnalytics = require('./domain_analytics')(sequelize);
+db.AiRecommendation = require('./ai_recommendations')(sequelize);
+db.AiStrategyScenario = require('./ai_strategy_scenarios')(sequelize);
+db.SyncConflict = require('./sync_conflicts')(sequelize);
+db.SyncOfflineSnapshot = require('./sync_offline_snapshots')(sequelize);
 
 // ── Existing associations ────────────────────────────────────────────────────
 db.Dashboard.hasMany(db.Widget, { foreignKey: 'dashboard_id', as: 'widgets', onDelete: 'CASCADE' });

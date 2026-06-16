@@ -32,7 +32,7 @@ public class EscrowController {
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
     String safeRef = sanitizeForLog(request.getEscrowRef());
-    log.info("POST /escrow: tenant={}, ref={}, amount={}", tenantId, safeRef, request.getAmount());
+    log.info("POST /escrow: tenant={}, ref={}, amount={}", sanitizeForLog(String.valueOf(tenantId)), safeRef, request.getAmount());
 
     EscrowResponse response = escrowService.createHold(tenantId, request);
     return ResponseEntity.status(HttpStatus.CREATED).body(response);
@@ -57,7 +57,7 @@ public class EscrowController {
     @RequestParam(defaultValue = "20") int size
   ) {
     UUID tenantId = extractTenantId(tenantIdHeader);
-    log.info("GET /escrow: tenant={}, status={}, page={}, size={}", tenantId, status, page, size);
+    log.info("GET /escrow: tenant={}, status={}, page={}, size={}", sanitizeForLog(String.valueOf(tenantId)), sanitizeForLog(status), page, size);
 
     return ResponseEntity.ok(escrowService.listEscrows(tenantId, status, page, size));
   }

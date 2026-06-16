@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const http = require('http');
@@ -13,6 +14,7 @@ const v1Routes = require('./routes/v1');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
 const logger = require('./utils/logger');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 const server = http.createServer(app);
@@ -52,6 +54,12 @@ const start = async () => {
 
     server.listen(config.port, () =>
         logger.info(`[RBAC] Service running on port ${config.port} (RS256=${jwt.isRs256Enabled()})`));
+
+    // Graceful shutdown (drains HTTP, then runs cleanup handlers in parallel)
+    registerShutdown('db', async () => {
+        if (db.sequelize && db.sequelize.close) await db.sequelize.close();
+    });
+    initGracefulShutdown(server);
 };
 
 if (require.main === module) start();

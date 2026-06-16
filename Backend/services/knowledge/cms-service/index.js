@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 const express = require('express');
 const path = require('path');
 const helmet = require('helmet');
@@ -15,6 +16,7 @@ const { logger } = require('./platform/logger');
 const createIpRateLimit = require('./middleware/rateLimit');
 const { startSchedulerWorker } = require('./queues/schedulerQueue');
 const { startNotificationWorker } = require('./queues/notificationQueue');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
 
@@ -31,7 +33,10 @@ app.use('/uploads', express.static(path.resolve(__dirname, 'uploads'), {
 }));
 
 app.use(express.json({ limit: '10mb' }));
-app.use(cookieParser());
+// Sign cookies so their integrity can be validated server-side (req.signedCookies).
+// Reuses the env-backed service secret, which is enforced to a non-default value
+// outside development by config/appConfig.js.
+app.use(cookieParser(config.internalSecret));
 app.use(requestContext);
 // SDK trace context: binds a traceId (+ tenant) to the request before any route,
 // so all logging / events / outbound HTTP downstream are correlated.
@@ -60,9 +65,14 @@ async function start() {
         startSchedulerWorker();
         startNotificationWorker();
 
-        app.listen(config.port, () => {
+        const server = app.listen(config.port, () => {
             logger('boot').info({ port: config.port, env: config.env }, 'cms-service listening');
         });
+
+        registerShutdown('db', async () => {
+            if (sequelize && sequelize.close) await sequelize.close();
+        });
+        initGracefulShutdown(server);
     } catch (err) {
         logger('boot').error({ err: err && err.message }, 'cms-service startup failed');
         process.exit(1);

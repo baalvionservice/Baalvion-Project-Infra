@@ -1,7 +1,10 @@
 import { ImageResponse } from 'next/og';
 import { SITE } from '@/lib/content';
 
-export const runtime = 'edge';
+// No `runtime = 'edge'`: a static export prerenders this OG card to a PNG at
+// build time (the edge runtime would force a dynamic function a static host
+// can't serve). `force-static` is required by `output: export`.
+export const dynamic = 'force-static';
 export const alt = `${SITE.name} — ${SITE.tagline}`;
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';

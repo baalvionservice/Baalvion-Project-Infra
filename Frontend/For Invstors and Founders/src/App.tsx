@@ -16,7 +16,6 @@ const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
-const Forums = lazy(() => import("./pages/Forums"));
 const ForumThreads = lazy(() => import("./pages/ForumThreads"));
 const ThreadDetail = lazy(() => import("./pages/ThreadDetail"));
 const CreateThread = lazy(() => import("./pages/CreateThread"));

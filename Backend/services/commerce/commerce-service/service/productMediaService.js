@@ -44,6 +44,15 @@ async function assertProductInStore(storeId, productId) {
 // ── storage driver ─────────────────────────────────────────────────────────────
 function ensureLocalDir(dir) { fs.mkdirSync(dir, { recursive: true }); }
 
+// Resolve `key` under UPLOAD_DIR and reject anything that escapes it (path-traversal guard).
+function safeLocalPath(key) {
+    const full = path.resolve(UPLOAD_DIR, String(key));
+    if (full !== UPLOAD_DIR && !full.startsWith(UPLOAD_DIR + path.sep)) {
+        throw new AppError('VALIDATION_ERROR', 'Invalid storage key', 400);
+    }
+    return full;
+}
+
 /** Persist a buffer under `key`; returns the public URL. */
 async function putObject(key, buffer, contentType) {
     if (DRIVER === 'minio' || DRIVER === 's3') {
@@ -51,7 +60,7 @@ async function putObject(key, buffer, contentType) {
         await s3.putObject(BUCKET, key, buffer, contentType);
         return s3.publicUrl(BUCKET, key);
     }
-    const full = path.join(UPLOAD_DIR, key);
+    const full = safeLocalPath(key);
     ensureLocalDir(path.dirname(full));
     fs.writeFileSync(full, buffer);
     return `${PUBLIC_BASE}/uploads/${key}`;
@@ -72,7 +81,7 @@ async function removeObjectByUrl(url) {
     if (!key) return;
     try {
         if (DRIVER === 'minio' || DRIVER === 's3') await s3.deleteObject(BUCKET, key);
-        else fs.unlinkSync(path.join(UPLOAD_DIR, key));
+        else fs.unlinkSync(safeLocalPath(key));
     } catch { /* already gone — best effort */ }
 }
 

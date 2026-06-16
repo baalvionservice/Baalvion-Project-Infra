@@ -1,4 +1,5 @@
 'use strict';
+require('@baalvion/telemetry/bootstrap');
 require('dotenv').config();
 const express    = require('express');
 const rateLimit = require('express-rate-limit');
@@ -17,6 +18,11 @@ const { startSmsWorker }     = require('./workers/smsWorker');
 const { startPushWorker }    = require('./workers/pushWorker');
 const { startNotificationWorker } = require('./workers/notificationWorker');
 const { startEventConsumer, stopEventConsumer } = require('./workers/eventConsumer');
+const { validateConfig } = require('./config/validateConfig');
+const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
+
+// Fail-closed: refuse to boot in production without a real email provider (no silent log-only mail).
+validateConfig();
 
 const app = express();
 
@@ -80,13 +86,15 @@ async function start() {
         logger.info({ port: config.port }, 'notification-service started');
     });
 
-    const shutdown = async () => {
-        logger.info('Shutting down notification-service...');
-        await stopEventConsumer();
-        server.close(() => process.exit(0));
-    };
-    process.on('SIGTERM', shutdown);
-    process.on('SIGINT',  shutdown);
+    // Graceful shutdown: drain HTTP, then stop consumer, close queues, quit Redis.
+    registerShutdown('event-consumer', async () => { await stopEventConsumer(); });
+    registerShutdown('queues', async () => {
+        const { getQueues } = require('./queue/queues');
+        const q = getQueues();
+        await Promise.all(Object.values(q).map((item) => (item && item.close ? item.close() : null)));
+    });
+    registerShutdown('redis', async () => { const c = redis.getClient && redis.getClient(); if (c && c.quit) await c.quit(); });
+    initGracefulShutdown(server);
 }
 
 start().catch((err) => {
