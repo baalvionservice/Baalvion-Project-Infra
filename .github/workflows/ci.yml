@@ -26,13 +26,13 @@ jobs:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -69,17 +69,17 @@ jobs:
     name: Backend Go (Gateway)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           # Track the module's declared toolchain (go 1.25.0) so coverage
           # instrumentation (`covdata`) matches; a 1.22 pin broke `go test`.
           go-version-file: Backend/gateway/go.mod
           
       - name: Cache Go Modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/go/pkg/mod
@@ -104,17 +104,17 @@ jobs:
     name: Backend Java (Financial Services)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       
       - name: Setup JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'temurin'
           cache: 'maven'
           
       - name: Cache Maven Repository
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.m2/repository
@@ -136,7 +136,7 @@ jobs:
     outputs:
       dirs: ${{ steps.extract-apps.outputs.dirs }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Extract App Directories from Config
         id: extract-apps
         run: |
@@ -157,13 +157,13 @@ jobs:
         app: ${{ fromJson(needs.discover-frontends.outputs.dirs) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -193,7 +193,7 @@ jobs:
         working-directory: Frontend/${{ matrix.app }}
         
       - name: Upload Build Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-${{ matrix.app }}-dist
           path: Frontend/${{ matrix.app }}/dist
@@ -223,14 +223,14 @@ jobs:
       # only runs migrations + an RLS probe, it never mints real tokens.
       JWT_ACCESS_SECRET: ci-dummy-access-secret-not-used-for-real-auth
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       # The RLS probe needs only the trade-service submodule (public). Init it
       # directly rather than `submodules: recursive`, which would also pull the
       # Global-Trade-Infrastructure submodule whose gitlink points to an
       # unpushed commit ("not our ref") and fails the whole checkout step.
       - name: Check out trade-service submodule
         run: git submodule update --init --depth=1 Backend/services/commerce/trade-service
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install psql client
@@ -274,8 +274,8 @@ jobs:
     name: Security — Tenant RLS Coverage Audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       # trade-service is a submodule; its migrations are part of the coverage set.
@@ -306,8 +306,8 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 5s
           --health-timeout 5s --health-retries 12
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
       - name: Install psql client
@@ -337,7 +337,7 @@ jobs:
     needs: [backend-go, backend-java, frontend-build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Run Backend Integration Tests
         run: |
           # No cross-service integration harness exists yet. The previous body ran
