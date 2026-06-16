@@ -1,0 +1,19 @@
+# Gitleaks configuration for Baalvion-Project-Infra
+#
+# Extends the built-in gitleaks ruleset (all default secret detectors stay active)
+# and adds a tightly-scoped allowlist for verified false positives only.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = """
+CTM auth-boundary tests mint their own RS256 keypair at runtime via
+crypto.generateKeyPairSync() and sign tokens with jwt.sign() — no real
+credential is committed. The generic-api-key heuristic trips on the
+ephemeral, in-memory test fixtures. Scoped to these test files only so
+genuine secrets anywhere else still fail the scan.
+"""
+paths = [
+  '''Backend/services/ecosystem/ctm-service/tests/auth-denial\.test\.js''',
+]
