@@ -1,4 +1,4 @@
-import DOMPurify from 'isomorphic-dompurify';
+import { sanitizeRichHtml } from '@/lib/sanitize';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
@@ -143,7 +143,7 @@ export default async function BlogArticlePage({
         {/* Article body — trusted, hand-authored static HTML from the data module. */}
         <div
           className="article-body"
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.body) }}
+          dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(article.body) }}
         />
 
         {/* Related articles */}

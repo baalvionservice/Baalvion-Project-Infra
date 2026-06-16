@@ -5039,9 +5039,6 @@ importers:
       genkit:
         specifier: ^1.28.0
         version: 1.36.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0)
-      isomorphic-dompurify:
-        specifier: ^2.16.0
-        version: 2.36.0(@noble/hashes@1.8.0)
       lucide-react:
         specifier: ^0.475.0
         version: 0.475.0(react@19.2.7)
@@ -5066,6 +5063,9 @@ importers:
       recharts:
         specifier: ^2.15.1
         version: 2.15.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      sanitize-html:
+        specifier: ^2.13.0
+        version: 2.17.5
       tailwind-merge:
         specifier: ^3.0.1
         version: 3.6.0
@@ -5085,6 +5085,9 @@ importers:
       '@types/react-dom':
         specifier: 18.3.7
         version: 18.3.7(@types/react@18.3.29)
+      '@types/sanitize-html':
+        specifier: ^2.13.0
+        version: 2.16.1
       genkit-cli:
         specifier: ^1.36.0
         version: 1.36.0(@cfworker/json-schema@4.1.1)(@types/node@20.19.42)(zod@3.25.76)
@@ -5758,9 +5761,6 @@ importers:
       genkit:
         specifier: ^1.28.0
         version: 1.36.0(@google-cloud/firestore@7.11.6)(firebase-admin@13.10.0)(firebase@11.10.0)
-      isomorphic-dompurify:
-        specifier: ^2.16.0
-        version: 2.36.0(@noble/hashes@1.8.0)
       lucide-react:
         specifier: ^0.475.0
         version: 0.475.0(react@19.2.7)
@@ -5785,6 +5785,9 @@ importers:
       recharts:
         specifier: ^2.15.1
         version: 2.15.4(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      sanitize-html:
+        specifier: ^2.13.0
+        version: 2.17.5
       tailwind-merge:
         specifier: ^3.0.1
         version: 3.6.0
@@ -5807,6 +5810,9 @@ importers:
       '@types/react-dom':
         specifier: 18.3.7
         version: 18.3.7(@types/react@18.3.29)
+      '@types/sanitize-html':
+        specifier: ^2.13.0
+        version: 2.16.1
       genkit-cli:
         specifier: ^1.36.0
         version: 1.36.0(@cfworker/json-schema@4.1.1)(@types/node@20.19.42)(zod@3.25.76)

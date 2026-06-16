@@ -1,4 +1,4 @@
-import DOMPurify from "isomorphic-dompurify";
+import { sanitizeRichHtml } from "@/lib/sanitize";
 import { Footer } from "@/components/footer";
 import { Navbar } from "@/components/navbar";
 import { cmsGetSitePage } from "@/lib/cms";
@@ -34,7 +34,7 @@ export default async function TermsPage() {
                 <h1 className="text-3xl font-bold mb-4">{title}</h1>
                 <div
                     className="prose prose-gray max-w-none text-gray-600 leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(bodyHtml) }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(bodyHtml) }}
                 />
             </main>
             <Footer />
