@@ -24,6 +24,17 @@ const OrdersReturnItem   = require('./ordersReturnItem')(sequelize, DataTypes);
 const OrdersInvoice      = require('./ordersInvoice')(sequelize, DataTypes);
 const OrdersShipment     = require('./ordersShipment')(sequelize, DataTypes);
 
+// Resale: consignment + authentication + certificate of authenticity.
+const ConsignmentSellerProfile  = require('./consignmentSellerProfile')(sequelize, DataTypes);
+const ConsignmentRequest         = require('./consignmentRequest')(sequelize, DataTypes);
+const ConsignmentItem            = require('./consignmentItem')(sequelize, DataTypes);
+const ItemAuthentication         = require('./itemAuthentication')(sequelize, DataTypes);
+const CertificateOfAuthenticity  = require('./certificateOfAuthenticity')(sequelize, DataTypes);
+// Wishlist + appointments persistence.
+const Wishlist           = require('./wishlist')(sequelize, DataTypes);
+const WishlistItem       = require('./wishlistItem')(sequelize, DataTypes);
+const Appointment        = require('./appointment')(sequelize, DataTypes);
+
 // Associations
 OrdersCustomer.hasMany(OrdersAddress, { foreignKey: 'customerId', as: 'addresses' });
 OrdersAddress.belongsTo(OrdersCustomer, { foreignKey: 'customerId', as: 'customer' });
@@ -49,6 +60,25 @@ OrdersReturnItem.belongsTo(OrdersReturn, { foreignKey: 'returnId', as: 'return' 
 OrdersOrder.hasMany(OrdersShipment, { foreignKey: 'orderId', as: 'shipments' });
 OrdersShipment.belongsTo(OrdersOrder, { foreignKey: 'orderId', as: 'order' });
 
+// Consignment associations.
+ConsignmentSellerProfile.hasMany(ConsignmentRequest, { foreignKey: 'sellerProfileId', as: 'requests' });
+ConsignmentRequest.belongsTo(ConsignmentSellerProfile, { foreignKey: 'sellerProfileId', as: 'sellerProfile' });
+
+ConsignmentRequest.hasMany(ConsignmentItem, { foreignKey: 'consignmentRequestId', as: 'items' });
+ConsignmentItem.belongsTo(ConsignmentRequest, { foreignKey: 'consignmentRequestId', as: 'request' });
+
+ConsignmentItem.hasMany(ItemAuthentication, { foreignKey: 'consignmentItemId', as: 'authentications' });
+ItemAuthentication.belongsTo(ConsignmentItem, { foreignKey: 'consignmentItemId', as: 'item' });
+
+ConsignmentItem.hasMany(CertificateOfAuthenticity, { foreignKey: 'consignmentItemId', as: 'certificates' });
+CertificateOfAuthenticity.belongsTo(ConsignmentItem, { foreignKey: 'consignmentItemId', as: 'item' });
+ItemAuthentication.hasOne(CertificateOfAuthenticity, { foreignKey: 'itemAuthenticationId', as: 'certificate' });
+CertificateOfAuthenticity.belongsTo(ItemAuthentication, { foreignKey: 'itemAuthenticationId', as: 'authentication' });
+
+// Wishlist associations.
+Wishlist.hasMany(WishlistItem, { foreignKey: 'wishlistId', as: 'items' });
+WishlistItem.belongsTo(Wishlist, { foreignKey: 'wishlistId', as: 'wishlist' });
+
 const db = {
     sequelize, Sequelize,
     Op: Sequelize.Op,
@@ -63,6 +93,14 @@ const db = {
     OrdersReturnItem,
     OrdersInvoice,
     OrdersShipment,
+    ConsignmentSellerProfile,
+    ConsignmentRequest,
+    ConsignmentItem,
+    ItemAuthentication,
+    CertificateOfAuthenticity,
+    Wishlist,
+    WishlistItem,
+    Appointment,
 };
 
 module.exports = db;
