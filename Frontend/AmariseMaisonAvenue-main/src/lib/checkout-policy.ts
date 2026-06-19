@@ -43,9 +43,10 @@ export function onMissingCheckoutDependency(feature: CheckoutDependency): Checko
 }
 
 // ── Oversell guard: synchronous live stock re-check ──────────────────────────
-// There is no atomic reservation/lock API (inventoryApi.lock returns 501). For this
-// low-concurrency consignment catalog we close the pre-order window with a SYNCHRONOUS
-// live availability re-check at checkout, against the catalog's server-computed `inStock`
+// inventory-service now exposes a reservation/lock API (inventoryApi.lock), but reservation
+// COMMITMENT is server-side (order-service confirms on payment). For this low-concurrency
+// consignment catalog we still close the pre-order window with a SYNCHRONOUS live availability
+// re-check at checkout, against the catalog's server-computed `inStock`
 // (commerce-service: trackInventory ? stockQuantity>0 : true). createOrder still atomically
 // reserves at order time — this just hard-blocks an item the catalog already reports sold out,
 // so two shoppers racing for the last unit don't both reach settlement on a stale page.
