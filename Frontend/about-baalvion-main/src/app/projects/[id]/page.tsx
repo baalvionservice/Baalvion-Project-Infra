@@ -8,7 +8,7 @@ const BASE_URL = "https://about.baalvion.com";
 
 // Incremental Static Regeneration: project pages are statically generated and
 // refreshed from the CMS at most once per hour.
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 // Pre-render known project URLs at build time; unknown ids render on demand.
 export async function generateStaticParams(): Promise<{ id: string }[]> {

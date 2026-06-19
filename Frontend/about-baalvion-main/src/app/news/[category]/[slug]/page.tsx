@@ -18,7 +18,7 @@ const SITE_NAME = 'Baalvion Operating System (BOS)';
 
 // Incremental Static Regeneration: pages are statically generated and refreshed
 // from the CMS at most once per hour.
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 type Params = { category: string; slug: string };
 

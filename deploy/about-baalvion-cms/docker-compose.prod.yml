@@ -1,0 +1,284 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Production stack for the About-Baalvion CMS — single EC2 host, Docker Compose.
+#
+# PURPOSE: publish the central Baalvion CMS so the about.baalvion.com site on Vercel
+# (and every CMS-backed page) fetches LIVE content from the admin platform instead of
+# showing "Service Temporarily Unavailable". Caddy terminates TLS and is the only thing
+# that binds public ports (80/443); Postgres + Redis stay internal.
+#
+#   Public delivery (what Vercel reads, no auth):
+#     vercel ─→ https://{DOMAIN_CMS}/api/v1/public/about-baalvion/content[/:slug]
+#   Internally:
+#     caddy ─ {DOMAIN_CMS}  → cms-service:3011  (public delivery + authenticated admin API)
+#     caddy ─ {DOMAIN_ADMIN}→ admin-web:3030    (admin console, --profile admin only)
+#     auth-service:3001  mints RS256 + serves JWKS; cms-service verifies admin tokens via JWKS
+#     postgres + redis   (internal compose network; no public port)
+#
+#   CORE (fixes the site) — run from the REPO ROOT:
+#     docker compose --env-file deploy/about-baalvion-cms/.env.prod \
+#       -f deploy/about-baalvion-cms/docker-compose.prod.yml up -d --build
+#
+#   ONE-SHOT tools (migrate cms schema / seed content) — profile "tools":
+#     docker compose ... --profile tools run --rm cms-migrate
+#     docker compose ... --profile tools run --rm cms-seed
+#
+#   ADMIN CONSOLE (optional, manage content in prod) — profile "admin":
+#     docker compose ... --profile admin up -d --build auth-gateway admin-web
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-db: &db
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${POSTGRES_DB}
+  DB_USER: ${POSTGRES_USER}
+  DB_PASSWORD: ${POSTGRES_PASSWORD}
+  # In-network Postgres container has no TLS. Services default to requiring DB TLS in
+  # production (correct for RDS), so disable it here — the DB is never publicly exposed.
+  # Set DB_SSL=true (or drop this) when you move DB_HOST to RDS (rds.force_ssl=1).
+  DB_SSL: ${DB_SSL:-false}
+
+x-redis: &redis
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── Identity: mints RS256 tokens (needs the PRIVATE key) + serves JWKS ───────
+  auth-service:
+    image: ${IMAGE_PREFIX:-baalvion}/about-cms-auth-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/identity/auth-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3001"
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      JWT_ALLOW_HS256_FALLBACK: "false"
+      API_BASE_URL: https://${DOMAIN_CMS}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@baalvion.com}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  # ── CMS: public delivery API (what Vercel reads) + authenticated admin API ───
+  cms-service:
+    image: ${IMAGE_PREFIX:-baalvion}/about-cms-cms-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3011"
+      # Verify admin-API tokens against auth-service's JWKS (public delivery needs no token).
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      # Production guards — service refuses to start with the dev defaults.
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      CMS_SECRETS_KEY: ${CMS_SECRETS_KEY}
+      CMS_BASE_URL: http://cms-service:3011/api/v1
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      EVENT_TRANSPORT: redis
+      LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3011/api/v1/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      auth-service: { condition: service_started }
+
+  # ── ONE-SHOT: create the `cms` schema tables (Sequelize migrations). ─────────
+  # Built to the Dockerfile's `installer` target, which keeps devDeps (sequelize-cli)
+  # + the migrations/ source that the slim prod image strips. Run, then it exits.
+  cms-migrate:
+    profiles: ["tools"]
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/knowledge/cms-service
+    command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
+    environment:
+      <<: *db
+      NODE_ENV: production
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # ── ONE-SHOT: register the about-baalvion website tenant (cms.cms_websites). ──
+  # MUST run after cms-migrate (creates the table) + the super-admin bootstrap (so the
+  # site is owned by a real org/user), and BEFORE cms-seed (content attaches to this site).
+  # Pass CMS_ORG_ID + CMS_CREATED_BY = the orgId/userId printed by bootstrapSuperAdmin.
+  cms-register:
+    profiles: ["tools"]
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/knowledge/cms-service
+    command: ["node", "scripts/registerProductionWebsites.cjs"]
+    environment:
+      <<: *db
+      NODE_ENV: production
+      CMS_ORG_ID: ${CMS_ORG_ID:-}
+      CMS_CREATED_BY: ${CMS_CREATED_BY:-}
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # ── ONE-SHOT: seed + publish all About-Baalvion content items via the API. ────
+  # Talks to the RUNNING auth-service + cms-service over the compose network, so run
+  # this AFTER `up -d` + cms-migrate + the super-admin bootstrap.
+  cms-seed:
+    profiles: ["tools"]
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/knowledge/cms-service
+    command: ["node", "scripts/seedAboutBaalvion.cjs"]
+    environment:
+      NODE_ENV: production
+      AUTH_URL: http://auth-service:3001/v1/auth
+      CMS_URL: http://cms-service:3011/api/v1
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-superadmin@baalvion.com}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD}
+    restart: "no"
+    depends_on:
+      cms-service: { condition: service_healthy }
+      auth-service: { condition: service_healthy }
+
+  # ── BFF cookie gateway for the admin console (HttpOnly cookies ↔ RS256). ─────
+  auth-gateway:
+    profiles: ["admin"]
+    image: ${IMAGE_PREFIX:-baalvion}/about-cms-auth-gateway:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/identity/auth-gateway/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *redis
+      NODE_ENV: production
+      PORT: "3099"
+      AUTH_SERVICE_URL: http://auth-service:3001/v1/auth
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      CORS_ORIGINS: https://${DOMAIN_ADMIN}
+      BFF_ENFORCEMENT_MODE: hybrid
+      GATEWAY_SIGNING_SECRET: ${GATEWAY_SIGNING_SECRET}
+      COOKIE_ACCESS_NAME: baalvion_access
+      COOKIE_REFRESH_NAME: baalvion_refresh
+      CSRF_COOKIE_NAME: csrf_token
+      COOKIE_SAMESITE: lax
+      # Route the console's CMS calls through the gateway (it forwards the Bearer).
+      SVC_CMS: http://cms-service:3011
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3099/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      auth-service: { condition: service_started }
+      cms-service: { condition: service_started }
+      redis: { condition: service_healthy }
+
+  # ── Admin console (Next.js standalone). NEXT_PUBLIC_* are baked at BUILD. ─────
+  admin-web:
+    profiles: ["admin"]
+    image: ${IMAGE_PREFIX:-baalvion}/about-cms-admin-web:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Frontend/admin-platform/Dockerfile.deploy
+      args:
+        NEXT_PUBLIC_APP_URL: https://${DOMAIN_ADMIN}
+        # Client calls go through the same-origin BFF; the gateway injects auth + proxies CMS.
+        NEXT_PUBLIC_GATEWAY_URL: /auth-bff
+        NEXT_PUBLIC_CMS_API_URL: https://${DOMAIN_ADMIN}/api-bff/knowledge/cms/api/v1
+        NEXT_PUBLIC_AUTH_URL: https://${DOMAIN_ADMIN}/auth-bff
+        NEXT_PUBLIC_APP_ENV: production
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3030"
+      HOSTNAME: 0.0.0.0
+      # Server-side rewrites proxy /auth-bff + /api-bff to the internal gateway.
+      NEXT_PUBLIC_GATEWAY_URL: http://auth-gateway:3099
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3030',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      auth-gateway: { condition: service_started }
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN_CMS: ${DOMAIN_CMS}
+      DOMAIN_ADMIN: ${DOMAIN_ADMIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      cms-service: { condition: service_started }
+
+volumes:
+  pgdata:
+  redisdata:
+  caddy_data:
+  caddy_config:

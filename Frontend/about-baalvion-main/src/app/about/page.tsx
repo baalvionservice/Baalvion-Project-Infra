@@ -8,7 +8,7 @@ import { cmsGetAboutPages } from '@/lib/cms';
 import { JsonLd } from '@/components/json-ld';
 import { BASE_URL, SITE_NAME, breadcrumbSchema } from '@/lib/schema';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 const TITLE = 'About Baalvion | Mission, Vision & Story';
 const DESCRIPTION =

@@ -1,0 +1,35 @@
+# Caddy v2 — TLS termination + reverse proxy for the About-Baalvion CMS stack.
+# Caddy auto-provisions + renews Let's Encrypt certs and redirects HTTP→HTTPS.
+#
+# Two sites:
+#   {$DOMAIN_CMS}   → cms-service:3011  — the public delivery API Vercel reads (+ admin API)
+#   {$DOMAIN_ADMIN} → admin-web:3030    — the admin console (only serves traffic with --profile admin)
+#
+# NOTE: if you are NOT running the admin profile yet, point DNS for {$DOMAIN_CMS} only.
+# Caddy will keep retrying the cert for {$DOMAIN_ADMIN} in the background until its DNS
+# resolves — that retry does NOT affect the CMS site, which serves normally.
+#
+# These are APIs / a Next app that sets its own CSP. Caddy only terminates TLS, compresses,
+# and strips the Server banner — it does NOT inject CSP/HSTS/X-Frame (avoids duplicate headers).
+
+{$DOMAIN_CMS} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+
+	header {
+		-Server
+	}
+
+	reverse_proxy cms-service:3011
+}
+
+{$DOMAIN_ADMIN} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+
+	header {
+		-Server
+	}
+
+	reverse_proxy admin-web:3030
+}

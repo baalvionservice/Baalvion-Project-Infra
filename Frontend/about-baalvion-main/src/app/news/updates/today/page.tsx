@@ -14,7 +14,7 @@ const PAGE_DESC = 'The latest headlines and strategic briefings from Baalvion Ne
 const URL = `${BASE_URL}/news/updates/today`;
 const OG_IMAGE = `${BASE_URL}/api/og?title=${encodeURIComponent(PAGE_TITLE)}&eyebrow=${encodeURIComponent('Baalvion News')}`;
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: PAGE_TITLE,

@@ -7,7 +7,7 @@ import { JsonLd } from '@/components/json-ld';
 import { getResearch, getResearchSlugs, loadResearch } from '@/lib/research';
 import { BASE_URL, SITE_NAME, articleSchema, breadcrumbSchema, faqSchema } from '@/lib/schema';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 type Params = { slug: string };
 

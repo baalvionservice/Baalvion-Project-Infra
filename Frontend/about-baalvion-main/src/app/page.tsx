@@ -40,6 +40,11 @@ export const metadata: Metadata = {
   },
 };
 
+// Fully dynamic: the home page is rendered per-request from live CMS content and is
+// never statically prerendered. This means the build never tries (and fails) to fetch
+// the CMS, and every visitor gets the latest content managed in the admin platform.
+export const dynamic = "force-dynamic";
+
 export default async function BaalvionHomePage() {
   // Fetch data on the server for SEO optimization
   const [homePageData, projects, ecoItems] = await Promise.all([
@@ -49,28 +54,10 @@ export default async function BaalvionHomePage() {
   ]);
 
   // If the CMS genuinely can't supply the home content (after the fetch layer's
-  // retries), THROW rather than returning a cacheable 200 "maintenance" page.
-  // Under ISR this makes Next serve the last successfully-generated page (stale
-  // but real content) while it retries in the background, and routes the no-cache
-  // case to error.tsx — so a transient blip can never get cached and "stick".
+  // retries), THROW so Next routes to error.tsx (which auto-retries) instead of
+  // rendering a cacheable "maintenance" page. With dynamic rendering there is no
+  // build-time prerender, so this only ever fires at request time.
   if (!homePageData) {
-    // Exception: during the production build itself the CMS is typically unreachable
-    // (CI has no CMS), and prerendering `/` must not abort the build. Render a static
-    // shell at build time; ISR replaces it with real content on the first revalidation.
-    if (process.env.NEXT_PHASE === "phase-production-build") {
-      return (
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Service Temporarily Unavailable
-            </h1>
-            <p className="text-gray-600">
-              The Baalvion Operating System is currently undergoing maintenance.
-            </p>
-          </div>
-        </div>
-      );
-    }
     throw new Error("Home page content is temporarily unavailable from the CMS");
   }
 

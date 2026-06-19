@@ -4,7 +4,7 @@ import { AuthorityIndex } from '@/components/authority-index';
 import { JsonLd } from '@/components/json-ld';
 import { BASE_URL, SITE_NAME, breadcrumbSchema, collectionSchema } from '@/lib/schema';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 const TITLE = 'Industries We Serve | Baalvion';
 const DESCRIPTION =

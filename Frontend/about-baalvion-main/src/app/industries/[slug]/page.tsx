@@ -7,7 +7,7 @@ import { JsonLd } from '@/components/json-ld';
 import { cmsGetIndustries, cmsGetRichDoc } from '@/lib/cms';
 import { BASE_URL, SITE_NAME, breadcrumbSchema, faqSchema } from '@/lib/schema';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 type Params = { slug: string };
 

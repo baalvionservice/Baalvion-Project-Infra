@@ -75,10 +75,12 @@ async function fetchJSON(url: string, attempts = 3): Promise<any | null> {
   // (e.g. 404) is a genuine "not found" and returns null immediately without retry.
   for (let i = 0; i < attempts; i++) {
     try {
-      // Time-based revalidation (ISR) rather than `no-store`: lets pages that read
-      // the CMS be statically generated at build time and refreshed hourly, which
-      // is what makes generateStaticParams / `export const revalidate` effective.
-      const r = await fetch(url, { next: { revalidate: 3600 } });
+      // Fully dynamic delivery: every request fetches live content from the central
+      // CMS (admin platform) with no caching, so editorial changes appear instantly
+      // and no stale/static snapshot is ever served. `no-store` opts every route that
+      // reads the CMS into dynamic rendering, which is why content pages also export
+      // `dynamic = 'force-dynamic'`.
+      const r = await fetch(url, { cache: 'no-store' });
       if (r.ok) return await r.json();
       if (r.status >= 400 && r.status < 500) return null; // not-found / client error → don't retry
       // 5xx → fall through and retry
