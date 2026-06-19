@@ -43,14 +43,14 @@
       <artifactId>spring-boot-configuration-processor</artifactId>
       <optional>true</optional>
     </dependency>
-    <!-- RLS runtime enforcement (Tenant Isolation layer 3): the AOP starter provides AspectJ
-         (org.aspectj.lang.*) for RlsTenantAspect. optional=true so it is on the compile classpath
-         here but is only pulled into a service when that service actually depends on it (every
-         JPA-backed financial service already does, via spring-boot-starter-data-jpa's transitive
-         AOP, but we declare it explicitly so the aspect compiles and is bean-eligible). -->
+    <!-- RLS runtime enforcement (Tenant Isolation layer 3): the AspectJ starter provides
+         org.aspectj.lang.* for RlsTenantAspect. Spring Boot 4 renamed spring-boot-starter-aop ->
+         spring-boot-starter-aspectj (and JPA no longer pulls it transitively), so consuming
+         services that want the RLS aspect active must depend on it themselves. optional=true keeps
+         it on the compile classpath here so the aspect compiles and is bean-eligible. -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-aop</artifactId>
+      <artifactId>spring-boot-starter-aspectj</artifactId>
       <optional>true</optional>
     </dependency>
     <!-- jakarta.persistence-api (EntityManager) for RlsTenantSession. provided/optional: the

@@ -7,7 +7,7 @@ import com.baalvion.reconciliation.service.ReconciliationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -43,7 +43,7 @@ class ReconciliationServiceIntegrationTest {
     registry.add("spring.datasource.password", postgres::getPassword);
   }
 
-  @MockBean
+  @MockitoBean
   KafkaTemplate<String, Object> kafkaTemplate;
 
   @Autowired
