@@ -63,8 +63,9 @@ function toCmsContent(spec, contentType) {
 }
 
 function main() {
-  const articles = readSpecs(ARTICLES_DIR).map((s) => toCmsContent(s, 'article'));
-  const pages = readSpecs(PAGES_DIR).map((s) => toCmsContent(s, 'page'));
+  const bySlug = (a, b) => a.slug.localeCompare(b.slug);
+  const articles = readSpecs(ARTICLES_DIR).map((s) => toCmsContent(s, 'article')).sort(bySlug);
+  const pages = readSpecs(PAGES_DIR).map((s) => toCmsContent(s, 'page')).sort(bySlug);
   const all = [...articles, ...pages];
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(all));
