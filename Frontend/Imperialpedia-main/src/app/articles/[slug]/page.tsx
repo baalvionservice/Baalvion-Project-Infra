@@ -11,6 +11,7 @@ import { Article } from "@/modules/content-engine/types";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
 import { schemaService } from "@/modules/seo/services/schema-service";
 import { structuredData } from "@/lib/seo/structured-data";
+import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
 import { CommentIntelligenceHub } from "@/modules/content-engine/components/CommentIntelligence/CommentIntelligenceHub";
 import { ArticleConnectionDisplay } from "@/modules/content-engine/components/KnowledgeGraph/ArticleConnectionDisplay";
@@ -29,7 +30,8 @@ export async function generateMetadata({
 }: ArticleRouteProps): Promise<Metadata> {
   const { slug } = await params;
   const response = await articlesService.getArticleBySlug(slug);
-  const article = response.data;
+  // Fall back to the committed snapshot when the CMS is offline (e.g. on Vercel).
+  const article = response.data ?? staticArticleBySlug(slug);
 
   if (!article) {
     return buildMetadata({
@@ -69,7 +71,8 @@ export default async function Page({ params }: ArticleRouteProps) {
   const { slug } = await params;
 
   const response = await articlesService.getArticleBySlug(slug);
-  const article = response.data as unknown as Article;
+  // Live CMS first; baked snapshot keeps the article available when the CMS is offline.
+  const article = (response.data ?? staticArticleBySlug(slug)) as unknown as Article;
 
   if (!article) {
     notFound();

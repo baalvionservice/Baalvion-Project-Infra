@@ -1,5 +1,6 @@
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles } from "@/services/data/cms-public";
+import { staticCategoryNews } from "@/services/data/static-content";
 import { topicCopy, staticCategoryFor } from "@/lib/topic-config";
 import { ExploreNewsSection } from "@/app/news/ExploreNewsSection";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
@@ -25,8 +26,18 @@ export async function CategoryFeed({ slug }: Props) {
   let articles: NewsArticle[] = await getCategoryArticles(slug, 30);
   let isLive = articles.length > 0;
 
-  // 2) Fallback to static content (category-filtered, then whole set) so the
-  //    page stays populated until editors publish into this category.
+  // 1b) Baked snapshot (committed): real published content when the CMS is offline
+  //     (e.g. on Vercel). Treated as live so the page shows the genuine articles.
+  if (!isLive) {
+    const baked = staticCategoryNews(slug);
+    if (baked.length) {
+      articles = baked;
+      isLive = true;
+    }
+  }
+
+  // 2) Fallback to bundled demo content (category-filtered, then whole set) so the
+  //    page stays populated for topics that have no published content yet.
   if (!isLive) {
     const cat = staticCategoryFor(slug);
     const filtered = cat ? newsArticles.filter((a) => a.category === cat) : [];

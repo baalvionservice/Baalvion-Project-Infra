@@ -4,7 +4,8 @@
     "private":  true,
     "scripts":  {
                     "dev":  "next dev -p 3029",
-                    "build":  "next build",
+                    "build":  "node scripts/generate-static-content.cjs && next build",
+                    "generate:content":  "node scripts/generate-static-content.cjs",
                     "start":  "next start",
                     "lint":  "eslint .",
                     "type-check":  "tsc --noEmit",

@@ -3,6 +3,7 @@ import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { sanitizeRichHtml } from '@/lib/sanitize';
 import { getCmsPage } from '@/services/data/cms-public';
+import { staticPageBySlug } from '@/services/data/static-content';
 
 interface CmsPageProps {
   /** CMS page slug (e.g. "about", "contact", "privacy-policy"). */
@@ -25,7 +26,9 @@ interface CmsPageProps {
  * `fallback` is rendered instead, so the page is never empty.
  */
 export async function CmsPage({ slug, eyebrow, fallback, children }: CmsPageProps) {
-  const page = await getCmsPage(slug);
+  // Live CMS takes precedence; baked snapshot keeps the page populated when the CMS
+  // is offline (e.g. on Vercel); the route's static fallback is the last resort.
+  const page = (await getCmsPage(slug)) ?? staticPageBySlug(slug);
   if (!page) return <>{fallback}</>;
 
   return (
