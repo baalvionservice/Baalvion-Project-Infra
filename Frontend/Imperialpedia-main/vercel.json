@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "npx turbo-ignore imperialpedia-web"
+  "ignoreCommand": "npx turbo-ignore imperialpedia-web",
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=imperialpedia-web"
 }

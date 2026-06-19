@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "npx turbo-ignore controlthemarket-web"
+  "ignoreCommand": "npx turbo-ignore controlthemarket-web",
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=controlthemarket-web"
 }

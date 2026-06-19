@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "npx turbo-ignore investors-and-founders-web"
+  "ignoreCommand": "npx turbo-ignore investors-and-founders-web",
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=investors-and-founders-web"
 }
