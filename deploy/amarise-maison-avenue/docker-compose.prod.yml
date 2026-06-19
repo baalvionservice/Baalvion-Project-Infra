@@ -1,0 +1,377 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Production stack for Amarisé Maison Avenue — single EC2 host, Docker Compose.
+# All-in-one: the storefront AND its backend run on one box behind Caddy (TLS).
+#
+#   Public (browser ↔ Caddy, 80/443 only):
+#     https://{DOMAIN}/                  → web:3033          (Next.js storefront, SSR+ISR)
+#     https://{DOMAIN}/svc/commerce/*    → commerce-service:3012  (catalog, markets/FX/tax)
+#     https://{DOMAIN}/svc/order/*       → order-service:3013     (cart, checkout, payments, webhooks)
+#     https://{DOMAIN}/svc/inventory/*   → inventory-service:3014 (stock)
+#     https://{DOMAIN}/svc/cms/*         → cms-service:3011       (published content + media)
+#     https://{DOMAIN}/auth-bff/*        → web → AUTH_PROXY_TARGET (auth-service:3001, same-origin)
+#   Internal only (no public port): postgres, redis, auth-service.
+#
+#   CORE (bring the site up) — run from the REPO ROOT:
+#     docker compose --env-file deploy/amarise-maison-avenue/.env.prod \
+#       -f deploy/amarise-maison-avenue/docker-compose.prod.yml up -d --build
+#
+#   ONE-SHOT tools (schema migrations + seed) — profile "tools":
+#     docker compose ... --profile tools run --rm cms-migrate
+#     docker compose ... --profile tools run --rm commerce-migrate
+#     ...or just run deploy/amarise-maison-avenue/init-data.sh once (orchestrates all of it).
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-db: &db
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${POSTGRES_DB}
+  DB_USER: ${POSTGRES_USER}
+  DB_PASSWORD: ${POSTGRES_PASSWORD}
+  # In-network Postgres has no TLS; services default to requiring DB TLS in prod (correct
+  # for RDS), so disable it here — the DB is never publicly exposed. Set DB_SSL=true when
+  # you move DB_HOST to RDS (rds.force_ssl=1).
+  DB_SSL: ${DB_SSL:-false}
+
+x-redis: &redis
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── Identity: mints RS256 tokens (needs the PRIVATE key) + serves JWKS ────────
+  auth-service:
+    image: ${IMAGE_PREFIX:-baalvion}/amarise-auth-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/identity/auth-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3001"
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      JWT_ALLOW_HS256_FALLBACK: "false"
+      API_BASE_URL: https://${DOMAIN}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@amarisemaisonavenue.com}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  # ── CMS: published content delivery (homepage/press/about/…) + admin API + media ─
+  cms-service:
+    image: ${IMAGE_PREFIX:-baalvion}/amarise-cms-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3011"
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      CMS_SECRETS_KEY: ${CMS_SECRETS_KEY}
+      CMS_BASE_URL: http://cms-service:3011/api/v1
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      # A storefront page load makes several content calls; raise the per-IP cap well above
+      # the dev default (200) and tune down only behind a WAF/CDN.
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-5000}
+      EVENT_TRANSPORT: redis
+      LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3011/api/v1/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      auth-service: { condition: service_started }
+
+  # ── Commerce: product catalog, collections, markets (FX/tax) — public storefront API ─
+  commerce-service:
+    image: ${IMAGE_PREFIX:-baalvion}/amarise-commerce-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/commerce/commerce-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3012"
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-5000}
+      LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3012/api/v1/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      auth-service: { condition: service_started }
+
+  # ── Inventory: stock levels / availability ───────────────────────────────────
+  inventory-service:
+    image: ${IMAGE_PREFIX:-baalvion}/amarise-inventory-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/commerce/inventory-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3014"
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3014/api/v1/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  # ── Order: cart, server-priced checkout, orders, and PSP webhooks ────────────
+  # Amarisé's checkout path. The browser opens the Razorpay popup / Stripe.js / PayU form
+  # directly; order-service creates the server-priced order, returns the payment intent,
+  # and validates the gateway webhook (HMAC). Payment keys live here (keys-at-go-live).
+  order-service:
+    image: ${IMAGE_PREFIX:-baalvion}/amarise-order-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/commerce/order-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3013"
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      COMMERCE_BASE_URL: http://commerce-service:3012/api/v1
+      INVENTORY_BASE_URL: http://inventory-service:3014/api/v1
+      PUBLIC_APP_URL: https://${DOMAIN}
+      # ── Payment gateways (keys-at-go-live). Leave blank + PAYMENTS_MOCK=true to launch the
+      #    storefront before keys land; fill the provider(s) you use, set PAYMENTS_MOCK=false. ──
+      PAYMENTS_MOCK: "${PAYMENTS_MOCK:-true}"
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      STRIPE_PUBLISHABLE_KEY: ${STRIPE_PUBLISHABLE_KEY:-}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      PAYU_MERCHANT_KEY: ${PAYU_MERCHANT_KEY:-}
+      PAYU_MERCHANT_SALT: ${PAYU_MERCHANT_SALT:-}
+      LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3013/api/v1/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      commerce-service: { condition: service_started }
+
+  # ── Storefront (Next.js standalone). NEXT_PUBLIC_* are baked at BUILD time. ───
+  web:
+    image: ${IMAGE_PREFIX:-baalvion}/amarise-web:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Frontend/AmariseMaisonAvenue-main/Dockerfile
+      args:
+        # Public, same-origin API bases (Caddy strips the /svc/<x> prefix → service sees /api/v1/…).
+        NEXT_PUBLIC_COMMERCE_URL: https://${DOMAIN}/svc/commerce/api/v1
+        NEXT_PUBLIC_CMS_URL: https://${DOMAIN}/svc/cms/api/v1
+        NEXT_PUBLIC_ORDER_URL: https://${DOMAIN}/svc/order/api/v1
+        NEXT_PUBLIC_INVENTORY_URL: https://${DOMAIN}/svc/inventory/api/v1
+        NEXT_PUBLIC_CMS_WEBSITE_SLUG: ${NEXT_PUBLIC_CMS_WEBSITE_SLUG:-amarise-maison-avenue}
+        NEXT_PUBLIC_STORE_ID: ${NEXT_PUBLIC_STORE_ID}
+        NEXT_PUBLIC_APP_URL: https://${DOMAIN}
+        NEXT_PUBLIC_MEDIA_HOST: ${NEXT_PUBLIC_MEDIA_HOST:-${DOMAIN}}
+        NEXT_PUBLIC_ADMIN_CONSOLE_URL: ${NEXT_PUBLIC_ADMIN_CONSOLE_URL:-}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3033"
+      HOSTNAME: 0.0.0.0
+      # Same-origin auth: Next rewrites /auth-bff/* → this internal target (runtime env).
+      AUTH_PROXY_TARGET: ${AUTH_PROXY_TARGET:-http://auth-service:3001/v1/auth}
+      # next.config.ts builds the CSP/security headers at RUNTIME from these — mirror the
+      # build args so the production CSP (img-src/connect-src/upgrade-insecure-requests) is exact.
+      NEXT_PUBLIC_APP_URL: https://${DOMAIN}
+      NEXT_PUBLIC_COMMERCE_URL: https://${DOMAIN}/svc/commerce/api/v1
+      NEXT_PUBLIC_CMS_URL: https://${DOMAIN}/svc/cms/api/v1
+      NEXT_PUBLIC_ORDER_URL: https://${DOMAIN}/svc/order/api/v1
+      NEXT_PUBLIC_MEDIA_HOST: ${NEXT_PUBLIC_MEDIA_HOST:-${DOMAIN}}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3033/',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      commerce-service: { condition: service_started }
+      cms-service: { condition: service_started }
+      order-service: { condition: service_started }
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web: { condition: service_started }
+      commerce-service: { condition: service_started }
+
+  # ── ONE-SHOT migration tools (profile "tools"). Built to each Dockerfile's `installer`
+  #    target, which keeps devDeps (sequelize-cli) + migrations/ that the slim image strips. ──
+  cms-migrate:
+    profiles: ["tools"]
+    build: { context: ../.., dockerfile: Backend/services/knowledge/cms-service/Dockerfile, target: installer }
+    working_dir: /repo/Backend/services/knowledge/cms-service
+    command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
+    environment: { <<: *db, NODE_ENV: production }
+    restart: "no"
+    depends_on: { postgres: { condition: service_healthy } }
+
+  commerce-migrate:
+    profiles: ["tools"]
+    build: { context: ../.., dockerfile: Backend/services/commerce/commerce-service/Dockerfile, target: installer }
+    working_dir: /repo/Backend/services/commerce/commerce-service
+    command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
+    environment: { <<: *db, NODE_ENV: production }
+    restart: "no"
+    depends_on: { postgres: { condition: service_healthy } }
+
+  inventory-migrate:
+    profiles: ["tools"]
+    build: { context: ../.., dockerfile: Backend/services/commerce/inventory-service/Dockerfile, target: installer }
+    working_dir: /repo/Backend/services/commerce/inventory-service
+    command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
+    environment: { <<: *db, NODE_ENV: production }
+    restart: "no"
+    depends_on: { postgres: { condition: service_healthy } }
+
+  order-migrate:
+    profiles: ["tools"]
+    build: { context: ../.., dockerfile: Backend/services/commerce/order-service/Dockerfile, target: installer }
+    working_dir: /repo/Backend/services/commerce/order-service
+    command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
+    environment: { <<: *db, NODE_ENV: production }
+    restart: "no"
+    depends_on: { postgres: { condition: service_healthy } }
+
+  # ── ONE-SHOT: publish the Amarisé homepage/press/about/customer-service/membership
+  #    content into the CMS so the storefront reads live, admin-editable content. ──
+  # The seed script lives in the FRONTEND (not in any backend image) and uses only the
+  # global fetch (no npm deps), so run it on a plain node image with the script bind-mounted.
+  cms-seed:
+    profiles: ["tools"]
+    image: node:20-alpine
+    working_dir: /work
+    volumes:
+      - ../../Frontend/AmariseMaisonAvenue-main/scripts:/work:ro
+    command: ["node", "seed-amarise-cms.cjs"]
+    environment:
+      NODE_ENV: production
+      AUTH_URL: http://auth-service:3001/v1/auth
+      CMS_URL: http://cms-service:3011/api/v1
+      WEBSITE_SLUG: ${NEXT_PUBLIC_CMS_WEBSITE_SLUG:-amarise-maison-avenue}
+      WEBSITE_DOMAIN: ${DOMAIN}
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-superadmin@baalvion.com}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD}
+    restart: "no"
+    depends_on:
+      cms-service: { condition: service_healthy }
+      auth-service: { condition: service_healthy }
+
+  # ── ONE-SHOT: seed the Amarisé product catalog (brands→categories→products, all
+  #    published). Idempotent (wipe + reseed). Photos default to branded placeholders;
+  #    set SEED_MEDIA_BASE_URL to your CDN to wire real photography. AMARISE_ORG_ID /
+  #    AMARISE_OWNER_ID must be the prod super-admin's org/user (init-data.sh passes them). ──
+  commerce-seed:
+    profiles: ["tools"]
+    build: { context: ../.., dockerfile: Backend/services/commerce/commerce-service/Dockerfile, target: installer }
+    working_dir: /repo/Backend/services/commerce/commerce-service
+    command: ["node", "scripts/seedAmarise.js"]
+    environment:
+      <<: *db
+      NODE_ENV: production
+      AMARISE_ORG_ID: ${AMARISE_ORG_ID:-}
+      AMARISE_OWNER_ID: ${AMARISE_OWNER_ID:-}
+      SEED_MEDIA_BASE_URL: ${SEED_MEDIA_BASE_URL:-}
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+volumes:
+  pgdata:
+  redisdata:
+  caddy_data:
+  caddy_config:

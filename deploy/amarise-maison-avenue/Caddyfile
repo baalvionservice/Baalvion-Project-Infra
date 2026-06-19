@@ -1,0 +1,52 @@
+# Caddy v2 — TLS termination + reverse proxy for Amarisé Maison Avenue (all-in-one EC2).
+# Caddy auto-provisions + renews Let's Encrypt certs and redirects HTTP→HTTPS. It is the
+# ONLY process binding public ports; every backend stays on the internal compose network.
+#
+# The Next.js app sets its own CSP/HSTS/security headers (next.config.ts), and each API
+# service sets its own CORS — so Caddy only terminates TLS, compresses, and strips the
+# Server banner here (avoids duplicate/ conflicting headers).
+#
+# `handle_path` STRIPS the matched prefix, so /svc/commerce/api/v1/… reaches
+# commerce-service as /api/v1/… (its native mount). The NEXT_PUBLIC_* build args in
+# docker-compose.prod.yml point the browser at these exact /svc/* bases.
+
+{$DOMAIN} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+
+	header {
+		-Server
+	}
+
+	# Commerce — catalog, collections, markets (FX/tax). Public reads; auth for writes.
+	handle_path /svc/commerce/* {
+		reverse_proxy commerce-service:3012
+	}
+
+	# Order — cart, server-priced checkout, orders, and PSP webhooks (Razorpay/Stripe/PayU).
+	handle_path /svc/order/* {
+		reverse_proxy order-service:3013
+	}
+
+	# Inventory — stock levels / availability.
+	handle_path /svc/inventory/* {
+		reverse_proxy inventory-service:3014
+	}
+
+	# CMS — published content delivery (homepage/press/about/…) + admin media (/uploads).
+	handle_path /svc/cms/* {
+		reverse_proxy cms-service:3011
+	}
+
+	# Everything else → Next.js storefront. /auth-bff/* is rewritten server-side by
+	# next.config.ts to AUTH_PROXY_TARGET (auth-service), so it also flows through here.
+	handle {
+		reverse_proxy web:3033
+	}
+}
+
+# Redirect the www host to the canonical apex (keeps one set of canonical URLs / SEO).
+www.{$DOMAIN} {
+	tls {$ACME_EMAIL}
+	redir https://{$DOMAIN}{uri} permanent
+}
