@@ -122,6 +122,10 @@ services:
       CMS_SECRETS_KEY: ${CMS_SECRETS_KEY}
       CMS_BASE_URL: http://cms-service:3011/api/v1
       CORS_ORIGINS: ${CORS_ORIGINS}
+      # Per-IP request cap. The default (200) is far too low for a content-delivery API
+      # (a single page load makes several calls) and also throttles the seed's burst of
+      # creates. Raise it; tune down only if you front the API with a WAF/CDN.
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-5000}
       EVENT_TRANSPORT: redis
       LOG_LEVEL: info
     healthcheck:
