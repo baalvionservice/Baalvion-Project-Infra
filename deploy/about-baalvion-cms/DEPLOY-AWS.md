@@ -86,6 +86,12 @@ First build pulls Node images + runs `turbo prune` per service — give it a few
 that's expected). The `cms` schema itself is auto-created on boot.
 
 ## 7. Database setup (one-time, on a fresh DB)
+
+> **Easy path:** run `bash deploy/about-baalvion-cms/init-data.sh` from the repo root once the
+> stack is up. It performs ALL of §7 + §8 automatically (waits for health → auth migrations →
+> CMS migrations → super-admin → registers the website → resolves its id → seeds → verifies).
+> The manual steps below are the same sequence, kept for reference and troubleshooting.
+
 This exact sequence was validated end-to-end on a local copy of this stack. Run the steps in
 order — each depends on the previous.
 ```bash
