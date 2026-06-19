@@ -7,7 +7,12 @@ import { JsonLd } from '@/components/json-ld';
 import { getGuide, getGuideSlugs, loadGuides } from '@/lib/guides';
 import { BASE_URL, SITE_NAME, breadcrumbSchema, faqSchema, articleSchema } from '@/lib/schema';
 
-export const revalidate = 3600;
+// Fully static: prerender every guide from committed Markdown at build time and
+// never re-run on the server. `dynamicParams = false` means any slug outside
+// generateStaticParams 404s without spinning up a lambda — so there is no runtime
+// filesystem read on Vercel (which would otherwise fail output-file tracing).
+export const dynamic = 'force-static';
+export const dynamicParams = false;
 
 type Params = { slug: string };
 

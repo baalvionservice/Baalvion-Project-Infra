@@ -17,8 +17,10 @@ import type { RichDoc, RichBlock, FaqItem } from '@/lib/cms';
 
 const GUIDES_DIR = path.join(process.cwd(), 'content-gen', 'research-batch-2');
 
-// Explicit publication order for the fundamentals cluster.
-const ORDER = [
+// Explicit publication order for the fundamentals cluster. Exported as a plain
+// constant (no filesystem access) so the sitemap and other server modules can
+// enumerate guide URLs without triggering a runtime fs read.
+export const GUIDE_SLUGS = [
   'hs-codes-explained',
   'freight-forwarder-explained',
   'customs-broker-explained',
@@ -307,8 +309,8 @@ export function loadGuides(): RichDoc[] {
   }
   const docs = files.map((f) => parseGuide(f.replace(/\.md$/, ''), fs.readFileSync(path.join(GUIDES_DIR, f), 'utf8')));
   docs.sort((a, b) => {
-    const ia = ORDER.indexOf(a.slug);
-    const ib = ORDER.indexOf(b.slug);
+    const ia = GUIDE_SLUGS.indexOf(a.slug);
+    const ib = GUIDE_SLUGS.indexOf(b.slug);
     return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
   });
   cache = docs;
