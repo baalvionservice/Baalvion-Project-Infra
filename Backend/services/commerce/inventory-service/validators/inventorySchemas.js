@@ -22,3 +22,20 @@ exports.adjustStockSchema = z.object({
     reference: z.string().max(200).optional(),
     notes: z.string().max(1000).optional(),
 });
+
+// Reservation/lock body. `variantId` is the stock key (== sku in this service); see reservationService.
+exports.lockSchema = z.object({
+    variantId: z.string().min(1).max(200),
+    userId: z.union([z.string().min(1).max(128), z.number()]).optional().nullable(),
+    quantity: z.number().int().min(1).default(1),
+    warehouseId: z.string().uuid().optional().nullable(),
+    productId: z.string().uuid().optional().nullable(),
+});
+
+exports.confirmLockSchema = z.object({
+    orderId: z.string().uuid(),
+});
+
+exports.bulkStockSchema = z.object({
+    variantIds: z.array(z.string().min(1).max(200)).min(1).max(200),
+});

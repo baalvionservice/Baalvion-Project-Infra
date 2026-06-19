@@ -10,10 +10,11 @@ const sequelize = new Sequelize(config.db.name, config.db.user, config.db.passwo
     pool: { max: 10, min: 2, acquire: 30000, idle: 10000 },
 });
 
-const InventoryWarehouse  = require('./inventoryWarehouse')(sequelize, DataTypes);
-const InventoryStock      = require('./inventoryStock')(sequelize, DataTypes);
-const InventoryMovement   = require('./inventoryMovement')(sequelize, DataTypes);
-const InventoryAdjustment = require('./inventoryAdjustment')(sequelize, DataTypes);
+const InventoryWarehouse   = require('./inventoryWarehouse')(sequelize, DataTypes);
+const InventoryStock       = require('./inventoryStock')(sequelize, DataTypes);
+const InventoryMovement    = require('./inventoryMovement')(sequelize, DataTypes);
+const InventoryAdjustment  = require('./inventoryAdjustment')(sequelize, DataTypes);
+const InventoryReservation = require('./inventoryReservation')(sequelize, DataTypes);
 
 InventoryWarehouse.hasMany(InventoryStock, { foreignKey: 'warehouseId', as: 'stockItems' });
 InventoryStock.belongsTo(InventoryWarehouse, { foreignKey: 'warehouseId', as: 'warehouse' });
@@ -21,10 +22,13 @@ InventoryStock.belongsTo(InventoryWarehouse, { foreignKey: 'warehouseId', as: 'w
 InventoryWarehouse.hasMany(InventoryMovement, { foreignKey: 'warehouseId', as: 'movements' });
 InventoryMovement.belongsTo(InventoryWarehouse, { foreignKey: 'warehouseId', as: 'warehouse' });
 
+InventoryWarehouse.hasMany(InventoryReservation, { foreignKey: 'warehouseId', as: 'reservations' });
+InventoryReservation.belongsTo(InventoryWarehouse, { foreignKey: 'warehouseId', as: 'warehouse' });
+
 const db = {
     sequelize, Sequelize, Op: Sequelize.Op,
     connectDB: async () => { await sequelize.authenticate(); console.log('[Inventory Service] Database connection established'); },
-    InventoryWarehouse, InventoryStock, InventoryMovement, InventoryAdjustment,
+    InventoryWarehouse, InventoryStock, InventoryMovement, InventoryAdjustment, InventoryReservation,
 };
 
 module.exports = db;
