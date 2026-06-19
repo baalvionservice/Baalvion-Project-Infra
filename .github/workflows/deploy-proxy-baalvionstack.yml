@@ -95,13 +95,30 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     steps:
+      # Skip cleanly (job stays green) when deploy secrets are not configured,
+      # instead of hard-failing on an empty host. When PROD_HOST/PROD_USER/
+      # PROD_SSH_KEY are set, the deploy runs exactly as before.
+      - name: Check deploy secrets
+        id: secrets
+        env:
+          PROD_HOST: ${{ secrets.PROD_HOST }}
+        run: |
+          if [ -n "$PROD_HOST" ]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=Deploy skipped::PROD_HOST is not set — skipping the EC2 deploy. Set PROD_HOST/PROD_USER/PROD_SSH_KEY (repo or 'production' environment) to enable it."
+          fi
+
       - name: Fetch built SPA
+        if: steps.secrets.outputs.configured == 'true'
         uses: actions/download-artifact@v8
         with:
           name: proxy-spa-dist
           path: dist
       # Ship the static SPA to the path Caddy mounts (the repo's Frontend/.../dist on the host).
       - name: Upload SPA to EC2
+        if: steps.secrets.outputs.configured == 'true'
         uses: appleboy/scp-action@v1.0.0
         with:
           host: ${{ secrets.PROD_HOST }}
@@ -112,6 +129,7 @@ jobs:
           target: /opt/baalvion/Frontend/Proxy-BaalvionStack/dist
           rm: true
       - name: Pull images + roll the stack
+        if: steps.secrets.outputs.configured == 'true'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.PROD_HOST }}
@@ -129,6 +147,7 @@ jobs:
             $COMPOSE restart caddy   # pick up the freshly uploaded SPA
             docker system prune -f
       - name: Smoke test
+        if: steps.secrets.outputs.configured == 'true'
         run: |
           sleep 15
           curl -sf https://proxy.baalvionstack.com/v1/public/plans > /dev/null && echo "plans OK" || echo "plans NOT responding"
