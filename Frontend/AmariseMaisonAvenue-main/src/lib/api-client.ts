@@ -17,6 +17,15 @@
 import { getStoreId } from './store-context';
 import { unwrapResponse, ApiEnvelopeError } from './unwrap';
 import { getAccessToken, authClient } from './auth';
+import type {
+  Consignment,
+  ConsignmentItem,
+  SellerProfile,
+  StoredWishlist,
+  StoreAppointment,
+  StoreAppointmentType,
+  CertificateVerification,
+} from './types';
 
 // ── Base URLs (each service mounts its routes under /api/v1) ─────────────────
 // IMPORTANT — TWO commerce base URLs, by design:
@@ -315,6 +324,8 @@ export interface StockLevel {
   quantity: number;
   reserved: number;
   available: number;
+  /** Availability status from inventory-service (e.g. 'in_stock' | 'low_stock' | 'out_of_stock'). */
+  status?: string;
   updatedAt: string;
 }
 
@@ -327,28 +338,62 @@ export interface LockResult {
   ttlMinutes: number;
 }
 
-// ── inventoryApi ─────────────────────────────────────────────────────────────
-// Backend inventory-service is WAREHOUSE-scoped (/inventory/stores/:storeId/warehouses/...
-// and /inventory/stores/:storeId/stock list). There is NO variant-level stock lookup,
-// no bulk endpoint, and NO reservation/lock API. All methods are explicitly unimplemented.
-// (Canonical base, when these are built: `${INVENTORY_URL}/inventory/stores/:storeId/...`)
+// ── inventoryApi (store-scoped: /inventory/stores/:storeId/...) ───────────────
+// Now fully backed by inventory-service: variant stock lookup, bulk stock, and a
+// reservation/lock API. NOTE: there is intentionally NO client `confirm` — reservation
+// commitment is SERVER-SIDE (order-service confirms the lock on payment). `confirm` is
+// kept only as a safe no-op so legacy call sites compile (see method comment).
 const INVENTORY_CANONICAL_BASE = `${INVENTORY_URL}/inventory/stores`;
 
 export const inventoryApi = {
-  getStock(_variantId: string): Promise<ApiResult<StockLevel>> {
-    return notImplemented<StockLevel>(`variant stock lookup (backend is warehouse-scoped: ${INVENTORY_CANONICAL_BASE}/:storeId/stock)`);
+  getStock(variantId: string): Promise<ApiResult<StockLevel>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<StockLevel>();
+    return apiFetch<StockLevel>(`${INVENTORY_CANONICAL_BASE}/${storeId}/stock/${variantId}`);
   },
-  getBulkStock(_variantIds: string[]): Promise<ApiResult<StockLevel[]>> {
-    return notImplemented<StockLevel[]>('bulk stock lookup');
+
+  getBulkStock(variantIds: string[]): Promise<ApiResult<StockLevel[]>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<StockLevel[]>();
+    return apiFetch<StockLevel[]>(`${INVENTORY_CANONICAL_BASE}/${storeId}/stock/bulk`, {
+      method: 'POST',
+      body: JSON.stringify({ variantIds }),
+    });
   },
-  lock(_variantId: string, _userId: string, _quantity = 1): Promise<ApiResult<LockResult>> {
-    return notImplemented<LockResult>('inventory reservation/lock (no lock API in inventory-service)');
+
+  // Reserve stock for a variant. Signature preserved (variantId, userId?, quantity) so the
+  // existing orchestrator call site keeps compiling; `userId` is optional server-side (the
+  // bearer token / guest session identifies the holder).
+  lock(
+    variantId: string,
+    userId?: string,
+    quantity = 1,
+    productId?: string,
+  ): Promise<ApiResult<LockResult>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<LockResult>();
+    const body: Record<string, unknown> = { variantId, quantity };
+    if (userId) body.userId = userId;
+    if (productId) body.productId = productId;
+    return apiFetch<LockResult>(`${INVENTORY_CANONICAL_BASE}/${storeId}/locks`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
   },
-  release(_lockId: string): Promise<ApiResult<{ released: boolean }>> {
-    return notImplemented<{ released: boolean }>('inventory lock release');
+
+  release(lockId: string): Promise<ApiResult<{ released: boolean }>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<{ released: boolean }>();
+    return apiFetch<{ released: boolean }>(
+      `${INVENTORY_CANONICAL_BASE}/${storeId}/locks/${lockId}/release`,
+      { method: 'POST' },
+    );
   },
+
+  // No-op: the server now OWNS reservation commitment (order-service confirms the lock on
+  // payment). Kept so legacy call sites compile; resolves immediately without a network call.
   confirm(_lockId: string, _orderId: string): Promise<ApiResult<{ confirmed: boolean }>> {
-    return notImplemented<{ confirmed: boolean }>('inventory lock confirm');
+    return Promise.resolve({ ok: true, data: { confirmed: true } });
   },
 };
 
@@ -967,5 +1012,173 @@ export const analyticsApi = {
     const storeId = getStoreId();
     if (!storeId) return missingStore<{ date: string; revenue: number }[]>();
     return apiFetch<{ date: string; revenue: number }[]>(`${ORDER_URL}/orders/stores/${storeId}/analytics/revenue${analyticsQs(filters, { granularity })}`);
+  },
+};
+
+// ── Consignment Types & API ──────────────────────────────────────────────────
+// Resale/consignment intake, my-consignments, single lookup, public certificate
+// verification, and the authenticated seller profile. Backed by order-service,
+// store-scoped: /consignments/stores/:storeId/...
+
+/** A single consigned item in a submit payload. */
+export interface ConsignmentItemInput {
+  brand: string;
+  model?: string;
+  category?: string;
+  color?: string;
+  material?: string;
+  conditionGrade?: 'pristine' | 'excellent' | 'very_good' | 'good' | 'fair';
+  askingPrice?: number;
+  currency?: string;
+  description?: string;
+  photoUrls?: string[];
+  accessories?: string[];
+  serialNumber?: string;
+}
+
+/** Submit body for a new consignment request (guest-capable). */
+export interface ConsignmentSubmitPayload {
+  contactEmail: string;
+  contactName?: string;
+  contactPhone?: string;
+  notes?: string;
+  items: ConsignmentItemInput[];
+}
+
+const CONSIGNMENT_BASE = `${ORDER_URL}/consignments/stores`;
+
+export const consignmentApi = {
+  // Submit a consignment request. Guest-capable (no auth required); the server stamps the
+  // owner from the bearer token when one is present, else binds to the contact email.
+  submit(payload: ConsignmentSubmitPayload): Promise<ApiResult<Consignment>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<Consignment>();
+    return apiFetch<Consignment>(`${CONSIGNMENT_BASE}/${storeId}/requests`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // The authenticated seller's own consignment requests (paginated).
+  listMine(
+    filters: { page?: number; pageSize?: number } = {},
+  ): Promise<ApiResult<PaginatedResponse<Consignment>>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<PaginatedResponse<Consignment>>();
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => { if (v !== undefined) params.set(k, String(v)); });
+    const qs = params.toString();
+    return apiFetch<PaginatedResponse<Consignment>>(`${CONSIGNMENT_BASE}/${storeId}/requests/mine${qs ? `?${qs}` : ''}`);
+  },
+
+  // A single consignment request (owner-or-staff; ownership enforced server-side).
+  get(id: string): Promise<ApiResult<Consignment>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<Consignment>();
+    return apiFetch<Consignment>(`${CONSIGNMENT_BASE}/${storeId}/requests/${id}`);
+  },
+
+  // PUBLIC: verify a certificate of authenticity by its printed code (no auth).
+  verifyCertificate(code: string): Promise<ApiResult<CertificateVerification>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<CertificateVerification>();
+    return apiFetch<CertificateVerification>(
+      `${CONSIGNMENT_BASE}/${storeId}/certificates/${encodeURIComponent(code)}/verify`,
+    );
+  },
+
+  // The authenticated seller's profile.
+  getSellerProfile(): Promise<ApiResult<SellerProfile>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<SellerProfile>();
+    return apiFetch<SellerProfile>(`${CONSIGNMENT_BASE}/${storeId}/sellers/me`);
+  },
+
+  updateSellerProfile(patch: Partial<SellerProfile>): Promise<ApiResult<SellerProfile>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<SellerProfile>();
+    return apiFetch<SellerProfile>(`${CONSIGNMENT_BASE}/${storeId}/sellers/me`, {
+      method: 'PUT',
+      body: JSON.stringify(patch),
+    });
+  },
+};
+
+// Re-export the shared consignment item shape for callers that build intake items.
+export type { ConsignmentItem };
+
+// ── wishlistApi (store-scoped: /wishlists/stores/:storeId, all auth) ──────────
+// Server-persisted wishlist for an AUTHENTICATED shopper. The storefront keeps a
+// localStorage wishlist as the GUEST fallback (see lib/store.tsx) and merges it into
+// the server wishlist on login.
+
+const WISHLIST_BASE = `${ORDER_URL}/wishlists/stores`;
+
+export const wishlistApi = {
+  getMine(): Promise<ApiResult<StoredWishlist>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<StoredWishlist>();
+    return apiFetch<StoredWishlist>(`${WISHLIST_BASE}/${storeId}/mine`);
+  },
+
+  addItem(productId: string, variantId?: string): Promise<ApiResult<StoredWishlist>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<StoredWishlist>();
+    const body: Record<string, unknown> = { productId };
+    if (variantId) body.variantId = variantId;
+    return apiFetch<StoredWishlist>(`${WISHLIST_BASE}/${storeId}/mine/items`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
+
+  removeItem(productId: string, variantId?: string): Promise<ApiResult<StoredWishlist>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<StoredWishlist>();
+    const qs = variantId ? `?variantId=${encodeURIComponent(variantId)}` : '';
+    return apiFetch<StoredWishlist>(
+      `${WISHLIST_BASE}/${storeId}/mine/items/${encodeURIComponent(productId)}${qs}`,
+      { method: 'DELETE' },
+    );
+  },
+};
+
+// ── appointmentsApi (store-scoped: /appointments/stores/:storeId) ─────────────
+// Showroom / virtual / in-home / phone appointment booking. Booking is guest-capable;
+// listing the shopper's own appointments requires auth.
+
+export interface AppointmentBookPayload {
+  customerName: string;
+  customerEmail: string;
+  customerPhone?: string;
+  type: StoreAppointmentType;
+  /** ISO datetime string. */
+  preferredAt: string;
+  notes?: string;
+}
+
+const APPOINTMENTS_BASE = `${ORDER_URL}/appointments/stores`;
+
+export const appointmentsApi = {
+  // Book an appointment (guest-capable).
+  book(payload: AppointmentBookPayload): Promise<ApiResult<StoreAppointment>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<StoreAppointment>();
+    return apiFetch<StoreAppointment>(`${APPOINTMENTS_BASE}/${storeId}`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // The authenticated shopper's own appointments (paginated).
+  listMine(
+    filters: { page?: number; pageSize?: number } = {},
+  ): Promise<ApiResult<PaginatedResponse<StoreAppointment>>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<PaginatedResponse<StoreAppointment>>();
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => { if (v !== undefined) params.set(k, String(v)); });
+    const qs = params.toString();
+    return apiFetch<PaginatedResponse<StoreAppointment>>(`${APPOINTMENTS_BASE}/${storeId}/mine${qs ? `?${qs}` : ''}`);
   },
 };

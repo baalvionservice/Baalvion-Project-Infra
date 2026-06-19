@@ -3,8 +3,12 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { ChevronRight, ShieldCheck, Fingerprint, FileText, Microscope } from 'lucide-react';
 import { COUNTRIES } from '@/lib/mock-data';
+import { CertificateVerifier } from '@/components/authenticity/CertificateVerifier';
 
-type PageProps = { params: Promise<{ country: string }> };
+type PageProps = {
+  params: Promise<{ country: string }>;
+  searchParams: Promise<{ code?: string }>;
+};
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const country = COUNTRIES[(await params).country] || COUNTRIES.us;
@@ -21,8 +25,9 @@ const STEPS = [
   { icon: ShieldCheck, title: 'Lifetime Guarantee', body: 'Our Authenticity Guarantee stands for the life of the piece. A verified inauthenticity claim is met with a full refund and complimentary return.' },
 ];
 
-export default async function AuthenticityPage({ params }: PageProps) {
+export default async function AuthenticityPage({ params, searchParams }: PageProps) {
   const countryCode = (await params).country || 'us';
+  const { code } = await searchParams;
 
   return (
     <div className="animate-fade-in bg-gradient-to-br from-ivory via-white to-ivory min-h-screen">
@@ -53,6 +58,11 @@ export default async function AuthenticityPage({ params }: PageProps) {
               <p className="text-md text-gray-500 font-light italic leading-relaxed">{s.body}</p>
             </div>
           ))}
+        </div>
+
+        {/* Public certificate verification */}
+        <div id="verify" className="mt-20 scroll-mt-24">
+          <CertificateVerifier initialCode={code} />
         </div>
 
         <div className="mt-20 p-12 bg-black text-white flex flex-col md:flex-row items-center justify-between gap-8">
