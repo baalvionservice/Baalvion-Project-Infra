@@ -10,6 +10,8 @@ import {
   cmsGetAboutPages,
 } from '@/lib/cms';
 import { GUIDE_SLUGS } from '@/lib/guides';
+import { INSIGHT_SLUGS } from '@/lib/insights';
+import { RESEARCH_SLUGS } from '@/lib/research';
 
 const BASE_URL = 'https://about.baalvion.com';
 
@@ -102,6 +104,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ['projects', 0.7],
     ['news', 0.7],
     ['guides', 0.8],
+    ['insights', 0.8],
+    ['research', 0.8],
     ['trust', 0.5],
     ['investors', 0.5],
   ].map(([path, priority]) => ({
@@ -120,6 +124,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }));
 
+  // File-based research/insights articles — enumerated from static slug lists
+  // so the sitemap needs no filesystem read at request time.
+  const insightRoutes: MetadataRoute.Sitemap = INSIGHT_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/insights/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  const researchRoutes: MetadataRoute.Sitemap = RESEARCH_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/research/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
   // Deduplicate by URL (hub routes may overlap with CMS page routes).
   const all = [
     ...hubRoutes,
@@ -132,6 +152,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...caseStudyRoutes,
     ...aboutRoutes,
     ...guideRoutes,
+    ...insightRoutes,
+    ...researchRoutes,
   ];
   const seen = new Set<string>();
   return all.filter((entry) => {
