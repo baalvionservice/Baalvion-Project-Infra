@@ -41,7 +41,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.5.14</version>
+    <version>4.1.0</version>
     <relativePath/>
   </parent>
 
@@ -59,17 +59,11 @@
          PreferQueryMode=SIMPLE and CVE-2026-42198 SCRAM DoS). 42.7.11 patches both. Property is
          BOM-managed, so this overrides every module's postgresql dependency. -->
     <postgresql.version>42.7.11</postgresql.version>
-    <!-- Patch-bump two BOM-pinned transitives flagged by the container image scan (newer than the
-         3.5.14 BOM): Tomcat 10.1.54 -> 10.1.55 (CVE-2026-41293/43512/43515 CRITICAL + 41284/42498/
-         43513 HIGH) and Netty 4.1.132 -> 4.1.135.Final (CVE-2026-42583 + CVE-2026-45416 SNI 16MiB
-         pre-allocation + CVE-2026-44249 IPv6 subnet-filter bypass, all HIGH in netty-handler).
-         Netty reaches every service image transitively via the OTLP gRPC exporter. Within-minor. -->
-    <tomcat.version>10.1.55</tomcat.version>
-    <netty.version>4.1.135.Final</netty.version>
-    <!-- Override the Spring Boot 3.5.14 BOM's spring-kafka 3.3.15 (CVE-2026-41731 HIGH: overly broad
-         trusted-package deserialization). 3.3.16 is the within-minor patch; property is BOM-managed,
-         so it overrides spring-kafka + spring-kafka-test for every module. -->
-    <spring-kafka.version>3.3.16</spring-kafka.version>
+    <!-- NOTE: the Spring Boot 3.5-era Tomcat/Netty/spring-kafka version overrides were removed for
+         the 4.1.0 migration. SB4 ships Jakarta EE 11 (Tomcat 11) and spring-kafka 4.x; pinning the
+         old majors here would conflict with the BOM. The 4.1.0 BOM already carries the CVE-patched
+         versions those overrides existed for — re-check Trivy/Dependabot after the migration and
+         re-add a within-major override only if a specific CVE is still flagged. -->
   </properties>
 
   <dependencyManagement>
@@ -115,11 +109,11 @@
       <artifactId>spring-boot-starter-validation</artifactId>
     </dependency>
 
-    <!-- API documentation (OpenAPI 3 + Swagger UI); 2.8.x aligns with Spring Boot 3.5 -->
+    <!-- API documentation (OpenAPI 3 + Swagger UI); 3.0.x aligns with Spring Boot 4 -->
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-      <version>2.8.6</version>
+      <version>3.0.3</version>
     </dependency>
 
     <!-- Database -->
@@ -174,7 +168,7 @@
     <!-- Resilience -->
     <dependency>
       <groupId>io.github.resilience4j</groupId>
-      <artifactId>resilience4j-spring-boot3</artifactId>
+      <artifactId>resilience4j-spring-boot4</artifactId>
       <version>${resilience4j.version}</version>
     </dependency>
     <dependency>
