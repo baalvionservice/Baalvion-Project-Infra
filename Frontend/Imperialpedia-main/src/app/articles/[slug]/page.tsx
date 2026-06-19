@@ -10,6 +10,7 @@ import { breadcrumbService } from "@/modules/seo-engine/services/breadcrumb-serv
 import { Article } from "@/modules/content-engine/types";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
 import { schemaService } from "@/modules/seo/services/schema-service";
+import { structuredData } from "@/lib/seo/structured-data";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
 import { CommentIntelligenceHub } from "@/modules/content-engine/components/CommentIntelligence/CommentIntelligenceHub";
 import { ArticleConnectionDisplay } from "@/modules/content-engine/components/KnowledgeGraph/ArticleConnectionDisplay";
@@ -76,10 +77,13 @@ export default async function Page({ params }: ArticleRouteProps) {
 
   const breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);
   const articleSchema = schemaService.generateArticleSchema(article);
+  const faqSchema =
+    article.faq && article.faq.length ? structuredData.faq(article.faq) : null;
 
   return (
     <div className="bg-background min-h-screen">
       <JsonLd data={articleSchema} />
+      {faqSchema && <JsonLd data={faqSchema} />}
       <Container className="py-8">
         <Breadcrumbs breadcrumb={breadcrumbs} />
 

@@ -22,7 +22,9 @@ export const schemaService = {
       title: article.title,
       description: article.description,
       image: article.featuredImage || '',
-      authorName: article.authorId === 'creator-1' ? 'The Market Maven' : 'Imperialpedia Expert',
+      authorName:
+        article.authorName ||
+        (article.authorId === 'creator-1' ? 'The Market Maven' : 'Imperialpedia Expert'),
       datePublished: article.publishedAt || new Date().toISOString(),
       dateModified: article.updatedAt,
     });

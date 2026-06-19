@@ -48,6 +48,7 @@ export interface CmsContent {
   createdAt?: string;
   updatedAt?: string;
   category?: { id: string; name: string; slug: string } | null;
+  customFields?: Record<string, unknown> | null;
 }
 
 interface CmsListEnvelope {
@@ -194,6 +195,14 @@ function plainTextLength(blocks?: CmsBlock[], excerpt?: string | null): number {
 // ── CMS content → Imperialpedia Article ─────────────────────────────────────
 export function cmsContentToArticle(raw: CmsContent): Article {
   const words = plainTextLength(raw.contentBlocks, raw.excerpt);
+  const cf = (raw.customFields ?? {}) as Record<string, unknown>;
+  const rawFaq = Array.isArray(cf.faq) ? (cf.faq as unknown[]) : [];
+  const faq = rawFaq
+    .map((f) => f as { question?: unknown; answer?: unknown })
+    .filter((f) => f && f.question && f.answer)
+    .map((f) => ({ question: String(f.question), answer: String(f.answer) }));
+  const author = cf.author as { name?: unknown } | undefined;
+  const authorName = author && typeof author.name === 'string' ? author.name : undefined;
   return {
     id: raw.id,
     slug: raw.slug,
@@ -201,6 +210,7 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     description: raw.excerpt ?? '',
     body: blocksToHtml(raw.contentBlocks) || undefined,
     authorId: String(raw.authorId ?? 'imperialpedia'),
+    authorName,
     publishedAt: raw.publishedAt ?? undefined,
     updatedAt: raw.updatedAt ?? raw.publishedAt ?? new Date().toISOString(),
     category: raw.category?.name ?? 'General',
@@ -211,6 +221,7 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     seoTitle: raw.seoMetadata?.title || raw.title,
     seoDescription: raw.seoMetadata?.description || raw.excerpt || '',
     seoKeywords: raw.seoMetadata?.keywords || raw.tagIds || [],
+    faq: faq.length ? faq : undefined,
   };
 }
 
