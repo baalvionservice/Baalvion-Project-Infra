@@ -23,4 +23,14 @@ const authMiddleware = wrap(_canonical);
 const requireRole = (...roles) => wrap(rbacRequireRole(...roles));
 const requirePermission = (...perms) => wrap(rbacRequirePermission(...perms));
 
-module.exports = { authMiddleware, requireRole, requirePermission };
+// Optional auth (guest-capable storefront routes, e.g. stock lookups and checkout holds): if an
+// Authorization header is present it MUST be valid (a forged/expired token is still rejected 401);
+// if absent, the request proceeds as a guest (req.auth undefined). A short reservation TTL bounds
+// guest abuse, and the global IP rate limit applies to every route regardless.
+const optionalAuth = (req, res, next) => {
+    const hasAuth = req.get && req.get('authorization');
+    if (!hasAuth) return next();
+    return authMiddleware(req, res, next);
+};
+
+module.exports = { authMiddleware, optionalAuth, requireRole, requirePermission };
