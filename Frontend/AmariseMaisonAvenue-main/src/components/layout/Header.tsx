@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useParams, useRouter, usePathname } from "next/navigation";
 import {
@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { BrandImage } from "@/components/ui/BrandImage";
 import placeholderData from "@/app/lib/placeholder-images.json";
+import { useDepartments, useCategories } from "@/lib/useCatalog";
 
 interface NavLink {
   name: string;
@@ -244,6 +245,9 @@ export const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
   const { cart, wishlist, currentUser } = useAppStore();
+  // Live catalog taxonomy that drives the category-based nav (falls back gracefully).
+  const { departments } = useDepartments();
+  const { categories } = useCategories();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
   const [hoveredLink, setHoveredLink] = useState<string | null>(null);
@@ -292,7 +296,8 @@ export const Header = () => {
     currentUser?.role === "super_admin" ||
     currentUser?.role === "country_admin";
 
-  const navLinks: NavLink[] = [
+  // Curated fallback nav — used until the admin store has departments/categories.
+  const defaultNavLinks: NavLink[] = [
     {
       id: "new",
       name: "NEW ARRIVALS",
@@ -314,6 +319,62 @@ export const Header = () => {
     { id: "live", name: "LIVE SHOP", href: `/${countryCode}/sell` },
     { id: "journal", name: "BLOG", href: `/${countryCode}/journal` },
   ];
+
+  // Drive the top nav + mega-menu from the admin catalog (departments → top-level
+  // items, their categories → mega-menu columns). Only takes over when the store
+  // actually has departments AND categories; otherwise the curated menu above is
+  // used, so the header never goes empty when commerce is unseeded or offline.
+  const dynamicNav = useMemo<{
+    navLinks: NavLink[];
+    mega: Record<string, any>;
+  } | null>(() => {
+    if (!departments.length || !categories.length) return null;
+    const byDept = new Map<string, typeof categories>();
+    for (const c of categories) {
+      const arr = byDept.get(c.departmentId) ?? [];
+      arr.push(c);
+      byDept.set(c.departmentId, arr);
+    }
+    const links: NavLink[] = [];
+    const mega: Record<string, any> = {};
+    for (const dept of departments) {
+      const cats = byDept.get(dept.id) ?? [];
+      if (!cats.length) continue;
+      links.push({
+        id: dept.id,
+        name: dept.name.toUpperCase(),
+        href: `/${countryCode}/category/${cats[0].id}`,
+      });
+      // Split categories into up to three balanced columns for the mega-menu.
+      const maxCols = cats.length > 16 ? 3 : cats.length > 8 ? 2 : 1;
+      const perCol = Math.ceil(cats.length / maxCols);
+      const sections: { title: string; links: { name: string; href: string }[] }[] = [];
+      for (let i = 0; i < cats.length; i += perCol) {
+        sections.push({
+          title: sections.length === 0 ? dept.name : "More",
+          links: cats
+            .slice(i, i + perCol)
+            .map((c) => ({ name: c.name, href: `/category/${c.id}` })),
+        });
+      }
+      mega[dept.id] = {
+        title: dept.name,
+        subtitle: dept.description || "Explore the collection",
+        image: dept.imageUrl || "",
+        collectionHref: `/category/${cats[0].id}`,
+        sections,
+      };
+    }
+    if (!links.length) return null;
+    // Preserve the editorial entries that aren't catalog departments.
+    links.push({ id: "live", name: "LIVE SHOP", href: `/${countryCode}/sell` });
+    links.push({ id: "journal", name: "BLOG", href: `/${countryCode}/journal` });
+    return { navLinks: links, mega };
+  }, [departments, categories, countryCode]);
+
+  const navLinks = dynamicNav?.navLinks ?? defaultNavLinks;
+  const megaData = dynamicNav?.mega ?? MEGA_MENU_DATA;
+  const activeMega = hoveredLink ? megaData[hoveredLink] : null;
 
   const handleNavEnter = (id: string) => {
     if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
@@ -675,7 +736,7 @@ export const Header = () => {
 
           {/* ─── Mega Menu ─── */}
           <AnimatePresence>
-            {hoveredLink && MEGA_MENU_DATA[hoveredLink] && (
+            {hoveredLink && activeMega && (
               <motion.div
                 ref={megaMenuRef}
                 initial={{ opacity: 0, y: -8 }}
@@ -690,17 +751,17 @@ export const Header = () => {
                   <div
                     className={cn(
                       "grid gap-10",
-                      MEGA_MENU_DATA[hoveredLink].sections.length >= 4
+                      activeMega.sections.length >= 4
                         ? "grid-cols-5":
-                        MEGA_MENU_DATA[hoveredLink].sections.length >= 3
+                        activeMega.sections.length >= 3
                         ? "grid-cols-4":
-                        MEGA_MENU_DATA[hoveredLink].sections.length >= 2
+                        activeMega.sections.length >= 2
                         ? "grid-cols-3":
                         "grid-cols-2"
                     )}
                   >
                     {/* Link columns */}
-                    {MEGA_MENU_DATA[hoveredLink].sections.map(
+                    {activeMega.sections.map(
                       (section: any, idx: number) => (
                         <div key={idx}>
                           <p className="text-[10px] font-bold tracking-[0.25em] uppercase text-gray-900 mb-4 pb-2 border-b border-gray-100">
@@ -727,25 +788,27 @@ export const Header = () => {
                     <div className="flex flex-col gap-4">
                       <BrandImage
                         src={
+                          activeMega.image ||
                           placeholderData.placeholderImages.find(
-                            (i) => i.id === MEGA_MENU_DATA[hoveredLink].imageId
-                          )?.imageUrl || ""
+                            (i) => i.id === activeMega.imageId
+                          )?.imageUrl ||
+                          ""
                         }
-                        alt={MEGA_MENU_DATA[hoveredLink].title}
+                        alt={activeMega.title}
                         className="aspect-[4/3] w-full bg-gray-50"
                         imgClassName="hover:scale-105 transition-transform duration-500"
                         variant="default"
                       />
                       <div>
                         <h5 className="text-[13px] font-bold uppercase tracking-[0.15em] text-gray-900 leading-snug">
-                          {MEGA_MENU_DATA[hoveredLink].title}
+                          {activeMega.title}
                         </h5>
                         <p className="text-[11px] text-gray-400 mt-0.5 italic">
-                          {MEGA_MENU_DATA[hoveredLink].subtitle}
+                          {activeMega.subtitle}
                         </p>
                       </div>
                       <Link
-                        href={`/${countryCode}${MEGA_MENU_DATA[hoveredLink].collectionHref}`}
+                        href={`/${countryCode}${activeMega.collectionHref}`}
                         onClick={() => setHoveredLink(null)}
                         className="inline-block text-[10px] font-bold tracking-[0.2em] uppercase text-black border-b border-black pb-0.5 hover:opacity-60 transition-opacity w-fit"
                       >

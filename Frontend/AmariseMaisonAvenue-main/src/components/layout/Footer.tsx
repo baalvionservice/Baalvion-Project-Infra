@@ -150,7 +150,7 @@ export function Footer() {
                                     </li>
                                     <li>
                                         <Link
-                                            href={`/${countryCode}/journal`}
+                                            href={`/${countryCode}/press`}
                                             className="text-black transition-colors"
                                         >
                                             Press
@@ -365,7 +365,7 @@ export function Footer() {
                             </li>
                             <li>
                                 <Link
-                                    href={`/${countryCode}/journal`}
+                                    href={`/${countryCode}/press`}
                                     className="text-black transition-colors"
                                 >
                                     Press

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { isRealImage } from '@/lib/image-utils';
 
 /**
  * Single image primitive for the storefront.
@@ -11,15 +12,11 @@ import { cn } from '@/lib/utils';
  * (cream gradient + Amarisé monogram) instead of a random stock photo — so the site reads
  * as an intentional luxury house until real product/editorial photography is uploaded,
  * and those photos then drop straight in with zero further changes.
+ *
+ * `isRealImage` lives in `@/lib/image-utils` (server-safe). Re-exported here so existing
+ * client-side imports `from "@/components/ui/BrandImage"` keep working unchanged.
  */
-const PLACEHOLDER_HOSTS = ['picsum.photos', 'placehold.co', 'placekitten', 'via.placeholder'];
-
-export function isRealImage(src?: string | null): boolean {
-  if (!src || typeof src !== 'string') return false;
-  const s = src.trim();
-  if (!s) return false;
-  return !PLACEHOLDER_HOSTS.some((h) => s.includes(h));
-}
+export { isRealImage };
 
 interface BrandImageProps {
   src?: string | null;

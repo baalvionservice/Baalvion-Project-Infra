@@ -31,6 +31,7 @@ import {
   TaxRule,
   Subscription,
 } from "./types";
+import type { HomepageContent, PressContent } from "./cms";
 
 export const COUNTRIES: Record<string, Country> = {
   us: {
@@ -1114,3 +1115,143 @@ export const formatPrice = (price: number, countryCode: string = "us") => {
 };
 
 export const getLocalizedMockText = (text: string, countryCode: string) => text;
+
+/**
+ * Last-resort homepage copy used when the CMS is unseeded or unreachable, so the
+ * storefront landing page is NEVER blank. Mirrors the `homepage` CMS document the
+ * admin edits (src/lib/cms.ts → getHomepage). Images are intentionally left empty
+ * so <BrandImage> renders the elegant branded panel until real photography is
+ * uploaded from the admin Media library. Positioning = hybrid maison heritage +
+ * authenticated resale.
+ */
+export const HOMEPAGE_FALLBACK: HomepageContent = {
+  hero: {
+    eyebrow: "Maison Amarisé · Est. 1924",
+    title: "The Art of Authenticated Luxury",
+    subtitle:
+      "A century of connoisseurship. Rare and pre-owned Hermès, Chanel and fine jewelry — every piece authenticated by our master curators.",
+    ctaLabel: "Discover New Arrivals",
+    ctaHref: "/category/new-arrivals-handbags",
+    secondaryCtaLabel: "Sell or Consign",
+    secondaryCtaHref: "/how-to-sell",
+    image: "",
+  },
+  announcements: [
+    "Complimentary white-glove delivery worldwide",
+    "Read our 100% Authenticity Guarantee",
+    "Book a private appointment — in showroom or virtually",
+  ],
+  featuredCollections: [
+    { title: "Hermès", subtitle: "Birkin, Kelly & the rare archive", image: "", href: "/category/hermes-handbags" },
+    { title: "Chanel", subtitle: "Timeless flaps & vintage", image: "", href: "/category/chanel-bags" },
+    { title: "Fine Jewelry", subtitle: "Van Cleef, Cartier & heritage", image: "", href: "/category/fine-jewelry" },
+    { title: "New Arrivals", subtitle: "The latest acquisitions", image: "", href: "/category/new-arrivals-handbags" },
+  ],
+  newArrivals: {
+    title: "New Arrivals",
+    subtitle: "The latest treasures to enter the Maison, ready to ship.",
+    limit: 8,
+    ctaLabel: "Shop All New Arrivals",
+    ctaHref: "/category/new-arrivals-handbags",
+  },
+  services: [
+    {
+      icon: "ShieldCheck",
+      title: "100% Authenticity Guarantee",
+      body: "Every piece is verified in-house by master authenticators and ships with its certificate of provenance.",
+      ctaLabel: "Our Guarantee",
+      href: "/authenticity",
+    },
+    {
+      icon: "Repeat",
+      title: "Sell or Consign",
+      body: "Receive a fast, fair quote for your Hermès, Chanel and fine jewelry. White-glove, fully insured.",
+      ctaLabel: "Get a Quote",
+      href: "/how-to-sell",
+    },
+    {
+      icon: "Crown",
+      title: "Private Concierge",
+      body: "Personal acquisitions, private viewings and bespoke sourcing through your dedicated client advisor.",
+      ctaLabel: "Book an Appointment",
+      href: "/appointments",
+    },
+  ],
+  trust: {
+    title: "The Maison Standard of Authenticity",
+    body: "For a century, Amarisé has been trusted for the rare, the iconic and the extraordinary. Every acquisition passes a rigorous multi-point authentication before it is offered to our clients.",
+    badge: "100% Authentic, Guaranteed",
+    points: [
+      "In-house expert authentication on every item",
+      "Certificate of provenance with each piece",
+      "Fully insured, white-glove global delivery",
+      "30-day returns with complete buyer protection",
+    ],
+  },
+  testimonials: [
+    {
+      quote:
+        "The most trusted name for a collector. My Birkin arrived flawless, with provenance documented to the stitch.",
+      author: "Isabella R.",
+      location: "New York",
+    },
+    {
+      quote:
+        "Discreet, impeccable and genuinely expert. The concierge sourced a piece I had searched years for.",
+      author: "Amelia K.",
+      location: "London",
+    },
+    {
+      quote:
+        "Consigning with Amarisé was effortless — a fair valuation and payment faster than I imagined.",
+      author: "Sophia L.",
+      location: "Dubai",
+    },
+  ],
+  pressTitle: "As Seen In",
+  pressSubtitle: "Recognised by the world's leading authorities on luxury.",
+};
+
+/**
+ * Fallback press content for /press when the CMS is unseeded. Logos use empty
+ * image URLs so the wordmark renders until real assets are uploaded in admin.
+ */
+export const PRESS_FALLBACK: PressContent = {
+  title: "Amarisé in the Press",
+  subtitle:
+    "The Maison and its archive have been featured by the world's foremost authorities on luxury, investment and style.",
+  logos: [
+    { name: "Vogue", image: "", href: "#" },
+    { name: "Bloomberg", image: "", href: "#" },
+    { name: "Financial Times", image: "", href: "#" },
+    { name: "WWD", image: "", href: "#" },
+    { name: "Robb Report", image: "", href: "#" },
+    { name: "Harper's Bazaar", image: "", href: "#" },
+  ],
+  articles: [
+    {
+      title: "Why authenticated pre-owned luxury is the new investment class",
+      outlet: "Bloomberg",
+      date: "2026",
+      excerpt:
+        "Inside the houses setting the standard for provenance and trust in the secondary luxury market.",
+      href: "#",
+    },
+    {
+      title: "The collectors quietly building museum-grade archives",
+      outlet: "Financial Times",
+      date: "2026",
+      excerpt:
+        "How a new generation of connoisseurs is treating the Birkin and the flap bag as heritage assets.",
+      href: "#",
+    },
+    {
+      title: "The art of the authenticated handbag",
+      outlet: "Vogue",
+      date: "2025",
+      excerpt:
+        "A look behind the curtain at the experts who certify the rare, the iconic and the extraordinary.",
+      href: "#",
+    },
+  ],
+};

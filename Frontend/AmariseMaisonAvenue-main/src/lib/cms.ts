@@ -303,3 +303,173 @@ function mapEditorial(c: CmsContent): EditorialContent {
     metaDescription: c.seoMetadata?.description ?? c.excerpt ?? '',
   };
 }
+
+// ── Homepage (slug `homepage`) ───────────────────────────────────────────────
+// The entire storefront landing page is ONE admin-editable CMS document. Every
+// image is a URL the owner pastes from the admin Media library (or any URL); a
+// missing image degrades gracefully through <BrandImage>. The page falls back to
+// HOMEPAGE_FALLBACK (src/lib/mock-data) when the CMS is unseeded or unreachable,
+// so the homepage is never blank. All `href` values are country-LESS paths
+// (e.g. `/category/new-arrivals-handbags`); the page prepends the active market.
+export interface HomepageHero {
+  eyebrow: string;
+  title: string;
+  subtitle: string;
+  ctaLabel: string;
+  ctaHref: string;
+  secondaryCtaLabel?: string;
+  secondaryCtaHref?: string;
+  image: string;
+}
+export interface HomepageCollectionTile {
+  title: string;
+  subtitle: string;
+  image: string;
+  href: string;
+}
+export interface HomepageNewArrivals {
+  title: string;
+  subtitle: string;
+  /** Optional commerce filters — which live products to feature. */
+  categoryId?: string;
+  collectionId?: string;
+  limit: number;
+  ctaLabel: string;
+  ctaHref: string;
+}
+export interface HomepageService {
+  /** lucide-react icon name, e.g. 'ShieldCheck' | 'Repeat' | 'Gem'. */
+  icon: string;
+  title: string;
+  body: string;
+  ctaLabel: string;
+  href: string;
+}
+export interface HomepageTrust {
+  title: string;
+  body: string;
+  badge: string;
+  points: string[];
+}
+export interface HomepageTestimonial {
+  quote: string;
+  author: string;
+  location: string;
+}
+export interface HomepageContent {
+  hero: HomepageHero;
+  announcements: string[];
+  featuredCollections: HomepageCollectionTile[];
+  newArrivals: HomepageNewArrivals;
+  services: HomepageService[];
+  trust: HomepageTrust;
+  testimonials: HomepageTestimonial[];
+  pressTitle: string;
+  pressSubtitle: string;
+}
+
+const asArray = <T,>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
+
+/** The storefront landing page payload (slug `homepage`, structured customFields). */
+export async function getHomepage(): Promise<HomepageContent | null> {
+  const c = await getContent('homepage');
+  const cf = c?.customFields;
+  if (!cf) return null;
+  const hero = cf.hero ?? {};
+  const na = cf.newArrivals ?? {};
+  const trust = cf.trust ?? {};
+  const press = cf.press ?? {};
+  return {
+    hero: {
+      eyebrow: hero.eyebrow ?? '',
+      title: hero.title ?? c!.title,
+      subtitle: hero.subtitle ?? c!.excerpt ?? '',
+      ctaLabel: hero.ctaLabel ?? 'Discover the Collection',
+      ctaHref: hero.ctaHref ?? '/category/new-arrivals-handbags',
+      secondaryCtaLabel: hero.secondaryCtaLabel,
+      secondaryCtaHref: hero.secondaryCtaHref,
+      image: hero.image ?? c!.featuredImage ?? '',
+    },
+    announcements: asArray<unknown>(cf.announcements).map(String),
+    featuredCollections: asArray<Record<string, unknown>>(cf.featuredCollections).map((t) => ({
+      title: String(t.title ?? ''),
+      subtitle: String(t.subtitle ?? ''),
+      image: String(t.image ?? ''),
+      href: String(t.href ?? '#'),
+    })),
+    newArrivals: {
+      title: na.title ?? 'New Arrivals',
+      subtitle: na.subtitle ?? '',
+      categoryId: na.categoryId || undefined,
+      collectionId: na.collectionId || undefined,
+      limit: Number(na.limit ?? 8),
+      ctaLabel: na.ctaLabel ?? 'Shop All New Arrivals',
+      ctaHref: na.ctaHref ?? '/category/new-arrivals-handbags',
+    },
+    services: asArray<Record<string, unknown>>(cf.services).map((s) => ({
+      icon: String(s.icon ?? 'Sparkles'),
+      title: String(s.title ?? ''),
+      body: String(s.body ?? ''),
+      ctaLabel: String(s.ctaLabel ?? 'Learn More'),
+      href: String(s.href ?? '#'),
+    })),
+    trust: {
+      title: trust.title ?? '',
+      body: trust.body ?? '',
+      badge: trust.badge ?? '100% Authentic',
+      points: asArray<unknown>(trust.points).map(String),
+    },
+    testimonials: asArray<Record<string, unknown>>(cf.testimonials).map((t) => ({
+      quote: String(t.quote ?? ''),
+      author: String(t.author ?? ''),
+      location: String(t.location ?? ''),
+    })),
+    pressTitle: press.title ?? cf.pressTitle ?? 'As Seen In',
+    pressSubtitle: press.subtitle ?? cf.pressSubtitle ?? '',
+  };
+}
+
+// ── Press / Media (slug `press`) ─────────────────────────────────────────────
+export interface PressLogo {
+  name: string;
+  image: string;
+  href: string;
+}
+export interface PressArticle {
+  title: string;
+  outlet: string;
+  date: string;
+  excerpt: string;
+  href: string;
+  image?: string;
+}
+export interface PressContent {
+  title: string;
+  subtitle: string;
+  logos: PressLogo[];
+  articles: PressArticle[];
+}
+
+/** Press logos + media coverage (slug `press`, customFields.logos[]/articles[]). */
+export async function getPressItems(): Promise<PressContent | null> {
+  const c = await getContent('press');
+  const cf = c?.customFields;
+  if (!cf) return null;
+  return {
+    title: cf.title ?? c!.title ?? 'Press',
+    subtitle: cf.subtitle ?? c!.excerpt ?? '',
+    logos: asArray<Record<string, unknown>>(cf.logos).map((l) => ({
+      name: String(l.name ?? ''),
+      image: String(l.image ?? ''),
+      href: String(l.href ?? '#'),
+    })),
+    articles: asArray<Record<string, unknown>>(cf.articles).map((a) => ({
+      title: String(a.title ?? ''),
+      outlet: String(a.outlet ?? ''),
+      date: String(a.date ?? ''),
+      excerpt: String(a.excerpt ?? ''),
+      href: String(a.href ?? '#'),
+      image: a.image ? String(a.image) : undefined,
+    })),
+  };
+}

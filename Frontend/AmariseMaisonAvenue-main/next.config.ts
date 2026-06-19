@@ -5,6 +5,25 @@ import type { NextConfig } from 'next';
 // "amarise-media.s3.amazonaws.com") and uploaded images load + pass CSP automatically.
 const MEDIA_HOST = (process.env.NEXT_PUBLIC_MEDIA_HOST || '').trim();
 
+// Admin-uploaded media (CMS media library) is served from the cms-service / gateway
+// origin (NEXT_PUBLIC_CMS_URL) or an S3/CDN (NEXT_PUBLIC_MEDIA_HOST). Derive the CMS
+// host so admin-edited homepage / featuredImage URLs load through next/image and pass
+// CSP without per-image config.
+function originParts(
+  url: string
+): { protocol: 'http' | 'https'; hostname: string; port: string } | null {
+  try {
+    const u = new URL(url);
+    const protocol = u.protocol.replace(':', '');
+    if (protocol !== 'http' && protocol !== 'https') return null;
+    return { protocol, hostname: u.hostname, port: u.port };
+  } catch {
+    return null;
+  }
+}
+const CMS_HOST = originParts(process.env.NEXT_PUBLIC_CMS_URL || '');
+const IS_DEV = process.env.NODE_ENV !== 'production';
+
 const nextConfig: NextConfig = {
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
@@ -41,6 +60,24 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'picsum.photos', pathname: '/**' },
       { protocol: 'https', hostname: 'madisonavenuecouture.com', pathname: '/**' },
       ...(MEDIA_HOST ? [{ protocol: 'https' as const, hostname: MEDIA_HOST, pathname: '/**' }] : []),
+      // Admin CMS media origin (covers gateway / cms-service uploads).
+      ...(CMS_HOST
+        ? [
+            {
+              protocol: CMS_HOST.protocol,
+              hostname: CMS_HOST.hostname,
+              ...(CMS_HOST.port ? { port: CMS_HOST.port } : {}),
+              pathname: '/**',
+            },
+          ]
+        : []),
+      // In dev, admin media is typically served from a localhost service port.
+      ...(IS_DEV
+        ? [
+            { protocol: 'http' as const, hostname: 'localhost', pathname: '/**' },
+            { protocol: 'http' as const, hostname: '127.0.0.1', pathname: '/**' },
+          ]
+        : []),
     ],
   },
   async rewrites() {
@@ -64,6 +101,13 @@ const nextConfig: NextConfig = {
     // break them). In real prod APP_URL is the https domain, so the directive is emitted normally.
     const isLocalhost = /localhost|127\.0\.0\.1/.test(process.env.NEXT_PUBLIC_APP_URL || '');
 
+    // Admin CMS media origin (e.g. https://api.baalvion.com or http://localhost:3018)
+    // so admin-uploaded homepage / press images aren't CSP-blocked.
+    const cmsImgSrc = CMS_HOST
+      ? `${CMS_HOST.protocol}://${CMS_HOST.hostname}${CMS_HOST.port ? `:${CMS_HOST.port}` : ''}`
+      : '';
+    const devImgSrc = isDev || isLocalhost ? 'http://localhost:* http://127.0.0.1:*' : '';
+
     const connectSrc = [
       "'self'",
       'https://api.baalvion.com',
@@ -85,7 +129,7 @@ const nextConfig: NextConfig = {
       default-src 'self';
       script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://www.google-analytics.com https://checkout.razorpay.com https://js.stripe.com;
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://madisonavenuecouture.com https://www.google-analytics.com https://www.googletagmanager.com ${MEDIA_HOST ? `https://${MEDIA_HOST}` : ''};
+      img-src 'self' blob: data: https://picsum.photos https://images.unsplash.com https://placehold.co https://madisonavenuecouture.com https://www.google-analytics.com https://www.googletagmanager.com ${MEDIA_HOST ? `https://${MEDIA_HOST}` : ''} ${cmsImgSrc} ${devImgSrc};
       font-src 'self' data: https://fonts.gstatic.com;
       object-src 'none';
       base-uri 'self';
