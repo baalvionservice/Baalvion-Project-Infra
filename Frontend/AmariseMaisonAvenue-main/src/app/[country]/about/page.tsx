@@ -8,6 +8,9 @@ import { normalizeCountry } from '@/lib/i18n/countries';
 import { Sparkles, History, Gem, ShieldCheck, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
+// Fetch CMS content live per request (works on Vercel against the public CMS).
+export const dynamic = 'force-dynamic';
+
 type AboutPageProps = {
   params: Promise<{
     country: string;

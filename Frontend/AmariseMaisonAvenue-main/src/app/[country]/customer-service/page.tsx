@@ -21,6 +21,9 @@ import { CUSTOMER_SERVICE as CUSTOMER_SERVICE_FALLBACK, COUNTRIES } from '@/lib/
 import { getCustomerService } from '@/lib/cms';
 import type { CountryCode } from '@/lib/types';
 
+// Fetch CMS content live per request (works on Vercel against the public CMS).
+export const dynamic = 'force-dynamic';
+
 type CustomerServicePageProps = {
   params: Promise<{
     country: string;

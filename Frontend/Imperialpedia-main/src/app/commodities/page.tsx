@@ -6,8 +6,9 @@ const SLUG = "commodities";
 
 export const metadata = buildMetadata(topicMeta(SLUG));
 
-// Editorial content changes on publish — render dynamically, revalidate often.
-export const revalidate = 120;
+// Editorial content changes on publish — render LIVE per-request so the CMS
+// is read on every request (works on Vercel against a public CMS).
+export const dynamic = 'force-dynamic';
 
 export default function Page() {
   return <CategoryFeed slug={SLUG} />;

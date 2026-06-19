@@ -5,6 +5,9 @@ import { ChevronRight } from 'lucide-react';
 import { COUNTRIES } from '@/lib/mock-data';
 import { getContent, toProse } from '@/lib/cms';
 
+// Fetch CMS content live per request (works on Vercel against the public CMS).
+export const dynamic = 'force-dynamic';
+
 type PageProps = { params: Promise<{ country: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

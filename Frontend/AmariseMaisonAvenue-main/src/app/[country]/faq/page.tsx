@@ -6,6 +6,9 @@ import { COUNTRIES } from '@/lib/mock-data';
 import { getCustomerService } from '@/lib/cms';
 import type { CountryCode } from '@/lib/types';
 
+// Fetch CMS content live per request (works on Vercel against the public CMS).
+export const dynamic = 'force-dynamic';
+
 type PageProps = { params: Promise<{ country: string }> };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

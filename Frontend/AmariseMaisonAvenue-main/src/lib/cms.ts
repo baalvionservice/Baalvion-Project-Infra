@@ -9,7 +9,8 @@
  * used MAISON_STORY / CUSTOMER_SERVICE / CITIES / BUYING_GUIDES / editorials now reads
  * here, so the content is centrally managed from the admin console (/cms/websites/...).
  *
- * Usable directly from Server Components (it `fetch`es with ISR revalidate). Each reader
+ * Usable directly from Server Components (it `fetch`es dynamically with `cache: 'no-store'`,
+ * so content is fetched live per request). Each reader
  * degrades to `null`/`[]` on any failure so a CMS outage never breaks a page render —
  * callers supply their own last-resort fallback copy where appropriate.
  */
@@ -46,7 +47,7 @@ export interface CmsContent {
 
 async function getJson<T>(path: string, fallback: T): Promise<T> {
   try {
-    const res = await fetch(`${PUBLIC_BASE}${path}`, { next: { revalidate: 120 } });
+    const res = await fetch(`${PUBLIC_BASE}${path}`, { cache: 'no-store' });
     if (!res.ok) return fallback;
     const json = await res.json();
     return (json && json.data !== undefined ? json.data : fallback) as T;

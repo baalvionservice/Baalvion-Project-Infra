@@ -6,8 +6,9 @@ import { REGIONS, worldSeo } from "@/lib/data/worldRegions";
 
 type Params = Promise<{ region: string }>;
 
-// ISR: statically cached, regenerated every 2 minutes for fresh markets/news.
-export const revalidate = 120;
+// Fully dynamic: rendered per-request so live markets/news and CMS content are
+// always fresh (and work on Vercel against a public CMS).
+export const dynamic = 'force-dynamic';
 // Only the known regions are valid; anything else 404s (no thin/duplicate pages).
 export const dynamicParams = false;
 

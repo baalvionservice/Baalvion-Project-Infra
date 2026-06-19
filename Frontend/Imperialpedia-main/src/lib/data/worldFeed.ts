@@ -503,8 +503,9 @@ async function buildNews(region: RegionId): Promise<NewsBundle | null> {
 // matches the region id (us, europe, asia, china, emerging) and assign content
 // to it. Anything published also flows into the general feed.
 
-// Cached CMS read (own copy, not the shared no-store client) so the World page
-// stays statically cached / ISR instead of being forced into dynamic rendering.
+// Live CMS read (own copy of the client) — no-store so published content shows
+// up immediately. The World pages render dynamically (force-dynamic), so this
+// fetch runs per-request rather than at build/ISR time.
 const CMS_PUBLIC_URL =
   process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || "http://localhost:3011/api/v1/public";
 const CMS_SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
@@ -520,7 +521,9 @@ async function cmsList(params: {
   if (params.limit) q.set("limit", String(params.limit));
   const res = await fetch(`${CMS_PUBLIC_URL}/${CMS_SITE}/content?${q.toString()}`, {
     headers: { Accept: "application/json" },
-    next: { revalidate: 120 },
+    // Editorial content changes on publish — read it LIVE per-request so the
+    // World page reflects the CMS immediately (the page is rendered dynamically).
+    cache: "no-store",
   });
   if (!res.ok) throw new Error(`cms ${res.status}`);
   const env = (await res.json()) as { data?: CmsContent[] };

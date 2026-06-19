@@ -3,8 +3,9 @@ import WorldView from "@/components/world/WorldView";
 import { getWorldDataLive } from "@/lib/data/worldFeed";
 import { worldSeo } from "@/lib/data/worldRegions";
 
-// ISR: statically cached, regenerated every 2 minutes for fresh markets/news.
-export const revalidate = 120;
+// Fully dynamic: rendered per-request so live markets/news and CMS content are
+// always fresh (and work on Vercel against a public CMS).
+export const dynamic = 'force-dynamic';
 
 export function generateMetadata(): Metadata {
   const seo = worldSeo("world");
