@@ -11,6 +11,9 @@ const paymentWebhookRoutes = require('./paymentWebhookRoutes');
 const razorpayWebhookRoutes = require('./razorpayWebhookRoutes');
 const payuReturnRoutes = require('./payuReturnRoutes');
 const reconciliationRoutes = require('./reconciliationRoutes');
+const consignmentRoutes = require('./consignmentRoutes');
+const wishlistRoutes = require('./wishlistRoutes');
+const appointmentRoutes = require('./appointmentRoutes');
 
 const router = Router();
 
@@ -44,5 +47,15 @@ router.use('/orders/stores/:storeId/carts', optionalAuth, cartRoutes);
 // Admin routes (list/process) and the customer "my returns" route RE-APPLY authMiddleware inside
 // returnRoutes, so a guest is 401'd there. Guest ownership is enforced in-service via ownerSessionId.
 router.use('/orders/stores/:storeId/returns', optionalAuth, returnRoutes);
+
+// Luxury-resale (consignment + authentication + certificate) supports guest sellers + a PUBLIC
+// certificate-verify route: optionalAuth admits anonymous; admin/ops + "mine"/seller routes
+// re-apply authMiddleware inside consignmentRoutes. Guest ownership via ownerSessionId.
+router.use('/consignments/stores/:storeId', optionalAuth, consignmentRoutes);
+// Wishlist is authenticated-only (the owner is the JWT userId); the router needs no guest path,
+// but mounting under authMiddleware guarantees req.auth is present for every route inside.
+router.use('/wishlists/stores/:storeId', authMiddleware, wishlistRoutes);
+// Appointments are guest-capable to book; "mine"/admin routes re-apply authMiddleware inside.
+router.use('/appointments/stores/:storeId', optionalAuth, appointmentRoutes);
 
 module.exports = router;
