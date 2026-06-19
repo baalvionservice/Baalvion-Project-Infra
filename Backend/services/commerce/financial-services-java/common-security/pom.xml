@@ -28,7 +28,7 @@
     <dependency>
       <groupId>com.github.vladimir-bukhtoyarov</groupId>
       <artifactId>bucket4j-core</artifactId>
-      <version>7.6.0</version>
+      <version>8.0.1</version>
     </dependency>
     <!-- Optional distributed rate-limit backend (active only when app.security.rate-limit.backend=redis).
          On every service's classpath; the Redis health indicator is disabled by default (see
