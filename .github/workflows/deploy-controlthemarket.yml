@@ -79,8 +79,23 @@ jobs:
     needs: [build-push]
     runs-on: ubuntu-latest
     environment: production
+    # Secrets can't be used in `if:` directly, so surface CTM_PROD_HOST as an env var
+    # and gate the roll on it. Images are always built + pushed to GHCR by build-push;
+    # the SSH roll only runs once the prod target is configured.
+    env:
+      CTM_PROD_HOST: ${{ secrets.CTM_PROD_HOST }}
     steps:
+      - name: Check prod target is configured
+        id: gate
+        run: |
+          if [ -z "${CTM_PROD_HOST}" ]; then
+            echo "::notice title=Prod roll skipped::CTM_PROD_HOST is not set. Images were built and pushed to GHCR, but the production roll was skipped. Set CTM_PROD_HOST / CTM_PROD_USER / CTM_PROD_SSH_KEY (and the production environment) to enable auto-deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
       - name: Pull images + roll the stack
+        if: steps.gate.outputs.ready == 'true'
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.CTM_PROD_HOST }}
@@ -98,6 +113,7 @@ jobs:
             $COMPOSE restart caddy
             docker system prune -f
       - name: Smoke test
+        if: steps.gate.outputs.ready == 'true'
         run: |
           sleep 15
           curl -sf https://controlthemarket.com/api/v1/payments/provider > /dev/null && echo "api OK" || echo "api NOT responding"
