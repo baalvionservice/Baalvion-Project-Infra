@@ -89,6 +89,10 @@ jobs:
     runs-on: ubuntu-latest
     needs: lint-and-test
     if: github.ref == 'refs/heads/main'
+    # GHCR push needs packages:write (repo default token is read-only).
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v6
@@ -115,7 +119,10 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v7
         with:
-          context: Backend/services/ecosystem/jobs-service
+          # The jobs-service Dockerfile is monorepo-aware (turbo prune + COPY .npmrc):
+          # context MUST be the repo root, with the Dockerfile referenced via file.
+          context: .
+          file: Backend/services/ecosystem/jobs-service/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
