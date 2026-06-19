@@ -1,0 +1,121 @@
+-- 008 — CR-8: harden tenant RLS so the app.tenant_bypass escape hatch is honoured
+-- ONLY for roles that are NOT the runtime application role baalvion_app. Any SQL
+-- injection that flipped app.tenant_bypass on the runtime connection previously
+-- defeated isolation on every financial table; this recreates each policy so the
+-- bypass requires a non-app role (admin/superuser tooling).
+--
+-- NOTE: written as explicit per-table statements (not a DO-block) because the
+-- migrate.js statement splitter cannot parse dollar-quoted blocks and otherwise
+-- blocked the whole migration queue.
+
+ALTER TABLE "trade".orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".orders FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".orders;
+CREATE POLICY tenant_isolation ON "trade".orders
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".escrows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".escrows FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".escrows;
+CREATE POLICY tenant_isolation ON "trade".escrows
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".shipments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".shipments FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".shipments;
+CREATE POLICY tenant_isolation ON "trade".shipments
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".documents ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".documents FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".documents;
+CREATE POLICY tenant_isolation ON "trade".documents
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".payments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".payments FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".payments;
+CREATE POLICY tenant_isolation ON "trade".payments
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".compliance_cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".compliance_cases FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".compliance_cases;
+CREATE POLICY tenant_isolation ON "trade".compliance_cases
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".disputes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".disputes FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".disputes;
+CREATE POLICY tenant_isolation ON "trade".disputes
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".wallets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".wallets FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".wallets;
+CREATE POLICY tenant_isolation ON "trade".wallets
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".notifications FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".notifications;
+CREATE POLICY tenant_isolation ON "trade".notifications
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".freight_quotes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".freight_quotes FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".freight_quotes;
+CREATE POLICY tenant_isolation ON "trade".freight_quotes
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".bills_of_lading ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".bills_of_lading FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".bills_of_lading;
+CREATE POLICY tenant_isolation ON "trade".bills_of_lading
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".customs_entries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".customs_entries FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".customs_entries;
+CREATE POLICY tenant_isolation ON "trade".customs_entries
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".certificates_of_origin ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".certificates_of_origin FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".certificates_of_origin;
+CREATE POLICY tenant_isolation ON "trade".certificates_of_origin
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".carbon_footprints ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".carbon_footprints FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".carbon_footprints;
+CREATE POLICY tenant_isolation ON "trade".carbon_footprints
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".insurance_policies ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".insurance_policies FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".insurance_policies;
+CREATE POLICY tenant_isolation ON "trade".insurance_policies
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
+
+ALTER TABLE "trade".insurance_claims ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade".insurance_claims FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "trade".insurance_claims;
+CREATE POLICY tenant_isolation ON "trade".insurance_claims
+    USING ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on' AND current_user <> 'baalvion_app') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND tenant_id::text = current_setting('app.current_tenant', true)));
