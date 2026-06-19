@@ -123,14 +123,15 @@
       <scope>runtime</scope>
     </dependency>
 
-    <!-- Flyway Migrations -->
+    <!-- Flyway Migrations. Spring Boot 4 no longer auto-configures Flyway from flyway-core alone
+         (migrations silently don't run, breaking ddl-auto=validate); the autoconfiguration now
+         lives in the dedicated spring-boot-starter-flyway, which brings flyway-core transitively. -->
     <dependency>
-      <groupId>org.flywaydb</groupId>
-      <artifactId>flyway-core</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-flyway</artifactId>
     </dependency>
-    <!-- Flyway 11.x (managed by Spring Boot 3.5) moved per-database support out of flyway-core;
-         PostgreSQL support now lives in flyway-database-postgresql (BOM-managed version). Without
-         it, Flyway cannot resolve a database module for jdbc:postgresql at startup. -->
+    <!-- Per-database support (BOM-managed): PostgreSQL support lives in flyway-database-postgresql,
+         not flyway-core. Without it, Flyway cannot resolve a database module for jdbc:postgresql. -->
     <dependency>
       <groupId>org.flywaydb</groupId>
       <artifactId>flyway-database-postgresql</artifactId>
