@@ -447,6 +447,12 @@ jobs:
       github.ref == 'refs/heads/main' &&
       !contains(needs.*.result, 'failure')
     runs-on: ubuntu-latest
+    # Default workflow token is read-only (repo setting); GHCR push needs
+    # packages:write or it fails with "installation not allowed to Create
+    # organization package". Mirrors financial-services.yml / deploy-proxy.
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         include:
