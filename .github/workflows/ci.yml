@@ -140,11 +140,9 @@ jobs:
       - name: Extract App Directories from Config
         id: extract-apps
         run: |
-          # Only include apps whose package.json is present in this checkout.
-          # Submodule-vendored frontends (e.g. Global-Trade-Infrastructure) are
-          # not checked out here; without this filter their empty dir makes the
-          # build step fall through to a root `pnpm run build` that builds the
-          # entire monorepo. Those apps are built by their own repo's CI.
+          # Only include apps whose package.json is present in this checkout — a
+          # guard so a missing app dir can't make the build step fall through to a
+          # root `pnpm run build` that builds the entire monorepo.
           DIRS=$(node -p "JSON.stringify(require('./frontends.config.js').apps.map(a => a.cwd.replace('D:/Baalvion Projects/Frontend/', '')).filter(d => require('fs').existsSync('Frontend/' + d + '/package.json')))")
           echo "dirs=$DIRS" >> "$GITHUB_OUTPUT"
 
@@ -224,12 +222,8 @@ jobs:
       JWT_ACCESS_SECRET: ci-dummy-access-secret-not-used-for-real-auth
     steps:
       - uses: actions/checkout@v6
-      # The RLS probe needs only the trade-service submodule (public). Init it
-      # directly rather than `submodules: recursive`, which would also pull the
-      # Global-Trade-Infrastructure submodule whose gitlink points to an
-      # unpushed commit ("not our ref") and fails the whole checkout step.
-      - name: Check out trade-service submodule
-        run: git submodule update --init --depth=1 Backend/services/commerce/trade-service
+      # trade-service is a regular folder in this repo (vendored from its former
+      # submodule), so the normal checkout already includes it.
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -278,11 +272,9 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-      # trade-service is a submodule; its migrations are part of the coverage set.
-      # Init it directly (NOT submodules: recursive — the GTI submodule gitlink is
-      # an unpushed commit that fails checkout).
-      - name: Check out trade-service submodule
-        run: git submodule update --init --depth=1 Backend/services/commerce/trade-service
+      # trade-service is a regular folder in this repo (vendored from its former
+      # submodule); its migrations come with the normal checkout and are part of
+      # the coverage set.
       - name: Static tenant-isolation audit (fail-closed RLS on every tenant table)
         run: node Backend/scripts/tenant-isolation-audit.mjs
       - name: Audit guard + RLS SQL builder unit tests
