@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAutomation } from "@/hooks/use-automation";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 export default function AutomationAdminHub() {
   const { rules, toggleRule } = useAutomation();
@@ -100,6 +101,7 @@ export default function AutomationAdminHub() {
         </header>
 
         <div className="p-12 space-y-12 animate-fade-in pb-32">
+          <PreviewNotice />
           <Tabs defaultValue="registry" className="w-full">
             <TabsList className="bg-white border border-border h-14 p-1 rounded-none mb-12">
               <TabsTrigger

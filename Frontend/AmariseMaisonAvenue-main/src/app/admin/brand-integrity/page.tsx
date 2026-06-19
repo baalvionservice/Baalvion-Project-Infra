@@ -42,6 +42,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 /**
  * Brand Integrity Auditor: The 21st Tactical Node.
@@ -144,6 +145,7 @@ export default function BrandIntegrityHub() {
         </header>
 
         <div className="p-12 space-y-12 animate-fade-in pb-32">
+          <PreviewNotice />
           {/* Quick Overview */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <StatCard

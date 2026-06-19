@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 export default function FinanceHub() {
   const { scopedTransactions, currentUser, countryConfigs, updateTransactionStatus, refundTransaction } = useAppStore();
@@ -109,6 +110,7 @@ export default function FinanceHub() {
 
   return (
     <div className="space-y-10 animate-fade-in pb-20">
+      <PreviewNotice />
       {/* Refund Modal */}
       <Dialog open={!!refundTargetId} onOpenChange={() => setRefundTargetId(null)}>
         <DialogContent className="max-w-xl bg-white border-none shadow-2xl rounded-none p-0 overflow-hidden">

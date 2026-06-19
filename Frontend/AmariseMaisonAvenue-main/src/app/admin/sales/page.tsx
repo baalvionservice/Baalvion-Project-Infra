@@ -1,26 +1,15 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import Link from "next/link";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Target,
-  Users,
-  Crown,
-  MessageSquare,
   ChevronRight,
-  Search,
-  Filter,
-  TrendingUp,
-  Award,
-  Lock,
+  Loader2,
+  AlertCircle,
+  Package,
   X,
-  Plus,
-  ArrowRight,
-  ShieldCheck,
-  FileText,
-  BadgeDollarSign,
-  CheckCircle2,
 } from "lucide-react";
+import Link from "next/link";
 import {
   Card,
   CardContent,
@@ -28,11 +17,8 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { useAppStore } from "@/lib/store";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -41,448 +27,309 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-import { useSearch } from "@/hooks/use-search";
+import { useToast } from "@/hooks/use-toast";
+import {
+  orderApi,
+  type Order,
+  type OrderStatus,
+} from "@/lib/api-client";
 
 /**
- * Connoisseur CRM: Strategic Engagement Hub
- * Tab 1: Overview (Tier 1 Priority), Tab 2: Dialogue Hub, Tab 3: Curatorial Scripts
+ * Sales / Order Management — LIVE order-service.
+ * Lists store orders (orderApi.list) with a status filter, an order detail drawer,
+ * and forward status advancement (orderApi.updateStatus, ops_manager-gated server-side).
  */
-export default function AdminSalesHub() {
-  const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
 
-  const { scopedInquiries, updateInquiryStatus, currentUser } = useAppStore();
+const ORDER_STATUSES: OrderStatus[] = [
+  "confirmed",
+  "processing",
+  "shipped",
+  "delivered",
+  "cancelled",
+  "refunded",
+];
 
-  const filteredLeads = useSearch(scopedInquiries, searchQuery, {
-    status: statusFilter,
-  });
+const STATUS_STYLE: Record<string, string> = {
+  pending: "bg-white/10 text-white/50",
+  confirmed: "bg-blue-500/10 text-blue-400",
+  processing: "bg-indigo-500/10 text-indigo-400",
+  shipped: "bg-amber-500/10 text-amber-400",
+  delivered: "bg-emerald-500/10 text-emerald-400",
+  cancelled: "bg-red-500/10 text-red-400",
+  refunded: "bg-red-500/10 text-red-400",
+};
 
-  const priorityLeads = useMemo(() => {
-    return scopedInquiries
-      .filter((i) => i.leadTier === 1 && i.status === "new")
-      .slice(0, 3);
-  }, [scopedInquiries]);
+export default function AdminOrdersHub() {
+  const { toast } = useToast();
 
-  const selectedLead = useMemo(
-    () => scopedInquiries.find((i) => i.id === selectedLeadId),
-    [scopedInquiries, selectedLeadId]
-  );
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [selected, setSelected] = useState<Order | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    const res = await orderApi.list({
+      pageSize: 100,
+      ...(statusFilter !== "all" ? { status: statusFilter as OrderStatus } : {}),
+    });
+    if (res.ok) setOrders(res.data.items ?? []);
+    else setError(res.error.message || "Could not load orders.");
+    setLoading(false);
+  }, [statusFilter]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const kpis = useMemo(() => {
+    const total = orders.length;
+    const paid = orders.filter((o) => o.paymentStatus === "paid");
+    const revenue = paid.reduce((acc, o) => acc + (o.totalAmount ?? 0), 0);
+    const open = orders.filter(
+      (o) => !["delivered", "cancelled", "refunded"].includes(o.status),
+    ).length;
+    return { total, paidCount: paid.length, revenue, open };
+  }, [orders]);
+
+  const handleStatus = async (orderId: string, status: OrderStatus) => {
+    setUpdatingId(orderId);
+    const res = await orderApi.updateStatus(orderId, status);
+    setUpdatingId(null);
+    if (res.ok) {
+      toast({ title: "Order updated", description: `Order is now ${status}.` });
+      setOrders((prev) => prev.map((o) => (o.id === orderId ? res.data : o)));
+      setSelected((s) => (s && s.id === orderId ? res.data : s));
+    } else {
+      toast({ variant: "destructive", title: "Update failed", description: res.error.message });
+    }
+  };
 
   return (
-    <div className="space-y-12 animate-fade-in">
-      <header className="flex justify-between items-end">
+    <div className="space-y-12 animate-fade-in font-body pb-20 text-white">
+      <header className="flex justify-between items-end border-b border-white/5 pb-10">
         <div className="space-y-2">
-          <nav className="text-[9px] font-bold uppercase tracking-[0.4em] text-gray-400 flex items-center space-x-2">
-            <Link href="/admin">Dashboard</Link>
+          <nav className="text-[9px] font-bold uppercase tracking-[0.4em] text-white/30 flex items-center space-x-2">
+            <Link href="/admin">Terminal</Link>
             <ChevronRight className="w-2.5 h-2.5" />
-            <span className="text-plum">Engagement CRM</span>
+            <span className="text-blue-400">Order Management</span>
           </nav>
-          <h1 className="text-4xl font-headline font-bold italic tracking-tight text-gray-900 uppercase">
-            Sales CRM
-          </h1>
-          <p className="text-sm text-gray-500 font-light italic">
-            High-ticket curatorial dialogue & acquisition tracking.
-          </p>
+          <div className="flex items-center gap-3 text-blue-400">
+            <Target className="w-5 h-5" />
+            <span className="text-[9px] font-bold uppercase tracking-[0.4em]">Layer 5 — Sales</span>
+          </div>
+          <h1 className="text-4xl font-headline font-bold italic tracking-tight uppercase">Order Stream</h1>
+          <p className="text-sm text-white/40 font-light italic">Live acquisition fulfillment & settlement.</p>
         </div>
-        <div className="flex items-center space-x-4">
-          <Button className="h-14 px-10 rounded-none bg-plum text-white hover:bg-black transition-all text-[10px] font-bold uppercase tracking-[0.4em] shadow-2xl shadow-plum/20">
-            <Plus className="w-4 h-4 mr-3" /> REGISTER NEW CONNOISSEUR
-          </Button>
-        </div>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-12 w-48 rounded-none bg-[#111113] border-white/10 text-[10px] font-bold uppercase tracking-widest text-white">
+            <SelectValue placeholder="All statuses" />
+          </SelectTrigger>
+          <SelectContent className="bg-[#111113] border-white/10 rounded-none">
+            <SelectItem value="all" className="text-[10px] uppercase font-bold">All Statuses</SelectItem>
+            {ORDER_STATUSES.map((s) => (
+              <SelectItem key={s} value={s} className="text-[10px] uppercase font-bold">{s}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </header>
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-white border-b border-border h-14 w-full justify-start p-0 rounded-none space-x-12 mb-12">
-          <TabsTrigger value="overview" className="tab-trigger">
-            Strategic Overview
-          </TabsTrigger>
-          <TabsTrigger value="dialogue" className="tab-trigger">
-            Dialogue Hub
-          </TabsTrigger>
-          <TabsTrigger value="advanced" className="tab-trigger">
-            Curatorial Matrix
-          </TabsTrigger>
-        </TabsList>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <Kpi label="Orders" value={kpis.total} />
+        <Kpi label="Open" value={kpis.open} color="text-amber-400" />
+        <Kpi label="Paid" value={kpis.paidCount} color="text-emerald-400" />
+        <Kpi label="Paid Revenue" value={`$${(kpis.revenue / 1000).toFixed(1)}k`} color="text-blue-400" />
+      </div>
 
-        <TabsContent value="overview" className="space-y-12 animate-fade-in">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            <Card className="bg-white border-border shadow-luxury p-8 border-l-4 border-l-gold space-y-6">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                  Yield Pipeline
-                </span>
-                <BadgeDollarSign className="w-5 h-5 text-gold" />
-              </div>
-              <div className="text-4xl font-headline font-bold italic text-gray-900">
-                $2.4M
-              </div>
-              <p className="text-[10px] text-gray-400 italic">
-                Total value of open acquisitions.
-              </p>
-            </Card>
-            <Card className="bg-white border-border shadow-luxury p-8 space-y-6">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                  Tier 1 Resonance
-                </span>
-                <Crown className="w-5 h-5 text-plum" />
-              </div>
-              <div className="text-4xl font-headline font-bold italic text-gray-900">
-                {priorityLeads.length}
-              </div>
-              <p className="text-[10px] text-gray-400 italic">
-                Institutional connoisseurs awaiting first contact.
-              </p>
-            </Card>
-            <Card className="bg-white border-border shadow-luxury p-8 space-y-6">
-              <div className="flex justify-between items-center">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
-                  Conversion Rate
-                </span>
-                <TrendingUp className="w-5 h-5 text-plum" />
-              </div>
-              <div className="text-4xl font-headline font-bold italic text-gray-900">
-                12.4%
-              </div>
-              <p className="text-[10px] text-gray-400 italic">
-                Acquisition win-rate across the global registry.
-              </p>
-            </Card>
+      <Card className="bg-[#111113] border-white/5 rounded-none overflow-hidden shadow-2xl">
+        {loading ? (
+          <div className="py-32 flex flex-col items-center justify-center text-white/40 space-y-3">
+            <Loader2 className="w-6 h-6 animate-spin text-blue-400" />
+            <p className="text-[10px] font-bold uppercase tracking-widest italic">Loading orders…</p>
           </div>
-
-          <div className="space-y-6">
-            <h3 className="text-[10px] font-bold uppercase tracking-[0.4em] text-plum">
-              IMMEDIATE ACTION REQUIRED
-            </h3>
-            <div className="grid grid-cols-1 gap-4">
-              {priorityLeads.map((lead) => (
-                <div
-                  key={lead.id}
-                  className="p-8 bg-white border border-border shadow-sm flex items-center justify-between hover:border-plum transition-all group"
+        ) : error ? (
+          <div className="py-32 flex flex-col items-center justify-center text-red-400 space-y-4">
+            <AlertCircle className="w-8 h-8" />
+            <p className="text-[11px] font-bold uppercase tracking-widest text-center max-w-md px-6">{error}</p>
+            <Button
+              variant="outline"
+              onClick={load}
+              className="h-10 rounded-none border-white/10 text-white/60 text-[9px] font-bold uppercase tracking-widest hover:bg-white/5"
+            >
+              Retry
+            </Button>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader className="bg-white/5">
+              <TableRow className="border-white/5">
+                <TableHead className="text-[9px] uppercase font-bold pl-8 text-white/40">Order</TableHead>
+                <TableHead className="text-[9px] uppercase font-bold text-white/40">Market</TableHead>
+                <TableHead className="text-[9px] uppercase font-bold text-white/40">Total</TableHead>
+                <TableHead className="text-[9px] uppercase font-bold text-white/40">Payment</TableHead>
+                <TableHead className="text-[9px] uppercase font-bold text-white/40">Status</TableHead>
+                <TableHead className="text-[9px] uppercase font-bold text-right pr-8 text-white/40">Advance</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {orders.map((order) => (
+                <TableRow
+                  key={order.id}
+                  className="hover:bg-white/5 transition-colors border-white/5 h-16 cursor-pointer"
+                  onClick={() => setSelected(order)}
                 >
-                  <div className="flex items-center space-x-8">
-                    <div className="w-14 h-14 bg-plum/5 border border-plum/10 rounded-full flex items-center justify-center font-headline text-2xl font-bold text-plum">
-                      {lead.customerName.charAt(0)}
+                  <TableCell className="pl-8 font-mono text-blue-400 text-[10px] uppercase">
+                    {order.orderNumber || order.id}
+                  </TableCell>
+                  <TableCell className="text-[10px] uppercase tracking-widest text-white/50">
+                    {(order.market || order.country || "—").toUpperCase()}
+                  </TableCell>
+                  <TableCell className="text-sm font-bold tabular">
+                    {order.currencyCode} {(order.totalAmount ?? 0).toLocaleString()}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-[7px] uppercase border-none bg-white/10 text-white/50">
+                      {order.paymentStatus}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className={cn("text-[8px] uppercase border-none px-3 py-1", STATUS_STYLE[order.status] || "bg-white/10 text-white/40")}>
+                      {order.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right pr-8" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex justify-end items-center space-x-2">
+                      {updatingId === order.id && <Loader2 className="w-3 h-3 animate-spin text-blue-400" />}
+                      <Select value={order.status} onValueChange={(v) => handleStatus(order.id, v as OrderStatus)}>
+                        <SelectTrigger className="h-9 w-32 rounded-none bg-white/5 border-white/10 text-[9px] font-bold uppercase tracking-widest text-white">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#111113] border-white/10 rounded-none">
+                          {ORDER_STATUSES.map((s) => (
+                            <SelectItem key={s} value={s} className="text-[9px] uppercase font-bold">{s}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <div>
-                      <h4 className="text-lg font-headline font-bold uppercase tracking-tight">
-                        {lead.customerName}
-                      </h4>
-                      <p className="text-xs text-gray-400 italic">
-                        {lead.intent} Inquiry • {lead.country} Hub
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-12">
-                    <div className="text-right">
-                      <p className="text-[9px] font-bold uppercase text-gray-400 tracking-widest">
-                        Bracket
-                      </p>
-                      <p className="text-sm font-bold text-gray-900">
-                        {lead.budgetRange}
-                      </p>
-                    </div>
-                    <Button
-                      className="h-12 px-8 rounded-none bg-black text-white hover:bg-plum transition-all text-[10px] font-bold uppercase tracking-widest"
-                      onClick={() => setSelectedLeadId(lead.id)}
-                    >
-                      START DIALOGUE
-                    </Button>
-                  </div>
-                </div>
+                  </TableCell>
+                </TableRow>
               ))}
-              {priorityLeads.length === 0 && (
-                <div className="py-20 text-center border-2 border-dashed border-border flex flex-col items-center space-y-4 opacity-30">
-                  <CheckCircle2 className="w-12 h-12" />
-                  <p className="text-sm font-bold uppercase tracking-widest italic">
-                    All Tier 1 dialogues are currently optimized.
-                  </p>
-                </div>
+              {orders.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-24 text-center text-white/30 text-[11px] font-bold uppercase tracking-widest italic">
+                    No orders match this filter.
+                  </TableCell>
+                </TableRow>
               )}
-            </div>
-          </div>
-        </TabsContent>
+            </TableBody>
+          </Table>
+        )}
+      </Card>
 
-        <TabsContent value="dialogue" className="animate-fade-in space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-            <Card className="lg:col-span-7 bg-white border-border shadow-luxury overflow-hidden">
-              <CardHeader className="border-b border-border flex justify-between items-center bg-ivory/10">
-                <div>
-                  <CardTitle className="font-headline text-2xl">
-                    Acquisition Registry
-                  </CardTitle>
-                  <CardDescription className="text-[10px] uppercase tracking-widest">
-                    Global flow of connoisseur intent
-                  </CardDescription>
+      {/* Order detail drawer */}
+      <Sheet open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
+        <SheetContent className="w-full sm:max-w-[560px] bg-[#0A0A0B] border-l border-white/10 p-0 rounded-none text-white">
+          {selected && (
+            <div className="flex flex-col h-full">
+              <SheetHeader className="p-10 bg-white/[0.02] border-b border-white/5 text-left">
+                <SheetTitle className="font-headline text-2xl uppercase italic tracking-tighter text-white">
+                  {selected.orderNumber || selected.id}
+                </SheetTitle>
+                <SheetDescription className="text-[10px] uppercase font-bold tracking-widest text-white/30">
+                  {new Date(selected.createdAt).toLocaleString()}
+                </SheetDescription>
+              </SheetHeader>
+              <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
+                <div className="grid grid-cols-2 gap-6">
+                  <DetailRow label="Status" value={selected.status} />
+                  <DetailRow label="Payment" value={selected.paymentStatus} />
+                  <DetailRow label="Market" value={(selected.market || selected.country || "—").toUpperCase()} />
+                  <DetailRow label="Gateway" value={String(selected.gateway || "—")} />
                 </div>
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300" />
-                  <input
-                    className="bg-white border border-border h-10 pl-10 pr-4 text-[9px] font-bold uppercase tracking-widest outline-none w-48 focus:ring-1 focus:ring-plum transition-all"
-                    placeholder="FILTER..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </CardHeader>
-              <Table>
-                <TableHeader className="bg-ivory/50">
-                  <TableRow>
-                    <TableHead className="text-[9px] uppercase font-bold pl-8">
-                      Connoisseur
-                    </TableHead>
-                    <TableHead className="text-[9px] uppercase font-bold text-center">
-                      Tier
-                    </TableHead>
-                    <TableHead className="text-[9px] uppercase font-bold">
-                      Status
-                    </TableHead>
-                    <TableHead className="text-[9px] uppercase font-bold text-right pr-8">
-                      Context
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredLeads.map((lead) => (
-                    <TableRow
-                      key={lead.id}
-                      className={cn(
-                        "hover:bg-ivory/30 cursor-pointer transition-colors",
-                        selectedLeadId === lead.id && "bg-plum/5"
-                      )}
-                      onClick={() => setSelectedLeadId(lead.id)}
-                    >
-                      <TableCell className="pl-8">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold uppercase tracking-tight">
-                            {lead.customerName}
-                          </span>
-                          <span className="text-[8px] text-gray-400 uppercase font-mono">
-                            {lead.country}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <div
-                          className={cn(
-                            "inline-flex items-center justify-center w-6 h-6 rounded-full text-[9px] font-bold border",
-                            lead.leadTier === 1
-                              ? "bg-gold/10 border-gold text-gold"
-                              : "bg-gray-50 text-gray-400"
-                          )}
-                        >
-                          {lead.leadTier}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="text-[8px] uppercase tracking-widest"
-                        >
-                          {lead.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right pr-8">
-                        <ChevronRight className="w-4 h-4 ml-auto text-gray-200" />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
-
-            <div className="lg:col-span-5 space-y-8">
-              {selectedLead ? (
-                <Card className="bg-white border-border shadow-luxury overflow-hidden">
-                  <CardHeader className="border-b border-border bg-plum/5">
-                    <CardTitle className="font-headline text-xl uppercase italic">
-                      {selectedLead.customerName}
-                    </CardTitle>
-                    <CardDescription className="text-[9px] font-bold uppercase tracking-widest text-plum">
-                      Maison Dialogue Active
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-8 space-y-10">
-                    <div className="space-y-4">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-gray-400">
-                        Acquisition Stage
-                      </p>
-                      <div className="flex gap-2 flex-wrap">
-                        {[
-                          "contacted",
-                          "qualifying",
-                          "presenting",
-                          "closing",
-                          "won",
-                        ].map((stage) => (
-                          <Button
-                            key={stage}
-                            variant={
-                              selectedLead.status === stage
-                                ? "default"
-                                : "outline"
-                            }
-                            size="sm"
-                            className="h-8 rounded-none text-[8px] font-bold uppercase tracking-widest"
-                            onClick={() =>
-                              updateInquiryStatus(selectedLead.id, stage as any)
-                            }
-                          >
-                            {stage}
-                          </Button>
-                        ))}
-                      </div>
+                <div className="space-y-3 pt-6 border-t border-white/5">
+                  <p className="text-[9px] font-bold uppercase tracking-[0.4em] text-white/30">Line Items</p>
+                  {(selected.items ?? []).map((it, i) => (
+                    <div key={it.id || `${it.productId}-${i}`} className="flex items-center justify-between text-xs">
+                      <span className="text-white/70 flex items-center gap-2">
+                        <Package className="w-3 h-3 text-white/30" />
+                        {it.name || it.sku || it.productId} × {it.quantity}
+                      </span>
+                      <span className="font-bold tabular">
+                        {selected.currencyCode} {((it.total ?? it.unitPrice * it.quantity) || 0).toLocaleString()}
+                      </span>
                     </div>
-                    <Button
-                      className="w-full h-14 bg-black text-white hover:bg-plum rounded-none text-[10px] font-bold uppercase tracking-widest"
-                      asChild
-                    >
-                      <Link
-                        href={`/${selectedLead.country.toLowerCase()}/inquiry/${
-                          selectedLead.id
-                        }`}
-                      >
-                        OPEN SECURE TERMINAL
-                      </Link>
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="py-40 text-center border-2 border-dashed border-border flex flex-col items-center space-y-4 opacity-20">
-                  <MessageSquare className="w-12 h-12" />
-                  <p className="text-sm font-bold uppercase tracking-widest italic">
-                    Select a connoisseur to begin dialogue.
-                  </p>
+                  ))}
+                  {(selected.items ?? []).length === 0 && (
+                    <p className="text-[10px] text-white/30 italic">No line items returned.</p>
+                  )}
                 </div>
-              )}
+                <div className="space-y-2 pt-6 border-t border-white/5">
+                  <div className="flex justify-between text-xs text-white/50">
+                    <span>Subtotal</span>
+                    <span className="tabular">{selected.currencyCode} {(selected.subtotal ?? 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-xs text-white/50">
+                    <span>Tax</span>
+                    <span className="tabular">{selected.currencyCode} {(selected.taxAmount ?? 0).toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-bold pt-2 border-t border-white/5">
+                    <span>Total</span>
+                    <span className="tabular">{selected.currencyCode} {(selected.totalAmount ?? 0).toLocaleString()}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="p-10 bg-white/[0.02] border-t border-white/5">
+                <Select value={selected.status} onValueChange={(v) => handleStatus(selected.id, v as OrderStatus)}>
+                  <SelectTrigger className="h-12 w-full rounded-none bg-white/5 border-white/10 text-[10px] font-bold uppercase tracking-widest text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#111113] border-white/10 rounded-none">
+                    {ORDER_STATUSES.map((s) => (
+                      <SelectItem key={s} value={s} className="text-[10px] uppercase font-bold">{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="advanced" className="animate-fade-in space-y-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <Card className="bg-white border-border shadow-luxury p-10 space-y-8">
-              <div className="flex items-center space-x-4 text-plum">
-                <FileText className="w-6 h-6" />
-                <h3 className="text-xl font-headline font-bold italic uppercase tracking-widest">
-                  Curatorial Scripts
-                </h3>
-              </div>
-              <p className="text-sm text-gray-500 font-light italic leading-relaxed">
-                Manage the artisanal narrative templates used by AI Sales Agents
-                and human curators to maintain Maison principles.
-              </p>
-              <Button
-                variant="outline"
-                className="w-full h-12 border-border text-[9px] font-bold uppercase tracking-widest hover:bg-black hover:text-white"
-                asChild
-              >
-                <Link href="/admin/messaging">MANAGE TEMPLATES</Link>
-              </Button>
-            </Card>
-
-            <Card className="bg-white border-border shadow-luxury p-10 space-y-8">
-              <div className="flex items-center space-x-4 text-plum">
-                <ShieldCheck className="w-6 h-6" />
-                <h3 className="text-xl font-headline font-bold italic uppercase tracking-widest">
-                  Dialogue Security
-                </h3>
-              </div>
-              <p className="text-sm text-gray-500 font-light italic leading-relaxed">
-                Configure end-to-end encryption protocols and archival
-                requirements for global high-ticket negotiations.
-              </p>
-              <div className="flex items-center justify-between pt-4 border-t border-border">
-                <span className="text-[10px] font-bold uppercase tracking-widest">
-                  Institutional Audit Active
-                </span>
-                <Switch
-                  defaultChecked
-                  className="data-[state=checked]:bg-plum"
-                />
-              </div>
-            </Card>
-          </div>
-        </TabsContent>
-      </Tabs>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
 
-function RevenueNavItem({
-  icon,
-  label,
-  active,
-}: {
-  icon: any;
-  label: string;
-  active: boolean;
-}) {
+function Kpi({ label, value, color = "text-white" }: { label: string; value: React.ReactNode; color?: string }) {
   return (
-    <button
-      className={cn(
-        "w-full flex items-center space-x-4 px-6 py-4 text-[11px] font-bold uppercase tracking-[0.2em] transition-all group rounded-sm border",
-        active
-          ? "bg-plum text-white border-plum shadow-md"
-          : "text-gray-400 hover:bg-ivory hover:text-plum border-transparent"
-      )}
-    >
-      <span
-        className={cn(
-          "transition-transform group-hover:scale-110",
-          active ? "text-white" : "text-gold"
-        )}
-      >
-        {React.cloneElement(icon as React.ReactElement<any>, {
-          className: "w-5 h-5",
-        })}
-      </span>
-      <span>{label}</span>
-      {active && <ChevronRight className="w-4 h-4 ml-auto" />}
-    </button>
+    <Card className="bg-[#111113] border-white/5 p-8 space-y-3 rounded-none shadow-xl">
+      <span className="text-[9px] font-bold uppercase tracking-[0.4em] text-white/20">{label}</span>
+      <div className={cn("text-4xl font-headline font-bold italic tabular", color)}>{value}</div>
+    </Card>
   );
 }
 
-function StatCard({
-  icon,
-  label,
-  value,
-  trend,
-  positive,
-}: {
-  icon: any;
-  label: string;
-  value: string;
-  trend: string;
-  positive: boolean;
-}) {
+function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <Card className="bg-white border-border shadow-luxury hover:border-gold transition-colors group">
-      <CardContent className="p-8 space-y-6">
-        <div className="flex justify-between items-start">
-          <div className="p-4 bg-ivory rounded-full group-hover:bg-gold/10 transition-colors text-plum">
-            {icon}
-          </div>
-          <div
-            className={cn(
-              "flex items-center text-[10px] font-bold tracking-widest uppercase",
-              positive ? "text-gold" : "text-gray-400"
-            )}
-          >
-            {trend}
-          </div>
-        </div>
-        <div>
-          <div className="text-gray-400 text-[10px] uppercase tracking-[0.4em] font-bold">
-            {label}
-          </div>
-          <div className="text-4xl font-headline font-bold italic mt-2 text-gray-900">
-            {value}
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-1">
+      <p className="text-[8px] font-bold uppercase tracking-[0.3em] text-white/30">{label}</p>
+      <p className="text-xs font-bold uppercase text-white/80">{value}</p>
+    </div>
   );
 }

@@ -46,6 +46,7 @@ import { useAI } from "@/hooks/use-ai";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 /**
  * Institutional AI Control Panel: Tactical Layer 4 Node.
@@ -81,6 +82,7 @@ export default function AIControlPanel() {
 
   return (
     <div className="space-y-12 animate-fade-in font-body pb-20">
+      <PreviewNotice />
       <header className="flex justify-between items-end border-b border-white/5 pb-12">
         <div className="space-y-2">
           <div className="flex items-center space-x-3 mb-2 text-plum">

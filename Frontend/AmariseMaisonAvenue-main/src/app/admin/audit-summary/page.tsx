@@ -32,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 /**
  * Institutional System Audit Dashboard.
@@ -108,6 +109,7 @@ export default function SystemAuditDashboard() {
 
   return (
     <div className="space-y-12 animate-fade-in pb-20 font-body">
+      <PreviewNotice />
       <header className="flex justify-between items-end border-b border-white/5 pb-12">
         <div className="space-y-2">
           <div className="flex items-center space-x-3 mb-2 text-blue-400">

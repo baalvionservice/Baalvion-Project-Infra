@@ -35,8 +35,9 @@ import {
   TableCell, 
   TableHead, 
   TableHeader, 
-  TableRow 
+  TableRow
 } from "@/components/ui/table";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 /**
  * Live Control Room: The Curator's Command Center.
@@ -50,6 +51,7 @@ export default function LiveControlRoom() {
 
   return (
     <div className="space-y-12 animate-fade-in">
+      <PreviewNotice />
       <header className="flex justify-between items-end border-b border-white/5 pb-12">
         <div className="space-y-2">
           <div className="flex items-center space-x-3 mb-2 text-plum">

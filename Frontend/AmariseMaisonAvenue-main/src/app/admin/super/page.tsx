@@ -28,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import {
@@ -61,6 +62,7 @@ export default function GlobalMatrixHub() {
 
   return (
     <div className="space-y-12 animate-fade-in font-body pb-20">
+      <PreviewNotice />
       {/* Safe Sync Authorization */}
       <Dialog open={isSyncModalOpen} onOpenChange={setIsSyncOpen}>
         <DialogContent className="max-w-xl bg-white border-none shadow-2xl rounded-none p-0 overflow-hidden">

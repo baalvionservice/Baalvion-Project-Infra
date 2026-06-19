@@ -37,6 +37,7 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { downloadMockAuditReport } from '@/lib/audit/engine';
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 /**
  * Compliance Hub: The Governance Tactical Node.
@@ -61,6 +62,7 @@ export default function ComplianceAdminHub() {
 
   return (
     <div className="space-y-12 animate-fade-in font-body pb-20">
+      <PreviewNotice />
       <header className="flex justify-between items-end border-b border-white/5 pb-12">
         <div className="space-y-2">
           <div className="flex items-center space-x-3 mb-2 text-blue-400">

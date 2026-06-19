@@ -1,15 +1,17 @@
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
+import { AdminShell } from "./AdminShell";
 
-// Per-app admin RETIRED. All Amarisé administration (products, orders, catalog) is centralized
-// in the Baalvion admin-platform console → Commerce section. Any /admin/* hit redirects there.
-// The console URL is env-driven; the hardcoded localhost is a DEV-ONLY fallback (guarded by
-// NODE_ENV). In production with no env set we 404 rather than redirect users to localhost.
-const IS_PRODUCTION = process.env.NODE_ENV === 'production';
-const ADMIN_CONSOLE_URL =
-  process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL ||
-  (IS_PRODUCTION ? '' : 'http://localhost:3030/commerce');
+/**
+ * Amarisé admin console layout.
+ *
+ * By default this renders the LOCAL admin console (sidebar + top bar + page).
+ * If an external console is configured via NEXT_PUBLIC_ADMIN_CONSOLE_URL, every
+ * /admin/* hit redirects there instead (opt-in centralization). With no env set,
+ * the local console is served — so the live-wired admin surfaces are reachable.
+ */
+const EXTERNAL_ADMIN_CONSOLE_URL = process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL;
 
-export default function AdminLayout() {
-  if (!ADMIN_CONSOLE_URL) notFound();
-  redirect(ADMIN_CONSOLE_URL);
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  if (EXTERNAL_ADMIN_CONSOLE_URL) redirect(EXTERNAL_ADMIN_CONSOLE_URL);
+  return <AdminShell>{children}</AdminShell>;
 }

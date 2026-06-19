@@ -59,6 +59,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Product } from "@/lib/types";
 import { useAISEO } from "@/hooks/use-ai";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 /**
  * Atelier CMS: Multi-Market Registry Terminal
@@ -156,6 +157,7 @@ export default function ContentAdminHub() {
 
   return (
     <div className="space-y-10 animate-fade-in">
+      <PreviewNotice message="Atelier CMS edits this page's in-memory catalog only. Live product management — including resale provenance — is at /admin/commerce." />
       <header className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
           <nav className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 flex items-center space-x-2 mb-2">

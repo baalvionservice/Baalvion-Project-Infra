@@ -23,6 +23,8 @@ import {
   Cpu,
   Lock,
   Settings,
+  Gem,
+  CalendarClock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -85,6 +87,18 @@ export function AdminSidebar() {
           permission: PERMISSIONS.ACCESS_COMMERCE,
         },
         {
+          icon: <Target />,
+          label: "Order Stream",
+          href: "/admin/sales",
+          permission: PERMISSIONS.ACCESS_COMMERCE,
+        },
+        {
+          icon: <CreditCard />,
+          label: "Revenue Matrix",
+          href: "/admin/revenue",
+          permission: PERMISSIONS.ACCESS_FINANCE,
+        },
+        {
           icon: <CreditCard />,
           label: "Finance Hub",
           href: "/admin/finance",
@@ -117,14 +131,25 @@ export function AdminSidebar() {
       ],
     },
     {
-      title: "Layer 5 & Support",
+      title: "Resale Operations",
       items: [
         {
-          icon: <Target />,
-          label: "Sales CRM",
-          href: "/admin/sales",
+          icon: <Gem />,
+          label: "Consignments",
+          href: "/admin/consignments",
+          permission: PERMISSIONS.ACCESS_COMMERCE,
+        },
+        {
+          icon: <CalendarClock />,
+          label: "Appointments",
+          href: "/admin/appointments",
           permission: PERMISSIONS.ACCESS_CRM,
         },
+      ],
+    },
+    {
+      title: "Layer 5 & Support",
+      items: [
         {
           icon: <UserCircle />,
           label: "Partner Portal",

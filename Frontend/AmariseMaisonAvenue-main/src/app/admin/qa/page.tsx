@@ -33,6 +33,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -131,6 +132,7 @@ export default function QADashboard() {
         </header>
 
         <div className="p-12 space-y-12 animate-fade-in pb-32">
+          <PreviewNotice />
           {/* Integrity Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <StatCard

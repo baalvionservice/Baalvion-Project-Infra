@@ -6,7 +6,7 @@
 // products available in that market (regions/isGlobal), and (b) makes the serializer
 // return the market's converted price + currency + tax. Unknown/absent country falls
 // back to base (USD) behavior so existing callers are unaffected.
-const { Op, literal } = require('sequelize');
+const { Op, literal, QueryTypes } = require('sequelize');
 const {
     sequelize,
     CommerceStore, CommerceProduct, CommerceProductVariant, CommerceProductPricing,
@@ -15,11 +15,37 @@ const {
 const { AppError } = require('../utils/errors');
 const { parsePagination } = require('../utils/pagination');
 const serializer = require('../utils/storefrontSerializer');
+const filters = require('../utils/storefrontFilters');
 const { isSupportedMarket } = require('../config/markets');
 const discountService = require('./discountService');
 
 const PUBLIC_WHERE = { status: 'published', visibility: 'public' };
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+// Keyword-search target columns. ILIKE across name + sku + brand (custom_fields->>'brandId') +
+// description + tags. brand/tags need raw fragments because brand lives in JSONB and tags is a
+// text[] (matched with array_to_string). Built with sequelize.escape so the term is injection-safe.
+// Case-insensitive; the term is wrapped in %…% with LIKE metacharacters escaped so a user-supplied
+// %/_ matches literally rather than acting as a wildcard.
+function escapeLike(term) {
+    return term.replace(/[\\%_]/g, (ch) => `\\${ch}`);
+}
+function searchClause(rawTerm, { Op, literal }) {
+    const term = typeof rawTerm === 'string' ? rawTerm.trim() : '';
+    if (!term) return null;
+    const like = `%${escapeLike(term)}%`;
+    const safe = sequelize.escape(like); // fully-quoted SQL string literal
+    return {
+        [Op.or]: [
+            { name: { [Op.iLike]: like } },
+            { sku: { [Op.iLike]: like } },
+            { description: { [Op.iLike]: like } },
+            // brand (JSONB scalar) and tags (text[]) — raw, value bound via sequelize.escape.
+            literal(`(custom_fields->>'brandId') ILIKE ${safe}`),
+            literal(`array_to_string(tags, ' ') ILIKE ${safe}`),
+        ],
+    };
+}
 
 // Resolve a validated market code, or null when none is supplied. A PRESENT-but-invalid
 // country is an explicit client error (400) rather than a silently-unfiltered request.
@@ -81,16 +107,31 @@ async function listProducts(storeId, query = {}) {
     const country = resolveCountry(query);
     const { page, limit, offset } = parsePagination(query, 200);
     const where = { storeId, ...PUBLIC_WHERE };
+    const and = [];
 
+    // categoryId is a slug → resolve to the real category UUID once; reused by the count queries.
+    let categoryId = null;
     if (query.categoryId) {
         const cat = await CommerceCategory.findOne({ where: { storeId, slug: query.categoryId }, attributes: ['id'] });
-        where.categoryId = cat ? cat.id : '00000000-0000-0000-0000-000000000000';
+        categoryId = cat ? cat.id : '00000000-0000-0000-0000-000000000000';
+        where.categoryId = categoryId;
     }
     if (query.isFeatured !== undefined) where.isFeatured = String(query.isFeatured) === 'true';
-    if (query.search) where.name = { [Op.iLike]: `%${query.search}%` };
+
+    // (1) Real keyword search: ILIKE across name + sku + brand + description + tags (was name-only).
+    const search = searchClause(query.search ?? query.q, { Op, literal });
+    if (search) and.push(search);
+
+    // (2) Faceted filters (brand/color/size/condition/price). OR within a facet, AND across facets.
+    const selection = filters.parseFacetFilters(query);
+    const deps = { Op, literal, escape: (v) => sequelize.escape(v) };
+    const facetWhere = filters.buildFacetWhere(selection, deps);
+    if (facetWhere.clause) Object.assign(where, facetWhere.clause); // condition Op.in (real column)
+    and.push(...facetWhere.and);
 
     // Server-side per-market availability filter (real backend filtering, not advisory).
-    if (country) where[Op.and] = [...(where[Op.and] || []), regionWhere(country)];
+    if (country) and.push(regionWhere(country));
+    if (and.length) where[Op.and] = and;
 
     const includes = baseIncludes();
     if (query.collectionId) {
@@ -104,13 +145,51 @@ async function listProducts(storeId, query = {}) {
         include: includes, distinct: true,
     });
 
+    // (3) Facet counts: one grouped aggregate per dimension + one price MIN/MAX. Each dimension is
+    // counted with the OTHER active facets applied but its OWN selection excluded (mutual-exclusion
+    // faceting) so selecting a value never collapses that facet's option list.
+    const facets = await computeFacets(selection, { storeId, categoryId });
+
     return {
+        // Backward-compatible legacy shape (items/total/page/pageSize/totalPages) + the new facets.
         items: rows.map((r) => serializer.serializeProductListItem(r.toJSON(), { country })),
         total: count,
         page,
         pageSize: limit,
         totalPages: Math.max(1, Math.ceil(count / limit)),
+        facets,
     };
+}
+
+// Compute the `facets` object. Strategy: ONE grouped COUNT(*) query per facet dimension (brand,
+// color, size, condition) + ONE MIN/MAX price query — 5 single-pass aggregates total, NO N+1 and
+// NO per-product looping. Each dimension query excludes its own selection (so the facet shows all
+// options, not just the chosen one) but applies every other active filter.
+//
+// Documented simplification: facet counts are scoped to the storeId + public/published catalog +
+// scalar (categoryId) + facet filters. They deliberately do NOT re-apply the per-market region
+// filter or the collection join — those affect the product LIST only. This keeps each facet to a
+// single grouped pass; counts therefore reflect the catalog-wide facet filter set, which is the
+// standard, predictable behaviour for a faceted filter sidebar.
+async function computeFacets(selection, base) {
+    const run = async (sql, binds) =>
+        sequelize.query(sql, { bind: binds, type: QueryTypes.SELECT });
+
+    const [brandRows, colorRows, sizeRows, conditionRows, priceRows] = await Promise.all([
+        (() => { const { sql, binds } = filters.buildDimensionCountQuery('brand', selection, base); return run(sql, binds); })(),
+        (() => { const { sql, binds } = filters.buildDimensionCountQuery('color', selection, base); return run(sql, binds); })(),
+        (() => { const { sql, binds } = filters.buildDimensionCountQuery('size', selection, base); return run(sql, binds); })(),
+        (() => { const { sql, binds } = filters.buildDimensionCountQuery('condition', selection, base); return run(sql, binds); })(),
+        (() => { const { sql, binds } = filters.buildPriceRangeQuery(selection, base); return run(sql, binds); })(),
+    ]);
+
+    return filters.shapeFacets({
+        brand: filters.shapeBuckets(brandRows),
+        color: filters.shapeBuckets(colorRows),
+        size: filters.shapeBuckets(sizeRows),
+        condition: filters.shapeBuckets(conditionRows),
+        priceRange: filters.shapePriceRange(priceRows && priceRows[0]),
+    });
 }
 
 async function getProduct(storeId, idOrSlug, query = {}) {

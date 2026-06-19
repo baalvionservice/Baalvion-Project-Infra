@@ -50,6 +50,7 @@ import {
   CartesianGrid
 } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 /**
  * AI Autopilot: High-Frequency Automation Terminal
@@ -85,6 +86,7 @@ export default function AIDashboard() {
 
   return (
     <div className="space-y-12 animate-fade-in">
+      <PreviewNotice />
       <header className="flex justify-between items-end">
         <div className="space-y-2">
           <nav className="text-[9px] font-bold uppercase tracking-[0.4em] text-gray-400 flex items-center space-x-2">

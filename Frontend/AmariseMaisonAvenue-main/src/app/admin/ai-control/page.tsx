@@ -35,6 +35,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 export default function AIControlHub() {
   const { modules, updateModule } = useAI();
@@ -100,6 +101,7 @@ export default function AIControlHub() {
         </header>
 
         <div className="p-12 space-y-12 animate-fade-in pb-32">
+          <PreviewNotice />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {modules.map((module) => (
               <Card

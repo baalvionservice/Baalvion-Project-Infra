@@ -32,6 +32,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 import { useAppStore } from "@/lib/store";
 import { listSupportTickets } from "@/lib/crm-client";
 import type { SupportTicket } from "@/lib/types";
@@ -203,6 +204,7 @@ export default function SupportAdminPanel() {
         </header>
 
         <div className="p-12 space-y-12 animate-fade-in pb-32">
+          <PreviewNotice />
           {activeTab === "dashboard" && (
             <div className="space-y-12">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

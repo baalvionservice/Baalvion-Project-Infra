@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { NotificationFeed } from "@/components/admin/NotificationFeed";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 import { useAppStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -93,6 +94,7 @@ export default function NotificationsAdminPage() {
         </header>
 
         <div className="p-12 space-y-12 animate-fade-in pb-32">
+          <PreviewNotice />
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
             <div className="lg:col-span-8">
               <Card className="bg-white border-border shadow-luxury overflow-hidden">

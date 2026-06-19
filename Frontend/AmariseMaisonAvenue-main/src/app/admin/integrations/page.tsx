@@ -46,6 +46,7 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 type IntegrationTab =
   | "dashboard"
@@ -154,6 +155,7 @@ export default function IntegrationsAdminPanel() {
       </aside>
 
       <main className="flex-1 overflow-y-auto bg-ivory relative">
+        <PreviewNotice />
         <header className="flex justify-between items-center bg-white/80 luxury-blur p-8 border-b border-border sticky top-0 z-30">
           <div>
             <h1 className="text-3xl font-headline font-bold italic text-gray-900 uppercase tracking-widest">

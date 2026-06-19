@@ -43,6 +43,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { downloadMockAuditReport } from '@/lib/audit/engine';
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 
 /**
  * Layer 4: Action Ledger & Institutional Compliance Node.
@@ -63,6 +64,7 @@ export default function AuditCommandHub() {
 
   return (
     <div className="space-y-12 animate-fade-in font-body">
+      <PreviewNotice />
       {/* State Delta Inspector Modal */}
       <Dialog open={!!selectedLogId} onOpenChange={() => setSelectedLogId(null)}>
         <DialogContent className="max-w-4xl bg-[#0A0A0B] border-white/5 text-white p-0 overflow-hidden shadow-2xl rounded-none">

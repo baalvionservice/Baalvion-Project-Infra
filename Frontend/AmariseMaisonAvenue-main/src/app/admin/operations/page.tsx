@@ -28,6 +28,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { PreviewNotice } from "@/components/admin/PreviewBadge";
 import { useAppStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import { 
@@ -63,6 +64,7 @@ export default function OperationsHub() {
 
   return (
     <div className="space-y-12 animate-fade-in font-body pb-20">
+      <PreviewNotice />
       <header className="flex justify-between items-end border-b border-white/5 pb-12">
         <div className="space-y-2">
           <div className="flex items-center space-x-3 mb-2 text-plum">

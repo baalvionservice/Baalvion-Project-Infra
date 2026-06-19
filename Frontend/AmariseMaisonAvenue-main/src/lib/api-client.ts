@@ -186,6 +186,14 @@ export interface ProductDetail extends ProductListItem {
   regions: string[];
   seoTitle?: string;
   seoDescription?: string;
+  // ── Resale / consignment provenance (commerce-service product, camelCase) ──
+  // The admin product editor sets these so a resale piece carries verifiable provenance:
+  // condition grade, authenticity status, one-of-a-kind flag, and serial number.
+  conditionGrade?: 'pristine' | 'excellent' | 'very_good' | 'good' | 'fair';
+  authenticityStatus?: string;
+  authenticityCertificateCode?: string;
+  isOneOfAKind?: boolean;
+  serialNumber?: string;
 }
 
 export interface ProductFilters {
@@ -644,6 +652,17 @@ export const orderApi = {
     return apiFetch<Order>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}/cancel`, {
       method: 'POST',
       body: JSON.stringify({ reason }),
+    });
+  },
+
+  // ADMIN/OPS: advance an order's fulfillment status. Requires an ops_manager store role
+  // (enforced server-side). Status enum mirrors order-service updateOrderStatusSchema.
+  updateStatus(orderId: string, status: OrderStatus): Promise<ApiResult<Order>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<Order>();
+    return apiFetch<Order>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
     });
   },
 
@@ -1180,5 +1199,160 @@ export const appointmentsApi = {
     Object.entries(filters).forEach(([k, v]) => { if (v !== undefined) params.set(k, String(v)); });
     const qs = params.toString();
     return apiFetch<PaginatedResponse<StoreAppointment>>(`${APPOINTMENTS_BASE}/${storeId}/mine${qs ? `?${qs}` : ''}`);
+  },
+};
+
+// ── ADMIN / STAFF surfaces ────────────────────────────────────────────────────
+// The methods below require an authenticated STAFF token. They reuse apiFetch, so the
+// in-memory bearer token (lib/auth) is attached automatically — exactly like the
+// customer-facing methods above. The backend independently enforces staff membership
+// (store-scoped); an under-privileged token surfaces as a 403 ApiError, never a fake success.
+
+// ── consignmentAdminApi (store-scoped: /consignments/stores/:storeId) ─────────
+// Staff ops queue: list every request, advance lifecycle status (with quote/payout terms),
+// record a per-item authentication result, and issue a certificate of authenticity.
+
+export type ConsignmentPayoutType = 'consignment' | 'buyout';
+export type ConsignmentAuthStatus = 'pending' | 'in_review' | 'authenticated' | 'rejected';
+export type ConsignmentAuthConfidence = 'high' | 'medium' | 'low';
+
+export interface ConsignmentStatusUpdate {
+  status: string;
+  quoteAmount?: number;
+  quoteCurrency?: string;
+  payoutType?: ConsignmentPayoutType;
+  commissionRate?: number;
+  reviewerNotes?: string;
+  listedProductId?: string;
+}
+
+export interface ConsignmentAuthenticationInput {
+  status: ConsignmentAuthStatus;
+  authenticatorName?: string;
+  method?: string;
+  findings?: string;
+  confidence?: ConsignmentAuthConfidence;
+  photoUrls?: string[];
+}
+
+export interface ConsignmentCertificateInput {
+  issuerName?: string;
+  serialNumber?: string;
+  /** Accepted for forward-compat; current backend issueCertificateSchema ignores unknown keys. */
+  conditionGrade?: string;
+  productId?: string;
+}
+
+export interface ConsignmentAuthenticationRecord {
+  id: string;
+  requestId: string;
+  itemId: string;
+  status: ConsignmentAuthStatus;
+  authenticatorName?: string | null;
+  method?: string | null;
+  findings?: string | null;
+  confidence?: ConsignmentAuthConfidence | null;
+  photoUrls?: string[];
+  createdAt?: string;
+}
+
+export interface ConsignmentCertificate {
+  id: string;
+  code: string;
+  requestId: string;
+  itemId: string;
+  serialNumber?: string | null;
+  conditionGrade?: string | null;
+  productId?: string | null;
+  issuedAt?: string;
+}
+
+const CONSIGNMENT_ADMIN_BASE = `${ORDER_URL}/consignments/stores`;
+
+export const consignmentAdminApi = {
+  // Every consignment request for the store (staff-scoped), optionally filtered by status.
+  list(
+    filters: { status?: string; page?: number; pageSize?: number } = {},
+  ): Promise<ApiResult<PaginatedResponse<Consignment>>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<PaginatedResponse<Consignment>>();
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => { if (v !== undefined && v !== null) params.set(k, String(v)); });
+    const qs = params.toString();
+    return apiFetch<PaginatedResponse<Consignment>>(
+      `${CONSIGNMENT_ADMIN_BASE}/${storeId}/requests${qs ? `?${qs}` : ''}`,
+    );
+  },
+
+  // Advance a request's lifecycle (quote → accept → received → authenticating → listed → sold).
+  // Optional quote/payout/commission terms are carried on the same transition.
+  updateStatus(id: string, body: ConsignmentStatusUpdate): Promise<ApiResult<Consignment>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<Consignment>();
+    return apiFetch<Consignment>(`${CONSIGNMENT_ADMIN_BASE}/${storeId}/requests/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
+  },
+
+  // Record an authentication result for a single consigned item.
+  recordAuthentication(
+    requestId: string,
+    itemId: string,
+    body: ConsignmentAuthenticationInput,
+  ): Promise<ApiResult<ConsignmentAuthenticationRecord>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<ConsignmentAuthenticationRecord>();
+    return apiFetch<ConsignmentAuthenticationRecord>(
+      `${CONSIGNMENT_ADMIN_BASE}/${storeId}/requests/${requestId}/items/${itemId}/authentication`,
+      { method: 'POST', body: JSON.stringify(body) },
+    );
+  },
+
+  // Issue a Certificate of Authenticity for an authenticated item.
+  issueCertificate(
+    requestId: string,
+    itemId: string,
+    body: ConsignmentCertificateInput = {},
+  ): Promise<ApiResult<ConsignmentCertificate>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<ConsignmentCertificate>();
+    return apiFetch<ConsignmentCertificate>(
+      `${CONSIGNMENT_ADMIN_BASE}/${storeId}/requests/${requestId}/items/${itemId}/certificate`,
+      { method: 'POST', body: JSON.stringify(body) },
+    );
+  },
+};
+
+// ── appointmentsAdminApi (store-scoped: /appointments/stores/:storeId) ────────
+// Staff ops queue for showroom/virtual/in-home/phone appointments.
+
+export type AppointmentAdminStatus = 'confirmed' | 'cancelled' | 'completed' | 'no_show';
+
+const APPOINTMENTS_ADMIN_BASE = `${ORDER_URL}/appointments/stores`;
+
+export const appointmentsAdminApi = {
+  // Every appointment for the store (staff-scoped), optionally filtered by status.
+  list(
+    filters: { status?: string; page?: number; pageSize?: number } = {},
+  ): Promise<ApiResult<PaginatedResponse<StoreAppointment>>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<PaginatedResponse<StoreAppointment>>();
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => { if (v !== undefined && v !== null) params.set(k, String(v)); });
+    const qs = params.toString();
+    return apiFetch<PaginatedResponse<StoreAppointment>>(
+      `${APPOINTMENTS_ADMIN_BASE}/${storeId}${qs ? `?${qs}` : ''}`,
+    );
+  },
+
+  // Confirm / cancel / complete / mark no-show.
+  updateStatus(id: string, body: { status: AppointmentAdminStatus }): Promise<ApiResult<StoreAppointment>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<StoreAppointment>();
+    return apiFetch<StoreAppointment>(`${APPOINTMENTS_ADMIN_BASE}/${storeId}/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify(body),
+    });
   },
 };
