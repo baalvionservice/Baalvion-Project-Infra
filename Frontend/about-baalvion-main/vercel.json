@@ -1,4 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "ignoreCommand": "npx turbo-ignore about-baalvion-web"
+  "ignoreCommand": "npx turbo-ignore about-baalvion-web",
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=about-baalvion-web"
 }
