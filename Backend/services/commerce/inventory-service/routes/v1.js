@@ -4,7 +4,8 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 const { loadStoreRole, requireStoreRole } = require('../middleware/rbacPep');
 const { validate } = require('../middleware/validate');
 const ctrl = require('../controller/warehouseController');
-const { createWarehouseSchema, updateWarehouseSchema, adjustStockSchema } = require('../validators/inventorySchemas');
+const reservationCtrl = require('../controller/reservationController');
+const { createWarehouseSchema, updateWarehouseSchema, adjustStockSchema, lockSchema, confirmLockSchema, bulkStockSchema } = require('../validators/inventorySchemas');
 
 const router = Router();
 
@@ -25,5 +26,14 @@ router.patch('/inventory/stores/:storeId/warehouses/:warehouseId', ...write, val
 router.delete('/inventory/stores/:storeId/warehouses/:warehouseId', ...write, requireStoreRole('store_admin'), ctrl.deleteWarehouse);
 router.get('/inventory/stores/:storeId/warehouses/:warehouseId/stock', ...read, ctrl.listStock);
 router.post('/inventory/stores/:storeId/warehouses/:warehouseId/stock/adjust', ...write, validate(adjustStockSchema), ctrl.adjustStock);
+
+// ── Reservation / lock API (storefront checkout: prevents oversell of unique luxury items) ──
+// Variant-level stock lookup is a read; reserving/releasing/confirming mutates reserved/on-hand
+// stock so it is gated at operations level (ops_manager), matching how stock adjust is gated.
+router.get('/inventory/stores/:storeId/stock/:variantId', ...read, reservationCtrl.getStock);
+router.post('/inventory/stores/:storeId/stock/bulk', ...read, validate(bulkStockSchema), reservationCtrl.getBulkStock);
+router.post('/inventory/stores/:storeId/locks', ...write, validate(lockSchema), reservationCtrl.lock);
+router.post('/inventory/stores/:storeId/locks/:lockId/release', ...write, reservationCtrl.release);
+router.post('/inventory/stores/:storeId/locks/:lockId/confirm', ...write, validate(confirmLockSchema), reservationCtrl.confirm);
 
 module.exports = router;
