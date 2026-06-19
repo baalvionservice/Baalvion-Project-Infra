@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "ignoreCommand": "npx turbo-ignore baalvion-jobs-portal-web",
+  "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile",
   "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=baalvion-jobs-portal-web"
 }
