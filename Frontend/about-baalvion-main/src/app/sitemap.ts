@@ -9,6 +9,9 @@ import {
   cmsGetCaseStudies,
   cmsGetAboutPages,
 } from '@/lib/cms';
+import { GUIDE_SLUGS } from '@/lib/guides';
+import { INSIGHT_SLUGS } from '@/lib/insights';
+import { RESEARCH_SLUGS } from '@/lib/research';
 
 const BASE_URL = 'https://about.baalvion.com';
 
@@ -100,6 +103,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ['ecosystem', 0.6],
     ['projects', 0.7],
     ['news', 0.7],
+    ['guides', 0.8],
+    ['insights', 0.8],
+    ['research', 0.8],
     ['trust', 0.5],
     ['investors', 0.5],
   ].map(([path, priority]) => ({
@@ -107,6 +113,31 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     lastModified: now,
     changeFrequency: 'weekly' as const,
     priority: priority as number,
+  }));
+
+  // File-based trade guides (/guides/[slug]) — enumerated from a static slug
+  // list so the sitemap needs no filesystem read at request time.
+  const guideRoutes: MetadataRoute.Sitemap = GUIDE_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/guides/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  // File-based research/insights articles — enumerated from static slug lists
+  // so the sitemap needs no filesystem read at request time.
+  const insightRoutes: MetadataRoute.Sitemap = INSIGHT_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/insights/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  const researchRoutes: MetadataRoute.Sitemap = RESEARCH_SLUGS.map((slug) => ({
+    url: `${BASE_URL}/research/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly',
+    priority: 0.7,
   }));
 
   // Deduplicate by URL (hub routes may overlap with CMS page routes).
@@ -120,6 +151,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...industryRoutes,
     ...caseStudyRoutes,
     ...aboutRoutes,
+    ...guideRoutes,
+    ...insightRoutes,
+    ...researchRoutes,
   ];
   const seen = new Set<string>();
   return all.filter((entry) => {

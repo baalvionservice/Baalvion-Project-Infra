@@ -4,7 +4,11 @@ import { AuthorityIndex } from '@/components/authority-index';
 import { JsonLd } from '@/components/json-ld';
 import { BASE_URL, SITE_NAME, breadcrumbSchema, collectionSchema } from '@/lib/schema';
 
-export const revalidate = 3600;
+// Guides are sourced from committed Markdown, parsed at build time. Force fully
+// static output so no serverless fs read happens at runtime (ISR regeneration on
+// Vercel would not have the content-gen/ files traced into the lambda). Content
+// updates ship via redeploy, which is correct for evergreen reference content.
+export const dynamic = 'force-static';
 
 const TITLE = 'Trade Guides | Baalvion';
 const DESCRIPTION =

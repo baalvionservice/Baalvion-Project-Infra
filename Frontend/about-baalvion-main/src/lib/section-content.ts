@@ -1,38 +1,29 @@
 /**
- * File-based loader for the `/guides` knowledge hub.
+ * Generic file-based loader for evergreen research/education sections
+ * (`/insights`, `/research`). Mirrors the approach of `@/lib/guides`: Markdown
+ * authored under `content-gen/<section>/*.md` is parsed at build time into the
+ * shared `RichDoc` shape the `AuthorityDoc` renderer understands, so these pages
+ * render identically to the CMS-backed surfaces without requiring the CMS.
  *
- * Unlike the CMS-backed authority surfaces (services / industries / case
- * studies / about), the evergreen trade-education guides are authored as
- * Markdown in `content-gen/research-batch-2/*.md` and committed to the repo.
- * This module parses those files at build time into the same `RichDoc` shape
- * the shared `AuthorityDoc` renderer already understands, so the guide pages
- * render identically to the CMS pages without requiring the CMS service.
+ * Difference from `@/lib/guides`: this parser accepts FAQ questions written
+ * either as bold lines (`**Question?**`) or as `###`/`####` headings, since the
+ * Batch-1 research articles use both conventions.
  *
- * Server-only by construction: reads from the filesystem during static
- * generation (SSG/ISR), so it must only be imported by server components.
+ * Server-only by construction: reads the filesystem during static generation,
+ * so it must only be imported by server components.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import type { RichDoc, RichBlock, FaqItem } from '@/lib/cms';
 
-const GUIDES_DIR = path.join(process.cwd(), 'content-gen', 'research-batch-2');
+const CONTENT_ROOT = path.join(process.cwd(), 'content-gen');
 
-// Explicit publication order for the fundamentals cluster. Exported as a plain
-// constant (no filesystem access) so the sitemap and other server modules can
-// enumerate guide URLs without triggering a runtime fs read.
-export const GUIDE_SLUGS = [
-  'hs-codes-explained',
-  'freight-forwarder-explained',
-  'customs-broker-explained',
-  'export-documentation-checklist',
-  'export-compliance-guide',
-  'factory-to-port-export-process',
-];
-
-// Body sections that are editorial production notes, not reader content.
+// Body headings that mark editorial production notes, not reader content.
+// Parsing stops at the first one; everything below is dropped from the page.
 const STOP_HEADINGS = new Set([
   'internal linking recommendations',
   'cta recommendations',
+  'call-to-action recommendations',
   'schema markup recommendations',
 ]);
 
@@ -47,10 +38,7 @@ interface FrontMatter {
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /** Inline markdown → HTML for table cells (escape, then re-introduce bold + links). */
@@ -78,7 +66,7 @@ function parseFrontMatter(lines: string[]): { fm: FrontMatter; rest: string[] } 
     }
     const listItem = line.match(/^\s+-\s+(.*)$/);
     if (listItem && currentListKey === 'secondary_keywords') {
-      (fm.secondary_keywords ||= []).push(listItem[1].trim());
+      (fm.secondary_keywords ||= []).push(listItem[1].trim().replace(/^["']|["']$/g, ''));
       continue;
     }
     const kv = line.match(/^([a-zA-Z_]+):\s*(.*)$/);
@@ -98,7 +86,7 @@ function parseFrontMatter(lines: string[]): { fm: FrontMatter; rest: string[] } 
   return { fm, rest: lines.slice(i) };
 }
 
-function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
+function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[]; words: number } {
   const blocks: RichBlock[] = [];
   const faqs: FaqItem[] = [];
   let para: string[] = [];
@@ -106,10 +94,16 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
   let mode: 'body' | 'faq' = 'body';
   let faqQ: string | null = null;
   let faqA: string[] = [];
+  let words = 0;
 
+  const countWords = (s: string) => {
+    words += s.split(/\s+/).filter(Boolean).length;
+  };
   const flushPara = () => {
     if (para.length) {
-      blocks.push({ type: 'paragraph', text: para.join(' ').trim() });
+      const text = para.join(' ').trim();
+      countWords(text);
+      blocks.push({ type: 'paragraph', text });
       para = [];
     }
   };
@@ -139,6 +133,12 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
       const level = h[1].length;
       const text = h[2].trim();
       const lower = text.toLowerCase();
+      // Inside an FAQ block, a level-3+ heading is a question, not a new section.
+      if (mode === 'faq' && level >= 3) {
+        flushFaq();
+        faqQ = text;
+        continue;
+      }
       if (STOP_HEADINGS.has(lower)) break; // editorial notes follow — stop the body
       if (/frequently asked questions/.test(lower)) {
         flushFaq();
@@ -154,7 +154,7 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
       continue;
     }
 
-    // FAQ mode: **question** then answer paragraph(s)
+    // FAQ mode: bold-line question (`**question**`) then answer paragraph(s)
     if (mode === 'faq') {
       const q = trimmed.match(/^\*\*(.+?)\*\*$/);
       if (q) {
@@ -162,15 +162,12 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
         faqQ = q[1].trim();
         continue;
       }
-      if (trimmed === '') {
-        // blank line ends the current answer accumulation but keeps the Q open
-        continue;
-      }
+      if (trimmed === '') continue;
       if (faqQ) faqA.push(trimmed);
       continue;
     }
 
-    // Code fence → <pre> html block (ASCII flow diagrams, JSON)
+    // Code fence → <pre> html block (ASCII flow diagrams)
     if (trimmed.startsWith('```')) {
       flushPara();
       flushQuote();
@@ -180,7 +177,7 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
         if (lines[i].trim().startsWith('```')) break;
         buf.push(lines[i]);
       }
-      blocks.push({ type: 'html', html: `<pre class="guide-pre">${escapeHtml(buf.join('\n'))}</pre>` });
+      blocks.push({ type: 'html', html: `<pre class="section-pre">${escapeHtml(buf.join('\n'))}</pre>` });
       continue;
     }
 
@@ -204,7 +201,7 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
       const tbody = `<tbody>${rows
         .map((r) => `<tr>${r.map((c) => `<td>${cellHtml(c)}</td>`).join('')}</tr>`)
         .join('')}</tbody>`;
-      blocks.push({ type: 'html', html: `<table class="guide-table">${thead}${tbody}</table>` });
+      blocks.push({ type: 'html', html: `<table class="section-table">${thead}${tbody}</table>` });
       continue;
     }
 
@@ -216,7 +213,7 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
       continue;
     }
 
-    // Unordered list / checklist
+    // Unordered list
     const ul = trimmed.match(/^[-*]\s+(.*)$/);
     if (ul) {
       flushPara();
@@ -228,7 +225,8 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
           i--;
           break;
         }
-        items.push(m[1].replace(/^\[[ xX]\]\s*/, (mm) => (mm.trim() === '[x]' || mm.trim() === '[X]' ? '✓ ' : '☐ ')));
+        countWords(m[1]);
+        items.push(m[1]);
       }
       blocks.push({ type: 'list', ordered: false, items });
       continue;
@@ -246,6 +244,7 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
           i--;
           break;
         }
+        countWords(m[1]);
         items.push(m[1]);
       }
       blocks.push({ type: 'list', ordered: true, items });
@@ -267,26 +266,28 @@ function parseBody(lines: string[]): { blocks: RichBlock[]; faqs: FaqItem[] } {
   flushPara();
   flushQuote();
   flushFaq();
-  return { blocks, faqs };
+  return { blocks, faqs, words };
 }
 
-function parseGuide(slug: string, raw: string): RichDoc {
+function parseDoc(slug: string, raw: string, kind: string): RichDoc {
   const lines = raw.replace(/\r\n/g, '\n').split('\n');
   const { fm, rest } = parseFrontMatter(lines);
-  const { blocks, faqs } = parseBody(rest);
+  const { blocks, faqs, words } = parseBody(rest);
   const title = fm.title || slug;
   const keywords = [fm.target_keyword, ...(fm.secondary_keywords || [])].filter((k): k is string => !!k);
+  const readMinutes = Math.max(1, Math.round(words / 200));
   return {
     id: slug,
     slug,
     title,
     excerpt: fm.meta_description,
-    kind: 'guide',
+    kind,
     category: fm.category || 'trade',
     author: 'Baalvion Research',
+    readTime: `${readMinutes} min read`,
     blocks,
     faqs,
-    custom: { kind: 'guide', target_keyword: fm.target_keyword },
+    custom: { kind, target_keyword: fm.target_keyword },
     seo: {
       title: fm.seo_title || title,
       description: fm.meta_description,
@@ -298,30 +299,25 @@ function parseGuide(slug: string, raw: string): RichDoc {
   };
 }
 
-let cache: RichDoc[] | null = null;
+const caches: Record<string, RichDoc[]> = {};
 
-export function loadGuides(): RichDoc[] {
-  if (cache) return cache;
+/** Load and parse all Markdown docs in `content-gen/<dirName>` as `kind`. */
+export function loadSection(dirName: string, kind: string, order: string[] = []): RichDoc[] {
+  const key = `${dirName}:${kind}`;
+  if (caches[key]) return caches[key];
+  const dir = path.join(CONTENT_ROOT, dirName);
   let files: string[] = [];
   try {
-    files = fs.readdirSync(GUIDES_DIR).filter((f) => f.endsWith('.md') && !f.startsWith('_'));
+    files = fs.readdirSync(dir).filter((f) => f.endsWith('.md') && !f.startsWith('_'));
   } catch {
     return [];
   }
-  const docs = files.map((f) => parseGuide(f.replace(/\.md$/, ''), fs.readFileSync(path.join(GUIDES_DIR, f), 'utf8')));
+  const docs = files.map((f) => parseDoc(f.replace(/\.md$/, ''), fs.readFileSync(path.join(dir, f), 'utf8'), kind));
   docs.sort((a, b) => {
-    const ia = GUIDE_SLUGS.indexOf(a.slug);
-    const ib = GUIDE_SLUGS.indexOf(b.slug);
+    const ia = order.indexOf(a.slug);
+    const ib = order.indexOf(b.slug);
     return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
   });
-  cache = docs;
+  caches[key] = docs;
   return docs;
-}
-
-export function getGuide(slug: string): RichDoc | null {
-  return loadGuides().find((g) => g.slug === slug) || null;
-}
-
-export function getGuideSlugs(): string[] {
-  return loadGuides().map((g) => g.slug);
 }
