@@ -9,6 +9,8 @@
 #   • about-baalvion        → about.baalvion.com
 #   • baalvion-ir           → ir.baalvion.com
 #   • amarise-maison-avenue → amarisemaisonavenue.com
+#   • law-elite-network     → lawelitenetwork.com
+#   • baalvion-mining       → mining.baalvion.com
 #
 #   bash deploy/about-baalvion-cms/init-data.sh
 #   # validate against a throwaway env:  CMS_ENV_FILE=deploy/about-baalvion-cms/.env.smoke bash ...
@@ -87,17 +89,26 @@ echo "  --- amarise-maison-avenue (amarisemaisonavenue.com) ---"
 WID=$(resolve_wid amarise-maison-avenue); [ -n "$WID" ] || { echo "ERROR: amarise-maison-avenue not registered"; exit 1; }
 seed_run -e AMARISE_WEBSITE_ID="$WID" cms-seed node scripts/seedAmariseEditorial.cjs
 
+echo "  --- law-elite-network (lawelitenetwork.com) ---"
+WID=$(resolve_wid law-elite-network); [ -n "$WID" ] || { echo "ERROR: law-elite-network not registered"; exit 1; }
+seed_run -e LAW_WEBSITE_ID="$WID" cms-seed node scripts/seedLawElite.cjs
+seed_run -e LAW_WEBSITE_ID="$WID" cms-seed node scripts/seedLawArticlesLongform.cjs
+
+echo "  --- baalvion-mining (mining.baalvion.com) ---"
+WID=$(resolve_wid baalvion-mining); [ -n "$WID" ] || { echo "ERROR: baalvion-mining not registered"; exit 1; }
+seed_run -e MINING_WEBSITE_ID="$WID" cms-seed node scripts/seedBaalvionMining.cjs
+
 echo "  --- publish: mark all public seeded content as published ---"
 # publishWebsite.cjs resolves the site via the authenticated websites LIST, which only
 # returns sites the user is a MEMBER of — register doesn't add membership, so it can't
 # find freshly-registered sites. The public delivery API serves rows where
 # status='published' AND visibility='public', so publish those directly (deploy-time bulk
 # publish of initial seed content). This also catches any seed that deferred publishing.
-psql_q -c "UPDATE cms.cms_contents c SET status='published', published_at=COALESCE(published_at, now()), updated_at=now() FROM cms.cms_websites w WHERE c.website_id=w.id AND w.slug IN ('about-baalvion','baalvion-ir','amarise-maison-avenue') AND c.status<>'published' AND c.visibility='public';"
+psql_q -c "UPDATE cms.cms_contents c SET status='published', published_at=COALESCE(published_at, now()), updated_at=now() FROM cms.cms_websites w WHERE c.website_id=w.id AND w.slug IN ('about-baalvion','baalvion-ir','amarise-maison-avenue','law-elite-network','baalvion-mining') AND c.status<>'published' AND c.visibility='public';"
 
 echo ""
 echo "[7/7] Verify — published item count per site (public delivery API the frontends read):"
-for slug in about-baalvion baalvion-ir amarise-maison-avenue; do
+for slug in about-baalvion baalvion-ir amarise-maison-avenue law-elite-network baalvion-mining; do
   n=$(docker compose $CF exec -T cms-service node -e \
     "fetch('http://localhost:3011/api/v1/public/$slug/content?limit=200').then(r=>r.json()).then(j=>console.log((j.data||[]).length)).catch(()=>console.log('ERR'))" 2>/dev/null | tr -d '[:space:]')
   echo "    $slug: $n published items"
@@ -106,4 +117,5 @@ done
 echo ""
 echo "DONE. Each site above should show a non-zero item count."
 echo "Next: in each site's Vercel project set CMS_PUBLIC_URL=https://<your-cms-domain>/api/v1/public"
-echo "      and CMS_WEBSITE_SLUG to its slug (about-baalvion / baalvion-ir / amarise-maison-avenue), then redeploy."
+echo "      and CMS_WEBSITE_SLUG to its slug (about-baalvion / baalvion-ir / amarise-maison-avenue /"
+echo "      law-elite-network / baalvion-mining), then redeploy."
