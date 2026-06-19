@@ -9,6 +9,22 @@ const { parsePagination, buildPaginated } = require('../utils/pagination');
 const identityService = require('./identityService');
 const { emitSafe, CmsEvents } = require('../platform/events');
 
+/**
+ * Resolve a caller "scope" into the org filter for a website query.
+ *
+ * Accepts either the new scope object `{ orgId, isPlatformAdmin }` threaded from the
+ * controller, or a legacy plain `orgId` string (kept for any direct callers/scripts).
+ * A platform principal (super_admin/owner/admin) is NOT org-scoped — they see and
+ * manage every website across orgs, consistent with cmsAccess.loadCmsRole already
+ * granting them cms_admin on any site. Everyone else is filtered to their org.
+ */
+function orgFilter(scope) {
+    if (scope && typeof scope === 'object') {
+        return scope.isPlatformAdmin ? {} : { organizationId: scope.orgId };
+    }
+    return { organizationId: scope };
+}
+
 /** Attach the platform user (name/email/avatar) to each membership row for display. */
 async function enrichMembers(members) {
     const rows = members.map((m) => (typeof m.toJSON === 'function' ? m.toJSON() : m));
@@ -24,10 +40,10 @@ async function enrichMembers(members) {
     });
 }
 
-async function listWebsites(orgId, query = {}) {
+async function listWebsites(scope, query = {}) {
     const { page, limit, offset } = parsePagination(query);
     const { status, search } = query;
-    const where = { organizationId: orgId };
+    const where = { ...orgFilter(scope) };
     if (status) where.status = status;
     if (search) where.name = { [Op.iLike]: `%${search}%` };
 
@@ -38,12 +54,12 @@ async function listWebsites(orgId, query = {}) {
     return buildPaginated(rows, count, { page, limit });
 }
 
-async function getWebsite(websiteId, orgId) {
+async function getWebsite(websiteId, scope) {
     const cacheKey = cache.keys.website(websiteId);
     const cached = await cache.get(cacheKey);
     if (cached) return cached;
 
-    const website = await CmsWebsite.findOne({ where: { id: websiteId, organizationId: orgId } });
+    const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
     const data = website.toJSON();
@@ -68,27 +84,28 @@ async function createWebsite(orgId, userId, body) {
     return website.toJSON();
 }
 
-async function updateWebsite(websiteId, orgId, body) {
-    const website = await CmsWebsite.findOne({ where: { id: websiteId, organizationId: orgId } });
+async function updateWebsite(websiteId, scope, body) {
+    const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
     await website.update(body);
     await cache.del(cache.keys.website(websiteId));
-    await cache.delPattern(`cms:websites:org:${orgId}*`);
+    await cache.delPattern(`cms:websites:org:${website.organizationId}*`);
     return website.toJSON();
 }
 
-async function deleteWebsite(websiteId, orgId) {
-    const website = await CmsWebsite.findOne({ where: { id: websiteId, organizationId: orgId } });
+async function deleteWebsite(websiteId, scope) {
+    const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
+    const ownerOrgId = website.organizationId;
     await website.destroy();
     await cache.del(cache.keys.website(websiteId));
-    await cache.delPattern(`cms:websites:org:${orgId}*`);
+    await cache.delPattern(`cms:websites:org:${ownerOrgId}*`);
 }
 
-async function listMembers(websiteId, orgId) {
-    const website = await CmsWebsite.findOne({ where: { id: websiteId, organizationId: orgId } });
+async function listMembers(websiteId, scope) {
+    const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
     const members = await CmsWebsiteMember.findAll({ where: { websiteId }, order: [['createdAt', 'DESC']] });
@@ -101,8 +118,8 @@ async function listMembers(websiteId, orgId) {
  * resolved against the platform identity store; an unknown email is a 404 so the
  * console can tell the admin to create the user under Identity → Users first.
  */
-async function addMember(websiteId, orgId, body, inviterId = null) {
-    const website = await CmsWebsite.findOne({ where: { id: websiteId, organizationId: orgId } });
+async function addMember(websiteId, scope, body, inviterId = null) {
+    const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
     let userId = body.userId;
@@ -142,8 +159,8 @@ async function addMember(websiteId, orgId, body, inviterId = null) {
     return enriched;
 }
 
-async function updateMemberRole(websiteId, orgId, userId, role) {
-    const website = await CmsWebsite.findOne({ where: { id: websiteId, organizationId: orgId } });
+async function updateMemberRole(websiteId, scope, userId, role) {
+    const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
     const member = await CmsWebsiteMember.findOne({ where: { websiteId, userId } });
@@ -154,8 +171,8 @@ async function updateMemberRole(websiteId, orgId, userId, role) {
     return enriched;
 }
 
-async function removeMember(websiteId, orgId, userId) {
-    const website = await CmsWebsite.findOne({ where: { id: websiteId, organizationId: orgId } });
+async function removeMember(websiteId, scope, userId) {
+    const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
     const member = await CmsWebsiteMember.findOne({ where: { websiteId, userId } });
@@ -165,8 +182,8 @@ async function removeMember(websiteId, orgId, userId) {
 }
 
 /** Typeahead for the invite dialog: find platform users to add to this website. */
-async function searchUsers(websiteId, orgId, q) {
-    const website = await CmsWebsite.findOne({ where: { id: websiteId, organizationId: orgId } });
+async function searchUsers(websiteId, scope, q) {
+    const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
     const users = await identityService.search(q);
