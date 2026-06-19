@@ -10,9 +10,6 @@ import {
   Plus,
   Minus,
   Info,
-  ShieldCheck,
-  Gem,
-  BadgeCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/store";
@@ -124,93 +121,6 @@ function ConditionMatrix({ condition }: { condition: string }) {
       <div className="bg-cream px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-[15px] tracking-wide text-gray-600">
         {CONDITIONS[active].description}
       </div>
-    </div>
-  );
-}
-
-// ─── Provenance Panel ──────────────────────────────────────────────────────
-// Surfaces the resale/consignment provenance returned on the product detail:
-// condition grade, authenticity guarantee, one-of-a-kind flag, and (when present)
-// a deep-link to verify the certificate of authenticity. Renders nothing when the
-// product carries no provenance signals.
-const CONDITION_GRADE_LABEL: Record<string, string> = {
-  pristine: "Pristine",
-  excellent: "Excellent",
-  very_good: "Very Good",
-  good: "Good",
-  fair: "Fair",
-};
-
-function ProvenancePanel({
-  product,
-  countryCode,
-}: {
-  product: Product;
-  countryCode: string;
-}) {
-  const gradeKey = product.conditionGrade
-    ? String(product.conditionGrade).toLowerCase()
-    : null;
-  const gradeLabel = gradeKey
-    ? CONDITION_GRADE_LABEL[gradeKey] ?? gradeKey.replace(/_/g, " ")
-    : null;
-  const isAuthenticated =
-    !!product.authenticityCertificateCode ||
-    (product.authenticityStatus
-      ? ["verified", "authenticated", "certified"].includes(
-          String(product.authenticityStatus).toLowerCase()
-        )
-      : false);
-  const certCode = product.authenticityCertificateCode;
-
-  // Nothing to show — keep the panel out of the DOM entirely.
-  if (!gradeLabel && !isAuthenticated && !product.isOneOfAKind && !certCode) {
-    return null;
-  }
-
-  return (
-    <div className="border border-gray-200 bg-cream/40 p-4 sm:p-5 space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        {gradeLabel && (
-          <span className="inline-flex items-center gap-1.5 bg-white border border-gray-300 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-gray-800">
-            <BadgeCheck className="w-3.5 h-3.5 text-plum" />
-            {gradeLabel}
-          </span>
-        )}
-        {isAuthenticated && (
-          <span className="inline-flex items-center gap-1.5 bg-emerald-50 border border-emerald-200 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-emerald-700">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Authenticity Guaranteed
-          </span>
-        )}
-        {product.isOneOfAKind && (
-          <span className="inline-flex items-center gap-1.5 bg-plum/10 border border-plum/20 px-3 py-1 text-[10px] font-bold tracking-[0.2em] uppercase text-plum">
-            <Gem className="w-3.5 h-3.5" />
-            One of a Kind
-          </span>
-        )}
-      </div>
-
-      {product.conditionDetails?.trim() && (
-        <p className="text-[12px] sm:text-[13px] text-gray-600 leading-relaxed italic">
-          {product.conditionDetails}
-        </p>
-      )}
-
-      {certCode && (
-        <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-500">
-            Certificate&nbsp;
-            <span className="font-mono text-gray-800 tracking-wider">{certCode}</span>
-          </span>
-          <Link
-            href={`/${countryCode}/authenticity?code=${encodeURIComponent(certCode)}#verify`}
-            className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-plum hover:text-black underline underline-offset-4 transition-colors"
-          >
-            <ShieldCheck className="w-3.5 h-3.5" /> Verify Certificate
-          </Link>
-        </div>
-      )}
     </div>
   );
 }
@@ -487,9 +397,6 @@ export default function ProductInfoPanel({
 
       {/* ── Condition Matrix ── */}
       <ConditionMatrix condition={condition || "New"} />
-
-      {/* ── Provenance (condition grade, authenticity, one-of-a-kind, certificate) ── */}
-      <ProvenancePanel product={product} countryCode={country} />
 
       {/* ── Accordions ── */}
       <div className="space-y-0">

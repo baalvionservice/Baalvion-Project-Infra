@@ -5,26 +5,6 @@ import type { NextConfig } from 'next';
 // only; prod stays strict. 'unsafe-inline' stays for inline JSON-LD / Next bootstrap.
 const isDev = process.env.NODE_ENV !== 'production';
 
-// This console can also run as a PRODUCTION build (`next start`) while still pointing at
-// http://localhost backends — e.g. the local pm2 fleet. The browser calls those services
-// cross-origin (cms:3011, admin:3021, realtime ws:3026, …), so the strict prod CSP
-// `connect-src 'self' https:` BLOCKS every one of those XHR/WS calls and leaves every data
-// panel empty (no error, just no data). Detect local backends from the configured service
-// URLs (or an explicit ALLOW_LOCAL_BACKENDS opt-in) and widen connect-src to include
-// http/ws localhost — WITHOUT weakening the CSP for a real https deployment.
-const backendsConfig = [
-  process.env.NEXT_PUBLIC_API_URL,
-  process.env.NEXT_PUBLIC_CMS_API_URL,
-  process.env.NEXT_PUBLIC_ADMIN_API_URL,
-  process.env.NEXT_PUBLIC_SESSION_API_URL,
-  process.env.NEXT_PUBLIC_OAUTH_URL,
-  process.env.NEXT_PUBLIC_WS_URL,
-  process.env.NEXT_PUBLIC_SERVICE_URLS,
-].filter(Boolean).join(' ');
-const usesLocalBackends = /\b(?:https?|wss?):\/\/(?:localhost|127\.0\.0\.1)/.test(backendsConfig);
-const allowLocalConnections = isDev || usesLocalBackends || process.env.ALLOW_LOCAL_BACKENDS === 'true';
-const localConnectSrc = ' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:*';
-
 // The admin console talks to many backend services through the same-origin /api/proxy rewrite, so
 // connect-src stays permissive (https: + self) rather than enumerating every microservice origin.
 const cspHeader = `
@@ -33,7 +13,7 @@ const cspHeader = `
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   img-src 'self' data: https: blob:;
   font-src 'self' https://fonts.gstatic.com data:;
-  connect-src 'self' https:${allowLocalConnections ? localConnectSrc : ''};
+  connect-src 'self' https:${isDev ? ' http://localhost:* ws://localhost:* ws://127.0.0.1:*' : ''};
   frame-ancestors 'none';
   base-uri 'self';
   object-src 'none';

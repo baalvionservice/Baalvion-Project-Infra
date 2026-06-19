@@ -131,17 +131,8 @@ function serializeProductDetail(p, opts = {}) {
         ...serializeProductListItem(p, opts),
         description: p.description || '',
         specialNotes: cf.specialNotes,
-        // Luxury-resale provenance. Prefer the first-class columns; fall back to the legacy
-        // custom_fields keys for rows authored before the condition/authenticity migration.
-        condition: p.condition ?? cf.condition,
-        conditionGrade: p.conditionGrade ?? cf.conditionGrade,
-        // conditionDetails is the storefront's existing prose field — back it with the new
-        // condition_notes column, falling back to the legacy custom_fields key.
-        conditionDetails: p.conditionNotes ?? cf.conditionDetails ?? cf.conditionNotes,
-        authenticityStatus: p.authenticityStatus ?? cf.authenticityStatus,
-        authenticityCertificateCode: p.authenticityCertificateCode ?? cf.authenticityCertificateCode,
-        isOneOfAKind: p.isOneOfAKind != null ? !!p.isOneOfAKind : !!cf.isOneOfAKind,
-        serialNumber: p.serialNumber ?? cf.serialNumber,
+        condition: cf.condition,
+        conditionDetails: cf.conditionDetails,
         scope: cf.scope || 'global',
         currentVersion: cf.currentVersion || 1,
         conflictStrategy: cf.conflictStrategy,

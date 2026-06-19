@@ -80,8 +80,6 @@ import {
   TAX_RULES,
 } from "./mock-data";
 import { MOCK_SESSION_USER, MaisonUser } from "./permissions/mock-users";
-import { wishlistApi } from "./api-client";
-import { getAccessToken } from "./auth";
 import { COUNTRIES_CONFIG, BRANDS_CONFIG } from "./mock-global-config";
 import { MOCK_INQUIRIES, MOCK_CONVERSATIONS } from "./mock-sales";
 import { ACQUISITION_SCRIPTS } from "./mock-sales-system";
@@ -476,86 +474,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     initializeGlobalHandlers();
   }, []);
 
-  // Wishlist persistence + server sync.
-  //
-  // GUEST: localStorage is the source of truth (survives reloads, no account needed).
-  // AUTHENTICATED: the wishlist-service is authoritative. We load the server wishlist,
-  // best-effort merge any locally-saved guest items UP to the server (merge-on-login),
-  // and thereafter every toggle mirrors to the API. localStorage is still written so the
-  // guest experience is intact and a logout falls back to the last known list.
-  //
-  // The server stores only { productId, variantId? }; the storefront keeps full Product
-  // objects, so server productIds are resolved against the loaded `products` catalog.
-  const _wishlistHydrated = useRef(false);
-  const _wishlistServerSynced = useRef(false);
-
-  // 1) Hydrate from localStorage on mount (client-only, guest source of truth).
+  // Persist the wishlist locally so it survives reloads. There is no wishlist
+  // backend yet, so localStorage is the source of truth for the Private Archive.
   useEffect(() => {
     try {
       const raw = window.localStorage.getItem("amarise.wishlist");
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) setWishlist(parsed);
-      }
+      if (raw) setWishlist(JSON.parse(raw));
     } catch {
       /* storage unavailable — wishlist stays in-memory for this session */
     }
-    _wishlistHydrated.current = true;
   }, []);
-
-  // 2) Persist every change to localStorage (after hydration, so the empty initial
-  //    state can never clobber a saved list before it is restored).
   useEffect(() => {
-    if (!_wishlistHydrated.current) return;
     try {
       window.localStorage.setItem("amarise.wishlist", JSON.stringify(wishlist));
     } catch {
       /* ignore */
     }
   }, [wishlist]);
-
-  // 3) Server sync for authenticated shoppers. Runs once a token is present AND the
-  //    catalog has loaded (so server productIds resolve to full Product objects). Merges
-  //    local → server best-effort, then reconciles the local list with the server's.
-  useEffect(() => {
-    if (!_wishlistHydrated.current) return;
-    if (_wishlistServerSynced.current) return;
-    if (!getAccessToken()) return; // guest — localStorage only
-    if (products.length === 0) return; // wait for catalog so ids resolve to Products
-
-    let cancelled = false;
-    (async () => {
-      const res = await wishlistApi.getMine();
-      if (cancelled || !res.ok) return; // fail-soft: keep the local list on error
-
-      const serverIds = new Set((res.data.items ?? []).map((i) => i.productId));
-
-      // Merge-on-login: push locally-saved items the server does not have yet.
-      const localOnly = wishlist.filter((p) => !serverIds.has(p.id));
-      await Promise.allSettled(
-        localOnly.map((p) => wishlistApi.addItem(p.id)),
-      );
-      localOnly.forEach((p) => serverIds.add(p.id));
-
-      if (cancelled) return;
-
-      // Reconcile the in-memory list to the authoritative server set: keep already-loaded
-      // Product objects, resolve the rest from the catalog (drop ids we cannot resolve).
-      const byId = new Map(products.map((p) => [p.id, p]));
-      const reconciled: Product[] = [];
-      serverIds.forEach((id) => {
-        const existing = wishlist.find((p) => p.id === id) ?? byId.get(id);
-        if (existing) reconciled.push(existing);
-      });
-      setWishlist(reconciled);
-      _wishlistServerSynced.current = true;
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-    // Re-run when the catalog hydrates; the guards above make repeat runs cheap/no-ops.
-  }, [products, wishlist]);
 
   // Persist the shopping bag locally so it survives reloads / new tabs (the order-service cart
   // API is cartId-keyed and created at checkout; localStorage is the cross-reload source for the
@@ -844,19 +779,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     clearCart: () => setCart([]),
     setCartOpen,
     toggleWishlist: (p) =>
-      setWishlist((prev) => {
-        const isRemoving = !!prev.find((i) => i.id === p.id);
-        // Mirror to the wishlist-service for authenticated shoppers (fire-and-forget,
-        // optimistic). Guests persist via localStorage only. Errors are swallowed so the
-        // UI stays responsive; the next authenticated load reconciles any drift.
-        if (getAccessToken()) {
-          const op = isRemoving ? wishlistApi.removeItem(p.id) : wishlistApi.addItem(p.id);
-          void op.catch(() => {
-            /* best-effort: local state is authoritative for this session */
-          });
-        }
-        return isRemoving ? prev.filter((i) => i.id !== p.id) : [...prev, p];
-      }),
+      setWishlist((prev) =>
+        prev.find((i) => i.id === p.id)
+          ? prev.filter((i) => i.id !== p.id)
+          : [...prev, p]
+      ),
     topUpWallet: (amt) =>
       setVips((prev) =>
         prev.map((v) =>
