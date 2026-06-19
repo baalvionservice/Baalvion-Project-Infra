@@ -31,6 +31,19 @@ module.exports = function (sequelize, DataTypes) {
         stockQuantity: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
         trackInventory: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
         allowBackorder: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        // Luxury-resale / consignment provenance (promoted from custom_fields to typed columns).
+        // condition mirrors the DB CHECK allowlist; the rest are free-form/optional. All nullable
+        // so non-resale catalog rows are unaffected.
+        condition: {
+            type: DataTypes.STRING(40), allowNull: true,
+            validate: { isIn: [['pristine', 'excellent', 'very_good', 'good', 'fair', 'vintage']] },
+        },
+        conditionGrade: { type: DataTypes.STRING(40), allowNull: true },
+        conditionNotes: { type: DataTypes.TEXT, allowNull: true },
+        authenticityStatus: { type: DataTypes.STRING(40), allowNull: true },
+        authenticityCertificateCode: { type: DataTypes.STRING(120), allowNull: true },
+        isOneOfAKind: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        serialNumber: { type: DataTypes.STRING(120), allowNull: true },
         downloadLimit: { type: DataTypes.INTEGER, allowNull: true },
         downloadExpiry: { type: DataTypes.INTEGER, allowNull: true },
         relatedProductIds: { type: DataTypes.ARRAY(DataTypes.UUID), defaultValue: [] },
