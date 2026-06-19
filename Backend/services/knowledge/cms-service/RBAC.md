@@ -21,15 +21,5 @@ Canonical auth via `@baalvion/auth-node`. `req.auth` canonical; back-compat
 `PLATFORM_BYPASS_ROLES = ['super_admin','owner','admin']` → grants `cms_admin` (level 100).
 The local exact-match `requireRole` was replaced with auth-node's hierarchical guard.
 
-## Website org-scope bypass for platform admins
-`controller/websiteController.js` builds a `callerScope = { orgId, isPlatformAdmin }`
-(`isPlatformAdmin` reuses `PLATFORM_BYPASS_ROLES`). `service/websiteService.js#orgFilter`
-drops the `organizationId` filter when `isPlatformAdmin` is true, so a platform principal
-lists/reads/manages **every** website across orgs — consistent with `loadCmsRole` already
-granting them `cms_admin` on any site. Non-platform callers stay strictly org-scoped.
-This fixes the "websites list is empty" glitch that occurred when a platform owner's token
-carried a non-platform org (personal workspace / test org) while all sites live under the
-`Baalvion Platform` org.
-
 ## Revocation
 Consumer-side JTI blacklist not yet wired (enforced at issuer). Follow-up.

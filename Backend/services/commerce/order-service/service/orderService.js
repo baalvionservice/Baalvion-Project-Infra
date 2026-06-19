@@ -15,85 +15,6 @@ const markets = require('../config/markets');
 const pricing = require('./pricing');
 const fxRateProvider = require('./fxRateProvider');
 const { sendOrderEmail } = require('./orderNotifications');
-const inventoryClient = require('./inventoryClient');
-const alerts = require('./alerts');
-
-// ── Cross-service inventory reservation (the AUTHORITATIVE oversell guard) ──────────────────────
-// inventory-service owns warehouse-scoped stock and an atomic, row-locked reserve→confirm→release
-// state machine. createOrder reserves each line's resolved SKU via inventoryClient; the returned
-// lockId is recorded on order.metadata.inventoryLocks so the capture path can CONFIRM the hold and
-// the cancel/fail path can RELEASE it.
-//
-// "Tracked" signal: order-service re-prices each line from commerce tables (products/variants/
-// pricing) — that path does NOT expose a trackInventory flag, and stock lives in inventory-service,
-// not commerce. So we do NOT pre-classify lines. Instead we attempt a reserve for EVERY line with a
-// resolvable SKU and let inventory-service be the authority on "tracked":
-//   • 201            → the SKU is tracked and a hold was taken (lockId recorded).
-//   • 409 CONFLICT   → the SKU is tracked AND out of stock → HARD-FAIL the order (release prior
-//                      holds taken in THIS order, then throw 409 OUT_OF_STOCK).
-//   • anything else  → FAIL-OPEN (untracked 404, inventory outage/5xx/timeout, or disabled client):
-//                      proceed with the order and emit an ops alert for reconciliation. This keeps
-//                      checkout resilient to an inventory outage, exactly like the ledger pattern.
-//
-// This runs POST-COMMIT (after the order row + the existing in-DB reserveInventory have committed),
-// because it must persist the returned lockIds onto the already-created order. The in-DB
-// reserveInventory remains the same-DB backstop; this cross-service hold is the distributed guard.
-
-/**
- * Reserve every line of an order against inventory-service. Returns the locks to persist, or throws
- * 409 OUT_OF_STOCK (after releasing any holds already taken) when a tracked SKU is unavailable.
- * @returns {Promise<Array<{ lockId: string, sku: string, quantity: number }>>}
- */
-async function reserveOrderInventory(storeId, orderId, items, userId) {
-    if (!config.inventory.enabled) return []; // disabled → fail-open, nothing to record
-    const taken = [];
-    for (const i of items) {
-        const sku = i.sku || i.variantId;
-        const result = await inventoryClient.reserve(storeId, { variantId: sku, sku, productId: i.productId, quantity: i.quantity, userId });
-        if (result.ok) {
-            taken.push({ lockId: result.lockId, sku, quantity: i.quantity });
-            continue;
-        }
-        if (result.conflict) {
-            // Tracked + out of stock → don't place an order we can't fulfil. Release prior holds first.
-            await releaseLocks(storeId, taken, orderId);
-            throw new AppError('OUT_OF_STOCK', `Insufficient stock for ${sku || i.productId}`, 409, result.detail || {});
-        }
-        // Fail-open (untracked / outage / disabled). Alert only on a genuine reachability failure,
-        // not on an untracked-SKU 404 (which is the documented "not tracked → allow" case).
-        if (!result.skipped && result.status !== 404) {
-            alerts.inventoryUnavailable(storeId, { orderId, sku, phase: 'reserve', reason: result.error || `status ${result.status}` }).catch(() => {});
-        }
-    }
-    return taken;
-}
-
-/** Best-effort release of a set of recorded locks (compensating rollback / cancel / fail). */
-async function releaseLocks(storeId, locks, orderId) {
-    for (const l of (locks || [])) {
-        const r = await inventoryClient.release(storeId, l.lockId);
-        if (!r.ok && !r.skipped) {
-            alerts.inventoryUnavailable(storeId, { orderId, sku: l.sku, phase: 'release', reason: r.error || `status ${r.status}` }).catch(() => {});
-        }
-    }
-}
-
-/** Best-effort confirm of a set of recorded locks (payment capture commits the held stock). */
-async function confirmLocks(storeId, locks, orderId) {
-    for (const l of (locks || [])) {
-        const r = await inventoryClient.confirm(storeId, l.lockId, orderId);
-        if (!r.ok && !r.skipped) {
-            alerts.inventoryUnavailable(storeId, { orderId, sku: l.sku, phase: 'confirm', reason: r.error || `status ${r.status}` }).catch(() => {});
-        }
-    }
-}
-
-/** Read the inventory locks recorded on an order's metadata (set by createOrder). */
-function locksFromOrder(order) {
-    const meta = order && order.metadata;
-    const locks = meta && meta.inventoryLocks;
-    return Array.isArray(locks) ? locks : [];
-}
 
 // Money movements are mirrored into the double-entry ledger via the TRANSACTIONAL OUTBOX
 // (service/ledgerOutbox.js): the ledger event is committed in the same DB transaction as the
@@ -434,38 +355,8 @@ async function createOrder(storeId, body, actor) {
         return o;
     });
 
-    // ── Cross-service inventory reservation (AUTHORITATIVE oversell guard) ───────
-    // Runs POST-COMMIT so the order id exists to bind locks to. A 409 (tracked SKU out of stock)
-    // hard-fails the order: we release any holds taken here AND cancel the just-committed order
-    // (mark cancelled + unwind the in-DB reservation) so a placed-but-unfulfillable order is never
-    // left behind, then surface 409 OUT_OF_STOCK to the shopper. Any other failure is fail-open
-    // (handled inside reserveOrderInventory) so an inventory outage never breaks checkout.
-    const reserveUserId = (actor && actor.userId != null) ? actor.userId : null;
-    let inventoryLocks = [];
-    try {
-        inventoryLocks = await reserveOrderInventory(storeId, order.id, items, reserveUserId);
-    } catch (err) {
-        if (err instanceof AppError && err.statusCode === 409) {
-            // Compensating rollback of the committed order (prior cross-service holds already released
-            // inside reserveOrderInventory). Best-effort; never mask the original 409.
-            await cancelOrder(storeId, order.id, 'Out of stock at reservation').catch(() => {});
-        }
-        throw err;
-    }
-    // Persist the lock handles on the order so capture can confirm them and cancel/fail can release.
-    if (inventoryLocks.length) {
-        try {
-            await order.update({ metadata: { ...(order.metadata || {}), inventoryLocks } });
-        } catch (e) {
-            // The holds exist in inventory-service but we couldn't record them → they will lapse on
-            // TTL (no stock leak). Alert so ops can reconcile; never fail an otherwise-placed order.
-            console.error(JSON.stringify({ evt: 'inventory.lock_persist_failed', storeId, orderId: order.id, error: e.message }));
-            alerts.inventoryUnavailable(storeId, { orderId: order.id, phase: 'persist_locks', reason: e.message }).catch(() => {});
-        }
-    }
-
     // Phase 6: structured audit log (orderNumber is the cross-service correlation handle).
-    console.info(JSON.stringify({ evt: 'order.created', storeId, orderId: order.id, orderNumber, totalAmount: Number(order.totalAmount), discountAmount: Number(order.discountAmount), currencyCode, market, taxType, taxInclusive, lineCount: items.length, inventoryLocks: inventoryLocks.length }));
+    console.info(JSON.stringify({ evt: 'order.created', storeId, orderId: order.id, orderNumber, totalAmount: Number(order.totalAmount), discountAmount: Number(order.discountAmount), currencyCode, market, taxType, taxInclusive, lineCount: items.length }));
     // Transactional order-confirmation email (post-commit, fire-and-forget, fail-open).
     sendOrderEmail('orderConfirmation', order.toJSON(), items).catch(() => {});
     return order.toJSON();
@@ -527,13 +418,10 @@ async function cancelOrder(storeId, orderId, reason) {
     const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
     if (['delivered', 'refunded', 'cancelled'].includes(order.status)) throw new AppError('CONFLICT', `Cannot cancel a ${order.status} order`, 409);
-    const locks = locksFromOrder(order);
     await sequelize.transaction(async (t) => {
         await order.update({ status: 'cancelled', cancelledAt: new Date(), cancelReason: reason }, { transaction: t });
         await unwindReservation(t, storeId, orderId, 'release'); // Phase 3: free reserved stock
     });
-    // Release the cross-service inventory holds (post-commit, idempotent, fail-open).
-    await releaseLocks(storeId, locks, orderId);
     await cache.del(cache.keys.order(orderId));
     return order.toJSON();
 }
@@ -577,9 +465,6 @@ async function recordPayment(storeId, orderId, body) {
             amount: body.amount, currencyCode: body.currencyCode || order.currencyCode,
             provider: body.provider, transactionId: body.transactionId,
         });
-        // Commit the cross-service inventory holds (reserved → deducted) on this manual capture.
-        // Idempotent + fail-open (an inventory hiccup never re-fails an already-recorded payment).
-        await confirmLocks(storeId, locksFromOrder(order), orderId);
         // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
         OrdersOrderItem.findAll({ where: { orderId } })
             .then((items) => sendOrderEmail('orderPaid', order.toJSON(), items))
@@ -771,9 +656,6 @@ async function confirmPayment(storeId, orderId, intentId, actor, verification, s
     // The ledger mirror is now enqueued transactionally inside the capture above (no post-commit
     // fire-and-forget). Only the payment-received email remains best-effort here.
     if (!out.replay) {
-        // Commit the cross-service inventory holds (reserved → deducted) now that payment captured.
-        // Post-commit + idempotent + fail-open (never re-fail a captured order on an inventory hiccup).
-        await confirmLocks(storeId, locksFromOrder(order0), orderId);
         // Payment-received email (post-commit, fire-and-forget, fail-open; de-duped by idempotencyKey).
         OrdersOrderItem.findAll({ where: { orderId } })
             .then((items) => sendOrderEmail('orderPaid', fresh.toJSON(), items))
@@ -785,15 +667,12 @@ async function confirmPayment(storeId, orderId, intentId, actor, verification, s
 async function failPayment(storeId, orderId, intentId, reason) {
     const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
-    const locks = locksFromOrder(order);
     await getProvider().failPayment({ intentId, reason });
     await sequelize.transaction(async (t) => {
         await order.update({ paymentStatus: 'failed' }, { transaction: t });
         if (intentId) await OrdersOrderPayment.update({ status: 'failed' }, { where: { orderId, transactionId: intentId }, transaction: t });
         await unwindReservation(t, storeId, orderId, 'release'); // Phase 3: free reserved stock on failure
     });
-    // Release the cross-service inventory holds (post-commit, idempotent, fail-open).
-    await releaseLocks(storeId, locks, orderId);
     await cache.del(cache.keys.order(orderId));
     console.warn(JSON.stringify({ evt: 'payment.failed', storeId, orderId, intentId, reason }));
     return order.toJSON();
@@ -803,15 +682,12 @@ async function cancelPayment(storeId, orderId, intentId) {
     const order = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
     if (!order) throw new AppError('NOT_FOUND', 'Order not found', 404);
     if (order.paymentStatus === 'paid') throw new AppError('CONFLICT', 'Cannot cancel a paid order (use refund)', 409);
-    const locks = locksFromOrder(order);
     await getProvider().cancelPayment({ intentId });
     await sequelize.transaction(async (t) => {
         await order.update({ paymentStatus: 'voided', status: 'cancelled' }, { transaction: t });
         if (intentId) await OrdersOrderPayment.update({ status: 'voided' }, { where: { orderId, transactionId: intentId }, transaction: t });
         await unwindReservation(t, storeId, orderId, 'release'); // Phase 3: free reserved stock on cancel
     });
-    // Release the cross-service inventory holds (post-commit, idempotent, fail-open).
-    await releaseLocks(storeId, locks, orderId);
     await cache.del(cache.keys.order(orderId));
     console.info(JSON.stringify({ evt: 'payment.cancelled', storeId, orderId, intentId }));
     return order.toJSON();
@@ -910,13 +786,10 @@ async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, a
             amount: order.totalAmount, currencyCode: order.currencyCode,
             provider: intentPayment.provider, transactionId: providerPaymentId,
         }, t);
-        // Carry the recorded inventory locks out of the txn so we can confirm them post-commit.
-        return { ok: true, inventoryLocks: locksFromOrder(order) };
+        return { ok: true };
     });
     await cache.del(cache.keys.order(orderId));
     if (out.ok && !out.replay) {
-        // Commit the cross-service inventory holds (reserved → deducted). Idempotent + fail-open.
-        await confirmLocks(storeId, out.inventoryLocks || [], orderId);
         securityAudit.payment('captured', 'allow', { storeId, resource: { type: 'order', id: orderId }, metadata: { via: 'webhook', providerPaymentId } });
         const fresh = await OrdersOrder.findOne({ where: { id: orderId, storeId } });
         OrdersOrderItem.findAll({ where: { orderId } })
