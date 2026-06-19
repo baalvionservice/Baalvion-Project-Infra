@@ -43,25 +43,20 @@ it explicitly (`"nextjs"`) only when you want to remove ambiguity.
 
 ## Submodules — the rule that bites
 
-`Frontend/Global-Trade-Infrastructure-main` is a **git submodule** (its own repo,
-`Global-Trade-Infrastructure.git`), as is `Backend/services/commerce/trade-service`.
-Vercel checks out submodules **recursively**.
+All `Frontend/` apps (including `Global-Trade-Infrastructure-main`) are now plain
+folders tracked directly in this repo. The only remaining submodule is
+`Backend/services/commerce/trade-service`, which Vercel checks out **recursively**.
 
-> **The submodule gitlink must always point at a commit that is pushed to the
+> **A submodule gitlink must always point at a commit that is pushed to the
 > submodule's remote.** If the parent points at an unpushed commit, Vercel's
 > recursive checkout fails entirely with `fatal: ... not our ref` — before
-> install or build even start, with no useful build log.
+> install or build even start, with no useful build log. (`Global-Trade-Infrastructure`
+> was a submodule and hit exactly this; it has since been vendored into the
+> monorepo as a regular folder, which removes the whole class of problem.)
 
-To ship a change inside a submodule app:
-
-1. Commit + **push** in the submodule repo first (e.g. GTI `master`).
-2. In the parent repo, `git add <submodule-path>` to bump the gitlink, commit, and
-   open a PR to `main` (protected).
-
-(CI checks out **non-recursively** and inits only `trade-service` directly, to
-avoid pulling a possibly-unpushed GTI gitlink — see `ci.yml`. That's why a
-non-recursive frozen install also stays green: pnpm tolerates absent workspace
-members.)
+(CI checks out **non-recursively** and inits only `trade-service` directly — see
+`ci.yml`. That's why a non-recursive frozen install also stays green: pnpm
+tolerates absent workspace members.)
 
 ## Special cases
 

@@ -1,7 +1,3 @@
-[submodule "Frontend/Global-Trade-Infrastructure-main"]
-	path = Frontend/Global-Trade-Infrastructure-main
-	url = https://github.com/baalvionservice/Global-Trade-Infrastructure.git
-	branch = master
 [submodule "Backend/services/commerce/trade-service"]
 	path = Backend/services/commerce/trade-service
 	url = https://github.com/baalvionservice/trade-service.git
