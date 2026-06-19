@@ -1,0 +1,84 @@
+{
+  "topicNumber": 102,
+  "title": "Contact ImperialPedia",
+  "slug": "contact",
+  "seo": {
+    "seoTitle": "Contact Us | ImperialPedia",
+    "metaDescription": "Get in touch with ImperialPedia. Reach us for reader questions, editorial requests, business partnerships, and media inquiries. We read every message.",
+    "focusKeyword": "contact ImperialPedia",
+    "secondaryKeywords": ["contact us", "editorial requests", "business partnerships", "media inquiries", "reader questions"],
+    "searchIntent": "Navigational/Transactional — the reader wants to reach the team.",
+    "schemaRecommendation": "ContactPage + Organization"
+  },
+  "excerpt": "Reach the ImperialPedia team — for reader questions, editorial requests, business partnerships, and media inquiries. Here's how to get in touch and what to include.",
+  "intro": "We'd genuinely like to hear from you. Whether you spotted something that needs a correction, want to suggest a topic, or are exploring a partnership, your message helps make ImperialPedia better.\n\nTo get a useful reply as quickly as possible, pick the category below that fits your message and include the details we mention. The more context you give us, the faster we can help.",
+  "tableOfContents": ["Reader Questions and Feedback", "Editorial and Content Requests", "Business and Partnership Inquiries", "Media and Press", "General Contact Template", "Response Times"],
+  "sections": [
+    {
+      "heading": "Reader Questions and Feedback",
+      "paragraphs": [
+        "Have a question about something you read, or feedback on a guide? This is the most common reason people reach out, and we welcome it. Tell us which article you're referring to and what would have made it clearer or more useful.",
+        "Please note that we can offer general clarification on our published education, but we can't provide personalized financial, investment, legal, or tax advice. For decisions specific to your situation, a qualified professional is the right call."
+      ],
+      "callout": {
+        "title": "Spotted an error?",
+        "text": "Accuracy matters to us. If you believe something is out of date or incorrect, send the article link and the detail in question, and we'll review it promptly."
+      }
+    },
+    {
+      "heading": "Editorial and Content Requests",
+      "paragraphs": [
+        "Want us to cover a topic, expand a guide, or answer a question we haven't addressed yet? We keep a running list of reader-suggested topics and prioritize the ones we hear about most.",
+        "When suggesting a topic, a sentence or two on what you're trying to figure out helps us write something that actually solves the problem rather than skimming the surface."
+      ]
+    },
+    {
+      "heading": "Business and Partnership Inquiries",
+      "paragraphs": [
+        "We're open to partnerships that serve our readers and respect our editorial independence — content collaborations, licensing, and aligned sponsorships among them.",
+        "To help us evaluate quickly, include your organization, the nature of the proposal, your timeline, and any relevant links. We review partnership proposals on their merits and only pursue those that fit our standards and our audience."
+      ]
+    },
+    {
+      "heading": "Media and Press",
+      "paragraphs": [
+        "Journalists and producers are welcome to reach out for commentary, data context, or background on personal finance topics within our wheelhouse.",
+        "Please include your outlet, the topic or story angle, and your deadline. Clearly flagging press requests helps us route them quickly so we can meet your timeline."
+      ]
+    },
+    {
+      "heading": "General Contact Template",
+      "paragraphs": [
+        "Not sure which bucket you fall into? Use the simple template below so we have what we need to respond well."
+      ],
+      "table": {
+        "caption": "Copy, fill in, and send.",
+        "headers": ["Field", "What to include"],
+        "rows": [
+          ["Name", "Your full name (or your organization's name)"],
+          ["Email", "The best address to reach you"],
+          ["Category", "Reader question / Editorial request / Partnership / Media"],
+          ["Subject", "A short, specific summary of your message"],
+          ["Message", "The details, plus any relevant article links or deadlines"]
+        ]
+      }
+    },
+    {
+      "heading": "Response Times",
+      "paragraphs": [
+        "We read everything that comes in. We aim to respond to genuine reader and partnership inquiries within a few business days, though volume can affect timing. Press requests with a stated deadline are prioritized.",
+        "If your question is already answered in one of our guides, we may point you there first — it's often the fastest way to get you a complete answer."
+      ]
+    }
+  ],
+  "faq": [
+    { "question": "Can ImperialPedia give me personal financial advice?", "answer": "No. We provide financial education and general information, not personalized financial, investment, legal, or tax advice. For guidance tailored to your circumstances, please consult a qualified professional." },
+    { "question": "How do I suggest a topic or report an error?", "answer": "Use the contact template above, choose the 'Editorial request' category, and include the relevant article link plus a short description of what you'd like covered or corrected. Reader suggestions directly shape our publishing queue." },
+    { "question": "How quickly will I hear back?", "answer": "We aim to reply to genuine reader and partnership inquiries within a few business days. Media requests with a clear deadline are prioritized so we can meet your timeline." },
+    { "question": "Do you accept partnerships or sponsorships?", "answer": "Yes, when they serve our readers and preserve our editorial independence. Share your organization, proposal, timeline, and relevant links, and we'll evaluate it on its merits." }
+  ],
+  "conclusion": "Thanks for taking the time to reach out. Clear questions and honest feedback are how ImperialPedia keeps improving. While you wait for a reply, feel free to explore our [Personal Finance](/personal-finance) guides — the answer you're after may already be a click away.",
+  "internalLinks": [],
+  "externalSources": [],
+  "wordCountEstimate": 950
+}

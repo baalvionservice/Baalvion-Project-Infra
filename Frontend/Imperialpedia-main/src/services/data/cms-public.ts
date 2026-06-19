@@ -312,3 +312,38 @@ export async function getPublishedNewsBySlug(slug: string): Promise<NewsArticle 
     return null;
   }
 }
+
+// ── CMS `page` documents (About / Contact / Privacy, etc.) ──────────────────
+export interface CmsPage {
+  title: string;
+  bodyHtml: string;
+  seoTitle: string;
+  seoDescription: string;
+  seoKeywords: string[];
+  updatedAt?: string;
+}
+
+/**
+ * Fetch a published CMS `page` document by slug and return it ready to render.
+ * Returns null on any failure (unknown slug, cms-service unreachable) so route
+ * components can fall back to their built-in static content during cutover or
+ * when the CMS is offline.
+ */
+export async function getCmsPage(slug: string): Promise<CmsPage | null> {
+  try {
+    const raw = await getCmsContentBySlug(slug);
+    if (raw.contentType && raw.contentType !== 'page') return null;
+    const bodyHtml = blocksToHtml(raw.contentBlocks);
+    if (!bodyHtml) return null;
+    return {
+      title: raw.title,
+      bodyHtml,
+      seoTitle: raw.seoMetadata?.title || raw.title,
+      seoDescription: raw.seoMetadata?.description || raw.excerpt || '',
+      seoKeywords: raw.seoMetadata?.keywords || [],
+      updatedAt: raw.updatedAt ?? raw.publishedAt ?? undefined,
+    };
+  } catch {
+    return null;
+  }
+}

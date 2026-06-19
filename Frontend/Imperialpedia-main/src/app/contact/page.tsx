@@ -8,16 +8,114 @@ import { Mail, Globe, Zap } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import ContactForm from '@/components/common/ContactForm';
 import { env } from '@/config/env';
+import { CmsPage } from '@/components/pages/CmsPage';
+import { getCmsPage } from '@/services/data/cms-public';
 
-export const metadata: Metadata = buildMetadata({
-  title: 'Contact',
-  description:
-    'Contact Imperialpedia for general inquiries, support, or expert onboarding. Send a message or reach us by email.',
-  canonical: '/contact',
-  noIndex: false,
-});
+// Managed in the CMS (admin-platform); read live per request with a static fallback.
+export const dynamic = 'force-dynamic';
 
-export default function ContactPage() {
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getCmsPage('contact');
+  if (page) {
+    return buildMetadata({
+      title: page.seoTitle,
+      description: page.seoDescription,
+      keywords: page.seoKeywords,
+      canonical: '/contact',
+      noIndex: false,
+    });
+  }
+  return buildMetadata({
+    title: 'Contact',
+    description:
+      'Contact Imperialpedia for general inquiries, support, or expert onboarding. Send a message or reach us by email.',
+    canonical: '/contact',
+    noIndex: false,
+  });
+}
+
+export default async function ContactPage() {
+  return (
+    <CmsPage slug="contact" eyebrow="Contact" fallback={<ContactFallback />}>
+      <div className="mt-16">
+        <ContactChannels />
+      </div>
+    </CmsPage>
+  );
+}
+
+/** Functional contact channels (email cards + form) — shown under the CMS copy. */
+function ContactChannels() {
+  const mailtoGeneral = `mailto:${env.contactEmail}?subject=${encodeURIComponent('Imperialpedia inquiry')}`;
+  const mailtoSupport = `mailto:${env.supportEmail}`;
+  const mailtoExperts = `mailto:${env.expertsEmail}`;
+
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-16 not-prose">
+        <Card className="glass-card bg-primary/5 border-primary/20 p-8 hover:border-primary/40 transition-all group">
+          <CardContent className="p-0 space-y-6">
+            <div className="p-4 rounded-2xl bg-primary/10 text-primary w-fit group-hover:scale-110 transition-transform">
+              <Globe className="h-8 w-8" aria-hidden />
+            </div>
+            <div className="space-y-2">
+              <Text variant="h3" className="text-2xl font-bold">
+                General &amp; support
+              </Text>
+              <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
+                Site issues, press, and general questions.
+              </Text>
+            </div>
+            <Link
+              href={mailtoSupport}
+              className="font-mono text-primary font-bold hover:underline break-all"
+            >
+              {env.supportEmail}
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-card bg-secondary/5 border-secondary/20 p-8 hover:border-secondary/40 transition-all group">
+          <CardContent className="p-0 space-y-6">
+            <div className="p-4 rounded-2xl bg-secondary/10 text-secondary w-fit group-hover:scale-110 transition-transform">
+              <Zap className="h-8 w-8" aria-hidden />
+            </div>
+            <div className="space-y-2">
+              <Text variant="h3" className="text-2xl font-bold">
+                Creators &amp; experts
+              </Text>
+              <Text variant="bodySmall" className="text-muted-foreground leading-relaxed">
+                Verification, contributor programs, and expert onboarding.
+              </Text>
+            </div>
+            <Link
+              href={mailtoExperts}
+              className="font-mono text-secondary font-bold hover:underline break-all"
+            >
+              {env.expertsEmail}
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card className="glass-card p-8 md:p-10 border-white/5 bg-card/30 mb-10 not-prose">
+        <Text variant="h3" className="text-xl font-bold mb-6">
+          Send a message
+        </Text>
+        <ContactForm />
+        <Text variant="caption" className="text-muted-foreground mt-8 block">
+          Prefer email without the form? Write to{' '}
+          <Link href={mailtoGeneral} className="text-primary hover:underline font-medium">
+            {env.contactEmail}
+          </Link>
+          .
+        </Text>
+      </Card>
+    </>
+  );
+}
+
+function ContactFallback() {
   const mailtoGeneral = `mailto:${env.contactEmail}?subject=${encodeURIComponent('Imperialpedia inquiry')}`;
   const mailtoSupport = `mailto:${env.supportEmail}`;
   const mailtoExperts = `mailto:${env.expertsEmail}`;
