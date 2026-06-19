@@ -66,6 +66,20 @@ module.exports = {
         timeoutMs:   Number(process.env.LEDGER_TIMEOUT_MS || 4000),
         get enabled() { return !!this.internalKey; },
     },
+    // Cross-service inventory reservation (inventory-service). The AUTHORITATIVE oversell guard for
+    // unique luxury items: createOrder reserves each tracked line's stock, capture confirms the
+    // hold, cancel/fail releases it. Authenticates with the shared internal key (X-Internal-Key,
+    // matching inventory-service's INVENTORY_INTERNAL_KEY). Mirrors the ledger client's fail-open
+    // posture: an inventory OUTAGE (unreachable/5xx) or a disabled client never breaks checkout (the
+    // local in-DB reserve + reconciliation/alerts are the backstop); only an explicit 409 (the SKU
+    // is tracked AND out of stock) HARD-FAILS the order so we never sell what we can't fulfil.
+    inventory: {
+        baseUrl:     process.env.INVENTORY_BASE_URL || 'http://localhost:3014',
+        apiPrefix:   process.env.INVENTORY_API_PREFIX || '/api/v1',
+        internalKey: process.env.INVENTORY_INTERNAL_KEY || '',
+        timeoutMs:   Number(process.env.INVENTORY_TIMEOUT_MS || 4000),
+        get enabled() { return !!this.internalKey; },
+    },
     // Outbound operational alerts (reconciliation drift, ledger unreachable) → notification-service.
     // Fire-and-forget, fail-open: an alert delivery failure must never affect order processing.
     notifications: {

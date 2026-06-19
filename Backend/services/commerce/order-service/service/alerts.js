@@ -74,4 +74,20 @@ async function ledgerUnavailable(storeId, reason) {
     });
 }
 
-module.exports = { dispatch, reconciliationDrift, ledgerUnavailable, SEVERITY };
+/**
+ * Inventory-service reservation could not be completed during checkout/capture/cancel (unreachable
+ * / 5xx / unexpected status). The order proceeded FAIL-OPEN, so reserved stock may now be out of
+ * sync with inventory-service — ops should reconcile. Fired only for the fail-open path; an explicit
+ * 409 (out of stock) hard-fails the order instead and needs no alert.
+ */
+async function inventoryUnavailable(storeId, { orderId, sku, phase, reason } = {}) {
+    return dispatch({
+        severity: SEVERITY.WARN,
+        title: `Inventory reservation unavailable: store ${storeId}`,
+        body: `Reservation ${phase || 'operation'} for order ${orderId || '(pre-create)'} could not reach inventory-service (${reason || 'unknown'}). The order proceeded fail-open — reconcile inventory holds.`,
+        data: { storeId, orderId: orderId || null, sku: sku || null, phase: phase || null, reason: reason || null },
+        idempotencyKey: `inventory-unavailable:${storeId}:${orderId || 'precreate'}:${phase || 'op'}`,
+    });
+}
+
+module.exports = { dispatch, reconciliationDrift, ledgerUnavailable, inventoryUnavailable, SEVERITY };

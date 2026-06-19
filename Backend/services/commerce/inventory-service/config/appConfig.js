@@ -18,6 +18,11 @@ module.exports = {
         rbacScopeTtl: Number(process.env.CACHE_RBAC_SCOPE_TTL || 300),
     },
     security: { ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 200) },
+    // Internal service-to-service key for committing operations a shopper must never invoke (the
+    // reservation `confirm` endpoint commits stock without payment). Must match order-service's
+    // INVENTORY_INTERNAL_KEY. When empty (dev), confirm falls back to requiring the ops_manager RBAC
+    // chain (still never anonymous-open). RECOMMENDED in production.
+    internal: { key: process.env.INVENTORY_INTERNAL_KEY || '' },
     // RBAC is the single source of truth; this service is a PEP via @baalvion/commerce-rbac.
     rbac: {
         baseUrl:       process.env.RBAC_BASE_URL || 'http://localhost:3055',
