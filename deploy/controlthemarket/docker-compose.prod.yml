@@ -1,4 +1,10 @@
 # ─────────────────────────────────────────────────────────────────────────────
+# ⚠️  DEPRECATED — superseded by deploy/ec2-single-host/ (the ONE canonical production stack:
+#     GitHub Actions → Amazon ECR → EC2 `docker compose pull` + `up -d --no-build`; zero host
+#     builds, zero GHCR). The deployed CTM image is built + pushed to ECR (repo
+#     controlthemarket-ctm-service) by .github/workflows/deploy.yml. Kept for reference only —
+#     do NOT deploy production from this file.
+# ─────────────────────────────────────────────────────────────────────────────
 # Production stack for controlthemarket.com — single EC2 host, Docker Compose.
 # CTM runs its OWN backend (ctm-service). It does NOT use the central admin panel / CMS vault:
 # payments (Razorpay) are handled directly by ctm-service from env keys. Login/refresh proxy to the
@@ -34,10 +40,10 @@ services:
       retries: 10
 
   ctm-service:
-    # image: pulled on the EC2 (CI builds+pushes to GHCR); build: used by CI and a manual
-    # `up --build`. Both paths produce the same tag. Repo-root context — the Dockerfile runs
-    # `turbo prune` over the pnpm workspace.
-    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/controlthemarket-ctm-service:${IMAGE_TAG:-prod-latest}
+    # image: built + pushed to Amazon ECR by the canonical pipeline (.github/workflows/deploy.yml);
+    # the `build:` below is for local/manual use only. Repo-root context — the Dockerfile runs
+    # `turbo prune` over the pnpm workspace. (No GHCR — see the DEPRECATED banner at the top.)
+    image: ${IMAGE_PREFIX:-baalvion}/controlthemarket-ctm-service:${IMAGE_TAG:-prod-latest}
     build:
       context: ../..
       dockerfile: Backend/services/ecosystem/ctm-service/Dockerfile
@@ -83,7 +89,7 @@ services:
   web:
     # Next.js 15 standalone server. NEXT_PUBLIC_* are baked at BUILD time (build.args below); the
     # /auth-bff rewrite target (AUTH_PROXY_TARGET) is read at server start, so it is a RUNTIME env.
-    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/controlthemarket-web:${IMAGE_TAG:-prod-latest}
+    image: ${IMAGE_PREFIX:-baalvion}/controlthemarket-web:${IMAGE_TAG:-prod-latest}
     build:
       context: ../..
       dockerfile: Frontend/controlthemarket-main/Dockerfile

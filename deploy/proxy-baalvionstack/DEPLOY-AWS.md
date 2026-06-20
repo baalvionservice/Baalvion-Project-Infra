@@ -1,5 +1,13 @@
 # Deploy `proxy.baalvionstack.com` to AWS (single EC2 + Docker Compose)
 
+> ⚠️ **DEPRECATED — this standalone per-stack package is superseded by
+> [`deploy/ec2-single-host/`](../ec2-single-host/), the ONE canonical production stack.**
+> Production now follows **GitHub Actions → Amazon ECR → EC2 `docker compose pull`** (zero host
+> builds, **zero GHCR**). The per-stack `deploy-proxy-baalvionstack.yml` workflow has been removed;
+> the proxy images are built + pushed to ECR by [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml).
+> See [`deploy/ec2-single-host/ECR-CICD.md`](../ec2-single-host/ECR-CICD.md) for the live pipeline,
+> IAM policies, and secret names. Kept for historical reference only.
+
 Production deploy of the **proxy purchase stack** (the flow verified locally: pricing → signup →
 checkout → **real Razorpay charge** → active subscription). One EC2 host runs everything via
 `docker-compose.prod.yml`; Caddy terminates TLS and serves the SPA. This is the right shape for ONE
@@ -146,12 +154,12 @@ the EC2 to `rsync` the SPA, `docker compose pull`, `up -d --no-build`, and resta
 | `PROD_USER` | SSH user (e.g. `ubuntu`) |
 | `PROD_SSH_KEY` | private key whose public half is in the EC2's `~/.ssh/authorized_keys` |
 
-**GHCR pull access on the EC2** (so `docker compose pull` works) — pick one:
-- Make the `proxy-baalvionstack-*` packages **public** in GHCR (simplest), or
-- `docker login ghcr.io -u <user> -p <read:packages PAT>` once on the EC2.
+**Amazon ECR pull access on the EC2** (so `docker compose pull` works): attach the **read-only ECR
+instance role** to the EC2 (`AmazonEC2ContainerRegistryReadOnly`, scoped to `baalvion/*`). The host
+then pulls with **no stored credentials**. Full IAM policy: [`ECR-CICD.md` §3B](../ec2-single-host/ECR-CICD.md).
 
-`IMAGE_PREFIX` in `.env.prod` must equal the workflow's (`ghcr.io/<owner>/baalvion`). The workflow
-derives `<owner>` from the repo automatically; the `.env.prod.example` default assumes `baalvionservice`.
+`IMAGE_PREFIX` in `.env.prod` must equal the ECR registry the canonical pipeline pushes to
+(`<account>.dkr.ecr.<region>.amazonaws.com/baalvion`). No GHCR login / PAT is required anywhere.
 
 > The workflow assumes §1–9 are already done on the EC2 (repo at `/opt/baalvion`, `.env.prod`
 > present, RS256 keys mounted, DB migrated, vault seeded). It updates code/images — it does not

@@ -23,13 +23,20 @@ Assembled by merging the three *verified* per-stack packages
 | `VALIDATION-RUNBOOK.md` | Deploy sequence + health/routing/security validation, **§11 CMS seed**, **§12 trade bring-up + Vercel env**. |
 | `secrets/` | proxy-service RS256 keypair mount (gitignored). |
 
-## One-line deploy (on the host, from repo root)
+## Deploy (on the host, from repo root)
+
+Images are **built in CI and pulled from Amazon ECR — this host never builds.** The full
+pipeline (GitHub Actions → ECR → EC2), IAM policies, and secret names are in
+[ECR-CICD.md](ECR-CICD.md). Manual roll on the host:
 
 ```bash
 cp deploy/ec2-single-host/.env.production.example deploy/ec2-single-host/.env.production   # fill 🔒
-docker compose -f deploy/ec2-single-host/docker-compose.yml \
-  --env-file deploy/ec2-single-host/.env.production up -d --build
+#   set IMAGE_PREFIX=<account>.dkr.ecr.<region>.amazonaws.com/baalvion  and  AWS_REGION
+bash deploy/ec2-single-host/deploy.sh        # ECR login → pull → up -d --no-build
 ```
+
+On every push to `main`, [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml)
+builds + pushes every image to ECR and rolls this host automatically.
 
 Then follow [VALIDATION-RUNBOOK.md](VALIDATION-RUNBOOK.md) §3 (keys), §5 (post-boot grant), §6–9 (verify).
 

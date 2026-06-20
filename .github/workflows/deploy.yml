@@ -1,0 +1,241 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Deploy — GitHub Actions → Amazon ECR → EC2 (Docker Compose runtime only)
+#
+#   git push main  ──▶  build EVERY service image in GitHub Actions
+#                  ──▶  push to Amazon ECR, tagged  <commit-sha>  +  prod-latest
+#                  ──▶  SSH the EC2 host and roll the single-host stack (pull + up -d)
+#
+# HARD INVARIANTS (enforced by design):
+#   • EC2 NEVER builds. It only `docker compose pull` + `up -d --no-build`.
+#     The runtime compose (deploy/ec2-single-host/docker-compose.yml) has ZERO `build:` keys.
+#   • All builds happen here, in CI, with the repo root as the build context
+#     (the Dockerfiles are monorepo-aware `turbo prune` builds).
+#   • No secrets in this file. Everything sensitive comes from GitHub Secrets / OIDC.
+#
+# One ECR repo per image:  <account>.dkr.ecr.<region>.amazonaws.com/baalvion/<service>
+# (ECR repo names support the `baalvion/...` namespace; this matches IMAGE_PREFIX on the host.)
+# ─────────────────────────────────────────────────────────────────────────────
+name: Deploy — ECR → EC2 (single-host)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag to roll on EC2 (default: this run's commit SHA)"
+        required: false
+        default: ""
+
+# Never run two production rolls at once; let an in-flight roll finish.
+concurrency:
+  group: deploy-ec2-single-host
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write   # enables the OIDC auth path (see "Configure AWS credentials" below)
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+  ECR_NAMESPACE: baalvion        # must equal the `/baalvion` suffix of IMAGE_PREFIX on the host
+  # Immutable production release tag, pushed alongside prod-latest + <sha> on every build.
+  # Bump via the repo Variable RELEASE_TAG when you cut a new production release.
+  RELEASE_TAG: ${{ vars.RELEASE_TAG || 'v1.0.1-production' }}
+
+jobs:
+  # ════════════════════════════ 1) build + push to ECR ════════════════════════════
+  build-push:
+    name: build ${{ matrix.repo }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false            # one bad image must not block the other 18
+      max-parallel: 6
+      matrix:
+        include:
+          # ── Stack A — identity / content / commerce / gateway (Node) ──────────────
+          - { repo: auth-service,          file: Backend/services/identity/auth-service/Dockerfile }
+          - { repo: rbac-service,          file: Backend/services/identity/rbac-service/Dockerfile }
+          - { repo: audit-service,         file: Backend/services/infrastructure/audit-service/Dockerfile }
+          - { repo: cms-service,           file: Backend/services/knowledge/cms-service/Dockerfile,       cache: cms }
+          - { repo: commerce-service,      file: Backend/services/commerce/commerce-service/Dockerfile }
+          - { repo: inventory-service,     file: Backend/services/commerce/inventory-service/Dockerfile }
+          - { repo: order-service,         file: Backend/services/commerce/order-service/Dockerfile }
+          - { repo: auth-gateway,          file: Backend/services/identity/auth-gateway/Dockerfile }
+          - { repo: notification-service,  file: Backend/services/infrastructure/notification-service/Dockerfile }
+          # ── Stack A — payment-service (Java / Maven; its own build context) ───────
+          - { repo: payment-service,       file: Backend/services/commerce/financial-services-java/Dockerfile,
+              context: Backend/services/commerce/financial-services-java, args: "SERVICE=payment-service", cache: payjava }
+          # ── Stack B — ControlTheMarket ───────────────────────────────────────────
+          - { repo: controlthemarket-ctm-service, file: Backend/services/ecosystem/ctm-service/Dockerfile }
+          # ── Stack C — Proxy / BaalvionStack (cms + payment reuse Stack-A images) ──
+          - { repo: proxy-baalvionstack-cms-service,     file: Backend/services/knowledge/cms-service/Dockerfile, cache: cms }
+          - { repo: proxy-baalvionstack-payment-service, file: Backend/services/commerce/financial-services-java/Dockerfile,
+              context: Backend/services/commerce/financial-services-java, args: "SERVICE=payment-service", cache: payjava }
+          - { repo: proxy-baalvionstack-proxy-service,   file: Backend/services/infrastructure/proxy-service/Dockerfile }
+          # ── Stack D — Law / Imperialpedia / Trade ────────────────────────────────
+          - { repo: law-service,           file: Backend/services/knowledge/law-service/Dockerfile }
+          - { repo: imperialpedia-service, file: Backend/services/knowledge/imperialpedia-service/Dockerfile }
+          - { repo: trade-service,         file: Backend/services/commerce/trade-service/Dockerfile }
+          # gti-web is a Next 15 standalone frontend; NEXT_PUBLIC_* are baked at BUILD time.
+          - { repo: gti-web,               file: Frontend/Global-Trade-Infrastructure-main/Dockerfile, frontend: "true" }
+          # ── one-shot CMS tools image (Dockerfile `installer` target; tools profile) ──
+          - { repo: cms-tools,             file: Backend/services/knowledge/cms-service/Dockerfile, target: installer, cache: cms }
+    steps:
+      - uses: actions/checkout@v4
+
+      # build-push-action exports the GHA layer cache (cache-to: type=gha), which the default
+      # docker driver cannot do — the docker-container driver from setup-buildx can.
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ── AWS auth (OIDC preferred, static keys as fallback) ────────────────────
+      # Secrets cannot be referenced in `if:`, so a selector step surfaces which auth
+      # mode is available. If AWS_DEPLOY_ROLE_ARN is set, we use keyless GitHub OIDC
+      # (no long-lived credentials in GitHub). Otherwise we fall back to static keys.
+      - name: Select AWS auth mode
+        id: awsauth
+        env:
+          ROLE_ARN: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+        run: |
+          if [ -n "${ROLE_ARN}" ]; then
+            echo "mode=oidc" >> "$GITHUB_OUTPUT"
+            echo "::notice title=AWS auth::Using GitHub OIDC role assumption (keyless)."
+          else
+            echo "mode=keys" >> "$GITHUB_OUTPUT"
+            echo "::notice title=AWS auth::AWS_DEPLOY_ROLE_ARN not set — falling back to static access keys. Set it to switch to keyless OIDC (recommended)."
+          fi
+
+      - name: Configure AWS credentials (OIDC — preferred)
+        if: steps.awsauth.outputs.mode == 'oidc'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-ecr-push-${{ github.run_id }}
+
+      - name: Configure AWS credentials (static keys — fallback)
+        if: steps.awsauth.outputs.mode == 'keys'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Idempotent: create the per-image ECR repo on first deploy so the push never 404s.
+      # scanOnPush gives you image CVE scanning for free; tags stay MUTABLE so prod-latest can move.
+      - name: Ensure ECR repository exists
+        run: |
+          repo="${ECR_NAMESPACE}/${{ matrix.repo }}"
+          aws ecr describe-repositories --repository-names "$repo" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository \
+                 --repository-name "$repo" \
+                 --image-tag-mutability MUTABLE \
+                 --image-scanning-configuration scanOnPush=true \
+                 --region "$AWS_REGION"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_NAMESPACE }}/${{ matrix.repo }}
+          # Every build pushes four tags:
+          #   prod-latest          → moving pointer the compose defaults to (IMAGE_TAG)
+          #   latest               → conventional moving pointer
+          #   <full-commit-sha>    → immutable, reproducible rollbacks (CI rolls EC2 to this)
+          #   v1.0.1-production     → immutable release pointer (RELEASE_TAG)
+          tags: |
+            type=raw,value=prod-latest
+            type=raw,value=latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=sha,format=long,prefix=
+
+      # Frontend (gti-web) build args. NEXT_PUBLIC_* are inlined into the client bundle at
+      # build time, so they MUST be the production origins. Override via repo Variables if needed.
+      - name: Frontend build args
+        id: fe
+        if: ${{ matrix.frontend == 'true' }}
+        run: |
+          {
+            echo "args<<EOF"
+            echo "NEXT_PUBLIC_API_BASE_URL=${{ vars.TRADE_API_BASE_URL || 'https://api.baalvion.com/api/v1/commerce/trade/v1' }}"
+            echo "NEXT_PUBLIC_APP_URL=${{ vars.TRADE_PUBLIC_URL || 'https://trade.baalvion.com' }}"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build and push to ECR
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context || '.' }}
+          file: ${{ matrix.file }}
+          target: ${{ matrix.target || '' }}
+          build-args: ${{ matrix.frontend == 'true' && steps.fe.outputs.args || matrix.args || '' }}
+          push: true
+          provenance: false        # single-arch image manifest — simplest to pull + run on EC2
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.cache || matrix.repo }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.cache || matrix.repo }}
+
+  # ════════════════════════════ 2) roll the EC2 stack ════════════════════════════
+  deploy:
+    name: Roll EC2 stack
+    needs: build-push
+    runs-on: ubuntu-latest
+    environment: production       # gate behind a protected environment for manual approval
+    env:
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      DEPLOY_TAG: ${{ github.event.inputs.image_tag || github.sha }}
+    steps:
+      # Secrets can't be used in `if:`, so surface EC2_HOST and gate on it. Images are always
+      # built + pushed above; the SSH roll only runs once the prod target is configured.
+      - name: Check EC2 target is configured
+        id: gate
+        run: |
+          if [ -z "${EC2_HOST}" ]; then
+            echo "::notice title=Prod roll skipped::EC2_HOST is not set. Images were built and pushed to ECR (tag ${DEPLOY_TAG} + prod-latest); the EC2 roll was skipped. Set EC2_HOST / EC2_USER / EC2_SSH_KEY to enable auto-deploy."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull + roll via deploy.sh on EC2
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          # The host holds the repo at /opt/baalvion (compose + deploy.sh are version-controlled;
+          # .env.production is gitignored and stays put). The EC2 IAM instance role grants ECR
+          # pull, so deploy.sh authenticates to ECR with NO keys on the box.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion
+            git fetch --all --prune
+            git checkout main
+            git pull --ff-only
+            bash deploy/ec2-single-host/deploy.sh "${{ github.event.inputs.image_tag || github.sha }}"
+
+      - name: Smoke test public ingress
+        if: steps.gate.outputs.ready == 'true'
+        continue-on-error: true
+        # One health ping per stack, hitting the EC2 host's OWN ingress only (this Caddy
+        # serves api.baalvion.com + trade.baalvion.com; the Vercel frontends are not on this
+        # box). Each non-Stack-A app is reached via its path prefix → strip → service /health.
+        run: |
+          sleep 20
+          for url in \
+            "https://api.baalvion.com/health" \
+            "https://api.baalvion.com/ctm/health" \
+            "https://api.baalvion.com/proxy/healthz" \
+            "https://api.baalvion.com/law/health" \
+            "https://api.baalvion.com/imperialpedia/health" \
+            "https://trade.baalvion.com/api/health" ; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
+            echo "$url -> $code"
+          done

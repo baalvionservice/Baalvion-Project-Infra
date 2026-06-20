@@ -431,96 +431,11 @@ jobs:
       - name: Docker build (monorepo context = repo root)
         run: docker build -f Backend/services/platform/dashboard-service/Dockerfile -t baalvion-dashboard:ci .
 
-  # ── Docker push on main (all changed services) ────────────────────────────
-  push-images:
-    needs:
-      - mining-service
-      - imperialpedia-service
-      - real-estate-service
-      - market-service
-      - ir-service
-      - about-service
-      - brand-connector-service
-      - dashboard-service
-    if: |
-      always() &&
-      github.ref == 'refs/heads/main' &&
-      !contains(needs.*.result, 'failure')
-    runs-on: ubuntu-latest
-    # Default workflow token is read-only (repo setting); GHCR push needs
-    # packages:write or it fails with "installation not allowed to Create
-    # organization package". Mirrors financial-services.yml / deploy-proxy.
-    permissions:
-      contents: read
-      packages: write
-    strategy:
-      matrix:
-        include:
-          - service: mining-service
-            port: 3003
-            image: baalvion-mining
-            context: .
-            file: Backend/services/ecosystem/mining-service/Dockerfile
-          - service: imperialpedia-service
-            port: 3004
-            image: baalvion-imperialpedia
-            context: .
-            file: Backend/services/knowledge/imperialpedia-service/Dockerfile
-          - service: real-estate-service
-            port: 3005
-            image: baalvion-real-estate
-            context: .
-            file: Backend/services/ecosystem/real-estate-service/Dockerfile
-          - service: market-service
-            port: 3007
-            image: baalvion-market
-            context: .
-            file: Backend/services/commerce/market-service/Dockerfile
-          - service: ir-service
-            port: 3008
-            image: baalvion-ir
-            context: .
-            file: Backend/services/ecosystem/ir-service/Dockerfile
-          - service: about-service
-            port: 3010
-            image: baalvion-about
-            context: .
-            file: Backend/services/ecosystem/about-service/Dockerfile
-          - service: brand-connector-service
-            port: 3006
-            image: baalvion-brand
-            context: .
-            file: Backend/services/ecosystem/brand-connector-service/Dockerfile
-          - service: dashboard-service
-            port: 3009
-            image: baalvion-dashboard
-            context: .
-            file: Backend/services/platform/dashboard-service/Dockerfile
-    steps:
-      - uses: actions/checkout@v6
-      - uses: docker/setup-buildx-action@v4
-      - uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/${{ github.repository_owner }}/${{ matrix.image }}
-          tags: |
-            type=sha,prefix=
-            type=raw,value=latest
-      - uses: docker/build-push-action@v7
-        with:
-          # Migrated services set matrix.context/.file (monorepo build); flat services default.
-          context: ${{ matrix.context || format('Backend/{0}', matrix.service) }}
-          file: ${{ matrix.file }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+  # NOTE: the GHCR `push-images` job was removed during the ECR consolidation.
+  # These domain services are not part of the single-host production stack; production
+  # image builds for the deployed fleet are owned by the canonical pipeline
+  # (.github/workflows/deploy.yml → Amazon ECR only). The per-service jobs above keep
+  # their local `docker build … :ci` compile-verification step (no registry push).
 
   # ── CI gate ────────────────────────────────────────────────────────────────
   domain-ci-success:

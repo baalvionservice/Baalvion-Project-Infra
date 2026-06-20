@@ -258,8 +258,10 @@ done
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $REG
 ```
 
-> Stacks B & C compose default to **GHCR** (`ghcr.io/baalvionservice/baalvion`). To use ECR instead,
-> set `IMAGE_PREFIX=$REG/baalvion` in their `.env.prod` (the image names already include the stack prefix).
+> The legacy Stack B & C per-stack compose files now default to a neutral `baalvion` prefix; set
+> `IMAGE_PREFIX=$REG/baalvion` (your ECR registry) in their `.env.prod`. **The canonical production
+> path is `deploy/ec2-single-host/` (GitHub Actions → Amazon ECR → EC2 pull) — there is no GHCR
+> anywhere in the pipeline.** See [`deploy/ec2-single-host/ECR-CICD.md`](deploy/ec2-single-host/ECR-CICD.md).
 
 ---
 

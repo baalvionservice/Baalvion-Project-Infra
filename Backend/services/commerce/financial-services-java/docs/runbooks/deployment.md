@@ -1,9 +1,11 @@
 # Runbook — Deployment, Promotion & Rollback
 
 ## Pipeline (CI/CD)
-`deploy/ci/financial-services.yml` (copy to repo-root `.github/workflows/` to activate):
+The active CI workflow `.github/workflows/financial-services.yml` runs:
 build → `mvn verify` (Testcontainers) → Trivy FS scan → per-service image build → Trivy image
-scan → push to GHCR on `push`. Images: `ghcr.io/<owner>/<service>:<sha>` and `:latest`.
+scan. It pushes to **no registry** (no GHCR). The deployed payment-service image is built +
+pushed to **Amazon ECR** (`baalvion/payment-service`, build-arg `SERVICE=payment-service`) by the
+canonical pipeline `.github/workflows/deploy.yml`.
 
 ## Deploy (Helm)
 ```
