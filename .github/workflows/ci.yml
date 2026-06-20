@@ -400,6 +400,22 @@ jobs:
             fi
           done
 
+      # The canonical single-host runtime compose (pull-only, no build: keys) lives at
+      # docker-compose.yml with a .env.production.example. Validate it too, and assert it
+      # stays strictly image-only so a stray `build:` key can never re-enter the runtime.
+      - name: Validate single-host runtime compose (image-only)
+        run: |
+          set -e
+          compose="deploy/ec2-single-host/docker-compose.yml"
+          envfile="deploy/ec2-single-host/.env.production.example"
+          echo "Validating $compose"
+          docker compose --env-file "$envfile" -f "$compose" config -q
+          if docker compose --env-file "$envfile" -f "$compose" config | grep -qE '^\s+build:'; then
+            echo "::error::single-host compose must be pull-only — a build: key was found." >&2
+            exit 1
+          fi
+          echo "OK: single-host compose is valid and image-only."
+
   # Build the production service images and scan them with Trivy. The scan STEP
   # fails (exit-code 1) on any fixable HIGH or CRITICAL OS/library CVE. Scope = the
   # curated set of images that are deploy-verified (repo-root context + `turbo prune`,

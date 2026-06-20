@@ -1,4 +1,9 @@
 # ─────────────────────────────────────────────────────────────────────────────
+# ⚠️  DEPRECATED — superseded by deploy/ec2-single-host/ (the ONE canonical production stack:
+#     GitHub Actions → Amazon ECR → EC2 `docker compose pull` + `up -d --no-build`; zero host
+#     builds, zero GHCR). Kept for reference only — do NOT deploy production from this file.
+#     Production images are built + pushed to Amazon ECR by .github/workflows/deploy.yml.
+# ─────────────────────────────────────────────────────────────────────────────
 # Production stack for the Company Unified Dashboard — single EC2 host, Docker Compose.
 # SELF-CONTAINED identity slice: this deploy runs its OWN auth (auth-service MINTS RS256 tokens),
 # the BFF cookie gateway, session-service, and dashboard-service. No dependency on a central
@@ -66,7 +71,7 @@ services:
 
   # ── Identity: auth-service MINTS RS256 tokens (needs the PRIVATE key) ─────────
   auth-service:
-    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/company-dashboard-auth-service:${IMAGE_TAG:-prod-latest}
+    image: ${IMAGE_PREFIX:-baalvion}/company-dashboard-auth-service:${IMAGE_TAG:-prod-latest}
     build:
       context: ../..
       dockerfile: Backend/services/identity/auth-service/Dockerfile
@@ -97,7 +102,7 @@ services:
   # session-management / anomaly-detection surface.
 
   dashboard-service:
-    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/company-dashboard-dashboard-service:${IMAGE_TAG:-prod-latest}
+    image: ${IMAGE_PREFIX:-baalvion}/company-dashboard-dashboard-service:${IMAGE_TAG:-prod-latest}
     build:
       context: ../..
       dockerfile: Backend/services/platform/dashboard-service/Dockerfile
@@ -121,7 +126,7 @@ services:
 
   # ── BFF cookie gateway: HttpOnly cookies ↔ RS256, forwards Bearer in hybrid mode ─
   auth-gateway:
-    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/company-dashboard-auth-gateway:${IMAGE_TAG:-prod-latest}
+    image: ${IMAGE_PREFIX:-baalvion}/company-dashboard-auth-gateway:${IMAGE_TAG:-prod-latest}
     build:
       context: ../..
       dockerfile: Backend/services/identity/auth-gateway/Dockerfile
@@ -160,7 +165,7 @@ services:
   #    /auth-bff + /api-bff rewrite target (NEXT_PUBLIC_GATEWAY_URL) is read by next.config at
   #    server start → RUNTIME env, pointed at the internal gateway. ──────────────
   web:
-    image: ${IMAGE_PREFIX:-ghcr.io/baalvionservice/baalvion}/company-dashboard-web:${IMAGE_TAG:-prod-latest}
+    image: ${IMAGE_PREFIX:-baalvion}/company-dashboard-web:${IMAGE_TAG:-prod-latest}
     build:
       context: ../..
       dockerfile: Frontend/company-unified-Dashboard-main/Dockerfile

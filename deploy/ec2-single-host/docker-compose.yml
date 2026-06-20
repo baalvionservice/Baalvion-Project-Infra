@@ -1,9 +1,17 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # Baalvion — SINGLE-HOST EC2 backend (all stacks A+B+C on one box, self-contained data tier).
 #
-#   Run from the REPO ROOT on the EC2 host:
+#   CI/CD image model: GitHub Actions builds every service image and pushes it to AWS ECR.
+#   This host ONLY pulls and runs — it never builds. Point IMAGE_PREFIX at your ECR registry
+#   (e.g. <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com/baalvion) and set IMAGE_TAG to the
+#   released tag in .env.production, then run from the REPO ROOT on the EC2 host:
+#
+#     aws ecr get-login-password --region ap-south-1 \
+#       | docker login --username AWS --password-stdin <ACCOUNT_ID>.dkr.ecr.ap-south-1.amazonaws.com
 #     docker compose -f deploy/ec2-single-host/docker-compose.yml \
-#       --env-file deploy/ec2-single-host/.env.production up -d --build
+#       --env-file deploy/ec2-single-host/.env.production pull
+#     docker compose -f deploy/ec2-single-host/docker-compose.yml \
+#       --env-file deploy/ec2-single-host/.env.production up -d
 #
 # Built by merging the THREE verified packages (deploy/mvp-production, deploy/controlthemarket,
 # deploy/proxy-baalvionstack). Service identity/membership is unchanged; only co-located.
@@ -114,7 +122,6 @@ services:
   # ═══════════════════════════════ Stack A — identity ════════════════════════════
   auth-service:
     image: ${IMAGE_PREFIX:-baalvion}/auth-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/identity/auth-service/Dockerfile }
     <<: *restart
     environment:
       <<: *stackA-env
@@ -142,7 +149,6 @@ services:
 
   rbac-service:
     image: ${IMAGE_PREFIX:-baalvion}/rbac-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/identity/rbac-service/Dockerfile }
     <<: *restart
     environment:
       <<: *stackA-env
@@ -161,7 +167,6 @@ services:
 
   audit-service:
     image: ${IMAGE_PREFIX:-baalvion}/audit-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/infrastructure/audit-service/Dockerfile }
     <<: *restart
     environment:
       <<: *stackA-env
@@ -183,7 +188,6 @@ services:
   # ═══════════════════════════════ Stack A — content ═════════════════════════════
   cms-service:
     image: ${IMAGE_PREFIX:-baalvion}/cms-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/knowledge/cms-service/Dockerfile }
     <<: *restart
     environment:
       <<: *stackA-env
@@ -215,7 +219,6 @@ services:
   # ═══════════════════════════════ Stack A — commerce ════════════════════════════
   commerce-service:
     image: ${IMAGE_PREFIX:-baalvion}/commerce-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/commerce/commerce-service/Dockerfile }
     <<: *restart
     environment:
       <<: *stackA-env
@@ -243,7 +246,6 @@ services:
 
   inventory-service:
     image: ${IMAGE_PREFIX:-baalvion}/inventory-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/commerce/inventory-service/Dockerfile }
     <<: *restart
     environment:
       <<: *stackA-env
@@ -264,7 +266,6 @@ services:
 
   order-service:
     image: ${IMAGE_PREFIX:-baalvion}/order-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/commerce/order-service/Dockerfile }
     <<: *restart
     environment:
       <<: *stackA-env
@@ -302,10 +303,6 @@ services:
   # Stack A Java payment-service (Razorpay gateway) — baalvion_db, Flyway as owner, runtime as app role.
   payment-service:
     image: ${IMAGE_PREFIX:-baalvion}/payment-service:${IMAGE_TAG:-prod-latest}
-    build:
-      context: ../../Backend/services/commerce/financial-services-java
-      dockerfile: Dockerfile
-      args: { SERVICE: payment-service }
     <<: *restart
     environment:
       PORT: "3015"
@@ -345,7 +342,6 @@ services:
   # ═══════════════════════════════ Stack A — gateway + workers ════════════════════
   auth-gateway:
     image: ${IMAGE_PREFIX:-baalvion}/auth-gateway:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/identity/auth-gateway/Dockerfile }
     <<: *restart
     environment:
       <<: *stackA-env
@@ -378,7 +374,6 @@ services:
 
   notification-service:
     image: ${IMAGE_PREFIX:-baalvion}/notification-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/infrastructure/notification-service/Dockerfile }
     <<: *restart
     environment:
       <<: *stackA-env
@@ -400,7 +395,6 @@ services:
   # ═══════════════════════════════ Stack B — ControlTheMarket ════════════════════
   ctm-service:
     image: ${IMAGE_PREFIX:-baalvion}/controlthemarket-ctm-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/ecosystem/ctm-service/Dockerfile }
     <<: *restart
     environment:
       NODE_ENV: production
@@ -438,7 +432,6 @@ services:
   # ═══════════════════════════════ Stack C — Proxy / BaalvionStack ════════════════
   proxy-cms-service:
     image: ${IMAGE_PREFIX:-baalvion}/proxy-baalvionstack-cms-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/knowledge/cms-service/Dockerfile }
     <<: *restart
     environment:
       NODE_ENV: production
@@ -469,9 +462,6 @@ services:
   # Stack C Java payment-service — proxy_db (SEPARATE Flyway history from Stack A payment-service).
   proxy-payment-service:
     image: ${IMAGE_PREFIX:-baalvion}/proxy-baalvionstack-payment-service:${IMAGE_TAG:-prod-latest}
-    build:
-      context: ../../Backend/services/commerce/financial-services-java
-      args: { SERVICE: payment-service }
     <<: *restart
     environment:
       PORT: "3015"
@@ -509,7 +499,6 @@ services:
 
   proxy-service:
     image: ${IMAGE_PREFIX:-baalvion}/proxy-baalvionstack-proxy-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/infrastructure/proxy-service/Dockerfile }
     <<: *restart
     environment:
       NODE_ENV: production
@@ -556,7 +545,6 @@ services:
   # (self-creates + syncs + migrates on boot). RS256-verified against Stack A auth (one issuer).
   law-service:
     image: ${IMAGE_PREFIX:-baalvion}/law-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/knowledge/law-service/Dockerfile }
     <<: *restart
     environment:
       NODE_ENV: production
@@ -619,7 +607,6 @@ services:
   # baalvion_db / schema `imperialpedia` (self-creates + syncs on boot). HS256 (JWT_ACCESS_SECRET).
   imperialpedia-service:
     image: ${IMAGE_PREFIX:-baalvion}/imperialpedia-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/knowledge/imperialpedia-service/Dockerfile }
     <<: *restart
     environment:
       NODE_ENV: production
@@ -649,7 +636,6 @@ services:
   # migrations on boot; DB_SYNC=false in prod). BullMQ workers run in-process → need Redis.
   trade-service:
     image: ${IMAGE_PREFIX:-baalvion}/trade-service:${IMAGE_TAG:-prod-latest}
-    build: { context: ../.., dockerfile: Backend/services/commerce/trade-service/Dockerfile }
     <<: *restart
     environment:
       NODE_ENV: production
@@ -717,12 +703,6 @@ services:
   # match the auth-gateway's so GTI can verify the gateway's signed identity envelope.
   gti-web:
     image: ${IMAGE_PREFIX:-baalvion}/gti-web:${IMAGE_TAG:-prod-latest}
-    build:
-      context: ../..
-      dockerfile: Frontend/Global-Trade-Infrastructure-main/Dockerfile
-      args:
-        NEXT_PUBLIC_API_BASE_URL: ${TRADE_PUBLIC_URL:-https://trade.baalvion.com}
-        NEXT_PUBLIC_APP_URL: ${TRADE_PUBLIC_URL:-https://trade.baalvion.com}
     <<: *restart
     environment:
       NODE_ENV: production
@@ -752,10 +732,6 @@ services:
   cms-migrate:
     profiles: ["tools"]
     image: ${IMAGE_PREFIX:-baalvion}/cms-tools:${IMAGE_TAG:-prod-latest}
-    build:
-      context: ../..
-      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
-      target: installer
     working_dir: /repo/Backend/services/knowledge/cms-service
     command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
     environment:
@@ -777,10 +753,6 @@ services:
   cms-register:
     profiles: ["tools"]
     image: ${IMAGE_PREFIX:-baalvion}/cms-tools:${IMAGE_TAG:-prod-latest}
-    build:
-      context: ../..
-      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
-      target: installer
     working_dir: /repo/Backend/services/knowledge/cms-service
     command: ["node", "scripts/registerProductionWebsites.cjs"]
     environment:
@@ -803,10 +775,6 @@ services:
   cms-seed-law:
     profiles: ["tools"]
     image: ${IMAGE_PREFIX:-baalvion}/cms-tools:${IMAGE_TAG:-prod-latest}
-    build:
-      context: ../..
-      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
-      target: installer
     working_dir: /repo/Backend/services/knowledge/cms-service
     command: ["sh", "-c", "node scripts/seedLawElite.cjs && node scripts/seedLawArticlesLongform.cjs"]
     environment:

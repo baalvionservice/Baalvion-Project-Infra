@@ -218,6 +218,7 @@ same CMS the public API serves, so changes are live immediately.
   drop those services from the compose).
 - Put the EC2 behind **CloudFront/ALB + AWS WAF**; the CMS public API benefits from a CDN
   cache in front (the delivery responses are public and cacheable).
-- Add a CI workflow to build+push the images to GHCR and `docker compose pull && up -d` on push.
+- Production image build/push + EC2 roll is handled by the canonical pipeline
+  (`.github/workflows/deploy.yml` → Amazon ECR → EC2 `docker compose pull`). No GHCR is used.
 - Wire transactional email (`SMTP_*`) for admin password reset + member invites.
 ```

@@ -1,6 +1,7 @@
-# Financial Services CI/CD — staged here, NOT yet active.
-# To activate: copy to the repo root at .github/workflows/financial-services.yml
-# (GitHub only runs workflows from the repository-root .github/workflows directory).
+# Financial Services CI/CD — staged copy that mirrors the ACTIVE root workflow.
+# The deployed pipeline is .github/workflows/financial-services.yml (test + image build/scan only).
+# Production images are built + pushed to Amazon ECR by the canonical pipeline
+# .github/workflows/deploy.yml — this workflow pushes to NO registry (no GHCR). Keep in sync.
 name: Financial Services CI/CD
 
 on:
@@ -16,8 +17,10 @@ on:
 
 env:
   MODULE_DIR: Backend/services/commerce/financial-services-java
-  REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
+  # Local-only image tag prefix used for the Trivy scan below. Production images are
+  # built + pushed to Amazon ECR by the canonical pipeline (.github/workflows/deploy.yml).
+  # This workflow no longer pushes to any registry — it builds + scans only (no GHCR).
+  IMAGE_PREFIX: baalvion-financial
 
 jobs:
   build-test:
@@ -62,7 +65,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
     strategy:
       fail-fast: false
       matrix:
@@ -99,21 +101,7 @@ jobs:
           severity: HIGH,CRITICAL
           exit-code: "1"
           ignore-unfixed: "true"
-      - name: Log in to GHCR
-        if: github.event_name == 'push'
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Push image (${{ matrix.service }})
-        if: github.event_name == 'push'
-        uses: docker/build-push-action@v6
-        with:
-          context: ${{ env.MODULE_DIR }}
-          file: ${{ env.MODULE_DIR }}/Dockerfile
-          build-args: SERVICE=${{ matrix.service }}
-          push: true
-          tags: |
-            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }}
-            ${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:latest
+      # GHCR login + push removed during the ECR consolidation. The deployed Java
+      # payment-service is built + pushed to Amazon ECR (repo baalvion/payment-service,
+      # build-arg SERVICE=payment-service) by the canonical pipeline
+      # .github/workflows/deploy.yml. This job now builds + Trivy-scans only.
