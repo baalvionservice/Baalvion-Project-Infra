@@ -1,3 +1,12 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# CI is build + scan ONLY. It never pushes images and never deploys.
+# .github/workflows/deploy.yml is the authoritative 19-service production
+# pipeline (the single source of truth for Amazon ECR push + EC2 roll).
+#
+# Any image names referenced here are kept in sync with the deploy.yml ECR repos
+# so a CI-scanned artifact maps 1:1 to the image deploy.yml ships. The image set
+# below is a representative SUBSET of those 19 services, not the full fleet.
+# ─────────────────────────────────────────────────────────────────────────────
 name: CI Pipeline
 
 on:
@@ -417,10 +426,13 @@ jobs:
           echo "OK: single-host compose is valid and image-only."
 
   # Build the production service images and scan them with Trivy. The scan STEP
-  # fails (exit-code 1) on any fixable HIGH or CRITICAL OS/library CVE. Scope = the
-  # curated set of images that are deploy-verified (repo-root context + `turbo prune`,
-  # mirroring the deploy-* workflows). Extend the matrix as more Dockerfiles are
-  # build-verified (same pattern as the frontend/eslint allow-list above).
+  # fails (exit-code 1) on any fixable HIGH or CRITICAL OS/library CVE. Scope = a
+  # representative SUBSET of the deploy.yml 19-service fleet (repo-root context +
+  # `turbo prune`, mirroring the canonical deploy.yml build). Matrix `name`s mirror
+  # the deploy.yml ECR repo names so each scanned artifact maps 1:1 to the pushed
+  # image. This job NEVER pushes — deploy.yml is the only path to ECR/EC2. Extend
+  # the matrix as more Dockerfiles are build-verified (same pattern as the
+  # frontend/eslint allow-list above).
   #
   # continue-on-error (informational, like dockerfile-lint): the gate is live and
   # red-on-findings, but does not yet block merges. It surfaced real pre-existing
@@ -438,18 +450,28 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # ── Production fleet images — `name` mirrors the deploy.yml ECR repo
+          #    (baalvion/<name>) so the scanned artifact maps 1:1 to the pushed image.
           - name: auth-service
             file: Backend/services/identity/auth-service/Dockerfile
           - name: auth-gateway
             file: Backend/services/identity/auth-gateway/Dockerfile
-          - name: dashboard-service
-            file: Backend/services/platform/dashboard-service/Dockerfile
-          - name: ctm-service
-            file: Backend/services/ecosystem/ctm-service/Dockerfile
           - name: cms-service
             file: Backend/services/knowledge/cms-service/Dockerfile
-          - name: proxy-service
+          # deploy.yml ECR repo is controlthemarket-ctm-service (same Dockerfile);
+          # name kept in sync — was the drifting `ctm-service` alias.
+          - name: controlthemarket-ctm-service
+            file: Backend/services/ecosystem/ctm-service/Dockerfile
+          # deploy.yml ECR repo is proxy-baalvionstack-proxy-service (same Dockerfile);
+          # name kept in sync — was the drifting `proxy-service` alias.
+          - name: proxy-baalvionstack-proxy-service
             file: Backend/services/infrastructure/proxy-service/Dockerfile
+          # ── Dev-only — NOT part of the deploy.yml 19-service production stack.
+          #    dashboard-service deploys via the separate company-dashboard package and
+          #    is build-verified in domain-services.yml; scanned here for CVE hygiene
+          #    only. Do not read its presence as production-deploy coverage.
+          - name: dashboard-service
+            file: Backend/services/platform/dashboard-service/Dockerfile
     steps:
       - uses: actions/checkout@v4
 
