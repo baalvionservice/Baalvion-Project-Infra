@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# This is a pnpm workspace app — never commit Bun/npm/yarn lockfiles here.
+# A stray bun.lockb makes Vercel auto-detect Bun and fail on workspace:* deps.
+bun.lock
+bun.lockb
+package-lock.json
+yarn.lock
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
