@@ -18,13 +18,11 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/design-system/typography/text";
 import {
   Zap,
   Activity,
   ShieldCheck,
-  AlertTriangle,
   Loader2,
   RefreshCw,
   Plus,
@@ -35,13 +33,7 @@ import {
   TrendingUp,
   Target,
   FlaskConical,
-  LineChart,
-  ChevronRight,
-  MousePointer2,
-  Users,
   CheckCircle2,
-  Clock,
-  Layout,
   Filter,
 } from "lucide-react";
 import {
@@ -52,20 +44,14 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
-  AreaChart,
-  Area,
 } from "recharts";
 import { systemService } from "@/services/data/system-service";
 import {
   ExperimentManagementData,
   ExperimentNode,
-  AbVariant,
-  ExperimentDetail,
 } from "@/types/system";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { Progress } from "@/components/ui/progress";
 import { Slider } from "@/components/ui/slider";
 
 /**

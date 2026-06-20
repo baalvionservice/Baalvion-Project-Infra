@@ -3,17 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { AssetSentiment, UserSentimentVote } from '@/types/community';
 import { communityService } from '@/services/data/community-service';
-import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   TrendingUp, 
   TrendingDown, 
   Activity, 
-  Zap, 
   Loader2, 
   Search, 
   Filter, 

@@ -13,12 +13,9 @@ import {
 import { Text } from "@/design-system/typography/text";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Trophy,
-  Users,
   Clock,
-  ArrowRight,
   Zap,
   Layers,
   ChevronRight,
@@ -27,7 +24,6 @@ import {
   Medal,
   Activity,
 } from "lucide-react";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface ContestCardProps {

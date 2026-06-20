@@ -2,7 +2,7 @@
 
 import React, { useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Minus, ChevronUp, ChevronDown } from "lucide-react";
+import { ChevronUp, ChevronDown } from "lucide-react";
 import { Text } from "@/design-system/typography/text";
 import { cn } from "@/lib/utils";
 import { trackEvent, logEvent } from '@/lib/utils/analytics';

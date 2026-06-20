@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Users, UserPlus, UserCheck, UserX, Activity, Search, Filter, Eye, Ban, MoreHorizontal, TrendingUp } from "lucide-react";
+import { Users, UserPlus, UserCheck, UserX, Activity, Search, Eye, Ban, MoreHorizontal, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

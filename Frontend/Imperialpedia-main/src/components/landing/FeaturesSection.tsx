@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Text } from '@/design-system/typography/text';
-import { Brain, Database, Sparkles, Code, Bot, Search } from 'lucide-react';
+import { Database, Bot, Search } from 'lucide-react';
 import { FeatureCard } from '@/components/common/FeatureCard';
 import { useTranslation } from 'react-i18next';
 

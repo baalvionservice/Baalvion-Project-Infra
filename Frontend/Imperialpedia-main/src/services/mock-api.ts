@@ -2,7 +2,7 @@
  * @deprecated Use `@/lib/api-client` instead. This file is kept for backwards
  * compatibility — existing component imports will continue to work.
  */
-import { User, BaseModule } from "@/types";
+import { BaseModule } from "@/types";
 import { Article, ArticleStatus } from "@/modules/content-engine/types/article";
 
 export const mockApi = {

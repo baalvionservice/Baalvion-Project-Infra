@@ -5,14 +5,11 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
-  ShieldCheck, 
   Building2, 
   Pickaxe, 
   ChevronRight, 
   CheckCircle2, 
-  Upload, 
-  AlertCircle,
-  Clock,
+  Upload,
   Info
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";

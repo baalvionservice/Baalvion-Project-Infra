@@ -1,9 +1,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { TransparencyData, TransparencyReportNode } from "@/types/system";
+import { TransparencyData } from "@/types/system";
 import { systemService } from "@/services/data/system-service";
-import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
 import {
   Card,
@@ -11,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,8 +17,6 @@ import {
   ShieldCheck,
   Globe,
   Activity,
-  BarChart3,
-  TrendingUp,
   FileText,
   Download,
   Loader2,
@@ -29,10 +25,8 @@ import {
   Users,
   Scale,
   MessageSquare,
-  CheckCircle2,
   ArrowRight,
   Sparkles,
-  Target,
 } from "lucide-react";
 import {
   BarChart,
@@ -44,8 +38,6 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
-  Legend,
-  Cell,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
@@ -611,4 +603,4 @@ export function TransparencyClient() {
 }
 
 import { RefreshCw } from "lucide-react";
-import { Heart } from "lucide-react";
+

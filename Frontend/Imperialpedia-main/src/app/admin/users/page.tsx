@@ -4,10 +4,6 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Table,
@@ -17,24 +13,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/design-system/typography/text";
 import {
-  Users,
   ShieldCheck,
   Search,
   ChevronRight,
-  Activity,
   Lock,
   Loader2,
-  Settings2,
   Key,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { adminKernel } from "@/lib/services/admin-service";
 import { AdminUser, AdminRole } from "@/types/admin-system";
-import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import {
   Select,

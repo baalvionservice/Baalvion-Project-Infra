@@ -4,9 +4,6 @@ import React from 'react';
 import { EditMilestone } from '@/types/version-control';
 import { Text } from '@/design-system/typography/text';
 import { 
-  CheckCircle2, 
-  Zap, 
-  History, 
   FileEdit, 
   User, 
   Clock,
@@ -14,7 +11,6 @@ import {
   Send,
   Plus
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface EditTimelineProps {
   milestones: EditMilestone[];

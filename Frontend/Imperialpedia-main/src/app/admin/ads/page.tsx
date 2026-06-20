@@ -1,14 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/design-system/typography/text';
 import { 
-  Megaphone, Plus, Search, Edit, Trash2, TrendingUp, 
-  ChevronRight, ArrowUpRight, Zap, Target, Users, DollarSign,
+  Megaphone, Plus, Search, Edit, Trash2, TrendingUp, Zap, Target, Users, DollarSign,
   Activity, PieChart as PieIcon, Link as LinkIcon
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';

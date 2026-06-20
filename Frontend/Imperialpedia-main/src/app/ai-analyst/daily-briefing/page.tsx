@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { generateDailyBriefing, DailyBriefingOutput } from '@/ai/flows/daily-briefing-flow';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -14,18 +14,15 @@ import {
   TrendingUp, 
   TrendingDown, 
   Zap, 
-  MessageSquare, 
-  Info,
+  MessageSquare,
   ArrowRight,
   Globe,
   Newspaper,
   Target,
-  BarChart3,
   Calendar
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 
 /**
  * AI Daily Briefing Dashboard.

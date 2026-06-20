@@ -1,4 +1,3 @@
-import { PlatformConfig } from '@/types';
 import { env } from './env';
 
 /**

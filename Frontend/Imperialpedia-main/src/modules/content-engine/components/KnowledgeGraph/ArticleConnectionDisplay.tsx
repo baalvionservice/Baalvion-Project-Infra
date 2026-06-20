@@ -3,8 +3,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
-import { Badge } from '@/components/ui/badge';
-import { Layers, Zap, ArrowRight, Target, Globe } from 'lucide-react';
+import { Layers, Zap, ArrowRight, Globe } from 'lucide-react';
 import Link from 'next/link';
 
 /**

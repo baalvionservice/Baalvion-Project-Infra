@@ -18,7 +18,6 @@ import {
   Search,
   Filter,
   Edit,
-  Trash2,
   Eye,
   Loader2,
   Layers,

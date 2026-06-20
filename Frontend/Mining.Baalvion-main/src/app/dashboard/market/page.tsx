@@ -4,9 +4,8 @@
 import { useState } from "react";
 import { getMarketInsights, type GetMarketInsightsOutput } from "@/ai/flows/get-market-insights";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BarChart4, Loader2, Sparkles, TrendingUp, Info, DollarSign, Target } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";

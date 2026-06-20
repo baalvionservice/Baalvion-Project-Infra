@@ -12,8 +12,7 @@ import {
   Loader2, 
   Activity, 
   Target, 
-  Zap, 
-  Globe,
+  Zap,
   ChevronRight,
   ShieldCheck
 } from 'lucide-react';

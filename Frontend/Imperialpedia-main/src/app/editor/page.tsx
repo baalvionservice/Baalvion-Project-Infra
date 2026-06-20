@@ -23,7 +23,6 @@ import {
   ArrowRight,
   Clock,
   User,
-  MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { getSubmittedArticles } from "@/services/mock-api/articles";

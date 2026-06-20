@@ -2,16 +2,14 @@
 
 import React from 'react';
 import { CommentAnalytics as AnalyticsType } from '@/types/community';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
 import { Badge } from '@/components/ui/badge';
 import { 
   BarChart3, 
   Users, 
-  Heart, 
   Activity, 
-  TrendingUp, 
-  Sparkles 
+  TrendingUp 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

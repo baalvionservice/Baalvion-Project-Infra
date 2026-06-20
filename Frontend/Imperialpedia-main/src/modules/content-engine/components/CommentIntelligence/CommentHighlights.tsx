@@ -6,7 +6,6 @@ import {
   Card,
   CardContent,
   CardHeader,
-  CardTitle,
   CardFooter,
 } from "@/components/ui/card";
 import { Text } from "@/design-system/typography/text";
@@ -16,14 +15,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Zap,
   Sparkles,
-  Trophy,
-  MessageSquare,
   ArrowUpRight,
   ChevronRight,
   ShieldCheck,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
 
 interface CommentHighlightsProps {
   editorsPick: IntelligenceCommentNode[];

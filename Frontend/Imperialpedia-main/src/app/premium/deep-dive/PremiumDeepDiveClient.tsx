@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { PortfolioDeepDiveData, DeepDiveAsset } from "@/types/premium";
+import { PortfolioDeepDiveData } from "@/types/premium";
 import { premiumService } from "@/services/data/premium-service";
 import {
   Card,
@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,19 +25,13 @@ import {
   BarChart3,
   Target,
   Sparkles,
-  Info,
   Layers,
   Search,
-  Filter,
   Loader2,
-  ChevronRight,
-  ArrowRight,
   Bookmark,
   FileText,
   PieChart as PieIcon,
   AlertTriangle,
-  Flame,
-  ArrowUpRight,
   GitCompare,
 } from "lucide-react";
 import {
@@ -48,11 +41,6 @@ import {
   ResponsiveContainer,
   Tooltip,
   Legend,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
 } from "recharts";
 import {
   Table,

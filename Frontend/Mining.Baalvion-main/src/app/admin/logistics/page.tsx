@@ -1,22 +1,17 @@
 
 "use client"
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
   Truck, 
-  Ship, 
-  MapPin, 
   Activity, 
   ShieldCheck, 
   Globe, 
   Plus, 
   Search, 
-  Filter, 
   History,
   AlertCircle,
-  CheckCircle2,
   Anchor,
   Settings2,
   ArrowRight

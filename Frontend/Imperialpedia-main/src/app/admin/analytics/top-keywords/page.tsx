@@ -32,7 +32,6 @@ import {
   Download,
   BarChart3,
   MousePointer2,
-  Filter,
   Activity,
 } from "lucide-react";
 import Link from "next/link";

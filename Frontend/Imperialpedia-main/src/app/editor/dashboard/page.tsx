@@ -6,7 +6,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +18,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Send,
-  BarChart3,
   Loader2,
   ArrowRight,
   ShieldCheck,

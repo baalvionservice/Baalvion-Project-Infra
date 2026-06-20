@@ -2,17 +2,15 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/design-system/typography/text';
 import { 
-  DollarSign, TrendingUp, TrendingDown, Activity, 
-  Zap, Loader2, Download, CreditCard, PieChart as PieIcon, 
-  Globe, ArrowUpRight, ShieldCheck, ChevronRight, 
-  Calendar, Layers, ArrowRight, Target
+  DollarSign, Activity, 
+  Zap, Loader2, Download, CreditCard, PieChart as PieIcon, ShieldCheck, 
+  Calendar
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { adminService } from '@/services/mock-api/admin';
 import { RevenueMetric } from '@/types/admin';
 import { cn } from '@/lib/utils';

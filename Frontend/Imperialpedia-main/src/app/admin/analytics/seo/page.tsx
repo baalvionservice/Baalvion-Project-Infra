@@ -13,7 +13,6 @@ import {
   ArrowLeft, 
   ArrowUpRight, 
   BarChart3, 
-  MousePointer2, 
   Link as LinkIcon, 
   Loader2,
   Calendar,
@@ -24,7 +23,6 @@ import {
   Activity,
   Zap,
   Target,
-  FileText,
   ShieldCheck,
   SearchX,
   ExternalLink,
@@ -41,13 +39,11 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  LineChart,
   Line,
   Legend
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { SeoAnalytics } from '@/types';
 
 /**

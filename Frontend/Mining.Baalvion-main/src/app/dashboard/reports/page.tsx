@@ -16,7 +16,6 @@ import {
   Loader2,
   CheckCircle2,
   Clock,
-  ExternalLink,
   ChevronRight
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

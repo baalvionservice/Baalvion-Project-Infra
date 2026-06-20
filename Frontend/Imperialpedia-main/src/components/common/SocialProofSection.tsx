@@ -5,7 +5,6 @@ import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import LogoCard from './LogoCard';
 import { useTranslation } from 'react-i18next';
-import { Badge } from '@/components/ui/badge';
 import { ShieldCheck } from 'lucide-react';
 
 /**

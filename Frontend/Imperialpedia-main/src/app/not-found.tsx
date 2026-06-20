@@ -5,7 +5,7 @@ import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { SearchX, ArrowLeft, Search, Globe, Layout } from 'lucide-react';
+import { SearchX, ArrowLeft, Search, Globe } from 'lucide-react';
 import Link from 'next/link';
 
 /**

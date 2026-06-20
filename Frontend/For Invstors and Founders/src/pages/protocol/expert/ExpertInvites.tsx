@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link2, Copy, Clock, Users, DollarSign, Plus, Trash2, ExternalLink, Check } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";

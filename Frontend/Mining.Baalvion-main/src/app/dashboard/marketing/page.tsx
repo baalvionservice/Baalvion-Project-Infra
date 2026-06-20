@@ -9,14 +9,9 @@ import {
   Plus, 
   TrendingUp, 
   Eye, 
-  MousePointer2, 
   BarChart3, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle,
-  ArrowUpRight,
+  CheckCircle2,
   Image as ImageIcon,
-  ChevronRight,
   Loader2
 } from "lucide-react";
 import { 

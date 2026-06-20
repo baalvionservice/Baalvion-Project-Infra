@@ -16,7 +16,6 @@ import {
   Save, 
   Loader2, 
   ArrowLeft, 
-  ShieldCheck, 
   Info,
   CheckCircle2,
   RefreshCcw,
@@ -26,7 +25,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { systemService } from '@/services/data/system-service';
-import { BrandingSettings } from '@/types/system';
 import { toast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 

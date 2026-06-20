@@ -11,8 +11,7 @@ import {
   Filter, 
   Edit, 
   CheckCircle2, 
-  AlertCircle, 
-  History,
+  AlertCircle,
   Download,
   UploadCloud,
   ArrowRight

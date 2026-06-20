@@ -10,18 +10,14 @@ import {
   Flame, 
   TrendingUp, 
   Eye, 
-  Heart, 
-  MessageSquare, 
   Share2, 
   ArrowLeft, 
   Download, 
   Loader2,
   Calendar,
-  ChevronRight,
   ArrowUpRight,
   Sparkles,
-  Search,
-  Filter
+  Search
 } from 'lucide-react';
 import Link from 'next/link';
 import { analyticsService } from '@/services/data/analytics-service';
@@ -33,9 +29,7 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  AreaChart,
-  Area
+  ResponsiveContainer
 } from 'recharts';
 import { Input } from '@/components/ui/input';
 

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 

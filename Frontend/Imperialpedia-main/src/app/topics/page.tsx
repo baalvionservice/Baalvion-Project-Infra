@@ -6,7 +6,7 @@ import { getGlobalTopicIndex } from '@/services/mock-api/topics';
 import { TopicIndexClient } from './TopicIndexClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
-import { Grid as GridIcon, Sparkles } from 'lucide-react';
+import { Grid as GridIcon } from 'lucide-react';
 
 export const metadata: Metadata = buildMetadata({
   title: 'Global Topic Index | Financial Intelligence Directory',

@@ -8,15 +8,12 @@ import {
   ShieldAlert, 
   Activity, 
   Lock, 
-  Key, 
   Search, 
-  Filter, 
   ArrowUpRight, 
   MapPin, 
   History, 
   FileCheck,
   CheckCircle2,
-  AlertTriangle,
   Fingerprint
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

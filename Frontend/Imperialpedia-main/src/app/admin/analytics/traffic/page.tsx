@@ -7,10 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Text } from '@/design-system/typography/text';
 import { 
-  Globe, 
-  Monitor, 
-  Smartphone, 
-  Tablet, 
   Users, 
   Eye, 
   Clock, 
@@ -19,24 +15,17 @@ import {
   Download,
   Loader2,
   TrendingUp,
-  MapPin,
-  ChevronRight,
-  MousePointer2,
   Share2
 } from 'lucide-react';
 import Link from 'next/link';
 import { analyticsService } from '@/services/data/analytics-service';
 import { TrafficAnalyticsReport } from '@/types/analytics';
 import { 
-  AreaChart, 
-  Area, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  BarChart,
-  Bar,
   Cell,
   PieChart,
   Pie,

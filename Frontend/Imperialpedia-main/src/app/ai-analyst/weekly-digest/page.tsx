@@ -4,20 +4,17 @@ import React, { useState } from 'react';
 import { generateWeeklyDigest, WeeklyDigestOutput } from '@/ai/flows/weekly-digest-flow';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { 
-  Sparkles, 
   Loader2, 
   TrendingUp, 
   TrendingDown, 
   Zap, 
-  MessageSquare, 
-  Info,
+  MessageSquare,
   ArrowRight,
-  Globe,
   Newspaper,
   Target,
   BarChart3,
@@ -26,7 +23,6 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { format, subDays } from 'date-fns';
-import { cn } from '@/lib/utils';
 
 /**
  * AI Weekly Digest Dashboard.

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,13 +9,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Text } from '@/design-system/typography/text';
 import { 
   Plus, 
-  Edit, 
   Trash2, 
   Search, 
   Tag as TagIcon, 
   Settings2,
   Globe,
-  CheckCircle2,
   TrendingUp
 } from 'lucide-react';
 import { MOCK_TAGS } from '@/modules/content-engine/models/tag';
@@ -26,8 +24,7 @@ import {
   DialogDescription, 
   DialogFooter, 
   DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+  DialogTitle 
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { slugify } from '@/modules/content-engine/utils/slugify';

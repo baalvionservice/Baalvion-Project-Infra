@@ -7,12 +7,7 @@ import { Text } from '@/design-system/typography/text';
 import { Badge } from '@/components/ui/badge';
 import { 
   History, 
-  TrendingUp, 
-  TrendingDown, 
-  Clock, 
   ChevronRight,
-  ArrowRight,
-  Zap,
   Activity
 } from 'lucide-react';
 import { cn } from '@/lib/utils';

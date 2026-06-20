@@ -3,7 +3,7 @@
 // Prevent prerendering for this page since it uses client-side form hooks
 export const dynamic = "force-dynamic";
 
-import React, { useState, Suspense } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Form,

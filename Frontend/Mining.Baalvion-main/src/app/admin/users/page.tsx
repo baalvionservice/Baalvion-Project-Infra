@@ -2,17 +2,14 @@
 "use client"
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { 
   Users, 
-  ShieldCheck, 
   UserPlus, 
   Search, 
   Filter, 
-  MoreVertical, 
   ShieldAlert, 
-  Lock, 
-  CheckCircle2,
+  Lock,
   Settings2, 
   Trash2,
   Edit,
@@ -32,8 +29,6 @@ import {
   DialogTrigger,
   DialogFooter 
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 

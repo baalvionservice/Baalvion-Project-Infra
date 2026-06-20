@@ -1,4 +1,4 @@
-import { ApiResponse, SubscriptionTier, PremiumState, PremiumReport, PremiumAnalytics, MockPaymentStatus, BacktestingTool, PremiumDashboardData, PortfolioDeepDiveData, ScreenerDashboardData, BacktestDashboardData, MarketHeatmapData } from '@/types/premium';
+import { ApiResponse, SubscriptionTier, PremiumState, PremiumReport, PremiumAnalytics, BacktestingTool, PremiumDashboardData, PortfolioDeepDiveData, ScreenerDashboardData, BacktestDashboardData, MarketHeatmapData } from '@/types/premium';
 
 /**
  * @fileOverview Mock service for managing subscription tiers, premium reports, and advanced analytics.

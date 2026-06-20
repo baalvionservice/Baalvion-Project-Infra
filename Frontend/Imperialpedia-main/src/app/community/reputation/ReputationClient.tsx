@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { ReputationSystemData, ReputationUser } from "@/types/community";
+import { ReputationSystemData } from "@/types/community";
 import { communityService } from "@/services/data/community-service";
 import {
   Card,
@@ -37,7 +37,6 @@ import {
   MessageSquare,
   Loader2,
   ChevronRight,
-  ArrowUpRight,
   Heart,
   Target,
   Activity,
@@ -60,7 +59,6 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-  Cell,
 } from "recharts";
 import { cn } from "@/lib/utils";
 

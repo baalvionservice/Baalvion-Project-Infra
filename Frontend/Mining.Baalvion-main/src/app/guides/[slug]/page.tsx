@@ -6,7 +6,7 @@ import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, FileText, Globe, ShieldCheck, ArrowLeft, ArrowRight, Share2, ClipboardCheck, History } from "lucide-react";
+import { FileText, Globe, ShieldCheck, ArrowLeft, ArrowRight, Share2, History } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { JsonLd } from "@/components/seo/JsonLd";

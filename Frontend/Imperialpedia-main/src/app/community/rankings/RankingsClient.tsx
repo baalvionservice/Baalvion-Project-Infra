@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { CommunityRankingsData, RankedUser } from "@/types/community";
-import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
 import {
   Card,
@@ -34,34 +33,18 @@ import {
   Award,
   Target,
   Search,
-  Filter,
-  Loader2,
   ChevronRight,
-  ArrowUpRight,
   Flame,
-  MessageSquare,
-  Users,
   Zap,
-  Info,
-  ExternalLink,
   ShieldCheck,
-  Calendar,
   Sparkles,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
+
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 

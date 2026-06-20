@@ -9,8 +9,6 @@ import {
   ShieldCheck, 
   ShieldAlert, 
   Lock, 
-  Zap, 
-  Activity, 
   Globe, 
   FileLock, 
   ShieldX,

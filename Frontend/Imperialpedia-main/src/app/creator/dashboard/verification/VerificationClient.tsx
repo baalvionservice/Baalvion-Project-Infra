@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,8 +17,6 @@ import { Label } from "@/components/ui/label";
 import {
   ShieldCheck,
   Clock,
-  AlertCircle,
-  CheckCircle2,
   Upload,
   FileText,
   ExternalLink,

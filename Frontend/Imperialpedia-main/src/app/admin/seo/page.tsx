@@ -1,19 +1,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/design-system/typography/text';
 import { 
   Globe, 
-  Search, 
   Layers, 
-  ArrowUpRight, 
   CheckCircle2, 
-  Zap, 
-  Target, 
   RefreshCw, 
   Loader2, 
   Info,
@@ -21,7 +17,6 @@ import {
   ArrowRight,
   ShieldCheck,
   ExternalLink,
-  ChevronRight,
   XCircle,
   Clock
 } from 'lucide-react';
@@ -29,7 +24,6 @@ import { seoService } from '@/lib/services/seoService';
 import { IndexSummary, IndexStatusNode, SitemapStatus } from '@/types/seo';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
-import Link from 'next/link';
 
 export default function SEOEngineHub() {
   const [summary, setSummary] = useState<IndexSummary | null>(null);

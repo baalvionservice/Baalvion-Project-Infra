@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { Text } from '@/design-system/typography/text';
 import { TrustLevel } from '@/types/trust';
 
 interface TrustScoreGaugeProps {

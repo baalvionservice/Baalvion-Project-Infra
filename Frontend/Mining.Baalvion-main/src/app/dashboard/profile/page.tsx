@@ -16,7 +16,6 @@ import {
   Building2,
   MapPin,
   Globe,
-  Pickaxe,
   ShieldCheck,
   Award,
   Mail,

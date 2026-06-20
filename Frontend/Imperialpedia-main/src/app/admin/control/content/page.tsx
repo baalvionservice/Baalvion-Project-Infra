@@ -3,10 +3,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Table,
@@ -27,7 +23,6 @@ import {
   Trash2,
   Loader2,
   ExternalLink,
-  ChevronRight,
   Filter,
   Layers,
   ArrowRight,

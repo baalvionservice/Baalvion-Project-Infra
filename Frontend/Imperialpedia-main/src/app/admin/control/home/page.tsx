@@ -6,7 +6,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -20,16 +19,12 @@ import {
   ShieldAlert,
   LayoutDashboard,
   ChevronRight,
-  ArrowUpRight,
   Activity,
   Database,
   History,
-  Bell,
-  RotateCcw,
   Palette,
   Megaphone,
   Loader2,
-  FileCode,
   ShieldX,
   Network,
   Cpu,

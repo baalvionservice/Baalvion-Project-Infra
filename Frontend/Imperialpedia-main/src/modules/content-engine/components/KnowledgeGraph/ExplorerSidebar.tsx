@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { GraphNode, NodeCategory } from "@/types/knowledge-graph";
+import { GraphNode } from "@/types/knowledge-graph";
 import {
   Card,
   CardContent,
@@ -15,10 +15,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Search,
-  Filter,
   Layers,
-  Zap,
-  ArrowRight,
   Activity,
   ChevronRight,
 } from "lucide-react";

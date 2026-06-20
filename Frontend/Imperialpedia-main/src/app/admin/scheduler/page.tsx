@@ -12,7 +12,6 @@ import {
   Edit, 
   Trash2, 
   Plus,
-  ChevronRight,
   Loader2
 } from 'lucide-react';
 import { getScheduledArticles, ScheduledArticle } from '@/services/mock-api/scheduler';

@@ -1,13 +1,13 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { JsonLd } from "@/components/seo/JsonLd";
-import { BookOpen, ArrowRight, FileText, Globe, ShieldCheck } from "lucide-react";
+import { BookOpen, ArrowRight } from "lucide-react";
 import { guides } from "@/lib/sitemap-data";
 import { BRAND_IMAGES } from "@/lib/brand-assets";
 

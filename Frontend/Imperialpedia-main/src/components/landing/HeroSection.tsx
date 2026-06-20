@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
@@ -9,10 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Sparkles,
   ArrowRight,
-  ShieldCheck,
-  Globe,
-  Activity,
-  Zap,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { useTranslation } from "react-i18next";

@@ -8,8 +8,6 @@ import { Text } from '@/design-system/typography/text';
 import { 
   Activity, 
   ShieldCheck, 
-  Server, 
-  Database, 
   Zap, 
   AlertTriangle, 
   RefreshCw, 
@@ -18,7 +16,6 @@ import {
   ChevronRight,
   Monitor,
   CheckCircle2,
-  XCircle,
   BarChart3
 } from 'lucide-react';
 import { systemService } from '@/services/data/system-service';

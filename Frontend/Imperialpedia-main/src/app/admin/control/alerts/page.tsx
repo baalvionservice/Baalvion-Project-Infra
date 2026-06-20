@@ -6,7 +6,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Table,
@@ -23,7 +22,6 @@ import { Text } from "@/design-system/typography/text";
 import { cn } from "@/lib/utils";
 import {
   Bell,
-  Plus,
   Search,
   Filter,
   Loader2,
@@ -32,7 +30,6 @@ import {
   AlertTriangle,
   XCircle,
   Megaphone,
-  ArrowUpRight,
   ShieldCheck,
   Send,
   ArrowLeft,

@@ -13,7 +13,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +21,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   ShieldAlert,
   Loader2,
-  Search,
   AlertTriangle,
   ShieldCheck,
   Zap,

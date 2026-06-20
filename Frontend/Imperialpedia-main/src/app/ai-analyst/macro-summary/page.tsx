@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { generateMacroSummary, MacroSummaryOutput } from '@/ai/flows/macro-summary-flow';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -12,7 +12,6 @@ import { Progress } from '@/components/ui/progress';
 import { 
   Globe, 
   Loader2, 
-  Search, 
   TrendingUp, 
   Activity, 
   Zap, 

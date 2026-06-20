@@ -6,19 +6,14 @@
 
 import React, { useState } from 'react';
 import { QualityScoredArticle } from '@/types/content-quality';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Text } from '@/design-system/typography/text';
 import { 
   Trophy, 
   Search, 
-  ChevronRight, 
-  ArrowRight, 
-  Activity, 
-  TrendingUp,
-  FileText,
+  ArrowRight,
   User
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';

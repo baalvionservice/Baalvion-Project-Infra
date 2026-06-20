@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,20 +13,12 @@ import {
   Zap, 
   Activity, 
   ShieldCheck, 
-  AlertTriangle, 
   Loader2, 
   RefreshCw,
   Plus,
-  Trash2,
-  Clock,
-  ArrowRight,
   ShieldAlert,
-  CheckCircle2,
-  XCircle,
-  Database,
   Layers,
   Search,
-  Filter,
   Mail,
   Smartphone,
   MessageSquare,
@@ -38,9 +30,6 @@ import {
 import { systemService } from "@/services/data/system-service";
 import {
   AlertsSystemData,
-  AdvancedAlertNode,
-  NotificationChannelNode,
-  AlertRuleNode,
 } from "@/types/system";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";

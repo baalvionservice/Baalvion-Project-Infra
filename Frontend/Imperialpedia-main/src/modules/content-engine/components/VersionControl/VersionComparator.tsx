@@ -3,9 +3,8 @@
 import React from "react";
 import { ArticleVersion } from "@/types/version-control";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Text } from "@/design-system/typography/text";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeftRight, GitCompare, Minus, Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface VersionComparatorProps {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { PremiumAnalytics, BacktestingTool } from "@/types/premium";
+import { PremiumAnalytics } from "@/types/premium";
 import {
   Card,
   CardContent,
@@ -18,9 +18,6 @@ import { Label } from "@/components/ui/label";
 import {
   Activity,
   TrendingUp,
-  TrendingDown,
-  Zap,
-  Clock,
   ArrowRight,
   ShieldCheck,
   BarChart3,
@@ -29,14 +26,11 @@ import {
   Sparkles,
   Info,
   Download,
-  RotateCcw,
   Play,
-  Settings2,
   Database,
   Loader2,
 } from "lucide-react";
 import {
-  LineChart,
   Line,
   XAxis,
   YAxis,
@@ -47,8 +41,6 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import { Progress } from "@/components/ui/progress";
-import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
 interface PremiumAnalyticsClientProps {

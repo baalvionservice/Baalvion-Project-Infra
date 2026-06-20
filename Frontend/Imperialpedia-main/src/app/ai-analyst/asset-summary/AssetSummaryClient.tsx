@@ -3,14 +3,9 @@
 import React, { useEffect, useState } from "react";
 import { AssetSummary } from "@/types/analytics";
 import { analyticsService } from "@/services/data/analytics-service";
-import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
 import {
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,25 +15,18 @@ import { Progress } from "@/components/ui/progress";
 import {
   TrendingUp,
   TrendingDown,
-  Minus,
-  AlertTriangle,
-  Info,
   Zap,
   ArrowRight,
   Globe,
   Activity,
   Loader2,
   Sparkles,
-  BarChart3,
   Target,
   Search,
-  RefreshCw,
-  Flame,
   ShieldAlert,
 } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, YAxis, XAxis } from "recharts";
+import { LineChart, Line, ResponsiveContainer } from "recharts";
 import { cn } from "@/lib/utils";
-import { toast } from "@/hooks/use-toast";
 
 /**
  * AI Asset Summary Client Hub.

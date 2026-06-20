@@ -20,12 +20,9 @@ import {
   Clock,
   Package,
   CheckCircle2,
-  AlertCircle,
   Activity,
   Anchor,
   ChevronRight,
-  Star,
-  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";

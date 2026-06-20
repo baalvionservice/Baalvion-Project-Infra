@@ -1,11 +1,8 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ScreenerDashboardData,
-  ScreenerAsset,
-  ScreenerNode,
-  CustomStrategy,
 } from "@/types/premium";
 import { premiumService } from "@/services/data/premium-service";
 import {
@@ -14,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -40,19 +36,14 @@ import { Text } from "@/design-system/typography/text";
 import {
   Search,
   Filter,
-  Zap,
   TrendingUp,
   TrendingDown,
-  BarChart3,
   Activity,
-  Star,
   ChevronRight,
   ArrowUpRight,
   Plus,
-  Trash2,
   Settings2,
   Sparkles,
-  Layers,
   Database,
   ShieldCheck,
   RefreshCw,
@@ -65,7 +56,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { Progress } from "@/components/ui/progress";
 
 /**
  * Advanced Asset Screener & Strategy Builder Dashboard Client.

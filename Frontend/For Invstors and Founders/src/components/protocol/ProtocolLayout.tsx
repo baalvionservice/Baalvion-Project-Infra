@@ -9,7 +9,6 @@ import {
   Shield,
   ChevronLeft,
   Menu,
-  X,
   LogOut,
   Bell,
   Settings,
@@ -21,7 +20,6 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,

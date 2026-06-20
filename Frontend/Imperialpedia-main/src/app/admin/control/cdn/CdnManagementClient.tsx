@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,24 +9,21 @@ import { Text } from '@/design-system/typography/text';
 import { 
   Globe, 
   Zap, 
-  Activity, 
   ShieldCheck, 
   AlertTriangle, 
   Loader2, 
   RefreshCw,
   Trash2,
   Clock,
-  ArrowUpRight,
   ShieldAlert,
   CheckCircle2,
   XCircle,
   Database,
   Layers,
-  Search,
-  Filter
+  Search
 } from 'lucide-react';
 import { systemService } from '@/services/data/system-service';
-import { CdnManagementData, CdnNode, PageCacheItem, CdnLogEntry } from '@/types/system';
+import { CdnManagementData } from '@/types/system';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';

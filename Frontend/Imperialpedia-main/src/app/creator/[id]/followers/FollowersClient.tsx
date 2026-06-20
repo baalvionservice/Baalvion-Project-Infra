@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { CreatorProfile, Follower } from '@/types';
-import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';

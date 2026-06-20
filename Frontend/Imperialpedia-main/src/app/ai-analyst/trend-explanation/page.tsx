@@ -6,7 +6,7 @@ import { analyticsService } from '@/services/data/analytics-service';
 import { TrendExplanationItem } from '@/types/analytics';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -20,12 +20,9 @@ import {
   Zap, 
   Sparkles,
   ArrowRight,
-  Info,
   Target
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { toast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 /**
  * AI Trend Explanation Dashboard.

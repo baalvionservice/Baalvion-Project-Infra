@@ -20,10 +20,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/design-system/typography/text";
 import {
-  BarChart3,
   TrendingUp,
   TrendingDown,
-  Activity,
   Zap,
   Loader2,
   Server,
@@ -32,7 +30,6 @@ import {
   AlertTriangle,
   ArrowUpRight,
   ArrowDownRight,
-  Calendar,
   Download,
   RefreshCw,
   Clock,

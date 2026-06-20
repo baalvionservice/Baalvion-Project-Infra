@@ -21,7 +21,6 @@ import {
   AlertTriangle,
   ArrowRight,
   BarChart3,
-  Search,
   Target,
   RefreshCw,
   Calendar

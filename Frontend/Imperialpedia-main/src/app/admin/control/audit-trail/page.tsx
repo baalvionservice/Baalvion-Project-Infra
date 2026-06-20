@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,11 +13,9 @@ import {
   Search, 
   Filter, 
   Loader2, 
-  Clock, 
   CheckCircle2, 
   XCircle,
   FileCode,
-  ArrowUpRight,
   ShieldAlert,
   Download,
   Lock,
@@ -30,8 +28,6 @@ import Link from 'next/link';
 import { systemService } from '@/services/data/system-service';
 import { AuditTrailEntry } from '@/types/system';
 import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
 
 const ITEMS_PER_PAGE = 10;
 

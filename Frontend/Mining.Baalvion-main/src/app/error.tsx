@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCcw, ShieldAlert } from "lucide-react";
+import { RefreshCcw, ShieldAlert } from "lucide-react";
 import { reportError } from "@/lib/monitoring";
 
 export default function Error({

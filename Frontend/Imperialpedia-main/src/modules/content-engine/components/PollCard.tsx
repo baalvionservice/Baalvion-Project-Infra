@@ -1,13 +1,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Poll, PollOption } from '@/types/community';
+import { Poll } from '@/types/community';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Target, Users, Clock, CheckCircle2, Lock } from 'lucide-react';
-import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface PollCardProps {

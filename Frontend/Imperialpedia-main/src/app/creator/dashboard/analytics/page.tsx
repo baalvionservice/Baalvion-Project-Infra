@@ -12,7 +12,6 @@ import {
   TrendingUp, 
   Eye, 
   MousePointer2, 
-  Share2, 
   DollarSign, 
   Calendar,
   Download,
@@ -25,8 +24,6 @@ import { getCreatorAnalytics } from '@/services/mock-api/creators';
 import { CreatorDashboardAnalytics } from '@/types';
 import { format } from 'date-fns';
 import { 
-  LineChart, 
-  Line, 
   XAxis, 
   YAxis, 
   CartesianGrid, 

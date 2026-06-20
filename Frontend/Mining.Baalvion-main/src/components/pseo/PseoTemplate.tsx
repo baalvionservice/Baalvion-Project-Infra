@@ -9,11 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import {
   ShieldCheck,
   Globe,
-  Gem,
   ArrowRight,
-  CheckCircle2,
   TrendingUp,
-  MapPin,
   Building2,
   HelpCircle,
   Briefcase,
@@ -23,18 +20,13 @@ import {
   Truck,
   Scale,
   Target,
-  Users,
-  Anchor,
 } from "lucide-react";
 import {
   PseoPageData,
   getVariatedIntro,
-  miningProducts,
-  tradeLocations,
 } from "@/lib/pseo-data";
 import Link from "next/link";
 import { RelatedProducts } from "@/components/marketplace/RelatedProducts";
-import { cn } from "@/lib/utils";
 
 interface PseoTemplateProps {
   data: PseoPageData;

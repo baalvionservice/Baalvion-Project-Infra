@@ -28,8 +28,6 @@ import {
   ShieldCheck,
   Loader2,
   Search,
-  Filter,
-  BarChart3,
   Calendar,
   Download,
   DollarSign,

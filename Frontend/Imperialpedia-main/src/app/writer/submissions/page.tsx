@@ -3,9 +3,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Table,
@@ -19,13 +16,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/design-system/typography/text";
 import {
-  Send,
-  CheckCircle2,
-  AlertCircle,
-  Clock,
   MessageSquare,
   Loader2,
-  ExternalLink,
 } from "lucide-react";
 import { format } from "date-fns";
 

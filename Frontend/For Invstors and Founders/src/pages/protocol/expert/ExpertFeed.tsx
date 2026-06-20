@@ -5,14 +5,13 @@
  * TODO: Connect to analytics API for engagement data
  */
 import { useState, useEffect } from "react";
-import { Plus, Pin, BarChart3, MessageSquare, Headphones, Video, Heart, MessageCircle, Share2, MoreHorizontal, Image } from "lucide-react";
+import { Plus, Pin, BarChart3, MessageSquare, Headphones, Video, Heart, MessageCircle, Share2, MoreHorizontal } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
-import EmptyState from "@/components/protocol/EmptyState";
 import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 

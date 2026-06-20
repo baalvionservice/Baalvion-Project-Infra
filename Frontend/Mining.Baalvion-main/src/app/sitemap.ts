@@ -1,5 +1,5 @@
 import { MetadataRoute } from 'next';
-import { products, suppliers, blogPosts, guides, tradePages, SITEMAP_BASE_URL } from '@/lib/sitemap-data';
+import { products, suppliers, blogPosts, guides, SITEMAP_BASE_URL } from '@/lib/sitemap-data';
 import { pseoPages, isValidPseoPage } from '@/lib/pseo-data';
 
 /**

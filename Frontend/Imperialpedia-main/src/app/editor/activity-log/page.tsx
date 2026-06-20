@@ -3,10 +3,6 @@
 import React, { useEffect, useState } from "react";
 import {
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Table,
@@ -22,26 +18,19 @@ import { Text } from "@/design-system/typography/text";
 import {
   History,
   Search,
-  Filter,
   Loader2,
-  Clock,
   CheckCircle2,
-  XCircle,
   ShieldAlert,
   ArrowLeft,
-  ArrowUpRight,
   Zap,
-  Users,
-  MessageSquare,
   Scale,
 } from "lucide-react";
 import Link from "next/link";
-import { getEditorialDashboardData } from "@/services/data/editorial-service"; // Corrected path
+// Corrected path
 import { getEditorialDashboardData as getMockData } from "@/services/mock-api/editorial";
 import { EditorialLogEntry } from "@/types/editorial";
 import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 /**
  * Editorial Activity Audit Trail.

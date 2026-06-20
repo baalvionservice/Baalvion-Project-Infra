@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Text } from '@/design-system/typography/text';
 import { 
   ShieldCheck, 
-  Lock, 
   Settings2, 
   Save, 
   Loader2, 
@@ -17,7 +16,6 @@ import {
   ShieldAlert, 
   Info,
   CheckCircle2,
-  RefreshCcw,
   ChevronRight,
   Zap,
   Users
@@ -30,7 +28,7 @@ import {
 } from "@/components/ui/accordion";
 import Link from 'next/link';
 import { usersService } from '@/services/data/users-service';
-import { RolePermissionSet, Permission } from '@/types/system';
+import { RolePermissionSet } from '@/types/system';
 import { ALL_PERMISSIONS } from '@/services/mock-api/roles';
 import { toast } from '@/hooks/use-toast';
 

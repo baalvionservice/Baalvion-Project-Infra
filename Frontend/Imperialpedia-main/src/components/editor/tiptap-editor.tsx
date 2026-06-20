@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
@@ -17,17 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import {
-  Bold,
-  Italic,
-  Heading1,
-  Heading2,
-  List,
-  Quote,
-  Image as ImageIcon,
-  Link as LinkIcon,
   Plus,
   Trash2,
   Save,
@@ -37,7 +28,6 @@ import {
 import {
   Term,
   TermsBodyBlock,
-  accordionType,
   TextSegment,
 } from "@/lib/data/terms";
 import { NewsCategory } from "@/lib/data.news";

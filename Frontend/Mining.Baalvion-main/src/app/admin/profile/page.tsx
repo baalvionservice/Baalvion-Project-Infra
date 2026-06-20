@@ -10,20 +10,16 @@ import {
   User, 
   Mail, 
   ShieldCheck, 
-  Lock, 
   History, 
-  Bell, 
   Smartphone,
   CheckCircle2,
   Save,
-  LogOut,
   Fingerprint,
   Clock
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { cn } from "@/lib/utils";
 
 export default function AdminProfilePage() {
   const { toast } = useToast();

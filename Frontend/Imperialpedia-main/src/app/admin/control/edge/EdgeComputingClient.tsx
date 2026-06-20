@@ -4,9 +4,6 @@ import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import {
   Table,
@@ -28,25 +25,18 @@ import {
   AlertTriangle,
   Loader2,
   Monitor,
-  Cpu,
   Network,
   RefreshCw,
-  Plus,
-  ArrowRight,
   ShieldAlert,
   XCircle,
   CheckCircle2,
   Layers,
   MapPin,
-  Clock,
 } from "lucide-react";
 import Link from "next/link";
 import { systemService } from "@/services/data/system-service";
 import {
   EdgeComputingData,
-  RegionNode,
-  EdgeNode,
-  EdgeAlert,
 } from "@/types/system";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";

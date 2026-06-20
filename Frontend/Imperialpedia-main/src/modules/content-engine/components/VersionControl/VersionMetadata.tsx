@@ -8,12 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { 
   FileText, 
   Clock, 
-  Zap, 
-  Award, 
-  Sparkles,
-  BarChart3
+  Sparkles
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface VersionMetadataProps {
   metadata: MetadataType;

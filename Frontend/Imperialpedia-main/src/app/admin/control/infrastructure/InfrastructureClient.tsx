@@ -3,9 +3,6 @@
 import React, { useEffect, useState } from "react";
 import {
   InfrastructureMockData,
-  InfrastructureNode,
-  PipelineNode,
-  QueueNode,
 } from "@/types/system";
 import { systemService } from "@/services/data/system-service";
 import {
@@ -13,7 +10,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -30,10 +26,6 @@ import {
   Layers,
   Loader2,
   ShieldCheck,
-  CheckCircle2,
-  AlertTriangle,
-  Clock,
-  ArrowUpRight,
   Monitor,
   Cpu,
   Globe,

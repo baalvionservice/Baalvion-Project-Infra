@@ -27,8 +27,6 @@ import {
   XCircle,
   Clock,
   Activity,
-  TrendingUp,
-  ArrowRight,
   Zap,
   Layers,
   Sparkles,

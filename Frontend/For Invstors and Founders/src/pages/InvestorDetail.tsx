@@ -14,8 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
-  ArrowLeft, BadgeCheck, MapPin, Globe, Linkedin, Twitter, Instagram, Facebook, Wallet, Briefcase,
-  Layers, Mail, Phone, Building2, Landmark, ExternalLink, TrendingUp, Newspaper, Users, Link2, ShieldCheck,
+  ArrowLeft, BadgeCheck, MapPin, Globe, Linkedin, Twitter, Instagram, Facebook, Wallet, Briefcase, Mail, Phone, Building2, Landmark, ExternalLink, TrendingUp, Newspaper, Users, Link2, ShieldCheck,
   Lock, Clock, CheckCircle2, XCircle, Send,
 } from "lucide-react";
 import { Investor, money, checkRange } from "./Investors";

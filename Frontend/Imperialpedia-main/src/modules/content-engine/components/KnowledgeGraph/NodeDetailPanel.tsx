@@ -1,17 +1,13 @@
 'use client';
 
 import React from 'react';
-import { GraphNode, GraphConnection } from '@/types/knowledge-graph';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { GraphNode } from '@/types/knowledge-graph';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   ArrowRight, 
-  Layers, 
-  FileText, 
-  Users, 
-  TrendingUp, 
   Zap,
   ChevronRight,
   Target,
@@ -19,7 +15,6 @@ import {
   Search
 } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 
 interface NodeDetailPanelProps {
   node: GraphNode;

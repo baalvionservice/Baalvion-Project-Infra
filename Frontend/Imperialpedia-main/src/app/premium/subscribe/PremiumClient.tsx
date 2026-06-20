@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import { SubscriptionTier, PremiumState } from '@/types/premium';
-import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -19,9 +18,7 @@ import {
   CreditCard,
   Loader2,
   Lock,
-  Info,
-  XCircle,
-  AlertCircle
+  Info
 } from 'lucide-react';
 import {
   Dialog,

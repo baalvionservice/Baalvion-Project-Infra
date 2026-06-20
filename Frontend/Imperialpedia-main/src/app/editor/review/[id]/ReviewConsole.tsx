@@ -1,13 +1,12 @@
 "use client";
 
 import React, { useState } from "react";
-import { EditorialSubmission, RevisionDirective } from "@/types/editorial";
+import { EditorialSubmission } from "@/types/editorial";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardFooter,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +19,6 @@ import {
   ShieldCheck,
   CheckCircle2,
   XCircle,
-  AlertCircle,
   ArrowLeft,
   MessageSquare,
   Clock,
@@ -30,15 +28,10 @@ import {
   Activity,
   Target,
   FileText,
-  User,
-  ExternalLink,
-  ChevronRight,
-  TrendingUp,
   Scale,
   Sparkles,
 } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 import { Progress } from "@/components/ui/progress";
 

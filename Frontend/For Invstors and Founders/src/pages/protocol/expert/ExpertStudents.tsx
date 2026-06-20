@@ -5,15 +5,13 @@
  * TODO: Add bulk actions for student management
  */
 import { useState, useEffect } from "react";
-import { Search, Filter, Eye, Ban, Trash2, MoreHorizontal, Users } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Search, Filter, Eye, Ban, Trash2, MoreHorizontal } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
-import StatusDot from "@/components/protocol/StatusDot";
-import EmptyState from "@/components/protocol/EmptyState";
 import { protocolApi } from "@/lib/protocol-api";
 import { toast } from "sonner";
 

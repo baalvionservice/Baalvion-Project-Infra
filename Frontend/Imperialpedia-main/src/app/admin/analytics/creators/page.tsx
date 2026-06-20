@@ -12,13 +12,10 @@ import {
   TrendingUp, 
   ArrowLeft, 
   ArrowUpRight, 
-  FileText, 
   MousePointer2, 
   ShieldCheck, 
   Loader2,
   Search,
-  Filter,
-  BarChart3,
   Calendar,
   Download,
   ChevronRight,
@@ -35,12 +32,8 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell
+  ResponsiveContainer
 } from 'recharts';
-import { format } from 'date-fns';
 
 /**
  * Creator Performance Dashboard.

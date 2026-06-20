@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { 
   Megaphone, 
@@ -10,7 +10,6 @@ import {
   Filter, 
   Clock, 
   CheckCircle2, 
-  XCircle, 
   Eye, 
   Settings2,
   DollarSign,

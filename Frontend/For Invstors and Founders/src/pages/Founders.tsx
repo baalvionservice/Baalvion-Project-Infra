@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Users, Layers, Globe, Rocket, ChevronRight, Building2 } from "lucide-react";
+import { Search, Users, Layers, Globe, ChevronRight, Building2 } from "lucide-react";
 import { useActivityTracking } from "@/hooks/useActivityTracking";
 
 export type Founder = {

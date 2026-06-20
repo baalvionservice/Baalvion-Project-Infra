@@ -3,7 +3,7 @@
 import React from 'react';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Settings, ShieldCheck, Clock, Globe, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 

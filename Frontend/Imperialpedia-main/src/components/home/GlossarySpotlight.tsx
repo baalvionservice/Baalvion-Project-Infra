@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
 import { Button } from '@/components/ui/button';
-import { BookOpen, Sparkles, ArrowRight, ExternalLink } from 'lucide-react';
+import { BookOpen, Sparkles, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 
 export function GlossarySpotlight() {

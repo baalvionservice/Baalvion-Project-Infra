@@ -4,7 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
-import { Button } from '@/components/ui/button';
 import { ArrowRight, LucideIcon } from 'lucide-react';
 
 interface ExploreCardProps {

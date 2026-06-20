@@ -3,23 +3,19 @@
 import React, { useEffect, useState } from 'react';
 import { DebateNode } from '@/types/community';
 import { communityService } from '@/services/data/community-service';
-import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   Scale, 
   TrendingUp, 
   TrendingDown, 
-  Zap, 
   Clock, 
   ArrowLeft, 
   ShieldCheck, 
   Loader2, 
   Info,
-  ChevronRight,
-  MessageSquare,
   Users,
   Target
 } from 'lucide-react';

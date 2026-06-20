@@ -14,7 +14,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   TrendingUp,
   Target,
-  Users,
   MessageSquare,
   Zap,
   CheckCircle2,
@@ -31,9 +30,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Cell,
 } from "recharts";
-import { cn } from "@/lib/utils";
 
 interface AnalystPerformanceDashboardProps {
   stats: {

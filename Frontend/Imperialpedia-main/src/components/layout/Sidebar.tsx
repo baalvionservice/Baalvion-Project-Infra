@@ -15,9 +15,6 @@ import {
   DollarSign,
   Package,
   MessageSquare,
-  Zap,
-  ChevronRight,
-  LogOut,
   Terminal
 } from 'lucide-react';
 import { Text } from '@/design-system/typography/text';

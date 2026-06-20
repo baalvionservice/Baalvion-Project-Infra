@@ -11,10 +11,7 @@ import {
   ShieldAlert, 
   Boxes, 
   Activity, 
-  Map as MapIcon,
-  Search,
-  CheckCircle2,
-  Clock
+  Map as MapIcon
 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";

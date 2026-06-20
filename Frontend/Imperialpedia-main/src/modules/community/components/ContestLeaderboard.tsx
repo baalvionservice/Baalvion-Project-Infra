@@ -4,7 +4,6 @@ import React from "react";
 import { ContestLeaderboardEntry } from "@/types/community";
 import {
   Card,
-  CardContent,
   CardHeader,
   CardTitle,
   CardFooter,
@@ -24,13 +23,8 @@ import { Text } from "@/design-system/typography/text";
 import {
   Trophy,
   Medal,
-  Zap,
-  Activity,
-  Target,
-  Sparkles,
   ChevronRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 interface ContestLeaderboardProps {
   entries: ContestLeaderboardEntry[];

@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { 
   Search, 
-  Filter, 
   ShieldCheck, 
   TrendingUp, 
   Grid as GridIcon, 
@@ -19,7 +18,6 @@ import {
   Calendar
 } from 'lucide-react';
 import { CreatorCard } from '@/modules/creators/components/CreatorCard';
-import { Badge } from '@/components/ui/badge';
 import { Text } from '@/design-system/typography/text';
 import { 
   Select, 

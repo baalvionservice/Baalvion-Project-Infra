@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { UserPortfolioData, WatchlistItem } from "@/types/user-system";
+import { UserPortfolioData } from "@/types/user-system";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +20,6 @@ import {
   Plus,
   Star,
   Zap,
-  Clock,
   Bell,
   ChevronRight,
   ArrowUpRight,
@@ -35,7 +33,6 @@ import {
   Target,
   AlertCircle,
   MoreVertical,
-  Briefcase,
   History,
   DollarSign,
 } from "lucide-react";
@@ -54,7 +51,7 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
   DialogContent,

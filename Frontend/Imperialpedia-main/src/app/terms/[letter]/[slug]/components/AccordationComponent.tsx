@@ -1,6 +1,5 @@
 "use client";
 
-import FaqItem from "@/components/common/FaqItem";
 import {
   Accordion as UIAccordion,
   AccordionContent,

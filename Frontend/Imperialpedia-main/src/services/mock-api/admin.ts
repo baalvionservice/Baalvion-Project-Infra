@@ -3,9 +3,7 @@ import {
   AdminArticle, 
   GlossaryTermNode, 
   UserNode, 
-  AuthorExpert, 
-  RevenueMetric, 
-  SEOMetric,
+  RevenueMetric,
   PlatformDashboardStats 
 } from '@/types/admin';
 

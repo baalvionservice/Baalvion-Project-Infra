@@ -4,7 +4,7 @@ import React from 'react';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import TestimonialCarousel from '@/components/common/TestimonialCarousel';
-import { Quote, Globe, ShieldCheck, Building, Sparkles } from 'lucide-react';
+import { Globe, ShieldCheck, Building, Sparkles } from 'lucide-react';
 
 /**
  * @fileOverview Landing Page Testimonials Section.

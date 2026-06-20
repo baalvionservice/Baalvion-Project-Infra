@@ -16,8 +16,7 @@ import {
   Clock, 
   ArrowRight,
   MoreVertical,
-  Check,
-  EyeOff
+  Check
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';

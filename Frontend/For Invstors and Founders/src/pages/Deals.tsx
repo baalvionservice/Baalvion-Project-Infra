@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, Users, TrendingUp, Briefcase, Banknote, Flame, ChevronRight } from "lucide-react";
+import { Plus, Users, TrendingUp, Briefcase, Banknote, Flame } from "lucide-react";
 
 const money = (n: number | null) => {
   if (n == null) return "—";

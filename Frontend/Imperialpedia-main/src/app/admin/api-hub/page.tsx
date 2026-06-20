@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/design-system/typography/text';
 import { 
-  Terminal, ShieldCheck, Zap, RefreshCw, Key, Settings2, Loader2, Trash2, Plus, ArrowRightLeft, Globe
+  Terminal, ShieldCheck, RefreshCw, Key, Loader2, Trash2, Plus, ArrowRightLeft
 } from 'lucide-react';
 import { adminKernel } from '@/lib/services/admin-service';
 import { toast } from '@/hooks/use-toast';

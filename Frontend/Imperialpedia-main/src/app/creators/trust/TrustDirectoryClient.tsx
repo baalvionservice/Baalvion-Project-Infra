@@ -3,9 +3,8 @@
 import React, { useEffect, useState } from 'react';
 import { TrustRankedContributor } from '@/types/trust';
 import { getTrustDirectory } from '@/services/mock-api/creators';
-import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,22 +12,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { 
   ShieldCheck, 
   Search, 
-  Filter, 
   Loader2, 
-  ChevronRight, 
   ArrowRight,
   TrendingUp,
-  Star,
   Activity,
   Layers,
   Sparkles,
   Info,
-  CheckCircle2,
-  FileText,
-  Users
+  CheckCircle2
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
 /**

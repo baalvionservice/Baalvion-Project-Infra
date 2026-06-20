@@ -11,11 +11,8 @@ import {
   Activity, 
   Globe, 
   Lock, 
-  Loader2, 
-  RefreshCw,
-  AlertCircle,
+  Loader2,
   XCircle,
-  Zap,
   CheckCircle2,
   Terminal,
   Fingerprint

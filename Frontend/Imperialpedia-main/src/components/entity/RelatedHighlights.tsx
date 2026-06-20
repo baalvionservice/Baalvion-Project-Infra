@@ -1,7 +1,6 @@
 import React from 'react';
 import { getGraphRelatedEntities } from '@/lib/utils/entityHelpers';
 import { ID } from '@/types/common';
-import { Text } from '@/design-system/typography/text';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Layers } from 'lucide-react';

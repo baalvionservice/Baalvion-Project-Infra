@@ -7,21 +7,16 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Text } from "@/design-system/typography/text";
 import {
-  FileText,
   Download,
   Search,
-  Filter,
   ArrowRight,
   BarChart3,
-  Table as TableIcon,
-  ChevronRight,
   ExternalLink,
   Zap,
   Globe,

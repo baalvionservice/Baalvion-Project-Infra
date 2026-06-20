@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { authApi, getCurrentUser } from "@/lib/api-client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
-  TrendingUp, 
   Activity, 
   ArrowUpRight,
   ArrowDownRight,
@@ -19,7 +18,6 @@ import {
   MousePointer2,
   Zap,
   Settings2,
-  Brain,
   UserCheck,
   ClipboardList
 } from "lucide-react";

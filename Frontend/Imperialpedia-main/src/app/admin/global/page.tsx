@@ -7,8 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/design-system/typography/text';
 import { 
-  Globe, Languages, Search, Filter, CheckCircle2, 
-  XCircle, Clock, ArrowRight, Zap, Info, Layers,
+  Globe, Languages, Search, Zap, Info, Layers,
   Activity, MapPin, RefreshCw, Plus, Trash2, Edit, ChevronRight
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';

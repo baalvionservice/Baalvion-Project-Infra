@@ -6,9 +6,8 @@ import {
   PopoverContent, 
   PopoverTrigger 
 } from "@/components/ui/popover";
-import { Bell, CheckCheck, Clock, Settings, ArrowRight, Circle } from "lucide-react";
+import { Bell, CheckCheck, Clock, Settings, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
