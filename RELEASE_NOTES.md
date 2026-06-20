@@ -4,6 +4,46 @@
 
 ---
 
+## v1.0.1-production — Baalvion Production Hotfix + Stability Release
+
+**Release date:** 2026-06-21 · **Branch:** `release/ec2-single-host-v1.0.1-production`
+**Tag (suggested):** `v1.0.1-production` · **Based on:** latest `main` + the EC2 single-host
+deployment configs from the v1.0.0 release line.
+**Type:** Production hotfix + stability release. No new features.
+
+This release does not change `v1.0.0-mvp`. It is a minimal, production-safe hotfix on top of
+the EC2 single-host v1.0.0 deployment that removes a CI-blocking build hang and hardens
+sitemap generation so `next build` is deterministic in constrained CI environments.
+
+### Fixed
+
+- **CI-blocking build hang (Law-Elite-Network-main `/sitemap.xml`).** The sitemap was
+  statically prerendered at build time, which executed live `fetch` calls against law-service.
+  Against an unreachable/slow API in CI this hung `next build` (no fetch timeout) until the
+  step timed out. The route is now `export const dynamic = 'force-dynamic'` — it renders at
+  request time and is **never** generated during the build, so the production build has no
+  build-time external dependency. Verified locally: the build prints `ƒ /sitemap.xml`
+  (Dynamic, server-rendered on demand).
+- **Defense-in-depth sitemap fetch hardening (Law-Elite-Network-main + Imperialpedia-main).**
+  Each sitemap fetch is now wrapped in an `AbortController` timeout (4s) and skips
+  non-absolute URLs, so a slow or unconfigured upstream degrades gracefully to the static
+  routes instead of hanging the request or an ISR regeneration. Imperialpedia shared the
+  identical unguarded build-time `fetch` pattern and received the same fix.
+
+### Stability / validation
+
+- All affected frontend apps type-check clean; Law-Elite-Network-main `next build` succeeds.
+- EC2 single-host `deploy/ec2-single-host/docker-compose.yml` validates clean
+  (`docker compose config -q`) against `.env.production.example`.
+- The CI `deploy-compose-validate` set (`deploy/*/docker-compose.prod.yml`) validates clean.
+
+### Deployment
+
+- EC2 single-host deployment (`deploy/ec2-single-host/`) is **unchanged** and stable.
+- No backend service changes; no breaking changes. Safe for immediate EC2 deployment.
+
+---
+
 ## v1.0.0-mvp — Baalvion MVP Production Release
 
 **Release date:** 2026-06-20 · **Branch:** `main` · **Tag:** `v1.0.0-mvp`
