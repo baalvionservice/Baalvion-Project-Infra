@@ -143,7 +143,12 @@ export async function startGatewayCheckout(req: CheckoutRequest): Promise<Checko
     // PayU is a redirect/form-POST: build a signed form from the provider-public clientParams and
     // submit it to PayU's hosted page. The action URL is env-configurable (test vs secure PayU).
     const cp = init.clientParams || {};
-    const action = import.meta.env.VITE_PAYU_ACTION_URL ?? "https://test.payu.in/_payment";
+    // Production-aware default: a prod build defaults to the LIVE PayU endpoint so a missing
+    // build arg never silently routes real customers through the sandbox (broken payments);
+    // dev defaults to the test endpoint. Always overridable via VITE_PAYU_ACTION_URL.
+    const action =
+      import.meta.env.VITE_PAYU_ACTION_URL?.trim() ||
+      (import.meta.env.PROD ? "https://secure.payu.in/_payment" : "https://test.payu.in/_payment");
     // PayU browser-POSTs the result to surl (success) / furl (failure). Point both at our same-origin
     // callback, which verifies PayU's reverse-hash, activates, and redirects back to the app. surl/furl
     // are NOT part of the PayU request hash, so adding them here doesn't affect verification.

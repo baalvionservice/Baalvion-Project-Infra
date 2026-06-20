@@ -14,7 +14,8 @@ import type {
  */
 
 const IMP_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || "http://localhost:3004/api/v1";
+  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3004/api/v1");
 
 async function authedGet<T>(path: string): Promise<T | null> {
   const token = await authClient.getValidToken().catch(() => null);

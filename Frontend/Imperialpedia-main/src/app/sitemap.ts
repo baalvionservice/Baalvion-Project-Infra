@@ -2,8 +2,9 @@ import { MetadataRoute } from 'next';
 import { env } from '@/config/env';
 
 const BASE = env.siteUrl || 'https://imperialpedia.com';
-const IMP = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || 'http://localhost:3004/api/v1';
-const CMS = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || 'http://localhost:3018/api/v1/public';
+const IS_PROD = process.env.NODE_ENV === 'production';
+const IMP = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || (IS_PROD ? '' : 'http://localhost:3004/api/v1');
+const CMS = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || (IS_PROD ? '' : 'http://localhost:3018/api/v1/public');
 const SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 type Slugged = { slug: string; name?: string; updatedAt?: string; publishedAt?: string };

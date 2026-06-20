@@ -11,6 +11,10 @@ import { ShieldCheck, User, Gavel, Shield } from "lucide-react";
  * Enhanced with testing credentials for administrative auditing.
  */
 
+// Demo quick-fill credentials are a development-only aid and must never render in
+// production (they would advertise working test logins on the public login page).
+const SHOW_TEST_CREDENTIALS = process.env.NODE_ENV !== 'production';
+
 export default function LoginPage() {
   const testUsers = [
     { role: 'Premier Client', email: 'client@test.com', pass: 'password123', icon: <User className="w-3.5 h-3.5" /> },
@@ -53,7 +57,8 @@ export default function LoginPage() {
           </Card>
         </div>
 
-        {/* Testing Credentials Helper */}
+        {/* Testing Credentials Helper — development only */}
+        {SHOW_TEST_CREDENTIALS && (
         <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
           <div className="glass-panel p-6 rounded-2xl border-white/5 bg-accent/5">
             <div className="flex items-center gap-2 mb-4">
@@ -86,6 +91,7 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
+        )}
 
       </main>
     </div>

@@ -22,7 +22,11 @@ async function safeFetch<T>(url: string): Promise<T[]> {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3015/v1';
+  // No localhost fallback in production: an unset build arg yields '' so safeFetch
+  // fails closed (sitemap degrades to static routes) instead of probing localhost.
+  const apiBase =
+    process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
+    (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 
   const [lawyers, articles, categories] = await Promise.all([
     safeFetch<LawyerEntry>(`${apiBase}/lawyers?limit=1000`),

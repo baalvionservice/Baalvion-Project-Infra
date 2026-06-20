@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireServerEnv } from "@/lib/env";
 
 // Server-side base URL for the Node auth-service. Not NEXT_PUBLIC — the browser
 // never talks to it directly; this BFF proxy does (server-to-server, no CORS).
-const AUTH = process.env.AUTH_SERVICE_URL || "http://localhost:3001";
+// AUTH_SERVICE_URL is required in production (fail-fast); localhost is dev-only.
+const AUTH = requireServerEnv("AUTH_SERVICE_URL", "http://localhost:3001");
 const isDev = process.env.NODE_ENV !== "production";
 
 /**

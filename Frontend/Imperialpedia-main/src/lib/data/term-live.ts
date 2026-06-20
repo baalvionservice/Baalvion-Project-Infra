@@ -8,7 +8,8 @@ import { Term, terms as staticTerms } from './terms';
 import { getTermBySlug as staticTermBySlug, getTermsByLetter as staticTermsByLetter } from './utils';
 
 const IMP_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || 'http://localhost:3004/api/v1';
+  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3004/api/v1');
 
 export async function fetchTermBySlug(slug: string): Promise<Term | undefined> {
   try {

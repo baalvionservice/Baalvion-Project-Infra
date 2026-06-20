@@ -51,7 +51,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     // The in-app admin/editor/writer panels are RETIRED in favour of the central
     // admin-platform (CMS console + workflow). Bounce them there.
-    const admin = process.env.NEXT_PUBLIC_ADMIN_PLATFORM_URL || 'http://localhost:3030';
+    // Localhost is dev-only; in production an unset var collapses to '' so the
+    // /admin redirects resolve same-origin instead of bouncing users to localhost.
+    const admin =
+      process.env.NEXT_PUBLIC_ADMIN_PLATFORM_URL ||
+      (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3030');
     return [
       { source: '/admin', destination: `${admin}/dashboard`, permanent: false },
       { source: '/admin/:path*', destination: `${admin}/dashboard`, permanent: false },

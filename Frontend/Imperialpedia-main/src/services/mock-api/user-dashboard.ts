@@ -23,7 +23,7 @@ export const getMockUserDashboard = async (): Promise<ApiResponse<UserDashboardD
     data: {
       user_details: {
         name: "Deepak Kumar",
-        email: "allenkrewzz1@gmail.com",
+        email: "deepak.kumar@example.com",
         subscription_tier: "Pro",
         avatar: "https://picsum.photos/seed/deepak/200/200"
       },

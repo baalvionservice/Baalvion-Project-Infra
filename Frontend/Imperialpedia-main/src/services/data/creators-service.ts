@@ -11,7 +11,8 @@ import authClient from "@/lib/auth-client";
  */
 
 const IMP_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || "http://localhost:3004/api/v1";
+  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3004/api/v1");
 
 type Row = {
   meta?: Partial<CreatorProfile>;

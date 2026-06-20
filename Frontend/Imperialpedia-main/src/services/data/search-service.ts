@@ -8,8 +8,13 @@ import { errorHandler } from '@/lib/errors/error-handler';
  * AND the CMS published content (articles/news). Mock fallback when both are unreachable/empty.
  */
 
-const IMP_API = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || 'http://localhost:3004/api/v1';
-const CMS_PUBLIC = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || 'http://localhost:3018/api/v1/public';
+// Localhost is a dev-only default; production resolves to '' (search falls back to
+// mock when the upstreams are unreachable) so no dev URL ships in the prod bundle.
+const IS_PROD = process.env.NODE_ENV === 'production';
+const IMP_API =
+  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || (IS_PROD ? '' : 'http://localhost:3004/api/v1');
+const CMS_PUBLIC =
+  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || (IS_PROD ? '' : 'http://localhost:3018/api/v1/public');
 const SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 const TYPE_MAP: Record<string, SearchResultType> = {
