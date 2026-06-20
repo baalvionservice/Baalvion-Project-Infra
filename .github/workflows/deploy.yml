@@ -224,12 +224,18 @@ jobs:
       - name: Smoke test public ingress
         if: steps.gate.outputs.ready == 'true'
         continue-on-error: true
+        # One health ping per stack, hitting the EC2 host's OWN ingress only (this Caddy
+        # serves api.baalvion.com + trade.baalvion.com; the Vercel frontends are not on this
+        # box). Each non-Stack-A app is reached via its path prefix → strip → service /health.
         run: |
           sleep 20
           for url in \
             "https://api.baalvion.com/health" \
-            "https://trade.baalvion.com/api/health" \
-            "https://controlthemarket.com/" ; do
+            "https://api.baalvion.com/ctm/health" \
+            "https://api.baalvion.com/proxy/healthz" \
+            "https://api.baalvion.com/law/health" \
+            "https://api.baalvion.com/imperialpedia/health" \
+            "https://trade.baalvion.com/api/health" ; do
             code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
             echo "$url -> $code"
           done

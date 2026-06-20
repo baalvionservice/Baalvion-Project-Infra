@@ -829,6 +829,11 @@ services:
       - caddy_config:/config
     depends_on:
       - auth-gateway
+      # Stack A upstreams Caddy dials directly (public CMS reads + raw-body webhook routes
+      # that bypass the gateway). Listed so Caddy starts after every backend it proxies.
+      - cms-service
+      - order-service
+      - payment-service
       - ctm-service
       - proxy-service
       - proxy-cms-service
