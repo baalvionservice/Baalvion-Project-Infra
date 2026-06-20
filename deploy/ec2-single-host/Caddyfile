@@ -1,0 +1,154 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Baalvion — SINGLE-HOST EC2 backend ingress (Caddy v2, automatic TLS via Let's Encrypt).
+#
+# Operator decisions (2026-06-20):
+#   • Frontends are on VERCEL. This EC2 host is backend-only.
+#   • ONE public API hostname: api.baalvion.com — path-routed to all three BFFs.
+#   • Self-contained data tier (postgres/redis/redpanda in compose); no managed AWS data.
+#   • This Caddy is the ONLY process bound to :80 / :443. Every backend container stays on
+#     `baalvion-net` with NO host-published port. This file is the whole public surface.
+#
+# >>> Because all BFFs share ONE host, each non-Stack-A app gets a path PREFIX so its
+#     routes don't collide with Stack A's /api/*. Your Vercel apps must call these bases
+#     (set on Vercel — I did not touch Vercel):
+#         admin / amarisé / about  →  https://api.baalvion.com                  (Stack A, native /api/*)
+#         Stack A CMS reads        →  https://api.baalvion.com/api/v1/public/...  (about / law / imperialpedia editorial)
+#         controlthemarket         →  https://api.baalvion.com/ctm               (+ /ctm/api/v1/...)
+#         baalvionstack (proxy)    →  https://api.baalvion.com/proxy             (+ /proxy/v1/..., /proxy/auth-bff/*)
+#         CMS reads (proxy stack)  →  https://api.baalvion.com/proxy-cms/api/v1/public/...
+#         lawelitenetwork (data)   →  https://api.baalvion.com/law/v1/...         (law-service: directory/bookings/cases)
+#         imperialpedia (entities) →  https://api.baalvion.com/imperialpedia/api/v1/...
+#     And one DEDICATED hostname (full-stack app, not a Vercel frontend):
+#         trade.baalvion.com       →  gti-web (UI) + /trade-bff,/finance-bff → gateway (data + SSO)
+# <<<
+#
+# Centralized SSO preserved: B, C, D verify RS256 tokens against Stack A's auth-service JWKS
+# (reached INTERNALLY at http://auth-service:3001/.well-known/jwks.json — see compose). One issuer.
+#
+# DNS: api.baalvion.com  A → this host's Elastic IP.  trade.baalvion.com  A → SAME Elastic IP.
+# ─────────────────────────────────────────────────────────────────────────────
+{
+	email {$ACME_EMAIL}
+}
+
+api.baalvion.com {
+	encode zstd gzip
+
+	# ── Webhooks (raw-body HMAC) → bypass the JWT gateway, forward unmodified ───────
+	handle /api/v1/orders/webhooks/* {
+		reverse_proxy order-service:3013
+	}
+	handle /api/payments/webhooks/* {
+		reverse_proxy payment-service:3015
+	}
+
+	# ── Stack C — Proxy / BaalvionStack BFF (prefix /proxy) ─────────────────────────
+	# Customer auth: SPA calls /proxy/auth-bff/* → strip → proxy-service /v1/auth/*.
+	handle_path /proxy/auth-bff/* {
+		rewrite * /v1/auth{path}
+		reverse_proxy proxy-service:4000
+	}
+	# Platform + billing API + provider webhooks: /proxy/v1/* → strip → proxy-service /v1/*.
+	handle_path /proxy/* {
+		reverse_proxy proxy-service:4000
+	}
+
+	# ── Stack C — public read-only CMS (prefix /proxy-cms) ──────────────────────────
+	# Only /api/v1/public/* and /api/v1/health survive; admin/write/internal never exposed.
+	handle_path /proxy-cms/api/v1/public/* {
+		rewrite * /api/v1/public{path}
+		reverse_proxy proxy-cms-service:3011
+	}
+	handle_path /proxy-cms/api/v1/health {
+		rewrite * /api/v1/health
+		reverse_proxy proxy-cms-service:3011
+	}
+	handle /proxy-cms/* {
+		respond "Not Found" 404
+	}
+
+	# ── Stack B — ControlTheMarket BFF (prefix /ctm) ────────────────────────────────
+	# /ctm/api/v1/... → strip → ctm-service /api/v1/... (incl. Razorpay webhook, raw body).
+	handle_path /ctm/* {
+		reverse_proxy ctm-service:3017
+	}
+
+	# ── Stack D — Law Elite Network dynamic backend (prefix /law) ───────────────────
+	# /law/v1/... → strip /law → law-service /v1/... (directory, bookings, cases, billing).
+	# Razorpay webhook (raw-body HMAC, verified in-service) rides the same strip → /v1/payments/webhook.
+	handle_path /law/* {
+		reverse_proxy law-service:3015
+	}
+
+	# ── Stack D — Imperialpedia entity backend (prefix /imperialpedia) ──────────────
+	# /imperialpedia/api/v1/... → strip → imperialpedia-service /api/v1/... (companies/glossary).
+	handle_path /imperialpedia/* {
+		reverse_proxy imperialpedia-service:3004
+	}
+
+	# ── Stack A — public CMS delivery API (read-only) → cms-service direct ───────────
+	# about / lawelitenetwork / imperialpedia fetch editorial content from
+	# /api/v1/public/<slug>/content. These reads are NOT session-gated, so they bypass the
+	# auth-gateway (which only serves authenticated /api/* + /auth/*) and go straight to cms-service.
+	# Path is preserved (no strip): cms-service serves the full /api/v1/public/* tree.
+	handle /api/v1/public/* {
+		reverse_proxy cms-service:3018
+	}
+
+	# ── Stack A — everything else → central auth-gateway BFF ("the gateway") ─────────
+	handle {
+		reverse_proxy auth-gateway:3099
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
+# ─────────────────────────────────────────────────────────────────────────────
+# trade.baalvion.com — Global-Trade-Infrastructure (GTI): a FULL-STACK app on this host
+# (its own Next 15 server `gti-web` + its own Prisma store `gti_db`), NOT a Vercel frontend.
+#
+# GTI's browser client talks ONLY to its own origin via same-origin proxies. We terminate those
+# proxies HERE (at the edge) instead of inside GTI's Next server, so the gateway target is not
+# baked into GTI's build:
+#   /trade-bff/auth/*  → auth-gateway /auth/*          (login / register / refresh / logout / me)
+#   /trade-bff/*       → auth-gateway /api/trade/v1/*  (data → trade-service; session + CSRF + signed identity)
+#   /finance-bff/*     → auth-gateway /api/*           (financial-services-java suite)
+# Everything else → gti-web (UI + GTI's own /api/* Prisma routes + /api/health).
+# The session/CSRF cookies the gateway sets are scoped to trade.baalvion.com (same origin), so
+# they ride every subsequent /trade-bff call. Central SSO: the gateway verifies RS256 once.
+# ─────────────────────────────────────────────────────────────────────────────
+trade.baalvion.com {
+	encode zstd gzip
+
+	# Auth BFF — must precede the data catch-all so /trade-bff/auth/login isn't misrouted.
+	handle_path /trade-bff/auth/* {
+		rewrite * /auth{path}
+		reverse_proxy auth-gateway:3099
+	}
+	# Data BFF — strip /trade-bff, prepend the gateway's trade base (/api/trade/v1 → trade-service).
+	handle_path /trade-bff/* {
+		rewrite * /api/trade/v1{path}
+		reverse_proxy auth-gateway:3099
+	}
+	# Finance BFF — strip /finance-bff, prepend /api (gateway routes /api/<resource> to the Java suite).
+	handle_path /finance-bff/* {
+		rewrite * /api{path}
+		reverse_proxy auth-gateway:3099
+	}
+	# UI + GTI's own Next API routes (Prisma → gti_db).
+	handle {
+		reverse_proxy gti-web:9003
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
