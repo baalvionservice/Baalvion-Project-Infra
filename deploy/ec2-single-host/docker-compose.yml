@@ -1,0 +1,871 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Baalvion — SINGLE-HOST EC2 backend (all stacks A+B+C on one box, self-contained data tier).
+#
+#   Run from the REPO ROOT on the EC2 host:
+#     docker compose -f deploy/ec2-single-host/docker-compose.yml \
+#       --env-file deploy/ec2-single-host/.env.production up -d --build
+#
+# Built by merging the THREE verified packages (deploy/mvp-production, deploy/controlthemarket,
+# deploy/proxy-baalvionstack). Service identity/membership is unchanged; only co-located.
+#
+# Invariants enforced here:
+#   • ONLY `caddy` publishes ports (80/443). DB / Redis / Kafka / every app: internal-only.
+#   • De-conflicted names: Stack C's CMS + Java payment become proxy-cms-service /
+#     proxy-payment-service so Docker DNS is unambiguous next to Stack A's cms-service / payment-service.
+#   • One Postgres, THREE databases: baalvion_db (A), ctm_db (B), proxy_db (C) — the two Java
+#     payment-services run Flyway on SEPARATE databases so their migration histories never collide.
+#   • Local Postgres has NO TLS → DB_SSL=disable (Node) and empty DB_JDBC_PARAMS (Java). Setting
+#     sslmode=require here would make every service fail at connect ("server does not support SSL").
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: baalvion-single-host
+
+x-restart: &restart
+  restart: unless-stopped
+
+# Common env for Stack A Node services (all on baalvion_db).
+x-stackA-env: &stackA-env
+  NODE_ENV: production
+  DB_HOST: postgres
+  DB_PORT: "5432"
+  DB_NAME: ${DB_NAME:-baalvion_db}
+  DB_USER: ${DB_USER:-baalvion}
+  DB_PASSWORD: ${DB_PASSWORD}
+  DB_SSL: ${DB_SSL:-disable}
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+  JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+  JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+  JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+  CORS_ORIGINS: ${CORS_ORIGINS}
+
+networks:
+  baalvion-net:
+    name: baalvion-net
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:
+  redpanda_data:
+  caddy_data:
+  caddy_config:
+
+services:
+  # ═══════════════════════════════ infra (self-contained) ════════════════════════
+  postgres:
+    image: postgres:16
+    <<: *restart
+    environment:
+      POSTGRES_USER: ${DB_USER:-baalvion}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-baalvion_db}
+      # Extra DBs + the baalvion_app RLS role are created by the init scripts below.
+      CTM_DB: ${CTM_DB:-ctm_db}
+      PROXY_DB: ${PROXY_DB:-proxy_db}
+      GTI_DB: ${GTI_DB:-gti_db}
+      DB_APP_USER: ${DB_APP_USER:-baalvion_app}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # *.sql / *.sh here run ONCE, the first time the data volume is empty.
+      - ./initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-baalvion} -d ${DB_NAME:-baalvion_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+    networks: [baalvion-net]
+
+  redis:
+    image: redis:7
+    <<: *restart
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks: [baalvion-net]
+
+  redpanda:
+    image: redpandadata/redpanda:v24.2.7
+    <<: *restart
+    command:
+      - redpanda start
+      - --smp 1
+      - --memory 512M
+      - --overprovisioned
+      - --node-id 0
+      - --kafka-addr PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr PLAINTEXT://redpanda:9092
+    volumes:
+      - redpanda_data:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    networks: [baalvion-net]
+
+  # ═══════════════════════════════ Stack A — identity ════════════════════════════
+  auth-service:
+    image: ${IMAGE_PREFIX:-baalvion}/auth-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/identity/auth-service/Dockerfile }
+    <<: *restart
+    environment:
+      <<: *stackA-env
+      PORT: "3001"
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      API_BASE_URL: ${API_BASE_URL}
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@baalvion.com}
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3001/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  rbac-service:
+    image: ${IMAGE_PREFIX:-baalvion}/rbac-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/identity/rbac-service/Dockerfile }
+    <<: *restart
+    environment:
+      <<: *stackA-env
+      PORT: "3055"
+      DB_SCHEMA: rbac
+      INTERNAL_API_KEY: ${RBAC_INTERNAL_API_KEY}
+    depends_on:
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3055/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  audit-service:
+    image: ${IMAGE_PREFIX:-baalvion}/audit-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/infrastructure/audit-service/Dockerfile }
+    <<: *restart
+    environment:
+      <<: *stackA-env
+      PORT: "3032"
+      DB_SCHEMA: audit
+      AUDIT_CONSUME_EVENTS: "true"
+      EVENT_BUS_STREAM: baalvion:events
+      INTERNAL_API_KEY: ${AUDIT_INTERNAL_KEY}
+    depends_on:
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3032/readyz',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ═══════════════════════════════ Stack A — content ═════════════════════════════
+  cms-service:
+    image: ${IMAGE_PREFIX:-baalvion}/cms-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/knowledge/cms-service/Dockerfile }
+    <<: *restart
+    environment:
+      <<: *stackA-env
+      PORT: "3018"
+      DB_SCHEMA: cms
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      CMS_SECRETS_KEY: ${CMS_SECRETS_KEY}
+      CMS_BASE_URL: ${CMS_BASE_URL:-http://cms-service:3018}
+      EVENT_TRANSPORT: redis
+      # Object storage. With the self-contained tier, point these at your S3 bucket OR a
+      # local MinIO. If unset, media upload is disabled but content APIs still serve.
+      AWS_REGION: ${AWS_REGION:-ap-south-1}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-ap-south-1}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+    depends_on:
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3018/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ═══════════════════════════════ Stack A — commerce ════════════════════════════
+  commerce-service:
+    image: ${IMAGE_PREFIX:-baalvion}/commerce-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/commerce/commerce-service/Dockerfile }
+    <<: *restart
+    environment:
+      <<: *stackA-env
+      PORT: "3012"
+      DB_SCHEMA: commerce
+      RBAC_BASE_URL: http://rbac-service:3055
+      RBAC_INTERNAL_API_KEY: ${RBAC_INTERNAL_API_KEY}
+      RBAC_FAIL_MODE: closed
+      MEDIA_DRIVER: ${MEDIA_DRIVER:-s3}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-ap-south-1}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+    depends_on:
+      rbac-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3012/readyz',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  inventory-service:
+    image: ${IMAGE_PREFIX:-baalvion}/inventory-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/commerce/inventory-service/Dockerfile }
+    <<: *restart
+    environment:
+      <<: *stackA-env
+      PORT: "3014"
+      DB_SCHEMA: inventory
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      INVENTORY_INTERNAL_KEY: ${INVENTORY_INTERNAL_KEY}
+      INVENTORY_LOCK_TTL_MINUTES: "15"
+    depends_on:
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3014/readyz',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  order-service:
+    image: ${IMAGE_PREFIX:-baalvion}/order-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/commerce/order-service/Dockerfile }
+    <<: *restart
+    environment:
+      <<: *stackA-env
+      PORT: "3013"
+      DB_SCHEMA: orders
+      PAYMENT_PROVIDER: razorpay
+      ALLOW_MOCK_PAYMENTS: "false"
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      RAZORPAY_WEBHOOK_STRICT_AMOUNT: "true"
+      CMS_BASE_URL: ${CMS_BASE_URL:-http://cms-service:3018}
+      PAYMENT_SITE_SLUG: ${AMARISE_CMS_SLUG:-amarise-maison-avenue}
+      CART_SESSION_SECRET: ${CART_SESSION_SECRET}
+      RBAC_BASE_URL: http://rbac-service:3055
+      RBAC_INTERNAL_API_KEY: ${RBAC_INTERNAL_API_KEY}
+      RBAC_FAIL_MODE: closed
+      INVENTORY_BASE_URL: http://inventory-service:3014
+      INVENTORY_INTERNAL_KEY: ${INVENTORY_INTERNAL_KEY}
+      NOTIFICATION_BASE_URL: http://notification-service:3031
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      LEDGER_INTERNAL_KEY: ""
+    depends_on:
+      rbac-service: { condition: service_started }
+      inventory-service: { condition: service_started }
+      cms-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3013/readyz',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # Stack A Java payment-service (Razorpay gateway) — baalvion_db, Flyway as owner, runtime as app role.
+  payment-service:
+    image: ${IMAGE_PREFIX:-baalvion}/payment-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../../Backend/services/commerce/financial-services-java
+      dockerfile: Dockerfile
+      args: { SERVICE: payment-service }
+    <<: *restart
+    environment:
+      PORT: "3015"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-baalvion_db}
+      DB_MIGRATION_USER: ${DB_USER:-baalvion}
+      DB_MIGRATION_PASSWORD: ${DB_PASSWORD}
+      DB_APP_USER: ${DB_APP_USER:-baalvion_app}
+      DB_APP_PASSWORD: ${DB_APP_PASSWORD}
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-}
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      KAFKA_BROKERS: redpanda:9092
+      PSP_MOCK: "false"
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      RAZORPAY_BASE_URL: ${RAZORPAY_BASE_URL:-https://api.razorpay.com}
+      RAZORPAY_REPLAY_WINDOW_SECONDS: "600"
+      CMS_BASE_URL: ${CMS_BASE_URL:-http://cms-service:3018}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redpanda: { condition: service_healthy }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3015/actuator/health | grep -q UP || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+      start_period: 70s
+
+  # ═══════════════════════════════ Stack A — gateway + workers ════════════════════
+  auth-gateway:
+    image: ${IMAGE_PREFIX:-baalvion}/auth-gateway:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/identity/auth-gateway/Dockerfile }
+    <<: *restart
+    environment:
+      <<: *stackA-env
+      PORT: "3099"
+      AUTH_SERVICE_URL: http://auth-service:3001
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      GATEWAY_SIGNING_SECRET: ${GATEWAY_SIGNING_SECRET}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      BFF_ENFORCEMENT_MODE: hybrid
+      SVC_RBAC: http://rbac-service:3055
+      SVC_CMS: http://cms-service:3018
+      SVC_COMMERCE: http://commerce-service:3012
+      SVC_INVENTORY: http://inventory-service:3014
+      SVC_ORDER: http://order-service:3013
+      SVC_PAYMENT: http://payment-service:3015
+      # trade.baalvion.com (GTI) dashboard data: /trade-bff/* → gateway /api/trade/v1/* → trade-service.
+      SVC_TRADE: http://trade-service:3025
+      # imperialpedia.com authenticated entity data (the public site reads CMS directly; this is
+      # for any session-gated /api/imperialpedia/* calls routed through the gateway).
+      SVC_IMPERIALPEDIA: http://imperialpedia-service:3004
+    depends_on:
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3099/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  notification-service:
+    image: ${IMAGE_PREFIX:-baalvion}/notification-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/infrastructure/notification-service/Dockerfile }
+    <<: *restart
+    environment:
+      <<: *stackA-env
+      PORT: "3031"
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@baalvion.com}
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3031/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ═══════════════════════════════ Stack B — ControlTheMarket ════════════════════
+  ctm-service:
+    image: ${IMAGE_PREFIX:-baalvion}/controlthemarket-ctm-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/ecosystem/ctm-service/Dockerfile }
+    <<: *restart
+    environment:
+      NODE_ENV: production
+      PORT: "3017"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${CTM_DB:-ctm_db}
+      DB_USER: ${DB_USER:-baalvion}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-disable}
+      CORS_ORIGINS: ${CTM_CORS_ORIGINS:-https://controlthemarket.com}
+      # Central SSO — verify against Stack A auth INTERNALLY (same network, no public hop).
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      PAYMENT_PROVIDER: ${CTM_PAYMENT_PROVIDER:-razorpay}
+      RAZORPAY_KEY_ID: ${CTM_RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${CTM_RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${CTM_RAZORPAY_WEBHOOK_SECRET}
+      PAYMENT_SUCCESS_URL: ${CTM_PAYMENT_SUCCESS_URL:-https://controlthemarket.com/billing/success}
+      PAYMENT_CANCEL_URL: ${CTM_PAYMENT_CANCEL_URL:-https://controlthemarket.com/billing/cancel}
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}
+    depends_on:
+      postgres: { condition: service_healthy }
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3017/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # ═══════════════════════════════ Stack C — Proxy / BaalvionStack ════════════════
+  proxy-cms-service:
+    image: ${IMAGE_PREFIX:-baalvion}/proxy-baalvionstack-cms-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/knowledge/cms-service/Dockerfile }
+    <<: *restart
+    environment:
+      NODE_ENV: production
+      PORT: "3011"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${PROXY_DB:-proxy_db}
+      DB_USER: ${DB_USER:-baalvion}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-disable}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      CMS_SECRETS_KEY: ${PROXY_CMS_SECRETS_KEY}
+      INTERNAL_SERVICE_SECRET: ${PROXY_INTERNAL_SERVICE_SECRET}
+      JWT_PUBLIC_KEY: ${CMS_JWT_PUBLIC_KEY}
+      CORS_ORIGINS: ${PROXY_CMS_CORS_ORIGINS:-https://baalvionstack.com,https://about.baalvion.com}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3011/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
+
+  # Stack C Java payment-service — proxy_db (SEPARATE Flyway history from Stack A payment-service).
+  proxy-payment-service:
+    image: ${IMAGE_PREFIX:-baalvion}/proxy-baalvionstack-payment-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../../Backend/services/commerce/financial-services-java
+      args: { SERVICE: payment-service }
+    <<: *restart
+    environment:
+      PORT: "3015"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${PROXY_DB:-proxy_db}
+      DB_USER: ${DB_USER:-baalvion}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-}
+      KAFKA_BROKERS: redpanda:9092
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      CMS_BASE_URL: http://proxy-cms-service:3011
+      INTERNAL_SERVICE_SECRET: ${PROXY_INTERNAL_SERVICE_SECRET}
+      PSP_MOCK: "false"
+      RAZORPAY_KEY_ID: ${PROXY_RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${PROXY_RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${PROXY_RAZORPAY_WEBHOOK_SECRET}
+      RAZORPAY_BASE_URL: ${RAZORPAY_BASE_URL:-https://api.razorpay.com}
+      APP_SECURITY_ENABLED: "true"
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "true"
+      SPRING_FLYWAY_BASELINE_VERSION: "0"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redpanda: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      proxy-cms-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:3015/actuator/health | grep -q UP || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+      start_period: 70s
+
+  proxy-service:
+    image: ${IMAGE_PREFIX:-baalvion}/proxy-baalvionstack-proxy-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/infrastructure/proxy-service/Dockerfile }
+    <<: *restart
+    environment:
+      NODE_ENV: production
+      PORT: "4000"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${PROXY_DB:-proxy_db}
+      DB_USER: ${DB_USER:-baalvion}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-disable}
+      REDIS_URL: redis://redis:6379
+      JWT_ACCESS_SECRET: ${PROXY_JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${PROXY_JWT_REFRESH_SECRET}
+      JWT_ACTIVE_KID: ${PROXY_JWT_ACTIVE_KID:-baalvion-key-1}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      JWT_KEYS_DIR: /app/config/keys
+      INTERNAL_SERVICE_SECRET: ${PROXY_INTERNAL_SERVICE_SECRET}
+      PAYMENT_SERVICE_URL: http://proxy-payment-service:3015
+      PAYMENT_SITE_SLUG: ${PROXY_PAYMENT_SITE_SLUG:-proxy-baalvionstack}
+      CMS_BASE_URL: http://proxy-cms-service:3011
+      RAZORPAY_WEBHOOK_SECRET: ${PROXY_RAZORPAY_WEBHOOK_SECRET:-}
+      PUBLIC_APP_URL: ${PROXY_PUBLIC_APP_URL:-https://baalvionstack.com}
+      CORS_ORIGINS: ${PROXY_CORS_ORIGINS:-https://baalvionstack.com}
+    volumes:
+      # RS256 signing keypair (generate per proxy package runbook §5). Read-only.
+      - ./secrets/keys:/app/config/keys:ro
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      proxy-payment-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:4000/healthz || wget -qO- http://127.0.0.1:4000/health || exit 1"]
+      interval: 20s
+      timeout: 5s
+      retries: 6
+      start_period: 40s
+
+  # ═══════════════ Stack D — Law Elite Network (lawelitenetwork.com) ═══════════════
+  # CMS editorial content (homepage, legal pages, encyclopedia articles) is served by Stack A
+  # cms-service via the public delivery API. THIS service is the dynamic backend: practitioner
+  # directory, bookings, cases, chat, subscription billing. baalvion_db / schema `legal`
+  # (self-creates + syncs + migrates on boot). RS256-verified against Stack A auth (one issuer).
+  law-service:
+    image: ${IMAGE_PREFIX:-baalvion}/law-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/knowledge/law-service/Dockerfile }
+    <<: *restart
+    environment:
+      NODE_ENV: production
+      PORT: "3015"
+      SERVICE_NAME: law-service
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-baalvion_db}
+      DB_USER: ${DB_USER:-baalvion}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-disable}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      AUTH_SERVICE_URL: http://auth-service:3001
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_URL: redis://redis:6379
+      CORS_ORIGINS: ${LAW_CORS_ORIGINS:-https://lawelitenetwork.com}
+      APP_PUBLIC_URL: ${LAW_PUBLIC_URL:-https://lawelitenetwork.com}
+      LAW_ADMIN_EMAILS: ${LAW_ADMIN_EMAILS:-infra.baalvion@gmail.com}
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}
+      # Subscription billing (renewal scan). Razorpay keys optional → simulated until provided.
+      BILLING_WORKER_ENABLED: ${LAW_BILLING_WORKER_ENABLED:-true}
+      BILLING_INTERVAL_MINUTES: "60"
+      PLATFORM_FEE_PERCENT: "15"
+      RAZORPAY_KEY_ID: ${LAW_RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${LAW_RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${LAW_RAZORPAY_WEBHOOK_SECRET:-}
+      # Transactional email (optional → MAIL_ENABLED=false logs instead of sending).
+      MAIL_ENABLED: ${LAW_MAIL_ENABLED:-false}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${LAW_MAIL_FROM:-Law Elite Network <no-reply@lawelitenetwork.com>}
+      # Document storage (optional → blank disables upload; directory/booking APIs still serve).
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_PUBLIC_ENDPOINT: ${S3_PUBLIC_URL:-}
+      S3_REGION: ${S3_REGION:-ap-south-1}
+      S3_BUCKET_NAME: ${LAW_S3_BUCKET:-}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3015/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ═══════════════════ Stack D — Imperialpedia (imperialpedia.com) ═════════════════
+  # CMS editorial articles via Stack A cms-service (public reads). THIS backend serves the
+  # structured knowledge entities (companies / countries / industries / glossary).
+  # baalvion_db / schema `imperialpedia` (self-creates + syncs on boot). HS256 (JWT_ACCESS_SECRET).
+  imperialpedia-service:
+    image: ${IMAGE_PREFIX:-baalvion}/imperialpedia-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/knowledge/imperialpedia-service/Dockerfile }
+    <<: *restart
+    environment:
+      NODE_ENV: production
+      PORT: "3004"
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-baalvion_db}
+      DB_USER: ${DB_USER:-baalvion}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-disable}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      CORS_ORIGINS: ${IMPERIALPEDIA_CORS_ORIGINS:-https://imperialpedia.com}
+    depends_on:
+      postgres: { condition: service_healthy }
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3004/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+  # ═══════════════ Stack D — Trade backend (trade.baalvion.com data tier) ══════════
+  # GTI's dashboard reads/writes via /trade-bff → gateway /api/trade/v1/* → THIS service
+  # (SVC_TRADE on auth-gateway). baalvion_db / schema `trade` (self-creates + versioned
+  # migrations on boot; DB_SYNC=false in prod). BullMQ workers run in-process → need Redis.
+  trade-service:
+    image: ${IMAGE_PREFIX:-baalvion}/trade-service:${IMAGE_TAG:-prod-latest}
+    build: { context: ../.., dockerfile: Backend/services/commerce/trade-service/Dockerfile }
+    <<: *restart
+    environment:
+      NODE_ENV: production
+      PORT: "3025"
+      SERVICE_NAME: trade-service
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-baalvion_db}
+      DB_USER: ${DB_USER:-baalvion}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-disable}
+      DB_SYNC: "false"
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      REDIS_URL: redis://redis:6379
+      # Central SSO — gateway presents the RS256 Bearer (hybrid) + signs identity headers/envelope.
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      GATEWAY_SIGNING_SECRET: ${GATEWAY_SIGNING_SECRET}
+      CORS_ORIGINS: ${TRADE_CORS_ORIGINS:-https://trade.baalvion.com}
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}
+      # Firebase Admin SDK (OPTIONAL — powers a feature subset; the service boots without it).
+      FIREBASE_PROJECT_ID: ${TRADE_FIREBASE_PROJECT_ID:-}
+      FIREBASE_CLIENT_EMAIL: ${TRADE_FIREBASE_CLIENT_EMAIL:-}
+      FIREBASE_PRIVATE_KEY: ${TRADE_FIREBASE_PRIVATE_KEY:-}
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3025/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 50s
+
+  # ═══════════════ trade.baalvion.com — GTI app (own Prisma orchestration store) ═══
+  # One-shot: apply Prisma migrations to gti_db BEFORE gti-web starts. Mounts the repo's GTI
+  # prisma/ dir (read-only) and pins prisma@6 to match GTI's generated client. Requires
+  # outbound internet on the host (npx fetches the prisma engines). Exits 0 when done.
+  gti-migrate:
+    image: node:20-alpine
+    working_dir: /gti
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-baalvion}:${DB_PASSWORD}@postgres:5432/${GTI_DB:-gti_db}?schema=public
+    volumes:
+      - ../../Frontend/Global-Trade-Infrastructure-main/prisma:/gti/prisma:ro
+    command:
+      - sh
+      - -c
+      - "apk add --no-cache openssl libc6-compat >/dev/null && npx --yes prisma@6 migrate deploy --schema=/gti/prisma/schema.prisma"
+    depends_on:
+      postgres: { condition: service_healthy }
+    restart: "no"
+    networks: [baalvion-net]
+
+  # GTI dashboard (Next 15 standalone). Serves the UI + its own /api/* (Prisma → gti_db) and
+  # /api/health. Browser data + auth go same-origin to /trade-bff and /finance-bff, which the
+  # Caddy `trade.baalvion.com` vhost forwards to the gateway (so GTI's build-time-baked rewrite
+  # target is bypassed — no GATEWAY_PROXY_TARGET build-arg needed). GATEWAY_SIGNING_SECRET must
+  # match the auth-gateway's so GTI can verify the gateway's signed identity envelope.
+  gti-web:
+    image: ${IMAGE_PREFIX:-baalvion}/gti-web:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Frontend/Global-Trade-Infrastructure-main/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${TRADE_PUBLIC_URL:-https://trade.baalvion.com}
+        NEXT_PUBLIC_APP_URL: ${TRADE_PUBLIC_URL:-https://trade.baalvion.com}
+    <<: *restart
+    environment:
+      NODE_ENV: production
+      PORT: "9003"
+      HOSTNAME: 0.0.0.0
+      DATABASE_URL: postgresql://${DB_USER:-baalvion}:${DB_PASSWORD}@postgres:5432/${GTI_DB:-gti_db}?schema=public
+      GATEWAY_SIGNING_SECRET: ${GATEWAY_SIGNING_SECRET}
+      # Same-origin BFF is enforced at the Caddy edge; kept for any server-side code path.
+      GATEWAY_PROXY_TARGET: http://auth-gateway:3099
+    depends_on:
+      postgres: { condition: service_healthy }
+      gti-migrate: { condition: service_completed_successfully }
+      auth-gateway: { condition: service_started }
+    networks: [baalvion-net]
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:9003/api/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 50s
+
+  # ═══════════════ one-shot tools — CMS schema + content (profile: tools) ══════════
+  # These NEVER auto-start (profile-gated). cms-service creates the `cms` SCHEMA on boot but
+  # NOT its tables — run cms-migrate ONCE on a fresh DB, then register the website tenants and
+  # seed Stack D content. Ordered sequence (with super-admin bootstrap) → VALIDATION-RUNBOOK §11.
+  # All build the cms-service `installer` image (keeps devDeps: sequelize-cli + scripts + content).
+  cms-migrate:
+    profiles: ["tools"]
+    image: ${IMAGE_PREFIX:-baalvion}/cms-tools:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/knowledge/cms-service
+    command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-baalvion_db}
+      DB_USER: ${DB_USER:-baalvion}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-disable}
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [baalvion-net]
+
+  # Registers ALL production website tenants in cms.cms_websites — incl. law-elite-network
+  # (schema legal) and imperialpedia (schema imperialpedia). Idempotent. Pass the org/user
+  # printed by bootstrapSuperAdmin.js as CMS_ORG_ID / CMS_CREATED_BY so sites are owned for real.
+  cms-register:
+    profiles: ["tools"]
+    image: ${IMAGE_PREFIX:-baalvion}/cms-tools:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/knowledge/cms-service
+    command: ["node", "scripts/registerProductionWebsites.cjs"]
+    environment:
+      NODE_ENV: production
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-baalvion_db}
+      DB_USER: ${DB_USER:-baalvion}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-disable}
+      CMS_ORG_ID: ${CMS_ORG_ID:-}
+      CMS_CREATED_BY: ${CMS_CREATED_BY:-}
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+    networks: [baalvion-net]
+
+  # Seeds + publishes Law Elite Network editorial content (homepage, legal pages, A–Z articles)
+  # via the running CMS admin API. Pass LAW_WEBSITE_ID = the id resolved after cms-register.
+  cms-seed-law:
+    profiles: ["tools"]
+    image: ${IMAGE_PREFIX:-baalvion}/cms-tools:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/knowledge/cms-service
+    command: ["sh", "-c", "node scripts/seedLawElite.cjs && node scripts/seedLawArticlesLongform.cjs"]
+    environment:
+      NODE_ENV: production
+      AUTH_URL: http://auth-service:3001/v1/auth
+      CMS_URL: http://cms-service:3018/api/v1
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-superadmin@baalvion.com}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD}
+      LAW_WEBSITE_ID: ${LAW_WEBSITE_ID:-}
+    restart: "no"
+    depends_on:
+      cms-service: { condition: service_healthy }
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+
+  # OPTIONAL: pushes Imperialpedia's "Personal Finance" articles+pages into the LIVE CMS so they
+  # are editable in the admin console. Runs the FRONTEND seed (pure node, no extra deps) with the
+  # repo's content mounted RO. WITHOUT this, imperialpedia.com still renders from its committed
+  # snapshot fallback — this only promotes that content into CMS management. Pass IMPERIALPEDIA_WEBSITE_ID.
+  cms-seed-imperialpedia:
+    profiles: ["tools"]
+    image: node:20-alpine
+    working_dir: /imperialpedia
+    command: ["node", "scripts/seed-personal-finance.cjs"]
+    environment:
+      AUTH_URL: http://auth-service:3001/v1/auth
+      CMS_URL: http://cms-service:3018/api/v1
+      SUPERADMIN_EMAIL: ${SUPERADMIN_EMAIL:-superadmin@baalvion.com}
+      SUPERADMIN_PASSWORD: ${SUPERADMIN_PASSWORD}
+      WEBSITE_SLUG: imperialpedia
+      WEBSITE_ID: ${IMPERIALPEDIA_WEBSITE_ID:-}
+    volumes:
+      - ../../Frontend/Imperialpedia-main:/imperialpedia:ro
+    restart: "no"
+    depends_on:
+      cms-service: { condition: service_healthy }
+      auth-service: { condition: service_started }
+    networks: [baalvion-net]
+
+  # ═══════════════════════════════ ingress (only public surface) ══════════════════
+  caddy:
+    image: caddy:2.8-alpine
+    <<: *restart
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - auth-gateway
+      - ctm-service
+      - proxy-service
+      - proxy-cms-service
+      - law-service
+      - imperialpedia-service
+      - trade-service
+      - gti-web
+    networks: [baalvion-net]

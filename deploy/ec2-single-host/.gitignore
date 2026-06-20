@@ -1,0 +1,6 @@
+# Never commit live secrets for the single-host stack.
+.env
+.env.production
+.env.*.local
+secrets/
+!secrets/.gitkeep
