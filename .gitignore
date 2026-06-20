@@ -129,6 +129,8 @@ backups/
 
 # Reports
 Reports/
+build-report.txt
+lint-report.txt
 
 # Generic cache
 .cache/

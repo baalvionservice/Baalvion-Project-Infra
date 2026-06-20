@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
     'express',
   ],
   reactStrictMode: true,
+  // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
+  // Gated off on win32 (Next standalone symlink emission is unreliable on Windows dev boxes);
+  // Docker/CI builds run on Linux where standalone is emitted correctly.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   typescript: {
     // Type errors will now fail the build — all type issues must be resolved.
     ignoreBuildErrors: false,

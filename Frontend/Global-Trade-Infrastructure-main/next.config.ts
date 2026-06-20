@@ -35,6 +35,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
+  // Gated off on win32 (Next standalone symlink emission is unreliable on Windows dev boxes);
+  // Docker/CI builds run on Linux where standalone is emitted correctly.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   // Server-only AI/telemetry runtime. Genkit pulls in @opentelemetry/* + require-in-the-middle +
   // protobufjs + express, all of which use dynamic `require(expr)` that webpack cannot statically
   // analyse ("Critical dependency: the request of a dependency is an expression"). Keeping these

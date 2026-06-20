@@ -1,3 +1,58 @@
+# Release Notes
+
+> Newest release first. Prior release notes are retained below for history.
+
+---
+
+## v1.0.0-mvp — Baalvion MVP Production Release
+
+**Release date:** 2026-06-20 · **Branch:** `main` · **Tag:** `v1.0.0-mvp`
+**Scope:** Critical-path production launch — user registration, login, CMS publishing,
+product management, order creation, and Razorpay payments.
+
+This release packages the platform for its first production deployment on AWS: a
+self-contained, single-database MVP slice with Caddy TLS ingress, a hardened service
+roster, and reproducible standalone Docker images for the frontend apps.
+
+### What's new
+
+**Deployment infrastructure (`deploy/mvp-production/`)**
+- `docker-compose.yml` — full MVP stack, 100% env-driven (`${VAR}`), no embedded secrets
+- `Caddyfile` — ACME TLS ingress for `api` / `admin` / `baalvion.com` / `shop` + payment webhook routes
+- `.env.production.example` — complete config template; all secret fields blank with 🔒 markers
+- `init-roles.sql` — idempotent RDS bootstrap of `baalvion` (owner) + `baalvion_app` (RLS runtime) roles
+- `redis.conf`, `RUNBOOK.md`, `MVP-DEPLOYMENT-ANALYSIS.md`
+
+**Frontend production builds**
+- `output: 'standalone'` for about-baalvion, Imperialpedia, Law-Elite-Network, Global-Trade-Infrastructure
+- New production `Dockerfile` + `Dockerfile.dockerignore` for GTI, Imperialpedia, Proxy-BaalvionStack,
+  about-baalvion, admin-platform; updated Amarisé + admin-platform multi-stage Dockerfiles
+- `nginx.conf.template` for the Proxy-BaalvionStack SPA
+
+**Platform**
+- Service catalog contract refreshed (`Backend/catalog/index.json`); PM2 ecosystem aligned
+
+### Services included (MVP critical path)
+Infra: PostgreSQL 16 (`baalvion_db`, schema-per-service), Redis 7, Redpanda, Caddy.
+Services: auth-service, auth-gateway, rbac-service, audit-service, cms-service, commerce-service,
+inventory-service, order-service, payment-service (Java), notification-service, admin-platform,
+about-web, amarise-web.
+
+### Services deferred (stubbed / fail-open)
+ledger, session-service, media-service, dashboards, ControlTheMarket (CTM), analytics, OAuth.
+
+### Security
+- In-schema PostgreSQL RLS via non-superuser `baalvion_app` runtime role
+- RS256 JWT, centralized issuer; Razorpay webhook HMAC verification
+- All secrets injected at deploy time from AWS Secrets Manager — none in source
+- Audit: no secrets in any committed file (verified pre-tag)
+
+### Deploy notes
+Run `init-roles.sql` against fresh RDS **before** starting services; rotate `SUPERADMIN_PASSWORD`
+after first login. See `deploy/mvp-production/RUNBOOK.md`.
+
+---
+
 # Release Notes — Baalvion Limited Beta RC
 
 **Release:** Limited-Beta Release Candidate · **Date:** 2026-06-02 ·

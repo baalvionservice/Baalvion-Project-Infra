@@ -1,0 +1,16 @@
+# Law Elite Network web image — single-directory build context.
+# Keep the host's node_modules / build artifacts OUT so the image uses the clean
+# Linux `npm install` from the deps stage (host node_modules are Windows binaries).
+node_modules
+.next
+.turbo
+dist
+build
+coverage
+.git
+*.log
+.env
+.env.local
+.env.*.local
+Dockerfile
+.dockerignore
