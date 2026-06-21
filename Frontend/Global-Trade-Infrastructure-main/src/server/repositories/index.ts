@@ -77,3 +77,31 @@ export type {
   LedgerEntryInput,
   SettlementInstructionFilter,
 } from './ledger-repository';
+export {
+  GckbRecordRepository,
+  GckbRelationshipRepository,
+  GckbRevisionRepository,
+  gckbRecordRepository,
+  gckbRelationshipRepository,
+  gckbRevisionRepository,
+} from './gckb-repository';
+export type { RecordSearchFilter, RelationshipInput, GckbRevisionInput } from './gckb-repository';
+export {
+  TreasuryAccountRepository,
+  WalletRepository,
+  WalletProjectionRepository,
+  FXQuoteRepository,
+  FXTradeRepository,
+  LiquidityPositionRepository,
+  FeeRuleRepository,
+  FeeTransactionRepository,
+  treasuryAccountRepository,
+  walletRepository,
+  walletProjectionRepository,
+  fxQuoteRepository,
+  fxTradeRepository,
+  liquidityPositionRepository,
+  feeRuleRepository,
+  feeTransactionRepository,
+} from './treasury-repository';
+export type { WalletFilter, WalletProjectionInput } from './treasury-repository';

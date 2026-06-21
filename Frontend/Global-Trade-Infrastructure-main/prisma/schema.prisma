@@ -1099,3 +1099,385 @@ model SettlementInstruction {
   @@index([deletedAt])
   @@map("settlement_instructions")
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// Global Country Knowledge Base (GCKB) — Phase 1 (configuration over code)
+//
+// The canonical reference for every country and its trade policy, stored as
+// DATA. A single generic, discriminated record table holds all entity types
+// (country, currency, language, timezone, trade_region, subdivision, authority,
+// point_of_entry, trade_agreement, country_policy). Adding an entity type or a
+// policy type is REGISTRY CONFIGURATION (server/gckb/registry.ts) — never a new
+// table, migration, service or route. entityType / policyType / status are text,
+// not enums, precisely so new kinds need no schema change.
+//
+// `attributes` is a per-entity JSON payload validated by the registry's zod
+// schema; the promoted columns (countryId, code, policyType, hsCode, …) exist
+// only for relational integrity (self-FK) and indexed search. organizationId is
+// NULLABLE: NULL = the platform-global canonical baseline inherited by every
+// tenant; non-null = a tenant override. RLS (see migration) enforces read
+// global+own / write own. Every version is preserved forever in the append-only
+// gckb_revisions store (DB-enforced immutable); the head row is the current
+// projection. Relationships are generic typed edges (gckb_relationships).
+// ──────────────────────────────────────────────────────────────────────────
+
+model GckbRecord {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizationId  String?   @db.Uuid // null = platform-global canonical baseline
+  entityType      String // country | currency | authority | point_of_entry | country_policy | …
+  recordKey       String // natural business key, unique per (org, entityType)
+  name            String
+  countryId       String?   @db.Uuid // self-FK: owning country for country-scoped records
+  parentId        String?   @db.Uuid // self-FK: generic hierarchy (port→subdivision, …)
+  code            String? // ISO / UN-LOCODE / IATA etc. for fast lookup
+  policyType      String? // for entityType=country_policy (tax | tariff | certificate | …)
+  hsCode          String?
+  productCategory String?
+  attributes      Json      @default("{}")
+  tags            String[]  @default([])
+  version         Int       @default(1)
+  status          String    @default("DRAFT") // DRAFT | PUBLISHED | SUPERSEDED | ARCHIVED
+  effectiveFrom   DateTime?
+  effectiveTo     DateTime?
+  publishedAt     DateTime?
+  authority       String? // issuing authority (envelope provenance, free text)
+  source          String?
+  checksum        String
+  auditReference  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  country       GckbRecord?        @relation("GckbRecordCountry", fields: [countryId], references: [id], onDelete: SetNull)
+  countryOf     GckbRecord[]       @relation("GckbRecordCountry")
+  parent        GckbRecord?        @relation("GckbRecordParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children      GckbRecord[]       @relation("GckbRecordParent")
+  relationships GckbRelationship[] @relation("GckbRelFrom")
+  revisions     GckbRevision[]
+
+  @@index([organizationId])
+  @@index([entityType])
+  @@index([entityType, recordKey])
+  @@index([countryId])
+  @@index([parentId])
+  @@index([policyType])
+  @@index([hsCode])
+  @@index([productCategory])
+  @@index([code])
+  @@index([status])
+  @@index([effectiveFrom])
+  @@index([effectiveTo])
+  @@index([deletedAt])
+  @@map("gckb_records")
+}
+
+model GckbRelationship {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  fromId         String   @db.Uuid
+  relationType   String // MEMBER_OF | LOCATED_IN | GOVERNED_BY | REQUIRES_CERTIFICATE | APPLIES_TO_HS | REFERENCES_RULE | …
+  toType         String // gckb entityType OR external (rule | document | product | organization | hs_code)
+  toId           String?
+  toRef          String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  from GckbRecord @relation("GckbRelFrom", fields: [fromId], references: [id], onDelete: Cascade)
+
+  @@index([fromId])
+  @@index([toType, toId])
+  @@index([relationType])
+  @@index([organizationId])
+  @@map("gckb_relationships")
+}
+
+/// Append-only version history for every GCKB record (immutable, CR-14). Each
+/// create/update/publish/archive/import writes one full snapshot, enabling
+/// version comparison and forensic replay. DB trigger blocks UPDATE/DELETE so
+/// historical policy is queryable forever and nothing is ever overwritten.
+model GckbRevision {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  recordId       String?  @db.Uuid
+  entityType     String
+  recordKey      String
+  version        Int
+  action         String // CREATE | UPDATE | PUBLISH | ARCHIVE | SUPERSEDE | IMPORT
+  snapshot       Json
+  checksum       String
+  actorId        String
+  actorRole      String?
+  source         String?
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  record GckbRecord? @relation(fields: [recordId], references: [id], onDelete: SetNull)
+
+  @@index([recordId])
+  @@index([entityType, recordKey])
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("gckb_revisions")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Treasury engine (Phase 2 — wallets, multi-currency accounts, FX, fees,
+// liquidity). Built ON TOP of the immutable settlement ledger: every wallet
+// balance is a DERIVED sum of ledger account balances / entries. The only
+// mutable "balance" rows are the explicitly-cached wallet_projections and the
+// append-only liquidity_positions snapshots. Tenant-owned and RLS-scoped.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum WalletType {
+  USER
+  COMPANY
+  MERCHANT
+  ESCROW
+  RESERVE
+  TREASURY
+  VIRTUAL
+  SETTLEMENT
+  INTEREST
+}
+
+enum TreasuryAccountKind {
+  OPERATING
+  SETTLEMENT
+  RESERVE
+  LIQUIDITY
+  ESCROW
+  INTEREST
+  FX
+  FEE
+  SUSPENSE
+}
+
+enum FeeType {
+  FLAT
+  PERCENTAGE
+  TIER
+}
+
+enum FXQuoteStatus {
+  QUOTED
+  LOCKED
+  EXPIRED
+  EXECUTED
+  CANCELLED
+}
+
+enum FXTradeStatus {
+  EXECUTED
+  REVERSED
+}
+
+/// Registry mapping a (kind, currency) to its backing ledger account. One live
+/// treasury account per (org, kind, currency).
+model TreasuryAccount {
+  id              String              @id @default(uuid()) @db.Uuid
+  organizationId  String              @db.Uuid
+  kind            TreasuryAccountKind
+  currency        String
+  ledgerAccountId String              @db.Uuid
+  status          String              @default("ACTIVE")
+  metadata        Json?
+  version         Int                 @default(1)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  deletedAt       DateTime?
+
+  @@index([organizationId])
+  @@index([kind])
+  @@index([currency])
+  @@index([deletedAt])
+  @@map("treasury_accounts")
+}
+
+/// A wallet whose funds live across four ledger bucket accounts. Balances are
+/// always derived from those accounts — there is no balance column here.
+model Wallet {
+  id                 String     @id @default(uuid()) @db.Uuid
+  organizationId     String     @db.Uuid
+  type               WalletType
+  ownerOrgId         String?    @db.Uuid
+  ownerRef           String?
+  currency           String     @default("USD")
+  status             String     @default("ACTIVE")
+  reference          String?
+  availableAccountId String     @db.Uuid
+  heldAccountId      String     @db.Uuid
+  reservedAccountId  String     @db.Uuid
+  pendingAccountId   String     @db.Uuid
+  metadata           Json?
+  version            Int        @default(1)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  deletedAt          DateTime?
+
+  @@index([organizationId])
+  @@index([type])
+  @@index([ownerOrgId])
+  @@index([currency])
+  @@index([deletedAt])
+  @@map("wallets")
+}
+
+/// Cached projection of a wallet's derived balances (the ONE place a mutable
+/// balance is stored — it is always recomputable from the ledger).
+model WalletProjection {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizationId   String   @db.Uuid
+  walletId         String   @unique @db.Uuid
+  currency         String
+  available        Decimal  @db.Decimal(20, 4)
+  held             Decimal  @db.Decimal(20, 4)
+  reserved         Decimal  @db.Decimal(20, 4)
+  pending          Decimal  @db.Decimal(20, 4)
+  incoming         Decimal  @db.Decimal(20, 4)
+  outgoing         Decimal  @db.Decimal(20, 4)
+  total            Decimal  @db.Decimal(20, 4)
+  projected        Decimal  @db.Decimal(20, 4)
+  computedAt       DateTime
+  sourceEntryCount Int      @default(0)
+  version          Int      @default(1)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([organizationId])
+  @@map("wallet_projections")
+}
+
+/// A priced FX quote (mid + spread/margin → all-in rate), with an expiry.
+model FXQuote {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @db.Uuid
+  reference      String?
+  baseCurrency   String
+  quoteCurrency  String
+  baseAmount     Decimal?      @db.Decimal(20, 4)
+  midRate        Decimal       @db.Decimal(20, 8)
+  spreadBps      Int
+  marginBps      Int
+  allInRate      Decimal       @db.Decimal(20, 8)
+  quoteAmount    Decimal?      @db.Decimal(20, 4)
+  status         FXQuoteStatus @default(QUOTED)
+  rateSource     String        @default("internal")
+  expiresAt      DateTime
+  lockedUntil    DateTime?
+  correlationId  String
+  metadata       Json?
+  version        Int           @default(1)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([baseCurrency, quoteCurrency])
+  @@index([createdAt])
+  @@map("fx_quotes")
+}
+
+/// An executed FX conversion, recording the TWO balanced ledger postings (one
+/// per currency leg) that effected it. Append-only (status may flip to REVERSED).
+model FXTrade {
+  id               String        @id @default(uuid()) @db.Uuid
+  organizationId   String        @db.Uuid
+  quoteId          String        @db.Uuid
+  reference        String?
+  baseCurrency     String
+  quoteCurrency    String
+  baseAmount       Decimal       @db.Decimal(20, 4)
+  quoteAmount      Decimal       @db.Decimal(20, 4)
+  allInRate        Decimal       @db.Decimal(20, 8)
+  status           FXTradeStatus @default(EXECUTED)
+  baseLedgerTxnId  String        @db.Uuid
+  quoteLedgerTxnId String        @db.Uuid
+  correlationId    String
+  metadata         Json?
+  createdAt        DateTime      @default(now())
+
+  @@index([organizationId])
+  @@index([quoteId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("fx_trades")
+}
+
+/// An append-only liquidity snapshot for a currency at a point in time.
+model LiquidityPosition {
+  id                 String   @id @default(uuid()) @db.Uuid
+  organizationId     String   @db.Uuid
+  currency           String
+  asOf               DateTime
+  currentPosition    Decimal  @db.Decimal(20, 4)
+  availableLiquidity Decimal  @db.Decimal(20, 4)
+  reserved           Decimal  @db.Decimal(20, 4)
+  exposure           Decimal  @db.Decimal(20, 4)
+  forecast           Decimal  @db.Decimal(20, 4)
+  reserveRatioBps    Int      @default(0)
+  metadata           Json?
+  createdAt          DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([currency])
+  @@index([asOf])
+  @@map("liquidity_positions")
+}
+
+/// A configurable fee rule (flat / percentage / tier) with optional clamps.
+model FeeRule {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  code           String
+  name           String
+  type           FeeType
+  scope          String // SETTLEMENT | FX | BANK | PLATFORM | PARTNER | … (data)
+  currency       String
+  basisPoints    Int?
+  flatAmount     Decimal?  @db.Decimal(20, 4)
+  tiers          Json?
+  minFee         Decimal?  @db.Decimal(20, 4)
+  maxFee         Decimal?  @db.Decimal(20, 4)
+  feeAccountId   String?   @db.Uuid // ledger account that receives the fee
+  country        String?
+  priority       Int       @default(0)
+  status         String    @default("ACTIVE")
+  effectiveFrom  DateTime?
+  effectiveTo    DateTime?
+  metadata       Json?
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  @@index([organizationId])
+  @@index([scope])
+  @@index([currency])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("fee_rules")
+}
+
+/// An append-only record of a charged fee and the ledger posting that booked it.
+model FeeTransaction {
+  id                  String   @id @default(uuid()) @db.Uuid
+  organizationId      String   @db.Uuid
+  feeRuleId           String?  @db.Uuid
+  reference           String?
+  scope               String
+  baseAmount          Decimal  @db.Decimal(20, 4)
+  feeAmount           Decimal  @db.Decimal(20, 4)
+  currency            String
+  ledgerTransactionId String?  @db.Uuid
+  sourceType          String?
+  sourceId            String?  @db.Uuid
+  correlationId       String
+  metadata            Json?
+  createdAt           DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([feeRuleId])
+  @@index([scope])
+  @@index([createdAt])
+  @@map("fee_transactions")
+}

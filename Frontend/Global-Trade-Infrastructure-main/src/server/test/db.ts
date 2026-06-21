@@ -6,6 +6,17 @@ import { prisma } from '../db/prisma';
 import { organizationRepository } from '../repositories';
 
 const TABLES = [
+  'fee_transactions',
+  'fee_rules',
+  'fx_trades',
+  'fx_quotes',
+  'liquidity_positions',
+  'wallet_projections',
+  'wallets',
+  'treasury_accounts',
+  'gckb_revisions',
+  'gckb_relationships',
+  'gckb_records',
   'ledger_entries',
   'ledger_transactions',
   'settlement_instructions',

@@ -17,7 +17,8 @@
     "prisma:status": "prisma migrate status",
     "prisma:studio": "prisma studio",
     "db:backfill": "node scripts/run-backfill.cjs",
-    "seed:restricted-goods": "node scripts/seed-restricted-goods.cjs"
+    "seed:restricted-goods": "node scripts/seed-restricted-goods.cjs",
+    "seed:countries": "node scripts/seed-countries.cjs"
   },
   "dependencies": {
     "@baalvion/auth-sdk": "workspace:*",
