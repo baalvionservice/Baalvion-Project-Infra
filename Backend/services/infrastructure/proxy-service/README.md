@@ -135,7 +135,6 @@ The exhaustive contract lives in:
 
 - **[`openapi.yaml`](openapi.yaml)** — full OpenAPI 3 spec
 - **[`Baalvion-API.postman_collection.json`](Baalvion-API.postman_collection.json)** — Postman collection
-- **[`IMPLEMENTATION_GUIDE.md`](IMPLEMENTATION_GUIDE.md)** — endpoint-by-endpoint request/response reference
 - **[`RBAC.md`](RBAC.md)** — auth contract, claims, and the role hierarchy
 
 ## Getting Started
