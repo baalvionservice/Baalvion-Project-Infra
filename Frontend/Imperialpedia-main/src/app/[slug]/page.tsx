@@ -12,6 +12,7 @@ import { fetchReviewBySlug } from "@/lib/data/review-live";
 import { getTermUrl } from "@/lib/data/utils";
 import { fetchTermsByLetter } from "@/lib/data/term-live";
 import { Term } from "@/lib/data/terms";
+import { staticNewsBySlug } from "@/services/data/static-content";
 import Link from "next/link";
 import { env } from "@/config/env";
 
@@ -52,9 +53,12 @@ export async function generateMetadata({
     });
   }
 
-  // Standard article metadata — static set first, then live CMS news.
+  // Standard article metadata — static set first, then live CMS news, then the
+  // committed snapshot (so real articles keep valid metadata when the CMS is offline).
   const article =
-    newsArticles.find((a) => a.slug === slug) ?? (await getPublishedNewsBySlug(slug));
+    newsArticles.find((a) => a.slug === slug) ??
+    (await getPublishedNewsBySlug(slug)) ??
+    staticNewsBySlug(slug);
   if (!article) return {};
   return buildMetadata({
     title: article.title,
@@ -209,9 +213,12 @@ export default async function SingleNewsPage({
       brokerGuides.find((a) => a.slug === slug) ||
       stocksPageData.latest.find((a) => a.slug === slug);
   }
-  // Last resort: live editorial news published from the CMS.
+  // Last resort: live editorial news from the CMS, then the committed snapshot.
+  // The snapshot keeps real CMS articles reachable at their canonical `/<slug>`
+  // URL when the live CMS is unreachable (e.g. on Vercel) — every card links here,
+  // so without this fallback published articles 404 even while topic feeds list them.
   if (!article) {
-    article = (await getPublishedNewsBySlug(slug)) ?? undefined;
+    article = (await getPublishedNewsBySlug(slug)) ?? staticNewsBySlug(slug) ?? undefined;
   }
   if (!article) notFound();
 

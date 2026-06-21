@@ -38,6 +38,17 @@ export function staticArticleBySlug(slug: string): Article | null {
 }
 
 /**
+ * A single baked article by slug as a NewsArticle card/detail, or null if not in
+ * the snapshot. Used by the canonical root `/[slug]` article route so real CMS
+ * articles stay reachable when the live CMS is offline (e.g. on Vercel) — mirrors
+ * the hybrid fallback already used by `/articles/[slug]` and the topic feeds.
+ */
+export function staticNewsBySlug(slug: string): NewsArticle | null {
+  const c = ARTICLES.find((a) => a.slug === slug);
+  return c ? cmsContentToNews(c) : null;
+}
+
+/**
  * Baked articles for a category, as NewsArticle cards (for topic/hub pages).
  * Every baked article lives in the `personal-finance` category, so only that slug
  * (or no slug) returns content.
