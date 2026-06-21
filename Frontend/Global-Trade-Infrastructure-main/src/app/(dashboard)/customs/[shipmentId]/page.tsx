@@ -21,6 +21,7 @@ import { CustomsStatusTimeline } from './_components/customs-status-timeline';
 import { CustomsDocumentList } from './_components/customs-document-list';
 import { CostBreakdown } from './_components/cost-breakdown';
 import { RegulatoryRulesPanel } from './_components/regulatory-rules-panel';
+import { RestrictedGoodsScreening } from './_components/restricted-goods-screening';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -211,6 +212,13 @@ export default function CustomsDetailPage() {
                  </div>
               </CardContent>
            </Card>
+
+           <RestrictedGoodsScreening
+              hsCode={customs.hts_code || customs.hsCode}
+              originCountry={customs.originCountry}
+              destinationCountry={customs.destinationCountry}
+              direction="IMPORT"
+           />
 
            <RegulatoryRulesPanel origin={originRules} destination={destRules} />
         </div>
