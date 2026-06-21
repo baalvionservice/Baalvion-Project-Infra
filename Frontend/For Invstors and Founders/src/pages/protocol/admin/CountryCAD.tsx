@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
-  Globe, Users, DollarSign, TrendingUp, ChevronRight, Search,
+  Globe, Users, DollarSign, Search,
   ArrowUpRight
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
 import { protocolApi } from "@/lib/protocol-api";
 

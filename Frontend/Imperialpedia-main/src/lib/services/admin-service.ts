@@ -2,7 +2,6 @@ import {
   AdminUser,
   GlossaryTerm,
   APIKeyNode,
-  AdPlacement,
   SystemConfig,
 } from "@/types/admin-system";
 import { NewsArticle, NewsCategory, NewsBodyBlock } from "@/lib/data.news";
@@ -862,8 +861,7 @@ class AdminService {
               )
             )
         );
-      default:
-        // eslint-disable-next-line no-case-declarations
+      default: {
         const slugKeywords = slug.split("-");
         return articles.filter(
           (article) =>
@@ -876,6 +874,7 @@ class AdminService {
               )
             )
         );
+      }
     }
   }
 

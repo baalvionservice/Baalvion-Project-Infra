@@ -10,7 +10,11 @@
  * module only covers CMS-managed editorial surfaces and degrades gracefully to
  * `null` when the CMS is unreachable so callers can fall back to built-in copy.
  */
-const CMS_BASE = process.env.CMS_PUBLIC_URL || 'http://localhost:3011/api/v1/public';
+import { requireServerEnv } from './env';
+
+// CMS_PUBLIC_URL is required in production (fail-fast via requireServerEnv); a
+// localhost default is used only in development.
+const CMS_BASE = requireServerEnv('CMS_PUBLIC_URL', 'http://localhost:3011/api/v1/public');
 const SITE = process.env.CMS_WEBSITE_SLUG || 'law-elite-network';
 const BASE = `${CMS_BASE}/${SITE}`;
 

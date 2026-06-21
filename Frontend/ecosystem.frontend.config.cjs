@@ -52,7 +52,9 @@ module.exports = {
   apps: [
     next('about-web', 'about-baalvion-main', 3020),
     next('ir-web', 'IR-Baalvion-main', 3027),
-    next('baalvion-com-web', 'baalvion-com-main', 3043),
+    // baalvion-com uses `output: 'export'` (static) + Cloudflare/wrangler in prod,
+    // so `next start` refuses to serve it. Run `next dev` locally instead.
+    next('baalvion-com-web', 'baalvion-com-main', 3043, 'dev'),
     next('imperialpedia-web', 'Imperialpedia-main', 3029),
     next('gti-web', 'Global-Trade-Infrastructure-main', 9003),
     next('law-web', 'Law-Elite-Network-main', 9002),

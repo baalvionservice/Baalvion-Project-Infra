@@ -2,29 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/design-system/typography/text';
 import { 
   DollarSign, 
-  TrendingUp, 
-  TrendingDown, 
   Activity, 
   Zap, 
   Loader2, 
   Download, 
   CreditCard,
   PieChart as PieIcon,
-  Globe,
-  ArrowUpRight,
   ShieldCheck,
-  ChevronRight,
-  Calendar,
-  Layers,
-  ArrowRight,
-  Target,
-  Search
+  Calendar
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -33,11 +23,9 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  Legend
+  ResponsiveContainer
 } from 'recharts';
 import { cn } from '@/lib/utils';
-import { toast } from '@/hooks/use-toast';
 
 export default function MonetizationGovernancePage() {
   const [loading, setLoading] = useState(true);

@@ -22,10 +22,7 @@ import { Text } from "@/design-system/typography/text";
 import {
   Package,
   Search,
-  Filter,
-  Loader2,
   ShieldCheck,
-  ArrowRight,
   TrendingUp,
   AlertCircle,
   CheckCircle2,
@@ -33,8 +30,6 @@ import {
   Database,
   Globe,
   Plus,
-  ChevronRight,
-  Info,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";

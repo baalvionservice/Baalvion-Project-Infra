@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/card";
 import {
   Zap,
-  Activity,
   Server,
   Cpu,
   Database,

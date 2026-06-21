@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,23 +9,19 @@ import { Text } from '@/design-system/typography/text';
 import {
   FileSearch,
   Search,
-  Filter,
   Loader2,
   Clock,
   ChevronRight,
   ArrowLeft,
-  ArrowUpRight,
   Layers,
   Users,
   Target,
-  Zap,
-  Activity
+  Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { getEditorialDashboardData } from '@/services/mock-api/editorial';
 import { EditorialSubmission, ReviewStatus } from '@/types/editorial';
 import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 /**

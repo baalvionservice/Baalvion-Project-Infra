@@ -1,20 +1,38 @@
 import { MetadataRoute } from 'next';
 import { env } from '@/config/env';
 
+// Render at request time, never at build time. This route fetches from
+// imperialpedia-service + cms-service, and a build-time fetch against an
+// unreachable API blocks `next build` (CI timeout). force-dynamic guarantees
+// the production build never depends on an external service.
+export const dynamic = 'force-dynamic';
+
+// Hard cap on any sitemap fetch so a slow/hung upstream degrades to the static
+// routes instead of hanging the request.
+const FETCH_TIMEOUT_MS = 4000;
+
 const BASE = env.siteUrl || 'https://imperialpedia.com';
-const IMP = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || 'http://localhost:3004/api/v1';
-const CMS = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || 'http://localhost:3018/api/v1/public';
+const IS_PROD = process.env.NODE_ENV === 'production';
+const IMP = process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || (IS_PROD ? '' : 'http://localhost:3004/api/v1');
+const CMS = process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || (IS_PROD ? '' : 'http://localhost:3018/api/v1/public');
 const SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 type Slugged = { slug: string; name?: string; updatedAt?: string; publishedAt?: string };
 
 async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
+  // No absolute base URL configured (production with an unset API env) → fail closed
+  // to static routes without attempting a relative fetch (which throws under Node).
+  if (!/^https?:\/\//i.test(url)) return null;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
     if (!res.ok) return null;
     return (await res.json()) as Record<string, unknown>;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 // Structured entities (company/country/industry/technology/term/review) — imperialpedia-service.

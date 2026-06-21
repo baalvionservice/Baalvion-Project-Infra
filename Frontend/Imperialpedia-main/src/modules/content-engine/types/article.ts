@@ -13,6 +13,7 @@ export interface Article {
   description: string;
   body?: string; // Full content body
   authorId: ID;
+  authorName?: string; // Display author (e.g. CMS customFields.author.name)
   publishedAt?: Timestamp;
   updatedAt: Timestamp;
   category: string;
@@ -20,11 +21,12 @@ export interface Article {
   status: ArticleStatus;
   readingTime: number; // in minutes
   featuredImage: string;
-  
+
   // SEO specific fields
   seoTitle?: string;
   seoDescription?: string;
   seoKeywords?: string[];
+  faq?: { question: string; answer: string }[]; // Drives FAQPage JSON-LD
 }
 
 /**

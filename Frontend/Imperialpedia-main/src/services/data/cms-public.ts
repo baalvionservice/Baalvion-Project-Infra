@@ -17,8 +17,12 @@
 import { Article, ArticleStatus } from '@/modules/content-engine/types/article';
 import type { NewsArticle, NewsBodyBlock, NewsCategory } from '@/lib/data.news';
 
+// No localhost fallback in production: an unset NEXT_PUBLIC_CMS_PUBLIC_URL yields
+// '' so the server fetch fails closed (callers fall back to built-in copy) instead
+// of shipping a localhost dev URL to the production bundle.
 const CMS_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || 'http://localhost:3018/api/v1/public';
+  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3018/api/v1/public');
 const SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 // ── cms-service wire shapes ─────────────────────────────────────────────────
@@ -48,6 +52,7 @@ export interface CmsContent {
   createdAt?: string;
   updatedAt?: string;
   category?: { id: string; name: string; slug: string } | null;
+  customFields?: Record<string, unknown> | null;
 }
 
 interface CmsListEnvelope {
@@ -194,6 +199,14 @@ function plainTextLength(blocks?: CmsBlock[], excerpt?: string | null): number {
 // ── CMS content → Imperialpedia Article ─────────────────────────────────────
 export function cmsContentToArticle(raw: CmsContent): Article {
   const words = plainTextLength(raw.contentBlocks, raw.excerpt);
+  const cf = (raw.customFields ?? {}) as Record<string, unknown>;
+  const rawFaq = Array.isArray(cf.faq) ? (cf.faq as unknown[]) : [];
+  const faq = rawFaq
+    .map((f) => f as { question?: unknown; answer?: unknown })
+    .filter((f) => f && f.question && f.answer)
+    .map((f) => ({ question: String(f.question), answer: String(f.answer) }));
+  const author = cf.author as { name?: unknown } | undefined;
+  const authorName = author && typeof author.name === 'string' ? author.name : undefined;
   return {
     id: raw.id,
     slug: raw.slug,
@@ -201,6 +214,7 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     description: raw.excerpt ?? '',
     body: blocksToHtml(raw.contentBlocks) || undefined,
     authorId: String(raw.authorId ?? 'imperialpedia'),
+    authorName,
     publishedAt: raw.publishedAt ?? undefined,
     updatedAt: raw.updatedAt ?? raw.publishedAt ?? new Date().toISOString(),
     category: raw.category?.name ?? 'General',
@@ -211,6 +225,7 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     seoTitle: raw.seoMetadata?.title || raw.title,
     seoDescription: raw.seoMetadata?.description || raw.excerpt || '',
     seoKeywords: raw.seoMetadata?.keywords || raw.tagIds || [],
+    faq: faq.length ? faq : undefined,
   };
 }
 
@@ -308,6 +323,41 @@ export async function getCategoryArticles(
 export async function getPublishedNewsBySlug(slug: string): Promise<NewsArticle | null> {
   try {
     return cmsContentToNews(await getCmsContentBySlug(slug));
+  } catch {
+    return null;
+  }
+}
+
+// ── CMS `page` documents (About / Contact / Privacy, etc.) ──────────────────
+export interface CmsPage {
+  title: string;
+  bodyHtml: string;
+  seoTitle: string;
+  seoDescription: string;
+  seoKeywords: string[];
+  updatedAt?: string;
+}
+
+/**
+ * Fetch a published CMS `page` document by slug and return it ready to render.
+ * Returns null on any failure (unknown slug, cms-service unreachable) so route
+ * components can fall back to their built-in static content during cutover or
+ * when the CMS is offline.
+ */
+export async function getCmsPage(slug: string): Promise<CmsPage | null> {
+  try {
+    const raw = await getCmsContentBySlug(slug);
+    if (raw.contentType && raw.contentType !== 'page') return null;
+    const bodyHtml = blocksToHtml(raw.contentBlocks);
+    if (!bodyHtml) return null;
+    return {
+      title: raw.title,
+      bodyHtml,
+      seoTitle: raw.seoMetadata?.title || raw.title,
+      seoDescription: raw.seoMetadata?.description || raw.excerpt || '',
+      seoKeywords: raw.seoMetadata?.keywords || [],
+      updatedAt: raw.updatedAt ?? raw.publishedAt ?? undefined,
+    };
   } catch {
     return null;
   }

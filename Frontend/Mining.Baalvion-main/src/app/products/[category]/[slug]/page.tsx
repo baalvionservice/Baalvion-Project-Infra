@@ -21,7 +21,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 import { getProduct, getProductCategories } from "@/lib/content/store";
-import type { Product, ProductCategory } from "@/lib/content/types";
+import type { ProductCategory } from "@/lib/content/types";
 import { BRAND_IMAGES } from "@/lib/brand-assets";
 import { PendingDisclosure } from "@/components/common/PendingDisclosure";
 import { ProductInquiryForm } from "@/components/products/ProductInquiryForm";

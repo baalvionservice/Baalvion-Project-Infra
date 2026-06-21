@@ -7,17 +7,37 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 import { ShieldCheck } from 'lucide-react';
 import { env } from '@/config/env';
+import { CmsPage } from '@/components/pages/CmsPage';
+import { getCmsPage } from '@/services/data/cms-public';
 
-export const metadata: Metadata = buildMetadata({
-  title: 'Privacy Policy',
-  description:
-    'How Imperialpedia collects, uses, and protects information when you use our website and services.',
-  canonical: '/privacy-policy',
-});
+// Managed in the CMS (admin-platform); read live per request with a static fallback.
+export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getCmsPage('privacy-policy');
+  if (page) {
+    return buildMetadata({
+      title: page.seoTitle,
+      description: page.seoDescription,
+      keywords: page.seoKeywords,
+      canonical: '/privacy-policy',
+    });
+  }
+  return buildMetadata({
+    title: 'Privacy Policy',
+    description:
+      'How Imperialpedia collects, uses, and protects information when you use our website and services.',
+    canonical: '/privacy-policy',
+  });
+}
 
 const LAST_UPDATED = 'April 8, 2026';
 
-export default function PrivacyPolicyPage() {
+export default async function PrivacyPolicyPage() {
+  return <CmsPage slug="privacy-policy" eyebrow="Legal" fallback={<PrivacyFallback />} />;
+}
+
+function PrivacyFallback() {
   return (
     <main className="min-h-screen bg-background pt-24 pb-32">
       <Container isNarrow>

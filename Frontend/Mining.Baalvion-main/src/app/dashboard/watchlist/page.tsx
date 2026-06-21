@@ -9,15 +9,12 @@ import {
   Star, 
   Bell, 
   Trash2, 
-  Filter, 
   Search, 
   Gem, 
   Building2, 
   ClipboardList, 
   ArrowRight,
   TrendingUp,
-  History,
-  CheckCircle2,
   Clock,
   ArrowUpRight
 } from "lucide-react";

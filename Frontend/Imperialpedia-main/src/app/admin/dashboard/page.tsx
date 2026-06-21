@@ -10,12 +10,10 @@ import {
   Users, 
   FileText, 
   Zap, 
-  TrendingUp, 
   ShieldAlert, 
   ChevronRight, 
   Activity, 
   DollarSign,
-  ArrowUpRight,
   Loader2,
   RefreshCw,
   Sparkles

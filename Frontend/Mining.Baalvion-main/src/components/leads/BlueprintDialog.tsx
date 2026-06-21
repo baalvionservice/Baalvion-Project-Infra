@@ -1,7 +1,7 @@
 
 "use client"
 
-import { DialogContent, DialogTitle, DialogDescription, DialogHeader } from "@/components/ui/dialog";
+import { DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { FileText, Printer, Download, Zap, Target, Gem, ArrowRight } from "lucide-react";

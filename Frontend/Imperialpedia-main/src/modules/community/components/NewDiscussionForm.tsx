@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,21 +19,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { DialogFooter } from "@/components/ui/dialog";
 import { Text } from "@/design-system/typography/text";
 import {
-  MessageSquare,
   Send,
   Loader2,
   CheckCircle2,
-  Zap,
   Tag as TagIcon,
   Sparkles,
   ShieldCheck,
-  Activity,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
 
 interface NewDiscussionFormProps {

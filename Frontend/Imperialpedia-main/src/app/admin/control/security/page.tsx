@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -21,8 +21,7 @@ import {
   Save, 
   Loader2, 
   ArrowLeft, 
-  ShieldAlert, 
-  Info,
+  ShieldAlert,
   CheckCircle2,
   Fingerprint,
   RotateCcw,
@@ -31,7 +30,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { systemService } from '@/services/data/system-service';
-import { SecuritySettings } from '@/types/system';
 import { toast } from '@/hooks/use-toast';
 import { SecurityMonitor } from './SecurityMonitor';
 

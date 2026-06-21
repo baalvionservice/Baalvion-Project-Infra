@@ -4,7 +4,6 @@ import React from 'react';
 import { DebateTimelineEvent } from '@/types/community';
 import { Text } from '@/design-system/typography/text';
 import { Clock, Zap, MessageCircle, Target, CheckCircle2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface DebateTimelineProps {
   events: DebateTimelineEvent[];

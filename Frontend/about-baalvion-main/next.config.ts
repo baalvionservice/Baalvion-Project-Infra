@@ -36,6 +36,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Standalone server output for the monorepo Docker image (mirrors the Amarisé storefront).
+  // Produces .next/standalone/Frontend/about-baalvion-main/server.js — see Dockerfile.
+  output: 'standalone',
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
   // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the

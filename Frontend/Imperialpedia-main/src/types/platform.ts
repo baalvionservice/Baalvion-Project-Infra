@@ -1,4 +1,3 @@
-import { ID, Status } from './common';
 
 /**
  * @fileOverview Platform and configuration related types.

@@ -19,7 +19,6 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area,
-  Legend,
 } from "recharts";
 import {
   TrendingUp,

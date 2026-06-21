@@ -9,15 +9,12 @@ import {
   Filter, 
   AlertTriangle, 
   CheckCircle2, 
-  Clock, 
   UserX, 
   Ban, 
   Eye,
-  ArrowRight,
   ShieldCheck,
   History,
-  Activity,
-  UserCheck
+  Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";

@@ -2,7 +2,7 @@
 "use client"
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   BellRing, 
   Plus, 
@@ -10,8 +10,7 @@ import {
   Trash2, 
   Settings2, 
   ArrowUp, 
-  ArrowDown, 
-  ShieldCheck,
+  ArrowDown,
   Zap,
   Info
 } from "lucide-react";

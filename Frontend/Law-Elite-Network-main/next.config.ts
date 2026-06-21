@@ -102,7 +102,10 @@ const nextConfig: NextConfig = {
     'protobufjs',
     'express',
   ],
-  output: undefined,
+  // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
+  // Gated off on win32 (Next standalone symlink emission is unreliable on Windows dev boxes);
+  // Docker/CI builds run on Linux where standalone is emitted correctly.
+  output: process.platform === 'win32' ? undefined : 'standalone',
 
   typescript: {
     ignoreBuildErrors: false,

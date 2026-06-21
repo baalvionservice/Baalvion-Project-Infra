@@ -2,18 +2,14 @@
 "use client"
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { 
   History, 
   Search, 
   Filter, 
   Download, 
-  User, 
   ShieldCheck, 
-  Server, 
-  Globe,
-  Settings2,
-  AlertTriangle,
+  Server,
   ExternalLink
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

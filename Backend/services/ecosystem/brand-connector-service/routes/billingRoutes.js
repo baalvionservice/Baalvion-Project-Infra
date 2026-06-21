@@ -4,7 +4,10 @@ const ctrl = require('../controller/billingController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const router = Router();
 
-router.get('/plans', authMiddleware, ctrl.listPlans);
+// Public pricing catalog: active plans are global, non-sensitive marketing data
+// read by the unauthenticated landing page (Pricing section). All other billing
+// routes below remain auth-gated.
+router.get('/plans', ctrl.listPlans);
 router.post('/subscribe', authMiddleware, ctrl.subscribe);
 router.get('/subscription', authMiddleware, ctrl.getSubscription);
 router.post('/cancel', authMiddleware, ctrl.cancelSubscription);

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -12,13 +12,8 @@ import {
   Filter, 
   MapPin, 
   Star, 
-  ShieldCheck, 
-  ChevronRight, 
-  Building2, 
-  Pickaxe, 
-  Award,
+  Building2,
   ArrowRightLeft,
-  Users,
   Globe,
   CheckCircle2
 } from "lucide-react";

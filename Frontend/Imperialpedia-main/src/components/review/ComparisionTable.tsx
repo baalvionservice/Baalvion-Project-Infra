@@ -1,8 +1,6 @@
 "use client";
 
 import { ReviewArticle } from "@/types/Review";
-import Image from "next/image";
-import Link from "next/link";
 import { StarRating } from "./StarRating";
 
 export function ComparisonTable({ review }: { review: ReviewArticle }) {

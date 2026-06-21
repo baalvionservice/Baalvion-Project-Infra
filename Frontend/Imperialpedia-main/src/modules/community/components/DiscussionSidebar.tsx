@@ -2,9 +2,8 @@
 
 import React from 'react';
 import { TrendingTopic } from '@/types/community';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
   Flame, 

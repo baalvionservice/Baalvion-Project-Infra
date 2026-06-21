@@ -1,6 +1,5 @@
 "use client";
 
-import { slugify } from "@/modules/content-engine/utils/slugify";
 import { cn } from "@/lib/utils";
 import { ChevronRight } from "lucide-react";
 

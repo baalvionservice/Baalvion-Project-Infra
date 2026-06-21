@@ -10,7 +10,6 @@ import { Video, Newspaper, ShoppingBag, Crown, Star, Calendar, Clock } from "luc
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
-import StatusDot from "@/components/protocol/StatusDot";
 import { protocolApi } from "@/lib/protocol-api";
 
 const mockExpert = {

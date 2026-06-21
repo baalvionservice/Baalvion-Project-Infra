@@ -2,15 +2,14 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Users, DollarSign, Globe, TrendingUp,
-  Shield, Eye, BarChart3, Activity,
+  Shield, BarChart3, Activity,
   ChevronRight, ArrowUpRight, ArrowDownRight
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ProtocolLayout from "@/components/protocol/ProtocolLayout";
 import { protocolApi } from "@/lib/protocol-api";
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell
 } from "recharts";
 
 // Mock data

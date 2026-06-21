@@ -3,8 +3,6 @@
 import React, { useEffect, useState } from "react";
 import {
   BacktestDashboardData,
-  StrategyCondition,
-  TradeEntry,
 } from "@/types/premium";
 import { premiumService } from "@/services/data/premium-service";
 import {
@@ -13,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -44,16 +41,11 @@ import {
   History,
   Play,
   Settings2,
-  LineChart,
   ArrowRight,
   ShieldCheck,
   Layers,
-  Flame,
   Layout,
   Clock,
-  ChevronRight,
-  Filter,
-  DollarSign,
 } from "lucide-react";
 import {
   AreaChart,
@@ -63,16 +55,9 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  Legend,
-  LineChart as RechartsLine,
-  Line,
-  BarChart,
-  Bar,
-  Cell,
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { toast } from "@/hooks/use-toast";
-import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,

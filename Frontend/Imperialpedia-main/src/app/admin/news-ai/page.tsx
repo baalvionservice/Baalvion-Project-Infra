@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/design-system/typography/text';
@@ -9,19 +9,13 @@ import {
   Zap, 
   Brain, 
   Sparkles, 
-  Send, 
   Loader2, 
   Search, 
-  Filter, 
   ChevronRight, 
-  ArrowRight, 
   Terminal, 
   Globe, 
-  Newspaper,
-  TrendingUp, 
-  Activity, 
-  CheckCircle2, 
-  History,
+  Newspaper, 
+  Activity,
   Clock
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';

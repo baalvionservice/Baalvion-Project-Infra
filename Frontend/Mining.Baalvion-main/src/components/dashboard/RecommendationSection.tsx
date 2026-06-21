@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sparkles, ArrowRight, Gem, Building2, ThumbsUp, ThumbsDown, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 interface Recommendation {

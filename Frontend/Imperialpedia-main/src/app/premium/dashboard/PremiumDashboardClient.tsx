@@ -3,9 +3,6 @@
 import React, { useEffect, useState } from "react";
 import {
   PremiumDashboardData,
-  PremiumAnalyticsKPI,
-  PremiumReportNode,
-  AdvancedMetricNode,
 } from "@/types/premium";
 import { premiumService } from "@/services/data/premium-service";
 import {
@@ -23,18 +20,10 @@ import {
   TrendingUp,
   TrendingDown,
   Minus,
-  Users,
-  DollarSign,
-  Zap,
   Activity,
-  BarChart3,
   Download,
   Share2,
-  Clock,
-  Search,
-  Filter,
   Loader2,
-  Calendar,
   ChevronRight,
   Target,
   Layers,

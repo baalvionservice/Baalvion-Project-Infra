@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { DebateNode } from '@/types/community';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/design-system/typography/text';
@@ -11,10 +11,7 @@ import {
   TrendingDown, 
   MessageSquare, 
   Eye, 
-  Users, 
   ArrowRight,
-  Zap,
-  Layers,
   Scale
 } from 'lucide-react';
 import Link from 'next/link';

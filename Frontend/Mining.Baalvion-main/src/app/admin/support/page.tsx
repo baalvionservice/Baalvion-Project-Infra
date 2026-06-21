@@ -10,13 +10,9 @@ import {
   CheckCircle2, 
   AlertCircle, 
   Search, 
-  Filter, 
-  User, 
-  Building2,
+  Filter,
   ArrowRight,
   ShieldCheck,
-  Send,
-  MoreVertical,
   History
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

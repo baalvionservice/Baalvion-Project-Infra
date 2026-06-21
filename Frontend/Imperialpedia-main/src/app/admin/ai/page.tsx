@@ -2,12 +2,12 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
-  Brain, Sparkles, Zap, Target, ArrowRight, Loader2, Send, Settings2, CheckCircle2, Info
+  Brain, Sparkles, Zap, Target, ArrowRight, Loader2, CheckCircle2
 } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';

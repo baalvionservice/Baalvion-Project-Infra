@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/tooltip';
 import { calculatorsService } from '@/services/data';
 import { CalculatorResultModal } from '@/modules/calculators/components/CalculatorResultModal';
-import { Sunrise, RefreshCcw, ArrowLeft, Info, TrendingUp, Wallet, CheckCircle2, Loader2, HelpCircle } from 'lucide-react';
+import { Sunrise, RefreshCcw, ArrowLeft, TrendingUp, Wallet, Loader2, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useCalculatorStore } from '@/lib/state/calculator-store';
 import { 

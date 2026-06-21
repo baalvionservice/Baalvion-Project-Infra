@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -13,11 +13,8 @@ import {
   Loader2, 
   Settings2, 
   FlaskConical, 
-  ShieldCheck, 
-  AlertTriangle, 
-  Info,
+  ShieldCheck,
   Clock,
-  ArrowUpRight,
   ShieldAlert
 } from 'lucide-react';
 import { systemService } from '@/services/data/system-service';

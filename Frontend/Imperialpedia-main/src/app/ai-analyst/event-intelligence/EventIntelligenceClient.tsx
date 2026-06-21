@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { EventIntelligenceData, CatalystEvent, EarningsSummaryDetail } from '@/types/analytics';
+import { EventIntelligenceData } from '@/types/analytics';
 import { analyticsService } from '@/services/data/analytics-service';
-import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,12 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Zap, 
-  TrendingUp, 
-  TrendingDown, 
-  Minus, 
   AlertTriangle, 
   Calendar, 
-  PieChart, 
   Activity, 
   BarChart3,
   Loader2,
@@ -35,7 +30,6 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  Cell,
   Legend
 } from 'recharts';
 import { cn } from '@/lib/utils';

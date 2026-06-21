@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { Button } from '@/components/ui/button';
-import { ShieldCheck, Info } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { trackEvent } from '@/lib/utils/analytics';
 import { toast } from '@/hooks/use-toast';

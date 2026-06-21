@@ -130,7 +130,8 @@ const WATCHLIST_SYMBOLS: { symbol: string; name: string }[] = [
 // panel; this reads that config. Falls back to the shipped defaults above.
 
 const IMPERIALPEDIA_API =
-  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL || "http://localhost:3004/api/v1";
+  process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3004/api/v1");
 
 interface WorldConfig {
   settings?: { newsFallback?: boolean; refreshSeconds?: number };
@@ -506,8 +507,11 @@ async function buildNews(region: RegionId): Promise<NewsBundle | null> {
 // Live CMS read (own copy of the client) — no-store so published content shows
 // up immediately. The World pages render dynamically (force-dynamic), so this
 // fetch runs per-request rather than at build/ISR time.
+// Localhost is dev-only (port aligned with the rest of the app: 3018); production
+// resolves to '' so the per-request fetch fails closed rather than probing a dev box.
 const CMS_PUBLIC_URL =
-  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL || "http://localhost:3011/api/v1/public";
+  process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
+  (process.env.NODE_ENV === "production" ? "" : "http://localhost:3018/api/v1/public");
 const CMS_SITE = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 
 async function cmsList(params: {

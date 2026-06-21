@@ -1,3 +1,98 @@
+# Release Notes
+
+> Newest release first. Prior release notes are retained below for history.
+
+---
+
+## v1.0.1-production — Baalvion Production Hotfix + Stability Release
+
+**Release date:** 2026-06-21 · **Branch:** `release/ec2-single-host-v1.0.1-production`
+**Tag (suggested):** `v1.0.1-production` · **Based on:** latest `main` + the EC2 single-host
+deployment configs from the v1.0.0 release line.
+**Type:** Production hotfix + stability release. No new features.
+
+This release does not change `v1.0.0-mvp`. It is a minimal, production-safe hotfix on top of
+the EC2 single-host v1.0.0 deployment that removes a CI-blocking build hang and hardens
+sitemap generation so `next build` is deterministic in constrained CI environments.
+
+### Fixed
+
+- **CI-blocking build hang (Law-Elite-Network-main `/sitemap.xml`).** The sitemap was
+  statically prerendered at build time, which executed live `fetch` calls against law-service.
+  Against an unreachable/slow API in CI this hung `next build` (no fetch timeout) until the
+  step timed out. The route is now `export const dynamic = 'force-dynamic'` — it renders at
+  request time and is **never** generated during the build, so the production build has no
+  build-time external dependency. Verified locally: the build prints `ƒ /sitemap.xml`
+  (Dynamic, server-rendered on demand).
+- **Defense-in-depth sitemap fetch hardening (Law-Elite-Network-main + Imperialpedia-main).**
+  Each sitemap fetch is now wrapped in an `AbortController` timeout (4s) and skips
+  non-absolute URLs, so a slow or unconfigured upstream degrades gracefully to the static
+  routes instead of hanging the request or an ISR regeneration. Imperialpedia shared the
+  identical unguarded build-time `fetch` pattern and received the same fix.
+
+### Stability / validation
+
+- All affected frontend apps type-check clean; Law-Elite-Network-main `next build` succeeds.
+- EC2 single-host `deploy/ec2-single-host/docker-compose.yml` validates clean
+  (`docker compose config -q`) against `.env.production.example`.
+- The CI `deploy-compose-validate` set (`deploy/*/docker-compose.prod.yml`) validates clean.
+
+### Deployment
+
+- EC2 single-host deployment (`deploy/ec2-single-host/`) is **unchanged** and stable.
+- No backend service changes; no breaking changes. Safe for immediate EC2 deployment.
+
+---
+
+## v1.0.0-mvp — Baalvion MVP Production Release
+
+**Release date:** 2026-06-20 · **Branch:** `main` · **Tag:** `v1.0.0-mvp`
+**Scope:** Critical-path production launch — user registration, login, CMS publishing,
+product management, order creation, and Razorpay payments.
+
+This release packages the platform for its first production deployment on AWS: a
+self-contained, single-database MVP slice with Caddy TLS ingress, a hardened service
+roster, and reproducible standalone Docker images for the frontend apps.
+
+### What's new
+
+**Deployment infrastructure (`deploy/mvp-production/`)**
+- `docker-compose.yml` — full MVP stack, 100% env-driven (`${VAR}`), no embedded secrets
+- `Caddyfile` — ACME TLS ingress for `api` / `admin` / `baalvion.com` / `shop` + payment webhook routes
+- `.env.production.example` — complete config template; all secret fields blank with 🔒 markers
+- `init-roles.sql` — idempotent RDS bootstrap of `baalvion` (owner) + `baalvion_app` (RLS runtime) roles
+- `redis.conf`, `RUNBOOK.md`, `MVP-DEPLOYMENT-ANALYSIS.md`
+
+**Frontend production builds**
+- `output: 'standalone'` for about-baalvion, Imperialpedia, Law-Elite-Network, Global-Trade-Infrastructure
+- New production `Dockerfile` + `Dockerfile.dockerignore` for GTI, Imperialpedia, Proxy-BaalvionStack,
+  about-baalvion, admin-platform; updated Amarisé + admin-platform multi-stage Dockerfiles
+- `nginx.conf.template` for the Proxy-BaalvionStack SPA
+
+**Platform**
+- Service catalog contract refreshed (`Backend/catalog/index.json`); PM2 ecosystem aligned
+
+### Services included (MVP critical path)
+Infra: PostgreSQL 16 (`baalvion_db`, schema-per-service), Redis 7, Redpanda, Caddy.
+Services: auth-service, auth-gateway, rbac-service, audit-service, cms-service, commerce-service,
+inventory-service, order-service, payment-service (Java), notification-service, admin-platform,
+about-web, amarise-web.
+
+### Services deferred (stubbed / fail-open)
+ledger, session-service, media-service, dashboards, ControlTheMarket (CTM), analytics, OAuth.
+
+### Security
+- In-schema PostgreSQL RLS via non-superuser `baalvion_app` runtime role
+- RS256 JWT, centralized issuer; Razorpay webhook HMAC verification
+- All secrets injected at deploy time from AWS Secrets Manager — none in source
+- Audit: no secrets in any committed file (verified pre-tag)
+
+### Deploy notes
+Run `init-roles.sql` against fresh RDS **before** starting services; rotate `SUPERADMIN_PASSWORD`
+after first login. See `deploy/mvp-production/RUNBOOK.md`.
+
+---
+
 # Release Notes — Baalvion Limited Beta RC
 
 **Release:** Limited-Beta Release Candidate · **Date:** 2026-06-02 ·

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,23 +9,16 @@ import { Text } from '@/design-system/typography/text';
 import { 
   Sparkles, 
   Zap, 
-  Search, 
-  FileText, 
   Loader2, 
   CheckCircle2, 
-  Activity, 
-  ArrowRight,
-  TrendingUp,
+  Activity,
   Brain,
-  MessageSquare,
   Edit,
-  Clock,
   Layout,
   Terminal,
   RefreshCw,
   Plus,
-  Target,
-  ChevronRight
+  Target
 } from 'lucide-react';
 import { getMediaAdminData } from '@/services/mock-api/admin-media';
 import { MediaAdminDashboardData } from '@/types/admin-media';

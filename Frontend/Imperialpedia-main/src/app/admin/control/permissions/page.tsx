@@ -10,7 +10,6 @@ import { Text } from '@/design-system/typography/text';
 import { 
   ShieldCheck, 
   Lock, 
-  Settings2, 
   Save, 
   Loader2, 
   ArrowLeft, 
@@ -22,7 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usersService } from '@/services/data/users-service';
-import { RolePermissionSet, Permission } from '@/types/system';
+import { RolePermissionSet } from '@/types/system';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 

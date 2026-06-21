@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { MessageSquare, FileText, Sparkles, Bot, ShoppingCart, Check, CreditCard, X } from "lucide-react";
+import { MessageSquare, FileText, Sparkles, Bot, ShoppingCart, Check, CreditCard } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";

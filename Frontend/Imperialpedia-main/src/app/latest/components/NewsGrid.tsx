@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { NewsCard } from "./NewsCard";
 import { NewsArticle, generateMockNews } from "@/data/mockNews";

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { MarketHeatmapData, SectorHeatmapNode, StockHeatmapNode } from '@/types/premium';
+import { MarketHeatmapData } from '@/types/premium';
 import { premiumService } from '@/services/data/premium-service';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -14,16 +14,10 @@ import {
   TrendingDown,
   Zap,
   Globe,
-  ArrowUpRight,
   Loader2,
-  ChevronRight,
   ChevronLeft,
-  Search,
-  Filter,
   ArrowRight,
   Maximize2,
-  Info,
-  Layers,
   Sparkles,
   ShieldCheck
 } from 'lucide-react';

@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { CommunityData, LeaderboardItem, ReputationEntry } from '@/types/community';
-import { Container } from '@/design-system/layout/container';
+import { CommunityData } from '@/types/community';
 import { Text } from '@/design-system/typography/text';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -22,14 +21,9 @@ import {
   Star, 
   Medal,
   ChevronRight,
-  Info,
-  Users,
-  MessageSquare,
-  Activity,
   Target
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Link from 'next/link';
 
 interface LeaderboardClientProps {
   data: CommunityData;

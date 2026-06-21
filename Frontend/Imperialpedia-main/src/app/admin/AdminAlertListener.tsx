@@ -4,7 +4,7 @@ import React, { useEffect, useRef } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { systemService } from '@/services/data/system-service';
 import { AdminAlert } from '@/types/system';
-import { ShieldAlert, FileText, UserCheck, Zap } from 'lucide-react';
+import { FileText, UserCheck, Zap } from 'lucide-react';
 
 /**
  * Administrative Background Monitor.

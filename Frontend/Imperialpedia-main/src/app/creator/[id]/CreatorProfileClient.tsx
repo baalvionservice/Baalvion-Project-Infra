@@ -11,28 +11,21 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import {
   ShieldCheck,
-  Users,
   UserPlus,
   UserMinus,
   BookOpen,
-  TrendingUp,
   Twitter,
   Linkedin,
   Globe,
   Github,
   Youtube,
-  ArrowUpRight,
   ChevronRight,
-  Info,
   Layers,
-  ArrowRight,
-  Award,
   GraduationCap,
   Briefcase,
   Zap,
@@ -41,19 +34,14 @@ import {
   Bell,
   BellOff,
   Flame,
-  Target,
-  FileText,
   Loader2,
 } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
-import { ArticleCard } from "@/modules/content-engine/components/ArticleCard";
 import {
   getCreatorContent,
-  getCreators,
   getContributorTrustData,
 } from "@/services/mock-api/creators";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import {
   Table,

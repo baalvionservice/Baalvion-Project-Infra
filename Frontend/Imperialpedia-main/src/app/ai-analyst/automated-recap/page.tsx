@@ -10,10 +10,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardFooter,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   History,
@@ -22,14 +20,12 @@ import {
   Zap,
   Calendar,
   Loader2,
-  ArrowRight,
   ChevronRight,
   Globe,
   PieChart,
   Target,
 } from "lucide-react";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 /**
  * AI Automated Recap Dashboard.

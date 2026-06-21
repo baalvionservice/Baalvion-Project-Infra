@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://api.baalvion.com/api/v1/knowledge/law/v1';
+// NEXT_PUBLIC_API_BASE_URL is baked at build time and MUST be supplied for prod
+// builds. We removed the wrong-domain prod fallback (api.baalvion.com/...law) so a
+// missing build arg fails loudly (relative/empty baseURL) instead of silently
+// masking misconfiguration. Localhost is a dev-only default.
+const BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 export const TOKEN_KEY = 'baalvion_law_token'; // retained export for back-compat (NOT a storage key)
 
 // SECURITY (P0): access token in memory ONLY — never localStorage/sessionStorage.

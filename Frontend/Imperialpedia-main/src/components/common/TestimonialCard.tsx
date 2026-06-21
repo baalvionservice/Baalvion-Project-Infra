@@ -6,7 +6,6 @@ import { Text } from '@/design-system/typography/text';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Star, Quote } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { motion } from 'framer-motion';
 
 interface TestimonialCardProps {
   name: string;

@@ -2,7 +2,7 @@
 "use client"
 
 import { Card } from "@/components/ui/card";
-import { CheckCircle2, FileText, Mail, AlertCircle, ArrowRight } from "lucide-react";
+import { CheckCircle2, FileText, Mail, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SubmissionProgressProps {

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { UserDashboardData, WatchlistItem } from '@/types/user-system';
+import { UserDashboardData } from '@/types/user-system';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +12,8 @@ import { Text } from '@/design-system/typography/text';
 import { 
   TrendingUp, 
   TrendingDown, 
-  Eye, 
   Star, 
-  ShieldCheck, 
   Zap, 
-  Clock, 
   Bell, 
   Settings, 
   ChevronRight, 
@@ -28,9 +25,7 @@ import {
   Search,
   LogOut,
   Moon,
-  FlaskConical,
-  Flame,
-  Layout
+  FlaskConical
 } from 'lucide-react';
 import Link from 'next/link';
 import { 
@@ -40,10 +35,7 @@ import {
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
+  ResponsiveContainer
 } from 'recharts';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';

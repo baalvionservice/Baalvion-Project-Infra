@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { Toast, ToastProps } from './Toast';
+import { Toast } from './Toast';
 import { AnimatePresence } from 'framer-motion';
 
 interface ToastOptions {

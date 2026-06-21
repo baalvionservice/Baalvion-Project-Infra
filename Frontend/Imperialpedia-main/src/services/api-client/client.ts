@@ -20,7 +20,7 @@ apiClient.interceptors.response.use(
     if (error.response?.data) {
       const errorData = error.response.data as ApiResponse<any>;
       // If the error response doesn't follow ApiResponse structure, wrap it
-      if (!errorData.hasOwnProperty("success")) {
+      if (!Object.prototype.hasOwnProperty.call(errorData, "success")) {
         error.response.data = {
           success: false,
           statusCode: error.response.status,

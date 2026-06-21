@@ -11,19 +11,16 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Eye, 
-  Calendar, 
   ArrowLeft,
   Search,
   Filter,
   ArrowUpRight,
   Edit,
   Trash2,
-  Tag as TagIcon,
   Layers,
   MoreVertical,
   Clock
 } from 'lucide-react';
-import { format } from 'date-fns';
 import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { 

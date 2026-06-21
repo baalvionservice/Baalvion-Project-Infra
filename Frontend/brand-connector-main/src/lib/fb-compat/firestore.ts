@@ -29,6 +29,7 @@ const ALIASES: Record<string, string> = {
   audit_logs: 'system-logs',
   auditLogs: 'system-logs',
   portfolioItems: 'portfolio',
+  system_plans: 'billing/plans',
 };
 const endpoint = (path: string) => '/' + (ALIASES[path] ?? path);
 const pathOf = (ref: any) => ref?.path;

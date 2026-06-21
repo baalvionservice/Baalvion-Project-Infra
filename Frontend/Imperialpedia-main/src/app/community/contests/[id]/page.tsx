@@ -16,14 +16,11 @@ import {
   Users, 
   Clock, 
   Globe, 
-  Activity, 
   Zap,
   Target,
-  Layers,
   Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 
 interface ContestDetailsPageProps {

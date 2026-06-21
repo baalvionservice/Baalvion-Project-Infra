@@ -6,7 +6,7 @@ import MainLayout from "@/components/layout/MainLayout";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Users, CheckCircle2, Rocket, Wallet, Handshake } from "lucide-react";
+import { Users, Rocket, Wallet, Handshake } from "lucide-react";
 
 const fmtDate = (d: string | null) => (d ? new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "—");
 const STATUS: Record<string, string> = {

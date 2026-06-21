@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Trophy, Award, TrendingUp, MessageSquare, Zap, Bell, Search, Star, Target, Flame } from "lucide-react";
+import { Award, TrendingUp, MessageSquare, Zap, Star, Target, Flame } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { PremiumBadges } from "@/components/elite/PremiumBadges";
 import MainLayout from "@/components/layout/MainLayout";

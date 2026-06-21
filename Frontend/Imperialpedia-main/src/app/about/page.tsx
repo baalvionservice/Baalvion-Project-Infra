@@ -1,4 +1,5 @@
 import React from 'react';
+import type { Metadata } from 'next';
 import { buildMetadata } from '@/lib/seo';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
@@ -6,16 +7,38 @@ import { Section } from '@/design-system/layout/section';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Target, BookOpen, Sparkles } from 'lucide-react';
+import { CmsPage } from '@/components/pages/CmsPage';
+import { getCmsPage } from '@/services/data/cms-public';
 
-export const metadata = buildMetadata({
-  title: 'About Us',
-  description:
-    'Imperialpedia explains who we are: a financial education and research platform covering markets, tools, and AI-assisted analysis.',
-  canonical: '/about',
-  noIndex: false,
-});
+// Content is managed in the CMS (admin-platform) — read live per request so
+// edits publish instantly; falls back to the static copy below when offline.
+export const dynamic = 'force-dynamic';
 
-export default function AboutPage() {
+export async function generateMetadata(): Promise<Metadata> {
+  const page = await getCmsPage('about');
+  if (page) {
+    return buildMetadata({
+      title: page.seoTitle,
+      description: page.seoDescription,
+      keywords: page.seoKeywords,
+      canonical: '/about',
+      noIndex: false,
+    });
+  }
+  return buildMetadata({
+    title: 'About Us',
+    description:
+      'Imperialpedia explains who we are: a financial education and research platform covering markets, tools, and AI-assisted analysis.',
+    canonical: '/about',
+    noIndex: false,
+  });
+}
+
+export default async function AboutPage() {
+  return <CmsPage slug="about" eyebrow="About ImperialPedia" fallback={<AboutFallback />} />;
+}
+
+function AboutFallback() {
   return (
     <main className="min-h-screen bg-background pt-24 pb-32">
       <Container isNarrow>

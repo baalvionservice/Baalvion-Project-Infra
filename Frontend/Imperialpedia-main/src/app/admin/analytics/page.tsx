@@ -28,8 +28,7 @@ import {
   Tooltip, 
   ResponsiveContainer,
   BarChart,
-  Bar,
-  Cell
+  Bar
 } from 'recharts';
 import { analyticsService } from '@/lib/services/analyticsService';
 import { VisitorStats, TrafficTrendNode, PageStats, UserActivityNode } from '@/types/analytics';

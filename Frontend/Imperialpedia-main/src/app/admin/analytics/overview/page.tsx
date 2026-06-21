@@ -13,13 +13,10 @@ import {
   FileText, 
   Activity, 
   ArrowUpRight, 
-  ArrowDownRight, 
   Loader2,
   Calendar,
   Download,
-  ChevronRight,
-  Eye,
-  MousePointer2
+  ChevronRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { analyticsService } from '@/services/data/analytics-service';

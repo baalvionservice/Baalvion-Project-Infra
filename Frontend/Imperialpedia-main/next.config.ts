@@ -22,6 +22,10 @@ const nextConfig: NextConfig = {
     'express',
   ],
   reactStrictMode: true,
+  // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
+  // Gated off on win32 (Next standalone symlink emission is unreliable on Windows dev boxes);
+  // Docker/CI builds run on Linux where standalone is emitted correctly.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   typescript: {
     // Type errors will now fail the build — all type issues must be resolved.
     ignoreBuildErrors: false,
@@ -47,7 +51,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     // The in-app admin/editor/writer panels are RETIRED in favour of the central
     // admin-platform (CMS console + workflow). Bounce them there.
-    const admin = process.env.NEXT_PUBLIC_ADMIN_PLATFORM_URL || 'http://localhost:3030';
+    // Localhost is dev-only; in production an unset var collapses to '' so the
+    // /admin redirects resolve same-origin instead of bouncing users to localhost.
+    const admin =
+      process.env.NEXT_PUBLIC_ADMIN_PLATFORM_URL ||
+      (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3030');
     return [
       { source: '/admin', destination: `${admin}/dashboard`, permanent: false },
       { source: '/admin/:path*', destination: `${admin}/dashboard`, permanent: false },

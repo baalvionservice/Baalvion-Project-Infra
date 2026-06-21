@@ -7,18 +7,15 @@ import {
   BookOpen, 
   Plus, 
   Search, 
-  Edit, 
   Trash2, 
   Layers, 
   Gem, 
   Settings2,
-  ChevronRight,
-  Info
+  ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { 
   Dialog, 
   DialogContent, 
@@ -27,8 +24,6 @@ import {
   DialogTrigger,
   DialogFooter 
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

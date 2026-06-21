@@ -6,7 +6,6 @@ import {
   CreatorProfile,
   ApiResponse,
   CreatorContentItem,
-  CreatorDashboardSummary,
   CreatorDashboardAnalytics,
   CreatorVerification,
   CreatorLeaderboard,

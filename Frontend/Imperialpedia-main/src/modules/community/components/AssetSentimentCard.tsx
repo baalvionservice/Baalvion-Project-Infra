@@ -2,21 +2,17 @@
 
 import React, { useState } from 'react';
 import { AssetSentiment } from '@/types/community';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { 
   TrendingUp, 
   TrendingDown, 
   ArrowUpRight, 
   ArrowDownRight, 
-  Zap, 
-  Users, 
-  Activity,
+  Users,
   CheckCircle2,
-  ChevronRight,
   LineChart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';

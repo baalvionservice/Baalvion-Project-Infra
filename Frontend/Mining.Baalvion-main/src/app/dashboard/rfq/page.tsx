@@ -14,11 +14,7 @@ import {
   Gem,
   ArrowRight,
   TrendingUp,
-  CheckCircle2,
-  AlertCircle,
-  Eye,
-  ArrowUpDown,
-  History
+  CheckCircle2
 } from "lucide-react";
 import { 
   Dialog, 
@@ -29,7 +25,6 @@ import {
   DialogFooter,
   DialogDescription
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

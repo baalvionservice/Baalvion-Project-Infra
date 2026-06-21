@@ -17,7 +17,6 @@ import {
   Gem,
   ChevronRight,
   Building2,
-  SlidersHorizontal,
   Bell,
   ArrowUpDown,
   CheckCircle2,
@@ -25,7 +24,6 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { VerificationBadge } from "@/components/compliance/VerificationBadge";
 import { Slider } from "@/components/ui/slider";
 import { Checkbox } from "@/components/ui/checkbox";

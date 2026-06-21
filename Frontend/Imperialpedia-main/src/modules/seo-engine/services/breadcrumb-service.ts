@@ -2,7 +2,7 @@ import { Article } from '@/modules/content-engine/types';
 import { GlossaryTerm } from '@/modules/seo/models/glossary-term';
 import { Category } from '@/modules/content-engine/types/category';
 import { Tag } from '@/modules/content-engine/types/tag';
-import { Breadcrumb, BreadcrumbItem } from '../types';
+import { Breadcrumb } from '../types';
 import { env } from '@/config/env';
 
 /**

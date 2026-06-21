@@ -27,7 +27,7 @@ function renderTextSegment(
         </a>
       );
 
-    case "list":
+    case "list": {
       // Group consecutive items into single list items
       const groupedItems: React.ReactNode[] = [];
       let currentGroup: React.ReactNode[] = [];
@@ -64,6 +64,7 @@ function renderTextSegment(
           {groupedItems}
         </ol>
       );
+    }
 
     default:
       return null;

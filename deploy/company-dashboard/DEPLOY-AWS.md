@@ -147,6 +147,6 @@ data is added — that is expected, not an error.
 - Put the EC2 behind an **ALB + AWS WAF**; ship logs to CloudWatch; alarm on 5xx.
 - Add `session-service` if you want the standalone session-management / anomaly surface.
 - Wire transactional email (SMTP_*) for password reset + member invites.
-- Add a CI workflow (mirror `.github/workflows/deploy-proxy-baalvionstack.yml`) to build+push the 3
-  images to GHCR and `docker compose pull && up -d` on the EC2 on each push.
+- Production image build/push + EC2 roll is handled by the canonical pipeline
+  (`.github/workflows/deploy.yml` → Amazon ECR → EC2 `docker compose pull`). No GHCR is used.
 ```

@@ -1,0 +1,54 @@
+# Baalvion MVP — Caddy ingress (auto-TLS via ACME).
+# Replace the {$DOMAIN_*} placeholders are read from container env if you switch
+# to Caddy env interpolation; otherwise hardcode the four hostnames.
+
+# ---- API gateway (single ingress for all backend APIs) ----------------------
+api.baalvion.com {
+	encode zstd gzip
+
+	# Razorpay webhooks are signature-authenticated (X-Razorpay-Signature over the raw
+	# body) -> send straight to the owning service, bypassing the JWT gateway.
+
+	# Marketplace checkout settles in order-service (the storefront critical path).
+	handle /api/v1/orders/webhooks/* {
+		reverse_proxy order-service:3013
+	}
+
+	# Java payment-service gateway (other sites; only if that service is deployed).
+	handle /api/payments/webhooks/* {
+		reverse_proxy payment-service:3015
+	}
+
+	# Everything else goes through the auth-gateway BFF.
+	handle {
+		reverse_proxy auth-gateway:3099
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+}
+
+# ---- Admin platform ---------------------------------------------------------
+admin.baalvion.com {
+	encode zstd gzip
+	reverse_proxy admin-platform:3030
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}
+
+# ---- Main website -----------------------------------------------------------
+baalvion.com, www.baalvion.com {
+	encode zstd gzip
+	reverse_proxy about-web:3020
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}
+
+# ---- Marketplace ------------------------------------------------------------
+shop.baalvion.com {
+	encode zstd gzip
+	reverse_proxy amarise-web:3033
+	header Strict-Transport-Security "max-age=31536000; includeSubDomains"
+}

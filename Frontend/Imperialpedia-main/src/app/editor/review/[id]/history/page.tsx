@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState, use } from "react";
-import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
 import { getVersionHistory } from "@/services/mock-api/version-control";
 import { VersionControlData, ArticleVersion } from "@/types/version-control";
@@ -11,7 +10,6 @@ import {
   CardHeader,
   CardTitle,
   CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -29,15 +27,12 @@ import {
   GitCompare,
   ArrowLeft,
   Loader2,
-  Search,
-  Filter,
   ChevronRight,
   ArrowLeftRight,
   Info,
   ShieldCheck,
   Zap,
   Layers,
-  ArrowRight,
   User,
   Clock,
   Save,

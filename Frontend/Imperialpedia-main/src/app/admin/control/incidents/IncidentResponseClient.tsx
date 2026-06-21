@@ -4,10 +4,6 @@ import React, { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Table,
@@ -26,26 +22,18 @@ import {
   Activity,
   Clock,
   CheckCircle2,
-  XCircle,
-  AlertTriangle,
   Loader2,
   Search,
-  Filter,
-  ArrowRight,
   Info,
   Layers,
   Zap,
-  MoreVertical,
   Terminal,
-  ExternalLink,
   ChevronRight,
   ShieldCheck,
-  RefreshCw,
-  Plus
+  RefreshCw
 } from 'lucide-react';
 import { systemService } from '@/services/data/system-service';
-import { IncidentResponseData, IncidentNode, SystemAlertNode, IncidentDetail } from '@/types/system';
-import { cn } from '@/lib/utils';
+import { IncidentResponseData, IncidentNode } from '@/types/system';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import {

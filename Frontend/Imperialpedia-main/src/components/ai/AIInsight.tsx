@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
-import { Sparkles, Loader2, Zap, AlertCircle, FileText } from 'lucide-react';
+import { Sparkles, Loader2, AlertCircle, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AIInsight as AIInsightType } from '@/types/ai';
 import { AIInsightModal } from './AIInsightModal';

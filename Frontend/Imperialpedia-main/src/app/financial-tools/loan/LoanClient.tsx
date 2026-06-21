@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/tooltip';
 import { calculatorsService } from '@/services/data';
 import { CalculatorResultModal } from '@/modules/calculators/components/CalculatorResultModal';
-import { RefreshCcw, ArrowLeft, Info, Landmark, CheckCircle2, Loader2, HelpCircle } from 'lucide-react';
+import { RefreshCcw, ArrowLeft, Info, Landmark, Loader2, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
 import { useCalculatorStore } from '@/lib/state/calculator-store';
 

@@ -13,7 +13,6 @@ import {
   Edit, 
   Trash2, 
   Plus,
-  ChevronRight,
   Loader2,
   CalendarCheck,
   FileText,

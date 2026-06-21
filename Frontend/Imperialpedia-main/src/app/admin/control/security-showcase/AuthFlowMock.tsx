@@ -10,17 +10,14 @@ import {
   Lock, 
   Mail, 
   Key, 
-  ShieldCheck, 
   ArrowRight, 
   Loader2, 
-  Fingerprint, 
-  UserCircle,
+  Fingerprint,
   AlertCircle,
   CheckCircle2,
   ChevronLeft
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 type AuthStep = 'login' | '2fa' | 'success' | 'failure';
 

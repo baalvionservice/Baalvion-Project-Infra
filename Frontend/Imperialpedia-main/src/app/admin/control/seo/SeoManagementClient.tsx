@@ -23,36 +23,27 @@ import { Text } from "@/design-system/typography/text";
 import {
   Globe,
   Search,
-  Activity,
   ShieldCheck,
   AlertTriangle,
   Loader2,
   RefreshCw,
-  Plus,
-  Trash2,
-  Clock,
   Eye,
   Zap,
-  ArrowUpRight,
   ShieldAlert,
   CheckCircle2,
   XCircle,
   Database,
   Layers,
   FileText,
-  ExternalLink,
-  ChevronRight,
   Sparkles,
   Twitter,
   Linkedin,
-  Monitor,
 } from 'lucide-react';
 import { systemService } from '@/services/data/system-service';
-import { SeoManagementData, SeoManagementPage, SitemapEntry, SeoAlertSuggestion } from '@/types/system';
+import { SeoManagementData, SeoManagementPage } from '@/types/system';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
 import {
   Dialog,
   DialogContent,
@@ -60,10 +51,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 
 /**
  * SEO & Sitemap Management Hub Client.

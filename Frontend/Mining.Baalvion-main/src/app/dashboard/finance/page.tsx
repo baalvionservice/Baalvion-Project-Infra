@@ -8,7 +8,6 @@ import {
   ShieldCheck, 
   Clock, 
   ArrowUpRight, 
-  ArrowDownRight, 
   CreditCard, 
   FileText,
   Search,

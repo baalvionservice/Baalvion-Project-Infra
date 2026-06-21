@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { Breadcrumbs } from "@/components/seo/Breadcrumbs";
 import { RelatedProducts } from "@/components/marketplace/RelatedProducts";
 import { JsonLd } from "@/components/seo/JsonLd";

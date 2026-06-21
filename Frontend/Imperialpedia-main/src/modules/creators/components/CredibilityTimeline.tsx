@@ -4,8 +4,6 @@ import React from 'react';
 import { CredibilityMilestone } from '@/types/trust';
 import { Text } from '@/design-system/typography/text';
 import { 
-  CheckCircle2, 
-  Zap, 
   Trophy, 
   UserPlus, 
   BookOpen, 
@@ -13,7 +11,6 @@ import {
   ShieldCheck,
   Star
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface CredibilityTimelineProps {
   milestones: CredibilityMilestone[];

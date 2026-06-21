@@ -16,8 +16,7 @@ import {
   Download,
   Zap,
   UserPlus,
-  BarChart3,
-  Layers
+  BarChart3
 } from 'lucide-react';
 import Link from 'next/link';
 import { analyticsService } from '@/services/data/analytics-service';

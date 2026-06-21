@@ -12,8 +12,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -31,18 +29,11 @@ import {
   Calendar,
   Download,
   ChevronRight,
-  Eye,
-  MousePointer2,
   Heart,
-  MessageSquare,
-  Share2,
   ShieldCheck,
   Zap,
   Globe,
-  Monitor,
   Target,
-  Clock,
-  ArrowLeft,
 } from "lucide-react";
 import {
   Accordion,
@@ -61,11 +52,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
   LineChart,
   Line,
-  Cell,
 } from "recharts";
 
 /**

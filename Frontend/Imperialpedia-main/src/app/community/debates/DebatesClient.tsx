@@ -1,34 +1,26 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { CommunityData, DebateNode, DebateLeaderboardEntry } from '@/types/community';
+import { DebateNode, DebateLeaderboardEntry } from '@/types/community';
 import { communityService } from '@/services/data/community-service';
-import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { 
   Scale, 
   Trophy, 
-  TrendingUp, 
-  TrendingDown, 
   Zap, 
   Activity, 
   Loader2, 
-  Search, 
-  Filter, 
-  ArrowRight,
+  Search,
   Sparkles,
   Layers,
-  Flame,
   ChevronRight
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { DebateCard } from '@/modules/community/components/DebateCard';
-import { cn } from '@/lib/utils';
 
 /**
  * Financial Debate Rooms Dashboard Client.

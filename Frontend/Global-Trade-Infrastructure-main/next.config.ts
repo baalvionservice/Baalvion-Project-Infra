@@ -35,6 +35,10 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Self-contained server bundle so the Dockerfile's `.next/standalone` + server.js exist.
+  // Gated off on win32 (Next standalone symlink emission is unreliable on Windows dev boxes);
+  // Docker/CI builds run on Linux where standalone is emitted correctly.
+  output: process.platform === 'win32' ? undefined : 'standalone',
   // Server-only AI/telemetry runtime. Genkit pulls in @opentelemetry/* + require-in-the-middle +
   // protobufjs + express, all of which use dynamic `require(expr)` that webpack cannot statically
   // analyse ("Critical dependency: the request of a dependency is an expression"). Keeping these
@@ -74,7 +78,11 @@ const nextConfig: NextConfig = {
   // Order matters: the auth rule must precede the catch-all so /trade-bff/auth/login is not
   // misrouted into the data proxy.
   async rewrites() {
-    const gateway = process.env.GATEWAY_PROXY_TARGET || 'http://localhost:3099';
+    // GATEWAY_PROXY_TARGET must be supplied at build/deploy time — the BFF proxy is
+    // non-functional without it. Localhost is dev-only; in production an unset var
+    // collapses to a same-origin path (404, fail-loud) rather than baking a localhost
+    // target into the production routes manifest.
+    const gateway = process.env.GATEWAY_PROXY_TARGET || (isDev ? 'http://localhost:3099' : '');
     return [
       { source: '/trade-bff/auth/:path*', destination: `${gateway}/auth/:path*` },
       { source: '/trade-bff/:path*', destination: `${gateway}/api/trade/v1/:path*` },

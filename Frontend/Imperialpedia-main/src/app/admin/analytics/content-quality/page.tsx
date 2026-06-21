@@ -9,7 +9,7 @@ import { getContentQualityData } from '@/services/mock-api/content-quality';
 import { ContentQualityDashboardData } from '@/types/content-quality';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
@@ -17,17 +17,12 @@ import {
   Activity, 
   TrendingUp, 
   Zap, 
-  Loader2, 
-  ArrowLeft, 
-  BarChart3,
-  Search,
+  Loader2,
   Target,
   RefreshCw,
   Award,
-  Layers,
   Sparkles
 } from 'lucide-react';
-import Link from 'next/link';
 import { QualityScoreGauge } from '@/modules/content-engine/components/QualityScoring/QualityScoreGauge';
 import { QualityFactorsPanel } from '@/modules/content-engine/components/QualityScoring/QualityFactorsPanel';
 import { ImprovementPanel } from '@/modules/content-engine/components/QualityScoring/ImprovementPanel';

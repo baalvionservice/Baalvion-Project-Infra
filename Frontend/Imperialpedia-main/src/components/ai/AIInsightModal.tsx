@@ -17,13 +17,10 @@ import {
   FileText, 
   Download, 
   ShieldCheck, 
-  Zap, 
-  Save, 
-  ArrowRight,
+  Save,
   Info
 } from 'lucide-react';
 import { AIInsight as AIInsightType } from '@/types/ai';
-import { cn } from '@/lib/utils';
 
 interface AIInsightModalProps {
   isOpen: boolean;

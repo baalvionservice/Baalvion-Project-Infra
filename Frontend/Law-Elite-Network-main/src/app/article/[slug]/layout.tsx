@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-const API = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3015/v1';
+const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());

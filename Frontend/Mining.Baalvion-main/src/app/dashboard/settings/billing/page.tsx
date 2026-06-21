@@ -11,14 +11,11 @@ import {
   Clock, 
   Download, 
   ArrowRight,
-  Gem,
-  BarChart3,
   History,
   FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
 
 export default function UserBillingPage() {

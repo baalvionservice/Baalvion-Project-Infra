@@ -1,6 +1,6 @@
 import { GlossaryTerm } from '../models/glossary-term';
 import { glossaryService as dataService } from '@/services/data';
-import { ApiResponse, PaginatedResponse } from '@/types/api';
+import { ApiResponse } from '@/types/api';
 
 /**
  * @fileOverview Service layer for the Glossary Engine, handling pSEO logic and filtering.

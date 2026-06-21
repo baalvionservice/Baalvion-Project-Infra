@@ -2,36 +2,23 @@
 
 import React, { useState } from "react";
 import { CommunityData } from "@/types/community";
-import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
 import {
   Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Trophy,
   Target,
   Activity,
   Sparkles,
-  ChevronRight,
   ArrowRight,
-  TrendingUp,
   Users,
   Search,
-  Zap,
-  Layers,
   Flame,
-  Filter,
   History,
-  Lock,
-  PieChart,
   CalendarDays,
 } from "lucide-react";
 import { PollCard } from "@/modules/content-engine/components/PollCard";

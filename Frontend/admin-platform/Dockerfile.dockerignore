@@ -1,0 +1,17 @@
+# Build-context filter for the admin-platform web image ONLY.
+# BuildKit uses `<dockerfile-path>.dockerignore` in preference to the repo-root `.dockerignore`
+# when this file exists. The root `.dockerignore` excludes the whole `Frontend/` tree (to keep the
+# BACKEND image builds lean) — but this image is a repo-root `turbo prune` build that NEEDS the
+# Frontend source + every workspace package.json to resolve `@baalvion/auth-sdk`. So this override
+# keeps all source and only strips heavy build artifacts + secrets.
+**/node_modules
+**/.next
+**/dist
+**/build
+**/.turbo
+**/coverage
+.git
+**/*.log
+**/.env
+**/.env.local
+**/.env.*.local

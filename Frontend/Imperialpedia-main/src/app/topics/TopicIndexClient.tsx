@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { GlobalTopicIndexData, TopicNode, LearningPath } from "@/types/topics";
+import { GlobalTopicIndexData, TopicNode } from "@/types/topics";
 import {
   Card,
   CardContent,
@@ -17,21 +17,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Text } from "@/design-system/typography/text";
 import {
   Search,
-  Filter,
   Layers,
-  Zap,
   Flame,
-  Star,
-  Target,
   ArrowRight,
   ChevronRight,
-  BookOpen,
   Activity,
   Globe,
   Tag as TagIcon,
   SortAsc,
   Clock,
-  Layout,
   GraduationCap,
   TrendingUp,
   ArrowUpRight,

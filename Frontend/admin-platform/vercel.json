@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "cd ../.. && pnpm --filter @baalvion/auth-sdk build && pnpm --filter baalvion-admin-platform build",
-  "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+  "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=baalvion-admin-platform",
+  "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile",
   "ignoreCommand": "npx turbo-ignore baalvion-admin-platform"
 }

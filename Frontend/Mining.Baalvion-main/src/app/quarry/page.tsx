@@ -11,7 +11,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  PendingDisclosure,
   EmptyState,
 } from "@/components/common/PendingDisclosure";
 import { getQuarrySites, companyFacts } from "@/lib/content/store";
@@ -24,7 +23,6 @@ import {
   Cog,
   MapPin,
   Gauge,
-  ShieldCheck,
   ArrowRight,
 } from "lucide-react";
 import type { Metadata } from "next";

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Trophy, Award, TrendingUp, MessageSquare, Zap, Bell, Search, Star, Target, Flame, Bookmark } from "lucide-react";
+import { Award, TrendingUp, MessageSquare, Zap, Star, Target, Flame, Bookmark } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { useVerified } from "@/hooks/useVerified";
@@ -10,7 +10,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import { PremiumBadges } from "@/components/elite/PremiumBadges";
 import MainLayout from "@/components/layout/MainLayout";

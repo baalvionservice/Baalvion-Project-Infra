@@ -1,0 +1,2 @@
+# Keeps an empty public/ dir present so the Dockerfile's `COPY /app/public ./public`
+# step succeeds. Next.js standalone output does not require static public assets here.

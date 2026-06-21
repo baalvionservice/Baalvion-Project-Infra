@@ -4,8 +4,6 @@ import React from 'react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Text } from '@/design-system/typography/text';
 import { FinancialCalculator } from '@/types/financial-tools';
 import { 
   TrendingUp, 

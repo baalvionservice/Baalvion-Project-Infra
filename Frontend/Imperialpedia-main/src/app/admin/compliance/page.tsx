@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,13 +12,8 @@ import {
   Scale, 
   History, 
   Search, 
-  Filter, 
-  CheckCircle2, 
-  XCircle, 
-  AlertTriangle, 
-  FileText,
+  CheckCircle2,
   Lock, 
-  ArrowRight, 
   Zap, 
   Info, 
   ChevronRight,

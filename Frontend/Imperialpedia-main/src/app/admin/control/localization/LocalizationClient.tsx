@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,31 +12,24 @@ import {
   Globe, 
   Languages, 
   Search, 
-  Filter, 
   Loader2, 
   RefreshCw,
   Plus,
-  Trash2,
   Clock,
-  ArrowRight,
   ShieldCheck,
   CheckCircle2,
-  XCircle,
   Layers,
   Settings2,
   Activity,
-  Calendar,
   Sparkles,
-  ChevronRight,
   FileText,
   AlertCircle
 } from 'lucide-react';
 import { systemService } from '@/services/data/system-service';
-import { LocalizationData, LanguageNode, LocalizationItem } from '@/types/system';
+import { LocalizationData } from '@/types/system';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 /**
  * Multi-Language & Localization Orchestration Hub Client.

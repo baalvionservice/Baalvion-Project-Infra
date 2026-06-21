@@ -24,7 +24,7 @@ const SocialLinks = [
     {
         name: "Email",
         icon: Mail,
-        href: "info@amarisemaison@gmail.com",
+        href: "mailto:info@amarisemaisonavenue.com",
     },
     {
         name: "Whatsapp",

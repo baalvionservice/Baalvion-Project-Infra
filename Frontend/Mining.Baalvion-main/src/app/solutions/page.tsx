@@ -1,6 +1,6 @@
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { ShieldCheck, Truck, BarChart3, Users, Globe } from "lucide-react";
+import { ShieldCheck, Truck, BarChart3, Globe } from "lucide-react";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {

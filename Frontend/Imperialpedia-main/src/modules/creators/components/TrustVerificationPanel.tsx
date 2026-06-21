@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ContributorTrustData, VerificationFlag } from "@/types/trust";
+import { ContributorTrustData } from "@/types/trust";
 import {
   Card,
   CardContent,
@@ -17,7 +17,6 @@ import {
   ShieldCheck,
   Info,
   Briefcase,
-  GraduationCap,
   Award,
   CheckCircle2,
   AlertCircle,

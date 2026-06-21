@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Text } from '@/design-system/typography/text';
 import { Button } from '@/components/ui/button';
 import { GraduationCap, ArrowRight, TrendingUp, Cpu, Globe } from 'lucide-react';

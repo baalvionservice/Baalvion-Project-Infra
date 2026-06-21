@@ -1,9 +1,8 @@
 'use client';
 
 import React, { useState, useId } from 'react';
-import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
-import { Zap, ArrowRight } from 'lucide-react';
+import { Zap } from 'lucide-react';
 import { WaitlistModal } from './WaitlistModal';
 import { logEvent } from '@/lib/utils/analytics';
 import { PricingCard } from '@/components/common/PricingCard';

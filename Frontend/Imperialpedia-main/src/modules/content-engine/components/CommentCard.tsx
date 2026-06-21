@@ -16,9 +16,7 @@ import {
   Flag,
   Clock,
   Zap,
-  CornerDownRight,
 } from "lucide-react";
-import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface CommentCardProps {

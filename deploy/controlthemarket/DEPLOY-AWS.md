@@ -1,5 +1,13 @@
 # Deploy `controlthemarket.com` to AWS (single EC2 + Docker Compose)
 
+> ⚠️ **DEPRECATED — this standalone per-stack package is superseded by
+> [`deploy/ec2-single-host/`](../ec2-single-host/), the ONE canonical production stack.**
+> Production now follows **GitHub Actions → Amazon ECR → EC2 `docker compose pull`** (zero host
+> builds, **zero GHCR**). The per-stack `deploy-controlthemarket.yml` workflow has been removed; the
+> CTM image is built + pushed to ECR by [`.github/workflows/deploy.yml`](../../.github/workflows/deploy.yml).
+> See [`deploy/ec2-single-host/ECR-CICD.md`](../ec2-single-host/ECR-CICD.md) for the live pipeline,
+> IAM policies, and secret names. This document is kept for historical reference only.
+
 Production deploy of **ControlTheMarket** — its own standalone stack: the Next.js frontend
 (`controlthemarket-web`) + its own backend (`ctm-service`) + Postgres, fronted by Caddy (TLS).
 CTM does **not** use the central admin panel / CMS vault: Razorpay is handled directly by
@@ -146,12 +154,13 @@ pushes the two images (web + ctm-service) to GHCR (cached), then SSHes the EC2 t
 | `CTM_PROD_USER` | SSH user (e.g. `ubuntu`) |
 | `CTM_PROD_SSH_KEY` | private key whose public half is in the EC2's `~/.ssh/authorized_keys` |
 
-**GHCR pull access on the EC2** (so `docker compose pull` works) — pick one:
-- Make the `controlthemarket-*` packages **public** in GHCR (simplest), or
-- `docker login ghcr.io -u <user> -p <read:packages PAT>` once on the EC2.
+**Amazon ECR pull access on the EC2** (so `docker compose pull` works): attach the **read-only ECR
+instance role** to the EC2 (`AmazonEC2ContainerRegistryReadOnly`, scoped to `baalvion/*`). The host
+then pulls with **no stored credentials** — `aws ecr get-login-password | docker login` uses the
+instance role. Full IAM policy: [`ECR-CICD.md` §3B](../ec2-single-host/ECR-CICD.md).
 
-`IMAGE_PREFIX` in `.env.prod` must equal the workflow's (`ghcr.io/<owner>/baalvion`). The workflow
-derives `<owner>` from the repo automatically; the `.env.prod.example` default assumes `baalvionservice`.
+`IMAGE_PREFIX` in `.env.prod` must equal the ECR registry the canonical pipeline pushes to
+(`<account>.dkr.ecr.<region>.amazonaws.com/baalvion`). No GHCR login / PAT is required anywhere.
 
 > The workflow assumes §1–7 are already done on the EC2 (repo at `/opt/baalvion`, `.env.prod`
 > present). It updates images — it does not bootstrap a fresh host. The frontend's `NEXT_PUBLIC_*`

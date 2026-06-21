@@ -5,7 +5,12 @@ import { NextRequest, NextResponse } from 'next/server';
  * to the auth-service register endpoint server-side (so the browser stays same-origin and any
  * session cookies set by auth-service flow back). No mock — real registration.
  */
-const AUTH_TARGET = process.env.AUTH_PROXY_TARGET || 'http://localhost:3001/v1/auth';
+// AUTH_PROXY_TARGET must be supplied in production; localhost is dev-only. An unset
+// var in prod collapses to '' so registration fails loudly rather than silently
+// proxying to a developer's machine.
+const AUTH_TARGET =
+  process.env.AUTH_PROXY_TARGET ||
+  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3001/v1/auth');
 
 export async function POST(req: NextRequest) {
   let body: unknown;

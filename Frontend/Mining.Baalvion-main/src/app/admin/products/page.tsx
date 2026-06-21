@@ -1,20 +1,18 @@
 "use client"
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardDescription } from "@/components/ui/card";
 import { 
   PackageSearch, 
   Search, 
   Filter, 
   CheckCircle2, 
-  XCircle, 
   AlertTriangle, 
   Eye, 
   MoreVertical,
   Gem,
   History,
-  ShieldCheck,
-  ArrowRight
+  ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";

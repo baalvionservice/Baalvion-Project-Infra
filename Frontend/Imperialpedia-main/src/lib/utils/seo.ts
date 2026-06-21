@@ -1,6 +1,5 @@
 import { Metadata } from 'next';
 import { buildMetadata } from '@/lib/seo/metadata-builder';
-import { BaseEntity } from '@/types/entity';
 
 /**
  * @fileOverview Specialized utility for generating high-fidelity SEO metadata for entities.

@@ -3,10 +3,10 @@
 
 import { useState, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { ShieldCheck, Globe, Zap, TrendingUp, Truck, Target, ArrowRight, CheckCircle2, Mail, Clock } from "lucide-react";
+import { ShieldCheck, Zap, TrendingUp, Truck, Target, ArrowRight, CheckCircle2, Mail, Clock } from "lucide-react";
 import { PartnershipSurvey } from "@/components/partnership/PartnershipSurvey";
 
 /** Shape of the data emitted by <PartnershipSurvey>. */

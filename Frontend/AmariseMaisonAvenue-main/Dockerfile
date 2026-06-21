@@ -22,14 +22,33 @@ COPY --from=pruner /app/out/json/ ./
 COPY --from=pruner /app/pnpm-lock.yaml ./pnpm-lock.yaml
 RUN pnpm install --no-frozen-lockfile
 
-# 3) Build (NEXT_PUBLIC_* must be present here)
+# 3) Build (NEXT_PUBLIC_* must be present here).
+# These ARGs are the exact build-time variables the storefront source consumes for the
+# MVP flows (product listing, cart, order creation, Razorpay checkout, CMS reads).
 ARG NEXT_PUBLIC_COMMERCE_URL
-ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_COMMERCE_API_URL
+ARG NEXT_PUBLIC_ORDER_URL
+ARG NEXT_PUBLIC_INVENTORY_URL
+ARG NEXT_PUBLIC_CMS_URL
+ARG NEXT_PUBLIC_CMS_WEBSITE_SLUG
 ARG NEXT_PUBLIC_STORE_ID
+ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_SITE_URL
 ARG NEXT_PUBLIC_MEDIA_HOST
-ARG NEXT_PUBLIC_REFRESH_COOKIE_NAME
-ARG NEXT_PUBLIC_ADMIN_CONSOLE_URL
-ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production
+# CRITICAL: ARG alone is NOT visible to `next build`. Each value must be re-exported as a
+# NEXT_PUBLIC_* ENV so Next inlines it into the client bundle. Without these ENV lines the
+# build bakes the localhost code-defaults regardless of --build-arg.
+ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
+    NEXT_PUBLIC_COMMERCE_URL=${NEXT_PUBLIC_COMMERCE_URL} \
+    NEXT_PUBLIC_COMMERCE_API_URL=${NEXT_PUBLIC_COMMERCE_API_URL} \
+    NEXT_PUBLIC_ORDER_URL=${NEXT_PUBLIC_ORDER_URL} \
+    NEXT_PUBLIC_INVENTORY_URL=${NEXT_PUBLIC_INVENTORY_URL} \
+    NEXT_PUBLIC_CMS_URL=${NEXT_PUBLIC_CMS_URL} \
+    NEXT_PUBLIC_CMS_WEBSITE_SLUG=${NEXT_PUBLIC_CMS_WEBSITE_SLUG} \
+    NEXT_PUBLIC_STORE_ID=${NEXT_PUBLIC_STORE_ID} \
+    NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL} \
+    NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL} \
+    NEXT_PUBLIC_MEDIA_HOST=${NEXT_PUBLIC_MEDIA_HOST}
 COPY --from=pruner /app/out/full/ ./
 RUN pnpm turbo run build --filter=amarise-maison-avenue-web
 

@@ -2,13 +2,13 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { knowledgeGraphService } from '@/services/data/knowledge-graph-service';
-import { KnowledgeGraphData, GraphNode, NodeSelectionState } from '@/types/knowledge-graph';
+import { KnowledgeGraphData, NodeSelectionState } from '@/types/knowledge-graph';
 import { GraphVisualizer } from './GraphVisualizer';
 import { NodeDetailPanel } from './NodeDetailPanel';
 import { ExplorerSidebar } from './ExplorerSidebar';
-import { Loader2, Zap, Globe, Layers, Activity } from 'lucide-react';
+import { Loader2, Zap, Globe, Layers } from 'lucide-react';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 
 /**
  * Main terminal for the Financial Knowledge Graph Engine.

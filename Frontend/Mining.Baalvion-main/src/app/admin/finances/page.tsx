@@ -10,11 +10,9 @@ import {
 } from "@/components/ui/card";
 import {
   DollarSign,
-  TrendingUp,
   ShieldCheck,
   ArrowUpRight,
   ArrowDownRight,
-  PieChart as PieChartIcon,
   Activity,
   Landmark,
   CreditCard,

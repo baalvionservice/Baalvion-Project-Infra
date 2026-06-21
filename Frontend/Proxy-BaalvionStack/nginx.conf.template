@@ -1,0 +1,66 @@
+# proxy.baalvionstack.com — SPA static host + same-origin /auth-bff reverse proxy.
+# ${AUTH_PROXY_TARGET} / ${AUTH_PROXY_HOST} are substituted by the nginx image entrypoint
+# (envsubst) at container start. nginx runtime vars ($uri, $host, ...) are preserved.
+server {
+    listen       8080;
+    server_name  _;
+    root   /usr/share/nginx/html;
+    index  index.html;
+
+    # gzip for text assets
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript application/wasm image/svg+xml;
+    gzip_min_length 1024;
+
+    # ── Production security headers ───────────────────────────────────────────────
+    # Set at server scope with `always` so they apply to error responses too. The CSP
+    # mirrors vite.config.ts but with PRODUCTION origins only (no localhost / no
+    # 'unsafe-eval'). connect-src lists the prod API origin (api.baalvion.com) +
+    # same-origin (/auth-bff is proxied same-origin). Payment gateways: Razorpay/
+    # Cashfree/Stripe (script/frame/connect/img) and PayU (form-action redirect).
+    # NOTE (nginx footgun): an `add_header` inside a location CANCELS inheritance of
+    # these, so the /assets/ block re-adds the headers it needs.
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://*.razorpay.com https://*.cashfree.com https://*.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://*.razorpay.com https://*.cashfree.com https://*.stripe.com; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.baalvion.com wss://api.baalvion.com https://*.razorpay.com https://*.cashfree.com https://*.stripe.com; frame-src https://*.razorpay.com https://*.cashfree.com https://*.stripe.com; frame-ancestors 'none'; form-action 'self' https://*.payu.in https://*.cashfree.com https://checkout.stripe.com; base-uri 'self'; object-src 'none'" always;
+
+    # Liveness/readiness endpoint for ALB / ECS / Docker healthcheck.
+    location = /healthz {
+        access_log off;
+        add_header Content-Type text/plain;
+        return 200 'ok';
+    }
+
+    # Same-origin auth proxy → auth gateway (httpOnly refresh cookie flows same-origin, no CORS).
+    # Trailing slash on both sides strips the /auth-bff/ prefix and appends to the target path.
+    # No add_header here → the server-scope security headers above are inherited on proxied responses.
+    location /auth-bff/ {
+        proxy_pass              ${AUTH_PROXY_TARGET}/;
+        proxy_http_version      1.1;
+        proxy_ssl_server_name   on;
+        proxy_set_header        Host ${AUTH_PROXY_HOST};
+        proxy_set_header        X-Real-IP $remote_addr;
+        proxy_set_header        X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header        X-Forwarded-Proto $scheme;
+        proxy_cookie_domain     ${AUTH_PROXY_HOST} $host;
+    }
+
+    # Long-cache fingerprinted Vite assets. The Cache-Control add_header cancels inheritance,
+    # so re-add nosniff (the security header that matters for static JS/CSS responses).
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        try_files $uri =404;
+    }
+
+    # SPA fallback — every unknown path resolves to index.html for client-side routing.
+    # No add_header here → the HTML document inherits all server-scope security headers (incl. CSP).
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { CreatorSettings } from '@/types';
 import { Text } from '@/design-system/typography/text';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,6 @@ import {
   Mail, 
   Bell, 
   Shield, 
-  Globe, 
   Camera, 
   Save, 
   Twitter, 

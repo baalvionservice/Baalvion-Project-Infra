@@ -4,7 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ShieldCheck, Lock, Loader2, LogIn, ArrowRight } from "lucide-react";
+import { ShieldCheck, Lock, Loader2, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

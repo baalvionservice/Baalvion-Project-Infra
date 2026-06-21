@@ -5,7 +5,7 @@
  */
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Shield, Users, GraduationCap, Crown, ChevronRight, Eye } from "lucide-react";
+import { Shield, GraduationCap, Crown, ChevronRight, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import AmbientBackground from "@/components/protocol/AmbientBackground";
 

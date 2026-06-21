@@ -3,16 +3,11 @@
 import React, { useEffect, useState } from "react";
 import {
   UserAlertsAndNotificationsData,
-  UserAlert,
-  UserNotification,
 } from "@/types/user-system";
 import { dashboardService } from "@/services/data/dashboard-service";
 import {
   Card,
   CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,15 +23,10 @@ import {
   MessageSquare,
   Clock,
   Plus,
-  Trash2,
   Target,
-  Search,
-  Filter,
   Loader2,
   ArrowRight,
   Info,
-  CheckCircle2,
-  AlertCircle,
   MoreVertical,
 } from "lucide-react";
 import {

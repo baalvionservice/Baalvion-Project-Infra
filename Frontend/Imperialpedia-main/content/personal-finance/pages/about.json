@@ -1,0 +1,114 @@
+{
+  "topicNumber": 101,
+  "title": "About ImperialPedia",
+  "slug": "about",
+  "seo": {
+    "seoTitle": "About ImperialPedia | Personal Finance Made Clear",
+    "metaDescription": "ImperialPedia turns complex money topics into clear, practical, trustworthy personal finance guidance. Learn about our mission, editorial standards, and team.",
+    "focusKeyword": "about ImperialPedia",
+    "secondaryKeywords": ["personal finance website", "financial education", "editorial standards", "money guidance", "trustworthy finance content"],
+    "searchIntent": "Navigational/Informational — readers want to understand who is behind the content and whether to trust it.",
+    "schemaRecommendation": "AboutPage + Organization"
+  },
+  "excerpt": "ImperialPedia turns complicated money topics into clear, practical guidance you can act on — built on research, real-world experience, and strict editorial standards.",
+  "intro": "Money is one of the few subjects that touches every single day of your life, yet most of us were never formally taught how to handle it. ImperialPedia exists to close that gap. We translate the dense, jargon-heavy world of personal finance into plain language and practical steps — the kind of guidance you'd hope to get from a sharp, honest friend who happens to know the numbers cold.\n\nWe're not here to sell you a dream or a get-rich-quick scheme. We're here to help you make better decisions with the money you already have, and to build the confidence that comes from finally understanding how it all fits together.",
+  "tableOfContents": ["Who We Are", "Our Mission", "Our Vision", "What We Cover", "Our Editorial Standards", "How We Handle Accuracy and Sources", "The People Behind the Words", "Why Readers Trust ImperialPedia", "A Note on Financial Advice"],
+  "sections": [
+    {
+      "heading": "Who We Are",
+      "paragraphs": [
+        "ImperialPedia is an independent personal finance and financial education platform. We publish explainers, step-by-step guides, comparisons, and tools across budgeting, saving, investing, debt, and wealth building. Our readers range from people writing their very first budget to professionals fine-tuning a long-term plan.",
+        "What ties everything together is a single editorial promise: every article should leave you more capable than you were before you read it. No filler, no fear-mongering, no hype — just clear thinking you can put to work this week."
+      ]
+    },
+    {
+      "heading": "Our Mission",
+      "paragraphs": [
+        "Our mission is to make personal finance understandable and actionable for everyone, regardless of income, background, or starting point. We believe financial literacy is a form of freedom, and that the right explanation at the right moment can change the trajectory of someone's money for decades.",
+        "Practically, that means we obsess over clarity. We use real numbers and realistic scenarios. We show the trade-offs instead of pretending there's one perfect answer. And we always connect the 'what' to the 'how,' so you finish a guide knowing exactly what to do next."
+      ]
+    },
+    {
+      "heading": "Our Vision",
+      "paragraphs": [
+        "We want ImperialPedia to be the resource people reach for the moment a money question appears — the first paycheck, the first credit card, the surprise bill, the raise, the house, the retirement plan. A trusted reference that grows with you across every stage of your financial life.",
+        "In a landscape crowded with noise and conflicting advice, our long-term vision is simple: become a name readers associate with accuracy, calm, and genuine usefulness."
+      ]
+    },
+    {
+      "heading": "What We Cover",
+      "paragraphs": [
+        "Our [Personal Finance](/personal-finance) library spans the topics that shape everyday money decisions: building a budget, saving an emergency fund, understanding inflation, paying down debt, setting goals, and growing wealth over time.",
+        "Popular starting points include our guides on [how to create a monthly budget](/articles/how-to-create-a-monthly-budget), the [50/30/20 budget rule](/articles/50-30-20-budget-rule-explained), and [building an emergency fund](/articles/emergency-fund-guide). From there, readers branch into investing basics, financial independence, and smarter spending."
+      ]
+    },
+    {
+      "heading": "Our Editorial Standards",
+      "paragraphs": [
+        "Every piece we publish is written to be accurate, original, and genuinely helpful. We hold our work to clear standards before it ever reaches you."
+      ],
+      "subsections": [
+        {
+          "heading": "Clarity over cleverness",
+          "paragraphs": ["We write for understanding, not to sound impressive. If a concept can be explained with a simple example, that's how we explain it."]
+        },
+        {
+          "heading": "Originality and integrity",
+          "paragraphs": ["Our content is original and researched. We don't copy, and we don't publish thin, recycled filler. When we describe a study, a rule of thumb, or a regulation, we aim to represent it fairly and in context."]
+        },
+        {
+          "heading": "Independence",
+          "paragraphs": ["Our guidance is editorial. We don't let any commercial relationship dictate what we recommend or how we explain a topic. Education comes first, always."]
+        }
+      ]
+    },
+    {
+      "heading": "How We Handle Accuracy and Sources",
+      "paragraphs": [
+        "Personal finance is full of numbers that change — interest rates, contribution limits, tax thresholds. We do our best to keep guidance current and to point readers toward authoritative primary sources, such as the Consumer Financial Protection Bureau, the Federal Reserve, the Bureau of Labor Statistics, the FDIC, and the IRS, when specific rules or data matter.",
+        "When we share benchmarks or rules of thumb, we say so plainly rather than dressing them up as guarantees. And when something is uncertain or depends on your situation, we tell you that too. Trust is built on honesty about what we do and don't know."
+      ]
+    },
+    {
+      "heading": "The People Behind the Words",
+      "paragraphs": [
+        "ImperialPedia content is shaped by researchers and analysts who live and breathe this subject. Our personal finance coverage is led by Allen Krewzz, a finance researcher, business analyst, and digital entrepreneur focused on personal finance, wealth creation, financial planning, investing, and business growth.",
+        "His approach — simplifying complex financial concepts into practical strategies — sets the tone for everything we publish: rigorous underneath, readable on the surface."
+      ]
+    },
+    {
+      "heading": "Why Readers Trust ImperialPedia",
+      "paragraphs": [
+        "Readers come back because our guidance respects their intelligence and their time. We explain the reasoning, not just the rule, so you can adapt it to your own life. We're upfront about trade-offs. And we treat your financial decisions with the seriousness they deserve."
+      ],
+      "callout": {
+        "title": "Our promise",
+        "text": "Clear, original, practical guidance — written to make you more capable with money, not more confused."
+      }
+    },
+    {
+      "heading": "A Note on Financial Advice",
+      "paragraphs": [
+        "ImperialPedia provides financial education and general information, not personalized financial, investment, legal, or tax advice. Everyone's situation is different. For decisions with significant stakes, we encourage you to confirm details with a qualified professional who can account for your full circumstances.",
+        "Markets and money involve risk, and past performance never guarantees future results. Use our work to build understanding and context — then make the call that's right for you."
+      ]
+    }
+  ],
+  "faq": [
+    { "question": "What is ImperialPedia?", "answer": "ImperialPedia is an independent personal finance and financial education platform. We publish clear, original guides on budgeting, saving, investing, debt, and wealth building, designed to help readers make smarter money decisions at every stage of life." },
+    { "question": "Is ImperialPedia financial advice?", "answer": "No. ImperialPedia offers financial education and general information, not personalized financial, investment, legal, or tax advice. For decisions with significant stakes, confirm details with a qualified professional who understands your full situation." },
+    { "question": "Who writes ImperialPedia's content?", "answer": "Our personal finance coverage is led by Allen Krewzz, a finance researcher and business analyst, supported by an editorial process focused on accuracy, originality, and clarity." },
+    { "question": "How can I contact ImperialPedia?", "answer": "Visit our [contact page](/contact) for reader questions, editorial requests, business partnerships, and media inquiries. We read everything that comes in and respond to as much as we can." }
+  ],
+  "conclusion": "ImperialPedia was built on a simple belief: that clear, honest information about money should be available to everyone. Whether you're writing your first budget or refining a decades-long plan, we're here to make the next step obvious. Explore our [Personal Finance](/personal-finance) library and start building the confidence that comes from finally understanding your money.",
+  "internalLinks": [
+    { "anchor": "How to Create a Monthly Budget", "slug": "how-to-create-a-monthly-budget" },
+    { "anchor": "Emergency Fund Guide", "slug": "emergency-fund-guide" },
+    { "anchor": "How to Build Wealth From Scratch", "slug": "how-to-build-wealth-from-scratch" }
+  ],
+  "externalSources": [
+    { "name": "Consumer Financial Protection Bureau", "url": "https://www.consumerfinance.gov/" },
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 1200
+}

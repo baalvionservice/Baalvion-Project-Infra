@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { MentionInput } from "@/components/forum/MentionInput";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Label } from "@/components/ui/label";
 import MainLayout from "@/components/layout/MainLayout";
 import { ArrowLeft, MessageSquare, ThumbsUp, Share2, Flag, User, Clock, Send, Bookmark } from "lucide-react";
 import { toast } from "sonner";

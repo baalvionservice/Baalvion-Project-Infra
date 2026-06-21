@@ -3,14 +3,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Scale, 
   MessageSquare, 
   AlertCircle, 
   Plus, 
   ArrowRight, 
-  FileText, 
   History,
   ShieldAlert,
   HelpCircle,
@@ -29,8 +28,6 @@ import {
   DialogFooter,
   DialogDescription
 } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";

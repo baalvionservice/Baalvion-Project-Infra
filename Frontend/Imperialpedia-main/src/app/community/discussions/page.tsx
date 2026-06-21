@@ -3,22 +3,14 @@
 import React, { useEffect, useState } from "react";
 import { Container } from "@/design-system/layout/container";
 import { Text } from "@/design-system/typography/text";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   MessageSquare,
   Plus,
   Search,
-  Filter,
-  Flame,
-  Sparkles,
-  TrendingUp,
   Activity,
-  Loader2,
-  ChevronRight,
-  Target
+  Loader2
 } from 'lucide-react';
 import { communityService } from '@/services/data/community-service';
 import { DiscussionNode, TrendingTopic } from '@/types/community';

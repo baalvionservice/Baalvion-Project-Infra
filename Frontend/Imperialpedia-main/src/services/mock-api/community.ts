@@ -2,9 +2,6 @@ import { ApiResponse } from '@/types';
 import { 
   CommunityData, 
   Comment, 
-  Poll, 
-  UserReputation, 
-  LeaderboardEntry, 
   PredictionContest, 
   ReputationEntry, 
   LeaderboardItem,
@@ -17,7 +14,6 @@ import {
   DiscussionNode,
   TrendingTopic,
   ReputationSystemData,
-  ReputationUser,
   DebateNode,
   DebateLeaderboardEntry
 } from '@/types/community';

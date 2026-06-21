@@ -27,7 +27,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { systemService } from '@/services/data/system-service';
-import { PlatformSettings } from '@/types/system';
 import { toast } from '@/hooks/use-toast';
 
 const platformSchema = z.object({

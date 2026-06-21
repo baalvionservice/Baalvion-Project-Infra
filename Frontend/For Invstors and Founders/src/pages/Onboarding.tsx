@@ -13,8 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import {
-  ArrowLeft, ArrowRight, Check, Plus, Trash2, Sparkles, User, Building2, Lightbulb, Target,
-  TrendingUp, Users, Banknote, PartyPopper, BadgeCheck,
+  ArrowLeft, ArrowRight, Plus, Trash2, User, Building2, Lightbulb, Target,
+  TrendingUp, Users, Banknote, PartyPopper,
 } from "lucide-react";
 
 const REGIONS = ["North America", "Europe", "Asia", "Middle East", "Africa", "South America", "Oceania"];

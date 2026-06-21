@@ -36,14 +36,12 @@ import {
   TrendingDown,
   Zap,
   Info,
-  ArrowRight,
   Target,
   BarChart3,
   ShieldCheck,
   Plus,
   Trash2,
   Layers,
-  Activity,
   AlertCircle,
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";

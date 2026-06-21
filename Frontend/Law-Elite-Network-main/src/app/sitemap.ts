@@ -1,5 +1,14 @@
 import { MetadataRoute } from 'next';
 
+// Render at request time, never at build time. This route fetches from law-service,
+// and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
+// force-dynamic guarantees the production build never depends on an external service.
+export const dynamic = 'force-dynamic';
+
+// Hard cap on any sitemap fetch so a slow/hung upstream degrades to the static
+// routes instead of hanging the request.
+const FETCH_TIMEOUT_MS = 4000;
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
 interface LawyerEntry { id: string; updated_at?: string; updatedAt?: string }
@@ -8,8 +17,13 @@ interface CategoryEntry { slug: string; updated_at?: string; updatedAt?: string 
 
 // law-service wraps lists as { data: { items: [...] } } and singles as { data: [...] }.
 async function safeFetch<T>(url: string): Promise<T[]> {
+  // No absolute base URL configured (production with an unset API env) → fail closed
+  // to static routes without attempting a relative fetch (which throws under Node).
+  if (!/^https?:\/\//i.test(url)) return [];
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const res = await fetch(url, { next: { revalidate: 3600 } });
+    const res = await fetch(url, { cache: 'no-store', signal: controller.signal });
     if (!res.ok) return [];
     const json = await res.json();
     const d = json?.data;
@@ -18,11 +32,17 @@ async function safeFetch<T>(url: string): Promise<T[]> {
     return [];
   } catch {
     return [];
+  } finally {
+    clearTimeout(timer);
   }
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3015/v1';
+  // No localhost fallback in production: an unset build arg yields '' so safeFetch
+  // fails closed (sitemap degrades to static routes) instead of probing localhost.
+  const apiBase =
+    process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
+    (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 
   const [lawyers, articles, categories] = await Promise.all([
     safeFetch<LawyerEntry>(`${apiBase}/lawyers?limit=1000`),
