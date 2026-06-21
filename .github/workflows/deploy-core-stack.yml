@@ -1,0 +1,174 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Deploy — CORE 3-service stack:  GitHub Actions → Amazon ECR → EC2 (runtime only)
+#
+#   The reduced core (auth + cms + payment) as its OWN pipeline, decoupled from the
+#   full single-host deploy.yml. Builds dedicated `core-*` ECR repos so it never races
+#   the main pipeline's pointers, then SSH-rolls a SEPARATE core host.
+#
+#     trigger  ──▶  build core images in GitHub Actions (repo-root / Maven contexts)
+#              ──▶  push to Amazon ECR, tagged  <commit-sha> + prod-latest + latest + RELEASE_TAG
+#              ──▶  SSH the core host and roll the stack (pull + up -d --no-build)
+#
+# HARD INVARIANTS:
+#   • The core host NEVER builds — deploy.sh does `docker compose pull` + `up -d --no-build`.
+#   • All builds happen here, in CI. No secrets in this file (GitHub Secrets / OIDC / IAM only).
+#   • Shares the GHA build cache (scopes `cms` / `payjava`) with deploy.yml → fast cache hits.
+#
+# ECR repos: <account>.dkr.ecr.<region>.amazonaws.com/baalvion/core-<image>
+# Triggers on workflow_dispatch (operator-initiated) and on main pushes that touch this slice.
+# See deploy/core-stack/ECR-CICD.md for IAM + the exact secret/variable names.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Deploy — Core stack (ECR → EC2)
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag to roll on the core host (default: this run's commit SHA)"
+        required: false
+        default: ""
+  push:
+    branches: [main]
+    paths:
+      - "deploy/core-stack/**"
+      - ".github/workflows/deploy-core-stack.yml"
+
+# Never run two core rolls at once; let an in-flight roll finish.
+concurrency:
+  group: deploy-core-stack
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write   # keyless AWS auth via GitHub OIDC role assumption
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+  ECR_NAMESPACE: baalvion          # equals the `/baalvion` suffix of IMAGE_PREFIX on the host
+  RELEASE_TAG: ${{ vars.RELEASE_TAG || 'v1.0.1-production' }}
+
+jobs:
+  # ════════════════════════════ 1) build + push to ECR ════════════════════════════
+  build-push:
+    name: build ${{ matrix.repo }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - { repo: core-auth-service,    file: Backend/services/identity/auth-service/Dockerfile }
+          - { repo: core-cms-service,     file: Backend/services/knowledge/cms-service/Dockerfile, cache: cms }
+          - { repo: core-payment-service, file: Backend/services/commerce/financial-services-java/Dockerfile,
+              context: Backend/services/commerce/financial-services-java, args: "SERVICE=payment-service", cache: payjava }
+          # One-shot tools image (Dockerfile `installer` target) — cms migrations + register, tools profile.
+          - { repo: core-cms-tools,       file: Backend/services/knowledge/cms-service/Dockerfile, target: installer, cache: cms }
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ── AWS auth (OIDC ONLY — keyless via GitHub OIDC role assumption) ────────
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-core-ecr-push-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Idempotent: create the per-image ECR repo on first deploy so the push never 404s.
+      - name: Ensure ECR repository exists
+        run: |
+          repo="${ECR_NAMESPACE}/${{ matrix.repo }}"
+          aws ecr describe-repositories --repository-names "$repo" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository \
+                 --repository-name "$repo" \
+                 --image-tag-mutability MUTABLE \
+                 --image-scanning-configuration scanOnPush=true \
+                 --region "$AWS_REGION"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_NAMESPACE }}/${{ matrix.repo }}
+          tags: |
+            type=raw,value=prod-latest
+            type=raw,value=latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=sha,format=long,prefix=
+
+      - name: Build and push to ECR
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context || '.' }}
+          file: ${{ matrix.file }}
+          target: ${{ matrix.target || '' }}
+          build-args: ${{ matrix.args || '' }}
+          push: true
+          provenance: false        # single-arch manifest — simplest to pull + run on EC2
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ matrix.cache || matrix.repo }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.cache || matrix.repo }}
+
+  # ════════════════════════════ 2) roll the core host ════════════════════════════
+  deploy:
+    name: Roll core host
+    needs: build-push
+    runs-on: ubuntu-latest
+    environment: production       # gate behind a protected environment for manual approval
+    env:
+      CORE_EC2_HOST: ${{ secrets.CORE_EC2_HOST }}
+      CORE_EC2_USER: ${{ secrets.CORE_EC2_USER }}
+      CORE_EC2_SSH_KEY: ${{ secrets.CORE_EC2_SSH_KEY }}
+      DEPLOY_TAG: ${{ github.event.inputs.image_tag || github.sha }}
+    steps:
+      # Secrets can't be used in `if:`, so surface the SSH inputs as env and gate on ALL THREE.
+      # Images always build + push above; the roll only runs once the core host is FULLY
+      # configured (host + user + key). A partial config SKIPs (not fails) so the pipeline stays
+      # green until the deploy target is wired. Values are only tested for emptiness, never printed.
+      - name: Check core host is configured
+        id: gate
+        run: |
+          if [ -z "${CORE_EC2_HOST}" ] || [ -z "${CORE_EC2_USER}" ] || [ -z "${CORE_EC2_SSH_KEY}" ]; then
+            echo "::notice title=Core roll skipped::core host not fully configured — need CORE_EC2_HOST + CORE_EC2_USER + CORE_EC2_SSH_KEY. Images were built + pushed to ECR (tag ${DEPLOY_TAG} + prod-latest); the roll was skipped."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull + roll via deploy.sh on the core host
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          # The host holds the repo at CORE_DEPLOY_PATH (compose + deploy.sh are version-controlled;
+          # .env.production is gitignored and stays on the box). The EC2 IAM instance role grants
+          # ECR pull, so deploy.sh authenticates to ECR with NO keys on the host.
+          script: |
+            set -euo pipefail
+            cd ${{ vars.CORE_DEPLOY_PATH || '/opt/baalvion-core' }}
+            git fetch --all --prune
+            git checkout ${{ github.ref_name }}
+            git pull --ff-only
+            bash deploy/core-stack/deploy.sh "${{ github.event.inputs.image_tag || github.sha }}"
+
+      - name: Smoke test public ingress
+        if: steps.gate.outputs.ready == 'true'
+        continue-on-error: true
+        run: |
+          sleep 20
+          for url in \
+            "https://${{ vars.CORE_DOMAIN_API || 'api.baalvion.com' }}/health" \
+            "https://${{ vars.CORE_DOMAIN_CMS || 'cms.baalvion.com' }}/api/v1/health" ; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
+            echo "$url -> $code"
+          done

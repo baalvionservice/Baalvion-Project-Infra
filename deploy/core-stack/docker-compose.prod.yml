@@ -215,6 +215,8 @@ services:
   # Built to the Dockerfile's `installer` target (keeps devDeps + migrations the slim image strips).
   cms-migrate:
     profiles: ["tools"]
+    # On the EC2 host this is PULLED from ECR (core-cms-tools); locally `--build` builds it.
+    image: ${IMAGE_PREFIX:-baalvion}/core-cms-tools:${IMAGE_TAG:-prod-latest}
     build:
       context: ../..
       dockerfile: Backend/services/knowledge/cms-service/Dockerfile
@@ -234,6 +236,8 @@ services:
   # does this for you). Skip entirely if you use GLOBAL env keys (single-tenant).
   cms-register:
     profiles: ["tools"]
+    # On the EC2 host this is PULLED from ECR (core-cms-tools); locally `--build` builds it.
+    image: ${IMAGE_PREFIX:-baalvion}/core-cms-tools:${IMAGE_TAG:-prod-latest}
     build:
       context: ../..
       dockerfile: Backend/services/knowledge/cms-service/Dockerfile

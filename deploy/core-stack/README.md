@@ -145,6 +145,15 @@ platform BFF/gateway in front of `payment-service` is the cleaner long-term answ
 Point `DB_HOST` at the RDS endpoint, set `DB_SSL=true` and `DB_JDBC_PARAMS=?sslmode=require`, and
 drop the `postgres` service. Same idea for ElastiCache (`REDIS_HOST`) and MSK (`KAFKA_BROKERS`).
 
+## Production CI/CD (GitHub Actions → ECR → EC2)
+
+Steps 3–4 above are the **local / manual** path. For the automated pipeline — CI builds the
+`core-*` images to Amazon ECR and SSH-rolls a dedicated host that only pulls (never builds) — see
+[ECR-CICD.md](ECR-CICD.md). In short: set the `AWS_DEPLOY_ROLE_ARN` + `CORE_EC2_*` GitHub secrets,
+clone this repo to the host with a `.env.production`, and run the
+[deploy-core-stack.yml](../../.github/workflows/deploy-core-stack.yml) workflow (or push a change
+under `deploy/core-stack/**` to `main`). The host roll is [deploy.sh](deploy.sh).
+
 ## Profiles
 
 | Profile  | Adds                          | Use when                                            |
