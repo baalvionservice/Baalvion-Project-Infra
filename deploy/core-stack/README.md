@@ -32,11 +32,31 @@ slug (or from global env), then calls Razorpay; Razorpay calls back to the webho
 Infra (`postgres`, `redis`, `zookeeper`, `kafka`) and the edge (`caddy`) are supporting
 containers — `kafka` backs payment-service's transactional outbox + saga listeners.
 
+### Added platform + commerce services (internal-only)
+
+These ride on the same Postgres (each owns an **isolated schema**) + Redis, verify RS256 via the
+auth-service JWKS, and are **not** exposed through Caddy this round (no public routes added):
+
+| Service                | Port | Schema     | Role                                                         |
+|------------------------|------|------------|--------------------------------------------------------------|
+| `rbac-service`         | 3055 | `rbac`     | Tenants / roles / policies. commerce + order gate on it.     |
+| `audit-service`        | 3032 | `audit`    | Immutable, hash-chained audit trail (consumes Redis events). |
+| `commerce-service`     | 3012 | `commerce` | Catalog / pricing. RBAC fail-closed.                         |
+| `order-service`        | 3013 | `orders`   | Orders + checkout — **LIVE Razorpay** (Node-direct).         |
+| `notification-service` | 3031 | —          | Email (SMTP/Resend) + BullMQ on Redis. No DB.                |
+| `trade-service`        | 3025 | `trade`    | Trade / GTI backend.                                         |
+
+> **Memory:** every container now has a `mem_limit` (+ a matching Node/JVM heap cap) so the whole
+> set fits an 8 GB host — total ceilings ≈ 5 GB. Keep host **swap** on as a backstop.
+> **inventory-service is not in this slice** → `order-service` boots, but its stock-lock /
+> reservation calls fail at request time until `inventory-service` is also deployed.
+
 ---
 
 ## 1. Prerequisites
 
-- A host with Docker + Docker Compose v2 (≈ 4 GB RAM; the Java service + Kafka want headroom).
+- A host with Docker + Docker Compose v2. The core 3 fit ≈ 4 GB; **with the added platform +
+  commerce services budget an 8 GB host with swap** (per-container `mem_limit`s total ≈ 5 GB).
 - DNS A records for `DOMAIN_API`, `DOMAIN_CMS`, (and `DOMAIN_ADMIN` if you run the admin profile)
   all pointing at this host's public IP. Ports 80 + 443 open.
 
@@ -79,6 +99,25 @@ REGISTER_PAYMENT_SITE=my-site bash deploy/core-stack/init-data.sh
 
 This applies the auth + cms migrations, bootstraps the super-admin, and (optionally) registers
 a payment website tenant. `payment-service` self-migrates on boot (Flyway).
+
+## 5. Migrate the added services (once)
+
+After the new images are rolled and the core DB is initialised, create the added services'
+schemas (`rbac`, `audit`, `commerce`, `orders`, `trade`):
+
+```bash
+CORE_ENV_FILE=deploy/core-stack/.env.prod bash deploy/core-stack/init-extras.sh
+#   on the EC2 host, point it at the host env file:
+#   CORE_ENV_FILE=deploy/core-stack/.env.production bash deploy/core-stack/init-extras.sh
+```
+
+Idempotent — safe to re-run. Until it runs, the new services crash-loop (no tables); the script
+restarts them at the end. `notification-service` has no DB, so it is not migrated.
+
+> **First roll only:** the CI roll (`deploy.sh`) pulls + starts the new containers, then
+> health-gates them. On the very first roll their schemas don't exist yet, so they report
+> unhealthy and the roll step may go **red** — this is expected. SSH in, run `init-extras.sh`,
+> and they go healthy. Every later roll (schema already present) gates clean.
 
 ---
 
@@ -158,8 +197,8 @@ under `deploy/core-stack/**` to `main`). The host roll is [deploy.sh](deploy.sh)
 
 | Profile  | Adds                          | Use when                                            |
 |----------|-------------------------------|-----------------------------------------------------|
-| (none)   | core 6 + caddy                | normal operation                                    |
-| `tools`  | `cms-migrate`, `cms-register` | one-shot DB setup (driven by `init-data.sh`)        |
+| (none)   | core + added services + caddy | normal operation                                    |
+| `tools`  | `cms-migrate`, `cms-register`, `rbac/audit/commerce/order/trade-migrate` | one-shot DB setup (`init-data.sh` + `init-extras.sh`) |
 | `admin`  | `auth-gateway`, `admin-web`   | manage the CMS vault / content via the admin console |
 
 ## Troubleshooting

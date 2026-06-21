@@ -47,6 +47,9 @@ services:
   postgres:
     image: postgres:16
     restart: unless-stopped
+    # Shared DB for ~9 services now — give it the most headroom of the infra tier.
+    mem_limit: 1g
+    mem_reservation: 256m
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -62,7 +65,9 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
-    command: ["redis-server", "--appendonly", "yes"]
+    mem_limit: 256m
+    mem_reservation: 64m
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "200mb", "--maxmemory-policy", "noeviction"]
     volumes:
       - redisdata:/data
     healthcheck:
@@ -74,7 +79,11 @@ services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.0
     restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 96m
     environment:
+      # Cap the JVM heap so the cgroup mem_limit above is never breached (8 GB box).
+      KAFKA_HEAP_OPTS: "-Xmx192m -Xms128m"
       ZOOKEEPER_CLIENT_PORT: "2181"
       ZOOKEEPER_TICK_TIME: "2000"
     volumes:
@@ -84,8 +93,12 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.6.0
     restart: unless-stopped
+    mem_limit: 768m
+    mem_reservation: 256m
     depends_on: [zookeeper]
     environment:
+      # Cap the JVM heap so the cgroup mem_limit above is never breached (8 GB box).
+      KAFKA_HEAP_OPTS: "-Xmx512m -Xms256m"
       KAFKA_BROKER_ID: "1"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
@@ -103,10 +116,14 @@ services:
       context: ../..
       dockerfile: Backend/services/identity/auth-service/Dockerfile
     restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 64m
     environment:
       <<: [*db, *redis]
       NODE_ENV: production
       PORT: "3001"
+      # GC before the cgroup mem_limit so a leak self-corrects instead of OOM-killing (8 GB box).
+      NODE_OPTIONS: --max-old-space-size=192
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
       JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
@@ -135,10 +152,13 @@ services:
       context: ../..
       dockerfile: Backend/services/knowledge/cms-service/Dockerfile
     restart: unless-stopped
+    mem_limit: 320m
+    mem_reservation: 96m
     environment:
       <<: [*db, *redis]
       NODE_ENV: production
       PORT: "3011"
+      NODE_OPTIONS: --max-old-space-size=256
       # Verify admin-API tokens against auth-service's JWKS (public delivery needs no token).
       BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
@@ -177,8 +197,13 @@ services:
       args:
         SERVICE: payment-service
     restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 256m
     environment:
       <<: *db
+      # Container-aware JVM: cap heap at ~65% of mem_limit (~333 MB) so the cgroup ceiling
+      # above is never breached. SerialGC keeps GC overhead tiny on a small heap (8 GB box).
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=65.0 -XX:+UseSerialGC -Xss512k"
       PORT: "3015"
       DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-}
       KAFKA_BROKERS: kafka:9092
@@ -210,6 +235,252 @@ services:
       redis: { condition: service_healthy }
       kafka: { condition: service_started }
       cms-service: { condition: service_started }
+
+  # ═══════════════════════ Platform + commerce services ═══════════════════════
+  # Added onto the core: RBAC, audit, commerce, order, notification, trade. All share the one
+  # Postgres (each owns an isolated SCHEMA) + Redis, verify RS256 tokens via auth-service's JWKS,
+  # and stay INTERNAL to the compose network (no new public Caddy routes this round). Every block
+  # has a hard mem_limit + a matching Node heap cap so the 8 GB box can't be OOM'd by one runaway.
+  # Their schemas are created by the one-shot *-migrate jobs below (profile "tools") — see
+  # init-extras.sh for the one-time, idempotent migration of these 5 schemas on a live DB.
+
+  # ── Platform: RBAC — tenants / roles / policies. Owns the `rbac` schema. ─────
+  rbac-service:
+    image: ${IMAGE_PREFIX:-baalvion}/core-rbac-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/identity/rbac-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 224m
+    mem_reservation: 64m
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3055"
+      DB_SCHEMA: rbac
+      NODE_OPTIONS: --max-old-space-size=160
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      # commerce/order call rbac internally with this key (RBAC_FAIL_MODE=closed → must match).
+      INTERNAL_API_KEY: ${RBAC_INTERNAL_API_KEY}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3055/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      auth-service: { condition: service_started }
+
+  # ── Platform: immutable, hash-chained audit trail. Owns the `audit` schema. ──
+  # Consumes domain events off the Redis event bus (baalvion:events) and records them WORM.
+  audit-service:
+    image: ${IMAGE_PREFIX:-baalvion}/core-audit-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/infrastructure/audit-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 224m
+    mem_reservation: 64m
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3032"
+      DB_SCHEMA: audit
+      NODE_OPTIONS: --max-old-space-size=160
+      AUDIT_CONSUME_EVENTS: "true"
+      EVENT_TRANSPORT: redis
+      EVENT_BUS_STREAM: baalvion:events
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      INTERNAL_API_KEY: ${AUDIT_INTERNAL_KEY}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3032/readyz',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      auth-service: { condition: service_started }
+
+  # ── Commerce: catalog / pricing. Owns the `commerce` schema; RBAC-gated (fail-closed). ──
+  commerce-service:
+    image: ${IMAGE_PREFIX:-baalvion}/core-commerce-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/commerce/commerce-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 320m
+    mem_reservation: 96m
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3012"
+      DB_SCHEMA: commerce
+      NODE_OPTIONS: --max-old-space-size=256
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      EVENT_TRANSPORT: redis
+      RBAC_BASE_URL: http://rbac-service:3055
+      RBAC_INTERNAL_API_KEY: ${RBAC_INTERNAL_API_KEY}
+      RBAC_FAIL_MODE: closed
+      # Media uploads need object storage; leave S3_* blank to serve content with uploads disabled.
+      MEDIA_DRIVER: ${MEDIA_DRIVER:-s3}
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_REGION: ${S3_REGION:-ap-south-1}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3012/readyz',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      rbac-service: { condition: service_started }
+
+  # ── Commerce: orders + checkout (live Razorpay, Node-direct). Owns `orders`. ──
+  # NOTE: inventory-service is NOT in this slice — stock-lock / reservation calls will fail at
+  # REQUEST time (the service still boots + serves /readyz). Deploy inventory-service to enable it.
+  order-service:
+    image: ${IMAGE_PREFIX:-baalvion}/core-order-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/commerce/order-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 320m
+    mem_reservation: 96m
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3013"
+      DB_SCHEMA: orders
+      NODE_OPTIONS: --max-old-space-size=256
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      # LIVE payments: real Razorpay charges, server-priced, strict webhook amount-check, NO mock.
+      PAYMENT_PROVIDER: razorpay
+      ALLOW_MOCK_PAYMENTS: "false"
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      RAZORPAY_WEBHOOK_STRICT_AMOUNT: "true"
+      CART_SESSION_SECRET: ${CART_SESSION_SECRET}
+      CMS_BASE_URL: ${CMS_BASE_URL:-http://cms-service:3011/api/v1}
+      PAYMENT_SITE_SLUG: ${ORDER_PAYMENT_SITE_SLUG:-}
+      RBAC_BASE_URL: http://rbac-service:3055
+      RBAC_INTERNAL_API_KEY: ${RBAC_INTERNAL_API_KEY}
+      RBAC_FAIL_MODE: closed
+      INVENTORY_BASE_URL: ${INVENTORY_BASE_URL:-}
+      INVENTORY_INTERNAL_KEY: ${INVENTORY_INTERNAL_KEY:-}
+      NOTIFICATION_BASE_URL: http://notification-service:3031
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3013/readyz',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      rbac-service: { condition: service_started }
+      cms-service: { condition: service_started }
+
+  # ── Platform: notifications (email via SMTP/Resend, BullMQ on Redis). No DB. ──
+  notification-service:
+    image: ${IMAGE_PREFIX:-baalvion}/core-notification-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/infrastructure/notification-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 64m
+    environment:
+      <<: *redis
+      NODE_ENV: production
+      PORT: "3031"
+      NODE_OPTIONS: --max-old-space-size=192
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@baalvion.com}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3031/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on:
+      redis: { condition: service_healthy }
+
+  # ── Ecosystem: trade / GTI backend. Owns the `trade` schema (DB_SYNC off → migrated). ──
+  # Boots standalone; gateway-signed identity flows need the admin-profile auth-gateway + a Caddy
+  # route (not added this round). The GTI web UI (gti-web) is NOT included here.
+  trade-service:
+    image: ${IMAGE_PREFIX:-baalvion}/core-trade-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/commerce/trade-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 320m
+    mem_reservation: 96m
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3025"
+      SERVICE_NAME: trade-service
+      DB_SYNC: "false"
+      NODE_OPTIONS: --max-old-space-size=256
+      REDIS_URL: redis://redis:6379
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET:-}
+      GATEWAY_SIGNING_SECRET: ${GATEWAY_SIGNING_SECRET:-}
+      CORS_ORIGINS: ${TRADE_CORS_ORIGINS:-${CORS_ORIGINS}}
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}
+      # Firebase Admin SDK is OPTIONAL — trade-service boots without it (powers a feature subset).
+      FIREBASE_PROJECT_ID: ${TRADE_FIREBASE_PROJECT_ID:-}
+      FIREBASE_CLIENT_EMAIL: ${TRADE_FIREBASE_CLIENT_EMAIL:-}
+      FIREBASE_PRIVATE_KEY: ${TRADE_FIREBASE_PRIVATE_KEY:-}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3025/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 50s
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      auth-service: { condition: service_started }
 
   # ── ONE-SHOT: create the `cms` schema tables (Sequelize migrations). ─────────
   # Built to the Dockerfile's `installer` target (keeps devDeps + migrations the slim image strips).
@@ -249,6 +520,100 @@ services:
       NODE_ENV: production
       CMS_ORG_ID: ${CMS_ORG_ID:-}
       CMS_CREATED_BY: ${CMS_CREATED_BY:-}
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # ═══════════ ONE-SHOT migrations for the added services (profile "tools") ═════════
+  # These NEVER auto-start. Run once on a fresh schema (init-extras.sh chains them in order).
+  # All are idempotent: rbac/audit/trade use CREATE … IF NOT EXISTS (+ trade tracks
+  # trade.schema_migrations); commerce/order use sequelize-cli (tracks SequelizeMeta).
+
+  # rbac + audit ship RAW .sql — apply with psql straight from the reused postgres:16 image
+  # (no extra build), mounting the repo's migrations dir read-only. PG* env auto-connects psql.
+  rbac-migrate:
+    profiles: ["tools"]
+    image: postgres:16
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+    entrypoint: ["bash", "-c"]
+    command:
+      - "psql -f /migs/001_rbac_schema.sql && psql -f /migs/002_permissions.sql && psql -f /migs/003_policies.sql && psql -v ON_ERROR_STOP=1 -f /migs/004_rls_tenant_isolation.sql"
+    volumes:
+      - ../../Backend/services/identity/rbac-service/migrations:/migs:ro
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  audit-migrate:
+    profiles: ["tools"]
+    image: postgres:16
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+    entrypoint: ["bash", "-c"]
+    command:
+      - "psql -f /migs/001_audit_schema.sql && psql -v ON_ERROR_STOP=1 -f /migs/002_rls_tenant_isolation.sql"
+    volumes:
+      - ../../Backend/services/infrastructure/audit-service/migrations:/migs:ro
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # commerce + order migrate via sequelize-cli → need the `installer` target (keeps devDeps the
+  # slim runtime image strips). Same pattern as cms-migrate; pulled from ECR on the host.
+  commerce-migrate:
+    profiles: ["tools"]
+    image: ${IMAGE_PREFIX:-baalvion}/core-commerce-tools:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/commerce/commerce-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/commerce/commerce-service
+    command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
+    environment:
+      <<: *db
+      NODE_ENV: production
+      DB_SCHEMA: commerce
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  order-migrate:
+    profiles: ["tools"]
+    image: ${IMAGE_PREFIX:-baalvion}/core-order-tools:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/commerce/order-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/commerce/order-service
+    command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
+    environment:
+      <<: *db
+      NODE_ENV: production
+      DB_SCHEMA: orders
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # trade migrate.js uses only PROD deps (pg + sequelize) → reuse the runtime image, override CMD.
+  trade-migrate:
+    profiles: ["tools"]
+    image: ${IMAGE_PREFIX:-baalvion}/core-trade-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/commerce/trade-service/Dockerfile
+    working_dir: /app
+    command: ["node", "migrate.js"]
+    environment:
+      <<: *db
+      NODE_ENV: production
+      DB_SYNC: "false"
     restart: "no"
     depends_on:
       postgres: { condition: service_healthy }
