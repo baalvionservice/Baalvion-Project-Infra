@@ -189,15 +189,20 @@ jobs:
     environment: production       # gate behind a protected environment for manual approval
     env:
       EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_USER: ${{ secrets.EC2_USER }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
       DEPLOY_TAG: ${{ github.event.inputs.image_tag || github.sha }}
     steps:
-      # Secrets can't be used in `if:`, so surface EC2_HOST and gate on it. Images are always
-      # built + pushed above; the SSH roll only runs once the prod target is configured.
+      # Secrets can't be used in `if:`, so surface the SSH inputs as env and gate on ALL THREE.
+      # Images are always built + pushed above; the SSH roll only runs once the prod target is
+      # FULLY configured (host + user + private key). A partial config — e.g. EC2_HOST set but
+      # EC2_SSH_KEY missing — must SKIP, not fail, so the pipeline stays green until deploy is
+      # fully wired. (Values are only tested for emptiness here; they are never printed.)
       - name: Check EC2 target is configured
         id: gate
         run: |
-          if [ -z "${EC2_HOST}" ]; then
-            echo "::notice title=Prod roll skipped::EC2_HOST is not set. Images were built and pushed to ECR (tag ${DEPLOY_TAG} + prod-latest); the EC2 roll was skipped. Set EC2_HOST / EC2_USER / EC2_SSH_KEY to enable auto-deploy."
+          if [ -z "${EC2_HOST}" ] || [ -z "${EC2_USER}" ] || [ -z "${EC2_SSH_KEY}" ]; then
+            echo "::notice title=Prod roll skipped::EC2 deploy target not fully configured — need all of EC2_HOST + EC2_USER + EC2_SSH_KEY. Images were built and pushed to ECR (tag ${DEPLOY_TAG} + prod-latest); the EC2 roll was skipped."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
