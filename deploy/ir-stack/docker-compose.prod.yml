@@ -1,0 +1,107 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# IR-STACK — the Investor Relations backend, deployable as a self-contained slice.
+#
+#   ir-service  :3008  — Investor Relations API (applications, eligibility, contact inbox,
+#                        reports, filings, events, …). Owns the `ir` Postgres schema, which it
+#                        creates + syncs on boot. Verifies staff tokens via RS256 (JWT_PUBLIC_KEY
+#                        / JWKS); its public endpoints (apply, eligibility, contact) need no token.
+#   postgres:16        — Shared DB for the slice (ir-service owns the `ir` schema).
+#   caddy:2            — TLS edge + the ONLY public port. Reverse-proxies the IR API domain to
+#                        ir-service so the Vercel frontend's BFF can reach it.
+#
+# WHY THIS EXISTS: the IR frontend runs on Vercel and its /api/ir/* BFF routes call ir-service
+# server-side via IR_SERVICE_URL. With no reachable backend, every onboarding submission fails
+# with "The application service is temporarily unavailable." This slice gives that backend a home.
+#
+#   Run from the REPO ROOT (build context is the monorepo root):
+#     docker compose --env-file deploy/ir-stack/.env.prod \
+#       -f deploy/ir-stack/docker-compose.prod.yml up -d --build
+#
+#   Then on Vercel set:  IR_SERVICE_URL = https://<DOMAIN_IR_API>
+#   See README.md for the full runbook + the "fold into core-stack instead" option.
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-db: &db
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${POSTGRES_DB}
+  DB_USER: ${POSTGRES_USER}
+  DB_PASSWORD: ${POSTGRES_PASSWORD}
+  # In-network Postgres has no TLS. @baalvion/auth-node defaults to requiring DB TLS in production
+  # (correct for RDS); disable it here since the DB is never publicly exposed. Flip to true on RDS.
+  DB_SSL: ${DB_SSL:-false}
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    mem_limit: 512m
+    mem_reservation: 128m
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ir_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  ir-service:
+    image: ${IMAGE_PREFIX:-baalvion}/ir-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/ecosystem/ir-service/Dockerfile
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 64m
+    environment:
+      <<: *db
+      NODE_ENV: production
+      PORT: "3008"
+      NODE_OPTIONS: --max-old-space-size=192
+      # ir-service VERIFIES tokens (it never mints) — only the PUBLIC key is needed. Provide it
+      # inline (\n-escaped) or point BAALVION_JWKS_URI at auth-service's JWKS endpoint.
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      BAALVION_JWKS_URI: ${BAALVION_JWKS_URI:-}
+      # The browser hits Vercel, not this host (the BFF calls server-side), so CORS is belt-and-
+      # suspenders — set it to your IR origin anyway.
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://ir.baalvion.com}
+      # Tenant the public submissions are stamped to (must match the IR org used by staff tooling).
+      IR_DEFAULT_ORG_ID: ${IR_DEFAULT_ORG_ID:-11111111-1111-1111-1111-111111111111}
+      # Minutes an approved applicant waits before the deal room unlocks (product rule: 5).
+      IR_DEAL_ROOM_COOLDOWN_MINUTES: ${IR_DEAL_ROOM_COOLDOWN_MINUTES:-5}
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3008/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN_IR_API: ${DOMAIN_IR_API}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      ir-service: { condition: service_started }
+
+volumes:
+  ir_pgdata:
+  caddy_data:
+  caddy_config:
