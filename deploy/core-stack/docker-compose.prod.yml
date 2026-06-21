@@ -56,6 +56,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     volumes:
       - pgdata:/var/lib/postgresql/data
+      # Fresh-DB bootstrap (runs once, only when the data dir is empty): creates the
+      # `postgres` role so payment-service Flyway V001 succeeds without a crash-loop.
+      - ./initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
@@ -705,7 +708,13 @@ services:
       payment-service: { condition: service_started }
 
 volumes:
+  # EXTERNAL on purpose: production data must survive `docker compose down -v` and any
+  # stack re-creation. Declaring it external means compose will NEVER delete it. deploy.sh
+  # `docker volume create`s it (idempotent) so a first-time host still works with no manual
+  # step. NEVER `docker volume rm core-stack_pgdata` to "reset" — it is the live prod DB.
   pgdata:
+    external: true
+    name: core-stack_pgdata
   redisdata:
   zkdata:
   zklog:
