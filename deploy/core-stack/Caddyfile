@@ -1,0 +1,82 @@
+# Caddy v2 — TLS termination + reverse proxy for the CORE 3-service stack.
+# Caddy auto-provisions + renews Let's Encrypt certs and redirects HTTP→HTTPS. It is the ONLY
+# thing bound to public ports; every backend stays on the internal compose network.
+#
+# Three hosts (point each one's DNS A record at this host's Elastic IP):
+#   {$DOMAIN_API}   → auth-service:3001 (/v1/auth, JWKS) + payment-service:3015 (/v1/gateway)
+#   {$DOMAIN_CMS}   → cms-service:3011  — public content delivery + admin API (vault route denied)
+#   {$DOMAIN_ADMIN} → admin-web:3030    — admin console (only serves traffic with --profile admin)
+#
+# These are APIs / a Next app that set their own CSP. Caddy terminates TLS, compresses, and
+# strips the Server banner; it does NOT inject CSP/HSTS (avoids duplicate headers).
+
+# ── API host: identity + payment, with the surface deliberately narrowed ──────
+{$DOMAIN_API} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+	header {
+		-Server
+	}
+
+	# Identity: login / register / token / JWKS. JWKS is public by design.
+	@auth path /v1/auth /v1/auth/* /.well-known/jwks.json /health
+	handle @auth {
+		reverse_proxy auth-service:3001
+	}
+
+	# Payment — DENY money-moving + internal ops at the edge. There is no BFF in this slice,
+	# so refund/capture (money OUT), the /api/** saga surface, and actuator are NOT internet-
+	# reachable. Operators invoke these over the internal compose network or an admin tool.
+	# (Listed before the allow block below — first matching handle wins.)
+	@payment_locked path /v1/gateway/payments/*/refund /v1/gateway/payments/*/capture /api/* /actuator/*
+	handle @payment_locked {
+		respond "Forbidden" 403
+	}
+
+	# Payment — public product surface: initiate a charge, read its status, and receive
+	# provider webhooks (HMAC-verified inside payment-service). Pass ?site=<slug> to resolve
+	# per-tenant keys from the CMS vault; omit it to use the GLOBAL env keys.
+	@payment path /v1/gateway/payments /v1/gateway/payments/* /v1/gateway/webhooks/*
+	handle @payment {
+		reverse_proxy payment-service:3015
+	}
+
+	# Nothing else on this host is part of the public surface.
+	handle {
+		respond "Not Found" 404
+	}
+}
+
+# ── CMS host: public delivery (what Vercel reads) + admin API; vault NOT exposed ──
+{$DOMAIN_CMS} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+	header {
+		-Server
+	}
+
+	# Defense in depth: the per-tenant provider-key vault (GET /api/v1/internal/integrations/*)
+	# is guarded by the x-internal-secret header and is meant for in-network callers
+	# (payment-service reaches it directly as cms-service:3011). Never expose it to the internet.
+	@cms_internal path /api/v1/internal/* /internal/*
+	handle @cms_internal {
+		respond "Forbidden" 403
+	}
+
+	# Public delivery (/api/v1/public/*, unauthenticated) + admin API (JWKS-verified) both
+	# live on cms-service; the admin API authenticates itself, the public delivery bypasses it.
+	handle {
+		reverse_proxy cms-service:3011
+	}
+}
+
+# ── Admin console (only serves traffic when you run `--profile admin`) ────────
+{$DOMAIN_ADMIN} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+	header {
+		-Server
+	}
+
+	reverse_proxy admin-web:3030
+}

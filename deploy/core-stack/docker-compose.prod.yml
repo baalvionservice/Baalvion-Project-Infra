@@ -1,0 +1,345 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# CORE 3-SERVICE STACK — single EC2 host, Docker Compose.
+#
+# The reduced platform core. Three bounded-context services, the proven wiring:
+#
+#   auth-service   :3001  — Identity. Mints RS256 access tokens + serves JWKS.
+#   cms-service    :3011  — Content/admin data + the per-tenant "Integrations & Keys" vault.
+#   payment-service:3015  — Java PSP gateway. Razorpay + transactions; reads provider keys
+#                           from the CMS vault (per website slug) over the internal network.
+#
+#   Auth flow (unchanged):  auth-service mints RS256 → cms-service verifies admin tokens via
+#     JWKS → CMS public delivery (/api/v1/public/*) needs NO token and bypasses the gateway.
+#   Money flow (unchanged): client → payment-service /v1/gateway/payments → CMS vault
+#     (GET /api/v1/internal/integrations/{slug}, x-internal-secret) → Razorpay. Razorpay calls
+#     back to /v1/gateway/webhooks/razorpay (HMAC-verified).
+#
+# Only Caddy binds public ports (80/443). Postgres, Redis, Kafka and every service are
+# internal to the compose network. Kafka backs payment-service's transactional outbox +
+# saga listeners (it is @EnableKafka) — infra, like Postgres/Redis.
+#
+#   CORE — run from the REPO ROOT:
+#     docker compose --env-file deploy/core-stack/.env.prod \
+#       -f deploy/core-stack/docker-compose.prod.yml up -d --build
+#
+#   ONE-SHOT tools (profile "tools"): cms schema migrate + website register (CMS-vault mode).
+#   ADMIN console (profile "admin"): auth-gateway + admin-web — to manage the CMS vault UI.
+#   See README.md for the full runbook (init-data.sh automates first-time DB setup).
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-db: &db
+  DB_HOST: ${DB_HOST:-postgres}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${POSTGRES_DB}
+  DB_USER: ${POSTGRES_USER}
+  DB_PASSWORD: ${POSTGRES_PASSWORD}
+  # In-network Postgres has no TLS. Services default to requiring DB TLS in production
+  # (correct for RDS), so disable it here — the DB is never publicly exposed. Set DB_SSL=true
+  # (and DB_JDBC_PARAMS=?sslmode=require for the Java service) when DB_HOST moves to RDS.
+  DB_SSL: ${DB_SSL:-false}
+
+x-redis: &redis
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+
+services:
+  # ── Infra ───────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: "2181"
+      ZOOKEEPER_TICK_TIME: "2000"
+    volumes:
+      - zkdata:/var/lib/zookeeper/data
+      - zklog:/var/lib/zookeeper/log
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    restart: unless-stopped
+    depends_on: [zookeeper]
+    environment:
+      KAFKA_BROKER_ID: "1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes:
+      - kafkadata:/var/lib/kafka/data
+
+  # ── Identity: mints RS256 tokens (needs the PRIVATE key) + serves JWKS ───────
+  auth-service:
+    image: ${IMAGE_PREFIX:-baalvion}/core-auth-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/identity/auth-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3001"
+      JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      JWT_ALLOW_HS256_FALLBACK: "false"
+      API_BASE_URL: https://${DOMAIN_API}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@baalvion.com}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+
+  # ── CMS: public delivery + admin API + per-tenant provider-key vault ─────────
+  cms-service:
+    image: ${IMAGE_PREFIX:-baalvion}/core-cms-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: [*db, *redis]
+      NODE_ENV: production
+      PORT: "3011"
+      # Verify admin-API tokens against auth-service's JWKS (public delivery needs no token).
+      BAALVION_JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      # Production guards — cms-service refuses to start with the dev defaults.
+      # INTERNAL_SERVICE_SECRET also gates GET /api/v1/internal/integrations/{slug} (the vault
+      # read), which payment-service calls with header x-internal-secret. They MUST match.
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      # CMS_SECRETS_KEY encrypts the stored PSP provider keys at rest (AES). If you rotate it
+      # AFTER seeding the vault you must re-enter the keys (old ciphertext won't decrypt).
+      CMS_SECRETS_KEY: ${CMS_SECRETS_KEY}
+      CMS_BASE_URL: http://cms-service:3011/api/v1
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      # Content-delivery + admin API make several calls per page; the 200 default is too low.
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-5000}
+      EVENT_TRANSPORT: redis
+      LOG_LEVEL: info
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3011/api/v1/health',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      auth-service: { condition: service_started }
+
+  # ── Payment: Java PSP gateway (Razorpay) → CMS vault → Razorpay ──────────────
+  # Self-migrates on boot (Flyway, history table flyway_history_payment). Razorpay keys resolve
+  # per-call: pass ?site=<slug> → CMS-vault keys for that tenant; omit → GLOBAL env keys below.
+  payment-service:
+    image: ${IMAGE_PREFIX:-baalvion}/core-payment-service:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../../Backend/services/commerce/financial-services-java
+      args:
+        SERVICE: payment-service
+    restart: unless-stopped
+    environment:
+      <<: *db
+      PORT: "3015"
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-}
+      KAFKA_BROKERS: kafka:9092
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      # payment-service → CMS vault (internal). Resolver fetches {CMS_BASE_URL}/internal/integrations/{slug}.
+      CMS_BASE_URL: ${CMS_BASE_URL:-http://cms-service:3011/api/v1}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      # PSP_MOCK=true → deterministic create/refund ids, NO real charges (safe first boot).
+      # Flip to false + real keys (env GLOBAL or CMS vault) to hit api.razorpay.com.
+      PSP_MOCK: "${PSP_MOCK:-true}"
+      # GLOBAL (single-tenant) Razorpay keys — used only when a call omits ?site=. For the
+      # multi-tenant "keep current pattern" flow, leave these blank and store keys in the vault.
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      RAZORPAY_BASE_URL: ${RAZORPAY_BASE_URL:-https://api.razorpay.com}
+      # Permissive by default (matches the proven stack): no IdP minted for the Java suite, and
+      # the public surface is locked down at the Caddy edge (only initiate/status/webhook are
+      # exposed; refund/capture/api/actuator are denied). To enforce RS256 here instead, set
+      # APP_SECURITY_ENABLED=true AND OAUTH_JWK_SET_URI=http://auth-service:3001/.well-known/jwks.json
+      # — but note that also 401s the Razorpay webhook (it carries an HMAC, not a JWT).
+      APP_SECURITY_ENABLED: "${APP_SECURITY_ENABLED:-false}"
+      # Shared DB: let the Java service baseline its own Flyway history on the shared schema.
+      SPRING_FLYWAY_BASELINE_ON_MIGRATE: "${SPRING_FLYWAY_BASELINE_ON_MIGRATE:-true}"
+      SPRING_FLYWAY_BASELINE_VERSION: "${SPRING_FLYWAY_BASELINE_VERSION:-0}"
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_started }
+      cms-service: { condition: service_started }
+
+  # ── ONE-SHOT: create the `cms` schema tables (Sequelize migrations). ─────────
+  # Built to the Dockerfile's `installer` target (keeps devDeps + migrations the slim image strips).
+  cms-migrate:
+    profiles: ["tools"]
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/knowledge/cms-service
+    command: ["sh", "-c", "pnpm exec sequelize-cli db:migrate"]
+    environment:
+      <<: *db
+      NODE_ENV: production
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # ── ONE-SHOT (CMS-vault mode only): register the payment website tenant. ─────
+  # Needed only if you resolve Razorpay keys PER-SITE from the vault (call with ?site=<slug>).
+  # Pass CMS_ORG_ID + CMS_CREATED_BY = the orgId/userId printed by bootstrapSuperAdmin (init-data.sh
+  # does this for you). Skip entirely if you use GLOBAL env keys (single-tenant).
+  cms-register:
+    profiles: ["tools"]
+    build:
+      context: ../..
+      dockerfile: Backend/services/knowledge/cms-service/Dockerfile
+      target: installer
+    working_dir: /repo/Backend/services/knowledge/cms-service
+    command: ["node", "scripts/registerProductionWebsites.cjs"]
+    environment:
+      <<: *db
+      NODE_ENV: production
+      CMS_ORG_ID: ${CMS_ORG_ID:-}
+      CMS_CREATED_BY: ${CMS_CREATED_BY:-}
+    restart: "no"
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  # ── BFF cookie gateway for the admin console (HttpOnly cookies ↔ RS256). ─────
+  auth-gateway:
+    profiles: ["admin"]
+    image: ${IMAGE_PREFIX:-baalvion}/core-auth-gateway:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Backend/services/identity/auth-gateway/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *redis
+      NODE_ENV: production
+      PORT: "3099"
+      AUTH_SERVICE_URL: http://auth-service:3001/v1/auth
+      JWKS_URI: http://auth-service:3001/.well-known/jwks.json
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      CORS_ORIGINS: https://${DOMAIN_ADMIN}
+      BFF_ENFORCEMENT_MODE: hybrid
+      GATEWAY_SIGNING_SECRET: ${GATEWAY_SIGNING_SECRET}
+      COOKIE_ACCESS_NAME: baalvion_access
+      COOKIE_REFRESH_NAME: baalvion_refresh
+      CSRF_COOKIE_NAME: csrf_token
+      COOKIE_SAMESITE: lax
+      # Route the console's CMS calls through the gateway (it forwards the Bearer).
+      SVC_CMS: http://cms-service:3011
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3099/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      auth-service: { condition: service_started }
+      cms-service: { condition: service_started }
+      redis: { condition: service_healthy }
+
+  # ── Admin console (Next.js standalone). NEXT_PUBLIC_* are baked at BUILD. ─────
+  # Use this UI to enter Razorpay keys into the CMS "Integrations & Keys" vault per website.
+  admin-web:
+    profiles: ["admin"]
+    image: ${IMAGE_PREFIX:-baalvion}/core-admin-web:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Frontend/admin-platform/Dockerfile.deploy
+      args:
+        NEXT_PUBLIC_APP_URL: https://${DOMAIN_ADMIN}
+        NEXT_PUBLIC_GATEWAY_URL: /auth-bff
+        NEXT_PUBLIC_CMS_API_URL: https://${DOMAIN_ADMIN}/api-bff/knowledge/cms/api/v1
+        NEXT_PUBLIC_AUTH_URL: https://${DOMAIN_ADMIN}/auth-bff
+        NEXT_PUBLIC_APP_ENV: production
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3030"
+      HOSTNAME: 0.0.0.0
+      # Server-side rewrites proxy /auth-bff + /api-bff to the internal gateway.
+      NEXT_PUBLIC_GATEWAY_URL: http://auth-gateway:3099
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3030',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      auth-gateway: { condition: service_started }
+
+  # ── Edge: TLS termination + the ONLY public ports. Locks down the surface. ───
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN_API: ${DOMAIN_API}
+      DOMAIN_CMS: ${DOMAIN_CMS}
+      DOMAIN_ADMIN: ${DOMAIN_ADMIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      auth-service: { condition: service_started }
+      cms-service: { condition: service_started }
+      payment-service: { condition: service_started }
+
+volumes:
+  pgdata:
+  redisdata:
+  zkdata:
+  zklog:
+  kafkadata:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,3 @@
+# Never commit real secrets from this deploy slice. Only the template is tracked.
+.env*
+!.env.prod.example
