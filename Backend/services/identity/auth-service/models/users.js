@@ -7,6 +7,10 @@ module.exports = function (sequelize, DataTypes) {
         avatar_url: { type: DataTypes.TEXT, allowNull: true },
         status: { type: DataTypes.STRING(16), allowNull: false, defaultValue: 'active' },
         email_verified_at: { type: DataTypes.DATE, allowNull: true },
+        // Phone verification (public buyer/seller self-service). Set via the phone OTP flow;
+        // phone_verified_at is stamped only after a code from auth.phone_otps is confirmed.
+        phone: { type: DataTypes.STRING(32), allowNull: true },
+        phone_verified_at: { type: DataTypes.DATE, allowNull: true },
         mfa_enabled: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
         mfa_secret: { type: DataTypes.TEXT, allowNull: true },
         mfa_pending_secret: { type: DataTypes.TEXT, allowNull: true },

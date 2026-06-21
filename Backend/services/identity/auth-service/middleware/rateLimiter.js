@@ -46,6 +46,9 @@ const forgotPwLimiter     = createRateLimiter({ max: 5,  window: 3600,  prefix: 
 const verifyEmailLimiter  = createRateLimiter({ max: 10, window: 3600,  prefix: 'auth:rl:ve',    keyFn: (req) => req.ip });
 const mfaChallengeLimiter = createRateLimiter({ max: 10, window: 300,   prefix: 'auth:rl:mfa',   keyFn: (req) => req.ip, message: 'Too many MFA attempts. Try again in 5 minutes.' });
 const verifyTokenLimiter  = createRateLimiter({ max: 60, window: 60,    prefix: 'auth:rl:vtok',  keyFn: (req) => req.ip });
+// Phone OTP — keyed by the authenticated user (authMiddleware runs first), IP as a fallback.
+const otpRequestLimiter   = createRateLimiter({ max: 5,  window: 3600,  prefix: 'auth:rl:otpreq', keyFn: (req) => (req.auth?.userId || req.ip), message: 'Too many verification codes requested. Try again later.' });
+const otpVerifyLimiter    = createRateLimiter({ max: 15, window: 900,   prefix: 'auth:rl:otpver', keyFn: (req) => (req.auth?.userId || req.ip), message: 'Too many verification attempts. Try again later.' });
 
 module.exports = {
     createRateLimiter,
@@ -54,4 +57,6 @@ module.exports = {
     verifyEmailLimiter,
     mfaChallengeLimiter,
     verifyTokenLimiter,
+    otpRequestLimiter,
+    otpVerifyLimiter,
 };
