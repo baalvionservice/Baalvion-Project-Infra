@@ -8,7 +8,14 @@ module.exports = {
     env: process.env.NODE_ENV || 'development',
     port: Number(process.env.PORT || 3060),
     apiVersion: 'v1',
+    supportedVersions: ['v1'],
     schema: 'marketplace',
+    // Fallback org for self-service onboarding before a platform identity exists.
+    defaultOrgId: process.env.MARKETPLACE_DEFAULT_ORG_ID || '52c76e5c-0668-4492-ba20-23e7ee16f49b',
+    pagination: {
+        defaultLimit: Number(process.env.MARKETPLACE_DEFAULT_LIMIT || 20),
+        maxLimit: Number(process.env.MARKETPLACE_MAX_LIMIT || 100),
+    },
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000']),
     jwt: {
         // Optional at boot — the canonical verifier is created lazily on first protected
