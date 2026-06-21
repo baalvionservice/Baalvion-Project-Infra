@@ -1481,3 +1481,466 @@ model FeeTransaction {
   @@index([createdAt])
   @@map("fee_transactions")
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// Auction engine (Phase 2): live bidding, proxy/anti-snipe, winner selection,
+// settlement and an append-only per-auction audit log. Money is Decimal(20,4)
+// + currency; settlement posts to the immutable ledger via SettlementInstruction.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum AuctionType {
+  ENGLISH // ascending open-cry with eBay-style proxy bidding
+  SEALED // single sealed bid (reserved for future use)
+  DUTCH // descending clock (reserved for future use)
+}
+
+enum AuctionStatus {
+  DRAFT // created, not yet scheduled
+  SCHEDULED // start/end set, not yet open
+  LIVE // open for bidding
+  ENDED // bidding closed, awaiting settlement
+  SETTLED // winner selected and settlement created/finalised
+  FAILED // closed with no qualifying winner (no bids / reserve unmet)
+  CANCELLED // withdrawn before settlement
+}
+
+enum AuctionBidStatus {
+  ACCEPTED // recorded and standing
+  WINNING // currently the leading bid
+  OUTBID // superseded by a higher (or proxy) bid
+  WON // final winner at close
+  LOST // did not win at close
+  REJECTED // rejected at placement (too low / auction not live)
+  RETRACTED // withdrawn (rare; fully audited)
+}
+
+/// A timed auction lot. Mutable aggregate guarded by optimistic locking; price,
+/// leader and end time advance as bids land. Reserve is a hidden floor.
+model Auction {
+  id                 String        @id @default(uuid()) @db.Uuid
+  organizationId     String        @db.Uuid
+  reference          String? // external/idempotency key (unique per org while set)
+  type               AuctionType   @default(ENGLISH)
+  status             AuctionStatus @default(DRAFT)
+  title              String
+  lotRef             String? // links to a product / listing / trade lot
+  tradeId            String?       @db.Uuid
+  sellerOrgId        String?       @db.Uuid
+  sellerRef          String?
+  currency           String        @default("USD")
+  startPrice         Decimal       @db.Decimal(20, 4)
+  reservePrice       Decimal?      @db.Decimal(20, 4) // hidden floor; unmet => FAILED
+  bidIncrement       Decimal       @default(1) @db.Decimal(20, 4)
+  buyNowPrice        Decimal?      @db.Decimal(20, 4)
+  currentPrice       Decimal       @default(0) @db.Decimal(20, 4) // standing/visible price
+  currentBidId       String?       @db.Uuid // the leading bid
+  leaderActorId      String? // current leader (denormalised for fast checks)
+  leaderMaxProxy     Decimal?      @db.Decimal(20, 4) // hidden proxy ceiling of the leader
+  bidCount           Int           @default(0)
+  startsAt           DateTime
+  endsAt             DateTime
+  originalEndsAt     DateTime
+  antiSnipeSeconds   Int           @default(0) // extension applied when a late bid lands
+  antiSnipeThreshold Int           @default(0) // a bid is "late" within this many secs of endsAt
+  extensionCount     Int           @default(0)
+  winnerBidId        String?       @db.Uuid
+  winnerActorId      String?
+  winningAmount      Decimal?      @db.Decimal(20, 4)
+  settlementId       String?       @db.Uuid // links to a SettlementInstruction
+  settledAt          DateTime?
+  closedReason       String?
+  metadata           Json?
+  version            Int           @default(1)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?
+
+  bids   AuctionBid[]
+  events AuctionEvent[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([endsAt])
+  @@index([tradeId])
+  @@index([deletedAt])
+  @@map("auctions")
+}
+
+/// One bid. The amount and time are immutable facts; only `status` flips as the
+/// auction progresses. The DB forbids deletion (append-only via no-delete trigger).
+model AuctionBid {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  auctionId      String           @db.Uuid
+  bidderActorId  String
+  bidderOrgId    String?          @db.Uuid
+  amount         Decimal          @db.Decimal(20, 4) // visible/standing amount committed
+  maxProxyAmount Decimal?         @db.Decimal(20, 4) // proxy ceiling for auto-bidding
+  currency       String           @default("USD")
+  status         AuctionBidStatus @default(ACCEPTED)
+  isAutoBid      Boolean          @default(false) // raised by the proxy engine, not a human action
+  sequence       Int // monotonic order within the auction
+  reference      String? // idempotency key (unique per org+auction while set)
+  placedAt       DateTime         @default(now())
+  metadata       Json?
+
+  auction Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([auctionId, amount])
+  @@index([auctionId, sequence])
+  @@index([bidderActorId])
+  @@index([status])
+  @@map("auction_bids")
+}
+
+/// Append-only forensic log of everything that happens to an auction: every
+/// bid, proxy raise, anti-snipe extension and state transition. Never updated
+/// or deleted (enforced by DB trigger).
+model AuctionEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  auctionId      String   @db.Uuid
+  sequence       Int // event order within the auction
+  type           String // BID_PLACED | BID_OUTBID | PROXY_RAISE | ANTI_SNIPE_EXTENDED | OPENED | CLOSED | WINNER_SELECTED | SETTLED | CANCELLED | REJECTED
+  actorId        String
+  actorRole      String?
+  bidId          String?  @db.Uuid
+  amount         Decimal? @db.Decimal(20, 4)
+  currency       String?
+  priceBefore    Decimal? @db.Decimal(20, 4)
+  priceAfter     Decimal? @db.Decimal(20, 4)
+  data           Json?
+  correlationId  String?
+  createdAt      DateTime @default(now())
+
+  auction Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  @@unique([auctionId, sequence])
+  @@index([organizationId])
+  @@index([auctionId, sequence])
+  @@index([type])
+  @@index([createdAt])
+  @@map("auction_events")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Compliance publish gate (Phase 2): AI content moderation + a publish gate
+// that folds restricted-goods, sanctions, country-rule and moderation screens
+// into one publish decision before a listing/lot can go live.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum ModerationStatus {
+  PENDING
+  CLEARED
+  FLAGGED // needs human review
+  BLOCKED
+}
+
+enum PublishGateStatus {
+  DRAFT
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+  SUSPENDED
+}
+
+enum PublishGateDecision {
+  APPROVE
+  REVIEW
+  REJECT
+}
+
+/// One AI moderation verdict over a piece of listing content.
+model ModerationCase {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  subjectType    String // listing | auction_lot | product | document
+  subjectId      String
+  reference      String?
+  status         ModerationStatus @default(PENDING)
+  decision       String? // CLEAR | REVIEW | BLOCK (engine verdict)
+  score          Int              @default(0)
+  model          String           @default("heuristic-v1")
+  labels         Json?
+  reasons        Json?
+  decidedBy      String?
+  decidedAt      DateTime?
+  metadata       Json?
+  version        Int              @default(1)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([organizationId])
+  @@index([subjectType, subjectId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("moderation_cases")
+}
+
+/// The publish gate for a subject (listing/lot). Aggregates the four compliance
+/// checks into a decision and tracks the publish lifecycle. Mutable workflow row
+/// under optimistic locking; soft-deleted, never hard-deleted.
+model PublishGate {
+  id              String               @id @default(uuid()) @db.Uuid
+  organizationId  String               @db.Uuid
+  subjectType     String
+  subjectId       String
+  reference       String?
+  tradeId         String?              @db.Uuid
+  status          PublishGateStatus    @default(DRAFT)
+  decision        PublishGateDecision?
+  checks          Json?
+  blockers        Json?
+  warnings        Json?
+  requiredActions Json?
+  goods           Json?
+  sanctions       Json?
+  country         Json?
+  moderationCaseId String?             @db.Uuid
+  evaluatedAt     DateTime?
+  decidedBy       String?
+  decidedAt       DateTime?
+  publishedAt     DateTime?
+  metadata        Json?
+  version         Int                  @default(1)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  deletedAt       DateTime?
+
+  @@index([organizationId])
+  @@index([subjectType, subjectId])
+  @@index([status])
+  @@index([tradeId])
+  @@index([deletedAt])
+  @@map("publish_gates")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Logistics engine (Phase 2): warehouses, carriers, freight quotes, container
+// management, shipments and an append-only tracking timeline.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum FreightMode {
+  SEA
+  AIR
+  ROAD
+  RAIL
+  MULTIMODAL
+}
+
+enum WarehouseType {
+  GENERAL
+  DISTRIBUTION
+  BONDED
+  COLD_STORAGE
+  FULFILLMENT
+  CROSS_DOCK
+}
+
+enum FreightQuoteStatus {
+  DRAFT
+  QUOTED
+  ACCEPTED
+  EXPIRED
+  REJECTED
+}
+
+enum LogisticsShipmentStatus {
+  CREATED
+  BOOKED
+  IN_TRANSIT
+  ARRIVED
+  CUSTOMS_HOLD
+  DELIVERED
+  EXCEPTION
+  CANCELLED
+}
+
+enum ContainerStatus {
+  EMPTY
+  ALLOCATED
+  LOADING
+  LOADED
+  IN_TRANSIT
+  DISCHARGED
+  RETURNED
+}
+
+model Warehouse {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @db.Uuid
+  code           String
+  name           String
+  type           WarehouseType @default(GENERAL)
+  addressLine    String?
+  city           String?
+  country        String?
+  lat            Decimal?      @db.Decimal(9, 6)
+  lng            Decimal?      @db.Decimal(9, 6)
+  capacityUnits  Int?
+  status         String        @default("ACTIVE") // ACTIVE | INACTIVE
+  metadata       Json?
+  version        Int           @default(1)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  containers Container[]
+
+  @@index([organizationId])
+  @@index([country])
+  @@index([deletedAt])
+  @@map("warehouses")
+}
+
+model Carrier {
+  id             String      @id @default(uuid()) @db.Uuid
+  organizationId String      @db.Uuid
+  code           String
+  name           String
+  mode           FreightMode
+  scac           String? // Standard Carrier Alpha Code (ocean/road)
+  iataCode       String? // air carrier code
+  services       Json?
+  rating         Decimal?    @db.Decimal(3, 2)
+  status         String      @default("ACTIVE")
+  metadata       Json?
+  version        Int         @default(1)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+
+  @@index([organizationId])
+  @@index([mode])
+  @@index([deletedAt])
+  @@map("carriers")
+}
+
+model FreightQuote {
+  id                 String             @id @default(uuid()) @db.Uuid
+  organizationId     String             @db.Uuid
+  reference          String?
+  carrierId          String?            @db.Uuid
+  mode               FreightMode
+  originCountry      String?
+  originPort         String?
+  destinationCountry String?
+  destinationPort    String?
+  containerType      String?
+  weightKg           Decimal?           @db.Decimal(14, 3)
+  volumeM3           Decimal?           @db.Decimal(14, 3)
+  chargeableWeightKg Decimal?           @db.Decimal(14, 3)
+  currency           String             @default("USD")
+  baseAmount         Decimal            @db.Decimal(20, 4)
+  surchargeAmount    Decimal            @default(0) @db.Decimal(20, 4)
+  totalAmount        Decimal            @db.Decimal(20, 4)
+  transitDays        Int?
+  status             FreightQuoteStatus @default(QUOTED)
+  validUntil         DateTime?
+  acceptedShipmentId String?            @db.Uuid
+  metadata           Json?
+  version            Int                @default(1)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
+
+  @@index([organizationId])
+  @@index([carrierId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("freight_quotes")
+}
+
+model LogisticsShipment {
+  id                  String                  @id @default(uuid()) @db.Uuid
+  organizationId      String                  @db.Uuid
+  reference           String?
+  tradeId             String?                 @db.Uuid
+  carrierId           String?                 @db.Uuid
+  freightQuoteId      String?                 @db.Uuid
+  mode                FreightMode
+  status              LogisticsShipmentStatus @default(CREATED)
+  trackingNumber      String?
+  originWarehouseId   String?                 @db.Uuid
+  destWarehouseId     String?                 @db.Uuid
+  originLocation      String?
+  destinationLocation String?
+  incoterm            String?
+  etd                 DateTime?
+  eta                 DateTime?
+  deliveredAt         DateTime?
+  lastEventAt         DateTime?
+  lastLocation        String?
+  metadata            Json?
+  version             Int                     @default(1)
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  deletedAt           DateTime?
+
+  containers Container[]
+  events     ShipmentTrackingEvent[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([tradeId])
+  @@index([carrierId])
+  @@index([deletedAt])
+  @@map("logistics_shipments")
+}
+
+model Container {
+  id              String          @id @default(uuid()) @db.Uuid
+  organizationId  String          @db.Uuid
+  containerNo     String
+  type            String // 20GP | 40GP | 40HC | 45HC | 20RF | ...
+  sealNo          String?
+  status          ContainerStatus @default(EMPTY)
+  shipmentId      String?         @db.Uuid
+  warehouseId     String?         @db.Uuid
+  grossWeightKg   Decimal?        @db.Decimal(14, 3)
+  tareWeightKg    Decimal?        @db.Decimal(14, 3)
+  cargoDescription String?
+  metadata        Json?
+  version         Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+
+  shipment  LogisticsShipment? @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+  warehouse Warehouse?         @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([shipmentId])
+  @@index([warehouseId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("containers")
+}
+
+/// Append-only tracking timeline for a shipment (never updated or deleted).
+model ShipmentTrackingEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  shipmentId     String   @db.Uuid
+  sequence       Int
+  type           String // BOOKED | DEPARTED | ARRIVED | CUSTOMS | DELIVERED | EXCEPTION | ...
+  status         String?
+  location       String?
+  description    String?
+  occurredAt     DateTime
+  source         String   @default("system")
+  data           Json?
+  correlationId  String?
+  createdAt      DateTime @default(now())
+
+  shipment LogisticsShipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@unique([shipmentId, sequence])
+  @@index([organizationId])
+  @@index([shipmentId, sequence])
+  @@index([occurredAt])
+  @@map("shipment_tracking_events")
+}

@@ -112,6 +112,11 @@ export const PATHS = {
   ACCEPT_INVITE: '/accept-invite',
   FORGOT_PASSWORD: '/forgot-password',
   RESET_PASSWORD: '/reset-password',
+  // Public self-service registration + verification (buyer/seller)
+  REGISTER: '/register',
+  VERIFY_EMAIL: '/verify-email',
+  // Post-signup phone verification (auth-required)
+  VERIFY_PHONE: '/verify-phone',
   // Account security (auth-required, covered by /settings prefix)
   MFA_SETUP: '/settings/mfa',
   PROFILE: '/profile',

@@ -49,6 +49,7 @@ export const AUTH_REQUIRED_PREFIXES: readonly string[] = [
   '/trade-management',
   '/trade-ops', // Trade Operations control center (shipment-centric TradeOps Cloud surface)
   '/settings',
+  '/verify-phone',           // post-signup phone OTP — needs the just-established session
   '/platform/organizations', // platform console — requires auth
   '/organization',           // org self-administration (/organization/settings, /users, /audit)
 ];
@@ -91,6 +92,8 @@ export const PUBLIC_EXACT: ReadonlySet<string> = new Set([
   '/accept-invite',
   '/forgot-password',
   '/reset-password',
+  '/register',
+  '/verify-email',
 ]);
 
 const matchesPrefix = (prefixes: readonly string[], pathname: string): boolean =>

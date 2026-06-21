@@ -45,6 +45,7 @@ export {
   financingRequestRepository,
 } from './finance-repository';
 export { DocumentRepository, documentRepository } from './document-repository';
+export type { VaultFilter } from './document-repository';
 export { WorkflowRepository, workflowRepository } from './workflow-repository';
 export { EventRepository, eventRepository } from './event-repository';
 export type { DomainEventInput, DeadLetterInput } from './event-repository';
@@ -105,3 +106,55 @@ export {
   feeTransactionRepository,
 } from './treasury-repository';
 export type { WalletFilter, WalletProjectionInput } from './treasury-repository';
+export {
+  AuctionRepository,
+  AuctionBidRepository,
+  AuctionEventRepository,
+  auctionRepository,
+  auctionBidRepository,
+  auctionEventRepository,
+} from './auction-repository';
+export type {
+  AuctionFilter,
+  AuctionCreateInput,
+  AuctionBidCreateInput,
+  AuctionEventCreateInput,
+} from './auction-repository';
+export {
+  ModerationCaseRepository,
+  PublishGateRepository,
+  moderationCaseRepository,
+  publishGateRepository,
+} from './compliance-publish-repository';
+export type {
+  PublishGateFilter,
+  ModerationCaseCreateInput,
+  PublishGateCreateInput,
+} from './compliance-publish-repository';
+export {
+  WarehouseRepository,
+  CarrierRepository,
+  FreightQuoteRepository,
+  LogisticsShipmentRepository,
+  ContainerRepository,
+  ShipmentTrackingEventRepository,
+  warehouseRepository,
+  carrierRepository,
+  freightQuoteRepository,
+  logisticsShipmentRepository,
+  containerRepository,
+  shipmentTrackingEventRepository,
+} from './logistics-repository';
+export type {
+  WarehouseFilter,
+  CarrierFilter,
+  FreightQuoteFilter,
+  ShipmentFilter,
+  ContainerFilter,
+  WarehouseCreateInput,
+  CarrierCreateInput,
+  FreightQuoteCreateInput,
+  LogisticsShipmentCreateInput,
+  ContainerCreateInput,
+  TrackingEventCreateInput,
+} from './logistics-repository';

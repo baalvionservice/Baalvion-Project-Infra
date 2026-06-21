@@ -156,6 +156,63 @@ const restrictionSchema = z.object({
   reference: z.string().optional(),
 });
 
+// ── Media, commercial terms & variant options ────────────────────────────────
+// (the "Images", "MOQ" and "Variants" capabilities, expressed as shape only)
+
+/**
+ * A media asset attached to a product or variant. The GCKB stores **metadata,
+ * not binaries** (consistent with the engine's "metadata, not integration"
+ * boundary): the asset itself lives in object storage / a CDN; here we keep its
+ * URL plus presentation metadata.
+ */
+const mediaItemSchema = z.object({
+  url: z.string().url(),
+  type: z.enum(['IMAGE', 'VIDEO', 'DOCUMENT', 'MODEL_3D', 'OTHER']).optional(),
+  role: z.string().optional(), // PRIMARY | GALLERY | THUMBNAIL | SWATCH | PACKAGING | LABEL | SPEC_SHEET
+  alt: z.string().optional(),
+  title: z.string().optional(),
+  sortOrder: z.number().int().nonnegative().optional(),
+  width: z.number().int().positive().optional(),
+  height: z.number().int().positive().optional(),
+  mimeType: z.string().optional(),
+  variantKey: z.string().optional(), // pins the asset to one variant
+  checksum: z.string().optional(),
+});
+
+/** A quantity-tiered price point (volume pricing). */
+const priceBreakSchema = z.object({
+  minQuantity: z.number().nonnegative(),
+  unitPrice: z.number().nonnegative(),
+  currency: z.string().length(3).optional(),
+});
+
+/**
+ * Commercial / order terms — the MOQ envelope: minimum order quantity, order
+ * increment, lead times, sampling and tiered pricing. Applies to a product (and
+ * may be overridden per variant).
+ */
+const commercialTermsSchema = z.object({
+  minimumOrderQuantity: z.number().positive().optional(), // MOQ
+  orderIncrement: z.number().positive().optional(), // saleable multiple above the MOQ
+  maximumOrderQuantity: z.number().positive().optional(),
+  packagingMultiple: z.number().int().positive().optional(),
+  unitOfMeasure: z.string().optional(), // PCS | KG | L | CARTON | …
+  leadTimeDays: z.number().int().nonnegative().optional(),
+  sampleAvailable: z.boolean().optional(),
+  sampleLeadTimeDays: z.number().int().nonnegative().optional(),
+  currency: z.string().length(3).optional(),
+  unitPrice: z.number().nonnegative().optional(),
+  priceBreaks: z.array(priceBreakSchema).optional(),
+  incoterms: z.array(z.string()).optional(),
+});
+
+/** A configurable variant axis (e.g. Colour → [Red, Blue]; Size → [S, M, L]). */
+const variantOptionSchema = z.object({
+  name: z.string().min(1),
+  values: z.array(z.string().min(1)).min(1),
+  displayName: z.string().optional(),
+});
+
 // ── Entity attribute schemas ─────────────────────────────────────────────────
 
 const productSchema = z.object({
@@ -189,6 +246,12 @@ const productSchema = z.object({
   certificates: z.array(certificateRefSchema).optional(),
   compliance: complianceSchema.optional(),
   restrictions: z.array(restrictionSchema).optional(),
+  // Media (images / video / docs), commercial order terms (MOQ) & the axes this
+  // product varies on. Individual variants are first-class `product_variant`
+  // records linked back by a VARIANT_OF edge.
+  media: z.array(mediaItemSchema).optional(),
+  commercialTerms: commercialTermsSchema.optional(),
+  variantOptions: z.array(variantOptionSchema).optional(),
 });
 
 const productCategorySchema = z.object({
@@ -219,12 +282,60 @@ const manufacturerSchema = z.object({
   address: z.string().optional(),
 });
 
+/**
+ * A sellable variant of a product (SKU level). It carries the parent reference
+ * (also emitted as a typed VARIANT_OF edge), its own identifiers, the option
+ * values that distinguish it on the parent's axes, its own media, price, and an
+ * optional per-variant MOQ / pricing override.
+ */
+const productVariantSchema = z.object({
+  parentProductKey: z.string().min(1), // → parent product (also a VARIANT_OF edge)
+  sku: z.string().optional(),
+  gtin: z.string().optional(),
+  mpn: z.string().optional(),
+  barcode: z.string().optional(),
+  optionValues: z.record(z.string(), z.string()).optional(), // { Colour: 'Red', Size: 'M' }
+  media: z.array(mediaItemSchema).optional(),
+  weight: weightSchema.optional(),
+  volume: volumeSchema.optional(),
+  packaging: packagingSchema.optional(),
+  commercialTerms: commercialTermsSchema.optional(), // per-variant MOQ / pricing override
+  price: z
+    .object({ currency: z.string().length(3).optional(), amount: z.number().nonnegative().optional() })
+    .optional(),
+  position: z.number().int().nonnegative().optional(),
+  isDefault: z.boolean().optional(),
+  variantStatus: z.string().optional(), // ACTIVE | INACTIVE | DISCONTINUED (domain status)
+});
+
 // ── Natural-key derivation ───────────────────────────────────────────────────
 
 function productKey(i: KbWriteInput): string {
   const a = i.attributes ?? {};
   const id = a.globalProductId ?? a.gtin ?? a.sku ?? i.code;
   return id ? String(id).trim() : slug(i.name);
+}
+
+/**
+ * Variant natural key: SKU › GTIN › `code`, else a deterministic composite of
+ * the parent key and its (order-independent) option values — used only when
+ * option values are present, since the parent key alone does not distinguish one
+ * variant from another — else slug(name).
+ */
+function variantKey(i: KbWriteInput): string {
+  const a = i.attributes ?? {};
+  const explicit = a.sku ?? a.gtin ?? i.code;
+  if (explicit) return String(explicit).trim();
+  const parent = a.parentProductKey ? String(a.parentProductKey) : '';
+  const opts =
+    a.optionValues && typeof a.optionValues === 'object'
+      ? Object.entries(a.optionValues as Record<string, string>)
+          .map(([k, v]) => `${k}=${v}`)
+          .sort()
+          .join('/')
+      : '';
+  if (parent && opts) return `${parent}:${opts}`.toUpperCase();
+  return slug(i.name);
 }
 
 function codeOrSlugKey(i: KbWriteInput): string {
@@ -264,6 +375,33 @@ const productFormFields: KbEntityDefinition['formFields'] = [
   { name: 'tradeMetadata', label: 'Trade metadata', type: 'json', placement: 'attributes' },
   { name: 'compliance', label: 'Compliance metadata', type: 'json', placement: 'attributes' },
   { name: 'restrictions', label: 'Restrictions', type: 'json', placement: 'attributes' },
+  { name: 'media', label: 'Media (images / video / docs)', type: 'json', placement: 'attributes', description: 'Array of assets: { url, role, alt, sortOrder }.' },
+  { name: 'commercialTerms', label: 'Commercial terms (MOQ, pricing)', type: 'json', placement: 'attributes', description: 'MOQ, order increment, lead time, price breaks.' },
+  { name: 'variantOptions', label: 'Variant options (axes)', type: 'json', placement: 'attributes', description: 'Axes this product varies on, e.g. Colour, Size.' },
+];
+
+const variantRelationshipTypes: RelationshipTypeDescriptor[] = [
+  { relationType: PRODUCT_RELATIONSHIP_TYPES.VARIANT_OF, label: 'Variant of', toType: 'product' },
+  { relationType: PRODUCT_RELATIONSHIP_TYPES.CLASSIFIED_UNDER_HS, label: 'HS classification', toType: 'hs_code' },
+  { relationType: PRODUCT_RELATIONSHIP_TYPES.REQUIRES_CERTIFICATE, label: 'Requires certificate', toType: 'certificate' },
+  { relationType: PRODUCT_RELATIONSHIP_TYPES.SUBSTITUTE_FOR, label: 'Substitute for', toType: 'product' },
+];
+
+const productVariantFormFields: KbEntityDefinition['formFields'] = [
+  { name: 'name', label: 'Variant name', type: 'string', placement: 'top', required: true },
+  { name: 'code', label: 'SKU / code', type: 'string', placement: 'top', description: 'Promoted, indexed identifier.' },
+  { name: 'hsCode', label: 'HS code', type: 'string', placement: 'top', description: 'Optional per-variant HS override.' },
+  { name: 'tags', label: 'Tags', type: 'string[]', placement: 'top' },
+  { name: 'parentProductKey', label: 'Parent product', type: 'string', placement: 'attributes', required: true },
+  { name: 'optionValues', label: 'Option values', type: 'json', placement: 'attributes', description: 'e.g. { "Colour": "Red", "Size": "M" }.' },
+  { name: 'gtin', label: 'GTIN / EAN / UPC', type: 'string', placement: 'attributes' },
+  { name: 'barcode', label: 'Barcode', type: 'string', placement: 'attributes' },
+  { name: 'price', label: 'Price', type: 'json', placement: 'attributes' },
+  { name: 'commercialTerms', label: 'Commercial terms (MOQ)', type: 'json', placement: 'attributes' },
+  { name: 'media', label: 'Media', type: 'json', placement: 'attributes' },
+  { name: 'weight', label: 'Weight', type: 'json', placement: 'attributes' },
+  { name: 'volume', label: 'Volume / dimensions', type: 'json', placement: 'attributes' },
+  { name: 'variantStatus', label: 'Status', type: 'enum', placement: 'attributes', options: ['ACTIVE', 'INACTIVE', 'DISCONTINUED'] },
 ];
 
 // ── The product-domain registry ──────────────────────────────────────────────
@@ -339,5 +477,17 @@ export const productEntities: KbEntityDefinition[] = [
       { name: 'website', label: 'Website', type: 'string', placement: 'attributes' },
       { name: 'email', label: 'Email', type: 'string', placement: 'attributes' },
     ],
+  }),
+  simpleEntity({
+    entityType: 'product_variant',
+    label: 'Product Variant',
+    description: 'A sellable, SKU-level variant of a product: option values (colour/size/grade), barcode, media, price and a per-variant MOQ override. Linked to its parent product by a VARIANT_OF edge.',
+    domain: 'product',
+    countryScoped: false,
+    schema: productVariantSchema,
+    recordKey: variantKey,
+    events: { created: 'PRODUCT_VARIANT_CREATED', updated: 'PRODUCT_VARIANT_UPDATED', archived: 'PRODUCT_VARIANT_ARCHIVED' },
+    formFields: productVariantFormFields,
+    relationshipTypes: variantRelationshipTypes,
   }),
 ];

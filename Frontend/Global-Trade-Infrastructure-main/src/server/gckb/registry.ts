@@ -4,7 +4,8 @@
  * composes every knowledge-base entity. The country-reference domain (country,
  * currency, language, timezone, trade_region, subdivision, authority,
  * point_of_entry, trade_agreement) lives in `./registries/country-reference`; the
- * product registry in `./registries/product`. The `country_policy` entity — the
+ * product registry (incl. `product_variant`) in `./registries/product` and stock
+ * positions in `./registries/inventory`. The `country_policy` entity — the
  * long tail of import/export policy, tax, tariff, duty, certificate, license,
  * restricted/prohibited goods, inspection/packaging/labeling rules, document &
  * form requirements, digital-API metadata, signatures, compliance, risk and
@@ -28,6 +29,7 @@ import {
 } from './entity-kit';
 import { countryReferenceEntities } from './registries/country-reference';
 import { productEntities } from './registries/product';
+import { inventoryEntities } from './registries/inventory';
 import { hsCodeEntities } from './registries/hs-code';
 import { certificateEntities } from './registries/certificate';
 import { organizationEntities } from './registries/organization';
@@ -118,7 +120,8 @@ const countryPolicyEntity: KbEntityDefinition = {
 const definitions: KbEntityDefinition[] = [
   ...countryReferenceEntities, // country, currency, language, timezone, trade_region, subdivision, authority, point_of_entry, trade_agreement
   countryPolicyEntity, // the policy long tail (policyType-discriminated)
-  ...productEntities, // Module 1 — Universal Product Registry
+  ...productEntities, // Module 1 — Universal Product Registry (+ product_variant)
+  ...inventoryEntities, // Inventory — stock positions (inventory_item)
   ...hsCodeEntities, // Module 2 — Global HS Registry
   ...certificateEntities, // Module 3 — Global Certificate Registry
   ...organizationEntities, // Module 4 — Universal Organization Registry
