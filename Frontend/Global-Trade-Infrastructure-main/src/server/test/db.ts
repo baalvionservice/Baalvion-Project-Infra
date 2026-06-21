@@ -6,6 +6,13 @@ import { prisma } from '../db/prisma';
 import { organizationRepository } from '../repositories';
 
 const TABLES = [
+  'ledger_entries',
+  'ledger_transactions',
+  'settlement_instructions',
+  'ledger_accounts',
+  'rule_revisions',
+  'rules',
+  'rule_sets',
   'workflow_events',
   'domain_events',
   'dead_letter_events',

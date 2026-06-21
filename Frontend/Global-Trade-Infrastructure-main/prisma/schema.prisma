@@ -143,21 +143,21 @@ model Organization {
   updatedAt DateTime         @updatedAt
   deletedAt DateTime?
 
-  users        User[]
-  buyers       Buyer[]
-  suppliers    Supplier[]
-  trades       TradeTransaction[]
-  rfqs         Rfq[]
-  deals        Deal[]
-  orders       Order[]
-  escrows      Escrow[]
-  payments     Payment[]
-  shipments    Shipment[]
-  customs      CustomsDeclaration[]
-  settlements  Settlement[]
-  documents    Document[]
-  notifications Notification[]
-  auditLogs    AuditLog[]
+  users              User[]
+  buyers             Buyer[]
+  suppliers          Supplier[]
+  trades             TradeTransaction[]
+  rfqs               Rfq[]
+  deals              Deal[]
+  orders             Order[]
+  escrows            Escrow[]
+  payments           Payment[]
+  shipments          Shipment[]
+  customs            CustomsDeclaration[]
+  settlements        Settlement[]
+  documents          Document[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
   riskAssessments    RiskAssessment[]
   complianceChecks   ComplianceCheck[]
   financeInstruments TradeFinanceInstrument[]
@@ -168,15 +168,15 @@ model Organization {
 }
 
 model User {
-  id             String     @id @default(uuid()) @db.Uuid
-  organizationId String     @db.Uuid
-  email          String     @unique
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  email          String    @unique
   name           String
-  status         String     @default("active")
+  status         String    @default("active")
   metadata       Json?
-  version        Int        @default(1)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -188,12 +188,12 @@ model User {
 }
 
 model Role {
-  id          String           @id @default(uuid()) @db.Uuid
-  name        String           @unique
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @unique
   description String?
-  version     Int              @default(1)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  version     Int       @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
   permissions RolePermission[]
@@ -203,10 +203,10 @@ model Role {
 }
 
 model Permission {
-  id        String           @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
   resource  String
   action    String
-  createdAt DateTime         @default(now())
+  createdAt DateTime @default(now())
 
   roles RolePermission[]
 
@@ -215,8 +215,8 @@ model Permission {
 }
 
 model RolePermission {
-  roleId       String     @db.Uuid
-  permissionId String     @db.Uuid
+  roleId       String @db.Uuid
+  permissionId String @db.Uuid
 
   role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
@@ -279,9 +279,9 @@ model Supplier {
 // ──────────────────────────────────────────────────────────────────────────
 
 model TradeTransaction {
-  id             String           @id @default(uuid()) @db.Uuid
-  organizationId String           @db.Uuid
-  reference      String           @unique
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  reference      String @unique
   correlationId  String
 
   buyerId    String? @db.Uuid
@@ -580,18 +580,18 @@ model WorkflowEvent {
 }
 
 model DomainEvent {
-  id            String        @id @default(uuid()) @db.Uuid
-  eventId       String        @unique
-  organizationId String?      @db.Uuid
-  type          String
-  tradeId       String?       @db.Uuid
-  correlationId String
-  userId        String?
-  source        String        @default("CORE")
-  severity      EventSeverity @default(INFO)
-  payload       Json
-  occurredAt    DateTime
-  createdAt     DateTime      @default(now())
+  id             String        @id @default(uuid()) @db.Uuid
+  eventId        String        @unique
+  organizationId String?       @db.Uuid
+  type           String
+  tradeId        String?       @db.Uuid
+  correlationId  String
+  userId         String?
+  source         String        @default("CORE")
+  severity       EventSeverity @default(INFO)
+  payload        Json
+  occurredAt     DateTime
+  createdAt      DateTime      @default(now())
 
   @@index([type])
   @@index([organizationId])
@@ -785,4 +785,317 @@ model FinancingRequest {
   @@index([status])
   @@index([deletedAt])
   @@map("financing_requests")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Rule Engine (Phase 1 — configuration over code)
+//
+// Every business rule lives here as DATA, never as a TS `if/switch`. A RuleSet
+// is a versioned, conflict-resolving collection of Rules. A Rule pairs a safe,
+// structured condition AST (see server/rules/condition.ts) with one or more
+// effects (see server/rules/types.ts). Selector columns (country/hsCode/role/…)
+// pre-filter candidate rules cheaply before the condition is evaluated.
+//
+// organizationId is NULLABLE: NULL = a platform-global regulatory baseline that
+// every tenant inherits; a non-null value = a tenant-specific override/addition.
+// Evaluation merges global + tenant rules. RLS (see the migration) lets every
+// tenant read global rows + its own, and write only its own.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum RuleStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum ConflictStrategy {
+  PRIORITY // highest-priority matching rule's decision wins
+  FIRST_MATCH // only the first matching rule (priority desc, then createdAt) applies
+  ALL_MATCH // every matching rule contributes; most-severe decision wins
+  DENY_OVERRIDES // any DENY beats REVIEW beats ALLOW
+  ALLOW_OVERRIDES // any ALLOW beats DENY
+}
+
+enum TradeDirection {
+  IMPORT
+  EXPORT
+  BOTH
+}
+
+model RuleSet {
+  id               String           @id @default(uuid()) @db.Uuid
+  organizationId   String?          @db.Uuid // null = platform-global baseline
+  key              String
+  name             String
+  description      String?
+  category         String // SANCTIONS | LICENSING | TAX | DOCUMENT | ROUTING | … (data, not enum)
+  status           RuleStatus       @default(ACTIVE)
+  conflictStrategy ConflictStrategy @default(DENY_OVERRIDES)
+  defaultDecision  String           @default("ALLOW") // decision when no rule matches
+  effectiveFrom    DateTime?
+  effectiveTo      DateTime?
+  priority         Int              @default(0)
+  metadata         Json?
+  version          Int              @default(1)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+
+  rules     Rule[]
+  revisions RuleRevision[]
+
+  @@index([organizationId, key])
+  @@index([category])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("rule_sets")
+}
+
+model Rule {
+  id             String     @id @default(uuid()) @db.Uuid
+  ruleSetId      String     @db.Uuid
+  organizationId String?    @db.Uuid // mirrors the set's org (RLS + fast filter)
+  key            String
+  name           String
+  description    String?
+  priority       Int        @default(0)
+  status         RuleStatus @default(ACTIVE)
+  condition      Json // safe structured AST — never an evaluated string
+  effect         Json // structured effect(s) applied on match
+
+  // Cheap pre-filter selectors (null = matches any)
+  country         String?
+  region          String?
+  hsCode          String?
+  productCategory String?
+  orgType         String?
+  role            String?
+  direction       TradeDirection @default(BOTH)
+
+  tags          String[]
+  effectiveFrom DateTime?
+  effectiveTo   DateTime?
+  metadata      Json?
+  version       Int       @default(1)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  ruleSet RuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+
+  @@index([ruleSetId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([country])
+  @@index([hsCode])
+  @@index([deletedAt])
+  @@map("rules")
+}
+
+/// Append-only version history for rule sets and rules (immutable, CR-14). Each
+/// create/update/delete writes one snapshot row enabling version comparison and
+/// forensic replay. Enforced no-UPDATE/DELETE at the database layer (migration).
+model RuleRevision {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  ruleSetId      String?  @db.Uuid
+  ruleId         String?  @db.Uuid
+  entityType     String // RULE_SET | RULE
+  entityKey      String
+  version        Int
+  action         String // CREATE | UPDATE | DELETE | PUBLISH | SUSPEND | ARCHIVE
+  snapshot       Json
+  actorId        String
+  actorRole      String?
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  ruleSet RuleSet? @relation(fields: [ruleSetId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([ruleSetId])
+  @@index([ruleId])
+  @@index([entityType, entityKey])
+  @@index([createdAt])
+  @@map("rule_revisions")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Settlement ledger (Phase 2 — Global Settlement Network / Multi-Ledger System)
+//
+// An immutable double-entry ledger and the settlement engine that posts to it.
+// Every money movement is a balanced ledger_transaction (Σdebits = Σcredits)
+// made of append-only ledger_entries; account balances are maintained in the
+// same transaction under optimistic locking. Tenant-owned and RLS-scoped.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum LedgerNormalSide {
+  DEBIT
+  CREDIT
+}
+
+enum LedgerEntryDirection {
+  DEBIT
+  CREDIT
+}
+
+enum LedgerTxnStatus {
+  POSTED
+  REVERSED
+}
+
+enum SettlementInstrStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  PARTIALLY_SETTLED
+  SETTLED
+  FAILED
+  CANCELLED
+  REVERSED
+}
+
+enum SettlementRail {
+  INTERNAL
+  SWIFT
+  SEPA
+  FEDWIRE
+  RTGS
+  ACH
+  UPI
+  NEFT
+  IMPS
+  FPS
+  BACS
+}
+
+model LedgerAccount {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  code           String // unique per org while live
+  name           String
+  type           LedgerAccountType
+  // Functional role: OPERATING | SETTLEMENT | CLEARING | ESCROW | RESERVE |
+  // LIQUIDITY | FX | FEE_INCOME | INTEREST | SUSPENSE | EXTERNAL (data, not enum)
+  purpose        String            @default("OPERATING")
+  normalSide     LedgerNormalSide
+  currency       String            @default("USD")
+  status         String            @default("ACTIVE") // ACTIVE | FROZEN | CLOSED
+  // System/clearing accounts may run negative; customer balance accounts may not.
+  allowNegative  Boolean           @default(false)
+  balance        Decimal           @default(0) @db.Decimal(20, 4)
+  // The customer org this account belongs to (null = platform-internal account).
+  ownerOrgId     String?           @db.Uuid
+  metadata       Json?
+  version        Int               @default(1)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  deletedAt      DateTime?
+
+  entries LedgerEntry[]
+
+  @@index([organizationId])
+  @@index([code])
+  @@index([purpose])
+  @@index([ownerOrgId])
+  @@index([deletedAt])
+  @@map("ledger_accounts")
+}
+
+/// A balanced posting (journal entry). Immutable: corrections are made by a
+/// reversing transaction (self-relation), never by editing or deleting a row.
+model LedgerTransaction {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @db.Uuid
+  reference      String? // external/idempotency key (unique per org while set)
+  description    String?
+  status         LedgerTxnStatus @default(POSTED)
+  currency       String
+  amount         Decimal         @db.Decimal(20, 4) // the balanced total (debits = credits)
+  tradeId        String?         @db.Uuid
+  correlationId  String
+  source         String          @default("ledger")
+  reversalOfId   String?         @db.Uuid // this transaction reverses another
+  reversedById   String?         @db.Uuid // the transaction that reversed this one
+  postedAt       DateTime        @default(now())
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+
+  entries    LedgerEntry[]
+  reversalOf LedgerTransaction?  @relation("LedgerReversal", fields: [reversalOfId], references: [id], onDelete: SetNull)
+  reversals  LedgerTransaction[] @relation("LedgerReversal")
+
+  @@index([organizationId])
+  @@index([correlationId])
+  @@index([tradeId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ledger_transactions")
+}
+
+/// One leg of a posting. Append-only (DB trigger forbids UPDATE/DELETE).
+model LedgerEntry {
+  id             String               @id @default(uuid()) @db.Uuid
+  transactionId  String               @db.Uuid
+  organizationId String               @db.Uuid
+  accountId      String               @db.Uuid
+  direction      LedgerEntryDirection
+  amount         Decimal              @db.Decimal(20, 4) // always positive
+  currency       String
+  balanceAfter   Decimal              @db.Decimal(20, 4) // account normal-side balance after the txn
+  memo           String?
+  sequence       Int // order within the transaction
+  createdAt      DateTime             @default(now())
+
+  transaction LedgerTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  account     LedgerAccount     @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([transactionId])
+  @@index([accountId])
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("ledger_entries")
+}
+
+/// A settlement instruction driven by the settlement state machine. Each legal
+/// transition posts a balanced movement between the payer, clearing and payee
+/// ledger accounts. `version` guards transitions with optimistic locking.
+model SettlementInstruction {
+  id                String                @id @default(uuid()) @db.Uuid
+  organizationId    String                @db.Uuid
+  reference         String?
+  status            SettlementInstrStatus @default(CREATED)
+  rail              SettlementRail        @default(INTERNAL)
+  currency          String                @default("USD")
+  amount            Decimal               @db.Decimal(20, 4)
+  settledAmount     Decimal               @default(0) @db.Decimal(20, 4)
+  payerAccountId    String                @db.Uuid
+  clearingAccountId String                @db.Uuid
+  payeeAccountId    String                @db.Uuid
+  tradeId           String?               @db.Uuid
+  escrowId          String?               @db.Uuid
+  priority          Int                   @default(0)
+  scheduledAt       DateTime?
+  correlationId     String
+  metadata          Json?
+  version           Int                   @default(1)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  deletedAt         DateTime?
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([tradeId])
+  @@index([escrowId])
+  @@index([deletedAt])
+  @@map("settlement_instructions")
 }
