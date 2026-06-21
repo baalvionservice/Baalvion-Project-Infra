@@ -28,7 +28,10 @@ RUN pnpm install --no-frozen-lockfile
 # value the client bundle needs is the public app URL.
 ARG NEXT_PUBLIC_APP_URL
 # CRITICAL: ARG alone is NOT visible to `next build`; re-export as ENV so it is inlined.
+# BUILD_STANDALONE=1 enables `output: 'standalone'` (see next.config.ts) for the container
+# image; it stays off for local `next build` so Windows/pm2 builds don't hit symlink EPERM.
 ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
+    BUILD_STANDALONE=1 \
     NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 COPY --from=pruner /app/out/full/ ./
 RUN pnpm turbo run build --filter=about-baalvion-web

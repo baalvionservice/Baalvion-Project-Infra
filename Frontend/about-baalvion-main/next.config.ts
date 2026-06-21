@@ -38,7 +38,14 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Standalone server output for the monorepo Docker image (mirrors the Amarisé storefront).
   // Produces .next/standalone/Frontend/about-baalvion-main/server.js — see Dockerfile.
-  output: 'standalone',
+  //
+  // Gated on BUILD_STANDALONE (set in the Dockerfile build stage). Locally the app runs via
+  // `next start` (pm2), which serves the normal `.next` build and never uses the standalone
+  // bundle — and on Windows the standalone trace-copy step fails with EPERM while symlinking
+  // pnpm packages, breaking the build. So enable it only for the container image.
+  ...(process.env.BUILD_STANDALONE === '1'
+    ? { output: 'standalone' as const }
+    : {}),
   // Keep the server-only Genkit + OpenTelemetry runtime external so Next leaves it as a runtime
   // require() instead of bundling and statically analysing its dynamic `require(expr)` calls
   // (@opentelemetry/instrumentation, require-in-the-middle, protobufjs, express). Removes the
