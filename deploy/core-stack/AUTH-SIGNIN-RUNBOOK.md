@@ -183,6 +183,26 @@ Confirm: `dig +short auth.baalvion.com` returns the core EIP before you deploy.
 
 `auth-service` is already in the core stack; it just needs the §2a env and a roll.
 
+> **First-time only — provision the ECR repositories.** The `build-push` job auto-creates each
+> `baalvion/core-*` ECR repo on first push **only if the deploy role has `ecr:CreateRepository`**. If it
+> doesn't, builds for *new* services fail at the **"Ensure ECR repository exists"** step (the Docker build
+> never runs — you'll see `core-auth-baalvion`, `core-rbac-service`, etc. fail while existing repos like
+> `core-auth-service` succeed). Fix it one of two ways:
+>
+> - **Grant the role** `ecr:CreateRepository` + `ecr:DescribeRepositories` (then the workflow self-provisions), **or**
+> - **Pre-create the repos once** (the established pattern):
+>
+>   ```bash
+>   for r in core-auth-baalvion core-rbac-service core-audit-service core-notification-service \
+>            core-commerce-service core-order-service core-trade-service core-commerce-tools core-order-tools; do
+>     aws ecr create-repository --repository-name "baalvion/$r" \
+>       --image-scanning-configuration scanOnPush=true --region ap-south-1 || true
+>   done
+>   ```
+>
+>   `core-auth-baalvion` is the only repo this feature strictly needs; the rest cover the other core
+>   services added earlier. Re-run the deploy workflow afterward.
+
 **Option A — CI/CD (recommended):** push the merged deploy changes to `main` (or run the workflow manually):
 
 ```
@@ -317,6 +337,7 @@ Pin an immutable tag for a known-good host: set `IMAGE_TAG=<git-sha>` in `.env.p
 | Signed in on the surface but **not** on the site | `REFRESH_COOKIE_DOMAIN` not `.baalvion.com`, or the site is cross-apex (Amarisé) — verify the `#token` handoff and `AUTH_ALLOWED_RETURN_HOSTS`. |
 | `return_to` rejected | Target host isn't `*.baalvion.com` and isn't in `AUTH_ALLOWED_RETURN_HOSTS`. Add the apex. |
 | CORS error in console | Cross-apex site calling auth-service directly without being in `CORS_ORIGINS`. Add its origin. |
+| `build-push` fails at **"Ensure ECR repository exists"** (build skipped) | Deploy role lacks `ecr:CreateRepository` for a new repo (`core-auth-baalvion` etc.). Grant it, or pre-create the repo — see §6 "provision the ECR repositories". |
 | `core-auth-baalvion` image not found on roll | `build-push` didn't run / failed before the host pulled. Re-run the workflow; the host only pulls. |
 | Disposable-email false positive for a real domain | Domain matches the disposable list or has no MX/A. Override per env: `EMAIL_REQUIRE_MX=false` (last resort) or whitelist upstream. |
 | `[BOS] Invalid environment variables` at a frontend build | A client module imported a server-env file; read `NEXT_PUBLIC_*` directly (see the about-web fix in this work). |
