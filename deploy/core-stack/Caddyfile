@@ -85,6 +85,15 @@
 	handle_path /api-bff/knowledge/cms/* {
 		reverse_proxy cms-service:3011
 	}
+	# Auth BFF shim: the admin image's next.config bakes the /auth-bff rewrite target at
+	# BUILD time (AUTH_PROXY_TARGET is never set during the Docker build), so it freezes the
+	# fallback https://api.baalvion.com/api/v1/identity/auth/v1/auth/* — which the API host's
+	# /api/* edge lock answers with 403, breaking login/refresh/logout/MFA. Terminate /auth-bff
+	# here at the edge -> auth-service (same-origin, so the httpOnly refresh cookie flows).
+	handle /auth-bff/* {
+		uri replace /auth-bff /v1/auth
+		reverse_proxy auth-service:3001
+	}
 	handle {
 		reverse_proxy admin-web:3030
 	}
