@@ -26,7 +26,7 @@ export interface OrderLine {
 }
 
 /** Consumer gateway checkout (alongside the escrow/saga settlement rail). */
-export type GatewaySlug = 'razorpay' | 'stripe' | 'payu' | 'bank';
+export type GatewaySlug = 'razorpay' | 'stripe' | 'payu' | 'cashfree' | 'bank';
 
 export interface RazorpayVerification {
   razorpay_payment_id: string;
@@ -39,13 +39,15 @@ export interface GatewayIntent {
   intentId: string;
   status: string;
   keyId?: string;            // Razorpay key_id (open the popup)
-  amount?: number;           // minor units
+  amount?: number;           // minor units (Razorpay) / major units (Cashfree)
   currency?: string;
   instructions?: string;     // bank transfer wire instructions
   redirectUrl?: string;      // Stripe hosted Checkout
   clientSecret?: string;
   publishableKey?: string;
   formPost?: { action: string; fields: Record<string, string> }; // PayU
+  sessionId?: string;        // Cashfree payment_session_id (v3 SDK)
+  mode?: 'sandbox' | 'production'; // Cashfree SDK mode
 }
 
 /**

@@ -15,6 +15,14 @@
  *   STRIPE_SECRET_KEY=... STRIPE_PUBLISHABLE_KEY=... STRIPE_WEBHOOK_SECRET=... \
  *   node scripts/loadPaymentProvider.cjs
  *
+ *   # PayU (webhook hash verified with the salt; PAYU_WEBHOOK_SECRET optional):
+ *   SITE_SLUG=control-the-market PAYMENT_PROVIDER=payu PAYMENT_MODE=live \
+ *   PAYU_MERCHANT_KEY=... PAYU_MERCHANT_SALT=... node scripts/loadPaymentProvider.cjs
+ *
+ *   # Cashfree (webhook signature verified with the clientSecret):
+ *   SITE_SLUG=control-the-market PAYMENT_PROVIDER=cashfree PAYMENT_MODE=live \
+ *   CASHFREE_CLIENT_ID=... CASHFREE_CLIENT_SECRET=... node scripts/loadPaymentProvider.cjs
+ *
  * VALIDATE with TEST keys + PAYMENT_MODE=mock first; flip to live only after a
  * sandbox dry-run and sign-off. See payment-service/docs/ROLLOUT.md.
  */
@@ -36,7 +44,14 @@ function secretsFor(provider) {
         return { secretKey: env('STRIPE_SECRET_KEY'), publishableKey: env('STRIPE_PUBLISHABLE_KEY'), webhookSecret: env('STRIPE_WEBHOOK_SECRET') };
     }
     if (provider === 'payu') {
-        return { merchantKey: env('PAYU_MERCHANT_KEY'), merchantSalt: env('PAYU_MERCHANT_SALT') };
+        // webhookSecret is optional for PayU (the return hash is verified with merchantSalt).
+        const out = { merchantKey: env('PAYU_MERCHANT_KEY'), merchantSalt: env('PAYU_MERCHANT_SALT') };
+        if (process.env.PAYU_WEBHOOK_SECRET) out.webhookSecret = process.env.PAYU_WEBHOOK_SECRET;
+        return out;
+    }
+    if (provider === 'cashfree') {
+        // Cashfree verifies webhooks with the clientSecret (no separate webhook secret).
+        return { clientId: env('CASHFREE_CLIENT_ID'), clientSecret: env('CASHFREE_CLIENT_SECRET') };
     }
     console.error(`Unsupported PAYMENT_PROVIDER: ${provider}`); process.exit(2);
 }

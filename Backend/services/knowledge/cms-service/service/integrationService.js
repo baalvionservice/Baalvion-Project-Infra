@@ -19,6 +19,7 @@ const PROVIDER_REQUIRED = {
     razorpay: ['keyId', 'keySecret'],
     stripe: ['secretKey'],
     payu: ['merchantKey', 'merchantSalt'],
+    cashfree: ['clientId', 'clientSecret'],
     twilio: ['accountSid', 'authToken'],
     gemini: ['apiKey'],
     openai: ['apiKey'],

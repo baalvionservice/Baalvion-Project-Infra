@@ -411,10 +411,23 @@ services:
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
       JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
       JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      # ── Payments — PRIMARY path is the CENTRAL CMS vault (admin.baalvion.com) ────────────────
+      # ctm-service resolves Razorpay/Cashfree/PayU keys from the central CMS vault for the website
+      # slug, so a key pasted in the admin panel is live within ~60s. The CTM_* keys below are an
+      # optional FALLBACK used only when the vault is unreachable / a provider isn't configured there.
+      PAYMENT_SITE_SLUG: ${CTM_PAYMENT_SITE_SLUG:-control-the-market}
+      CMS_BASE_URL: ${CTM_CMS_BASE_URL:-http://cms-service:3018/api/v1}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
       PAYMENT_PROVIDER: ${CTM_PAYMENT_PROVIDER:-razorpay}
-      RAZORPAY_KEY_ID: ${CTM_RAZORPAY_KEY_ID}
-      RAZORPAY_KEY_SECRET: ${CTM_RAZORPAY_KEY_SECRET}
-      RAZORPAY_WEBHOOK_SECRET: ${CTM_RAZORPAY_WEBHOOK_SECRET}
+      RAZORPAY_KEY_ID: ${CTM_RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${CTM_RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${CTM_RAZORPAY_WEBHOOK_SECRET:-}
+      CASHFREE_CLIENT_ID: ${CTM_CASHFREE_CLIENT_ID:-}
+      CASHFREE_CLIENT_SECRET: ${CTM_CASHFREE_CLIENT_SECRET:-}
+      CASHFREE_NOTIFY_URL: ${CTM_CASHFREE_NOTIFY_URL:-https://controlthemarket.com/api/v1/payments/webhook}
+      PAYU_MERCHANT_KEY: ${CTM_PAYU_MERCHANT_KEY:-}
+      PAYU_MERCHANT_SALT: ${CTM_PAYU_MERCHANT_SALT:-}
+      PAYU_RETURN_URL: ${CTM_PAYU_RETURN_URL:-https://controlthemarket.com/api/v1/payments/return/payu}
       PAYMENT_SUCCESS_URL: ${CTM_PAYMENT_SUCCESS_URL:-https://controlthemarket.com/billing/success}
       PAYMENT_CANCEL_URL: ${CTM_PAYMENT_CANCEL_URL:-https://controlthemarket.com/billing/cancel}
       RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}
@@ -660,6 +673,22 @@ services:
       GATEWAY_SIGNING_SECRET: ${GATEWAY_SIGNING_SECRET}
       CORS_ORIGINS: ${TRADE_CORS_ORIGINS:-https://trade.baalvion.com}
       RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}
+      # ── Consumer gateway checkout (Razorpay / Stripe / PayU / Cashfree) ──────────────────────
+      # PRIMARY: keys resolve from the central CMS vault (admin.baalvion.com → the website
+      # ${TRADE_PAYMENT_SITE_SLUG} → Integrations & Keys), live within ~60s, NO redeploy. The env
+      # keys below are an optional FALLBACK used only when the vault is unreachable / a key isn't set.
+      PAYMENT_SITE_SLUG: ${TRADE_PAYMENT_SITE_SLUG:-}
+      CMS_INTERNAL_URL: ${CMS_BASE_URL:-http://cms-service:3018}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      STOREFRONT_URL: ${TRADE_STOREFRONT_URL:-https://trade.baalvion.com}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      CASHFREE_CLIENT_ID: ${TRADE_CASHFREE_CLIENT_ID:-}
+      CASHFREE_CLIENT_SECRET: ${TRADE_CASHFREE_CLIENT_SECRET:-}
+      CASHFREE_MODE: ${TRADE_CASHFREE_MODE:-live}
+      PAYU_MERCHANT_KEY: ${TRADE_PAYU_MERCHANT_KEY:-}
+      PAYU_MERCHANT_SALT: ${TRADE_PAYU_MERCHANT_SALT:-}
+      PAYU_RETURN_URL: ${TRADE_PAYU_RETURN_URL:-}
       # Firebase Admin SDK (OPTIONAL — powers a feature subset; the service boots without it).
       FIREBASE_PROJECT_ID: ${TRADE_FIREBASE_PROJECT_ID:-}
       FIREBASE_CLIENT_EMAIL: ${TRADE_FIREBASE_CLIENT_EMAIL:-}
