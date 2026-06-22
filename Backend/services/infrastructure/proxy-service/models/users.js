@@ -57,6 +57,20 @@ module.exports = function(sequelize, DataTypes) {
       type: DataTypes.DATE,
       allowNull: true
     },
+    // Social login (Google / GitHub) identity. NULL for password accounts.
+    // See sql/003_oauth_identity.sql + service/oauthService.js.
+    oauth_provider: {
+      type: DataTypes.STRING(32),
+      allowNull: true
+    },
+    oauth_provider_id: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
+    avatar_url: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
     token_version: {
       type: DataTypes.INTEGER,
       allowNull: false,
