@@ -16,6 +16,17 @@ interface NewsCategoryPageProps {
   categoryName: string;
 }
 
+interface Pagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+const PAGE_SIZE = 12;
+
 export function NewsCategoryPage({
   category,
   title,
@@ -23,19 +34,45 @@ export function NewsCategoryPage({
   categoryName,
 }: NewsCategoryPageProps) {
   const [articles, setArticles] = useState<Article[]>([]);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  // `category` is stable for a mounted instance (each /news/<category> route mounts its
+  // own page), so paging only re-fetches on `page` change. The flag guards against a
+  // late response from a superseded request overwriting newer state.
   useEffect(() => {
-    fetch(`/api/news?category=${category}`)
+    let active = true;
+    setLoading(true);
+    fetch(
+      `/api/news?category=${encodeURIComponent(category)}&page=${page}&limit=${PAGE_SIZE}`
+    )
       .then((res) => res.json())
       .then((data) => {
-        setArticles(data);
+        if (!active) return;
+        setArticles(Array.isArray(data?.items) ? data.items : []);
+        setPagination(data?.pagination ?? null);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
-  }, [category]);
+      .catch(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [category, page]);
 
-  if (loading)
+  const goToPage = (next: number) => {
+    if (next < 1 || loading) return;
+    if (pagination && next > pagination.totalPages) return;
+    setPage(next);
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  // Initial load (no results yet) shows the full-screen sync state.
+  if (loading && articles.length === 0 && !pagination) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -46,6 +83,43 @@ export function NewsCategoryPage({
         </div>
       </div>
     );
+  }
+
+  const total = pagination?.total ?? articles.length;
+  const currentPage = pagination?.page ?? page;
+  const totalPages = pagination?.totalPages ?? 1;
+  const hasPrev = pagination?.hasPrev ?? currentPage > 1;
+  const hasNext = pagination?.hasNext ?? false;
+  const rangeStart = total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(currentPage * PAGE_SIZE, total);
+
+  const Pager = ({ compact = false }: { compact?: boolean }) => (
+    <div
+      className={`flex items-center gap-6 text-[10px] font-bold text-gray-900 uppercase tracking-widest ${
+        compact ? "" : "gap-8 text-[11px]"
+      }`}
+    >
+      <button
+        type="button"
+        onClick={() => goToPage(currentPage - 1)}
+        disabled={!hasPrev || loading}
+        className="flex items-center gap-1.5 transition-colors enabled:hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        <ChevronLeft className="w-4 h-4" /> Previous
+      </button>
+      <span className="text-primary">
+        Page {currentPage} of {totalPages}
+      </span>
+      <button
+        type="button"
+        onClick={() => goToPage(currentPage + 1)}
+        disabled={!hasNext || loading}
+        className="flex items-center gap-1.5 transition-colors enabled:hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        Next <ChevronRight className="w-4 h-4" />
+      </button>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-white">
@@ -57,17 +131,11 @@ export function NewsCategoryPage({
           {/* Results Header */}
           <div className="flex justify-between items-center mb-12 border-b border-gray-100 pb-6">
             <p className="text-sm font-medium text-gray-500">
-              Showing {articles.length} strategic results from the{" "}
-              {categoryName} nexus
+              {total === 0
+                ? `No results yet in the ${categoryName} nexus`
+                : `Showing ${rangeStart}–${rangeEnd} of ${total} strategic results from the ${categoryName} nexus`}
             </p>
-            <div className="flex items-center gap-6 text-[10px] font-bold text-gray-900 uppercase tracking-widest">
-              <button className="flex items-center gap-1.5 opacity-40 cursor-not-allowed">
-                <ChevronLeft className="w-4 h-4" /> Previous
-              </button>
-              <button className="flex items-center gap-1.5 hover:text-primary transition-colors">
-                Next <ChevronRight className="w-4 h-4" />
-              </button>
-            </div>
+            <Pager compact />
           </div>
 
           {/* News Grid */}
@@ -79,7 +147,11 @@ export function NewsCategoryPage({
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16">
+            <div
+              className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-16 transition-opacity ${
+                loading ? "opacity-50" : "opacity-100"
+              }`}
+            >
               {articles.map((news) => (
                 <Link
                   key={news.id}
@@ -115,21 +187,9 @@ export function NewsCategoryPage({
           )}
 
           {/* Bottom Pagination */}
-          {articles.length > 0 && (
+          {total > 0 && (
             <div className="mt-24 pt-10 border-t border-gray-100 flex justify-center">
-              <div className="flex items-center gap-8 text-[11px] font-bold text-gray-900 uppercase tracking-widest">
-                <button className="flex items-center gap-1.5 opacity-40 cursor-not-allowed">
-                  <ChevronLeft className="w-4 h-4" /> Previous
-                </button>
-                <div className="flex items-center gap-6">
-                  <span className="text-primary border-b-2 border-primary pb-1">
-                    01
-                  </span>
-                </div>
-                <button className="flex items-center gap-1.5 opacity-40 cursor-not-allowed">
-                  Next <ChevronRight className="w-4 h-4" />
-                </button>
-              </div>
+              <Pager />
             </div>
           )}
         </div>
