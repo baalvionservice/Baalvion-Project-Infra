@@ -13,7 +13,14 @@
 **/.env
 **/.env.local
 **/.env.*.local
-Frontend
+# Frontend is excluded from the lean backend build contexts, EXCEPT auth-baalvion, which is the one
+# frontend image built from the repo root (deploy-core-stack core-auth-baalvion). Re-include just it;
+# its build artifacts stay excluded by the **/node_modules etc. rules below.
+Frontend/*
+!Frontend/auth-baalvion
+Frontend/auth-baalvion/node_modules
+Frontend/auth-baalvion/.next
+Frontend/auth-baalvion/.turbo
 e2e
 docs
 *.md
