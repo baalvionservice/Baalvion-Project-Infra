@@ -7,7 +7,7 @@
  * Cashfree v3 modal) or show bank wire instructions. Capture is verified SERVER-SIDE — success only
  * shows on a real 'confirmed'.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -15,6 +15,7 @@ import { CreditCard, Smartphone, Globe, Building2, Loader2, ShieldCheck, Wallet 
 import {
   createPaymentIntent,
   capturePayment,
+  getConfiguredGateways,
   type GatewaySlug,
   type Order,
 } from '@/services/order-service';
@@ -84,6 +85,21 @@ export function GatewayPayment({ order, onPaid }: { order: Order; onPaid: (o: Or
   const [gateway, setGateway] = useState<GatewaySlug>('razorpay');
   const [busy, setBusy] = useState(false);
   const [instructions, setInstructions] = useState<string | null>(null);
+  // Only offer gateways with keys configured in the admin vault. Default to ALL until we know, so a
+  // slow/unavailable endpoint never blocks checkout; once known we default to the card-capable one.
+  const [available, setAvailable] = useState<GatewaySlug[]>(GATEWAYS.map((g) => g.id));
+
+  useEffect(() => {
+    let active = true;
+    getConfiguredGateways().then(({ gateways, preferred }) => {
+      if (!active || !gateways.length) return; // empty → keep showing all (graceful fallback)
+      setAvailable(gateways);
+      setGateway((cur) => (gateways.includes(cur) ? cur : (preferred ?? gateways[0])));
+    });
+    return () => { active = false; };
+  }, []);
+
+  const visibleGateways = GATEWAYS.filter((g) => available.includes(g.id));
 
   const fail = (description: string) => {
     setBusy(false);
@@ -193,7 +209,7 @@ export function GatewayPayment({ order, onPaid }: { order: Order; onPaid: (o: Or
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {GATEWAYS.map((g) => (
+              {visibleGateways.map((g) => (
                 <button
                   key={g.id}
                   type="button"

@@ -22,6 +22,7 @@ import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import { getAllPlans } from '@/lib/api';
 import { startCheckout, type CheckoutProvider } from '@/lib/checkout';
+import { useConfiguredProviders, PROVIDER_LABELS } from '@/lib/payment-providers';
 import { useToast } from '@/hooks/use-toast';
 
 type Plan = {
@@ -128,6 +129,9 @@ export default function PricingPage() {
 
   const [checkoutPlan, setCheckoutPlan] = useState<string | null>(null);
   const [isStarting, setIsStarting] = useState(false);
+  // Only offer gateways that are actually configured (keys in the admin vault); fetched when the
+  // checkout dialog opens. `preferred` backs the one-tap "Pay by card" button.
+  const { providers, preferred, loading: providersLoading } = useConfiguredProviders(checkoutPlan !== null);
 
   const handleChoosePlan = (plan: Plan) => {
     if (plan.isCustom) {
@@ -338,18 +342,19 @@ export default function PricingPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-3 py-2">
-            <Button onClick={() => handlePay('stripe')} disabled={isStarting}>
-              Pay with Card (Stripe)
-            </Button>
-            <Button variant="outline" onClick={() => handlePay('razorpay')} disabled={isStarting}>
-              Pay with Razorpay (UPI / Cards / Netbanking)
-            </Button>
-            <Button variant="outline" onClick={() => handlePay('cashfree')} disabled={isStarting}>
-              Pay with Cashfree (UPI / Cards / Netbanking)
-            </Button>
-            <Button variant="outline" onClick={() => handlePay('payu')} disabled={isStarting}>
-              Pay with PayU (Cards / UPI / Wallets)
-            </Button>
+            {preferred && (
+              <Button onClick={() => handlePay(preferred)} disabled={isStarting || providersLoading}>
+                Pay by card
+              </Button>
+            )}
+            {providers.length > 1 && (
+              <p className="text-center text-xs text-muted-foreground">or choose a specific provider</p>
+            )}
+            {providers.map((p) => (
+              <Button key={p} variant="outline" onClick={() => handlePay(p)} disabled={isStarting || providersLoading}>
+                Pay with {PROVIDER_LABELS[p]}
+              </Button>
+            ))}
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setCheckoutPlan(null)} disabled={isStarting}>Cancel</Button>

@@ -5,7 +5,7 @@
 //   • confirmPayment is BACKEND-AUTHORITATIVE: it captures ONLY when Cashfree reports
 //     order_status === 'PAID' AND the order is bound to the same orderId (never trusts the client).
 //   • getProvider('cashfree') resolves the adapter.
-const { getProvider } = require('./consumerProvider');
+const { getProvider, listConfiguredGateways } = require('./consumerProvider');
 
 const realFetch = global.fetch;
 
@@ -32,6 +32,16 @@ describe('cashfree consumer provider (GTI order-execution)', () => {
 
   test('getProvider("cashfree") returns the cashfree adapter', () => {
     expect(getProvider('cashfree').name).toBe('cashfree');
+  });
+
+  test('listConfiguredGateways reports only gateways with keys (+ bank always)', async () => {
+    // Deterministic: only CASHFREE_* is set; clear the other providers so their creds resolvers throw.
+    for (const k of ['RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET', 'STRIPE_SECRET_KEY', 'PAYU_MERCHANT_KEY', 'PAYU_MERCHANT_SALT']) delete process.env[k];
+    const gateways = await listConfiguredGateways();
+    expect(gateways).toContain('cashfree');
+    expect(gateways).toContain('bank');     // always available (manual wire, no keys)
+    expect(gateways).not.toContain('razorpay');
+    expect(gateways).not.toContain('stripe');
   });
 
   test('createPaymentIntent creates an order and returns the payment_session_id + bound order tag', async () => {
