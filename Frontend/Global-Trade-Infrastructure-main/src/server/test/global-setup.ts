@@ -21,7 +21,18 @@ let pg: InstanceType<typeof EmbeddedPostgres> | null = null;
 export default async function setup(): Promise<() => Promise<void>> {
   const root = process.cwd();
   const dir = path.join(os.tmpdir(), `gti-pg-test-${process.pid}-${PORT}`);
-  pg = new EmbeddedPostgres({ databaseDir: dir, user: USER, password: PASSWORD, port: PORT, persistent: false });
+  // Force a UTF-8 cluster. Without this, initdb inherits the host locale (e.g.
+  // WIN1252 on Windows), and any migration containing non-ASCII characters fails
+  // to apply with a 22P05 "no equivalent in encoding" error. `--locale=C` keeps
+  // collation deterministic and encoding-agnostic.
+  pg = new EmbeddedPostgres({
+    databaseDir: dir,
+    user: USER,
+    password: PASSWORD,
+    port: PORT,
+    persistent: false,
+    initdbFlags: ['--encoding=UTF8', '--locale=C'],
+  });
   await pg.initialise();
   await pg.start();
   try {

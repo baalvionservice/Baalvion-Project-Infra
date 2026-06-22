@@ -1,0 +1,20 @@
+# TLS edge for the Investor Relations API. This is the only publicly bound surface; ir-service and
+# Postgres stay internal to the compose network. Caddy auto-provisions a Let's Encrypt cert for
+# DOMAIN_IR_API. Point an A record for that host at this server before first boot.
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN_IR_API} {
+	encode zstd gzip
+
+	# Security headers (the API serves JSON only; no inline scripts).
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	reverse_proxy ir-service:3008
+}

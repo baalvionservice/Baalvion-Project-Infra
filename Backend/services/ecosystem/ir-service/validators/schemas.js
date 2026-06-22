@@ -92,6 +92,28 @@ const createContactSchema = z.object({
 
 const updateContactSchema = createContactSchema.partial();
 
+// Public inbound contact form. `website` is a honeypot — humans never see/fill it; if present
+// the controller silently drops the submission. Inquiry types mirror the IR contact UI.
+const createContactMessageSchema = z.object({
+    name: z.string().min(2).max(255),
+    email: z.string().email().max(255),
+    company: z.string().max(300).optional(),
+    inquiry_type: z.enum([
+        'investor', 'partnership', 'diligence', 'financial', 'governance', 'media', 'career', 'other',
+    ]).optional(),
+    subject: z.string().max(300).optional(),
+    message: z.string().min(10).max(5000),
+    website: z.string().max(0).optional(), // honeypot: must be empty
+});
+
+const contactMessageQuerySchema = paginationSchema.extend({
+    status: z.enum(['new', 'read', 'archived']).optional(),
+});
+
+const updateContactMessageSchema = z.object({
+    status: z.enum(['new', 'read', 'archived']),
+});
+
 const createEventSchema = z.object({
     title: z.string().min(1).max(500),
     event_type: z.enum(['earnings_call', 'agm', 'investor_day', 'roadshow', 'conference', 'webinar']).default('investor_day'),
@@ -141,11 +163,122 @@ const applicationQuerySchema = paginationSchema.extend({
     status: z.enum(['pending', 'approved', 'rejected']).optional(),
 });
 
+// ---------------------------------------------------------------------------
+// Business onboarding (company creation, KYC, IEC/GST/VAT, documents, approval)
+// ---------------------------------------------------------------------------
+
+const ENTITY_TYPES = [
+    'private_limited', 'public_limited', 'llp', 'partnership',
+    'sole_proprietorship', 'trust', 'society', 'branch_office', 'other',
+];
+const ID_TYPES = ['passport', 'national_id', 'driver_license', 'aadhaar', 'pan', 'other'];
+const DOC_TYPES = [
+    'certificate_of_incorporation', 'gst_certificate', 'iec_certificate', 'vat_certificate',
+    'pan_card', 'address_proof', 'board_resolution', 'authorized_signatory_id',
+    'bank_statement', 'other',
+];
+const APPLICATION_STATUSES = ['draft', 'submitted', 'under_review', 'approved', 'rejected'];
+const KYC_STATUSES = ['not_started', 'pending', 'verified', 'rejected'];
+
+// Treat blank strings from form inputs as "absent" so .optional() applies cleanly.
+const emptyToUndef = (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v);
+const optStr = (max) => z.preprocess(emptyToUndef, z.string().trim().max(max).optional());
+const optEnum = (values) => z.preprocess(emptyToUndef, z.enum(values).optional());
+// Optional government identifier: trims, upper-cases, drops blanks, then format-checks.
+const optCode = (re, msg) => z.preprocess(
+    (v) => {
+        if (typeof v !== 'string') return v;
+        const t = v.trim().toUpperCase();
+        return t === '' ? undefined : t;
+    },
+    z.string().regex(re, msg).optional(),
+);
+const optEmail = z.preprocess(emptyToUndef, z.string().trim().email().max(255).optional());
+
+const beneficialOwnerSchema = z.object({
+    name: z.string().trim().min(2).max(200),
+    ownership_pct: z.coerce.number().min(0).max(100).optional(),
+    nationality: optStr(100),
+    id_type: optEnum(ID_TYPES),
+    id_number: optStr(120),
+});
+
+const businessDocumentInputSchema = z.object({
+    document_type: z.enum(DOC_TYPES),
+    title: z.string().trim().min(1).max(300),
+    // Either an https URL or an inline data: URI captured client-side (size-capped there).
+    file_url: z.string().trim().min(1).max(5_000_000),
+    file_name: optStr(300),
+    file_size_bytes: z.coerce.number().int().nonnegative().optional(),
+    mime_type: optStr(120),
+});
+
+const createBusinessApplicationSchema = z.object({
+    // Company identity
+    legal_name: z.string().trim().min(2).max(300),
+    trade_name: optStr(300),
+    entity_type: z.enum(ENTITY_TYPES),
+    incorporation_country: z.string().trim().min(2).max(100),
+    incorporation_date: optStr(10), // YYYY-MM-DD
+    registration_number: optStr(120),
+    // Primary contact
+    contact_name: z.string().trim().min(2).max(200),
+    contact_email: z.string().trim().email().max(255),
+    contact_phone: optStr(40),
+    website: z.preprocess(emptyToUndef, z.string().trim().url().max(255).optional()),
+    // Registered address
+    address_line1: optStr(255),
+    address_line2: optStr(255),
+    city: optStr(120),
+    state_region: optStr(120),
+    postal_code: optStr(40),
+    country: optStr(100),
+    // Trade & tax registrations
+    iec_code: optCode(/^[0-9A-Z]{10}$/, 'IEC must be 10 characters'),
+    gstin: optCode(/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/, 'Invalid GSTIN format'),
+    vat_number: optStr(40),
+    pan: optCode(/^[A-Z]{5}[0-9]{4}[A-Z]$/, 'Invalid PAN format'),
+    // KYC
+    authorized_signatory_name: optStr(200),
+    authorized_signatory_email: optEmail,
+    authorized_signatory_id_type: optEnum(ID_TYPES),
+    authorized_signatory_id_number: optStr(120),
+    beneficial_owners: z.array(beneficialOwnerSchema).max(20).default([]),
+    // Documents (submitted together with the application)
+    documents: z.array(businessDocumentInputSchema).max(15).default([]),
+}).refine((d) => Boolean(d.iec_code || d.gstin || d.vat_number), {
+    message: 'At least one trade/tax registration (IEC, GSTIN or VAT) is required',
+    path: ['iec_code'],
+});
+
+const reviewBusinessApplicationSchema = z.object({
+    action: z.enum(['approve', 'reject', 'start_review']),
+    review_note: optStr(5000),
+    kyc_status: z.enum(KYC_STATUSES).optional(),
+});
+
+const businessApplicationQuerySchema = paginationSchema.extend({
+    status: z.enum(APPLICATION_STATUSES).optional(),
+    kyc_status: z.enum(KYC_STATUSES).optional(),
+});
+
+const reviewBusinessDocumentSchema = z.object({
+    action: z.enum(['verify', 'reject']),
+    review_note: optStr(5000),
+});
+
 module.exports = {
     paginationSchema,
     createApplicationSchema,
     reviewApplicationSchema,
     applicationQuerySchema,
+    // Business onboarding
+    createBusinessApplicationSchema,
+    reviewBusinessApplicationSchema,
+    businessApplicationQuerySchema,
+    businessDocumentInputSchema,
+    reviewBusinessDocumentSchema,
+    BUSINESS_ENUMS: { ENTITY_TYPES, ID_TYPES, DOC_TYPES, APPLICATION_STATUSES, KYC_STATUSES },
     createReportSchema,
     updateReportSchema,
     createFilingSchema,
@@ -158,6 +291,9 @@ module.exports = {
     updateShareholderSchema,
     createContactSchema,
     updateContactSchema,
+    createContactMessageSchema,
+    contactMessageQuerySchema,
+    updateContactMessageSchema,
     createEventSchema,
     updateEventSchema,
     marketSnapshotSchema,

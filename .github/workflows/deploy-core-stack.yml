@@ -63,6 +63,17 @@ jobs:
               context: Backend/services/commerce/financial-services-java, args: "SERVICE=payment-service", cache: payjava }
           # One-shot tools image (Dockerfile `installer` target) — cms migrations + register, tools profile.
           - { repo: core-cms-tools,       file: Backend/services/knowledge/cms-service/Dockerfile, target: installer, cache: cms }
+          # ── Added platform + commerce services (all repo-root context) ─────────────────
+          - { repo: core-rbac-service,         file: Backend/services/identity/rbac-service/Dockerfile }
+          - { repo: core-audit-service,        file: Backend/services/infrastructure/audit-service/Dockerfile }
+          - { repo: core-notification-service, file: Backend/services/infrastructure/notification-service/Dockerfile }
+          - { repo: core-commerce-service,     file: Backend/services/commerce/commerce-service/Dockerfile, cache: commerce }
+          - { repo: core-order-service,        file: Backend/services/commerce/order-service/Dockerfile,    cache: order }
+          - { repo: core-trade-service,        file: Backend/services/commerce/trade-service/Dockerfile,    cache: trade }
+          # Migration tools images (Dockerfile `installer` target → keeps sequelize-cli devDep).
+          # Share each service's GHA cache scope so the tools build reuses already-built layers.
+          - { repo: core-commerce-tools,       file: Backend/services/commerce/commerce-service/Dockerfile, target: installer, cache: commerce }
+          - { repo: core-order-tools,          file: Backend/services/commerce/order-service/Dockerfile,    target: installer, cache: order }
     steps:
       - uses: actions/checkout@v4
 

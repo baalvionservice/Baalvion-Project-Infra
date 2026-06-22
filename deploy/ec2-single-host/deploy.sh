@@ -104,6 +104,38 @@ wait_for_health() {
   done
 }
 
+# ── 0) ensure swap — 22 containers (incl. 2 JVMs + Redpanda) on an 8 GB box run hot.
+# Swap is the safety net: under a memory spike the kernel pages out instead of OOM-killing
+# a container into a restart loop. Idempotent; skips if adequate swap already exists or if
+# we can't get root. Override size with SWAP_GB (default 6), disable with ENSURE_SWAP=0.
+ensure_swap() {
+  [[ "${ENSURE_SWAP:-1}" == "0" ]] && { echo "▶ Swap   : skipped (ENSURE_SWAP=0)"; return 0; }
+  local want_gb="${SWAP_GB:-6}" swapfile="${SWAPFILE:-/swapfile}" cur_kb
+  cur_kb="$(awk '/SwapTotal/{print $2}' /proc/meminfo 2>/dev/null || echo 0)"
+  if (( cur_kb >= want_gb*1024*1024 - 262144 )); then
+    echo "▶ Swap   : $((cur_kb/1024)) MB already active — ok"; return 0
+  fi
+  local SUDO=""
+  if [[ "$(id -u)" != "0" ]]; then
+    if sudo -n true 2>/dev/null; then SUDO="sudo"
+    else echo "⚠ Swap   : need root to create ${want_gb}G swap — skipping (create ${swapfile} manually)"; return 0; fi
+  fi
+  echo "▶ Swap   : provisioning ${want_gb}G ${swapfile}…"
+  ${SUDO} swapoff "${swapfile}" 2>/dev/null || true
+  ${SUDO} rm -f "${swapfile}" 2>/dev/null || true
+  if ! ${SUDO} fallocate -l "${want_gb}G" "${swapfile}" 2>/dev/null; then
+    ${SUDO} dd if=/dev/zero of="${swapfile}" bs=1M count=$((want_gb*1024)) status=none
+  fi
+  ${SUDO} chmod 600 "${swapfile}"
+  ${SUDO} mkswap "${swapfile}" >/dev/null
+  ${SUDO} swapon "${swapfile}"
+  grep -q "^${swapfile} " /etc/fstab 2>/dev/null || echo "${swapfile} none swap sw 0 0" | ${SUDO} tee -a /etc/fstab >/dev/null
+  # Prefer RAM, but spill under pressure; shrink dirty pages so writeback can't pin memory.
+  ${SUDO} sysctl -w vm.swappiness=30 >/dev/null 2>&1 || true
+  echo "▶ Swap   : ${want_gb}G active (swappiness=30)"
+}
+ensure_swap
+
 # ── 1) authenticate to ECR (instance-role creds; no keys stored on host) ─────────
 echo "▶ Logging in to Amazon ECR…"
 aws ecr get-login-password --region "${AWS_REGION}" \

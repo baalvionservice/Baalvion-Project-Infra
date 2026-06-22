@@ -103,6 +103,13 @@ aws ecr get-login-password --region "${AWS_REGION}" \
 echo "▶ Pulling images…"
 "${COMPOSE[@]}" pull
 
+# ── 2.5) ensure the EXTERNAL prod data volume exists (idempotent) ─────────────────
+# pgdata is declared `external` in the compose file so a stray `down -v` can never wipe
+# production data. Creating it here is a no-op when it already exists and keeps first-time
+# hosts working without a manual `docker volume create`.
+echo "▶ Ensuring external DB volume core-stack_pgdata exists…"
+docker volume create core-stack_pgdata >/dev/null 2>&1 || true
+
 # ── 3) recreate changed containers — NEVER build (invariant) ─────────────────────
 echo "▶ Starting / recreating containers…"
 "${COMPOSE[@]}" up -d --no-build --remove-orphans

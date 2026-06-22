@@ -8,6 +8,7 @@ import {
   getProjects,
   getEcosystemItems,
 } from "@/lib/server-data";
+import { HOMEPAGE_FALLBACK } from "@/lib/home-fallback";
 
 export const metadata: Metadata = {
   title: "Baalvion — Global Trade Infrastructure Platform",
@@ -53,19 +54,19 @@ export default async function BaalvionHomePage() {
     getEcosystemItems(),
   ]);
 
-  // If the CMS genuinely can't supply the home content (after the fetch layer's
-  // retries), THROW so Next routes to error.tsx (which auto-retries) instead of
-  // rendering a cacheable "maintenance" page. With dynamic rendering there is no
-  // build-time prerender, so this only ever fires at request time.
-  if (!homePageData) {
-    throw new Error("Home page content is temporarily unavailable from the CMS");
-  }
+  // If the CMS can't supply the home content (after the fetch layer's retries),
+  // degrade gracefully to a brand-consistent static fallback instead of throwing
+  // a 500. This keeps the home page available (HTTP 200) whether the CMS is up,
+  // briefly hiccuping, or fully down. Because the page is `force-dynamic`, the
+  // moment live CMS content is reachable again it is served automatically — the
+  // fallback is never cached in its place.
+  const homeContent = homePageData ?? HOMEPAGE_FALLBACK;
 
   return (
     <>
       <Navbar />
       <HomePageServer
-        homePageData={homePageData}
+        homePageData={homeContent}
         projects={projects}
         ecoItems={ecoItems}
       />

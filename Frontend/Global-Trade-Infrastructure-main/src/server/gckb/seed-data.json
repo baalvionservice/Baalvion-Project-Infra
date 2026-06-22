@@ -1,0 +1,111 @@
+{
+  "meta": {
+    "description": "Platform-global Country Knowledge Base baseline (organizationId NULL). Single source of truth shared by scripts/seed-countries.cjs (production seed) and the seed integration test (registry validation), so the two can never drift. Real reference data; rates are indicative and must be verified against official schedules.",
+    "version": "1"
+  },
+  "countries": [
+    { "code": "IN", "name": "India", "attributes": { "alpha2": "IN", "alpha3": "IND", "numericCode": "356", "officialName": "Republic of India", "capital": "New Delhi", "region": "Asia", "subregion": "Southern Asia", "currencyCodes": ["INR"], "languageCodes": ["hi", "en"], "timezoneCodes": ["Asia/Kolkata"], "dialingCode": "+91", "flagEmoji": "🇮🇳" } },
+    { "code": "US", "name": "United States", "attributes": { "alpha2": "US", "alpha3": "USA", "numericCode": "840", "officialName": "United States of America", "capital": "Washington, D.C.", "region": "Americas", "subregion": "Northern America", "currencyCodes": ["USD"], "languageCodes": ["en"], "timezoneCodes": ["America/New_York"], "dialingCode": "+1", "flagEmoji": "🇺🇸" } },
+    { "code": "AE", "name": "United Arab Emirates", "attributes": { "alpha2": "AE", "alpha3": "ARE", "numericCode": "784", "officialName": "United Arab Emirates", "capital": "Abu Dhabi", "region": "Asia", "subregion": "Western Asia", "currencyCodes": ["AED"], "languageCodes": ["ar", "en"], "timezoneCodes": ["Asia/Dubai"], "dialingCode": "+971", "flagEmoji": "🇦🇪" } },
+    { "code": "SG", "name": "Singapore", "attributes": { "alpha2": "SG", "alpha3": "SGP", "numericCode": "702", "officialName": "Republic of Singapore", "capital": "Singapore", "region": "Asia", "subregion": "South-Eastern Asia", "currencyCodes": ["SGD"], "languageCodes": ["en", "ms", "zh", "ta"], "timezoneCodes": ["Asia/Singapore"], "dialingCode": "+65", "flagEmoji": "🇸🇬" } },
+    { "code": "JP", "name": "Japan", "attributes": { "alpha2": "JP", "alpha3": "JPN", "numericCode": "392", "officialName": "Japan", "capital": "Tokyo", "region": "Asia", "subregion": "Eastern Asia", "currencyCodes": ["JPY"], "languageCodes": ["ja"], "timezoneCodes": ["Asia/Tokyo"], "dialingCode": "+81", "flagEmoji": "🇯🇵" } },
+    { "code": "DE", "name": "Germany", "attributes": { "alpha2": "DE", "alpha3": "DEU", "numericCode": "276", "officialName": "Federal Republic of Germany", "capital": "Berlin", "region": "Europe", "subregion": "Western Europe", "currencyCodes": ["EUR"], "languageCodes": ["de"], "timezoneCodes": ["Europe/Berlin"], "dialingCode": "+49", "flagEmoji": "🇩🇪" } },
+    { "code": "FR", "name": "France", "attributes": { "alpha2": "FR", "alpha3": "FRA", "numericCode": "250", "officialName": "French Republic", "capital": "Paris", "region": "Europe", "subregion": "Western Europe", "currencyCodes": ["EUR"], "languageCodes": ["fr"], "timezoneCodes": ["Europe/Paris"], "dialingCode": "+33", "flagEmoji": "🇫🇷" } },
+    { "code": "GB", "name": "United Kingdom", "attributes": { "alpha2": "GB", "alpha3": "GBR", "numericCode": "826", "officialName": "United Kingdom of Great Britain and Northern Ireland", "capital": "London", "region": "Europe", "subregion": "Northern Europe", "currencyCodes": ["GBP"], "languageCodes": ["en"], "timezoneCodes": ["Europe/London"], "dialingCode": "+44", "flagEmoji": "🇬🇧" } },
+    { "code": "CA", "name": "Canada", "attributes": { "alpha2": "CA", "alpha3": "CAN", "numericCode": "124", "officialName": "Canada", "capital": "Ottawa", "region": "Americas", "subregion": "Northern America", "currencyCodes": ["CAD"], "languageCodes": ["en", "fr"], "timezoneCodes": ["America/Toronto"], "dialingCode": "+1", "flagEmoji": "🇨🇦" } },
+    { "code": "AU", "name": "Australia", "attributes": { "alpha2": "AU", "alpha3": "AUS", "numericCode": "036", "officialName": "Commonwealth of Australia", "capital": "Canberra", "region": "Oceania", "subregion": "Australia and New Zealand", "currencyCodes": ["AUD"], "languageCodes": ["en"], "timezoneCodes": ["Australia/Sydney"], "dialingCode": "+61", "flagEmoji": "🇦🇺" } }
+  ],
+  "currencies": [
+    { "code": "INR", "name": "Indian Rupee", "attributes": { "alpha": "INR", "numericCode": "356", "minorUnits": 2, "symbol": "₹" } },
+    { "code": "USD", "name": "United States Dollar", "attributes": { "alpha": "USD", "numericCode": "840", "minorUnits": 2, "symbol": "$" } },
+    { "code": "AED", "name": "UAE Dirham", "attributes": { "alpha": "AED", "numericCode": "784", "minorUnits": 2, "symbol": "د.إ" } },
+    { "code": "SGD", "name": "Singapore Dollar", "attributes": { "alpha": "SGD", "numericCode": "702", "minorUnits": 2, "symbol": "S$" } },
+    { "code": "JPY", "name": "Japanese Yen", "attributes": { "alpha": "JPY", "numericCode": "392", "minorUnits": 0, "symbol": "¥" } },
+    { "code": "EUR", "name": "Euro", "attributes": { "alpha": "EUR", "numericCode": "978", "minorUnits": 2, "symbol": "€" } },
+    { "code": "GBP", "name": "Pound Sterling", "attributes": { "alpha": "GBP", "numericCode": "826", "minorUnits": 2, "symbol": "£" } },
+    { "code": "CAD", "name": "Canadian Dollar", "attributes": { "alpha": "CAD", "numericCode": "124", "minorUnits": 2, "symbol": "C$" } },
+    { "code": "AUD", "name": "Australian Dollar", "attributes": { "alpha": "AUD", "numericCode": "036", "minorUnits": 2, "symbol": "A$" } }
+  ],
+  "authorities": [
+    { "code": "cbic", "name": "Central Board of Indirect Taxes and Customs", "countryCode": "IN", "attributes": { "kind": "CUSTOMS", "website": "https://www.cbic.gov.in", "jurisdiction": "Customs & GST" } },
+    { "code": "dgft", "name": "Directorate General of Foreign Trade", "countryCode": "IN", "attributes": { "kind": "COMMERCE", "website": "https://www.dgft.gov.in", "jurisdiction": "Foreign trade policy, licensing" } },
+    { "code": "cbp", "name": "U.S. Customs and Border Protection", "countryCode": "US", "attributes": { "kind": "CUSTOMS", "website": "https://www.cbp.gov", "jurisdiction": "Customs & border" } },
+    { "code": "fca", "name": "Federal Customs Authority", "countryCode": "AE", "attributes": { "kind": "CUSTOMS", "website": "https://www.fca.gov.ae", "jurisdiction": "Federal customs policy" } },
+    { "code": "customs", "name": "Singapore Customs", "countryCode": "SG", "attributes": { "kind": "CUSTOMS", "website": "https://www.customs.gov.sg" } },
+    { "code": "customs", "name": "Japan Customs", "countryCode": "JP", "attributes": { "kind": "CUSTOMS", "website": "https://www.customs.go.jp" } },
+    { "code": "zoll", "name": "Generalzolldirektion (German Customs)", "countryCode": "DE", "attributes": { "kind": "CUSTOMS", "website": "https://www.zoll.de" } },
+    { "code": "douane", "name": "Direction générale des douanes et droits indirects", "countryCode": "FR", "attributes": { "kind": "CUSTOMS", "website": "https://www.douane.gouv.fr" } },
+    { "code": "hmrc", "name": "HM Revenue & Customs", "countryCode": "GB", "attributes": { "kind": "CUSTOMS", "website": "https://www.gov.uk/government/organisations/hm-revenue-customs" } },
+    { "code": "cbsa", "name": "Canada Border Services Agency", "countryCode": "CA", "attributes": { "kind": "CUSTOMS", "website": "https://www.cbsa-asfc.gc.ca" } },
+    { "code": "abf", "name": "Australian Border Force", "countryCode": "AU", "attributes": { "kind": "CUSTOMS", "website": "https://www.abf.gov.au" } },
+    { "code": "wco", "name": "World Customs Organization", "attributes": { "kind": "STANDARDS", "website": "https://www.wcoomd.org", "jurisdiction": "Global (HS nomenclature)" } }
+  ],
+  "ports": [
+    { "code": "INNSA", "name": "Jawaharlal Nehru Port (Nhava Sheva)", "countryCode": "IN", "attributes": { "kind": "SEAPORT", "unlocode": "INNSA", "latitude": 18.9490, "longitude": 72.9525, "capacityNote": "Largest container port in India" } },
+    { "code": "INMUN", "name": "Mundra Port", "countryCode": "IN", "attributes": { "kind": "SEAPORT", "unlocode": "INMUN", "latitude": 22.8395, "longitude": 69.7280 } },
+    { "code": "INDEL", "name": "Indira Gandhi International Airport", "countryCode": "IN", "attributes": { "kind": "AIRPORT", "iata": "DEL", "icao": "VIDP" } },
+    { "code": "USLAX", "name": "Port of Los Angeles", "countryCode": "US", "attributes": { "kind": "SEAPORT", "unlocode": "USLAX", "latitude": 33.7395, "longitude": -118.2610 } },
+    { "code": "USJFK", "name": "John F. Kennedy International Airport", "countryCode": "US", "attributes": { "kind": "AIRPORT", "iata": "JFK", "icao": "KJFK" } },
+    { "code": "AEJEA", "name": "Jebel Ali Port", "countryCode": "AE", "attributes": { "kind": "SEAPORT", "unlocode": "AEJEA", "latitude": 25.0107, "longitude": 55.0610, "capacityNote": "Largest port in the Middle East" } },
+    { "code": "AEDXB", "name": "Dubai International Airport", "countryCode": "AE", "attributes": { "kind": "AIRPORT", "iata": "DXB", "icao": "OMDB" } },
+    { "code": "SGSIN", "name": "Port of Singapore", "countryCode": "SG", "attributes": { "kind": "SEAPORT", "unlocode": "SGSIN", "latitude": 1.2644, "longitude": 103.8400, "capacityNote": "World's busiest transshipment hub" } },
+    { "code": "JPYOK", "name": "Port of Yokohama", "countryCode": "JP", "attributes": { "kind": "SEAPORT", "unlocode": "JPYOK", "latitude": 35.4530, "longitude": 139.6660 } },
+    { "code": "DEHAM", "name": "Port of Hamburg", "countryCode": "DE", "attributes": { "kind": "SEAPORT", "unlocode": "DEHAM", "latitude": 53.5410, "longitude": 9.9320 } },
+    { "code": "FRLEH", "name": "Port of Le Havre", "countryCode": "FR", "attributes": { "kind": "SEAPORT", "unlocode": "FRLEH", "latitude": 49.4830, "longitude": 0.1170 } },
+    { "code": "GBFXT", "name": "Port of Felixstowe", "countryCode": "GB", "attributes": { "kind": "SEAPORT", "unlocode": "GBFXT", "latitude": 51.9540, "longitude": 1.3110 } },
+    { "code": "CAVAN", "name": "Port of Vancouver", "countryCode": "CA", "attributes": { "kind": "SEAPORT", "unlocode": "CAVAN", "latitude": 49.2890, "longitude": -123.1110 } },
+    { "code": "AUMEL", "name": "Port of Melbourne", "countryCode": "AU", "attributes": { "kind": "SEAPORT", "unlocode": "AUMEL", "latitude": -37.8330, "longitude": 144.9170 } }
+  ],
+  "agreements": [
+    { "code": "IND-UAE-CEPA", "name": "India–UAE Comprehensive Economic Partnership Agreement", "attributes": { "kind": "FTA", "status": "IN_FORCE", "inForceSince": "2022-05-01", "memberCountryCodes": ["IN", "AE"], "rulesOfOriginSummary": "Product-specific rules; generally 40% qualifying value content with change of tariff heading.", "dutyPreferenceNote": "Phased elimination of tariffs on the vast majority of tariff lines, including gold concession." } },
+    { "code": "IND-AUS-ECTA", "name": "India–Australia Economic Cooperation and Trade Agreement", "attributes": { "kind": "FTA", "status": "IN_FORCE", "inForceSince": "2022-12-29", "memberCountryCodes": ["IN", "AU"], "rulesOfOriginSummary": "Change in tariff classification or regional value content thresholds per product.", "dutyPreferenceNote": "Immediate or phased duty elimination on most goods." } },
+    { "code": "USMCA", "name": "United States–Mexico–Canada Agreement", "attributes": { "kind": "FTA", "status": "IN_FORCE", "inForceSince": "2020-07-01", "memberCountryCodes": ["US", "CA"], "rulesOfOriginSummary": "Regional value content; for autos, 75% RVC and labour value content rules.", "dutyPreferenceNote": "Duty-free treatment for originating goods." } },
+    { "code": "EU-CU", "name": "European Union Customs Union", "attributes": { "kind": "CUSTOMS_UNION", "status": "IN_FORCE", "inForceSince": "1968-07-01", "memberCountryCodes": ["DE", "FR"], "rulesOfOriginSummary": "Free circulation within the union; common external tariff applies to third countries.", "dutyPreferenceNote": "No internal customs duties between member states." } },
+    { "code": "CPTPP", "name": "Comprehensive and Progressive Agreement for Trans-Pacific Partnership", "attributes": { "kind": "FTA", "status": "IN_FORCE", "inForceSince": "2018-12-30", "memberCountryCodes": ["JP", "SG", "CA", "AU"], "rulesOfOriginSummary": "Regional value content and product-specific rules." } },
+    { "code": "RCEP", "name": "Regional Comprehensive Economic Partnership", "attributes": { "kind": "FTA", "status": "IN_FORCE", "inForceSince": "2022-01-01", "memberCountryCodes": ["JP", "SG", "AU"], "rulesOfOriginSummary": "Single rules-of-origin framework across the bloc." } }
+  ],
+  "policies": [
+    { "code": "igst", "name": "Integrated GST on imports", "countryCode": "IN", "policyType": "tax", "attributes": { "taxName": "IGST", "taxType": "GST", "ratePercent": 18, "basis": "ASSESSABLE_VALUE", "exemptions": ["Essential drugs (notified)"] } },
+    { "code": "mfn-1006", "name": "Basic customs duty — Rice", "countryCode": "IN", "policyType": "tariff", "hsCode": "1006", "attributes": { "schedule": "MFN", "ratePercent": 70, "hsCodes": ["1006"] } },
+    { "code": "mfn-8703", "name": "Basic customs duty — Motor cars", "countryCode": "IN", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "MFN", "ratePercent": 70, "hsCodes": ["8703"] } },
+    { "code": "cepa-7108", "name": "CEPA preferential — Gold", "countryCode": "IN", "policyType": "tariff", "hsCode": "7108", "attributes": { "ratePercent": 1, "preferentialUnder": "IND-UAE-CEPA", "hsCodes": ["7108"] } },
+    { "code": "ad-7208", "name": "Anti-dumping duty — Flat-rolled steel", "countryCode": "IN", "policyType": "duty", "hsCode": "7208", "attributes": { "dutyType": "ANTI_DUMPING", "ratePercent": 18, "hsCodes": ["7208"] } },
+    { "code": "import-license", "name": "Import licence (restricted items)", "countryCode": "IN", "policyType": "license", "attributes": { "licenseName": "Import Authorisation", "issuingAuthority": "DGFT", "appliesTo": "IMPORT", "validityMonths": 18 } },
+    { "code": "coo", "name": "Certificate of Origin", "countryCode": "IN", "policyType": "certificate", "attributes": { "certificateName": "Certificate of Origin", "issuingBody": "DGFT / authorised chambers", "mandatory": true, "validityMonths": 12 } },
+    { "code": "used-goods", "name": "Restricted: certain second-hand goods", "countryCode": "IN", "policyType": "restricted_goods", "attributes": { "description": "Import of specified second-hand capital goods and refurbished electronics is restricted and requires authorisation.", "requiresPermit": true } },
+    { "code": "bill-of-entry", "name": "Bill of Entry", "countryCode": "IN", "policyType": "document_requirement", "attributes": { "documentType": "BILL_OF_ENTRY", "mandatory": true, "copies": 1, "issuedBy": "Importer / customs broker via ICEGATE" } },
+    { "code": "icegate", "name": "ICEGATE single-window", "countryCode": "IN", "policyType": "digital_api", "attributes": { "system": "ICEGATE", "protocol": "REST", "sandbox": true, "docsUrl": "https://www.icegate.gov.in" } },
+
+    { "code": "mfn-8703", "name": "Customs duty — Passenger vehicles", "countryCode": "US", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "MFN (HTSUS)", "ratePercent": 2.5, "hsCodes": ["8703"] } },
+    { "code": "usmca-8703", "name": "USMCA preferential — Passenger vehicles", "countryCode": "US", "policyType": "tariff", "hsCode": "8703", "attributes": { "ratePercent": 0, "preferentialUnder": "USMCA", "hsCodes": ["8703"] } },
+    { "code": "mpf", "name": "Merchandise Processing Fee", "countryCode": "US", "policyType": "duty", "attributes": { "dutyType": "PROCESSING_FEE", "ratePercent": 0.3464 } },
+    { "code": "ace", "name": "Automated Commercial Environment (ACE)", "countryCode": "US", "policyType": "digital_api", "attributes": { "system": "ACE", "protocol": "EDIFACT", "docsUrl": "https://www.cbp.gov/trade/ace" } },
+
+    { "code": "vat", "name": "Value Added Tax on imports", "countryCode": "AE", "policyType": "tax", "attributes": { "taxName": "VAT", "taxType": "VAT", "ratePercent": 5, "basis": "CIF" } },
+    { "code": "cet", "name": "GCC Common External Tariff", "countryCode": "AE", "policyType": "tariff", "attributes": { "schedule": "GCC CET", "ratePercent": 5 } },
+    { "code": "mirsal", "name": "Mirsal 2 (Dubai Customs)", "countryCode": "AE", "policyType": "digital_api", "attributes": { "system": "Mirsal 2", "protocol": "REST", "sandbox": false } },
+
+    { "code": "gst", "name": "Goods and Services Tax", "countryCode": "SG", "policyType": "tax", "attributes": { "taxName": "GST", "taxType": "GST", "ratePercent": 9, "basis": "CIF" } },
+    { "code": "free-port", "name": "Free-port — most goods duty free", "countryCode": "SG", "policyType": "tariff", "attributes": { "schedule": "MFN", "ratePercent": 0 } },
+
+    { "code": "consumption", "name": "Consumption Tax on imports", "countryCode": "JP", "policyType": "tax", "attributes": { "taxName": "Consumption Tax", "taxType": "CONSUMPTION", "ratePercent": 10, "basis": "CIF" } },
+    { "code": "mfn-8703", "name": "Customs duty — Motor cars", "countryCode": "JP", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "MFN", "ratePercent": 0, "hsCodes": ["8703"] } },
+
+    { "code": "vat", "name": "Einfuhrumsatzsteuer (import VAT)", "countryCode": "DE", "policyType": "tax", "attributes": { "taxName": "Import VAT", "taxType": "VAT", "ratePercent": 19, "basis": "CIF" } },
+    { "code": "mfn-8703", "name": "EU common customs tariff — Motor cars", "countryCode": "DE", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "EU CCT", "ratePercent": 10, "hsCodes": ["8703"] } },
+
+    { "code": "vat", "name": "TVA à l'importation (import VAT)", "countryCode": "FR", "policyType": "tax", "attributes": { "taxName": "Import VAT", "taxType": "VAT", "ratePercent": 20, "basis": "CIF" } },
+    { "code": "mfn-8703", "name": "EU common customs tariff — Motor cars", "countryCode": "FR", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "EU CCT", "ratePercent": 10, "hsCodes": ["8703"] } },
+
+    { "code": "vat", "name": "Import VAT", "countryCode": "GB", "policyType": "tax", "attributes": { "taxName": "Import VAT", "taxType": "VAT", "ratePercent": 20, "basis": "CIF" } },
+    { "code": "mfn-8703", "name": "UK Global Tariff — Motor cars", "countryCode": "GB", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "UKGT", "ratePercent": 10, "hsCodes": ["8703"] } },
+
+    { "code": "gst", "name": "Goods and Services Tax", "countryCode": "CA", "policyType": "tax", "attributes": { "taxName": "GST", "taxType": "GST", "ratePercent": 5, "basis": "CIF" } },
+    { "code": "mfn-8703", "name": "Customs duty — Passenger vehicles", "countryCode": "CA", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "MFN", "ratePercent": 6.1, "hsCodes": ["8703"] } },
+    { "code": "usmca-8703", "name": "USMCA preferential — Passenger vehicles", "countryCode": "CA", "policyType": "tariff", "hsCode": "8703", "attributes": { "ratePercent": 0, "preferentialUnder": "USMCA", "hsCodes": ["8703"] } },
+
+    { "code": "gst", "name": "Goods and Services Tax", "countryCode": "AU", "policyType": "tax", "attributes": { "taxName": "GST", "taxType": "GST", "ratePercent": 10, "basis": "CIF" } },
+    { "code": "mfn-8703", "name": "Customs duty — Passenger vehicles", "countryCode": "AU", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "MFN", "ratePercent": 5, "hsCodes": ["8703"] } },
+    { "code": "ecta-8703", "name": "ECTA preferential — Passenger vehicles", "countryCode": "AU", "policyType": "tariff", "hsCode": "8703", "attributes": { "ratePercent": 0, "preferentialUnder": "IND-AUS-ECTA", "hsCodes": ["8703"] } }
+  ]
+}

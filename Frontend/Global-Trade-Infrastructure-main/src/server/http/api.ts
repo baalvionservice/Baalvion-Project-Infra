@@ -87,6 +87,14 @@ export function toErrorResponse(err: unknown): NextResponse {
   if (err instanceof OptimisticLockError) return fail(409, err.message);
   if (err instanceof ValidationError) return fail(400, err.message);
   if (err instanceof z.ZodError) return fail(400, err.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '));
+  // Ledger/settlement domain errors (matched by name to avoid import coupling).
+  if (err instanceof Error) {
+    if (err.name === 'SettlementError') {
+      const conflict = err.message.startsWith('ILLEGAL_TRANSITION') || err.message.startsWith('TERMINAL_STATE');
+      return fail(conflict ? 409 : 400, err.message);
+    }
+    if (err.name === 'MoneyError' || err.name === 'PostingError') return fail(400, err.message);
+  }
   const message = err instanceof Error ? err.message : 'Internal error';
   return fail(500, message);
 }

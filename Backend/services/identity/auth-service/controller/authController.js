@@ -1,4 +1,5 @@
 const authService = require('../service/authService');
+const phoneVerification = require('../service/phoneVerificationService');
 const schemas = require('../validators/schemas');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
@@ -136,6 +137,27 @@ exports.verifyEmail = async (req, res, next) => {
         if (!token) throw new AppError('VALIDATION_ERROR', 'Token is required', 400);
         await authService.verifyEmail({ token });
         sendSuccess(req, res, { message: 'Email verified successfully' });
+    } catch (err) { next(err); }
+};
+
+// ── Phone verification (OTP) — authenticated; operates on req.auth.userId ─────────
+exports.requestPhoneOtp = async (req, res, next) => {
+    try {
+        const parsed = schemas.phoneOtpRequest.safeParse(req.body);
+        if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
+        const result = await phoneVerification.requestOtp({ userId: req.auth.userId, phone: parsed.data.phone, ipAddress: req.ip });
+        req.audit?.log('phone_otp_requested', { userId: req.auth.userId, orgId: req.auth.orgId });
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+exports.verifyPhoneOtp = async (req, res, next) => {
+    try {
+        const parsed = schemas.phoneOtpVerify.safeParse(req.body);
+        if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
+        const result = await phoneVerification.verifyOtp({ userId: req.auth.userId, code: parsed.data.code, ipAddress: req.ip });
+        req.audit?.log('phone_verified', { userId: req.auth.userId, orgId: req.auth.orgId });
+        sendSuccess(req, res, result);
     } catch (err) { next(err); }
 };
 

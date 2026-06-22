@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const { v4: uuidv4 } = require('uuid');
 const config = require('./config/appConfig');
 const v1Routes = require('./routes/v1');
+const apiVersion = require('./middleware/apiVersion');
 const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware');
 const db = require('./models');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
@@ -23,7 +24,16 @@ app.use((req, _res, next) => { req.requestId = req.headers['x-request-id'] || uu
 
 app.get('/', (req, res) => res.json({ service: 'Baalvion Invest — Marketplace Service', version: config.apiVersion }));
 app.get('/health', (req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+// Version discovery — clients negotiate against supportedVersions; current is the default mount.
+app.get('/version', (req, res) => res.json({
+    service: 'marketplace-service',
+    current: config.apiVersion,
+    supported: config.supportedVersions,
+}));
 
+// URI-based versioning: stamp the negotiated version (→ X-API-Version header + response meta),
+// then mount the v1 router at both /v1 and /api/v1.
+app.use(['/v1', '/api/v1'], apiVersion('v1'));
 app.use('/v1', v1Routes);
 app.use('/api/v1', v1Routes);
 app.use(notFoundHandler);

@@ -22,6 +22,18 @@ const createApplication = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// Deal-room eligibility for an email. Public + read-only: a server-side BFF calls this with the
+// signed-in investor's own email (derived from their session, never client-supplied), so it
+// returns only booleans/reasons — no applicant PII. Rate-limited globally (see index.js).
+const getEligibility = async (req, res, next) => {
+    try {
+        const email = req.user?.email || req.query.email;
+        if (!email) return next(new AppError('VALIDATION_ERROR', 'email is required', 400));
+        const orgId = req.user?.orgId || DEFAULT_ORG_ID;
+        return sendSuccess(req, res, await applicationService.getEligibilityByEmail(orgId, email));
+    } catch (err) { return next(err); }
+};
+
 // Staff list (auth required) — scoped to the caller's org.
 const listApplications = async (req, res, next) => {
     try {
@@ -50,4 +62,4 @@ const reviewApplication = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { createApplication, listApplications, getApplication, reviewApplication };
+module.exports = { createApplication, getEligibility, listApplications, getApplication, reviewApplication };

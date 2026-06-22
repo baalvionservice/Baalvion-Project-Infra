@@ -73,6 +73,7 @@ npm start                   # boots on :3060  (npm run dev for nodemon watch)
 | `npm start` | `node index.js` — start the service |
 | `npm run dev` | `nodemon index.js` — watch mode |
 | `npm run migrate` | `node scripts/migrate.js` — apply SQL migrations |
+| `npm test` | `node --test` — run the unit suite (query · authz · validate · matching) |
 
 > **pm2 note:** `ecosystem.config.js` points `NODE_PATH` at `ir-service`'s installed
 > `node_modules` (its deps are a strict subset) so the service runs on-host without a dedicated
@@ -84,9 +85,9 @@ All routes require a valid platform identity except public opportunity discovery
 
 | Mount | Resource | Notes |
 |---|---|---|
-| `/v1/companies` · `/api/v1/companies` | Company profiles | CRUD; cap table read at `/companies/:id/cap-table` |
-| `/v1/investors` | Investor profiles | CRUD |
-| `/v1/opportunities` | Deal opportunities | Public discovery + publish; AI matches at `/opportunities/recommended` |
+| `/v1/companies` · `/api/v1/companies` | Company profiles | Full CRUD (`POST` · `GET` · `GET /:id` · `PATCH /:id` · `DELETE /:id` archive); profile/founders/documents sub-resources; cap table at `/:id/cap-table` |
+| `/v1/investors` | Investor profiles | Full CRUD (`POST` · `GET` list · `GET /:id` · `PATCH /:id` · `DELETE /:id` archive); profile/preferences/accreditation |
+| `/v1/opportunities` | Deal opportunities | Public discovery + `POST` · `PATCH /:id` (draft) · `DELETE /:id` (draft = delete, live = archive) · `/:id/publish`; AI matches at `/recommended` |
 | `/v1/deals` | Deal lifecycle | Open, list, stage transitions |
 | `/v1/deals/:dealId/messages` · `/members` | Deal room | Threaded messaging + membership |
 | `/v1/deals/:dealId/nda` · `/documents` · `/access-grants` | Document room | NDA, document requests, access grants |
@@ -94,7 +95,29 @@ All routes require a valid platform identity except public opportunity discovery
 | `/v1/deals/:dealId/term-sheets` · `/signatures` | Term sheets | Versioned term sheets + e-signature flow |
 | `/v1/deals/:dealId/escrow` | Escrow | Create, fund, release |
 | `/v1/admin` | Admin | Platform administration |
+| `GET /version` | Version discovery | `{ service, current, supported }` |
 | `GET /health` | Liveness | `{ status, timestamp }` |
+
+### Conventions
+
+Cross-cutting request/response behavior is identical across every resource:
+
+- **Validation** — request bodies are validated with **Zod** via the `validate` middleware
+  (`middleware/validate.js`); schemas live per module in `modules/<x>/schemas.js`. A failure
+  returns `400` `{ error: { code: "VALIDATION_ERROR", details } }` *before* any DB call.
+- **Pagination** — list endpoints accept `?page` (1-based) and `?limit` (default `20`, max
+  `100`; admin lists default `50`, max `200`). Responses carry
+  `data: { items, total, page, limit, totalPages }`.
+- **Sorting** — `?sort=<column>&order=asc|desc` (aliases `?sortBy` / `?dir`). Sortable columns
+  are **allowlisted per resource** — an unknown column is a `400` `INVALID_SORT`, never an
+  unguarded `ORDER BY`. Defaults: most resources `created_at DESC`, opportunities
+  `published_at DESC`.
+- **Versioning** — URI-based: the v1 router is mounted at `/v1` and `/api/v1`. Every response
+  carries an `X-API-Version` header and `meta.version`; supported versions are advertised at
+  `GET /version` and in `X-API-Supported-Versions`. Changes are additive within a version; a
+  breaking revision mounts a new `/v2` prefix.
+- **Layering** — routes are thin controllers (validate → delegate → shape response); all
+  business logic and authorization live in `service/*Service.js`.
 
 ## Configuration
 
@@ -114,15 +137,19 @@ Configuration is environment-driven (`config/appConfig.js`); copy `.env` from th
 
 ```
 marketplace-service/
-├── index.js                # Express boot, helmet/cors, /health, /v1 + /api/v1 mounts
-├── config/appConfig.js     # env-driven config (port, schema, db, jwt)
+├── index.js                # Express boot, helmet/cors, /health, /version, /v1 + /api/v1 mounts
+├── config/appConfig.js     # env-driven config (port, schema, db, jwt, pagination, versions)
 ├── routes/v1.js            # mounts the domain modules
 ├── modules/                # companies · investors · opportunities · deals · admin · matching
+│   └── <x>/                #   routes.js (thin controllers) + schemas.js (Zod validation)
+├── service/                # domain logic: company · investor · opportunity · deal services
 ├── models/                 # Sequelize models (schema: marketplace)
-├── middleware/             # errorMiddleware (notFound + errorHandler)
+├── middleware/             # validate (Zod) · apiVersion · authMiddleware · errorMiddleware
 ├── migrations/             # 001_init.sql (28 tables) · 002_rls_tenant_isolation.sql
 ├── scripts/migrate.js      # SQL migration runner
-├── integrations/ · utils/  # reused-service clients + helpers
+├── integrations/           # reused-service clients (KYC/AML)
+├── utils/                  # query (pagination+sorting) · authz · response · errors
+├── tests/                  # node --test unit tests (query · authz · validate · matching)
 ├── ecosystem.config.js     # pm2 process definition
 └── package.json
 ```
