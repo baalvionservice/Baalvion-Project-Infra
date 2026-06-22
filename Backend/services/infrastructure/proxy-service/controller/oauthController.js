@@ -53,14 +53,6 @@ function fail(res, code) {
   res.redirect(`${APP_URL}/login?oauth_error=${encodeURIComponent(safe)}`);
 }
 
-const txCookieOpts = () => ({
-  httpOnly: true,
-  secure: config.env === 'production',
-  sameSite: 'lax',
-  maxAge: config.oauth.stateTtlMs,
-  path: '/',
-});
-
 module.exports = {
   start: async (req, res) => {
     try {
@@ -73,7 +65,14 @@ module.exports = {
       const nonce = crypto.randomBytes(24).toString('hex');
       const pkce = oauthService.createPkce();
       const tx = oauthService.encodeTx({ nonce, provider, verifier: pkce.verifier });
-      res.cookie(TX_COOKIE, tx, txCookieOpts());
+      // Options inlined (not via a helper) so the httpOnly/secure flags are statically visible.
+      res.cookie(TX_COOKIE, tx, {
+        httpOnly: true,
+        secure: config.env === 'production',
+        sameSite: 'lax',
+        maxAge: config.oauth.stateTtlMs,
+        path: '/',
+      });
 
       return res.redirect(await oauthService.authorizeUrl(provider, { state: nonce, codeChallenge: pkce.challenge }));
     } catch (e) {

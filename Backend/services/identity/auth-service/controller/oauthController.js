@@ -27,8 +27,6 @@ function setRefresh(res, token) {
   res.cookie(REFRESH_COOKIE, token, { httpOnly: true, secure: config.env === 'production', sameSite: 'lax', maxAge: 7 * 24 * 60 * 60 * 1000 });
 }
 
-const txOpts = () => ({ httpOnly: true, secure: config.env === 'production', sameSite: 'lax', maxAge: config.oauth.stateTtlMs, path: '/' });
-
 const CLIENT_ERROR_CODES = new Set([
   'unsupported_provider', 'provider_not_configured', 'provider_denied', 'invalid_state',
   'state_mismatch', 'missing_code', 'start_failed', 'oauth_email_unverified',
@@ -61,7 +59,14 @@ module.exports = {
 
       const nonce = crypto.randomBytes(24).toString('hex');
       const pkce = oauth.createPkce();
-      res.cookie(TX_COOKIE, oauth.encodeTx({ nonce, provider, verifier: pkce.verifier, returnTo }), txOpts());
+      // Options inlined (not via a helper) so the httpOnly/secure flags are statically visible.
+      res.cookie(TX_COOKIE, oauth.encodeTx({ nonce, provider, verifier: pkce.verifier, returnTo }), {
+        httpOnly: true,
+        secure: config.env === 'production',
+        sameSite: 'lax',
+        maxAge: config.oauth.stateTtlMs,
+        path: '/',
+      });
       return res.redirect(await oauth.authorizeUrl(provider, { state: nonce, codeChallenge: pkce.challenge }));
     } catch (e) {
       logger.error('[oauth] start: ' + (e && e.message));

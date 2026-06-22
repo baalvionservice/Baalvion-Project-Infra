@@ -80,7 +80,8 @@ function buildAuthorizeUrl(provider, { clientId, redirectUri, state, codeChallen
 // ── PKCE (RFC 7636) ──────────────────────────────────────────────────────────────
 // Google supports S256 PKCE; GitHub ignores the extra params (harmless). The verifier
 // stays server-side (in the httpOnly tx cookie) and is never sent to the provider.
-const b64url = (buf) => buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+// Node's native 'base64url' = URL-safe + unpadded; no regex (avoids the ReDoS on replaces).
+const b64url = (buf) => buf.toString('base64url');
 const challengeFromVerifier = (verifier) => b64url(crypto.createHash('sha256').update(verifier).digest());
 function createPkce() {
   const verifier = b64url(crypto.randomBytes(32));
@@ -96,7 +97,7 @@ function encodeTx(obj) {
 function decodeTx(value) {
   if (!value || typeof value !== 'string') return null;
   try {
-    const json = Buffer.from(value.replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8');
+    const json = Buffer.from(value, 'base64url').toString('utf8');
     const obj = JSON.parse(json);
     return obj && typeof obj === 'object' && obj.nonce && obj.provider ? obj : null;
   } catch {
