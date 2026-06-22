@@ -48,6 +48,13 @@ module.exports = {
         bcryptRounds:  Number(process.env.BCRYPT_ROUNDS       || 12),
         ipRateLimit:   Number(process.env.RATE_LIMIT_IP_MAX   || 20),
         emailRateLimit:Number(process.env.RATE_LIMIT_EMAIL_MAX || 10),
+        // Phone-verification OTP policy.
+        otp: {
+            length:         Number(process.env.OTP_LENGTH           || 6),   // digits
+            ttlSeconds:     Number(process.env.OTP_TTL_SECONDS       || 600), // 10 minutes
+            maxAttempts:    Number(process.env.OTP_MAX_ATTEMPTS      || 5),   // verify tries per code
+            resendCooldown: Number(process.env.OTP_RESEND_COOLDOWN_S || 60),  // min seconds between sends
+        },
     },
 
     // ── Session enrichment (Phase 2 — absorbed from the retired session-service) ──
@@ -68,7 +75,43 @@ module.exports = {
         pass: process.env.SMTP_PASS   || '',
     },
 
+    // ── SMS / phone OTP delivery (utils/sms.js) ──────────────────────────────────────
+    // provider: 'twilio' | 'webhook' | '' (DEV console fallback — logs the code, never sends).
+    sms: {
+        provider:     process.env.SMS_PROVIDER     || '',
+        webhookUrl:   process.env.SMS_WEBHOOK_URL  || '',
+        webhookToken: process.env.SMS_WEBHOOK_TOKEN || '',
+        twilio: {
+            accountSid: process.env.TWILIO_ACCOUNT_SID || '',
+            authToken:  process.env.TWILIO_AUTH_TOKEN  || '',
+            from:       process.env.TWILIO_FROM        || '',
+        },
+    },
+
     eventBus: {
         stream: process.env.EVENT_BUS_STREAM || 'baalvion:events',
+    },
+
+    // Consumer social login (Google / Facebook). Credentials are resolved per-site from
+    // the CMS vault first (admin panel), then these env vars. See service/oauthLogin.js +
+    // service/oauthProviders.js. Amarisé talks to auth-service directly (no gateway).
+    oauth: {
+        // Public origin the provider redirects the BROWSER back to. Must serve the SPA AND
+        // /auth-bff/* (which the SPA rewrites to auth-service /v1/auth/*). e.g. https://amarisemaisonavenue.com
+        publicBaseUrl: process.env.OAUTH_PUBLIC_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:8080',
+        // Where the post-login redirect lands (the site). Usually == publicBaseUrl.
+        appUrl: process.env.OAUTH_APP_URL || process.env.OAUTH_PUBLIC_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:8080',
+        // CMS website slug this auth-service instance serves (per-site cred lookup).
+        siteSlug: process.env.AUTH_SITE_SLUG || process.env.CMS_WEBSITE_SLUG || '',
+        cmsBaseUrl: process.env.CMS_BASE_URL || process.env.CMS_INTERNAL_URL || 'http://localhost:3011/api/v1',
+        stateTtlMs: Number(process.env.OAUTH_STATE_TTL_MS || 10 * 60 * 1000),
+        google: {
+            clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+            clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
+        },
+        facebook: {
+            clientId: process.env.FACEBOOK_OAUTH_CLIENT_ID || '',
+            clientSecret: process.env.FACEBOOK_OAUTH_CLIENT_SECRET || '',
+        },
     },
 };

@@ -28,6 +28,24 @@ class UserRepository {
         return db.User.update({ email_verified_at: new Date() }, { where: { id: userId } });
     }
 
+    // ── Phone verification ─────────────────────────────────────────────────────────
+
+    async findByPhone(phone) {
+        return db.User.findOne({ where: { phone: String(phone).trim() } });
+    }
+
+    /** Set/replace the user's phone number. Does NOT mark it verified (that needs an OTP). */
+    async setPhone(userId, phone) {
+        return db.User.update({ phone: phone ? String(phone).trim() : null }, { where: { id: userId } });
+    }
+
+    /** Stamp phone_verified_at (and persist the confirmed number) after an OTP is confirmed. */
+    async setPhoneVerified(userId, phone) {
+        const fields = { phone_verified_at: new Date() };
+        if (phone) fields.phone = String(phone).trim();
+        return db.User.update(fields, { where: { id: userId } });
+    }
+
     async setPasswordHash(userId, passwordHash) {
         return db.User.update({ password_hash: passwordHash }, { where: { id: userId } });
     }

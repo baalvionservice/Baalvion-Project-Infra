@@ -18,6 +18,9 @@ const PAYMENT_CONFIRM_ROLES = (process.env.PAYMENT_CONFIRM_ROLES
 const canConfirmPayment = requireRole(...PAYMENT_CONFIRM_ROLES);
 
 router.get('/', requireTenant, c.listOrders);
+// Which consumer gateways are configured (chargeable) — literal path registered BEFORE '/:id' so it
+// isn't swallowed by the param route. Same tenant scope as the order reads; no spend-authority needed.
+router.get('/payment-gateways', requireTenant, pc.listGateways);
 router.get('/:id', requireTenant, c.getOrder);
 router.get('/:id/timeline', requireTenant, c.getTimeline);
 router.post('/', requireTenant, c.createOrder);

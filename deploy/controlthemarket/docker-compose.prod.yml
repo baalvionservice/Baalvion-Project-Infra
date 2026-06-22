@@ -70,11 +70,25 @@ services:
       JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
       JWT_ISSUER: ${JWT_ISSUER}
       JWT_AUDIENCE: ${JWT_AUDIENCE}
-      # ── Razorpay LIVE (real money) — handled by ctm-service directly, no CMS vault ───────────
+      # ── Payments — PRIMARY path is the CENTRAL CMS vault (admin.baalvion.com) ────────────────
+      # ctm-service resolves Razorpay/Cashfree/PayU keys from the central CMS vault for this site
+      # slug, so a key pasted in the admin panel is live within ~60s. The env keys below are an
+      # optional FALLBACK used only when the vault is unreachable / a provider isn't configured there.
+      PAYMENT_SITE_SLUG: ${PAYMENT_SITE_SLUG:-control-the-market}
+      CMS_BASE_URL: ${CMS_BASE_URL:-}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET:-}
       PAYMENT_PROVIDER: ${PAYMENT_PROVIDER}
-      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID}
-      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET}
-      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET}
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+      CASHFREE_CLIENT_ID: ${CASHFREE_CLIENT_ID:-}
+      CASHFREE_CLIENT_SECRET: ${CASHFREE_CLIENT_SECRET:-}
+      CASHFREE_BASE_URL: ${CASHFREE_BASE_URL:-}
+      CASHFREE_NOTIFY_URL: ${CASHFREE_NOTIFY_URL:-}
+      PAYU_MERCHANT_KEY: ${PAYU_MERCHANT_KEY:-}
+      PAYU_MERCHANT_SALT: ${PAYU_MERCHANT_SALT:-}
+      PAYU_BASE_URL: ${PAYU_BASE_URL:-}
+      PAYU_RETURN_URL: ${PAYU_RETURN_URL:-}
       PAYMENT_SUCCESS_URL: ${PAYMENT_SUCCESS_URL}
       PAYMENT_CANCEL_URL: ${PAYMENT_CANCEL_URL}
       RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}

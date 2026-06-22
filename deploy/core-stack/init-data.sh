@@ -32,7 +32,7 @@ export $(grep -E '^(POSTGRES_USER|POSTGRES_DB|SUPERADMIN_EMAIL|SUPERADMIN_PASSWO
 
 psql_q() { docker compose $CF exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" "$@"; }
 
-echo "[1/5] Waiting for postgres + auth-service + cms-service to be healthy..."
+echo "[1/6] Waiting for postgres + auth-service + cms-service to be healthy..."
 for i in $(seq 1 40); do
   pg=$(docker compose $CF ps postgres --format '{{.Health}}' 2>/dev/null || echo "")
   au=$(docker compose $CF ps auth-service --format '{{.Health}}' 2>/dev/null || echo "")
@@ -43,7 +43,7 @@ for i in $(seq 1 40); do
   [ "$i" = "40" ] && { echo "ERROR: services not healthy after ~200s. Check: docker compose $CF logs"; exit 1; }
 done
 
-echo "[2/5] Applying auth schema migrations (001-008, then 009 RLS best-effort)..."
+echo "[2/6] Applying auth schema migrations (001-008, then 009 RLS best-effort)..."
 for f in "$AUTH_MIG"/00{1,2,3,4,5,6,7,8}*.sql; do
   [ -e "$f" ] || continue
   echo "    >> $(basename "$f")"
@@ -51,10 +51,10 @@ for f in "$AUTH_MIG"/00{1,2,3,4,5,6,7,8}*.sql; do
 done
 psql_q -q < "$AUTH_MIG"/009*.sql >/dev/null 2>&1 && echo "    >> 009 (RLS)" || echo "    (009 skipped — ok)"
 
-echo "[3/5] Applying CMS schema migrations..."
+echo "[3/6] Applying CMS schema migrations..."
 docker compose $CF --profile tools run --rm cms-migrate
 
-echo "[4/5] Bootstrapping super-admin..."
+echo "[4/6] Bootstrapping super-admin..."
 BOOT=$(docker compose $CF exec -T \
   -e SUPERADMIN_EMAIL="$SUPERADMIN_EMAIL" -e SUPERADMIN_PASSWORD="$SUPERADMIN_PASSWORD" \
   auth-service node scripts/bootstrapSuperAdmin.js)
@@ -64,7 +64,23 @@ USER_ID=$(printf '%s' "$BOOT" | grep -oE '"userId":[[:space:]]*"[^"]+"' | head -
 [ -n "$ORG_ID" ] && [ -n "$USER_ID" ] || { echo "ERROR: could not parse orgId/userId from bootstrap output"; exit 1; }
 echo "    orgId=$ORG_ID userId=$USER_ID"
 
-echo "[5/5] Payment website tenant (CMS-vault mode)..."
+echo "[5/6] Seeding CMS baseline (websites + taxonomy + content) if empty..."
+# Restores the website catalog on a fresh DB. The seed carries the org as the placeholder
+# __CMS_ORG_ID__, replaced here with the just-bootstrapped super-admin org. Guarded so a
+# re-run on a populated DB is a no-op. Seed excludes integrations (secrets) and members.
+CMS_SEED="deploy/core-stack/seed/cms-seed.sql"
+WCOUNT=$(psql_q -t -A -c "SELECT count(*) FROM cms.cms_websites;" 2>/dev/null | tr -d '[:space:]' || echo 0)
+if [ -f "$CMS_SEED" ] && [ "${WCOUNT:-0}" = "0" ]; then
+  sed "s/__CMS_ORG_ID__/$ORG_ID/g" "$CMS_SEED" | psql_q -q
+  NEW=$(psql_q -t -A -c "SELECT count(*) FROM cms.cms_websites;" 2>/dev/null | tr -d '[:space:]')
+  echo "    Seeded. cms_websites now: ${NEW:-?}"
+elif [ ! -f "$CMS_SEED" ]; then
+  echo "    Skipped — seed file $CMS_SEED not found."
+else
+  echo "    Skipped — cms_websites already populated (${WCOUNT})."
+fi
+
+echo "[6/6] Payment website tenant (CMS-vault mode)..."
 if [ -n "$REGISTER_PAYMENT_SITE" ]; then
   echo "    Registering site '$REGISTER_PAYMENT_SITE' (owned by the super-admin org)..."
   docker compose $CF --profile tools run --rm \

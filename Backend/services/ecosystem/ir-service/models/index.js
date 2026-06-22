@@ -26,6 +26,7 @@ db.EarningsCall = require('./earnings_calls')(sequelize, Sequelize.DataTypes);
 db.IrShareholder = require('./ir_shareholders')(sequelize, Sequelize.DataTypes);
 db.Shareholder = require('./shareholders')(sequelize, Sequelize.DataTypes);
 db.IrContact = require('./ir_contacts')(sequelize, Sequelize.DataTypes);
+db.IrContactMessage = require('./ir_contact_messages')(sequelize, Sequelize.DataTypes);
 db.IrEvent = require('./ir_events')(sequelize, Sequelize.DataTypes);
 db.IrNotification = require('./ir_notifications')(sequelize, Sequelize.DataTypes);
 db.IrSubscription = require('./ir_subscriptions')(sequelize, Sequelize.DataTypes);
@@ -37,8 +38,10 @@ db.IrGeneratedReport = require('./ir_generated_reports')(sequelize, Sequelize.Da
 db.IrPerformance = require('./ir_performance')(sequelize, Sequelize.DataTypes);
 db.MarketSnapshot = require('./market_snapshot')(sequelize, Sequelize.DataTypes);
 db.IrInvestorApplication = require('./ir_investor_applications')(sequelize, Sequelize.DataTypes);
+db.IrBusinessApplication = require('./ir_business_applications')(sequelize, Sequelize.DataTypes);
+db.IrBusinessDocument = require('./ir_business_documents')(sequelize, Sequelize.DataTypes);
 
-// Associations (none required between IR models currently)
+// Associations (business onboarding: application 1—N documents)
 Object.values(db).forEach(model => {
     if (model.associate) model.associate(db);
 });

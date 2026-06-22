@@ -7,6 +7,10 @@ module.exports = function (sequelize, DataTypes) {
         avatar_url: { type: DataTypes.TEXT, allowNull: true },
         status: { type: DataTypes.STRING(16), allowNull: false, defaultValue: 'active' },
         email_verified_at: { type: DataTypes.DATE, allowNull: true },
+        // Phone verification (public buyer/seller self-service). Set via the phone OTP flow;
+        // phone_verified_at is stamped only after a code from auth.phone_otps is confirmed.
+        phone: { type: DataTypes.STRING(32), allowNull: true },
+        phone_verified_at: { type: DataTypes.DATE, allowNull: true },
         mfa_enabled: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
         mfa_secret: { type: DataTypes.TEXT, allowNull: true },
         mfa_pending_secret: { type: DataTypes.TEXT, allowNull: true },
@@ -19,6 +23,10 @@ module.exports = function (sequelize, DataTypes) {
         // this is the single authoritative source of a cross-tenant grant (added to roles[] at
         // issuance). See migration 006_user_platform_role.sql.
         platform_role: { type: DataTypes.STRING(32), allowNull: true, defaultValue: null },
+        // Social login (Google / Facebook) identity. NULL for password accounts.
+        // See migration 011_oauth_identity.sql + service/oauthLogin.js.
+        oauth_provider:    { type: DataTypes.STRING(32), allowNull: true, defaultValue: null },
+        oauth_provider_id: { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
     }, {
         sequelize,
         tableName: 'users',

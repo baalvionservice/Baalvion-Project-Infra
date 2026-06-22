@@ -1,0 +1,10 @@
+# gitleaks fingerprints for verified false positives.
+# Format: <commit>:<file>:<ruleID>:<startLine>  (printed by gitleaks as "Fingerprint:")
+#
+# GTI Certificate Registry engine spec. gitleaks' generic-api-key entropy
+# heuristic flags a Markdown test-plan bullet ("registration, key handling,
+# validity / signature / QR-code checks, required certificateTypeKey, ...").
+# No real credential is present; the high-entropy match was the slash-joined
+# token sitting next to the word "keys". Suppressed by fingerprint so genuine
+# secrets anywhere else still fail the scan.
+41506bb14f25ebeb6d1a59dd607b60bc1a2244ce:Frontend/Global-Trade-Infrastructure-main/docs/engines/CERTIFICATE-REGISTRY.md:generic-api-key:193

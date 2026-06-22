@@ -150,7 +150,7 @@ router.get('/submissions/:id/test-cases',     authMiddleware, integ.listTestCase
 router.post('/submissions/:id/test-cases',    authMiddleware, integ.createTestCase);
 router.post('/submissions/:id/test-cases/run', authMiddleware, integ.runTestCases);
 
-// ── Payments (provider-agnostic: Stripe/Razorpay env-gated) ─────────────────────
+// ── Payments (provider-agnostic: Stripe/Razorpay/PayU/Cashfree, vault- or env-gated) ────────────
 // Payment records contain financial PII; require auth and scope by caller's org.
 router.get('/payments',          authMiddleware,  payments.listPayments);
 // Require auth: don't disclose which providers are configured to anonymous callers (L1).
@@ -158,6 +158,9 @@ router.get('/payments/provider', authMiddleware,  payments.providerStatus);
 // Admin pre-flight self-check (vault keys + webhook secrets resolvable) — no secrets exposed.
 router.get('/payments/health',   adminOnly,       payments.health);
 router.post('/payments/checkout', authMiddleware, payments.createCheckout);
-router.post('/payments/webhook', payments.handleWebhook); // no auth — verified by provider signature
+router.post('/payments/webhook', payments.handleWebhook); // no auth — verified by provider signature (Stripe/Razorpay/Cashfree)
+// PayU surl/furl: form-POST return, verified by SHA-512 reverse hash (no auth header). GET = a cancel bounce.
+router.post('/payments/return/payu', payments.payuReturn);
+router.get('/payments/return/payu', (req, res) => res.redirect(303, process.env.PAYMENT_CANCEL_URL || 'https://controlthemarket.com/company/billing?canceled=1'));
 
 module.exports = router;

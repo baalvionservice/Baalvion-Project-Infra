@@ -8,6 +8,7 @@ router.use('/earnings', require('./earnings'));
 router.use('/shareholders', require('./shareholders'));
 router.use('/events', require('./events'));
 router.use('/contacts', require('./contacts'));
+router.use('/contact-messages', require('./contactMessages'));
 router.use('/notifications', require('./notifications'));
 router.use('/subscriptions', require('./subscriptions'));
 router.use('/votes', require('./votes'));
@@ -18,5 +19,6 @@ router.use('/generated-reports', require('./generatedReports'));
 router.use('/performance', require('./performance'));
 router.use('/market', require('./market'));
 router.use('/applications', require('./applications'));
+router.use('/business-applications', require('./businessApplications'));
 
 module.exports = router;

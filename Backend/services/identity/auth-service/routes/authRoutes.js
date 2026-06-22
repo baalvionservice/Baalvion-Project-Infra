@@ -1,7 +1,8 @@
 const express = require('express');
 const ctrl    = require('../controller/authController');
+const oauthCtrl = require('../controller/oauthController');
 const { authMiddleware }       = require('../middleware/authMiddleware');
-const { registerLimiter, forgotPwLimiter, mfaChallengeLimiter, verifyEmailLimiter, verifyTokenLimiter } = require('../middleware/rateLimiter');
+const { registerLimiter, forgotPwLimiter, mfaChallengeLimiter, verifyEmailLimiter, verifyTokenLimiter, otpRequestLimiter, otpVerifyLimiter } = require('../middleware/rateLimiter');
 const internalAuth = require('../middleware/internalAuth');
 
 // ---------------------------------------------------------------------------
@@ -33,6 +34,11 @@ const acceptInviteLimiter = rateLimit({
 
 const router = express.Router();
 
+// Social login (Google / Facebook) — public; the browser is redirected to the provider
+// and back. See controller/oauthController.js + service/oauthLogin.js.
+router.get('/oauth/:provider/start',    oauthCtrl.start);
+router.get('/oauth/:provider/callback', oauthCtrl.callback);
+
 router.post('/register',       registerLimiter,     ctrl.register);
 router.post('/login',          loginLimiter,        ctrl.login);
 router.post('/refresh',                             ctrl.refresh);
@@ -51,6 +57,11 @@ router.post('/accept-invite',   acceptInviteLimiter, ctrl.acceptInvite);
 
 router.get('/me', authMiddleware, ctrl.getMe);
 router.patch('/me', authMiddleware, ctrl.updateMe);
+
+// Phone verification (OTP) — authenticated. authMiddleware runs FIRST so the limiter can key on
+// the user id. Reachable from the frontend via the gateway's /auth/svc/* passthrough.
+router.post('/phone/otp/request', authMiddleware, otpRequestLimiter, ctrl.requestPhoneOtp);
+router.post('/phone/otp/verify',  authMiddleware, otpVerifyLimiter,  ctrl.verifyPhoneOtp);
 
 router.get('/sessions',              authMiddleware, ctrl.listSessions);
 router.delete('/sessions',           authMiddleware, ctrl.revokeAllSessions);

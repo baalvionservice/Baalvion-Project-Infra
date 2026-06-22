@@ -1,0 +1,954 @@
+openapi: 3.1.0
+info:
+  title: Baalvion Global Trade Infrastructure — Trade & Treasury API
+  version: "1.0.0"
+  description: >-
+    REST API for the Baalvion GTI platform: trades, the double-entry settlement
+    ledger, treasury (wallets / FX / fees / liquidity), settlements, the rule
+    engine, compliance/sanctions screening, and the Country Knowledge Base
+    (GCKB) — including the public, unauthenticated portal.
+
+
+    ## Authentication & tenancy (CR-1 / CR-2 / CR-3)
+
+    Identity is **never** taken from client-supplied headers. The API gateway
+    forwards an authenticated principal as a *signed envelope*: a base64url JSON
+    document in `x-identity-envelope` plus an HMAC-SHA256 signature in
+    `x-identity-signature`, computed with the shared `GATEWAY_SIGNING_SECRET`.
+    A request authenticates only if the signature verifies and the envelope has
+    not expired. Anonymous requests, forged headers and role spoofing all
+    fail closed. The caller's `organizationId` (tenant) is derived **only** from
+    the verified principal — it is intentionally never accepted in request
+    bodies.
+
+
+    Routes under `/gckb/public/**` and `/health` are the exceptions: they are
+    intentionally unauthenticated.
+
+  contact:
+    name: Baalvion Platform Engineering
+  license:
+    name: Proprietary
+
+servers:
+  - url: /api
+    description: Default (app-relative)
+  - url: /api/v1
+    description: Versioned alias (registry/event surface)
+
+tags:
+  - name: Health
+  - name: Trades
+  - name: Ledger
+  - name: Settlements
+  - name: Wallets
+  - name: Treasury
+  - name: FX
+  - name: Fees
+  - name: Liquidity
+  - name: Reporting
+  - name: Rules
+  - name: Compliance
+  - name: GCKB (authenticated)
+  - name: GCKB (public portal)
+
+security:
+  - gatewayEnvelope: []
+    gatewaySignature: []
+
+paths:
+  # ─────────────────────────── Health ────────────────────────────
+  /health:
+    get:
+      tags: [Health]
+      summary: Liveness / readiness probe
+      security: []
+      responses:
+        "200":
+          description: Service healthy
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SuccessEnvelope" }
+
+  # ─────────────────────────── Trades ────────────────────────────
+  /trades:
+    get:
+      tags: [Trades]
+      summary: List trades for the caller's organization
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/pageSize"
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+    post:
+      tags: [Trades]
+      summary: Open a new trade
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateTrade" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /trades/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Trades]
+      summary: Get a trade (tenant-checked)
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /trades/{id}/cancel:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      tags: [Trades]
+      summary: Cancel a trade
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason: { type: string, minLength: 1, default: cancelled_by_operator }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "409": { $ref: "#/components/responses/Conflict" }
+  /trades/{id}/complete:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      tags: [Trades]
+      summary: Mark a trade complete
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /trades/{id}/finance:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Trades]
+      summary: List financing requests for a trade
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Trades]
+      summary: Request trade financing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RequestFinancing" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /trades/{id}/documents:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Trades]
+      summary: List trade documents
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Trades]
+      summary: Attach a document to a trade
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /trades/{id}/events:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Trades]
+      summary: Domain-event history (append-only)
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /trades/{id}/audit:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Trades]
+      summary: Audit-log entries for a trade
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /trades/{id}/compliance:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Trades]
+      summary: Compliance status for a trade
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /trades/{id}/workflow:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Trades]
+      summary: Workflow state for a trade
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /finance/{requestId}/decision:
+    parameters:
+      - { name: requestId, in: path, required: true, schema: { type: string, format: uuid } }
+    post:
+      tags: [Trades]
+      summary: Approve or reject a financing request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FinanceDecision" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  # ─────────────────────────── Ledger ────────────────────────────
+  /ledger/accounts:
+    get:
+      tags: [Ledger]
+      summary: List ledger accounts
+      parameters: [{ $ref: "#/components/parameters/page" }, { $ref: "#/components/parameters/pageSize" }]
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Ledger]
+      summary: Open a ledger account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OpenAccount" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /ledger/accounts/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Ledger]
+      summary: Get a ledger account
+      responses: { "200": { $ref: "#/components/responses/Success" }, "404": { $ref: "#/components/responses/NotFound" } }
+    patch:
+      tags: [Ledger]
+      summary: Set account status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetAccountStatus" }
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /ledger/accounts/{id}/entries:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Ledger]
+      summary: List posting entries for an account
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /ledger/transactions:
+    get:
+      tags: [Ledger]
+      summary: List journal transactions
+      parameters: [{ $ref: "#/components/parameters/page" }, { $ref: "#/components/parameters/pageSize" }]
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Ledger]
+      summary: Post a balanced journal entry (Σdebit = Σcredit)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PostJournal" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400":
+          description: Validation or unbalanced posting (MoneyError / PostingError)
+          content: { application/json: { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } }
+  /ledger/transactions/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Ledger]
+      summary: Get a journal transaction
+      responses: { "200": { $ref: "#/components/responses/Success" }, "404": { $ref: "#/components/responses/NotFound" } }
+  /ledger/transactions/{id}/reverse:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      tags: [Ledger]
+      summary: Post a reversing entry for a transaction
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { reason: { type: string, maxLength: 500 } }
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /ledger/trial-balance:
+    get:
+      tags: [Ledger]
+      summary: Trial balance (derived from postings)
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+
+  # ─────────────────────────── Settlements ────────────────────────
+  /settlements:
+    get:
+      tags: [Settlements]
+      summary: List settlement instructions
+      parameters: [{ $ref: "#/components/parameters/page" }, { $ref: "#/components/parameters/pageSize" }]
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Settlements]
+      summary: Create a settlement instruction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateSettlement" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /settlements/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Settlements]
+      summary: Get a settlement
+      responses: { "200": { $ref: "#/components/responses/Success" }, "404": { $ref: "#/components/responses/NotFound" } }
+  /settlements/{id}/transition:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      tags: [Settlements]
+      summary: Drive the settlement state machine (AUTHORIZE/CAPTURE/SETTLE/FAIL/CANCEL/REVERSE)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TransitionSettlement" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "409":
+          description: Illegal transition or terminal state
+          content: { application/json: { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } }
+  /settlements/{id}/history:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Settlements]
+      summary: Settlement transition history
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+
+  # ─────────────────────────── Wallets ───────────────────────────
+  /wallets:
+    get:
+      tags: [Wallets]
+      summary: List wallets
+      parameters: [{ $ref: "#/components/parameters/page" }, { $ref: "#/components/parameters/pageSize" }]
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Wallets]
+      summary: Open a wallet (backed by a ledger account bucket)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OpenWallet" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /wallets/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get:
+      tags: [Wallets]
+      summary: Get a wallet with derived balances (AVAILABLE/HELD/RESERVED/PENDING)
+      responses: { "200": { $ref: "#/components/responses/Success" }, "404": { $ref: "#/components/responses/NotFound" } }
+    patch:
+      tags: [Wallets]
+      summary: Set wallet status (ACTIVE/FROZEN/CLOSED)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SetWalletStatus" }
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /wallets/{id}/operations:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    post:
+      tags: [Wallets]
+      summary: Execute a balanced wallet operation (CREDIT/DEBIT/HOLD/RELEASE/RESERVE/UNRESERVE/MARK_PENDING/CLEAR_PENDING)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WalletOperation" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  # ─────────────────────────── Treasury ──────────────────────────
+  /treasury/accounts:
+    get:
+      tags: [Treasury]
+      summary: List treasury accounts
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Treasury]
+      summary: Provision a treasury account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProvisionTreasuryAccount" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  # ─────────────────────────── FX ────────────────────────────────
+  /fx/quote:
+    get:
+      tags: [FX]
+      summary: List / retrieve FX quotes
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [FX]
+      summary: Create an FX quote (mid-rate + spread/margin in bps)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FxQuote" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /fx/execute:
+    post:
+      tags: [FX]
+      summary: Execute an FX quote (two single-currency ledger postings via FX clearing)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/FxExecute" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+  # ─────────────────────────── Fees ──────────────────────────────
+  /fees:
+    get:
+      tags: [Fees]
+      summary: List fee rules
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Fees]
+      summary: Create a fee rule (FLAT / PERCENTAGE / TIER)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CreateFeeRule" }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+  /fees/calculate:
+    post:
+      tags: [Fees]
+      summary: Calculate a fee (pure, no posting)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CalculateFee" }
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /fees/apply:
+    post:
+      tags: [Fees]
+      summary: Apply a fee (posts a balanced fee charge)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ApplyFee" }
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+
+  # ─────────────────────────── Liquidity / Reporting ─────────────
+  /liquidity:
+    get:
+      tags: [Liquidity]
+      summary: Liquidity overview
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Liquidity]
+      summary: Snapshot liquidity for a currency
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [currency]
+              properties: { currency: { $ref: "#/components/schemas/Currency" } }
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /reconciliation:
+    get:
+      tags: [Reporting]
+      summary: Reconciliation report (ledger vs wallet projections)
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /reporting:
+    get:
+      tags: [Reporting]
+      summary: Financial reporting rollups
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+
+  # ─────────────────────────── Rules engine ──────────────────────
+  /rules:
+    get:
+      tags: [Rules]
+      summary: List rule sets
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [Rules]
+      summary: Create a rule set
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/CreateRuleSet" } } }
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /rules/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get: { tags: [Rules], summary: Get a rule set, responses: { "200": { $ref: "#/components/responses/Success" } } }
+    patch: { tags: [Rules], summary: Update a rule set, responses: { "200": { $ref: "#/components/responses/Success" } } }
+    delete: { tags: [Rules], summary: Delete a rule set, responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /rules/{id}/items:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get: { tags: [Rules], summary: List rules in a set, responses: { "200": { $ref: "#/components/responses/Success" } } }
+    post:
+      tags: [Rules]
+      summary: Add a rule to a set
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /rules/{id}/items/{ruleId}:
+    parameters:
+      - { $ref: "#/components/parameters/id" }
+      - { name: ruleId, in: path, required: true, schema: { type: string, format: uuid } }
+    patch: { tags: [Rules], summary: Update a rule, responses: { "200": { $ref: "#/components/responses/Success" } } }
+    delete: { tags: [Rules], summary: Delete a rule, responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /rules/{id}/revisions:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get: { tags: [Rules], summary: Append-only revision history, responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /rules/evaluate:
+    post:
+      tags: [Rules]
+      summary: Evaluate facts against a rule set (pure JSON-AST evaluator, no eval)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/EvaluateRules" } } }
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+
+  # ─────────────────────────── Compliance ────────────────────────
+  /compliance/goods-screening:
+    post:
+      tags: [Compliance]
+      summary: Screen goods against restricted/controlled rules
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/GoodsScreening" } } }
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /sanctions/screen:
+    post:
+      tags: [Compliance]
+      summary: Sanctions screening (proxies the sanctions micro-service; CR-11 auth mandatory)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name: { type: string, minLength: 1 }
+                country: { type: string }
+      responses:
+        "200":
+          description: Screening result
+          content: { application/json: { schema: { type: object } } }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  # ─────────────────────────── GCKB (authenticated) ──────────────
+  /gckb/entities:
+    get:
+      tags: [GCKB (authenticated)]
+      summary: List registered GCKB entity types
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /gckb/{entity}:
+    parameters: [{ $ref: "#/components/parameters/entity" }]
+    get:
+      tags: [GCKB (authenticated)]
+      summary: List records of an entity type
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+    post:
+      tags: [GCKB (authenticated)]
+      summary: Create a record
+      responses: { "200": { $ref: "#/components/responses/Success" } }
+  /gckb/{entity}/{id}:
+    parameters: [{ $ref: "#/components/parameters/entity" }, { $ref: "#/components/parameters/id" }]
+    get: { tags: [GCKB (authenticated)], summary: Get a record, responses: { "200": { $ref: "#/components/responses/Success" } } }
+    patch: { tags: [GCKB (authenticated)], summary: Update a record, responses: { "200": { $ref: "#/components/responses/Success" } } }
+    delete: { tags: [GCKB (authenticated)], summary: Delete a record, responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/{entity}/{id}/history:
+    parameters: [{ $ref: "#/components/parameters/entity" }, { $ref: "#/components/parameters/id" }]
+    get: { tags: [GCKB (authenticated)], summary: Record change history, responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/{entity}/{id}/versions:
+    parameters: [{ $ref: "#/components/parameters/entity" }, { $ref: "#/components/parameters/id" }]
+    get: { tags: [GCKB (authenticated)], summary: Record revisions (append-only), responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/{entity}/{id}/relationships:
+    parameters: [{ $ref: "#/components/parameters/entity" }, { $ref: "#/components/parameters/id" }]
+    get: { tags: [GCKB (authenticated)], summary: List edges, responses: { "200": { $ref: "#/components/responses/Success" } } }
+    post: { tags: [GCKB (authenticated)], summary: Create an edge, responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/{entity}/validate:
+    parameters: [{ $ref: "#/components/parameters/entity" }]
+    post: { tags: [GCKB (authenticated)], summary: Validate a candidate record against the registry, responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/{entity}/import:
+    parameters: [{ $ref: "#/components/parameters/entity" }]
+    post: { tags: [GCKB (authenticated)], summary: CSV/JSON import (dry-run / dedupe / 422 report), responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/{entity}/export:
+    parameters: [{ $ref: "#/components/parameters/entity" }]
+    get: { tags: [GCKB (authenticated)], summary: Export records (CSV/JSON), responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/graph/{id}:
+    parameters: [{ $ref: "#/components/parameters/id" }]
+    get: { tags: [GCKB (authenticated)], summary: Knowledge-graph neighborhood for a node, responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/search:
+    get: { tags: [GCKB (authenticated)], summary: Global search across the knowledge base, responses: { "200": { $ref: "#/components/responses/Success" } } }
+
+  # ─────────────────────────── GCKB (public portal) ──────────────
+  /gckb/public/countries:
+    get: { tags: [GCKB (public portal)], summary: List published countries, security: [], responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/public/countries/{code}:
+    parameters: [{ name: code, in: path, required: true, schema: { type: string } }]
+    get: { tags: [GCKB (public portal)], summary: Get a published country profile, security: [], responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/public/authorities:
+    get: { tags: [GCKB (public portal)], summary: List regulatory authorities, security: [], responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/public/ports:
+    get: { tags: [GCKB (public portal)], summary: List ports, security: [], responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/public/fta:
+    get: { tags: [GCKB (public portal)], summary: List free-trade agreements, security: [], responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/public/fta/{code}:
+    parameters: [{ name: code, in: path, required: true, schema: { type: string } }]
+    get: { tags: [GCKB (public portal)], summary: Get an FTA, security: [], responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/public/compare:
+    get: { tags: [GCKB (public portal)], summary: Compare countries, security: [], responses: { "200": { $ref: "#/components/responses/Success" } } }
+  /gckb/public/duty-calculator:
+    post:
+      tags: [GCKB (public portal)]
+      summary: Estimate import duty (pure compute, FTA-preference override)
+      security: []
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: "#/components/schemas/DutyCalculator" } } }
+      responses:
+        "200": { $ref: "#/components/responses/Success" }
+        "400": { $ref: "#/components/responses/BadRequest" }
+
+components:
+  securitySchemes:
+    gatewayEnvelope:
+      type: apiKey
+      in: header
+      name: x-identity-envelope
+      description: base64url JSON principal envelope, issued by the gateway.
+    gatewaySignature:
+      type: apiKey
+      in: header
+      name: x-identity-signature
+      description: HMAC-SHA256 of the envelope, keyed with GATEWAY_SIGNING_SECRET.
+
+  parameters:
+    id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+    entity:
+      name: entity
+      in: path
+      required: true
+      schema: { type: string }
+      description: GCKB entity type slug (e.g. country-reference, policy-forms).
+    page:
+      name: page
+      in: query
+      schema: { type: integer, minimum: 1, default: 1 }
+    pageSize:
+      name: pageSize
+      in: query
+      schema: { type: integer, minimum: 1, maximum: 200, default: 25 }
+
+  responses:
+    Success:
+      description: Success
+      content: { application/json: { schema: { $ref: "#/components/schemas/SuccessEnvelope" } } }
+    BadRequest:
+      description: Validation error
+      content: { application/json: { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } }
+    Unauthorized:
+      description: Missing/invalid/expired identity envelope (CR-1)
+      content: { application/json: { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } }
+    NotFound:
+      description: Resource not found (or not in caller's tenant)
+      content: { application/json: { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } }
+    Conflict:
+      description: Optimistic-lock or illegal state transition
+      content: { application/json: { schema: { $ref: "#/components/schemas/ErrorEnvelope" } } }
+
+  schemas:
+    SuccessEnvelope:
+      type: object
+      required: [success, data, error]
+      properties:
+        success: { type: boolean, const: true }
+        data: {}
+        error: { type: "null" }
+    ErrorEnvelope:
+      type: object
+      required: [success, data, error]
+      properties:
+        success: { type: boolean, const: false }
+        data: { type: "null" }
+        error: { type: string }
+    Currency:
+      type: string
+      pattern: "^[A-Za-z]{3}$"
+      description: 3-letter ISO 4217 currency code.
+    Money:
+      description: Non-negative money amount — precise decimal string or finite number.
+      oneOf:
+        - { type: string, pattern: "^\\d{1,16}(\\.\\d{1,8})?$" }
+        - { type: number, minimum: 0 }
+
+    CreateTrade:
+      type: object
+      required: [terms]
+      properties:
+        reference: { type: string, minLength: 1 }
+        correlationId: { type: string, minLength: 1 }
+        terms:
+          type: object
+          required: [buyerId, commodity, quantity, unitPrice, currency]
+          properties:
+            buyerId: { type: string, minLength: 1 }
+            sellerId: { type: string, minLength: 1 }
+            commodity: { type: string, minLength: 1 }
+            quantity: { type: number, exclusiveMinimum: 0 }
+            unitPrice: { type: number, exclusiveMinimum: 0 }
+            currency: { $ref: "#/components/schemas/Currency" }
+            incoterm: { type: string }
+            originCountry: { type: string }
+            destinationCountry: { type: string }
+        buyer:
+          type: object
+          required: [name]
+          properties: { name: { type: string }, externalRef: { type: string } }
+        supplier:
+          type: object
+          required: [name]
+          properties: { name: { type: string }, externalRef: { type: string } }
+        metadata: { type: object, additionalProperties: true }
+    RequestFinancing:
+      type: object
+      required: [type, amount]
+      properties:
+        type:
+          type: string
+          enum: [LETTER_OF_CREDIT, BANK_GUARANTEE, INVOICE_FINANCING, FACTORING, SUPPLY_CHAIN_FINANCE, PURCHASE_ORDER_FINANCE]
+        amount: { type: number, exclusiveMinimum: 0 }
+        currency: { $ref: "#/components/schemas/Currency" }
+        terms: { type: object, additionalProperties: true }
+    FinanceDecision:
+      type: object
+      required: [decision]
+      properties:
+        decision: { type: string, enum: [approved, rejected] }
+        reason: { type: string }
+        provider: { type: string }
+
+    OpenAccount:
+      type: object
+      required: [code, name, type, currency]
+      properties:
+        code: { type: string, minLength: 1, maxLength: 64, pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]*$" }
+        name: { type: string, minLength: 1, maxLength: 256 }
+        type: { type: string, enum: [ASSET, LIABILITY, EQUITY, REVENUE, EXPENSE] }
+        purpose: { type: string, maxLength: 64 }
+        normalSide: { type: string, enum: [DEBIT, CREDIT] }
+        currency: { $ref: "#/components/schemas/Currency" }
+        allowNegative: { type: boolean }
+        ownerOrgId: { type: string, format: uuid }
+        metadata: { type: object, additionalProperties: true }
+    SetAccountStatus:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [ACTIVE, FROZEN, CLOSED] }
+        reason: { type: string, maxLength: 500 }
+    PostJournal:
+      type: object
+      required: [currency, lines]
+      properties:
+        currency: { $ref: "#/components/schemas/Currency" }
+        lines:
+          type: array
+          minItems: 2
+          maxItems: 64
+          items:
+            type: object
+            required: [accountId, direction, amount]
+            properties:
+              accountId: { type: string, format: uuid }
+              direction: { type: string, enum: [DEBIT, CREDIT] }
+              amount: { $ref: "#/components/schemas/Money" }
+              memo: { type: string, maxLength: 500 }
+        reference: { type: string, minLength: 1, maxLength: 128 }
+        description: { type: string, maxLength: 1000 }
+        tradeId: { type: string, format: uuid }
+        correlationId: { type: string, minLength: 1, maxLength: 128 }
+        source: { type: string, minLength: 1, maxLength: 64 }
+    CreateSettlement:
+      type: object
+      required: [amount, currency, payerAccountId, clearingAccountId, payeeAccountId]
+      properties:
+        amount: { $ref: "#/components/schemas/Money" }
+        currency: { $ref: "#/components/schemas/Currency" }
+        rail: { type: string, enum: [INTERNAL, SWIFT, SEPA, FEDWIRE, RTGS, ACH, UPI, NEFT, IMPS, FPS, BACS] }
+        payerAccountId: { type: string, format: uuid }
+        clearingAccountId: { type: string, format: uuid }
+        payeeAccountId: { type: string, format: uuid }
+        tradeId: { type: string, format: uuid }
+        escrowId: { type: string, format: uuid }
+        priority: { type: integer, minimum: 0, maximum: 1000 }
+        scheduledAt: { type: string, format: date-time }
+        reference: { type: string, minLength: 1, maxLength: 128 }
+        correlationId: { type: string, minLength: 1, maxLength: 128 }
+        metadata: { type: object, additionalProperties: true }
+    TransitionSettlement:
+      type: object
+      required: [action]
+      properties:
+        action: { type: string, enum: [AUTHORIZE, CAPTURE, SETTLE, FAIL, CANCEL, REVERSE] }
+        amount: { $ref: "#/components/schemas/Money" }
+        reason: { type: string, maxLength: 500 }
+        expectedVersion: { type: integer, exclusiveMinimum: 0 }
+
+    OpenWallet:
+      type: object
+      required: [type, currency]
+      properties:
+        type: { type: string, enum: [USER, COMPANY, MERCHANT, ESCROW, RESERVE, TREASURY, VIRTUAL, SETTLEMENT, INTEREST] }
+        currency: { $ref: "#/components/schemas/Currency" }
+        ownerOrgId: { type: string, format: uuid }
+        ownerRef: { type: string, minLength: 1, maxLength: 128 }
+        reference: { type: string, minLength: 1, maxLength: 128 }
+        metadata: { type: object, additionalProperties: true }
+    WalletOperation:
+      type: object
+      required: [op, amount]
+      properties:
+        op: { type: string, enum: [CREDIT, DEBIT, HOLD, RELEASE, RESERVE, UNRESERVE, MARK_PENDING, CLEAR_PENDING] }
+        amount: { $ref: "#/components/schemas/Money" }
+        counterAccountId: { type: string, format: uuid }
+        reference: { type: string, minLength: 1, maxLength: 128 }
+        reason: { type: string, maxLength: 500 }
+    SetWalletStatus:
+      type: object
+      required: [status]
+      properties:
+        status: { type: string, enum: [ACTIVE, FROZEN, CLOSED] }
+        reason: { type: string, maxLength: 500 }
+    ProvisionTreasuryAccount:
+      type: object
+      required: [kind, currency]
+      properties:
+        kind: { type: string, enum: [OPERATING, SETTLEMENT, RESERVE, LIQUIDITY, ESCROW, INTEREST, FX, FEE, SUSPENSE] }
+        currency: { $ref: "#/components/schemas/Currency" }
+
+    FxQuote:
+      type: object
+      required: [baseCurrency, quoteCurrency, midRate]
+      properties:
+        baseCurrency: { $ref: "#/components/schemas/Currency" }
+        quoteCurrency: { $ref: "#/components/schemas/Currency" }
+        midRate: { type: string, pattern: "^\\d{1,12}(\\.\\d{1,8})?$" }
+        spreadBps: { type: integer, minimum: 0, maximum: 1000000 }
+        marginBps: { type: integer, minimum: 0, maximum: 1000000 }
+        baseAmount: { $ref: "#/components/schemas/Money" }
+        ttlSeconds: { type: integer, minimum: 1, maximum: 86400 }
+        rateSource: { type: string, minLength: 1, maxLength: 64 }
+        reference: { type: string, minLength: 1, maxLength: 128 }
+    FxExecute:
+      type: object
+      required: [quoteId, fromWalletId, toWalletId]
+      properties:
+        quoteId: { type: string, format: uuid }
+        fromWalletId: { type: string, format: uuid }
+        toWalletId: { type: string, format: uuid }
+        baseAmount: { $ref: "#/components/schemas/Money" }
+        reference: { type: string, minLength: 1, maxLength: 128 }
+
+    CreateFeeRule:
+      type: object
+      required: [code, name, type, scope, currency]
+      properties:
+        code: { type: string, minLength: 1, maxLength: 64, pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]*$" }
+        name: { type: string, minLength: 1, maxLength: 256 }
+        type: { type: string, enum: [FLAT, PERCENTAGE, TIER] }
+        scope: { type: string, minLength: 1, maxLength: 64 }
+        currency: { $ref: "#/components/schemas/Currency" }
+        basisPoints: { type: integer, minimum: 0, maximum: 1000000 }
+        flatAmount: { type: string, pattern: "^\\d{1,16}(\\.\\d{1,8})?$" }
+        tiers:
+          type: array
+          minItems: 1
+          maxItems: 32
+          items:
+            type: object
+            properties:
+              upToAmount: { type: [string, "null"], pattern: "^\\d{1,16}(\\.\\d{1,8})?$" }
+              basisPoints: { type: integer, minimum: 0, maximum: 1000000 }
+              flatAmount: { type: string }
+        minFee: { type: string }
+        maxFee: { type: string }
+        feeAccountId: { type: string, format: uuid }
+        country: { type: string, maxLength: 64 }
+        priority: { type: integer, minimum: 0, maximum: 1000 }
+    CalculateFee:
+      type: object
+      required: [feeRuleId, baseAmount, currency]
+      properties:
+        feeRuleId: { type: string, format: uuid }
+        baseAmount: { $ref: "#/components/schemas/Money" }
+        currency: { $ref: "#/components/schemas/Currency" }
+    ApplyFee:
+      type: object
+      required: [feeRuleId, baseAmount, currency, payerAccountId]
+      properties:
+        feeRuleId: { type: string, format: uuid }
+        baseAmount: { $ref: "#/components/schemas/Money" }
+        currency: { $ref: "#/components/schemas/Currency" }
+        payerAccountId: { type: string, format: uuid }
+        feeAccountId: { type: string, format: uuid }
+        sourceType: { type: string, maxLength: 64 }
+        sourceId: { type: string, format: uuid }
+        reference: { type: string, minLength: 1, maxLength: 128 }
+
+    CreateRuleSet:
+      type: object
+      required: [key, name, category]
+      properties:
+        key: { type: string }
+        name: { type: string }
+        category: { type: string }
+        description: { type: string }
+    EvaluateRules:
+      type: object
+      description: Facts evaluated against a rule set by the pure JSON-AST evaluator.
+      properties:
+        ruleSetKey: { type: string }
+        facts: { type: object, additionalProperties: true }
+    GoodsScreening:
+      type: object
+      properties:
+        hsCode: { type: [string, "null"], maxLength: 32 }
+        productCategory: { type: [string, "null"], maxLength: 128 }
+        originCountry: { type: [string, "null"], maxLength: 64 }
+        destinationCountry: { type: [string, "null"], maxLength: 64 }
+        direction: { type: string, enum: [IMPORT, EXPORT, BOTH] }
+        quantity: { type: number, minimum: 0 }
+        value: { type: number, minimum: 0 }
+        metadata: { type: object, additionalProperties: true }
+    DutyCalculator:
+      type: object
+      required: [destinationCountryCode, hsCode, customsValue, currency]
+      properties:
+        destinationCountryCode: { type: string, minLength: 2, maxLength: 8 }
+        hsCode: { type: string, minLength: 2, maxLength: 16 }
+        customsValue: { type: number, exclusiveMinimum: 0 }
+        currency: { type: string, minLength: 3, maxLength: 3 }
+        originCountryCode: { type: string, minLength: 2, maxLength: 8 }
+        quantity: { type: number, exclusiveMinimum: 0 }
+        unit: { type: string, maxLength: 16 }

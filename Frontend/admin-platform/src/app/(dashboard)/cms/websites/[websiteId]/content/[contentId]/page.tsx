@@ -1,8 +1,8 @@
 'use client';
 
-import { use, useEffect } from 'react';
+import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Copy, Check, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import ContentEditor from '@/components/cms/ContentEditor';
@@ -21,6 +21,17 @@ export default function ContentEditorPage({
   const setActiveContent = useCmsStore((s) => s.setActiveContent);
   const setActiveWebsiteId = useCmsStore((s) => s.setActiveWebsiteId);
   const clearDraft = useCmsStore((s) => s.clearDraft);
+  const [copied, setCopied] = useState(false);
+
+  const copyId = async () => {
+    try {
+      await navigator.clipboard.writeText(contentId);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      /* clipboard unavailable (non-secure context) — ignore */
+    }
+  };
 
   // Set the active website BEFORE content queries fire so id-only API calls resolve it.
   useEffect(() => { setActiveWebsiteId(websiteId); }, [websiteId, setActiveWebsiteId]);
@@ -69,6 +80,14 @@ export default function ContentEditorPage({
     );
   }
 
+  // Canonical public URL for this item, e.g. https://imperialpedia.com/<slug>.
+  // `domain` is stored bare (no scheme); normalize and strip any trailing slash.
+  const liveBase = website?.domain
+    ? `https://${website.domain.replace(/^https?:\/\//, '').replace(/\/+$/, '')}`
+    : null;
+  const liveUrl = liveBase ? `${liveBase}/${content.slug}` : null;
+  const isPublished = content.status === 'published';
+
   return (
     <div className="h-full flex flex-col -mx-4 -mt-4">
       {/* Minimal back bar */}
@@ -81,6 +100,43 @@ export default function ContentEditorPage({
         </Button>
         <span className="text-xs text-muted-foreground">/</span>
         <span className="text-xs font-medium truncate">{content.title}</span>
+
+        {/* Content ID (copyable) + link to the live public page */}
+        <div className="ml-auto flex items-center gap-3 pl-3 shrink-0">
+          <button
+            type="button"
+            onClick={copyId}
+            title="Copy content ID"
+            className="flex items-center gap-1 font-mono text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {copied ? (
+              <Check className="h-3 w-3 text-green-600" />
+            ) : (
+              <Copy className="h-3 w-3" />
+            )}
+            <span className="hidden sm:inline">ID:</span>
+            {content.id}
+          </button>
+
+          {liveUrl && (
+            <a
+              href={liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={
+                isPublished
+                  ? `Open ${liveUrl}`
+                  : `Not published yet — ${liveUrl} may 404 until you publish`
+              }
+              className={`flex items-center gap-1 text-xs transition-colors hover:underline ${
+                isPublished ? 'text-primary' : 'text-muted-foreground'
+              }`}
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              View live
+            </a>
+          )}
+        </div>
       </div>
 
       <div className="flex-1 overflow-hidden">

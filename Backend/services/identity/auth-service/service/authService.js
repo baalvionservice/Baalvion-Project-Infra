@@ -41,6 +41,8 @@ function presentUser(user, extras = {}) {
         avatarUrl:     user.avatar_url || null,
         status:        user.status,
         emailVerified: !!user.email_verified_at,
+        phone:         user.phone || null,
+        phoneVerified: !!user.phone_verified_at,
         mfaEnabled:    user.mfa_enabled,
         mfaRequired:   !!user.mfa_required,
         lastLoginAt:   user.last_login_at || null,
@@ -154,20 +156,26 @@ async function issueTokenPair(user, orgId, sessionId, familyId) {
 
 // ── Auth flows ─────────────────────────────────────────────────────────────────
 
-async function register({ email, password: plainPw, fullName, orgName, orgType, ipAddress, userAgent }) {
+async function register({ email, password: plainPw, fullName, orgName, accountType, orgType, phone, ipAddress, userAgent }) {
     const existing = await userRepo.findByEmail(email);
     if (existing) throw new AppError('EMAIL_TAKEN', 'Email already registered', 409);
 
     const passwordHash = await password.hash(plainPw);
     const user = await userRepo.create({ email, passwordHash, fullName });
 
-    // New self-service registrations default to a Buyer organization unless an explicit
-    // (validated) org type is supplied — buyers are the lowest-privilege market participant.
+    // Optional phone captured at signup is stored UNVERIFIED — it only becomes verified after the
+    // phone OTP flow (POST /phone/otp/request → /phone/otp/verify). Kept in-memory for presentUser.
+    if (phone) { await userRepo.setPhone(user.id, phone); user.phone = String(phone).trim(); }
+
+    // New self-service registrations default to a Buyer organization. `accountType` is the
+    // public-facing buyer/seller choice; `orgType` remains for internal/back-compat callers.
+    // Anything outside the validated set falls back to buyer — the lowest-privilege participant.
     const ALLOWED_ORG_TYPES = new Set([
         'buyer', 'seller', 'trade_agent', 'logistics_provider', 'customs_authority',
         'bank', 'insurance_provider', 'compliance_agency', 'regulator', 'platform_owner',
     ]);
-    const safeOrgType = ALLOWED_ORG_TYPES.has(orgType) ? orgType : 'buyer';
+    const requestedType = accountType || orgType;
+    const safeOrgType = ALLOWED_ORG_TYPES.has(requestedType) ? requestedType : 'buyer';
     const org = await orgRepo.create({ name: orgName || `${(fullName || email).split('@')[0]}'s Workspace`, ownerId: user.id, type: safeOrgType });
     await orgRepo.addMember({ orgId: org.id, userId: user.id, role: 'owner' });
 
@@ -745,4 +753,8 @@ module.exports = {
     validateInvite,
     acceptInvite,
     verifyToken,
+    // Exposed for the social-login flow (service/oauthLogin.js) so OAuth reuses the
+    // exact RS256 issuance + user presentation as password login.
+    issueTokenPair,
+    presentUser,
 };

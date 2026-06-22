@@ -4,11 +4,12 @@ import { Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Decode a JWT payload (no verification — server already verified; this just
-// extracts identity for the local session).
+// extracts identity for the local session). UTF-8-safe (handles non-ASCII claims).
 function decodeJwt(token: string): Record<string, unknown> | null {
   try {
     const part = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
-    return JSON.parse(decodeURIComponent(escape(atob(part))));
+    const bytes = Uint8Array.from(atob(part), (c) => c.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
   } catch {
     return null;
   }
@@ -22,11 +23,16 @@ export default function SsoCallback() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.hash.replace(/^#/, ""));
     const token = params.get("token");
-    const refresh = params.get("refresh");
-    if (!token || !refresh) { setError(true); return; }
+    // The refresh token now arrives ONLY via the httpOnly cookie set by the server
+    // (kept out of the URL). `refresh` here stays optional for backward compatibility.
+    const refresh = params.get("refresh") || "";
+    if (!token) { setError(true); return; }
 
     const claims = decodeJwt(token);
     if (!claims) { setError(true); return; }
+    // Reject an already-expired token (e.g. a stale bookmarked callback URL).
+    const exp = typeof claims.exp === "number" ? claims.exp : 0;
+    if (exp && exp * 1000 <= Date.now()) { setError(true); return; }
 
     loginWithTokens({
       accessToken: token,
@@ -40,7 +46,8 @@ export default function SsoCallback() {
         emailVerified: true,
         mfaEnabled: false,
         role: claims.role as string | undefined,
-        orgId: claims.organizationId as string | undefined,
+        // Canonical Baalvion tokens carry `org_id`; older tokens used `organizationId`.
+        orgId: (claims.organizationId ?? claims.org_id) as string | undefined,
       },
     });
     // Clear the fragment (don't leave tokens in history) and enter the app.
