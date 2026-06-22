@@ -87,6 +87,10 @@ export default function CheckoutPage() {
     countryCode.toUpperCase()
   );
   const [phone, setPhone] = useState("");
+  // Contact email — REQUIRED for both guest and signed-in checkout. It is persisted on the order's
+  // shippingAddress so the order-confirmation email can reach a guest AND so a guest can later track
+  // the order (email + order number) without an account. Prefilled from the account for signed-in users.
+  const [email, setEmail] = useState("");
 
   // Saved-address autofill (signed-in shoppers only). Guests keep a blank form.
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
@@ -104,6 +108,8 @@ export default function CheckoutPage() {
     useState<PaymentGateway>("STRIPE");
   const [isSettling, setIsSettling] = useState(false);
   const [orderRef, setOrderRef] = useState("");
+  // The human-readable order number (ORD-…) shown on the confirmation + used for guest tracking.
+  const [orderNumberRef, setOrderNumberRef] = useState("");
   const [inventoryLockId, setInventoryLockId] = useState<string | null>(null);
   const [lockedFXRate, setLockedFXRate] = useState<number | null>(null);
   const [fraudBlocked, setFraudBlocked] = useState(false);
@@ -144,6 +150,9 @@ export default function CheckoutPage() {
       const signedIn = !!getAccessToken() && !!getCurrentUser();
       if (cancelled) return;
       setIsSignedIn(signedIn);
+      // Prefill the contact email for signed-in shoppers (still editable).
+      const signedInEmail = getCurrentUser()?.email;
+      if (signedIn && signedInEmail) setEmail(signedInEmail);
 
       if (!signedIn) {
         // Guest: blank form, no save-to-account option.
@@ -187,9 +196,12 @@ export default function CheckoutPage() {
   // exactly: firstName/lastName/address1/city/countryCode. state/zip are OPTIONAL (not every
   // market uses them) — requiring them here would wrongly block an otherwise-valid saved or
   // entered address from checking out.
+  // A valid contact email is required (guest confirmation + order tracking depend on it).
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
   const isAddressComplete =
     firstName.trim() !== "" &&
     lastName.trim() !== "" &&
+    isEmailValid &&
     address1.trim() !== "" &&
     city.trim() !== "" &&
     addrCountryCode.trim() !== "";
@@ -209,6 +221,8 @@ export default function CheckoutPage() {
     zip: zip.trim(),
     countryCode: addrCountryCode.trim().toUpperCase(),
     ...(phone.trim() ? { phone: phone.trim() } : {}),
+    // Contact email — drives the order-confirmation email + guest order tracking.
+    ...(email.trim() ? { email: email.trim().toLowerCase() } : {}),
   });
 
   const handleSelectSavedAddress = (id: string) => {
@@ -410,6 +424,7 @@ export default function CheckoutPage() {
    */
   const finalizeSuccess = (order: Order) => {
     setOrderRef(order.id);
+    setOrderNumberRef(order.orderNumber ?? "");
 
     setIsSettling(false);
     setStep(3);
@@ -970,6 +985,32 @@ export default function CheckoutPage() {
 
                           <div className="md:col-span-2 space-y-2.5">
                             <Label
+                              htmlFor="checkout-email"
+                              className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
+                            >
+                              Email Address
+                            </Label>
+                            <Input
+                              id="checkout-email"
+                              type="email"
+                              inputMode="email"
+                              autoComplete="email"
+                              aria-required="true"
+                              aria-invalid={email.trim() !== "" && !isEmailValid}
+                              className="rounded-none border-border bg-ivory/30 h-12 py-3 text-sm focus:border-plum"
+                              placeholder="you@example.com"
+                              value={email}
+                              onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <p className="text-[11px] text-gray-400 font-light">
+                              {email.trim() !== "" && !isEmailValid
+                                ? "Please enter a valid email address."
+                                : "For your order confirmation and tracking — no account required."}
+                            </p>
+                          </div>
+
+                          <div className="md:col-span-2 space-y-2.5">
+                            <Label
                               htmlFor="checkout-address1"
                               className="text-[10px] uppercase font-bold tracking-widest text-slate-500"
                             >
@@ -1382,7 +1423,7 @@ export default function CheckoutPage() {
                       Order Number
                     </span>
                     <span className="font-mono text-lg font-bold uppercase tracking-tight text-gray-900">
-                      {orderRef || "…"}
+                      {orderNumberRef || orderRef || "…"}
                     </span>
                   </div>
                   <div className="p-3 bg-white border border-border rounded-full text-plum">
@@ -1421,6 +1462,21 @@ export default function CheckoutPage() {
                     Continue Shopping
                   </Button>
                 </div>
+
+                {/* Guest-friendly: track this order anytime with the order number + email (no account). */}
+                {orderNumberRef && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(
+                        `/${countryCode}/track-order?order=${encodeURIComponent(orderNumberRef)}&email=${encodeURIComponent(email)}`
+                      )
+                    }
+                    className="mx-auto flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-gray-500 hover:text-plum transition-colors"
+                  >
+                    <Truck className="w-3.5 h-3.5" /> Track Your Order
+                  </button>
+                )}
               </div>
             </div>
           )}

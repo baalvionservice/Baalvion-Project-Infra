@@ -71,6 +71,14 @@ export function Footer() {
                                     </li>
                                     <li>
                                         <Link
+                                            href={`/${countryCode}/track-order`}
+                                            className="text-black transition-colors"
+                                        >
+                                            Track Order
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link
                                             href={`/${countryCode}/customer-service`}
                                             className="text-black transition-colors"
                                         >
@@ -280,6 +288,14 @@ export function Footer() {
                                     className="text-black transition-colors"
                                 >
                                     My Account
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href={`/${countryCode}/track-order`}
+                                    className="text-black transition-colors"
+                                >
+                                    Track Order
                                 </Link>
                             </li>
                             <li>

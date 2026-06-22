@@ -541,6 +541,38 @@ export interface OrderFilters {
   pageSize?: number;
 }
 
+export type OrderFulfillmentStatus = 'unfulfilled' | 'partial' | 'fulfilled' | 'returned';
+
+/**
+ * PUBLIC guest order-tracking projection (order-service POST /orders/lookup). PII-minimised by
+ * design: order state, totals, line items, and a COARSE destination (city/country) only — never the
+ * full street address, phone, contact email, customer id, or internal metadata.
+ */
+export interface OrderTrackingView {
+  orderNumber: string;
+  status: OrderStatus;
+  paymentStatus: OrderPaymentStatus;
+  fulfillmentStatus: OrderFulfillmentStatus;
+  currencyCode: string;
+  subtotal: number;
+  discountAmount: number;
+  shippingAmount: number;
+  taxAmount: number;
+  totalAmount: number;
+  placedAt: string;
+  updatedAt: string;
+  cancelledAt?: string | null;
+  shipTo: { city: string | null; countryCode: string | null };
+  items: Array<{
+    name: string;
+    variantName?: string | null;
+    sku: string;
+    quantity: number;
+    price: number;
+    total: number;
+  }>;
+}
+
 // ── Shipment / tracking (order-service orders_shipments) ──────────────────────
 export interface ShipmentEvent {
   status: string;
@@ -579,6 +611,18 @@ export const orderApi = {
     const storeId = getStoreId();
     if (!storeId) return missingStore<Order>();
     return apiFetch<Order>(`${ORDER_URL}/orders/stores/${storeId}/orders/${orderId}`);
+  },
+
+  // PUBLIC guest order tracking: look up an order by the email used at checkout + the order number
+  // on the confirmation. No auth or guest session required (order-service POST /orders/lookup); a
+  // wrong email or unknown number returns a uniform 404. Returns a PII-minimised tracking view.
+  lookup(email: string, orderNumber: string): Promise<ApiResult<OrderTrackingView>> {
+    const storeId = getStoreId();
+    if (!storeId) return missingStore<OrderTrackingView>();
+    return apiFetch<OrderTrackingView>(`${ORDER_URL}/orders/stores/${storeId}/orders/lookup`, {
+      method: 'POST',
+      body: JSON.stringify({ email, orderNumber }),
+    });
   },
 
   // Payment: create a provider intent, then confirm it (backend-authoritative capture —
