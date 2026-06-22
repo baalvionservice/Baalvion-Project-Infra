@@ -1,0 +1,5 @@
+# Never commit real secrets for this slice (root .gitignore does not cover .env.prod).
+.env.prod
+.env.production
+*.key
+*.pem

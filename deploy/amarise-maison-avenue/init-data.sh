@@ -37,8 +37,11 @@ for i in $(seq 1 48); do
   [ "$i" = 48 ] && { echo "ERROR: services not healthy after ~240s. Check: docker compose $CF logs"; exit 1; }
 done
 
-echo "[2/7] Applying auth schema migrations (001-009)..."
-for f in "$AUTH_MIG"/00{1,2,3,4,5,6,7,8}*.sql; do
+echo "[2/7] Applying auth schema migrations (001-008a, 010 phone, 011 oauth; RLS 009 last)..."
+# Order mirrors auth-service `npm run migrate`: base schema → 010 (phone OTP) →
+# 011 (Google/Facebook social-login columns) → 009 (RLS) last. The 00{1..8} glob alone
+# silently skipped 010/011, so social login had no oauth_provider columns to write to.
+for f in "$AUTH_MIG"/00{1,2,3,4,5,6,7,8}*.sql "$AUTH_MIG"/010_*.sql "$AUTH_MIG"/011_*.sql; do
   echo "    >> $(basename "$f")"
   psql_q -v ON_ERROR_STOP=1 -q < "$f" >/dev/null
 done

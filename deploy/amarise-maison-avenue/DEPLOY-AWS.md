@@ -73,6 +73,29 @@ rm -f /tmp/jwt.key /tmp/jwt.pub
 ```
 Leave `PAYMENTS_MOCK=true` for now (storefront launches; checkout switches to real charges at go-live).
 
+## 5a. Social login (Google / Facebook) — optional
+Login + register show "Continue with Google / Facebook" buttons. The auth-service compose block
+already defaults `OAUTH_PUBLIC_BASE_URL` / `OAUTH_APP_URL` to `https://<DOMAIN>` and `AUTH_SITE_SLUG`
+to the storefront slug — you only supply the client credentials and register the callback URL.
+
+1. **Register the redirect URI** in each provider console (must match exactly):
+   ```
+   https://amarisemaisonavenue.com/auth-bff/oauth/google/callback
+   https://amarisemaisonavenue.com/auth-bff/oauth/facebook/callback
+   ```
+2. **Add the credentials** to `.env.prod` (or manage them in the admin → CMS vault for slug
+   `amarise-maison-avenue` and leave these blank):
+   ```
+   GOOGLE_OAUTH_CLIENT_ID=...
+   GOOGLE_OAUTH_CLIENT_SECRET=...
+   FACEBOOK_OAUTH_CLIENT_ID=...
+   FACEBOOK_OAUTH_CLIENT_SECRET=...
+   ```
+3. `init-data.sh` (§7) applies migration `011_oauth_identity.sql` automatically — no manual SQL.
+
+Leave the credentials blank to launch without social login; the buttons stay visible but return a
+graceful "not available yet" until a provider is configured. No Caddy/edge change is needed.
+
 ## 6. Build & bring up the stack
 Run from the repo root. First build is ~5–10 min (builds all service + frontend images).
 ```bash
@@ -96,6 +119,9 @@ curl -s "https://amarisemaisonavenue.com/svc/commerce/api/v1/health" | head -c 8
 curl -s "https://amarisemaisonavenue.com/svc/cms/api/v1/public/amarise-maison-avenue/content/homepage" -o /dev/null -w '%{http_code}\n'   # 200
 # Catalog through the storefront base the browser uses:
 curl -s "https://amarisemaisonavenue.com/svc/commerce/api/v1/commerce/storefront/$(grep NEXT_PUBLIC_STORE_ID deploy/amarise-maison-avenue/.env.prod | cut -d= -f2)/products?limit=2" -o /dev/null -w '%{http_code}\n'
+# Social login (if configured): the start endpoint should 302 to the provider (or to
+# ?oauth_error=provider_not_configured when creds are blank — both prove the route is live):
+curl -s -o /dev/null -w '%{http_code} %{redirect_url}\n' "https://amarisemaisonavenue.com/auth-bff/oauth/google/start"
 ```
 Then open `https://amarisemaisonavenue.com` — hero, collections, a product grid (branded
 placeholder photos), authenticity, testimonials, press; `/us/press` and `/us/about` render.

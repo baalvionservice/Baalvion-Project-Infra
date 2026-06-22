@@ -6,12 +6,23 @@ const roleEnum = z.enum(MEMBERSHIP_ROLES);
 const orgTypeEnum = z.enum(ORG_TYPES);
 const orgStatusEnum = z.enum(ORG_STATUSES);
 
+// Loose E.164-ish phone: optional leading +, then 7–19 digits/spaces/dashes/parens.
+const phoneSchema = z.string().trim().min(8).max(20).regex(/^\+?[0-9][0-9\s\-()]{6,18}$/, 'Invalid phone number');
+
 const register = z.object({
     email: z.string().email(),
     password: z.string().min(8).max(128),
     fullName: z.string().max(200).optional(),
     orgName: z.string().max(200).optional(),
+    // Public self-service account type — drives the new org's type (buyer is the default).
+    accountType: z.enum(['buyer', 'seller']).optional(),
+    // Optional phone captured at signup; verified later via the phone OTP flow.
+    phone: phoneSchema.optional(),
 });
+
+// Phone verification (OTP). request: target number optional (falls back to the stored phone).
+const phoneOtpRequest = z.object({ phone: phoneSchema.optional() });
+const phoneOtpVerify = z.object({ code: z.string().trim().regex(/^[0-9]{4,8}$/, 'Code must be 4–8 digits') });
 
 const login = z.object({
     email: z.string().email(),
@@ -107,7 +118,7 @@ const setOrgStatus = z.object({ status: orgStatusEnum });
 
 module.exports = {
     register, login, forgotPassword, resetPassword, verifyEmail, updateMe, mfaVerify, mfaChallenge,
-    mfaEnrollStart, mfaEnroll,
+    mfaEnrollStart, mfaEnroll, phoneOtpRequest, phoneOtpVerify,
     createOrg, inviteMember, bulkInvite, updateMemberRole, acceptInvite, transferOwnership,
     platformCreateOrg, updateOrg, setOrgStatus,
 };

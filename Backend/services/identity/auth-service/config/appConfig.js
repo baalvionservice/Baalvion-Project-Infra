@@ -48,6 +48,13 @@ module.exports = {
         bcryptRounds:  Number(process.env.BCRYPT_ROUNDS       || 12),
         ipRateLimit:   Number(process.env.RATE_LIMIT_IP_MAX   || 20),
         emailRateLimit:Number(process.env.RATE_LIMIT_EMAIL_MAX || 10),
+        // Phone-verification OTP policy.
+        otp: {
+            length:         Number(process.env.OTP_LENGTH           || 6),   // digits
+            ttlSeconds:     Number(process.env.OTP_TTL_SECONDS       || 600), // 10 minutes
+            maxAttempts:    Number(process.env.OTP_MAX_ATTEMPTS      || 5),   // verify tries per code
+            resendCooldown: Number(process.env.OTP_RESEND_COOLDOWN_S || 60),  // min seconds between sends
+        },
     },
 
     // ── Session enrichment (Phase 2 — absorbed from the retired session-service) ──
@@ -66,6 +73,19 @@ module.exports = {
         port: Number(process.env.SMTP_PORT || 587),
         user: process.env.SMTP_USER   || '',
         pass: process.env.SMTP_PASS   || '',
+    },
+
+    // ── SMS / phone OTP delivery (utils/sms.js) ──────────────────────────────────────
+    // provider: 'twilio' | 'webhook' | '' (DEV console fallback — logs the code, never sends).
+    sms: {
+        provider:     process.env.SMS_PROVIDER     || '',
+        webhookUrl:   process.env.SMS_WEBHOOK_URL  || '',
+        webhookToken: process.env.SMS_WEBHOOK_TOKEN || '',
+        twilio: {
+            accountSid: process.env.TWILIO_ACCOUNT_SID || '',
+            authToken:  process.env.TWILIO_AUTH_TOKEN  || '',
+            from:       process.env.TWILIO_FROM        || '',
+        },
     },
 
     eventBus: {

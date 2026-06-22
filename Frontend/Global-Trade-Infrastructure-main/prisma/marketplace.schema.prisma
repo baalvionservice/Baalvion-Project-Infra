@@ -1,0 +1,788 @@
+// Baalvion Marketplace — Commerce & Auction Datastore
+// ─────────────────────────────────────────────────────────────────────────────
+// A self-contained Prisma schema for a multi-seller marketplace with both
+// fixed-price commerce and timed auctions. It is deliberately INDEPENDENT of the
+// GTI orchestration schema (prisma/schema.prisma): it has its own datasource and
+// generator output, and every table is `mkt_`-prefixed so the two can safely
+// coexist in one Postgres instance if desired.
+//
+// Conventions (mirrors the GTI schema so it reads native to this repo):
+//   • Primary keys     : String @id @default(uuid()) @db.Uuid
+//   • Optimistic lock  : version Int @default(1) on mutable aggregates
+//   • Lifecycle audit  : createdAt / updatedAt / deletedAt (soft delete)
+//   • Money            : Decimal @db.Decimal(20, 4) + currency String
+//   • Table names      : @@map("mkt_<snake_plural>")
+//   • Enums            : SCREAMING_SNAKE_CASE
+//
+// Generate with:
+//   prisma generate --schema prisma/marketplace.schema.prisma
+//   prisma migrate dev --schema prisma/marketplace.schema.prisma
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/marketplace-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("MARKETPLACE_DATABASE_URL")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────────────────────────────────
+
+enum StoreStatus {
+  DRAFT
+  PENDING_REVIEW
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum ProductStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum ListingType {
+  FIXED_PRICE
+  AUCTION
+}
+
+enum ListingStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  PAUSED
+  SOLD_OUT
+  ENDED
+  REMOVED
+}
+
+enum ProductCondition {
+  NEW
+  LIKE_NEW
+  REFURBISHED
+  USED_GOOD
+  USED_FAIR
+  FOR_PARTS
+}
+
+enum ImageOwnerType {
+  PRODUCT
+  LISTING
+  STORE
+  REVIEW
+}
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+  HIDDEN
+}
+
+enum FavoriteTargetType {
+  LISTING
+  PRODUCT
+  STORE
+}
+
+enum AuctionStatus {
+  SCHEDULED
+  LIVE
+  ENDED
+  SETTLED
+  CANCELLED
+}
+
+enum BidStatus {
+  ACTIVE
+  OUTBID
+  WINNING
+  WON
+  LOST
+  RETRACTED
+  REJECTED
+}
+
+enum OrderStatus {
+  PENDING
+  AWAITING_PAYMENT
+  PAID
+  PROCESSING
+  PARTIALLY_FULFILLED
+  FULFILLED
+  COMPLETED
+  CANCELLED
+  REFUNDED
+  DISPUTED
+}
+
+enum PaymentType {
+  CHARGE
+  REFUND
+}
+
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  CAPTURED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum ShipmentStatus {
+  PENDING
+  LABEL_CREATED
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  RETURNED
+  LOST
+  CANCELLED
+}
+
+enum AddressType {
+  SHIPPING
+  BILLING
+  PICKUP
+  RETURN
+}
+
+enum NotificationType {
+  ORDER_PLACED
+  ORDER_PAID
+  ORDER_SHIPPED
+  ORDER_DELIVERED
+  ORDER_CANCELLED
+  BID_PLACED
+  BID_OUTBID
+  AUCTION_WON
+  AUCTION_LOST
+  AUCTION_ENDING_SOON
+  AUCTION_ENDED
+  REVIEW_RECEIVED
+  PRICE_DROP
+  BACK_IN_STOCK
+  PAYOUT
+  SYSTEM
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  SMS
+  PUSH
+}
+
+enum NotificationStatus {
+  QUEUED
+  SENT
+  FAILED
+  READ
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Identity (marketplace-local; `externalUserId` maps to the central Baalvion
+// identity platform so this store never becomes a second source of truth).
+// ──────────────────────────────────────────────────────────────────────────
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  externalUserId String?   @unique // central @baalvion/auth subject (sub claim)
+  email          String    @unique
+  displayName    String
+  avatarUrl      String?
+  isSeller       Boolean   @default(false)
+  metadata       Json?
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  stores        Store[]
+  addresses     Address[]
+  listings      Listing[]      @relation("ListingSeller")
+  reviews       Review[]
+  favorites     Favorite[]
+  bids          Bid[]
+  wonAuctions   Auction[]      @relation("AuctionWinner")
+  orders        Order[]        @relation("OrderBuyer")
+  notifications Notification[]
+
+  @@index([isSeller])
+  @@index([deletedAt])
+  @@map("mkt_users")
+}
+
+model Address {
+  id          String      @id @default(uuid()) @db.Uuid
+  userId      String?     @db.Uuid
+  storeId     String?     @db.Uuid
+  type        AddressType @default(SHIPPING)
+  label       String?
+  recipient   String
+  phone       String?
+  line1       String
+  line2       String?
+  city        String
+  region      String? // state / province
+  postalCode  String?
+  countryCode String      @db.Char(2) // ISO 3166-1 alpha-2
+  isDefault   Boolean     @default(false)
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  deletedAt   DateTime?
+
+  user           User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  store          Store?     @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  shippingOrders Order[]    @relation("OrderShippingAddress")
+  billingOrders  Order[]    @relation("OrderBillingAddress")
+  shipmentsFrom  Shipment[] @relation("ShipmentFromAddress")
+  shipmentsTo    Shipment[] @relation("ShipmentToAddress")
+
+  @@index([userId])
+  @@index([storeId])
+  @@index([deletedAt])
+  @@map("mkt_addresses")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Catalog: Store → Product → Listing → Inventory, plus Category tree & Images
+// ──────────────────────────────────────────────────────────────────────────
+
+model Store {
+  id             String      @id @default(uuid()) @db.Uuid
+  ownerId        String      @db.Uuid
+  slug           String      @unique
+  name           String
+  tagline        String?
+  description    String?
+  logoUrl        String?
+  bannerUrl      String?
+  status         StoreStatus @default(DRAFT)
+  payoutCurrency String      @default("USD")
+  ratingAverage  Decimal     @default(0) @db.Decimal(3, 2) // 0.00–5.00, denormalized
+  ratingCount    Int         @default(0)
+  metadata       Json?
+  version        Int         @default(1)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+
+  owner     User       @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  products  Product[]
+  listings  Listing[]
+  orders    Order[]
+  reviews   Review[]
+  favorites Favorite[]
+  images    Image[]
+  addresses Address[]
+
+  @@index([ownerId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("mkt_stores")
+}
+
+model Category {
+  id          String    @id @default(uuid()) @db.Uuid
+  parentId    String?   @db.Uuid
+  slug        String    @unique
+  name        String
+  description String?
+  iconUrl     String?
+  position    Int       @default(0)
+  isActive    Boolean   @default(true)
+  metadata    Json?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  parent          Category?         @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children        Category[]        @relation("CategoryTree")
+  products        ProductCategory[]
+  primaryProducts Product[]         @relation("ProductPrimaryCategory")
+
+  @@index([parentId])
+  @@index([isActive])
+  @@index([deletedAt])
+  @@map("mkt_categories")
+}
+
+model Product {
+  id                String           @id @default(uuid()) @db.Uuid
+  storeId           String           @db.Uuid
+  primaryCategoryId String?          @db.Uuid
+  slug              String
+  title             String
+  subtitle          String?
+  description       String?
+  brand             String?
+  sku               String?
+  condition         ProductCondition @default(NEW)
+  status            ProductStatus    @default(DRAFT)
+  attributes        Json? // free-form spec map: { color, size, material, ... }
+  tags              String[]
+  ratingAverage     Decimal          @default(0) @db.Decimal(3, 2)
+  ratingCount       Int              @default(0)
+  metadata          Json?
+  version           Int              @default(1)
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  deletedAt         DateTime?
+
+  store           Store             @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  primaryCategory Category?         @relation("ProductPrimaryCategory", fields: [primaryCategoryId], references: [id], onDelete: SetNull)
+  categories      ProductCategory[]
+  listings        Listing[]
+  images          Image[]
+  reviews         Review[]
+  favorites       Favorite[]
+
+  @@unique([storeId, slug])
+  @@index([storeId])
+  @@index([primaryCategoryId])
+  @@index([status])
+  @@index([sku])
+  @@index([deletedAt])
+  @@map("mkt_products")
+}
+
+// Self-describing M2M: a product can sit in several browse categories while still
+// keeping a single canonical `primaryCategoryId` for breadcrumbs/SEO.
+model ProductCategory {
+  productId  String   @db.Uuid
+  categoryId String   @db.Uuid
+  assignedAt DateTime @default(now())
+
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([productId, categoryId])
+  @@index([categoryId])
+  @@map("mkt_product_categories")
+}
+
+// A Listing is the sellable OFFER of a Product — it carries price/availability and
+// is what carts, orders, bids and favorites reference. One product can be offered
+// as several listings (e.g. fixed-price + auction, or different sellers).
+model Listing {
+  id             String        @id @default(uuid()) @db.Uuid
+  storeId        String        @db.Uuid
+  productId      String        @db.Uuid
+  sellerId       String        @db.Uuid
+  type           ListingType   @default(FIXED_PRICE)
+  status         ListingStatus @default(DRAFT)
+  title          String // may override product title for the offer
+  price          Decimal       @db.Decimal(20, 4) // for AUCTION this is the buy-now / reference price
+  compareAtPrice Decimal?      @db.Decimal(20, 4) // strike-through "was" price
+  currency       String        @default("USD")
+  quantity       Int           @default(1) // total units offered (fixed-price)
+  soldCount      Int           @default(0)
+  isFeatured     Boolean       @default(false)
+  publishedAt    DateTime?
+  endsAt         DateTime?
+  metadata       Json?
+  version        Int           @default(1)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  store      Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  seller     User        @relation("ListingSeller", fields: [sellerId], references: [id], onDelete: Cascade)
+  inventory  Inventory?
+  auction    Auction?
+  images     Image[]
+  favorites  Favorite[]
+  orderItems OrderItem[]
+
+  @@index([storeId])
+  @@index([productId])
+  @@index([sellerId])
+  @@index([type])
+  @@index([status])
+  @@index([isFeatured])
+  @@index([deletedAt])
+  @@map("mkt_listings")
+}
+
+// Stock ledger for a fixed-price listing. `available` is a generated convenience
+// kept in sync by the service layer (onHand − reserved). Reservations protect
+// against overselling between add-to-cart and capture.
+model Inventory {
+  id             String   @id @default(uuid()) @db.Uuid
+  listingId      String   @unique @db.Uuid
+  sku            String?
+  quantityOnHand Int      @default(0)
+  reserved       Int      @default(0)
+  available      Int      @default(0)
+  reorderLevel   Int      @default(0)
+  warehouseCode  String?
+  trackInventory Boolean  @default(true)
+  allowBackorder Boolean  @default(false)
+  metadata       Json?
+  version        Int      @default(1)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([sku])
+  @@index([warehouseCode])
+  @@map("mkt_inventory")
+}
+
+// Polymorphic image attached to exactly one owner (product/listing/store/review).
+// `ownerType` is a discriminator for query convenience; the nullable FKs enforce
+// referential integrity and cascade cleanup.
+model Image {
+  id        String         @id @default(uuid()) @db.Uuid
+  ownerType ImageOwnerType
+  productId String?        @db.Uuid
+  listingId String?        @db.Uuid
+  storeId   String?        @db.Uuid
+  reviewId  String?        @db.Uuid
+  url       String
+  alt       String?
+  position  Int            @default(0)
+  width     Int?
+  height    Int?
+  blurhash  String?
+  isPrimary Boolean        @default(false)
+  metadata  Json?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  listing Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  store   Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  review  Review?  @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([listingId])
+  @@index([storeId])
+  @@index([reviewId])
+  @@map("mkt_images")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Social: Reviews & Favorites
+// ──────────────────────────────────────────────────────────────────────────
+
+model Review {
+  id             String       @id @default(uuid()) @db.Uuid
+  authorId       String       @db.Uuid
+  productId      String?      @db.Uuid
+  storeId        String?      @db.Uuid
+  orderId        String?      @db.Uuid // links to a verified purchase
+  rating         Int // 1..5 (enforced at app + CHECK in migration)
+  title          String?
+  body           String?
+  isVerified     Boolean      @default(false) // true when tied to a fulfilled order
+  status         ReviewStatus @default(PENDING)
+  helpfulCount   Int          @default(0)
+  reportedCount  Int          @default(0)
+  sellerResponse String?
+  respondedAt    DateTime?
+  metadata       Json?
+  version        Int          @default(1)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  deletedAt      DateTime?
+
+  author  User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  store   Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  order   Order?   @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  images  Image[]
+
+  // one review per author per product per order
+  @@unique([authorId, productId, orderId])
+  @@index([productId])
+  @@index([storeId])
+  @@index([authorId])
+  @@index([status])
+  @@index([rating])
+  @@index([deletedAt])
+  @@map("mkt_reviews")
+}
+
+model Favorite {
+  id                String             @id @default(uuid()) @db.Uuid
+  userId            String             @db.Uuid
+  targetType        FavoriteTargetType
+  listingId         String?            @db.Uuid
+  productId         String?            @db.Uuid
+  storeId           String?            @db.Uuid
+  notifyOnPriceDrop Boolean            @default(false)
+  notifyOnRestock   Boolean            @default(false)
+  createdAt         DateTime           @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing? @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+  store   Store?   @relation(fields: [storeId], references: [id], onDelete: Cascade)
+
+  // NULLs are distinct in Postgres, so each pairing is independently unique
+  @@unique([userId, listingId])
+  @@unique([userId, productId])
+  @@unique([userId, storeId])
+  @@index([userId])
+  @@index([listingId])
+  @@index([productId])
+  @@map("mkt_favorites")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Auctions & Bids
+// ──────────────────────────────────────────────────────────────────────────
+
+model Auction {
+  id               String        @id @default(uuid()) @db.Uuid
+  listingId        String        @unique @db.Uuid
+  winnerId         String?       @db.Uuid
+  winningBidId     String?       @unique @db.Uuid
+  status           AuctionStatus @default(SCHEDULED)
+  currency         String        @default("USD")
+  startPrice       Decimal       @db.Decimal(20, 4)
+  reservePrice     Decimal?      @db.Decimal(20, 4) // hidden floor; unmet = no sale
+  buyNowPrice      Decimal?      @db.Decimal(20, 4)
+  bidIncrement     Decimal       @default(1) @db.Decimal(20, 4)
+  currentPrice     Decimal       @default(0) @db.Decimal(20, 4) // highest bid so far
+  bidCount         Int           @default(0)
+  startsAt         DateTime
+  endsAt           DateTime
+  antiSnipeSeconds Int           @default(0) // extend endsAt when a late bid lands
+  settledAt        DateTime?
+  metadata         Json?
+  version          Int           @default(1)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  deletedAt        DateTime?
+
+  listing    Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  winner     User?   @relation("AuctionWinner", fields: [winnerId], references: [id], onDelete: SetNull)
+  winningBid Bid?    @relation("AuctionWinningBid", fields: [winningBidId], references: [id], onDelete: SetNull)
+  bids       Bid[]   @relation("AuctionBids")
+
+  @@index([status])
+  @@index([endsAt])
+  @@index([winnerId])
+  @@index([deletedAt])
+  @@map("mkt_auctions")
+}
+
+model Bid {
+  id             String    @id @default(uuid()) @db.Uuid
+  auctionId      String    @db.Uuid
+  bidderId       String    @db.Uuid
+  amount         Decimal   @db.Decimal(20, 4) // visible bid
+  maxProxyAmount Decimal?  @db.Decimal(20, 4) // proxy ceiling for auto-bidding
+  currency       String    @default("USD")
+  status         BidStatus @default(ACTIVE)
+  isAutoBid      Boolean   @default(false)
+  placedAt       DateTime  @default(now())
+  retractedAt    DateTime?
+  metadata       Json?
+
+  auction    Auction  @relation("AuctionBids", fields: [auctionId], references: [id], onDelete: Cascade)
+  bidder     User     @relation(fields: [bidderId], references: [id], onDelete: Cascade)
+  wonAuction Auction? @relation("AuctionWinningBid")
+
+  @@index([auctionId, amount])
+  @@index([auctionId, placedAt])
+  @@index([bidderId])
+  @@index([status])
+  @@map("mkt_bids")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Orders, Payments, Shipments
+// ──────────────────────────────────────────────────────────────────────────
+
+model Order {
+  id                String      @id @default(uuid()) @db.Uuid
+  orderNumber       String      @unique // human-facing, e.g. BV-2026-000123
+  buyerId           String      @db.Uuid
+  storeId           String      @db.Uuid
+  shippingAddressId String?     @db.Uuid
+  billingAddressId  String?     @db.Uuid
+  status            OrderStatus @default(PENDING)
+  currency          String      @default("USD")
+  subtotal          Decimal     @default(0) @db.Decimal(20, 4)
+  shippingTotal     Decimal     @default(0) @db.Decimal(20, 4)
+  taxTotal          Decimal     @default(0) @db.Decimal(20, 4)
+  discountTotal     Decimal     @default(0) @db.Decimal(20, 4)
+  grandTotal        Decimal     @default(0) @db.Decimal(20, 4)
+  amountPaid        Decimal     @default(0) @db.Decimal(20, 4)
+  amountRefunded    Decimal     @default(0) @db.Decimal(20, 4)
+  placedAt          DateTime?
+  cancelledAt       DateTime?
+  customerNote      String?
+  metadata          Json?
+  version           Int         @default(1)
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  deletedAt         DateTime?
+
+  buyer           User        @relation("OrderBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  store           Store       @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  shippingAddress Address?    @relation("OrderShippingAddress", fields: [shippingAddressId], references: [id], onDelete: SetNull)
+  billingAddress  Address?    @relation("OrderBillingAddress", fields: [billingAddressId], references: [id], onDelete: SetNull)
+  items           OrderItem[]
+  payments        Payment[]
+  shipments       Shipment[]
+  reviews         Review[]
+
+  @@index([buyerId])
+  @@index([storeId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@map("mkt_orders")
+}
+
+// Price/title are SNAPSHOTTED at purchase time so later catalog edits never
+// rewrite history. `listingId` is SetNull on delete to preserve the line.
+model OrderItem {
+  id              String   @id @default(uuid()) @db.Uuid
+  orderId         String   @db.Uuid
+  listingId       String?  @db.Uuid
+  productTitle    String // snapshot
+  variantLabel    String?
+  sku             String?
+  unitPrice       Decimal  @db.Decimal(20, 4)
+  quantity        Int      @default(1)
+  lineSubtotal    Decimal  @db.Decimal(20, 4)
+  lineTax         Decimal  @default(0) @db.Decimal(20, 4)
+  lineTotal       Decimal  @db.Decimal(20, 4)
+  currency        String   @default("USD")
+  quantityShipped Int      @default(0)
+  metadata        Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  order         Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  listing       Listing?       @relation(fields: [listingId], references: [id], onDelete: SetNull)
+  shipmentItems ShipmentItem[]
+
+  @@index([orderId])
+  @@index([listingId])
+  @@map("mkt_order_items")
+}
+
+model Payment {
+  id            String        @id @default(uuid()) @db.Uuid
+  orderId       String        @db.Uuid
+  type          PaymentType   @default(CHARGE)
+  status        PaymentStatus @default(PENDING)
+  provider      String // e.g. stripe | razorpay
+  providerRef   String? // gateway charge/refund id
+  amount        Decimal       @db.Decimal(20, 4)
+  currency      String        @default("USD")
+  failureReason String?
+  processedAt   DateTime?
+  metadata      Json?
+  version       Int           @default(1)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerRef])
+  @@index([orderId])
+  @@index([status])
+  @@map("mkt_payments")
+}
+
+model Shipment {
+  id             String         @id @default(uuid()) @db.Uuid
+  orderId        String         @db.Uuid
+  fromAddressId  String?        @db.Uuid
+  toAddressId    String?        @db.Uuid
+  status         ShipmentStatus @default(PENDING)
+  carrier        String?
+  service        String? // e.g. "Express", "Standard"
+  trackingNumber String?
+  trackingUrl    String?
+  labelUrl       String?
+  shippingCost   Decimal?       @db.Decimal(20, 4)
+  currency       String         @default("USD")
+  weightGrams    Int?
+  shippedAt      DateTime?
+  estimatedAt    DateTime?
+  deliveredAt    DateTime?
+  metadata       Json?
+  version        Int            @default(1)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  order       Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  fromAddress Address?       @relation("ShipmentFromAddress", fields: [fromAddressId], references: [id], onDelete: SetNull)
+  toAddress   Address?       @relation("ShipmentToAddress", fields: [toAddressId], references: [id], onDelete: SetNull)
+  items       ShipmentItem[]
+
+  @@index([orderId])
+  @@index([status])
+  @@index([trackingNumber])
+  @@map("mkt_shipments")
+}
+
+// Resolves split shipments — which units of which order line went in which box.
+model ShipmentItem {
+  id          String   @id @default(uuid()) @db.Uuid
+  shipmentId  String   @db.Uuid
+  orderItemId String   @db.Uuid
+  quantity    Int      @default(1)
+  createdAt   DateTime @default(now())
+
+  shipment  Shipment  @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
+
+  @@unique([shipmentId, orderItemId])
+  @@index([orderItemId])
+  @@map("mkt_shipment_items")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Notifications (loose entity refs kept as scalars so notification rows never
+// block deletes of the things they reference)
+// ──────────────────────────────────────────────────────────────────────────
+
+model Notification {
+  id         String              @id @default(uuid()) @db.Uuid
+  userId     String              @db.Uuid
+  type       NotificationType
+  channel    NotificationChannel @default(IN_APP)
+  status     NotificationStatus  @default(QUEUED)
+  title      String
+  body       String?
+  // soft references — no FK on purpose
+  entityType String? // "order" | "auction" | "listing" | "bid" | "review" | ...
+  entityId   String?             @db.Uuid
+  actionUrl  String?
+  isRead     Boolean             @default(false)
+  readAt     DateTime?
+  sentAt     DateTime?
+  metadata   Json?
+  createdAt  DateTime            @default(now())
+  updatedAt  DateTime            @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead])
+  @@index([status])
+  @@index([type])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("mkt_notifications")
+}

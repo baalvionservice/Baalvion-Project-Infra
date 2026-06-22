@@ -22,6 +22,8 @@ import {
   complianceCheckRepository,
 } from '../repositories';
 import type { OrgContext } from '../orchestration/prisma-ports';
+import { tryScreenGoods } from '../rules/goods-screening';
+import type { ActorContext } from '../services/rule-service';
 
 const AML_THRESHOLD = 500_000;
 const HIGH_VALUE_THRESHOLD = 1_000_000;
@@ -197,8 +199,19 @@ export class ComplianceEngine implements CompliancePort {
     const blocking = checks.filter(
       (c) => c.outcome === ComplianceOutcome.FAIL || c.outcome === ComplianceOutcome.BLOCKED,
     );
-    const passed = blocking.length === 0;
-    const reasons = blocking.flatMap((c) => c.reasons);
+
+    // Goods-level restriction screening via the Rule/Policy Engine. Additive and
+    // fail-open: when the `compliance.restricted-goods` baseline is not seeded this is
+    // a no-op, and only a hard DENY (a prohibited good) blocks the trade. REVIEW and
+    // documentary obligations are surfaced through the dedicated screening endpoint.
+    const goods = await this.screenRestrictedGoods(context);
+    const goodsBlocked = goods?.decision === 'DENY';
+
+    const passed = blocking.length === 0 && !goodsBlocked;
+    const reasons = [
+      ...blocking.flatMap((c) => c.reasons),
+      ...(goodsBlocked ? goods!.matchedRules.map((k) => `restricted_goods:${k}`) : []),
+    ];
     const kycVerified = checks.find((c) => c.type === ComplianceCheckType.KYC)?.outcome === ComplianceOutcome.PASS;
 
     if (trade) {
@@ -206,5 +219,35 @@ export class ComplianceEngine implements CompliancePort {
     }
 
     return { passed, sanctions: sanctioned, kycVerified, reasons };
+  }
+
+  /**
+   * Consult the restricted-goods rule set for the goods in this trade. Best-effort:
+   * a missing baseline or any non-fatal engine error degrades to null (fail-open),
+   * preserving the party/country/value screening as the sole gate. Identity is carried
+   * through for the audit trail; the tenant comes from this engine's org context.
+   */
+  private async screenRestrictedGoods(context: TradeContext) {
+    const meta = context.metadata;
+    const actor: ActorContext = {
+      organizationId: this.ctx.organizationId,
+      actorId: context.actorId,
+      actorRole: context.actorRole,
+      ip: null,
+    };
+    return tryScreenGoods(actor, {
+      hsCode: typeof meta.hsCode === 'string' ? meta.hsCode : null,
+      productCategory:
+        typeof meta.productCategory === 'string'
+          ? meta.productCategory
+          : typeof meta.commodityCategory === 'string'
+            ? meta.commodityCategory
+            : null,
+      originCountry: context.terms.originCountry ?? null,
+      destinationCountry: context.terms.destinationCountry ?? null,
+      direction: meta.direction === 'IMPORT' || meta.direction === 'EXPORT' ? meta.direction : undefined,
+      quantity: context.terms.quantity,
+      value: context.terms.quantity * context.terms.unitPrice,
+    });
   }
 }

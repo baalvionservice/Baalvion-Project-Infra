@@ -102,10 +102,13 @@ router.post('/login', async (req, res) => {
 // Mirrors /login exactly; the access token is NEVER returned in the body.
 router.post('/register', async (req, res) => {
   const { status, json, refreshFromCookie } = await authService('/register', {
-    email:    req.body && req.body.email,
-    password: req.body && req.body.password,
-    fullName: req.body && req.body.fullName,
-    orgName:  req.body && req.body.orgName,
+    email:       req.body && req.body.email,
+    password:    req.body && req.body.password,
+    fullName:    req.body && req.body.fullName,
+    orgName:     req.body && req.body.orgName,
+    // Public self-service buyer/seller selection + optional phone (verified later via OTP).
+    accountType: req.body && req.body.accountType,
+    phone:       req.body && req.body.phone,
   }, req);
   if ((status !== 200 && status !== 201) || !json || !json.success || !json.data || !json.data.accessToken) {
     return res.status(status || 400).json({ error: (json && json.error) || { code: 'REGISTER_FAILED', message: 'Registration failed' } });
@@ -223,6 +226,24 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
   const { status, json } = await authService('/reset-password', req.body || {}, req);
   return res.status(status || 200).json(json ?? { ok: true });
+});
+
+// Email verification — public, token-gated (the token IS the proof, no session needed).
+// POST is the primary path (token in the body, kept out of URLs/logs); GET supports a raw
+// email link landing on the gateway directly (?token=...).
+router.post('/verify-email', async (req, res) => {
+  const { status, json } = await authService('/verify-email', { token: req.body && req.body.token }, req);
+  return res.status(status || 400).json(json ?? { error: { code: 'VERIFY_EMAIL_FAILED', message: 'Verification failed' } });
+});
+router.get('/verify-email', async (req, res) => {
+  try {
+    const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+    const r = await fetch(`${config.authServiceUrl}/verify-email${q}`, { method: 'GET' });
+    let json = null; try { json = await r.json(); } catch { /* no body */ }
+    return res.status(r.status).json(json ?? { ok: r.ok });
+  } catch {
+    return res.status(502).json({ error: { code: 'AUTH_SVC_UNAVAILABLE', message: 'Auth service unavailable' } });
+  }
 });
 
 // MFA login challenge (second step after /login returns mfa_required) → establish cookies.
