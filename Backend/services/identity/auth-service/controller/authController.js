@@ -12,12 +12,22 @@ const parseClientInfo = (req) => ({
     userAgent: req.headers['user-agent'],
 });
 
+// Single source of truth for the refresh-token cookie policy. The optional `domain` makes the
+// session shareable across every *.baalvion.com site (cross-subdomain SSO from auth.baalvion.com).
+const refreshCookieOpts = () => ({
+    httpOnly: true,
+    secure: config.env === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+    ...(config.refreshCookieDomain ? { domain: config.refreshCookieDomain } : {}),
+});
+
 exports.register = async (req, res, next) => {
     try {
         const parsed = schemas.register.safeParse(req.body);
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         const result = await authService.register({ ...parsed.data, ...parseClientInfo(req) });
-        res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        res.cookie(config.refreshCookieName, result.refreshToken, refreshCookieOpts());
         sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, org: result.org }, 201);
     } catch (err) { next(err); }
 };
@@ -34,7 +44,7 @@ exports.login = async (req, res, next) => {
         if (result.mfa_enrollment_required) {
             return sendSuccess(req, res, { mfa_enrollment_required: true, challengeToken: result.challengeToken });
         }
-        res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        res.cookie(config.refreshCookieName, result.refreshToken, refreshCookieOpts());
         req.audit?.log('login_success', { userId: result.user?.id, orgId: result.user?.orgId, metadata: { email: parsed.data.email } });
         sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt });
     } catch (err) {
@@ -59,7 +69,7 @@ exports.mfaChallenge = async (req, res, next) => {
         const parsed = schemas.mfaChallenge.safeParse(req.body);
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         const result = await authService.completeMfaLogin({ ...parsed.data, ...parseClientInfo(req) });
-        res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        res.cookie(config.refreshCookieName, result.refreshToken, refreshCookieOpts());
         sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt });
     } catch (err) { next(err); }
 };
@@ -83,7 +93,7 @@ exports.enrollMfa = async (req, res, next) => {
         const parsed = schemas.mfaEnroll.safeParse(req.body);
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         const result = await authService.enrollMfaComplete({ ...parsed.data, ...parseClientInfo(req) });
-        res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        res.cookie(config.refreshCookieName, result.refreshToken, refreshCookieOpts());
         req.audit?.log('mfa_enrolled', { userId: result.user?.id, orgId: result.user?.orgId });
         sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt }, 201);
     } catch (err) { next(err); }
@@ -95,7 +105,7 @@ exports.refresh = async (req, res, next) => {
         // never from the request body (which is reachable via XSS / logs).
         const rawToken = req.cookies?.[config.refreshCookieName];
         const result = await authService.refresh(rawToken, req.ip);
-        res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        res.cookie(config.refreshCookieName, result.refreshToken, refreshCookieOpts());
         req.audit?.log('refresh', { userId: result.userId ?? result.user?.id ?? null });
         sendSuccess(req, res, { accessToken: result.accessToken, expiresAt: result.expiresAt });
     } catch (err) { next(err); }
@@ -105,7 +115,8 @@ exports.logout = async (req, res, next) => {
     try {
         const rawToken = req.cookies?.[config.refreshCookieName] || req.body?.refreshToken;
         await authService.logout(req.auth?.sessionId, rawToken, req.auth?.jti);
-        res.clearCookie(config.refreshCookieName);
+        // Clear with the SAME domain it was set with, or the browser keeps the shared cookie.
+        res.clearCookie(config.refreshCookieName, config.refreshCookieDomain ? { domain: config.refreshCookieDomain } : {});
         if (req.auth?.jti) req.audit?.log('token_revoked', { userId: req.auth.userId, orgId: req.auth.orgId, sessionId: req.auth.sessionId, jti: req.auth.jti, issuer: 'baalvion-auth' });
         req.audit?.log('logout', { userId: req.auth?.userId, orgId: req.auth?.orgId, sessionId: req.auth?.sessionId });
         sendSuccess(req, res, { message: 'Logged out successfully' });
@@ -167,7 +178,13 @@ exports.requestEmailOtp = async (req, res, next) => {
     try {
         const parsed = schemas.emailOtpRequest.safeParse(req.body);
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
-        const result = await emailLogin.requestOtp({ email: parsed.data.email, ipAddress: req.ip });
+        const result = await emailLogin.requestOtp({
+            email:        parsed.data.email,
+            firstName:    parsed.data.firstName,
+            lastName:     parsed.data.lastName,
+            captchaToken: parsed.data.captchaToken,
+            ipAddress:    req.ip,
+        });
         req.audit?.log('email_otp_requested', { metadata: { email: parsed.data.email } });
         sendSuccess(req, res, result);
     } catch (err) { next(err); }
@@ -179,7 +196,7 @@ exports.verifyEmailOtp = async (req, res, next) => {
         if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
         const result = await emailLogin.verifyOtp({ ...parsed.data, ...parseClientInfo(req) });
         // Same session shape as password login — set the refresh cookie, return the access token.
-        res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        res.cookie(config.refreshCookieName, result.refreshToken, refreshCookieOpts());
         req.audit?.log('login_success', { userId: result.user?.id, orgId: result.user?.orgId, metadata: { email: parsed.data.email, method: 'email_otp', newUser: result.isNewUser } });
         sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt, isNewUser: result.isNewUser });
     } catch (err) {
@@ -291,12 +308,7 @@ exports.acceptInvite = async (req, res, next) => {
         if (result.mfa_enrollment_required) {
             return sendSuccess(req, res, { mfa_enrollment_required: true, challengeToken: result.challengeToken });
         }
-        res.cookie(config.refreshCookieName, result.refreshToken, {
-            httpOnly: true,
-            secure: config.env === 'production',
-            sameSite: 'strict',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
+        res.cookie(config.refreshCookieName, result.refreshToken, refreshCookieOpts());
         sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt }, 201);
     } catch (err) { next(err); }
 };

@@ -1,11 +1,20 @@
 {
-  // Cloudflare Workers Static Assets — serves the Next.js static export in `out/`.
+  // Cloudflare Workers Static Assets — serves the Next.js static export in `out/`, with a thin
+  // Worker (worker.ts) in front that proxies `/auth-bff/*` to the central auth-service so the
+  // embedded /signin form is first-party. Everything else is served straight from `out/`.
   // Deploy:  npx wrangler deploy   (after `next build` produces `out/`)
   // Preview: npx wrangler dev
   "name": "baalvion",
   "compatibility_date": "2024-11-01",
+  "main": "worker.ts",
   "assets": {
     "directory": "./out",
+    "binding": "ASSETS",
     "not_found_handling": "404-page"
+  },
+  "vars": {
+    // OPERATOR: set to the real auth-service base reachable from Cloudflare's edge.
+    // Override per-env with `wrangler secret put AUTH_SERVICE_URL` if it should not live in source.
+    "AUTH_SERVICE_URL": "https://api.baalvion.com"
   }
 }

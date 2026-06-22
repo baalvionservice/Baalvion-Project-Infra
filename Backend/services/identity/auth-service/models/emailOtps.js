@@ -3,6 +3,11 @@ module.exports = function (sequelize, DataTypes) {
         id: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
         // The login identity. Pre-auth (the user may not exist yet) so we key by email, not user_id.
         email: { type: DataTypes.STRING(255), allowNull: false },
+        // Name supplied at request time (the public sign-up captures First + Last before the code).
+        // Bound to the code so verify can create the account with the right name — not re-sent (and
+        // therefore not spoofable) at verify time. Unverified until the code is entered.
+        first_name: { type: DataTypes.STRING(80), allowNull: true },
+        last_name:  { type: DataTypes.STRING(80), allowNull: true },
         // sha256(code) — the plaintext OTP is never stored.
         code_hash: { type: DataTypes.TEXT, allowNull: false },
         purpose: { type: DataTypes.STRING(32), allowNull: false, defaultValue: 'login' },

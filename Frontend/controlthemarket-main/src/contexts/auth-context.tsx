@@ -636,6 +636,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isPublicPath =
       pathname.startsWith("/login") ||
       pathname.startsWith("/signup") ||
+      // Shared-auth SSO landing — must be public so the client guard doesn't bounce the
+      // returning (cookie-less, cross-apex) user to /login before the callback runs.
+      pathname.startsWith("/auth") ||
       pathname === "/" ||
       pathname.startsWith("/demos") ||
       pathname.startsWith("/blog") ||

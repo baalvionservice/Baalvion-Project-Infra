@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/accordion";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { sharedSignInUrl } from "@/lib/shared-auth";
 
 type NavChild = { label: string; href: string };
 type NavItem = { label: string; href?: string; children?: NavChild[] };
@@ -145,11 +146,16 @@ export function Navbar() {
             />
           </form>
 
-          <Link href="/login" className="hidden sm:block">
-            <Button variant="outline" size="sm" className="h-9 gap-2 border-primary text-primary hover:bg-primary/5" aria-label="Sign In">
-              <User className="h-4 w-4" aria-hidden="true" /> Sign In
-            </Button>
-          </Link>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => window.location.assign(sharedSignInUrl())}
+            className="hidden sm:flex h-9 gap-2 border-primary text-primary hover:bg-primary/5"
+            aria-label="Sign In"
+          >
+            <User className="h-4 w-4" aria-hidden="true" /> Sign In
+          </Button>
           <Link href="/contact" className="hidden md:block">
             <Button size="sm" className="h-9 bg-secondary text-secondary-foreground hover:bg-secondary/90 font-bold">
               Get in touch

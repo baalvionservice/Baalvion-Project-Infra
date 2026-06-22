@@ -15,6 +15,10 @@ module.exports = {
     corsOrigins: parseList(process.env.CORS_ORIGINS, ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:8080']),
 
     refreshCookieName: process.env.REFRESH_COOKIE_NAME || 'baalvion_refresh',
+    // Cross-subdomain SSO: set to '.baalvion.com' in production so the refresh cookie is shared by
+    // every *.baalvion.com site (the shared auth.baalvion.com surface signs the user in once).
+    // Empty (default) = host-only cookie, preserving single-host/local behaviour.
+    refreshCookieDomain: process.env.REFRESH_COOKIE_DOMAIN || '',
 
     jwt: {
         // RS256 is the ONLY signing path (config/vault.js + utils/jwtRsa.js). These HS256
@@ -54,6 +58,31 @@ module.exports = {
             ttlSeconds:     Number(process.env.OTP_TTL_SECONDS       || 600), // 10 minutes
             maxAttempts:    Number(process.env.OTP_MAX_ATTEMPTS      || 5),   // verify tries per code
             resendCooldown: Number(process.env.OTP_RESEND_COOLDOWN_S || 60),  // min seconds between sends
+        },
+        // Passwordless email-OTP login policy. Kept SEPARATE from the phone `otp` block so the
+        // public sign-in/sign-up experience enforces its own (stricter) rules without changing
+        // the authenticated phone-verification flow.
+        emailOtp: {
+            length:              Number(process.env.OTP_LENGTH                  || 6),   // digits
+            ttlSeconds:          Number(process.env.EMAIL_OTP_TTL_SECONDS       || 300), // 5 minutes (spec)
+            maxAttempts:         Number(process.env.EMAIL_OTP_MAX_ATTEMPTS      || 5),   // verify tries per code
+            resendCooldown:      Number(process.env.EMAIL_OTP_RESEND_COOLDOWN_S || 60),  // min seconds between sends
+            maxResends:          Number(process.env.EMAIL_OTP_MAX_RESENDS       || 3),   // hard cap of code re-sends…
+            resendWindowSeconds: Number(process.env.EMAIL_OTP_RESEND_WINDOW_S   || 900), // …counted over this window
+        },
+        // Bot/spam defence on the public OTP-request endpoint. Cloudflare Turnstile token is
+        // verified server-side. ENFORCED whenever a secret is configured (always in prod); skipped
+        // in local dev when unset so the flow stays runnable without a captcha.
+        turnstile: {
+            secretKey: process.env.TURNSTILE_SECRET_KEY || '',
+            verifyUrl: process.env.TURNSTILE_VERIFY_URL || 'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        },
+        // Genuine-email gate: reject disposable/temp inboxes and require a deliverable domain
+        // (MX, falling back to A/AAAA) before a code is ever sent.
+        emailValidation: {
+            rejectDisposable: (process.env.EMAIL_REJECT_DISPOSABLE || 'true') !== 'false',
+            requireMx:        (process.env.EMAIL_REQUIRE_MX        || 'true') !== 'false',
+            dnsTimeoutMs:     Number(process.env.EMAIL_DNS_TIMEOUT_MS || 4000),
         },
     },
 

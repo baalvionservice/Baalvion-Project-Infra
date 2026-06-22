@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { Logo } from '@/components/layout/logo';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { sharedSignInUrl } from '@/lib/shared-auth';
 import { Menu, ChevronDown } from 'lucide-react';
 import {
     DropdownMenu,
@@ -144,8 +145,8 @@ export function PublicHeader() {
                         </nav>
 
                         <div className="hidden md:flex items-center gap-2">
-                            <Button variant="outline" asChild>
-                                <Link href="/login">Sign In</Link>
+                            <Button variant="outline" onClick={() => window.location.assign(sharedSignInUrl())}>
+                                Sign In
                             </Button>
                             <Button asChild>
                                 <Link href="/onboarding">Join Baalvion</Link>
@@ -229,8 +230,12 @@ export function PublicHeader() {
                                             </Button>
                                         </SheetClose>
                                         <SheetClose asChild>
-                                            <Button variant="outline" asChild className="w-full">
-                                                <Link href="/login">Sign In</Link>
+                                            <Button
+                                                variant="outline"
+                                                className="w-full"
+                                                onClick={() => window.location.assign(sharedSignInUrl())}
+                                            >
+                                                Sign In
                                             </Button>
                                         </SheetClose>
                                     </nav>

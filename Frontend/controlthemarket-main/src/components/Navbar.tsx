@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import { sharedSignInUrl } from "@/lib/shared-auth";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -50,12 +51,15 @@ export default function Navbar() {
 
         {/* CTA Buttons */}
         <div className="flex gap-2">
-          <Link
-            href="/login"
+          {/* Primary sign-in → shared Baalvion auth surface (auth.baalvion.com). The
+              local /login route remains reachable as a fallback. */}
+          <button
+            type="button"
+            onClick={() => window.location.assign(sharedSignInUrl())}
             className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold text-gray-800 rounded-lg hover:bg-gray-100 transition-all no-underline"
           >
             Log in
-          </Link>
+          </button>
           <Link
             href="/signup"
             className="inline-flex items-center justify-center px-[18px] py-[9px] text-sm font-semibold bg-green-600 text-white rounded-lg hover:bg-green-700 hover:-translate-y-px transition-all shadow-[0_4px_12px_rgba(34,197,94,0.3)] no-underline"

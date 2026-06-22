@@ -19,6 +19,10 @@ const clientSchema = z.object({
     .string()
     .url()
     .default('http://localhost:3020'),
+  NEXT_PUBLIC_AUTH_URL: z
+    .string()
+    .url()
+    .default('https://auth.baalvion.com'),
 });
 
 function validateEnv() {
@@ -45,5 +49,6 @@ export const env = {
   client: {
     aboutApiUrl: process.env.NEXT_PUBLIC_ABOUT_API_URL ?? 'https://api.baalvion.com/api/v1/ecosystem/about',
     appUrl: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3020',
+    authUrl: process.env.NEXT_PUBLIC_AUTH_URL ?? 'https://auth.baalvion.com',
   },
 };

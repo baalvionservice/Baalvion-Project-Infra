@@ -40,6 +40,7 @@ import { NavigationItem, UserRole } from "@/core/content/schemas";
 import { AlertsSidebar } from "@/components/notifications/AlertsSidebar";
 import { LanguageSelector } from "./LanguageSelector";
 import { LoginModal } from "@/components/auth/LoginModal";
+import { sharedSignInUrl } from "@/lib/shared-auth";
 
 export default function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -491,7 +492,10 @@ function AuthButtons({ userRole, isMobile, onAction, onLogin }: any) {
       <Button
         size="sm"
         className="shadow-md w-full font-bold"
-        onClick={() => onLogin?.()}
+        onClick={() => {
+          onAction?.();
+          window.location.assign(sharedSignInUrl());
+        }}
       >
         Sign In
       </Button>

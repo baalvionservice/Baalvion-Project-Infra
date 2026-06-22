@@ -32,9 +32,15 @@ export function SiteHeader() {
           </span>
           <a
             href={EXTERNAL.ir}
-            className="border hairline-strong px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:border-accent hover:text-accent active:border-accent-ink active:text-accent-ink"
+            className="hidden border hairline-strong px-4 py-2 text-sm font-medium text-foreground transition-colors duration-200 hover:border-accent hover:text-accent active:border-accent-ink active:text-accent-ink sm:inline-flex"
           >
             Investor Relations
+          </a>
+          <a
+            href="/signin"
+            className="bg-accent px-4 py-2 text-sm font-medium text-ink-deep transition-colors duration-200 hover:bg-accent-ink"
+          >
+            Sign in
           </a>
         </div>
       </div>

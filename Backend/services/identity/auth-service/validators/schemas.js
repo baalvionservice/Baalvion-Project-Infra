@@ -24,8 +24,19 @@ const register = z.object({
 const phoneOtpRequest = z.object({ phone: phoneSchema.optional() });
 const phoneOtpVerify = z.object({ code: z.string().trim().regex(/^[0-9]{4,8}$/, 'Code must be 4–8 digits') });
 
-// Passwordless email-OTP login (public). request needs only the email; verify needs email + code.
-const emailOtpRequest = z.object({ email: z.string().email() });
+// Passwordless email-OTP login / sign-up (public). The user enters First + Last name and email to
+// request a code; verify needs only email + code (the names are bound to the issued code server-side).
+// `nameField` is unicode-aware so international names pass, but forbids angle brackets / control chars
+// → the value is safe to interpolate into the OTP email and to store.
+const nameField = z.string().trim().min(1).max(80).regex(/^[\p{L}\p{M}'.\- ]+$/u, 'Please enter a valid name');
+const emailOtpRequest = z.object({
+    email:        z.string().email(),
+    firstName:    nameField,
+    lastName:     nameField,
+    // Cloudflare Turnstile token. Optional at the schema layer so local dev (no captcha configured)
+    // still works; the service ENFORCES it whenever TURNSTILE_SECRET_KEY is set.
+    captchaToken: z.string().min(1).max(4000).optional(),
+});
 const emailOtpVerify = z.object({
     email: z.string().email(),
     code:  z.string().trim().regex(/^[0-9]{4,8}$/, 'Code must be 4–8 digits'),
