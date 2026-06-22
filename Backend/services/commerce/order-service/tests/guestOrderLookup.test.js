@@ -47,10 +47,11 @@ function guestOrder(overrides = {}) {
     return { ...base, toJSON() { return base; } };
 }
 
-function stubOrder(order) {
+function stubOrder(order, shipment = null) {
     models.OrdersOrder.findOne = async ({ where }) =>
         (where.storeId === STORE && where.orderNumber === order.orderNumber) ? order : null;
     models.OrdersCustomer.findByPk = async () => null;
+    models.OrdersShipment.findOne = async () => shipment;
 }
 
 async function status(fn) { try { await fn(); return 200; } catch (e) { return e.statusCode || 500; } }
@@ -69,6 +70,8 @@ test('guest lookup: correct orderNumber + email returns a safe, PII-minimised tr
     assert.equal(view.items[0].name, 'Heritage Bag');
     // Coarse destination only.
     assert.deepEqual(view.shipTo, { city: 'London', countryCode: 'GB' });
+    // No shipment created yet → shipment is null (not an error).
+    assert.equal(view.shipment, null);
 
     // Sensitive fields are NOT leaked.
     const json = JSON.stringify(view);
@@ -96,6 +99,33 @@ test('guest lookup: wrong email, unknown order number, and missing fields all re
     assert.equal(await status(() => orderService.lookupGuestOrder(STORE, { email: EMAIL, orderNumber: '' })), 404);
 });
 
+test('guest lookup: a shipped order surfaces customer-shareable parcel tracking (carrier + number)', async () => {
+    const shipment = {
+        status: "in_transit",
+        carrier: "DHL Express",
+        trackingNumber: "JD0123456789",
+        trackingUrl: "https://track.dhl.com/JD0123456789",
+        shippedAt: new Date("2026-06-23T02:00:00Z"),
+        deliveredAt: null,
+        estimatedDelivery: new Date("2026-06-25T00:00:00Z"),
+        events: [
+            { status: "pending", message: "Label created", at: "2026-06-23T01:30:00Z" },
+            { status: "in_transit", message: "Departed facility", location: "London", at: "2026-06-23T02:00:00Z" },
+        ],
+    };
+    stubOrder(guestOrder({ status: "shipped" }), shipment);
+
+    const view = await orderService.lookupGuestOrder(STORE, { email: EMAIL, orderNumber: ORDER_NUMBER });
+    assert.ok(view.shipment, "shipment is present");
+    assert.equal(view.shipment.carrier, "DHL Express");
+    assert.equal(view.shipment.trackingNumber, "JD0123456789");
+    assert.equal(view.shipment.trackingUrl, "https://track.dhl.com/JD0123456789");
+    assert.equal(view.shipment.status, "in_transit");
+    // Latest timeline event is surfaced.
+    assert.equal(view.shipment.lastUpdate.status, "in_transit");
+    assert.equal(view.shipment.lastUpdate.location, "London");
+});
+
 test('guest lookup: a registered order is findable by the linked customer email (no address email)', async () => {
     const order = guestOrder({
         customerId: 'cust-1',
@@ -103,6 +133,7 @@ test('guest lookup: a registered order is findable by the linked customer email 
     });
     models.OrdersOrder.findOne = async ({ where }) => (where.orderNumber === ORDER_NUMBER ? order : null);
     models.OrdersCustomer.findByPk = async (id) => (id === 'cust-1' ? { email: EMAIL } : null);
+    models.OrdersShipment.findOne = async () => null;
 
     const view = await orderService.lookupGuestOrder(STORE, { email: EMAIL, orderNumber: ORDER_NUMBER });
     assert.equal(view.orderNumber, ORDER_NUMBER);

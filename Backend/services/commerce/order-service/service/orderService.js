@@ -1,7 +1,7 @@
 'use strict';
 const crypto = require('crypto');
 const { Op, QueryTypes } = require('sequelize');
-const { OrdersOrder, OrdersOrderItem, OrdersOrderPayment, OrdersInvoice, OrdersCustomer, sequelize } = require('../models');
+const { OrdersOrder, OrdersOrderItem, OrdersOrderPayment, OrdersInvoice, OrdersCustomer, OrdersShipment, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const { getProvider, payuVerifyReturn, payuParseReturn } = require('./paymentProvider');
@@ -212,10 +212,29 @@ async function orderRecipientEmails(order) {
     return [...out];
 }
 
+// Customer-shareable parcel-tracking projection (carrier + tracking number + timeline are meant to
+// reach the shopper). null when no shipment has been created yet.
+function toShipmentView(s) {
+    if (!s) return null;
+    const o = typeof s.toJSON === 'function' ? s.toJSON() : s;
+    const events = Array.isArray(o.events) ? o.events : [];
+    const last = events.length ? events[events.length - 1] : null;
+    return {
+        status: o.status,
+        carrier: o.carrier || null,
+        trackingNumber: o.trackingNumber || null,
+        trackingUrl: o.trackingUrl || null,
+        shippedAt: o.shippedAt || null,
+        deliveredAt: o.deliveredAt || null,
+        estimatedDelivery: o.estimatedDelivery || null,
+        lastUpdate: last ? { status: last.status, message: last.message || null, location: last.location || null, at: last.at } : null,
+    };
+}
+
 // SAFE, PII-minimised tracking projection for the public lookup. Exposes order state + totals +
-// line items + a COARSE destination (city/country only) — never the street address, phone, contact
-// email, customer id, or internal metadata.
-function toTrackingView(order) {
+// line items + a COARSE destination (city/country only) + customer-shareable parcel tracking —
+// never the street address, phone, contact email, customer id, or internal metadata.
+function toTrackingView(order, shipment = null) {
     const o = typeof order.toJSON === 'function' ? order.toJSON() : order;
     const ship = o.shippingAddress || {};
     return {
@@ -242,6 +261,7 @@ function toTrackingView(order) {
             price: i.price,
             total: i.total,
         })),
+        shipment: toShipmentView(shipment),
     };
 }
 
@@ -258,7 +278,9 @@ async function lookupGuestOrder(storeId, { email, orderNumber } = {}) {
     const recipients = await orderRecipientEmails(order);
     const matches = recipients.some((e) => timingSafeEqualStr(e, provided));
     if (!matches) throw NOT_FOUND; // email mismatch → SAME 404 as unknown order
-    return toTrackingView(order);
+    // Latest shipment (if any) so a guest can follow the parcel, not just the order state.
+    const shipment = await OrdersShipment.findOne({ where: { storeId, orderId: order.id }, order: [['createdAt', 'DESC']] });
+    return toTrackingView(order, shipment);
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

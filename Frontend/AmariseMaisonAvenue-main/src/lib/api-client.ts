@@ -571,6 +571,17 @@ export interface OrderTrackingView {
     price: number;
     total: number;
   }>;
+  /** Customer-shareable parcel tracking (carrier + number + latest event). null until shipped. */
+  shipment: {
+    status: string;
+    carrier: string | null;
+    trackingNumber: string | null;
+    trackingUrl: string | null;
+    shippedAt: string | null;
+    deliveredAt: string | null;
+    estimatedDelivery: string | null;
+    lastUpdate: { status: string; message: string | null; location: string | null; at: string } | null;
+  } | null;
 }
 
 // ── Shipment / tracking (order-service orders_shipments) ──────────────────────

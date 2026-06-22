@@ -43,6 +43,17 @@ function formatDate(iso: string): string {
   }
 }
 
+// Only allow http(s) carrier tracking links — never a javascript:/data: scheme in an href.
+function safeHttpUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    return parsed.protocol === "http:" || parsed.protocol === "https:" ? url : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 function PaymentBadge({ status }: { status: OrderTrackingView["paymentStatus"] }) {
   const map: Record<string, { label: string; cls: string }> = {
     paid: { label: "Paid", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -271,6 +282,49 @@ export default function TrackOrderPage() {
             </div>
 
             <StatusRail view={view} />
+
+            {/* Parcel tracking — shown once a shipment exists */}
+            {view.shipment && (
+              <div className="border border-border bg-ivory/40 p-5 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <span className="text-[9px] font-bold uppercase tracking-[0.2em] text-gray-400 flex items-center gap-1.5">
+                    <Truck className="w-3.5 h-3.5 text-gold" /> Parcel Tracking
+                  </span>
+                  {view.shipment.estimatedDelivery && (
+                    <span className="text-[11px] text-gray-500 font-light">
+                      Est. delivery {formatDate(view.shipment.estimatedDelivery)}
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-end justify-between gap-4">
+                  <div className="space-y-1">
+                    {view.shipment.carrier && (
+                      <p className="text-sm font-medium text-gray-900">{view.shipment.carrier}</p>
+                    )}
+                    {view.shipment.trackingNumber && (
+                      <p className="font-mono text-sm text-gray-700">{view.shipment.trackingNumber}</p>
+                    )}
+                    {view.shipment.lastUpdate && (
+                      <p className="text-[11px] text-gray-400 font-light">
+                        {view.shipment.lastUpdate.message || view.shipment.lastUpdate.status}
+                        {view.shipment.lastUpdate.location ? ` · ${view.shipment.lastUpdate.location}` : ""}
+                        {` · ${formatDate(view.shipment.lastUpdate.at)}`}
+                      </p>
+                    )}
+                  </div>
+                  {safeHttpUrl(view.shipment.trackingUrl) && (
+                    <a
+                      href={safeHttpUrl(view.shipment.trackingUrl)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.25em] text-plum hover:underline"
+                    >
+                      Track Parcel <ArrowRight className="w-3.5 h-3.5" />
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Items */}
             <div className="border border-border">
