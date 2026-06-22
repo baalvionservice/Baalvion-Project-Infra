@@ -30,6 +30,11 @@ name: baalvion-single-host
 
 x-restart: &restart
   restart: unless-stopped
+  # 8 GB single-host: give EVERY long-running container a hard memory ceiling so one
+  # runaway can't OOM the whole box. Heavy services (Postgres, the 2 JVMs, Next.js)
+  # override mem_limit individually below. mem_reservation is a soft scheduling floor.
+  mem_limit: 256m
+  mem_reservation: 48m
 
 # Common env for Stack A Node services (all on baalvion_db).
 x-stackA-env: &stackA-env
@@ -47,6 +52,9 @@ x-stackA-env: &stackA-env
   JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
   JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
   CORS_ORIGINS: ${CORS_ORIGINS}
+  # Cap V8 old-space so Node GCs *before* hitting the cgroup mem_limit (avoids OOM-kill loops
+  # on the 8 GB box). Services with a larger mem_limit may raise this in their own env block.
+  NODE_OPTIONS: --max-old-space-size=${STACKA_NODE_HEAP_MB:-200}
 
 networks:
   baalvion-net:
@@ -65,6 +73,8 @@ services:
   postgres:
     image: postgres:16
     <<: *restart
+    mem_limit: 768m
+    mem_reservation: 256m
     environment:
       POSTGRES_USER: ${DB_USER:-baalvion}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -89,7 +99,8 @@ services:
   redis:
     image: redis:7
     <<: *restart
-    command: ["redis-server", "--appendonly", "yes"]
+    mem_limit: 224m
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "160mb", "--maxmemory-policy", "allkeys-lru"]
     volumes:
       - redisdata:/data
     healthcheck:
@@ -102,6 +113,7 @@ services:
   redpanda:
     image: redpandadata/redpanda:v24.2.7
     <<: *restart
+    mem_limit: 768m
     command:
       - redpanda start
       - --smp 1
@@ -189,6 +201,7 @@ services:
   cms-service:
     image: ${IMAGE_PREFIX:-baalvion}/cms-service:${IMAGE_TAG:-prod-latest}
     <<: *restart
+    mem_limit: 320m
     environment:
       <<: *stackA-env
       PORT: "3018"
@@ -220,6 +233,7 @@ services:
   commerce-service:
     image: ${IMAGE_PREFIX:-baalvion}/commerce-service:${IMAGE_TAG:-prod-latest}
     <<: *restart
+    mem_limit: 320m
     environment:
       <<: *stackA-env
       PORT: "3012"
@@ -267,6 +281,7 @@ services:
   order-service:
     image: ${IMAGE_PREFIX:-baalvion}/order-service:${IMAGE_TAG:-prod-latest}
     <<: *restart
+    mem_limit: 320m
     environment:
       <<: *stackA-env
       PORT: "3013"
@@ -304,7 +319,12 @@ services:
   payment-service:
     image: ${IMAGE_PREFIX:-baalvion}/payment-service:${IMAGE_TAG:-prod-latest}
     <<: *restart
+    mem_limit: 512m
+    mem_reservation: 256m
     environment:
+      # Container-aware JVM: cap heap at ~65% of mem_limit (~333 MB), leaving room for
+      # metaspace/threads/non-heap. SerialGC keeps GC overhead tiny on a small heap.
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=65.0 -XX:+UseSerialGC -Xss512k"
       PORT: "3015"
       DB_HOST: postgres
       DB_PORT: "5432"
@@ -476,7 +496,10 @@ services:
   proxy-payment-service:
     image: ${IMAGE_PREFIX:-baalvion}/proxy-baalvionstack-payment-service:${IMAGE_TAG:-prod-latest}
     <<: *restart
+    mem_limit: 512m
+    mem_reservation: 256m
     environment:
+      JAVA_TOOL_OPTIONS: "-XX:MaxRAMPercentage=65.0 -XX:+UseSerialGC -Xss512k"
       PORT: "3015"
       DB_HOST: postgres
       DB_PORT: "5432"
@@ -650,7 +673,9 @@ services:
   trade-service:
     image: ${IMAGE_PREFIX:-baalvion}/trade-service:${IMAGE_TAG:-prod-latest}
     <<: *restart
+    mem_limit: 320m
     environment:
+      NODE_OPTIONS: --max-old-space-size=256
       NODE_ENV: production
       PORT: "3025"
       SERVICE_NAME: trade-service
@@ -733,8 +758,11 @@ services:
   gti-web:
     image: ${IMAGE_PREFIX:-baalvion}/gti-web:${IMAGE_TAG:-prod-latest}
     <<: *restart
+    mem_limit: 384m
+    mem_reservation: 128m
     environment:
       NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=320
       PORT: "9003"
       HOSTNAME: 0.0.0.0
       DATABASE_URL: postgresql://${DB_USER:-baalvion}:${DB_PASSWORD}@postgres:5432/${GTI_DB:-gti_db}?schema=public
@@ -847,6 +875,7 @@ services:
   caddy:
     image: caddy:2.8-alpine
     <<: *restart
+    mem_limit: 96m
     ports:
       - "80:80"
       - "443:443"
