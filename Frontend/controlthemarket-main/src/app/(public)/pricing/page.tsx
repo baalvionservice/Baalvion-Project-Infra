@@ -344,6 +344,12 @@ export default function PricingPage() {
             <Button variant="outline" onClick={() => handlePay('razorpay')} disabled={isStarting}>
               Pay with Razorpay (UPI / Cards / Netbanking)
             </Button>
+            <Button variant="outline" onClick={() => handlePay('cashfree')} disabled={isStarting}>
+              Pay with Cashfree (UPI / Cards / Netbanking)
+            </Button>
+            <Button variant="outline" onClick={() => handlePay('payu')} disabled={isStarting}>
+              Pay with PayU (Cards / UPI / Wallets)
+            </Button>
           </div>
           <DialogFooter>
             <Button variant="ghost" onClick={() => setCheckoutPlan(null)} disabled={isStarting}>Cancel</Button>

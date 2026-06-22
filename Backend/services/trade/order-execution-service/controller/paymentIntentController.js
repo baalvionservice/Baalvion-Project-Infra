@@ -16,7 +16,7 @@ const { runWithTenant } = require('@baalvion/tenancy');
 
 const tenantOf = (req) => (req.auth && (req.auth.tenantId || req.auth.orgId)) || null;
 const STOREFRONT = (process.env.STOREFRONT_URL || 'http://localhost:9003').replace(/\/+$/, '');
-const GATEWAYS = ['razorpay', 'stripe', 'payu', 'bank'];
+const GATEWAYS = ['razorpay', 'stripe', 'payu', 'cashfree', 'bank'];
 
 const intentSchema = z.object({ gateway: z.enum(GATEWAYS) });
 const captureSchema = z.object({
@@ -72,6 +72,7 @@ async function createPaymentIntent(req, res, next) {
                 ...(intent.clientSecret ? { clientSecret: intent.clientSecret } : {}),
                 ...(intent.publishableKey ? { publishableKey: intent.publishableKey } : {}),
                 ...(intent.formPost ? { formPost: intent.formPost } : {}),
+                ...(intent.sessionId ? { sessionId: intent.sessionId, mode: intent.mode, amount: intent.amount, currency: intent.currency } : {}),
             };
         });
         auditPayment(req, 'order.payment_intent', { orderId: req.params.id, gateway: body.gateway, intentId: result.intentId });

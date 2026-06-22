@@ -387,6 +387,120 @@ function payuParseReturn(body) {
   return { status, txnid: (body && body.txnid) || null, mihpayid: (body && body.mihpayid) || null, amount: body && body.amount, currency: (body && body.currency) || 'INR' };
 }
 
+// ── Cashfree (REAL, international + India) ───────────────────────────────────────
+// Cashfree PG: order + payment-session + hosted/SDK checkout. createPaymentIntent creates a REAL
+// Cashfree order (x-client-id/secret) and returns the payment_session_id for the v3 SDK; confirmPayment
+// RE-FETCHES the order from Cashfree and captures ONLY when Cashfree itself reports order_status==='PAID'
+// (and the order is bound to THIS order via order_tags) — so capture is backend-authoritative, exactly
+// like the Stripe session retrieval. Keys come from the CMS vault (admin panel) or env, never hardcoded.
+const CASHFREE_API_VERSION = '2023-08-01';
+
+// SSRF guard: the base URL can come from the CMS vault (an admin-pasted value). Only ever send the
+// client secret to an OFFICIAL Cashfree host — anything else falls back to the mode default.
+const CASHFREE_BASES = ['https://api.cashfree.com', 'https://sandbox.cashfree.com'];
+
+async function cashfreeCreds() {
+  const v = await getPaymentCreds('cashfree');
+  const clientId = (v && v.secrets.clientId) || process.env.CASHFREE_CLIENT_ID;
+  const clientSecret = (v && v.secrets.clientSecret) || process.env.CASHFREE_CLIENT_SECRET;
+  const mode = (v && v.mode) || process.env.CASHFREE_MODE || 'test';
+  const fallback = (mode === 'live' || mode === 'production') ? 'https://api.cashfree.com' : 'https://sandbox.cashfree.com';
+  const requested = ((v && v.config && v.config.baseUrl) || process.env.CASHFREE_BASE_URL || '').replace(/\/+$/, '');
+  const base = requested && CASHFREE_BASES.includes(requested) ? requested : fallback;
+  if (!clientId || !clientSecret) throw new Error("payment provider 'cashfree' is not configured (set keys in the admin panel, or CASHFREE_CLIENT_ID + CASHFREE_CLIENT_SECRET)");
+  return { clientId, clientSecret, base };
+}
+
+async function cashfreeFetch(path, { clientId, clientSecret, base }, options = {}) {
+  const res = await fetch(`${base}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-client-id': clientId,
+      'x-client-secret': clientSecret,
+      'x-api-version': CASHFREE_API_VERSION,
+      ...(options.headers || {}),
+    },
+  });
+  const text = await res.text();
+  let body = {};
+  try { body = text ? JSON.parse(text) : {}; } catch { /* non-JSON */ }
+  if (!res.ok) {
+    // Never echo the provider's raw message back to the caller — log a code + throw a generic error.
+    console.warn(JSON.stringify({ evt: 'cashfree_api_error', path, status: res.status, code: body && (body.code || body.type) }));
+    const err = new Error(`cashfree request failed (${res.status})`);
+    err.providerStatus = res.status;
+    throw err;
+  }
+  return body;
+}
+
+const cashfreeProvider = {
+  name: 'cashfree',
+  PRODUCTION: true,
+  async createPaymentIntent({ orderId, amount, currencyCode }) {
+    const creds = await cashfreeCreds();
+    const major = Number(Number(amount).toFixed(2)); // Cashfree order_amount is in MAJOR units
+    if (!(major > 0)) throw new Error('cashfree: invalid order amount');
+    const cfOrderId = `cfo_${crypto.randomBytes(12).toString('hex')}`; // unique, ≤50 chars (alnum/_/-)
+    const storefront = (process.env.STOREFRONT_URL || 'http://localhost:9003').replace(/\/+$/, '');
+    const order = await cashfreeFetch('/pg/orders', creds, {
+      method: 'POST',
+      body: JSON.stringify({
+        order_id: cfOrderId,
+        order_amount: major,
+        order_currency: (currencyCode || 'INR').toUpperCase(),
+        customer_details: {
+          customer_id: `ord_${String(orderId).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 40)}`,
+          customer_email: process.env.CASHFREE_DEFAULT_EMAIL || 'orders@baalvion.test',
+          customer_phone: process.env.CASHFREE_DEFAULT_PHONE || '9999999999',
+        },
+        order_meta: { return_url: `${storefront}/orders/${orderId}?cashfree=return` },
+        order_tags: { orderId: String(orderId) }, // binds the Cashfree order to THIS GTI order
+      }),
+    });
+    const mode = creds.base.includes('sandbox') ? 'sandbox' : 'production';
+    // intentId = the Cashfree order_id; the client echoes it back on capture, and confirm re-fetches it.
+    return {
+      intentId: order.order_id || cfOrderId,
+      status: 'requires_action',
+      sessionId: order.payment_session_id,
+      mode,
+      amount: major,
+      currency: (currencyCode || 'INR').toUpperCase(),
+    };
+  },
+  async confirmPayment({ intentId, orderId }) {
+    const creds = await cashfreeCreds();
+    // Trust ONLY Cashfree's verdict (never the client): re-fetch the order + assert it's bound to THIS
+    // order via the order_tags we set at creation. Fail CLOSED if the binding tag is absent — a Cashfree
+    // order with no orderId tag must never settle an arbitrary GTI order.
+    const order = await cashfreeFetch(`/pg/orders/${encodeURIComponent(intentId)}`, creds);
+    const boundOrderId = order && order.order_tags && order.order_tags.orderId;
+    if (!order || order.order_id !== intentId || boundOrderId !== String(orderId)) {
+      return { status: 'failed', transactionId: null, reason: 'order_mismatch' };
+    }
+    if (String(order.order_status).toUpperCase() !== 'PAID') {
+      return { status: 'failed', transactionId: null, reason: `cashfree_status_${String(order.order_status || 'unknown').toLowerCase()}` };
+    }
+    // transactionId = our Cashfree order_id so a later refund can target /pg/orders/{id}/refunds.
+    return { status: 'captured', transactionId: intentId };
+  },
+  async failPayment() { return { status: 'failed' }; },
+  async cancelPayment() { return { status: 'voided' }; },
+  async refundPayment({ intentId, transactionId, amount, reason }) {
+    const creds = await cashfreeCreds();
+    const orderRef = intentId || transactionId;
+    if (!orderRef) throw new Error('cashfree: refund requires the order id (intentId)');
+    const refundId = `rf_cf_${crypto.randomBytes(8).toString('hex')}`;
+    const data = await cashfreeFetch(`/pg/orders/${encodeURIComponent(orderRef)}/refunds`, creds, {
+      method: 'POST',
+      body: JSON.stringify({ refund_id: refundId, ...(amount != null ? { refund_amount: Number(Number(amount).toFixed(2)) } : {}), refund_note: reason || 'refund' }),
+    });
+    return { status: 'refunded', provider: 'cashfree', refundId: data.refund_id || refundId, amount };
+  },
+};
+
 // Future real adapters — interface-compatible, intentionally unimplemented until configured.
 const unconfigured = (name) => ({
   name,
@@ -411,6 +525,7 @@ function getProvider(selectedGateway = null) {
     case 'razorpay':                return razorpayProvider;
     case 'bank': case 'bank_transfer': return bankTransferProvider;
     case 'payu':                    return payuProvider;
+    case 'cashfree':                return cashfreeProvider;
     case 'paypal':                  return unconfigured('paypal');
     case 'mock':
     default:

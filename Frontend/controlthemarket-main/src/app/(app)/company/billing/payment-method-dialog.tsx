@@ -71,7 +71,7 @@ export function PaymentMethodDialog({ isOpen, onOpenChange, presetPlanId }: Paym
         <DialogHeader>
           <DialogTitle>Choose a plan &amp; pay</DialogTitle>
           <DialogDescription>
-            Payment is completed on a secure checkout (Stripe or Razorpay). No card details are stored here.
+            Payment is completed on a secure checkout (Stripe, Razorpay, Cashfree or PayU). No card details are stored here.
           </DialogDescription>
         </DialogHeader>
 
@@ -113,6 +113,12 @@ export function PaymentMethodDialog({ isOpen, onOpenChange, presetPlanId }: Paym
           </Button>
           <Button className="h-11" variant="outline" onClick={() => pay('razorpay')} disabled={isStarting || !selectedPlanId}>
             Pay with Razorpay (UPI / Cards / Netbanking)
+          </Button>
+          <Button className="h-11" variant="outline" onClick={() => pay('cashfree')} disabled={isStarting || !selectedPlanId}>
+            Pay with Cashfree (UPI / Cards / Netbanking)
+          </Button>
+          <Button className="h-11" variant="outline" onClick={() => pay('payu')} disabled={isStarting || !selectedPlanId}>
+            Pay with PayU (Cards / UPI / Wallets)
           </Button>
         </div>
       </DialogContent>
