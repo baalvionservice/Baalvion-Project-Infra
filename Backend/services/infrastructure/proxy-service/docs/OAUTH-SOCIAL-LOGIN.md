@@ -56,9 +56,21 @@ https://proxy.baalvionstack.com/auth-bff/oauth/github/callback
 
 Copy the **Client ID** and generate a **Client secret**.
 
-### 2. Set the env vars (never commit real values)
+### 2. Provide the credentials — pick ONE source
 
-On the proxy-service (or in the deploy `.env.prod`):
+**Option A (recommended): the admin CMS panel.** In admin-platform open
+*CMS → Websites → (the site) → Integrations & Keys → Social Login*, then fill in the
+**Google Sign-In** / **GitHub Sign-In** cards (Client ID + Client Secret) and toggle Enabled.
+The keys are encrypted at rest (CMS vault) and proxy-service reads them **live** (≈60s cache,
+no redeploy). This requires the site to exist as a CMS website with the slug proxy-service
+looks up (`PAYMENT_SITE_SLUG`, default `proxy-baalvionstack`). The Social Login cards are
+scoped to specific sites via `OAUTH_WEBSITE_SLUGS` in the admin catalog
+(`amarise-maison-avenue`, `proxy-baalvionstack`).
+
+Resolution order in `oauthService.resolveClient`: **CMS vault → env vars**. So the panel wins
+when set, and env remains a fallback.
+
+**Option B: env vars** (never commit real values). On the proxy-service host (or deploy `.env.prod`):
 
 ```bash
 OAUTH_PUBLIC_BASE_URL=https://proxy.baalvionstack.com   # serves the SPA + /auth-bff/*

@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, KeyRound, Plug, CreditCard, MessageSquare, Sparkles, ShieldCheck, Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, KeyRound, Plug, CreditCard, MessageSquare, Sparkles, ShieldCheck, Trash2, CheckCircle2, XCircle, LogIn } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,6 +34,7 @@ const CATEGORY_ICON: Record<IntegrationCategory, typeof Plug> = {
   sms: MessageSquare,
   ai: Sparkles,
   webhook: Plug,
+  oauth: LogIn,
   other: Plug,
 };
 
@@ -208,7 +209,11 @@ export default function WebsiteIntegrationsPage({
   }, [website, setBreadcrumbs, websiteId]);
 
   const byProvider = new Map((integrations ?? []).map((i) => [i.provider, i]));
-  const categories = [...new Set(PROVIDER_CATALOG.map((p) => p.category))] as IntegrationCategory[];
+  // Some providers (social login) are scoped to specific websites by slug; hide them elsewhere.
+  const visibleCatalog = PROVIDER_CATALOG.filter(
+    (p) => !p.websiteSlugs || (website?.slug ? p.websiteSlugs.includes(website.slug) : false),
+  );
+  const categories = [...new Set(visibleCatalog.map((p) => p.category))] as IntegrationCategory[];
 
   return (
     <div className="space-y-4">
@@ -247,7 +252,7 @@ export default function WebsiteIntegrationsPage({
               {CATEGORY_LABELS[cat]}
             </h2>
             <div className="grid gap-3">
-              {PROVIDER_CATALOG.filter((p) => p.category === cat).map((def) => (
+              {visibleCatalog.filter((p) => p.category === cat).map((def) => (
                 <IntegrationCard
                   key={def.provider}
                   websiteId={websiteId}

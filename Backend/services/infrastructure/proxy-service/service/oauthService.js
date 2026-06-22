@@ -17,18 +17,42 @@ const db = require('../models');
 const config = require('../config/appConfig');
 const providers = require('./oauthProviders');
 const signupService = require('./signupService');
+const cmsVault = require('./cmsVault');
 const { AppError } = require('../utils/errors');
 
 const Q = db.Sequelize.QueryTypes;
 
-const clientFor = (provider) =>
+// Our short provider name → the CMS-vault integration provider key (admin panel).
+const VAULT_PROVIDER = { google: 'google-oauth', github: 'github-oauth' };
+
+// Env-configured client — the fallback when the CMS vault has nothing for this site.
+const envClientFor = (provider) =>
   provider === 'google' ? config.oauth.google : provider === 'github' ? config.oauth.github : null;
 
-/** True only when both the client id AND secret are configured for the provider. */
-const isConfigured = (provider) => {
-  const c = clientFor(provider);
-  return !!(c && c.clientId && c.clientSecret);
-};
+/**
+ * Resolve { clientId, clientSecret } for a provider, preferring the per-site CMS vault
+ * (managed from the admin panel — paste a key and it takes effect live, no redeploy) and
+ * falling back to env vars. clientId is non-secret config; clientSecret is encrypted at rest.
+ */
+async function resolveClient(provider) {
+  try {
+    const entry = await cmsVault.getProvider(VAULT_PROVIDER[provider]);
+    if (entry && entry.enabled !== false) {
+      const clientId = (entry.config && entry.config.clientId) || (entry.secrets && entry.secrets.clientId);
+      const clientSecret = entry.secrets && entry.secrets.clientSecret;
+      if (clientId && clientSecret) return { clientId, clientSecret };
+    }
+  } catch {
+    /* vault unavailable → fall back to env */
+  }
+  const c = envClientFor(provider);
+  return c && c.clientId && c.clientSecret ? { clientId: c.clientId, clientSecret: c.clientSecret } : null;
+}
+
+/** True when the provider has usable credentials (vault first, then env). */
+async function isConfigured(provider) {
+  return !!(await resolveClient(provider));
+}
 
 /**
  * The public callback URL handed to the provider. Must be reachable by the browser and
@@ -39,8 +63,9 @@ const isConfigured = (provider) => {
 const redirectUri = (provider) =>
   `${String(config.oauth.publicBaseUrl).replace(/\/$/, '')}/auth-bff/oauth/${provider}/callback`;
 
-function authorizeUrl(provider, { state, codeChallenge } = {}) {
-  const c = clientFor(provider);
+async function authorizeUrl(provider, { state, codeChallenge } = {}) {
+  const c = await resolveClient(provider);
+  if (!c) throw new AppError('OAUTH_NOT_CONFIGURED', 'Provider is not configured', 400);
   return providers.buildAuthorizeUrl(provider, {
     clientId: c.clientId,
     redirectUri: redirectUri(provider),
@@ -50,7 +75,8 @@ function authorizeUrl(provider, { state, codeChallenge } = {}) {
 }
 
 async function exchangeCode(provider, { code, codeVerifier } = {}) {
-  const c = clientFor(provider);
+  const c = await resolveClient(provider);
+  if (!c) throw new AppError('OAUTH_NOT_CONFIGURED', 'Provider is not configured', 400);
   const ep = providers.ENDPOINTS[provider];
   const body = new URLSearchParams({
     client_id: c.clientId,

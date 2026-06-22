@@ -66,7 +66,7 @@ module.exports = {
     try {
       const provider = String(req.params.provider || '').toLowerCase();
       if (!oauthService.isSupportedProvider(provider)) return fail(res, 'unsupported_provider');
-      if (!oauthService.isConfigured(provider)) return fail(res, 'provider_not_configured');
+      if (!(await oauthService.isConfigured(provider))) return fail(res, 'provider_not_configured');
 
       // CSPRNG nonce — the sole CSRF guard for the redirect: it is echoed back via the
       // provider's `state` and compared against the httpOnly tx cookie on callback.
@@ -75,7 +75,7 @@ module.exports = {
       const tx = oauthService.encodeTx({ nonce, provider, verifier: pkce.verifier });
       res.cookie(TX_COOKIE, tx, txCookieOpts());
 
-      return res.redirect(oauthService.authorizeUrl(provider, { state: nonce, codeChallenge: pkce.challenge }));
+      return res.redirect(await oauthService.authorizeUrl(provider, { state: nonce, codeChallenge: pkce.challenge }));
     } catch (e) {
       logger.error('[oauth] start:', e.message);
       return fail(res, 'start_failed');
