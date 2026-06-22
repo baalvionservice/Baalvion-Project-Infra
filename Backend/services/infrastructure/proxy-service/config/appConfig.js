@@ -48,4 +48,33 @@ module.exports = {
     websocket: {
         path: '/v1/ws',
     },
+    // Consumer social login (Google / GitHub). Client credentials are per-platform
+    // (one app each) and come from env — register the apps and set these to go live.
+    // See service/oauthService.js + docs/OAUTH-SOCIAL-LOGIN.md.
+    oauth: {
+        // Public origin the provider redirects the BROWSER back to. Must serve BOTH the SPA
+        // and /auth-bff/* (reverse-proxied to /v1/auth/*). In prod set OAUTH_PUBLIC_BASE_URL
+        // (or PUBLIC_APP_URL) to e.g. https://proxy.baalvionstack.com.
+        publicBaseUrl:
+            process.env.OAUTH_PUBLIC_BASE_URL ||
+            process.env.PUBLIC_APP_URL ||
+            process.env.APP_URL ||
+            'http://localhost:8080',
+        // Where the post-login redirect lands (the SPA /auth/sso-callback route).
+        appUrl: process.env.APP_URL || process.env.PUBLIC_APP_URL || 'http://localhost:8080',
+        // How long the start→callback transaction cookie (state nonce + PKCE verifier) lives.
+        stateTtlMs: Number(process.env.OAUTH_STATE_TTL_MS || 10 * 60 * 1000),
+        google: {
+            clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+            clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
+        },
+        facebook: {
+            clientId: process.env.FACEBOOK_OAUTH_CLIENT_ID || '',
+            clientSecret: process.env.FACEBOOK_OAUTH_CLIENT_SECRET || '',
+        },
+        github: {
+            clientId: process.env.GITHUB_OAUTH_CLIENT_ID || '',
+            clientSecret: process.env.GITHUB_OAUTH_CLIENT_SECRET || '',
+        },
+    },
 };

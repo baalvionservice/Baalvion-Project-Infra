@@ -19,6 +19,10 @@ module.exports = function (sequelize, DataTypes) {
         // this is the single authoritative source of a cross-tenant grant (added to roles[] at
         // issuance). See migration 006_user_platform_role.sql.
         platform_role: { type: DataTypes.STRING(32), allowNull: true, defaultValue: null },
+        // Social login (Google / Facebook) identity. NULL for password accounts.
+        // See migration 011_oauth_identity.sql + service/oauthLogin.js.
+        oauth_provider:    { type: DataTypes.STRING(32), allowNull: true, defaultValue: null },
+        oauth_provider_id: { type: DataTypes.TEXT, allowNull: true, defaultValue: null },
     }, {
         sequelize,
         tableName: 'users',

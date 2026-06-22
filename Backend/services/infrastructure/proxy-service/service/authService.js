@@ -53,6 +53,13 @@ const login = async ({ email, password, ipAddress, userAgent }) => {
         throw new AppError('INVALID_CREDENTIALS', 'Invalid email or password', 401);
     }
 
+    // Passwordless accounts (social login + SSO JIT) carry an unusable, non-bcrypt
+    // placeholder hash ('oauth:' / 'sso:'). Reject the password path for them EXPLICITLY
+    // rather than relying on bcrypt.compare coincidentally returning false for a non-$2 hash.
+    if (typeof user.passwordHash !== 'string' || !user.passwordHash.startsWith('$2')) {
+        throw new AppError('INVALID_CREDENTIALS', 'Invalid email or password', 401);
+    }
+
     const valid = await bcrypt.compare(password, user.passwordHash);
     if (!valid) {
         throw new AppError('INVALID_CREDENTIALS', 'Invalid email or password', 401);

@@ -1,4 +1,4 @@
-export type IntegrationCategory = 'api' | 'payment' | 'sms' | 'ai' | 'webhook' | 'other';
+export type IntegrationCategory = 'api' | 'payment' | 'sms' | 'ai' | 'webhook' | 'oauth' | 'other';
 
 export interface Integration {
   id: string;
@@ -58,6 +58,11 @@ export interface ProviderDef {
   fields: ProviderField[];
   /** Secret fields (encrypted at rest, shown masked). */
   secretFields: ProviderField[];
+  /**
+   * When set, this provider card is only shown for websites whose slug is listed
+   * (used to scope social login to specific sites). Omit = available to every website.
+   */
+  websiteSlugs?: string[];
 }
 
 export const CATEGORY_LABELS: Record<IntegrationCategory, string> = {
@@ -66,8 +71,13 @@ export const CATEGORY_LABELS: Record<IntegrationCategory, string> = {
   sms: 'SMS / Messaging',
   ai: 'AI',
   webhook: 'Webhooks',
+  oauth: 'Social Login',
   other: 'Other',
 };
+
+// Sites allowed to use social login (Google / GitHub). Keyed by CMS website slug.
+// Scoped deliberately — these cards only appear on these two websites' integration pages.
+export const OAUTH_WEBSITE_SLUGS = ['amarise-maison-avenue', 'proxy-baalvionstack'];
 
 export const PROVIDER_CATALOG: ProviderDef[] = [
   {
@@ -150,5 +160,29 @@ export const PROVIDER_CATALOG: ProviderDef[] = [
     description: 'AI features (content generation, assistants).',
     fields: [{ key: 'model', label: 'Model', placeholder: 'gemini-1.5-pro' }],
     secretFields: [{ key: 'apiKey', label: 'API Key' }],
+  },
+  {
+    provider: 'google-oauth',
+    category: 'oauth',
+    label: 'Google Sign-In',
+    description: '"Continue with Google" on this site\'s login page.',
+    fields: [
+      { key: 'clientId', label: 'Client ID', placeholder: '…apps.googleusercontent.com' },
+      { key: 'redirectUri', label: 'Redirect URI (register this in Google Console)', placeholder: 'https://<site>/auth-bff/oauth/google/callback' },
+    ],
+    secretFields: [{ key: 'clientSecret', label: 'Client Secret', placeholder: 'GOCSPX-…' }],
+    websiteSlugs: OAUTH_WEBSITE_SLUGS,
+  },
+  {
+    provider: 'facebook-oauth',
+    category: 'oauth',
+    label: 'Facebook Login',
+    description: '"Continue with Facebook" on this site\'s login page.',
+    fields: [
+      { key: 'clientId', label: 'App ID', placeholder: 'Facebook App ID' },
+      { key: 'redirectUri', label: 'Redirect URI (register in Meta App → Facebook Login)', placeholder: 'https://<site>/auth-bff/oauth/facebook/callback' },
+    ],
+    secretFields: [{ key: 'clientSecret', label: 'App Secret', placeholder: 'Facebook App Secret' }],
+    websiteSlugs: OAUTH_WEBSITE_SLUGS,
   },
 ];

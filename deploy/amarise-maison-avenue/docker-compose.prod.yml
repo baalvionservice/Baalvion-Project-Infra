@@ -87,6 +87,19 @@ services:
       SMTP_PORT: ${SMTP_PORT:-587}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
+      # Social login (Google / Facebook). Creds resolve from the CMS vault per-site first
+      # (admin panel, slug below), then these env vars. Register the SAME shared apps'
+      # redirect URI: https://${DOMAIN}/auth-bff/oauth/<provider>/callback
+      FRONTEND_URL: https://${DOMAIN}
+      OAUTH_PUBLIC_BASE_URL: https://${DOMAIN}
+      OAUTH_APP_URL: https://${DOMAIN}
+      AUTH_SITE_SLUG: ${NEXT_PUBLIC_CMS_WEBSITE_SLUG:-amarise-maison-avenue}
+      CMS_BASE_URL: http://cms-service:3011/api/v1
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID:-}
+      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET:-}
+      FACEBOOK_OAUTH_CLIENT_ID: ${FACEBOOK_OAUTH_CLIENT_ID:-}
+      FACEBOOK_OAUTH_CLIENT_SECRET: ${FACEBOOK_OAUTH_CLIENT_SECRET:-}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
       interval: 15s
