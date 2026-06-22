@@ -48,7 +48,7 @@ jobs:
       brand:        ${{ steps.filter.outputs.brand }}
       dashboard:    ${{ steps.filter.outputs.dashboard }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
         id: filter
         with:
@@ -100,7 +100,7 @@ jobs:
       JWT_ACCESS_SECRET: ci-test-secret
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -145,7 +145,7 @@ jobs:
       JWT_ACCESS_SECRET: ci-test-secret
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -190,7 +190,7 @@ jobs:
       JWT_ACCESS_SECRET: ci-test-secret
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -235,7 +235,7 @@ jobs:
       JWT_ACCESS_SECRET: ci-test-secret
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -280,7 +280,7 @@ jobs:
       JWT_ACCESS_SECRET: ci-test-secret
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -325,7 +325,7 @@ jobs:
       JWT_ACCESS_SECRET: ci-test-secret
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -371,7 +371,7 @@ jobs:
       JWT_ACCESS_SECRET: ci-test-secret
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
@@ -416,7 +416,7 @@ jobs:
       JWT_ACCESS_SECRET: ci-test-secret
       JWT_REFRESH_SECRET: ci-test-refresh-secret
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:

@@ -84,14 +84,14 @@ jobs:
           - { repo: core-commerce-tools,       file: Backend/services/commerce/commerce-service/Dockerfile, target: installer, cache: commerce }
           - { repo: core-order-tools,          file: Backend/services/commerce/order-service/Dockerfile,    target: installer, cache: order }
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # ── AWS auth (OIDC ONLY — keyless via GitHub OIDC role assumption) ────────
       - name: Configure AWS credentials (OIDC)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-region: ${{ env.AWS_REGION }}
           role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
@@ -114,7 +114,7 @@ jobs:
 
       - name: Resolve image tags
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_NAMESPACE }}/${{ matrix.repo }}
           tags: |
@@ -124,7 +124,7 @@ jobs:
             type=sha,format=long,prefix=
 
       - name: Build and push to ECR
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ matrix.context || '.' }}
           file: ${{ matrix.file }}
