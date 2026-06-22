@@ -537,4 +537,23 @@ function getProvider(selectedGateway = null) {
   }
 }
 
-module.exports = { getProvider, payuVerifyReturn, payuParseReturn };
+// Which consumer gateways can actually charge right now (keys present in the CMS vault or env). Each
+// creds resolver THROWS when unconfigured, so we probe with try/catch (vault reads are 60s-cached).
+// 'bank' needs no keys (manual wire settlement) so it's always offered. Drives the storefront UI so
+// only chargeable gateways are shown. Order = display/preference order (card-first).
+async function listConfiguredGateways() {
+  const probes = [
+    ['razorpay', razorpayKeys],
+    ['cashfree', cashfreeCreds],
+    ['stripe', stripeCreds],
+    ['payu', payuCreds],
+  ];
+  const out = [];
+  for (const [name, resolve] of probes) {
+    try { await resolve(); out.push(name); } catch { /* not configured — skip */ }
+  }
+  out.push('bank');
+  return out;
+}
+
+module.exports = { getProvider, payuVerifyReturn, payuParseReturn, listConfiguredGateways };

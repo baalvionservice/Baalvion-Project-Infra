@@ -12,6 +12,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const billingService = require('../service/billingService');
+const cmsVault = require('../service/cmsVault');
 const logger = require('../service/logger');
 
 // Server-authoritative promo codes. The browser's discount display is cosmetic; the ACTUAL
@@ -182,6 +183,20 @@ router.post('/checkout', authMiddleware, async (req, res) => {
             return res.status(502).json({ error: { code: 'PAYMENT_UPSTREAM', message: 'payment-service unreachable' } });
         }
         return res.status(500).json({ error: { code: 'CHECKOUT_ERROR', message: e && e.message ? e.message : 'checkout failed' } });
+    }
+});
+
+// GET /v1/billing/providers — which gateways are configured (chargeable) for THIS site, from the
+// CMS vault, plus the card-capable default. Lets the SPA render only chargeable gateways + a one-tap
+// "Pay by card" button. Auth'd like checkout; never throws (degrades to an empty list).
+router.get('/providers', authMiddleware, async (req, res) => {
+    try {
+        const configured = await cmsVault.listConfiguredProviders();
+        const providers = GATEWAY_PROVIDERS.filter((p) => configured.includes(p));
+        return res.json({ providers, default: providers[0] || null });
+    } catch (e) {
+        logger.warn('[billing] providers list failed:', e && e.message);
+        return res.json({ providers: [], default: null });
     }
 });
 

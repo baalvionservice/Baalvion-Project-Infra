@@ -214,6 +214,24 @@ class OrderService {
     return order;
   }
 
+  /**
+   * Which consumer gateways are configured (chargeable) right now + the card-capable default.
+   * Drives the checkout UI so it only offers gateways that can actually charge. Never throws —
+   * degrades to an empty list (the page then falls back to showing all).
+   */
+  async getConfiguredGateways(): Promise<{ gateways: GatewaySlug[]; preferred: GatewaySlug | null }> {
+    const all: GatewaySlug[] = ['razorpay', 'cashfree', 'stripe', 'payu', 'bank'];
+    try {
+      const res = await apiClient.get<{ gateways?: string[]; preferred?: string | null }>('/orders/payment-gateways');
+      const data = res.data || {};
+      const gateways = (Array.isArray(data.gateways) ? data.gateways : []).filter((g): g is GatewaySlug => all.includes(g as GatewaySlug));
+      const preferred = data.preferred && all.includes(data.preferred as GatewaySlug) ? (data.preferred as GatewaySlug) : null;
+      return { gateways, preferred };
+    } catch {
+      return { gateways: [], preferred: null };
+    }
+  }
+
   async getOrderDocuments(orderId: string): Promise<any[]> {
     return documentService.getDossier(orderId);
   }
@@ -228,6 +246,7 @@ export const updateOrderStatus = (id: string, s: any) => orderService.updateOrde
 export const getOrderDocuments = (id: string) => orderService.getOrderDocuments(id);
 export const createOrder = (input: Parameters<OrderService['createOrder']>[0]) => orderService.createOrder(input);
 export const createPaymentIntent = (orderId: string, gateway: GatewaySlug) => orderService.createPaymentIntent(orderId, gateway);
+export const getConfiguredGateways = () => orderService.getConfiguredGateways();
 export const capturePayment = (orderId: string, intentId: string, gateway: GatewaySlug, v?: RazorpayVerification) => orderService.capturePayment(orderId, intentId, gateway, v);
 
 export type Order = TradeOrder;

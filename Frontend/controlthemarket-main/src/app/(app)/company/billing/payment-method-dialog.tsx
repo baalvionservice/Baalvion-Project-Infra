@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getAllPlans } from '@/lib/api';
 import type { Plan } from '@/lib/types';
 import { startCheckout, type CheckoutProvider } from '@/lib/checkout';
+import { useConfiguredProviders, PROVIDER_LABELS } from '@/lib/payment-providers';
 
 interface PaymentMethodDialogProps {
   isOpen: boolean;
@@ -33,6 +34,8 @@ export function PaymentMethodDialog({ isOpen, onOpenChange, presetPlanId }: Paym
   const [selectedPlanId, setSelectedPlanId] = useState<string | undefined>(presetPlanId);
   const [isYearly, setIsYearly] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
+  // Only show gateways with keys configured in the admin vault; `preferred` backs "Pay by card".
+  const { providers, preferred, loading: providersLoading } = useConfiguredProviders(isOpen);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -108,18 +111,19 @@ export function PaymentMethodDialog({ isOpen, onOpenChange, presetPlanId }: Paym
         </div>
 
         <div className="grid gap-3 py-2">
-          <Button className="h-11" onClick={() => pay('stripe')} disabled={isStarting || !selectedPlanId}>
-            <CreditCard className="mr-2 h-4 w-4" /> Pay with Card (Stripe)
-          </Button>
-          <Button className="h-11" variant="outline" onClick={() => pay('razorpay')} disabled={isStarting || !selectedPlanId}>
-            Pay with Razorpay (UPI / Cards / Netbanking)
-          </Button>
-          <Button className="h-11" variant="outline" onClick={() => pay('cashfree')} disabled={isStarting || !selectedPlanId}>
-            Pay with Cashfree (UPI / Cards / Netbanking)
-          </Button>
-          <Button className="h-11" variant="outline" onClick={() => pay('payu')} disabled={isStarting || !selectedPlanId}>
-            Pay with PayU (Cards / UPI / Wallets)
-          </Button>
+          {preferred && (
+            <Button className="h-11" onClick={() => pay(preferred)} disabled={isStarting || providersLoading || !selectedPlanId}>
+              <CreditCard className="mr-2 h-4 w-4" /> Pay by card
+            </Button>
+          )}
+          {providers.length > 1 && (
+            <p className="text-center text-xs text-muted-foreground">or choose a specific provider</p>
+          )}
+          {providers.map((p) => (
+            <Button key={p} className="h-11" variant="outline" onClick={() => pay(p)} disabled={isStarting || providersLoading || !selectedPlanId}>
+              Pay with {PROVIDER_LABELS[p]}
+            </Button>
+          ))}
         </div>
       </DialogContent>
     </Dialog>
