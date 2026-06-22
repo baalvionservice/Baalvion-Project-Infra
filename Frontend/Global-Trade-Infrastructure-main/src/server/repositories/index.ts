@@ -61,19 +61,3 @@ export {
   ruleRevisionRepository,
 } from './rule-repository';
 export type { RuleSetFilter, RuleRevisionInput } from './rule-repository';
-export {
-  LedgerAccountRepository,
-  LedgerTransactionRepository,
-  LedgerEntryRepository,
-  SettlementInstructionRepository,
-  ledgerAccountRepository,
-  ledgerTransactionRepository,
-  ledgerEntryRepository,
-  settlementInstructionRepository,
-} from './ledger-repository';
-export type {
-  LedgerAccountFilter,
-  LedgerTransactionFilter,
-  LedgerEntryInput,
-  SettlementInstructionFilter,
-} from './ledger-repository';
