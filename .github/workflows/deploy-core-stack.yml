@@ -58,6 +58,15 @@ jobs:
       matrix:
         include:
           - { repo: core-auth-service,    file: Backend/services/identity/auth-service/Dockerfile }
+          # Shared brand-aware sign-in surface (auth.baalvion.com). NEXT_PUBLIC_* are baked at BUILD:
+          # the Turnstile SITE key is PUBLIC (repo variable vars.TURNSTILE_SITE_KEY); allowed return
+          # hosts are optional (vars.AUTH_ALLOWED_RETURN_HOSTS). Empty when unset → ships with no captcha.
+          - repo: core-auth-baalvion
+            file: Frontend/auth-baalvion/Dockerfile
+            cache: authbaalvion
+            args: |
+              NEXT_PUBLIC_TURNSTILE_SITE_KEY=${{ vars.TURNSTILE_SITE_KEY }}
+              NEXT_PUBLIC_ALLOWED_RETURN_HOSTS=${{ vars.AUTH_ALLOWED_RETURN_HOSTS }}
           - { repo: core-cms-service,     file: Backend/services/knowledge/cms-service/Dockerfile, cache: cms }
           - { repo: core-payment-service, file: Backend/services/commerce/financial-services-java/Dockerfile,
               context: Backend/services/commerce/financial-services-java, args: "SERVICE=payment-service", cache: payjava }

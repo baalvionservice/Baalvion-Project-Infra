@@ -14,6 +14,14 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY Frontend/auth-baalvion ./Frontend/auth-baalvion
 COPY package.json pnpm-workspace.yaml ./
 WORKDIR /app/Frontend/auth-baalvion
+# NEXT_PUBLIC_* are inlined into the client bundle at build time, so they must be present for
+# `pnpm build`. The Turnstile SITE key is public (safe to bake); the matching SECRET key lives
+# only on auth-service. Empty defaults keep local/dev image builds runnable (the captcha widget
+# simply does not render, and the server-side check is skipped when its secret is unset).
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY=""
+ARG NEXT_PUBLIC_ALLOWED_RETURN_HOSTS=""
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ENV NEXT_PUBLIC_ALLOWED_RETURN_HOSTS=$NEXT_PUBLIC_ALLOWED_RETURN_HOSTS
 RUN pnpm build
 
 FROM base AS runner

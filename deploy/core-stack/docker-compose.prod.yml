@@ -140,6 +140,13 @@ services:
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASS: ${SMTP_PASS:-}
       OTP_EMAIL_BRAND: ${OTP_EMAIL_BRAND:-Baalvion}
+      # ── Passwordless email-OTP shared sign-in (auth.baalvion.com) ──────────────
+      # Cross-subdomain SSO: scope the refresh cookie to .baalvion.com so one sign-in on the shared
+      # surface is shared by every *.baalvion.com site. Empty (default) = host-only (current behaviour).
+      REFRESH_COOKIE_DOMAIN: ${REFRESH_COOKIE_DOMAIN:-}
+      # Cloudflare Turnstile secret (server-side siteverify). When SET, the captcha is ENFORCED on the
+      # public OTP-request endpoint (fail-closed); when empty, it is skipped. Keep it SET in production.
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
       interval: 15s
@@ -687,6 +694,40 @@ services:
     depends_on:
       auth-gateway: { condition: service_started }
 
+  # ── Shared sign-in surface (auth.baalvion.com) — brand-aware passwordless email-OTP ──
+  # The single hosted "Sign in" surface every Baalvion site delegates to. Next.js standalone,
+  # mirrors admin-web: NEXT_PUBLIC_* are baked at BUILD (Turnstile site key, allowed return hosts).
+  # The browser only ever sees same-origin /auth-bff/*, which Caddy terminates at the EDGE →
+  # auth-service (so the .baalvion.com refresh cookie flows). Public surface → default profile.
+  auth-baalvion:
+    image: ${IMAGE_PREFIX:-baalvion}/core-auth-baalvion:${IMAGE_TAG:-prod-latest}
+    build:
+      context: ../..
+      dockerfile: Frontend/auth-baalvion/Dockerfile
+      args:
+        # SITE key is public (safe to bake). Its SECRET counterpart is TURNSTILE_SECRET_KEY on
+        # auth-service. Leave blank to ship without a captcha widget (server check also skipped).
+        NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${NEXT_PUBLIC_TURNSTILE_SITE_KEY:-}
+        # Extra (non-baalvion.com) return_to apexes, comma-separated. *.baalvion.com is always allowed.
+        NEXT_PUBLIC_ALLOWED_RETURN_HOSTS: ${AUTH_ALLOWED_RETURN_HOSTS:-}
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 64m
+    environment:
+      NODE_ENV: production
+      PORT: "3055"
+      HOSTNAME: 0.0.0.0
+      # Belt-and-suspenders: the app's own next.config rewrite also targets auth-service, but Caddy
+      # terminates /auth-bff/* at the edge first (below), so this is only a fallback for direct hits.
+      AUTH_SERVICE_URL: http://auth-service:3001
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3055',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+    depends_on:
+      auth-service: { condition: service_started }
+
   # ── Edge: TLS termination + the ONLY public ports. Locks down the surface. ───
   caddy:
     image: caddy:2
@@ -698,6 +739,9 @@ services:
       DOMAIN_API: ${DOMAIN_API}
       DOMAIN_CMS: ${DOMAIN_CMS}
       DOMAIN_ADMIN: ${DOMAIN_ADMIN}
+      # Shared sign-in surface host. Defaulted so an existing host without this key set still parses
+      # (Caddy retries ACME for it harmlessly until DNS for auth.baalvion.com points here).
+      DOMAIN_AUTH: ${DOMAIN_AUTH:-auth.baalvion.com}
       ACME_EMAIL: ${ACME_EMAIL}
     volumes:
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
@@ -707,6 +751,7 @@ services:
       auth-service: { condition: service_started }
       cms-service: { condition: service_started }
       payment-service: { condition: service_started }
+      auth-baalvion: { condition: service_started }
 
 volumes:
   # EXTERNAL on purpose: production data must survive `docker compose down -v` and any

@@ -98,3 +98,27 @@
 		reverse_proxy admin-web:3030
 	}
 }
+
+# ── Shared sign-in surface (auth.baalvion.com): brand-aware passwordless email-OTP ──
+# Serves the auth-baalvion Next app. /auth-bff/* is terminated HERE at the edge → auth-service
+# (same-origin, so the refresh cookie auth-service sets for .baalvion.com flows to every subdomain,
+# giving cross-site SSO). This mirrors the admin console's /auth-bff shim and is independent of the
+# app's own build-time rewrite. Point auth.baalvion.com's DNS A record at this host.
+{$DOMAIN_AUTH} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+	header {
+		-Server
+	}
+
+	# Same-origin BFF → auth-service /v1/auth/*. The browser only ever sees /auth-bff/* (first-party),
+	# so the email-OTP request/verify calls keep credentials on auth.baalvion.com.
+	handle /auth-bff/* {
+		uri replace /auth-bff /v1/auth
+		reverse_proxy auth-service:3001
+	}
+	# Everything else is the brand-aware sign-in app.
+	handle {
+		reverse_proxy auth-baalvion:3055
+	}
+}
