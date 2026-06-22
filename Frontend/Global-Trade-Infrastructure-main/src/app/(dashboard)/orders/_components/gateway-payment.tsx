@@ -2,28 +2,34 @@
 
 /**
  * Consumer gateway checkout for a GTI order — a direct settlement rail (Razorpay / Stripe / PayU /
- * bank) alongside escrow. The shopper picks a gateway; we create a backend payment intent, then hand
- * off to the provider's hosted flow (Razorpay popup / Stripe redirect / PayU form-POST) or show bank
- * wire instructions. Capture is verified SERVER-SIDE — success only shows on a real 'confirmed'.
+ * Cashfree / bank) alongside escrow. The shopper picks a gateway; we create a backend payment intent,
+ * then hand off to the provider's hosted flow (Razorpay popup / Stripe redirect / PayU form-POST /
+ * Cashfree v3 modal) or show bank wire instructions. Capture is verified SERVER-SIDE — success only
+ * shows on a real 'confirmed'.
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { CreditCard, Smartphone, Globe, Building2, Loader2, ShieldCheck } from 'lucide-react';
+import { CreditCard, Smartphone, Globe, Building2, Loader2, ShieldCheck, Wallet } from 'lucide-react';
 import {
   createPaymentIntent,
   capturePayment,
+  getConfiguredGateways,
   type GatewaySlug,
   type Order,
 } from '@/services/order-service';
 
 declare global {
-  interface Window { Razorpay?: new (opts: unknown) => { open: () => void; on: (e: string, cb: (r: unknown) => void) => void } }
+  interface Window {
+    Razorpay?: new (opts: unknown) => { open: () => void; on: (e: string, cb: (r: unknown) => void) => void };
+    Cashfree?: (opts: { mode: string }) => { checkout: (opts: Record<string, unknown>) => Promise<{ error?: unknown; redirect?: boolean; paymentDetails?: unknown }> };
+  }
 }
 
 const GATEWAYS: { id: GatewaySlug; label: string; desc: string; Icon: typeof CreditCard }[] = [
   { id: 'razorpay', label: 'Card · UPI · Netbanking', desc: 'Razorpay', Icon: Smartphone },
+  { id: 'cashfree', label: 'Card · UPI · Netbanking', desc: 'Cashfree', Icon: Wallet },
   { id: 'stripe', label: 'International Card', desc: 'Stripe', Icon: CreditCard },
   { id: 'payu', label: 'International', desc: 'PayU · cards worldwide', Icon: Globe },
   { id: 'bank', label: 'Bank Transfer', desc: 'Wire · settles in 1–2 days', Icon: Building2 },
@@ -42,6 +48,21 @@ function loadRazorpay(): Promise<void> {
     document.body.appendChild(s);
   });
   return razorpayScript;
+}
+
+let cashfreeScript: Promise<void> | null = null;
+function loadCashfree(): Promise<void> {
+  if (typeof window === 'undefined') return Promise.reject(new Error('no window'));
+  if (typeof window.Cashfree === 'function') return Promise.resolve();
+  if (cashfreeScript) return cashfreeScript;
+  cashfreeScript = new Promise<void>((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://sdk.cashfree.com/js/v3/cashfree.js';
+    s.onload = () => resolve();
+    s.onerror = () => { cashfreeScript = null; reject(new Error('failed to load Cashfree')); };
+    document.body.appendChild(s);
+  });
+  return cashfreeScript;
 }
 
 function submitPayuForm(formPost: { action: string; fields: Record<string, string> }) {
@@ -64,6 +85,21 @@ export function GatewayPayment({ order, onPaid }: { order: Order; onPaid: (o: Or
   const [gateway, setGateway] = useState<GatewaySlug>('razorpay');
   const [busy, setBusy] = useState(false);
   const [instructions, setInstructions] = useState<string | null>(null);
+  // Only offer gateways with keys configured in the admin vault. Default to ALL until we know, so a
+  // slow/unavailable endpoint never blocks checkout; once known we default to the card-capable one.
+  const [available, setAvailable] = useState<GatewaySlug[]>(GATEWAYS.map((g) => g.id));
+
+  useEffect(() => {
+    let active = true;
+    getConfiguredGateways().then(({ gateways, preferred }) => {
+      if (!active || !gateways.length) return; // empty → keep showing all (graceful fallback)
+      setAvailable(gateways);
+      setGateway((cur) => (gateways.includes(cur) ? cur : (preferred ?? gateways[0])));
+    });
+    return () => { active = false; };
+  }, []);
+
+  const visibleGateways = GATEWAYS.filter((g) => available.includes(g.id));
 
   const fail = (description: string) => {
     setBusy(false);
@@ -86,6 +122,27 @@ export function GatewayPayment({ order, onPaid }: { order: Order; onPaid: (o: Or
       if (intent.instructions || gateway === 'bank') {
         setInstructions(intent.instructions || 'Our team will email you the wire details and reference shortly.');
         setBusy(false);
+        return;
+      }
+
+      // Cashfree → v3 SDK modal; capture only after a server-verified order status (order_status==='PAID').
+      if (intent.sessionId) {
+        await loadCashfree();
+        if (typeof window.Cashfree !== 'function') { fail('Payment is still loading — please try again.'); return; }
+        const cashfree = window.Cashfree({ mode: intent.mode === 'production' ? 'production' : 'sandbox' });
+        const result = await cashfree.checkout({ paymentSessionId: intent.sessionId, redirectTarget: '_modal' });
+        if (result && result.error) { setBusy(false); return; } // buyer dismissed / payment not completed
+        try {
+          const updated = await capturePayment(order.id, intent.intentId, 'cashfree');
+          if (updated.paymentStatus === 'confirmed') {
+            toast({ title: 'Payment Confirmed', description: `Order ${order.id.slice(0, 8)} is settled.` });
+            onPaid(updated);
+          } else {
+            fail('Payment could not be verified.');
+          }
+        } catch (e) {
+          fail(e instanceof Error ? e.message : 'Payment confirmation failed.');
+        }
         return;
       }
 
@@ -152,7 +209,7 @@ export function GatewayPayment({ order, onPaid }: { order: Order; onPaid: (o: Or
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {GATEWAYS.map((g) => (
+              {visibleGateways.map((g) => (
                 <button
                   key={g.id}
                   type="button"

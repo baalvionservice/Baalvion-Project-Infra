@@ -1,5 +1,6 @@
 const express = require('express');
 const ctrl    = require('../controller/authController');
+const oauthCtrl = require('../controller/oauthController');
 const { authMiddleware }       = require('../middleware/authMiddleware');
 const { registerLimiter, forgotPwLimiter, mfaChallengeLimiter, verifyEmailLimiter, verifyTokenLimiter, otpRequestLimiter, otpVerifyLimiter } = require('../middleware/rateLimiter');
 const internalAuth = require('../middleware/internalAuth');
@@ -32,6 +33,11 @@ const acceptInviteLimiter = rateLimit({
 });
 
 const router = express.Router();
+
+// Social login (Google / Facebook) — public; the browser is redirected to the provider
+// and back. See controller/oauthController.js + service/oauthLogin.js.
+router.get('/oauth/:provider/start',    oauthCtrl.start);
+router.get('/oauth/:provider/callback', oauthCtrl.callback);
 
 router.post('/register',       registerLimiter,     ctrl.register);
 router.post('/login',          loginLimiter,        ctrl.login);

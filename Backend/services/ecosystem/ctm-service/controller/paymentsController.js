@@ -92,8 +92,8 @@ exports.listPayments = async (req, res, next) => {
     } catch (err) { next(err); }
 };
 
-// Provider webhook receiver (Stripe/Razorpay). The provider is auto-detected from the signature
-// header and verified off the RAW body (captured in index.js). It then marks the payment +
+// Provider webhook receiver (Stripe / Razorpay / Cashfree). The provider is auto-detected from the
+// signature header and verified off the RAW body (captured in index.js). It then marks the payment +
 // invoice paid and activates the subscription — idempotently and with amount-integrity checks.
 exports.handleWebhook = async (req, res) => {
     try {
@@ -127,6 +127,44 @@ exports.handleWebhook = async (req, res) => {
     } catch (err) {
         // Signature/verification failures surface as 400 so the provider retries appropriately.
         res.status(400).json({ error: String(err.message || err) });
+    }
+};
+
+// PayU form-POST return (surl/furl). PayU has no signature header and no JSON body — it posts the
+// result form-encoded, so it lands here (NOT the JSON webhook). We verify the SHA-512 REVERSE hash
+// (the provider's auth, NOT user auth), settle the payment idempotently with an amount-integrity
+// check, then 303-redirect the browser back to the billing page. A bad/failed result bounces to the
+// cancel URL — never marking a payment paid without a verified success.
+exports.payuReturn = async (req, res) => {
+    const body = req.body || {};
+    const paidUrl = process.env.PAYMENT_SUCCESS_URL || 'https://controlthemarket.com/company/billing?paid=1';
+    const cancelUrl = process.env.PAYMENT_CANCEL_URL || 'https://controlthemarket.com/company/billing?canceled=1';
+    try {
+        if (!(await pay.verifyPayuReturn(body))) return res.redirect(303, cancelUrl);
+        const parsed = pay.parsePayuReturn(body);
+        if (parsed.status !== 'succeeded' || !parsed.txnid) return res.redirect(303, cancelUrl);
+
+        // Unknown txnid (deleted / wrong instance) → don't show a "paid" page for a payment we can't settle.
+        const payment = await db.payments.findOne({ where: { provider_ref: parsed.txnid } });
+        if (!payment) return res.redirect(303, cancelUrl);
+        if (payment.status !== 'succeeded') {
+            // Amount integrity: the settled amount MUST match what we recorded at checkout. Fail closed
+            // if PayU's amount is absent/unparseable (don't activate on an unknown amount).
+            const expectedMinor = Math.round(Number(payment.amount) * 100);
+            const gotMinor = parsed.amountMajor != null && parsed.amountMajor !== '' && Number.isFinite(Number(parsed.amountMajor))
+                ? Math.round(Number(parsed.amountMajor) * 100) : null;
+            if (gotMinor === null || gotMinor !== expectedMinor) {
+                await db.integration_logs.create({ source: 'Payments', event_type: 'payu.return', status: 'Failed', description: `PayU amount mismatch for ${parsed.txnid} (got ${gotMinor}, expected ${expectedMinor})`, related_entity: { type: 'Company', id: payment.company_id } }).catch(() => {});
+                return res.redirect(303, cancelUrl);
+            }
+            payment.status = 'succeeded'; payment.raw = body; await payment.save();
+            if (payment.invoice_id) await db.invoices.update({ status: 'Paid' }, { where: { id: payment.invoice_id } });
+            if (payment.subscription_id) await db.subscriptions.update({ status: 'active' }, { where: { id: payment.subscription_id } });
+            await db.integration_logs.create({ source: 'Payments', event_type: 'payu.return', status: 'Success', description: `PayU payment ${parsed.txnid} succeeded`, related_entity: { type: 'Company', id: payment.company_id } }).catch(() => {});
+        }
+        return res.redirect(303, paidUrl);
+    } catch (err) {
+        return res.redirect(303, cancelUrl);
     }
 };
 

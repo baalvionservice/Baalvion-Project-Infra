@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { usePlans } from "@/hooks/usePlatform";
 import { Plan, billingApi } from "@/lib/platformClient";
-import { startGatewayCheckout, type GatewayProvider } from "@/lib/gatewayCheckout";
+import { startGatewayCheckout, fetchConfiguredGateways, type GatewayProvider } from "@/lib/gatewayCheckout";
 import { PaymentForms, emptyPayment, type PaymentState } from "@/components/billing/PaymentForms";
 import { validateCard } from "@/lib/payment/cards";
 import { cn } from "@/lib/utils";
@@ -74,6 +74,8 @@ export default function BillingCheckout() {
   const [payment, setPayment] = useState<PaymentState>(emptyPayment);
   // Settlement gateway for card/wallet payments — the shopper's choice, forwarded to the PSP.
   const [gateway, setGateway] = useState<GatewayProvider>("razorpay");
+  // Which gateways are actually configured (keys in the admin vault). null = unknown → show all.
+  const [availableGateways, setAvailableGateways] = useState<GatewayProvider[] | null>(null);
   const [coupon, setCoupon] = useState("");
   const [couponApplied, setCouponApplied] = useState(false);
   const [result, setResult] = useState<ResultType | null>(null);
@@ -82,6 +84,17 @@ export default function BillingCheckout() {
   const [invoiceId, setInvoiceId] = useState<string | null>(null);
 
   const { data: plans, isLoading: loadingPlans } = usePlans();
+
+  // Only offer gateways with keys configured in the admin vault; default to the card-capable one.
+  useEffect(() => {
+    let active = true;
+    fetchConfiguredGateways().then(({ providers, preferred }) => {
+      if (!active || !providers.length) return; // empty → leave null (show all) as a graceful fallback
+      setAvailableGateways(providers);
+      setGateway((cur) => (providers.includes(cur) ? cur : (preferred ?? providers[0])));
+    });
+    return () => { active = false; };
+  }, []);
 
   // Pre-select the plan chosen on /pricing (carried as ?plan=<slug>) and jump
   // the user straight to the payment step — they already picked their plan.
@@ -511,7 +524,9 @@ Thank you for your business!
                         { id: "stripe", label: "Stripe", desc: "International cards" },
                         { id: "payu", label: "PayU", desc: "Cards worldwide" },
                         { id: "cashfree", label: "Cashfree", desc: "Cards · UPI · Netbanking" },
-                      ] as const).map((g) => (
+                      ] as const)
+                        .filter((g) => !availableGateways || availableGateways.includes(g.id))
+                        .map((g) => (
                         <button
                           key={g.id}
                           type="button"

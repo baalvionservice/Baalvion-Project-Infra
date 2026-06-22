@@ -58,4 +58,23 @@ async function getSecret(provider, key) {
     return entry && entry.secrets ? (entry.secrets[key] || null) : null;
 }
 
-module.exports = { getProvider, getSecret, SITE_SLUG };
+/**
+ * Payment-provider keys (lowercase) that are ENABLED + CONFIGURED in this site's vault. Lets the BFF
+ * tell the SPA which gateways can actually charge so it only offers those. Returns [] on any vault
+ * error (caller then degrades to showing all gateways). The Java payment-service still resolves the
+ * actual keys at charge time — this is purely a UI hint.
+ */
+async function listConfiguredProviders() {
+    const map = await fetchAll();
+    const out = [];
+    for (const [provider, e] of Object.entries(map)) {
+        if (!e) continue;
+        const isPayment = e.category === 'payment' || e.category == null;
+        const enabled = e.enabled !== false;
+        const configured = e.status === 'configured' || e.status == null;
+        if (isPayment && enabled && configured) out.push(provider);
+    }
+    return out;
+}
+
+module.exports = { getProvider, getSecret, listConfiguredProviders, SITE_SLUG };

@@ -83,6 +83,30 @@ async function createIntent(req: CheckoutRequest): Promise<CheckoutInit> {
   return res.json();
 }
 
+/**
+ * Which gateways are configured (chargeable) for this site + the card-capable default — so the UI
+ * only offers gateways that can really charge, and "Pay by card" knows where to route. Never throws
+ * (an empty list lets the caller degrade to showing all gateways).
+ */
+export async function fetchConfiguredGateways(): Promise<{ providers: GatewayProvider[]; preferred: GatewayProvider | null }> {
+  const ALL: GatewayProvider[] = ["razorpay", "stripe", "payu", "cashfree"];
+  try {
+    const token = tokenStore.getAccess();
+    const headers: Record<string, string> = {};
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    const res = await fetch(`${PLATFORM_BASE}/billing/providers`, { headers, credentials: "include" });
+    if (!res.ok) return { providers: [], preferred: null };
+    const data = await res.json().catch(() => ({}));
+    const providers = (Array.isArray(data?.providers) ? data.providers : []).filter(
+      (p: string): p is GatewayProvider => (ALL as string[]).includes(p),
+    );
+    const preferred = data?.default && (ALL as string[]).includes(data.default) ? (data.default as GatewayProvider) : null;
+    return { providers, preferred };
+  } catch {
+    return { providers: [], preferred: null };
+  }
+}
+
 let razorpayScript: Promise<void> | null = null;
 function loadRazorpay(): Promise<void> {
   if (typeof window === "undefined") return Promise.reject(new Error("no window"));

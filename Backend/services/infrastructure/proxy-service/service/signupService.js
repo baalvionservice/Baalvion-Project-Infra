@@ -17,6 +17,7 @@
  * SECURITY: role and orgId are NEVER taken from the request — the registrant is
  * forced to `owner` of the new org. The register schema also strips unknown keys.
  */
+const crypto = require('crypto');
 const store = require('./platformStore');
 const userService = require('./userService');
 const authService = require('./authService');
@@ -155,4 +156,88 @@ const registerOrg = async (
   };
 };
 
-module.exports = { registerOrg, resolvePlan, slugify };
+/**
+ * Provision a brand-new account for a social login (Google / GitHub) user. Mirrors
+ * registerOrg's org + owner + subscription provisioning, but PASSWORDLESS: the user is
+ * created with an unusable `oauth:`-prefixed placeholder hash (so password login can
+ * never match) and email_verified_at stamped (the provider already verified it).
+ *
+ * Unlike registerOrg this does NOT issue tokens — the caller (oauthController) mints the
+ * session via ssoService.completeLogin so OAuth/SAML/OIDC all share one session path.
+ * Returns { user, org }.
+ */
+const provisionOAuthAccount = async (
+  { email, fullName, avatarUrl, provider, providerUserId } = {},
+  /* ctx (ipAddress/userAgent) is accepted for symmetry; session minting happens upstream */
+) => {
+  const normEmail = String(email || '').toLowerCase().trim();
+  if (!normEmail) throw new AppError('OAUTH_NO_EMAIL', 'Email is required to create an account', 400);
+
+  // Duplicate guard (the unique email/identity indexes are the real backstop).
+  const existing = await store.findUserByEmail(normEmail);
+  if (existing) throw new AppError('USER_EXISTS', 'An account with this email already exists', 409);
+
+  const planRecord = await resolvePlan(null); // default plan, same as email/password signup
+  const isPayg = !!(planRecord && planRecord.slug === 'pay-as-you-go');
+  const requiresPayment = isPayg || !!(planRecord && Number(planRecord.monthlyPrice) > 0);
+
+  const orgDisplayName = fullName ? `${fullName.split(' ')[0]}'s Workspace` : 'My Workspace';
+  const now = new Date();
+  const periodEnd = new Date(now.getTime() + TRIAL_DAYS * 24 * 60 * 60 * 1000);
+
+  let org;
+  let user;
+  await db.sequelize.transaction(async (t) => {
+    org = await store.insert('organizations', {
+      slug: `${slugify(fullName || normEmail.split('@')[0])}-${generateToken(4)}`,
+      name: orgDisplayName,
+      status: 'active',
+      planSlug: planRecord ? planRecord.slug : DEFAULT_PLAN_SLUG,
+      bandwidthLimitGb: planRecord ? planRecord.bandwidthLimitGb : 0,
+    }, { transaction: t });
+    if (!org || !org.id) {
+      throw new AppError('ORG_CREATE_FAILED', 'Could not create your workspace', 500);
+    }
+
+    // Passwordless social account — unusable placeholder hash (mirrors SSO JIT provisioning).
+    user = await db.users.create({
+      org_id: org.id,
+      email: normEmail,
+      full_name: fullName || normEmail.split('@')[0],
+      role: 'owner',
+      status: 'active',
+      password_hash: 'oauth:' + crypto.randomBytes(24).toString('hex'),
+      oauth_provider: provider,
+      oauth_provider_id: providerUserId,
+      avatar_url: avatarUrl || null,
+      email_verified_at: now,
+    }, { transaction: t });
+
+    await store.insert('orgMemberships', {
+      orgId: org.id,
+      userId: user.id,
+      role: 'owner',
+      status: 'active',
+    }, { transaction: t });
+
+    if (planRecord) {
+      await store.insert('subscriptions', {
+        orgId: org.id,
+        userId: user.id,
+        planId: planRecord.id,
+        planSlug: planRecord.slug,
+        status: (requiresPayment && !isPayg) ? 'trialing' : 'active',
+        enforcementMode: 'pay-as-you-go',
+        currentPeriodStart: now.toISOString(),
+        currentPeriodEnd: periodEnd.toISOString(),
+      }, { transaction: t });
+    }
+  });
+
+  authService.issueEvent('org.created', org.id, { orgId: org.id, ownerUserId: user.id, planSlug: org.planSlug });
+  authService.issueEvent('user.registered', org.id, { userId: user.id, email: normEmail });
+
+  return { user, org };
+};
+
+module.exports = { registerOrg, provisionOAuthAccount, resolvePlan, slugify };

@@ -11,12 +11,12 @@ const db = require('../models');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { auditPayment } = require('../utils/audit');
-const { getProvider, payuVerifyReturn, payuParseReturn } = require('../integrations/payment/consumerProvider');
+const { getProvider, payuVerifyReturn, payuParseReturn, listConfiguredGateways } = require('../integrations/payment/consumerProvider');
 const { runWithTenant } = require('@baalvion/tenancy');
 
 const tenantOf = (req) => (req.auth && (req.auth.tenantId || req.auth.orgId)) || null;
 const STOREFRONT = (process.env.STOREFRONT_URL || 'http://localhost:9003').replace(/\/+$/, '');
-const GATEWAYS = ['razorpay', 'stripe', 'payu', 'bank'];
+const GATEWAYS = ['razorpay', 'stripe', 'payu', 'cashfree', 'bank'];
 
 const intentSchema = z.object({ gateway: z.enum(GATEWAYS) });
 const captureSchema = z.object({
@@ -72,6 +72,7 @@ async function createPaymentIntent(req, res, next) {
                 ...(intent.clientSecret ? { clientSecret: intent.clientSecret } : {}),
                 ...(intent.publishableKey ? { publishableKey: intent.publishableKey } : {}),
                 ...(intent.formPost ? { formPost: intent.formPost } : {}),
+                ...(intent.sessionId ? { sessionId: intent.sessionId, mode: intent.mode, amount: intent.amount, currency: intent.currency } : {}),
             };
         });
         auditPayment(req, 'order.payment_intent', { orderId: req.params.id, gateway: body.gateway, intentId: result.intentId });
@@ -158,4 +159,15 @@ async function payuReturn(req, res) {
     }
 }
 
-module.exports = { createPaymentIntent, capturePayment, payuReturn };
+// GET /orders/payment-gateways — which consumer gateways are configured (chargeable) right now, plus
+// the card-capable default. Drives the storefront so it only offers gateways that can actually charge.
+async function listGateways(req, res, next) {
+    try {
+        const gateways = await listConfiguredGateways();
+        // "Pay by card" default = the first configured card-capable gateway (everything except bank).
+        const preferred = gateways.find((g) => g !== 'bank') || null;
+        return sendSuccess(req, res, { gateways, preferred });
+    } catch (err) { return next(err); }
+}
+
+module.exports = { createPaymentIntent, capturePayment, payuReturn, listGateways };

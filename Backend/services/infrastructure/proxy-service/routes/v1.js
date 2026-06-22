@@ -8,10 +8,14 @@ const adminRoutes = require('./admin/platformAdminRoutes');
 const uploadRoutes = require('./uploadRoutes');
 const developerRoutes = require('./apiRoutes');
 const ssoRoutes = require('./ssoRoutes');
+const oauthRoutes = require('./oauthRoutes');
 const billingRoutes = require('./billingRoutes');
 
 const router = express.Router();
 
+// Social login (Google / GitHub) — mounted before /auth so the more specific
+// /auth/oauth/* prefix is matched first.
+router.use('/auth/oauth', oauthRoutes);
 router.use('/auth', authRoutes);
 router.use('/users', userRoutes);
 router.use('/payment', paymentRoutes);

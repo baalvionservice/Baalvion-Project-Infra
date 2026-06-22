@@ -19,9 +19,14 @@ const PROVIDER_REQUIRED = {
     razorpay: ['keyId', 'keySecret'],
     stripe: ['secretKey'],
     payu: ['merchantKey', 'merchantSalt'],
+    cashfree: ['clientId', 'clientSecret'],
     twilio: ['accountSid', 'authToken'],
     gemini: ['apiKey'],
     openai: ['apiKey'],
+    // Social login (clientId is non-secret config; clientSecret is encrypted).
+    'google-oauth': ['clientId', 'clientSecret'],
+    'facebook-oauth': ['clientId', 'clientSecret'],
+    'github-oauth': ['clientId', 'clientSecret'],
 };
 
 async function assertWebsite(websiteId, orgId) {

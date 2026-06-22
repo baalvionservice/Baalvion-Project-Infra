@@ -312,6 +312,19 @@ export async function createPaymentCheckout(data: { planId: string; provider?: s
   }) };
 }
 
+// Which payment providers are actually configured right now (keys present in the CMS vault or env),
+// and the server-preferred default. Drives the checkout UI so we only ever offer gateways that can
+// really charge. Returns { providers, preferred } — never throws (degrades to an empty list).
+export async function getConfiguredPaymentProviders(): Promise<{ providers: string[]; preferred: string | null }> {
+  if (USE_MOCK) return { providers: ['stripe', 'razorpay'], preferred: 'stripe' };
+  try {
+    const data = await ctmClient.get<{ providers?: string[]; default?: string | null }>('/payments/provider');
+    return { providers: Array.isArray(data?.providers) ? data.providers : [], preferred: data?.default ?? null };
+  } catch {
+    return { providers: [], preferred: null };
+  }
+}
+
 export async function runTestCases(submissionId: string, opts?: { sourceCode?: string; language?: string; cases?: any[] }) {
   if (USE_MOCK) return { data: { ran: 0, total: 0, sandbox: false, testCases: [] } };
   return { data: await ctmClient.post<any>(`/submissions/${submissionId}/test-cases/run`, opts ?? {}) };

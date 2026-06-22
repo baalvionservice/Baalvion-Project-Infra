@@ -91,4 +91,27 @@ module.exports = {
     eventBus: {
         stream: process.env.EVENT_BUS_STREAM || 'baalvion:events',
     },
+
+    // Consumer social login (Google / Facebook). Credentials are resolved per-site from
+    // the CMS vault first (admin panel), then these env vars. See service/oauthLogin.js +
+    // service/oauthProviders.js. Amarisé talks to auth-service directly (no gateway).
+    oauth: {
+        // Public origin the provider redirects the BROWSER back to. Must serve the SPA AND
+        // /auth-bff/* (which the SPA rewrites to auth-service /v1/auth/*). e.g. https://amarisemaisonavenue.com
+        publicBaseUrl: process.env.OAUTH_PUBLIC_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:8080',
+        // Where the post-login redirect lands (the site). Usually == publicBaseUrl.
+        appUrl: process.env.OAUTH_APP_URL || process.env.OAUTH_PUBLIC_BASE_URL || process.env.FRONTEND_URL || 'http://localhost:8080',
+        // CMS website slug this auth-service instance serves (per-site cred lookup).
+        siteSlug: process.env.AUTH_SITE_SLUG || process.env.CMS_WEBSITE_SLUG || '',
+        cmsBaseUrl: process.env.CMS_BASE_URL || process.env.CMS_INTERNAL_URL || 'http://localhost:3011/api/v1',
+        stateTtlMs: Number(process.env.OAUTH_STATE_TTL_MS || 10 * 60 * 1000),
+        google: {
+            clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
+            clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
+        },
+        facebook: {
+            clientId: process.env.FACEBOOK_OAUTH_CLIENT_ID || '',
+            clientSecret: process.env.FACEBOOK_OAUTH_CLIENT_SECRET || '',
+        },
+    },
 };

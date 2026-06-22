@@ -753,4 +753,8 @@ module.exports = {
     validateInvite,
     acceptInvite,
     verifyToken,
+    // Exposed for the social-login flow (service/oauthLogin.js) so OAuth reuses the
+    // exact RS256 issuance + user presentation as password login.
+    issueTokenPair,
+    presentUser,
 };
