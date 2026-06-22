@@ -190,8 +190,8 @@ npx vitest run src/server/gckb/__tests__/certificate-registry.test.ts \
                src/server/gckb/__tests__/certificate-service.integration.test.ts
 ```
 
-- Unit — registration, keys, validity/signature/QR validation, required
-  `certificateTypeKey`, events, relationship catalogue.
+- Unit — registration, key handling, validity / signature / QR-code checks,
+  required `certificateTypeKey`, events, relationship catalogue.
 - Integration (real PostgreSQL) — catalogue → issue → link (INSTANCE_OF), renewal
   (SUPERSEDES), search, idempotent import, and RLS tenant isolation.
 
