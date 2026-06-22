@@ -38,7 +38,19 @@ function stripHtmlTags(input: string): string {
   return out;
 }
 
-const CMS_BASE = process.env.CMS_PUBLIC_URL || 'http://localhost:3018/api/v1/public';
+// Resolve the CMS delivery API base.
+//   1. An explicit `CMS_PUBLIC_URL` ALWAYS wins — set it per-environment (Vercel
+//      project env, Docker `.env`, or local `.env.local`). This is the canonical knob.
+//   2. On Vercel with no override, default to the public CMS host instead of a
+//      `localhost` that does not exist in the cloud — that localhost fallback was the
+//      direct cause of the home page's "Service Temporarily Unavailable" 500.
+//   3. Everywhere else (local dev) fall back to a local cms-service.
+// Trailing slashes are stripped so `${BASE}/...` never produces a `//`.
+const PROD_CMS_BASE = 'https://cms.baalvion.com/api/v1/public';
+const CMS_BASE = (
+  process.env.CMS_PUBLIC_URL ||
+  (process.env.VERCEL ? PROD_CMS_BASE : 'http://localhost:3018/api/v1/public')
+).replace(/\/+$/, '');
 const SITE = process.env.CMS_WEBSITE_SLUG || 'about-baalvion';
 const BASE = `${CMS_BASE}/${SITE}`;
 
@@ -69,23 +81,31 @@ interface CmsContent {
   updatedAt: string;
 }
 
+// Per-request timeout so a slow/hung CMS can never stall a page render indefinitely;
+// an aborted attempt is treated like any other transient failure and retried.
+const REQUEST_TIMEOUT_MS = 8000;
+
 async function fetchJSON(url: string, attempts = 3): Promise<any | null> {
-  // Retry transient failures (network errors / 5xx) with small backoff so a brief
-  // CMS hiccup at build or revalidation time doesn't surface as a hard null. A 4xx
+  // Retry transient failures (network errors / timeouts / 5xx) with small backoff so a
+  // brief CMS hiccup at build or revalidation time doesn't surface as a hard null. A 4xx
   // (e.g. 404) is a genuine "not found" and returns null immediately without retry.
   for (let i = 0; i < attempts; i++) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
     try {
       // Fully dynamic delivery: every request fetches live content from the central
       // CMS (admin platform) with no caching, so editorial changes appear instantly
       // and no stale/static snapshot is ever served. `no-store` opts every route that
       // reads the CMS into dynamic rendering, which is why content pages also export
       // `dynamic = 'force-dynamic'`.
-      const r = await fetch(url, { cache: 'no-store' });
+      const r = await fetch(url, { cache: 'no-store', signal: controller.signal });
       if (r.ok) return await r.json();
       if (r.status >= 400 && r.status < 500) return null; // not-found / client error → don't retry
       // 5xx → fall through and retry
     } catch {
-      // network error → fall through and retry
+      // network error / timeout (abort) → fall through and retry
+    } finally {
+      clearTimeout(timer);
     }
     if (i < attempts - 1) {
       await new Promise((resolve) => setTimeout(resolve, 150 * (i + 1)));
@@ -94,14 +114,76 @@ async function fetchJSON(url: string, attempts = 3): Promise<any | null> {
   return null;
 }
 
-async function listContent(params: Record<string, string | number | undefined> = {}): Promise<CmsContent[]> {
+// The CMS delivery API caps a single page at 100 items and returns pagination meta.
+const CMS_PAGE_MAX = 100;
+// Safety ceiling for "fetch every item of a type" so an unbounded dataset (e.g. tens of
+// thousands of articles) can never pull every row into a single server render. Index
+// pages that can grow without bound use the paginated readers (`listContentPage`) and
+// page through the UI instead of relying on this.
+const AGGREGATE_CAP = 2000;
+
+export interface CmsPagination {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrev: boolean;
+}
+
+function buildContentQuery(
+  params: Record<string, string | number | undefined>,
+  page: number,
+  limit: number,
+): string {
   const qs = new URLSearchParams();
-  qs.set('limit', String(params.limit ?? 100));
+  qs.set('page', String(Math.max(page, 1)));
+  qs.set('limit', String(Math.min(Math.max(limit, 1), CMS_PAGE_MAX)));
   for (const [k, v] of Object.entries(params)) {
-    if (k !== 'limit' && v !== undefined && v !== null) qs.set(k, String(v));
+    if (k !== 'limit' && k !== 'page' && v !== undefined && v !== null) qs.set(k, String(v));
   }
-  const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
-  return j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+  return qs.toString();
+}
+
+/** A single page of content plus its pagination meta — for index pages with UI paging. */
+async function listContentPage(
+  params: Record<string, string | number | undefined> = {},
+  page = 1,
+  limit = 24,
+): Promise<{ items: CmsContent[]; pagination: CmsPagination | null }> {
+  const j = await fetchJSON(`${BASE}/content?${buildContentQuery(params, page, limit)}`);
+  const items = j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+  const pagination = j && j.pagination ? (j.pagination as CmsPagination) : null;
+  return { items, pagination };
+}
+
+/**
+ * Every item matching a query, paginating through all pages up to AGGREGATE_CAP.
+ * Replaces the former silent 100-item cap that dropped any content beyond the first
+ * page — so all content authored in the admin panel is actually fetched.
+ */
+async function fetchAllContent(
+  params: Record<string, string | number | undefined> = {},
+  cap = AGGREGATE_CAP,
+): Promise<CmsContent[]> {
+  const out: CmsContent[] = [];
+  let page = 1;
+  // Bounded by the page count needed to reach `cap`, plus one — so a misreporting API
+  // can never spin this loop forever.
+  const maxPages = Math.ceil(cap / CMS_PAGE_MAX) + 1;
+  for (let guard = 0; guard < maxPages; guard++) {
+    const { items, pagination } = await listContentPage(params, page, CMS_PAGE_MAX);
+    out.push(...items);
+    if (out.length >= cap) return out.slice(0, cap);
+    if (!pagination || !pagination.hasNext || items.length === 0) break;
+    page += 1;
+  }
+  return out;
+}
+
+/** Back-compat list reader: returns every matching item (no longer capped at 100). */
+async function listContent(params: Record<string, string | number | undefined> = {}): Promise<CmsContent[]> {
+  return fetchAllContent(params);
 }
 
 async function getContent(slug: string): Promise<CmsContent | null> {
@@ -246,6 +328,25 @@ export async function cmsGetArticles(category?: string): Promise<Article[]> {
 export async function cmsGetArticle(slug: string): Promise<Article | null> {
   const c = await getContent(slug);
   return c ? mapArticle(c) : null;
+}
+
+// ── Paginated index readers ──────────────────────────────────────────────────
+// Index pages that can grow without bound (articles, projects) read one page at a
+// time and render pagination controls, rather than pulling the entire collection
+// into a single render. `page` is 1-based; `limit` is clamped to the API's max.
+export interface PagedResult<T> {
+  items: T[];
+  pagination: CmsPagination | null;
+}
+
+export async function cmsListProjects(page = 1, limit = 24): Promise<PagedResult<Project>> {
+  const { items, pagination } = await listContentPage({ contentType: 'portfolio_item' }, page, limit);
+  return { items: items.map(mapProject), pagination };
+}
+
+export async function cmsListArticles(page = 1, limit = 24): Promise<PagedResult<Article>> {
+  const { items, pagination } = await listContentPage({ contentType: 'news' }, page, limit);
+  return { items: items.map(mapArticle), pagination };
 }
 
 export async function cmsGetEcosystem(): Promise<EcosystemItem[]> {
