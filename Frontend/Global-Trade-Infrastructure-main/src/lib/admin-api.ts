@@ -244,6 +244,19 @@ export const publicAuthApi = {
   verifyEmail: (token: string) =>
     publicPost<{ success?: boolean; data?: { message: string } }>('/auth/verify-email', { token }),
 
+  /** Passwordless login step 1: email a one-time code. No session is created yet.
+   *  Returns the auth-service envelope ({ success, data: { sentTo, resendAvailableInSeconds } }). */
+  requestEmailOtp: (email: string) =>
+    publicPost<{ success?: boolean; data?: { sentTo?: string; expiresAt?: string; resendAvailableInSeconds?: number } }>(
+      '/auth/email/otp/request', { email },
+    ),
+
+  /** Step 2: verify the code → the gateway establishes the session cookies (auto-login). */
+  verifyEmailOtp: (email: string, code: string) =>
+    publicPost<{ user: { roles?: string[]; orgId?: string | null; orgType?: string | null }; csrfToken: string }>(
+      '/auth/email/otp/verify', { email, code },
+    ),
+
   forgotPassword: (email: string) => publicPost<unknown>('/auth/forgot-password', { email }),
   resetPassword: (token: string, newPassword: string) => publicPost<unknown>('/auth/reset-password', { token, newPassword }),
 

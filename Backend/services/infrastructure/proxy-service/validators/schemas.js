@@ -21,6 +21,13 @@ const registerSchema = z.object({
     plan: z.string().max(40).optional(),
 });
 
+// Passwordless email-OTP login (public). request needs only the email; verify needs email + code.
+const emailOtpRequestSchema = z.object({ email: z.string().email() });
+const emailOtpVerifySchema = z.object({
+    email: z.string().email(),
+    code:  z.string().trim().regex(/^[0-9]{4,8}$/, 'Code must be 4–8 digits'),
+});
+
 const forgotPasswordSchema = z.object({ email: z.string().email() });
 const resetPasswordSchema = z.object({ email: z.string().email(), newPassword: z.string().min(8) });
 const verifyEmailSchema = z.object({ email: z.string().email() });
@@ -72,6 +79,8 @@ module.exports = {
     paginationSchema,
     loginSchema,
     registerSchema,
+    emailOtpRequestSchema,
+    emailOtpVerifySchema,
     forgotPasswordSchema,
     resetPasswordSchema,
     verifyEmailSchema,

@@ -4,6 +4,7 @@ import { Zap, Menu, X, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { sharedSignInUrl } from "@/lib/sharedAuth";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -100,7 +101,7 @@ export function PublicHeader() {
 
         <div className="hidden md:flex items-center gap-2">
           <ThemeToggle />
-          <Button variant="ghost" asChild><Link to="/login">Sign In</Link></Button>
+          <Button variant="ghost" asChild><a href={sharedSignInUrl()}>Sign In</a></Button>
           <Button variant="hero" asChild><Link to="/signup">Start Free Trial</Link></Button>
         </div>
 
@@ -128,7 +129,7 @@ export function PublicHeader() {
             <Link key={link.path} to={link.path} className="block px-4 py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary" onClick={() => setMobileMenuOpen(false)}>{link.label}</Link>
           ))}
           <div className="pt-4 space-y-2 border-t border-border mt-4">
-            <Button variant="ghost" className="w-full" asChild><Link to="/login">Sign In</Link></Button>
+            <Button variant="ghost" className="w-full" asChild><a href={sharedSignInUrl()}>Sign In</a></Button>
             <Button variant="hero" className="w-full" asChild><Link to="/signup">Start Free Trial</Link></Button>
           </div>
         </div>

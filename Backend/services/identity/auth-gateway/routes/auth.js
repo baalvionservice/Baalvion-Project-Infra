@@ -118,6 +118,23 @@ router.post('/register', async (req, res) => {
   return res.status(201).json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
 });
 
+// Passwordless email-OTP login. request → auth-service emails a one-time code (no session).
+// verify → auth-service validates the code + mints a token pair (find-or-create); the gateway
+// then establishes the session cookies exactly like /login. NO access token in the body.
+router.post('/email/otp/request', async (req, res) => {
+  const { status, json } = await authService('/email/otp/request', { email: req.body && req.body.email }, req);
+  return res.status(status || 502).json(json ?? { error: { code: 'OTP_REQUEST_FAILED', message: 'Could not send a login code' } });
+});
+router.post('/email/otp/verify', async (req, res) => {
+  const { status, json, refreshFromCookie } = await authService('/email/otp/verify', { email: req.body && req.body.email, code: req.body && req.body.code }, req);
+  if ((status !== 200 && status !== 201) || !json || !json.success || !json.data || !json.data.accessToken) {
+    return res.status(status || 401).json({ error: (json && json.error) || { code: 'OTP_LOGIN_FAILED', message: 'Invalid or expired login code' } });
+  }
+  const { accessToken, user } = json.data;
+  const { c, csrfToken } = await establish(req, res, accessToken, refreshFromCookie);
+  return res.json({ user: { id: user && user.id, email: user && user.email, fullName: user && user.fullName, roles: c.roles || [], orgId: c.org_id ?? null, orgType: c.org_type ?? null }, csrfToken });
+});
+
 // POST /auth/invite → invite a member to the caller's org. Requires a valid session; forwards the
 // session's access token to auth-service's team API (POST /v1/orgs/:orgId/invite). Body: { email, role }.
 router.post('/invite', requireSession(), async (req, res) => {

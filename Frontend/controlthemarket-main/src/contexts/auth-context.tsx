@@ -52,6 +52,7 @@ interface AuthContextType {
   plan: Plan | null;
   subscription: Subscription | null;
   login: (credentials: LoginCredentials) => Promise<AuthResult>;
+  loginWithOtp: (email: string, code: string) => Promise<AuthResult>;
   signup: (details: SignupDetails) => Promise<AuthResult>;
   logout: () => void;
   loading: boolean;
@@ -482,26 +483,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateUser({ candidateOnboardingCompleted: true });
   };
 
+  // Shared post-credential session bootstrap — used by password login AND passwordless OTP login.
+  // Maps the gateway/auth-service response to the CTM user, adopts the ctm-service profile, and
+  // sets the in-memory token + context user (the redirect guard then routes the user).
+  const establishCtmSession = async (raw: any): Promise<void> => {
+    // Old auth-service: { token, refreshToken, user }
+    // Gateway BFF:      { user: { userId, email, fullName, roles, orgId }, csrfToken }
+    const token = raw?.token ?? raw?.data?.accessToken;
+    if (token) storeToken(token);
+    const proxyUser: ProxyUser = raw?.user ?? raw;
+    const ctmUser = mapProxyUserToCTM(proxyUser);
+    // Adopt app-role, companyId, onboarding/consent flags + profile from the ctm profile
+    // (identity only knows org role 'owner'). Onboarding flags MUST be applied to avoid
+    // the redirect guard bouncing the user to the onboarding flow.
+    applyProfile(ctmUser, await fetchCtmProfileFields(ctmUser.id));
+    setUser(ctmUser);
+    setCtmScopeCookies(ctmUser);
+    mirrorCtmProfile(ctmUser); // name/email only — never clobbers the profile role
+    if (ctmUser.role === 'company' && ctmUser.companyId) {
+      await fetchRealCompanyData(ctmUser.companyId);
+    }
+  };
+
   const login = async (credentials: LoginCredentials): Promise<AuthResult> => {
     if (!USE_MOCK) {
       try {
         const raw = await ctmAuthClient.post<any>('/login', credentials);
-        // Old auth-service: { token, refreshToken, user }
-        // Gateway BFF:      { user: { userId, email, fullName, roles, orgId }, csrfToken }
-        const token = raw?.token ?? raw?.data?.accessToken;
-        if (token) storeToken(token);
-        const proxyUser: ProxyUser = raw?.user ?? raw;
-        const ctmUser = mapProxyUserToCTM(proxyUser);
-        // Adopt app-role, companyId, onboarding/consent flags + profile from the ctm profile
-        // (identity only knows org role 'owner'). Onboarding flags MUST be applied to avoid
-        // the redirect guard bouncing the user to the onboarding flow.
-        applyProfile(ctmUser, await fetchCtmProfileFields(ctmUser.id));
-        setUser(ctmUser);
-        setCtmScopeCookies(ctmUser);
-        mirrorCtmProfile(ctmUser); // name/email only — never clobbers the profile role
-        if (ctmUser.role === 'company' && ctmUser.companyId) {
-          await fetchRealCompanyData(ctmUser.companyId);
-        }
+        await establishCtmSession(raw);
         return { success: true };
       } catch (err: unknown) {
         const message = err instanceof Error ? err.message : 'Login failed';
@@ -525,6 +533,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { success: true };
     }
     return { success: false, message: "Invalid credentials." };
+  };
+
+  // Passwordless email-OTP login: verify the code, then bootstrap the session exactly like
+  // password login (the redirect guard routes the user once `user` is set).
+  const loginWithOtp = async (email: string, code: string): Promise<AuthResult> => {
+    if (USE_MOCK) return { success: false, message: "OTP login is unavailable in mock mode." };
+    try {
+      const raw = await ctmAuthClient.post<any>('/email/otp/verify', { email, code });
+      await establishCtmSession(raw);
+      return { success: true };
+    } catch (err: unknown) {
+      return { success: false, message: err instanceof Error ? err.message : "Verification failed" };
+    }
   };
 
   const signup = async (details: SignupDetails): Promise<AuthResult> => {
@@ -615,6 +636,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const isPublicPath =
       pathname.startsWith("/login") ||
       pathname.startsWith("/signup") ||
+      // Shared-auth SSO landing — must be public so the client guard doesn't bounce the
+      // returning (cookie-less, cross-apex) user to /login before the callback runs.
+      pathname.startsWith("/auth") ||
       pathname === "/" ||
       pathname.startsWith("/demos") ||
       pathname.startsWith("/blog") ||
@@ -647,6 +671,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         plan,
         subscription,
         login,
+        loginWithOtp,
         signup,
         logout,
         loading,

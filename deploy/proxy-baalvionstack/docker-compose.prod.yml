@@ -173,6 +173,13 @@ services:
       FACEBOOK_OAUTH_CLIENT_SECRET: ${FACEBOOK_OAUTH_CLIENT_SECRET:-}
       GITHUB_OAUTH_CLIENT_ID: ${GITHUB_OAUTH_CLIENT_ID:-}
       GITHUB_OAUTH_CLIENT_SECRET: ${GITHUB_OAUTH_CLIENT_SECRET:-}
+      # Transactional email (AWS SES) — REQUIRED for passwordless email-OTP login.
+      EMAIL_FROM: ${EMAIL_FROM:-noreply@baalvion.com}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      OTP_EMAIL_BRAND: ${OTP_EMAIL_BRAND:-Baalvion NetStack}
     volumes:
       # RS256 signing keypair (generate per runbook §5). Read-only.
       - ./secrets/keys:/app/config/keys:ro

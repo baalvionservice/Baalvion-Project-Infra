@@ -32,6 +32,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
+import { sharedSignInUrl } from "@/lib/shared-auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { BrandImage } from "@/components/ui/BrandImage";
 import placeholderData from "@/app/lib/placeholder-images.json";
@@ -629,10 +630,20 @@ export const Header = () => {
               </Link>
             </div>
 
-            <div className="hidden lg:flex space-x-2 text-gray-600 text-[12px]">
-              <Link href={`/${countryCode}/account/login`}>Log In</Link>
-              <span>|</span>
-              <Link href={`/${countryCode}/account/register`}>Sign Up</Link>
+            <div className="hidden lg:flex items-center space-x-3 text-gray-600 text-[12px]">
+              {/* Primary sign-in → shared Baalvion auth surface (auth.baalvion.com). The
+                  local /account/login + /account/register routes remain as a fallback. */}
+              <button
+                type="button"
+                onClick={() => window.location.assign(sharedSignInUrl())}
+                className="text-[11px] tracking-[0.16em] uppercase text-black border-b border-black pb-px hover:opacity-60 transition-opacity"
+              >
+                Sign in
+              </button>
+              <span className="text-gray-300">|</span>
+              <Link href={`/${countryCode}/account/register`} className="hover:text-black transition-colors">
+                Sign Up
+              </Link>
             </div>
 
             {/* CENTER: Logo */}

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { BaalvionLogo } from '@/components/icons';
 import { Button } from '@/components/ui/button';
+import { sharedSignInUrl } from '@/lib/shared-auth';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ChevronDown, Menu, Globe, ShieldCheck } from 'lucide-react';
 import {
@@ -76,9 +77,9 @@ export function InstitutionalHeader() {
         </nav>
 
         <div className="flex items-center gap-6">
-          <Link href={PATHS.LOGIN || '/login'} className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 hover:text-primary transition-colors hidden lg:flex items-center gap-2">
+          <button type="button" onClick={() => window.location.assign(sharedSignInUrl())} className="text-[9px] font-black uppercase tracking-[0.3em] text-slate-500 hover:text-primary transition-colors hidden lg:flex items-center gap-2">
             <Globe className="h-3 w-3" aria-hidden="true" /> Institutional Login
-          </Link>
+          </button>
           <Button size="lg" className="font-black h-12 px-8 bg-white text-slate-950 rounded-none shadow-2xl hidden sm:flex hover:bg-slate-200" asChild>
             <Link href={PATHS.ACCESS_REQUEST || '#'}>Access Portal</Link>
           </Button>
@@ -123,8 +124,8 @@ export function InstitutionalHeader() {
                    <Button size="lg" className="h-16 font-black uppercase tracking-widest text-xs rounded-none bg-white text-slate-950" asChild>
                      <Link href={PATHS.ACCESS_REQUEST || '#'}>Onboard Institution</Link>
                    </Button>
-                   <Button size="lg" variant="outline" className="h-16 border-white/10 font-black uppercase tracking-widest text-xs rounded-none text-white" asChild>
-                    <Link href={PATHS.LOGIN || '/login'}>Institutional Login</Link>
+                   <Button size="lg" variant="outline" onClick={() => window.location.assign(sharedSignInUrl())} className="h-16 border-white/10 font-black uppercase tracking-widest text-xs rounded-none text-white">
+                    Institutional Login
                    </Button>
                 </div>
               </div>

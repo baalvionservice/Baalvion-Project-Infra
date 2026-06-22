@@ -124,6 +124,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|auth-bff|_next/static|_next/image|favicon.ico).*)',
+    // `auth` is excluded so the shared-auth SSO landing (/auth/sso-callback) is NOT
+    // country-rewritten — it's a brand-level (country-less) callback.
+    '/((?!api|auth-bff|auth/|_next/static|_next/image|favicon.ico).*)',
   ],
 };

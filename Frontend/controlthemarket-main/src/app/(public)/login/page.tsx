@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Loader2, Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { AuthShell } from '@/components/auth/auth-shell';
+import { EmailOtpLogin } from '@/components/auth/email-otp-login';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -106,6 +107,16 @@ export default function LoginPage() {
           Sign in
         </Button>
       </form>
+
+      {/* Divider */}
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center"><div className="w-full border-t" /></div>
+        <div className="relative flex justify-center text-xs">
+          <span className="bg-background px-3 text-muted-foreground">or</span>
+        </div>
+      </div>
+
+      <EmailOtpLogin />
     </AuthShell>
   );
 }

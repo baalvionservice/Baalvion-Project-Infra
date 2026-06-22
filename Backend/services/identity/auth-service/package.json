@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "generate-keys": "node scripts/generateKeys.js",
-    "migrate": "psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/001_auth_schema.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/002_add_family_id.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/003_auth_audit_log.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/004_org_type.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/005_org_admin_lifecycle.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/006_user_platform_role.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/007_org_pending_status.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/008a_session_enrichment.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/010_phone_verification.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/011_oauth_identity.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/009_rls_tenant_isolation.sql",
+    "migrate": "psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/001_auth_schema.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/002_add_family_id.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/003_auth_audit_log.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/004_org_type.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/005_org_admin_lifecycle.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/006_user_platform_role.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/007_org_pending_status.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/008a_session_enrichment.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/010_phone_verification.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/011_oauth_identity.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/012_email_otp_login.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/013_user_first_last_name.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/009_rls_tenant_isolation.sql",
     "seed:gti": "node scripts/seedGtiOrganizations.js"
   },
   "dependencies": {
@@ -22,6 +22,7 @@
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "disposable-email-domains": "^1.0.62",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-rate-limit": "^7.5.0",

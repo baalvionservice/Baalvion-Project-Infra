@@ -87,6 +87,36 @@ export const authClient = {
     return applySession(json.data ?? json, email);
   },
 
+  /** Passwordless login — step 1: email a one-time code. */
+  async emailOtpRequest(email: string): Promise<{ sentTo: string; expiresAt: string; resendAvailableInSeconds: number }> {
+    const res = await fetch(`${AUTH_URL}/email/otp/request`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || json.success === false) {
+      throw new Error(json?.error?.message || 'Could not send your login code. Please try again.');
+    }
+    return json.data ?? json;
+  },
+
+  /** Step 2: exchange the code for a session (sets the httpOnly refresh cookie). */
+  async emailOtpVerify(email: string, code: string): Promise<AmariseUser> {
+    const res = await fetch(`${AUTH_URL}/email/otp/verify`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok || json.success === false) {
+      throw new Error(json?.error?.message || 'That code is incorrect or expired.');
+    }
+    return applySession(json.data ?? json, email);
+  },
+
   async register(email: string, password: string, fullName?: string): Promise<AmariseUser> {
     const res = await fetch(`${AUTH_URL}/register`, {
       method: 'POST',

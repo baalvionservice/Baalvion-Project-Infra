@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { authClient } from '@/lib/auth';
 import { SocialLogin } from '@/components/account/SocialLogin';
+import { EmailOtpLogin } from '@/components/account/EmailOtpLogin';
 
 /**
  * Account login — REAL authentication against the Baalvion identity gateway.
@@ -160,6 +161,8 @@ export default function LoginPage() {
             <Suspense fallback={null}>
               <SocialLogin />
             </Suspense>
+
+            <EmailOtpLogin redirectTo={safeRedirect} />
 
             <div className="flex items-center space-x-2 text-[11px] text-gray-500 font-light italic">
               <Link href={`/${countryCode}/account/reset-password`} className="hover:text-black transition-colors underline underline-offset-4">Forgot your password?</Link>

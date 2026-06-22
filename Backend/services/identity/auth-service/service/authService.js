@@ -10,6 +10,7 @@ const redis      = require('../config/redis');
 const eventBus   = require('../utils/eventBus');
 const { generateToken, hashToken } = require('../utils/crypto');
 const { sendMail }  = require('../utils/mailer');
+const { computeInitials } = require('../utils/initials');
 const { AppError }  = require('../utils/errors');
 const config        = require('../config/appConfig');
 // C4: platform vs tenant role separation. assertNoRoleConfusion guarantees an org-membership
@@ -38,6 +39,11 @@ function presentUser(user, extras = {}) {
         id:            String(user.id),
         email:         user.email,
         fullName:      user.full_name  || null,
+        firstName:     user.first_name || null,
+        lastName:      user.last_name  || null,
+        // Avatar initials (first+last → full_name → email). The UI renders these in the avatar chip
+        // and greets the user by firstName after verification.
+        initials:      computeInitials(user),
         avatarUrl:     user.avatar_url || null,
         status:        user.status,
         emailVerified: !!user.email_verified_at,

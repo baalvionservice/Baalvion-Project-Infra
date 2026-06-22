@@ -7,6 +7,7 @@ import { Menu, X, Search, ChevronDown, LayoutDashboard } from "lucide-react";
 import { SearchModal } from "@/components/search/SearchModal";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/state/app-store";
+import { sharedSignInUrl } from "@/lib/shared-auth";
 
 type NavLink = { label: string; href: string };
 type NavCategory = {
@@ -210,12 +211,12 @@ export const Navbar = () => {
                 </Link>
               )}
 
-              <Link
-                href="/auth/sign-in"
+              <button
+                onClick={() => window.location.assign(sharedSignInUrl())}
                 className="hidden sm:inline-flex items-center h-9 px-3 text-sm font-semibold text-foreground hover:text-primary transition-colors"
               >
                 Sign In
-              </Link>
+              </button>
               <Link
                 href="/premium/subscribe"
                 className="inline-flex items-center h-9 px-4 rounded-sm bg-accent text-accent-foreground text-sm font-bold hover:brightness-95 transition-all"
@@ -328,12 +329,12 @@ export const Navbar = () => {
                 </div>
               ))}
               <div className="p-4 space-y-2">
-                <Link
-                  href="/auth/sign-in"
+                <button
+                  onClick={() => window.location.assign(sharedSignInUrl())}
                   className="block w-full text-center h-10 leading-10 rounded-sm border border-border font-semibold"
                 >
                   Sign In
-                </Link>
+                </button>
                 <Link
                   href="/premium/subscribe"
                   className="block w-full text-center h-10 leading-10 rounded-sm bg-accent text-accent-foreground font-bold"

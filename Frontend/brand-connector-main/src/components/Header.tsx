@@ -1,7 +1,10 @@
+'use client'
+
 import { RocketIcon } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 import { Button } from './ui'
+import { sharedSignInUrl } from '@/lib/shared-auth'
 
 const Header = () => {
 
@@ -25,7 +28,13 @@ const Header = () => {
                         <Link key={link.name} className="hover:text-primary transition-colors hidden md:inline-flex" href={link.href}>{link.name}</Link>
                     ))
                }
-                <Link className="hover:text-primary transition-colors" href="/auth/login">Login</Link>
+                <button
+                    type="button"
+                    className="hover:text-primary transition-colors"
+                    onClick={() => window.location.assign(sharedSignInUrl())}
+                >
+                    Login
+                </button>
                 <Link href="/auth/signup">
                     <Button size="sm" className="rounded-full">Get Started</Button>
                 </Link>

@@ -14,6 +14,10 @@ const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_
 // Public (no session required). Mirrors the client AuthProvider's public-path list.
 const PUBLIC_PREFIXES = [
   '/login', '/signup', '/forgot-password', '/reset-password',
+  // '/auth' is the shared-auth SSO landing (/auth/sso-callback). It MUST stay public:
+  // CTM is cross-apex (controlthemarket.com), so a returning user has no .baalvion.com
+  // refresh cookie yet — gating it would bounce them to /login before the token stashes.
+  '/auth',
   '/demos', '/blog', '/badges', '/companies', '/contact',
   '/leaderboard', '/pricing', '/privacy', '/terms', '/about',
 ];

@@ -4,6 +4,10 @@ module.exports = function (sequelize, DataTypes) {
         email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
         password_hash: { type: DataTypes.TEXT, allowNull: false },
         full_name: { type: DataTypes.TEXT, allowNull: true },
+        // First/last name for the public sign-up experience (avatar initials + personalized
+        // greeting). `full_name` is kept as the combined display value for back-compat.
+        first_name: { type: DataTypes.STRING(80), allowNull: true },
+        last_name:  { type: DataTypes.STRING(80), allowNull: true },
         avatar_url: { type: DataTypes.TEXT, allowNull: true },
         status: { type: DataTypes.STRING(16), allowNull: false, defaultValue: 'active' },
         email_verified_at: { type: DataTypes.DATE, allowNull: true },

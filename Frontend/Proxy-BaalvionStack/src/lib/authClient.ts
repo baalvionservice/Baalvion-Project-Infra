@@ -91,6 +91,19 @@ export const authClient = {
     return normalizeTokens(data);
   },
 
+  // Passwordless email-OTP login — step 1: email a one-time code.
+  emailOtpRequest: async (
+    email: string,
+  ): Promise<{ sentTo: string; expiresAt: string; resendAvailableInSeconds: number }> => {
+    return post('/email/otp/request', { email });
+  },
+
+  // Step 2: exchange the code for a session (sets the httpOnly refresh cookie + returns tokens).
+  emailOtpVerify: async (email: string, code: string): Promise<AuthTokens> => {
+    const data = await post<Record<string, unknown>>('/email/otp/verify', { email, code });
+    return normalizeTokens(data);
+  },
+
   register: async (
     email: string,
     password: string,

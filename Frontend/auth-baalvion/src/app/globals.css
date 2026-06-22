@@ -1,0 +1,339 @@
+/*
+ * Token-driven styles. Every value resolves from a CSS custom property set by the active brand
+ * theme (see lib/themes.ts), so the same markup renders natively in any Baalvion brand — dark
+ * ledger, light editorial, etc. Nothing here hardcodes a brand color.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Stage: full-viewport branded backdrop ─────────────────────────────────────── */
+.stage {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 2vw, 2.5rem);
+  color: var(--text);
+  background:
+    radial-gradient(1200px 600px at 50% -10%, var(--bg-grad-1), transparent 60%),
+    var(--bg);
+  font-family: var(--font-body);
+}
+
+/* ── Card ──────────────────────────────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 2);
+  box-shadow: var(--shadow, 0 24px 60px -20px rgba(0, 0, 0, 0.35));
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Top accent hairline — the "mark of record". */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.9;
+}
+
+/* ── Brand header ──────────────────────────────────────────────────────────────── */
+.brand {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1.75rem;
+}
+.brand__mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.5rem;
+  letter-spacing: -0.01em;
+  color: var(--text-strong);
+}
+.brand__dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 1px;
+  background: var(--accent);
+  display: inline-block;
+}
+.brand__tagline {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ── Typography ────────────────────────────────────────────────────────────────── */
+.h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1rem + 1.6vw, 1.9rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin: 0 0 0.4rem;
+  color: var(--text-strong);
+}
+.sub {
+  margin: 0 0 1.5rem;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.sub strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ── Fields ────────────────────────────────────────────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+.label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text-muted);
+}
+.input {
+  width: 100%;
+  height: 2.85rem;
+  padding: 0 0.85rem;
+  font-size: 0.95rem;
+  font-family: var(--font-body);
+  color: var(--text);
+  background: var(--field-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+.input:hover {
+  border-color: var(--border-strong, color-mix(in srgb, var(--border), var(--accent) 35%));
+}
+.input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--ring, color-mix(in srgb, var(--accent) 35%, transparent));
+}
+.input[aria-invalid='true'] {
+  border-color: #ef4444;
+}
+
+/* ── OTP code input ────────────────────────────────────────────────────────────── */
+.otp {
+  letter-spacing: 0.7em;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 600;
+  padding-left: 0.7em;
+}
+
+/* ── Button ────────────────────────────────────────────────────────────────────── */
+.btn {
+  width: 100%;
+  height: 2.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background var(--dur) var(--ease), transform 120ms var(--ease), opacity var(--dur);
+}
+.btn:hover {
+  background: var(--accent-hover);
+}
+.btn:active {
+  transform: scale(0.985);
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border-color: var(--border);
+}
+.btn--ghost:hover {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-strong, color-mix(in srgb, var(--border), var(--accent) 35%));
+}
+
+/* ── Inline link / secondary actions ───────────────────────────────────────────── */
+.link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.link:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
+}
+.link:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  text-decoration: none;
+}
+
+/* ── Messages ──────────────────────────────────────────────────────────────────── */
+.alert {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  padding: 0.7rem 0.85rem;
+  border-radius: var(--radius);
+  margin-bottom: 1rem;
+}
+.alert--error {
+  color: #fecaca;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+.alert--info {
+  color: var(--text-muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.field-error {
+  color: #ef4444;
+  font-size: 0.76rem;
+  min-height: 1rem;
+}
+
+/* ── Foot note ─────────────────────────────────────────────────────────────────── */
+.meta {
+  margin-top: 1.4rem;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+.turnstile {
+  margin: 0.25rem 0 1rem;
+  min-height: 0;
+}
+
+/* ── Avatar + greeting (success) ───────────────────────────────────────────────── */
+.success {
+  text-align: center;
+  animation: rise 0.5s var(--ease) both;
+}
+.avatar {
+  width: 5rem;
+  height: 5rem;
+  margin: 0 auto 1.25rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  box-shadow: 0 0 0 6px var(--ring, color-mix(in srgb, var(--accent) 28%, transparent));
+}
+.greeting {
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 1rem + 1.5vw, 1.8rem);
+  color: var(--text-strong);
+  margin: 0 0 0.4rem;
+}
+.greeting .wave {
+  display: inline-block;
+  animation: wave 1.6s var(--ease) 0.3s 2;
+  transform-origin: 70% 70%;
+}
+
+/* ── Step transition ───────────────────────────────────────────────────────────── */
+.step {
+  animation: rise 0.4s var(--ease) both;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes wave {
+  0%,
+  60%,
+  100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(16deg);
+  }
+  40% {
+    transform: rotate(-8deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .step,
+  .success,
+  .greeting .wave {
+    animation: none;
+  }
+  .input,
+  .btn {
+    transition: none;
+  }
+}

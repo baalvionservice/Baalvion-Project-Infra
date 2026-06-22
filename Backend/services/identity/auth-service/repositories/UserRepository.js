@@ -10,13 +10,33 @@ class UserRepository {
         return db.User.findByPk(id);
     }
 
-    async create({ email, passwordHash, fullName }) {
+    async create({ email, passwordHash, fullName, firstName, lastName }) {
+        const first = firstName ? String(firstName).trim() : null;
+        const last  = lastName  ? String(lastName).trim()  : null;
+        // full_name stays the canonical display value (every downstream presenter reads it). When
+        // first/last are supplied, derive it from them; otherwise keep an explicit fullName.
+        const combined = [first, last].filter(Boolean).join(' ');
         return db.User.create({
             email:         email.toLowerCase().trim(),
             password_hash: passwordHash,
-            full_name:     fullName || null,
+            full_name:     combined || fullName || null,
+            first_name:    first,
+            last_name:     last,
             status:        'active',
         });
+    }
+
+    /** Backfill names on an existing account that has none yet (never overwrites a set name). */
+    async setNamesIfMissing(userId, { firstName, lastName }) {
+        const first = firstName ? String(firstName).trim() : null;
+        const last  = lastName  ? String(lastName).trim()  : null;
+        if (!first && !last) return false;
+        const combined = [first, last].filter(Boolean).join(' ');
+        const [affected] = await db.User.update(
+            { first_name: first, last_name: last, full_name: combined || null },
+            { where: { id: userId, full_name: null } },
+        );
+        return affected > 0;
     }
 
     async update(id, fields) {

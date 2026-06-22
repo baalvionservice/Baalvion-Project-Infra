@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { sharedSignInUrl } from "@/lib/shared-auth";
 import {
   Menu,
   X,
@@ -374,6 +375,15 @@ export function Navbar() {
               </button>
             </form>
           </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => window.location.assign(sharedSignInUrl())}
+            className="h-10 px-4 rounded-sm font-bold text-sm whitespace-nowrap border-gray-300 text-gray-900 hover:bg-gray-50"
+          >
+            Sign in
+          </Button>
 
           <Button
             asChild

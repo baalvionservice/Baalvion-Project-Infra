@@ -8,6 +8,10 @@ const schemas = require('../validators/schemas');
 
 router.route('/register').post(validate(schemas.registerSchema), authController.register);
 router.route('/login').post(validate(schemas.loginSchema), authController.login);
+
+// Passwordless email-OTP login (public): request emails a code, verify mints a session.
+router.route('/email/otp/request').post(validate(schemas.emailOtpRequestSchema), authController.requestEmailOtp);
+router.route('/email/otp/verify').post(validate(schemas.emailOtpVerifySchema), authController.verifyEmailOtp);
 router.route('/logout').post(authController.logout);
 router.route('/refresh').post(authController.refreshToken);
 router.route('/forgot-password').post(validate(schemas.forgotPasswordSchema), authController.forgotPassword);

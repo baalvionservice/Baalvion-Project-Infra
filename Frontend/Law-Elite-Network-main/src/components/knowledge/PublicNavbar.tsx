@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import seedData from '../../../docs/seed-data.json';
 import { useAuth } from '@/hooks/useAuth';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { sharedSignInUrl } from '@/lib/shared-auth';
 
 export function PublicNavbar() {
   const { isAuthenticated, role } = useAuth();
@@ -119,11 +120,12 @@ export function PublicNavbar() {
                 </button>
               </Link>
             ) : (
-              <Link href="/login">
-                <button className="px-5 h-10 rounded-xl border border-slate-200 text-slate-900 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all">
-                  Sign In
-                </button>
-              </Link>
+              <button
+                onClick={() => window.location.assign(sharedSignInUrl())}
+                className="px-5 h-10 rounded-xl border border-slate-200 text-slate-900 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all"
+              >
+                Sign In
+              </button>
             )}
           </div>
 
