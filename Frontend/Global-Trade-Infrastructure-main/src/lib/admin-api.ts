@@ -158,6 +158,20 @@ export const orgAdminApi = {
   me: () => apiClient.get<{ id: string; email: string; mfaEnabled: boolean; mfaRequired: boolean }>(`${SVC}/me`),
 };
 
+// ── Phone verification (authenticated — operates on the session user) ─────────────
+
+export interface OtpRequestResult { sentTo: string; expiresAt: string; resendAvailableInSeconds: number }
+export interface OtpVerifyResult { phone: string; phoneVerified: boolean }
+
+export const phoneApi = {
+  /** Request an SMS code for the session user's phone (or `phone` to set/replace it). */
+  requestOtp: (phone?: string) =>
+    apiClient.post<OtpRequestResult>(`${SVC}/phone/otp/request`, phone ? { phone } : {}),
+  /** Confirm the SMS code → marks the user's phone verified. */
+  verifyOtp: (code: string) =>
+    apiClient.post<OtpVerifyResult>(`${SVC}/phone/otp/verify`, { code }),
+};
+
 // ── Public flows (no session) ────────────────────────────────────────────────────
 
 async function publicPost<T>(path: string, body: unknown): Promise<T> {
@@ -176,6 +190,28 @@ async function publicPost<T>(path: string, body: unknown): Promise<T> {
 }
 
 export interface InvitePreview { email: string; role: string; orgName: string; expiresAt: string }
+
+export type AccountType = 'buyer' | 'seller';
+
+export interface RegisterInput {
+  email: string;
+  password: string;
+  fullName?: string;
+  orgName?: string;
+  /** Public self-service account type — drives the new organization's type. */
+  accountType?: AccountType;
+  /** Optional phone captured at signup; verified later via the phone OTP flow. */
+  phone?: string;
+}
+
+export interface RegisteredUser {
+  id?: string;
+  email?: string;
+  fullName?: string;
+  roles?: string[];
+  orgId?: string | null;
+  orgType?: string | null;
+}
 
 export const publicAuthApi = {
   /** Look up an invitation by token (gateway → auth-service /validate-invite). */
@@ -196,6 +232,17 @@ export const publicAuthApi = {
     publicPost<{ user: { id?: string; email?: string; roles?: string[]; orgId?: string | null; orgType?: string | null }; csrfToken: string }>(
       '/auth/accept-invite', input,
     ),
+
+  /**
+   * Public self-service registration (buyer/seller). The gateway registers the user, creates the
+   * scoped org, and establishes the session cookies (auto-login). Returns the safe profile.
+   */
+  register: (input: RegisterInput) =>
+    publicPost<{ user: RegisteredUser; csrfToken: string }>('/auth/register', input),
+
+  /** Confirm an email-verification token (from the link in the verification email). */
+  verifyEmail: (token: string) =>
+    publicPost<{ success?: boolean; data?: { message: string } }>('/auth/verify-email', { token }),
 
   forgotPassword: (email: string) => publicPost<unknown>('/auth/forgot-password', { email }),
   resetPassword: (token: string, newPassword: string) => publicPost<unknown>('/auth/reset-password', { token, newPassword }),

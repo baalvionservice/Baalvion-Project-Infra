@@ -88,6 +88,9 @@ export default function MarketplacePage() {
            <h2 className="text-4xl font-black tracking-tight uppercase tracking-tighter leading-[0.8]">Trade <br />Discovery.</h2>
         </div>
         <div className="flex gap-4">
+           <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md" onClick={() => router.push('/marketplace/search')}>
+              <Search className="mr-3 h-4 w-4" /> Catalogue Search
+           </Button>
            <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md" onClick={() => router.push('/discovery/radar')}>
               <Target className="mr-3 h-4 w-4" /> Opportunity Radar
            </Button>

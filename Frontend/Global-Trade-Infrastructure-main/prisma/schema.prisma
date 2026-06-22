@@ -143,21 +143,21 @@ model Organization {
   updatedAt DateTime         @updatedAt
   deletedAt DateTime?
 
-  users        User[]
-  buyers       Buyer[]
-  suppliers    Supplier[]
-  trades       TradeTransaction[]
-  rfqs         Rfq[]
-  deals        Deal[]
-  orders       Order[]
-  escrows      Escrow[]
-  payments     Payment[]
-  shipments    Shipment[]
-  customs      CustomsDeclaration[]
-  settlements  Settlement[]
-  documents    Document[]
-  notifications Notification[]
-  auditLogs    AuditLog[]
+  users              User[]
+  buyers             Buyer[]
+  suppliers          Supplier[]
+  trades             TradeTransaction[]
+  rfqs               Rfq[]
+  deals              Deal[]
+  orders             Order[]
+  escrows            Escrow[]
+  payments           Payment[]
+  shipments          Shipment[]
+  customs            CustomsDeclaration[]
+  settlements        Settlement[]
+  documents          Document[]
+  notifications      Notification[]
+  auditLogs          AuditLog[]
   riskAssessments    RiskAssessment[]
   complianceChecks   ComplianceCheck[]
   financeInstruments TradeFinanceInstrument[]
@@ -168,15 +168,15 @@ model Organization {
 }
 
 model User {
-  id             String     @id @default(uuid()) @db.Uuid
-  organizationId String     @db.Uuid
-  email          String     @unique
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  email          String    @unique
   name           String
-  status         String     @default("active")
+  status         String    @default("active")
   metadata       Json?
-  version        Int        @default(1)
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   deletedAt      DateTime?
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -188,12 +188,12 @@ model User {
 }
 
 model Role {
-  id          String           @id @default(uuid()) @db.Uuid
-  name        String           @unique
+  id          String    @id @default(uuid()) @db.Uuid
+  name        String    @unique
   description String?
-  version     Int              @default(1)
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  version     Int       @default(1)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
 
   permissions RolePermission[]
@@ -203,10 +203,10 @@ model Role {
 }
 
 model Permission {
-  id        String           @id @default(uuid()) @db.Uuid
+  id        String   @id @default(uuid()) @db.Uuid
   resource  String
   action    String
-  createdAt DateTime         @default(now())
+  createdAt DateTime @default(now())
 
   roles RolePermission[]
 
@@ -215,8 +215,8 @@ model Permission {
 }
 
 model RolePermission {
-  roleId       String     @db.Uuid
-  permissionId String     @db.Uuid
+  roleId       String @db.Uuid
+  permissionId String @db.Uuid
 
   role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
@@ -279,9 +279,9 @@ model Supplier {
 // ──────────────────────────────────────────────────────────────────────────
 
 model TradeTransaction {
-  id             String           @id @default(uuid()) @db.Uuid
-  organizationId String           @db.Uuid
-  reference      String           @unique
+  id             String @id @default(uuid()) @db.Uuid
+  organizationId String @db.Uuid
+  reference      String @unique
   correlationId  String
 
   buyerId    String? @db.Uuid
@@ -580,18 +580,18 @@ model WorkflowEvent {
 }
 
 model DomainEvent {
-  id            String        @id @default(uuid()) @db.Uuid
-  eventId       String        @unique
-  organizationId String?      @db.Uuid
-  type          String
-  tradeId       String?       @db.Uuid
-  correlationId String
-  userId        String?
-  source        String        @default("CORE")
-  severity      EventSeverity @default(INFO)
-  payload       Json
-  occurredAt    DateTime
-  createdAt     DateTime      @default(now())
+  id             String        @id @default(uuid()) @db.Uuid
+  eventId        String        @unique
+  organizationId String?       @db.Uuid
+  type           String
+  tradeId        String?       @db.Uuid
+  correlationId  String
+  userId         String?
+  source         String        @default("CORE")
+  severity       EventSeverity @default(INFO)
+  payload        Json
+  occurredAt     DateTime
+  createdAt      DateTime      @default(now())
 
   @@index([type])
   @@index([organizationId])
@@ -785,4 +785,1162 @@ model FinancingRequest {
   @@index([status])
   @@index([deletedAt])
   @@map("financing_requests")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Rule Engine (Phase 1 — configuration over code)
+//
+// Every business rule lives here as DATA, never as a TS `if/switch`. A RuleSet
+// is a versioned, conflict-resolving collection of Rules. A Rule pairs a safe,
+// structured condition AST (see server/rules/condition.ts) with one or more
+// effects (see server/rules/types.ts). Selector columns (country/hsCode/role/…)
+// pre-filter candidate rules cheaply before the condition is evaluated.
+//
+// organizationId is NULLABLE: NULL = a platform-global regulatory baseline that
+// every tenant inherits; a non-null value = a tenant-specific override/addition.
+// Evaluation merges global + tenant rules. RLS (see the migration) lets every
+// tenant read global rows + its own, and write only its own.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum RuleStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ARCHIVED
+}
+
+enum ConflictStrategy {
+  PRIORITY // highest-priority matching rule's decision wins
+  FIRST_MATCH // only the first matching rule (priority desc, then createdAt) applies
+  ALL_MATCH // every matching rule contributes; most-severe decision wins
+  DENY_OVERRIDES // any DENY beats REVIEW beats ALLOW
+  ALLOW_OVERRIDES // any ALLOW beats DENY
+}
+
+enum TradeDirection {
+  IMPORT
+  EXPORT
+  BOTH
+}
+
+model RuleSet {
+  id               String           @id @default(uuid()) @db.Uuid
+  organizationId   String?          @db.Uuid // null = platform-global baseline
+  key              String
+  name             String
+  description      String?
+  category         String // SANCTIONS | LICENSING | TAX | DOCUMENT | ROUTING | … (data, not enum)
+  status           RuleStatus       @default(ACTIVE)
+  conflictStrategy ConflictStrategy @default(DENY_OVERRIDES)
+  defaultDecision  String           @default("ALLOW") // decision when no rule matches
+  effectiveFrom    DateTime?
+  effectiveTo      DateTime?
+  priority         Int              @default(0)
+  metadata         Json?
+  version          Int              @default(1)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
+
+  rules     Rule[]
+  revisions RuleRevision[]
+
+  @@index([organizationId, key])
+  @@index([category])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("rule_sets")
+}
+
+model Rule {
+  id             String     @id @default(uuid()) @db.Uuid
+  ruleSetId      String     @db.Uuid
+  organizationId String?    @db.Uuid // mirrors the set's org (RLS + fast filter)
+  key            String
+  name           String
+  description    String?
+  priority       Int        @default(0)
+  status         RuleStatus @default(ACTIVE)
+  condition      Json // safe structured AST — never an evaluated string
+  effect         Json // structured effect(s) applied on match
+
+  // Cheap pre-filter selectors (null = matches any)
+  country         String?
+  region          String?
+  hsCode          String?
+  productCategory String?
+  orgType         String?
+  role            String?
+  direction       TradeDirection @default(BOTH)
+
+  tags          String[]
+  effectiveFrom DateTime?
+  effectiveTo   DateTime?
+  metadata      Json?
+  version       Int       @default(1)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  ruleSet RuleSet @relation(fields: [ruleSetId], references: [id], onDelete: Cascade)
+
+  @@index([ruleSetId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([country])
+  @@index([hsCode])
+  @@index([deletedAt])
+  @@map("rules")
+}
+
+/// Append-only version history for rule sets and rules (immutable, CR-14). Each
+/// create/update/delete writes one snapshot row enabling version comparison and
+/// forensic replay. Enforced no-UPDATE/DELETE at the database layer (migration).
+model RuleRevision {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  ruleSetId      String?  @db.Uuid
+  ruleId         String?  @db.Uuid
+  entityType     String // RULE_SET | RULE
+  entityKey      String
+  version        Int
+  action         String // CREATE | UPDATE | DELETE | PUBLISH | SUSPEND | ARCHIVE
+  snapshot       Json
+  actorId        String
+  actorRole      String?
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  ruleSet RuleSet? @relation(fields: [ruleSetId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([ruleSetId])
+  @@index([ruleId])
+  @@index([entityType, entityKey])
+  @@index([createdAt])
+  @@map("rule_revisions")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Settlement ledger (Phase 2 — Global Settlement Network / Multi-Ledger System)
+//
+// An immutable double-entry ledger and the settlement engine that posts to it.
+// Every money movement is a balanced ledger_transaction (Σdebits = Σcredits)
+// made of append-only ledger_entries; account balances are maintained in the
+// same transaction under optimistic locking. Tenant-owned and RLS-scoped.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum LedgerAccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum LedgerNormalSide {
+  DEBIT
+  CREDIT
+}
+
+enum LedgerEntryDirection {
+  DEBIT
+  CREDIT
+}
+
+enum LedgerTxnStatus {
+  POSTED
+  REVERSED
+}
+
+enum SettlementInstrStatus {
+  CREATED
+  AUTHORIZED
+  CAPTURED
+  PARTIALLY_SETTLED
+  SETTLED
+  FAILED
+  CANCELLED
+  REVERSED
+}
+
+enum SettlementRail {
+  INTERNAL
+  SWIFT
+  SEPA
+  FEDWIRE
+  RTGS
+  ACH
+  UPI
+  NEFT
+  IMPS
+  FPS
+  BACS
+}
+
+model LedgerAccount {
+  id             String            @id @default(uuid()) @db.Uuid
+  organizationId String            @db.Uuid
+  code           String // unique per org while live
+  name           String
+  type           LedgerAccountType
+  // Functional role: OPERATING | SETTLEMENT | CLEARING | ESCROW | RESERVE |
+  // LIQUIDITY | FX | FEE_INCOME | INTEREST | SUSPENSE | EXTERNAL (data, not enum)
+  purpose        String            @default("OPERATING")
+  normalSide     LedgerNormalSide
+  currency       String            @default("USD")
+  status         String            @default("ACTIVE") // ACTIVE | FROZEN | CLOSED
+  // System/clearing accounts may run negative; customer balance accounts may not.
+  allowNegative  Boolean           @default(false)
+  balance        Decimal           @default(0) @db.Decimal(20, 4)
+  // The customer org this account belongs to (null = platform-internal account).
+  ownerOrgId     String?           @db.Uuid
+  metadata       Json?
+  version        Int               @default(1)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  deletedAt      DateTime?
+
+  entries LedgerEntry[]
+
+  @@index([organizationId])
+  @@index([code])
+  @@index([purpose])
+  @@index([ownerOrgId])
+  @@index([deletedAt])
+  @@map("ledger_accounts")
+}
+
+/// A balanced posting (journal entry). Immutable: corrections are made by a
+/// reversing transaction (self-relation), never by editing or deleting a row.
+model LedgerTransaction {
+  id             String          @id @default(uuid()) @db.Uuid
+  organizationId String          @db.Uuid
+  reference      String? // external/idempotency key (unique per org while set)
+  description    String?
+  status         LedgerTxnStatus @default(POSTED)
+  currency       String
+  amount         Decimal         @db.Decimal(20, 4) // the balanced total (debits = credits)
+  tradeId        String?         @db.Uuid
+  correlationId  String
+  source         String          @default("ledger")
+  reversalOfId   String?         @db.Uuid // this transaction reverses another
+  reversedById   String?         @db.Uuid // the transaction that reversed this one
+  postedAt       DateTime        @default(now())
+  metadata       Json?
+  createdAt      DateTime        @default(now())
+
+  entries    LedgerEntry[]
+  reversalOf LedgerTransaction?  @relation("LedgerReversal", fields: [reversalOfId], references: [id], onDelete: SetNull)
+  reversals  LedgerTransaction[] @relation("LedgerReversal")
+
+  @@index([organizationId])
+  @@index([correlationId])
+  @@index([tradeId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ledger_transactions")
+}
+
+/// One leg of a posting. Append-only (DB trigger forbids UPDATE/DELETE).
+model LedgerEntry {
+  id             String               @id @default(uuid()) @db.Uuid
+  transactionId  String               @db.Uuid
+  organizationId String               @db.Uuid
+  accountId      String               @db.Uuid
+  direction      LedgerEntryDirection
+  amount         Decimal              @db.Decimal(20, 4) // always positive
+  currency       String
+  balanceAfter   Decimal              @db.Decimal(20, 4) // account normal-side balance after the txn
+  memo           String?
+  sequence       Int // order within the transaction
+  createdAt      DateTime             @default(now())
+
+  transaction LedgerTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  account     LedgerAccount     @relation(fields: [accountId], references: [id], onDelete: Restrict)
+
+  @@index([transactionId])
+  @@index([accountId])
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("ledger_entries")
+}
+
+/// A settlement instruction driven by the settlement state machine. Each legal
+/// transition posts a balanced movement between the payer, clearing and payee
+/// ledger accounts. `version` guards transitions with optimistic locking.
+model SettlementInstruction {
+  id                String                @id @default(uuid()) @db.Uuid
+  organizationId    String                @db.Uuid
+  reference         String?
+  status            SettlementInstrStatus @default(CREATED)
+  rail              SettlementRail        @default(INTERNAL)
+  currency          String                @default("USD")
+  amount            Decimal               @db.Decimal(20, 4)
+  settledAmount     Decimal               @default(0) @db.Decimal(20, 4)
+  payerAccountId    String                @db.Uuid
+  clearingAccountId String                @db.Uuid
+  payeeAccountId    String                @db.Uuid
+  tradeId           String?               @db.Uuid
+  escrowId          String?               @db.Uuid
+  priority          Int                   @default(0)
+  scheduledAt       DateTime?
+  correlationId     String
+  metadata          Json?
+  version           Int                   @default(1)
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+  deletedAt         DateTime?
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([tradeId])
+  @@index([escrowId])
+  @@index([deletedAt])
+  @@map("settlement_instructions")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Global Country Knowledge Base (GCKB) — Phase 1 (configuration over code)
+//
+// The canonical reference for every country and its trade policy, stored as
+// DATA. A single generic, discriminated record table holds all entity types
+// (country, currency, language, timezone, trade_region, subdivision, authority,
+// point_of_entry, trade_agreement, country_policy). Adding an entity type or a
+// policy type is REGISTRY CONFIGURATION (server/gckb/registry.ts) — never a new
+// table, migration, service or route. entityType / policyType / status are text,
+// not enums, precisely so new kinds need no schema change.
+//
+// `attributes` is a per-entity JSON payload validated by the registry's zod
+// schema; the promoted columns (countryId, code, policyType, hsCode, …) exist
+// only for relational integrity (self-FK) and indexed search. organizationId is
+// NULLABLE: NULL = the platform-global canonical baseline inherited by every
+// tenant; non-null = a tenant override. RLS (see migration) enforces read
+// global+own / write own. Every version is preserved forever in the append-only
+// gckb_revisions store (DB-enforced immutable); the head row is the current
+// projection. Relationships are generic typed edges (gckb_relationships).
+// ──────────────────────────────────────────────────────────────────────────
+
+model GckbRecord {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizationId  String?   @db.Uuid // null = platform-global canonical baseline
+  entityType      String // country | currency | authority | point_of_entry | country_policy | …
+  recordKey       String // natural business key, unique per (org, entityType)
+  name            String
+  countryId       String?   @db.Uuid // self-FK: owning country for country-scoped records
+  parentId        String?   @db.Uuid // self-FK: generic hierarchy (port→subdivision, …)
+  code            String? // ISO / UN-LOCODE / IATA etc. for fast lookup
+  policyType      String? // for entityType=country_policy (tax | tariff | certificate | …)
+  hsCode          String?
+  productCategory String?
+  attributes      Json      @default("{}")
+  tags            String[]  @default([])
+  version         Int       @default(1)
+  status          String    @default("DRAFT") // DRAFT | PUBLISHED | SUPERSEDED | ARCHIVED
+  effectiveFrom   DateTime?
+  effectiveTo     DateTime?
+  publishedAt     DateTime?
+  authority       String? // issuing authority (envelope provenance, free text)
+  source          String?
+  checksum        String
+  auditReference  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  deletedAt       DateTime?
+
+  country       GckbRecord?        @relation("GckbRecordCountry", fields: [countryId], references: [id], onDelete: SetNull)
+  countryOf     GckbRecord[]       @relation("GckbRecordCountry")
+  parent        GckbRecord?        @relation("GckbRecordParent", fields: [parentId], references: [id], onDelete: SetNull)
+  children      GckbRecord[]       @relation("GckbRecordParent")
+  relationships GckbRelationship[] @relation("GckbRelFrom")
+  revisions     GckbRevision[]
+
+  @@index([organizationId])
+  @@index([entityType])
+  @@index([entityType, recordKey])
+  @@index([countryId])
+  @@index([parentId])
+  @@index([policyType])
+  @@index([hsCode])
+  @@index([productCategory])
+  @@index([code])
+  @@index([status])
+  @@index([effectiveFrom])
+  @@index([effectiveTo])
+  @@index([deletedAt])
+  @@map("gckb_records")
+}
+
+model GckbRelationship {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  fromId         String   @db.Uuid
+  relationType   String // MEMBER_OF | LOCATED_IN | GOVERNED_BY | REQUIRES_CERTIFICATE | APPLIES_TO_HS | REFERENCES_RULE | …
+  toType         String // gckb entityType OR external (rule | document | product | organization | hs_code)
+  toId           String?
+  toRef          String?
+  metadata       Json?
+  createdAt      DateTime @default(now())
+
+  from GckbRecord @relation("GckbRelFrom", fields: [fromId], references: [id], onDelete: Cascade)
+
+  @@index([fromId])
+  @@index([toType, toId])
+  @@index([relationType])
+  @@index([organizationId])
+  @@map("gckb_relationships")
+}
+
+/// Append-only version history for every GCKB record (immutable, CR-14). Each
+/// create/update/publish/archive/import writes one full snapshot, enabling
+/// version comparison and forensic replay. DB trigger blocks UPDATE/DELETE so
+/// historical policy is queryable forever and nothing is ever overwritten.
+model GckbRevision {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String?  @db.Uuid
+  recordId       String?  @db.Uuid
+  entityType     String
+  recordKey      String
+  version        Int
+  action         String // CREATE | UPDATE | PUBLISH | ARCHIVE | SUPERSEDE | IMPORT
+  snapshot       Json
+  checksum       String
+  actorId        String
+  actorRole      String?
+  source         String?
+  reason         String?
+  createdAt      DateTime @default(now())
+
+  record GckbRecord? @relation(fields: [recordId], references: [id], onDelete: SetNull)
+
+  @@index([recordId])
+  @@index([entityType, recordKey])
+  @@index([organizationId])
+  @@index([createdAt])
+  @@map("gckb_revisions")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Treasury engine (Phase 2 — wallets, multi-currency accounts, FX, fees,
+// liquidity). Built ON TOP of the immutable settlement ledger: every wallet
+// balance is a DERIVED sum of ledger account balances / entries. The only
+// mutable "balance" rows are the explicitly-cached wallet_projections and the
+// append-only liquidity_positions snapshots. Tenant-owned and RLS-scoped.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum WalletType {
+  USER
+  COMPANY
+  MERCHANT
+  ESCROW
+  RESERVE
+  TREASURY
+  VIRTUAL
+  SETTLEMENT
+  INTEREST
+}
+
+enum TreasuryAccountKind {
+  OPERATING
+  SETTLEMENT
+  RESERVE
+  LIQUIDITY
+  ESCROW
+  INTEREST
+  FX
+  FEE
+  SUSPENSE
+}
+
+enum FeeType {
+  FLAT
+  PERCENTAGE
+  TIER
+}
+
+enum FXQuoteStatus {
+  QUOTED
+  LOCKED
+  EXPIRED
+  EXECUTED
+  CANCELLED
+}
+
+enum FXTradeStatus {
+  EXECUTED
+  REVERSED
+}
+
+/// Registry mapping a (kind, currency) to its backing ledger account. One live
+/// treasury account per (org, kind, currency).
+model TreasuryAccount {
+  id              String              @id @default(uuid()) @db.Uuid
+  organizationId  String              @db.Uuid
+  kind            TreasuryAccountKind
+  currency        String
+  ledgerAccountId String              @db.Uuid
+  status          String              @default("ACTIVE")
+  metadata        Json?
+  version         Int                 @default(1)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  deletedAt       DateTime?
+
+  @@index([organizationId])
+  @@index([kind])
+  @@index([currency])
+  @@index([deletedAt])
+  @@map("treasury_accounts")
+}
+
+/// A wallet whose funds live across four ledger bucket accounts. Balances are
+/// always derived from those accounts — there is no balance column here.
+model Wallet {
+  id                 String     @id @default(uuid()) @db.Uuid
+  organizationId     String     @db.Uuid
+  type               WalletType
+  ownerOrgId         String?    @db.Uuid
+  ownerRef           String?
+  currency           String     @default("USD")
+  status             String     @default("ACTIVE")
+  reference          String?
+  availableAccountId String     @db.Uuid
+  heldAccountId      String     @db.Uuid
+  reservedAccountId  String     @db.Uuid
+  pendingAccountId   String     @db.Uuid
+  metadata           Json?
+  version            Int        @default(1)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  deletedAt          DateTime?
+
+  @@index([organizationId])
+  @@index([type])
+  @@index([ownerOrgId])
+  @@index([currency])
+  @@index([deletedAt])
+  @@map("wallets")
+}
+
+/// Cached projection of a wallet's derived balances (the ONE place a mutable
+/// balance is stored — it is always recomputable from the ledger).
+model WalletProjection {
+  id               String   @id @default(uuid()) @db.Uuid
+  organizationId   String   @db.Uuid
+  walletId         String   @unique @db.Uuid
+  currency         String
+  available        Decimal  @db.Decimal(20, 4)
+  held             Decimal  @db.Decimal(20, 4)
+  reserved         Decimal  @db.Decimal(20, 4)
+  pending          Decimal  @db.Decimal(20, 4)
+  incoming         Decimal  @db.Decimal(20, 4)
+  outgoing         Decimal  @db.Decimal(20, 4)
+  total            Decimal  @db.Decimal(20, 4)
+  projected        Decimal  @db.Decimal(20, 4)
+  computedAt       DateTime
+  sourceEntryCount Int      @default(0)
+  version          Int      @default(1)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([organizationId])
+  @@map("wallet_projections")
+}
+
+/// A priced FX quote (mid + spread/margin → all-in rate), with an expiry.
+model FXQuote {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @db.Uuid
+  reference      String?
+  baseCurrency   String
+  quoteCurrency  String
+  baseAmount     Decimal?      @db.Decimal(20, 4)
+  midRate        Decimal       @db.Decimal(20, 8)
+  spreadBps      Int
+  marginBps      Int
+  allInRate      Decimal       @db.Decimal(20, 8)
+  quoteAmount    Decimal?      @db.Decimal(20, 4)
+  status         FXQuoteStatus @default(QUOTED)
+  rateSource     String        @default("internal")
+  expiresAt      DateTime
+  lockedUntil    DateTime?
+  correlationId  String
+  metadata       Json?
+  version        Int           @default(1)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([baseCurrency, quoteCurrency])
+  @@index([createdAt])
+  @@map("fx_quotes")
+}
+
+/// An executed FX conversion, recording the TWO balanced ledger postings (one
+/// per currency leg) that effected it. Append-only (status may flip to REVERSED).
+model FXTrade {
+  id               String        @id @default(uuid()) @db.Uuid
+  organizationId   String        @db.Uuid
+  quoteId          String        @db.Uuid
+  reference        String?
+  baseCurrency     String
+  quoteCurrency    String
+  baseAmount       Decimal       @db.Decimal(20, 4)
+  quoteAmount      Decimal       @db.Decimal(20, 4)
+  allInRate        Decimal       @db.Decimal(20, 8)
+  status           FXTradeStatus @default(EXECUTED)
+  baseLedgerTxnId  String        @db.Uuid
+  quoteLedgerTxnId String        @db.Uuid
+  correlationId    String
+  metadata         Json?
+  createdAt        DateTime      @default(now())
+
+  @@index([organizationId])
+  @@index([quoteId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("fx_trades")
+}
+
+/// An append-only liquidity snapshot for a currency at a point in time.
+model LiquidityPosition {
+  id                 String   @id @default(uuid()) @db.Uuid
+  organizationId     String   @db.Uuid
+  currency           String
+  asOf               DateTime
+  currentPosition    Decimal  @db.Decimal(20, 4)
+  availableLiquidity Decimal  @db.Decimal(20, 4)
+  reserved           Decimal  @db.Decimal(20, 4)
+  exposure           Decimal  @db.Decimal(20, 4)
+  forecast           Decimal  @db.Decimal(20, 4)
+  reserveRatioBps    Int      @default(0)
+  metadata           Json?
+  createdAt          DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([currency])
+  @@index([asOf])
+  @@map("liquidity_positions")
+}
+
+/// A configurable fee rule (flat / percentage / tier) with optional clamps.
+model FeeRule {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid
+  code           String
+  name           String
+  type           FeeType
+  scope          String // SETTLEMENT | FX | BANK | PLATFORM | PARTNER | … (data)
+  currency       String
+  basisPoints    Int?
+  flatAmount     Decimal?  @db.Decimal(20, 4)
+  tiers          Json?
+  minFee         Decimal?  @db.Decimal(20, 4)
+  maxFee         Decimal?  @db.Decimal(20, 4)
+  feeAccountId   String?   @db.Uuid // ledger account that receives the fee
+  country        String?
+  priority       Int       @default(0)
+  status         String    @default("ACTIVE")
+  effectiveFrom  DateTime?
+  effectiveTo    DateTime?
+  metadata       Json?
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+
+  @@index([organizationId])
+  @@index([scope])
+  @@index([currency])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("fee_rules")
+}
+
+/// An append-only record of a charged fee and the ledger posting that booked it.
+model FeeTransaction {
+  id                  String   @id @default(uuid()) @db.Uuid
+  organizationId      String   @db.Uuid
+  feeRuleId           String?  @db.Uuid
+  reference           String?
+  scope               String
+  baseAmount          Decimal  @db.Decimal(20, 4)
+  feeAmount           Decimal  @db.Decimal(20, 4)
+  currency            String
+  ledgerTransactionId String?  @db.Uuid
+  sourceType          String?
+  sourceId            String?  @db.Uuid
+  correlationId       String
+  metadata            Json?
+  createdAt           DateTime @default(now())
+
+  @@index([organizationId])
+  @@index([feeRuleId])
+  @@index([scope])
+  @@index([createdAt])
+  @@map("fee_transactions")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Auction engine (Phase 2): live bidding, proxy/anti-snipe, winner selection,
+// settlement and an append-only per-auction audit log. Money is Decimal(20,4)
+// + currency; settlement posts to the immutable ledger via SettlementInstruction.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum AuctionType {
+  ENGLISH // ascending open-cry with eBay-style proxy bidding
+  SEALED // single sealed bid (reserved for future use)
+  DUTCH // descending clock (reserved for future use)
+}
+
+enum AuctionStatus {
+  DRAFT // created, not yet scheduled
+  SCHEDULED // start/end set, not yet open
+  LIVE // open for bidding
+  ENDED // bidding closed, awaiting settlement
+  SETTLED // winner selected and settlement created/finalised
+  FAILED // closed with no qualifying winner (no bids / reserve unmet)
+  CANCELLED // withdrawn before settlement
+}
+
+enum AuctionBidStatus {
+  ACCEPTED // recorded and standing
+  WINNING // currently the leading bid
+  OUTBID // superseded by a higher (or proxy) bid
+  WON // final winner at close
+  LOST // did not win at close
+  REJECTED // rejected at placement (too low / auction not live)
+  RETRACTED // withdrawn (rare; fully audited)
+}
+
+/// A timed auction lot. Mutable aggregate guarded by optimistic locking; price,
+/// leader and end time advance as bids land. Reserve is a hidden floor.
+model Auction {
+  id                 String        @id @default(uuid()) @db.Uuid
+  organizationId     String        @db.Uuid
+  reference          String? // external/idempotency key (unique per org while set)
+  type               AuctionType   @default(ENGLISH)
+  status             AuctionStatus @default(DRAFT)
+  title              String
+  lotRef             String? // links to a product / listing / trade lot
+  tradeId            String?       @db.Uuid
+  sellerOrgId        String?       @db.Uuid
+  sellerRef          String?
+  currency           String        @default("USD")
+  startPrice         Decimal       @db.Decimal(20, 4)
+  reservePrice       Decimal?      @db.Decimal(20, 4) // hidden floor; unmet => FAILED
+  bidIncrement       Decimal       @default(1) @db.Decimal(20, 4)
+  buyNowPrice        Decimal?      @db.Decimal(20, 4)
+  currentPrice       Decimal       @default(0) @db.Decimal(20, 4) // standing/visible price
+  currentBidId       String?       @db.Uuid // the leading bid
+  leaderActorId      String? // current leader (denormalised for fast checks)
+  leaderMaxProxy     Decimal?      @db.Decimal(20, 4) // hidden proxy ceiling of the leader
+  bidCount           Int           @default(0)
+  startsAt           DateTime
+  endsAt             DateTime
+  originalEndsAt     DateTime
+  antiSnipeSeconds   Int           @default(0) // extension applied when a late bid lands
+  antiSnipeThreshold Int           @default(0) // a bid is "late" within this many secs of endsAt
+  extensionCount     Int           @default(0)
+  winnerBidId        String?       @db.Uuid
+  winnerActorId      String?
+  winningAmount      Decimal?      @db.Decimal(20, 4)
+  settlementId       String?       @db.Uuid // links to a SettlementInstruction
+  settledAt          DateTime?
+  closedReason       String?
+  metadata           Json?
+  version            Int           @default(1)
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  deletedAt          DateTime?
+
+  bids   AuctionBid[]
+  events AuctionEvent[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([endsAt])
+  @@index([tradeId])
+  @@index([deletedAt])
+  @@map("auctions")
+}
+
+/// One bid. The amount and time are immutable facts; only `status` flips as the
+/// auction progresses. The DB forbids deletion (append-only via no-delete trigger).
+model AuctionBid {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  auctionId      String           @db.Uuid
+  bidderActorId  String
+  bidderOrgId    String?          @db.Uuid
+  amount         Decimal          @db.Decimal(20, 4) // visible/standing amount committed
+  maxProxyAmount Decimal?         @db.Decimal(20, 4) // proxy ceiling for auto-bidding
+  currency       String           @default("USD")
+  status         AuctionBidStatus @default(ACCEPTED)
+  isAutoBid      Boolean          @default(false) // raised by the proxy engine, not a human action
+  sequence       Int // monotonic order within the auction
+  reference      String? // idempotency key (unique per org+auction while set)
+  placedAt       DateTime         @default(now())
+  metadata       Json?
+
+  auction Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([auctionId, amount])
+  @@index([auctionId, sequence])
+  @@index([bidderActorId])
+  @@index([status])
+  @@map("auction_bids")
+}
+
+/// Append-only forensic log of everything that happens to an auction: every
+/// bid, proxy raise, anti-snipe extension and state transition. Never updated
+/// or deleted (enforced by DB trigger).
+model AuctionEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  auctionId      String   @db.Uuid
+  sequence       Int // event order within the auction
+  type           String // BID_PLACED | BID_OUTBID | PROXY_RAISE | ANTI_SNIPE_EXTENDED | OPENED | CLOSED | WINNER_SELECTED | SETTLED | CANCELLED | REJECTED
+  actorId        String
+  actorRole      String?
+  bidId          String?  @db.Uuid
+  amount         Decimal? @db.Decimal(20, 4)
+  currency       String?
+  priceBefore    Decimal? @db.Decimal(20, 4)
+  priceAfter     Decimal? @db.Decimal(20, 4)
+  data           Json?
+  correlationId  String?
+  createdAt      DateTime @default(now())
+
+  auction Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+
+  @@unique([auctionId, sequence])
+  @@index([organizationId])
+  @@index([auctionId, sequence])
+  @@index([type])
+  @@index([createdAt])
+  @@map("auction_events")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Compliance publish gate (Phase 2): AI content moderation + a publish gate
+// that folds restricted-goods, sanctions, country-rule and moderation screens
+// into one publish decision before a listing/lot can go live.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum ModerationStatus {
+  PENDING
+  CLEARED
+  FLAGGED // needs human review
+  BLOCKED
+}
+
+enum PublishGateStatus {
+  DRAFT
+  SUBMITTED
+  IN_REVIEW
+  APPROVED
+  REJECTED
+  PUBLISHED
+  SUSPENDED
+}
+
+enum PublishGateDecision {
+  APPROVE
+  REVIEW
+  REJECT
+}
+
+/// One AI moderation verdict over a piece of listing content.
+model ModerationCase {
+  id             String           @id @default(uuid()) @db.Uuid
+  organizationId String           @db.Uuid
+  subjectType    String // listing | auction_lot | product | document
+  subjectId      String
+  reference      String?
+  status         ModerationStatus @default(PENDING)
+  decision       String? // CLEAR | REVIEW | BLOCK (engine verdict)
+  score          Int              @default(0)
+  model          String           @default("heuristic-v1")
+  labels         Json?
+  reasons        Json?
+  decidedBy      String?
+  decidedAt      DateTime?
+  metadata       Json?
+  version        Int              @default(1)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@index([organizationId])
+  @@index([subjectType, subjectId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("moderation_cases")
+}
+
+/// The publish gate for a subject (listing/lot). Aggregates the four compliance
+/// checks into a decision and tracks the publish lifecycle. Mutable workflow row
+/// under optimistic locking; soft-deleted, never hard-deleted.
+model PublishGate {
+  id              String               @id @default(uuid()) @db.Uuid
+  organizationId  String               @db.Uuid
+  subjectType     String
+  subjectId       String
+  reference       String?
+  tradeId         String?              @db.Uuid
+  status          PublishGateStatus    @default(DRAFT)
+  decision        PublishGateDecision?
+  checks          Json?
+  blockers        Json?
+  warnings        Json?
+  requiredActions Json?
+  goods           Json?
+  sanctions       Json?
+  country         Json?
+  moderationCaseId String?             @db.Uuid
+  evaluatedAt     DateTime?
+  decidedBy       String?
+  decidedAt       DateTime?
+  publishedAt     DateTime?
+  metadata        Json?
+  version         Int                  @default(1)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  deletedAt       DateTime?
+
+  @@index([organizationId])
+  @@index([subjectType, subjectId])
+  @@index([status])
+  @@index([tradeId])
+  @@index([deletedAt])
+  @@map("publish_gates")
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Logistics engine (Phase 2): warehouses, carriers, freight quotes, container
+// management, shipments and an append-only tracking timeline.
+// ──────────────────────────────────────────────────────────────────────────
+
+enum FreightMode {
+  SEA
+  AIR
+  ROAD
+  RAIL
+  MULTIMODAL
+}
+
+enum WarehouseType {
+  GENERAL
+  DISTRIBUTION
+  BONDED
+  COLD_STORAGE
+  FULFILLMENT
+  CROSS_DOCK
+}
+
+enum FreightQuoteStatus {
+  DRAFT
+  QUOTED
+  ACCEPTED
+  EXPIRED
+  REJECTED
+}
+
+enum LogisticsShipmentStatus {
+  CREATED
+  BOOKED
+  IN_TRANSIT
+  ARRIVED
+  CUSTOMS_HOLD
+  DELIVERED
+  EXCEPTION
+  CANCELLED
+}
+
+enum ContainerStatus {
+  EMPTY
+  ALLOCATED
+  LOADING
+  LOADED
+  IN_TRANSIT
+  DISCHARGED
+  RETURNED
+}
+
+model Warehouse {
+  id             String        @id @default(uuid()) @db.Uuid
+  organizationId String        @db.Uuid
+  code           String
+  name           String
+  type           WarehouseType @default(GENERAL)
+  addressLine    String?
+  city           String?
+  country        String?
+  lat            Decimal?      @db.Decimal(9, 6)
+  lng            Decimal?      @db.Decimal(9, 6)
+  capacityUnits  Int?
+  status         String        @default("ACTIVE") // ACTIVE | INACTIVE
+  metadata       Json?
+  version        Int           @default(1)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  containers Container[]
+
+  @@index([organizationId])
+  @@index([country])
+  @@index([deletedAt])
+  @@map("warehouses")
+}
+
+model Carrier {
+  id             String      @id @default(uuid()) @db.Uuid
+  organizationId String      @db.Uuid
+  code           String
+  name           String
+  mode           FreightMode
+  scac           String? // Standard Carrier Alpha Code (ocean/road)
+  iataCode       String? // air carrier code
+  services       Json?
+  rating         Decimal?    @db.Decimal(3, 2)
+  status         String      @default("ACTIVE")
+  metadata       Json?
+  version        Int         @default(1)
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?
+
+  @@index([organizationId])
+  @@index([mode])
+  @@index([deletedAt])
+  @@map("carriers")
+}
+
+model FreightQuote {
+  id                 String             @id @default(uuid()) @db.Uuid
+  organizationId     String             @db.Uuid
+  reference          String?
+  carrierId          String?            @db.Uuid
+  mode               FreightMode
+  originCountry      String?
+  originPort         String?
+  destinationCountry String?
+  destinationPort    String?
+  containerType      String?
+  weightKg           Decimal?           @db.Decimal(14, 3)
+  volumeM3           Decimal?           @db.Decimal(14, 3)
+  chargeableWeightKg Decimal?           @db.Decimal(14, 3)
+  currency           String             @default("USD")
+  baseAmount         Decimal            @db.Decimal(20, 4)
+  surchargeAmount    Decimal            @default(0) @db.Decimal(20, 4)
+  totalAmount        Decimal            @db.Decimal(20, 4)
+  transitDays        Int?
+  status             FreightQuoteStatus @default(QUOTED)
+  validUntil         DateTime?
+  acceptedShipmentId String?            @db.Uuid
+  metadata           Json?
+  version            Int                @default(1)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
+
+  @@index([organizationId])
+  @@index([carrierId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("freight_quotes")
+}
+
+model LogisticsShipment {
+  id                  String                  @id @default(uuid()) @db.Uuid
+  organizationId      String                  @db.Uuid
+  reference           String?
+  tradeId             String?                 @db.Uuid
+  carrierId           String?                 @db.Uuid
+  freightQuoteId      String?                 @db.Uuid
+  mode                FreightMode
+  status              LogisticsShipmentStatus @default(CREATED)
+  trackingNumber      String?
+  originWarehouseId   String?                 @db.Uuid
+  destWarehouseId     String?                 @db.Uuid
+  originLocation      String?
+  destinationLocation String?
+  incoterm            String?
+  etd                 DateTime?
+  eta                 DateTime?
+  deliveredAt         DateTime?
+  lastEventAt         DateTime?
+  lastLocation        String?
+  metadata            Json?
+  version             Int                     @default(1)
+  createdAt           DateTime                @default(now())
+  updatedAt           DateTime                @updatedAt
+  deletedAt           DateTime?
+
+  containers Container[]
+  events     ShipmentTrackingEvent[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([tradeId])
+  @@index([carrierId])
+  @@index([deletedAt])
+  @@map("logistics_shipments")
+}
+
+model Container {
+  id              String          @id @default(uuid()) @db.Uuid
+  organizationId  String          @db.Uuid
+  containerNo     String
+  type            String // 20GP | 40GP | 40HC | 45HC | 20RF | ...
+  sealNo          String?
+  status          ContainerStatus @default(EMPTY)
+  shipmentId      String?         @db.Uuid
+  warehouseId     String?         @db.Uuid
+  grossWeightKg   Decimal?        @db.Decimal(14, 3)
+  tareWeightKg    Decimal?        @db.Decimal(14, 3)
+  cargoDescription String?
+  metadata        Json?
+  version         Int             @default(1)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  deletedAt       DateTime?
+
+  shipment  LogisticsShipment? @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+  warehouse Warehouse?         @relation(fields: [warehouseId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([shipmentId])
+  @@index([warehouseId])
+  @@index([status])
+  @@index([deletedAt])
+  @@map("containers")
+}
+
+/// Append-only tracking timeline for a shipment (never updated or deleted).
+model ShipmentTrackingEvent {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid
+  shipmentId     String   @db.Uuid
+  sequence       Int
+  type           String // BOOKED | DEPARTED | ARRIVED | CUSTOMS | DELIVERED | EXCEPTION | ...
+  status         String?
+  location       String?
+  description    String?
+  occurredAt     DateTime
+  source         String   @default("system")
+  data           Json?
+  correlationId  String?
+  createdAt      DateTime @default(now())
+
+  shipment LogisticsShipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@unique([shipmentId, sequence])
+  @@index([organizationId])
+  @@index([shipmentId, sequence])
+  @@index([occurredAt])
+  @@map("shipment_tracking_events")
 }

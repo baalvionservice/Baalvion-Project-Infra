@@ -78,5 +78,14 @@
 		-Server
 	}
 
-	reverse_proxy admin-web:3030
+	# BFF shim: the admin image is built to call /api-bff/knowledge/cms/... but the
+	# console's next.config has no /api-bff rewrite (and the gateway has no cms target),
+	# so terminate the CMS BFF path here at the edge -> cms-service, which authenticates
+	# the Bearer the console already sends. Everything else falls through to the app.
+	handle_path /api-bff/knowledge/cms/* {
+		reverse_proxy cms-service:3011
+	}
+	handle {
+		reverse_proxy admin-web:3030
+	}
 }

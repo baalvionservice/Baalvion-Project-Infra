@@ -212,7 +212,10 @@ export default function LoginPage() {
             </CardContent>
             <CardFooter className="flex flex-col border-t bg-muted/30 pt-8 pb-8 space-y-4">
               <p className="text-[10px] font-bold text-center text-muted-foreground w-full">
-                New to Baalvion? <Link href={PATHS.ONBOARD} className="text-primary font-black uppercase tracking-widest hover:underline">Get Verified</Link>
+                New to Baalvion? <Link href={PATHS.REGISTER} className="text-primary font-black uppercase tracking-widest hover:underline">Create Account</Link>
+              </p>
+              <p className="text-[10px] font-bold text-center text-muted-foreground w-full">
+                Need institutional onboarding? <Link href={PATHS.ONBOARD} className="text-primary font-black uppercase tracking-widest hover:underline">Get Verified</Link>
               </p>
             </CardFooter>
           </Card>
