@@ -177,6 +177,90 @@ async function getOrder(storeId, orderId, actor) {
     return data;
 }
 
+// ── PUBLIC guest order lookup / tracking (email + orderNumber) ───────────────────────────────────
+// A returning guest who lost their signed X-Cart-Session (closed/reopened the browser) can still
+// find and track an order with the order number on their confirmation + the email they used. This is
+// the only order read that requires NEITHER auth NOR a guest session, so it is deliberately narrow:
+//   • the orderNumber embeds CSPRNG bytes (generateOrderNumber) → non-enumerable,
+//   • the supplied email MUST match the order's recipient (constant-time compare),
+//   • a mismatch on EITHER field returns the SAME 404 (never reveals which was wrong),
+//   • only a SAFE projection is returned — no full street address, phone, customer id, internal
+//     metadata (guest session / inventory locks / idempotency key), or ledger refs,
+//   • the route (orderRoutes) is rate-limited well below the global IP cap.
+
+// Constant-time string compare (length-padded) so an attacker can't time-probe the recipient email.
+function timingSafeEqualStr(a, b) {
+    const ba = Buffer.from(String(a));
+    const bb = Buffer.from(String(b));
+    if (ba.length !== bb.length) return false;
+    return crypto.timingSafeEqual(ba, bb);
+}
+
+// Every email an order can legitimately be looked up by: the address contact email(s) the guest
+// entered at checkout, plus the linked customer's email (a registered shopper looking up without
+// signing in). Lower-cased for case-insensitive matching.
+async function orderRecipientEmails(order) {
+    const out = new Set();
+    const ship = order.shippingAddress || {};
+    const bill = order.billingAddress || {};
+    if (ship.email) out.add(String(ship.email).trim().toLowerCase());
+    if (bill.email) out.add(String(bill.email).trim().toLowerCase());
+    if (order.customerId) {
+        const c = await OrdersCustomer.findByPk(order.customerId, { attributes: ['email'] });
+        if (c && c.email) out.add(String(c.email).trim().toLowerCase());
+    }
+    return [...out];
+}
+
+// SAFE, PII-minimised tracking projection for the public lookup. Exposes order state + totals +
+// line items + a COARSE destination (city/country only) — never the street address, phone, contact
+// email, customer id, or internal metadata.
+function toTrackingView(order) {
+    const o = typeof order.toJSON === 'function' ? order.toJSON() : order;
+    const ship = o.shippingAddress || {};
+    return {
+        orderNumber: o.orderNumber,
+        status: o.status,
+        paymentStatus: o.paymentStatus,
+        fulfillmentStatus: o.fulfillmentStatus,
+        currencyCode: o.currencyCode,
+        subtotal: o.subtotal,
+        discountAmount: o.discountAmount,
+        shippingAmount: o.shippingAmount,
+        taxAmount: o.taxAmount,
+        totalAmount: o.totalAmount,
+        placedAt: o.createdAt,
+        updatedAt: o.updatedAt,
+        cancelledAt: o.cancelledAt || null,
+        // Coarse destination only — confirms "shipping to the right place" without leaking the full address.
+        shipTo: { city: ship.city || null, countryCode: ship.countryCode || null },
+        items: (o.items || []).map((i) => ({
+            name: i.name,
+            variantName: i.variantName || null,
+            sku: i.sku,
+            quantity: i.quantity,
+            price: i.price,
+            total: i.total,
+        })),
+    };
+}
+
+async function lookupGuestOrder(storeId, { email, orderNumber } = {}) {
+    const NOT_FOUND = new AppError('NOT_FOUND', 'No order matches that order number and email', 404);
+    const provided = String(email || '').trim().toLowerCase();
+    const number = String(orderNumber || '').trim();
+    if (!provided || !number) throw NOT_FOUND;
+    const order = await OrdersOrder.findOne({
+        where: { storeId, orderNumber: number },
+        include: [{ model: OrdersOrderItem, as: 'items' }],
+    });
+    if (!order) throw NOT_FOUND; // unknown order number → generic 404 (no existence oracle)
+    const recipients = await orderRecipientEmails(order);
+    const matches = recipients.some((e) => timingSafeEqualStr(e, provided));
+    if (!matches) throw NOT_FOUND; // email mismatch → SAME 404 as unknown order
+    return toTrackingView(order);
+}
+
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /**
@@ -926,7 +1010,7 @@ async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, a
     return out;
 }
 
-module.exports = { listOrders, listMyOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, failPayment, cancelPayment, handlePaymentWebhook };
+module.exports = { listOrders, listMyOrders, getOrder, lookupGuestOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, failPayment, cancelPayment, handlePaymentWebhook };
 // Appended export (separate statement to avoid colliding with concurrent edits to the line above).
 module.exports.capturePaymentFromWebhook = capturePaymentFromWebhook;
 module.exports.settlePayuReturn = settlePayuReturn;

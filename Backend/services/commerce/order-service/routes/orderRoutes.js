@@ -1,13 +1,25 @@
 'use strict';
 const { Router } = require('express');
+const rateLimit = require('express-rate-limit');
 const ctrl = require('../controller/orderController');
 const shipmentCtrl = require('../controller/shipmentController');
 const { validate } = require('../middleware/validate');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { loadStoreRole, requireStoreRole } = require('../middleware/rbacPep');
-const { createOrderSchema, updateOrderStatusSchema, cancelOrderSchema, recordPaymentSchema, refundPaymentSchema, createPaymentIntentSchema, confirmPaymentSchema, createShipmentSchema, updateShipmentSchema } = require('../validators/orderSchemas');
+const { createOrderSchema, updateOrderStatusSchema, cancelOrderSchema, recordPaymentSchema, refundPaymentSchema, createPaymentIntentSchema, confirmPaymentSchema, createShipmentSchema, updateShipmentSchema, lookupOrderSchema } = require('../validators/orderSchemas');
 
 const router = Router({ mergeParams: true });
+
+// Guest order-lookup limiter: email+orderNumber is a (weak) guessing surface, so cap it well below
+// the global IP limit. Defence in depth — the orderNumber already embeds CSPRNG bytes (non-enumerable).
+// Env-overridable, safe non-prod default.
+const orderLookupLimit = rateLimit({
+    windowMs: 60_000,
+    max: Number(process.env.ORDER_LOOKUP_RL_MAX || 12),
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many order lookups, please slow down' } },
+});
 
 // ── Admin surface (RBAC store-scoped) ──────────────────────────────────────────
 // The router is mounted under optionalAuth (guest checkout), so these admin routes RE-APPLY
@@ -27,6 +39,10 @@ router.patch('/shipments/:shipmentId/tracking', authMiddleware, loadStoreRole, r
 // carts). Ownership (owner OR guest-session OR staff) is enforced in the service layer, never here.
 // Gating these with a store-admin role would break storefront checkout.
 router.post('/', validate(createOrderSchema), ctrl.createOrder);
+// PUBLIC guest order tracking (no auth, no guest session): look up an order by email + orderNumber.
+// Rate-limited + schema-validated. A distinct literal path, so it never collides with POST '/' or
+// the GET '/:orderId' param route. Lets a returning guest track an order after losing their session.
+router.post('/lookup', orderLookupLimit, validate(lookupOrderSchema), ctrl.lookupOrder);
 // Customer-facing "my orders". MUST precede GET '/:orderId' so 'mine' is not parsed as an order id.
 // authMiddleware is re-applied (router is optionalAuth) so a guest is 401'd — there is no "my orders" for a guest.
 router.get('/mine', authMiddleware, ctrl.listMyOrders);

@@ -82,6 +82,16 @@ exports.createOrderSchema = z.object({
     idempotencyKey: z.string().max(128).optional(),
 });
 
+// PUBLIC guest order lookup (email + orderNumber). No auth/session: a returning guest who lost their
+// signed X-Cart-Session can still track an order with the order number printed on their confirmation
+// and the email they checked out with. Both fields are required; the service matches the email against
+// the order's recipient (constant-time) and returns the SAME 404 on either mismatch so the endpoint
+// never reveals which field was wrong. The route is tightly rate-limited (orderRoutes).
+exports.lookupOrderSchema = z.object({
+    email: z.string().email().max(254),
+    orderNumber: z.string().trim().min(3).max(50),
+});
+
 exports.updateOrderStatusSchema = z.object({ status: z.enum(['confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded']) });
 exports.cancelOrderSchema = z.object({ reason: z.string().min(1).max(500) });
 exports.recordPaymentSchema = z.object({
