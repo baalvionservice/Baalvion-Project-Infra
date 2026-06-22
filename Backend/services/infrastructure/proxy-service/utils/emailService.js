@@ -89,7 +89,12 @@ const sendOtpEmail = async ({ toEmail, code, expiresInMinutes }) => {
     text: `Your ${BRAND} login code is ${code}. It expires in ${expiresInMinutes} minutes. If you didn't request this, ignore this email.`,
   });
   const preview = nodemailer.getTestMessageUrl(info);
-  if (preview) console.log(`[Email] OTP login code sent to ${toEmail} — preview: ${preview}`);
+  if (preview) {
+    // Strip CR/LF from the user-supplied address before logging so a crafted email can't forge
+    // additional log lines (log injection / CWE-117). `preview` is system-generated (ethereal test URL).
+    const safeEmail = String(toEmail).replace(/[\r\n]+/g, ' ');
+    console.log(`[Email] OTP login code sent to ${safeEmail} — preview: ${preview}`);
+  }
   return { messageId: info.messageId, previewUrl: preview || null };
 };
 
