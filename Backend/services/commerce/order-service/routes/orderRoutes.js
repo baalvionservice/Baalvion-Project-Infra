@@ -6,6 +6,7 @@ const shipmentCtrl = require('../controller/shipmentController');
 const { validate } = require('../middleware/validate');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { loadStoreRole, requireStoreRole } = require('../middleware/rbacPep');
+const createCheckoutRateLimit = require('../middleware/checkoutRateLimit');
 const { createOrderSchema, updateOrderStatusSchema, cancelOrderSchema, recordPaymentSchema, refundPaymentSchema, createPaymentIntentSchema, confirmPaymentSchema, createShipmentSchema, updateShipmentSchema, lookupOrderSchema } = require('../validators/orderSchemas');
 
 const router = Router({ mergeParams: true });
@@ -20,6 +21,10 @@ const orderLookupLimit = rateLimit({
     legacyHeaders: false,
     message: { success: false, error: { code: 'RATE_LIMITED', message: 'Too many order lookups, please slow down' } },
 });
+
+// Tighter per-IP limiter for the write-side checkout/payment endpoints (order create + pay), on top
+// of the global IP read limit. Card-testing / order-spam protection. Shared across the 3 routes.
+const checkoutLimit = createCheckoutRateLimit();
 
 // ── Admin surface (RBAC store-scoped) ──────────────────────────────────────────
 // The router is mounted under optionalAuth (guest checkout), so these admin routes RE-APPLY
@@ -38,7 +43,7 @@ router.patch('/shipments/:shipmentId/tracking', authMiddleware, loadStoreRole, r
 // Authenticated → bound to the user; guest → bound to a signed X-Cart-Session (same mechanism as
 // carts). Ownership (owner OR guest-session OR staff) is enforced in the service layer, never here.
 // Gating these with a store-admin role would break storefront checkout.
-router.post('/', validate(createOrderSchema), ctrl.createOrder);
+router.post('/', checkoutLimit, validate(createOrderSchema), ctrl.createOrder);
 // PUBLIC guest order tracking (no auth, no guest session): look up an order by email + orderNumber.
 // Rate-limited + schema-validated. A distinct literal path, so it never collides with POST '/' or
 // the GET '/:orderId' param route. Lets a returning guest track an order after losing their session.
@@ -50,7 +55,7 @@ router.get('/:orderId', ctrl.getOrder);
 // Customer-readable shipment tracking for an order. No store-role gate (inherits optionalAuth);
 // ownership (owner OR guest-session OR staff) is enforced in shipmentService.listOrderShipments.
 router.get('/:orderId/shipments', shipmentCtrl.listShipments);
-router.post('/:orderId/payments/intent', validate(createPaymentIntentSchema), ctrl.createPaymentIntent);
-router.post('/:orderId/payments/confirm', validate(confirmPaymentSchema), ctrl.confirmPayment);
+router.post('/:orderId/payments/intent', checkoutLimit, validate(createPaymentIntentSchema), ctrl.createPaymentIntent);
+router.post('/:orderId/payments/confirm', checkoutLimit, validate(confirmPaymentSchema), ctrl.confirmPayment);
 
 module.exports = router;
