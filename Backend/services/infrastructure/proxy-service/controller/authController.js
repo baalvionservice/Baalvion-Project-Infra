@@ -1,6 +1,7 @@
 const authService = require('../service/authService');
 const userService = require('../service/userService');
 const signupService = require('../service/signupService');
+const otpLoginService = require('../service/otpLoginService');
 const store = require('../service/platformStore');
 const inviteStore = require('../utils/inviteStore');
 const config = require('../config/appConfig');
@@ -85,6 +86,41 @@ const login = async (req, res, next) => {
                 ip_address: ip,
             }).catch(() => {});
         }
+        return next(error);
+    }
+};
+
+// ── Passwordless email-OTP login (public) ─────────────────────────────────────────
+const requestEmailOtp = async (req, res, next) => {
+    try {
+        const ip = req.ip;
+        const rl = await rateLimiter.slidingWindow(`otp:req:${ip}`, 20, 60 * 60 * 1000);
+        if (!rl.allowed) {
+            return next(new AppError('RATE_LIMITED', 'Too many login codes requested. Please try again later.', 429));
+        }
+        const result = await otpLoginService.requestOtp({ email: req.body.email, ipAddress: ip });
+        return sendSuccess(req, res, result);
+    } catch (error) {
+        return next(error);
+    }
+};
+
+const verifyEmailOtp = async (req, res, next) => {
+    try {
+        const ip = req.ip;
+        const rl = await rateLimiter.slidingWindow(`otp:ver:${ip}`, 30, 15 * 60 * 1000);
+        if (!rl.allowed) {
+            return next(new AppError('RATE_LIMITED', 'Too many login attempts. Please try again later.', 429));
+        }
+        const result = await otpLoginService.verifyOtp({
+            email: req.body.email,
+            code: req.body.code,
+            ipAddress: ip,
+            userAgent: req.headers['user-agent'],
+        });
+        setRefreshCookie(res, result.refreshToken);
+        return sendSuccess(req, res, { token: result.token, refreshToken: result.refreshToken, user: result.user, isNewUser: result.isNewUser });
+    } catch (error) {
         return next(error);
     }
 };
@@ -239,6 +275,8 @@ const acceptInvite = async (req, res, next) => {
 module.exports = {
     register,
     login,
+    requestEmailOtp,
+    verifyEmailOtp,
     logout,
     refreshToken,
     forgotPassword,

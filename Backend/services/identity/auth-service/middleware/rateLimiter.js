@@ -49,6 +49,10 @@ const verifyTokenLimiter  = createRateLimiter({ max: 60, window: 60,    prefix: 
 // Phone OTP — keyed by the authenticated user (authMiddleware runs first), IP as a fallback.
 const otpRequestLimiter   = createRateLimiter({ max: 5,  window: 3600,  prefix: 'auth:rl:otpreq', keyFn: (req) => (req.auth?.userId || req.ip), message: 'Too many verification codes requested. Try again later.' });
 const otpVerifyLimiter    = createRateLimiter({ max: 15, window: 900,   prefix: 'auth:rl:otpver', keyFn: (req) => (req.auth?.userId || req.ip), message: 'Too many verification attempts. Try again later.' });
+// Email-OTP login — UNauthenticated, so keyed by IP. The per-email resend cooldown + single-live-code
+// invariant in emailLoginService bound abuse of any one address; this caps email-bombing across many.
+const emailOtpRequestLimiter = createRateLimiter({ max: 20, window: 3600, prefix: 'auth:rl:eotpreq', keyFn: (req) => req.ip, message: 'Too many login codes requested. Try again later.' });
+const emailOtpVerifyLimiter  = createRateLimiter({ max: 30, window: 900,  prefix: 'auth:rl:eotpver', keyFn: (req) => req.ip, message: 'Too many login attempts. Try again later.' });
 
 module.exports = {
     createRateLimiter,
@@ -59,4 +63,6 @@ module.exports = {
     verifyTokenLimiter,
     otpRequestLimiter,
     otpVerifyLimiter,
+    emailOtpRequestLimiter,
+    emailOtpVerifyLimiter,
 };

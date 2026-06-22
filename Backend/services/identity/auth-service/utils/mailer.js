@@ -31,4 +31,14 @@ async function sendMail({ to, subject, html }) {
     await t.sendMail({ from: config.email.from, to, subject, html });
 }
 
-module.exports = { sendMail };
+/**
+ * Whether a real SMTP transport is configured (i.e. SMTP_HOST is set). Flows where delivery
+ * is the WHOLE point — e.g. email-OTP login — must check this and fail loudly instead of
+ * silently falling back to the dev console logger (which would tell the user "code sent" while
+ * no email is ever delivered). Best-effort flows (register/reset) ignore this and fire-and-forget.
+ */
+function isMailerConfigured() {
+    return !!config.email.host;
+}
+
+module.exports = { sendMail, isMailerConfigured };

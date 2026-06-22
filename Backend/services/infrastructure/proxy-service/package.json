@@ -12,7 +12,7 @@
     "lint": "node --check index.js",
     "test": "node --test",
     "keys:generate": "node scripts/generateKeys.js",
-    "migrate": "psql $DATABASE_URL -f sql/schema.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f sql/003_oauth_identity.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f sql/002_rls_tenant_isolation.sql"
+    "migrate": "psql $DATABASE_URL -f sql/schema.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f sql/003_oauth_identity.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f sql/004_email_otp_login.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f sql/002_rls_tenant_isolation.sql"
   },
   "devDependencies": {
     "@opentelemetry/api": "^1.9.0",

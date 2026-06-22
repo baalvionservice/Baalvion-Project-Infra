@@ -23,6 +23,7 @@ db.RefreshToken = require('./refreshTokens')(sequelize, DataTypes);
 db.PasswordReset = require('./passwordResets')(sequelize, DataTypes);
 db.EmailVerification = require('./emailVerifications')(sequelize, DataTypes);
 db.PhoneOtp = require('./phoneOtps')(sequelize, DataTypes);
+db.EmailOtp = require('./emailOtps')(sequelize, DataTypes);
 db.AuditLog = require('./auditLogs')(sequelize, DataTypes);
 
 // Associations

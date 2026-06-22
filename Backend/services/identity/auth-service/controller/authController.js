@@ -1,5 +1,6 @@
 const authService = require('../service/authService');
 const phoneVerification = require('../service/phoneVerificationService');
+const emailLogin = require('../service/emailLoginService');
 const schemas = require('../validators/schemas');
 const { sendSuccess } = require('../utils/response');
 const { AppError } = require('../utils/errors');
@@ -159,6 +160,32 @@ exports.verifyPhoneOtp = async (req, res, next) => {
         req.audit?.log('phone_verified', { userId: req.auth.userId, orgId: req.auth.orgId });
         sendSuccess(req, res, result);
     } catch (err) { next(err); }
+};
+
+// ── Passwordless email-OTP login — public (no session yet) ────────────────────────
+exports.requestEmailOtp = async (req, res, next) => {
+    try {
+        const parsed = schemas.emailOtpRequest.safeParse(req.body);
+        if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
+        const result = await emailLogin.requestOtp({ email: parsed.data.email, ipAddress: req.ip });
+        req.audit?.log('email_otp_requested', { metadata: { email: parsed.data.email } });
+        sendSuccess(req, res, result);
+    } catch (err) { next(err); }
+};
+
+exports.verifyEmailOtp = async (req, res, next) => {
+    try {
+        const parsed = schemas.emailOtpVerify.safeParse(req.body);
+        if (!parsed.success) throw new AppError('VALIDATION_ERROR', 'Invalid input', 400, parsed.error.flatten());
+        const result = await emailLogin.verifyOtp({ ...parsed.data, ...parseClientInfo(req) });
+        // Same session shape as password login — set the refresh cookie, return the access token.
+        res.cookie(config.refreshCookieName, result.refreshToken, { httpOnly: true, secure: config.env === 'production', sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 });
+        req.audit?.log('login_success', { userId: result.user?.id, orgId: result.user?.orgId, metadata: { email: parsed.data.email, method: 'email_otp', newUser: result.isNewUser } });
+        sendSuccess(req, res, { accessToken: result.accessToken, user: result.user, expiresAt: result.expiresAt, isNewUser: result.isNewUser });
+    } catch (err) {
+        req.audit?.log('login_failure', { metadata: { email: req.body?.email, method: 'email_otp', reason: err.code || 'error' } });
+        next(err);
+    }
 };
 
 exports.getMe = async (req, res, next) => {

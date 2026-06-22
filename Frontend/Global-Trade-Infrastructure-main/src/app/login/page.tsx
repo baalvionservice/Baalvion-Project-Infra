@@ -21,6 +21,7 @@ import { useAppState } from '@/app/(dashboard)/_components/app-state';
 import { safeInternalPath } from '@/lib/safe-redirect';
 import { isMfaRequiredError, type MfaKind } from './_components/mfa-login';
 import { MfaPanel } from './_components/mfa-panel';
+import { EmailOtpLogin } from './_components/email-otp-login';
 import { motion } from 'framer-motion';
 
 interface MfaFlow {
@@ -165,9 +166,10 @@ export default function LoginPage() {
                   onCancel={() => { setMfaFlow(null); setLoginError(null); }}
                 />
               ) : (
-                /* method="post" is a safety net: if a submit fires before React hydrates (slow/failed JS),
+                <div className="space-y-6">
+                {/* method="post" is a safety net: if a submit fires before React hydrates (slow/failed JS),
                    the browser's native fallback sends credentials in the POST body instead of leaking them
-                   into the URL/history via the default GET. Once hydrated, handleLogin's preventDefault wins. */
+                   into the URL/history via the default GET. Once hydrated, handleLogin's preventDefault wins. */}
                 <form onSubmit={handleLogin} method="post" className="space-y-6">
                   <div className="space-y-3">
                     <Label htmlFor="email" className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Corporate Identifier</Label>
@@ -208,6 +210,17 @@ export default function LoginPage() {
                     Authorize Session
                   </Button>
                 </form>
+
+                {/* Passwordless alternative — OUTSIDE the password form so Enter in its fields
+                    never submits the credentials form. */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center"><div className="w-full border-t" /></div>
+                  <div className="relative flex justify-center">
+                    <span className="bg-card px-3 text-[10px] font-black uppercase tracking-widest text-muted-foreground">or</span>
+                  </div>
+                </div>
+                <EmailOtpLogin />
+                </div>
               )}
             </CardContent>
             <CardFooter className="flex flex-col border-t bg-muted/30 pt-8 pb-8 space-y-4">

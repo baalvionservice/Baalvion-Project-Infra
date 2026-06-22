@@ -2,7 +2,7 @@ const express = require('express');
 const ctrl    = require('../controller/authController');
 const oauthCtrl = require('../controller/oauthController');
 const { authMiddleware }       = require('../middleware/authMiddleware');
-const { registerLimiter, forgotPwLimiter, mfaChallengeLimiter, verifyEmailLimiter, verifyTokenLimiter, otpRequestLimiter, otpVerifyLimiter } = require('../middleware/rateLimiter');
+const { registerLimiter, forgotPwLimiter, mfaChallengeLimiter, verifyEmailLimiter, verifyTokenLimiter, otpRequestLimiter, otpVerifyLimiter, emailOtpRequestLimiter, emailOtpVerifyLimiter } = require('../middleware/rateLimiter');
 const internalAuth = require('../middleware/internalAuth');
 
 // ---------------------------------------------------------------------------
@@ -41,6 +41,11 @@ router.get('/oauth/:provider/callback', oauthCtrl.callback);
 
 router.post('/register',       registerLimiter,     ctrl.register);
 router.post('/login',          loginLimiter,        ctrl.login);
+
+// Passwordless email-OTP login (public). request → emails a code; verify → mints a session.
+// Reachable from every frontend via its /auth-bff/* rewrite to auth-service /v1/auth/*.
+router.post('/email/otp/request', emailOtpRequestLimiter, ctrl.requestEmailOtp);
+router.post('/email/otp/verify',  emailOtpVerifyLimiter,  ctrl.verifyEmailOtp);
 router.post('/refresh',                             ctrl.refresh);
 router.post('/logout',         authMiddleware,       ctrl.logout);
 router.post('/forgot-password', forgotPwLimiter,    ctrl.forgotPassword);

@@ -24,6 +24,13 @@ const register = z.object({
 const phoneOtpRequest = z.object({ phone: phoneSchema.optional() });
 const phoneOtpVerify = z.object({ code: z.string().trim().regex(/^[0-9]{4,8}$/, 'Code must be 4–8 digits') });
 
+// Passwordless email-OTP login (public). request needs only the email; verify needs email + code.
+const emailOtpRequest = z.object({ email: z.string().email() });
+const emailOtpVerify = z.object({
+    email: z.string().email(),
+    code:  z.string().trim().regex(/^[0-9]{4,8}$/, 'Code must be 4–8 digits'),
+});
+
 const login = z.object({
     email: z.string().email(),
     password: z.string().min(1),
@@ -118,7 +125,7 @@ const setOrgStatus = z.object({ status: orgStatusEnum });
 
 module.exports = {
     register, login, forgotPassword, resetPassword, verifyEmail, updateMe, mfaVerify, mfaChallenge,
-    mfaEnrollStart, mfaEnroll, phoneOtpRequest, phoneOtpVerify,
+    mfaEnrollStart, mfaEnroll, phoneOtpRequest, phoneOtpVerify, emailOtpRequest, emailOtpVerify,
     createOrg, inviteMember, bulkInvite, updateMemberRole, acceptInvite, transferOwnership,
     platformCreateOrg, updateOrg, setOrgStatus,
 };

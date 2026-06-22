@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { startOAuthLogin, oauthErrorMessage } from "@/lib/oauth";
+import { EmailOtpLogin } from "@/components/auth/EmailOtpLogin";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -471,6 +472,9 @@ const AuthPage = () => {
                 Facebook
               </Button>
             </div>
+
+            {/* Passwordless email-OTP login (sign-in only) */}
+            {isLogin && <EmailOtpLogin />}
 
             {/* Toggle Link */}
             <p className="text-center text-sm text-muted-foreground mt-6">
