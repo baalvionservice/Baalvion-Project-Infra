@@ -32,3 +32,20 @@ regexTarget = "match"
 regexes = [
   '''RS256-signed''',
 ]
+
+# GTI Certificate Registry engine spec — verified false positive. The
+# generic-api-key entropy heuristic matches prose in a Markdown test-plan bullet
+# ("Unit — registration, keys, validity/signature/QR validation, required
+# `certificateTypeKey`, ...") on docs/engines/CERTIFICATE-REGISTRY.md. No real
+# credential is present. Scoped to the single documentation file + its commit.
+[[allowlists]]
+description = "GTI CERTIFICATE-REGISTRY.md docs prose — verified false positive (commit layer)"
+commits = [
+  "41506bb14f25ebeb6d1a59dd607b60bc1a2244ce",
+]
+
+[[allowlists]]
+description = "GTI CERTIFICATE-REGISTRY.md docs prose — verified false positive (path layer)"
+paths = [
+  '''Frontend/Global-Trade-Infrastructure-main/docs/engines/CERTIFICATE-REGISTRY\.md''',
+]
