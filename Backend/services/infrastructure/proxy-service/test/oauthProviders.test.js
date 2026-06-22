@@ -20,12 +20,42 @@ const {
 
 const REDIRECT = 'https://proxy.baalvionstack.com/auth-bff/oauth/google/callback';
 
-test('isSupportedProvider: only google + github', () => {
-  assert.deepStrictEqual(SUPPORTED, ['google', 'github']);
+test('isSupportedProvider: google + facebook + (dormant) github', () => {
+  assert.deepStrictEqual(SUPPORTED, ['google', 'facebook', 'github']);
   assert.strictEqual(isSupportedProvider('google'), true);
+  assert.strictEqual(isSupportedProvider('facebook'), true);
   assert.strictEqual(isSupportedProvider('github'), true);
-  assert.strictEqual(isSupportedProvider('facebook'), false);
+  assert.strictEqual(isSupportedProvider('twitter'), false);
   assert.strictEqual(isSupportedProvider(''), false);
+});
+
+test('buildAuthorizeUrl(facebook): correct endpoint, scope, state + S256 PKCE', () => {
+  const url = new URL(buildAuthorizeUrl('facebook', {
+    clientId: 'fbappid',
+    redirectUri: REDIRECT,
+    state: 'nonceFB',
+    codeChallenge: 'chalFB',
+  }));
+  assert.strictEqual(url.origin + url.pathname, 'https://www.facebook.com/v19.0/dialog/oauth');
+  assert.strictEqual(url.searchParams.get('client_id'), 'fbappid');
+  assert.strictEqual(url.searchParams.get('scope'), 'email public_profile');
+  assert.strictEqual(url.searchParams.get('state'), 'nonceFB');
+  assert.strictEqual(url.searchParams.get('code_challenge'), 'chalFB');
+  assert.strictEqual(url.searchParams.get('code_challenge_method'), 'S256');
+});
+
+test('normalizeProfile(facebook): maps id/name/email/picture; verified when email present', () => {
+  const p = normalizeProfile('facebook', {
+    id: '7788', name: 'Jane Q', email: 'Jane@FB.com',
+    picture: { data: { url: 'https://fb/pic.jpg' } },
+  });
+  assert.deepStrictEqual(p, {
+    provider: 'facebook', providerUserId: '7788', email: 'jane@fb.com',
+    fullName: 'Jane Q', avatarUrl: 'https://fb/pic.jpg', emailVerified: true,
+  });
+  const noEmail = normalizeProfile('facebook', { id: '1', name: 'No Email' });
+  assert.strictEqual(noEmail.email, '');
+  assert.strictEqual(noEmail.emailVerified, false);
 });
 
 test('buildAuthorizeUrl(google): carries client_id, redirect_uri, scope, state + PKCE', () => {

@@ -68,6 +68,10 @@ module.exports = {
             clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || '',
             clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || '',
         },
+        facebook: {
+            clientId: process.env.FACEBOOK_OAUTH_CLIENT_ID || '',
+            clientSecret: process.env.FACEBOOK_OAUTH_CLIENT_SECRET || '',
+        },
         github: {
             clientId: process.env.GITHUB_OAUTH_CLIENT_ID || '',
             clientSecret: process.env.GITHUB_OAUTH_CLIENT_SECRET || '',

@@ -14,7 +14,8 @@
 
 const crypto = require('crypto');
 
-const SUPPORTED = ['google', 'github'];
+// 'github' is retained but dormant (no UI surfaces it) — Google + Facebook are the active set.
+const SUPPORTED = ['google', 'facebook', 'github'];
 const isSupportedProvider = (provider) => SUPPORTED.includes(provider);
 
 // Endpoint + scope config per provider. Scopes are the minimum needed to read a
@@ -25,6 +26,12 @@ const ENDPOINTS = {
     token: 'https://oauth2.googleapis.com/token',
     userInfo: 'https://openidconnect.googleapis.com/v1/userinfo',
     scope: 'openid email profile',
+  },
+  facebook: {
+    authorize: 'https://www.facebook.com/v19.0/dialog/oauth',
+    token: 'https://graph.facebook.com/v19.0/oauth/access_token',
+    userInfo: 'https://graph.facebook.com/me?fields=id,name,email,picture.type(large)',
+    scope: 'email public_profile',
   },
   github: {
     authorize: 'https://github.com/login/oauth/authorize',
@@ -58,6 +65,11 @@ function buildAuthorizeUrl(provider, { clientId, redirectUri, state, codeChallen
       url.searchParams.set('code_challenge', codeChallenge);
       url.searchParams.set('code_challenge_method', 'S256');
     }
+  }
+  if (provider === 'facebook' && codeChallenge) {
+    // Facebook Login supports S256 PKCE.
+    url.searchParams.set('code_challenge', codeChallenge);
+    url.searchParams.set('code_challenge_method', 'S256');
   }
   if (provider === 'github') {
     url.searchParams.set('allow_signup', 'true');
@@ -106,6 +118,19 @@ function normalizeProfile(provider, raw = {}, emails = null) {
       fullName: raw.name || [raw.given_name, raw.family_name].filter(Boolean).join(' ') || '',
       avatarUrl: raw.picture || null,
       emailVerified: raw.email_verified === true || raw.email_verified === 'true',
+    };
+  }
+  if (provider === 'facebook') {
+    // Facebook returns email only when granted; FB emails are provider-verified.
+    // picture is an object: { data: { url } }.
+    const pic = raw.picture && raw.picture.data ? raw.picture.data.url : (typeof raw.picture === 'string' ? raw.picture : null);
+    return {
+      provider,
+      providerUserId: raw.id ? String(raw.id) : '',
+      email: raw.email ? String(raw.email).toLowerCase() : '',
+      fullName: raw.name || '',
+      avatarUrl: pic || null,
+      emailVerified: !!raw.email, // Facebook only returns verified emails
     };
   }
   if (provider === 'github') {

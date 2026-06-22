@@ -174,15 +174,15 @@ export const PROVIDER_CATALOG: ProviderDef[] = [
     websiteSlugs: OAUTH_WEBSITE_SLUGS,
   },
   {
-    provider: 'github-oauth',
+    provider: 'facebook-oauth',
     category: 'oauth',
-    label: 'GitHub Sign-In',
-    description: '"Continue with GitHub" on this site\'s login page.',
+    label: 'Facebook Login',
+    description: '"Continue with Facebook" on this site\'s login page.',
     fields: [
-      { key: 'clientId', label: 'Client ID', placeholder: 'Ov23li…' },
-      { key: 'redirectUri', label: 'Redirect URI (register this in GitHub OAuth App)', placeholder: 'https://<site>/auth-bff/oauth/github/callback' },
+      { key: 'clientId', label: 'App ID', placeholder: 'Facebook App ID' },
+      { key: 'redirectUri', label: 'Redirect URI (register in Meta App → Facebook Login)', placeholder: 'https://<site>/auth-bff/oauth/facebook/callback' },
     ],
-    secretFields: [{ key: 'clientSecret', label: 'Client Secret', placeholder: '40-char hex secret' }],
+    secretFields: [{ key: 'clientSecret', label: 'App Secret', placeholder: 'Facebook App Secret' }],
     websiteSlugs: OAUTH_WEBSITE_SLUGS,
   },
 ];

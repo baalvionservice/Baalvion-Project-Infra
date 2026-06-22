@@ -23,11 +23,14 @@ const { AppError } = require('../utils/errors');
 const Q = db.Sequelize.QueryTypes;
 
 // Our short provider name → the CMS-vault integration provider key (admin panel).
-const VAULT_PROVIDER = { google: 'google-oauth', github: 'github-oauth' };
+const VAULT_PROVIDER = { google: 'google-oauth', facebook: 'facebook-oauth', github: 'github-oauth' };
 
 // Env-configured client — the fallback when the CMS vault has nothing for this site.
 const envClientFor = (provider) =>
-  provider === 'google' ? config.oauth.google : provider === 'github' ? config.oauth.github : null;
+  provider === 'google' ? config.oauth.google
+    : provider === 'facebook' ? config.oauth.facebook
+      : provider === 'github' ? config.oauth.github
+        : null;
 
 /**
  * Resolve { clientId, clientSecret } for a provider, preferring the per-site CMS vault
@@ -85,8 +88,8 @@ async function exchangeCode(provider, { code, codeVerifier } = {}) {
     redirect_uri: redirectUri(provider),
     grant_type: 'authorization_code',
   });
-  // PKCE verifier only applies to Google here; GitHub ignores it.
-  if (codeVerifier && provider === 'google') body.set('code_verifier', codeVerifier);
+  // PKCE verifier applies to Google + Facebook; GitHub ignores it.
+  if (codeVerifier && (provider === 'google' || provider === 'facebook')) body.set('code_verifier', codeVerifier);
 
   const res = await fetch(ep.token, {
     method: 'POST',

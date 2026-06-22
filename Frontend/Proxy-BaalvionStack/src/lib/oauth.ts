@@ -1,4 +1,4 @@
-// Social login (Google / GitHub) kickoff.
+// Social login (Google / Facebook) kickoff.
 //
 // This is a FULL-PAGE navigation (not fetch): the browser must follow the provider
 // redirect and carry the httpOnly tx/refresh cookies same-origin. The backend
@@ -7,7 +7,7 @@
 // then consumes. On failure it redirects to /login?oauth_error=<code>.
 const BASE = "/auth-bff";
 
-export type OAuthProvider = "google" | "github";
+export type OAuthProvider = "google" | "facebook";
 
 const OAUTH_ERROR_MESSAGES: Record<string, string> = {
   provider_not_configured: "Social login is not configured yet. Please use email and password.",
