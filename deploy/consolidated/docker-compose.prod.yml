@@ -70,7 +70,9 @@ services:
     mem_limit: 768m
     mem_reservation: 384m
     environment:
-      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:?set NEO4J_PASSWORD}
+      # NEO4J_PASSWORD presence is enforced fleet-wide by preflight-env.js (REQUIRED set)
+      # before pm2 starts; kept as a plain ref here so env-less `compose config` validation passes.
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD}
       NEO4J_server_memory_heap_max__size: 384m
       NEO4J_server_memory_pagecache_size: 128m
     volumes:
