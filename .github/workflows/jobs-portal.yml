@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # This is a pnpm + Turborepo monorepo: the lockfile (pnpm-lock.yaml) lives
       # at the repo root and there is no per-app package-lock.json, so dependency
@@ -64,7 +64,7 @@ jobs:
       NEXT_PUBLIC_APP_URL: ${{ secrets.JOBS_APP_URL || 'http://localhost:3026' }}
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6

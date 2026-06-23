@@ -35,7 +35,7 @@ jobs:
     name: Lint & Typecheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -78,7 +78,7 @@ jobs:
     name: Backend Go (Gateway)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -113,7 +113,7 @@ jobs:
     name: Backend Java (Financial Services)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       
       - name: Setup JDK
         uses: actions/setup-java@v5
@@ -145,7 +145,7 @@ jobs:
     outputs:
       dirs: ${{ steps.extract-apps.outputs.dirs }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Extract App Directories from Config
         id: extract-apps
         run: |
@@ -164,7 +164,7 @@ jobs:
         app: ${{ fromJson(needs.discover-frontends.outputs.dirs) }}
       fail-fast: false
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
@@ -230,7 +230,7 @@ jobs:
       # only runs migrations + an RLS probe, it never mints real tokens.
       JWT_ACCESS_SECRET: ci-dummy-access-secret-not-used-for-real-auth
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # trade-service is a regular folder in this repo (vendored from its former
       # submodule), so the normal checkout already includes it.
       - uses: actions/setup-node@v6
@@ -277,7 +277,7 @@ jobs:
     name: Security — Tenant RLS Coverage Audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -307,7 +307,7 @@ jobs:
           --health-cmd "pg_isready -U postgres" --health-interval 5s
           --health-timeout 5s --health-retries 12
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -338,7 +338,7 @@ jobs:
     needs: [backend-go, backend-java, frontend-build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - name: Run Backend Integration Tests
         run: |
           # No cross-service integration harness exists yet. The previous body ran
@@ -353,11 +353,11 @@ jobs:
     name: Node Package Tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v6
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
@@ -378,7 +378,7 @@ jobs:
     # Promote into ci-success once the findings are burned down.
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Hadolint all Dockerfiles (report-only)
         run: |
           find Backend Frontend -name Dockerfile \
@@ -393,7 +393,7 @@ jobs:
     name: Deploy Compose Validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Validate deploy docker-compose files
         run: |
           set -e
@@ -473,16 +473,16 @@ jobs:
           - name: dashboard-service
             file: Backend/services/platform/dashboard-service/Dockerfile
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       # Build locally (load into the runner's docker, do NOT push) so Trivy scans the
       # exact artifact CI produced. Repo-root context: the Dockerfile runs `turbo prune`
       # over the pnpm workspace. GHA layer cache keeps re-runs fast.
       - name: Build image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: ${{ matrix.file }}
