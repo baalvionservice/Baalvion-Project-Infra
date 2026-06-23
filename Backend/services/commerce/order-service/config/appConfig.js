@@ -104,5 +104,14 @@ module.exports = {
         cron:         process.env.RECONCILE_CRON || '0 * * * *', // hourly
         autoBackfill: process.env.RECONCILE_AUTO_BACKFILL === 'true',
         lookbackDays: Number(process.env.RECONCILE_LOOKBACK_DAYS || 7),
+        // Gateway "paid-but-pending" sweep (PR3): polls the PSP for pending payments whose webhook AND
+        // sync-confirm were both lost, settling any the gateway reports paid via the idempotent capture
+        // path. OFF by default — enable only after staging validation (instant rollback via the flag).
+        // Stripe/Razorpay only; independent of the ledger toggle.
+        gatewayEnabled:      process.env.RECONCILE_GATEWAY_ENABLED === 'true',
+        gatewayCron:         process.env.RECONCILE_GATEWAY_CRON || '*/10 * * * *', // every 10 min
+        gatewayGraceMinutes: Number(process.env.RECONCILE_GATEWAY_GRACE_MIN || 15),
+        gatewayWindowHours:  Number(process.env.RECONCILE_GATEWAY_WINDOW_HOURS || 72),
+        gatewayDelayMs:      Number(process.env.RECONCILE_GATEWAY_DELAY_MS || 120),
     },
 };

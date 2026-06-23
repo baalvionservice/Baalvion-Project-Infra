@@ -97,19 +97,27 @@ exports.listPayments = async (req, res, next) => {
 // signature header and verified off the RAW body (captured in index.js). It then marks the payment +
 // invoice paid and activates the subscription — idempotently and with amount-integrity checks.
 exports.handleWebhook = async (req, res) => {
+    const raw = req.rawBody || (req.body ? Buffer.from(JSON.stringify(req.body)) : Buffer.alloc(0));
+
+    // (1) VERIFY — a bad/unverifiable signature is genuinely non-retryable (it will never become
+    // valid on retry), so it is the ONLY case that legitimately returns 4xx from a transport failure.
+    let evt;
     try {
-        const raw = req.rawBody || (req.body ? Buffer.from(JSON.stringify(req.body)) : Buffer.alloc(0));
-        const evt = await pay.verifyWebhook({ rawBody: raw, headers: req.headers });
+        evt = await pay.verifyWebhook({ rawBody: raw, headers: req.headers });
+    } catch (err) {
+        return res.status(400).json({ error: 'invalid signature' });
+    }
+
+    // (2) PROCESS — ANY internal/transient failure (DB down, deadlock, timeout) MUST be retryable
+    // (5xx) so Stripe/Razorpay/Cashfree redeliver instead of dropping a real payment. The webhook
+    // retry IS the recovery mechanism; returning 4xx here was the silent-loss bug.
+    try {
         if (evt.status === 'succeeded' && evt.ref) {
             const payment = await db.payments.findOne({ where: { provider_ref: evt.ref } });
             if (payment) {
-                // Idempotency: an already-succeeded payment short-circuits, so a replayed or
-                // redelivered (still signature-valid) event can never double-activate.
-                if (payment.status === 'succeeded') {
-                    return res.status(200).json({ received: true, idempotent: true });
-                }
                 // Amount/currency integrity: the event MUST match what we recorded at checkout
-                // (server-authoritative). A mismatch is a tamper/misroute signal → do not activate.
+                // (server-authoritative). A mismatch is a tamper/misroute signal and is deterministic
+                // (a retry cannot fix it) → 400, never activate.
                 if (evt.amountMinor != null) {
                     const expectedMinor = Math.round(Number(payment.amount) * 100);
                     const currencyOk = !evt.currency || String(evt.currency).toUpperCase() === String(payment.currency).toUpperCase();
@@ -118,12 +126,20 @@ exports.handleWebhook = async (req, res) => {
                         return res.status(400).json({ error: 'amount mismatch' });
                     }
                 }
-                payment.status = 'succeeded'; payment.raw = evt.raw || payment.raw; await payment.save();
+                // Idempotent settlement. The status flip + success log happen ONLY on the first
+                // transition (so a replay never double-applies), but invoice/subscription activation
+                // is re-asserted on every delivery — a set-to-constant write — so a retry after a
+                // partial failure converges to the correct end state without a duplicate charge.
+                const firstTransition = payment.status !== 'succeeded';
+                if (firstTransition) {
+                    payment.status = 'succeeded'; payment.raw = evt.raw || payment.raw; await payment.save();
+                    await db.integration_logs.create({ source: 'Payments', event_type: evt.type, status: 'Success', description: `Payment ${evt.ref} succeeded`, related_entity: { type: 'Company', id: payment.company_id } }).catch(() => {});
+                }
                 if (payment.invoice_id) await db.invoices.update({ status: 'Paid' }, { where: { id: payment.invoice_id } });
                 if (payment.subscription_id) await db.subscriptions.update({ status: 'active' }, { where: { id: payment.subscription_id } });
-                await db.integration_logs.create({ source: 'Payments', event_type: evt.type, status: 'Success', description: `Payment ${evt.ref} succeeded`, related_entity: { type: 'Company', id: payment.company_id } }).catch(() => {});
                 // PCL shadow (Phase 1): mirror the succeeded payment into pcl.payment_state. Post-write,
-                // fire-and-forget, never throws — cannot affect this activation.
+                // fire-and-forget, never throws — cannot affect this activation. PCL is idempotent, so
+                // re-firing on a redelivery surfaces shadow drift (it never double-applies the charge).
                 pclShadow.recordCapture({
                     paymentId: payment.id,
                     provider: payment.provider,
@@ -132,12 +148,14 @@ exports.handleWebhook = async (req, res) => {
                     currency: payment.currency,
                     orgId: payment.company_id != null ? String(payment.company_id) : undefined,
                 }).catch(() => {});
+                return res.status(200).json({ received: true, idempotent: !firstTransition });
             }
         }
-        res.status(200).json({ received: true });
+        return res.status(200).json({ received: true });
     } catch (err) {
-        // Signature/verification failures surface as 400 so the provider retries appropriately.
-        res.status(400).json({ error: String(err.message || err) });
+        // Transient/internal failure → 503 so the gateway retries (no silent loss). Log for visibility.
+        console.error(JSON.stringify({ evt: 'ctm_webhook_internal_error', ref: evt && evt.ref, msg: String((err && err.message) || err) }));
+        return res.status(503).json({ error: 'temporary processing error' });
     }
 };
 
