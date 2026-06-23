@@ -23,6 +23,7 @@
     "lighthouse": "lhci autorun",
     "test:packages": "turbo run test --filter='./Backend/packages/*'",
     "lint": "turbo run lint",
+    "lint:backend": "eslint \"Backend/services/**/*.{js,cjs,mjs}\"",
     "type-check": "turbo run type-check",
     "ci:auth:jwt-imports": "node scripts/ci/check-jwt-imports.mjs Backend",
     "ci:auth:localstorage": "node scripts/ci/check-localstorage-auth.mjs Frontend",
@@ -53,10 +54,13 @@
     "scan:errors": "node scripts/error-scan.mjs"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@lhci/cli": "^0.15.1",
     "@playwright/test": "^1.48.0",
     "@types/jest": "^29.5.0",
     "concurrently": "^8.2.2",
+    "eslint": "^10.5.0",
+    "globals": "^15.15.0",
     "jest": "^29.7.0",
     "prettier": "^3.4.2",
     "prisma": "^5.22.0",
