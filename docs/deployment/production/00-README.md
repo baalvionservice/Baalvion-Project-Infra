@@ -23,6 +23,8 @@ anchored on the **measured ~4.0 GiB idle footprint**, not estimates.
 | 05 | [Runbooks](05-runbooks.md) | deployment · rollback · backup & recovery |
 | 06 | [Monitoring & alerting](06-monitoring-and-alerting.md) | metrics, logs, alarms, dashboards |
 | 07 | [Risks & readiness](07-risks-and-readiness.md) | risks found in testing · production readiness checklist |
+| 08 | [Service dependency map](08-service-dependency-map.md) | cross-container call edges + container-DNS env |
+| 09 | [Final deployment checklist](09-final-deployment-checklist.md) | authoritative pre-deploy gate |
 
 The production compose is [`deploy/consolidated/docker-compose.prod.yml`](../../../deploy/consolidated/docker-compose.prod.yml) (deliverable 8).
 
