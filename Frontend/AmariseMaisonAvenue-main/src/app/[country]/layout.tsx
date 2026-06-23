@@ -18,6 +18,7 @@ import { VipEmailSignup } from "@/components/home/VipEmailSingup";
 import { MeowTrigger } from "@/components/layout/JudyTrigger";
 import { CookiePopup } from "@/components/layout/CookiePopup";
 import { Footer } from "@/components/layout/Footer";
+import { PresenceBeacon } from "@/components/layout/PresenceBeacon";
 
 export default function CountryLayout({
   children,
@@ -65,6 +66,8 @@ export default function CountryLayout({
 
   return (
     <div dir={i18n.getDirection()}>
+      {/* Invisible: announces this storefront tab as a live visitor (admin sees the count). */}
+      <PresenceBeacon />
       {/* <MaisonPopup /> */}
       {/* <MadAveLiveWidget /> */}
 
