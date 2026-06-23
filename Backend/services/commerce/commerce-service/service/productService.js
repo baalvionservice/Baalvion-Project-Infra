@@ -2,6 +2,7 @@
 const { Op } = require('sequelize');
 const { CommerceProduct, CommerceProductVariant, CommerceProductPricing, CommerceProductMedia, CommerceCategory, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
+const { demoteFromMock } = require('../utils/mockFlag');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
 const { slugify } = require('../utils/slugify');
@@ -71,6 +72,9 @@ async function updateProduct(storeId, productId, userId, body) {
         if (existing) throw new AppError('CONFLICT', 'Product slug already exists', 409);
     }
     await product.update({ ...body, lastEditedBy: userId });
+    // An operator editing real details curates a mock filler into a real listing — clear its mock
+    // markers so the cleanup script never removes it.
+    await demoteFromMock(product);
     await cache.del(cache.keys.product(productId));
     return product.toJSON();
 }

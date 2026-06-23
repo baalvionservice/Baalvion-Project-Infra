@@ -18,19 +18,31 @@ const resultSchema = z.object({
     defects: z.array(z.object({ severity: z.enum(['critical', 'major', 'minor']), description: z.string(), qty: z.number().int().positive().default(1) })).default([]),
 });
 
+// Permissive pagination/filter schema for GET /inspections. Mirrors the prior manual
+// defaults (page=1, limit=20) but caps page-size so an unbounded ?limit= cannot force a
+// full-table scan. Coerces strings from the query string; bad values fall back to defaults.
+const MAX_PAGE_SIZE = 100;
+const listQuerySchema = z.object({
+    orderId: z.string().optional(),
+    supplierId: z.string().optional(),
+    status: z.string().optional(),
+    page: z.coerce.number().int().positive().catch(1).default(1),
+    limit: z.coerce.number().int().positive().max(MAX_PAGE_SIZE).catch(20).default(20),
+});
+
 // F2: every read/load runs inside a tenant transaction so the RLS GUC is set.
 const listInspections = async (req, res, next) => {
     try {
-        const { orderId, supplierId, status, page = 1, limit = 20 } = req.query;
+        const { orderId, supplierId, status, page, limit } = listQuerySchema.parse(req.query || {});
         const where = {};
         if (orderId) where.order_id = orderId;
         if (supplierId) where.supplier_id = supplierId;
         if (status) where.status = status;
-        const offset = (Number(page) - 1) * Number(limit);
+        const offset = (page - 1) * limit;
         const { count, rows } = await db.sequelize.transaction((t) =>
-            db.Inspection.findAndCountAll({ where, limit: Number(limit), offset, order: [['created_at', 'DESC']], transaction: t }));
-        return sendPaginated(req, res, { items: rows, total: count, page: Number(page), limit: Number(limit) });
-    } catch (err) { return next(err); }
+            db.Inspection.findAndCountAll({ where, limit, offset, order: [['created_at', 'DESC']], transaction: t }));
+        return sendPaginated(req, res, { items: rows, total: count, page, limit });
+    } catch (err) { return next(err instanceof z.ZodError ? new AppError('BAD_REQUEST', err.errors[0].message, 422) : err); }
 };
 
 const getInspection = async (req, res, next) => {
@@ -96,3 +108,5 @@ const openCapa = async (req, res, next) => {
 };
 
 module.exports = { listInspections, getInspection, scheduleInspection, startInspection, submitResult, openCapa };
+// Exported for unit testing of pure validation logic (no DB / network).
+module.exports.schemas = { createSchema, resultSchema, listQuerySchema, MAX_PAGE_SIZE };

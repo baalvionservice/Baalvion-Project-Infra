@@ -11,6 +11,7 @@ process.env.FX_API_URL = 'https://169.254.169.254/latest/meta-data';
 const { test } = require('node:test');
 const assert = require('node:assert');
 
+require('./_env'); // dummy JWT_PUBLIC_KEY so the fail-loud config boots under CI (no .env)
 const fx = require('../service/fxRateProvider');
 
 test('a private/link-local FX_API_URL DISABLES the live feed (no throw at boot)', () => {

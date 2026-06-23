@@ -9,7 +9,8 @@
     "start": "node index.js",
     "dev": "nodemon index.js",
     "migrate": "psql $DATABASE_URL -f migrations/001_audit_schema.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/002_rls_tenant_isolation.sql",
-    "smoke": "node scripts/smoke.js"
+    "smoke": "node scripts/smoke.mjs",
+    "test": "node --test"
   },
   "dependencies": {
     "@baalvion/telemetry": "workspace:*",

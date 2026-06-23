@@ -7,6 +7,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 
+require('../_env'); // dummy auth/billing secrets so the fail-loud config boots under CI (no .env)
 const ml = require('../service/mlMath');
 const ai = require('../service/aiRoutingEngine');
 const cost = require('../service/costOptimizer');

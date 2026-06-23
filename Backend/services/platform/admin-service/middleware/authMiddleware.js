@@ -12,11 +12,17 @@ const {
 } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
 const { AppError } = require('../utils/errors');
+const logger = require('../utils/logger');
 const redis = require('../config/redis');
 
 function resolveStaticPublicKey() {
     if (config.jwt.publicKeyPath) {
-        try { return fs.readFileSync(config.jwt.publicKeyPath, 'utf8'); } catch { /* fall through */ }
+        try {
+            return fs.readFileSync(config.jwt.publicKeyPath, 'utf8');
+        } catch (err) {
+            // Non-fatal: fall through to inline-key / B64 / JWKS sources below.
+            logger.warn({ err: err.message, path: config.jwt.publicKeyPath }, '[auth] could not read JWT_PUBLIC_KEY_PATH; falling back to other key sources');
+        }
     }
     if (config.jwt.publicKey) return config.jwt.publicKey.replace(/\\n/g, '\n');
     return undefined;

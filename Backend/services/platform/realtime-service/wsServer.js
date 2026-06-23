@@ -11,6 +11,21 @@ const crypto = require('crypto');
 
 const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11';
 
+// Socket write/close errors are dominated by routine peer disconnects (EPIPE,
+// ECONNRESET, ERR_STREAM_DESTROYED/WRITE_AFTER_END). Those are expected and would
+// flood the log, so they are dropped; anything else is surfaced so a real protocol
+// or encode bug does not stay silent (the previous behaviour swallowed everything).
+const ROUTINE_SOCKET_ERRORS = new Set([
+    'EPIPE', 'ECONNRESET', 'ECONNABORTED',
+    'ERR_STREAM_DESTROYED', 'ERR_STREAM_WRITE_AFTER_END',
+]);
+
+function logSocketError(where, err) {
+    if (!err) return;
+    if (ROUTINE_SOCKET_ERRORS.has(err.code)) return;
+    process.stderr.write(`[realtime-service] ws ${where} error: ${err.message}\n`);
+}
+
 function acceptKey(secWsKey) {
     return crypto.createHash('sha1').update(secWsKey + GUID).digest('base64');
 }
@@ -114,9 +129,20 @@ function attachWebSocket(httpServer, opts) {
             alive: true,
             send(obj) {
                 if (!this.alive) return;
-                try { const f = encodeText(typeof obj === 'string' ? obj : JSON.stringify(obj)); bytesOut += f.length; socket.write(f); } catch { /* gone */ }
+                try {
+                    const f = encodeText(typeof obj === 'string' ? obj : JSON.stringify(obj));
+                    bytesOut += f.length; socket.write(f);
+                } catch (e) {
+                    // Socket gone mid-write — mark dead and drop. Logged so a real
+                    // encode bug is visible (routine peer-disconnect writes are common).
+                    this.alive = false; clients.delete(this);
+                    logSocketError('send', e);
+                }
             },
-            close() { try { socket.write(encodeControl(0x8)); } catch {} try { socket.end(); } catch {} },
+            close() {
+                try { socket.write(encodeControl(0x8)); } catch (e) { logSocketError('close-frame', e); }
+                try { socket.end(); } catch (e) { logSocketError('close-end', e); }
+            },
         };
         clients.add(client);
 
@@ -127,8 +153,8 @@ function attachWebSocket(httpServer, opts) {
             const { frames, rest } = drainFrames(acc);
             acc = rest;
             for (const f of frames) {
-                if (f.opcode === 0x8) { client.alive = false; clients.delete(client); try { socket.end(); } catch {} return; } // close
-                if (f.opcode === 0x9) { try { socket.write(encodeControl(0xA, f.payload)); } catch {} continue; }   // ping → pong
+                if (f.opcode === 0x8) { client.alive = false; clients.delete(client); try { socket.end(); } catch (e) { logSocketError('close-recv', e); } return; } // close
+                if (f.opcode === 0x9) { try { socket.write(encodeControl(0xA, f.payload)); } catch (e) { logSocketError('pong', e); } continue; }   // ping → pong
                 if (f.opcode === 0xA) continue;                                                                     // pong
                 if (f.opcode === 0x1) {                                                                             // text
                     let msg = null;
@@ -148,7 +174,16 @@ function attachWebSocket(httpServer, opts) {
         clients,
         broadcast(obj) {
             const frame = encodeText(typeof obj === 'string' ? obj : JSON.stringify(obj));
-            for (const c of clients) { if (c.alive) { try { c.socket.write(frame); bytesOut += frame.length; } catch { /* gone */ } } }
+            for (const c of clients) {
+                if (!c.alive) continue;
+                try {
+                    c.socket.write(frame); bytesOut += frame.length;
+                } catch (e) {
+                    // Peer gone — drop this client and keep broadcasting to the rest.
+                    c.alive = false; clients.delete(c);
+                    logSocketError('broadcast', e);
+                }
+            }
         },
         /** Returns bytes since last call and resets the counters. */
         readBytes() { const v = { in: bytesIn, out: bytesOut }; bytesIn = 0; bytesOut = 0; return v; },

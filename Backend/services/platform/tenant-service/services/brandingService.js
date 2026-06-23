@@ -10,6 +10,7 @@
 const db = require('../models');
 const redis = require('../config/redis');
 const config = require('../config/appConfig');
+const logger = require('../utils/logger');
 const { mapBranding } = require('./tenantService');
 const { Errors } = require('../utils/errors');
 
@@ -49,7 +50,7 @@ async function resolveByDomain(domain, app = null) {
     if (!domain) throw Errors.badRequest('domain is required');
     const key = `${CACHE_PREFIX}${domain.toLowerCase()}:${app || 'default'}`;
     const r = redis.getClient();
-    if (r) { try { const hit = await r.get(key); if (hit) return JSON.parse(hit); } catch { /* ignore */ } }
+    if (r) { try { const hit = await r.get(key); if (hit) return JSON.parse(hit); } catch (err) { logger.warn({ err: err.message, key }, '[tenant-service] resolve cache read failed — falling through to DB'); } }
 
     const dom = await db.TenantDomain.findOne({ where: { domain: domain.toLowerCase(), verified: true } });
     if (!dom) throw Errors.notFound('No verified tenant for that domain');
@@ -61,7 +62,7 @@ async function resolveByDomain(domain, app = null) {
     if (!branding && wantApp !== 'default') branding = await db.TenantBranding.findOne({ where: { tenant_id: tenant.id, app: 'default', enabled: true } });
 
     const out = publicBranding(branding || { app: wantApp, brand_name: tenant.name }, tenant, dom.domain);
-    if (r) { try { await r.set(key, JSON.stringify(out), 'EX', config.tenant.resolveCacheTtl); } catch { /* ignore */ } }
+    if (r) { try { await r.set(key, JSON.stringify(out), 'EX', config.tenant.resolveCacheTtl); } catch (err) { logger.warn({ err: err.message, key }, '[tenant-service] resolve cache write failed — result not cached'); } }
     return out;
 }
 
@@ -73,7 +74,7 @@ async function invalidateForTenant(tenantId) {
         const keys = [];
         for (const d of domains) { const stream = r.scanStream({ match: `${CACHE_PREFIX}${d.domain}:*` }); for await (const batch of stream) keys.push(...batch); }
         if (keys.length) await r.del(keys);
-    } catch { /* best-effort */ }
+    } catch (err) { logger.warn({ err: err.message, tenantId }, '[tenant-service] resolve cache invalidation failed (best-effort)'); }
 }
 
 module.exports = { upsert, getForTenant, resolveByDomain, invalidateForTenant, publicBranding };

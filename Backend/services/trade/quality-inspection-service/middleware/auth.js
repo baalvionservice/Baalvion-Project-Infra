@@ -9,6 +9,11 @@ const crypto = require('crypto');
 const { createJwksVerifier } = require('@baalvion/auth-node');
 const config = require('../config/appConfig');
 const { AppError } = require('../utils/errors');
+const { tryGetSdk } = require('../platform/sdk');
+
+// Non-throwing structured log helper using the already-initialised SDK logger when
+// available. Never imports a new logging dependency and never throws at request time.
+const logDebug = (obj, msg) => { try { tryGetSdk()?.logger?.debug(obj, msg); } catch { /* logging must never break auth */ } };
 
 const gatewaySecret = () => process.env.GATEWAY_SIGNING_SECRET || '';
 
@@ -18,7 +23,8 @@ function verifyGatewayIdentity(headers) {
     const userId = headers['x-user-id'];
     const orgId = headers['x-org-id'] || '';
     let roles = [];
-    try { roles = JSON.parse(headers['x-roles'] || '[]'); } catch { /* [] */ }
+    try { roles = JSON.parse(headers['x-roles'] || '[]'); }
+    catch (err) { logDebug({ err: err && err.message }, 'malformed x-roles header; defaulting to []'); roles = []; }
     const sig = headers['x-gateway-signature'] || '';
     if (!userId || !sig) return null;
     const expected = crypto.createHmac('sha256', sec).update(`${userId}.${orgId}.${roles.join(',')}`).digest('hex');

@@ -1,0 +1,258 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Baalvion — consolidated backend, PRODUCTION compose (AWS single-host).
+#
+#   45 repo modules → 6 Node app containers + 1 JVM app, supervised by pm2-runtime.
+#   This is the production counterpart of docker-compose.yml. Differences vs the
+#   base file:
+#     • Images are PINNED to ECR tags (no :local builds on the box).
+#     • Neo4j is included on-box (network-graph-service HARD-EXITS without it).
+#     • Kafka + Zookeeper included under the `payments` profile (JVM @EnableKafka).
+#     • app-identity mem_limit raised to 1g (measured 723/768 MiB = 94% in dry-run).
+#     • Secrets come from .env injected at deploy time from SSM/Secrets Manager.
+#
+#   PostgreSQL is AWS RDS (external — DB_HOST in .env). Redis + Neo4j + Caddy on-box.
+#
+#   Run (from REPO ROOT, image already in ECR):
+#     docker compose --env-file deploy/consolidated/.env \
+#       -f deploy/consolidated/docker-compose.prod.yml up -d
+#     ... --profile payments up -d         # to include the JVM + Kafka
+#
+#   ⚠ Do NOT layer docker-compose.dryrun.yml on top of this in production — that file
+#     adds a throwaway Postgres, Mailpit and NODE_TLS_REJECT_UNAUTHORIZED. Prod uses
+#     RDS + Amazon SES. See docs/deployment/production/00-README.md.
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-db: &db
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME}
+  DB_USER: ${DB_USER}
+  DB_PASSWORD: ${DB_PASSWORD}
+  DB_SSL: ${DB_SSL:-true}            # RDS → TLS required
+
+x-redis: &redis
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+
+# One image, build-once-in-CI, pulled from ECR. pm2 selects the personality.
+x-node-app: &node-app
+  image: ${ECR_REGISTRY}/baalvion-backend:${IMAGE_TAG:-prod-latest}
+  pull_policy: always
+  restart: unless-stopped
+  # Loaded into every container at runtime; marked optional so env-less
+  # `compose config` validation (CI) does not fail when .env is absent.
+  env_file:
+    - path: .env
+      required: false
+  logging:
+    driver: awslogs                  # ship to CloudWatch Logs (see monitoring doc)
+    options:
+      awslogs-region: ${AWS_REGION:-ap-south-1}
+      awslogs-group: /baalvion/consolidated
+  depends_on:
+    redis: { condition: service_healthy }
+
+services:
+
+  # ── Backing services (on-box) ───────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    mem_limit: 320m
+    mem_reservation: 96m
+    command: ["redis-server","--appendonly","yes","--maxmemory","256mb","--maxmemory-policy","noeviction"]
+    volumes: [ redisdata:/data ]
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  neo4j:
+    image: neo4j:5
+    restart: unless-stopped
+    mem_limit: 768m
+    mem_reservation: 384m
+    environment:
+      # NEO4J_PASSWORD presence is enforced fleet-wide by preflight-env.js (REQUIRED set)
+      # before pm2 starts; kept as a plain ref here so env-less `compose config` validation passes.
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD}
+      NEO4J_server_memory_heap_max__size: 384m
+      NEO4J_server_memory_pagecache_size: 128m
+    volumes:
+      - neo4jdata:/data
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://localhost:7474 >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  # ── 1. Identity & trust core (5 modules) ────────────────────────────────────
+  app-identity:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/identity.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1024m                 # raised from 768m — measured 94% of cap in dry-run
+    mem_reservation: 512m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3001/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 2. Commerce + marketplace (7 modules) ───────────────────────────────────
+  app-commerce:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/commerce.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1280m
+    mem_reservation: 640m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3012/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 3. Global trade platform (6 modules) ────────────────────────────────────
+  app-trade:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/trade.config.js"]
+    environment:
+      <<: [*db, *redis]
+      NEO4J_URI: ${NEO4J_URI:-bolt://neo4j:7687}
+      NEO4J_USER: ${NEO4J_USER:-neo4j}
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD}
+      NEO4J_DATABASE: ${NEO4J_DATABASE:-neo4j}
+    mem_limit: 1024m
+    mem_reservation: 512m
+    depends_on:
+      redis: { condition: service_healthy }
+      neo4j: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3048/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 4. Ecosystem verticals (10 modules) ─────────────────────────────────────
+  app-ecosystem:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/ecosystem.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1536m
+    mem_reservation: 768m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3010/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 5. Back-office: platform + knowledge + infra utilities (10 modules) ──────
+  app-platform:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/platform.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1536m
+    mem_reservation: 768m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3021/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 6. Public BFF + websockets + async dispatch (4 modules) ──────────────────
+  app-edge-realtime:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/edge-realtime.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 896m
+    mem_reservation: 448m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:4000/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 7. Payments (JVM) + its Kafka — profile: payments ────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    profiles: ["payments"]
+    restart: unless-stopped
+    mem_limit: 384m
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    volumes: [ zkdata:/var/lib/zookeeper/data ]
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    profiles: ["payments"]
+    restart: unless-stopped
+    mem_limit: 768m
+    depends_on: [ zookeeper ]
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    volumes: [ kafkadata:/var/lib/kafka/data ]
+    healthcheck:
+      test: ["CMD-SHELL","kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 20
+      start_period: 40s
+
+  app-payments:
+    image: ${ECR_REGISTRY}/baalvion-payments:${IMAGE_TAG:-prod-latest}
+    pull_policy: always
+    restart: unless-stopped
+    profiles: ["payments"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: *db
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=require}
+      SPRING_PROFILES_ACTIVE: prod
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP:-kafka:9092}
+      JAVA_OPTS: "-Xms128m -Xmx512m -XX:+UseSerialGC -XX:MaxRAMPercentage=70"
+    depends_on:
+      redis:  { condition: service_healthy }
+      kafka:  { condition: service_healthy }
+    mem_limit: 768m
+    mem_reservation: 512m
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-ap-south-1}
+        awslogs-group: /baalvion/consolidated
+
+  # ── Edge: TLS + host/path routing (only this binds 80/443) ───────────────────
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    mem_limit: 96m
+    mem_reservation: 32m
+    ports: ["80:80","443:443"]
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [ app-identity, app-edge-realtime, app-platform ]
+
+volumes:
+  redisdata:
+  neo4jdata:
+  zkdata:
+  kafkadata:
+  caddy_data:
+  caddy_config:

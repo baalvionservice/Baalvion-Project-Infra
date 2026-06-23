@@ -91,7 +91,10 @@ async function ensureLocalIdentity(req) {
         const merged = new Set(rows.map((r) => r.role));
         for (const r of a.roles || []) if (APP_ROLES.has(r)) merged.add(r);
         a.roles = Array.from(merged);
-    } catch { /* on error keep the gateway-provided roles */ }
+    } catch (e) {
+        // On error keep the gateway-provided roles (control flow unchanged); log for diagnostics.
+        console.warn('[insiders] gateway identity role reflection failed, keeping gateway roles:', e.message);
+    }
 }
 
 module.exports = { ensureLocalIdentity, localIdFor };

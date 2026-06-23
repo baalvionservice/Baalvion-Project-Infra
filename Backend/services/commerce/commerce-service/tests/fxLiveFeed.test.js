@@ -8,6 +8,7 @@ process.env.FX_LIVE_FEED = 'false'; // fetchLiveSnapshot itself is not gated on 
 const { test, afterEach } = require('node:test');
 const assert = require('node:assert');
 
+require('./_env'); // dummy JWT_PUBLIC_KEY so the fail-loud config boots under CI (no .env)
 const fx = require('../service/fxRateProvider');
 
 const realFetch = global.fetch;

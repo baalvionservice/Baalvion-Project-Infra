@@ -2,6 +2,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 
+require('../_env'); // dummy auth/billing secrets so the fail-loud config boots under CI (no .env)
 const otp = require('../service/otpLoginService');
 const { sha256 } = require('../utils/crypto');
 

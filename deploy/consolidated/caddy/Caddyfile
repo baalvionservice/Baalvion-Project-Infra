@@ -1,0 +1,52 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Edge: TLS termination + host/path routing to the app containers. Only Caddy binds
+# 80/443; every app + Redis stay internal to the compose network. Caddy auto-upgrades
+# websockets, so socket.io / realtime work through reverse_proxy unchanged.
+#
+# Routing targets are <app-container>:<service-port>. Because each app container has its
+# own network IP, the same port can appear in two apps without colliding.
+#
+# Internal service-to-service calls do NOT go through Caddy — they use Docker DNS directly
+# (e.g. http://app-commerce:3013, http://app-platform:3018), exactly as before.
+# ─────────────────────────────────────────────────────────────────────────────
+{
+	email ops@baalvion.com
+}
+
+# ── Central auth surface → identity app (auth-gateway) ──
+auth.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-identity:3026
+}
+
+# ── Consumer + admin BFF → edge-realtime app (proxy-service) ──
+api.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-edge-realtime:4000
+}
+
+# ── Realtime websocket stream → edge-realtime app (socket.io fan-out) ──
+ws.baalvion.com {
+	reverse_proxy app-edge-realtime:3040
+}
+
+# ── Admin platform → platform app, with auth + CMS public carve-outs ──
+admin.baalvion.com {
+	encode gzip zstd
+	# Auth BFF shim → identity app (matches the proven core-stack /auth-bff → /v1/auth rewrite).
+	handle_path /auth-bff/* {
+		rewrite * /v1/auth{uri}
+		reverse_proxy app-identity:3001
+	}
+	# CMS public delivery bypasses the session gateway → knowledge/cms-service.
+	handle /api/v1/public/* {
+		reverse_proxy app-platform:3018
+	}
+	reverse_proxy app-platform:3021
+}
+
+# ── Direct service APIs (gateway-signed): add one block per public surface as needed,
+#    always pointing at <app>:<port>. Examples:
+#      commerce.baalvion.com   -> app-commerce:3013   (order-service)
+#      trade.baalvion.com      -> app-trade:3052      (order-execution-service)
+#      ir.baalvion.com         -> app-ecosystem:3008  (ir-service)

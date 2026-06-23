@@ -5,7 +5,8 @@
     "description": "Realtime metrics + event fan-out over WebSocket for the admin console (hand-rolled RFC6455, no ws dependency).",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js"
+        "start": "node index.js",
+        "test": "node --test"
     },
     "dependencies": {
         "dotenv": "^17.3.1",

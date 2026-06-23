@@ -5,12 +5,18 @@
 const router = require('express').Router();
 const ctrl   = require('../controller/staffController');
 const { requireSuperAdmin } = require('../middleware/authMiddleware');
+const { validateBody } = require('../middleware/validate');
+const {
+    createDepartmentSchema,
+    updateEmployeeSchema,
+    sendInvitationSchema,
+} = require('../validation/staffSchemas');
 
 router.use(requireSuperAdmin);
 
 // Departments
 router.get('/departments',         ctrl.listDepartments);
-router.post('/departments',        ctrl.createDepartment);
+router.post('/departments',        validateBody(createDepartmentSchema), ctrl.createDepartment);
 router.patch('/departments/:id',   ctrl.updateDepartment);
 router.delete('/departments/:id',  ctrl.deleteDepartment);
 
@@ -22,7 +28,7 @@ router.patch('/teams/:id',  ctrl.updateTeam);
 // Employees
 router.get('/employees',                    ctrl.listEmployees);
 router.get('/employees/:id',                ctrl.getEmployee);
-router.patch('/employees/:id',              ctrl.updateEmployee);
+router.patch('/employees/:id',              validateBody(updateEmployeeSchema), ctrl.updateEmployee);
 router.post('/employees/:id/deactivate',    ctrl.deactivateEmployee);
 
 // Onboarding
@@ -35,7 +41,7 @@ router.put('/employees/:id/permissions',  ctrl.updateIdentityPermissions);
 
 // Invitations
 router.get('/invitations',        ctrl.listInvitations);
-router.post('/invitations',       ctrl.sendInvitation);
+router.post('/invitations',       validateBody(sendInvitationSchema), ctrl.sendInvitation);
 router.delete('/invitations/:id', ctrl.revokeInvitation);
 
 module.exports = router;

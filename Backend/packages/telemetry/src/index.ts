@@ -82,11 +82,28 @@ export function getMeter(name: string) {
 
 // ── Structured logger with trace correlation ──────────────────────────────────
 
+// The pretty transport is a dev-only nicety and `pino-pretty` is an OPTIONAL
+// peer — it is not a hard dependency. Only enable it when it actually resolves,
+// so createLogger NEVER throws in an environment where pino-pretty is absent
+// (the default for most services). Production always emits plain structured JSON
+// (aggregator-friendly), and `LOG_PRETTY=false` force-disables it anywhere.
+function prettyTransportAvailable(): boolean {
+  if (process.env.NODE_ENV === 'production') return false;
+  if (process.env.LOG_PRETTY === 'false') return false;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require.resolve('pino-pretty');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function createLogger(service: string, level = process.env.LOG_LEVEL || 'info') {
   return pino({
     level,
     base: { service },
-    ...(process.env.NODE_ENV !== 'production' && {
+    ...(prettyTransportAvailable() && {
       transport: { target: 'pino-pretty', options: { colorize: true } },
     }),
     redact: [

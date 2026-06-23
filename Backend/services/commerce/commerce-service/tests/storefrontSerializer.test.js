@@ -9,6 +9,7 @@ process.env.FX_USD_GBP = '0.79';
 const { test } = require('node:test');
 const assert = require('node:assert');
 
+require('./_env'); // dummy JWT_PUBLIC_KEY so the fail-loud config boots under CI (no .env)
 const serializer = require('../utils/storefrontSerializer');
 
 function makeProduct(overrides = {}) {

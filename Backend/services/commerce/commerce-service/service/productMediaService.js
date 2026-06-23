@@ -19,6 +19,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { CommerceProduct, CommerceProductMedia, sequelize, Op } = require('../models');
 const { AppError } = require('../utils/errors');
+const { demoteFromMock } = require('../utils/mockFlag');
 const s3 = require('../utils/s3Client');
 const thumb = require('../utils/imageThumb');
 
@@ -157,6 +158,10 @@ async function uploadMedia(storeId, productId, { filePart, mediaType = 'image', 
             productId, variantId: variantId || null, mediaType,
             url, thumbnailUrl, altText: altText || null, sortOrder: nextSort, isFeatured: makeFeatured,
         }, { transaction: t });
+        // Uploading a real photo curates a mock filler into a real listing — drop its mock markers
+        // so the cleanup script can never delete it.
+        const product = await CommerceProduct.findOne({ where: { id: productId, storeId }, transaction: t });
+        await demoteFromMock(product, t);
         return row.toJSON();
     });
 }
@@ -232,6 +237,9 @@ async function replaceMedia(storeId, productId, mediaId, { filePart, mediaType }
     const oldUrl = media.url;
     const oldThumb = media.thumbnailUrl;
     await media.update({ url, thumbnailUrl, mediaType: type });
+    // Replacing a placeholder with a real photo also promotes a mock filler to a real listing.
+    const product = await CommerceProduct.findOne({ where: { id: productId, storeId } });
+    await demoteFromMock(product);
     // Best-effort cleanup of the superseded objects after the row points elsewhere.
     await removeObjectByUrl(oldUrl);
     if (oldThumb && oldThumb !== oldUrl) await removeObjectByUrl(oldThumb);

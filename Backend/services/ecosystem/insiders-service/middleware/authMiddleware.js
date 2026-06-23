@@ -49,7 +49,10 @@ const optionalAuth = async (req, res, next) => {
     try {
         const auth = await decode(req);
         if (auth) { req.auth = auth; await ensureLocalIdentity(req); }
-    } catch { /* anonymous on error */ }
+    } catch (e) {
+        // Soft gate: fall through anonymous on error (control flow unchanged), but log for diagnostics.
+        console.warn('[insiders] optionalAuth: identity resolution failed, continuing anonymous:', e.message);
+    }
     return next();
 };
 

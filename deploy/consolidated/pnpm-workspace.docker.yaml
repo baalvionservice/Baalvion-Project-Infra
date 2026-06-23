@@ -1,0 +1,8 @@
+# Docker-only workspace view: Backend packages + services ONLY (no Frontend).
+# Used by Dockerfile.node so the backend image never pulls Next.js/Vite app deps.
+packages:
+  - "Backend/packages/*"
+  - "Backend/services/**/*"
+  - "Backend/platform/*"
+  - "Backend/database/*"
+  - "Backend/*"

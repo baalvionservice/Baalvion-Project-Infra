@@ -1,0 +1,95 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Backend quality ratchet.
+#
+# The existing CI (ci.yml) type-checks the SDK + frontends and lints two frontend
+# apps; the backend *services* had no quality gate. This workflow closes that gap
+# with checks that are GREEN today, so quality can only ratchet UP:
+#
+#   • architecture:check  — the enforced service contract (one-DB-per-service,
+#     gateway-only entry, no auth duplication, …) — 0 violations.
+#   • backend type-check  — every TypeScript service compiles (tsc --noEmit).
+#   • backend tests       — every service whose `test` script is `node --test`
+#     (the pure node:test suites) must pass.
+#   • backend lint        — REPORT-ONLY for now (a baseline of ~1300 warnings
+#     exists). Tighten to a per-diff ratchet (fail on NEW console/empty-catch)
+#     once the baseline is burned down.
+#
+# Build the shared @baalvion/* packages first — their types publish from a
+# gitignored dist/ (tsup output) that the service type-checks import.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Backend Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+env:
+  NODE_VERSION: '20'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-quality:
+    name: Backend Quality (services)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+
+      - name: Install Workspace Dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build Workspace Packages
+        run: pnpm --filter "./Backend/packages/*" run build
+
+      # ── Gate 1: architecture contract (blocking) ──────────────────────────────
+      - name: Architecture Contract
+        run: pnpm run architecture:check
+
+      # ── Gate 2: backend service type-check (blocking) ─────────────────────────
+      # --continue so one failure does not mask the rest; scoped to services so
+      # frontend setup gaps never break this gate.
+      - name: Backend Type-check
+        run: pnpm exec turbo run type-check --filter="./Backend/services/*/*" --continue
+
+      # ── Gate 3: backend node:test suites (blocking) ───────────────────────────
+      # Run only services whose test script is `node --test` (pure, no DB/network);
+      # this deliberately excludes jest/vitest services until their runners are wired.
+      - name: Backend Tests (node:test)
+        run: |
+          set -e
+          failed=0
+          for pj in Backend/services/*/*/package.json; do
+            d=$(dirname "$pj")
+            if grep -Eq '"test"[[:space:]]*:[[:space:]]*"node --test"' "$pj"; then
+              echo "::group::node --test $d"
+              if (cd "$d" && node --test); then
+                echo "ok: $d"
+              else
+                echo "::error::tests failed in $d"
+                failed=1
+              fi
+              echo "::endgroup::"
+            fi
+          done
+          exit $failed
+
+      # ── Gate 4: backend lint (report-only — ratchet target) ───────────────────
+      - name: Backend Lint (report-only)
+        continue-on-error: true
+        run: pnpm run lint:backend

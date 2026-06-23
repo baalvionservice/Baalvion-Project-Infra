@@ -8,6 +8,7 @@ process.env.FX_LIVE_FEED = 'false';
 const { test } = require('node:test');
 const assert = require('node:assert');
 
+require('./_env'); // dummy JWT_PUBLIC_KEY so the fail-loud config boots under CI (no .env)
 const fx = require('../service/fxRateProvider');
 
 test('live feed is disabled by default', () => {

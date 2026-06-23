@@ -2,7 +2,8 @@
 const config = require('../config/appConfig');
 
 let expressRateLimit;
-try { expressRateLimit = require('express-rate-limit'); } catch { /* shim below */ }
+try { expressRateLimit = require('express-rate-limit'); }
+catch (err) { console.error(`[${config.service}] express-rate-limit unavailable; using no-op limiter:`, err.message); }
 
 module.exports = () => {
     const max = config.security?.ipRateLimit || 120;

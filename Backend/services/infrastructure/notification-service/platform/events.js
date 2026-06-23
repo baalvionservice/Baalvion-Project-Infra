@@ -6,6 +6,7 @@
  * current sdk.trace context. Fail-open: emission never breaks event processing.
  */
 const { tryGetSdk } = require('./sdk');
+const logger = require('../utils/logger');
 
 const NotificationEvents = Object.freeze({
     DISPATCHED: 'notification.dispatched',
@@ -17,7 +18,7 @@ async function emit(eventType, payload, meta) {
     const sdk = tryGetSdk();
     if (!sdk) return;
     try { await sdk.events.publish(eventType, payload, meta); }
-    catch (err) { try { sdk.logger.warn({ err: err && err.message, eventType }, 'notification lifecycle emit failed'); } catch { /* never throw */ } }
+    catch (err) { try { sdk.logger.warn({ err: err && err.message, eventType }, 'notification lifecycle emit failed'); } catch (logErr) { try { logger.warn({ err: err && err.message, logErr: logErr && logErr.message, eventType }, 'notification lifecycle emit failed (sdk logger unavailable)'); } catch { /* never throw */ } } }
 }
 
 module.exports = { NotificationEvents, emit };
