@@ -20,6 +20,7 @@
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/commerce-rbac": "workspace:*",
     "@baalvion/events": "workspace:*",
+    "@baalvion/payment-consistency": "workspace:*",
     "bullmq": "^5.52.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

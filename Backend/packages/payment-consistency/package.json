@@ -1,0 +1,38 @@
+{
+  "name": "@baalvion/payment-consistency",
+  "version": "1.0.0",
+  "description": "Payment Consistency Layer (PCL) — the single deterministic state machine + transactional outbox for every payment state transition across the platform.",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": ["dist", "migrations"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "test": "node --test test/*.test.mjs",
+    "clean": "rimraf dist"
+  },
+  "dependencies": {
+    "zod": "^3.24.2"
+  },
+  "peerDependencies": {
+    "@baalvion/events": "workspace:*"
+  },
+  "peerDependenciesMeta": {
+    "@baalvion/events": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "tsup": "^8.3.0",
+    "typescript": "^5.7.2",
+    "rimraf": "^6.0.1"
+  }
+}
