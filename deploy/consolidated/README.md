@@ -3,9 +3,10 @@
 **45 repository modules → 6 Node apps + 1 JVM app**, packaged for a single EC2 host with
 Docker Compose, PostgreSQL on AWS RDS, and a clean migration path to ECS.
 
-> 📚 **Full documentation:** [`docs/deployment/`](../../docs/deployment/README.md) — service
-> inventory, resource audit, architecture, capacity & cost, and the ECS migration plan. This README
-> is the quick-start; the docs are the reference.
+> 📚 **Full documentation:** [`docs/deployment/DEPLOYMENT.md`](../../docs/deployment/DEPLOYMENT.md) —
+> the single authoritative deployment guide (service inventory, resource audit, architecture, AWS
+> resources, sizing & cost, env & secrets, runbooks, monitoring, risks, the pre-deploy checklist, and
+> the ECS migration plan). This README is the quick-start; that doc is the reference.
 
 ## Principle
 
