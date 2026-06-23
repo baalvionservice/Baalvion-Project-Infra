@@ -39,7 +39,11 @@ x-node-app: &node-app
   image: ${ECR_REGISTRY}/baalvion-backend:${IMAGE_TAG:-prod-latest}
   pull_policy: always
   restart: unless-stopped
-  env_file: [ .env ]
+  # Loaded into every container at runtime; marked optional so env-less
+  # `compose config` validation (CI) does not fail when .env is absent.
+  env_file:
+    - path: .env
+      required: false
   logging:
     driver: awslogs                  # ship to CloudWatch Logs (see monitoring doc)
     options:
@@ -212,7 +216,9 @@ services:
     pull_policy: always
     restart: unless-stopped
     profiles: ["payments"]
-    env_file: [ .env ]
+    env_file:
+      - path: .env
+        required: false
     environment:
       <<: *db
       DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=require}

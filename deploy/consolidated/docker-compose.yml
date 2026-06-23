@@ -33,7 +33,9 @@ x-node-app: &node-app
     dockerfile: deploy/consolidated/Dockerfile.node
   image: baalvion-backend:local
   restart: unless-stopped
-  env_file: [ .env ]
+  env_file:
+    - path: .env
+      required: false
   depends_on:
     redis: { condition: service_healthy }
   logging:
@@ -149,7 +151,9 @@ services:
     image: baalvion-payments:local
     restart: unless-stopped
     profiles: ["payments"]
-    env_file: [ .env ]
+    env_file:
+      - path: .env
+        required: false
     environment:
       <<: *db
       DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=require}
