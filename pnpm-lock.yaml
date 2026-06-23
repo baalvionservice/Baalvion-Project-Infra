@@ -2171,9 +2171,15 @@ importers:
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown
+      '@baalvion/sdk':
+        specifier: workspace:*
+        version: link:../../../packages/sdk
       '@baalvion/telemetry':
         specifier: workspace:*
         version: link:../../../packages/telemetry
+      '@baalvion/types':
+        specifier: workspace:*
+        version: link:../../../packages/types
       bullmq:
         specifier: ^5.56.0
         version: 5.78.0
