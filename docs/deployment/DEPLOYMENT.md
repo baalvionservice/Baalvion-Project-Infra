@@ -13,6 +13,10 @@ boundaries stay intact.
 > **Companion artifacts** live in [`deploy/consolidated/`](../../deploy/consolidated/):
 > `docker-compose.prod.yml`, `.env.production.example`, the six `pm2/*.config.js`, `caddy/Caddyfile`,
 > `Dockerfile.node`, `Dockerfile.java`, `preflight-env.js`, and `sql/payments-bootstrap.sql`.
+>
+> **Design rationale** — why multi-process over single-process (the boot-pattern finding), the
+> per-container process model, and ECS guardrails — lives in [ARCHITECTURE.md](ARCHITECTURE.md). This
+> runbook is the *how*; that companion is the *why*.
 
 ## Contents
 
