@@ -413,7 +413,7 @@ function createJwksVerifier(opts = {}) {
     } catch (jwksErr) {
       // JWKS unreachable → fall back to a statically-injected RS256 public key
       // (still RS256-only). There is NO HS256 fallback.
-      const raw = staticPublicKey || (staticPublicKeyB64 ? Buffer.from(staticPublicKeyB64, 'base64').toString('utf8') : null);
+      const raw = normalizePem(staticPublicKey) || (staticPublicKeyB64 ? Buffer.from(staticPublicKeyB64, 'base64').toString('utf8') : null);
       if (!raw) throw jwksErr;
       payload = jwt.verify(token, raw, rsaOpts());
     }

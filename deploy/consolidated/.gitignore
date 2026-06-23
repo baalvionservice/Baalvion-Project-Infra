@@ -1,0 +1,9 @@
+# Consolidated deploy package — never commit local/dry-run secrets or throwaway material.
+# Templates (.env.example, .env.production.example) ARE committed.
+.env
+.env.local
+.env.*.local
+# Dry-run-only test keypair + self-signed SMTP cert (NOT for production).
+dryrun-keys/
+# Local validation overlay (throwaway Postgres + Mailpit) — never layered on prod.
+docker-compose.dryrun.yml

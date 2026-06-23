@@ -1,0 +1,179 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Baalvion — consolidated backend.  45 repo modules → 6 Node apps + 1 JVM app.
+#
+#   Each "app" is ONE container that supervises its bounded-context module processes
+#   with pm2-runtime (a different /app/pm2/<app>.config.js per service). No service
+#   code is changed; modules stay exactly where they live in Backend/services/**.
+#
+#   PostgreSQL is AWS RDS (external — set DB_HOST in .env). Redis + Caddy run on the box.
+#
+#   Run (from REPO ROOT):
+#     docker compose --env-file deploy/consolidated/.env \
+#       -f deploy/consolidated/docker-compose.yml up -d --build
+#
+#   With the JVM payment service:           ... --profile payments up -d --build
+# ─────────────────────────────────────────────────────────────────────────────
+
+x-db: &db
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT:-5432}
+  DB_NAME: ${DB_NAME}
+  DB_USER: ${DB_USER}
+  DB_PASSWORD: ${DB_PASSWORD}
+  DB_SSL: ${DB_SSL:-true}          # RDS → TLS on
+
+x-redis: &redis
+  REDIS_HOST: ${REDIS_HOST:-redis}
+  REDIS_PORT: ${REDIS_PORT:-6379}
+
+# Shared definition for every Node app: one image, build once, pm2 picks the personality.
+x-node-app: &node-app
+  build:
+    context: ../..
+    dockerfile: deploy/consolidated/Dockerfile.node
+  image: baalvion-backend:local
+  restart: unless-stopped
+  env_file: [ .env ]
+  depends_on:
+    redis: { condition: service_healthy }
+  logging:
+    driver: json-file
+    options: { max-size: "10m", max-file: "3" }
+
+# Reusable healthcheck factory note: each app probes ONE representative member's /health.
+services:
+
+  # ── Infra (on-box) ──────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 64m
+    command: ["redis-server","--appendonly","yes","--maxmemory","200mb","--maxmemory-policy","noeviction"]
+    volumes: [ redisdata:/data ]
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ── 1. Identity & trust core (5 modules) ────────────────────────────────────
+  app-identity:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/identity.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 768m
+    mem_reservation: 384m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3001/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 2. Commerce + marketplace (7 modules) ───────────────────────────────────
+  app-commerce:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/commerce.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1280m
+    mem_reservation: 640m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3012/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 3. Global trade platform (6 modules) ────────────────────────────────────
+  app-trade:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/trade.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1024m
+    mem_reservation: 512m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3048/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 4. Ecosystem verticals (10 modules) ─────────────────────────────────────
+  app-ecosystem:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/ecosystem.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1536m
+    mem_reservation: 768m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3010/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 5. Back-office: platform + knowledge + infra utilities (10 modules) ──────
+  app-platform:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/platform.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 1536m
+    mem_reservation: 768m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3021/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 6. Public BFF + websockets + async dispatch (4 modules) ──────────────────
+  app-edge-realtime:
+    <<: *node-app
+    command: ["pm2-runtime","start","/app/pm2/edge-realtime.config.js"]
+    environment: { <<: [*db, *redis] }
+    mem_limit: 896m
+    mem_reservation: 448m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:4000/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  # ── 7. Payments (JVM) — optional, starts only with `--profile payments` ──────
+  app-payments:
+    build:
+      context: ../..
+      dockerfile: deploy/consolidated/Dockerfile.java
+    image: baalvion-payments:local
+    restart: unless-stopped
+    profiles: ["payments"]
+    env_file: [ .env ]
+    environment:
+      <<: *db
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=require}
+      SPRING_PROFILES_ACTIVE: prod
+      JAVA_OPTS: "-Xms128m -Xmx512m -XX:+UseSerialGC -XX:MaxRAMPercentage=70"
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 768m
+    mem_reservation: 512m
+
+  # ── Edge ─────────────────────────────────────────────────────────────────────
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    mem_limit: 64m
+    mem_reservation: 32m
+    ports: ["80:80","443:443"]
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [ app-identity, app-edge-realtime, app-platform ]
+
+volumes:
+  redisdata:
+  caddy_data:
+  caddy_config:

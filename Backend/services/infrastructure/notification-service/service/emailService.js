@@ -21,10 +21,12 @@ function getSmtp() {
         _smtpTransport = nodemailer.createTransport({
             host:   config.email.smtp.host,
             port:   config.email.smtp.port,
-            secure: config.email.smtp.port === 465,
+            // Implicit TLS — defaults to port-465-only when SMTP_SECURE is unset.
+            secure: config.email.smtp.secure ?? (config.email.smtp.port === 465),
             // STARTTLS for 587 (e.g. AWS SES email-smtp.<region>.amazonaws.com) so SMTP creds are
             // never sent over an unencrypted connection. Port 465 is already implicit TLS.
-            requireTLS: config.email.smtp.port !== 465,
+            // Defaults to forced STARTTLS for non-465 ports; SMTP_REQUIRE_TLS=false opts into plain SMTP.
+            requireTLS: config.email.smtp.requireTLS ?? (config.email.smtp.port !== 465),
             // Auth only when credentials are provided — local/relay SMTP (e.g. Mailpit) needs none.
             ...(config.email.smtp.user ? { auth: { user: config.email.smtp.user, pass: config.email.smtp.pass } } : {}),
         });
@@ -128,7 +130,8 @@ async function sendRawEmail({ to, subject, html, idempotencyKey, replyTo }) {
 
     try {
         return await sendViaResend({ to, subject, html, replyTo });
-    } catch {
+    } catch (err) {
+        logger.warn({ err, to }, 'Resend failed — trying SMTP fallback');
         return await sendViaSmtp({ to, subject, html, replyTo });
     }
 }
