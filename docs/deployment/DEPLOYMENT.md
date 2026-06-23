@@ -17,6 +17,10 @@ boundaries stay intact.
 > **Design rationale** — why multi-process over single-process (the boot-pattern finding), the
 > per-container process model, and ECS guardrails — lives in [ARCHITECTURE.md](ARCHITECTURE.md). This
 > runbook is the *how*; that companion is the *why*.
+>
+> **Provisioning order** — the dependency-sequenced AWS setup checklist (network → data → registry →
+> compute → DNS → secrets → deploy), with the R1/R12 traps flagged in place, lives in
+> [AWS-PROVISIONING.md](AWS-PROVISIONING.md).
 
 ## Contents
 
