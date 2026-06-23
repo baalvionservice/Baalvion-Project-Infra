@@ -28,13 +28,35 @@ app.use(requestContext);
 
 app.get('/', (req, res) => res.json({ service: 'Baalvion Search Service', version: config.apiVersion, engine: 'opensearch' }));
 app.get('/health', async (req, res) => {
-    const os = await searchService.health();
-    // NOTE: config.opensearch.url is intentionally excluded — internal cluster URLs
-    // must not be exposed in unauthenticated responses (information disclosure).
-    res.status(os.reachable ? 200 : 503).json({
+    // Liveness — the process is up and serving, so always 200 regardless of OpenSearch.
+    // Conflating liveness with dependency readiness lets orchestrators kill a healthy
+    // container that is correctly serving in degraded mode. NOTE: config.opensearch.url
+    // is intentionally excluded — internal cluster URLs must not be exposed in
+    // unauthenticated responses (information disclosure).
+    let os = { reachable: false, status: 'unreachable' };
+    try {
+        os = await searchService.health();
+    } catch (err) {
+        logger.warn({ err: err.message }, '[Search] health check failed');
+    }
+    res.status(200).json({
         status: os.reachable ? 'ok' : 'degraded',
         service: 'search-service',
         rs256: jwt.isRs256Enabled(),
+        opensearch: { reachable: os.reachable, status: os.status },
+    });
+});
+app.get('/health/ready', async (req, res) => {
+    // Readiness — dependency-gated: 200 only when OpenSearch is reachable, else 503.
+    let os = { reachable: false, status: 'unreachable' };
+    try {
+        os = await searchService.health();
+    } catch (err) {
+        logger.warn({ err: err.message }, '[Search] readiness check failed');
+    }
+    res.status(os.reachable ? 200 : 503).json({
+        status: os.reachable ? 'ready' : 'unready',
+        service: 'search-service',
         opensearch: { reachable: os.reachable, status: os.status },
     });
 });

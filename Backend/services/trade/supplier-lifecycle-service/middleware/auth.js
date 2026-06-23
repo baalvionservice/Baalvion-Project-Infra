@@ -18,7 +18,12 @@ function verifyGatewayIdentity(headers) {
     const userId = headers['x-user-id'];
     const orgId = headers['x-org-id'] || '';
     let roles = [];
-    try { roles = JSON.parse(headers['x-roles'] || '[]'); } catch { /* [] */ }
+    try {
+        roles = JSON.parse(headers['x-roles'] || '[]');
+    } catch (rolesErr) {
+        // Malformed x-roles header: keep the safe empty-roles default (control flow unchanged), but make it observable.
+        console.warn('[supplier-lifecycle-service] malformed x-roles header; defaulting to no roles:', rolesErr && rolesErr.message);
+    }
     const sig = headers['x-gateway-signature'] || '';
     if (!userId || !sig) return null;
     const expected = crypto.createHmac('sha256', sec).update(`${userId}.${orgId}.${roles.join(',')}`).digest('hex');

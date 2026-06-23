@@ -34,6 +34,10 @@ module.exports = {
             port: parseInt(process.env.SMTP_PORT || '587', 10),
             user: process.env.SMTP_USER || '',
             pass: process.env.SMTP_PASS || '',
+            // Implicit TLS (default true only for 465). Override with SMTP_SECURE=true.
+            secure: process.env.SMTP_SECURE === 'true' || Number(process.env.SMTP_PORT) === 465,
+            // Force STARTTLS for non-465 ports by default; SMTP_REQUIRE_TLS=false allows plain SMTP.
+            requireTLS: process.env.SMTP_REQUIRE_TLS ? process.env.SMTP_REQUIRE_TLS !== 'false' : Number(process.env.SMTP_PORT || 587) !== 465,
         },
     },
 

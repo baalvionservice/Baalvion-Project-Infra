@@ -10,7 +10,8 @@
     "dev": "nodemon index.js",
     "migrate": "node migrate.js",
     "migrate:status": "node migrate.js status",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "test": "node --test \"test/**/*.test.js\""
   },
   "dependencies": {
     "@baalvion/telemetry": "workspace:*",

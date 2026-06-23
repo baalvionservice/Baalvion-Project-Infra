@@ -8,6 +8,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 
+require('../_env'); // dummy auth/billing secrets so the fail-loud config boots under CI (no .env)
 const pb = require('../service/partnerBilling');
 const reseller = require('../service/resellerService');
 const affiliate = require('../service/affiliateService');

@@ -10,18 +10,29 @@ const { canTransition } = require('../services/lifecycle');
 const tenantOf = (req) => (req.auth && (req.auth.tenantId || req.auth.orgId)) || null;
 const createSchema = z.object({ legal_name: z.string().min(1), country: z.string().length(2) });
 
+// Permissive pagination guard for GET /suppliers. Mirrors the prior manual
+// defaults (page=1, limit=20) and only adds a sane max page-size cap so an
+// unbounded `limit` cannot force an oversized scan. Invalid/missing values fall
+// back to defaults rather than rejecting the request (never stricter than before).
+const MAX_PAGE_SIZE = 100;
+const listQuerySchema = z.object({
+    page: z.coerce.number().int().min(1).catch(1).default(1),
+    limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).catch(20).default(20),
+});
+
 // F2: every read/load runs inside a tenant transaction so the RLS GUC is set.
 const listSuppliers = async (req, res, next) => {
     try {
-        const { stage, country, q, page = 1, limit = 20 } = req.query;
+        const { stage, country, q } = req.query;
+        const { page, limit } = listQuerySchema.parse(req.query);
         const where = {};
         if (stage) where.stage = stage;
         if (country) where.country = country.toUpperCase();
         if (q) where.legal_name = { [Op.iLike]: `%${q}%` };
-        const offset = (Number(page) - 1) * Number(limit);
+        const offset = (page - 1) * limit;
         const { count, rows } = await db.sequelize.transaction((t) =>
-            db.Supplier.findAndCountAll({ where, limit: Number(limit), offset, order: [['created_at', 'DESC']], transaction: t }));
-        return sendPaginated(req, res, { items: rows, total: count, page: Number(page), limit: Number(limit) });
+            db.Supplier.findAndCountAll({ where, limit, offset, order: [['created_at', 'DESC']], transaction: t }));
+        return sendPaginated(req, res, { items: rows, total: count, page, limit });
     } catch (err) { return next(err); }
 };
 
@@ -67,7 +78,11 @@ const createSupplier = async (req, res, next) => {
                 const country = ((req.body || {}).country || '').toUpperCase();
                 const existing = await db.sequelize.transaction((t) => findExisting(t, org_id, (req.body || {}).legal_name, country));
                 if (existing) return sendSuccess(req, res, existing, 200);
-            } catch (_) { /* fall through to error handler */ }
+            } catch (reReadErr) {
+                // Idempotent re-read after a concurrent unique-race failed; log
+                // and fall through to the original error handler (control flow unchanged).
+                console.error('[supplier-lifecycle-service] idempotent re-read after unique race failed:', reReadErr && reReadErr.message);
+            }
         }
         return next(err);
     }

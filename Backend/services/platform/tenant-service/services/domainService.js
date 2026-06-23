@@ -12,6 +12,7 @@ const crypto = require('node:crypto');
 const db = require('../models');
 const config = require('../config/appConfig');
 const events = require('./events');
+const logger = require('../utils/logger');
 const { invalidateForTenant } = require('./brandingService');
 const { Errors } = require('../utils/errors');
 
@@ -50,7 +51,10 @@ async function checkDns(domain, token) {
             const records = await Promise.race([dns.resolveTxt(name), timeout]);
             const flat = records.map((r) => r.join(''));
             if (flat.includes(token)) return true;
-        } catch { /* NXDOMAIN / no record / timeout — try next */ }
+        } catch (err) {
+            // NXDOMAIN / no record / timeout — expected during verification polling; try next name.
+            logger.debug({ err: err.message, name }, '[tenant-service] DNS TXT lookup miss — trying next name');
+        }
     }
     return false;
 }

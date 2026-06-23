@@ -16,7 +16,8 @@ const JWKS_URI = (config.jwt && config.jwt.jwksUri) || process.env.JWKS_URI
   || 'http://localhost:3001/.well-known/jwks.json';
 
 function _loadIORedis() {
-  try { return require('ioredis'); } catch {}
+  try { return require('ioredis'); }
+  catch (e) { console.warn('[rsVerifier] ioredis not resolvable from local node_modules; trying fallback path:', e.message); }
   try { return require(process.env.IOREDIS_PATH || 'd:/Baalvion Projects/Backend/services/identity/auth-service/node_modules/ioredis'); }
   catch (e) { console.warn('[rsVerifier] ioredis unavailable; JTI blacklist check OFF:', e.message); return null; }
 }

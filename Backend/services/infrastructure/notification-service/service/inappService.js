@@ -43,7 +43,7 @@ async function getInbox(userId, { limit = 50 } = {}) {
     const readSet = new Set(readIds);
     let unread = 0;
     const items = raw.map((j) => {
-        let e = {}; try { e = JSON.parse(j); } catch { /* */ }
+        let e = {}; try { e = JSON.parse(j); } catch (err) { logger.warn({ err: err && err.message, userId }, 'getInbox: skipping unparseable inbox entry'); }
         const read = readSet.has(e.id);
         if (!read) unread++;
         return { ...e, read };

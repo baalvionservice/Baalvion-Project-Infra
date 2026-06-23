@@ -43,6 +43,10 @@ app.use(requestContext);
 app.use(traceMiddleware);
 app.use(createIpRateLimit());
 
+// Root-level health probe — matches the fleet-wide `/health` convention so a
+// generic probe does not 404 (the existing /api/v1/health route is kept as-is).
+app.get('/health', (req, res) => res.json({ status: 'ok', service: 'cms-service', timestamp: new Date().toISOString() }));
+
 app.use('/api/v1', v1Router);
 
 // Catch-all

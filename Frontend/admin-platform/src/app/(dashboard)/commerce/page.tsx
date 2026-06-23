@@ -13,6 +13,7 @@ import { useOrders } from '@/lib/queries/orders.queries';
 import { useCommerceStore } from '@/lib/store/commerceStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import { formatCurrency } from '@/lib/utils/format';
+import LiveVisitorsCard from '@/components/commerce/LiveVisitorsCard';
 import type { CommerceStore } from '@/lib/types/commerce.types';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -43,6 +44,7 @@ export default function CommerceOverviewPage() {
   }, [setBreadcrumbs]);
 
   const stores = storesData?.data ?? [];
+  const activeStore = stores.find((s) => s.id === activeStoreId);
   const activeStores = stores.filter((s) => s.status === 'active').length;
   const pendingOrders = ordersData?.pagination?.total ?? 0;
 
@@ -176,6 +178,9 @@ export default function CommerceOverviewPage() {
 
         {/* Quick links */}
         <div className="space-y-4">
+          {/* Live shoppers on the selected storefront right now (polls every 15s). */}
+          <LiveVisitorsCard storeId={activeStoreId} storeName={activeStore?.name} />
+
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium">Quick Access</CardTitle>

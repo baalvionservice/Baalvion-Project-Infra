@@ -4,6 +4,7 @@
 // the dispatcher honor per-user opt-outs.
 const config = require('../config/appConfig');
 const redis  = require('../config/redis');
+const logger = require('../utils/logger');
 
 const CHANNELS = ['email', 'sms', 'push', 'inapp', 'webhook'];
 
@@ -30,7 +31,7 @@ async function listDevices(userId) {
     if (!r) return [];
     const map = await r.hgetall(devKey(userId));
     return Object.entries(map || {}).map(([token, meta]) => {
-        let parsed = {}; try { parsed = JSON.parse(meta); } catch { /* */ }
+        let parsed = {}; try { parsed = JSON.parse(meta); } catch (err) { logger.warn({ err: err && err.message, userId }, 'listDevices: skipping unparseable device entry'); }
         return { token, ...parsed };
     });
 }

@@ -9,8 +9,8 @@ const DEV_INSECURE_SECRET = 'dev-insecure-tenant-secret';
 const _jwtAccessSecret = process.env.JWT_ACCESS_SECRET || DEV_INSECURE_SECRET;
 const _nodeEnv = process.env.NODE_ENV || 'development';
 if (_nodeEnv === 'production' && (!process.env.JWT_PUBLIC_KEY && _jwtAccessSecret === DEV_INSECURE_SECRET)) {
-    // eslint-disable-next-line no-console
-    console.error('[tenant-service] FATAL: JWT_ACCESS_SECRET / JWT_PUBLIC_KEY must be set in production');
+    // utils/logger only reads process.env (no dependency on this module) — safe to use at boot.
+    require('../utils/logger').fatal('[tenant-service] FATAL: JWT_ACCESS_SECRET / JWT_PUBLIC_KEY must be set in production');
     process.exit(1);
 }
 

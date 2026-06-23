@@ -11,6 +11,9 @@ const scope = () => { const c = getTenantContext() || {}; return { orgId: c.tena
 
 const nodeSchema = z.object({ label: z.string(), id: z.string(), props: z.record(z.any()).default({}) });
 const edgeSchema = z.object({ type: z.string(), fromId: z.string(), toId: z.string(), props: z.record(z.any()).default({}) });
+// Permissive: shape only (template must be a non-empty string, params an object).
+// The allowlist (TEMPLATES[template]) still gates which template actually runs.
+const querySchema = z.object({ template: z.string().min(1), params: z.record(z.any()).default({}) });
 
 const upsertNode = async (req, res, next) => {
     try {
@@ -62,14 +65,14 @@ const sanctionPath = async (req, res, next) => {
 
 const query = async (req, res, next) => {
     try {
-        const { template, params = {} } = req.body || {};
+        const { template, params } = querySchema.parse(req.body || {});
         const fn = TEMPLATES[template];
         if (!fn) return next(new AppError('BAD_REQUEST', `unknown template '${template}'`, 422));
         const { orgId, bypass } = scope();
         const { cypher } = fn(params);
         const rows = await read(cypher, { ...params, orgId, bypass });
         return sendSuccess(req, res, { rows });
-    } catch (err) { return next(err); }
+    } catch (err) { return next(err instanceof z.ZodError ? new AppError('BAD_REQUEST', err.errors[0].message, 422) : err); }
 };
 
 module.exports = { upsertNode, createEdge, neighbors, paths, sanctionPath, query };

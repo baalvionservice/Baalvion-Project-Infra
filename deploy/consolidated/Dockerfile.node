@@ -1,0 +1,67 @@
+# syntax=docker/dockerfile:1
+# ─────────────────────────────────────────────────────────────────────────────
+# baalvion-backend — ONE image for all six Node "apps".
+#
+# The image carries the full Backend pnpm workspace (every service + the shared
+# @baalvion/* packages). Each container runs a DIFFERENT pm2 ecosystem file
+# (selected per docker-compose service via `command:`), so a container only
+# launches the module processes for its bounded context.
+#
+# ZERO code changes: pm2 runs each module's own `node index.js`, with its own cwd
+# and an explicit PORT — exactly as the service starts today.
+#
+# Build (from REPO ROOT):
+#   docker build -f deploy/consolidated/Dockerfile.node -t baalvion-backend:local .
+#
+# NOTE: ensure node_modules / Frontend are excluded from the build context. A clean
+# git checkout already is (node_modules is .gitignored); on a working tree add a
+# repo-root .dockerignore with: node_modules, **/node_modules, Frontend, .git, .turbo
+# ─────────────────────────────────────────────────────────────────────────────
+FROM node:20-bookworm-slim AS runtime
+
+ENV PNPM_HOME=/pnpm \
+    PATH=/pnpm:$PATH \
+    NODE_ENV=production
+
+# pnpm (workspace install) + pm2 (per-container process supervisor) + tini (PID 1).
+RUN corepack enable && corepack prepare pnpm@9 --activate \
+ && npm install -g pm2@5 \
+ && apt-get update && apt-get install -y --no-install-recommends tini ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# 1) Manifests first → cacheable install layer. The trimmed workspace file limits the
+#    install to Backend (services + packages); no Frontend deps land in the image.
+#    tsconfig.base.json is the root TS config every @baalvion/* package's tsconfig extends
+#    (Backend/tsconfig.base.json re-exports it); the tsup --dts builds below need it.
+COPY deploy/consolidated/pnpm-workspace.docker.yaml ./pnpm-workspace.yaml
+COPY package.json pnpm-lock.yaml tsconfig.base.json ./
+
+# 2) Backend source (services + shared packages). pnpm wires each service's node_modules
+#    to the shared store, so `node index.js` resolves deps from its own cwd unchanged.
+COPY Backend ./Backend
+
+# 3) Install + build the shared packages.
+#    - --prod=false: the @baalvion/* packages compile to dist/ with tsup (a devDependency),
+#      so devDeps MUST be present at build time; without this, NODE_ENV=production makes
+#      pnpm install prod-only → tsup absent → dist/ never built → consumers crash with
+#      MODULE_NOT_FOUND on @baalvion/<pkg>/dist/index.js at runtime.
+#    - the recursive build emits each package's dist/ (dist/ is .gitignored, so it is NOT
+#      in the build context and must be produced here).
+#    --no-frozen-lockfile because the Docker workspace view omits the Frontend packages the
+#    root lockfile also tracks. Pin/refresh the lockfile in CI for repro builds.
+RUN pnpm install --no-frozen-lockfile --prod=false \
+ && pnpm -r --filter "./Backend/packages/*" run build \
+ && pnpm store prune
+
+# 4) pm2 ecosystem files — one per app, chosen at run time via `command:`.
+COPY deploy/consolidated/pm2 ./pm2
+
+# Startup env preflight (fail-fast on missing/placeholder vars) runs before pm2.
+COPY deploy/consolidated/preflight-env.js deploy/consolidated/docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
+# tini (PID 1) forwards SIGTERM cleanly; the entrypoint validates env then exec's the CMD.
+ENTRYPOINT ["/usr/bin/tini","--","/app/docker-entrypoint.sh"]
+# Default personality; every compose service overrides this with its own ecosystem file.
+CMD ["pm2-runtime","start","/app/pm2/identity.config.js"]

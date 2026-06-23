@@ -17,6 +17,12 @@ const rand = (a) => a[Math.floor(Math.random() * a.length)];
 const ri = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
 async function main() {
+    // Secret guard: the local-dev fallback password must never silently apply in
+    // production. Fail-closed if DB_PASSWORD is missing under NODE_ENV=production,
+    // while preserving the convenient dev default everywhere else.
+    if (process.env.NODE_ENV === 'production' && !process.env.DB_PASSWORD) {
+        throw new Error('DB_PASSWORD is required in production (refusing the dev-default fallback)');
+    }
     const client = new Client({
         host: process.env.DB_HOST || 'localhost', port: Number(process.env.DB_PORT || 5432),
         database: process.env.DB_NAME || 'baalvion_db', user: process.env.DB_USER || 'baalvion',

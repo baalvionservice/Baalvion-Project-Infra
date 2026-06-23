@@ -5,6 +5,11 @@ const { makeController, DEFAULT_BRAND } = require('../controller/crudController'
 const { authMiddleware, optionalAuth } = require('../middleware/authMiddleware');
 const { AppError } = require('../utils/errors');
 const { sendSuccess } = require('../utils/response');
+const {
+    validateBody,
+    appointmentCreateSchema,
+    supportTicketCreateSchema,
+} = require('../middleware/validate');
 
 const router = Router();
 
@@ -20,12 +25,17 @@ const supportTickets = makeController(db.SupportTicket, { searchable: ['customer
 /**
  * Mount one entity with standard CRUD. List/read require auth by default (CRM data is
  * privileged), writes require auth. Pass `publicCreate` to allow anonymous create (used by
- * the storefront appointment booking form).
+ * the storefront appointment booking form). Pass `createValidator` (an Express middleware) to
+ * validate the create body before the controller runs — used on the anonymous create surfaces
+ * so unauthenticated public input is checked at the boundary.
  */
-function mountEntity(base, ctrl, { publicCreate = false } = {}) {
+function mountEntity(base, ctrl, { publicCreate = false, createValidator = null } = {}) {
     router.get(`${base}`, authMiddleware, ctrl.list);
     router.get(`${base}/:id`, authMiddleware, ctrl.getOne);
-    router.post(`${base}`, publicCreate ? optionalAuth : authMiddleware, ctrl.create);
+    const createChain = [publicCreate ? optionalAuth : authMiddleware];
+    if (createValidator) createChain.push(createValidator);
+    createChain.push(ctrl.create);
+    router.post(`${base}`, ...createChain);
     router.patch(`${base}/:id`, authMiddleware, ctrl.update);
     router.put(`${base}/:id`, authMiddleware, ctrl.update);
     router.delete(`${base}/:id`, authMiddleware, ctrl.remove);
@@ -49,7 +59,13 @@ mountEntity('/crm/segments', segments);
 mountEntity('/crm/campaigns', campaigns);
 mountEntity('/crm/vendors', vendors);
 mountEntity('/crm/affiliates', affiliates);
-mountEntity('/crm/appointments', appointments, { publicCreate: true });
-mountEntity('/crm/support-tickets', supportTickets, { publicCreate: true });
+mountEntity('/crm/appointments', appointments, {
+    publicCreate: true,
+    createValidator: validateBody(appointmentCreateSchema),
+});
+mountEntity('/crm/support-tickets', supportTickets, {
+    publicCreate: true,
+    createValidator: validateBody(supportTicketCreateSchema),
+});
 
 module.exports = router;

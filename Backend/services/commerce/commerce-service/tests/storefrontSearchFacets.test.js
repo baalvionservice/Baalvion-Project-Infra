@@ -11,6 +11,7 @@ const { test, beforeEach } = require('node:test');
 const assert = require('node:assert');
 const { Op } = require('sequelize');
 
+require('./_env'); // dummy JWT_PUBLIC_KEY so the fail-loud config boots under CI (no .env)
 const models = require('../models');
 const storefront = require('../service/storefrontService');
 

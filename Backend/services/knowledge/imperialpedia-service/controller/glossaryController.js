@@ -126,7 +126,10 @@ const getTooltip = async (req, res, next) => {
             attributes: ['id', 'term', 'slug', 'short_def', 'difficulty'],
         });
         if (!term) return next(new AppError('NOT_FOUND', 'Term not found', 404));
-        db.GlossaryTerm.increment('view_count', { where: { id: term.id } }).catch(() => {});
+        db.GlossaryTerm.increment('view_count', { where: { id: term.id } }).catch((e) => {
+            // Fire-and-forget: a failed view-count bump must never break the tooltip response.
+            console.error('[Imperialpedia] view_count increment failed:', e.message);
+        });
         return sendSuccess(req, res, {
             term: term.term, slug: term.slug, shortDef: term.short_def, difficulty: term.difficulty, url: `/glossary/${term.slug}`,
         });

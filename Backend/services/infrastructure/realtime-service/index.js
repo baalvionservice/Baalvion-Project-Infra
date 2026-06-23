@@ -126,7 +126,9 @@ async function connectRedis() {
         } else {
           io.of(ns).emit(type, data);
         }
-      } catch { /* invalid JSON */ }
+      } catch (err) {
+        console.error('[Redis] Dropping malformed event on baalvion:events:', err.message);
+      }
     });
 
     // Keep backward-compat with old channel name
@@ -134,7 +136,9 @@ async function connectRedis() {
       try {
         const event = JSON.parse(message);
         broadcastToAll('event', event);
-      } catch { /* invalid JSON */ }
+      } catch (err) {
+        console.error('[Redis] Dropping malformed event on baalvion:events:pubsub:', err.message);
+      }
     });
 
     console.log('[Redis] pub/sub subscribed to baalvion:events');
@@ -160,7 +164,9 @@ async function pushReplayEvent(userId, event) {
     await publisher.lPush(key, payload);
     await publisher.lTrim(key, 0, REPLAY_MAX - 1);
     await publisher.expire(key, REPLAY_TTL);
-  } catch { /* non-fatal */ }
+  } catch (err) {
+    console.error(`[Redis] Failed to buffer replay event for user=${userId}:`, err.message);
+  }
 }
 
 async function fetchReplayEvents(userId) {

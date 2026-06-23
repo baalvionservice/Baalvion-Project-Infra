@@ -12,6 +12,7 @@ const {
     makeCpuSampler, collectInfra, collectServiceHealth,
     collectPlatformStats, collectQueues, collectEvents,
 } = require('./collectors');
+const { requireSecret, DEV_DB_PASSWORD_FALLBACK } = require('./lib');
 
 // ── Config ───────────────────────────────────────────────────────────────────
 const PORT = Number(process.env.PORT || 3026);
@@ -19,7 +20,15 @@ const TICK_MS = Number(process.env.TICK_MS || 5000);
 const ISSUER = process.env.JWT_ISSUER || 'baalvion-auth';
 const AUDIENCE = process.env.JWT_AUDIENCE || 'baalvion-platform';
 const PUBLIC_KEY = (() => {
-    if (process.env.JWT_PUBLIC_KEY_PATH) { try { return fs.readFileSync(process.env.JWT_PUBLIC_KEY_PATH, 'utf8'); } catch {} }
+    if (process.env.JWT_PUBLIC_KEY_PATH) {
+        try {
+            return fs.readFileSync(process.env.JWT_PUBLIC_KEY_PATH, 'utf8');
+        } catch (e) {
+            // Fall through to the inline key / null. Log so a misconfigured path
+            // (typo, missing mount) is visible rather than silently disabling auth.
+            process.stderr.write(`[realtime-service] could not read JWT_PUBLIC_KEY_PATH (${process.env.JWT_PUBLIC_KEY_PATH}): ${e.message}\n`);
+        }
+    }
     if (process.env.JWT_PUBLIC_KEY) return process.env.JWT_PUBLIC_KEY.replace(/\\n/g, '\n');
     return null;
 })();
@@ -76,12 +85,16 @@ function buildPoolSsl() {
     return { rejectUnauthorized: process.env.DB_SSL_REJECT_UNAUTHORIZED !== 'false', ...(ca ? { ca } : {}) };
 }
 
+// Secret guard: in production a missing DB_PASSWORD throws at startup rather than
+// silently falling back to the known dev credential; dev/test keep the default.
+const DB_PASSWORD = requireSecret('DB_PASSWORD', process.env.DB_PASSWORD, DEV_DB_PASSWORD_FALLBACK);
+
 const pool = new Pool({
     host: process.env.DB_HOST || 'localhost',
     port: Number(process.env.DB_PORT || 5432),
     database: process.env.DB_NAME || 'baalvion_db',
     user: process.env.DB_USER || 'baalvion',
-    password: process.env.DB_PASSWORD || 'baalvion_dev_pass',
+    password: DB_PASSWORD,
     max: 4,
     ssl: buildPoolSsl(),
 });
@@ -106,7 +119,15 @@ function verifyUpgrade(req) {
         const roles = payload.roles || [];
         if (!roles.some((r) => INFRA_ROLES.has(r))) return null; // role gate
         return { userId: payload.sub, roles };
-    } catch { return null; }
+    } catch (e) {
+        // Reject the upgrade. Expired/invalid client tokens are expected and would
+        // flood the log, so only surface unexpected failures (e.g. a malformed JWT
+        // public key) which would otherwise silently break all WS auth.
+        if (e && e.name !== 'TokenExpiredError' && e.name !== 'JsonWebTokenError' && e.name !== 'NotBeforeError') {
+            process.stderr.write(`[realtime-service] WS upgrade auth error: ${e.message}\n`);
+        }
+        return null;
+    }
 }
 
 // ── Auth for REST requests (Bearer token or ?token= query param) ──────────────
@@ -126,7 +147,15 @@ function verifyRestToken(req) {
         const roles = payload.roles || [];
         if (!roles.some((r) => INFRA_ROLES.has(r))) return null; // role gate
         return { userId: payload.sub, roles };
-    } catch { return null; }
+    } catch (e) {
+        // Reject the request. As with the WS path, expired/invalid client tokens
+        // are routine; only log unexpected verification failures so a broken JWT
+        // public key surfaces instead of every request silently 401-ing.
+        if (e && e.name !== 'TokenExpiredError' && e.name !== 'JsonWebTokenError' && e.name !== 'NotBeforeError') {
+            process.stderr.write(`[realtime-service] REST auth error: ${e.message}\n`);
+        }
+        return null;
+    }
 }
 
 // ── HTTP server (health + REST snapshot) ─────────────────────────────────────
@@ -262,14 +291,26 @@ async function eventTick() {
 
 subscriber.subscribe('realtime:events').catch((e) => process.stderr.write(`[realtime] subscribe failed: ${e.message}\n`));
 subscriber.on('message', (_channel, payload) => {
-    try { wss.broadcast({ type: 'event', data: JSON.parse(payload) }); } catch { /* bad payload */ }
+    try {
+        wss.broadcast({ type: 'event', data: JSON.parse(payload) });
+    } catch (e) {
+        // Malformed pub/sub payload — drop it but log so a bad publisher is visible.
+        process.stderr.write(`[realtime-service] dropped malformed realtime:events payload: ${e.message}\n`);
+    }
 });
 
 server.listen(PORT, async () => {
     process.stdout.write(`[realtime-service] listening on :${PORT} (ws + REST) — tick ${TICK_MS}ms\n`);
     if (!PUBLIC_KEY) process.stderr.write('[realtime-service] WARNING: no JWT public key — WS auth will reject all clients\n');
     // Seed lastEventId to "now" so we stream only events from startup forward.
-    try { const r = await pgQuery('SELECT COALESCE(MAX(id),0) AS max FROM auth.audit_logs'); eventState.lastEventId = Number(r.rows[0].max); } catch {}
+    try {
+        const r = await pgQuery('SELECT COALESCE(MAX(id),0) AS max FROM auth.audit_logs');
+        eventState.lastEventId = Number(r.rows[0].max);
+    } catch (e) {
+        // DB unavailable at boot — leave lastEventId at 0 (event tail starts from
+        // the beginning once the DB returns). Log so the cause is visible.
+        process.stderr.write(`[realtime-service] could not seed lastEventId from auth.audit_logs: ${e.message}\n`);
+    }
     await tick();
     setInterval(tick, TICK_MS);
     setInterval(eventTick, 3000);

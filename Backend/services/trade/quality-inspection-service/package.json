@@ -10,7 +10,7 @@
     "dev": "nodemon index.js",
     "migrate": "node migrate.js",
     "migrate:status": "node migrate.js status",
-    "test": "jest --forceExit --runInBand"
+    "test": "node --test"
   },
   "dependencies": {
     "@baalvion/telemetry": "workspace:*",

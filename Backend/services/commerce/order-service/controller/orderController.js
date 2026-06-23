@@ -13,6 +13,12 @@ const getOrder = async (req, res, next) => {
     catch (err) { return next(err); }
 };
 
+// PUBLIC guest order lookup/tracking (email + orderNumber). No auth/session — see lookupGuestOrder.
+const lookupOrder = async (req, res, next) => {
+    try { return sendSuccess(req, res, await orderService.lookupGuestOrder(req.params.storeId, req.validated)); }
+    catch (err) { return next(err); }
+};
+
 // Customer-facing: the authenticated shopper's own orders in this store.
 const listMyOrders = async (req, res, next) => {
     try { return sendPaginated(req, res, await orderService.listMyOrders(req.params.storeId, req.auth && req.auth.userId, req.query)); }
@@ -69,4 +75,4 @@ const paymentWebhook = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listOrders, listMyOrders, getOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, paymentWebhook };
+module.exports = { listOrders, listMyOrders, getOrder, lookupOrder, createOrder, updateOrderStatus, cancelOrder, recordPayment, refundPayment, createPaymentIntent, confirmPayment, paymentWebhook };
