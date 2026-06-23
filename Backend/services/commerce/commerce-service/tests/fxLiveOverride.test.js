@@ -9,6 +9,7 @@ process.env.FX_CACHE_TTL = '3600';
 const { test, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert');
 
+require('./_env'); // dummy JWT_PUBLIC_KEY so the fail-loud config boots under CI (no .env)
 // Stub the cache module so refreshRates()/primeFromCache() never touch Redis.
 const cacheService = require('../service/cacheService');
 let cacheStore = {};

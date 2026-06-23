@@ -13,6 +13,7 @@ fs.writeFileSync = () => {};
 fs.mkdirSync = () => {};
 fs.unlinkSync = () => {};
 
+require('./_env'); // dummy JWT_PUBLIC_KEY so the fail-loud config boots under CI (no .env)
 const models = require('../models');
 const mediaService = require('../service/productMediaService');
 

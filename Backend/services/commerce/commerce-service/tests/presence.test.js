@@ -8,6 +8,7 @@ process.env.PRESENCE_WINDOW_MS = '10000';
 const { test, beforeEach, afterEach } = require('node:test');
 const assert = require('node:assert');
 
+require('./_env'); // dummy JWT_PUBLIC_KEY so the fail-loud config boots under CI (no .env)
 const cache = require('../service/cacheService');
 const presence = require('../service/presenceService');
 
