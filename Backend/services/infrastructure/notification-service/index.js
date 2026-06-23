@@ -44,7 +44,7 @@ app.get('/health', async (_req, res) => {
         const { emailQueue } = getQueues();
         await emailQueue.getWaitingCount();
         queueStatus = 'ok';
-    } catch { /* */ }
+    } catch (err) { logger.warn({ err: err && err.message }, 'health check: queue probe failed — reporting queues unavailable'); }
     const pushService = require('./service/pushService');
     res.json({
         status:  'ok',

@@ -5,29 +5,23 @@ const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { DocEvents, emitSafe } = require('../platform/events');
+const { createSchema, listQuerySchema, signSchema } = require('../validation/documentSchemas');
 
 const tenantOf = (req) => (req.auth && (req.auth.tenantId || req.auth.orgId)) || null;
-const DOC_TYPES = ['commercial_invoice', 'packing_list', 'bill_of_lading', 'certificate_of_origin', 'lc', 'inspection_cert'];
-
-const createSchema = z.object({
-    order_id: z.string().optional(),
-    doc_type: z.enum(DOC_TYPES),
-    payload: z.record(z.any()).default({}),
-});
 
 // F2: every read/load runs inside a tenant transaction so the RLS GUC is set.
 const listDocuments = async (req, res, next) => {
     try {
-        const { orderId, docType, status, page = 1, limit = 20 } = req.query;
+        const { orderId, docType, status, page, limit } = listQuerySchema.parse(req.query || {});
         const where = {};
         if (orderId) where.order_id = orderId;
         if (docType) where.doc_type = docType;
         if (status) where.status = status;
-        const offset = (Number(page) - 1) * Number(limit);
+        const offset = (page - 1) * limit;
         const { count, rows } = await db.sequelize.transaction((t) =>
-            db.Document.findAndCountAll({ where, limit: Number(limit), offset, order: [['created_at', 'DESC']], transaction: t }));
-        return sendPaginated(req, res, { items: rows, total: count, page: Number(page), limit: Number(limit) });
-    } catch (err) { return next(err); }
+            db.Document.findAndCountAll({ where, limit, offset, order: [['created_at', 'DESC']], transaction: t }));
+        return sendPaginated(req, res, { items: rows, total: count, page, limit });
+    } catch (err) { return next(err instanceof z.ZodError ? new AppError('BAD_REQUEST', err.errors[0].message, 422) : err); }
 };
 
 const getDocument = async (req, res, next) => {
@@ -73,8 +67,7 @@ const issueDocument = async (req, res, next) => {
 
 const signDocument = async (req, res, next) => {
     try {
-        const { signature } = req.body || {};
-        if (!signature) return next(new AppError('BAD_REQUEST', 'signature required', 422));
+        const { signature } = signSchema.parse(req.body || {});
         const doc = await db.sequelize.transaction(async (t) => {
             const row = await db.Document.findByPk(req.params.id, { transaction: t });
             if (!row) throw new AppError('NOT_FOUND', 'Document not found', 404);
@@ -84,7 +77,7 @@ const signDocument = async (req, res, next) => {
             return row;
         });
         return sendSuccess(req, res, doc);
-    } catch (err) { return next(err); }
+    } catch (err) { return next(err instanceof z.ZodError ? new AppError('BAD_REQUEST', err.errors[0].message, 422) : err); }
 };
 
 const voidDocument = async (req, res, next) => {

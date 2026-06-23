@@ -15,20 +15,32 @@ const createSchema = z.object({
     attributes: z.record(z.any()).default({}),
 });
 
+// Permissive list-query guard: mirrors the existing page=1/limit=20 defaults and
+// only adds a sane upper bound so `?limit=999999999` cannot trigger an unbounded
+// scan. Filters (hsCode/status/q) remain optional pass-through strings.
+const MAX_PAGE_SIZE = 100;
+const listQuerySchema = z.object({
+    hsCode: z.string().optional(),
+    status: z.string().optional(),
+    q: z.string().optional(),
+    page: z.coerce.number().int().min(1).default(1),
+    limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(20),
+}).passthrough();
+
 // F2: every read/load runs inside a tenant transaction so the RLS GUC is set;
 // otherwise FORCE RLS returns zero rows on the un-scoped pooled connection.
 const listProducts = async (req, res, next) => {
     try {
-        const { hsCode, status, q, page = 1, limit = 20 } = req.query;
+        const { hsCode, status, q, page, limit } = listQuerySchema.parse(req.query || {});
         const where = {};
         if (hsCode) where.hs_code = { [Op.like]: `${hsCode}%` };
         if (status) where.status = status;
         if (q) where.name = { [Op.iLike]: `%${q}%` };
-        const offset = (Number(page) - 1) * Number(limit);
+        const offset = (page - 1) * limit;
         const { count, rows } = await db.sequelize.transaction((t) =>
-            db.Product.findAndCountAll({ where, limit: Number(limit), offset, order: [['created_at', 'DESC']], transaction: t }));
-        return sendPaginated(req, res, { items: rows, total: count, page: Number(page), limit: Number(limit) });
-    } catch (err) { return next(err); }
+            db.Product.findAndCountAll({ where, limit, offset, order: [['created_at', 'DESC']], transaction: t }));
+        return sendPaginated(req, res, { items: rows, total: count, page, limit });
+    } catch (err) { return next(err instanceof z.ZodError ? new AppError('BAD_REQUEST', err.errors[0].message, 422) : err); }
 };
 
 const getProduct = async (req, res, next) => {
@@ -87,4 +99,8 @@ const hsRequirements = async (req, res, next) => {
 };
 const prefixes = (hs) => { const out = []; for (let i = 2; i <= hs.length; i += 2) out.push(hs.slice(0, i)); return out; };
 
-module.exports = { listProducts, getProduct, createProduct, updateProduct, retireProduct, hsRequirements };
+module.exports = {
+    listProducts, getProduct, createProduct, updateProduct, retireProduct, hsRequirements,
+    // Exported for unit testing of pure validation / helper logic (no DB needed).
+    createSchema, listQuerySchema, prefixes, MAX_PAGE_SIZE,
+};

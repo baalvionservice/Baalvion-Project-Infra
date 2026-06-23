@@ -215,7 +215,7 @@ async function isProcessed(eventId) {
 async function markProcessed(eventId) {
     if (!eventId) return;
     try { const r = redis.getClient(); if (r) await r.set(`notif:processed:${eventId}`, '1', 'EX', 86_400); }
-    catch { /* non-fatal — at worst a duplicate, which BullMQ jobIds absorb */ }
+    catch (err) { logger.warn({ err: err && err.message, eventId }, 'markProcessed failed — non-fatal (at worst a duplicate, which BullMQ jobIds absorb)'); }
 }
 
 // ── SDK event handler: idempotent + trace-scoped ──────────────────────────────
@@ -259,4 +259,4 @@ async function stopEventConsumer() {
     if (_subscription) { await _subscription.unsubscribe(); _subscription = null; }
 }
 
-module.exports = { startEventConsumer, stopEventConsumer, dispatch, handle };
+module.exports = { startEventConsumer, stopEventConsumer, dispatch, handle, formatRiskSignals };

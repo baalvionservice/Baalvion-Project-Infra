@@ -23,8 +23,8 @@ function getRedis() {
 }
 const cache = {
     get: async (k) => { try { const v = await getRedis().get(k); return v ? JSON.parse(v) : null; } catch { return null; } },
-    set: async (k, v, ttl) => { try { await getRedis().set(k, JSON.stringify(v), 'EX', ttl); } catch { /* best-effort */ } },
-    del: async (k) => { try { await getRedis().del(k); } catch { /* best-effort */ } },
+    set: async (k, v, ttl) => { try { await getRedis().set(k, JSON.stringify(v), 'EX', ttl); } catch (e) { console.error('[fulfillment-service rbac] cache set failed (best-effort):', e.message); } },
+    del: async (k) => { try { await getRedis().del(k); } catch (e) { console.error('[fulfillment-service rbac] cache del failed (best-effort):', e.message); } },
 };
 
 const rbacClient = createRbacClient({ ...config.rbac, AppError });

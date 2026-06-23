@@ -18,7 +18,8 @@ function verifyGatewayIdentity(headers) {
     const userId = headers['x-user-id'];
     const orgId = headers['x-org-id'] || '';
     let roles = [];
-    try { roles = JSON.parse(headers['x-roles'] || '[]'); } catch { /* [] */ }
+    try { roles = JSON.parse(headers['x-roles'] || '[]'); }
+    catch (err) { console.error(`[${config.service}] malformed x-roles header; defaulting to no roles: ${err.message}`); roles = []; }
     const sig = headers['x-gateway-signature'] || '';
     if (!userId || !sig) return null;
     const expected = crypto.createHmac('sha256', sec).update(`${userId}.${orgId}.${roles.join(',')}`).digest('hex');
