@@ -43,7 +43,7 @@ async function authService(path, body, req) {
     headers,
     body: JSON.stringify(body || {}),
   });
-  let json = null; try { json = await res.json(); } catch { /* no body */ }
+  let json = null; try { json = await res.json(); } catch (e) { console.debug('[auth-gateway] authService: no/invalid JSON body from', path, '-', e.message); }
   const setCookies = typeof res.headers.getSetCookie === 'function' ? res.headers.getSetCookie() : [];
   const refreshFromCookie = pickSetCookie(setCookies, config.cookie.refreshName);
   return { status: res.status, json, refreshFromCookie };
@@ -150,9 +150,10 @@ router.post('/invite', requireSession(), async (req, res) => {
       headers: { 'Content-Type': 'application/json', authorization: `Bearer ${accessToken}` },
       body: JSON.stringify({ email, role }),
     });
-    let json = null; try { json = await r.json(); } catch { /* no body */ }
+    let json = null; try { json = await r.json(); } catch (e) { console.debug('[auth-gateway] /invite: no/invalid JSON body from auth-service -', e.message); }
     return res.status(r.status).json(json || { ok: r.ok });
-  } catch {
+  } catch (err) {
+    console.error('[auth-gateway] /invite: auth-service request failed:', err.message);
     return res.status(502).json({ error: { code: 'INVITE_SERVICE_ERROR', message: 'Invite service unavailable' } });
   }
 });
@@ -182,9 +183,10 @@ router.all('/svc/*', requireSession(), requireCsrf, async (req, res) => {
       },
       ...(hasBody ? { body: JSON.stringify(req.body || {}) } : {}),
     });
-    let json = null; try { json = await r.json(); } catch { /* no body */ }
+    let json = null; try { json = await r.json(); } catch (e) { console.debug('[auth-gateway] /svc passthrough: no/invalid JSON body from auth-service -', e.message); }
     return res.status(r.status).json(json ?? { ok: r.ok });
-  } catch {
+  } catch (err) {
+    console.error('[auth-gateway] /svc passthrough: auth-service request failed:', err.message);
     return res.status(502).json({ error: { code: 'AUTH_SVC_UNAVAILABLE', message: 'Auth service unavailable' } });
   }
 });
@@ -195,9 +197,10 @@ router.get('/validate-invite', async (req, res) => {
   try {
     const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
     const r = await fetch(`${config.authServiceUrl}/validate-invite${q}`, { method: 'GET' });
-    let json = null; try { json = await r.json(); } catch { /* no body */ }
+    let json = null; try { json = await r.json(); } catch (e) { console.debug('[auth-gateway] /validate-invite: no/invalid JSON body from auth-service -', e.message); }
     return res.status(r.status).json(json ?? { ok: r.ok });
-  } catch {
+  } catch (err) {
+    console.error('[auth-gateway] /validate-invite: auth-service request failed:', err.message);
     return res.status(502).json({ error: { code: 'AUTH_SVC_UNAVAILABLE', message: 'Auth service unavailable' } });
   }
 });
@@ -256,9 +259,10 @@ router.get('/verify-email', async (req, res) => {
   try {
     const q = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
     const r = await fetch(`${config.authServiceUrl}/verify-email${q}`, { method: 'GET' });
-    let json = null; try { json = await r.json(); } catch { /* no body */ }
+    let json = null; try { json = await r.json(); } catch (e) { console.debug('[auth-gateway] GET /verify-email: no/invalid JSON body from auth-service -', e.message); }
     return res.status(r.status).json(json ?? { ok: r.ok });
-  } catch {
+  } catch (err) {
+    console.error('[auth-gateway] GET /verify-email: auth-service request failed:', err.message);
     return res.status(502).json({ error: { code: 'AUTH_SVC_UNAVAILABLE', message: 'Auth service unavailable' } });
   }
 });
@@ -339,12 +343,13 @@ router.post('/logout', async (req, res) => {
     try {
       const c = await verifier.verify(token);
       if (c && c.sid) await revoke(c.sid, c.jti, c.exp);
-    } catch {
+    } catch (e) {
       // Token invalid, expired, or tampered — skip revocation (no trusted claims to act on).
+      console.debug('[auth-gateway] /logout: skipping revocation (token not verifiable):', e.message);
     }
   }
   clearCookies(res);
-  try { await authService('/logout', {}, req); } catch { /* best-effort */ }
+  try { await authService('/logout', {}, req); } catch (e) { console.debug('[auth-gateway] /logout: best-effort auth-service logout failed:', e.message); }
   return res.json({ ok: true });
 });
 

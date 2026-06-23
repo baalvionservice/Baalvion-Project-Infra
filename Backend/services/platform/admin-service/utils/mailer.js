@@ -47,7 +47,15 @@ function sendMail({ to, subject, html, text }) {
         let idx = 0;
         let buf = '';
 
-        const fail = (msg) => { try { socket.destroy(); } catch {} reject(new Error(msg)); };
+        const fail = (msg) => {
+            try {
+                socket.destroy();
+            } catch (err) {
+                // Socket may already be torn down; surface it at debug, never abort the reject.
+                logger.debug({ err: err.message }, '[mailer] socket.destroy during failure handling');
+            }
+            reject(new Error(msg));
+        };
 
         socket.on('data', (chunk) => {
             buf += chunk;

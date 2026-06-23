@@ -30,6 +30,12 @@ const TITLES = ['Engineer', 'Senior Engineer', 'Designer', 'Product Manager', 'A
 const TIMEZONES = ['UTC', 'America/New_York', 'Europe/London', 'Asia/Kolkata', 'Asia/Singapore'];
 
 async function main() {
+    // Secret guard: the local-dev fallback password must never silently apply in
+    // production. Fail-closed if DB_PASSWORD is missing under NODE_ENV=production,
+    // while preserving the convenient dev default everywhere else.
+    if (process.env.NODE_ENV === 'production' && !process.env.DB_PASSWORD) {
+        throw new Error('DB_PASSWORD is required in production (refusing the dev-default fallback)');
+    }
     const client = new Client({
         host:     process.env.DB_HOST     || 'localhost',
         port:     Number(process.env.DB_PORT || 5432),

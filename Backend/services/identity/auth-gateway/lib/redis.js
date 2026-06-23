@@ -21,7 +21,10 @@ redis.isOrgSuspended = async function isOrgSuspended(orgId) {
   if (!orgId) return false;
   try {
     return (await redis.get(`auth:org_suspended:${orgId}`)) === '1';
-  } catch {
+  } catch (e) {
+    // Fail-OPEN by design (a Redis outage must not lock every tenant out), but the lookup
+    // failure is security-relevant — log it so a suspended-org check silently degrading is visible.
+    console.error('[auth-gateway] isOrgSuspended lookup failed (failing open):', e.message);
     return false;
   }
 };

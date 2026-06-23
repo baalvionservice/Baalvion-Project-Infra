@@ -68,7 +68,10 @@ function logAnomaly(anomaly) {
       p.incr('auth:burnin:anomaly_count');
       p.exec(() => {});
     }
-  } catch { /* anomaly logging must never throw */ }
+  } catch (e) {
+    // anomaly logging must never throw — log and swallow.
+    console.debug('[burn-in] logAnomaly failed (non-fatal):', e && e.message);
+  }
 }
 
 // ---- snapshot ----
@@ -160,7 +163,10 @@ function middleware() {
         }
         identityCache.set(userId, { orgId, source: id.source || 'unknown', ts: Date.now() });
         evictCache();
-      } catch { /* anomaly detection must never throw */ }
+      } catch (e) {
+        // anomaly detection must never throw — log and swallow.
+        console.debug('[burn-in] anomaly detection failed (non-fatal):', e && e.message);
+      }
     });
     next();
   };

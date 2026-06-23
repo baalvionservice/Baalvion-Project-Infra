@@ -125,14 +125,17 @@ function record(evt) {
       p.ltrim(recentKey, 0, RECENT_MAX - 1);
       p.exec(() => { /* ignore — fail-open */ });
     }
-  } catch { /* observability must NEVER break a request */ }
+  } catch (e) {
+    // observability must NEVER break a request — log and swallow.
+    console.debug('[auth-gateway] authTrace.record failed (non-fatal):', e && e.message);
+  }
   return evt;
 }
 
 // Express middleware: always writes to production stream.
 function middleware(service) {
   return function authTrace(req, res, next) {
-    res.on('finish', () => { try { record(buildEvent(service, req, { statusCode: res.statusCode, stream: 'production' })); } catch { /* */ } });
+    res.on('finish', () => { try { record(buildEvent(service, req, { statusCode: res.statusCode, stream: 'production' })); } catch (e) { console.debug('[auth-gateway] authTrace.middleware finish hook failed (non-fatal):', e && e.message); } });
     next();
   };
 }

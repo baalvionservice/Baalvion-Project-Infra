@@ -148,7 +148,7 @@ const proxy = createProxyMiddleware({
       // hybrid only: present the server-side RS256 Bearer for backends still verifying JWT.
       if (config.enforcementMode !== 'strict' && req._token) proxyReq.setHeader('authorization', `Bearer ${req._token}`);
     },
-    error: (err, _req, res) => { try { res.status(502).json({ error: { code: 'BAD_GATEWAY', message: err.message } }); } catch { /* */ } },
+    error: (err, _req, res) => { console.error('[auth-gateway] /api proxy upstream error:', err && err.message); try { res.status(502).json({ error: { code: 'BAD_GATEWAY', message: err.message } }); } catch (e) { console.debug('[auth-gateway] /api proxy: failed to send 502 (response already sent):', e && e.message); } },
   },
 });
 
