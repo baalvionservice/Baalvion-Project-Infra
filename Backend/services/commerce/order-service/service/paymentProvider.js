@@ -138,6 +138,24 @@ const razorpayProvider = {
     if (!ok) return { status: 'failed', transactionId: null, reason: 'signature_mismatch' };
     return { status: 'captured', transactionId: v.razorpay_payment_id };
   },
+  // Reconciliation poll (read-only): ask Razorpay for the authoritative state of the order behind
+  // this intent (intentId = the Razorpay order_id). Returns 'captured' ONLY when Razorpay itself
+  // reports the order paid, so a pending payment can never be falsely settled. Never mutates.
+  async getPaymentStatus({ intentId }) {
+    if (!intentId) return { status: 'pending' };
+    const keys = await razorpayKeys();
+    const order = await razorpayFetch(`/orders/${encodeURIComponent(intentId)}`, keys);
+    if (!order || order.status !== 'paid') return { status: 'pending' };
+    const list = await razorpayFetch(`/orders/${encodeURIComponent(intentId)}/payments`, keys);
+    const items = (list && list.items) || [];
+    const captured = items.find((p) => p.status === 'captured') || items[0] || null;
+    return {
+      status: 'captured',
+      transactionId: captured ? captured.id : null,
+      amountMinor: order.amount_paid != null ? Number(order.amount_paid) : null,
+      currency: (order.currency || '').toUpperCase() || null,
+    };
+  },
   async failPayment() { return { status: 'failed' }; },
   async cancelPayment() { return { status: 'voided' }; },
   async refundPayment({ transactionId, amount, reason }) {
@@ -249,6 +267,21 @@ const stripeProvider = {
       return { status: 'failed', transactionId: null, reason: `stripe_status_${session.payment_status || 'unknown'}` };
     }
     return { status: 'captured', transactionId: session.payment_intent || session.id };
+  },
+  // Reconciliation poll (read-only): retrieve the Checkout Session and trust ONLY Stripe's verdict.
+  // Returns 'captured' only when Stripe reports payment_status === 'paid' for the matching order.
+  async getPaymentStatus({ intentId, orderId }) {
+    if (!intentId) return { status: 'pending' };
+    const session = await stripeFetch(`/checkout/sessions/${encodeURIComponent(intentId)}`);
+    if (!session || session.id !== intentId) return { status: 'pending' };
+    if (orderId != null && session.metadata?.orderId !== String(orderId)) return { status: 'pending' };
+    if (session.payment_status !== 'paid') return { status: 'pending' };
+    return {
+      status: 'captured',
+      transactionId: session.payment_intent || session.id,
+      amountMinor: session.amount_total != null ? Number(session.amount_total) : null,
+      currency: (session.currency || '').toUpperCase() || null,
+    };
   },
   async failPayment() { return { status: 'failed' }; },
   async cancelPayment() { return { status: 'voided' }; },

@@ -58,6 +58,32 @@ async function reconcileStore(storeId, range) {
     return { storeId, balanced: true };
 }
 
+/**
+ * Gateway "paid-but-pending" sweep across all active stores (PR3). Each store's pending payments are
+ * polled against the PSP and settled via the idempotent capture path. Per-store failures are isolated.
+ */
+async function runPendingSweep() {
+    const storeIds = await activeStoreIds();
+    let settled = 0;
+    let errors = 0;
+    for (const storeId of storeIds) {
+        try {
+            const r = await reconciliationService.sweepPendingPayments(storeId, {
+                graceMinutes: config.reconcile.gatewayGraceMinutes,
+                windowHours: config.reconcile.gatewayWindowHours,
+                delayMs: config.reconcile.gatewayDelayMs,
+            });
+            settled += r.settled;
+            errors += r.errors;
+        } catch (err) {
+            errors += 1;
+            console.error(JSON.stringify({ evt: 'pending_sweep.store_failed', storeId, error: err.message }));
+        }
+    }
+    console.info(JSON.stringify({ evt: 'pending_sweep.sweep_complete', stores: storeIds.length, settled, errors }));
+    return { stores: storeIds.length, settled, errors };
+}
+
 /** Sweep all active stores. Per-store failures are isolated. */
 async function runSweep() {
     const range = lookbackRange();
@@ -86,27 +112,43 @@ async function startReconciliationWorker() {
         console.info('[Reconcile] disabled (RECONCILE_ENABLED=false)');
         return;
     }
-    if (!config.ledger.enabled) {
-        console.info('[Reconcile] skipped — ledger not configured (LEDGER_INTERNAL_KEY missing)');
+    const wantLedgerSweep = config.ledger.enabled;
+    const wantGatewaySweep = config.reconcile.gatewayEnabled;
+    // Preserve prior behaviour: with the gateway sweep off (default) and no ledger, do nothing.
+    if (!wantLedgerSweep && !wantGatewaySweep) {
+        console.info('[Reconcile] skipped — ledger not configured and gateway sweep disabled');
         return;
     }
     queue = new Queue(QUEUE_NAME, { connection });
     worker = new Worker(QUEUE_NAME, async (job) => {
         if (job.name === 'reconcile-sweep') return runSweep();
         if (job.name === 'reconcile-store') return reconcileStore(job.data.storeId, lookbackRange());
+        if (job.name === 'pending-sweep') return runPendingSweep();
         return null;
     }, { connection });
 
     worker.on('failed', (job, err) => console.error(`[Reconcile] job ${job?.id} failed:`, err.message));
 
-    // Register the repeatable sweep (idempotent: a fixed jobId/cron upserts the schedule).
-    await queue.add('reconcile-sweep', {}, {
-        repeat: { pattern: config.reconcile.cron },
-        jobId: 'reconcile-sweep',
-        removeOnComplete: 50,
-        removeOnFail: 50,
-    });
-    console.info(`[Reconcile] worker started; sweep scheduled '${config.reconcile.cron}' (autoBackfill=${config.reconcile.autoBackfill})`);
+    // Register the ledger reconciliation sweep (idempotent: a fixed jobId/cron upserts the schedule).
+    if (wantLedgerSweep) {
+        await queue.add('reconcile-sweep', {}, {
+            repeat: { pattern: config.reconcile.cron },
+            jobId: 'reconcile-sweep',
+            removeOnComplete: 50,
+            removeOnFail: 50,
+        });
+        console.info(`[Reconcile] ledger sweep scheduled '${config.reconcile.cron}' (autoBackfill=${config.reconcile.autoBackfill})`);
+    }
+    // Register the gateway "paid-but-pending" sweep — behind RECONCILE_GATEWAY_ENABLED (off by default).
+    if (wantGatewaySweep) {
+        await queue.add('pending-sweep', {}, {
+            repeat: { pattern: config.reconcile.gatewayCron },
+            jobId: 'pending-sweep',
+            removeOnComplete: 50,
+            removeOnFail: 50,
+        });
+        console.info(`[Reconcile] gateway pending-sweep scheduled '${config.reconcile.gatewayCron}'`);
+    }
 }
 
-module.exports = { startReconciliationWorker, runSweep, reconcileStore, QUEUE_NAME };
+module.exports = { startReconciliationWorker, runSweep, runPendingSweep, reconcileStore, QUEUE_NAME };
