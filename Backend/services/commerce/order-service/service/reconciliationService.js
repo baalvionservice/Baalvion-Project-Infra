@@ -129,4 +129,68 @@ async function backfill(storeId, opts = {}) {
     return { storeId, attempted: r.missing.length, posted, failed };
 }
 
-module.exports = { report, backfill, expectedMovements };
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Gateway "paid-but-pending" reconciliation (PR3). Backstop for the rare case where BOTH the
+// synchronous confirm AND the webhook were lost: the payment is captured at the PSP but our row is
+// still 'pending', so the ledger reconciliation above (which only looks at captured/refunded rows)
+// can never see it. This sweep asks the gateway for the authoritative status of each stale pending
+// payment and, when the gateway itself reports it paid, settles it through the EXISTING idempotent
+// capture path (capturePaymentFromWebhook) — which re-acquires the order-row lock and no-ops if the
+// order is already paid, so there is no duplicate-payment / double-ledger risk even under concurrent
+// delivery. Only Stripe/Razorpay are pollable (PayU is redirect-only, bank_transfer is manual) — both
+// are excluded by the SQL provider filter AND skipped if the adapter exposes no getPaymentStatus.
+// The grace window skips fresh rows (still mid-flow) and rows too old to resolve at the gateway.
+async function sweepPendingPayments(storeId, { graceMinutes = 15, windowHours = 72, limit = 200, delayMs = 120 } = {}) {
+    const rows = await sequelize.query(
+        `SELECT p.id, p.order_id AS "orderId", p.transaction_id AS "transactionId", p.provider,
+                p.amount, p.currency_code AS "currencyCode", o.order_number AS "orderNumber"
+           FROM orders.orders_order_payments p
+           JOIN orders.orders_orders o ON o.id = p.order_id
+          WHERE o.store_id = :storeId
+            AND p.status = 'pending'
+            AND o.payment_status <> 'paid'
+            AND p.provider IN ('razorpay', 'stripe')
+            AND p.created_at <  now() - (:graceMinutes * interval '1 minute')
+            AND p.created_at >  now() - (:windowHours  * interval '1 hour')
+          ORDER BY p.created_at ASC
+          LIMIT :limit`,
+        { replacements: { storeId, graceMinutes, windowHours, limit }, type: QueryTypes.SELECT },
+    );
+
+    const paymentProvider = require('./paymentProvider');
+    const orderService = require('./orderService');
+    let settled = 0;
+    let stillPending = 0;
+    let errors = 0;
+    for (const r of rows) {
+        try {
+            const provider = paymentProvider.getProvider(r.provider);
+            if (!provider || typeof provider.getPaymentStatus !== 'function') { stillPending += 1; continue; }
+            const st = await provider.getPaymentStatus({ intentId: r.transactionId, orderId: r.orderId });
+            if (st && st.status === 'captured') {
+                // Idempotent settlement (ledger mirror + inventory confirm live inside this call).
+                await orderService.capturePaymentFromWebhook({
+                    providerOrderId: r.transactionId,
+                    providerPaymentId: st.transactionId,
+                    amount: st.amountMinor,
+                    currencyCode: st.currency,
+                });
+                settled += 1;
+                console.info(JSON.stringify({ evt: 'pending_sweep.settled', storeId, orderId: r.orderId, provider: r.provider, paymentId: r.id }));
+            } else {
+                stillPending += 1;
+            }
+            if (delayMs) await sleep(delayMs); // gentle rate-limit against the gateway API
+        } catch (err) {
+            // Isolate per-row failures (e.g. a 429): count + log, leave the row pending for the next
+            // sweep. One bad row must never abort the sweep or silently drop a payment.
+            errors += 1;
+            console.error(JSON.stringify({ evt: 'pending_sweep.error', storeId, paymentId: r.id, provider: r.provider, msg: err.message }));
+        }
+    }
+    if (settled || errors) console.info(JSON.stringify({ evt: 'pending_sweep.done', storeId, scanned: rows.length, settled, stillPending, errors }));
+    return { storeId, scanned: rows.length, settled, stillPending, errors };
+}
+
+module.exports = { report, backfill, expectedMovements, sweepPendingPayments };
