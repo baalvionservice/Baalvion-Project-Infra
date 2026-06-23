@@ -33,16 +33,26 @@ WORKDIR /app
 
 # 1) Manifests first → cacheable install layer. The trimmed workspace file limits the
 #    install to Backend (services + packages); no Frontend deps land in the image.
+#    tsconfig.base.json is the root TS config every @baalvion/* package's tsconfig extends
+#    (Backend/tsconfig.base.json re-exports it); the tsup --dts builds below need it.
 COPY deploy/consolidated/pnpm-workspace.docker.yaml ./pnpm-workspace.yaml
-COPY package.json pnpm-lock.yaml ./
+COPY package.json pnpm-lock.yaml tsconfig.base.json ./
 
 # 2) Backend source (services + shared packages). pnpm wires each service's node_modules
 #    to the shared store, so `node index.js` resolves deps from its own cwd unchanged.
 COPY Backend ./Backend
 
-# 3) Install. --no-frozen-lockfile because the Docker workspace view omits the Frontend
-#    packages the root lockfile also tracks. Pin/refresh the lockfile in CI for repro builds.
-RUN pnpm install --no-frozen-lockfile \
+# 3) Install + build the shared packages.
+#    - --prod=false: the @baalvion/* packages compile to dist/ with tsup (a devDependency),
+#      so devDeps MUST be present at build time; without this, NODE_ENV=production makes
+#      pnpm install prod-only → tsup absent → dist/ never built → consumers crash with
+#      MODULE_NOT_FOUND on @baalvion/<pkg>/dist/index.js at runtime.
+#    - the recursive build emits each package's dist/ (dist/ is .gitignored, so it is NOT
+#      in the build context and must be produced here).
+#    --no-frozen-lockfile because the Docker workspace view omits the Frontend packages the
+#    root lockfile also tracks. Pin/refresh the lockfile in CI for repro builds.
+RUN pnpm install --no-frozen-lockfile --prod=false \
+ && pnpm -r --filter "./Backend/packages/*" run build \
  && pnpm store prune
 
 # 4) pm2 ecosystem files — one per app, chosen at run time via `command:`.

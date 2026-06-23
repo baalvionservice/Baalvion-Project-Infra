@@ -13,6 +13,8 @@
     "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
+    "@baalvion/sdk": "workspace:*",
+    "@baalvion/types": "workspace:*",
     "bullmq": "^5.56.0",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
