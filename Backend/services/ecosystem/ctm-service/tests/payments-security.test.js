@@ -95,8 +95,9 @@ test('money/identity writes derive the tenant from the verified token, not the r
   const payCtl = fs.readFileSync(path.join(__dirname, '..', 'controller', 'paymentsController.js'), 'utf8');
   assert.ok(payCtl.includes('const companyId = isAdmin ? (b.company_id ?? b.companyId ?? callerOrgId) : callerOrgId;'), 'createCheckout pins company_id to caller org');
   assert.ok(!payCtl.includes('Number(b.amount'), 'createCheckout must not trust a client-sent amount');
-  assert.ok(payCtl.includes("if (payment.status === 'succeeded')"), 'webhook idempotent on already-succeeded payments');
+  assert.ok(payCtl.includes('const firstTransition = payment.status !== \'succeeded\''), 'webhook idempotent via first-transition guard (no double-apply on replay)');
   assert.ok(payCtl.includes("error: 'amount mismatch'"), 'webhook validates amount/currency before activating');
+  assert.ok(payCtl.includes("status(503)"), 'webhook returns retryable 503 on internal error (no silent payment loss)');
 
   const extras = fs.readFileSync(path.join(__dirname, '..', 'controller', 'extrasController.js'), 'utf8');
   assert.ok(extras.includes('const targetId = isAdmin ? (req.body.id ?? req.body.user_id ?? req.auth?.userId) : req.auth?.userId;'), 'upsertUser pins identity to the verified token');
