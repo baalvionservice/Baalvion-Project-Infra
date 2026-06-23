@@ -60,6 +60,14 @@ jobs:
         working-directory: .
         run: pnpm install --frozen-lockfile --filter baalvion-ctm-service...
 
+      # ctm-service's PCL shadow adapter requires @baalvion/payment-consistency at runtime, whose
+      # package main is dist/index.js (gitignored, built via tsup). Build the workspace dependency
+      # before tests so `require('@baalvion/payment-consistency')` resolves in CI (it does locally
+      # only because dist/ already exists on disk).
+      - name: Build workspace package deps
+        working-directory: .
+        run: pnpm --filter @baalvion/payment-consistency build
+
       - name: Run tests
         working-directory: .
         run: pnpm --filter baalvion-ctm-service test --if-present

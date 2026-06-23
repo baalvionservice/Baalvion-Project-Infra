@@ -10,6 +10,7 @@ const { parsePagination, buildPaginated } = require('../utils/pagination');
 const ownership = require('./ownership');
 const securityAudit = require('./securityAudit');
 const ledgerOutbox = require('./ledgerOutbox');
+const pclShadow = require('./pclShadow'); // PCL Phase-1 shadow mode (flag-gated, non-blocking, never throws)
 const discountService = require('./discountService');
 const markets = require('../config/markets');
 const pricing = require('./pricing');
@@ -902,6 +903,17 @@ async function failPayment(storeId, orderId, intentId, reason) {
     await releaseLocks(storeId, locks, orderId);
     await cache.del(cache.keys.order(orderId));
     console.warn(JSON.stringify({ evt: 'payment.failed', storeId, orderId, intentId, reason }));
+    // PCL shadow (Phase 1): mirror the failure. Keyed by orderId, so a "failed" arriving AFTER a
+    // shadowed webhook capture for the same order surfaces a PCL CONFLICT (state stays CAPTURED) —
+    // never wiping a real payment. Fire-and-forget, post-commit, never throws.
+    pclShadow.recordFailure({
+        paymentId: orderId,
+        provider: 'unknown',
+        transactionId: intentId || `fail:${reason || 'declined'}`,
+        amountMinor: Math.round(Number(order.totalAmount) * 100),
+        currency: order.currencyCode,
+        orgId: storeId,
+    }).catch(() => {});
     return order.toJSON();
 }
 
@@ -1028,6 +1040,16 @@ async function capturePaymentFromWebhook({ providerOrderId, providerPaymentId, a
         OrdersOrderItem.findAll({ where: { orderId } })
             .then((items) => sendOrderEmail('orderPaid', fresh.toJSON(), items))
             .catch(() => {});
+        // PCL shadow (Phase 1): mirror this capture into pcl.payment_state alongside the legacy
+        // write. Fire-and-forget, post-commit, never throws — cannot affect this captured order.
+        pclShadow.recordCapture({
+            paymentId: orderId,
+            provider: intentPayment.provider,
+            transactionId: providerPaymentId || providerOrderId,
+            amountMinor: Math.round(Number(intentPayment.amount) * 100),
+            currency: intentPayment.currencyCode,
+            orgId: storeId,
+        }).catch(() => {});
     }
     return out;
 }

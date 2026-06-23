@@ -3,6 +3,7 @@ const db = require('../models');
 const { AppError } = require('../utils/errors');
 const { sendSuccess } = require('../utils/response');
 const pay = require('../service/payments');
+const pclShadow = require('../service/pclShadow'); // PCL Phase-1 shadow mode (flag-gated, non-blocking, never throws)
 
 // Create an invoice + payment + (provider) checkout in one call. The buyer picks the provider
 // (Stripe/Razorpay); the price is SERVER-AUTHORITATIVE (computed from the plan, never trusted
@@ -136,6 +137,17 @@ exports.handleWebhook = async (req, res) => {
                 }
                 if (payment.invoice_id) await db.invoices.update({ status: 'Paid' }, { where: { id: payment.invoice_id } });
                 if (payment.subscription_id) await db.subscriptions.update({ status: 'active' }, { where: { id: payment.subscription_id } });
+                // PCL shadow (Phase 1): mirror the succeeded payment into pcl.payment_state. Post-write,
+                // fire-and-forget, never throws — cannot affect this activation. PCL is idempotent, so
+                // re-firing on a redelivery surfaces shadow drift (it never double-applies the charge).
+                pclShadow.recordCapture({
+                    paymentId: payment.id,
+                    provider: payment.provider,
+                    transactionId: evt.ref,
+                    amountMinor: Math.round(Number(payment.amount) * 100),
+                    currency: payment.currency,
+                    orgId: payment.company_id != null ? String(payment.company_id) : undefined,
+                }).catch(() => {});
                 return res.status(200).json({ received: true, idempotent: !firstTransition });
             }
         }
@@ -178,6 +190,16 @@ exports.payuReturn = async (req, res) => {
             if (payment.invoice_id) await db.invoices.update({ status: 'Paid' }, { where: { id: payment.invoice_id } });
             if (payment.subscription_id) await db.subscriptions.update({ status: 'active' }, { where: { id: payment.subscription_id } });
             await db.integration_logs.create({ source: 'Payments', event_type: 'payu.return', status: 'Success', description: `PayU payment ${parsed.txnid} succeeded`, related_entity: { type: 'Company', id: payment.company_id } }).catch(() => {});
+            // PCL shadow (Phase 1): mirror the PayU-settled success. Fire-and-forget, never throws.
+            pclShadow.recordCapture({
+                paymentId: payment.id,
+                provider: payment.provider,
+                transactionId: parsed.txnid,
+                amountMinor: Math.round(Number(payment.amount) * 100),
+                currency: payment.currency,
+                orgId: payment.company_id != null ? String(payment.company_id) : undefined,
+                via: 'payu_return',
+            }).catch(() => {});
         }
         return res.redirect(303, paidUrl);
     } catch (err) {
