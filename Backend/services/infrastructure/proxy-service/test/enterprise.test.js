@@ -5,6 +5,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 
+require('../_env'); // dummy auth/billing secrets so the fail-loud config boots under CI (no .env)
 const rbacService = require('../service/rbacService');
 const slaService = require('../service/slaService');
 const auditExport = require('../service/auditExportService');
