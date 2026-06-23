@@ -41,6 +41,11 @@ public class OutboxPublisher {
     Gauge.builder("outbox.pending", repository, r -> (double) r.countByStatus(OutboxStatus.PENDING))
       .description("Outbox events awaiting publication")
       .register(meterRegistry);
+    // FAILED rows are recoverable (see recoverFailed) but must be VISIBLE: alert on a sustained
+    // non-zero value, which means events are repeatedly failing to publish (e.g. a poison payload).
+    Gauge.builder("outbox.failed", repository, r -> (double) r.countByStatus(OutboxStatus.FAILED))
+      .description("Outbox events that exhausted retries and are awaiting recovery")
+      .register(meterRegistry);
   }
 
   @Scheduled(fixedDelayString = "${app.outbox.poll-ms:2000}")
@@ -68,5 +73,34 @@ public class OutboxPublisher {
       }
     }
     repository.saveAll(pending);
+  }
+
+  /**
+   * Safety net for events that exhausted {@code max-attempts} — e.g. a Kafka outage longer than the
+   * tight drain retry window would otherwise strand a captured-payment event in FAILED forever, with
+   * no republication and permanent ledger divergence risk.
+   *
+   * <p>On a slow cadence (default 5 min — a cool-off so we don't thrash during an ongoing outage)
+   * this re-queues FAILED rows back to PENDING with a fresh attempt budget, so the normal {@link
+   * #drain()} pipeline republishes them. The drain logic itself is untouched. {@code lastError} is
+   * retained for forensics. Republication is safe under the platform's at-least-once contract:
+   * downstream consumers (ledger {@code postPaymentSaga}, {@code PaymentSagaListener}) dedupe on
+   * transactionId and the producer runs with {@code enable.idempotence=true}, so an event is never
+   * double-applied. Reuses {@code lockPendingBatch} (FOR UPDATE SKIP LOCKED) so it is replica-safe
+   * and cannot contend with a concurrent drain on the same row.
+   */
+  @Scheduled(fixedDelayString = "${app.outbox.recover-ms:300000}")
+  @Transactional
+  public void recoverFailed() {
+    List<OutboxEvent> failed = repository.lockPendingBatch(OutboxStatus.FAILED.name(), batchSize);
+    if (failed.isEmpty()) {
+      return;
+    }
+    for (OutboxEvent event : failed) {
+      event.setStatus(OutboxStatus.PENDING);
+      event.setAttempts(0); // fresh window; without this the drain would re-FAIL on the first error
+    }
+    repository.saveAll(failed);
+    log.warn("Outbox recovery: re-queued {} FAILED event(s) for republication", failed.size());
   }
 }
