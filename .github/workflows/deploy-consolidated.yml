@@ -1,0 +1,184 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Deploy — consolidated backend (ONE image) → Amazon ECR → EC2 (baalvion-prod-01)
+#
+#   The consolidated Release-1 stack (deploy/consolidated/) packs 45 repo modules
+#   into ONE Docker image (`baalvion-backend`) that all six Node app containers
+#   share; pm2 picks the per-container personality. This image has its OWN build
+#   (deploy/consolidated/Dockerfile.node, repo-root context) — it is NOT one of the
+#   per-service images that deploy.yml builds for the ec2-single-host stack.
+#
+#   git push main (Backend/** or deploy/consolidated/**)  ──▶  build baalvion-backend
+#                                                         ──▶  push to ECR (prod-<sha> + prod-latest)
+#                                                         ──▶  SSH baalvion-prod-01, roll the stack
+#
+# HARD INVARIANTS:
+#   • The EC2 box NEVER builds (only ~566 MB free); all builds happen here in CI.
+#   • OIDC only — no static AWS keys. AWS_DEPLOY_ROLE_ARN assumed via GitHub OIDC.
+#   • The roll is gated behind the `production` environment + CORE_EC2_* secrets;
+#     a partial/unconfigured target SKIPS (stays green) rather than failing.
+# ─────────────────────────────────────────────────────────────────────────────
+name: Deploy — consolidated backend (ECR → EC2)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "Backend/**"
+      - "deploy/consolidated/**"
+      - ".github/workflows/deploy-consolidated.yml"
+  workflow_dispatch:
+    inputs:
+      roll:
+        description: "Also roll the EC2 stack after pushing the image (true/false)"
+        required: false
+        default: "true"
+
+concurrency:
+  group: deploy-consolidated
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write   # OIDC role assumption
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
+  ECR_REPO: baalvion-backend         # top-level repo (matches docker-compose.prod.yml image)
+  RELEASE_TAG: ${{ vars.RELEASE_TAG || 'v1.0.1-production' }}
+
+jobs:
+  # ════════════════════════════ 1) build + push to ECR ════════════════════════════
+  build-push:
+    name: build baalvion-backend
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-consolidated-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "$ECR_REPO" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository \
+                 --repository-name "$ECR_REPO" \
+                 --image-tag-mutability MUTABLE \
+                 --image-scanning-configuration scanOnPush=true \
+                 --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}
+          # prod-latest  → moving pointer compose defaults to
+          # prod-<sha>   → immutable, reproducible roll/rollback target (this run's roll uses it)
+          # RELEASE_TAG  → immutable release pointer
+          tags: |
+            type=raw,value=prod-latest
+            type=raw,value=latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: deploy/consolidated/Dockerfile.node
+          push: true
+          provenance: false        # single-arch manifest — simplest to pull + run on EC2
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=consolidated-backend
+          cache-to: type=gha,mode=max,scope=consolidated-backend
+
+  # ════════════════════════════ 2) roll the consolidated stack ════════════════════════════
+  deploy:
+    name: Roll consolidated stack
+    needs: build-push
+    if: ${{ github.event_name == 'push' || github.event.inputs.roll != 'false' }}
+    runs-on: ubuntu-latest
+    environment: production       # protected environment — manual approval gate
+    env:
+      EC2_HOST: ${{ secrets.CORE_EC2_HOST }}
+      EC2_USER: ${{ secrets.CORE_EC2_USER }}
+      EC2_SSH_KEY: ${{ secrets.CORE_EC2_SSH_KEY }}
+      IMAGE_TAG: ${{ needs.build-push.outputs.image_tag }}
+    steps:
+      - name: Check EC2 target is configured
+        id: gate
+        run: |
+          if [ -z "${EC2_HOST}" ] || [ -z "${EC2_USER}" ] || [ -z "${EC2_SSH_KEY}" ]; then
+            echo "::notice title=Roll skipped::CORE_EC2_* not fully configured. Image is in ECR (tag ${IMAGE_TAG} + prod-latest); roll skipped."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull + roll the consolidated app containers on EC2
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        env:
+          IMAGE_TAG: ${{ needs.build-push.outputs.image_tag }}
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          envs: IMAGE_TAG
+          # The box holds the repo at /opt/baalvion-core; .env is gitignored and stays put.
+          # The EC2 instance role grants ECR pull (no keys on the box). Only the 3 Node app
+          # containers are rolled — redis/neo4j/caddy are left running untouched.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-core
+            git fetch --all --prune
+            git checkout main
+            git pull --ff-only
+            # Pin the new tag in .env so future restarts use it too.
+            if grep -q '^IMAGE_TAG=' deploy/consolidated/.env; then
+              sed -i "s|^IMAGE_TAG=.*|IMAGE_TAG=${IMAGE_TAG}|" deploy/consolidated/.env
+            else
+              echo "IMAGE_TAG=${IMAGE_TAG}" >> deploy/consolidated/.env
+            fi
+            # Authenticate to ECR (pull) via the instance role, then pull the new image.
+            REGION="$(grep -E '^AWS_REGION=' deploy/consolidated/.env | head -1 | cut -d= -f2)"
+            REGISTRY="$(grep -E '^ECR_REGISTRY=' deploy/consolidated/.env | head -1 | cut -d= -f2)"
+            aws ecr get-login-password --region "${REGION:-ap-south-1}" \
+              | docker login --username AWS --password-stdin "${REGISTRY}"
+            docker compose --env-file deploy/consolidated/.env \
+              -f deploy/consolidated/docker-compose.prod.yml pull app-identity app-platform app-edge-realtime
+            docker compose --env-file deploy/consolidated/.env \
+              -f deploy/consolidated/docker-compose.prod.yml up -d --no-deps \
+              app-identity app-platform app-edge-realtime
+            docker image prune -f
+
+      - name: Smoke test public ingress
+        if: steps.gate.outputs.ready == 'true'
+        continue-on-error: true
+        run: |
+          sleep 25
+          for url in \
+            "https://api.baalvion.com/health" \
+            "https://admin.baalvion.com/health" \
+            "https://auth.baalvion.com/health" \
+            "https://ws.baalvion.com/health" ; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
+            echo "  $url → $code"
+          done
