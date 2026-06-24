@@ -56,6 +56,9 @@ ENV NEXT_TELEMETRY_DISABLED=1 NODE_ENV=production \
 COPY --from=pruner /app/out/full/ ./
 # Shared tsconfig chain is not part of the pruned output → copy it for the TS build.
 COPY tsconfig.base.json ./tsconfig.base.json
+# admin-platform ships no public/ dir, but the runner stage COPYs it. Next standalone does not
+# require one — create it so the COPY can't fail "public: not found".
+RUN mkdir -p Frontend/admin-platform/public
 RUN pnpm dlx turbo@2.9.14 run build --filter=baalvion-admin-platform
 
 # 4) Minimal runner (Next standalone server).
