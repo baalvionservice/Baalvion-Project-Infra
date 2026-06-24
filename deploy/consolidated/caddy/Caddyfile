@@ -20,9 +20,40 @@ auth.baalvion.com {
 }
 
 # ── Consumer + admin BFF → edge-realtime app (proxy-service) ──
+# The session-gated BFF answers /api/* by default, but two surfaces MUST be reachable without a
+# session for the public Vercel sites to work — public CMS delivery and the PSP webhook/initiate
+# surface. These carve-outs are matched first; everything else falls through to the BFF unchanged.
 api.baalvion.com {
 	encode gzip zstd
-	reverse_proxy app-edge-realtime:4000
+
+	# Public CMS delivery (UNAUTHENTICATED) — the live sites (imperialpedia, law, about, …) fetch
+	# published content from api.baalvion.com/api/v1/public/*. cms-service is in app-platform:3018.
+	# The per-tenant key vault (/api/v1/internal/*) is NEVER exposed here — deny it explicitly.
+	@cms_internal path /api/v1/internal/* /internal/*
+	handle @cms_internal {
+		respond "Forbidden" 403
+	}
+	@cms_public path /api/v1/public /api/v1/public/*
+	handle @cms_public {
+		reverse_proxy app-platform:3018
+	}
+
+	# Payment public surface (Java PSP gateway, app-payments:3015 — runs under --profile payments):
+	# initiate a charge, read its status, receive provider webhooks (HMAC-verified inside the svc).
+	# Money-OUT (refund/capture) + actuator are denied at the edge (listed first → first match wins).
+	@pay_locked path /v1/gateway/payments/*/refund /v1/gateway/payments/*/capture /actuator/*
+	handle @pay_locked {
+		respond "Forbidden" 403
+	}
+	@pay path /v1/gateway/payments /v1/gateway/payments/* /v1/gateway/webhooks/*
+	handle @pay {
+		reverse_proxy app-payments:3015
+	}
+
+	# Everything else → the consumer/admin BFF (proxy-service, session-gated) — unchanged.
+	handle {
+		reverse_proxy app-edge-realtime:4000
+	}
 }
 
 # ── Realtime websocket stream → edge-realtime app (socket.io fan-out) ──
