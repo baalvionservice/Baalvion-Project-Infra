@@ -236,6 +236,37 @@ services:
         awslogs-region: ${AWS_REGION:-ap-south-1}
         awslogs-group: /baalvion/consolidated
 
+  # ── Admin console (Next.js standalone) → admin.baalvion.com ──────────────────
+  # The back-office UI. NEXT_PUBLIC_* are baked at BUILD time in CI (deploy-consolidated.yml),
+  # NOT here — this is its own ECR image (baalvion/admin-web), pulled like the backend image.
+  # Browser only sees same-origin /auth-bff + /api-bff, which Caddy terminates at the edge →
+  # app-identity (auth) / app-platform (cms). Mirrors the proven core-stack admin-web service.
+  admin-web:
+    image: ${ECR_REGISTRY}/baalvion/admin-web:${IMAGE_TAG:-prod-latest}
+    pull_policy: always
+    restart: unless-stopped
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3030"
+      HOSTNAME: 0.0.0.0
+    mem_limit: 384m
+    mem_reservation: 96m
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-ap-south-1}
+        awslogs-group: /baalvion/consolidated
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3030',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on: [ app-identity, app-platform ]
+
   # ── Edge: TLS + host/path routing (only this binds 80/443) ───────────────────
   caddy:
     image: caddy:2-alpine
@@ -247,7 +278,7 @@ services:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    depends_on: [ app-identity, app-edge-realtime, app-platform ]
+    depends_on: [ app-identity, app-edge-realtime, app-platform, admin-web ]
 
 volumes:
   redisdata:

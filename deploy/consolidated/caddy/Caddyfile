@@ -20,9 +20,40 @@ auth.baalvion.com {
 }
 
 # ── Consumer + admin BFF → edge-realtime app (proxy-service) ──
+# The session-gated BFF answers /api/* by default, but two surfaces MUST be reachable without a
+# session for the public Vercel sites to work — public CMS delivery and the PSP webhook/initiate
+# surface. These carve-outs are matched first; everything else falls through to the BFF unchanged.
 api.baalvion.com {
 	encode gzip zstd
-	reverse_proxy app-edge-realtime:4000
+
+	# Public CMS delivery (UNAUTHENTICATED) — the live sites (imperialpedia, law, about, …) fetch
+	# published content from api.baalvion.com/api/v1/public/*. cms-service is in app-platform:3018.
+	# The per-tenant key vault (/api/v1/internal/*) is NEVER exposed here — deny it explicitly.
+	@cms_internal path /api/v1/internal/* /internal/*
+	handle @cms_internal {
+		respond "Forbidden" 403
+	}
+	@cms_public path /api/v1/public /api/v1/public/*
+	handle @cms_public {
+		reverse_proxy app-platform:3018
+	}
+
+	# Payment public surface (Java PSP gateway, app-payments:3015 — runs under --profile payments):
+	# initiate a charge, read its status, receive provider webhooks (HMAC-verified inside the svc).
+	# Money-OUT (refund/capture) + actuator are denied at the edge (listed first → first match wins).
+	@pay_locked path /v1/gateway/payments/*/refund /v1/gateway/payments/*/capture /actuator/*
+	handle @pay_locked {
+		respond "Forbidden" 403
+	}
+	@pay path /v1/gateway/payments /v1/gateway/payments/* /v1/gateway/webhooks/*
+	handle @pay {
+		reverse_proxy app-payments:3015
+	}
+
+	# Everything else → the consumer/admin BFF (proxy-service, session-gated) — unchanged.
+	handle {
+		reverse_proxy app-edge-realtime:4000
+	}
 }
 
 # ── Realtime websocket stream → edge-realtime app (socket.io fan-out) ──
@@ -30,7 +61,10 @@ ws.baalvion.com {
 	reverse_proxy app-edge-realtime:3040
 }
 
-# ── Admin platform → platform app, with auth + CMS public carve-outs ──
+# ── Admin platform → admin-web console, with auth + CMS BFF carve-outs ──
+# The browser only ever sees same-origin /auth-bff + /api-bff; Caddy terminates them at the
+# edge so the httpOnly refresh cookie + the Bearer the console holds reach the right backend.
+# Everything else is the Next.js standalone admin console (admin-web:3030).
 admin.baalvion.com {
 	encode gzip zstd
 	# Auth BFF shim → identity app (matches the proven core-stack /auth-bff → /v1/auth rewrite).
@@ -38,11 +72,18 @@ admin.baalvion.com {
 		rewrite * /v1/auth{uri}
 		reverse_proxy app-identity:3001
 	}
+	# CMS admin API BFF: the admin image calls /api-bff/knowledge/cms/api/v1/* with the Bearer it
+	# already holds; terminate at the edge → cms-service (strips the prefix → /api/v1/*).
+	handle_path /api-bff/knowledge/cms/* {
+		reverse_proxy app-platform:3018
+	}
 	# CMS public delivery bypasses the session gateway → knowledge/cms-service.
 	handle /api/v1/public/* {
 		reverse_proxy app-platform:3018
 	}
-	reverse_proxy app-platform:3021
+	# Everything else → the admin console (Next.js standalone). app-platform:3021 (admin-service
+	# API) stays internal — it is NOT a browser surface and 404s on GET /.
+	reverse_proxy admin-web:3030
 }
 
 # ── Direct service APIs (gateway-signed): add one block per public surface as needed,
