@@ -36,7 +36,7 @@ x-redis: &redis
 
 # One image, build-once-in-CI, pulled from ECR. pm2 selects the personality.
 x-node-app: &node-app
-  image: ${ECR_REGISTRY}/baalvion-backend:${IMAGE_TAG:-prod-latest}
+  image: ${ECR_REGISTRY}/baalvion/backend:${IMAGE_TAG:-prod-latest}
   pull_policy: always
   restart: unless-stopped
   # Loaded into every container at runtime; marked optional so env-less
