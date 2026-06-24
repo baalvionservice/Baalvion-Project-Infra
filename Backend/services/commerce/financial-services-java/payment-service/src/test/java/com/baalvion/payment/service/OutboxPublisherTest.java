@@ -43,7 +43,7 @@ class OutboxPublisherTest {
   @BeforeEach
   void setUp() {
     registry = new SimpleMeterRegistry();
-    publisher = new OutboxPublisher(repository, kafkaTemplate, registry);
+    publisher = new OutboxPublisher(repository, kafkaTemplate, registry, true);
     ReflectionTestUtils.setField(publisher, "batchSize", 100);
     ReflectionTestUtils.setField(publisher, "maxAttempts", 10);
   }

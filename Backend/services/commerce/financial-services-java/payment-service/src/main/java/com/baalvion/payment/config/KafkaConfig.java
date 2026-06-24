@@ -5,8 +5,10 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
@@ -25,8 +27,16 @@ import java.util.Map;
  * JSON-string wire format (StringSerializer / StringDeserializer), an idempotent
  * producer used by the transactional outbox publisher, and a listener factory with a
  * DLT + exponential-backoff retry error handler (design §4.3).
+ *
+ * <p>Gated behind {@code app.kafka.enabled} (default true). When set to {@code false} — e.g. on a
+ * memory-constrained single host that cannot afford Kafka + ZooKeeper — this entire configuration
+ * (and {@code @EnableKafka}) backs off: no producer/consumer/listener beans are created and no
+ * broker connection is attempted. Outbox rows then stay durably PENDING (see {@code OutboxPublisher})
+ * until Kafka is re-enabled. The synchronous PSP gateway-checkout flow is unaffected.
  */
 @Configuration
+@EnableKafka
+@ConditionalOnProperty(name = "app.kafka.enabled", havingValue = "true", matchIfMissing = true)
 public class KafkaConfig {
 
   @Value("${spring.kafka.bootstrap-servers:localhost:9092}")
