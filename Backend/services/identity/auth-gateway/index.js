@@ -67,6 +67,7 @@ try {
 }
 
 const app = express();
+app.set('trust proxy', 1); // trust Caddy X-Forwarded-For
 
 app.use(helmet());
 // Global IP rate limiter (express-rate-limit, CodeQL-recognized) — generous DoS ceiling.

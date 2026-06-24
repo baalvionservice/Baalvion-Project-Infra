@@ -21,6 +21,9 @@ module.exports = {
         dialect: 'postgres',
         schema: 'cms',
         logging: false,
+        dialectOptions: {
+            ssl: { rejectUnauthorized: true },
+        },
         define: { underscored: true, timestamps: true },
     },
 };
