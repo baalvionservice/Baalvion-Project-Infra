@@ -43,7 +43,7 @@ permissions:
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'ap-south-1' }}
-  ECR_REPO: baalvion-backend         # top-level repo (matches docker-compose.prod.yml image)
+  ECR_REPO: baalvion/backend         # under the baalvion/* namespace the OIDC deploy role is scoped to
   RELEASE_TAG: ${{ vars.RELEASE_TAG || 'v1.0.1-production' }}
 
 jobs:
