@@ -253,8 +253,13 @@ jobs:
             $COMPOSE pull admin-web && $COMPOSE up -d --no-deps admin-web \
               || echo "::notice::admin-web image not available yet (create ECR repo baalvion/admin-web) — skipped"
             # Reload Caddy so the new api.baalvion.com carve-outs + admin route take effect.
+            # --force-recreate: the Caddyfile is a single-FILE bind mount; git pull replaces its
+            # inode, so a running caddy (or `caddy reload`) keeps reading the STALE inode. Only a
+            # container recreate re-binds the new file. --no-deps: never block this reload on a
+            # missing admin-web image (its build is non-fatal) — caddy 502s that one route until
+            # the admin-web image lands, while the shared CMS/payments carve-outs go live regardless.
             docker compose --env-file deploy/consolidated/.env \
-              -f deploy/consolidated/docker-compose.prod.yml up -d caddy
+              -f deploy/consolidated/docker-compose.prod.yml up -d --no-deps --force-recreate caddy
             docker image prune -f
 
       - name: Smoke test public ingress
