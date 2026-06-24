@@ -120,6 +120,10 @@ jobs:
   build-push-admin-web:
     name: build admin-web
     runs-on: ubuntu-latest
+    # Non-fatal: if the ECR repo `baalvion/admin-web` isn't created yet, this fails but is
+    # treated as success by `needs`, so the shared-blocker backend roll still proceeds. The
+    # roll pulls admin-web best-effort. Create the repo (runbook §4) to bring the console up.
+    continue-on-error: true
     outputs:
       image_tag: ${{ steps.tag.outputs.image_tag }}
     steps:
@@ -242,9 +246,13 @@ jobs:
             COMPOSE="docker compose --env-file deploy/consolidated/.env \
               -f deploy/consolidated/docker-compose.prod.yml \
               -f deploy/consolidated/docker-compose.ssl-override.yml"
-            $COMPOSE pull app-identity app-platform app-edge-realtime admin-web
-            $COMPOSE up -d --no-deps app-identity app-platform app-edge-realtime admin-web
-            # Reload Caddy so the new admin.baalvion.com → admin-web route takes effect.
+            $COMPOSE pull app-identity app-platform app-edge-realtime
+            $COMPOSE up -d --no-deps app-identity app-platform app-edge-realtime
+            # admin-web is best-effort: its ECR image may not exist yet (repo not created).
+            # Don't let a missing admin image abort the shared-blocker backend roll.
+            $COMPOSE pull admin-web && $COMPOSE up -d --no-deps admin-web \
+              || echo "::notice::admin-web image not available yet (create ECR repo baalvion/admin-web) — skipped"
+            # Reload Caddy so the new api.baalvion.com carve-outs + admin route take effect.
             docker compose --env-file deploy/consolidated/.env \
               -f deploy/consolidated/docker-compose.prod.yml up -d caddy
             docker image prune -f
