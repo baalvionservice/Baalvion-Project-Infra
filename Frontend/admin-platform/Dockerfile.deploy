@@ -8,7 +8,11 @@
 # Build context = REPO ROOT:
 #   docker build -f Frontend/admin-platform/Dockerfile.deploy -t admin-web .
 FROM node:20-alpine AS base
-RUN apk add --no-cache libc6-compat && corepack enable
+# Install pnpm directly via npm rather than `corepack enable`. node:20-alpine ships an older
+# corepack whose signed lazy-download of pnpm@9.15.0 now fails in CI ("Corepack is about to
+# download pnpm-9.15.0.tgz | not found") after npm's corepack integrity-key rotation. A direct
+# npm global install pins the same version deterministically and sidesteps corepack entirely.
+RUN apk add --no-cache libc6-compat && npm install -g pnpm@9.15.0
 WORKDIR /app
 
 # 1) Prune the monorepo to just this app + its workspace deps.
