@@ -107,6 +107,13 @@ app:
   name: Baalvion Payment Service
   version: 1.0.0
   description: Payment processing with tiered fees for Global Trade Infrastructure
+  # Kafka is OPTIONAL. Default true (full event-driven ledger saga). Set APP_KAFKA_ENABLED=false on
+  # memory-constrained hosts to run WITHOUT Kafka/ZooKeeper: the Kafka producer/consumer/listener
+  # wiring backs off, outbox rows stay durably PENDING, and the synchronous PSP gateway-checkout
+  # vertical (/v1/gateway/**) — Razorpay/PayU/Stripe/Cashfree create, verify, capture, refund and
+  # webhook handling — runs unaffected.
+  kafka:
+    enabled: ${APP_KAFKA_ENABLED:true}
   vat-rate: 0.075
   daily-limit: 1000000
   transaction-min-limit: 100

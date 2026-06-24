@@ -4,6 +4,7 @@ import com.baalvion.payment.service.PaymentService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -16,9 +17,13 @@ import java.util.UUID;
  *
  * Already-processed payments are treated as a no-op (idempotent on redelivery) rather
  * than re-thrown, so duplicate events don't churn into the DLT.
+ *
+ * <p>Gated behind {@code app.kafka.enabled} (default true): when Kafka is disabled this listener is
+ * not registered, so no consumer container starts and no broker connection is attempted.
  */
 @Slf4j
 @Component
+@ConditionalOnProperty(name = "app.kafka.enabled", havingValue = "true", matchIfMissing = true)
 public class PaymentSagaListener {
 
   private final PaymentService paymentService;

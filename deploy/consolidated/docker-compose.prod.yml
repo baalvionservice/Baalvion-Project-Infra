@@ -180,10 +180,54 @@ services:
       retries: 5
       start_period: 45s
 
-  # ── 7. Payments (JVM) + its Kafka — profile: payments ────────────────────────
+  # ── 7. Payments (JVM PSP gateway) — profile: payments ────────────────────────
+  # The synchronous /v1/gateway/** vertical (Razorpay/PayU/Stripe/Cashfree create, verify, capture,
+  # refund, webhooks) needs ONLY Postgres (RDS) + Redis — NOT Kafka. So on the 4 GiB single host we
+  # run it with APP_KAFKA_ENABLED=false: the service backs off all Kafka wiring (no producer/consumer/
+  # listener, no broker connection) and outbox rows stay durably PENDING. Kafka + ZooKeeper move to
+  # the OPT-IN `kafka` profile below — bring them up (and set APP_KAFKA_ENABLED=true) only on a host
+  # with the headroom for the event-driven ledger saga.
+  #
+  #   docker compose ... --profile payments up -d app-payments            # lean, no Kafka (default)
+  #   docker compose ... --profile payments --profile kafka up -d         # full event-driven setup
+  app-payments:
+    image: ${ECR_REGISTRY}/baalvion/payment-service:${PAYMENTS_IMAGE_TAG:-latest}
+    pull_policy: always
+    restart: unless-stopped
+    profiles: ["payments"]
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      <<: *db
+      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=require}
+      SPRING_PROFILES_ACTIVE: prod
+      # Kafka OFF by default on this host (see note above). Flip to true ONLY alongside --profile kafka.
+      APP_KAFKA_ENABLED: ${APP_KAFKA_ENABLED:-false}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP:-kafka:9092}
+      # PSP keys (RAZORPAY_*/PAYU_*/STRIPE_*) + CMS vault (CMS_BASE_URL/INTERNAL_SERVICE_SECRET) and
+      # PSP_MOCK are read from .env (env_file above) or the per-tenant CMS vault — never hardcoded.
+      JAVA_OPTS: "-Xms64m -Xmx448m -XX:+UseSerialGC -XX:MaxRAMPercentage=70"
+    depends_on:
+      redis: { condition: service_healthy }
+    mem_limit: 640m
+    mem_reservation: 256m
+    healthcheck:
+      test: ["CMD-SHELL","wget -qO- http://127.0.0.1:3015/actuator/health >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    logging:
+      driver: awslogs
+      options:
+        awslogs-region: ${AWS_REGION:-ap-south-1}
+        awslogs-group: /baalvion/consolidated
+
+  # ── Kafka + ZooKeeper — OPT-IN profile: kafka (event-driven ledger saga only) ─
   zookeeper:
     image: confluentinc/cp-zookeeper:7.6.1
-    profiles: ["payments"]
+    profiles: ["kafka"]
     restart: unless-stopped
     mem_limit: 384m
     environment:
@@ -193,7 +237,7 @@ services:
 
   kafka:
     image: confluentinc/cp-kafka:7.6.1
-    profiles: ["payments"]
+    profiles: ["kafka"]
     restart: unless-stopped
     mem_limit: 768m
     depends_on: [ zookeeper ]
@@ -210,31 +254,6 @@ services:
       timeout: 10s
       retries: 20
       start_period: 40s
-
-  app-payments:
-    image: ${ECR_REGISTRY}/baalvion-payments:${IMAGE_TAG:-prod-latest}
-    pull_policy: always
-    restart: unless-stopped
-    profiles: ["payments"]
-    env_file:
-      - path: .env
-        required: false
-    environment:
-      <<: *db
-      DB_JDBC_PARAMS: ${DB_JDBC_PARAMS:-?sslmode=require}
-      SPRING_PROFILES_ACTIVE: prod
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP:-kafka:9092}
-      JAVA_OPTS: "-Xms128m -Xmx512m -XX:+UseSerialGC -XX:MaxRAMPercentage=70"
-    depends_on:
-      redis:  { condition: service_healthy }
-      kafka:  { condition: service_healthy }
-    mem_limit: 768m
-    mem_reservation: 512m
-    logging:
-      driver: awslogs
-      options:
-        awslogs-region: ${AWS_REGION:-ap-south-1}
-        awslogs-group: /baalvion/consolidated
 
   # ── Admin console (Next.js standalone) → admin.baalvion.com ──────────────────
   # The back-office UI. NEXT_PUBLIC_* are baked at BUILD time in CI (deploy-consolidated.yml),

@@ -8,6 +8,7 @@ import io.micrometer.core.instrument.MeterRegistry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.lang.Nullable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,16 @@ import java.util.concurrent.TimeUnit;
 public class OutboxPublisher {
 
   private final OutboxEventRepository repository;
+
+  /**
+   * Nullable: when {@code app.kafka.enabled=false} the Kafka wiring backs off and no
+   * {@link KafkaTemplate} bean is provided, so {@link #drain()} short-circuits and outbox rows stay
+   * durably PENDING (republished once Kafka is re-enabled — at-least-once is preserved).
+   */
+  @Nullable
   private final KafkaTemplate<String, String> kafkaTemplate;
+
+  private final boolean kafkaEnabled;
 
   @Value("${app.outbox.batch-size:100}")
   private int batchSize;
@@ -35,9 +45,13 @@ public class OutboxPublisher {
   @Value("${app.outbox.max-attempts:10}")
   private int maxAttempts;
 
-  public OutboxPublisher(OutboxEventRepository repository, KafkaTemplate<String, String> kafkaTemplate, MeterRegistry meterRegistry) {
+  public OutboxPublisher(OutboxEventRepository repository,
+                         @Nullable KafkaTemplate<String, String> kafkaTemplate,
+                         MeterRegistry meterRegistry,
+                         @Value("${app.kafka.enabled:true}") boolean kafkaEnabled) {
     this.repository = repository;
     this.kafkaTemplate = kafkaTemplate;
+    this.kafkaEnabled = kafkaEnabled;
     Gauge.builder("outbox.pending", repository, r -> (double) r.countByStatus(OutboxStatus.PENDING))
       .description("Outbox events awaiting publication")
       .register(meterRegistry);
@@ -51,6 +65,11 @@ public class OutboxPublisher {
   @Scheduled(fixedDelayString = "${app.outbox.poll-ms:2000}")
   @Transactional
   public void drain() {
+    // Kafka disabled (or no template wired): leave rows PENDING — they are durable and will be
+    // republished once Kafka is re-enabled. Never claim/mark rows we cannot actually publish.
+    if (!kafkaEnabled || kafkaTemplate == null) {
+      return;
+    }
     // FOR UPDATE SKIP LOCKED: safe for many concurrent publisher replicas.
     List<OutboxEvent> pending = repository.lockPendingBatch(OutboxStatus.PENDING.name(), batchSize);
     if (pending.isEmpty()) {
