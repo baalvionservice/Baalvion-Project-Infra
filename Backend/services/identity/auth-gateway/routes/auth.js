@@ -122,7 +122,7 @@ router.post('/register', async (req, res) => {
 // verify → auth-service validates the code + mints a token pair (find-or-create); the gateway
 // then establishes the session cookies exactly like /login. NO access token in the body.
 router.post('/email/otp/request', async (req, res) => {
-  const { status, json } = await authService('/email/otp/request', { email: req.body && req.body.email }, req);
+  const { status, json } = await authService('/email/otp/request', req.body || {}, req);
   return res.status(status || 502).json(json ?? { error: { code: 'OTP_REQUEST_FAILED', message: 'Could not send a login code' } });
 });
 router.post('/email/otp/verify', async (req, res) => {
