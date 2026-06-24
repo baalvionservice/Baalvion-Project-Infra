@@ -73,5 +73,7 @@ USER nextjs
 EXPOSE 3030
 HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
     CMD node -e "require('http').get('http://127.0.0.1:'+(process.env.PORT||3030),r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"
-# Next standalone emits the workspace server.js under the package path.
-CMD ["node", "Frontend/admin-platform/server.js"]
+# Next standalone emits the workspace server.js under the package path. WORKDIR is already
+# /app/Frontend/admin-platform, so use an ABSOLUTE path — a relative one doubles the prefix
+# (/app/Frontend/admin-platform/Frontend/admin-platform/server.js) and crash-loops MODULE_NOT_FOUND.
+CMD ["node", "/app/Frontend/admin-platform/server.js"]
