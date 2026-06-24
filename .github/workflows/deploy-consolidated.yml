@@ -24,6 +24,7 @@ on:
     branches: [main]
     paths:
       - "Backend/**"
+      - "Frontend/admin-platform/**"
       - "deploy/consolidated/**"
       - ".github/workflows/deploy-consolidated.yml"
   workflow_dispatch:
@@ -109,10 +110,82 @@ jobs:
           cache-from: type=gha,scope=consolidated-backend
           cache-to: type=gha,mode=max,scope=consolidated-backend
 
+  # ════════════════════════ 1b) build + push the admin console image ════════════════════════
+  # admin.baalvion.com serves the Next.js standalone admin console (Frontend/admin-platform),
+  # NOT a backend service. It is its own ECR image (baalvion/admin-web). NEXT_PUBLIC_* are baked
+  # HERE at build (Next inlines them into the client bundle). The browser only ever calls
+  # same-origin /auth-bff + /api-bff, which Caddy terminates at the edge on the box.
+  # PREREQUISITE: an AWS admin must pre-create the ECR repo `baalvion/admin-web` once — the OIDC
+  # deploy role can describe/push under baalvion/* but cannot create new repos.
+  build-push-admin-web:
+    name: build admin-web
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.tag.outputs.image_tag }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          role-session-name: gha-admin-web-${{ github.run_id }}
+
+      - name: Log in to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        run: |
+          aws ecr describe-repositories --repository-names "baalvion/admin-web" --region "$AWS_REGION" >/dev/null 2>&1 \
+            || aws ecr create-repository \
+                 --repository-name "baalvion/admin-web" \
+                 --image-tag-mutability MUTABLE \
+                 --image-scanning-configuration scanOnPush=true \
+                 --region "$AWS_REGION"
+
+      - name: Compute image tag (prod-<short-sha>)
+        id: tag
+        run: echo "image_tag=prod-$(echo "${{ github.sha }}" | cut -c1-8)" >> "$GITHUB_OUTPUT"
+
+      - name: Resolve image tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ steps.ecr.outputs.registry }}/baalvion/admin-web
+          tags: |
+            type=raw,value=prod-latest
+            type=raw,value=${{ env.RELEASE_TAG }}
+            type=raw,value=${{ steps.tag.outputs.image_tag }}
+
+      - name: Build and push admin-web to ECR
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Frontend/admin-platform/Dockerfile.deploy
+          push: true
+          provenance: false
+          # Same-origin BFF: the browser hits admin.baalvion.com/auth-bff + /api-bff, which the
+          # box's Caddy terminates → app-identity (auth) / app-platform (cms).
+          build-args: |
+            NEXT_PUBLIC_APP_URL=https://admin.baalvion.com
+            NEXT_PUBLIC_GATEWAY_URL=/auth-bff
+            NEXT_PUBLIC_CMS_API_URL=https://admin.baalvion.com/api-bff/knowledge/cms/api/v1
+            NEXT_PUBLIC_AUTH_URL=https://admin.baalvion.com/auth-bff
+            NEXT_PUBLIC_APP_ENV=production
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=consolidated-admin-web
+          cache-to: type=gha,mode=max,scope=consolidated-admin-web
+
   # ════════════════════════════ 2) roll the consolidated stack ════════════════════════════
   deploy:
     name: Roll consolidated stack
-    needs: build-push
+    needs: [build-push, build-push-admin-web]
     if: ${{ github.event_name == 'push' || github.event.inputs.roll != 'false' }}
     runs-on: ubuntu-latest
     environment: production       # protected environment — manual approval gate
@@ -169,8 +242,11 @@ jobs:
             COMPOSE="docker compose --env-file deploy/consolidated/.env \
               -f deploy/consolidated/docker-compose.prod.yml \
               -f deploy/consolidated/docker-compose.ssl-override.yml"
-            $COMPOSE pull app-identity app-platform app-edge-realtime
-            $COMPOSE up -d --no-deps app-identity app-platform app-edge-realtime
+            $COMPOSE pull app-identity app-platform app-edge-realtime admin-web
+            $COMPOSE up -d --no-deps app-identity app-platform app-edge-realtime admin-web
+            # Reload Caddy so the new admin.baalvion.com → admin-web route takes effect.
+            docker compose --env-file deploy/consolidated/.env \
+              -f deploy/consolidated/docker-compose.prod.yml up -d caddy
             docker image prune -f
 
       - name: Smoke test public ingress
@@ -180,9 +256,9 @@ jobs:
           sleep 25
           for url in \
             "https://api.baalvion.com/health" \
-            "https://admin.baalvion.com/health" \
+            "https://admin.baalvion.com/" \
             "https://auth.baalvion.com/health" \
             "https://ws.baalvion.com/health" ; do
             code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || echo "000")
-            echo "  $url → $code"
+            echo "  $url → $code (expect admin / → 200 or 3xx login redirect)"
           done

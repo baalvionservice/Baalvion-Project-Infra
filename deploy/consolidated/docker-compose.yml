@@ -164,6 +164,35 @@ services:
     mem_limit: 768m
     mem_reservation: 512m
 
+  # ── Admin console (Next.js standalone). NEXT_PUBLIC_* are baked at BUILD. ─────
+  # Same artifact as core-stack's admin-web; built from Frontend/admin-platform/Dockerfile.deploy.
+  # Browser only sees same-origin /auth-bff + /api-bff (Caddy terminates them at the edge).
+  admin-web:
+    build:
+      context: ../..
+      dockerfile: Frontend/admin-platform/Dockerfile.deploy
+      args:
+        NEXT_PUBLIC_APP_URL: https://admin.baalvion.com
+        NEXT_PUBLIC_GATEWAY_URL: /auth-bff
+        NEXT_PUBLIC_CMS_API_URL: https://admin.baalvion.com/api-bff/knowledge/cms/api/v1
+        NEXT_PUBLIC_AUTH_URL: https://admin.baalvion.com/auth-bff
+        NEXT_PUBLIC_APP_ENV: production
+    image: baalvion-admin-web:local
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3030"
+      HOSTNAME: 0.0.0.0
+    mem_limit: 384m
+    mem_reservation: 96m
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3030',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    depends_on: [ app-identity, app-platform ]
+
   # ── Edge ─────────────────────────────────────────────────────────────────────
   caddy:
     image: caddy:2-alpine
@@ -175,7 +204,7 @@ services:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
       - caddy_config:/config
-    depends_on: [ app-identity, app-edge-realtime, app-platform ]
+    depends_on: [ app-identity, app-edge-realtime, app-platform, admin-web ]
 
 volumes:
   redisdata:

@@ -30,7 +30,10 @@ ws.baalvion.com {
 	reverse_proxy app-edge-realtime:3040
 }
 
-# ── Admin platform → platform app, with auth + CMS public carve-outs ──
+# ── Admin platform → admin-web console, with auth + CMS BFF carve-outs ──
+# The browser only ever sees same-origin /auth-bff + /api-bff; Caddy terminates them at the
+# edge so the httpOnly refresh cookie + the Bearer the console holds reach the right backend.
+# Everything else is the Next.js standalone admin console (admin-web:3030).
 admin.baalvion.com {
 	encode gzip zstd
 	# Auth BFF shim → identity app (matches the proven core-stack /auth-bff → /v1/auth rewrite).
@@ -38,11 +41,18 @@ admin.baalvion.com {
 		rewrite * /v1/auth{uri}
 		reverse_proxy app-identity:3001
 	}
+	# CMS admin API BFF: the admin image calls /api-bff/knowledge/cms/api/v1/* with the Bearer it
+	# already holds; terminate at the edge → cms-service (strips the prefix → /api/v1/*).
+	handle_path /api-bff/knowledge/cms/* {
+		reverse_proxy app-platform:3018
+	}
 	# CMS public delivery bypasses the session gateway → knowledge/cms-service.
 	handle /api/v1/public/* {
 		reverse_proxy app-platform:3018
 	}
-	reverse_proxy app-platform:3021
+	# Everything else → the admin console (Next.js standalone). app-platform:3021 (admin-service
+	# API) stays internal — it is NOT a browser surface and 404s on GET /.
+	reverse_proxy admin-web:3030
 }
 
 # ── Direct service APIs (gateway-signed): add one block per public surface as needed,
