@@ -13,14 +13,20 @@
 **/.env
 **/.env.local
 **/.env.*.local
-# Frontend is excluded from the lean backend build contexts, EXCEPT auth-baalvion, which is the one
-# frontend image built from the repo root (deploy-core-stack core-auth-baalvion). Re-include just it;
-# its build artifacts stay excluded by the **/node_modules etc. rules below.
+# Frontend is excluded from the lean backend build contexts, EXCEPT the two frontends built
+# from the repo root: auth-baalvion (core-auth-baalvion) and admin-platform (admin-web, the
+# admin.baalvion.com console). Re-include just those; their build artifacts stay excluded by
+# the **/node_modules etc. rules below. NOTE: without admin-platform here, its source never
+# enters the build context and `turbo prune baalvion-admin-platform` fails "package not found".
 Frontend/*
 !Frontend/auth-baalvion
+!Frontend/admin-platform
 Frontend/auth-baalvion/node_modules
 Frontend/auth-baalvion/.next
 Frontend/auth-baalvion/.turbo
+Frontend/admin-platform/node_modules
+Frontend/admin-platform/.next
+Frontend/admin-platform/.turbo
 e2e
 docs
 *.md
