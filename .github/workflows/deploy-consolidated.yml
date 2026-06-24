@@ -162,11 +162,15 @@ jobs:
             REGISTRY="$(grep -E '^ECR_REGISTRY=' deploy/consolidated/.env | head -1 | cut -d= -f2)"
             aws ecr get-login-password --region "${REGION:-ap-south-1}" \
               | docker login --username AWS --password-stdin "${REGISTRY}"
-            docker compose --env-file deploy/consolidated/.env \
-              -f deploy/consolidated/docker-compose.prod.yml pull app-identity app-platform app-edge-realtime
-            docker compose --env-file deploy/consolidated/.env \
-              -f deploy/consolidated/docker-compose.prod.yml up -d --no-deps \
-              app-identity app-platform app-edge-realtime
+            # The ssl-override mounts the RDS CA bundle + sets NODE_EXTRA_CA_CERTS on every app
+            # container. WITHOUT it, auth-service/rbac-service crash-loop on
+            # "self-signed certificate in certificate chain" against force_ssl RDS. Both files
+            # must be layered on every roll, exactly as the stack was first brought up.
+            COMPOSE="docker compose --env-file deploy/consolidated/.env \
+              -f deploy/consolidated/docker-compose.prod.yml \
+              -f deploy/consolidated/docker-compose.ssl-override.yml"
+            $COMPOSE pull app-identity app-platform app-edge-realtime
+            $COMPOSE up -d --no-deps app-identity app-platform app-edge-realtime
             docker image prune -f
 
       - name: Smoke test public ingress
