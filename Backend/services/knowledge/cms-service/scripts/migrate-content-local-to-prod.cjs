@@ -130,11 +130,31 @@ function sanitizeBlocks(raw, slug) {
 }
 
 // ── HTTP (target API) ────────────────────────────────────────────────────────
-async function api(method, urlPath, body) {
+// The target rate-limits at ~200 requests / 60s per IP. Pace every call to stay
+// under that, auto-wait through a 429 window reset, and abort fast on a 401 so an
+// expired token surfaces immediately (re-run with a fresh CMS_TOKEN — idempotent).
+const THROTTLE_MS = Number(process.env.MIGRATE_THROTTLE_MS || 350);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function api(method, urlPath, body, _attempt = 0) {
   const url = `${TARGET_BASE}${urlPath}`;
   const headers = { 'Content-Type': 'application/json' };
   if (TOKEN) headers.Authorization = `Bearer ${TOKEN}`;
   const res = await fetch(url, { method, headers, body: body ? JSON.stringify(body) : undefined });
+
+  if (res.status === 429 && _attempt < 6) {
+    const ra = Number(res.headers.get('retry-after'));
+    const waitMs = (Number.isFinite(ra) && ra > 0 ? ra * 1000 : 60_000) + 750;
+    log(`  …rate-limited; waiting ${Math.round(waitMs / 1000)}s for the window to reset`);
+    await sleep(waitMs);
+    return api(method, urlPath, body, _attempt + 1);
+  }
+  if (res.status === 401) {
+    const err = new Error('401 Unauthorized — the CMS_TOKEN has expired. Re-run with a fresh token (the import is idempotent and resumes).');
+    err.fatal = true;
+    throw err;
+  }
+
   const text = await res.text();
   let json = null;
   try { json = text ? JSON.parse(text) : null; } catch { /* non-json */ }
@@ -144,6 +164,7 @@ async function api(method, urlPath, body) {
     err.status = res.status;
     throw err;
   }
+  await sleep(THROTTLE_MS); // pace successful calls to stay under the rate limit
   return json;
 }
 
@@ -260,6 +281,7 @@ async function importSite(site, data, report) {
   try {
     await api('GET', `/cms/websites/${encodeURIComponent(target)}`);
   } catch (e) {
+    if (e.fatal) throw e;
     warn(`target website "${target}" not reachable (${e.message}). Skipping site.`);
     report.skippedSites.push(target);
     return;
@@ -283,7 +305,7 @@ async function importSite(site, data, report) {
       const id = created?.data?.id ?? created?.id;
       if (id) catId.set(c.slug, id);
       report.categories++;
-    } catch (e) { warn(`category ${c.slug}: ${e.message}`); report.errors++; }
+    } catch (e) { if (e.fatal) throw e; warn(`category ${c.slug}: ${e.message}`); report.errors++; }
   }
 
   // Existing content slugs (paginate) for idempotency.
@@ -337,6 +359,7 @@ async function importSite(site, data, report) {
         } catch (e) { warn(`schedule ${item.slug}: ${e.message} (left as draft)`); }
       }
     } catch (e) {
+      if (e.fatal) throw e;
       warn(`content ${item.slug}: ${e.message}`);
       report.errors++;
     }
