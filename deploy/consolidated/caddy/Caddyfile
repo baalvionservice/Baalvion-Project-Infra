@@ -89,6 +89,31 @@ admin.baalvion.com {
 	handle_path /api-bff/identity/session/* {
 		reverse_proxy app-identity:3022
 	}
+	# ── Per-domain service consoles (same-origin /api-bff/<domain>/<service>) ──
+	# Each strips its /api-bff/<domain>/<service> prefix; the service then receives its own
+	# mount (/api/v1 or /v1) + endpoint, exactly as the local /__api/<service> proxy does.
+	# Ports are the pm2-assigned ports — some are remapped from the standalone default
+	# (rbac 3055→3053, marketplace 3062→3060). Without these the console fell back to
+	# api.baalvion.com, which the edge BFF does not route → 404 "Route not found".
+	handle_path /api-bff/identity/oauth/*              { reverse_proxy app-identity:3023 }
+	handle_path /api-bff/identity/rbac/*               { reverse_proxy app-identity:3053 }
+	handle_path /api-bff/platform/dashboard/*          { reverse_proxy app-platform:3009 }
+	handle_path /api-bff/knowledge/imperialpedia/*     { reverse_proxy app-platform:3004 }
+	handle_path /api-bff/knowledge/law/*               { reverse_proxy app-platform:3015 }
+	handle_path /api-bff/infrastructure/audit/*        { reverse_proxy app-platform:3032 }
+	handle_path /api-bff/infrastructure/notification/* { reverse_proxy app-edge-realtime:3031 }
+	handle_path /api-bff/commerce/commerce/*           { reverse_proxy app-commerce:3012 }
+	handle_path /api-bff/commerce/market/*             { reverse_proxy app-commerce:3007 }
+	handle_path /api-bff/commerce/inventory/*          { reverse_proxy app-commerce:3014 }
+	handle_path /api-bff/commerce/fulfillment/*        { reverse_proxy app-commerce:3016 }
+	handle_path /api-bff/ecosystem/jobs/*              { reverse_proxy app-ecosystem:3002 }
+	handle_path /api-bff/ecosystem/mining/*            { reverse_proxy app-ecosystem:3003 }
+	handle_path /api-bff/ecosystem/real-estate/*       { reverse_proxy app-ecosystem:3005 }
+	handle_path /api-bff/ecosystem/brand-connector/*   { reverse_proxy app-ecosystem:3006 }
+	handle_path /api-bff/ecosystem/ir/*                { reverse_proxy app-ecosystem:3008 }
+	handle_path /api-bff/ecosystem/about/*             { reverse_proxy app-ecosystem:3010 }
+	handle_path /api-bff/ecosystem/ctm/*               { reverse_proxy app-ecosystem:3017 }
+	handle_path /api-bff/ecosystem/crm/*               { reverse_proxy app-ecosystem:3063 }
 	# CMS public delivery bypasses the session gateway → knowledge/cms-service.
 	handle /api/v1/public/* {
 		reverse_proxy app-platform:3018
