@@ -46,10 +46,17 @@ function stripHtmlTags(input: string): string {
 //      direct cause of the home page's "Service Temporarily Unavailable" 500.
 //   3. Everywhere else (local dev) fall back to a local cms-service.
 // Trailing slashes are stripped so `${BASE}/...` never produces a `//`.
-const PROD_CMS_BASE = 'https://cms.baalvion.com/api/v1/public';
+// The canonical production CMS delivery host is the API gateway. The former
+// `cms.baalvion.com` host does not resolve in production (DNS fails), which sent
+// every CMS fetch to a dead host and forced the static fallback on; use the
+// gateway's public delivery path instead. A deploy can still override via
+// `CMS_PUBLIC_URL`.
+const PROD_CMS_BASE = 'https://api.baalvion.com/api/v1/public';
 const CMS_BASE = (
   process.env.CMS_PUBLIC_URL ||
-  (process.env.VERCEL ? PROD_CMS_BASE : 'http://localhost:3018/api/v1/public')
+  (process.env.VERCEL || process.env.NODE_ENV === 'production'
+    ? PROD_CMS_BASE
+    : 'http://localhost:3018/api/v1/public')
 ).replace(/\/+$/, '');
 const SITE = process.env.CMS_WEBSITE_SLUG || 'about-baalvion';
 const BASE = `${CMS_BASE}/${SITE}`;

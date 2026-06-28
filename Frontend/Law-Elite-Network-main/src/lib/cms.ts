@@ -10,11 +10,13 @@
  * module only covers CMS-managed editorial surfaces and degrades gracefully to
  * `null` when the CMS is unreachable so callers can fall back to built-in copy.
  */
-import { requireServerEnv } from './env';
-
-// CMS_PUBLIC_URL is required in production (fail-fast via requireServerEnv); a
-// localhost default is used only in development.
-const CMS_BASE = requireServerEnv('CMS_PUBLIC_URL', 'http://localhost:3011/api/v1/public');
+// In production default to the API gateway's public delivery host (the former
+// fail-fast refused to start without CMS_PUBLIC_URL, so a forgotten deploy var
+// silently forced the static fallback). A deploy can still override via
+// CMS_PUBLIC_URL. The `law-elite-network` slug matches the central CMS.
+const IS_PROD = process.env.NODE_ENV === 'production';
+const CMS_BASE = process.env.CMS_PUBLIC_URL?.trim()
+  || (IS_PROD ? 'https://api.baalvion.com/api/v1/public' : 'http://localhost:3011/api/v1/public');
 const SITE = process.env.CMS_WEBSITE_SLUG || 'law-elite-network';
 const BASE = `${CMS_BASE}/${SITE}`;
 

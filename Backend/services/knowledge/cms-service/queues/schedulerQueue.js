@@ -21,6 +21,7 @@ function startSchedulerWorker() {
         const { CmsContent, CmsWorkflow, CmsWebsite } = require('../models');
         const cache = require('../service/cacheService');
         const auditService = require('../service/auditService');
+        const revalidateService = require('../service/revalidateService');
 
         const { contentId, websiteId } = job.data;
 
@@ -51,6 +52,16 @@ function startSchedulerWorker() {
             slug: content.slug, contentType: content.contentType ?? null,
             trigger: 'scheduler',
         }, { tenantId: websiteSlug });
+
+        // Bust the public delivery cache + revalidate the frontend so the
+        // auto-published post goes live exactly like a manual publish.
+        if (websiteSlug) {
+            try { await cache.delPattern(`cms:public:${websiteSlug}:*`); } catch { /* fail-open */ }
+            try {
+                const { paths, urls } = revalidateService.pathsForContent(content, website && website.domain);
+                revalidateService.dispatch(websiteSlug, { paths, urls });
+            } catch { /* fail-open */ }
+        }
 
         // SEO indexing trigger: notify search engines immediately on auto-publish too.
         try { require('../service/seoPingService').pingForWebsite(website); } catch { /* fail-open */ }

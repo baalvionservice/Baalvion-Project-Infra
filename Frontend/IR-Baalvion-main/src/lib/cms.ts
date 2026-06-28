@@ -9,8 +9,14 @@ import { leadershipTeam, globalLeaders, VicePersidents, boardOfDirectors } from 
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { slugify } from '@/utils/slug-generator';
 
-const CMS_BASE = process.env.CMS_PUBLIC_URL || 'http://localhost:3011/api/v1/public';
-const SITE = process.env.CMS_WEBSITE_SLUG || 'ir.baalvion.com';
+// In production default to the API gateway's public delivery host, and to the
+// website's *production* slug `baalvion-ir` (the central CMS registered IR under
+// that slug — the local dev DB uses `ir.baalvion.com`). A deploy can override
+// either via CMS_PUBLIC_URL / CMS_WEBSITE_SLUG.
+const IS_PROD = process.env.NODE_ENV === 'production';
+const CMS_BASE = process.env.CMS_PUBLIC_URL
+  || (IS_PROD ? 'https://api.baalvion.com/api/v1/public' : 'http://localhost:3011/api/v1/public');
+const SITE = process.env.CMS_WEBSITE_SLUG || (IS_PROD ? 'baalvion-ir' : 'ir.baalvion.com');
 const BASE = `${CMS_BASE}/${SITE}`;
 
 const phUrl = (id?: string): string | undefined =>

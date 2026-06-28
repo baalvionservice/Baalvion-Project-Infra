@@ -6,6 +6,11 @@ const parseList = (value, fallback = []) => {
     return value.split(',').map(s => s.trim()).filter(Boolean);
 };
 
+const parseJson = (value, fallback = {}) => {
+    if (!value) return fallback;
+    try { return JSON.parse(value); } catch { return fallback; }
+};
+
 const port = Number(process.env.PORT || 3018);
 
 module.exports = {
@@ -47,6 +52,19 @@ module.exports = {
     },
     media: {
         serviceUrl: process.env.MEDIA_SERVICE_URL || 'http://localhost:3012',
+    },
+    // On-publish revalidation: when content is published / unpublished / edited
+    // live, cms-service calls the affected website's frontend revalidate webhook so
+    // build-cached (ISR) pages refresh immediately instead of waiting out their TTL.
+    //   REVALIDATE_SECRET    shared secret, sent as the `x-revalidate-secret` header
+    //   REVALIDATE_WEBHOOKS  JSON map of websiteSlug -> frontend /api/revalidate URL
+    //                        e.g. {"imperialpedia":"https://imperialpedia.baalvion.com/api/revalidate"}
+    // Both unset → dispatch is a no-op (the public-cache bust still happens, so
+    // dynamic/no-store sites already reflect edits on the next request).
+    revalidate: {
+        secret: process.env.REVALIDATE_SECRET || null,
+        webhooks: parseJson(process.env.REVALIDATE_WEBHOOKS, {}),
+        timeoutMs: Number(process.env.REVALIDATE_TIMEOUT_MS || 5000),
     },
     notifications: {
         serviceUrl: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3013',

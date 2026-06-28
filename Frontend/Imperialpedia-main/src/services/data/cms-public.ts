@@ -17,12 +17,14 @@
 import { Article, ArticleStatus } from '@/modules/content-engine/types/article';
 import type { NewsArticle, NewsBodyBlock, NewsCategory } from '@/lib/data.news';
 
-// No localhost fallback in production: an unset NEXT_PUBLIC_CMS_PUBLIC_URL yields
-// '' so the server fetch fails closed (callers fall back to built-in copy) instead
-// of shipping a localhost dev URL to the production bundle.
+// In production default to the API gateway's public delivery host (not localhost,
+// and not an empty string that silently forced the built-in fallback). A deploy
+// can still override via NEXT_PUBLIC_CMS_PUBLIC_URL.
 const CMS_PUBLIC_URL =
   process.env.NEXT_PUBLIC_CMS_PUBLIC_URL ||
-  (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3018/api/v1/public');
+  (process.env.NODE_ENV === 'production'
+    ? 'https://api.baalvion.com/api/v1/public'
+    : 'http://localhost:3018/api/v1/public');
 const SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
 // ── cms-service wire shapes ─────────────────────────────────────────────────
