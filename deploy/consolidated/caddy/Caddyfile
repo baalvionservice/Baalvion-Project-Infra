@@ -77,6 +77,18 @@ admin.baalvion.com {
 	handle_path /api-bff/knowledge/cms/* {
 		reverse_proxy app-platform:3018
 	}
+	# Platform admin API BFF: the admin image calls /api-bff/platform/admin/v1/* (dashboard
+	# stats, users, orgs, sessions, audit-logs). handle_path strips the prefix → admin-service
+	# receives /v1/* (it mounts at /v1). Without this the console fell back to the public
+	# api.baalvion.com path, which the edge BFF does not route → 404 "Route not found".
+	handle_path /api-bff/platform/admin/* {
+		reverse_proxy app-platform:3021
+	}
+	# Identity session API BFF: the admin image calls /api-bff/identity/session/v1/* (active
+	# sessions + session stats). session-service mounts at /v1 → strip prefix → /v1/*.
+	handle_path /api-bff/identity/session/* {
+		reverse_proxy app-identity:3022
+	}
 	# CMS public delivery bypasses the session gateway → knowledge/cms-service.
 	handle /api/v1/public/* {
 		reverse_proxy app-platform:3018
