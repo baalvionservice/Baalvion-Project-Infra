@@ -29,8 +29,22 @@ const PROVIDER_REQUIRED = {
     'github-oauth': ['clientId', 'clientSecret'],
 };
 
-async function assertWebsite(websiteId, orgId) {
-    const w = await CmsWebsite.findOne({ where: { id: websiteId, organizationId: orgId } });
+/**
+ * Resolve a caller "scope" into the org filter for a website query. Accepts the
+ * scope object `{ orgId, isPlatformAdmin }` from the controller, or a legacy plain
+ * orgId string (kept for direct callers/scripts). Platform principals are NOT
+ * org-scoped — they manage every website across orgs, consistent with
+ * websiteService.orgFilter and cmsAccess.loadCmsRole. Everyone else is org-scoped.
+ */
+function orgFilter(scope) {
+    if (scope && typeof scope === 'object') {
+        return scope.isPlatformAdmin ? {} : { organizationId: scope.orgId };
+    }
+    return { organizationId: scope };
+}
+
+async function assertWebsite(websiteId, scope) {
+    const w = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!w) throw new AppError('NOT_FOUND', 'Website not found', 404);
     return w;
 }
@@ -54,8 +68,8 @@ function toPublic(row) {
     };
 }
 
-async function list(websiteId, orgId) {
-    await assertWebsite(websiteId, orgId);
+async function list(websiteId, scope) {
+    await assertWebsite(websiteId, scope);
     const rows = await CmsWebsiteIntegration.findAll({
         where: { websiteId },
         order: [['category', 'ASC'], ['provider', 'ASC']],
@@ -63,8 +77,8 @@ async function list(websiteId, orgId) {
     return rows.map(toPublic);
 }
 
-async function upsert(websiteId, orgId, provider, body, userId) {
-    const website = await assertWebsite(websiteId, orgId);
+async function upsert(websiteId, scope, provider, body, userId) {
+    const website = await assertWebsite(websiteId, scope);
     const existing = await CmsWebsiteIntegration.findOne({ where: { websiteId, provider } });
 
     // Merge secrets: a sent field replaces; an omitted or blank field is kept.
@@ -114,8 +128,8 @@ async function upsert(websiteId, orgId, provider, body, userId) {
     return result;
 }
 
-async function remove(websiteId, orgId, provider) {
-    const website = await assertWebsite(websiteId, orgId);
+async function remove(websiteId, scope, provider) {
+    const website = await assertWebsite(websiteId, scope);
     const row = await CmsWebsiteIntegration.findOne({ where: { websiteId, provider } });
     if (!row) throw new AppError('NOT_FOUND', 'Integration not found', 404);
     const category = row.category;
@@ -129,8 +143,8 @@ async function remove(websiteId, orgId, provider) {
     }, { tenantId: website.slug });
 }
 
-async function test(websiteId, orgId, provider) {
-    await assertWebsite(websiteId, orgId);
+async function test(websiteId, scope, provider) {
+    await assertWebsite(websiteId, scope);
     const row = await CmsWebsiteIntegration.findOne({ where: { websiteId, provider } });
     if (!row) throw new AppError('NOT_FOUND', 'Integration not found', 404);
 
@@ -206,10 +220,15 @@ async function resolve(websiteSlug, { provider, category } = {}) {
     }));
 }
 
-/** Org-wide rollup: per-website integration/connection status for the dashboard. */
-async function summary(orgId) {
+/**
+ * Per-website integration/connection status rollup for the dashboard "Website
+ * Connections" widget. Org-scoped for tenant admins; a platform principal sees
+ * every website across orgs (so the platform owner's dashboard isn't empty when
+ * their token's org doesn't own the sites). Scope = { orgId, isPlatformAdmin }.
+ */
+async function summary(scope) {
     const websites = await CmsWebsite.findAll({
-        where: { organizationId: orgId },
+        where: { ...orgFilter(scope) },
         attributes: ['id', 'name', 'slug'],
         order: [['name', 'ASC']],
     });

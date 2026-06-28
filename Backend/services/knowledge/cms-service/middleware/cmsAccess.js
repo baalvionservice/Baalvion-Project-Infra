@@ -74,6 +74,25 @@ const loadCmsRole = async (req, res, next) => {
 };
 
 /**
+ * Build the caller's website "scope" for org-filtered service queries.
+ *
+ * Platform principals (super_admin/owner/admin) operate across ALL organizations,
+ * so they are NOT org-scoped — their token's org_id must not filter away websites
+ * that belong to other orgs (the platform owner hosts many sites under the platform
+ * org). Everyone else is strictly org-scoped. Mirrors websiteService.orgFilter and
+ * the bypass in loadCmsRole; shared so every controller/middleware scopes the same way.
+ */
+const callerScope = (req) => {
+    const roles = Array.isArray(req.auth?.roles)
+        ? req.auth.roles
+        : (req.auth?.role != null ? [req.auth.role] : []);
+    return {
+        orgId: req.user?.orgId ?? req.auth?.orgId,
+        isPlatformAdmin: roles.some((r) => PLATFORM_BYPASS_ROLES.includes(r)),
+    };
+};
+
+/**
  * Require a minimum CMS role level.
  * minRole can be a role name string or a numeric level.
  */
@@ -90,4 +109,4 @@ const requireCmsRole = (...minRoles) => (req, res, next) => {
     return next();
 };
 
-module.exports = { loadCmsRole, requireCmsRole, CMS_ROLE_LEVEL, PLATFORM_BYPASS_ROLES };
+module.exports = { loadCmsRole, requireCmsRole, callerScope, CMS_ROLE_LEVEL, PLATFORM_BYPASS_ROLES };

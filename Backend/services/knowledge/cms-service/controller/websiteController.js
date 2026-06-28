@@ -1,25 +1,10 @@
 'use strict';
 const websiteService = require('../service/websiteService');
 const { sendSuccess, sendPaginated } = require('../utils/response');
-const { PLATFORM_BYPASS_ROLES } = require('../middleware/cmsAccess');
-
-/**
- * Build the caller's website scope. Platform principals (super_admin/owner/admin)
- * operate across ALL organizations — their token's org_id must NOT scope away
- * websites that belong to other orgs (the platform owner hosts many sites under the
- * platform org). Everyone else is strictly org-scoped. This mirrors the platform
- * bypass already applied by cmsAccess.loadCmsRole, which grants these roles cms_admin
- * on any website — the prior org filter on the list/lookup was inconsistent with that.
- */
-const callerScope = (req) => {
-    const roles = Array.isArray(req.auth?.roles)
-        ? req.auth.roles
-        : (req.auth?.role != null ? [req.auth.role] : []);
-    return {
-        orgId: req.user.orgId,
-        isPlatformAdmin: roles.some((r) => PLATFORM_BYPASS_ROLES.includes(r)),
-    };
-};
+// Shared scope helper — platform principals (super_admin/owner/admin) operate across
+// ALL orgs, everyone else is org-scoped. Single source of truth in cmsAccess so the
+// website, content, taxonomy, and integration paths all scope identically.
+const { callerScope } = require('../middleware/cmsAccess');
 
 const list = async (req, res, next) => {
     try {

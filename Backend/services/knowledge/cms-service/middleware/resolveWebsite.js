@@ -23,27 +23,50 @@ const cache = require('./../service/cacheService');
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SLUG_CACHE_TTL = 300; // seconds — slugs are immutable after creation
 
+// Inlined (not imported from cmsAccess) to avoid the cmsAccess ↔ resolveWebsite
+// circular require — cmsAccess requires this module for resolveWebsiteIdParam.
+const PLATFORM_BYPASS_ROLES = ['super_admin', 'owner', 'admin'];
+
+const isPlatformAdmin = (req) => {
+    const roles = Array.isArray(req.auth?.roles)
+        ? req.auth.roles
+        : (req.auth?.role != null ? [req.auth.role] : []);
+    return roles.some((r) => PLATFORM_BYPASS_ROLES.includes(r));
+};
+
 const slugCacheKey = (orgId, slug) => `cms:slug:${orgId}:${slug}`;
 
 /**
  * Rewrite req.params.websiteId from a slug to the canonical UUID, in place.
  * No-op when the param is absent or already a UUID. Throws 404 for an unknown
  * slug. Safe to call from any handler that shares the route's param layer.
+ *
+ * Platform principals (super_admin/owner/admin) manage sites across ALL orgs, so
+ * they resolve a slug WITHOUT the org filter — slugs are globally unique
+ * (createWebsite enforces this), so this is unambiguous. The previous
+ * unconditional `organizationId: orgId` filter 404'd platform admins on any site
+ * outside their token's org (and silently skipped resolution when their token had
+ * no org), which broke every slug-addressed page — e.g.
+ * /cms/websites/imperialpedia/content — even though websiteService/loadCmsRole
+ * already grant them access. Non-platform callers stay strictly org-scoped.
  */
 async function resolveWebsiteIdParam(req) {
     const raw = req.params.websiteId;
     if (!raw || UUID_RE.test(raw)) return;
 
     const orgId = req.user?.orgId ?? req.auth?.orgId;
-    if (!orgId) return; // unauthenticated — let the auth gate reject it
+    const platformAdmin = isPlatformAdmin(req);
 
-    const cacheKey = slugCacheKey(orgId, raw);
+    // A non-platform caller with no org can't be safely scoped — let the
+    // auth/membership gate reject it (unchanged behaviour for that case).
+    if (!orgId && !platformAdmin) return;
+
+    const where = platformAdmin ? { slug: raw } : { slug: raw, organizationId: orgId };
+    const cacheKey = slugCacheKey(platformAdmin ? 'platform' : orgId, raw);
+
     let id = await cache.get(cacheKey);
     if (!id) {
-        const website = await CmsWebsite.findOne({
-            where: { slug: raw, organizationId: orgId },
-            attributes: ['id'],
-        });
+        const website = await CmsWebsite.findOne({ where, attributes: ['id'] });
         if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
         id = website.id;
         await cache.set(cacheKey, id, SLUG_CACHE_TTL);
