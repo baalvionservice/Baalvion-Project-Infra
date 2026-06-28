@@ -176,6 +176,8 @@ services:
         NEXT_PUBLIC_GATEWAY_URL: /auth-bff
         NEXT_PUBLIC_CMS_API_URL: https://admin.baalvion.com/api-bff/knowledge/cms/api/v1
         NEXT_PUBLIC_AUTH_URL: https://admin.baalvion.com/auth-bff
+        NEXT_PUBLIC_ADMIN_API_URL: https://admin.baalvion.com/api-bff/platform/admin/v1
+        NEXT_PUBLIC_SESSION_API_URL: https://admin.baalvion.com/api-bff/identity/session/v1
         NEXT_PUBLIC_APP_ENV: production
     image: baalvion-admin-web:local
     restart: unless-stopped
