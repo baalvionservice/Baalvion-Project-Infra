@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const { CmsContent, CmsCategory, CmsTag, CmsWorkflow, CmsContentRevision, CmsWebsite, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
+const revalidateService = require('./revalidateService');
 const config = require('../config/appConfig');
 const { slugify } = require('../utils/slugify');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
@@ -140,8 +141,14 @@ async function updateContent(websiteId, contentId, userId, body) {
     // on the website immediately instead of waiting out the public TTL.
     if (content.status === 'published') {
         try {
-            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug'] });
-            if (website?.slug) await cache.delPattern(`cms:public:${website.slug}:*`);
+            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
+            if (website?.slug) {
+                await cache.delPattern(`cms:public:${website.slug}:*`);
+                // Revalidate the website's build-cached (ISR) pages so the live edit
+                // appears immediately. Fire-and-forget; never blocks the response.
+                const { paths, urls } = revalidateService.pathsForContent(content, website.domain);
+                revalidateService.dispatch(website.slug, { paths, urls });
+            }
         } catch { /* fail-open */ }
     }
     return content.toJSON();

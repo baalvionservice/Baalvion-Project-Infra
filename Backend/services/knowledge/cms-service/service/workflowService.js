@@ -5,6 +5,7 @@ const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const auditService = require('./auditService');
 const revisionService = require('./revisionService');
+const revalidateService = require('./revalidateService');
 const { emitSafe, CmsEvents } = require('../platform/events');
 const { logger } = require('../platform/logger');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
@@ -106,6 +107,11 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
             // live site instead of waiting out the 10-minute public TTL.
             if (websiteSlug) {
                 try { await cache.delPattern(`cms:public:${websiteSlug}:*`); } catch { /* fail-open */ }
+                // Tell the website's frontend to revalidate build-cached (ISR) pages now.
+                try {
+                    const { paths, urls } = revalidateService.pathsForContent(content, website && website.domain);
+                    revalidateService.dispatch(websiteSlug, { paths, urls });
+                } catch { /* fail-open — never affects the committed transition */ }
             }
             emitSafe(eventType, {
                 websiteId,
