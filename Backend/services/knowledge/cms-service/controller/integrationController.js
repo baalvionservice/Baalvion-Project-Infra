@@ -1,37 +1,38 @@
 'use strict';
 const svc = require('../service/integrationService');
 const { sendSuccess } = require('../utils/response');
+const { callerScope } = require('../middleware/cmsAccess');
 const { logger } = require('../platform/logger');
 
 const list = async (req, res, next) => {
     try {
-        return sendSuccess(req, res, await svc.list(req.params.websiteId, req.user.orgId));
+        return sendSuccess(req, res, await svc.list(req.params.websiteId, callerScope(req)));
     } catch (err) { return next(err); }
 };
 
 const upsert = async (req, res, next) => {
     try {
-        const result = await svc.upsert(req.params.websiteId, req.user.orgId, req.params.provider, req.validated, req.user.id);
+        const result = await svc.upsert(req.params.websiteId, callerScope(req), req.params.provider, req.validated, req.user.id);
         return sendSuccess(req, res, result);
     } catch (err) { return next(err); }
 };
 
 const remove = async (req, res, next) => {
     try {
-        await svc.remove(req.params.websiteId, req.user.orgId, req.params.provider);
+        await svc.remove(req.params.websiteId, callerScope(req), req.params.provider);
         return sendSuccess(req, res, null);
     } catch (err) { return next(err); }
 };
 
 const test = async (req, res, next) => {
     try {
-        return sendSuccess(req, res, await svc.test(req.params.websiteId, req.user.orgId, req.params.provider));
+        return sendSuccess(req, res, await svc.test(req.params.websiteId, callerScope(req), req.params.provider));
     } catch (err) { return next(err); }
 };
 
 const summary = async (req, res, next) => {
     try {
-        return sendSuccess(req, res, await svc.summary(req.user.orgId));
+        return sendSuccess(req, res, await svc.summary(callerScope(req)));
     } catch (err) { return next(err); }
 };
 
