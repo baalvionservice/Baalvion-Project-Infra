@@ -1,5 +1,9 @@
 // app-commerce — Commerce + marketplace (bounded context: commerce, marketplace).
 // financial-services-java is NOT here — the JVM ships as the separate app-payments container.
+// SLIMMED for the consolidated box: only the services the central admin console manages run
+// here. order-service is deprecated (its lifecycle moved to the trade domain's
+// order-execution-service) and trade-service has no admin-console panel, so both are omitted
+// to keep the 3.7GB box lean. Re-add them here if a console surface needs them.
 const ROOT = '/app/Backend/services';
 const svc = (name, dir, port, heapMB = 192, maxMemMB = 320) => ({
   name,
@@ -21,8 +25,6 @@ module.exports = {
     svc('inventory-service',   'commerce/inventory-service',   3014),
     svc('fulfillment-service', 'commerce/fulfillment-service', 3016),
     svc('market-service',      'commerce/market-service',      3007),
-    svc('order-service',       'commerce/order-service',       3013, 256, 384), // reconciliation worker
-    svc('trade-service',       'commerce/trade-service',       3025, 256, 448), // ws + doc/logistics engines
     svc('marketplace-service', 'marketplace/marketplace-service', 3060),
   ],
 };
