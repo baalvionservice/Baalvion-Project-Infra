@@ -225,8 +225,9 @@ jobs:
           key: ${{ secrets.CORE_EC2_SSH_KEY }}
           envs: IMAGE_TAG
           # The box holds the repo at /opt/baalvion-core; .env is gitignored and stays put.
-          # The EC2 instance role grants ECR pull (no keys on the box). Only the 3 Node app
-          # containers are rolled — redis/neo4j/caddy are left running untouched.
+          # The EC2 instance role grants ECR pull (no keys on the box). 5 Node app containers
+          # are rolled (core 3 + the slimmed commerce/ecosystem verticals) — redis/neo4j/caddy
+          # are left running untouched.
           script: |
             set -euo pipefail
             cd /opt/baalvion-core
@@ -251,8 +252,11 @@ jobs:
             COMPOSE="docker compose --env-file deploy/consolidated/.env \
               -f deploy/consolidated/docker-compose.prod.yml \
               -f deploy/consolidated/docker-compose.ssl-override.yml"
-            $COMPOSE pull app-identity app-platform app-edge-realtime
-            $COMPOSE up -d --no-deps app-identity app-platform app-edge-realtime
+            # app-commerce + app-ecosystem run the slimmed vertical services the admin console
+            # manages (commerce/market/inventory/fulfillment/marketplace + crm/ir). They depend on
+            # DB_SSL_REJECT_UNAUTHORIZED=false + ISLAND_AUTH_MODE=strict being set in .env.
+            $COMPOSE pull app-identity app-platform app-edge-realtime app-commerce app-ecosystem
+            $COMPOSE up -d --no-deps app-identity app-platform app-edge-realtime app-commerce app-ecosystem
             # admin-web is best-effort: its ECR image may not exist yet (repo not created).
             # Don't let a missing admin image abort the shared-blocker backend roll.
             $COMPOSE pull admin-web && $COMPOSE up -d --no-deps admin-web \
