@@ -12,6 +12,13 @@ export interface NavItem {
   badge?: string;
   roles?: UserRole[];
   children?: NavItem[];
+  /**
+   * When true (or when href is an absolute URL), the item opens its own
+   * standalone app in a new tab instead of an in-console route. Used for
+   * verticals that run as their own deployments (jobs, ctm, …) and aren't
+   * reachable as panels from the consolidated console.
+   */
+  external?: boolean;
 }
 
 export const NAVIGATION: NavGroup[] = [
@@ -181,14 +188,9 @@ export const NAVIGATION: NavGroup[] = [
   {
     label: 'Talent',
     items: [
-      {
-        title: 'Jobs',
-        href: '/jobs',
-        iconName: 'Briefcase',
-        children: [
-          { title: 'Overview', href: '/jobs', iconName: 'LayoutDashboard' },
-        ],
-      },
+      // Jobs runs as its own deployment (jobs.baalvion.com) with its own admin —
+      // not a panel on the consolidated console. Open it directly.
+      { title: 'Jobs', href: 'https://jobs.baalvion.com', iconName: 'Briefcase', external: true },
     ],
   },
   {
@@ -239,7 +241,9 @@ export const NAVIGATION: NavGroup[] = [
     label: 'Ecosystem',
     items: [
       { title: 'Law Elite',         href: '/law',           iconName: 'Scale'   },
-      { title: 'ControlTheMarket',  href: '/ctm',           iconName: 'Trophy'  },
+      // ControlTheMarket runs as its own deployment (controlthemarket.com) with its
+      // own admin — open it directly rather than a (non-routable) console panel.
+      { title: 'ControlTheMarket',  href: 'https://controlthemarket.com', iconName: 'Trophy', external: true },
       {
         title: 'Imperialpedia',
         href: '/imperialpedia',
