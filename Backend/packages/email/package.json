@@ -1,0 +1,33 @@
+{
+  "name": "@baalvion/email",
+  "version": "1.0.0",
+  "description": "Centralized Amazon SES (AWS SDK v3) email service — sender mapping, responsive dark-mode templates, retry, delivery logging and SNS event handling. Plain CommonJS, no build step, resolves in pruned production images.",
+  "private": true,
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    },
+    "./templates": "./src/templates/index.js",
+    "./sns": "./src/sns.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "src"
+  ],
+  "scripts": {
+    "build": "node -e \"process.exit(0)\"",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.700.0"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=20"
+  }
+}
