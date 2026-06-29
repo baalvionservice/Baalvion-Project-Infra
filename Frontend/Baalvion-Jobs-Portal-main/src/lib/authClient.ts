@@ -6,8 +6,10 @@
  * (never read by JS); the access token is held in memory only (see apiClient.ts),
  * never in localStorage. No browser password grant, no realm endpoints.
  */
-const AUTH_BASE =
-  process.env.NEXT_PUBLIC_AUTH_URL || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
+// Same-origin BFF route (src/app/api/auth/[...path]) → auth-service. The stale
+// /api/v1/identity/auth/v1/auth path hit the session-gated edge BFF (401), so default
+// to the same-origin proxy which forwards to the live auth-service.
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_URL || '/api/auth';
 
 export function decodeJwt(token: string): Record<string, any> {
   try {

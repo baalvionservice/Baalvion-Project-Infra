@@ -7,9 +7,13 @@ export interface ApiResponse<T> {
 
 import { refresh as authRefresh } from './authClient';
 
-const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_URL        || 'https://api.baalvion.com/api/v1/identity/auth/v1/auth';
-// Domain data via the gateway (port 4100 was a phantom backend).
-const JOBS_BASE = process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || 'https://api.baalvion.com/api/v1/ecosystem/jobs/api/v1';
+// Auth via the same-origin BFF route (forwards to the live auth-service). The old
+// /api/v1/identity/auth/v1/auth path resolved to the session-gated edge BFF → 401.
+const AUTH_BASE = process.env.NEXT_PUBLIC_AUTH_URL        || '/api/auth';
+// Jobs-service (TalentOS backend) via the consolidated admin BFF — same target the central
+// admin console uses (NEXT_PUBLIC_SERVICE_URLS). The old api.baalvion.com/api/v1/ecosystem/jobs
+// path hit the session-gated edge BFF (401), not the jobs-service.
+const JOBS_BASE = process.env.NEXT_PUBLIC_JOBS_SERVICE_URL || 'https://admin.baalvion.com/api-bff/ecosystem/jobs/api/v1';
 
 // Access token is held in MEMORY only. The refresh token is an httpOnly cookie set by
 // auth-service — never stored in localStorage (canonical, XSS-resistant).
