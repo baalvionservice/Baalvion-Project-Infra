@@ -5,13 +5,16 @@
  *   node workers/index.js
  *
  * Hosts:
- *   - notificationWorker, emailWorker (BullMQ)
+ *   - notificationWorker (BullMQ)
  *   - meteringWorker (Redis Streams → TimescaleDB + quota)
  *   - billing scheduler (idempotent monthly run + daily provider reconciliation)
+ *
+ * Transactional email is sent synchronously through the centralized @baalvion/email
+ * (Amazon SES) service in `service/mailer.js` / `utils/emailService.js` — there is no
+ * separate email worker/queue.
  */
 
 const notificationWorker = require('./notificationWorker');
-const emailWorker = require('./emailWorker');
 const meteringWorker = require('./meteringWorker');
 const intelligenceWorker = require('./intelligenceWorker');
 const billingEngine = require('../service/billingEngine');
@@ -106,7 +109,7 @@ const scheduler = setInterval(async () => {
   }
 }, HOUR);
 
-logger.info('[workers] started — notification, email, metering + billing scheduler active');
+logger.info('[workers] started — notification, metering + billing scheduler active');
 
 function shutdown() {
   clearInterval(scheduler);
@@ -118,4 +121,4 @@ function shutdown() {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-module.exports = { notificationWorker, emailWorker, meteringWorker };
+module.exports = { notificationWorker, meteringWorker };

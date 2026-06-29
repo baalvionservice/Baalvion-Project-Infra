@@ -17,6 +17,7 @@
     "coverageProvider": "v8"
   },
   "dependencies": {
+    "@baalvion/email": "workspace:*",
     "@baalvion/telemetry": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
     "express-rate-limit": "^7.5.0",

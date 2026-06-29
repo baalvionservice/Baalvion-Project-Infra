@@ -61,7 +61,7 @@ accepts:
 | `JWT_IMPERSONATION_ISSUER` | no | `baalvion-auth-impersonation` | Distinct issuer for impersonation tokens |
 | `CORS_ORIGINS` | no | `http://localhost:3030` | Comma-separated allowed origins |
 | `AUTH_SERVICE_URL` | no | `http://localhost:3001` | Upstream auth-service for user lookups / registration |
-| `SMTP_HOST` / `SMTP_PORT` / `EMAIL_FROM` | no | `127.0.0.1` / `1025` / `no-reply@baalvion.com` | Best-effort invitation email (dev: Mailpit) |
+| `SMTP_HOST` / `SMTP_PORT` / `EMAIL_FROM` | no | `127.0.0.1` / `1025` / `noreply@baalvion.com` | Best-effort invitation email (dev: Mailpit) |
 
 > Secrets are never committed — `.env*`, keys, and certs are git-ignored and
 > injected at deploy time. The bootstrap scripts keep a local-dev `DB_PASSWORD`

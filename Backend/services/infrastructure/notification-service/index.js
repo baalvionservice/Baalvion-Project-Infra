@@ -52,13 +52,18 @@ app.get('/health', async (_req, res) => {
         redis:   redis.isAvailable() ? 'ok' : 'unavailable',
         queues:  queueStatus,
         channels: {
-            email: config.email.resendApiKey ? 'resend' : (config.email.smtp.host ? 'smtp' : 'log'),
+            email: require('./service/sesMailer').isSesEnabled() ? 'ses'
+                : (config.email.resendApiKey ? 'resend' : (config.email.smtp.host ? 'smtp' : 'log')),
             sms:   config.sms.provider,
             push:  pushService.resolveProvider(),
             inapp: 'redis-pubsub',
         },
     });
 });
+
+// Amazon SNS → SES delivery-event webhook. Mounted at the platform-wide path (NOT under /v1)
+// and BEFORE the JSON body parser already ran — it uses its own raw text-body parser inside.
+app.use('/webhooks/aws/ses', require('./routes/sesWebhook'));
 
 app.use('/v1', require('./routes/v1'));
 

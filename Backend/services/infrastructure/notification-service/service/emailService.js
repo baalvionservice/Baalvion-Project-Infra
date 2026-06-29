@@ -5,6 +5,8 @@ const redis         = require('../config/redis');
 const config        = require('../config/appConfig');
 const logger        = require('../utils/logger');
 const { render }    = require('../templates');
+const { htmlToText } = require('@baalvion/email');
+const ses           = require('./sesMailer');
 
 let _resend      = null;
 let _smtpTransport = null;
@@ -57,7 +59,7 @@ async function markSent(idempotencyKey) {
 
 // ── Send via Resend (primary) ─────────────────────────────────────────────────
 
-async function sendViaResend({ to, subject, html, replyTo }) {
+async function sendViaResend({ to, subject, html, text, replyTo }) {
     const resend = getResend();
     if (!resend) throw new Error('Resend not configured');
     const result = await resend.emails.send({
@@ -65,6 +67,7 @@ async function sendViaResend({ to, subject, html, replyTo }) {
         to:      [to],
         subject,
         html,
+        text:    text || htmlToText(html),  // always ship a text/plain alternative
         reply_to: replyTo || config.email.replyTo,
     });
     if (result.error) throw new Error(`Resend error: ${result.error.message}`);
@@ -73,7 +76,7 @@ async function sendViaResend({ to, subject, html, replyTo }) {
 
 // ── Send via SMTP (fallback) ──────────────────────────────────────────────────
 
-async function sendViaSmtp({ to, subject, html, replyTo }) {
+async function sendViaSmtp({ to, subject, html, text, replyTo }) {
     const transport = getSmtp();
     if (!transport) throw new Error('SMTP not configured');
     const info = await transport.sendMail({
@@ -81,6 +84,7 @@ async function sendViaSmtp({ to, subject, html, replyTo }) {
         to,
         subject,
         html,
+        text:    text || htmlToText(html),  // always ship a text/plain alternative
         replyTo: replyTo || config.email.replyTo,
     });
     return { provider: 'smtp', id: info.messageId };
@@ -106,34 +110,51 @@ async function sendEmail({ to, templateName, data, idempotencyKey, replyTo }) {
     }
 
     const appData = { ...data, appUrl: config.appUrl, adminUrl: config.adminUrl };
-    const { subject, html } = render(templateName, appData);
+    const rendered = render(templateName, appData);
+    const { subject, html } = rendered;
+    const text = rendered.text || htmlToText(html);
 
-    let result;
-    try {
-        result = await sendViaResend({ to, subject, html, replyTo });
-    } catch (err) {
-        logger.warn({ err, to }, 'Resend failed — trying SMTP fallback');
-        result = await sendViaSmtp({ to, subject, html, replyTo });
-    }
-
+    const result = await deliver({ to, subject, html, text, replyTo, templateName });
     logger.info({ to, templateName, provider: result.provider, id: result.id }, 'Email sent');
     return result;
 }
 
+// ── Provider chain: SES (primary) → Resend → SMTP ─────────────────────────────
+//
+// SES is the platform's production sender. A PERMANENT SES failure (hard bounce / rejected
+// address) is NOT failed-over — retrying via Resend/SMTP would only bounce again and waste
+// reputation. Only a TRANSIENT SES error (thrown after the SDK's bounded retries) falls
+// through to Resend, then SMTP.
+async function deliver({ to, subject, html, text, replyTo, templateName }) {
+    const plainText = text || htmlToText(html);
+    if (ses.isSesEnabled()) {
+        try {
+            return await ses.sendViaSes({ to, subject, html, text: plainText, replyTo, templateName });
+        } catch (err) {
+            if (err && err.permanent) {
+                logger.warn({ to, templateName }, 'SES permanent failure — not failing over (bad recipient)');
+                return { provider: 'ses', id: null, status: 'failed' };
+            }
+            logger.warn({ err: err && err.message, to }, 'SES transient failure — trying Resend/SMTP fallback');
+        }
+    }
+    try {
+        return await sendViaResend({ to, subject, html, text: plainText, replyTo });
+    } catch (err) {
+        logger.warn({ err, to }, 'Resend failed — trying SMTP fallback');
+        return await sendViaSmtp({ to, subject, html, text: plainText, replyTo });
+    }
+}
+
 // ── Send raw HTML (for transactional emails without template) ─────────────────
 
-async function sendRawEmail({ to, subject, html, idempotencyKey, replyTo }) {
+async function sendRawEmail({ to, subject, html, text, idempotencyKey, replyTo }) {
     if (idempotencyKey) {
         const duplicate = await markSent(idempotencyKey);
         if (duplicate) return { suppressed: true, reason: 'duplicate' };
     }
 
-    try {
-        return await sendViaResend({ to, subject, html, replyTo });
-    } catch (err) {
-        logger.warn({ err, to }, 'Resend failed — trying SMTP fallback');
-        return await sendViaSmtp({ to, subject, html, replyTo });
-    }
+    return deliver({ to, subject, html, text: text || htmlToText(html), replyTo, templateName: 'raw' });
 }
 
 module.exports = { sendEmail, sendRawEmail };

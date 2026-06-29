@@ -13,6 +13,7 @@
     "migrate": "psql $DATABASE_URL -f migrations/001_feature_flags.sql && psql $DATABASE_URL -f migrations/002_analytics.sql && psql $DATABASE_URL -f migrations/003_support.sql && psql $DATABASE_URL -f migrations/004_developer.sql && psql $DATABASE_URL -f migrations/005_ai.sql && psql $DATABASE_URL -v ON_ERROR_STOP=1 -f migrations/006_rls_tenant_isolation.sql"
   },
   "dependencies": {
+    "@baalvion/email": "workspace:*",
     "@baalvion/telemetry": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
     "@baalvion/auth-node": "workspace:*",
