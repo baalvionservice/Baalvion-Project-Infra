@@ -1,0 +1,26 @@
+# Caddy v2 — TLS termination + reverse proxy for the STANDALONE jobs-service backend.
+# Caddy auto-provisions + renews a Let's Encrypt cert for {$DOMAIN} and redirects HTTP→HTTPS.
+# The frontend lives on Vercel (jobs.baalvion.com); this host serves only the TalentOS API.
+# jobs-service sets its own CORS (cors({origin: CORS_ORIGINS, credentials:true})), so Caddy
+# just forwards — do NOT add CORS headers here or they will duplicate.
+
+{$DOMAIN} {
+	encode gzip zstd
+	tls {$ACME_EMAIL}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# Block the in-process queue dashboard + docs from the public edge (admin-only surfaces).
+	@blocked path /admin/queues* /docs* /metrics
+	handle @blocked {
+		respond "Forbidden" 403
+	}
+
+	# TalentOS API — jobs-service mounts routes at both /v1 and /api/v1.
+	reverse_proxy jobs-service:3002
+}

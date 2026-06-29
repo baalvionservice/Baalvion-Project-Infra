@@ -1,0 +1,108 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Baalvion Jobs (TalentOS) — STANDALONE backend, production compose.
+#
+# Use this ONLY if you move jobs-service OFF the consolidated box (option B). By default
+# jobs-service runs on the consolidated box's app-ecosystem (deploy/consolidated/pm2/
+# ecosystem.config.js) and is reached at admin.baalvion.com/api-bff/ecosystem/jobs/*.
+#
+# This stack hosts just the backend; the frontend stays on Vercel (jobs.baalvion.com).
+# Point the Vercel project's NEXT_PUBLIC_JOBS_SERVICE_URL at https://{$DOMAIN}/api/v1.
+#
+#   Request path:
+#     Vercel FE ──HTTPS──> Caddy ({$DOMAIN}) ──> jobs-service:3002   (TalentOS API)
+#     Postgres = shared AWS RDS (schema `jobs`, auto-created on boot). Redis on-box (BullMQ).
+#     Auth = RS256 tokens minted by the CENTRAL auth-service, verified live via JWKS.
+#
+#   Run from REPO ROOT (image already in ECR):
+#     docker compose --env-file deploy/jobs/.env.prod \
+#       -f deploy/jobs/docker-compose.prod.yml up -d
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    mem_limit: 256m
+    mem_reservation: 64m
+    command: ["redis-server","--appendonly","yes","--maxmemory","192mb","--maxmemory-policy","noeviction"]
+    volumes: [ redisdata:/data ]
+    healthcheck:
+      test: ["CMD","redis-cli","ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  jobs-service:
+    # Same one-image backend artifact built + pushed to ECR by the consolidated pipeline.
+    # We override the command to run ONLY the jobs-service personality on :3002.
+    image: ${ECR_REGISTRY}/baalvion/backend:${IMAGE_TAG:-prod-latest}
+    pull_policy: always
+    restart: unless-stopped
+    working_dir: /app/Backend/services/ecosystem/jobs-service
+    command: ["node","index.js"]
+    env_file:
+      - path: .env.prod
+        required: false
+    environment:
+      NODE_ENV: production
+      PORT: "3002"
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_SSL: ${DB_SSL:-true}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      # Browser origin(s) that read this API directly (the Vercel FE). Comma-separated, no spaces.
+      CORS_ORIGINS: ${CORS_ORIGINS:-https://jobs.baalvion.com}
+      # ── Central SSO: verify RS256 tokens minted by the central auth-service ───────
+      # PREFERRED: BAALVION_JWKS_URI → central auth /.well-known/jwks.json (live key rotation,
+      # no redeploy). JWT_PUBLIC_KEY (single-line PEM, \n-escaped) is the static fallback.
+      BAALVION_JWKS_URI: ${BAALVION_JWKS_URI:-}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY:-}
+      JWT_ISSUER: ${JWT_ISSUER:-baalvion-auth}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-baalvion-platform}
+      # ── Object storage (resume/document uploads) — OPTIONAL; uploads fail soft if unset ──
+      S3_ENDPOINT: ${S3_ENDPOINT:-}
+      S3_REGION: ${S3_REGION:-ap-south-1}
+      S3_BUCKET: ${S3_BUCKET:-}
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_PUBLIC_URL: ${S3_PUBLIC_URL:-}
+      # ── Email (application receipts) — OPTIONAL; uses central SES/SMTP if set ─────
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      RATE_LIMIT_IP_MAX: ${RATE_LIMIT_IP_MAX:-120}
+    mem_limit: 512m
+    mem_reservation: 256m
+    depends_on:
+      redis: { condition: service_healthy }
+    healthcheck:
+      test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3002/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 45s
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    mem_limit: 96m
+    mem_reservation: 32m
+    ports: ["80:80","443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:-jobs-api.baalvion.com}
+      ACME_EMAIL: ${ACME_EMAIL:-ops@baalvion.com}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [ jobs-service ]
+
+volumes:
+  redisdata:
+  caddy_data:
+  caddy_config:

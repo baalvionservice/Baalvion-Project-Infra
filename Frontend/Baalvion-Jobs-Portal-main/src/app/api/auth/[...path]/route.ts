@@ -10,8 +10,14 @@ import { NextRequest, NextResponse } from 'next/server';
  *
  * In production this proxy is a no-op cookie-wise (HTTPS), and the upstream is the gateway.
  */
+// Upstream auth-service. Explicit AUTH_SERVICE_URL always wins (Docker/nginx hosts set it).
+// On Vercel (serverless — no localhost backend) default to the live consolidated edge gateway,
+// which proxies /v1/auth/* → auth-service. Locally default to the dev auth container.
 const AUTH_UPSTREAM =
-  process.env.AUTH_SERVICE_URL || 'http://localhost:3001/v1/auth';
+  process.env.AUTH_SERVICE_URL ||
+  (process.env.VERCEL
+    ? 'https://api.baalvion.com/v1/auth'
+    : 'http://localhost:3001/v1/auth');
 
 const IS_HTTPS = (process.env.NEXT_PUBLIC_APP_URL || '').startsWith('https://');
 
