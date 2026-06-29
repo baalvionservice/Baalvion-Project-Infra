@@ -1,5 +1,19 @@
 'use strict';
 const nodemailer = require('nodemailer');
+const { createEmailService, isSesConfigured, loadConfig } = require('@baalvion/email');
+
+// Amazon SES (preferred). OTP mail leaves the verified `auth` sender; invitations leave
+// `notifications`. Falls back to SMTP / the Ethereal dev sink when SES is not configured.
+let _sesEnabled = null;
+let _emailService = null;
+function sesEnabled() {
+  if (_sesEnabled === null) _sesEnabled = isSesConfigured(loadConfig());
+  return _sesEnabled;
+}
+function emailService() {
+  if (!_emailService) _emailService = createEmailService({ logger: console });
+  return _emailService;
+}
 
 let transporter = null;
 
@@ -28,6 +42,33 @@ const getTransporter = async () => {
 };
 
 const sendInvitationEmail = async ({ toEmail, toName, inviterName, orgName, role, inviteUrl }) => {
+  const subject = `You've been invited to join ${orgName} on Baalvion NetStack`;
+  const html = `
+      <div style="font-family:sans-serif;max-width:560px;margin:0 auto;padding:32px 24px;background:#0f1117;color:#e2e8f0;border-radius:12px">
+        <h2 style="color:#38bdf8;margin-bottom:8px">You're invited!</h2>
+        <p style="margin-bottom:16px">
+          <strong>${inviterName}</strong> has invited you to join <strong>${orgName}</strong>
+          as <strong>${role}</strong> on Baalvion NetStack.
+        </p>
+        <a href="${inviteUrl}"
+           style="display:inline-block;padding:12px 28px;background:#38bdf8;color:#0f1117;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px">
+          Accept Invitation
+        </a>
+        <p style="margin-top:24px;font-size:13px;color:#64748b">
+          This link expires in 7 days. If you did not expect this invitation, you can ignore this email.
+        </p>
+        <hr style="border-color:#1e293b;margin:24px 0">
+        <p style="font-size:12px;color:#475569">Baalvion Industries Private Limited</p>
+      </div>
+    `;
+  const text = `You've been invited to join ${orgName} as ${role}.\n\nAccept here: ${inviteUrl}\n\nLink expires in 7 days.`;
+
+  if (sesEnabled()) {
+    const res = await emailService().sendRaw({ to: toEmail, subject, html, text, category: 'notifications' });
+    if (res.status === 'sent') console.log(`[Email] Invitation sent to ${String(toEmail).replace(/[\r\n]+/g, ' ')} via SES`);
+    return { messageId: res.messageId, previewUrl: null };
+  }
+
   const transport = await getTransporter();
 
   const info = await transport.sendMail({
@@ -70,23 +111,34 @@ const BRAND = process.env.OTP_EMAIL_BRAND || 'Baalvion NetStack';
  * IS the auth — must check this and fail loudly in production rather than dropping the code into
  * the Ethereal dev sink (which would tell the customer "code sent" while nothing is delivered).
  */
-const isMailerConfigured = () => !!process.env.SMTP_HOST;
+const isMailerConfigured = () => sesEnabled() || !!process.env.SMTP_HOST;
 
 const sendOtpEmail = async ({ toEmail, code, expiresInMinutes }) => {
-  const transport = await getTransporter();
-  const info = await transport.sendMail({
-    from: process.env.EMAIL_FROM || '"Baalvion NetStack" <noreply@baalvion.com>',
-    to: toEmail,
-    subject: `${code} is your ${BRAND} login code`,
-    html: `
+  const subject = `${code} is your ${BRAND} login code`;
+  const html = `
       <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;background:#0f1117;color:#e2e8f0;border-radius:12px">
         <h2 style="color:#38bdf8;margin:0 0 12px">Sign in to ${BRAND}</h2>
         <p style="margin:0 0 8px">Use this one-time code to finish signing in:</p>
         <p style="font-size:34px;font-weight:800;letter-spacing:8px;margin:16px 0;color:#38bdf8">${code}</p>
         <p style="margin:0 0 4px;color:#94a3b8">This code expires in ${expiresInMinutes} minutes.</p>
         <p style="margin-top:20px;font-size:13px;color:#64748b">If you didn't request this, you can ignore this email — no one can sign in without the code.</p>
-      </div>`,
-    text: `Your ${BRAND} login code is ${code}. It expires in ${expiresInMinutes} minutes. If you didn't request this, ignore this email.`,
+      </div>`;
+  const text = `Your ${BRAND} login code is ${code}. It expires in ${expiresInMinutes} minutes. If you didn't request this, ignore this email.`;
+
+  if (sesEnabled()) {
+    const res = await emailService().sendRaw({ to: toEmail, subject, html, text, category: 'auth' });
+    const safeEmail = String(toEmail).replace(/[\r\n]+/g, ' ');
+    console.log(`[Email] OTP login code sent to ${safeEmail} via SES (${res.status})`);
+    return { messageId: res.messageId, previewUrl: null };
+  }
+
+  const transport = await getTransporter();
+  const info = await transport.sendMail({
+    from: process.env.EMAIL_FROM || '"Baalvion NetStack" <noreply@baalvion.com>',
+    to: toEmail,
+    subject,
+    html,
+    text,
   });
   const preview = nodemailer.getTestMessageUrl(info);
   if (preview) {

@@ -91,7 +91,7 @@ All 45 services under `Backend/services/<domain>/<service>/`. **Runtime split:**
 | identity | session-service | Node 20 / Express 5 | 3022 | geoip-lite, ua-parser, ioredis |
 | infrastructure | audit-service | Node 20 / Express 5 | 3032 | Sequelize, ioredis, pino (event consumer) |
 | infrastructure | developer-service | Node 20 / Express 5 | 3042 | Sequelize, ioredis, pino |
-| infrastructure | notification-service | Node 20 / Express 5 | 3031 | BullMQ ×5 workers, nodemailer + resend, Twilio/Firebase (optional) |
+| infrastructure | notification-service | Node 20 / Express 5 | 3031 | BullMQ ×5 workers, **Amazon SES (AWS SDK v3, `@baalvion/email`)** → Resend → SMTP fallback, SNS webhook `/webhooks/aws/ses`, Twilio/Firebase (optional) |
 | infrastructure | proxy-service | Node 20 / Express 5 | 4000 | socket.io, Razorpay/Stripe/PayU/Cashfree, S3, SAML/OpenID (consumer BFF) |
 | infrastructure | realtime-service | Node 20 / Express 4 | 3040 | socket.io, Redis pub/sub |
 | infrastructure | report-service | Node 20 / Express 5 | 3041 | Sequelize, exceljs + pdfkit (lazy) |
@@ -439,7 +439,9 @@ blocks missing/placeholder vars (31 required + an email provider) before the app
 | `APP_SECURITY_ENABLED` | payments JVM | yes | `false` *(edge-locked — see note)* |
 | `PSP_MOCK` | order/commerce/ctm | yes | `false` (prod) |
 | `CORS_ORIGINS` | all HTTP | yes | `https://app.baalvion.com,…` |
-| `SMTP_HOST` `SMTP_PORT` | notification, auth email | yes | `email-smtp.ap-south-1.amazonaws.com` / `587` |
+| `AWS_ACCESS_KEY_ID` `AWS_SECRET_ACCESS_KEY` | **all email senders** (SES SDK) | yes (prod) | `baalvion-ses-smtp` IAM creds |
+| `SES_CONFIGURATION_SET` `SES_FROM_*` | all email senders | yes (prod) | `baalvion-production` / verified senders — see [SES-EMAIL-INTEGRATION.md](./SES-EMAIL-INTEGRATION.md) |
+| `SMTP_HOST` `SMTP_PORT` | notification, auth email *(SES SDK fallback)* | no | `email-smtp.ap-south-1.amazonaws.com` / `587` |
 | `EMAIL_FROM` | notification, auth | yes | `noreply@baalvion.com` (SES-verified) |
 | `AWS_REGION` `S3_BUCKET` | trade, law, cms | yes (media) | `ap-south-1` / `baalvion-prod-media` |
 | `KAFKA_BOOTSTRAP` / `SPRING_KAFKA_BOOTSTRAP_SERVERS` | payments JVM | yes (payments) | `kafka:9092` |

@@ -27,12 +27,12 @@ const defaultQueueOptions = {
     },
 };
 
+// NOTE: there is no `emails` queue — transactional email is sent synchronously through the
+// centralized @baalvion/email (Amazon SES) service, not via a background worker.
 const notificationQueue = new Queue('notifications', defaultQueueOptions);
-const emailQueue        = new Queue('emails',        defaultQueueOptions);
 const analyticsQueue    = new Queue('analytics',     defaultQueueOptions);
 
 module.exports = {
     notificationQueue,
-    emailQueue,
     analyticsQueue,
 };

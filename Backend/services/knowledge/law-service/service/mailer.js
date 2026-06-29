@@ -12,9 +12,24 @@
 const nodemailer = require('nodemailer');
 const config = require('../config/appConfig');
 const { getSecret } = require('../config/secrets');
+const { createEmailService, isSesConfigured, loadConfig, htmlToText } = require('@baalvion/email');
 
 const ENABLED = String(process.env.MAIL_ENABLED || 'false').toLowerCase() === 'true';
 const FROM = process.env.MAIL_FROM || 'Law Elite Network <no-reply@lawelitenetwork.com>';
+
+// Amazon SES (preferred). When AWS credentials are present, mail is sent through the
+// centralized SES service from the verified Baalvion senders; otherwise we keep the existing
+// nodemailer/SMTP path so local/dev runs unchanged.
+let _sesEnabled = null;
+let _emailService = null;
+function sesEnabled() {
+    if (_sesEnabled === null) _sesEnabled = isSesConfigured(loadConfig());
+    return _sesEnabled;
+}
+function emailService() {
+    if (!_emailService) _emailService = createEmailService({ logger: console });
+    return _emailService;
+}
 
 let transporter = null;
 function getTransport() {
@@ -58,8 +73,22 @@ const btn = (href, label) =>
 /**
  * Low-level send. Returns { sent:boolean }. Never throws.
  */
-async function send({ to, subject, html, text }) {
+async function send({ to, subject, html, text, category = 'notifications' }) {
     if (!to) return { sent: false };
+
+    // Amazon SES first (when configured). Best-effort: a transient SES error falls through to
+    // SMTP; a permanent one (hard bounce) is reported without retrying.
+    if (sesEnabled()) {
+        try {
+            const res = await emailService().sendRaw({ to, subject, html, text, category });
+            if (res.status === 'sent') return { sent: true, messageId: res.messageId };
+            if (res.status === 'failed') return { sent: false, error: res.error || 'rejected' };
+        } catch (err) {
+            // eslint-disable-next-line no-console
+            console.warn(`[mailer] SES transient failure "${subject}" -> ${to}: ${err.message} — trying SMTP`);
+        }
+    }
+
     try {
         if (!ENABLED) {
             // eslint-disable-next-line no-console
@@ -67,7 +96,7 @@ async function send({ to, subject, html, text }) {
             return { sent: false, logged: true };
         }
         const t = getTransport();
-        const info = await t.sendMail({ from: FROM, to, subject, html, text: text || subject });
+        const info = await t.sendMail({ from: FROM, to, subject, html, text: text || htmlToText(html) });
         // eslint-disable-next-line no-console
         console.log(`[mailer] sent "${subject}" -> ${to} (${info.messageId})`);
         return { sent: true, messageId: info.messageId };
@@ -133,12 +162,22 @@ const templates = {
     }),
 };
 
+// Per-template SES sender category. Billing-related mail leaves billing@; everything else
+// uses the notifications@ sender. (Auth/security mail is owned by auth-service.)
+const TEMPLATE_CATEGORY = {
+    welcome: 'notifications',
+    bookingConfirmation: 'notifications',
+    paymentReceipt: 'billing',
+    lawyerVerified: 'notifications',
+    payoutProcessed: 'billing',
+};
+
 /** Send a named template; merges template output and sends. Never throws. */
 async function sendTemplate(name, to, data = {}) {
     const tpl = templates[name];
     if (!tpl) { console.error(`[mailer] unknown template "${name}"`); return { sent: false }; }
     const { subject, html } = tpl(data);
-    return send({ to, subject, html });
+    return send({ to, subject, html, category: TEMPLATE_CATEGORY[name] || 'notifications' });
 }
 
 module.exports = { send, sendTemplate, templates, ENABLED };

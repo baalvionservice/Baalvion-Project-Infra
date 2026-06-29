@@ -2,6 +2,16 @@
 const { Worker } = require('bullmq');
 const nodemailer  = require('nodemailer');
 const redisConnection = require('../config/redis');
+const { createEmailService, isSesConfigured, loadConfig, htmlToText } = require('@baalvion/email');
+
+// Amazon SES (preferred). Job notifications leave the verified `notifications` sender when AWS
+// credentials are configured; otherwise the existing SMTP / dev-json transport is used.
+const SES_ENABLED = isSesConfigured(loadConfig());
+let _emailService = null;
+function emailService() {
+    if (!_emailService) _emailService = createEmailService({ logger: console });
+    return _emailService;
+}
 
 // SMTP auth is optional — dev catchers (Mailpit/MailHog) accept mail with no credentials.
 const SMTP_CONFIGURED = !!process.env.SMTP_HOST;
@@ -60,7 +70,14 @@ const emailWorker = new Worker(
         if (!tpl) throw new Error(`Unknown email type: ${type}`);
 
         const { subject, html } = tpl(data || {});
-        const msg = { from: FROM, to, subject, html };
+
+        if (SES_ENABLED) {
+            const res = await emailService().sendRaw({ to, subject, html, category: 'notifications', template: type });
+            console.log(`[EmailWorker] Sent ${type} → ${to} via SES (${res.status})`);
+            return { sent: res.status === 'sent', messageId: res.messageId };
+        }
+
+        const msg = { from: FROM, to, subject, html, text: htmlToText(html) };
 
         if (!SMTP_CONFIGURED) {
             console.log(`[EmailWorker] (dev) ${type} → ${to} | Subject: ${subject}`);

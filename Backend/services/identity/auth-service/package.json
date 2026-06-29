@@ -16,6 +16,7 @@
     "seed:gti": "node scripts/seedGtiOrganizations.js"
   },
   "dependencies": {
+    "@baalvion/email": "workspace:*",
     "@baalvion/telemetry": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
     "@baalvion/auth-node": "workspace:*",

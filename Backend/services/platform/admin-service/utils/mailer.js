@@ -7,16 +7,31 @@
  * Sending is BEST-EFFORT: callers must not let a mail failure abort their work.
  *
  *   SMTP_HOST (default 127.0.0.1)   SMTP_PORT (default 1025)
- *   EMAIL_FROM (default no-reply@baalvion.com)
+ *   EMAIL_FROM (default noreply@baalvion.com)
  */
 const net = require('net');
 const logger = require('./logger');
+const { createEmailService, isSesConfigured, loadConfig } = require('@baalvion/email');
 
 const HOST = process.env.SMTP_HOST || '127.0.0.1';
 const PORT = Number(process.env.SMTP_PORT || 1025);
-const FROM = process.env.EMAIL_FROM || 'no-reply@baalvion.com';
+const FROM = process.env.EMAIL_FROM || 'noreply@baalvion.com';
 
-function sendMail({ to, subject, html, text }) {
+// Amazon SES (preferred). When AWS credentials are present, admin mail (staff invites,
+// onboarding) is sent through the centralized SES service from the verified `notifications`
+// sender; otherwise the existing minimal SMTP conversation (dev Mailpit) is used.
+let _sesEnabled = null;
+let _emailService = null;
+function sesEnabled() {
+    if (_sesEnabled === null) _sesEnabled = isSesConfigured(loadConfig());
+    return _sesEnabled;
+}
+function emailService() {
+    if (!_emailService) _emailService = createEmailService({ logger });
+    return _emailService;
+}
+
+function sendViaSmtp({ to, subject, html, text }) {
     return new Promise((resolve, reject) => {
         const socket = net.createConnection({ host: HOST, port: PORT });
         socket.setEncoding('utf8');
@@ -74,6 +89,23 @@ function sendMail({ to, subject, html, text }) {
         socket.on('timeout', () => fail('SMTP timeout'));
         socket.on('error', (e) => fail(`SMTP socket error: ${e.message}`));
     });
+}
+
+/**
+ * Send a pre-rendered email. Amazon SES (notifications sender) when configured, otherwise the
+ * minimal SMTP conversation above. Backward-compatible signature.
+ * @param {{ to:string, subject:string, html?:string, text?:string }} opts
+ */
+async function sendMail(opts) {
+    if (sesEnabled()) {
+        await emailService().sendRaw({
+            to: opts.to, subject: opts.subject,
+            html: opts.html || (opts.text ? `<p>${String(opts.text).replace(/\n/g, '<br/>')}</p>` : '<p></p>'),
+            text: opts.text, category: 'notifications',
+        });
+        return { delivered: true };
+    }
+    return sendViaSmtp(opts);
 }
 
 /** Best-effort wrapper: never throws; logs and returns a status flag. */

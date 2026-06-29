@@ -17,13 +17,15 @@ function validateConfig() {
   const isProd = config.nodeEnv === 'production';
   const problems = [];
 
+  let hasSes = false;
+  try { hasSes = require('../service/sesMailer').isSesEnabled(); } catch { hasSes = false; }
   const hasResend = !!config.email.resendApiKey;
   const hasSmtp = !!(config.email.smtp.host && config.email.smtp.user && config.email.smtp.pass);
 
-  if (isProd && !hasResend && !hasSmtp) {
+  if (isProd && !hasSes && !hasResend && !hasSmtp) {
     problems.push(
-      'No email provider configured. Set RESEND_API_KEY, or SMTP_HOST + SMTP_USER + SMTP_PASS. ' +
-      'For AWS SES use SMTP_HOST=email-smtp.<region>.amazonaws.com with SES SMTP credentials.',
+      'No email provider configured. Preferred: Amazon SES — set AWS_ACCESS_KEY_ID + AWS_SECRET_ACCESS_KEY ' +
+      '(+ AWS_REGION, SES_CONFIGURATION_SET). Alternatives: RESEND_API_KEY, or SMTP_HOST + SMTP_USER + SMTP_PASS.',
     );
   }
 
@@ -38,7 +40,7 @@ function validateConfig() {
 
   logger.info(
     {
-      email: hasResend ? 'resend' : hasSmtp ? 'smtp' : 'log(dev)',
+      email: hasSes ? 'ses' : hasResend ? 'resend' : hasSmtp ? 'smtp' : 'log(dev)',
       env: config.nodeEnv,
     },
     '[notification-service] startup config validated',
