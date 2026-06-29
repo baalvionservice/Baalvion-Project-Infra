@@ -4,6 +4,14 @@
   "installCommand": "cd ../.. && pnpm install --no-frozen-lockfile",
   "buildCommand": "cd ../.. && pnpm exec turbo run build --filter=proxy-baalvionstack-web",
   "rewrites": [
+    {
+      "source": "/auth-bff/:path*",
+      "destination": "https://api.baalvion.com/v1/auth/:path*"
+    },
+    {
+      "source": "/v1/:path*",
+      "destination": "https://api.baalvion.com/v1/:path*"
+    },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
