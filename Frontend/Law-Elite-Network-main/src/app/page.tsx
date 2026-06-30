@@ -1,136 +1,184 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { categoriesPublicApi, articlesPublicApi } from '@/lib/api/client';
-import { Hero } from '@/components/knowledge/Hero';
-import { CategoryGrid } from '@/components/knowledge/CategoryGrid';
-import { TrendingArticles } from '@/components/knowledge/TrendingArticles';
-import { FeaturedArticles } from '@/components/knowledge/FeaturedArticles';
-import { PublicFooter } from '@/components/knowledge/PublicFooter';
-import { PopularTopics } from '@/components/knowledge/PopularTopics';
+import { mergeArticles } from '@/data/law-content';
+import { TopicTicker } from '@/components/knowledge/news/TopicTicker';
+import { StoryCard } from '@/components/knowledge/news/StoryCard';
+import { LatestRail } from '@/components/knowledge/news/LatestRail';
+import { CategorySection } from '@/components/knowledge/news/CategorySection';
 import { TrustSection } from '@/components/knowledge/TrustSection';
-import { Sparkles, TrendingUp, Award, Zap } from 'lucide-react';
+import { PublicFooter } from '@/components/knowledge/PublicFooter';
+import SearchBar from '@/components/search/SearchBar';
+import { ShieldCheck } from 'lucide-react';
 
-const FALLBACK_CATEGORIES = [
-  { id: 1, name: 'Business & Corporate', slug: 'business-corporate', icon: 'Building2', description: 'Strategic counsel for enterprise governance and commerce.' },
-  { id: 2, name: 'Criminal Law', slug: 'criminal-law', icon: 'ShieldAlert', description: 'Expert defense strategies and litigation protocols.' },
-  { id: 3, name: 'Family & Personal', slug: 'family-personal', icon: 'Users', description: 'Navigation of domestic relations and immigration law.' },
-  { id: 4, name: 'Property & Real Estate', slug: 'property-real-estate', icon: 'Home', description: 'Legal frameworks for property and land acquisition.' },
-  { id: 5, name: 'Tax & Finance', slug: 'tax-finance', icon: 'Banknote', description: 'Audit of taxation, banking, and capital markets.' },
-  { id: 6, name: 'Employment & Labor', slug: 'employment-labor', icon: 'Briefcase', description: 'Workplace rights and labor dispute resolution.' },
-  { id: 7, name: 'Technology & IP', slug: 'technology-ip', icon: 'Cpu', description: 'Data privacy, AI ethics, and IP protection.' },
-];
+function categoryIdOf(a: any): string {
+  return String(a?.categoryId ?? a?.category?.id ?? a?.category_id ?? '');
+}
+function categorySlugOf(a: any): string {
+  return String(a?.category?.slug ?? a?.categorySlug ?? '');
+}
+
+function deriveCategories(pool: any[]): { id: string; name: string; slug: string }[] {
+  const map = new Map<string, { id: string; name: string; slug: string }>();
+  pool.forEach((a) => {
+    const c = a?.category;
+    if (c?.slug && c?.name && !map.has(c.slug)) {
+      map.set(c.slug, { id: c.id, name: c.name, slug: c.slug });
+    }
+  });
+  return [...map.values()];
+}
 
 export default function KnowledgeHomePage() {
-  const [categories, setCategories] = useState<any[]>(FALLBACK_CATEGORIES);
-  const [trendingArticles, setTrendingArticles] = useState<any[]>([]);
-  const [featuredArticles, setFeaturedArticles] = useState<any[]>([]);
-  const [trendingLoading, setTrendingLoading] = useState(true);
-  const [featuredLoading, setFeaturedLoading] = useState(true);
+  const [apiCategories, setApiCategories] = useState<any[]>([]);
+  const [apiArticles, setApiArticles] = useState<any[]>([]);
 
   useEffect(() => {
-    categoriesPublicApi.list()
-      .then(res => {
+    categoriesPublicApi
+      .list()
+      .then((res) => {
         const data = res.data?.data;
-        if (Array.isArray(data) && data.length > 0) setCategories(data);
+        if (Array.isArray(data) && data.length > 0) setApiCategories(data);
       })
       .catch(() => {});
 
-    articlesPublicApi.list({ sortBy: 'views', order: 'desc', limit: 6, status: 'published' })
-      .then(res => {
+    articlesPublicApi
+      .list({ sortBy: 'views', order: 'desc', limit: 50, status: 'published' })
+      .then((res) => {
         const items = res.data?.data?.items || res.data?.data || [];
-        setTrendingArticles(items);
+        if (Array.isArray(items)) setApiArticles(items);
       })
-      .catch(() => {})
-      .finally(() => setTrendingLoading(false));
-
-    articlesPublicApi.list({ limit: 4, status: 'published' })
-      .then(res => {
-        const items = res.data?.data?.items || res.data?.data || [];
-        setFeaturedArticles(items);
-      })
-      .catch(() => {})
-      .finally(() => setFeaturedLoading(false));
+      .catch(() => {});
   }, []);
 
+  // Bundled content is the trustworthy baseline; live API results take precedence.
+  const pool = useMemo(() => mergeArticles(apiArticles), [apiArticles]);
+
+  const trending = useMemo(() => [...pool].sort((a, b) => (b.views || 0) - (a.views || 0)), [pool]);
+
+  const lead = trending[0];
+  const heroSecondary = trending.slice(1, 3);
+  const latest = trending.slice(3, 9);
+
+  const editorsPicks = useMemo(() => {
+    const featured = pool.filter((a) => a.featured);
+    const base = featured.length >= 4 ? featured : [...featured, ...trending];
+    const seen = new Set<string>();
+    return base.filter((a) => (seen.has(a.slug) ? false : (seen.add(a.slug), true))).slice(0, 4);
+  }, [pool, trending]);
+
+  const categories = useMemo(() => {
+    if (apiCategories.length > 0) {
+      return apiCategories.map((c) => ({ id: c.id, name: c.name, slug: c.slug }));
+    }
+    return deriveCategories(pool);
+  }, [apiCategories, pool]);
+
+  const articlesByCategory = useMemo(() => {
+    return categories.map((cat) => ({
+      ...cat,
+      articles: pool.filter(
+        (a) => categoryIdOf(a) === String(cat.id) || categorySlugOf(a) === cat.slug,
+      ),
+    }));
+  }, [categories, pool]);
+
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden">
-      <Hero />
-
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
-
-        <section className="mb-20 md:mb-32 -mt-10 md:-mt-16 relative z-20">
-          <PopularTopics />
-        </section>
-
-        <section className="mb-20 md:mb-32 space-y-12 md:space-y-16">
-          <div className="text-center space-y-4 px-4">
-            <div className="flex justify-center">
-              <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-600 text-[10px] font-bold uppercase tracking-[0.2em] flex items-center gap-2">
-                <Sparkles className="w-3.5 h-3.5" /> Domain Discovery
-              </span>
-            </div>
-            <h2 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight">Explore by Category</h2>
-            <p className="text-slate-500 text-base md:text-lg font-medium italic max-w-2xl mx-auto leading-relaxed">
-              Navigate specialized intelligence across our primary professional pillars.
-            </p>
+    <div className="min-h-screen bg-white pt-[60px] lg:pt-[96px]">
+      {/* Masthead strip */}
+      <section className="border-b border-slate-100 bg-white">
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-6 md:py-8 flex flex-col lg:flex-row lg:items-end justify-between gap-5">
+          <div>
+            <span className="kicker">
+              <ShieldCheck className="w-3.5 h-3.5" /> Trusted Legal Knowledge · Worldwide
+            </span>
+            <h1 className="font-headline text-3xl md:text-[2.6rem] font-extrabold tracking-tight text-slate-900 leading-[1.05] mt-2">
+              Plain-language guides to the law,
+              <br className="hidden md:block" /> for every jurisdiction.
+            </h1>
           </div>
-          <CategoryGrid categories={categories} />
-        </section>
+          <div className="w-full lg:max-w-md">
+            <SearchBar variant="navbar" />
+          </div>
+        </div>
+      </section>
 
-        <section className="bg-slate-50/50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-20 md:py-24 rounded-3xl md:rounded-[4rem] border-y border-slate-100 relative overflow-hidden mb-20 md:mb-32">
-          <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-50/40 rounded-full blur-[120px] -mr-64 -mt-64" />
-          <div className="max-w-7xl mx-auto space-y-12 md:space-y-16 relative z-10">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-4">
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-blue-600" />
-                  <span className="text-blue-600 font-bold uppercase text-[10px] tracking-[0.3em]">Trending Now</span>
+      <TopicTicker categories={categories} />
+
+      <main className="container mx-auto px-4 sm:px-6 max-w-7xl">
+        {/* Hero: lead + secondary + latest rail */}
+        <section className="py-8 md:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+            <div className="lg:col-span-8 space-y-9">
+              {lead && <StoryCard article={lead} variant="lead" priority />}
+              {heroSecondary.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-7 pt-2 border-t border-slate-100">
+                  {heroSecondary.map((a) => (
+                    <StoryCard key={a.id || a.slug} article={a} variant="default" />
+                  ))}
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">High-Velocity Intelligence</h2>
-              </div>
-              <p className="text-slate-400 text-sm md:text-base font-medium italic max-w-sm md:text-right leading-relaxed">
-                Real-time synthesis of the most-audited legal dossiers within the global network.
-              </p>
+              )}
             </div>
-            {trendingLoading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 px-4">
-                {[1, 2, 3].map(i => (
-                  <div key={i} className="h-64 rounded-3xl bg-white border border-slate-100 animate-pulse" />
-                ))}
-              </div>
-            ) : (
-              <TrendingArticles articles={trendingArticles} />
-            )}
+            <div className="lg:col-span-4">
+              <LatestRail articles={latest} />
+            </div>
           </div>
         </section>
 
-        <section className="mb-20 md:mb-32 space-y-12 md:space-y-16">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 border-b border-slate-100 pb-8 px-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg">
-                <Award className="w-6 h-6" />
+        {/* Editor's picks */}
+        {editorsPicks.length > 0 && (
+          <section className="py-8 border-t border-slate-200">
+            <div className="flex items-end justify-between border-b-2 border-slate-900 pb-2 mb-6">
+              <div className="flex items-center gap-3">
+                <span className="w-1.5 h-6 bg-news-600 rounded-sm" />
+                <h2 className="font-headline text-xl md:text-2xl font-extrabold tracking-tight text-slate-900 m-0">
+                  Editor&rsquo;s Picks
+                </h2>
               </div>
-              <h2 className="text-2xl md:text-3xl font-bold text-slate-900">Featured Strategic Guides</h2>
             </div>
-            <Zap className="w-5 h-5 text-amber-500 animate-pulse hidden sm:block" />
-          </div>
-          {featuredLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 px-4">
-              {[1, 2].map(i => (
-                <div key={i} className="h-72 rounded-3xl bg-slate-50 animate-pulse border border-slate-100" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-7 gap-y-9">
+              {editorsPicks.map((a) => (
+                <StoryCard key={a.id || a.slug} article={a} variant="default" />
               ))}
             </div>
-          ) : (
-            <FeaturedArticles articles={featuredArticles} />
-          )}
-        </section>
+          </section>
+        )}
 
-        <section className="mb-16">
-          <TrustSection />
-        </section>
+        {/* Category sections */}
+        <div className="py-8 border-t border-slate-200">
+          {articlesByCategory.map((cat) => (
+            <CategorySection key={cat.slug} name={cat.name} slug={cat.slug} articles={cat.articles} />
+          ))}
+        </div>
 
+        {/* Browse-all CTA */}
+        <section className="pb-16">
+          <div className="rounded-xl bg-[#0B1F3A] px-6 md:px-10 py-10 md:py-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-news-600">
+                Need tailored advice?
+              </span>
+              <h3 className="font-headline text-2xl md:text-3xl font-extrabold text-white mt-2">
+                Connect with a verified lawyer in your jurisdiction.
+              </h3>
+            </div>
+            <Link
+              href="/lawyers"
+              className="inline-flex items-center justify-center px-7 h-12 rounded-md bg-white text-[#0B1F3A] font-bold text-sm hover:bg-news-600 hover:text-white transition-colors whitespace-nowrap"
+            >
+              Find a Lawyer
+            </Link>
+          </div>
+        </section>
       </main>
+
+      <section className="border-t border-slate-100">
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl py-12">
+          <TrustSection />
+        </div>
+      </section>
 
       <PublicFooter />
     </div>

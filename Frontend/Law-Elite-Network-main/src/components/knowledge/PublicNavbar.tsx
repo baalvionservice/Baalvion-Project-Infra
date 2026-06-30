@@ -1,17 +1,17 @@
-
 "use client";
 
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { categoriesPublicApi, subcategoriesPublicApi } from '@/lib/api/client';
 import {
-  Gavel,
+  Scale,
   Menu,
   X,
   ChevronRight,
-  ShieldCheck,
+  ChevronDown,
+  Search as SearchIcon,
+  UserPlus,
   LayoutDashboard,
-  Sparkles
 } from 'lucide-react';
 import SearchBar from '../search/SearchBar';
 import { cn } from '@/lib/utils';
@@ -20,19 +20,26 @@ import { useAuth } from '@/hooks/useAuth';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import { sharedSignInUrl } from '@/lib/shared-auth';
 
+/**
+ * @fileOverview Public masthead — editorial newsroom navigation.
+ * Two-tier layout: a white brand/utility row over a navy section bar with a
+ * subcategory mega-menu. Typographic + structural cues borrow from
+ * Investopedia (clean black-on-white masthead) and CNBC (dark section bar).
+ */
 export function PublicNavbar() {
   const { isAuthenticated, role } = useAuth();
   const [categories, setCategories] = useState<any[]>([]);
   const [subcategories, setSubcategories] = useState<any[]>([]);
   const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   useEffect(() => {
-    const syncLedger = async () => {
+    const load = async () => {
       try {
         const [catRes, subRes] = await Promise.all([
           categoriesPublicApi.list(),
-          subcategoriesPublicApi.list()
+          subcategoriesPublicApi.list(),
         ]);
         const cats = catRes.data?.data || [];
         const subs = subRes.data?.data || [];
@@ -48,183 +55,242 @@ export function PublicNavbar() {
         setSubcategories((seedData as any).subcategories || []);
       }
     };
-    syncLedger();
+    load();
   }, []);
 
   const filteredSubcategories = useMemo(() => {
     if (!activeCategory) return [];
-    return subcategories.filter(sub =>
-      String(sub.category_id || sub.categoryId) === String(activeCategory)
+    return subcategories.filter(
+      (sub) => String(sub.category_id || sub.categoryId) === String(activeCategory),
     );
   }, [activeCategory, subcategories]);
 
-  const activeCategoryData = useMemo(() => {
-    return categories.find(c => c.id === activeCategory);
-  }, [activeCategory, categories]);
+  const activeCategoryData = useMemo(
+    () => categories.find((c) => c.id === activeCategory),
+    [activeCategory, categories],
+  );
+
+  const dashboardHref =
+    role === 'admin' ? '/admin/dashboard' : role === 'lawyer' ? '/lawyer/dashboard' : '/dashboard';
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[9999] bg-white border-b border-slate-100 shadow-sm h-16 md:h-20">
-      <div className="container mx-auto px-6 h-full max-w-7xl flex items-center justify-between gap-8">
+    <header className="fixed top-0 left-0 right-0 z-[9999] bg-white shadow-[0_1px_0_rgba(15,23,42,0.08)]">
+      {/* Brand accent hairline — zero-height overlay so the header stays 96px. */}
+      <div className="absolute top-0 inset-x-0 h-[3px] z-20 bg-gradient-to-r from-[#0B1F3A] via-blue-700 to-news-600" />
 
-        <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-          <div className="w-10 h-10 rounded-xl bg-[#0B1F3A] flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-500">
-            <Gavel className="text-white w-5 h-5" />
-          </div>
-          <div className="hidden lg:flex flex-col -space-y-1">
-            <span className="text-xl font-bold tracking-tighter text-slate-900 font-serif italic leading-none">
-              Law <span className="text-blue-600">Elite</span>
-            </span>
-            <span className="text-[8px] font-bold uppercase tracking-[0.3em] text-slate-400 mt-1">Network</span>
-          </div>
-        </Link>
-
-        <div className="hidden lg:flex items-center gap-1 h-full">
-          {categories.length > 0 ? (
-            categories.slice(0, 8).map((cat) => (
-              <div
-                key={cat.id}
-                className="h-full flex items-center px-1"
-                onMouseEnter={() => setActiveCategory(cat.id)}
-                onMouseLeave={() => setActiveCategory(null)}
-              >
-                <Link
-                  href={`/law/${cat.slug}`}
-                  className={cn(
-                    "px-3 h-full flex items-center text-[10px] xl:text-[11px] font-bold uppercase tracking-widest transition-all relative",
-                    activeCategory === cat.id ? "text-blue-600" : "text-slate-500 hover:text-slate-900"
-                  )}
-                >
-                  {cat.name}
-                </Link>
-              </div>
-            ))
-          ) : (
-            <div className="flex gap-4 animate-pulse">
-              {[1,2,3,4,5,6,7,8].map(i => <div key={i} className="h-4 w-20 bg-slate-50 rounded" />)}
+      {/* ── Tier 1: brand + utilities ─────────────────────────────── */}
+      <div className="border-b border-slate-100">
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl h-[60px] flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-3 shrink-0 group">
+            <div className="w-10 h-10 rounded-md bg-[#0B1F3A] flex items-center justify-center shadow-sm group-hover:bg-blue-800 transition-colors">
+              <Scale className="text-white w-5 h-5" />
             </div>
-          )}
-        </div>
+            <div className="flex flex-col -space-y-0.5">
+              <span className="font-headline text-[1.35rem] font-extrabold tracking-tight text-slate-900 leading-none">
+                Law Elite
+              </span>
+              <span className="text-[9px] font-bold uppercase tracking-[0.34em] text-news-600">
+                Network
+              </span>
+            </div>
+          </Link>
 
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="hidden md:block w-48">
+          <div className="hidden md:block flex-1 max-w-md mx-4">
             <SearchBar variant="navbar" />
           </div>
 
-          <LanguageSwitcher />
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            <Link
+              href="/lawyers"
+              className="hidden lg:inline-flex items-center text-[13px] font-semibold text-slate-700 hover:text-news-600 transition-colors"
+            >
+              Find a Lawyer
+            </Link>
+            <span className="hidden lg:block w-px h-5 bg-slate-200" />
 
-          <div className="hidden sm:flex items-center gap-3">
+            <LanguageSwitcher />
+
             {isAuthenticated ? (
-              <Link href={role === 'admin' ? '/admin/dashboard' : role === 'lawyer' ? '/lawyer/dashboard' : '/dashboard'}>
-                <button className="flex items-center gap-2 px-4 h-10 rounded-xl bg-[#0B1F3A] text-white text-[10px] font-bold uppercase tracking-widest shadow-lg hover:bg-blue-900 transition-all">
-                  <LayoutDashboard className="w-3.5 h-3.5" /> Dashboard
+              <Link href={dashboardHref}>
+                <button className="inline-flex items-center gap-2 px-4 h-9 rounded-md bg-[#0B1F3A] text-white text-[12px] font-bold tracking-wide hover:bg-blue-800 transition-colors">
+                  <LayoutDashboard className="w-4 h-4" /> Dashboard
                 </button>
               </Link>
             ) : (
               <button
                 onClick={() => window.location.assign(sharedSignInUrl())}
-                className="px-5 h-10 rounded-xl border border-slate-200 text-slate-900 text-[10px] font-bold uppercase tracking-widest hover:bg-slate-50 transition-all"
+                className="hidden sm:inline-flex items-center gap-2 px-4 h-9 rounded-md bg-[#0B1F3A] text-white text-[12px] font-bold tracking-wide hover:bg-blue-800 transition-colors"
               >
-                Sign In
+                <UserPlus className="w-4 h-4" /> Sign In
               </button>
             )}
-          </div>
 
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden w-10 h-10 flex items-center justify-center text-slate-900"
-            aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? <X className="w-6 h-6" aria-hidden="true" /> : <Menu className="w-6 h-6" aria-hidden="true" />}
-          </button>
+            <button
+              onClick={() => setMobileSearchOpen((v) => !v)}
+              className="md:hidden w-9 h-9 flex items-center justify-center text-slate-700"
+              aria-label="Toggle search"
+            >
+              <SearchIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen((v) => !v)}
+              className="lg:hidden w-9 h-9 flex items-center justify-center text-slate-900"
+              aria-label={isMobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
+
+        {mobileSearchOpen && (
+          <div className="md:hidden border-t border-slate-100 px-4 py-3 bg-white">
+            <SearchBar variant="navbar" />
+          </div>
+        )}
       </div>
 
-      {activeCategory && activeCategoryData && (
-        <div
-          className="absolute top-full left-0 right-0 bg-white border-b border-slate-200 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
-          onMouseEnter={() => setActiveCategory(activeCategory)}
-          onMouseLeave={() => setActiveCategory(null)}
-        >
-          <div className="container mx-auto max-w-7xl px-6 py-12">
-            <div className="grid grid-cols-12 gap-12">
-              <div className="col-span-4 space-y-6 border-r border-slate-100 pr-12">
-                <div className="flex items-center gap-3">
-                  <span className="px-2 py-0.5 rounded bg-blue-50 border border-blue-100 text-blue-600 text-[8px] font-bold uppercase tracking-widest">Active Pillar</span>
-                  <ShieldCheck className="w-4 h-4 text-blue-600" />
-                </div>
-                <h3 className="text-3xl font-bold text-slate-900 font-serif italic">{activeCategoryData.name}</h3>
-                <p className="text-sm text-slate-500 leading-relaxed italic font-medium">
-                  {activeCategoryData.description || "Expert-verified strategic guides across the global legal ecosystem."}
-                </p>
-                <div className="pt-4 border-t border-slate-50">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Discovery Signal</p>
-                  <div className="flex items-center gap-2 text-blue-600">
-                    <Sparkles className="w-4 h-4 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">{filteredSubcategories.length} Specializations Loaded</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="col-span-8">
-                <div className="grid grid-cols-2 gap-x-8 gap-y-1 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">
-                  {filteredSubcategories.length > 0 ? (
-                    filteredSubcategories.map((sub) => (
-                      <Link
-                        key={sub.id}
-                        href={`/law/${activeCategoryData.slug}?sub=${sub.slug}`}
-                        onClick={() => setActiveCategory(null)}
-                        className="group/item flex items-center justify-between p-3 rounded-xl hover:bg-blue-50 transition-all border border-transparent hover:border-blue-100"
-                      >
-                        <span className="text-[13px] font-bold text-slate-700 group-hover/item:text-blue-700 transition-colors">
-                          {sub.name}
-                        </span>
-                        <ChevronRight className="w-3.5 h-3.5 text-slate-300 opacity-0 group-hover/item:opacity-100 group-hover/item:translate-x-1 transition-all" />
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="col-span-2 py-12 text-center border-2 border-dashed border-slate-100 rounded-2xl">
-                      <p className="text-xs italic text-slate-400 font-medium">No specialized guides identified for this pillar.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+      {/* ── Tier 2: navy section bar (desktop) ────────────────────── */}
+      <nav className="hidden lg:block bg-[#0B1F3A]" aria-label="Topic sections">
+        <div className="container mx-auto px-6 max-w-7xl h-9 flex items-center">
+          <Link
+            href="/"
+            className="flex items-center h-full px-3 text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
+          >
+            Home
+          </Link>
+          {categories.slice(0, 8).map((cat) => (
+            <div
+              key={cat.id}
+              className="h-full flex items-center"
+              onMouseEnter={() => setActiveCategory(cat.id)}
+              onMouseLeave={() => setActiveCategory(null)}
+            >
+              <Link
+                href={`/law/${cat.slug}`}
+                className={cn(
+                  'flex items-center gap-1 h-full px-3 text-[12px] font-bold uppercase tracking-wider border-b-[3px] transition-colors',
+                  activeCategory === cat.id
+                    ? 'text-white border-news-600'
+                    : 'text-white/80 hover:text-white border-transparent hover:border-news-600/60',
+                )}
+              >
+                {cat.name}
+              </Link>
             </div>
-          </div>
+          ))}
         </div>
-      )}
 
-      {isMobileMenuOpen && (
-        <div className="lg:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-200 shadow-2xl h-[calc(100vh-64px)] overflow-y-auto animate-in slide-in-from-top duration-300">
-          <div className="p-6 space-y-6">
-            <div className="space-y-2">
-              <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400 mb-4 px-2">Jurisdictional Pillars</h4>
-              {categories.map((cat) => (
-                <details key={cat.id} className="group/details border-b border-slate-50 last:border-0">
-                  <summary className="flex items-center justify-between p-4 cursor-pointer list-none">
-                    <span className="text-sm font-bold text-slate-900 uppercase tracking-tight">{cat.name}</span>
-                    <ChevronRight className="w-4 h-4 text-slate-400 group-open/details:rotate-90 transition-transform" />
-                  </summary>
-                  <div className="pl-6 pb-4 space-y-2">
-                    {subcategories
-                      .filter(sub => String(sub.category_id || sub.categoryId) === String(cat.id))
-                      .map(sub => (
+        {/* Mega-menu */}
+        {activeCategory && activeCategoryData && (
+          <div
+            className="absolute top-full left-0 right-0 bg-white border-b border-slate-200 shadow-xl animate-in fade-in slide-in-from-top-1 duration-150"
+            onMouseEnter={() => setActiveCategory(activeCategory)}
+            onMouseLeave={() => setActiveCategory(null)}
+          >
+            <div className="container mx-auto max-w-7xl px-6 py-8">
+              <div className="grid grid-cols-12 gap-10">
+                <div className="col-span-3 border-r border-slate-100 pr-8">
+                  <span className="kicker">Browse Topic</span>
+                  <h3 className="font-headline text-2xl font-extrabold text-slate-900 mt-3 mb-2">
+                    {activeCategoryData.name}
+                  </h3>
+                  <p className="text-sm text-slate-500 leading-relaxed mb-5">
+                    {activeCategoryData.description ||
+                      'Expert-reviewed guides and explainers across this practice area.'}
+                  </p>
+                  <Link
+                    href={`/law/${activeCategoryData.slug}`}
+                    onClick={() => setActiveCategory(null)}
+                    className="inline-flex items-center gap-1.5 text-[13px] font-bold text-blue-700 hover:text-news-600 transition-colors"
+                  >
+                    View all {filteredSubcategories.length} guides
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                <div className="col-span-9">
+                  <div className="grid grid-cols-3 gap-x-8 gap-y-1 max-h-[320px] overflow-y-auto pr-2">
+                    {filteredSubcategories.length > 0 ? (
+                      filteredSubcategories.map((sub) => (
                         <Link
                           key={sub.id}
-                          href={`/law/${cat.slug}?sub=${sub.slug}`}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className="block py-1 text-xs font-medium text-slate-500 hover:text-blue-600 italic"
+                          href={`/law/${activeCategoryData.slug}?sub=${sub.slug}`}
+                          onClick={() => setActiveCategory(null)}
+                          className="group flex items-center justify-between py-2.5 border-b border-slate-50 hover:border-slate-200 transition-colors"
                         >
-                          {sub.name}
+                          <span className="text-[14px] font-semibold text-slate-700 group-hover:text-news-600 transition-colors">
+                            {sub.name}
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </Link>
-                      ))}
+                      ))
+                    ) : (
+                      <p className="col-span-3 py-8 text-sm text-slate-400">
+                        Guides for this topic are being added.
+                      </p>
+                    )}
                   </div>
-                </details>
-              ))}
+                </div>
+              </div>
             </div>
+          </div>
+        )}
+      </nav>
+
+      {/* ── Mobile drawer ─────────────────────────────────────────── */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden border-t border-slate-100 bg-white shadow-2xl max-h-[calc(100vh-64px)] overflow-y-auto">
+          <div className="p-4 space-y-1">
+            <Link
+              href="/"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
+            >
+              Home
+            </Link>
+            <Link
+              href="/lawyers"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
+            >
+              Find a Lawyer
+            </Link>
+            <p className="pt-4 pb-2 px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-news-600">
+              Topics
+            </p>
+            {categories.map((cat) => (
+              <details key={cat.id} className="group border-b border-slate-50">
+                <summary className="flex items-center justify-between py-3 px-2 cursor-pointer list-none">
+                  <span className="text-sm font-bold text-slate-900">{cat.name}</span>
+                  <ChevronDown className="w-4 h-4 text-slate-400 group-open:rotate-180 transition-transform" />
+                </summary>
+                <div className="pb-3 pl-3 grid grid-cols-1 gap-0.5">
+                  <Link
+                    href={`/law/${cat.slug}`}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className="py-1.5 text-xs font-bold text-blue-700"
+                  >
+                    View all guides →
+                  </Link>
+                  {subcategories
+                    .filter((sub) => String(sub.category_id || sub.categoryId) === String(cat.id))
+                    .map((sub) => (
+                      <Link
+                        key={sub.id}
+                        href={`/law/${cat.slug}?sub=${sub.slug}`}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className="py-1.5 text-xs font-medium text-slate-500 hover:text-news-600"
+                      >
+                        {sub.name}
+                      </Link>
+                    ))}
+                </div>
+              </details>
+            ))}
           </div>
         </div>
       )}
-    </nav>
+    </header>
   );
 }

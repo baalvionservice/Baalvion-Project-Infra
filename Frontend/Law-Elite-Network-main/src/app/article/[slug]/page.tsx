@@ -15,8 +15,7 @@ import {
   ChevronDown,
   ChevronUp,
   BookOpen,
-  List,
-  ChevronRight
+  List
 } from 'lucide-react';
 import {
   Popover,
@@ -27,6 +26,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import seedData from '../../../../docs/seed-data.json';
+import { getArticleBySlug } from '@/data/law-content';
 
 interface TOCItem {
   id: string;
@@ -86,13 +86,17 @@ export default function ArticleDeepDivePage() {
         : null;
     };
 
+    // Bundled editorial library (full HTML content) sits between the CMS and
+    // the lightweight static seed so console-published articles still win.
+    const fromBundled = () => getArticleBySlug(slug as string);
+
     articlesPublicApi.get(slug as string)
       .then(async (res) => {
         const item = res.data?.data || null;
-        setArticle(item || (await fromCms()) || fromSeed());
+        setArticle(item || (await fromCms()) || fromBundled() || fromSeed());
       })
       .catch(async () => {
-        setArticle((await fromCms()) || fromSeed());
+        setArticle((await fromCms()) || fromBundled() || fromSeed());
       })
       .finally(() => setArticleLoading(false));
   }, [slug]);
@@ -217,34 +221,24 @@ export default function ArticleDeepDivePage() {
                     By
                     <Popover>
                       <PopoverTrigger asChild>
-                        <span className="font-bold text-blue-600 uppercase cursor-pointer border-b border-blue-600 hover:text-blue-800 transition-colors leading-none">
-                          JULIA KAGAN
+                        <span className="font-bold text-blue-700 cursor-pointer border-b border-blue-600 hover:text-blue-900 transition-colors leading-none">
+                          {article.author || 'Law Elite Editorial'}
                         </span>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[420px] p-0 shadow-2xl border-slate-200 rounded-none bg-white overflow-hidden" align="start" sideOffset={8}>
-                        <div className="p-8 space-y-6">
-                          <div className="flex gap-6">
-                            <div className="relative w-24 h-24 shrink-0 bg-slate-100 overflow-hidden">
-                              <Image
-                                src="https://picsum.photos/seed/julia-kagan-editorial/200/200"
-                                alt="Julia Kagan"
-                                fill
-                                className="object-cover grayscale"
-                              />
-                            </div>
-                            <div className="space-y-4">
-                              <p className="text-[15px] leading-relaxed text-slate-700 font-medium">
-                                Julia Kagan is a distinguished legal and financial journalist and former senior editor of strategic dossiers within the global professional network.
-                              </p>
-                              <Link href="#" className="text-blue-600 text-[15px] font-bold flex items-center gap-1 hover:underline group">
-                                Full Bio <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                              </Link>
-                            </div>
-                          </div>
+                      <PopoverContent className="w-[400px] p-0 shadow-2xl border-slate-200 rounded-lg bg-white overflow-hidden" align="start" sideOffset={8}>
+                        <div className="p-7 space-y-3">
+                          <p className="font-headline text-lg font-bold text-slate-900">
+                            {article.author || 'Law Elite Editorial'}
+                          </p>
+                          <p className="text-[14px] leading-relaxed text-slate-600">
+                            Part of the Law Elite Network editorial team. Our guides are
+                            researched and reviewed for accuracy and clarity, then kept current as
+                            laws change. They provide general legal information, not legal advice.
+                          </p>
                         </div>
                       </PopoverContent>
                     </Popover>
-                    Updated {article.updatedAt || article.updated_at || "February 12, 2025"}
+                    Updated {article.updatedAt || article.updated_at || 'February 12, 2025'}
                   </div>
                 </div>
 

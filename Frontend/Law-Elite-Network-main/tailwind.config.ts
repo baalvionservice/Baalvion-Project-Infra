@@ -11,9 +11,12 @@ export default {
   theme: {
     extend: {
       fontFamily: {
+        // Editorial type system (Investopedia / CNBC inspired):
+        // body = Inter (UI), headline = Libre Franklin (Franklin-Gothic display),
+        // serif = Source Serif 4 (long-form article reading).
         body: ['Inter', 'system-ui', 'sans-serif'],
-        headline: ['Inter', 'system-ui', 'sans-serif'],
-        serif: ['Inter', 'system-ui', 'sans-serif'], // Standardized to Inter as requested
+        headline: ['"Libre Franklin"', 'Inter', 'system-ui', 'sans-serif'],
+        serif: ['"Source Serif 4"', 'Georgia', 'Cambria', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',
@@ -22,6 +25,14 @@ export default {
           900: '#1E3A8A',
           600: '#2563EB',
           dark: '#0B1220',
+          navy: '#0B1F3A',
+        },
+        // News accent (CNBC-style section labels, "new/live" kickers). Used
+        // sparingly against the navy/blue brand for editorial emphasis.
+        news: {
+          DEFAULT: '#C8102E',
+          600: '#C8102E',
+          700: '#A50D26',
         },
         card: {
           DEFAULT: 'hsl(var(--card))',
