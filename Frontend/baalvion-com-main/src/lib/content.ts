@@ -21,11 +21,46 @@ export const EXTERNAL = {
   ir: 'https://ir.baalvion.com',
 } as const;
 
+/**
+ * On-site routes. Every menu item and footer link resolves to a real page that
+ * is emitted by the static export — no dead anchors, no off-site dependency for
+ * the company's own legal and account surfaces.
+ */
+export const ROUTES = {
+  home: '/',
+  about: '/about',
+  services: '/services',
+  contact: '/contact',
+  email: '/email',
+  security: '/security',
+  signin: '/signin',
+  register: '/register',
+  recovery: '/account/recovery',
+  privacy: '/legal/privacy',
+  terms: '/legal/terms',
+  cookies: '/legal/cookies',
+  acceptableUse: '/legal/acceptable-use',
+  dataProtection: '/legal/data-protection',
+} as const;
+
+/** Verified contact channels. All addresses are on the sending domain. */
+export const CONTACT = {
+  support: 'support@baalvion.com',
+  business: 'hello@baalvion.com',
+  privacy: 'privacy@baalvion.com',
+  security: 'security@baalvion.com',
+  legal: 'legal@baalvion.com',
+  abuse: 'abuse@baalvion.com',
+  responseWindow: 'Within 2 business days',
+  regions: ['Americas', 'EMEA', 'APAC'],
+} as const;
+
 export const NAV = [
-  { label: 'Company', href: '#company' },
-  { label: 'Domains', href: '#domains' },
-  { label: 'Network', href: '#network' },
-  { label: 'Governance', href: '#principles' },
+  { label: 'Company', href: ROUTES.about },
+  { label: 'Platform', href: ROUTES.services },
+  { label: 'Network', href: '/#network' },
+  { label: 'Email', href: ROUTES.email },
+  { label: 'Contact', href: ROUTES.contact },
 ] as const;
 
 export const HERO = {
@@ -391,40 +426,44 @@ export const CLOSING = {
 } as const;
 
 export const FOOTER = {
-  statement: 'Global infrastructure intelligence.',
-  charter: 'Baalvion · Global infrastructure intelligence · © 2026 · All systems governed under one standard',
+  statement: 'Global infrastructure intelligence. Engineered for permanence, governed for trust, held for the long horizon.',
+  charter: 'Baalvion · A multi-jurisdiction holding company for foundational infrastructure',
   columns: [
     {
       title: 'Company',
       links: [
-        { label: 'About', href: EXTERNAL.about },
-        { label: 'Structure', href: `${EXTERNAL.about}/structure` },
-        { label: 'Philosophy', href: `${EXTERNAL.about}/philosophy` },
-        { label: 'Leadership', href: `${EXTERNAL.about}/leadership` },
-        { label: 'Careers', href: `${EXTERNAL.about}/careers` },
-      ],
-    },
-    {
-      title: 'Network',
-      links: [
-        { label: 'Global Trade', href: 'https://trade.baalvion.com' },
-        { label: 'Mining & Resources', href: 'https://mining.baalvion.com' },
-        { label: 'Markets', href: 'https://market.baalvion.com' },
-        { label: 'Enterprise Access', href: 'https://dashboard.baalvion.com' },
-      ],
-    },
-    {
-      title: 'Investors',
-      links: [
+        { label: 'About', href: ROUTES.about },
+        { label: 'Platform & Services', href: ROUTES.services },
+        { label: 'The Network', href: '/#network' },
         { label: 'Investor Relations', href: EXTERNAL.ir },
-        { label: 'Contact', href: `${EXTERNAL.about}/contact` },
+      ],
+    },
+    {
+      title: 'Account',
+      links: [
+        { label: 'Sign in', href: ROUTES.signin },
+        { label: 'Create account', href: ROUTES.register },
+        { label: 'Account recovery', href: ROUTES.recovery },
+        { label: 'Email communications', href: ROUTES.email },
+      ],
+    },
+    {
+      title: 'Support',
+      links: [
+        { label: 'Contact', href: ROUTES.contact },
+        { label: 'Security', href: ROUTES.security },
+        { label: 'Status', href: ROUTES.contact },
+        { label: 'support@baalvion.com', href: `mailto:${CONTACT.support}` },
       ],
     },
     {
       title: 'Legal',
       links: [
-        { label: 'Privacy', href: `${EXTERNAL.about}/privacy` },
-        { label: 'Terms', href: `${EXTERNAL.about}/terms` },
+        { label: 'Privacy Policy', href: ROUTES.privacy },
+        { label: 'Terms of Service', href: ROUTES.terms },
+        { label: 'Cookie Policy', href: ROUTES.cookies },
+        { label: 'Acceptable Use', href: ROUTES.acceptableUse },
+        { label: 'Data Protection', href: ROUTES.dataProtection },
       ],
     },
   ],
