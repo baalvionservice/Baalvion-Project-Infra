@@ -20,6 +20,34 @@ const CMS_BASE = process.env.CMS_PUBLIC_URL?.trim()
 const SITE = process.env.CMS_WEBSITE_SLUG || 'law-elite-network';
 const BASE = `${CMS_BASE}/${SITE}`;
 
+// Validates Google's publisher-ID shape ("ca-pub-" + 10–20 digits). Anything else
+// is treated as "no ad client" so we never emit a broken AdSense tag.
+const ADSENSE_RE = /^ca-pub-\d{10,20}$/;
+
+/**
+ * Per-site AdSense publisher ID, managed in the CMS admin panel
+ * (Website → SEO → Monetization) and exposed on the public website-info endpoint
+ * `GET {CMS_PUBLIC_URL}/{site}` as `config.ads.adsensePublisherId`.
+ *
+ * Falls back to NEXT_PUBLIC_ADSENSE_CLIENT when the CMS is unreachable or unset.
+ * Returns null when no valid ID is available (callers then render no ad markup).
+ * Cached for an hour rather than `no-store` so it doesn't force dynamic rendering.
+ */
+export async function cmsGetAdsenseClient(): Promise<string | null> {
+  const envFallback = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
+  try {
+    const r = await fetch(BASE, { next: { revalidate: 3600 } });
+    if (r.ok) {
+      const j = (await r.json()) as { data?: { config?: { ads?: { adsensePublisherId?: string } } } };
+      const fromCms = j?.data?.config?.ads?.adsensePublisherId?.trim();
+      if (fromCms && ADSENSE_RE.test(fromCms)) return fromCms;
+    }
+  } catch {
+    // CMS unreachable — fall through to env fallback.
+  }
+  return envFallback && ADSENSE_RE.test(envFallback) ? envFallback : null;
+}
+
 interface Block { id: string; type: string; order: number; content: Record<string, any> }
 interface CmsContent {
   id: string;

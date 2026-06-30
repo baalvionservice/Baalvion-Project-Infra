@@ -6,6 +6,7 @@ import { Source_Serif_4 } from "next/font/google";
 import { cn } from "@/lib/utils";
 import RootLayoutClient from "@/components/common/RootLayoutClient";
 import { Analytics } from "@/components/common/Analytics";
+import { getSiteAdsenseClient } from "@/services/data/cms-public";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
@@ -91,9 +92,13 @@ const sourceSerif = Source_Serif_4({
  * Root Layout for Imperialpedia.
  * Optimized for institutional performance and accessibility.
  */
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // AdSense publisher ID is managed in the CMS admin panel (Website → SEO →
+  // Monetization); resolved server-side and passed to Analytics. Hourly-cached, so
+  // this does not force the site into dynamic rendering.
+  const adsenseClient = await getSiteAdsenseClient();
   return (
     <html
       lang="en"
@@ -138,7 +143,7 @@ export default function RootLayout({
         </a>
 
         <RootLayoutClient>{children}</RootLayoutClient>
-        <Analytics />
+        <Analytics adsenseClient={adsenseClient} />
       </body>
     </html>
   );

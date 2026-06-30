@@ -1,15 +1,19 @@
-// Serves /ads.txt for Google AdSense. The publisher ID is read from
-// NEXT_PUBLIC_ADSENSE_CLIENT (format: "ca-pub-XXXXXXXXXXXXXXXX"); ads.txt requires the
-// bare numeric publisher ID, so we strip the "ca-pub-" prefix.
+// Serves /ads.txt for Google AdSense. The publisher ID is managed in the CMS admin
+// panel (Website → SEO → Monetization) and resolved via cmsGetAdsenseClient, which
+// falls back to NEXT_PUBLIC_ADSENSE_CLIENT. ads.txt needs the bare numeric publisher
+// ID, so we strip the "ca-pub-" prefix.
 //
-// When the env var is unset, we return an empty (but valid 200) ads.txt so crawlers get
-// a clean response instead of a 404. Populate the env var once AdSense is approved.
+// When no valid ID is configured, we return an empty (but valid 200) ads.txt so
+// crawlers get a clean response instead of a 404. Set the ID in the admin panel once
+// AdSense is approved — no redeploy needed.
 
-export const dynamic = 'force-static';
-export const revalidate = 86400; // re-evaluate daily
+import { cmsGetAdsenseClient } from '@/lib/cms';
 
-export function GET(): Response {
-  const client = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
+// Revalidate daily; cmsGetAdsenseClient itself caches the CMS read for an hour.
+export const revalidate = 86400;
+
+export async function GET(): Promise<Response> {
+  const client = await cmsGetAdsenseClient();
   const pubId = client?.replace(/^ca-pub-/i, '');
 
   const body = pubId
