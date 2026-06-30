@@ -22,7 +22,9 @@ const dedup = require('../service/webhookDedup');
 const CASHFREE_SECRET_ENV = process.env.CASHFREE_CLIENT_SECRET || '';
 // Replay freshness window. The signature covers (timestamp+body) so a captured payload is replayable
 // verbatim; rejecting a stale x-webhook-timestamp bounds that window (the DB dedup is the second guard).
-const TOLERANCE_SECONDS = Number(process.env.CASHFREE_TOLERANCE_SECONDS || 300);
+// Clamp to [60, 600]s so a misconfigured/hostile env var can't widen the replay window to
+// effectively unbounded (or disable it). 5 min is the default; the DB dedup is the second guard.
+const TOLERANCE_SECONDS = Math.min(Math.max(Number(process.env.CASHFREE_TOLERANCE_SECONDS) || 300, 60), 600);
 // Idempotency + replay protection is now DURABLE + instance-shared via
 // public.payment_webhook_events keyed on the signature-verified Cashfree payment id. The
 // signature covers (timestamp+body) but is replayable verbatim, so this DB dedup is the replay guard.

@@ -38,13 +38,9 @@ const VALID_INTERVALS = new Set(['monthly', 'yearly']);
 // the consolidated-deploy service DNS name (app-payments:3015); override with PAYMENT_SERVICE_URL
 // for other topologies (e.g. a local JVM on :13015).
 const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://app-payments:3015';
-const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret';
-// Fail-fast: refuse to boot with the committed dev inter-service secret in production
-// (matches payment-service/cms-service appConfig guards). A misconfig is caught at deploy,
-// not at the first checkout — and never silently authenticates with a publicly-known string.
-if (process.env.NODE_ENV === 'production' && (!process.env.INTERNAL_SERVICE_SECRET || INTERNAL_SECRET === 'baalvion-internal-dev-secret')) {
-    throw new Error('INTERNAL_SERVICE_SECRET must be set to a non-default value in production');
-}
+// Inter-service secret: centralized resolution + deploy-time fail-fast (never boots a
+// deployed env with the committed dev default). See service/internalSecret.js.
+const { SECRET: INTERNAL_SECRET } = require('../service/internalSecret');
 // This backend serves the Proxy site → its vault tenant slug is constant.
 const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'proxy-baalvionstack';
 

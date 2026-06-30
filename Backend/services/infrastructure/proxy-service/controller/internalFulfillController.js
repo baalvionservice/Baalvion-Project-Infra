@@ -28,25 +28,21 @@ const store = require('../service/platformStore');
 const authService = require('../service/authService');
 const dedup = require('../service/webhookDedup');
 const logger = require('../service/logger');
+// Centralized secret: deploy-time fail-fast + constant-time, length-blind compare.
+const { timingSafeMatch } = require('../service/internalSecret');
 
-const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || '';
-
-// Constant-time-ish header comparison (avoid leaking secret length via early-exit).
-function secretMatches(provided) {
-  if (!INTERNAL_SECRET) return false;
-  const a = Buffer.from(String(provided || ''));
-  const b = Buffer.from(INTERNAL_SECRET);
-  if (a.length !== b.length) return false;
-  try { return require('crypto').timingSafeEqual(a, b); } catch (_) { return false; }
-}
+// Dedup is namespaced by (provider, eventId). Restrict provider to a known set so a caller
+// can't claim an event ID across provider namespaces by sending an arbitrary string.
+const ALLOWED_PROVIDERS = new Set(['razorpay', 'stripe', 'payu', 'cashfree', 'gateway']);
 
 async function fulfill(req, res) {
-  if (!secretMatches(req.headers['x-internal-secret'])) {
+  if (!timingSafeMatch(req.headers['x-internal-secret'])) {
     return res.status(401).json({ ok: false, error: { code: 'UNAUTHORIZED', message: 'internal secret required' } });
   }
 
   const b = req.body || {};
-  const provider = String(b.provider || 'gateway').toLowerCase();
+  const rawProvider = String(b.provider || 'gateway').toLowerCase();
+  const provider = ALLOWED_PROVIDERS.has(rawProvider) ? rawProvider : 'gateway';
   const providerRef = b.providerRef || b.provider_ref || null;
   const eventId = String(b.eventId || b.providerEventId || providerRef || '');
   const md = b.metadata || {};
@@ -63,14 +59,19 @@ async function fulfill(req, res) {
   // No tenant mapping → not a billing charge we own. Ack so the JVM commits (no retry).
   if (!orgId) return res.status(200).json({ ok: true, skipped: 'no-org' });
 
+  // A billing charge with no idempotency key cannot be safely deduplicated → refuse rather
+  // than activate without a claim. The JVM always supplies eventId; a missing one is malformed
+  // (or abuse) and is a permanent client error, so 400 (caller must not retry).
+  if (!eventId) {
+    return res.status(400).json({ ok: false, error: { code: 'MISSING_EVENT_ID', message: 'eventId is required for fulfillment' } });
+  }
+
   let claimed = false;
   try {
     // Durable, instance-shared idempotency claim (public.payment_webhook_events).
-    if (eventId) {
-      const claim = await dedup.claimEvent(provider, eventId, { eventType: 'gateway.captured', orgId, amount: amountMajor, currency });
-      if (!claim.fresh) return res.status(200).json({ ok: true, deduped: true });
-      claimed = true;
-    }
+    const claim = await dedup.claimEvent(provider, eventId, { eventType: 'gateway.captured', orgId, amount: amountMajor, currency });
+    if (!claim.fresh) return res.status(200).json({ ok: true, deduped: true });
+    claimed = true;
 
     const auth = { orgId, userId };
 

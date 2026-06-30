@@ -25,11 +25,16 @@ import java.util.Map;
  * paid invoice, and notifies — all idempotently.
  *
  * <p><b>At-least-once contract:</b> the Node side returns 2xx for
- * applied/duplicate/terminal-skip and 503 only for a transient failure. On any non-2xx
- * (or transport error) this throws {@link FulfillmentException}; because it is invoked
- * inside {@code GatewayService.applyWebhook}'s {@code @Transactional} method, that rolls
- * the webhook back so the PROVIDER re-delivers and the call is retried. Node-side dedup
- * (and claim-release on its own transient failures) keeps retries exactly-once.
+ * applied/duplicate/terminal-skip and 5xx (503) only for a transient failure.
+ * <ul>
+ *   <li><b>2xx</b> → success, commit.</li>
+ *   <li><b>5xx / transport error</b> → transient: throw {@link FulfillmentException}. Because this
+ *       runs inside {@code GatewayService.applyWebhook}'s {@code @Transactional} method, that rolls
+ *       the webhook back so the PROVIDER re-delivers and we retry. Node-side dedup keeps it exactly-once.</li>
+ *   <li><b>4xx</b> → permanent client error: the charge was genuinely CAPTURED at the PSP, so we must
+ *       NOT roll back (a deterministic 4xx would otherwise wedge an infinite provider-retry loop and
+ *       never persist the capture). We log loudly for out-of-band reconciliation and return.</li>
+ * </ul>
  */
 @Slf4j
 @Component
@@ -50,6 +55,13 @@ public class BillingFulfillmentClient {
     this.fulfillUrl = fulfillUrl;
     this.enabled = enabled;
     this.internalSecret = internalSecret;
+    if (enabled) {
+      validateFulfillUrl(fulfillUrl);
+      if (internalSecret == null || internalSecret.isBlank()) {
+        log.warn("Billing fulfillment is enabled but app.internal-secret/INTERNAL_SERVICE_SECRET is blank "
+            + "— every CAPTURED webhook dispatch will fail until it is configured.");
+      }
+    }
     // Pin HTTP/1.1: the Node billing service is HTTP/1.1-only. The JDK client defaults to HTTP/2 and
     // attempts a cleartext h2c upgrade, which that server rejects — surfacing as
     // "HTTP/1.1 header parser received no bytes". Forcing 1.1 avoids the upgrade handshake.
@@ -110,9 +122,20 @@ public class BillingFulfillmentClient {
     try {
       HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
       int code = response.statusCode();
+      if (code / 100 == 4) {
+        // Permanent client error (malformed payload, unknown org, …). Retrying re-delivers forever
+        // and never succeeds — and the charge WAS captured at the PSP, so the capture must still be
+        // recorded. Do NOT throw (no rollback): log loudly for out-of-band reconciliation and return.
+        log.error("Fulfillment permanently rejected (HTTP {}) for charge {} — committing the capture "
+            + "without downstream fulfillment; manual reconciliation required.", code, payment.getId());
+        return;
+      }
       if (code / 100 != 2) {
+        // 5xx / unexpected → transient: roll back so the PROVIDER re-delivers and we retry. The
+        // downstream response body is intentionally NOT included in the message/logs (it can carry
+        // internal detail and lands in CloudWatch); the status code + charge id are enough.
         throw new FulfillmentException(
-            "billing fulfill returned " + code + " for charge " + payment.getId() + ": " + truncate(response.body()));
+            "billing fulfill returned HTTP " + code + " for charge " + payment.getId());
       }
       log.info("Fulfillment dispatched: charge={}, provider={}, ref={}, httpStatus={}",
           payment.getId(), payment.getProvider(), payment.getProviderRef(), code);
@@ -139,11 +162,33 @@ public class BillingFulfillmentClient {
     }
   }
 
-  private static String truncate(String s) {
-    if (s == null) {
-      return "";
+  /**
+   * SSRF guard for the configured fulfill URL. It comes from config ({@code BILLING_FULFILL_URL})
+   * and is called with the internal secret in a header after every CAPTURED webhook, so a hostile
+   * override must not be able to exfiltrate that secret or pivot to internal targets. Require an
+   * http(s) URL to a real host, and reject cloud-metadata / link-local addresses (e.g. IMDS at
+   * 169.254.169.254). Validated once at startup so a misconfig fails the deploy, not the first charge.
+   */
+  private static void validateFulfillUrl(String url) {
+    final URI uri;
+    try {
+      uri = URI.create(url);
+    } catch (Exception e) {
+      throw new IllegalStateException("app.billing.fulfill-url is not a valid URI: " + url, e);
     }
-    return s.length() <= 300 ? s : s.substring(0, 300) + "…";
+    String scheme = uri.getScheme();
+    if (scheme == null || !(scheme.equalsIgnoreCase("http") || scheme.equalsIgnoreCase("https"))) {
+      throw new IllegalStateException("app.billing.fulfill-url must use http(s): " + url);
+    }
+    String host = uri.getHost();
+    if (host == null || host.isBlank()) {
+      throw new IllegalStateException("app.billing.fulfill-url must have a host: " + url);
+    }
+    String h = host.toLowerCase();
+    if (h.startsWith("169.254.") || h.equals("[fe80::]") || h.startsWith("[fe80:")) {
+      throw new IllegalStateException(
+          "app.billing.fulfill-url must not target a link-local/metadata address: " + url);
+    }
   }
 
   /** Transient fulfillment failure — propagated to roll back the webhook tx for provider retry. */
