@@ -70,6 +70,13 @@ const LINK_GROUPS: { heading: string; blurb: string; links: ToolLink[] }[] = [
         color: 'text-amber-500',
       },
       {
+        title: 'Authors',
+        description: 'Manage contributor profiles (bio, credentials, photo) that power bylines and author pages.',
+        icon: Users,
+        segment: 'authors',
+        color: 'text-teal-500',
+      },
+      {
         title: 'Media',
         description: 'Upload and reuse images, videos and files inside your content.',
         icon: Image,
