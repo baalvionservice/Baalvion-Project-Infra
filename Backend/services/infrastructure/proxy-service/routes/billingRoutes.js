@@ -11,9 +11,21 @@
 const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
+const rateLimit = require('../middleware/rateLimit');
 const billingService = require('../service/billingService');
 const cmsVault = require('../service/cmsVault');
 const logger = require('../service/logger');
+
+// Tight limiter for the money path — far below the coarse global IP ceiling. Keyed by org (set by
+// authMiddleware) so a shared egress IP isn't throttled for everyone. Stops promo brute-force / checkout
+// enumeration. Override the cap with RATE_LIMIT_CHECKOUT_MAX.
+const checkoutLimiter = rateLimit.strict(Number(process.env.RATE_LIMIT_CHECKOUT_MAX) || 15);
+
+// Bounds for user-supplied passthrough fields forwarded across the trust boundary to the JVM gateway.
+const MAX_IDEMPOTENCY_LEN = 128;   // header-safe; well above any real UUID/key
+const MAX_RECEIPT_LEN = 64;        // providers (e.g. Razorpay) cap receipt at ~40 chars
+const MAX_CUSTOMER_NAME_LEN = 128;
+const MAX_CUSTOMER_PHONE_LEN = 32;
 
 // Server-authoritative promo codes. The browser's discount display is cosmetic; the ACTUAL
 // discount is applied here only for codes in this map (unknown codes → 0% off). The Razorpay
@@ -21,16 +33,14 @@ const logger = require('../service/logger');
 const PROMOS = { WELCOME10: 0.10, LAUNCH20: 0.20 };
 const VALID_INTERVALS = new Set(['monthly', 'yearly']);
 
-// Canonical PSP gateway = Java payment-service (financial-services-java) on host 13015. It exposes
-// the same /v1/gateway/* contract as the retired Node twin, so this re-points by host only.
-const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://localhost:13015';
-const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret';
-// Fail-fast: refuse to boot with the committed dev inter-service secret in production
-// (matches payment-service/cms-service appConfig guards). A misconfig is caught at deploy,
-// not at the first checkout — and never silently authenticates with a publicly-known string.
-if (process.env.NODE_ENV === 'production' && (!process.env.INTERNAL_SERVICE_SECRET || INTERNAL_SECRET === 'baalvion-internal-dev-secret')) {
-    throw new Error('INTERNAL_SERVICE_SECRET must be set to a non-default value in production');
-}
+// Canonical PSP gateway = Java payment-service (financial-services-java). It exposes the same
+// /v1/gateway/* contract as the retired Node twin, so this re-points by host only. Default targets
+// the consolidated-deploy service DNS name (app-payments:3015); override with PAYMENT_SERVICE_URL
+// for other topologies (e.g. a local JVM on :13015).
+const PAYMENT_SERVICE_URL = process.env.PAYMENT_SERVICE_URL || 'http://app-payments:3015';
+// Inter-service secret: centralized resolution + deploy-time fail-fast (never boots a
+// deployed env with the committed dev default). See service/internalSecret.js.
+const { SECRET: INTERNAL_SECRET } = require('../service/internalSecret');
 // This backend serves the Proxy site → its vault tenant slug is constant.
 const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'proxy-baalvionstack';
 
@@ -49,7 +59,7 @@ const PUBLIC_APP_URL = (process.env.PUBLIC_APP_URL || 'http://localhost:8080').r
 // International cards are accepted; the card network/bank performs any FX. Override via BILLING_CURRENCY.
 const CHARGE_CURRENCY = (process.env.BILLING_CURRENCY || 'USD').toUpperCase();
 
-router.post('/checkout', authMiddleware, async (req, res) => {
+router.post('/checkout', authMiddleware, checkoutLimiter, async (req, res) => {
     const body = req.body || {};
     const provider = String(body.provider || '').toLowerCase();
     const method = String(body.method || '').toUpperCase();
@@ -60,8 +70,14 @@ router.post('/checkout', authMiddleware, async (req, res) => {
     if (!GATEWAY_METHODS.includes(method)) {
         return res.status(400).json({ error: { code: 'VALIDATION', message: 'method must be CARD, UPI, NETBANKING, or BANK' } });
     }
-    if (!idempotencyKey) {
-        return res.status(400).json({ error: { code: 'VALIDATION', message: 'idempotencyKey is required' } });
+    // idempotencyKey is forwarded verbatim as the JVM's `Idempotency-Key` header — bound its length/type so a
+    // hostile or oversized value can't break header parsing or pollute logs downstream.
+    if (!idempotencyKey || typeof idempotencyKey !== 'string' || idempotencyKey.length > MAX_IDEMPOTENCY_LEN) {
+        return res.status(400).json({ error: { code: 'VALIDATION', message: `idempotencyKey must be a string ≤ ${MAX_IDEMPOTENCY_LEN} characters` } });
+    }
+    // receipt → provider orderRef; cap it (providers reject long/weird receipts with an opaque 4xx).
+    if (receipt != null && String(receipt).length > MAX_RECEIPT_LEN) {
+        return res.status(400).json({ error: { code: 'VALIDATION', message: `receipt must be ≤ ${MAX_RECEIPT_LEN} characters` } });
     }
     try {
         // SECURITY: the charge amount is computed SERVER-SIDE from the plan price — never trusted from
@@ -124,8 +140,15 @@ router.post('/checkout', authMiddleware, async (req, res) => {
                 ...(receipt ? { orderRef: String(receipt) } : {}),
                 // Stamp the VERIFIED user email (never the browser's) onto the order. PayU echoes it
                 // back in its (hash-signed) callback, which is how that redirect flow maps the payment
-                // to the tenant; harmless prefill for the other providers.
-                customer: { ...(customer || {}), email: req.auth.email },
+                // to the tenant; harmless prefill for the other providers. We WHITELIST customer fields
+                // rather than spreading the raw browser object — arbitrary keys must not flow through to
+                // the JVM / provider notes (PII leakage + injection). Only email (trusted) + bounded
+                // name/phone prefill are forwarded.
+                customer: {
+                    email: req.auth.email,
+                    ...(customer && customer.name ? { name: String(customer.name).slice(0, MAX_CUSTOMER_NAME_LEN) } : {}),
+                    ...(customer && customer.phone ? { phone: String(customer.phone).slice(0, MAX_CUSTOMER_PHONE_LEN) } : {}),
+                },
                 // metadata → Razorpay order `notes` (the RazorpayGateway forwards it verbatim). These
                 // SERVER-TRUSTED fields (orgId/userId from the verified JWT) let the provider webhook
                 // map the payment back to the tenant + plan and activate idempotently. Never from the browser.

@@ -43,6 +43,13 @@ module.exports = function(sequelize, DataTypes) {
     org_id: {
       type: DataTypes.UUID,
       allowNull: false
+    },
+    // Stable per-payment reference (gateway payment id). Backed by a partial UNIQUE(org_id, payment_ref)
+    // index (migration 030) so one settled payment maps to at most ONE paid invoice across instances/
+    // restarts. Nullable: offline/pending orders have no gateway payment id.
+    payment_ref: {
+      type: DataTypes.STRING,
+      allowNull: true
     }
   }, {
     sequelize,

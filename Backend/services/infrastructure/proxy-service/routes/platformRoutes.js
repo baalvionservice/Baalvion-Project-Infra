@@ -1,4 +1,5 @@
 const express = require('express');
+const rateLimit = require('../middleware/rateLimit');
 const authMiddleware = require('../middleware/authMiddleware');
 const requireOrganizationAccess = require('../middleware/requireOrganizationAccess');
 const validate = require('../middleware/validate');
@@ -16,6 +17,12 @@ const router = express.Router();
 // Billing webhook authenticity is established by gateway signature verification,
 // NOT by a user session — it must bypass auth. Registered before the guard.
 router.route('/billing/webhook').post(controller.billingWebhook);
+// Internal fulfillment callback from the JVM PSP gateway (server-to-server). Bypasses
+// the user-session guard; authenticity is the shared internal secret (checked inside).
+// A strict per-IP limiter sits in front so a leaked-secret holder can't hammer activations
+// or run a timing oracle — the legitimate JVM caller is well under this rate.
+const fulfillLimiter = rateLimit.strict(Number(process.env.RATE_LIMIT_FULFILL_MAX) || 30);
+router.route('/billing/fulfill').post(fulfillLimiter, require('../controller/internalFulfillController').fulfill);
 // Affiliate click tracking + public marketplace catalog — no session required.
 router.route('/referral/track').post(marketplace.trackReferral);
 router.route('/marketplace/catalog').get(marketplace.catalog);

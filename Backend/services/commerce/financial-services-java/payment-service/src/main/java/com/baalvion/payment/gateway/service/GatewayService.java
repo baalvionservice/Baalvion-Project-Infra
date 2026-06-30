@@ -50,6 +50,7 @@ public class GatewayService {
   private final GatewayWebhookEventRepository webhookEventRepository;
   private final PspConfigResolver resolver;
   private final ObjectMapper objectMapper;
+  private final BillingFulfillmentClient fulfillmentClient;
 
   /**
    * When true (default), a webhook whose amount does not match the recorded charge is REFUSED for
@@ -61,12 +62,14 @@ public class GatewayService {
   public GatewayService(GatewayRegistry registry, GatewayPaymentRepository repository,
                         GatewayWebhookEventRepository webhookEventRepository,
                         PspConfigResolver resolver, ObjectMapper objectMapper,
+                        BillingFulfillmentClient fulfillmentClient,
                         @Value("${app.psp.webhook-strict-amount:true}") boolean webhookStrictAmount) {
     this.registry = registry;
     this.repository = repository;
     this.webhookEventRepository = webhookEventRepository;
     this.resolver = resolver;
     this.objectMapper = objectMapper;
+    this.fulfillmentClient = fulfillmentClient;
     this.webhookStrictAmount = webhookStrictAmount;
   }
 
@@ -262,6 +265,16 @@ public class GatewayService {
 
     log.info("Webhook applied: site={}, provider={}, eventId={}, providerRef={}, status={}",
       sanitizeForLog(slug), providerKey, sanitizeForLog(eventKey), result.providerRef(), result.status());
+
+    // Money landed: fulfill downstream (subscription/credit + invoice + notification) via the
+    // Node billing service. Only for a verified, amount-validated CAPTURED transition. The call is
+    // idempotent + at-least-once: a transient failure throws → this @Transactional method rolls back
+    // (status + event un-persisted) → the provider re-delivers and we retry. Node-side dedup makes
+    // the eventual duplicate delivery a no-op.
+    if (result.status() == GatewayStatus.CAPTURED && amountValidated) {
+      fulfillmentClient.dispatch(payment, result, eventKey);
+    }
+
     return result;
   }
 

@@ -43,10 +43,15 @@ public class WebhookController {
   )
   public ResponseEntity<Map<String, Object>> handle(
     @PathVariable String provider,
-    @RequestParam(value = "site", required = false) String site,
     @RequestBody(required = false) byte[] rawBody,
     HttpServletRequest httpRequest
   ) {
+    // CRITICAL: `site` is read from the QUERY STRING only — never via @RequestParam/getParameter.
+    // For an application/x-www-form-urlencoded POST (PayU) the servlet container parses the request
+    // BODY into parameters on the first getParameter() call, consuming the input stream and leaving
+    // @RequestBody byte[] empty — which silently breaks signature verification (the hash would be
+    // computed over zero bytes). Parsing the query string leaves the body intact for every provider.
+    String site = queryParam(httpRequest.getQueryString(), "site");
     log.info("POST gateway webhook: site={}, provider={}, bytes={}",
       sanitizeForLog(site), sanitizeForLog(provider), rawBody == null ? 0 : rawBody.length);
 
@@ -59,6 +64,25 @@ public class WebhookController {
     body.put("eventId", result.providerEventId());
     body.put("status", result.status().name());
     return ResponseEntity.status(HttpStatus.OK).body(body);
+  }
+
+  /**
+   * Extract a single query-string parameter WITHOUT triggering servlet POST-body parameter parsing
+   * (which would consume the raw body needed for signature verification). Decodes percent-escapes.
+   */
+  private static String queryParam(String queryString, String name) {
+    if (queryString == null || queryString.isEmpty()) {
+      return null;
+    }
+    for (String pair : queryString.split("&")) {
+      int eq = pair.indexOf('=');
+      String key = eq >= 0 ? pair.substring(0, eq) : pair;
+      if (name.equals(key)) {
+        String value = eq >= 0 ? pair.substring(eq + 1) : "";
+        return java.net.URLDecoder.decode(value, java.nio.charset.StandardCharsets.UTF_8);
+      }
+    }
+    return null;
   }
 
   /** Collect inbound headers into a case-insensitive map for the adapter. */

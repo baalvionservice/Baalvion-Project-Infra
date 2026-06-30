@@ -5,6 +5,7 @@ import com.baalvion.payment.gateway.config.PspProperties;
 import com.baalvion.payment.gateway.exception.PspConfigNotFoundException;
 import com.baalvion.payment.gateway.spi.ProviderConfig;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedHashMap;
@@ -43,11 +44,14 @@ public class PspConfigResolver {
 
   private final PspProperties pspProperties;
   private final CmsIntegrationsClient cmsClient;
+  private final boolean globalFallbackEnabled;
   private final Map<String, CacheEntry> cache = new ConcurrentHashMap<>();
 
-  public PspConfigResolver(PspProperties pspProperties, CmsIntegrationsClient cmsClient) {
+  public PspConfigResolver(PspProperties pspProperties, CmsIntegrationsClient cmsClient,
+                           @Value("${app.psp.global-fallback-enabled:true}") boolean globalFallbackEnabled) {
     this.pspProperties = pspProperties;
     this.cmsClient = cmsClient;
+    this.globalFallbackEnabled = globalFallbackEnabled;
   }
 
   /**
@@ -107,6 +111,17 @@ public class PspConfigResolver {
   private ProviderConfig cmsConfig(String slug, String provider) {
     Map<String, Object> entry = findProviderEntry(integrations(slug), provider);
     if (entry == null) {
+      // No per-tenant override in the CMS vault. Fall back to the GLOBAL/default credentials
+      // (app.psp.<provider> env) when they are present, so a site without bespoke keys still
+      // transacts on the platform default account — which in a sandbox/test deploy is the
+      // test merchant (PSP_MOCK + rzp_test_*). This realizes the "global defaults + tenant
+      // overrides, sandbox fallback" contract. Disable with app.psp.global-fallback-enabled=false
+      // to instead fail hard (422) for any tenant lacking its own configured provider.
+      if (globalFallbackEnabled && hasGlobalKeys(provider)) {
+        log.warn("No CMS payment config for site={} provider={} — falling back to GLOBAL default credentials (mock={})",
+          slug, provider, pspProperties.isMock());
+        return globalConfig(provider);
+      }
       throw new PspConfigNotFoundException(provider, slug);
     }
 
@@ -114,6 +129,17 @@ public class PspConfigResolver {
     Map<String, Object> config = objectMap(entry.get("config"));
     boolean mock = !MODE_LIVE.equals(config.get("mode"));
     return new ProviderConfig(provider, mock, secrets, config);
+  }
+
+  /** Whether the global env config carries a usable primary key for {@code provider}. */
+  private boolean hasGlobalKeys(String provider) {
+    String key = switch (provider) {
+      case "razorpay" -> pspProperties.getRazorpay().getKeyId();
+      case "stripe" -> pspProperties.getStripe().getSecretKey();
+      case "payu" -> pspProperties.getPayu().getMerchantKey();
+      default -> null;
+    };
+    return key != null && !key.isBlank();
   }
 
   /**
