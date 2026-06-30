@@ -31,6 +31,7 @@ db.CmsWebsiteMember   = require('./cmsWebsiteMember')(sequelize, DataTypes);
 db.CmsWebsiteIntegration = require('./cmsWebsiteIntegration')(sequelize, DataTypes);
 db.CmsMediaReference  = require('./cmsMediaReference')(sequelize, DataTypes);
 db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
+db.CmsAuthor          = require('./cmsAuthor')(sequelize, DataTypes);
 
 // ── Associations ─────────────────────────────────────────────────────────────
 
@@ -40,7 +41,9 @@ db.CmsWebsite.hasMany(db.CmsTag,           { foreignKey: 'websiteId', as: 'tags'
 db.CmsWebsite.hasMany(db.CmsContent,       { foreignKey: 'websiteId', as: 'contents' });
 db.CmsWebsite.hasMany(db.CmsWebsiteMember, { foreignKey: 'websiteId', as: 'members' });
 db.CmsWebsite.hasMany(db.CmsSeoRedirect,   { foreignKey: 'websiteId', as: 'redirects' });
+db.CmsWebsite.hasMany(db.CmsAuthor,        { foreignKey: 'websiteId', as: 'authors' });
 
+db.CmsAuthor.belongsTo(db.CmsWebsite,   { foreignKey: 'websiteId', as: 'website' });
 db.CmsCategory.belongsTo(db.CmsWebsite, { foreignKey: 'websiteId', as: 'website' });
 db.CmsTag.belongsTo(db.CmsWebsite,      { foreignKey: 'websiteId', as: 'website' });
 db.CmsContent.belongsTo(db.CmsWebsite,  { foreignKey: 'websiteId', as: 'website' });

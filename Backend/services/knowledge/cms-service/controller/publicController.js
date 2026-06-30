@@ -30,4 +30,18 @@ const getCategory = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { getWebsiteInfo, listContent, getContent, getCategory };
+const listAuthors = async (req, res, next) => {
+    try {
+        const authors = await publicService.listPublicAuthors(req.params.websiteSlug);
+        return sendSuccess(req, res, authors);
+    } catch (err) { return next(err); }
+};
+
+const getAuthor = async (req, res, next) => {
+    try {
+        const author = await publicService.getPublicAuthor(req.params.websiteSlug, req.params.slug);
+        return sendSuccess(req, res, author);
+    } catch (err) { return next(err); }
+};
+
+module.exports = { getWebsiteInfo, listContent, getContent, getCategory, listAuthors, getAuthor };

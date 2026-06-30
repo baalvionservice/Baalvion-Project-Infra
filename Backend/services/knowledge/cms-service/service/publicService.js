@@ -1,6 +1,6 @@
 'use strict';
 const { Op } = require('sequelize');
-const { CmsWebsite, CmsContent, CmsCategory, CmsTag } = require('../models');
+const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
@@ -83,10 +83,33 @@ async function getPublicCategory(websiteSlug, categorySlug) {
     return category.toJSON();
 }
 
+// Public author/contributor profiles for E-E-A-T bylines and /author pages.
+const AUTHOR_ATTRS = ['id', 'slug', 'name', 'title', 'credentials', 'bio', 'avatarUrl', 'expertise', 'social', 'seoMetadata'];
+
+async function listPublicAuthors(websiteSlug) {
+    const website = await _resolveWebsite(websiteSlug);
+    const authors = await CmsAuthor.findAll({
+        where: { websiteId: website.id, status: 'active' },
+        attributes: AUTHOR_ATTRS,
+        order: [['sortOrder', 'ASC'], ['name', 'ASC']],
+    });
+    return authors.map((a) => a.toJSON());
+}
+
+async function getPublicAuthor(websiteSlug, slug) {
+    const website = await _resolveWebsite(websiteSlug);
+    const author = await CmsAuthor.findOne({
+        where: { websiteId: website.id, slug, status: 'active' },
+        attributes: AUTHOR_ATTRS,
+    });
+    if (!author) throw new AppError('NOT_FOUND', 'Author not found', 404);
+    return author.toJSON();
+}
+
 async function getPublicWebsiteInfo(websiteSlug) {
     const website = await _resolveWebsite(websiteSlug);
     const { id, name, slug, domain, description, config: cfg, branding, modules } = website.toJSON();
     return { id, name, slug, domain, description, config: cfg, branding, modules };
 }
 
-module.exports = { getPublicContent, listPublicContent, getPublicCategory, getPublicWebsiteInfo };
+module.exports = { getPublicContent, listPublicContent, getPublicCategory, getPublicWebsiteInfo, listPublicAuthors, getPublicAuthor };
