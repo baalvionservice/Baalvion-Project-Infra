@@ -37,6 +37,7 @@ const footerSections = [
       { label: 'About', href: '/about' },
       { label: 'Privacy Policy', href: '/privacy-policy' },
       { label: 'Terms', href: '/terms-of-service' },
+      { label: 'Disclaimer', href: '/disclaimer' },
       { label: 'Contact', href: '/contact' },
     ],
   },
