@@ -82,7 +82,7 @@ const nextConfig: NextConfig = {
     // non-functional without it. Localhost is dev-only; in production an unset var
     // collapses to a same-origin path (404, fail-loud) rather than baking a localhost
     // target into the production routes manifest.
-    const gateway = process.env.GATEWAY_PROXY_TARGET || (isDev ? 'http://localhost:3099' : '');
+    const gateway = process.env.GATEWAY_PROXY_TARGET || (isDev ? 'http://localhost:3099' : 'https://auth.baalvion.com');
     return [
       { source: '/trade-bff/auth/:path*', destination: `${gateway}/auth/:path*` },
       { source: '/trade-bff/:path*', destination: `${gateway}/api/trade/v1/:path*` },
