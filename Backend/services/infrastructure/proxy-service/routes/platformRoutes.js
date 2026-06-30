@@ -16,6 +16,9 @@ const router = express.Router();
 // Billing webhook authenticity is established by gateway signature verification,
 // NOT by a user session — it must bypass auth. Registered before the guard.
 router.route('/billing/webhook').post(controller.billingWebhook);
+// Internal fulfillment callback from the JVM PSP gateway (server-to-server). Bypasses
+// the user-session guard; authenticity is the shared internal secret (checked inside).
+router.route('/billing/fulfill').post(require('../controller/internalFulfillController').fulfill);
 // Affiliate click tracking + public marketplace catalog — no session required.
 router.route('/referral/track').post(marketplace.trackReferral);
 router.route('/marketplace/catalog').get(marketplace.catalog);

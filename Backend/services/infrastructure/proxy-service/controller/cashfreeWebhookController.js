@@ -20,6 +20,9 @@ const cmsVault = require('../service/cmsVault');
 const dedup = require('../service/webhookDedup');
 // Cashfree's webhook secret IS the client secret. Vault (central admin panel) first; env fallback.
 const CASHFREE_SECRET_ENV = process.env.CASHFREE_CLIENT_SECRET || '';
+// Replay freshness window. The signature covers (timestamp+body) so a captured payload is replayable
+// verbatim; rejecting a stale x-webhook-timestamp bounds that window (the DB dedup is the second guard).
+const TOLERANCE_SECONDS = Number(process.env.CASHFREE_TOLERANCE_SECONDS || 300);
 // Idempotency + replay protection is now DURABLE + instance-shared via
 // public.payment_webhook_events keyed on the signature-verified Cashfree payment id. The
 // signature covers (timestamp+body) but is replayable verbatim, so this DB dedup is the replay guard.
@@ -32,6 +35,9 @@ function timingSafeEqual(a, b) {
 }
 
 async function cashfreeWebhook(req, res) {
+    // Tracks a FRESH idempotency claim so the catch can release it on apply-failure (else the orphaned
+    // claim dedups Cashfree's retry → payment captured, never fulfilled). See internalFulfillController.
+    let claimedId = null;
     try {
         const CASHFREE_SECRET = (await cmsVault.getSecret('cashfree', 'clientSecret')) || CASHFREE_SECRET_ENV;
         if (!CASHFREE_SECRET) {
@@ -49,6 +55,13 @@ async function cashfreeWebhook(req, res) {
         if (!timingSafeEqual(signature, expected)) {
             logger.warn('[cashfree-webhook] signature verification failed');
             return res.status(400).json({ error: { code: 'BAD_SIGNATURE', message: 'signature verification failed' } });
+        }
+        // Freshness: x-webhook-timestamp is epoch seconds and is covered by the signature, but a signed
+        // body can be replayed verbatim — reject anything outside the tolerance window (mirrors Stripe).
+        const skew = Math.abs(Math.floor(Date.now() / 1000) - Number(timestamp));
+        if (!Number.isFinite(skew) || skew > TOLERANCE_SECONDS) {
+            logger.warn('[cashfree-webhook] timestamp outside tolerance');
+            return res.status(400).json({ error: { code: 'STALE', message: 'timestamp outside tolerance' } });
         }
 
         let event;
@@ -93,6 +106,7 @@ async function cashfreeWebhook(req, res) {
             if (!claim.fresh) {
                 return res.status(200).json({ received: true, idempotent: true });
             }
+            claimedId = eventId;
         }
 
         if (planSlug === 'pay-as-you-go') {
@@ -110,6 +124,9 @@ async function cashfreeWebhook(req, res) {
         logger.info(`[cashfree-webhook] activated org=${auth.orgId} plan=${planSlug} event=${eventId}`);
         return res.status(200).json({ received: true, activated: true, status: activated && activated.status });
     } catch (e) {
+        // Release the (unapplied) claim so Cashfree's retry can re-fulfill. releaseEvent only deletes rows
+        // still applied=FALSE, so it can never undo a completed activation. 500 → Cashfree retries.
+        if (claimedId) { try { await dedup.releaseEvent('cashfree', claimedId); } catch (_) { /* best-effort */ } }
         logger.error('[cashfree-webhook] handler error:', e.message);
         return res.status(500).json({ error: { code: 'WEBHOOK_ERROR', message: 'internal error' } });
     }

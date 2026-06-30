@@ -41,6 +41,17 @@ spring:
       timeout: 2000
       database: 0
 
+  # RS256 verification source for app.security.enabled=true. Bind the central auth-service JWKS
+  # (JWKS_URI) so the secured filter chain can validate user bearer tokens on /api/**. Gateway
+  # webhooks stay public and server-to-server gateway calls use the internal secret, so this is
+  # only needed for the (non-checkout) authenticated surface. issuer-uri intentionally omitted
+  # (no OIDC discovery endpoint) — jwk-set-uri alone satisfies the secured chain.
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${OAUTH_JWK_SET_URI:${JWKS_URI:}}
+
   kafka:
     bootstrap-servers: ${KAFKA_BROKERS:localhost:9092}
     producer:
@@ -93,13 +104,24 @@ management:
       prometheus:
         enabled: true
 
+# OpenAPI/Swagger UI disabled by default — the PSP gateway exposes no public API docs surface. If
+# springdoc is on the classpath, leaving it enabled would publish the internal payment endpoint schema
+# (Caddy passes /v1/gateway/payments through). Re-enable explicitly in a non-prod profile if needed.
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+
 logging:
   level:
     root: INFO
-    com.baalvion: DEBUG
+    com.baalvion: INFO
     org.springframework.web: INFO
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    # Default to WARN: org.hibernate.SQL=DEBUG + BasicBinder=TRACE log every bound parameter (payment
+    # amounts, provider refs, order metadata) to CloudWatch. Raise to DEBUG/TRACE only in a dev profile.
+    org.hibernate.SQL: WARN
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
 

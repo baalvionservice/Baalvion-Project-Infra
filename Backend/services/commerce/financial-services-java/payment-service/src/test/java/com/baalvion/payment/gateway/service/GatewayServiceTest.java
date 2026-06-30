@@ -45,11 +45,12 @@ class GatewayServiceTest {
   @Mock private PspConfigResolver resolver;
   @Mock private PaymentGateway gateway;
   @Mock private ProviderConfig providerConfig;
+  @Mock private BillingFulfillmentClient fulfillmentClient;
 
   private static final UUID ID = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
   private GatewayService newService() {
-    return new GatewayService(registry, repository, webhookEventRepository, resolver, new ObjectMapper(), true);
+    return new GatewayService(registry, repository, webhookEventRepository, resolver, new ObjectMapper(), fulfillmentClient, true);
   }
 
   private static WebhookResult capturedEvent(String amountMinor) {

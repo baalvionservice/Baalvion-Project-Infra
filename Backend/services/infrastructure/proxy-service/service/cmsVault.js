@@ -15,6 +15,14 @@ const logger = require('./logger');
 
 const CMS_BASE_URL = (process.env.CMS_BASE_URL || 'http://localhost:3011/api/v1').replace(/\/$/, '');
 const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret';
+// Fail-fast: refuse to boot in production with the committed, publicly-known dev secret. This module
+// presents x-internal-secret to the CMS to retrieve DECRYPTED PSP keys, so a default/unset secret would
+// let anyone who knows the literal impersonate proxy-service and pull live merchant credentials. Mirrors
+// the identical guard in routes/billingRoutes.js (and payment-service/cms-service appConfig). Caught at
+// deploy, never silently authenticating with a public string at the first vault read.
+if (process.env.NODE_ENV === 'production' && (!process.env.INTERNAL_SERVICE_SECRET || INTERNAL_SECRET === 'baalvion-internal-dev-secret')) {
+    throw new Error('INTERNAL_SERVICE_SECRET must be set to a non-default value in production (cms-vault)');
+}
 const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'proxy-baalvionstack';
 const CACHE_TTL_MS = 60_000;
 

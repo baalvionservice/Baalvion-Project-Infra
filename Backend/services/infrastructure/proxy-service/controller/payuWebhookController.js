@@ -57,6 +57,10 @@ function parseForm(raw) {
 const landing = (outcome) => `${APP_URL.replace(/\/$/, '')}/app/billing/checkout?payu=${outcome}`;
 
 async function payuWebhook(req, res) {
+    // Tracks a FRESH idempotency claim so the catch can release it on apply-failure. Without this, a
+    // transient error after claiming orphans the row → the provider's retry is deduped → payment captured
+    // but never fulfilled. Mirrors controller/internalFulfillController.js.
+    let claimedTxnid = null;
     try {
         const payu = await cmsVault.getProvider('payu');
         const PAYU_KEY = (payu && payu.secrets && payu.secrets.merchantKey) || PAYU_KEY_ENV;
@@ -108,6 +112,7 @@ async function payuWebhook(req, res) {
             if (!claim.fresh) {
                 return res.redirect(302, landing('success'));
             }
+            claimedTxnid = txnid;
         }
 
         if (planSlug === 'pay-as-you-go') {
@@ -125,6 +130,9 @@ async function payuWebhook(req, res) {
         logger.info(`[payu-webhook] activated org=${auth.orgId} plan=${planSlug} txnid=${txnid}`);
         return res.redirect(302, landing('success'));
     } catch (e) {
+        // Release the (unapplied) claim so PayU's retry can re-fulfill — releaseEvent only deletes rows
+        // still applied=FALSE, so it can never undo a completed activation. 500 → PayU re-posts.
+        if (claimedTxnid) { try { await dedup.releaseEvent('payu', claimedTxnid); } catch (_) { /* best-effort */ } }
         logger.error('[payu-webhook] handler error:', e.message);
         return res.status(500).json({ error: { code: 'WEBHOOK_ERROR', message: 'internal error' } });
     }
