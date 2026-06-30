@@ -10,5 +10,7 @@ router.get('/:websiteSlug', ctrl.getWebsiteInfo);
 router.get('/:websiteSlug/content', ctrl.listContent);
 router.get('/:websiteSlug/content/:slug', ctrl.getContent);
 router.get('/:websiteSlug/categories/:categorySlug', ctrl.getCategory);
+router.get('/:websiteSlug/authors', ctrl.listAuthors);
+router.get('/:websiteSlug/authors/:slug', ctrl.getAuthor);
 
 module.exports = router;
