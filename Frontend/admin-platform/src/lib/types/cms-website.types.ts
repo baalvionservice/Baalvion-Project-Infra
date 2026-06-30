@@ -61,6 +61,11 @@ export interface WebsiteConfig {
     defaultMetaDescription?: string;
     defaultOgImage?: string;
   };
+  /** Public monetization config. AdSense publisher ID ("ca-pub-XXXX…") ships in the
+   *  page markup + ads.txt — public, not a secret. Empty/undefined disables ads. */
+  ads?: {
+    adsensePublisherId?: string;
+  };
 }
 
 export interface Website {

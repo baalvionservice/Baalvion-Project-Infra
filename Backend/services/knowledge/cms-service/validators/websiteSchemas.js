@@ -12,7 +12,30 @@ const websiteConfigSchema = z.object({
     postsPerPage: z.number().int().min(1).max(100).default(10),
     enableComments: z.boolean().default(false),
     enableAnalytics: z.boolean().default(true),
-    seoDefaults: z.object({ titleSuffix: z.string().max(100).optional() }).optional(),
+    seoDefaults: z
+        .object({
+            titleSuffix: z.string().max(100).optional(),
+            defaultMetaDescription: z.string().max(300).optional(),
+            defaultOgImage: z.string().max(500).optional(),
+        })
+        .optional(),
+    // Public per-site monetization config. The AdSense publisher ID ships in the
+    // page markup and ads.txt, so it is NOT a secret — it lives here in the public
+    // website config (exposed via GET /public/:slug), not the encrypted secrets vault.
+    ads: z
+        .object({
+            // Format: "ca-pub-XXXXXXXXXXXXXXXX". Empty string clears it (ads disabled).
+            adsensePublisherId: z
+                .string()
+                .trim()
+                .regex(
+                    /^ca-pub-\d{10,20}$/,
+                    'Must be a Google AdSense publisher ID like "ca-pub-1234567890123456"',
+                )
+                .or(z.literal(''))
+                .optional(),
+        })
+        .optional(),
 }).default({});
 
 const brandingSchema = z.object({

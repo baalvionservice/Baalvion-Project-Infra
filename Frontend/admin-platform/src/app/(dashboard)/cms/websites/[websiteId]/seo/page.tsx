@@ -28,13 +28,19 @@ export default function WebsiteSeoPage({
   const [titleSuffix, setTitleSuffix] = useState('');
   const [defaultDesc, setDefaultDesc] = useState('');
   const [defaultOgImage, setDefaultOgImage] = useState('');
+  const [adsensePublisherId, setAdsensePublisherId] = useState('');
   const [redirects, setRedirects] = useState<Array<{ from: string; to: string; code: number }>>([]);
+
+  // Blank clears the ID (disables ads); otherwise it must match Google's "ca-pub-…" format.
+  const adsenseTrimmed = adsensePublisherId.trim();
+  const isAdsenseValid = adsenseTrimmed === '' || /^ca-pub-\d{10,20}$/.test(adsenseTrimmed);
 
   useEffect(() => {
     if (website) {
       setTitleSuffix(website.config?.seoDefaults?.titleSuffix ?? '');
       setDefaultDesc(website.config?.seoDefaults?.defaultMetaDescription ?? '');
       setDefaultOgImage(website.config?.seoDefaults?.defaultOgImage ?? '');
+      setAdsensePublisherId(website.config?.ads?.adsensePublisherId ?? '');
       setBreadcrumbs([
         { label: 'CMS', href: '/cms' },
         { label: website.name, href: `/cms/websites/${websiteId}` },
@@ -52,6 +58,16 @@ export default function WebsiteSeoPage({
           defaultMetaDescription: defaultDesc || undefined,
           defaultOgImage: defaultOgImage || undefined,
         },
+      },
+    });
+  };
+
+  const handleSaveMonetization = () => {
+    if (!isAdsenseValid) return;
+    update({
+      config: {
+        ...website?.config,
+        ads: { adsensePublisherId: adsenseTrimmed || undefined },
       },
     });
   };
@@ -89,6 +105,7 @@ export default function WebsiteSeoPage({
       <Tabs defaultValue="defaults">
         <TabsList>
           <TabsTrigger value="defaults">Defaults</TabsTrigger>
+          <TabsTrigger value="monetization">Monetization</TabsTrigger>
           <TabsTrigger value="redirects">Redirects</TabsTrigger>
           <TabsTrigger value="sitemap">Sitemap</TabsTrigger>
         </TabsList>
@@ -137,6 +154,49 @@ export default function WebsiteSeoPage({
 
               <Button size="sm" onClick={handleSaveDefaults} disabled={isPending}>
                 {isPending ? 'Saving...' : 'Save Defaults'}
+              </Button>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="monetization" className="mt-4 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm">Google AdSense</CardTitle>
+              <CardDescription className="text-xs">
+                Enter your AdSense publisher ID to enable ads on this site. The ID is injected
+                into every page and the <code className="bg-muted px-1 rounded">/ads.txt</code>{' '}
+                file. Leave blank to disable ads. The site reads this automatically — no redeploy
+                needed.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs">AdSense Publisher ID</Label>
+                <Input
+                  className="h-8 text-xs max-w-sm font-mono"
+                  placeholder="ca-pub-1234567890123456"
+                  value={adsensePublisherId}
+                  onChange={(e) => setAdsensePublisherId(e.target.value)}
+                />
+                {!isAdsenseValid ? (
+                  <p className="text-[11px] text-destructive">
+                    Must look like “ca-pub-” followed by 10–20 digits.
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-muted-foreground">
+                    Found under AdSense → Account → Settings. Format:
+                    “ca-pub-XXXXXXXXXXXXXXXX”.
+                  </p>
+                )}
+              </div>
+
+              <Button
+                size="sm"
+                onClick={handleSaveMonetization}
+                disabled={isPending || !isAdsenseValid}
+              >
+                {isPending ? 'Saving...' : 'Save Monetization'}
               </Button>
             </CardContent>
           </Card>

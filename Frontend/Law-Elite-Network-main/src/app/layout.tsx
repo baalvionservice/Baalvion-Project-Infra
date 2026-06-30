@@ -8,14 +8,10 @@ import { Navbar } from '@/components/navbar';
 import NotificationToastListener from '@/components/notifications/NotificationToastListener';
 import { AIChatAssistantWrapper } from '@/components/ai/AIChatAssistantWrapper';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
+import { cmsGetAdsenseClient } from '@/lib/cms';
 import './globals.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
-
-// Google AdSense publisher ID (e.g. "ca-pub-1234567890123456"). Set via env at deploy
-// time so no client ID is hardcoded. When unset (local/dev), the AdSense loader is
-// omitted entirely — the site renders normally without ads.
-const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -112,11 +108,14 @@ const webSiteJsonLd = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // AdSense publisher ID is managed in the CMS admin panel (Website → SEO →
+  // Monetization); resolved server-side, hourly-cached, env-fallback inside.
+  const ADSENSE_CLIENT = await cmsGetAdsenseClient();
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

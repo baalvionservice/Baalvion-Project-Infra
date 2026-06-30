@@ -1,22 +1,28 @@
 import Script from "next/script";
 
 /**
- * Analytics & ad scripts, loaded only when their IDs are configured via env.
+ * Analytics & ad scripts, loaded only when their IDs are configured.
  *
  * Previously these were hardcoded placeholder IDs (`G-IMP-INDEX-42`,
  * `ca-pub-…`) injected as raw <script> tags inside the App Router <head>.
  * That produced CSP violations on every page (placeholder hosts are blocked)
- * and risked head-hydration mismatches. Gating on env means: no env → nothing
- * renders (clean console); real env → scripts load via next/script in <body>.
+ * and risked head-hydration mismatches. Gating on a real ID means: no ID →
+ * nothing renders (clean console); real ID → scripts load via next/script.
  *
- * Enable in production by setting:
- *   NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
- *   NEXT_PUBLIC_ADSENSE_CLIENT=ca-pub-XXXXXXXXXXXXXXXX
+ * The AdSense client is resolved server-side from the CMS admin panel
+ * (Website → SEO → Monetization, via getSiteAdsenseClient) and passed in as
+ * `adsenseClient`; that resolver falls back to NEXT_PUBLIC_ADSENSE_CLIENT.
+ * GA stays on env: NEXT_PUBLIC_GA_ID=G-XXXXXXXXXX
  */
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
-const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT;
 
-export function Analytics() {
+interface AnalyticsProps {
+  /** Resolved AdSense publisher ID ("ca-pub-…"), or null/undefined to disable ads. */
+  adsenseClient?: string | null;
+}
+
+export function Analytics({ adsenseClient }: AnalyticsProps) {
+  const ADSENSE_CLIENT = adsenseClient;
   return (
     <>
       {GA_ID ? (

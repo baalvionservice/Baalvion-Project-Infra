@@ -27,6 +27,39 @@ const CMS_PUBLIC_URL =
     : 'http://localhost:3018/api/v1/public');
 const SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 
+// Validates Google's publisher-ID shape ("ca-pub-" + 10–20 digits). Anything else
+// (placeholder text, a stray paste) is treated as "no ad client" so we never emit a
+// broken AdSense tag.
+const ADSENSE_RE = /^ca-pub-\d{10,20}$/;
+
+/**
+ * Per-site AdSense publisher ID, managed in the CMS admin panel
+ * (Website → SEO → Monetization) and exposed on the public website-info endpoint
+ * `GET {CMS_PUBLIC_URL}/{site}` as `config.ads.adsensePublisherId`.
+ *
+ * Falls back to the NEXT_PUBLIC_ADSENSE_CLIENT env var when the CMS is unreachable
+ * or hasn't been configured yet. Returns null when no valid ID is available, so
+ * callers render no ad markup at all. Cached for an hour (revalidate) rather than
+ * `no-store` so it doesn't opt the whole site into dynamic rendering.
+ */
+export async function getSiteAdsenseClient(): Promise<string | null> {
+  const envFallback = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
+  try {
+    const res = await fetch(`${CMS_PUBLIC_URL}/${SITE_SLUG}`, {
+      headers: { Accept: 'application/json' },
+      next: { revalidate: 3600 },
+    });
+    if (res.ok) {
+      const json = (await res.json()) as { data?: { config?: { ads?: { adsensePublisherId?: string } } } };
+      const fromCms = json?.data?.config?.ads?.adsensePublisherId?.trim();
+      if (fromCms && ADSENSE_RE.test(fromCms)) return fromCms;
+    }
+  } catch {
+    // CMS unreachable — fall through to env fallback below.
+  }
+  return envFallback && ADSENSE_RE.test(envFallback) ? envFallback : null;
+}
+
 // ── cms-service wire shapes ─────────────────────────────────────────────────
 export interface CmsBlock {
   id: string;
