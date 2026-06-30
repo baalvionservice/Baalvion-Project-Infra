@@ -74,16 +74,19 @@ export function PublicFooter() {
             <div className="md:col-span-2 space-y-4 text-[11px] font-medium text-white/70">
               <ul className="space-y-3">
                 <li><Link href="/about-us" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/authors" className="hover:text-white transition-colors">Our Contributors</Link></li>
+                <li><Link href="/contact-us" className="hover:text-white transition-colors">Contact Us</Link></li>
                 <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/advertise" className="hover:text-white transition-colors">Advertise</Link></li>
+                <li><Link href="/editorial-standards" className="hover:text-white transition-colors">Editorial Standards</Link></li>
+                <li><Link href="/editorial-process" className="hover:text-white transition-colors">Editorial Process</Link></li>
               </ul>
             </div>
 
             <div className="md:col-span-3 space-y-4 text-[11px] font-medium text-white/70">
               <ul className="space-y-3">
-                <li><Link href="/editorial-process" className="hover:text-white transition-colors">Editorial Process</Link></li>
-                <li><Link href="/contact-us" className="hover:text-white transition-colors">Contact Us</Link></li>
+                <li><Link href="/corrections" className="hover:text-white transition-colors">Corrections</Link></li>
+                <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
                 <li><Link href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</Link></li>
               </ul>

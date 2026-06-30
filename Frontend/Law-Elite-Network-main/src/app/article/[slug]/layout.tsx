@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
+import { cmsGetArticleBySlug } from '@/lib/cms';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
-async function fetchArticle(slug: string): Promise<any | null> {
+async function fetchFromLawService(slug: string): Promise<any | null> {
   try {
     // /articles/:slug resolves by slug (the ?slug= list filter is not applied server-side).
     const r = await fetch(`${API}/articles/${encodeURIComponent(slug)}`, { next: { revalidate: 3600 } });
@@ -15,6 +16,27 @@ async function fetchArticle(slug: string): Promise<any | null> {
   } catch {
     return null;
   }
+}
+
+/**
+ * Source-of-truth order for SEO metadata/JSON-LD: central CMS first, then
+ * law-service. Mirrors the client page so the indexed title/description/canonical
+ * track whatever is authoritative in the admin console.
+ */
+async function fetchArticle(slug: string): Promise<any | null> {
+  const cms = await cmsGetArticleBySlug(slug);
+  if (cms) {
+    return {
+      id: cms.id,
+      title: cms.title,
+      excerpt: cms.excerpt,
+      tags: [],
+      category: cms.category,
+      updated_at: cms.updatedAt,
+      published_at: cms.updatedAt,
+    };
+  }
+  return fetchFromLawService(slug);
 }
 
 export async function generateMetadata(

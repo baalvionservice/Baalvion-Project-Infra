@@ -65,8 +65,10 @@ export default function ArticleDeepDivePage() {
     if (!slug) return;
     setArticleLoading(true);
 
-    // Try law-service first, then CMS-managed articles (admin-platform console),
-    // then the static seed — so console-published articles open correctly.
+    // Source-of-truth order: central CMS (admin.baalvion.com) FIRST, then
+    // law-service, then the bundled editorial library, then the static seed.
+    // The CMS is authoritative so anything published/edited in the admin console
+    // wins over the legacy law-service record.
     const fromCms = async () => {
       try {
         const r = await fetch(`/api/cms/articles/${slug}`);
@@ -79,26 +81,32 @@ export default function ArticleDeepDivePage() {
       }
       return null;
     };
+    const fromLawService = async () => {
+      try {
+        const res = await articlesPublicApi.get(slug as string);
+        return res.data?.data || null;
+      } catch {
+        return null;
+      }
+    };
     const fromSeed = () => {
       const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug);
       return seedMatch
         ? { ...seedMatch, content: seedMatch.content || generateFallbackContent(seedMatch.title), updatedAt: "February 12, 2025" }
         : null;
     };
-
-    // Bundled editorial library (full HTML content) sits between the CMS and
-    // the lightweight static seed so console-published articles still win.
+    // Bundled editorial library (full HTML content) is the offline baseline.
     const fromBundled = () => getArticleBySlug(slug as string);
 
-    articlesPublicApi.get(slug as string)
-      .then(async (res) => {
-        const item = res.data?.data || null;
-        setArticle(item || (await fromCms()) || fromBundled() || fromSeed());
-      })
-      .catch(async () => {
-        setArticle((await fromCms()) || fromBundled() || fromSeed());
-      })
-      .finally(() => setArticleLoading(false));
+    (async () => {
+      try {
+        const resolved =
+          (await fromCms()) || (await fromLawService()) || fromBundled() || fromSeed();
+        setArticle(resolved);
+      } finally {
+        setArticleLoading(false);
+      }
+    })();
   }, [slug]);
 
   useEffect(() => {

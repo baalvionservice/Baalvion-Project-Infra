@@ -208,3 +208,76 @@ export async function cmsGetArticleBySlug(slug: string): Promise<CmsArticle | nu
   const c = await getContent(slug);
   return c ? toArticle(c) : null;
 }
+
+// ── Author / contributor profiles (E-E-A-T) ──────────────────────────────────
+export interface CmsAuthor {
+  slug: string;
+  name: string;
+  title?: string;
+  credentials?: string;
+  bio?: string;
+  avatarUrl?: string;
+  expertise?: string[];
+  social?: { x?: string; linkedin?: string };
+}
+
+function toAuthor(raw: any): CmsAuthor | null {
+  if (!raw || !raw.slug || !raw.name) return null;
+  return {
+    slug: String(raw.slug),
+    name: String(raw.name),
+    title: raw.title ?? undefined,
+    credentials: raw.credentials ?? undefined,
+    bio: raw.bio ?? undefined,
+    avatarUrl: raw.avatarUrl ?? raw.avatar_url ?? undefined,
+    expertise: Array.isArray(raw.expertise) ? raw.expertise : undefined,
+    social: raw.social && typeof raw.social === 'object' ? raw.social : undefined,
+  };
+}
+
+/**
+ * List author/contributor profiles managed in the CMS. The endpoint is part of
+ * the public delivery API once cms-service ships the Author entity; until then
+ * this returns [] and callers fall back to the bundled profiles in
+ * `@/data/authors`.
+ */
+export async function cmsGetAuthors(): Promise<CmsAuthor[]> {
+  const j = await fetchJSON(`${BASE}/authors`);
+  if (!j || !Array.isArray(j.data)) return [];
+  return j.data.map(toAuthor).filter(Boolean) as CmsAuthor[];
+}
+
+/** Fetch a single CMS author profile by slug (null until the backend ships it). */
+export async function cmsGetAuthorBySlug(slug: string): Promise<CmsAuthor | null> {
+  const j = await fetchJSON(`${BASE}/authors/${encodeURIComponent(slug)}`);
+  return j && j.data ? toAuthor(j.data) : null;
+}
+
+// ── Subcategory delivery (hierarchical taxonomy) ─────────────────────────────
+export interface CmsTaxonomyNode {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  parentSlug?: string;
+  seo?: Record<string, any>;
+}
+
+/**
+ * Resolve a subcategory under a parent category from the CMS taxonomy. Returns
+ * null until the public taxonomy endpoint is live; callers fall back to bundled
+ * article taxonomy refs.
+ */
+export async function cmsGetSubcategory(categorySlug: string, subSlug: string): Promise<CmsTaxonomyNode | null> {
+  const j = await fetchJSON(`${BASE}/categories/${encodeURIComponent(categorySlug)}/subcategories/${encodeURIComponent(subSlug)}`);
+  if (!j || !j.data) return null;
+  const d = j.data;
+  return {
+    id: String(d.id ?? subSlug),
+    name: String(d.name ?? subSlug),
+    slug: String(d.slug ?? subSlug),
+    description: d.description ?? undefined,
+    parentSlug: d.parentSlug ?? categorySlug,
+    seo: d.seoMetadata ?? d.seo ?? undefined,
+  };
+}

@@ -1,4 +1,6 @@
 import { MetadataRoute } from 'next';
+import { getAllArticles } from '@/data/law-content';
+import { getAllAuthors } from '@/data/authors';
 
 // Render at request time, never at build time. This route fetches from law-service,
 // and a build-time fetch against an unreachable API blocks `next build` (CI timeout).
@@ -12,7 +14,14 @@ const FETCH_TIMEOUT_MS = 4000;
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
 interface LawyerEntry { id: string; updated_at?: string; updatedAt?: string }
-interface ArticleEntry { slug: string; updated_at?: string; updatedAt?: string }
+interface TaxonomyRef { slug?: string }
+interface ArticleEntry {
+  slug: string;
+  updated_at?: string;
+  updatedAt?: string;
+  category?: TaxonomyRef;
+  subcategory?: TaxonomyRef;
+}
 interface CategoryEntry { slug: string; updated_at?: string; updatedAt?: string }
 
 // law-service wraps lists as { data: { items: [...] } } and singles as { data: [...] }.
@@ -55,6 +64,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/search`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.9 },
     { url: `${BASE_URL}/plans`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
     { url: `${BASE_URL}/about-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
+    { url: `${BASE_URL}/authors`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${BASE_URL}/editorial-standards`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
+    { url: `${BASE_URL}/corrections`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/contact-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
     { url: `${BASE_URL}/careers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.5 },
     { url: `${BASE_URL}/advertise`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
@@ -85,5 +97,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...staticRoutes, ...lawyerRoutes, ...articleRoutes, ...categoryRoutes];
+  // Subcategory routes: emit `/law/{categorySlug}/{subSlug}` for every category+subcategory
+  // pair that has at least one article. Derived from the bundled baseline (always present)
+  // unioned with any taxonomy slugs the live API returns — deduped by the composite path.
+  const taxonomyPairs = new Map<string, string>(); // `${cat}/${sub}` -> route URL
+  const addPair = (catSlug?: string, subSlug?: string) => {
+    if (!catSlug || !subSlug) return;
+    taxonomyPairs.set(`${catSlug}/${subSlug}`, `${BASE_URL}/law/${catSlug}/${subSlug}`);
+  };
+  getAllArticles().forEach((a) => addPair(a.category?.slug, a.subcategory?.slug));
+  articles.forEach((a) => addPair(a.category?.slug, a.subcategory?.slug));
+
+  const subcategoryRoutes: MetadataRoute.Sitemap = Array.from(taxonomyPairs.values()).map((url) => ({
+    url,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.55,
+  }));
+
+  // Author profile pages — one per contributor for E-E-A-T discoverability.
+  const authorRoutes: MetadataRoute.Sitemap = getAllAuthors().map((a) => ({
+    url: `${BASE_URL}/author/${a.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.45,
+  }));
+
+  return [
+    ...staticRoutes,
+    ...lawyerRoutes,
+    ...articleRoutes,
+    ...categoryRoutes,
+    ...subcategoryRoutes,
+    ...authorRoutes,
+  ];
 }
