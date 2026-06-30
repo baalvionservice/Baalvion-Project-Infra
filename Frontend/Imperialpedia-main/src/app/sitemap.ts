@@ -126,6 +126,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE}/transparency`, lastModified: now, changeFrequency: 'monthly', priority: 0.4 },
     { url: `${BASE}/privacy-policy`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE}/terms-of-service`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE}/disclaimer`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
   const [companies, countries, industries, technologies, terms, reviews, articles, news] =

@@ -12,6 +12,11 @@ import './globals.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
+// Google AdSense publisher ID (e.g. "ca-pub-1234567890123456"). Set via env at deploy
+// time so no client ID is hardcoded. When unset (local/dev), the AdSense loader is
+// omitted entirely — the site renders normally without ads.
+const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   // Suppress any favicon (no icon logo in the browser tab). `data:,` is an empty
@@ -122,6 +127,16 @@ export default function RootLayout({
           rel="stylesheet"
         />
         <meta name="theme-color" content="#1e3a5f" />
+        {ADSENSE_CLIENT && (
+          <>
+            <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
+            <script
+              async
+              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+              crossOrigin="anonymous"
+            />
+          </>
+        )}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}

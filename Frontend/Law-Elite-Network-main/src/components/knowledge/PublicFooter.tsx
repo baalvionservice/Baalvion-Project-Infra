@@ -59,12 +59,12 @@ export function PublicFooter() {
             {/* Middle: Primary Navigation */}
             <div className="md:col-span-3">
               <ul className="space-y-4 text-[13px] font-bold uppercase tracking-widest">
-                <li><Link href="/" className="hover:text-blue-300 transition-colors">Business & Corporate</Link></li>
-                <li><Link href="/" className="hover:text-blue-300 transition-colors">Criminal Law</Link></li>
-                <li><Link href="/" className="hover:text-blue-300 transition-colors">Family & Personal</Link></li>
-                <li><Link href="/" className="hover:text-blue-300 transition-colors">Tax & Finance</Link></li>
-                <li><Link href="/" className="hover:text-blue-300 transition-colors">Employment & Labor</Link></li>
-                <li><Link href="/" className="hover:text-blue-300 transition-colors">Technology & IP</Link></li>
+                <li><Link href="/law/business-corporate" className="hover:text-blue-300 transition-colors">Business & Corporate</Link></li>
+                <li><Link href="/law/criminal-law" className="hover:text-blue-300 transition-colors">Criminal Law</Link></li>
+                <li><Link href="/law/family-personal" className="hover:text-blue-300 transition-colors">Family & Personal</Link></li>
+                <li><Link href="/law/tax-finance" className="hover:text-blue-300 transition-colors">Tax & Finance</Link></li>
+                <li><Link href="/law/employment-labor" className="hover:text-blue-300 transition-colors">Employment & Labor</Link></li>
+                <li><Link href="/law/technology-ip" className="hover:text-blue-300 transition-colors">Technology & IP</Link></li>
                 <li><Link href="/lawyers" className="hover:text-blue-300 transition-colors">Counsel Registry</Link></li>
                 <li><Link href="/legal" className="hover:text-blue-300 transition-colors">Encyclopedia</Link></li>
               </ul>
@@ -85,6 +85,7 @@ export function PublicFooter() {
                 <li><Link href="/editorial-process" className="hover:text-white transition-colors">Editorial Process</Link></li>
                 <li><Link href="/contact-us" className="hover:text-white transition-colors">Contact Us</Link></li>
                 <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                <li><Link href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</Link></li>
               </ul>
             </div>
           </div>
