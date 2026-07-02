@@ -57,8 +57,7 @@ api.baalvion.com {
 	# logout) — the gateway BFF that issues the session cookies the FE expects.
 	@identity_auth_bff path /api/v1/identity/auth/v1/auth /api/v1/identity/auth/v1/auth/*
 	handle @identity_auth_bff {
-		uri strip_prefix /api/v1/identity/auth/v1/auth
-		rewrite * /auth{uri}
+		uri replace /api/v1/identity/auth/v1/auth /auth
 		reverse_proxy app-identity:3026
 	}
 
