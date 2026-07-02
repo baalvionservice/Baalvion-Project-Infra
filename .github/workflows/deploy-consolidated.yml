@@ -271,6 +271,46 @@ jobs:
               -f deploy/consolidated/docker-compose.prod.yml up -d --no-deps --force-recreate caddy
             docker image prune -f
 
+      - name: Bootstrap / repair platform super-admin (idempotent)
+        if: steps.gate.outputs.ready == 'true'
+        continue-on-error: true          # never block the backend roll on the admin seed
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          # bootstrapSuperAdmin.js is idempotent (ON CONFLICT upserts the user + the
+          # baalvion-platform org + a role='super_admin' membership — the exact claim the
+          # login token derives its role from and the /admin gate checks). Running it every
+          # deploy makes the super-admin self-healing: if the account is missing or its
+          # password drifted, this re-asserts it from Secrets Manager.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-core
+            ENV=deploy/consolidated/.env
+            # SUPERADMIN_EMAIL/PASSWORD are injected into the box .env from Secrets Manager
+            # (baalvion/superadmin). Read them without leaking the value into CI logs.
+            SA_EMAIL="$(grep -E '^SUPERADMIN_EMAIL=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+            SA_PASS="$(grep -E '^SUPERADMIN_PASSWORD=' "$ENV" | head -1 | cut -d= -f2- | tr -d '\r' || true)"
+            case "${SA_EMAIL}::${SA_PASS}" in
+              ::* | *::|*__from_secrets_manager__*)
+                echo "::notice title=Superadmin seed skipped::SUPERADMIN_EMAIL/PASSWORD not populated in the box .env (set them from Secrets Manager baalvion/superadmin)."
+                exit 0 ;;
+            esac
+            COMPOSE="docker compose --env-file $ENV \
+              -f deploy/consolidated/docker-compose.prod.yml \
+              -f deploy/consolidated/docker-compose.ssl-override.yml"
+            # PGSSLMODE=require → the raw pg client in the script negotiates TLS against the
+            # force_ssl RDS (NODE_EXTRA_CA_CERTS is already mounted on app-identity by the
+            # ssl-override, so the RDS CA verifies). -T: no TTY under CI.
+            $COMPOSE exec -T \
+              -e SUPERADMIN_EMAIL="${SA_EMAIL}" \
+              -e SUPERADMIN_PASSWORD="${SA_PASS}" \
+              -e PGSSLMODE=require \
+              app-identity \
+              node /app/Backend/services/identity/auth-service/scripts/bootstrapSuperAdmin.js
+            echo "::notice title=Superadmin seeded::${SA_EMAIL} asserted with role=super_admin."
+
       - name: Smoke test public ingress
         if: steps.gate.outputs.ready == 'true'
         continue-on-error: true
