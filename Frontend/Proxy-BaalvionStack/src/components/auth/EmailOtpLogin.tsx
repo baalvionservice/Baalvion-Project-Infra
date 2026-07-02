@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Mail, ArrowRight, ArrowLeft, KeyRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,8 +20,16 @@ const Spinner = () => (
  */
 export function EmailOtpLogin() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const { loginWithTokens } = useAuth();
+
+  // Honour ?redirect=<path> (e.g. from a gated /admin) — same-origin paths only.
+  const rawRedirect = searchParams.get("redirect");
+  const redirectTo =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/app/dashboard";
 
   const [step, setStep] = useState<Step>("trigger");
   const [email, setEmail] = useState("");
@@ -61,8 +69,8 @@ export function EmailOtpLogin() {
     try {
       const tokens = await authClient.emailOtpVerify(email.trim(), code.trim());
       loginWithTokens(tokens);
-      toast({ title: "Welcome!", description: "Redirecting to your dashboard..." });
-      navigate("/app/dashboard", { replace: true });
+      toast({ title: "Welcome!", description: "Redirecting…" });
+      navigate(redirectTo, { replace: true });
     } catch (err: unknown) {
       toast({
         title: "Invalid code",

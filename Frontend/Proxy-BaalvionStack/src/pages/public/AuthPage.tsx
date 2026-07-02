@@ -86,12 +86,20 @@ const AuthPage = () => {
     navigate(location.pathname, { replace: true });
   }, [searchParams, toast, navigate, location.pathname]);
 
+  // A gated page (e.g. /admin) sends us here as /login?redirect=<path>. Only honour
+  // same-origin absolute paths so ?redirect can't become an open-redirect vector.
+  const rawRedirect = searchParams.get("redirect");
+  const redirectTo =
+    rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
+      ? rawRedirect
+      : "/app/dashboard";
+
   const onLoginSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
       await login(data.email, data.password);
-      toast({ title: "Welcome back!", description: "Redirecting to dashboard..." });
-      navigate("/app/dashboard", { replace: true });
+      toast({ title: "Welcome back!", description: "Redirecting…" });
+      navigate(redirectTo, { replace: true });
     } catch (err: unknown) {
       toast({
         title: "Login failed",

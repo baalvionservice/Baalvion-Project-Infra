@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
+import { Outlet, Link, useLocation, Navigate } from "react-router-dom";
 import {
   Users, CreditCard, MessageSquare, LayoutDashboard, ChevronLeft, Shield,
   Server, Route, ShieldAlert, Activity, TrendingUp, Map, Heart, Rocket,
@@ -6,6 +6,7 @@ import {
   Globe, Brain, Store, ClipboardList
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CommandPalette } from "@/components/layout/CommandPalette";
@@ -43,8 +44,56 @@ const adminNavItems = [
   { icon: MessageSquare, label: "Support Tickets", path: "/admin/tickets" },
 ];
 
+// Only platform-level admins may open the console. Mirrors the backend gate
+// (proxy-service `requirePlatformAdmin`): platform_admin OR the higher super_admin.
+const PLATFORM_ADMIN_ROLES = new Set(["platform_admin", "super_admin"]);
+
+function AdminAccessDenied({ email, onSignOut }: { email?: string; onSignOut: () => void }) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background p-6">
+      <div className="w-full max-w-md text-center space-y-6">
+        <div className="mx-auto w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
+          <ShieldAlert className="w-7 h-7 text-destructive" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold text-foreground">Admin access required</h1>
+          <p className="text-muted-foreground">
+            {email ? (
+              <>You're signed in as <span className="text-foreground font-medium">{email}</span>, which doesn't have</>
+            ) : (
+              <>This account doesn't have</>
+            )}{" "}
+            platform-admin permissions. Sign in with a super-admin account to open the admin panel.
+          </p>
+        </div>
+        <div className="flex items-center justify-center gap-3">
+          <Button variant="outline" onClick={onSignOut}>Sign out</Button>
+          <Link to="/app/dashboard">
+            <Button variant="ghost">Back to app</Button>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminLayout() {
   const location = useLocation();
+  const { isInitialized, isAuthenticated, user, logout } = useAuth();
+
+  // Silent session-restore still in flight — render nothing to avoid a flash of
+  // the admin shell (or a premature redirect) before the session is known.
+  if (!isInitialized) return null;
+
+  // Not signed in → send to login, remembering the intended admin destination.
+  if (!isAuthenticated) {
+    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+  }
+
+  // Signed in but not a platform admin → hard stop (the API enforces this too).
+  if (!PLATFORM_ADMIN_ROLES.has(user?.role ?? "")) {
+    return <AdminAccessDenied email={user?.email} onSignOut={logout} />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
