@@ -26,10 +26,22 @@ const toAppError = (err) => new AppError((err.code || 'unauthorized').toUpperCas
  * auth token can't distinguish candidate/recruiter/admin and doesn't point at the employer org.
  * The jobs-service owns the portal role + the shared employer org, keyed by the user's EMAIL:
  *   - email in jobs.system_users  → that role (SUPER_ADMIN/ADMIN/RECRUITER/…) on the employer org
+ *   - platform super-admin token  → SUPER_ADMIN (no per-site staff row needed)
  *   - otherwise                   → CANDIDATE (their own application data, looked up by email)
  * For staff we override req.auth.orgId to the employer org so every existing org-scoped
  * controller operates on the right tenant unchanged.
  */
+// Central identity super-admins carry these in the RS256 token's roles[] (super_admin from the
+// team_members membership; platform_admin from users.platform_role). Either grants top portal
+// access on every surface WITHOUT needing a jobs.system_users row — so the one platform
+// superadmin id/password opens the jobs admin panel, and stays working across re-seeds.
+const PLATFORM_ADMIN_ROLES = new Set(['super_admin', 'platform_admin']);
+
+function isPlatformAdminToken(req) {
+    const roles = Array.isArray(req.auth && req.auth.roles) ? req.auth.roles : [];
+    return roles.some((r) => PLATFORM_ADMIN_ROLES.has(String(r).toLowerCase()));
+}
+
 async function resolvePortal(req) {
     let email = null;
     try {
@@ -38,16 +50,20 @@ async function resolvePortal(req) {
     } catch { /* ignore */ }
 
     req.portal = { role: 'CANDIDATE', email, candidateId: null, systemUserId: null, employerOrgId: req.auth.orgId };
-    if (!email) return;
 
     const db = require('../models');
-    const su = await db.SystemUser.findOne({ where: { email } });
+    const su = email ? await db.SystemUser.findOne({ where: { email } }) : null;
     if (su) {
         req.portal.role = su.role;
         req.portal.systemUserId = su.id;
         req.portal.employerOrgId = su.org_id;
         req.auth.orgId = su.org_id; // staff operate on the employer tenant
-    } else {
+    } else if (isPlatformAdminToken(req)) {
+        // Platform super-admin without a dedicated ATS staff row — grant the top portal role
+        // so the admin console opens. Org stays the token's own org (they read cross-tenant
+        // via their platform grant, not via jobs org-scoping).
+        req.portal.role = 'SUPER_ADMIN';
+    } else if (email) {
         const cand = await db.Candidate.findOne({ where: { email }, order: [['created_at', 'DESC']] });
         if (cand) req.portal.candidateId = cand.id;
     }
