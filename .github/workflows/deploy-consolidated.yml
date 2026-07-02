@@ -309,7 +309,18 @@ jobs:
               -e PGSSLMODE=require \
               app-identity \
               node /app/Backend/services/identity/auth-service/scripts/bootstrapSuperAdmin.js
-            echo "::notice title=Superadmin seeded::${SA_EMAIL} asserted with role=super_admin."
+            echo "::notice title=Superadmin seeded::${SA_EMAIL} asserted in identity auth-service (role=super_admin)."
+            # proxy.baalvionstack.com authenticates against proxy-service's OWN user store
+            # (public.users on app-edge-realtime), NOT the identity auth-service — so seed the
+            # platform_admin there too, or the /admin console stays locked out even though the
+            # identity super-admin exists. platform_admin (not super_admin) because it expands
+            # to ['*'] in proxy-service RBAC.
+            $COMPOSE exec -T \
+              -e SUPERADMIN_EMAIL="${SA_EMAIL}" \
+              -e SUPERADMIN_PASSWORD="${SA_PASS}" \
+              app-edge-realtime \
+              node /app/Backend/services/infrastructure/proxy-service/scripts/bootstrapPlatformAdmin.js
+            echo "::notice title=Platform-admin seeded::${SA_EMAIL} asserted in proxy-service (role=platform_admin)."
 
       - name: Smoke test public ingress
         if: steps.gate.outputs.ready == 'true'
