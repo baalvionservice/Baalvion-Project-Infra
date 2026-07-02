@@ -18,8 +18,10 @@
 name: Deploy — ECR → EC2 (single-host)
 
 on:
-  push:
-    branches: [main]
+  # LEGACY single-host topology (per-service images + deploy/ec2-single-host/docker-compose.yml).
+  # The box now runs the CONSOLIDATED single-image stack (see deploy-consolidated.yml), so this
+  # workflow must NOT auto-fire on push — doing so rolled a conflicting topology and left runs
+  # parked at the approval gate forever. Kept as manual-only for break-glass/rollback use.
   workflow_dispatch:
     inputs:
       image_tag:
@@ -27,10 +29,11 @@ on:
         required: false
         default: ""
 
-# Never run two production rolls at once; let an in-flight roll finish.
+# Never run two production rolls at once. cancel-in-progress: true so a manual dispatch parked
+# at the approval gate can't deadlock a later one (matches deploy-consolidated.yml).
 concurrency:
   group: deploy-ec2-single-host
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: read

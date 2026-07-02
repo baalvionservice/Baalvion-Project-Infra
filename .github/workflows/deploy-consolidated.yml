@@ -36,7 +36,12 @@ on:
 
 concurrency:
   group: deploy-consolidated
-  cancel-in-progress: false
+  # true (was false): a run parked at the production approval gate must NOT block newer
+  # deploys. With false, an un-approved "waiting" run holds the group indefinitely and every
+  # subsequent push queues behind it with zero jobs (the deadlock seen 2026-06-29 → 07-02).
+  # With true, a new push cancels the older waiting/in-flight run so the latest commit always
+  # wins — approve the newest run's gate, never an ancient one.
+  cancel-in-progress: true
 
 permissions:
   contents: read
