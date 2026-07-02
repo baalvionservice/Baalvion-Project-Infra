@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
 import { authClient } from "@/lib/authClient";
+import { isPlatformAdmin } from "@/lib/roles";
 import { useToast } from "@/hooks/use-toast";
 
 type Step = "trigger" | "email" | "code";
@@ -26,10 +27,10 @@ export function EmailOtpLogin() {
 
   // Honour ?redirect=<path> (e.g. from a gated /admin) — same-origin paths only.
   const rawRedirect = searchParams.get("redirect");
-  const redirectTo =
+  const safeRedirect =
     rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
       ? rawRedirect
-      : "/app/dashboard";
+      : null;
 
   const [step, setStep] = useState<Step>("trigger");
   const [email, setEmail] = useState("");
@@ -69,8 +70,9 @@ export function EmailOtpLogin() {
     try {
       const tokens = await authClient.emailOtpVerify(email.trim(), code.trim());
       loginWithTokens(tokens);
+      const dest = safeRedirect ?? (isPlatformAdmin(tokens.user.role) ? "/admin" : "/app/dashboard");
       toast({ title: "Welcome!", description: "Redirecting…" });
-      navigate(redirectTo, { replace: true });
+      navigate(dest, { replace: true });
     } catch (err: unknown) {
       toast({
         title: "Invalid code",

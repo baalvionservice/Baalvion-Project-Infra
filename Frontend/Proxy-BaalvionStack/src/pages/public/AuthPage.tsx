@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useBranding } from "@/hooks/usePlatform";
+import { isPlatformAdmin } from "@/lib/roles";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -89,17 +90,20 @@ const AuthPage = () => {
   // A gated page (e.g. /admin) sends us here as /login?redirect=<path>. Only honour
   // same-origin absolute paths so ?redirect can't become an open-redirect vector.
   const rawRedirect = searchParams.get("redirect");
-  const redirectTo =
+  const safeRedirect =
     rawRedirect && rawRedirect.startsWith("/") && !rawRedirect.startsWith("//")
       ? rawRedirect
-      : "/app/dashboard";
+      : null;
 
   const onLoginSubmit = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      await login(data.email, data.password);
+      const loggedInUser = await login(data.email, data.password);
+      // An explicit redirect wins; otherwise platform admins land on the admin
+      // console and everyone else on their dashboard.
+      const dest = safeRedirect ?? (isPlatformAdmin(loggedInUser.role) ? "/admin" : "/app/dashboard");
       toast({ title: "Welcome back!", description: "Redirecting…" });
-      navigate(redirectTo, { replace: true });
+      navigate(dest, { replace: true });
     } catch (err: unknown) {
       toast({
         title: "Login failed",

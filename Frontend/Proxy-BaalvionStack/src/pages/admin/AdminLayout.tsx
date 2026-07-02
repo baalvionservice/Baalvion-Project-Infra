@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { isPlatformAdmin } from "@/lib/roles";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { CommandPalette } from "@/components/layout/CommandPalette";
@@ -43,10 +44,6 @@ const adminNavItems = [
   { icon: Paintbrush, label: "White Label", path: "/admin/whitelabel" },
   { icon: MessageSquare, label: "Support Tickets", path: "/admin/tickets" },
 ];
-
-// Only platform-level admins may open the console. Mirrors the backend gate
-// (proxy-service `requirePlatformAdmin`): platform_admin OR the higher super_admin.
-const PLATFORM_ADMIN_ROLES = new Set(["platform_admin", "super_admin"]);
 
 function AdminAccessDenied({ email, onSignOut }: { email?: string; onSignOut: () => void }) {
   return (
@@ -91,7 +88,7 @@ export default function AdminLayout() {
   }
 
   // Signed in but not a platform admin → hard stop (the API enforces this too).
-  if (!PLATFORM_ADMIN_ROLES.has(user?.role ?? "")) {
+  if (!isPlatformAdmin(user?.role)) {
     return <AdminAccessDenied email={user?.email} onSignOut={logout} />;
   }
 
