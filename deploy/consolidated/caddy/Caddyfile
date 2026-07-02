@@ -50,6 +50,18 @@ api.baalvion.com {
 		reverse_proxy app-payments:3015
 	}
 
+	# CTM (controlthemarket.com) login BFF. The Vercel FE proxies /auth-bff/* to the code-default
+	# AUTH_PROXY_TARGET = api.baalvion.com/api/v1/identity/auth/v1/auth, which otherwise falls into
+	# the proxy-service BFF below and 401s ("No bearer token"). Route it to the identity auth-gateway
+	# (app-identity:3026) instead: strip the namespaced prefix, remap onto /auth/* (login|refresh|me|
+	# logout) — the gateway BFF that issues the session cookies the FE expects.
+	@identity_auth_bff path /api/v1/identity/auth/v1/auth /api/v1/identity/auth/v1/auth/*
+	handle @identity_auth_bff {
+		uri strip_prefix /api/v1/identity/auth/v1/auth
+		rewrite * /auth{uri}
+		reverse_proxy app-identity:3026
+	}
+
 	# Everything else → the consumer/admin BFF (proxy-service, session-gated) — unchanged.
 	handle {
 		reverse_proxy app-edge-realtime:4000
