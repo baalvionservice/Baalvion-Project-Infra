@@ -72,27 +72,23 @@ const NAV_COLUMNS = [
     links: [
       { label: 'News', href: '/news' },
       { label: 'Investing', href: '/investing' },
-      { label: 'Simulator', href: '/simulator' },
       { label: 'Banking', href: '/banking' },
       { label: 'Personal Finance', href: '/personal-finance' },
       { label: 'Economy', href: '/economy' },
       { label: 'Reviews', href: '/reviews' },
-      { label: 'Dictionary', href: '/dictionary' },
+      { label: 'Dictionary', href: '/glossary' },
     ],
   },
   {
     label: 'Company',
     links: [
       { label: 'About Us', href: '/about' },
-      { label: 'Careers', href: '/careers' },
       { label: 'Privacy Policy', href: '/privacy-policy' },
-      { label: 'Advertise', href: '/advertise' },
     ],
   },
   {
     label: 'Resources',
     links: [
-      { label: 'Editorial Process', href: '/editorial-process' },
       { label: 'Contact Us', href: '/contact' },
       { label: 'Terms of Service', href: '/terms-of-service' },
       { label: 'Transparency Hub', href: '/transparency' },
@@ -103,7 +99,6 @@ const NAV_COLUMNS = [
 const LEGAL_LINKS = [
   { label: 'Privacy Policy', href: '/privacy-policy' },
   { label: 'Terms of Service', href: '/terms-of-service' },
-  { label: 'Editorial Process', href: '/editorial-process' },
   { label: 'Contact Us', href: '/contact' },
 ];
 

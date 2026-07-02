@@ -54,7 +54,7 @@ class AdminService {
         featured: true,
         keyTakeaways: [
           "The FOMC voted unanimously to hold rates at 5.25%–5.50% for the fourth consecutive meeting.",
-          "Fed Chair Powell said inflation is 'moving in the right direction' but isn't yet at the 2% target.",
+          "The post-meeting statement described inflation as moving in the right direction but not yet at the 2% target.",
         ],
         body: [
           {

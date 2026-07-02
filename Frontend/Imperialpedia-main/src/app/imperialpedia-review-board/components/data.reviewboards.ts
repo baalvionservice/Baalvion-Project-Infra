@@ -12,7 +12,7 @@ export type ReviewBoardMember = {
 //
 // Two profile types exist:
 //
-//  'board-member'  — Financial Review Board experts (e.g. Anthony Battle)
+//  'board-member'  — Financial Review Board experts (e.g. Marcus Whitfield)
 //                    Extra fields: credentials line, quote section
 //
 //  'staff'         — Editors / fact-checkers / writers (e.g. Allen Krewzz)
@@ -60,12 +60,12 @@ export type ReviewBoardProfile = BoardMemberProfile | StaffProfile;
 
 export const reviewBoardMembers: ReviewBoardMember[] = [
   {
-    name: "Anthony Battle",
+    name: "Marcus Whitfield",
     role: "CERTIFIED FINANCIAL PLANNER™",
     image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80",
-    slug: "anthony-battle",
+    slug: "marcus-whitfield",
     shortBio:
-      "Anthony Battle is a CERTIFIED FINANCIAL PLANNER™ professional with 15+ years in financial markets and a fierce advocate for financial literacy.",
+      "Marcus Whitfield is a CERTIFIED FINANCIAL PLANNER™ professional with 15+ years in financial markets and a fierce advocate for financial literacy.",
   },
   {
     name: "Allen Krewzz",
@@ -97,14 +97,14 @@ export const reviewBoardMembers: ReviewBoardMember[] = [
 
 export const reviewBoardProfiles: ReviewBoardProfile[] = [
 
-  // ── BOARD MEMBER: Anthony Battle ─────────────────────────────────────────
+  // ── BOARD MEMBER: Marcus Whitfield ───────────────────────────────────────
   {
     profileType: "board-member",
-    slug: "anthony-battle",
-    name: "Anthony Battle",
+    slug: "marcus-whitfield",
+    name: "Marcus Whitfield",
     imageUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80",
     linkedInUrl: "https://www.linkedin.com/",
-    credentials: "CFP®, ChFC®, CLU®, RICP®, AFC®, CRC®",
+    credentials: "CFP®, ChFC®, CLU®, RICP®",
     currently: "Certified Financial Planner",
     residesIn: "New York, NY",
     education: "Bernard M. Baruch College, CUNY",
@@ -117,13 +117,13 @@ export const reviewBoardProfiles: ReviewBoardProfile[] = [
       "Experienced in the inner workings of alternative investments (private equity and hedge funds) as an investment vehicle.",
     ],
     experience: [
-      "Anthony Battle has spent his entire career in the financial services industry covering institutional and individual clients. Anthony currently presents various seminars on financial planning topics for a range of municipal employees, develops comprehensive financial plans and counsels individuals on retirement decisions.",
-      "Previously, Anthony worked for 7 years in asset management covering private equity and hedge funds as a Fund Controller providing oversight of financial reporting, investment valuations, and risk management. He has worked at various financial service firms, which included Bank of Bermuda, HSBC Corporate & Investment Bank, Tishman Speyer, McGladrey, and First Eagle Investment Management.",
+      "Marcus Whitfield has spent his entire career in the financial services industry covering institutional and individual clients. He currently presents various seminars on financial planning topics for a range of municipal employees, develops comprehensive financial plans, and counsels individuals on retirement decisions.",
+      "Previously, Marcus worked for 7 years in asset management covering private equity and hedge funds as a Fund Controller providing oversight of financial reporting, investment valuations, and risk management, holding roles at several mid-sized financial services and asset management firms.",
     ],
     educationDetail:
-      "Anthony obtained his Bachelor of Business Administration in Accounting from Baruch College, CUNY. Additionally, Anthony is a CERTIFIED FINANCIAL PLANNER™ professional. He has also earned the Chartered Financial Consultant® designation for advanced financial planning, the Chartered Life Underwriter® designation for advanced insurance specialization, the Accredited Financial Counselor® for Financial Counseling and both the Retirement Income Certified Professional®, and Certified Retirement Counselor designations for advance retirement planning.",
+      "Marcus obtained his Bachelor of Business Administration in Accounting from Baruch College, CUNY. Additionally, Marcus is a CERTIFIED FINANCIAL PLANNER™ professional. He has also earned the Chartered Financial Consultant® designation for advanced financial planning and the Chartered Life Underwriter® designation for advanced insurance specialization, along with the Retirement Income Certified Professional® designation for advanced retirement planning.",
     quote: {
-      text: "Obtaining a wealthy mindset requires learning from the past and applying it in the present. Dwight D. Eisenhower once said, \"Accomplishments will prove to be a journey, not a destination.\" In finance, these accomplishments can only be sustained by those that take on \"good risk\" and learn to be comfortable in uncomfortable situations.",
+      text: "A wealthy mindset is built the same way a financial plan is: one deliberate decision at a time. The clients who do best aren't the ones chasing the highest returns — they're the ones who take on good, measured risk and stay comfortable making decisions under uncertainty.",
     },
   },
 
@@ -145,7 +145,7 @@ export const reviewBoardProfiles: ReviewBoardProfile[] = [
     ],
     experience: [
       "Allen Krewzz has over a decade of experience as a writer and editor, having worked with a wide variety of finance and business content. Currently, he focuses on banking, credit and debt, auto loans, credit cards, and more.",
-      "Brendan is currently a full-time senior editor of financial products and services at Imperialpedia.",
+      "Allen is currently a full-time senior editor of financial products and services at Imperialpedia.",
       "He was an editor at Credit Card Insider before joining Imperialpedia. In that role, he researched, wrote, and managed content about credit cards, credit advice, and related topics.",
     ],
     educationDetail:

@@ -181,7 +181,7 @@ export const latestNews = [
     time: "12:18 PM ET",
     category: "ECONOMY",
     headline:
-      "Fed's Bowman says she needs to see 'several more months' of good inflation data before cuts",
+      "A Fed governor signals more inflation data is needed before any rate cuts",
     positive: null,
   },
   {
@@ -511,7 +511,7 @@ export const topStories = [
     id: 73,
     category: "TECH",
     headline:
-      "Sam Altman's vision for OpenAI: 'We want AGI for all of humanity, not just a few'",
+      "OpenAI's Sam Altman reiterates goal of AGI benefiting all of humanity",
     image:
       "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=80",
     time: "9 hours ago",
