@@ -159,6 +159,12 @@ export function PublicNavbar() {
           >
             Home
           </Link>
+          <Link
+            href="/news"
+            className="flex items-center h-full px-3 text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
+          >
+            News
+          </Link>
           {categories.slice(0, 8).map((cat) => (
             <div
               key={cat.id}
@@ -255,6 +261,13 @@ export function PublicNavbar() {
               className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
             >
               Find a Lawyer
+            </Link>
+            <Link
+              href="/news"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
+            >
+              News
             </Link>
             <p className="pt-4 pb-2 px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-news-600">
               Topics

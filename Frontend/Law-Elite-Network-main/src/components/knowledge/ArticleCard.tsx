@@ -14,6 +14,19 @@ function imageUrl(article: any): string {
   return `https://picsum.photos/seed/${encodeURIComponent(seed)}/640/400`;
 }
 
+function Byline({ article }: { article: any }) {
+  const author = article?.author;
+  const date = article?.updatedAt || article?.updated_at || article?.publishedAt || article?.published_at;
+  if (!author && !date) return null;
+  return (
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-slate-500 font-medium">
+      {author && <span className="text-slate-700 font-semibold">By {author}</span>}
+      {author && date && <span className="text-slate-300">·</span>}
+      {date && <span>{date}</span>}
+    </div>
+  );
+}
+
 /**
  * Editorial article card used on category and search result grids.
  * Image-led, with a category kicker, Franklin headline and clean metadata —
@@ -48,17 +61,20 @@ export function ArticleCard({ article }: ArticleCardProps) {
           </p>
         )}
 
-        <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-4 text-[12px] text-slate-400 font-medium">
-          {article.readingTime ? (
-            <span className="inline-flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5" /> {article.readingTime} min read
-            </span>
-          ) : null}
-          {article.views ? (
-            <span className="inline-flex items-center gap-1.5">
-              <Eye className="w-3.5 h-3.5" /> {Number(article.views).toLocaleString()} views
-            </span>
-          ) : null}
+        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2">
+          <Byline article={article} />
+          <div className="flex items-center gap-4 text-[12px] text-slate-400 font-medium">
+            {article.readingTime ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5" /> {article.readingTime} min read
+              </span>
+            ) : null}
+            {article.views ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Eye className="w-3.5 h-3.5" /> {Number(article.views).toLocaleString()} views
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
     </Link>

@@ -1,6 +1,7 @@
 import { NewsArticle, newsArticles, NewsCategory } from "@/lib/data.news";
 import { getPublishedNews } from "@/services/data/cms-public";
 import { buildMetadata } from "@/lib/seo";
+import { formatDate } from "@/services/format-date";
 import Image from "next/image";
 import Link from "next/link";
 import { ExploreNewsSection } from "./ExploreNewsSection";
@@ -59,7 +60,9 @@ function FeaturedArticleCard({ article }: { article: NewsArticle }) {
           {article.title}
         </h2>
 
-        <p className="text-gray-500 text-xs">By {article.author.name}</p>
+        <p className="text-gray-500 text-xs">
+          By {article.author.name} · {formatDate(article.publishedAt)}
+        </p>
       </div>
     </Link>
   );
@@ -87,7 +90,8 @@ function HorizontalArticleCard({ article }: { article: NewsArticle }) {
           {article.title}
         </h3>
         <div className="text-foreground text-sm">
-          By <span className="">{article.author.name}</span>
+          By <span className="">{article.author.name}</span> ·{" "}
+          {formatDate(article.publishedAt)}
         </div>
       </div>
     </Link>

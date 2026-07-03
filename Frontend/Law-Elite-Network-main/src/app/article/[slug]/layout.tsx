@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { cmsGetArticleBySlug } from '@/lib/cms';
+import { getAuthorByName } from '@/data/authors';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -33,6 +34,7 @@ async function fetchArticle(slug: string): Promise<any | null> {
       tags: [],
       category: cms.category,
       author: cms.author,
+      contentType: cms.contentType,
       updated_at: cms.updatedAt,
       published_at: cms.updatedAt,
     };
@@ -81,15 +83,20 @@ export default async function ArticleLayout(
 ) {
   const { slug } = await params;
   const a = await fetchArticle(slug);
+  const bylineName = (typeof a?.author === 'string' ? a.author : a?.author?.name) || undefined;
+  const matchedAuthor = bylineName ? getAuthorByName(bylineName) : null;
+  const authorLd = matchedAuthor
+    ? { '@type': 'Person', name: matchedAuthor.name, url: `${SITE}/author/${matchedAuthor.slug}` }
+    : { '@type': 'Organization', name: 'Law Elite Network' };
   const jsonLd = a && {
     '@context': 'https://schema.org',
-    '@type': 'Article',
+    '@type': a.contentType === 'news' ? 'NewsArticle' : 'Article',
     headline: a.title,
     description: a.excerpt || undefined,
     datePublished: a.published_at || undefined,
     dateModified: a.updated_at || a.published_at || undefined,
     mainEntityOfPage: `${SITE}/article/${slug}`,
-    author: { '@type': 'Organization', name: 'Law Elite Network' },
+    author: authorLd,
     publisher: { '@type': 'Organization', name: 'Law Elite Network', logo: { '@type': 'ImageObject', url: `${SITE}/logo.png` } },
   };
   // Breadcrumb trail: Home → (category hub, when known) → Article.
