@@ -32,6 +32,7 @@ async function fetchArticle(slug: string): Promise<any | null> {
       excerpt: cms.excerpt,
       tags: [],
       category: cms.category,
+      author: cms.author,
       updated_at: cms.updatedAt,
       published_at: cms.updatedAt,
     };
@@ -52,7 +53,7 @@ export async function generateMetadata(
   }
   const title = a.title;
   const description = String(a.excerpt || a.title).slice(0, 300);
-  const authorName = a.author?.name || a.author_name || undefined;
+  const authorName = (typeof a.author === 'string' ? a.author : a.author?.name) || a.author_name || undefined;
   const ogImage = a.cover_image || a.image_url || `https://picsum.photos/seed/${a.id || slug}/1200/630`;
   return {
     title,

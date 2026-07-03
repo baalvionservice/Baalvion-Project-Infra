@@ -169,6 +169,8 @@ export interface CmsArticle {
   /** Rendered HTML body for the article detail page. */
   content: string;
   category?: { name: string; slug?: string };
+  /** Named byline (E-E-A-T) — matches the bundled/law-service string convention. */
+  author?: string;
   readingTime?: string;
   featured?: boolean;
   updatedAt?: string;
@@ -178,6 +180,7 @@ function toArticle(c: CmsContent): CmsArticle {
   const cf = c.customFields || {};
   const rawLetter = (cf.alphabet || (c.title || '#').charAt(0) || '#').toString().toUpperCase();
   const alphabet = /[A-Z]/.test(rawLetter.charAt(0)) ? rawLetter.charAt(0) : '#';
+  const author = typeof cf.author === 'string' ? cf.author : cf.author?.name;
   return {
     id: c.id,
     slug: c.slug,
@@ -186,19 +189,23 @@ function toArticle(c: CmsContent): CmsArticle {
     alphabet,
     content: blocksToHtml(c.contentBlocks),
     category: c.category ? { name: c.category.name, slug: c.category.slug } : undefined,
+    author: typeof author === 'string' ? author : undefined,
     readingTime: typeof cf.readingTime === 'string' ? cf.readingTime : undefined,
     featured: !!cf.featured,
     updatedAt: c.publishedAt ?? undefined,
   };
 }
 
-/** List published encyclopedia articles, optionally filtered to one A–Z letter. */
-export async function cmsGetArticles(letter?: string): Promise<CmsArticle[]> {
+/** List published encyclopedia articles, optionally filtered to one A–Z letter and/or category. */
+export async function cmsGetArticles(letter?: string, categorySlug?: string): Promise<CmsArticle[]> {
   const items = await listContent({ contentType: 'article', limit: 200 });
   let arts = items.map(toArticle);
   if (letter) {
     const L = letter.toUpperCase().charAt(0);
     arts = arts.filter((a) => a.alphabet === L);
+  }
+  if (categorySlug) {
+    arts = arts.filter((a) => a.category?.slug === categorySlug);
   }
   return arts.sort((a, b) => a.title.localeCompare(b.title));
 }

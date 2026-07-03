@@ -63,8 +63,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/`, lastModified: new Date(), changeFrequency: 'daily', priority: 1.0 },
     { url: `${BASE_URL}/search`, lastModified: new Date(), changeFrequency: 'hourly', priority: 0.9 },
     { url: `${BASE_URL}/plans`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${BASE_URL}/lawyers`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.7 },
     { url: `${BASE_URL}/about-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6 },
     { url: `${BASE_URL}/authors`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.6 },
+    { url: `${BASE_URL}/legal`, lastModified: new Date(), changeFrequency: 'weekly', priority: 0.55 },
     { url: `${BASE_URL}/editorial-standards`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.4 },
     { url: `${BASE_URL}/corrections`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.3 },
     { url: `${BASE_URL}/contact-us`, lastModified: new Date(), changeFrequency: 'monthly', priority: 0.5 },
@@ -75,6 +77,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${BASE_URL}/terms-of-service`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
     { url: `${BASE_URL}/disclaimer`, lastModified: new Date(), changeFrequency: 'yearly', priority: 0.2 },
   ];
+
+  // A–Z legal glossary letter pages — each now has its own distinct
+  // title/description/canonical (see src/app/legal/[letter]/layout.tsx), so
+  // they belong in the sitemap as real indexable pages, not just linked from /legal.
+  const legalLetterRoutes: MetadataRoute.Sitemap = 'abcdefghijklmnopqrstuvwxyz'.split('').map((letter) => ({
+    url: `${BASE_URL}/legal/${letter}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.4,
+  }));
 
   const lawyerRoutes: MetadataRoute.Sitemap = lawyers.map((l) => ({
     url: `${BASE_URL}/lawyer/${l.id}`,
@@ -125,6 +137,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticRoutes,
+    ...legalLetterRoutes,
     ...lawyerRoutes,
     ...articleRoutes,
     ...categoryRoutes,

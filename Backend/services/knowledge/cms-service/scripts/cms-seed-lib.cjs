@@ -197,14 +197,26 @@ function createRunner(cfg) {
     walk(payload); return map;
   }
 
-  async function resolveCategoryId() {
-    const existing = await api('GET', `/cms/websites/${encodeURIComponent(SITE)}/categories`);
-    const byId = flattenTree(existing?.data ?? existing);
-    if (byId.has(cfg.categorySlug)) return byId.get(cfg.categorySlug);
-    log(`  + creating category ${cfg.categorySlug}`);
+  // Cached per-slug so a multi-category seed run (each doc carrying its own
+  // categorySlug/categoryName) only fetches the category tree once and creates
+  // each distinct category at most once.
+  const categoryCache = new Map();
+  let categoryTreeFetched = false;
+
+  async function resolveCategoryId(slug = cfg.categorySlug, name = cfg.categoryName) {
+    if (categoryCache.has(slug)) return categoryCache.get(slug);
+    if (!categoryTreeFetched) {
+      const existing = await api('GET', `/cms/websites/${encodeURIComponent(SITE)}/categories`);
+      for (const [s, id] of flattenTree(existing?.data ?? existing)) categoryCache.set(s, id);
+      categoryTreeFetched = true;
+    }
+    if (categoryCache.has(slug)) return categoryCache.get(slug);
+    log(`  + creating category ${slug}`);
     const created = await api('POST', `/cms/websites/${encodeURIComponent(SITE)}/categories`,
-      { name: cfg.categoryName, slug: cfg.categorySlug, sortOrder: 0 });
-    return created?.data?.id ?? created?.id;
+      { name, slug, sortOrder: 0 });
+    const id = created?.data?.id ?? created?.id;
+    categoryCache.set(slug, id);
+    return id;
   }
 
   async function existingSlugMap() {
@@ -229,13 +241,16 @@ function createRunner(cfg) {
     if (flags.export) { log('\n✓ export-only complete (no target writes).'); return; }
 
     if (!TOKEN) throw new Error('No CMS_TOKEN set — provide a prod super_admin bearer to write.');
-    const categoryId = await resolveCategoryId();
-    log(`  category id: ${categoryId}\n`);
     const existing = await existingSlugMap();
 
     const report = { created: 0, updated: 0, published: 0, skipped: 0, errors: 0 };
     for (const d of docs) {
-      const body = { ...d, ...(categoryId ? { categoryIds: [categoryId] } : {}) };
+      // Each doc may carry its own categorySlug/categoryName (e.g. Law Elite's real
+      // per-article taxonomy category); falls back to the run-wide cfg category
+      // when a doc doesn't specify one (Imperialpedia's single-category seed).
+      const { categorySlug, categoryName, ...docBody } = d;
+      const categoryId = await resolveCategoryId(categorySlug, categoryName);
+      const body = { ...docBody, ...(categoryId ? { categoryIds: [categoryId] } : {}) };
       const existsId = existing.get(d.slug);
       if (existsId && !flags.update) { log(`  = skip (exists)  ${d.slug}`); report.skipped++; continue; }
 

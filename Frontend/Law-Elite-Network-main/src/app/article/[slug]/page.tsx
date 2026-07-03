@@ -307,7 +307,11 @@ export default function ArticleDeepDivePage() {
                 />
               </div>
 
-              <RelatedArticles />
+              <RelatedArticles
+                currentSlug={slug as string}
+                categorySlug={category?.slug}
+                categoryName={category?.name}
+              />
             </article>
 
           </div>
