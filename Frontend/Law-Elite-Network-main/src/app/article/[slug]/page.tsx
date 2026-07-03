@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { articlesPublicApi } from '@/lib/api/client';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { AIAnswersCard } from '@/components/knowledge/AIAnswersCard';
@@ -51,6 +51,9 @@ function generateFallbackContent(title: string): string {
 
 export default function ArticleDeepDivePage() {
   const { slug } = useParams();
+  const searchParams = useSearchParams();
+  const previewToken = searchParams.get('previewToken');
+  const previewExp = searchParams.get('previewExp');
 
   const [article, setArticle] = useState<any>(null);
   const [articleLoading, setArticleLoading] = useState(true);
@@ -71,7 +74,10 @@ export default function ArticleDeepDivePage() {
     // wins over the legacy law-service record.
     const fromCms = async () => {
       try {
-        const r = await fetch(`/api/cms/articles/${slug}`);
+        const previewQs = previewToken && previewExp
+          ? `?previewToken=${encodeURIComponent(previewToken)}&previewExp=${encodeURIComponent(previewExp)}`
+          : '';
+        const r = await fetch(`/api/cms/articles/${slug}${previewQs}`);
         if (r.ok) {
           const j = await r.json();
           if (j?.data) return j.data;
@@ -107,7 +113,7 @@ export default function ArticleDeepDivePage() {
         setArticleLoading(false);
       }
     })();
-  }, [slug]);
+  }, [slug, previewToken, previewExp]);
 
   useEffect(() => {
     const optimizeContent = async () => {

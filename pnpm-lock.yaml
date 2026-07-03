@@ -2560,6 +2560,9 @@ importers:
       '@baalvion/auth-node':
         specifier: workspace:*
         version: link:../../../packages/auth-node
+      '@baalvion/crypto':
+        specifier: workspace:*
+        version: link:../../../packages/crypto
       '@baalvion/graceful-shutdown':
         specifier: workspace:*
         version: link:../../../packages/graceful-shutdown

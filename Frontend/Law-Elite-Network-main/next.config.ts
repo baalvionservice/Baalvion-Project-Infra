@@ -121,6 +121,21 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: securityHeaders,
       },
+      // Scoped relaxation for the admin CMS live-preview iframe: only requests carrying
+      // ?previewToken=... (set by /api/preview after validating the token with cms-service)
+      // get a permissive frame-ancestors. Every other request keeps frame-ancestors 'none'
+      // from the block above. Modern browsers prefer CSP frame-ancestors over
+      // X-Frame-Options when both are present, so this safely supersedes SAMEORIGIN here.
+      {
+        source: '/article/:slug*',
+        has: [{ type: 'query', key: 'previewToken' }],
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://admin.baalvion.com",
+          },
+        ],
+      },
     ];
   },
 

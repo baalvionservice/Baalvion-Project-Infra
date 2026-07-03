@@ -216,6 +216,17 @@ export async function cmsGetArticleBySlug(slug: string): Promise<CmsArticle | nu
   return c ? toArticle(c) : null;
 }
 
+/**
+ * Draft-safe article fetch for the admin CMS live-preview iframe. `exp`/`token` come from
+ * the preview URL (issued by cms-service, validated there too) — this app never holds
+ * CMS_PREVIEW_SECRET, it only relays the token back to cms-service's preview endpoint.
+ */
+export async function cmsGetPreviewContent(slug: string, exp: string, token: string): Promise<CmsArticle | null> {
+  const qs = new URLSearchParams({ exp, token }).toString();
+  const j = await fetchJSON(`${BASE}/content/${encodeURIComponent(slug)}/preview?${qs}`);
+  return j && j.data ? toArticle(j.data as CmsContent) : null;
+}
+
 // ── Author / contributor profiles (E-E-A-T) ──────────────────────────────────
 export interface CmsAuthor {
   slug: string;

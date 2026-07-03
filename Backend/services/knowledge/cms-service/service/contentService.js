@@ -1,5 +1,6 @@
 'use strict';
 const { Op } = require('sequelize');
+const { hmacSign } = require('@baalvion/crypto');
 const { CmsContent, CmsCategory, CmsTag, CmsWorkflow, CmsContentRevision, CmsWebsite, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
@@ -52,6 +53,25 @@ async function getContent(websiteId, contentId) {
     const data = content.toJSON();
     await cache.set(cacheKey, data, config.cache.contentTtl);
     return data;
+}
+
+/**
+ * Issues a short-lived HMAC token scoped to this content's website+slug, for the admin
+ * CMS live-preview iframe. The token (not the underlying CMS_PREVIEW_SECRET) is what
+ * reaches the browser and the target site — only cms-service ever holds the secret.
+ */
+async function getPreviewToken(websiteId, contentId) {
+    if (!config.preview.secret) throw new AppError('FORBIDDEN', 'Preview is not configured', 403);
+
+    const content = await CmsContent.findOne({ where: { id: contentId, websiteId }, attributes: ['id', 'slug'] });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+
+    const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
+    if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
+
+    const exp = Date.now() + config.preview.ttlMs;
+    const token = hmacSign(`${website.slug}:${content.slug}:${exp}`, config.preview.secret);
+    return { slug: content.slug, domain: website.domain, exp, token };
 }
 
 // Find a slug that is unique within the website, appending -2, -3, ... on collision.
@@ -222,4 +242,4 @@ function _normalizeCategoryIds(categoryIds, categoryId) {
     return [...new Set(merged.filter(Boolean))];
 }
 
-module.exports = { listContent, getContent, createContent, updateContent, autosaveContent, deleteContent, bulkUpdate, incrementViewCount };
+module.exports = { listContent, getContent, getPreviewToken, createContent, updateContent, autosaveContent, deleteContent, bulkUpdate, incrementViewCount };

@@ -66,6 +66,14 @@ module.exports = {
         webhooks: parseJson(process.env.REVALIDATE_WEBHOOKS, {}),
         timeoutMs: Number(process.env.REVALIDATE_TIMEOUT_MS || 5000),
     },
+    // Draft/unpublished content preview for the admin CMS editor's live-preview iframe.
+    // cms-service signs a short-lived HMAC token scoped to one website+slug; the target
+    // site's frontend never holds this secret, it only relays the token back here to
+    // validate + fetch in one call (GET /public/:websiteSlug/content/:slug/preview).
+    preview: {
+        secret: process.env.CMS_PREVIEW_SECRET || null,
+        ttlMs: Number(process.env.CMS_PREVIEW_TTL_MS || 15 * 60 * 1000),
+    },
     notifications: {
         serviceUrl: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3013',
     },
