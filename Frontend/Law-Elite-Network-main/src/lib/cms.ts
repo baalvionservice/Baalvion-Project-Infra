@@ -174,6 +174,8 @@ export interface CmsArticle {
   readingTime?: string;
   featured?: boolean;
   updatedAt?: string;
+  /** CMS content type, e.g. 'article' or 'news' — drives NewsArticle JSON-LD. */
+  contentType?: string;
 }
 
 function toArticle(c: CmsContent): CmsArticle {
@@ -193,6 +195,7 @@ function toArticle(c: CmsContent): CmsArticle {
     readingTime: typeof cf.readingTime === 'string' ? cf.readingTime : undefined,
     featured: !!cf.featured,
     updatedAt: c.publishedAt ?? undefined,
+    contentType: c.contentType,
   };
 }
 
@@ -214,6 +217,14 @@ export async function cmsGetArticles(letter?: string, categorySlug?: string): Pr
 export async function cmsGetArticleBySlug(slug: string): Promise<CmsArticle | null> {
   const c = await getContent(slug);
   return c ? toArticle(c) : null;
+}
+
+/** List published news content (contentType: 'news'), most recent first. */
+export async function cmsGetNews(limit = 50): Promise<CmsArticle[]> {
+  const items = await listContent({ contentType: 'news', limit });
+  return items
+    .map(toArticle)
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 }
 
 /**

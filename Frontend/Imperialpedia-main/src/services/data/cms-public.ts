@@ -310,12 +310,15 @@ function blocksToNewsBody(blocks?: CmsBlock[]): NewsBodyBlock[] {
 
 export function cmsContentToNews(raw: CmsContent): NewsArticle {
   const words = plainTextLength(raw.contentBlocks, raw.excerpt);
+  const cf = (raw.customFields ?? {}) as Record<string, unknown>;
+  const author = cf.author as { name?: unknown } | undefined;
+  const authorName = author && typeof author.name === 'string' ? author.name : undefined;
   return {
     id: raw.id,
     title: raw.title,
     excerpt: raw.excerpt ?? '',
     category: toNewsCategory(raw.category?.name),
-    author: { name: 'Imperialpedia Newsroom' },
+    author: { name: authorName || 'Imperialpedia Newsroom' },
     publishedAt: raw.publishedAt ?? raw.updatedAt ?? new Date().toISOString(),
     updatedAt: raw.updatedAt ?? undefined,
     readTimeMinutes: Math.max(1, Math.round(words / 200)),
