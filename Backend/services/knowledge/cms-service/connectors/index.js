@@ -15,12 +15,32 @@ const quotaService = require('../service/analytics/quotaService');
 const { AppError } = require('../utils/errors');
 const { logger } = require('../platform/logger');
 
-const BACKFILL_DAYS = { gsc: 480, ga4: 90, adsense: 90 }; // GSC ~16 months
+const BACKFILL_DAYS = {
+    gsc: 480, 'google-news': 480,                      // GSC/News ~16 months (GSC's own retention cap)
+    ga4: 90, adsense: 90, 'google-ads': 90, 'merchant-center': 90, cloudflare: 90,
+    'meta-pixel': 90, 'linkedin-insight': 90, 'pinterest-tag': 90, 'tiktok-pixel': 90, 'x-pixel': 90,
+    clarity: 3,   // hard Clarity API cap — see connectors/clarity.js
+    gtm: 1,       // config snapshot, no history to backfill
+};
 
 // ── Register built-in connectors ─────────────────────────────────────────────
 registry.register(require('./internalCms'));
+registry.register(require('./server'));
 registry.register(require('./gsc'));
 registry.register(require('./adsense'));
+registry.register(require('./ga4'));
+registry.register(require('./gtm'));
+registry.register(require('./googleAds'));
+registry.register(require('./merchantCenter'));
+registry.register(require('./googleNews'));
+registry.register(require('./clarity'));
+registry.register(require('./bingWebmaster'));
+registry.register(require('./cloudflare'));
+registry.register(require('./metaPixel'));
+registry.register(require('./linkedinInsight'));
+registry.register(require('./pinterestTag'));
+registry.register(require('./tiktokPixel'));
+registry.register(require('./xPixel'));
 // Remaining provider connectors (ga4, meta-pixel, …) are registered by their own
 // files as each is implemented; PROVIDER_CATALOG already advertises them.
 
@@ -142,16 +162,22 @@ async function writeMetrics(site, provider, metrics) {
     return written;
 }
 
+// No-credential connectors snapshotted for every active website (see below).
+const INTERNAL_PROVIDERS = ['internal_cms', 'server'];
+
 /**
- * Enqueue an internal_cms snapshot for every active website. Called daily by the
- * maintenance job so CMS operational metrics stay fresh without per-site config.
+ * Enqueue a snapshot of every no-credential connector (internal_cms, server) for
+ * every active website. Called daily by the maintenance job so CMS operational
+ * + infra health metrics stay fresh without per-site config.
  */
 async function syncAllInternal() {
     const db = require('../models');
     const { enqueueSync } = require('../queues/analyticsQueue');
     const sites = await db.CmsWebsite.findAll({ where: { status: 'active' }, attributes: ['id'] });
     for (const s of sites) {
-        await enqueueSync({ websiteId: s.id, provider: 'internal_cms', window: 'snapshot' });
+        for (const provider of INTERNAL_PROVIDERS) {
+            await enqueueSync({ websiteId: s.id, provider, window: 'snapshot' });
+        }
     }
     return sites.length;
 }

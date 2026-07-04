@@ -40,18 +40,24 @@ function list() {
 const PROVIDER_CATALOG = Object.freeze([
     { provider: 'ga4', label: 'Google Analytics 4', category: 'traffic', requiredCreds: ['propertyId', 'oauthClientId', 'oauthClientSecret', 'refreshToken'] },
     { provider: 'gsc', label: 'Google Search Console', category: 'seo', requiredCreds: ['siteUrl', 'oauthClientId', 'oauthClientSecret', 'refreshToken'] },
-    { provider: 'gtm', label: 'Google Tag Manager', category: 'traffic', requiredCreds: ['containerId', 'oauthClientId', 'oauthClientSecret', 'refreshToken'] },
+    // GTM has no traffic data of its own — syncs container/tag config health instead (see connectors/gtm.js).
+    { provider: 'gtm', label: 'Google Tag Manager', category: 'traffic', requiredCreds: ['accountId', 'containerId', 'oauthClientId', 'oauthClientSecret', 'refreshToken'] },
     { provider: 'google-ads', label: 'Google Ads', category: 'marketing', requiredCreds: ['customerId', 'developerToken', 'oauthClientId', 'oauthClientSecret', 'refreshToken'] },
     { provider: 'adsense', label: 'Google AdSense', category: 'marketing', requiredCreds: ['accountId', 'oauthClientId', 'oauthClientSecret', 'refreshToken'] },
-    { provider: 'google-news', label: 'Google News', category: 'seo', requiredCreds: ['publicationId'] },
+    // No per-publisher "News metrics" API exists — this reuses GSC's Search Analytics
+    // `type=news` filter (see connectors/googleNews.js), so it needs GSC-style creds.
+    { provider: 'google-news', label: 'Google News', category: 'seo', requiredCreds: ['siteUrl', 'oauthClientId', 'oauthClientSecret', 'refreshToken'] },
     { provider: 'merchant-center', label: 'Google Merchant Center', category: 'ecommerce', requiredCreds: ['merchantId', 'oauthClientId', 'oauthClientSecret', 'refreshToken'] },
-    { provider: 'clarity', label: 'Microsoft Clarity', category: 'traffic', requiredCreds: ['projectId', 'apiToken'] },
+    { provider: 'clarity', label: 'Microsoft Clarity', category: 'traffic', requiredCreds: ['apiToken'] },
     { provider: 'bing-webmaster', label: 'Bing Webmaster', category: 'seo', requiredCreds: ['siteUrl', 'apiKey'] },
-    { provider: 'meta-pixel', label: 'Meta Pixel', category: 'marketing', requiredCreds: ['pixelId', 'accessToken'] },
-    { provider: 'linkedin-insight', label: 'LinkedIn Insight', category: 'marketing', requiredCreds: ['partnerId', 'accessToken'] },
-    { provider: 'x-pixel', label: 'X Pixel', category: 'marketing', requiredCreds: ['pixelId', 'accessToken'] },
-    { provider: 'pinterest-tag', label: 'Pinterest Tag', category: 'marketing', requiredCreds: ['tagId', 'accessToken'] },
-    { provider: 'tiktok-pixel', label: 'TikTok Pixel', category: 'marketing', requiredCreds: ['pixelId', 'accessToken'] },
+    // Pixel platforms only expose Ads/Marketing-API insights (spend/clicks tied to an ad
+    // account) — there is no public API for raw pixel fire counts on any of these platforms.
+    { provider: 'meta-pixel', label: 'Meta Pixel', category: 'marketing', requiredCreds: ['adAccountId', 'accessToken'] },
+    { provider: 'linkedin-insight', label: 'LinkedIn Insight', category: 'marketing', requiredCreds: ['adAccountId', 'accessToken'] },
+    // X Ads API requires OAuth 1.0a user-context signing, not a bearer token.
+    { provider: 'x-pixel', label: 'X Pixel', category: 'marketing', requiredCreds: ['apiKey', 'apiSecretKey', 'accessToken', 'accessTokenSecret', 'adAccountId'] },
+    { provider: 'pinterest-tag', label: 'Pinterest Tag', category: 'marketing', requiredCreds: ['adAccountId', 'accessToken'] },
+    { provider: 'tiktok-pixel', label: 'TikTok Pixel', category: 'marketing', requiredCreds: ['advertiserId', 'accessToken'] },
     { provider: 'cloudflare', label: 'Cloudflare Analytics', category: 'traffic', requiredCreds: ['zoneId', 'apiToken'] },
     { provider: 'internal_cms', label: 'Internal CMS Analytics', category: 'content', requiredCreds: [] },
     { provider: 'server', label: 'Server Analytics', category: 'infra', requiredCreds: [] },
