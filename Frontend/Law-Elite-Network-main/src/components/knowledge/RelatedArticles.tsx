@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getArticlesByCategorySlug } from '@/data/law-content';
+import { resolveArticleImage } from '@/lib/article-art';
 
 interface RelatedArticle {
   id: string;
@@ -11,6 +12,7 @@ interface RelatedArticle {
   category: string;
   author: string;
   slug: string;
+  featuredImage?: string;
 }
 
 interface RelatedArticlesProps {
@@ -52,6 +54,7 @@ export function RelatedArticles({ currentSlug, categorySlug, categoryName }: Rel
                 category: a.category?.name || categoryName || 'Legal Guide',
                 author: 'Law Elite Editorial',
                 slug: a.slug,
+                featuredImage: a.featuredImage || undefined,
               }))
           : [];
         const bySlug = new Map<string, RelatedArticle>();
@@ -80,7 +83,7 @@ export function RelatedArticles({ currentSlug, categorySlug, categoryName }: Rel
               <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
                   <Image
-                    src={`https://picsum.photos/seed/${art.id}/400/260`}
+                    src={resolveArticleImage({ featuredImage: art.featuredImage, title: art.title, category: { name: art.category }, id: art.id })}
                     alt={art.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"

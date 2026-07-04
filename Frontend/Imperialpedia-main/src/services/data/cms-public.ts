@@ -16,6 +16,7 @@
 
 import { Article, ArticleStatus } from '@/modules/content-engine/types/article';
 import type { NewsArticle, NewsBodyBlock, NewsCategory } from '@/lib/data.news';
+import { articleArtDataUri } from '@baalvion/illustrations';
 
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
@@ -256,7 +257,12 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     tags: raw.tagIds ?? [],
     status: 'published' as ArticleStatus,
     readingTime: Math.max(1, Math.round(words / 200)),
-    featuredImage: raw.featuredImage || `https://picsum.photos/seed/${raw.slug}/800/600`,
+    // The CMS never falls back to stock/placeholder imagery — cms-service generates
+    // real original artwork on create/update (@baalvion/illustrations); this inline
+    // data-URI is only a safety net for rows that somehow still have none.
+    featuredImage:
+      raw.featuredImage ||
+      articleArtDataUri({ title: raw.title, category: raw.category?.name, tags: raw.tagIds, excerpt: raw.excerpt, seed: raw.id }),
     seoTitle: raw.seoMetadata?.title || raw.title,
     seoDescription: raw.seoMetadata?.description || raw.excerpt || '',
     seoKeywords: raw.seoMetadata?.keywords || raw.tagIds || [],
@@ -322,7 +328,9 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     publishedAt: raw.publishedAt ?? raw.updatedAt ?? new Date().toISOString(),
     updatedAt: raw.updatedAt ?? undefined,
     readTimeMinutes: Math.max(1, Math.round(words / 200)),
-    imageUrl: raw.featuredImage || `https://picsum.photos/seed/${raw.slug}/1200/675`,
+    imageUrl:
+      raw.featuredImage ||
+      articleArtDataUri({ title: raw.title, category: raw.category?.name, tags: raw.tagIds, excerpt: raw.excerpt, seed: raw.id }),
     slug: raw.slug,
     featured: false,
     body: blocksToNewsBody(raw.contentBlocks),

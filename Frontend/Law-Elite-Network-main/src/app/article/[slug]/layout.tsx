@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { cmsGetArticleBySlug } from '@/lib/cms';
 import { getAuthorByName } from '@/data/authors';
+import { articleArtDataUri } from '@baalvion/illustrations';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -37,6 +38,7 @@ async function fetchArticle(slug: string): Promise<any | null> {
       contentType: cms.contentType,
       updated_at: cms.updatedAt,
       published_at: cms.updatedAt,
+      cover_image: cms.featuredImage,
     };
   }
   return fetchFromLawService(slug);
@@ -56,7 +58,11 @@ export async function generateMetadata(
   const title = a.title;
   const description = String(a.excerpt || a.title).slice(0, 300);
   const authorName = (typeof a.author === 'string' ? a.author : a.author?.name) || a.author_name || undefined;
-  const ogImage = a.cover_image || a.image_url || `https://picsum.photos/seed/${a.id || slug}/1200/630`;
+  // Data-URI SVG art is a placeholder here — social crawlers need a real crawlable
+  // raster URL for og:image, which this app doesn't generate yet (tracked as a
+  // follow-up, same gap flagged on Imperialpedia). At minimum this is never a
+  // stock/placeholder image.
+  const ogImage = a.cover_image || a.image_url || articleArtDataUri({ title, category: a.category?.name, seed: String(a.id || slug) });
   return {
     title,
     description,

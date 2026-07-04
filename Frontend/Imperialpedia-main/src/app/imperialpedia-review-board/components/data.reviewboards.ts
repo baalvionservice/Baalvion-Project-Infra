@@ -1,5 +1,7 @@
 // ─── Review Board list card (used on /review-board index page) ───────────────
 
+import { personSilhouetteDataUri } from "@baalvion/illustrations";
+
 export type ReviewBoardMember = {
   name: string;
   role: string;
@@ -56,13 +58,17 @@ export interface StaffProfile extends ReviewBoardProfileBase {
 
 export type ReviewBoardProfile = BoardMemberProfile | StaffProfile;
 
+// Plain `Omit<Union, K>` doesn't distribute per-member (keyof a union is the
+// intersection of member keys), which loses the discriminated fields unique to
+// BoardMemberProfile. This conditional forces per-member distribution instead.
+type OmitImageUrl<T> = T extends unknown ? Omit<T, "imageUrl"> : never;
+
 // ─── Index page list ──────────────────────────────────────────────────────────
 
-export const reviewBoardMembers: ReviewBoardMember[] = [
+const rawReviewBoardMembers: Omit<ReviewBoardMember, "image">[] = [
   {
     name: "Marcus Whitfield",
     role: "CERTIFIED FINANCIAL PLANNER™",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80",
     slug: "marcus-whitfield",
     shortBio:
       "Marcus Whitfield is a CERTIFIED FINANCIAL PLANNER™ professional with 15+ years in financial markets and a fierce advocate for financial literacy.",
@@ -70,7 +76,6 @@ export const reviewBoardMembers: ReviewBoardMember[] = [
   {
     name: "Allen Krewzz",
     role: "Senior Editor, Financial Products and Services",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
     slug: "allen-krewzz",
     shortBio:
       "Allen Krewzz is a senior editor at Imperialpedia with over a decade of experience editing content for financial and business publications.",
@@ -78,7 +83,6 @@ export const reviewBoardMembers: ReviewBoardMember[] = [
   {
     name: "Sarah Mitchell",
     role: "Senior Investment Analyst & CFA Charterholder",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
     slug: "sarah-mitchell",
     shortBio:
       "Sarah Mitchell is a CFA Charterholder with 12+ years in equity research and portfolio management across global markets.",
@@ -86,23 +90,28 @@ export const reviewBoardMembers: ReviewBoardMember[] = [
   {
     name: "David Kim",
     role: "Fact Checker & Research Analyst",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
     slug: "david-kim",
     shortBio:
       "David Kim is a research analyst and fact checker at Imperialpedia specializing in macroeconomics, interest rates, and fixed income markets.",
   },
 ];
 
+// Abstract silhouette avatars (no stock headshot photos) — per the style guide's
+// "no people unless represented as abstract silhouettes" rule.
+export const reviewBoardMembers: ReviewBoardMember[] = rawReviewBoardMembers.map((member) => ({
+  ...member,
+  image: personSilhouetteDataUri({ name: member.name, seed: member.slug }),
+}));
+
 // ─── Full profile data ────────────────────────────────────────────────────────
 
-export const reviewBoardProfiles: ReviewBoardProfile[] = [
+const rawReviewBoardProfiles: OmitImageUrl<ReviewBoardProfile>[] = [
 
   // ── BOARD MEMBER: Marcus Whitfield ───────────────────────────────────────
   {
     profileType: "board-member",
     slug: "marcus-whitfield",
     name: "Marcus Whitfield",
-    imageUrl: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&q=80",
     linkedInUrl: "https://www.linkedin.com/",
     credentials: "CFP®, ChFC®, CLU®, RICP®",
     currently: "Certified Financial Planner",
@@ -132,7 +141,6 @@ export const reviewBoardProfiles: ReviewBoardProfile[] = [
     profileType: "staff",
     slug: "allen-krewzz",
     name: "Allen Krewzz",
-    imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
     linkedInUrl: "https://www.linkedin.com/",
     currently: "Senior Editor, Financial Products and Services",
     residesIn: "Syracuse, New York",
@@ -157,7 +165,6 @@ export const reviewBoardProfiles: ReviewBoardProfile[] = [
     profileType: "staff",
     slug: "sarah-mitchell",
     name: "Sarah Mitchell",
-    imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&q=80",
     linkedInUrl: "https://www.linkedin.com/",
     currently: "Senior Investment Analyst",
     residesIn: "New York, New York",
@@ -182,7 +189,6 @@ export const reviewBoardProfiles: ReviewBoardProfile[] = [
     profileType: "staff",
     slug: "david-kim",
     name: "David Kim",
-    imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
     linkedInUrl: "https://www.linkedin.com/",
     currently: "Fact Checker & Research Analyst",
     residesIn: "Chicago, Illinois",
@@ -203,3 +209,8 @@ export const reviewBoardProfiles: ReviewBoardProfile[] = [
   },
 
 ];
+
+export const reviewBoardProfiles: ReviewBoardProfile[] = rawReviewBoardProfiles.map((profile) => ({
+  ...profile,
+  imageUrl: personSilhouetteDataUri({ name: profile.name, seed: profile.slug }),
+})) as ReviewBoardProfile[];

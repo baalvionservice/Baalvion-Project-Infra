@@ -1,8 +1,9 @@
 /**
- * Baked Personal Finance content (committed snapshot) — the always-on source that
- * lets the site render its content with NO external CMS (e.g. on Vercel, where the
- * local cms-service is unreachable). A live CMS still takes precedence at request
- * time; this is only used as the fallback.
+ * Baked editorial content (committed snapshot, multiple categories/packs — see
+ * `scripts/generate-static-content.cjs`) — the always-on source that lets the site
+ * render its content with NO external CMS (e.g. on Vercel, where the local
+ * cms-service is unreachable). A live CMS still takes precedence at request time;
+ * this is only used as the fallback.
  *
  * IMPORTANT: import this module ONLY from Server Components / server-side code.
  * It statically imports a ~750 KB JSON snapshot; pulling it into a Client Component
@@ -50,12 +51,12 @@ export function staticNewsBySlug(slug: string): NewsArticle | null {
 
 /**
  * Baked articles for a category, as NewsArticle cards (for topic/hub pages).
- * Every baked article lives in the `personal-finance` category, so only that slug
- * (or no slug) returns content.
+ * Matches against each baked article's own category slug (set per content pack in
+ * `scripts/generate-static-content.cjs`); omitting `categorySlug` returns everything.
  */
 export function staticCategoryNews(categorySlug?: string): NewsArticle[] {
-  if (categorySlug && categorySlug !== 'personal-finance') return [];
-  return ARTICLES.map(cmsContentToNews);
+  const matching = categorySlug ? ARTICLES.filter((a) => a.category?.slug === categorySlug) : ARTICLES;
+  return matching.map(cmsContentToNews);
 }
 
 /** A baked CMS page (About / Contact / Privacy) by slug, or null. */

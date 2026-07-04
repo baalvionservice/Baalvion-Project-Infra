@@ -1,4 +1,5 @@
 import { ArticleStatus } from "@/modules/content-engine/types";
+import { articleArtDataUri } from "@baalvion/illustrations";
 
 export type NewsCategory =
   | "Markets"
@@ -55,7 +56,7 @@ export type NewsBodyBlock =
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
-export const newsArticles: NewsArticle[] = [
+const rawNewsArticles: Omit<NewsArticle, "imageUrl">[] = [
   {
     id: "1",
     title:
@@ -83,8 +84,6 @@ export const newsArticles: NewsArticle[] = [
         href: "#",
       },
     ],
-    imageUrl:
-      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=80",
     imageCaption: "The Federal Reserve building in Washington, D.C.",
     slug: "fed-holds-rates-inflation-cooling",
     featured: true,
@@ -164,8 +163,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "James Okafor", title: "Markets Reporter" },
     publishedAt: "2026-03-15T12:00:00Z",
     readTimeMinutes: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=1200&q=80",
     imageCaption:
       "Traders at the New York Stock Exchange react to earnings news.",
     slug: "sp500-record-high-earnings",
@@ -238,8 +235,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Priya Sharma", title: "Crypto & Digital Assets Editor" },
     publishedAt: "2026-03-15T10:15:00Z",
     readTimeMinutes: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=1200&q=80",
     imageCaption: "A Bitcoin token alongside other cryptocurrencies.",
     slug: "bitcoin-surges-institutional-demand",
     tags: ["Bitcoin", "Crypto", "ETF", "Institutional Investing"],
@@ -301,8 +296,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Marco Delgado", title: "Real Estate Correspondent" },
     publishedAt: "2026-03-14T16:45:00Z",
     readTimeMinutes: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200&q=80",
     imageCaption: "A suburban home listed for sale in the U.S.",
     slug: "housing-market-cools-mortgage-rates",
     tags: ["Housing Market", "Mortgage Rates", "Real Estate", "Fed"],
@@ -386,8 +379,6 @@ export const newsArticles: NewsArticle[] = [
         href: "#",
       },
     ],
-    imageUrl:
-      "https://images.unsplash.com/photo-1677756119517-756a188d2d94?w=1200&q=80",
     imageCaption: "A data center powering AI workloads.",
     slug: "tech-stocks-ai-spending-boom",
     tags: [
@@ -459,8 +450,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "David Chen", title: "Fixed Income Reporter" },
     publishedAt: "2026-03-13T15:20:00Z",
     readTimeMinutes: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1554260570-e9689a3418b8?w=1200&q=80",
     imageCaption: "U.S. Treasury Department building, Washington, D.C.",
     slug: "treasury-yields-jobs-data",
     tags: ["Treasury Yields", "Jobs Report", "Bonds", "Economy"],
@@ -518,8 +507,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Aisha Patel", title: "Personal Finance Editor" },
     publishedAt: "2026-03-13T09:00:00Z",
     readTimeMinutes: 6,
-    imageUrl:
-      "https://images.unsplash.com/photo-1579621970795-87facc2f976d?w=1200&q=80",
     imageCaption:
       "Online banking apps have made high-yield savings accounts more accessible than ever.",
     slug: "best-high-yield-savings-accounts-2026",
@@ -585,8 +572,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Nora Walsh", title: "Commodities Reporter" },
     publishedAt: "2026-03-12T13:30:00Z",
     readTimeMinutes: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=1200&q=80",
     imageCaption: "Gold bullion bars at a secure storage facility.",
     slug: "gold-hits-2400-safe-haven",
     tags: ["Gold", "Safe Haven", "Commodities", "Geopolitics"],
@@ -646,8 +631,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Tom Rivera", title: "ETF & Funds Reporter" },
     publishedAt: "2026-03-12T10:00:00Z",
     readTimeMinutes: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80",
     imageCaption:
       "Exchange-traded funds have become the dominant vehicle for passive investing.",
     slug: "etf-inflows-record-february",
@@ -708,3 +691,17 @@ export const newsArticles: NewsArticle[] = [
     ],
   },
 ];
+
+// Original, deterministic artwork per news article (no stock/placeholder images) —
+// generated from each article's own title/category/tags, computed after the literal
+// above since object literals can't reference their own sibling properties.
+export const newsArticles: NewsArticle[] = rawNewsArticles.map((article) => ({
+  ...article,
+  imageUrl: articleArtDataUri({
+    title: article.title,
+    category: article.category,
+    tags: article.tags,
+    excerpt: article.excerpt,
+    seed: article.slug,
+  }),
+}));

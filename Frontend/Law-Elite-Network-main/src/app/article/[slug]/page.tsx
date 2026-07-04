@@ -28,6 +28,7 @@ import { cn } from '@/lib/utils';
 import seedData from '../../../../docs/seed-data.json';
 import { getArticleBySlug } from '@/data/law-content';
 import { getAuthorByName } from '@/data/authors';
+import { resolveArticleImage } from '@/lib/article-art';
 
 interface TOCItem {
   id: string;
@@ -313,7 +314,7 @@ export default function ArticleDeepDivePage() {
                 <figure className="pt-6">
                   <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
                     <Image
-                      src={`https://picsum.photos/seed/${article.id}/1200/800`}
+                      src={resolveArticleImage(article)}
                       alt={article.title}
                       fill
                       className="object-cover"

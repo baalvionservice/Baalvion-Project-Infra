@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { useTranslation } from "react-i18next";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { logEvent } from "@/lib/utils/analytics";
 import { WaitlistModal } from "./WaitlistModal";
 import { WaitlistForm } from "./WaitlistForm";
@@ -19,7 +18,6 @@ import { WaitlistForm } from "./WaitlistForm";
 export const HeroSection = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { t } = useTranslation("common");
-  const heroImage = PlaceHolderImages.find((img) => img.id === "hero-bg");
 
   const handleCtaClick = (type: string) => {
     logEvent("CTA Click", "Engagement", `Hero ${type} Button`);

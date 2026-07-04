@@ -7,6 +7,7 @@ import { Navbar } from '@/components/navbar';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { getAllAuthors, authorNameToSlug, type LawAuthor } from '@/data/authors';
 import { getAllArticles } from '@/data/law-content';
+import { resolvePersonImage } from '@/lib/article-art';
 
 export default function AuthorsIndexPage() {
   const [authors, setAuthors] = useState<LawAuthor[]>(getAllAuthors());
@@ -76,7 +77,7 @@ export default function AuthorsIndexPage() {
                     <div className="flex items-center gap-4 mb-5">
                       <div className="relative w-16 h-16 shrink-0 rounded-2xl overflow-hidden bg-slate-100 shadow-sm">
                         <Image
-                          src={author.avatarUrl || `https://picsum.photos/seed/${author.avatarSeed}/200/200`}
+                          src={resolvePersonImage({ avatarUrl: author.avatarUrl, name: author.name, avatarSeed: author.avatarSeed })}
                           alt={author.name}
                           fill
                           className="object-cover"

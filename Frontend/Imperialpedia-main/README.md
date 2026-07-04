@@ -223,9 +223,12 @@ Everything served from `public/`:
 | `13c7ede615e8cf445c4e183a9894e9c4.txt` | IndexNow key file (matches `INDEXNOW_KEY`) |
 | `yandex_72dc394851184864.html` | Yandex Webmaster site-verification file |
 
-Most editorial imagery is **remote** (allow-listed in `next.config.ts` image config and CSP):
-`images.unsplash.com`, `picsum.photos`, `placehold.co`, `www.investopedia.com`, `imperialpedia.com`.
-Image formats are optimized to WebP/AVIF with a responsive device-size ladder.
+Every article's featured image is **original, deterministically-generated SVG artwork**
+(`@baalvion/illustrations` — see `Backend/packages/illustrations`), produced from the
+article's own title/category/tags. No stock photography, no third-party image hosts —
+`next.config.ts` only allow-lists `self`, `imperialpedia.com`, and `api.baalvion.com`
+(cms-service-hosted generated artwork). Image formats are optimized to WebP/AVIF with a
+responsive device-size ladder.
 
 Fonts: editorial headlines use **Source Serif 4** (loaded via `next/font/google`); body/UI use a
 native Helvetica/Arial system stack (no webfont) — an Investopedia-style pairing defined in

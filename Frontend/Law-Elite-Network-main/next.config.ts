@@ -65,7 +65,10 @@ const securityHeaders = [
         isDev ? " 'unsafe-eval'" : ''
       }`,
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' data: blob: https://placehold.co https://images.unsplash.com https://picsum.photos https://fastly.picsum.photos https://*.razorpay.com",
+      // 'self' + data: (inline generated SVG artwork) + api.baalvion.com (cms-service-
+      // hosted generated artwork) + firebasestorage/googleusercontent (real user/OAuth
+      // avatars) — no stock/placeholder image hosts.
+      "img-src 'self' data: blob: https://api.baalvion.com https://firebasestorage.googleapis.com https://lh3.googleusercontent.com https://*.razorpay.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       `connect-src 'self' ${extraConnect} https://api.baalvion.com https://*.razorpay.com https://lumberjack.razorpay.com https://*.googleapis.com https://*.algolianet.com https://*.algolia.net${
         isDev
@@ -140,25 +143,12 @@ const nextConfig: NextConfig = {
   },
 
   images: {
+    // Only self, the cms-service origin (auto-generated article artwork), and
+    // real user/OAuth-avatar hosts — no stock/placeholder image hosts.
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'fastly.picsum.photos',
+        hostname: 'api.baalvion.com',
         pathname: '/**',
       },
       {
@@ -172,6 +162,9 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Every SVG served through next/image here is our own deterministically generated
+    // artwork (@baalvion/illustrations) — never user-uploaded — so it's safe to allow.
+    dangerouslyAllowSVG: true,
   },
 };
 

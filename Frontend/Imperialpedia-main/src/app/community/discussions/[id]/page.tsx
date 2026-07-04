@@ -7,6 +7,7 @@ import { communityService } from "@/services/data/community-service";
 import { DiscussionNode, Comment } from "@/types/community";
 import { CommentCard } from "@/modules/content-engine/components/CommentCard";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { personSilhouetteDataUri } from "@baalvion/illustrations";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -295,7 +296,7 @@ export default function DiscussionDetailPage({
           {/* User Input Hub */}
           <div className="flex gap-5 animate-in slide-in-from-left-4 duration-500">
             <Avatar className="h-10 w-10 rounded-xl mt-1">
-              <AvatarImage src="https://picsum.photos/seed/user42/100/100" />
+              <AvatarImage src={personSilhouetteDataUri({ name: "Community Member", seed: "user42" })} />
               <AvatarFallback>ME</AvatarFallback>
             </Avatar>
             <div className="flex-1 space-y-4">

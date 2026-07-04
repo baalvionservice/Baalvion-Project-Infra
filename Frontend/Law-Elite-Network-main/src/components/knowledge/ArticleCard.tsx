@@ -4,14 +4,10 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Clock, Eye } from 'lucide-react';
+import { resolveArticleImage } from '@/lib/article-art';
 
 interface ArticleCardProps {
   article: any;
-}
-
-function imageUrl(article: any): string {
-  const seed = article?.imageSeed || article?.id || article?.slug || 'lawelite';
-  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/640/400`;
 }
 
 function Byline({ article }: { article: any }) {
@@ -40,7 +36,7 @@ export function ArticleCard({ article }: ArticleCardProps) {
     <Link href={`/article/${article.slug}`} className="group flex flex-col h-full">
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-slate-100">
         <Image
-          src={imageUrl(article)}
+          src={resolveArticleImage(article)}
           alt={article.title}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"

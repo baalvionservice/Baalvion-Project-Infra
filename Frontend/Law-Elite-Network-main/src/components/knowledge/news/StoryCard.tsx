@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { resolveArticleImage } from '@/lib/article-art';
 
 type Variant = 'lead' | 'default' | 'horizontal';
 
@@ -12,11 +13,6 @@ interface StoryCardProps {
   article: any;
   variant?: Variant;
   priority?: boolean;
-}
-
-function imageUrl(article: any, w: number, h: number): string {
-  const seed = article?.imageSeed || article?.id || article?.slug || 'lawelite';
-  return `https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}`;
 }
 
 function Kicker({ article }: { article: any }) {
@@ -57,7 +53,7 @@ export function StoryCard({ article, variant = 'default', priority = false }: St
       <Link href={href} className="group block">
         <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-slate-100">
           <Image
-            src={imageUrl(article, 1200, 675)}
+            src={resolveArticleImage(article)}
             alt={article.title}
             fill
             priority={priority}
@@ -88,7 +84,7 @@ export function StoryCard({ article, variant = 'default', priority = false }: St
       <Link href={href} className="group flex gap-4 items-start">
         <div className="relative w-28 h-20 sm:w-32 sm:h-24 shrink-0 overflow-hidden rounded-md bg-slate-100">
           <Image
-            src={imageUrl(article, 320, 240)}
+            src={resolveArticleImage(article)}
             alt={article.title}
             fill
             sizes="128px"
@@ -113,7 +109,7 @@ export function StoryCard({ article, variant = 'default', priority = false }: St
     <Link href={href} className="group flex flex-col h-full">
       <div className="relative aspect-[16/10] w-full overflow-hidden rounded-lg bg-slate-100">
         <Image
-          src={imageUrl(article, 640, 400)}
+          src={resolveArticleImage(article)}
           alt={article.title}
           fill
           sizes="(max-width: 768px) 100vw, 33vw"

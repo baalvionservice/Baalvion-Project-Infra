@@ -1,5 +1,6 @@
 import { NewsAuthor, NewsBodyBlock, RelatedLink } from "../data.news";
 import { StocksCategory } from "@/app/stocks/components/stocks-tab";
+import { articleArtDataUri } from "@baalvion/illustrations";
 
 export interface StockItem {
   symbol: string;
@@ -35,7 +36,17 @@ export interface StockPageData {
   guides: StocksArticle[];
   popularTags: string[];
 }
-export const stocksPageData: StockPageData = {
+
+type RawStocksArticle = Omit<StocksArticle, "imageUrl">;
+interface RawStockPageData {
+  featured: RawStocksArticle;
+  latest: RawStocksArticle[];
+  trendingStocks: StockItem[];
+  guides: RawStocksArticle[];
+  popularTags: string[];
+}
+
+const rawStocksPageData: RawStockPageData = {
   featured: {
     id: "stock-featured-1",
     title: "Why NVIDIA Sits at the Center of the AI Infrastructure Trade",
@@ -45,8 +56,6 @@ export const stocksPageData: StockPageData = {
     author: { name: "Lisa Tran", title: "Tech Stocks Reporter" },
     publishedAt: "2026-03-16T10:00:00Z",
     readTimeMinutes: 7,
-    imageUrl:
-      "https://images.unsplash.com/photo-1677756119517-756a188d2d94?w=1200&q=80",
     slug: "nvidia-ai-rally",
     featured: true,
     tags: ["NVIDIA", "AI Stocks", "Semiconductors"],
@@ -103,8 +112,6 @@ export const stocksPageData: StockPageData = {
       author: { name: "Priya Shenoy", title: "Auto & EV Markets Reporter" },
       publishedAt: "2026-03-16T08:00:00Z",
       readTimeMinutes: 6,
-      imageUrl:
-        "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=1200&q=80",
       slug: "tesla-stock-jump",
       keyTakeaways: [
         "Quarterly vehicle delivery numbers are the single most-watched data point, since they're the clearest proxy for near-term revenue.",
@@ -147,8 +154,6 @@ export const stocksPageData: StockPageData = {
       author: { name: "Marcus Whitfield", title: "Consumer Tech Reporter" },
       publishedAt: "2026-03-16T07:00:00Z",
       readTimeMinutes: 6,
-      imageUrl:
-        "https://images.unsplash.com/photo-1611078489935-0cb964de46d6?w=1200&q=80",
       slug: "apple-stock-steady",
       keyTakeaways: [
         "iPhone sales are still Apple's largest single revenue source, but they now grow much more slowly than in the company's early years.",
@@ -195,8 +200,6 @@ export const stocksPageData: StockPageData = {
       author: { name: "Daniela Kroft", title: "Cloud & E-Commerce Reporter" },
       publishedAt: "2026-03-15T18:00:00Z",
       readTimeMinutes: 6,
-      imageUrl:
-        "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1200&q=80",
       slug: "amazon-cloud-growth",
       keyTakeaways: [
         "Amazon's retail (online store) segment produces the majority of company revenue but operates on thin margins.",
@@ -239,8 +242,6 @@ export const stocksPageData: StockPageData = {
       author: { name: "Daniela Kroft", title: "Cloud & E-Commerce Reporter" },
       publishedAt: "2026-03-15T18:00:00Z",
       readTimeMinutes: 6,
-      imageUrl:
-        "https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80",
       slug: "google-search-cloud-growth",
       keyTakeaways: [
         "Search and network advertising remain Alphabet's dominant profit source, funding investment across the rest of the company.",
@@ -323,8 +324,6 @@ export const stocksPageData: StockPageData = {
       author: { name: "Finance Guide" },
       publishedAt: "2026-03-10T10:00:00Z",
       readTimeMinutes: 6,
-      imageUrl:
-        "https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1200&q=80",
       slug: "investing-for-beginners",
       body: [
         {
@@ -341,8 +340,6 @@ export const stocksPageData: StockPageData = {
       author: { name: "Finance Guide" },
       publishedAt: "2026-03-09T10:00:00Z",
       readTimeMinutes: 5,
-      imageUrl:
-        "https://images.unsplash.com/photo-1569025690938-a00729c9e1df?w=1200&q=80",
       slug: "what-is-stock",
       body: [
         {
@@ -361,4 +358,27 @@ export const stocksPageData: StockPageData = {
     "Stock Market Basics",
     "Day Trading",
   ],
+};
+
+// Original, deterministic artwork per stocks article (no stock/placeholder images) —
+// generated from each article's own title/category/tags, computed after the literal
+// above since object literals can't reference their own sibling properties.
+function withArt(article: RawStocksArticle): StocksArticle {
+  return {
+    ...article,
+    imageUrl: articleArtDataUri({
+      title: article.title,
+      category: article.category,
+      tags: article.tags,
+      excerpt: article.excerpt,
+      seed: article.slug,
+    }),
+  };
+}
+
+export const stocksPageData: StockPageData = {
+  ...rawStocksPageData,
+  featured: withArt(rawStocksPageData.featured),
+  latest: rawStocksPageData.latest.map(withArt),
+  guides: rawStocksPageData.guides.map(withArt),
 };

@@ -4,6 +4,7 @@
  */
 import { ApiResponse } from "@/types";
 import { getTopCreators } from "./creators";
+import { personSilhouetteDataUri } from "@baalvion/illustrations";
 import {
   TrafficAnalytics,
   SeoAnalytics,
@@ -464,7 +465,7 @@ export const getEngagementAnalytics = async (): Promise<
         {
           id: "u-1",
           name: "Eleanor Vance",
-          avatar: "https://picsum.photos/seed/eleanor/200/200",
+          avatar: personSilhouetteDataUri({ name: "Eleanor Vance", seed: "u-1" }),
           actions: 1240,
           level: "High",
           lastActive: "2024-03-12T10:30:00Z",
@@ -508,7 +509,7 @@ export const getCreatorEngagement = async (): Promise<
       {
         id: "creator-4",
         name: "Eleanor Vance",
-        avatar: "https://picsum.photos/seed/eleanor/200/200",
+        avatar: personSilhouetteDataUri({ name: "Eleanor Vance", seed: "creator-4" }),
         totalContent: 120,
         likes: 45200,
         comments: 8400,

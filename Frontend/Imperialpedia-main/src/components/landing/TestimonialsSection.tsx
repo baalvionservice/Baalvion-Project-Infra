@@ -5,35 +5,40 @@ import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import TestimonialCarousel from '@/components/common/TestimonialCarousel';
 import { Globe, ShieldCheck, Building, Sparkles } from 'lucide-react';
+import { personSilhouetteDataUri } from '@baalvion/illustrations';
 
 /**
  * @fileOverview Landing Page Testimonials Section.
  * Showcases expert feedback via an interactive, responsive carousel.
  */
 
-const testimonials = [
+const rawTestimonials = [
   {
     name: "Alice Johnson",
     role: "Market Analyst",
     company: "Capital Insights",
     content: "Imperialpedia’s AI knowledge engine accelerated our research like never before. The structured data nodes are a game changer.",
-    photoUrl: "https://picsum.photos/seed/alice/100/100",
   },
   {
     name: "David Lee",
     role: "Startup Founder",
     company: "NextGen Fintech",
     content: "Instant insights and structured data saved our team weeks of work. It is the architectural foundation we needed.",
-    photoUrl: "https://picsum.photos/seed/david/100/100",
   },
   {
     name: "Maria Garcia",
     role: "Investor",
     company: "Global Assets",
     content: "A must-have tool for decision-making and market research. The AI analyst suite has drastically reduced our discovery time.",
-    photoUrl: "https://picsum.photos/seed/maria/100/100",
   }
 ];
+
+// Abstract silhouette avatars (no stock headshot photos) — per the style guide's
+// "no people unless represented as abstract silhouettes" rule.
+const testimonials = rawTestimonials.map((t) => ({
+  ...t,
+  photoUrl: personSilhouetteDataUri({ name: t.name, seed: t.name }),
+}));
 
 const partners = [
   { name: "Tech University", icon: Globe },

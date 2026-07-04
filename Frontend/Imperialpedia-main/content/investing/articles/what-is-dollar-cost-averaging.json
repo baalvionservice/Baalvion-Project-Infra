@@ -1,0 +1,77 @@
+{
+  "topicNumber": 14,
+  "title": "What Is Dollar-Cost Averaging?",
+  "slug": "what-is-dollar-cost-averaging",
+  "seo": {
+    "seoTitle": "What Is Dollar-Cost Averaging? Explained With an Example",
+    "metaDescription": "Dollar-cost averaging means investing a fixed amount on a regular schedule regardless of price. Here's how it works and why it removes timing pressure.",
+    "focusKeyword": "what is dollar-cost averaging",
+    "secondaryKeywords": ["dollar cost averaging explained", "DCA investing strategy", "how does dollar cost averaging work", "investing on a schedule"],
+    "searchIntent": "Informational — a foundational definitional query for a widely recommended investing strategy.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Dollar-cost averaging means investing the same fixed amount on a regular schedule, regardless of price — removing the pressure of trying to time the market perfectly.",
+  "intro": "Dollar-cost averaging (DCA) is one of the most widely recommended investing strategies precisely because it's simple to execute and removes an enormous source of stress: trying to guess whether right now is the perfect moment to invest. The strategy simply means investing a fixed dollar amount at regular intervals — weekly, biweekly, or monthly — regardless of whether prices are up or down at that moment.",
+  "sections": [
+    {
+      "heading": "How Dollar-Cost Averaging Works",
+      "paragraphs": [
+        "Instead of investing a large lump sum all at once, you invest a consistent amount on a set schedule. If you invest $200 every month into the same fund, you'll automatically buy more shares when the price is lower and fewer shares when the price is higher, since the dollar amount stays fixed while the share price fluctuates. Over time, this averages your purchase price rather than betting everything on a single moment."
+      ]
+    },
+    {
+      "heading": "Why It Removes Timing Pressure",
+      "paragraphs": [
+        "Even professional investors struggle to consistently predict short-term market movements, and trying to time a single large investment perfectly often leads to hesitation, second-guessing, or investing right before a downturn out of impatience. Dollar-cost averaging sidesteps this entirely — since you're investing on a fixed schedule regardless of price, there's no decision to agonize over each time, which also makes it far easier to stick with consistently."
+      ]
+    },
+    {
+      "heading": "Dollar-Cost Averaging vs. Lump-Sum Investing",
+      "paragraphs": [
+        "If you already have a large lump sum available, some studies suggest that investing it all immediately has historically outperformed spreading it out over time, simply because markets rise more often than they fall over long periods, so money invested sooner has more time to grow. However, dollar-cost averaging still offers genuine emotional and practical benefits — reducing the risk of investing a large sum right before a sharp decline and making the process feel far more manageable, which matters enormously for actually sticking with a plan."
+      ],
+      "callout": {
+        "title": "The 'best' approach is the one you'll actually follow",
+        "text": "A mathematically optimal strategy that you abandon out of stress is worse than a slightly less optimal one you follow consistently. For most people without a large lump sum, dollar-cost averaging is simply the natural way investing happens anyway, through regular paycheck contributions."
+      }
+    },
+    {
+      "heading": "Putting It Into Practice",
+      "paragraphs": [
+        "Most brokerages let you automate dollar-cost averaging entirely by scheduling recurring purchases on a chosen date each month, which removes the need to manually place every trade. This pairs naturally with [building a stock portfolio](/articles/how-to-build-a-stock-portfolio) — automated recurring contributions into a core diversified holding are one of the most consistent, low-effort ways to invest over the long term."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Dollar-cost averaging means investing a fixed amount on a regular schedule, regardless of price.",
+    "This approach automatically buys more shares when prices are lower and fewer when prices are higher.",
+    "It removes the pressure of trying to time a single perfect entry point.",
+    "For a lump sum already in hand, investing immediately has historically outperformed spreading it out, though DCA still offers real emotional and practical benefits.",
+    "Most brokerages can automate dollar-cost averaging through scheduled recurring purchases."
+  ],
+  "faq": [
+    {
+      "question": "Is dollar-cost averaging better than investing a lump sum?",
+      "answer": "For money you already have available, historical data generally favors investing it immediately since markets trend upward more often than not. Dollar-cost averaging is most relevant and useful for money you're earning and investing gradually over time, like from a regular paycheck."
+    },
+    {
+      "question": "How often should I dollar-cost average?",
+      "answer": "Common schedules include weekly, biweekly (matching many pay schedules), or monthly. The exact frequency matters less than maintaining consistency over a long period."
+    },
+    {
+      "question": "Can I use dollar-cost averaging with individual stocks, not just funds?",
+      "answer": "Yes, though it's more commonly applied to diversified funds. Applying it to individual stocks works the same way but doesn't reduce single-company risk, which diversification addresses separately."
+    }
+  ],
+  "conclusion": "Dollar-cost averaging isn't a way to guarantee better returns — it's a way to remove emotional decision-making and market-timing pressure from the investing process, which for most people translates directly into actually sticking with their plan. Automating a fixed contribution on a regular schedule is one of the simplest, most sustainable habits a long-term investor can build.",
+  "internalLinks": [
+    { "anchor": "how much money you need to start investing", "slug": "how-much-money-do-you-need-to-start-investing" },
+    { "anchor": "how to build a stock portfolio", "slug": "how-to-build-a-stock-portfolio" },
+    { "anchor": "how to invest during a recession", "slug": "how-to-invest-during-a-recession" },
+    { "anchor": "best long-term stocks", "slug": "best-long-term-stocks" }
+  ],
+  "externalSources": [
+    { "name": "FINRA Investor Education", "url": "https://www.finra.org/investors" }
+  ],
+  "wordCountEstimate": 700
+}

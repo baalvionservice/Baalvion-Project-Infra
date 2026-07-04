@@ -1,5 +1,6 @@
 import { ArticleStatus } from "@/modules/content-engine/types";
 import { NewsCategory } from "../data.news";
+import { articleArtDataUri } from "@baalvion/illustrations";
 
 export type TextSegment =
   | { type: "text"; content: string }
@@ -56,13 +57,11 @@ export type Term = {
   relatedTerms?: string[];
 };
 
-export const terms: Term[] = [
+const rawTerms: Term[] = [
   {
     slug: "0x-protocol",
     seoTitle: "0x Protocol",
-    featuredImageUrl:
-      "https://picsum.photos/750/450",
-      author: "Imperialpedia Staff",
+    author: "Imperialpedia Staff",
     categoryNames: "Crypto",
     title: "0x Protocol: A Decentralized Exchange Infrastructure for Ethereum",
     seoDescription:  "An open protocol that enables the peer-to-peer exchange of assets on the Ethereum blockchain, facilitating decentralized trading and liquidity.",
@@ -139,8 +138,6 @@ export const terms: Term[] = [
   {
     slug: "a-b-trust",
     seoTitle: "A-B Trust",
-    featuredImageUrl:
-      "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "A-B Trust: Definition, How It Works, and Tax Benefits",
@@ -236,8 +233,6 @@ export const terms: Term[] = [
   {
     slug: "estate-tax",
     seoTitle: "Estate Tax",
-    featuredImageUrl:
-      "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "Estate Tax: Understanding Federal and State Tax Implications",
@@ -329,8 +324,6 @@ export const terms: Term[] = [
     slug: "revocable-trust",
     seoTitle: "Revocable Trust",
     title: "Revocable Trust: Flexibility in Estate Planning",
-    featuredImageUrl:
-      "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Economy",
     seoDescription:
@@ -421,8 +414,6 @@ export const terms: Term[] = [
   {
     slug: "marital-deduction",
     seoTitle: "Marital Deduction",
-    featuredImageUrl:
-      "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Economy",
     title: "Marital Deduction: Unlimited Tax-Free Transfers Between Spouses",
@@ -499,8 +490,6 @@ export const terms: Term[] = [
   {
     slug: "compound-interest",
     seoTitle: "Compound Interest",
-    featuredImageUrl:
-      "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "Compound Interest: The Power of Exponential Growth",
@@ -577,8 +566,6 @@ export const terms: Term[] = [
   {
     slug: "diversification",
     seoTitle: "Diversification",
-    featuredImageUrl:
-      "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Markets",
     title: "Diversification: Risk Management Through Asset Allocation",
@@ -655,7 +642,6 @@ export const terms: Term[] = [
   {
     slug: "bear-market",
     seoTitle: "Bear Market",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Markets",
     title: "Bear Market: Definition, Causes, and How to Navigate One",
@@ -731,7 +717,6 @@ export const terms: Term[] = [
   {
     slug: "fiduciary",
     seoTitle: "Fiduciary",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "Fiduciary: What the Legal Duty Actually Means for Investors",
@@ -808,7 +793,6 @@ export const terms: Term[] = [
   {
     slug: "gross-domestic-product",
     seoTitle: "Gross Domestic Product (GDP)",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Economy",
     title: "Gross Domestic Product (GDP): What It Measures and Why It Matters",
@@ -885,7 +869,6 @@ export const terms: Term[] = [
   {
     slug: "hedge-fund",
     seoTitle: "Hedge Fund",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Markets",
     title: "Hedge Fund: How These Pooled Investment Vehicles Work",
@@ -961,7 +944,6 @@ export const terms: Term[] = [
   {
     slug: "index-fund",
     seoTitle: "Index Fund",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Markets",
     title: "Index Fund: A Simple, Low-Cost Way to Own the Market",
@@ -1023,7 +1005,6 @@ export const terms: Term[] = [
   {
     slug: "junk-bond",
     seoTitle: "Junk Bond",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Bonds",
     title: "Junk Bond: High-Yield, Higher-Risk Corporate Debt Explained",
@@ -1085,7 +1066,6 @@ export const terms: Term[] = [
   {
     slug: "kiddie-tax",
     seoTitle: "Kiddie Tax",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "Kiddie Tax: How a Child's Investment Income Gets Taxed",
@@ -1147,7 +1127,6 @@ export const terms: Term[] = [
   {
     slug: "liquidity",
     seoTitle: "Liquidity",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Markets",
     title: "Liquidity: Why It Matters Beyond Just Having Cash",
@@ -1209,7 +1188,6 @@ export const terms: Term[] = [
   {
     slug: "net-worth",
     seoTitle: "Net Worth",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "Net Worth: How to Calculate Your Real Financial Scorecard",
@@ -1271,7 +1249,6 @@ export const terms: Term[] = [
   {
     slug: "opportunity-cost",
     seoTitle: "Opportunity Cost",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "Opportunity Cost: The Hidden Price of Every Financial Choice",
@@ -1333,7 +1310,6 @@ export const terms: Term[] = [
   {
     slug: "price-to-earnings-ratio",
     seoTitle: "Price-to-Earnings (P/E) Ratio",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Stocks",
     title: "Price-to-Earnings (P/E) Ratio: A Core Valuation Metric Explained",
@@ -1395,7 +1371,6 @@ export const terms: Term[] = [
   {
     slug: "quantitative-easing",
     seoTitle: "Quantitative Easing",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Economy",
     title: "Quantitative Easing: How Central Banks Stimulate the Economy",
@@ -1457,7 +1432,6 @@ export const terms: Term[] = [
   {
     slug: "simple-interest",
     seoTitle: "Simple Interest",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "Simple Interest: How It Works and How It Differs From Compounding",
@@ -1519,7 +1493,6 @@ export const terms: Term[] = [
   {
     slug: "treasury-bond",
     seoTitle: "Treasury Bond",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Bonds",
     title: "Treasury Bond: The Government Debt Behind the Yield Curve",
@@ -1581,7 +1554,6 @@ export const terms: Term[] = [
   {
     slug: "underwriting",
     seoTitle: "Underwriting",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "Underwriting: The Risk-Assessment Process Behind Loans and Insurance",
@@ -1643,7 +1615,6 @@ export const terms: Term[] = [
   {
     slug: "volatility",
     seoTitle: "Volatility",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Markets",
     title: "Volatility: What It Measures and Why It Isn't the Same as Risk",
@@ -1705,7 +1676,6 @@ export const terms: Term[] = [
   {
     slug: "wealth-management",
     seoTitle: "Wealth Management",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "PersonalFinance",
     title: "Wealth Management: What the Service Actually Includes",
@@ -1767,7 +1737,6 @@ export const terms: Term[] = [
   {
     slug: "xbrl-reporting",
     seoTitle: "XBRL",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Markets",
     title: "XBRL: The Standard Behind Machine-Readable Financial Filings",
@@ -1829,7 +1798,6 @@ export const terms: Term[] = [
   {
     slug: "yield-curve",
     seoTitle: "Yield Curve",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Bonds",
     title: "Yield Curve: What Its Shape Signals About the Economy",
@@ -1891,7 +1859,6 @@ export const terms: Term[] = [
   {
     slug: "zero-coupon-bond",
     seoTitle: "Zero-Coupon Bond",
-    featuredImageUrl: "https://picsum.photos/750/450",
     author: "Imperialpedia Staff",
     categoryNames: "Bonds",
     title: "Zero-Coupon Bond: How a Bond With No Interest Payments Works",
@@ -1951,3 +1918,15 @@ export const terms: Term[] = [
     ],
   },
 ];
+
+// Original, deterministic artwork per glossary term (no stock/placeholder images) —
+// generated from each term's own title/category, computed after the literal above
+// since object literals can't reference their own sibling properties.
+export const terms: Term[] = rawTerms.map((term) => ({
+  ...term,
+  featuredImageUrl: articleArtDataUri({
+    title: term.title,
+    category: term.categoryNames,
+    seed: term.slug,
+  }),
+}));

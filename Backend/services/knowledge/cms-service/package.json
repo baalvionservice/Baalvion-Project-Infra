@@ -23,6 +23,8 @@
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/sdk": "workspace:*",
     "@baalvion/upload": "workspace:*",
+    "@baalvion/email": "workspace:*",
+    "@baalvion/illustrations": "workspace:*",
     "bullmq": "^5.52.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

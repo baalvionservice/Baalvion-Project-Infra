@@ -1,5 +1,6 @@
 import { ApiResponse } from '@/types';
 import { EditorialDashboardData } from '@/types/editorial';
+import { personSilhouetteDataUri } from '@baalvion/illustrations';
 
 /**
  * @fileOverview Mock service for the Editorial Review Workflow system.
@@ -61,7 +62,7 @@ const mockEditorialData: EditorialDashboardData = {
       expertise: 'Macroeconomics',
       articles_assigned: 12,
       review_progress: 75,
-      avatar: 'https://picsum.photos/seed/sarah/100/100',
+      avatar: personSilhouetteDataUri({ name: 'Sarah Collins', seed: 'sarah' }),
       status: 'Active'
     },
     {
@@ -70,7 +71,7 @@ const mockEditorialData: EditorialDashboardData = {
       expertise: 'Stock Market',
       articles_assigned: 8,
       review_progress: 40,
-      avatar: 'https://picsum.photos/seed/michael/100/100',
+      avatar: personSilhouetteDataUri({ name: 'Michael Grant', seed: 'michael' }),
       status: 'Active'
     }
   ],

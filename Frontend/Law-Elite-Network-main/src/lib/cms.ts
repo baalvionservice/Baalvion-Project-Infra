@@ -176,6 +176,14 @@ export interface CmsArticle {
   updatedAt?: string;
   /** CMS content type, e.g. 'article' or 'news' — drives NewsArticle JSON-LD. */
   contentType?: string;
+  /**
+   * Real featured image set in the CMS admin panel, if any. Was previously
+   * dropped during normalization — every renderer had to synthesize a picsum
+   * placeholder instead, so admin-set images never appeared on the site. Now
+   * carried through; renderers should fall back to `articleArtDataUri` (never
+   * to a stock/placeholder image) when this is absent.
+   */
+  featuredImage?: string;
 }
 
 function toArticle(c: CmsContent): CmsArticle {
@@ -196,6 +204,7 @@ function toArticle(c: CmsContent): CmsArticle {
     featured: !!cf.featured,
     updatedAt: c.publishedAt ?? undefined,
     contentType: c.contentType,
+    featuredImage: c.featuredImage ?? undefined,
   };
 }
 

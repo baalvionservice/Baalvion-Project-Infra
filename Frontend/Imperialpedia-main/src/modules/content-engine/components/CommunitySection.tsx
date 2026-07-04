@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { personSilhouetteDataUri } from "@baalvion/illustrations";
 import { cn } from "@/lib/utils";
 
 /**
@@ -104,7 +105,7 @@ export function CommunitySection() {
                 className="h-9 w-9 border-2 border-background ring-1 ring-white/5"
               >
                 <AvatarImage
-                  src={`https://picsum.photos/seed/user${i}/100/100`}
+                  src={personSilhouetteDataUri({ name: `Community Member ${i}`, seed: `user${i}` })}
                 />
                 <AvatarFallback>U</AvatarFallback>
               </Avatar>

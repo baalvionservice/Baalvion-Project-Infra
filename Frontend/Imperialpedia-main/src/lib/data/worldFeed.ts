@@ -15,6 +15,7 @@
  */
 
 import type { CmsContent } from "@/services/data/cms-public";
+import { articleArtDataUri } from "@baalvion/illustrations";
 import {
   getWorldData,
   resolveRegion,
@@ -391,37 +392,22 @@ function relativeTime(ms: number): string {
 
 // next/image + the app CSP only allow a short list of image hosts. Article
 // thumbnails come from arbitrary news domains, so we never hotlink them — we map
-// each story to an allowlisted, category-matched image (and pass through a
-// remote image only when its host is already allowlisted, e.g. the CMS).
-const CATEGORY_IMG: Record<string, string> = {
-  MARKETS: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
-  ECONOMY: "https://images.unsplash.com/photo-1521790945508-bf2a36314e85?w=800&q=80",
-  TECH: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80",
-  ENERGY: "https://images.unsplash.com/photo-1606159068539-43f36b99d1b2?w=800&q=80",
-  POLITICS: "https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=800&q=80",
-  CRYPTO: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80",
-};
-const FALLBACK_IMG = CATEGORY_IMG.MARKETS;
+// each story to original, deterministically-generated artwork instead (and pass
+// through a remote image only when its host is already allowlisted, e.g. the CMS).
+const ALLOWED_IMG_HOSTS = new Set(["imperialpedia.com", "api.baalvion.com"]);
 
-const ALLOWED_IMG_HOSTS = new Set([
-  "images.unsplash.com",
-  "picsum.photos",
-  "placehold.co",
-  "imperialpedia.com",
-  "www.investopedia.com",
-]);
-
-/** Pass a remote image through only if its host is allowlisted, else use a
- * category-matched allowlisted image so next/image + CSP never break. */
-function safeImage(url: string | null | undefined, category: string): string {
+/** Pass a remote image through only if its host is allowlisted, else generate
+ * original artwork from the story's own title/category so next/image + CSP
+ * never break and no stock/placeholder image is ever hotlinked. */
+function safeImage(url: string | null | undefined, category: string, title: string): string {
   if (url) {
     try {
       if (ALLOWED_IMG_HOSTS.has(new URL(url).hostname)) return url;
     } catch {
-      /* malformed URL → fall through to category image */
+      /* malformed URL → fall through to generated artwork */
     }
   }
-  return CATEGORY_IMG[category] ?? FALLBACK_IMG;
+  return articleArtDataUri({ title, category, seed: title });
 }
 
 function classifyCategory(title: string): string {
@@ -461,7 +447,7 @@ async function buildNews(region: RegionId): Promise<NewsBundle | null> {
       category,
       headline: a.title,
       summary: a.domain ? `Latest from ${a.domain}.` : "",
-      image: safeImage(undefined, category),
+      image: safeImage(undefined, category, a.title),
       time: relativeTime(a.ms),
       author: a.domain ?? "Newswire",
       tag: i === 0 ? "BREAKING" : null,
@@ -490,7 +476,7 @@ async function buildNews(region: RegionId): Promise<NewsBundle | null> {
         id: 3000 + idx * 10 + i,
         headline: a.title,
         time: relativeTime(a.ms),
-        image: i === 0 ? safeImage(undefined, classifyCategory(a.title)) : null,
+        image: safeImage(undefined, classifyCategory(a.title), a.title),
       }));
     return { section: def.section, color: "#0a2463", items };
   }).filter((s) => s.items.length > 0);
@@ -588,7 +574,7 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
       category,
       headline: c.title,
       summary: c.excerpt ?? "",
-      image: safeImage(c.featuredImage, category),
+      image: safeImage(c.featuredImage, category, c.title),
       time: CMS_TIME(c),
       author: "Imperialpedia",
       tag: i === 0 ? "EXCLUSIVE" : null,
@@ -616,7 +602,7 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
         id: 3000 + idx * 10 + i,
         headline: c.title,
         time: CMS_TIME(c),
-        image: i === 0 ? safeImage(c.featuredImage, mapCmsCategory(c.category?.name, c.title)) : null,
+        image: safeImage(c.featuredImage, mapCmsCategory(c.category?.name, c.title), c.title),
       }));
     return { section: def.section, color: "#0a2463", items: its };
   }).filter((s) => s.items.length > 0);
