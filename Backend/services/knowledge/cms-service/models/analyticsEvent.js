@@ -30,6 +30,12 @@ module.exports = function (sequelize, DataTypes) {
         valueNum: { type: DataTypes.DECIMAL, allowNull: true },
         currency: { type: DataTypes.TEXT, allowNull: true },
         metadata: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
+        // ── v2 trust/compliance layers ──
+        consentState: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
+        fraudScore: { type: DataTypes.DECIMAL, allowNull: true },
+        attributionId: { type: DataTypes.TEXT, allowNull: true },
+        dedupeKey: { type: DataTypes.TEXT, allowNull: true },
+        eventSchemaVersion: { type: DataTypes.SMALLINT, allowNull: false, defaultValue: 2 },
     }, {
         sequelize,
         tableName: 'events',

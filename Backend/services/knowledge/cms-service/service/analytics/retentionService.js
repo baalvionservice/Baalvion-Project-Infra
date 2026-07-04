@@ -26,8 +26,17 @@ async function runMaintenance() {
         logger('analytics-maintenance').warn({ err: err && err.message }, 'internal_cms snapshot enqueue failed');
     }
 
-    logger('analytics-maintenance').info({ dropped, swept, internalSnapshots }, 'analytics maintenance complete');
-    return { dropped, swept, internalSnapshots };
+    // Reconciliation + anomaly detection (fail-open).
+    let anomaliesFlagged = 0;
+    try {
+        const rec = await require('./reconciliationService').runReconciliation();
+        anomaliesFlagged = rec.flagged;
+    } catch (err) {
+        logger('analytics-maintenance').warn({ err: err && err.message }, 'reconciliation failed');
+    }
+
+    logger('analytics-maintenance').info({ dropped, swept, internalSnapshots, anomaliesFlagged }, 'analytics maintenance complete');
+    return { dropped, swept, internalSnapshots, anomaliesFlagged };
 }
 
 /** Ensure this month + the next two months have partitions. */

@@ -825,7 +825,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         recordLog("Product Creation", "Registry", "global", null, p);
         return [p, ...prev];
       }),
-    addToCart: (p) =>
+    addToCart: (p) => {
+      // Unified-analytics ecommerce event (fire-and-forget via the first-party tracker).
+      if (typeof window !== 'undefined') {
+        (window as unknown as { baalvion?: { track?: (e: string, props?: Record<string, unknown>) => void } })
+          .baalvion?.track?.('add_to_cart', {
+            value: p.price ?? p.basePrice,
+            metadata: { productId: p.id, name: p.name },
+          });
+      }
       setCart((prev) => {
         const existing = prev.find((item) => item.id === p.id);
         if (existing)
@@ -833,7 +841,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             item.id === p.id ? { ...item, quantity: item.quantity + 1 } : item
           );
         return [...prev, { ...p, quantity: 1 }];
-      }),
+      });
+    },
     removeFromCart: (id) => setCart((prev) => prev.filter((i) => i.id !== id)),
     updateCartQuantity: (id, quantity) =>
       setCart((prev) =>

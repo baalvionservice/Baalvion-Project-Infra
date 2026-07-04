@@ -34,6 +34,7 @@ function _fromRow(row) {
         enabled: config.enableAnalytics !== false,
         modules: Array.isArray(analytics.modules) && analytics.modules.length ? analytics.modules : DEFAULT_MODULES,
         salt: analytics.visitorSalt || row.id, // per-site salt for cookieless ids
+        consentMode: analytics.consentMode === 'strict' ? 'strict' : 'implied',
     };
 }
 

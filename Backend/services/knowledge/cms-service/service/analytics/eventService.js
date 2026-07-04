@@ -10,6 +10,9 @@
  */
 const { QueryTypes } = require('sequelize');
 const { logger } = require('../../platform/logger');
+const fraudService = require('./fraudService');
+const attributionService = require('./attributionService');
+const realtimeService = require('./realtimeService');
 
 const ENGAGED_EVENTS = new Set(['engagement', 'scroll', 'reading']);
 
@@ -17,7 +20,22 @@ async function persist(evt) {
     const db = require('../../models');
     const { sequelize } = db;
 
-    // 1) Raw, append-only event.
+    // 0) Fraud/bot scoring. A blocking score is dropped entirely (not stored);
+    // a flag is stored but excluded from metric rollups (still counted in Security).
+    const fraud = fraudService.scoreEvent(evt);
+    if (fraud.action === 'block') {
+        logger('analytics-fraud').debug({ event: evt.event, score: fraud.score, reasons: fraud.reasons }, 'event blocked');
+        return { dropped: true, reason: 'fraud_block', score: fraud.score };
+    }
+    evt.fraudScore = fraud.score;
+
+    // 0b) Attribution for conversion events → stamps attribution_id + credits channels.
+    if (attributionService.CONVERSION_EVENTS.has(evt.event)) {
+        try { evt.attributionId = await attributionService.attributeConversion(evt); }
+        catch (err) { logger('analytics-attribution').warn({ err: err && err.message }, 'attribution failed'); }
+    }
+
+    // 1) Raw, append-only event (schema v2).
     await db.AnalyticsEvent.create({
         eventId: evt.eventId,
         occurredAt: evt.occurredAt,
@@ -39,6 +57,11 @@ async function persist(evt) {
         valueNum: evt.valueNum != null ? evt.valueNum : null,
         currency: evt.currency || null,
         metadata: evt.metadata || {},
+        consentState: evt.consentState || {},
+        fraudScore: evt.fraudScore,
+        attributionId: evt.attributionId || null,
+        dedupeKey: evt.dedupeKey || null,
+        eventSchemaVersion: evt.eventSchemaVersion || 2,
     });
 
     // 2) Derived session (first-party events carrying a session id).
@@ -47,7 +70,13 @@ async function persist(evt) {
     // 3) Derived visitor.
     if (evt.visitorId) await upsertVisitor(sequelize, evt);
 
-    return { persisted: true };
+    // 4) Realtime fanout (fail-open).
+    realtimeService.publish(evt);
+
+    // 5) v3 streaming seam — no-op until a stream sink is configured (dual-write path).
+    require('./streamSink').emit(evt);
+
+    return { persisted: true, score: fraud.score };
 }
 
 async function upsertSession(sequelize, evt) {

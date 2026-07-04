@@ -133,7 +133,42 @@ async function health(req, res, next) {
     } catch (err) { return next(err); }
 }
 
+async function anomalies(req, res, next) {
+    try {
+        const rows = await reportingService.anomalies(req.params.websiteId, { limit: req.validatedQuery?.limit || 50 });
+        return sendSuccess(req, res, { anomalies: rows });
+    } catch (err) { return next(err); }
+}
+
+async function providerState(req, res, next) {
+    try {
+        const state = await reportingService.providerState(req.params.websiteId);
+        return sendSuccess(req, res, { providers: state });
+    } catch (err) { return next(err); }
+}
+
+/** Server-Sent Events realtime stream, sharded by website (Redis pub/sub fanout). */
+function realtimeStream(req, res) {
+    res.set({
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        Connection: 'keep-alive',
+        'X-Accel-Buffering': 'no',
+    });
+    if (res.flushHeaders) res.flushHeaders();
+    res.write(`event: ready\ndata: {"ok":true}\n\n`);
+
+    const realtimeService = require('../service/analytics/realtimeService');
+    const unsubscribe = realtimeService.subscribe(req.params.websiteId, (msg) => {
+        try { res.write(`data: ${JSON.stringify(msg)}\n\n`); } catch { /* client gone */ }
+    });
+    // Heartbeat so proxies keep the connection open.
+    const ping = setInterval(() => { try { res.write(': ping\n\n'); } catch { /* noop */ } }, 25000);
+    req.on('close', () => { clearInterval(ping); unsubscribe(); });
+}
+
 module.exports = {
     overview, timeseries, breakdown, realtime, providers, triggerSync, health,
     seoVitals, providerTotals, providerBreakdown, moduleTotals, infra,
+    anomalies, providerState, realtimeStream,
 };

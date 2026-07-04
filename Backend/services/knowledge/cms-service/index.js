@@ -86,6 +86,7 @@ async function start() {
         registerShutdown('analytics-queues', async () => {
             await stopAnalyticsWorkers();
             await closeAnalyticsQueues();
+            try { await require('./service/analytics/redisClient').closeRedis(); } catch { /* noop */ }
         });
         registerShutdown('db', async () => {
             if (sequelize && sequelize.close) await sequelize.close();

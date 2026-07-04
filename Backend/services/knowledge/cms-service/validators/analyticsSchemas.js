@@ -25,6 +25,9 @@ const eventSchema = z.object({
     geo: z.record(z.string(), z.any()).optional(),
     device: z.record(z.string(), z.any()).optional(),
     metadata: z.record(z.string(), z.any()).optional(),
+    // v2 trust layers (client-supplied).
+    consent: z.record(z.string(), z.any()).optional(),
+    dedupeKey: z.string().max(200).optional(),
 }).strip();
 
 // Collect payload: one site key + a batch of events.

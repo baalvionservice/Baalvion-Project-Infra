@@ -1,6 +1,8 @@
 # Baalvion Unified Analytics Platform — Production Implementation Plan
 
-> Status: **PROPOSED — awaiting approval**
+> **v1 + v2 SHIPPED.** All 10 modules (Traffic, Content, SEO, CMS, Ecommerce, Marketing, Users, Security, Infra, AI) are live in `cms-service` with a unified per-website dashboard. **v2 trust/compliance/cost layers** are also shipped: GA-style consent enforcement, fraud/bot scoring, Redis dedupe, attribution engine (last-click + linear), cost/quota governance, watermarked+backfill-aware provider sync, GSC + AdSense connectors, reconciliation/anomaly detection, realtime SSE fanout, and schema-v2 events (`consent_state`/`fraud_score`/`attribution_id`/`dedupe_key`/`event_schema_version`). The 3 flagship sites (Imperialpedia, Law-Elite, Amarisé) are wired end-to-end incl. consent + ecommerce funnel. **v3** (ClickHouse/Kafka/edge/ML) is an infrastructure program — see [V3_MIGRATION_BLUEPRINT.md](V3_MIGRATION_BLUEPRINT.md); a forward `streamSink` seam is already in place so it migrates without a rewrite.
+
+> Status: **PROPOSED — awaiting approval** (original v1 plan, retained for reference)
 > Author: Principal Architect / Staff Engineer pass
 > Scope: One unified, multi-tenant, API-driven analytics platform serving every website managed by the CMS (Imperialpedia, Law Elite, Amarisé, and all future sites), enabled per-site by configuration only.
 

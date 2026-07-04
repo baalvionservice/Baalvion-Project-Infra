@@ -6,6 +6,7 @@ import {
   Radio, RefreshCw, Globe2, Monitor, PlugZap, CheckCircle2, Circle,
   Gauge, Zap, Search, MousePointer, FileText, FileStack, CalendarClock, PenLine, UserSquare2,
   ShoppingCart, DollarSign, Megaphone, ShieldAlert, Server, Bot, Package, UserCheck, Cpu, ListChecks,
+  BadgeDollarSign, GitCompareArrows, AlertTriangle, Target, Filter,
 } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import KpiCard from '@/components/common/KpiCard';
@@ -21,7 +22,7 @@ import {
   useTrafficOverview, useTrafficTimeseries, useTrafficBreakdown,
   useRealtime, useAnalyticsProviders, useTriggerProviderSync,
   useSeoVitals, useProviderTotals, useProviderBreakdown,
-  useModuleTotals, useInfra,
+  useModuleTotals, useInfra, useAnomalies, useProviderState,
   type AnalyticsPeriod,
 } from '@/lib/queries/analytics-unified.queries';
 import type { BreakdownRow } from '@/lib/api/analytics-unified';
@@ -137,6 +138,16 @@ export default function WebsiteAnalyticsPage({ params }: { params: Promise<{ web
   const botPct = botTotal ? Math.round(((sec.botEvents ?? 0) / botTotal) * 1000) / 10 : 0;
   const infra = useInfra(websiteId);
 
+  // v2: Ads (AdSense), Attribution, anomalies, provider sync state.
+  const adsense = useProviderTotals(websiteId, 'adsense');
+  const ad = adsense.data?.totals ?? {};
+  const attributionByChannel = useTrafficBreakdown(websiteId, period, 'channel', 'revenue', 'attribution_last_click');
+  const attributionTotals = useModuleTotals(websiteId, period, 'attribution_last_click');
+  const attr = attributionTotals.data?.totals ?? {};
+  const anomalies = useAnomalies(websiteId);
+  const provState = useProviderState(websiteId);
+  const cartAbandonment = e.addToCart ? Math.round((1 - (e.orders ?? 0) / e.addToCart) * 1000) / 10 : 0;
+
   const providers = useAnalyticsProviders(websiteId);
   const sync = useTriggerProviderSync(websiteId);
 
@@ -162,6 +173,21 @@ export default function WebsiteAnalyticsPage({ params }: { params: Promise<{ web
         }
       />
 
+      {/* Anomaly banner (reconciliation findings) */}
+      {(anomalies.data?.anomalies?.length ?? 0) > 0 && (
+        <Card className="mb-4 border-amber-500/40 bg-amber-500/5">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 text-amber-500" />
+              <div className="text-sm">
+                <span className="font-medium">{anomalies.data!.anomalies.length} anomal{anomalies.data!.anomalies.length === 1 ? 'y' : 'ies'} detected.</span>{' '}
+                {anomalies.data!.anomalies.slice(0, 3).map((a) => `${a.kind.replace(/_/g, ' ')} (${a.deviationPct > 0 ? '+' : ''}${a.deviationPct}%)`).join(' · ')}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* KPI row */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 mb-6">
         <KpiCard title="Visitors" value={m?.visitors ?? 0} icon={Users} isLoading={overview.isLoading} />
@@ -180,7 +206,9 @@ export default function WebsiteAnalyticsPage({ params }: { params: Promise<{ web
           <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="cms">CMS</TabsTrigger>
           <TabsTrigger value="ecommerce">Ecommerce</TabsTrigger>
+          <TabsTrigger value="ads">Ads</TabsTrigger>
           <TabsTrigger value="marketing">Marketing</TabsTrigger>
+          <TabsTrigger value="attribution">Attribution</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="security">Security</TabsTrigger>
           <TabsTrigger value="infra">Infra</TabsTrigger>
@@ -335,13 +363,28 @@ export default function WebsiteAnalyticsPage({ params }: { params: Promise<{ web
 
         {/* Ecommerce */}
         <TabsContent value="ecommerce" className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
             <KpiCard title="Revenue" value={e.revenue ?? 0} icon={DollarSign} isLoading={ecom.isLoading} />
             <KpiCard title="Orders" value={e.orders ?? 0} icon={ShoppingCart} isLoading={ecom.isLoading} />
             <KpiCard title="Avg. order value" value={aov} format="raw" icon={DollarSign} isLoading={ecom.isLoading} />
             <KpiCard title="Add to cart" value={e.addToCart ?? 0} icon={Package} isLoading={ecom.isLoading} />
             <KpiCard title="Checkouts" value={e.checkouts ?? 0} icon={ListChecks} isLoading={ecom.isLoading} />
+            <KpiCard title="Cart abandonment" value={cartAbandonment} format="percent" icon={Filter} isLoading={ecom.isLoading} />
           </div>
+          <Card>
+            <CardHeader className="pb-3"><CardTitle className="flex items-center gap-2 text-sm font-medium"><Filter className="h-4 w-4" /> Conversion funnel</CardTitle></CardHeader>
+            <CardContent>
+              <BarChart
+                data={[
+                  { label: 'Add to cart', value: e.addToCart ?? 0 },
+                  { label: 'Checkout', value: e.checkouts ?? 0 },
+                  { label: 'Purchase', value: e.orders ?? 0 },
+                ]}
+                color="hsl(24 90% 55%)"
+                formatValue={(v) => formatNumber(v)}
+              />
+            </CardContent>
+          </Card>
           <div className="grid gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader className="pb-3"><CardTitle className="text-sm font-medium">Revenue by country</CardTitle></CardHeader>
@@ -362,6 +405,47 @@ export default function WebsiteAnalyticsPage({ params }: { params: Promise<{ web
           <p className="text-xs text-muted-foreground">Ad spend, ROAS and CPA populate once you connect Google Ads / Meta / TikTok providers (Providers tab).</p>
         </TabsContent>
 
+        {/* Ads (AdSense) */}
+        <TabsContent value="ads" className="space-y-4">
+          <div className="mb-2 flex items-center justify-between">
+            <p className="text-sm font-medium text-muted-foreground">Google AdSense</p>
+            {adsense.data && Object.keys(ad).length === 0 && (
+              <span className="text-xs text-muted-foreground">Connect AdSense in Website → Integrations to populate.</span>
+            )}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <KpiCard title="Est. earnings" value={ad.earnings ?? 0} format="raw" icon={BadgeDollarSign} isLoading={adsense.isLoading} />
+            <KpiCard title="RPM" value={ad.rpm ?? 0} format="raw" icon={DollarSign} isLoading={adsense.isLoading} description="revenue / 1k views" />
+            <KpiCard title="CPC" value={ad.cpc ?? 0} format="raw" icon={MousePointer} isLoading={adsense.isLoading} />
+            <KpiCard title="Ad clicks" value={ad.clicks ?? 0} icon={MousePointerClick} isLoading={adsense.isLoading} />
+            <KpiCard title="Ad impressions" value={ad.impressions ?? 0} icon={Eye} isLoading={adsense.isLoading} />
+          </div>
+          <p className="text-xs text-muted-foreground">AdSense reporting reads the same publisher account managed under Website → SEO → Monetization.</p>
+        </TabsContent>
+
+        {/* Attribution */}
+        <TabsContent value="attribution" className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <KpiCard title="Attributed revenue" value={attr.revenue ?? 0} format="raw" icon={Target} isLoading={attributionTotals.isLoading} description="last-click model" />
+            <KpiCard title="Conversions" value={attr.conversions ?? 0} icon={GitCompareArrows} isLoading={attributionTotals.isLoading} />
+          </div>
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-sm font-medium"><GitCompareArrows className="h-4 w-4" /> Revenue by channel (last-click)</CardTitle>
+              <CardDescription>Conversions credited to the visitor&apos;s final acquisition channel. Linear-model splits are also computed.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {attributionByChannel.isLoading ? (
+                <Skeleton className="h-[200px] w-full" />
+              ) : (attributionByChannel.data?.rows?.length ?? 0) === 0 ? (
+                <p className="text-sm text-muted-foreground py-10 text-center">No conversions attributed in this range yet.</p>
+              ) : (
+                <BarChart data={barData(attributionByChannel.data?.rows)} color="hsl(200 80% 50%)" formatValue={(v) => formatNumber(v)} />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         {/* Users */}
         <TabsContent value="users" className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-3">
@@ -374,12 +458,30 @@ export default function WebsiteAnalyticsPage({ params }: { params: Promise<{ web
 
         {/* Security */}
         <TabsContent value="security" className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <KpiCard title="Bot events" value={sec.botEvents ?? 0} icon={Bot} isLoading={secTotals.isLoading} />
             <KpiCard title="Human events" value={sec.humanEvents ?? 0} icon={Users} isLoading={secTotals.isLoading} />
             <KpiCard title="Bot share" value={botPct} format="percent" icon={ShieldAlert} isLoading={secTotals.isLoading} />
+            <KpiCard title="Fraud-flagged" value={sec.flaggedEvents ?? 0} icon={AlertTriangle} isLoading={secTotals.isLoading} description="excluded from metrics" />
           </div>
-          <p className="text-xs text-muted-foreground">Failed/suspicious logins, API abuse and rate-limit events integrate from the audit &amp; gateway layers.</p>
+          {(anomalies.data?.anomalies?.length ?? 0) > 0 && (
+            <Card>
+              <CardHeader className="pb-3"><CardTitle className="text-sm font-medium">Open anomalies</CardTitle></CardHeader>
+              <CardContent>
+                <div className="space-y-1.5">
+                  {anomalies.data!.anomalies.map((a, i) => (
+                    <div key={i} className="flex items-center justify-between text-sm">
+                      <span className="capitalize">{a.kind.replace(/_/g, ' ')}{a.metric ? ` · ${a.metric}` : ''}</span>
+                      <Badge variant={a.severity === 'critical' ? 'destructive' : 'secondary'} className="text-xs">
+                        {a.deviationPct > 0 ? '+' : ''}{a.deviationPct}%
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+          <p className="text-xs text-muted-foreground">Fraud/bot scoring runs on every event; flagged traffic is excluded from all metric rollups. Failed/suspicious logins &amp; API abuse integrate from the audit &amp; gateway layers.</p>
         </TabsContent>
 
         {/* Infra */}
@@ -472,6 +574,24 @@ export default function WebsiteAnalyticsPage({ params }: { params: Promise<{ web
               )}
             </CardContent>
           </Card>
+
+          {(provState.data?.providers?.length ?? 0) > 0 && (
+            <Card>
+              <CardHeader className="pb-3"><CardTitle className="text-sm font-medium">Sync status</CardTitle><CardDescription>Watermark, last result and daily API calls (cost governance).</CardDescription></CardHeader>
+              <CardContent>
+                <div className="space-y-1.5">
+                  {provState.data!.providers.map((p) => (
+                    <div key={p.provider} className="flex items-center justify-between text-sm">
+                      <span className="font-medium">{p.provider}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {p.lastStatus ?? 'never'} · watermark {p.watermark ?? '—'} · {p.callsToday} calls today
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader className="pb-3"><CardTitle className="text-sm font-medium">Available providers</CardTitle></CardHeader>

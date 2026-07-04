@@ -194,7 +194,43 @@ async function infra() {
     return { queues, events24h: num(ev && ev.events_24h), partitions: num(pc && pc.partitions) };
 }
 
+/** Recent open anomalies for a website (reconciliation findings). */
+async function anomalies(websiteId, { limit = 50 } = {}) {
+    const db = require('../../models');
+    const rows = await db.sequelize.query(`
+        SELECT kind, severity, metric, observed, expected, deviation, details, detected_at
+        FROM analytics.anomalies
+        WHERE website_id = :websiteId AND resolved = false
+        ORDER BY detected_at DESC
+        LIMIT :limit`,
+        { type: QueryTypes.SELECT, replacements: { websiteId, limit } });
+    return rows.map((r) => ({
+        kind: r.kind,
+        severity: r.severity,
+        metric: r.metric,
+        observed: num(r.observed),
+        expected: num(r.expected),
+        deviationPct: r.details && r.details.pct != null ? Number(r.details.pct) : Math.round(num(r.deviation) * 1000) / 10,
+        detectedAt: r.detected_at,
+    }));
+}
+
+/** Per-provider sync bookkeeping (watermark, status, daily calls) for a website. */
+async function providerState(websiteId) {
+    const db = require('../../models');
+    const rows = await db.AnalyticsProviderSyncState.findAll({ where: { websiteId }, order: [['provider', 'ASC']] });
+    return rows.map((r) => ({
+        provider: r.provider,
+        watermark: r.watermark,
+        lastSyncedAt: r.lastSyncedAt,
+        lastStatus: r.lastStatus,
+        lastError: r.lastError,
+        rowsWritten: r.rowsWritten,
+        callsToday: r.callsToday,
+    }));
+}
+
 module.exports = {
     overview, timeseries, breakdown, realtime, seoVitals, providerTotals, providerBreakdown,
-    moduleTotals, infra,
+    moduleTotals, infra, anomalies, providerState,
 };

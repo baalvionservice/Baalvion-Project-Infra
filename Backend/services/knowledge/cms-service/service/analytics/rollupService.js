@@ -49,6 +49,10 @@ async function safe(fn, label) {
 const MERGE_DAILY = `ON CONFLICT (website_id, module, day, dims_hash)
     DO UPDATE SET metrics = analytics.rollup_daily.metrics || EXCLUDED.metrics, updated_at = now()`;
 
+// v2: exclude fraud-flagged events (score >= FLAG=0.5) from metric rollups. The
+// Security module deliberately omits this filter so it can count bot/flagged traffic.
+const FRAUD_FILTER = `AND (e.fraud_score IS NULL OR e.fraud_score < 0.5)`;
+
 // Traffic breakdown dimensions computed from raw events. dimKey/dimExpr are
 // code-controlled (never user input), so interpolation is safe.
 const EVENT_DIMENSIONS = [
@@ -84,7 +88,7 @@ async function eventBreakdown(sequelize, day, dimKey, dimExpr) {
                )
         FROM analytics.events e
         WHERE e.occurred_at >= :day::date AND e.occurred_at < (:day::date + interval '1 day')
-          AND e.module = 'traffic'
+          AND e.module = 'traffic' ${FRAUD_FILTER}
         GROUP BY e.website_id, e.organization_id, ${dimExpr}
         ${MERGE_DAILY}`, { replacements: { day } });
 }
@@ -98,7 +102,7 @@ async function contentBreakdown(sequelize, day, dimKey, dimExpr) {
                jsonb_build_object('views', count(*))
         FROM analytics.events e
         WHERE e.occurred_at >= :day::date AND e.occurred_at < (:day::date + interval '1 day')
-          AND e.module = 'content' AND e.event = 'content_view'
+          AND e.module = 'content' AND e.event = 'content_view' ${FRAUD_FILTER}
         GROUP BY e.website_id, e.organization_id, ${dimExpr}
         ${MERGE_DAILY}`, { replacements: { day } });
 }
@@ -114,7 +118,7 @@ async function rollupContent(sequelize, day) {
                )
         FROM analytics.events e
         WHERE e.occurred_at >= :day::date AND e.occurred_at < (:day::date + interval '1 day')
-          AND e.module = 'content' AND e.event = 'content_view'
+          AND e.module = 'content' AND e.event = 'content_view' ${FRAUD_FILTER}
         GROUP BY e.website_id, e.organization_id
         ${MERGE_DAILY}`, { replacements: { day } });
 
@@ -136,7 +140,7 @@ async function rollupSeo(sequelize, day) {
                )
         FROM analytics.events e
         WHERE e.occurred_at >= :day::date AND e.occurred_at < (:day::date + interval '1 day')
-          AND e.module = 'seo' AND e.event = 'web_vitals'
+          AND e.module = 'seo' AND e.event = 'web_vitals' ${FRAUD_FILTER}
         GROUP BY e.website_id, e.organization_id
         ${MERGE_DAILY}`, { replacements: { day } });
 }
@@ -154,7 +158,7 @@ async function rollupEcommerce(sequelize, day) {
                )
         FROM analytics.events e
         WHERE e.occurred_at >= :day::date AND e.occurred_at < (:day::date + interval '1 day')
-          AND e.module = 'ecommerce'
+          AND e.module = 'ecommerce' ${FRAUD_FILTER}
         GROUP BY e.website_id, e.organization_id
         ${MERGE_DAILY}`, { replacements: { day } });
 
@@ -173,7 +177,7 @@ async function rollupEcommerce(sequelize, day) {
                    )
             FROM analytics.events e
             WHERE e.occurred_at >= :day::date AND e.occurred_at < (:day::date + interval '1 day')
-              AND e.module = 'ecommerce'
+              AND e.module = 'ecommerce' ${FRAUD_FILTER}
             GROUP BY e.website_id, e.organization_id, ${expr}
             ${MERGE_DAILY}`, { replacements: { day } });
     }
@@ -191,6 +195,7 @@ async function rollupUsers(sequelize, day) {
                )
         FROM analytics.events e
         WHERE e.occurred_at >= :day::date AND e.occurred_at < (:day::date + interval '1 day')
+          ${FRAUD_FILTER}
         GROUP BY e.website_id, e.organization_id
         ${MERGE_DAILY}`, { replacements: { day } });
 }
@@ -202,7 +207,8 @@ async function rollupSecurity(sequelize, day) {
         SELECT e.website_id, e.organization_id, 'security', :day::date, '{}'::jsonb,
                jsonb_build_object(
                    'botEvents', count(*) FILTER (WHERE e.device->>'type' = 'bot'),
-                   'humanEvents', count(*) FILTER (WHERE e.device->>'type' IS DISTINCT FROM 'bot')
+                   'humanEvents', count(*) FILTER (WHERE e.device->>'type' IS DISTINCT FROM 'bot'),
+                   'flaggedEvents', count(*) FILTER (WHERE e.fraud_score >= 0.5)
                )
         FROM analytics.events e
         WHERE e.occurred_at >= :day::date AND e.occurred_at < (:day::date + interval '1 day')
@@ -241,7 +247,7 @@ async function rollupDay(day) {
                )
         FROM analytics.events e
         WHERE e.occurred_at >= :day::date AND e.occurred_at < (:day::date + interval '1 day')
-          AND e.module = 'traffic'
+          AND e.module = 'traffic' ${FRAUD_FILTER}
         GROUP BY e.website_id, e.organization_id
         ${MERGE_DAILY}`, { replacements: win });
 

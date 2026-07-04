@@ -28,6 +28,8 @@ export const unifiedAnalyticsKeys = {
   moduleTotals: (id: string, period: AnalyticsPeriod, module: string) =>
     ['ua', 'module-totals', id, period, module] as const,
   infra: (id: string) => ['ua', 'infra', id] as const,
+  anomalies: (id: string) => ['ua', 'anomalies', id] as const,
+  providerState: (id: string) => ['ua', 'provider-state', id] as const,
 };
 
 export const useTrafficOverview = (websiteId: string, period: AnalyticsPeriod, module = 'traffic') =>
@@ -131,6 +133,22 @@ export const useInfra = (websiteId: string) =>
     enabled: !!websiteId,
     refetchInterval: 30_000,
     staleTime: 15_000,
+  });
+
+export const useAnomalies = (websiteId: string) =>
+  useQuery({
+    queryKey: unifiedAnalyticsKeys.anomalies(websiteId),
+    queryFn: () => unifiedAnalyticsApi.anomalies(websiteId).then((r) => r.data.data),
+    enabled: !!websiteId,
+    staleTime: 120_000,
+  });
+
+export const useProviderState = (websiteId: string) =>
+  useQuery({
+    queryKey: unifiedAnalyticsKeys.providerState(websiteId),
+    queryFn: () => unifiedAnalyticsApi.providerState(websiteId).then((r) => r.data.data),
+    enabled: !!websiteId,
+    staleTime: 60_000,
   });
 
 export const useTriggerProviderSync = (websiteId: string) => {

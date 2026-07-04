@@ -43,6 +43,8 @@ db.AnalyticsVisitor        = require('./analyticsVisitor')(sequelize, DataTypes)
 db.AnalyticsProviderMetric = require('./analyticsProviderMetric')(sequelize, DataTypes);
 db.AnalyticsRollupDaily    = require('./analyticsRollupDaily')(sequelize, DataTypes);
 db.AnalyticsRollupMonthly  = require('./analyticsRollupMonthly')(sequelize, DataTypes);
+db.AnalyticsAnomaly           = require('./analyticsAnomaly')(sequelize, DataTypes);
+db.AnalyticsProviderSyncState = require('./analyticsProviderSyncState')(sequelize, DataTypes);
 
 // ── Associations ─────────────────────────────────────────────────────────────
 

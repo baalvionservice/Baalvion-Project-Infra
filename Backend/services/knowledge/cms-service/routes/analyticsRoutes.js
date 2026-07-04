@@ -29,6 +29,11 @@ router.get('/providers/:provider/totals', ...viewer, ctrl.providerTotals);
 router.get('/providers/:provider/breakdown', ...viewer, validateQuery(reportQuerySchema), ctrl.providerBreakdown);
 
 router.get('/providers', ...viewer, ctrl.providers);
+router.get('/providers/state', ...viewer, ctrl.providerState);
+
+// Reconciliation anomalies + realtime SSE stream.
+router.get('/anomalies', ...viewer, validateQuery(reportQuerySchema), ctrl.anomalies);
+router.get('/realtime/stream', ...viewer, ctrl.realtimeStream);
 
 // Management (cms_admin): trigger a provider sync + inspect queue health.
 router.post('/providers/:provider/sync', ...admin, ctrl.triggerSync);

@@ -130,7 +130,41 @@ export const unifiedAnalyticsApi = {
 
   infra: (websiteId: string) =>
     cmsApiClient.get<ApiResponse<InfraResponse>>(`${base(websiteId)}/infra`),
+
+  anomalies: (websiteId: string) =>
+    cmsApiClient.get<ApiResponse<AnomaliesResponse>>(`${base(websiteId)}/anomalies`),
+
+  providerState: (websiteId: string) =>
+    cmsApiClient.get<ApiResponse<ProviderStateResponse>>(`${base(websiteId)}/providers/state`),
 };
+
+export interface Anomaly {
+  kind: string;
+  severity: string;
+  metric: string | null;
+  observed: number;
+  expected: number;
+  deviationPct: number;
+  detectedAt: string;
+}
+
+export interface AnomaliesResponse {
+  anomalies: Anomaly[];
+}
+
+export interface ProviderSyncState {
+  provider: string;
+  watermark: string | null;
+  lastSyncedAt: string | null;
+  lastStatus: string | null;
+  lastError: string | null;
+  rowsWritten: number;
+  callsToday: number;
+}
+
+export interface ProviderStateResponse {
+  providers: ProviderSyncState[];
+}
 
 export interface ModuleTotalsResponse {
   range: DateRange;

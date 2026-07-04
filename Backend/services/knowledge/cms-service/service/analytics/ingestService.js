@@ -11,8 +11,12 @@
 const { v4: uuidv4 } = require('uuid');
 const registry = require('./websiteRegistry');
 const enrich = require('./enrich');
+const consentService = require('./consentService');
+const dedupeService = require('./dedupeService');
 const { enqueueIngestBatch } = require('../../queues/analyticsQueue');
 const { AppError } = require('../../utils/errors');
+
+const SCHEMA_VERSION = 2;
 
 const MAX_BATCH = Number(process.env.ANALYTICS_MAX_BATCH || 50);
 
@@ -89,6 +93,10 @@ function normalize(raw, site, ctx) {
         valueNum: typeof raw.value === 'number' && Number.isFinite(raw.value) ? raw.value : null,
         currency: clampStr(raw.currency, 8),
         metadata: (raw.metadata && typeof raw.metadata === 'object' && !Array.isArray(raw.metadata)) ? raw.metadata : {},
+        // ── v2 trust layers (fraud_score + attribution_id are set in the worker) ──
+        consentState: consentService.normalize(raw.consent),
+        eventSchemaVersion: SCHEMA_VERSION,
+        dedupeKey: raw.dedupeKey ? clampStr(raw.dedupeKey, 200) : null,
     };
 }
 
@@ -115,6 +123,12 @@ async function collect(payload, ctx) {
         // exactly what the tenant opted into.
         const evt = normalize(raw, site, ctx);
         if (!registry.moduleEnabled(site, evt.module)) continue;
+        // Consent enforcement (GA-style consent mode; per-site 'implied' | 'strict').
+        if (!consentService.isAdmissible(evt.consentState, site.consentMode)) continue;
+        // Replay / duplicate suppression (fail-open on Redis error).
+        const key = dedupeService.computeDedupeKey(evt);
+        evt.dedupeKey = key;
+        if (await dedupeService.isDuplicate(key)) continue;
         normalized.push(evt);
     }
 

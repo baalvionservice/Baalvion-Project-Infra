@@ -37,8 +37,23 @@ const TRACKER_JS = `(function(){
 
     var lang = (navigator.language || '').slice(0,16);
 
+    // GA-style consent mode. Sites set window.__baalvionConsent or call
+    // window.baalvion.consent({analytics:true,ad:false}); we default to 'implied'.
+    function normC(v){ return v==='granted'||v==='denied' ? v : (v===true?'granted':v===false?'denied':'implied'); }
+    function readConsent(){
+      var c = window.__baalvionConsent;
+      if (!c) { try { c = JSON.parse(ls('_ba_consent')||'null'); } catch(e){} }
+      c = (c && typeof c==='object') ? c : {};
+      return {
+        analytics_storage: normC(c.analytics_storage!==undefined?c.analytics_storage:c.analytics),
+        ad_storage: normC(c.ad_storage!==undefined?c.ad_storage:c.ad),
+        personalization_storage: normC(c.personalization_storage!==undefined?c.personalization_storage:c.personalization)
+      };
+    }
+
     function send(events){
       try {
+        if (readConsent().analytics_storage === 'denied') return; // respect explicit opt-out
         var body = JSON.stringify({ site: site, events: events });
         if (navigator.sendBeacon) {
           navigator.sendBeacon(endpoint, new Blob([body], { type: 'application/json' }));
@@ -48,7 +63,7 @@ const TRACKER_JS = `(function(){
       } catch(e){}
     }
     function base(extra){
-      var b = { sessionId: sess.id, visitorId: vid, page: location.pathname, url: location.href, referrer: document.referrer || '', lang: lang, occurredAt: new Date().toISOString() };
+      var b = { sessionId: sess.id, visitorId: vid, page: location.pathname, url: location.href, referrer: document.referrer || '', lang: lang, occurredAt: new Date().toISOString(), consent: readConsent() };
       for (var k in extra) b[k] = extra[k];
       return b;
     }
@@ -117,9 +132,12 @@ const TRACKER_JS = `(function(){
     history.pushState = function(){ var r = _ps.apply(this, arguments); spa(); return r; };
     window.addEventListener('popstate', spa);
 
-    // Expose a tiny API for custom events (e.g. ecommerce): window.baalvion.track(event, props)
+    // Public API: custom events + consent control.
+    //   window.baalvion.track('purchase', { value: 1200, currency: 'USD', metadata: {...} })
+    //   window.baalvion.consent({ analytics: true, ad: false, personalization: false })
     window.baalvion = window.baalvion || {};
     window.baalvion.track = function(event, props){ send([base(Object.assign({ event: String(event) }, props || {}))]); };
+    window.baalvion.consent = function(obj){ try { window.__baalvionConsent = obj; lss('_ba_consent', JSON.stringify(obj)); } catch(e){} };
   } catch(e){ /* never break the host page */ }
 })();`;
 
