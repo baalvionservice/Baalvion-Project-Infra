@@ -89,7 +89,7 @@ jobs:
           cache: 'pnpm'
 
       - name: Install
-        run: pnpm install --frozen-lockfile --filter law-elite-network...
+        run: pnpm install --frozen-lockfile --filter law-elite-network-web...
 
       - name: Build (standalone)
         working-directory: Frontend/Law-Elite-Network-main
