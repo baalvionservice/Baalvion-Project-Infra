@@ -19,6 +19,7 @@ import {
   PenLine,
   Send,
   ArrowRight,
+  BarChart3,
 } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -110,6 +111,13 @@ const LINK_GROUPS: { heading: string; blurb: string; links: ToolLink[] }[] = [
         icon: Search,
         segment: 'seo',
         color: 'text-rose-500',
+      },
+      {
+        title: 'Analytics',
+        description: 'Traffic, SEO, content, ecommerce, ads and more — one live dashboard for this site.',
+        icon: BarChart3,
+        segment: 'analytics',
+        color: 'text-indigo-500',
       },
     ],
   },
