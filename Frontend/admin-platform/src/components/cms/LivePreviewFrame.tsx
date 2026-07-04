@@ -46,7 +46,7 @@ export default function LivePreviewFrame({ contentId, websiteDomain }: Props) {
       <div className="flex h-full flex-col items-center justify-center gap-2 p-8 text-center text-sm text-muted-foreground">
         <AlertTriangle className="h-6 w-6 text-amber-500" />
         <p>{error}</p>
-        <p className="text-xs">Use the "Preview" tab above for a plain content preview instead.</p>
+        <p className="text-xs">Use the &quot;Preview&quot; tab above for a plain content preview instead.</p>
       </div>
     );
   }
