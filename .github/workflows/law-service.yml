@@ -91,6 +91,9 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile --filter law-elite-network-web...
 
+      - name: Build workspace dependencies (@baalvion/illustrations)
+        run: pnpm --filter @baalvion/illustrations build
+
       - name: Build (standalone)
         working-directory: Frontend/Law-Elite-Network-main
         run: pnpm run build
