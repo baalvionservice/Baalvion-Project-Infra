@@ -1,4 +1,4 @@
-export type IntegrationCategory = 'api' | 'payment' | 'sms' | 'ai' | 'webhook' | 'oauth' | 'other';
+export type IntegrationCategory = 'api' | 'payment' | 'sms' | 'ai' | 'webhook' | 'oauth' | 'analytics' | 'other';
 
 export interface Integration {
   id: string;
@@ -72,6 +72,7 @@ export const CATEGORY_LABELS: Record<IntegrationCategory, string> = {
   ai: 'AI',
   webhook: 'Webhooks',
   oauth: 'Social Login',
+  analytics: 'Analytics Providers',
   other: 'Other',
 };
 
@@ -184,5 +185,183 @@ export const PROVIDER_CATALOG: ProviderDef[] = [
     ],
     secretFields: [{ key: 'clientSecret', label: 'App Secret', placeholder: 'Facebook App Secret' }],
     websiteSlugs: OAUTH_WEBSITE_SLUGS,
+  },
+
+  // ── Unified Analytics providers (category 'analytics') ──────────────────────
+  // Field keys MUST match each connector's requiredCreds (Backend/services/knowledge/
+  // cms-service/connectors/*). IDs/URLs are non-secret config; OAuth secrets,
+  // refresh tokens and API keys are secretFields (AES-256-GCM encrypted at rest).
+  // First-party tracking works with none of these connected; add them for extra data.
+  {
+    provider: 'ga4',
+    category: 'analytics',
+    label: 'Google Analytics 4',
+    description: 'GA4 traffic — users, sessions, pageviews by page/country/channel (Data API).',
+    fields: [
+      { key: 'propertyId', label: 'Property ID', placeholder: 'properties/123456789 or 123456789' },
+      { key: 'oauthClientId', label: 'OAuth Client ID', placeholder: '…apps.googleusercontent.com' },
+    ],
+    secretFields: [
+      { key: 'oauthClientSecret', label: 'OAuth Client Secret', placeholder: 'GOCSPX-…' },
+      { key: 'refreshToken', label: 'OAuth Refresh Token', placeholder: '1//0g…' },
+    ],
+  },
+  {
+    provider: 'gsc',
+    category: 'analytics',
+    label: 'Google Search Console',
+    description: 'Search impressions, clicks, CTR, position + top queries/pages.',
+    fields: [
+      { key: 'siteUrl', label: 'Site URL / Property', placeholder: 'https://imperialpedia.baalvion.com/ or sc-domain:baalvion.com' },
+      { key: 'oauthClientId', label: 'OAuth Client ID', placeholder: '…apps.googleusercontent.com' },
+    ],
+    secretFields: [
+      { key: 'oauthClientSecret', label: 'OAuth Client Secret', placeholder: 'GOCSPX-…' },
+      { key: 'refreshToken', label: 'OAuth Refresh Token', placeholder: '1//0g…' },
+    ],
+  },
+  {
+    provider: 'gtm',
+    category: 'analytics',
+    label: 'Google Tag Manager',
+    description: 'Container/tag config health (GTM deploys tags — it has no traffic data of its own).',
+    fields: [
+      { key: 'accountId', label: 'Account ID', placeholder: 'GTM account id' },
+      { key: 'containerId', label: 'Container ID', placeholder: 'GTM container id' },
+      { key: 'oauthClientId', label: 'OAuth Client ID', placeholder: '…apps.googleusercontent.com' },
+    ],
+    secretFields: [
+      { key: 'oauthClientSecret', label: 'OAuth Client Secret', placeholder: 'GOCSPX-…' },
+      { key: 'refreshToken', label: 'OAuth Refresh Token' },
+    ],
+  },
+  {
+    provider: 'google-ads',
+    category: 'analytics',
+    label: 'Google Ads',
+    description: 'Campaign clicks, impressions, cost, conversions (Ads API).',
+    fields: [
+      { key: 'customerId', label: 'Customer ID', placeholder: '123-456-7890' },
+      { key: 'loginCustomerId', label: 'Login/MCC Customer ID (optional)', placeholder: 'manager account id, if via MCC' },
+      { key: 'oauthClientId', label: 'OAuth Client ID', placeholder: '…apps.googleusercontent.com' },
+    ],
+    secretFields: [
+      { key: 'developerToken', label: 'Developer Token' },
+      { key: 'oauthClientSecret', label: 'OAuth Client Secret', placeholder: 'GOCSPX-…' },
+      { key: 'refreshToken', label: 'OAuth Refresh Token' },
+    ],
+  },
+  {
+    provider: 'adsense',
+    category: 'analytics',
+    label: 'Google AdSense',
+    description: 'Est. earnings, RPM, CPC, ad clicks & impressions (AdSense Management API).',
+    fields: [
+      { key: 'accountId', label: 'Account ID', placeholder: 'pub-XXXXXXXXXXXXXXXX' },
+      { key: 'oauthClientId', label: 'OAuth Client ID', placeholder: '…apps.googleusercontent.com' },
+    ],
+    secretFields: [
+      { key: 'oauthClientSecret', label: 'OAuth Client Secret', placeholder: 'GOCSPX-…' },
+      { key: 'refreshToken', label: 'OAuth Refresh Token' },
+    ],
+  },
+  {
+    provider: 'google-news',
+    category: 'analytics',
+    label: 'Google News',
+    description: 'News-surface impressions/clicks via Search Console’s type=news filter.',
+    fields: [
+      { key: 'siteUrl', label: 'Site URL / Property', placeholder: 'https://imperialpedia.baalvion.com/' },
+      { key: 'oauthClientId', label: 'OAuth Client ID', placeholder: '…apps.googleusercontent.com' },
+    ],
+    secretFields: [
+      { key: 'oauthClientSecret', label: 'OAuth Client Secret', placeholder: 'GOCSPX-…' },
+      { key: 'refreshToken', label: 'OAuth Refresh Token' },
+    ],
+  },
+  {
+    provider: 'merchant-center',
+    category: 'analytics',
+    label: 'Google Merchant Center',
+    description: 'Shopping clicks, impressions, CTR (Content API for Shopping).',
+    fields: [
+      { key: 'merchantId', label: 'Merchant ID' },
+      { key: 'oauthClientId', label: 'OAuth Client ID', placeholder: '…apps.googleusercontent.com' },
+    ],
+    secretFields: [
+      { key: 'oauthClientSecret', label: 'OAuth Client Secret', placeholder: 'GOCSPX-…' },
+      { key: 'refreshToken', label: 'OAuth Refresh Token' },
+    ],
+  },
+  {
+    provider: 'clarity',
+    category: 'analytics',
+    label: 'Microsoft Clarity',
+    description: 'Session insights (last 3 days only — Clarity API hard cap).',
+    fields: [],
+    secretFields: [{ key: 'apiToken', label: 'API Token', placeholder: 'from Clarity project settings → Data Export' }],
+  },
+  {
+    provider: 'bing-webmaster',
+    category: 'analytics',
+    label: 'Bing Webmaster',
+    description: 'Bing search clicks, impressions, position + top queries.',
+    fields: [{ key: 'siteUrl', label: 'Site URL', placeholder: 'https://imperialpedia.baalvion.com/' }],
+    secretFields: [{ key: 'apiKey', label: 'API Key', placeholder: 'Bing Webmaster API key' }],
+  },
+  {
+    provider: 'cloudflare',
+    category: 'analytics',
+    label: 'Cloudflare Analytics',
+    description: 'Edge requests, pageviews, uniques, threats (GraphQL Analytics).',
+    fields: [{ key: 'zoneId', label: 'Zone ID' }],
+    secretFields: [{ key: 'apiToken', label: 'API Token', placeholder: 'scoped: Zone → Analytics → Read' }],
+  },
+  {
+    provider: 'meta-pixel',
+    category: 'analytics',
+    label: 'Meta Pixel',
+    description: 'Ad-account insights — impressions/clicks/spend (no raw pixel-fire API exists).',
+    fields: [{ key: 'adAccountId', label: 'Ad Account ID', placeholder: 'act_XXXXXXXXX or numeric' }],
+    secretFields: [{ key: 'accessToken', label: 'Access Token', placeholder: 'Meta long-lived access token' }],
+  },
+  {
+    provider: 'linkedin-insight',
+    category: 'analytics',
+    label: 'LinkedIn Insight',
+    description: 'Ad-account analytics — impressions/clicks/spend/conversions.',
+    fields: [{ key: 'adAccountId', label: 'Ad Account ID', placeholder: 'sponsoredAccount numeric id' }],
+    secretFields: [{ key: 'accessToken', label: 'Access Token' }],
+  },
+  {
+    provider: 'pinterest-tag',
+    category: 'analytics',
+    label: 'Pinterest Tag',
+    description: 'Ad-account analytics — spend/impressions/clicks.',
+    fields: [{ key: 'adAccountId', label: 'Ad Account ID' }],
+    secretFields: [{ key: 'accessToken', label: 'Access Token' }],
+  },
+  {
+    provider: 'tiktok-pixel',
+    category: 'analytics',
+    label: 'TikTok Pixel',
+    description: 'Advertiser reporting — spend/impressions/clicks/conversions.',
+    fields: [{ key: 'advertiserId', label: 'Advertiser ID' }],
+    secretFields: [{ key: 'accessToken', label: 'Access Token' }],
+  },
+  {
+    provider: 'x-pixel',
+    category: 'analytics',
+    label: 'X (Twitter) Ads',
+    description: 'Ad-account stats — impressions/clicks/spend (OAuth 1.0a signed).',
+    fields: [
+      { key: 'adAccountId', label: 'Ad Account ID' },
+      { key: 'apiKey', label: 'API Key (consumer key)' },
+    ],
+    secretFields: [
+      { key: 'apiSecretKey', label: 'API Secret Key (consumer secret)' },
+      { key: 'accessToken', label: 'Access Token' },
+      { key: 'accessTokenSecret', label: 'Access Token Secret' },
+    ],
   },
 ];
