@@ -90,13 +90,10 @@ jobs:
 
       - name: Install
         run: pnpm install --frozen-lockfile --filter law-elite-network...
-        continue-on-error: true
 
       - name: Build (standalone)
         working-directory: Frontend/Law-Elite-Network-main
-        run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install; fi
-          npm run build
+        run: pnpm run build
         env:
           NEXT_PUBLIC_API_BASE_URL: https://api.baalvion.com/api/v1/knowledge/law/v1
           NEXT_TELEMETRY_DISABLED: '1'
