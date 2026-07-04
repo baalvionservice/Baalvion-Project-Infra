@@ -16,6 +16,8 @@ const { logger } = require('./platform/logger');
 const createIpRateLimit = require('./middleware/rateLimit');
 const { startSchedulerWorker } = require('./queues/schedulerQueue');
 const { startNotificationWorker } = require('./queues/notificationQueue');
+const { startAnalyticsWorkers, stopAnalyticsWorkers, scheduleAnalyticsJobs } = require('./queues/analyticsWorkers');
+const { closeQueues: closeAnalyticsQueues } = require('./queues/analyticsQueue');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
 
 const app = express();
@@ -58,8 +60,10 @@ async function start() {
     try {
         await connectDB();
 
-        // Ensure schema exists (idempotent)
+        // Ensure schemas exist (idempotent): `cms` for content, `analytics` for
+        // the unified analytics event spine (both owned by this service).
         await sequelize.query(`CREATE SCHEMA IF NOT EXISTS cms;`);
+        await sequelize.query(`CREATE SCHEMA IF NOT EXISTS analytics;`);
 
         // Initialise the platform SDK (logging / tracing / events / internal-auth /
         // resilient HTTP) BEFORE the listener accepts traffic, so the trace
@@ -69,10 +73,20 @@ async function start() {
         startSchedulerWorker();
         startNotificationWorker();
 
+        // Unified Analytics workers (gated by ANALYTICS_WORKERS) + repeatable
+        // rollup/maintenance jobs. Scheduling is fail-open so a Redis blip never
+        // blocks the listener.
+        startAnalyticsWorkers();
+        await scheduleAnalyticsJobs();
+
         const server = app.listen(config.port, () => {
             logger('boot').info({ port: config.port, env: config.env }, 'cms-service listening');
         });
 
+        registerShutdown('analytics-queues', async () => {
+            await stopAnalyticsWorkers();
+            await closeAnalyticsQueues();
+        });
         registerShutdown('db', async () => {
             if (sequelize && sequelize.close) await sequelize.close();
         });

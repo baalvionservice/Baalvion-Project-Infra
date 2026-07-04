@@ -469,6 +469,18 @@ export default function CheckoutPage() {
         });
     }
 
+    // Unified-analytics purchase event (ecommerce module). Fire-and-forget via the
+    // first-party tracker's public API; fully guarded so it never affects checkout.
+    if (typeof window !== "undefined") {
+      const ba = (window as unknown as {
+        baalvion?: { track?: (event: string, props?: Record<string, unknown>) => void };
+      }).baalvion;
+      ba?.track?.("purchase", {
+        value: totalYield,
+        metadata: { orderId: order.id, orderNumber: order.orderNumber ?? null },
+      });
+    }
+
     toast({ title: "Order Confirmed", description: `Order ${order.id} confirmed.` });
   };
 

@@ -6,7 +6,10 @@ import { Source_Serif_4 } from "next/font/google";
 import { cn } from "@/lib/utils";
 import RootLayoutClient from "@/components/common/RootLayoutClient";
 import { Analytics } from "@/components/common/Analytics";
+import UnifiedAnalytics from "@/components/common/UnifiedAnalytics";
 import { getSiteAdsenseClient } from "@/services/data/cms-public";
+
+const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
@@ -144,6 +147,7 @@ export default async function RootLayout({
 
         <RootLayoutClient>{children}</RootLayoutClient>
         <Analytics adsenseClient={adsenseClient} />
+        <UnifiedAnalytics slug={CMS_SLUG} />
       </body>
     </html>
   );

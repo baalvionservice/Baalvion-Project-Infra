@@ -33,6 +33,17 @@ db.CmsMediaReference  = require('./cmsMediaReference')(sequelize, DataTypes);
 db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
 db.CmsAuthor          = require('./cmsAuthor')(sequelize, DataTypes);
 
+// ── Unified Analytics Platform (schema `analytics`) ───────────────────────────
+// Standalone event spine — no Sequelize associations to the `cms` tables (they
+// join by website_id/organization_id value, cross-schema). Scoped at the service
+// layer (loadCmsRole membership + orgFilter), same as the rest of cms-service.
+db.AnalyticsEvent          = require('./analyticsEvent')(sequelize, DataTypes);
+db.AnalyticsSession        = require('./analyticsSession')(sequelize, DataTypes);
+db.AnalyticsVisitor        = require('./analyticsVisitor')(sequelize, DataTypes);
+db.AnalyticsProviderMetric = require('./analyticsProviderMetric')(sequelize, DataTypes);
+db.AnalyticsRollupDaily    = require('./analyticsRollupDaily')(sequelize, DataTypes);
+db.AnalyticsRollupMonthly  = require('./analyticsRollupMonthly')(sequelize, DataTypes);
+
 // ── Associations ─────────────────────────────────────────────────────────────
 
 // Website → Categories, Tags, Content, Members, Redirects

@@ -50,6 +50,18 @@ module.exports = {
     security: {
         ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 200),
     },
+    // Unified Analytics Platform. Workers are gated so the same image runs as an
+    // API replica (workers off) or a dedicated worker replica. Retention windows
+    // (days) drive the nightly partition-drop + sweep; rollup_monthly is kept.
+    analytics: {
+        workersEnabled: process.env.ANALYTICS_WORKERS !== 'false',
+        retention: {
+            rawEventDays: Number(process.env.ANALYTICS_RETENTION_RAW_DAYS || 400),
+            sessionDays: Number(process.env.ANALYTICS_RETENTION_SESSION_DAYS || 400),
+            providerMetricDays: Number(process.env.ANALYTICS_RETENTION_PROVIDER_DAYS || 760),
+            rollupDailyDays: Number(process.env.ANALYTICS_RETENTION_ROLLUP_DAILY_DAYS || 760),
+        },
+    },
     media: {
         serviceUrl: process.env.MEDIA_SERVICE_URL || 'http://localhost:3012',
     },

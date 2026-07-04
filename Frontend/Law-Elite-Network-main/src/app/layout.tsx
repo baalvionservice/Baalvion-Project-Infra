@@ -9,9 +9,11 @@ import NotificationToastListener from '@/components/notifications/NotificationTo
 import { AIChatAssistantWrapper } from '@/components/ai/AIChatAssistantWrapper';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
 import { cmsGetAdsenseClient } from '@/lib/cms';
+import UnifiedAnalytics from '@/components/UnifiedAnalytics';
 import './globals.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_WEBSITE_SLUG || 'law-elite-network';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -175,6 +177,7 @@ export default async function RootLayout({
             <Toaster />
           </I18nProvider>
         </AuthProvider>
+        <UnifiedAnalytics slug={CMS_SLUG} />
       </body>
     </html>
   );

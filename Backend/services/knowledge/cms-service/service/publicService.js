@@ -6,6 +6,7 @@ const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
 const contentService = require('./contentService');
+const contentEvents = require('./analytics/contentEvents');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 
 async function _resolveWebsite(websiteSlug) {
@@ -19,6 +20,7 @@ async function getPublicContent(websiteSlug, slug) {
     const cached = await cache.get(cacheKey);
     if (cached) {
         await contentService.incrementViewCount(cached.id);
+        void contentEvents.recordContentView(websiteSlug, cached); // fire-and-forget, fail-open
         return cached;
     }
 
@@ -32,6 +34,7 @@ async function getPublicContent(websiteSlug, slug) {
     const data = content.toJSON();
     await cache.set(cacheKey, data, config.cache.publicTtl);
     await contentService.incrementViewCount(content.id);
+    void contentEvents.recordContentView(websiteSlug, data); // fire-and-forget, fail-open
     return data;
 }
 
