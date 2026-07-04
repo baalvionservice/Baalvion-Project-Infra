@@ -327,6 +327,28 @@ jobs:
               node /app/Backend/services/infrastructure/proxy-service/scripts/bootstrapPlatformAdmin.js
             echo "::notice title=Platform-admin seeded::${SA_EMAIL} asserted in proxy-service (role=platform_admin)."
 
+      - name: Apply cms-service migrations (incl. Unified Analytics schema)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          # cms-service carries the Unified Analytics schema (migrations 20260014/15/16,
+          # schema `analytics`). sequelize-cli ships in the image (built --prod=false) and
+          # SequelizeMeta skips already-applied migrations, so this is safe + idempotent to
+          # run every deploy. The analytics migrations are additive-only (new schema/tables),
+          # so running after the roll never breaks the live code path.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-core
+            COMPOSE="docker compose --env-file deploy/consolidated/.env \
+              -f deploy/consolidated/docker-compose.prod.yml \
+              -f deploy/consolidated/docker-compose.ssl-override.yml"
+            $COMPOSE exec -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/cms-service && npm run migrate"
+            echo "::notice title=Migrations applied::cms-service migrations (incl. analytics 20260014/15/16) run on app-platform."
+
       - name: Smoke test public ingress
         if: steps.gate.outputs.ready == 'true'
         continue-on-error: true
