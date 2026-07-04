@@ -38,6 +38,15 @@ api.baalvion.com {
 		reverse_proxy app-platform:3018
 	}
 
+	# Public analytics collector (UNAUTHENTICATED first-party beacon). The live sites load the
+	# tracker (/api/v1/collect.js) and POST page/scroll/vitals/ecommerce events to /api/v1/collect;
+	# the OpenAPI contract is public too. The reporting API (/api/v1/cms/.../analytics/*) stays
+	# auth-gated (reached via the admin BFF), and the vault (/api/v1/internal/*) is denied above.
+	@cms_collect path /api/v1/collect /api/v1/collect.js /api/v1/analytics/openapi.json
+	handle @cms_collect {
+		reverse_proxy app-platform:3018
+	}
+
 	# Payment public surface (Java PSP gateway, app-payments:3015 — runs under --profile payments):
 	# initiate a charge, read its status, receive provider webhooks (HMAC-verified inside the svc).
 	# Money-OUT (refund/capture) + actuator are denied at the edge (listed first → first match wins).
