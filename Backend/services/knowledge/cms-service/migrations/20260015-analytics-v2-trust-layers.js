@@ -48,10 +48,11 @@ module.exports = {
             );
         `);
         await sequelize.query(`CREATE INDEX IF NOT EXISTS anomalies_website_detected_idx ON analytics.anomalies (website_id, detected_at DESC);`);
-        // One open anomaly per (website, kind, metric, day) — re-detection updates in place.
+        // One OPEN anomaly per (website, kind, metric) — re-detection updates it in place
+        // (partial index; no non-immutable date expression so it is index-legal).
         await sequelize.query(`
-            CREATE UNIQUE INDEX IF NOT EXISTS anomalies_dedupe_idx
-            ON analytics.anomalies (website_id, kind, COALESCE(metric, ''), (detected_at::date))
+            CREATE UNIQUE INDEX IF NOT EXISTS anomalies_open_idx
+            ON analytics.anomalies (website_id, kind, COALESCE(metric, ''))
             WHERE resolved = false;
         `);
 

@@ -87,21 +87,20 @@ async function detectCtrDrops() {
     return n;
 }
 
-/** One open anomaly per (website, kind, metric, day); re-detection updates it. */
+/** One OPEN anomaly per (website, kind, metric); re-detection refreshes it in place. */
 async function upsertAnomaly(websiteId, organizationId, kind, metric, observed, expected, deviation, severity) {
     const db = require('../../models');
-    const today = new Date().toISOString().slice(0, 10);
     const existing = await db.sequelize.query(`
         SELECT id FROM analytics.anomalies
         WHERE website_id = :websiteId AND kind = :kind AND COALESCE(metric, '') = :metric
-          AND detected_at::date = :today::date AND resolved = false
+          AND resolved = false
         LIMIT 1`,
-        { type: QueryTypes.SELECT, replacements: { websiteId, kind, metric: metric || '', today } });
+        { type: QueryTypes.SELECT, replacements: { websiteId, kind, metric: metric || '' } });
 
     const details = { pct: Math.round(deviation * 1000) / 10 };
     if (existing[0]) {
         await db.AnalyticsAnomaly.update(
-            { observed, expected, deviation, severity, details },
+            { observed, expected, deviation, severity, details, detectedAt: new Date() },
             { where: { id: existing[0].id } });
     } else {
         await db.AnalyticsAnomaly.create({
