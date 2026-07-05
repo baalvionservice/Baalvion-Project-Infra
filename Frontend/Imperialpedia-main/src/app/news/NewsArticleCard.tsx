@@ -5,24 +5,12 @@ import Link from "next/link";
 
 import type { NewsArticle, NewsCategory } from "@/lib/data.news";
 import { formatDate } from "@/services/format-date";
-
-const CATEGORY_COLORS: Record<NewsCategory, string> = {
-  Markets: " text-blue-700",
-  Economy: " text-green-700",
-  Stocks: " text-violet-700",
-  Crypto: "text-orange-700",
-  PersonalFinance: "text-teal-700",
-  RealEstate: "text-rose-700",
-  ETFs: " text-indigo-700",
-  Bonds: " text-yellow-700",
-  Guides: "text-gray-700",
-  Editorial: "text-purple-700",
-};
+import { CATEGORY_COLORS } from "@/lib/utils/categories-colors";
 
 export function CategoryBadge({ category }: { category: NewsCategory }) {
   return (
     <span
-      className={`inline-block  w-fit  text-xs font-semibold uppercase tracking-wide py-0.5 rounded ${CATEGORY_COLORS[category]}`}
+      className={`inline-block w-fit text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded ${CATEGORY_COLORS[category]}`}
     >
       {category}
     </span>

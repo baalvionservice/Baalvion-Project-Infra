@@ -2,6 +2,7 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import { I18nProvider } from '@/i18n/I18nProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { Navbar } from '@/components/navbar';
@@ -153,7 +154,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
       </head>
-      <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-white text-slate-900 overflow-x-hidden">
+      <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground overflow-x-hidden">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-6 focus:py-3 focus:bg-blue-700 focus:text-white focus:rounded-xl focus:font-bold focus:shadow-2xl"
@@ -161,25 +162,27 @@ export default async function RootLayout({
           Skip to main content
         </a>
 
-        <AuthProvider>
-          <I18nProvider>
-            <div className="flex flex-col min-h-screen relative">
-              <Navbar />
+        <ThemeProvider>
+          <AuthProvider>
+            <I18nProvider>
+              <div className="flex flex-col min-h-screen relative">
+                <Navbar />
 
-              <main id="main-content" className="flex-1">
-                {children}
-              </main>
+                <main id="main-content" className="flex-1">
+                  {children}
+                </main>
 
-              <Suspense fallback={null}>
-                <AIChatAssistantWrapper />
-              </Suspense>
+                <Suspense fallback={null}>
+                  <AIChatAssistantWrapper />
+                </Suspense>
 
-              <NotificationToastListener />
-              <ImpersonationBanner />
-            </div>
-            <Toaster />
-          </I18nProvider>
-        </AuthProvider>
+                <NotificationToastListener />
+                <ImpersonationBanner />
+              </div>
+              <Toaster />
+            </I18nProvider>
+          </AuthProvider>
+        </ThemeProvider>
         <UnifiedAnalytics slug={CMS_SLUG} />
       </body>
     </html>
