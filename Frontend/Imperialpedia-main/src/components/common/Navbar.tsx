@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X, Search, ChevronDown, LayoutDashboard } from "lucide-react";
+import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 import { SearchModal } from "@/components/search/SearchModal";
 import { cn } from "@/lib/utils";
 import { useAppStore } from "@/lib/state/app-store";
@@ -172,7 +173,8 @@ export const Navbar = () => {
               >
                 <Menu className="h-6 w-6" />
               </button>
-              <Link href="/" className="flex items-center" aria-label="Imperialpedia home">
+              <Link href="/" className="flex items-center gap-2" aria-label="Imperialpedia home">
+                <ImperialpediaMark className="h-7 w-7 text-foreground" />
                 <span className="font-headline text-2xl font-black tracking-tight text-foreground">
                   Imperial<span className="text-primary">pedia</span>
                 </span>
@@ -283,7 +285,8 @@ export const Navbar = () => {
           />
           <div className="absolute left-0 top-0 h-full w-[85%] max-w-sm bg-background shadow-xl overflow-y-auto">
             <div className="flex items-center justify-between h-16 px-4 border-b border-border">
-              <span className="font-headline text-xl font-black">
+              <span className="flex items-center gap-2 font-headline text-xl font-black">
+                <ImperialpediaMark className="h-6 w-6 text-foreground" />
                 Imperial<span className="text-primary">pedia</span>
               </span>
               <button

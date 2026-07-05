@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { categoriesPublicApi, subcategoriesPublicApi } from '@/lib/api/client';
 import {
-  Scale,
   Menu,
   X,
   ChevronRight,
@@ -13,6 +12,7 @@ import {
   UserPlus,
   LayoutDashboard,
 } from 'lucide-react';
+import { LawEliteMark } from '@/components/icons/LawEliteMark';
 import SearchBar from '../search/SearchBar';
 import { cn } from '@/lib/utils';
 import seedData from '../../../docs/seed-data.json';
@@ -82,8 +82,8 @@ export function PublicNavbar() {
       <div className="border-b border-slate-100">
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl h-[60px] flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-10 h-10 rounded-md bg-[#0B1F3A] flex items-center justify-center shadow-sm group-hover:bg-blue-800 transition-colors">
-              <Scale className="text-white w-5 h-5" />
+            <div className="w-10 h-10 rounded-md bg-[#0F2440] flex items-center justify-center shadow-sm group-hover:bg-blue-900 transition-colors">
+              <LawEliteMark variant="white" className="w-6 h-6" />
             </div>
             <div className="flex flex-col -space-y-0.5">
               <span className="font-headline text-[1.35rem] font-extrabold tracking-tight text-slate-900 leading-none">

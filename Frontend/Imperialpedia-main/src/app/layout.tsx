@@ -13,7 +13,13 @@ const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
-  icons: { icon: 'data:,' },
+  icons: {
+    icon: [
+      { url: '/brand/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: '/brand/apple-icon.png',
+  },
   title: {
     default: 'Imperialpedia — The Financial Intelligence Network',
     template: '%s | Imperialpedia',
