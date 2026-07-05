@@ -2,14 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { 
-  Facebook, 
-  Instagram, 
-  Linkedin, 
-  Youtube, 
-  Gavel,
+import {
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
   ChevronRight
 } from 'lucide-react';
+import { LawEliteMark } from '@/components/icons/LawEliteMark';
 
 /**
  * @fileOverview High-Fidelity Editorial Footer
@@ -29,9 +29,9 @@ export function PublicFooter() {
             <div className="md:col-span-4 space-y-10">
               <Link href="/" className="flex items-center gap-3 group">
                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-2xl">
-                  <Gavel className="text-[#222b3e] w-6 h-6" />
+                  <LawEliteMark className="w-6 h-6" />
                 </div>
-                <span className="text-3xl font-bold tracking-tighter font-serif italic">
+                <span className="text-3xl font-bold tracking-tighter font-serif">
                   Law <span className="text-white/90">Elite</span>
                 </span>
               </Link>

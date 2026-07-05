@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { ImperialpediaMark } from '@/components/icons/ImperialpediaMark';
 
 // ─── Remove stubs and restore your real imports in production ─────────────────
 //   import { Container } from '@/design-system/layout/container';
@@ -178,24 +179,7 @@ export default function Footer() {
               className="inline-flex items-center mx-auto gap-2.5 outline-none w-fit md:w-full"
               aria-label="Imperialpedia Home"
             >
-              <span
-                className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center flex-shrink-0"
-                aria-hidden="true"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="white"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-4 h-4"
-                >
-                  <path d="M12 2L2 7l10 5 10-5-10-5" />
-                  <path d="M2 17l10 5 10-5" />
-                  <path d="M2 12l10 5 10-5" />
-                </svg>
-              </span>
+              <ImperialpediaMark className="w-7 h-7 flex-shrink-0 text-white" />
               <span className="text-xl text-center font-bold tracking-tight text-white font-serif">
                 Imperial<span className="text-blue-400">pedia</span>
               </span>

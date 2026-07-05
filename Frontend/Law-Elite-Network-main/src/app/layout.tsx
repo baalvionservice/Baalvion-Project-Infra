@@ -17,9 +17,13 @@ const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_WEBSITE_SLUG || 'law-elite-network'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  // Suppress any favicon (no icon logo in the browser tab). `data:,` is an empty
-  // resource, so the browser renders no icon and stops requesting /favicon.ico.
-  icons: { icon: 'data:,' },
+  icons: {
+    icon: [
+      { url: '/brand/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: '/brand/apple-icon.png',
+  },
   title: {
     default: 'Law Elite Network | Global Legal Intelligence',
     template: '%s | Law Elite Network',
@@ -80,7 +84,6 @@ const organizationJsonLd = {
   '@type': 'LegalService',
   name: 'Law Elite Network',
   url: SITE_URL,
-  // TODO: add real logo asset — /logo.png does not yet exist in this app (no public/ dir).
   logo: `${SITE_URL}/logo.png`,
   description:
     "The world's most distinguished legal knowledge and practitioner discovery platform.",
