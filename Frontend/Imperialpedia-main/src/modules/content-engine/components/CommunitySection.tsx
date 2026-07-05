@@ -309,7 +309,7 @@ export function CommunitySection() {
             </CardContent>
           </Card>
 
-          <PollCard poll={data.polls[0]} />
+          {data.polls[0] && <PollCard poll={data.polls[0]} />}
 
           <TrendingDiscussions topics={data.trendingDiscussions} />
         </div>
