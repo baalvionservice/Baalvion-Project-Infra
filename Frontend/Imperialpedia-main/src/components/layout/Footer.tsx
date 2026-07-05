@@ -41,6 +41,30 @@ const footerSections = [
       { label: 'Contact', href: '/contact' },
     ],
   },
+  {
+    title: 'Legal & Trust',
+    links: [
+      { label: 'Transparency', href: '/transparency' },
+      { label: 'Editorial Policy', href: '/editorial-policy' },
+      { label: 'Corrections Policy', href: '/corrections' },
+      { label: 'Fact-Checking Policy', href: '/fact-checking' },
+      { label: 'Ethics Policy', href: '/ethics-policy' },
+      { label: 'AI Usage Policy', href: '/ai-usage-policy' },
+      { label: 'Cookie Policy', href: '/cookie-policy' },
+      { label: 'Affiliate Disclosure', href: '/affiliate-disclosure' },
+      { label: 'Advertising Policy', href: '/advertising-policy' },
+      { label: 'Sponsored Content Policy', href: '/sponsored-content-policy' },
+      { label: 'Ownership Disclosure', href: '/ownership-disclosure' },
+      { label: 'Accessibility Statement', href: '/accessibility' },
+      { label: 'DMCA Policy', href: '/dmca-policy' },
+      { label: 'Copyright Policy', href: '/copyright-policy' },
+      { label: 'Comment & Community Policy', href: '/comment-policy' },
+      { label: 'Source Attribution Policy', href: '/source-attribution-policy' },
+      { label: 'Conflict of Interest Policy', href: '/conflict-of-interest-policy' },
+      { label: 'Diversity Policy', href: '/diversity-policy' },
+      { label: 'Careers', href: '/careers' },
+    ],
+  },
 ];
 
 const Footer = () => {

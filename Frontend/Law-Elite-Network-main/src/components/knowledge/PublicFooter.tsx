@@ -91,6 +91,32 @@ export function PublicFooter() {
                 <li><Link href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</Link></li>
               </ul>
             </div>
+
+            {/* Legal & Compliance: Trust Signals */}
+            <div className="md:col-span-3 space-y-4 text-[11px] font-medium text-white/70">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Trust & Compliance</p>
+              <ul className="space-y-3">
+                <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+                <li><Link href="/ai-usage-policy" className="hover:text-white transition-colors">AI Usage Policy</Link></li>
+                <li><Link href="/dmca-policy" className="hover:text-white transition-colors">DMCA Policy</Link></li>
+                <li><Link href="/copyright-policy" className="hover:text-white transition-colors">Copyright Policy</Link></li>
+                <li><Link href="/accessibility" className="hover:text-white transition-colors">Accessibility Statement</Link></li>
+                <li><Link href="/source-attribution-policy" className="hover:text-white transition-colors">Source Attribution Policy</Link></li>
+              </ul>
+            </div>
+
+            {/* Legal & Compliance: Editorial Disclosures */}
+            <div className="md:col-span-3 space-y-4 text-[11px] font-medium text-white/70">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Editorial Disclosures</p>
+              <ul className="space-y-3">
+                <li><Link href="/affiliate-disclosure" className="hover:text-white transition-colors">Affiliate Disclosure</Link></li>
+                <li><Link href="/sponsored-content-policy" className="hover:text-white transition-colors">Sponsored Content Policy</Link></li>
+                <li><Link href="/ownership-disclosure" className="hover:text-white transition-colors">Ownership Disclosure</Link></li>
+                <li><Link href="/conflict-of-interest-policy" className="hover:text-white transition-colors">Conflict of Interest Policy</Link></li>
+                <li><Link href="/diversity-policy" className="hover:text-white transition-colors">Diversity Policy</Link></li>
+                <li><Link href="/comment-policy" className="hover:text-white transition-colors">Comment & Review Policy</Link></li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
