@@ -97,10 +97,46 @@ const NAV_COLUMNS = [
   },
 ];
 
-const LEGAL_LINKS = [
-  { label: 'Privacy Policy', href: '/privacy-policy' },
-  { label: 'Terms of Service', href: '/terms-of-service' },
-  { label: 'Contact Us', href: '/contact' },
+const LEGAL_TRUST_COLUMNS = [
+  {
+    label: 'Editorial Integrity',
+    links: [
+      { label: 'Editorial Policy', href: '/editorial-policy' },
+      { label: 'Corrections Policy', href: '/corrections' },
+      { label: 'Fact-Checking Policy', href: '/fact-checking' },
+      { label: 'Ethics Policy', href: '/ethics-policy' },
+      { label: 'Conflict of Interest Policy', href: '/conflict-of-interest-policy' },
+      { label: 'Diversity Policy', href: '/diversity-policy' },
+    ],
+  },
+  {
+    label: 'Content & AI',
+    links: [
+      { label: 'AI Usage Policy', href: '/ai-usage-policy' },
+      { label: 'Comment & Community Policy', href: '/comment-policy' },
+      { label: 'Source Attribution Policy', href: '/source-attribution-policy' },
+    ],
+  },
+  {
+    label: 'Ads & Disclosures',
+    links: [
+      { label: 'Advertising Policy', href: '/advertising-policy' },
+      { label: 'Sponsored Content Policy', href: '/sponsored-content-policy' },
+      { label: 'Affiliate Disclosure', href: '/affiliate-disclosure' },
+      { label: 'Ownership Disclosure', href: '/ownership-disclosure' },
+    ],
+  },
+  {
+    label: 'Legal & Access',
+    links: [
+      { label: 'Disclaimer', href: '/disclaimer' },
+      { label: 'Cookie Policy', href: '/cookie-policy' },
+      { label: 'DMCA Policy', href: '/dmca-policy' },
+      { label: 'Copyright Policy', href: '/copyright-policy' },
+      { label: 'Accessibility Statement', href: '/accessibility' },
+      { label: 'Careers', href: '/careers' },
+    ],
+  },
 ];
 
 const ALPHABET = ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
@@ -229,6 +265,29 @@ export default function Footer() {
                         font-sans transition-colors duration-150
                         no-underline
                       "
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          ))}
+        </div>
+
+        {/* ── Legal, Trust & Editorial Standards ───────────────────── */}
+        <div className="grid gap-8 grid-cols-2 lg:grid-cols-4 py-10 border-b border-white/[0.08]">
+          {LEGAL_TRUST_COLUMNS.map((col) => (
+            <nav key={col.label} aria-label={`${col.label} links`}>
+              <p className="text-[10px] font-bold tracking-[0.18em] uppercase text-slate-100/60 mb-3.5 font-sans">
+                {col.label}
+              </p>
+              <ul className="flex flex-col gap-2.5 list-none p-0 m-0">
+                {col.links.map((link) => (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-slate-300 hover:text-white text-[13px] font-medium font-sans transition-colors duration-150 no-underline"
                     >
                       {link.label}
                     </Link>
