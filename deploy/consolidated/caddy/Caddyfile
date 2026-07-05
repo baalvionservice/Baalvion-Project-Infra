@@ -38,6 +38,15 @@ api.baalvion.com {
 		reverse_proxy app-platform:3018
 	}
 
+	# Public CMS media delivery (UNAUTHENTICATED) — featuredImage/generated-art files referenced
+	# by published content must be fetchable by anonymous site visitors and social/search
+	# crawlers, not just by logged-in admin sessions. cms-service serves UPLOAD_DIR statically
+	# at /uploads/** (see mediaService.js).
+	@cms_media path /uploads/*
+	handle @cms_media {
+		reverse_proxy app-platform:3018
+	}
+
 	# Public analytics collector (UNAUTHENTICATED first-party beacon). The live sites load the
 	# tracker (/api/v1/collect.js) and POST page/scroll/vitals/ecommerce events to /api/v1/collect;
 	# the OpenAPI contract is public too. The reporting API (/api/v1/cms/.../analytics/*) stays
