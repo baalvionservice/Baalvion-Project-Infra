@@ -3,6 +3,7 @@ const config = require('../config/appConfig');
 const store = require('./platformStore');
 const authService = require('./authService');
 const creditService = require('./creditService');
+const logger = require('./logger');
 const { AppError } = require('../utils/errors');
 
 const stripe = config.stripe.secretKey ? new Stripe(config.stripe.secretKey) : null;
@@ -34,12 +35,12 @@ const getInvoice = async (auth, id) => {
 // Create a real invoice row (shows in Billing History + is downloadable). invoices.subscription_id
 // is NOT NULL, so a subscription must exist first. Amounts are rounded to 2dp.
 const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
-const createInvoiceRecord = async (auth, { subscriptionId, amount, tax = 0, status, dueInDays = 0 }) => {
+const createInvoiceRecord = async (auth, { subscriptionId, amount, tax = 0, status, dueInDays = 0, paymentRef = null }) => {
     const now = new Date();
     const due = new Date(now.getTime() + dueInDays * 24 * 60 * 60 * 1000);
     const amt = round2(amount);
     const t = round2(tax);
-    return store.insert('invoices', {
+    const row = {
         orgId: auth.orgId,
         userId: auth.userId,
         subscriptionId,
@@ -49,7 +50,12 @@ const createInvoiceRecord = async (auth, { subscriptionId, amount, tax = 0, stat
         status,
         issuedAt: now.toISOString(),
         dueAt: due.toISOString(),
-    });
+    };
+    // Stable per-payment ref → DB enforces UNIQUE(org_id, payment_ref) WHERE payment_ref IS NOT NULL
+    // (migration 030). A provider redelivery / browser optimistic call / JVM retry for the SAME payment
+    // creates at most ONE paid invoice — the cross-instance, restart-durable backstop. NULL for offline orders.
+    if (paymentRef) row.paymentRef = String(paymentRef);
+    return store.insert('invoices', row);
 };
 
 const changePlan = async (auth, planSlug) => {
@@ -129,21 +135,38 @@ const activateSubscription = async (auth, planSlug, opts = {}) => {
         const charged = opts.amount != null ? Number(opts.amount) : (targetPlan.monthlyPrice || 0);
         if (charged > 0) {
             // Idempotency: the client (/billing/activate) AND the provider webhook can both fire for a
-            // single payment. Skip creating a second paid invoice if a matching one (same org + amount)
-            // was already recorded in the last 15 minutes, so one payment → one invoice.
+            // single payment. opts.paymentRef is the stable gateway payment id (set by the webhook/fulfill
+            // path). When present, the DB UNIQUE(org_id, payment_ref) index (migration 030) is the dedup
+            // AUTHORITY — atomic and race-proof across instances. The legacy 15-min/amount heuristic is kept
+            // ONLY as the fallback for the browser-optimistic path that carries no ref (best-effort).
+            const paymentRef = opts.paymentRef || null;
             let duplicate = false;
-            try {
-                const recent = (await getInvoices(auth)) || [];
-                const cutoff = Date.now() - 15 * 60 * 1000;
-                duplicate = recent.some((inv) =>
-                    inv.status === 'paid' &&
-                    round2(inv.amount) === round2(charged) &&
-                    inv.issuedAt && new Date(inv.issuedAt).getTime() >= cutoff);
-            } catch (_) { /* if the lookup fails, fall through and create the invoice */ }
+            if (!paymentRef) {
+                try {
+                    const recent = (await getInvoices(auth)) || [];
+                    const cutoff = Date.now() - 15 * 60 * 1000;
+                    duplicate = recent.some((inv) =>
+                        inv.status === 'paid' &&
+                        round2(inv.amount) === round2(charged) &&
+                        inv.issuedAt && new Date(inv.issuedAt).getTime() >= cutoff);
+                } catch (_) { /* if the lookup fails, fall through and create the invoice */ }
+            }
             if (!duplicate) {
                 try {
-                    await createInvoiceRecord(auth, { subscriptionId: activeSub.id, amount: charged, status: 'paid' });
-                } catch (e) { /* non-fatal: the subscription is active even if the invoice row fails */ }
+                    await createInvoiceRecord(auth, { subscriptionId: activeSub.id, amount: charged, status: 'paid', paymentRef });
+                } catch (e) {
+                    // A UNIQUE(org_id, payment_ref) violation means this payment was ALREADY invoiced —
+                    // exactly-once achieved, NOT an error. Anything else: contract preserved (the subscription
+                    // stays active even if the invoice row fails), but surface it for reconciliation instead of
+                    // swallowing — a settled charge with no invoice must never be a silent no-op.
+                    const isDupRef = e && (e.name === 'SequelizeUniqueConstraintError' || (e.original && e.original.code === '23505') || (e.parent && e.parent.code === '23505'));
+                    if (isDupRef) {
+                        logger.info(`[billing] duplicate paid-invoice suppressed by unique(payment_ref) ref=${paymentRef} — idempotent`);
+                    } else {
+                        logger.error('[billing] paid-invoice write failed (subscription active, invoice missing):', e && e.message);
+                        try { authService.issueEvent('billing.invoice.write_failed', auth.orgId, { planSlug, amount: charged, paymentRef }); } catch (_) { /* best-effort */ }
+                    }
+                }
             }
         }
     }

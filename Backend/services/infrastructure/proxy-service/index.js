@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const crypto = require('crypto');
 const cors = require('cors');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
@@ -107,7 +108,12 @@ function metricsGuard(req, res, next) {
         const bearer = authHeader.startsWith('Bearer ') ? authHeader.slice(7).trim() : '';
         const queryToken = req.query && req.query.token ? String(req.query.token) : '';
         const provided = bearer || queryToken;
-        if (provided && provided === METRICS_SECRET) return next();
+        // Constant-time compare — never leak the secret's length/prefix via early-exit string equality.
+        if (provided) {
+            const a = Buffer.from(provided);
+            const b = Buffer.from(METRICS_SECRET);
+            if (a.length === b.length && crypto.timingSafeEqual(a, b)) return next();
+        }
     }
 
     return res.status(403).json({ success: false, error: { code: 'FORBIDDEN', message: 'Access denied' } });

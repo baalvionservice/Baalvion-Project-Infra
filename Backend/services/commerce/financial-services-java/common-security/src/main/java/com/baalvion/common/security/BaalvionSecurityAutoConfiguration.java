@@ -56,6 +56,12 @@ public class BaalvionSecurityAutoConfiguration {
   @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri:}")
   private String jwkSetUri;
 
+  // Shared internal secret for trusted server-to-server calls (e.g. the Node BFF → PSP gateway).
+  // When set, /v1/gateway/payments/** is authorized via the x-internal-secret header (ROLE_INTERNAL)
+  // instead of a user JWT. Webhooks stay public; everything else still requires a user RS256 JWT.
+  @Value("${app.internal-secret:${INTERNAL_SERVICE_SECRET:}}")
+  private String internalSecret;
+
   public BaalvionSecurityAutoConfiguration(SecurityProperties properties) {
     this.properties = properties;
   }
@@ -180,8 +186,18 @@ public class BaalvionSecurityAutoConfiguration {
         .requestMatchers("/actuator/**").hasRole("OPERATOR")
         // OpenAPI/Swagger UI (turn off in prod with springdoc.api-docs.enabled / swagger-ui.enabled=false)
         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+        // PSP provider webhooks are PUBLIC — their authenticity is the provider signature, verified
+        // inside the service (HMAC-SHA256 / SHA-512). They carry neither a user JWT nor the internal
+        // secret, so they must be exempt. This is the ONLY public application surface.
+        .requestMatchers("/v1/gateway/webhooks/**", "/api/v1/gateway/webhooks/**").permitAll()
+        // Server-to-server PSP gateway calls (initiate/status/capture/refund) authenticate with the
+        // shared internal secret (ROLE_INTERNAL via InternalServiceAuthFilter), never a user session.
+        .requestMatchers("/v1/gateway/payments/**", "/api/v1/gateway/payments/**").hasRole("INTERNAL")
         .anyRequest().authenticated())
       .oauth2ResourceServer(oauth -> oauth.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())))
+      // Establish the internal-service principal (x-internal-secret) before bearer auth so
+      // server-to-server callers are authorized without a user JWT.
+      .addFilterBefore(new InternalServiceAuthFilter(internalSecret), BearerTokenAuthenticationFilter.class)
       // MFA runs after bearer authentication so the authenticated principal is available.
       .addFilterAfter(new MfaVerificationFilter(properties.getMfa(), mfaSecretStore, totpService),
         BearerTokenAuthenticationFilter.class);

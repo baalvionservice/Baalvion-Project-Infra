@@ -49,6 +49,9 @@ function parseSigHeader(header) {
 }
 
 async function stripeWebhook(req, res) {
+    // Tracks a FRESH idempotency claim so the catch can release it on apply-failure (else the orphaned
+    // claim dedups Stripe's retry → payment captured, never fulfilled). See internalFulfillController.
+    let claimedId = null;
     try {
         const STRIPE_WEBHOOK_SECRET = (await cmsVault.getSecret('stripe', 'webhookSecret')) || STRIPE_WEBHOOK_SECRET_ENV;
         if (!STRIPE_WEBHOOK_SECRET) {
@@ -126,6 +129,7 @@ async function stripeWebhook(req, res) {
             if (!claim.fresh) {
                 return res.status(200).json({ received: true, idempotent: true });
             }
+            claimedId = eventId;
         }
 
         if (kind === 'credit' || planSlug === 'pay-as-you-go') {
@@ -142,6 +146,9 @@ async function stripeWebhook(req, res) {
         logger.info(`[stripe-webhook] activated org=${orgId} plan=${planSlug} event=${eventId}`);
         return res.status(200).json({ received: true, activated: true, status: activated && activated.status });
     } catch (e) {
+        // Release the (unapplied) claim so Stripe's retry can re-fulfill. releaseEvent only deletes rows
+        // still applied=FALSE, so it can never undo a completed activation. 500 → Stripe retries.
+        if (claimedId) { try { await dedup.releaseEvent('stripe', claimedId); } catch (_) { /* best-effort */ } }
         logger.error('[stripe-webhook] handler error:', e.message);
         return res.status(500).json({ error: { code: 'WEBHOOK_ERROR', message: 'internal error' } });
     }
