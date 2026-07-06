@@ -77,4 +77,24 @@ async function markApplied(provider, eventId, patch = {}) {
   }
 }
 
-module.exports = { claimEvent, markApplied };
+/**
+ * Release an UNAPPLIED claim so a retry can re-claim and re-apply. Called when an
+ * apply step fails AFTER a fresh claim (e.g. a transient DB error between the claim
+ * and the activation): without this the orphaned claim would dedup the provider's
+ * retry and the payment would never fulfill. Only deletes rows still applied=FALSE,
+ * so it can never undo a completed fulfillment. Best-effort; never throws.
+ */
+async function releaseEvent(provider, eventId) {
+  if (!eventId) return;
+  try {
+    await db.sequelize.query(
+      `DELETE FROM public.payment_webhook_events
+        WHERE provider = :provider AND provider_event_id = :eventId AND applied = FALSE`,
+      { replacements: { provider, eventId: String(eventId) } },
+    );
+  } catch (e) {
+    logger.error('[webhookDedup] releaseEvent failed:', e.message);
+  }
+}
+
+module.exports = { claimEvent, markApplied, releaseEvent };
