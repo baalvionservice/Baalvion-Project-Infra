@@ -99,6 +99,12 @@ const PROCESSORS = {
     // a repeatable job below (every 6h); also triggerable on demand via
     // POST /v1/monitoring/run for the same underlying cycle.
     verification_monitor: async () => require('../service/verification/monitor').runCycle(),
+
+    // Logistics Core Foundation (Phase 2) — async/bulk tracking-event ingestion.
+    // Same recordTrackingEvent() logic the synchronous POST /tracking_events uses
+    // (service/tracking/trackingEngine.js); a thrown error here retries via BullMQ
+    // and eventually dead-letters, same as every other processor in this file.
+    tracking_sync: async (job) => require('../service/tracking/trackingEngine').recordTrackingEvent(job.data),
 };
 
 const workers = [];

@@ -9,6 +9,9 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { parseListQuery } = require('../utils/pagination');
 const { createContainerSchema, updateContainerSchema } = require('../validators/container.schema');
+const { auditLogistics } = require('../utils/logisticsAudit');
+const { emitLogisticsEvent } = require('../service/events/logisticsEvents');
+const { indexContainer } = require('../service/search/logisticsIndexer');
 
 function isAdmin(req) {
     const roles = (req.auth && req.auth.roles) || [];
@@ -94,6 +97,8 @@ const create = async (req, res, next) => {
             ...fromApi(parsed.data),
             ...(tenantId ? { tenant_id: tenantId } : {}),
         });
+        await auditLogistics(req, 'container.created', 'container', row.id, { containerNumber: row.container_number });
+        await indexContainer(row);
         return sendSuccess(req, res, toApi(row), 201);
     } catch (err) { return next(err); }
 };
@@ -106,7 +111,16 @@ const update = async (req, res, next) => {
         if (!parsed.success) return next(new AppError('VALIDATION_ERROR', parsed.error.issues[0].message, 400, { issues: parsed.error.issues }));
         const updates = fromApi(parsed.data);
         Object.keys(updates).forEach((k) => updates[k] === undefined && delete updates[k]);
+        const previousStatus = row.status;
         await row.update(updates);
+        await auditLogistics(req, 'container.updated', 'container', row.id, { fields: Object.keys(updates) });
+        await indexContainer(row);
+        if (updates.status && updates.status !== previousStatus) {
+            await emitLogisticsEvent('logisticsContainerStatusChanged', {
+                containerId: row.id, shipmentId: row.shipment_id,
+                previousStatus, newStatus: row.status, tenantId: row.tenant_id,
+            });
+        }
         return sendSuccess(req, res, toApi(row));
     } catch (err) { return next(err); }
 };
@@ -116,6 +130,7 @@ const remove = async (req, res, next) => {
         const row = await fetchContainerOwned(req.params.id, req, next);
         if (!row) return undefined;
         await row.destroy(); // paranoid: soft delete
+        await auditLogistics(req, 'container.deleted', 'container', row.id);
         return sendSuccess(req, res, { id: row.id, deleted: true });
     } catch (err) { return next(err); }
 };

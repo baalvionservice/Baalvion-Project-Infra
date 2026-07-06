@@ -5,6 +5,7 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { parseListQuery } = require('../utils/pagination');
 const { createPackageSchema, updatePackageSchema } = require('../validators/package.schema');
+const { auditLogistics } = require('../utils/logisticsAudit');
 
 function isAdmin(req) {
     const roles = (req.auth && req.auth.roles) || [];
@@ -98,6 +99,7 @@ const create = async (req, res, next) => {
             ...fromApi(parsed.data),
             ...(tenantId ? { tenant_id: tenantId } : {}),
         });
+        await auditLogistics(req, 'package.created', 'package', row.id, { shipmentId: row.shipment_id });
         return sendSuccess(req, res, toApi(row), 201);
     } catch (err) { return next(err); }
 };
@@ -111,6 +113,7 @@ const update = async (req, res, next) => {
         const updates = fromApi(parsed.data);
         Object.keys(updates).forEach((k) => updates[k] === undefined && delete updates[k]);
         await row.update(updates);
+        await auditLogistics(req, 'package.updated', 'package', row.id, { fields: Object.keys(updates) });
         return sendSuccess(req, res, toApi(row));
     } catch (err) { return next(err); }
 };
@@ -120,6 +123,7 @@ const remove = async (req, res, next) => {
         const row = await fetchPackageOwned(req.params.id, req, next);
         if (!row) return undefined;
         await row.destroy();
+        await auditLogistics(req, 'package.deleted', 'package', row.id);
         return sendSuccess(req, res, { id: row.id, deleted: true });
     } catch (err) { return next(err); }
 };

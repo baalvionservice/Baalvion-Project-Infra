@@ -145,6 +145,19 @@ router.use('/packages',        require('./packageRoutes'));
 router.use('/logistics_addresses', require('./addressRoutes'));
 router.use('/tracking_events', require('./trackingRoutes'));
 
+// Logistics Core Foundation (Phase 2): operational warehouses + inventory
+// movement ledger, and fleet (vehicles, drivers, assignments).
+router.use('/warehouses',          require('./warehouseRoutes'));
+router.use('/inventory_movements', require('./inventoryMovementRoutes'));
+router.use('/vehicles',            require('./vehicleRoutes'));
+router.use('/drivers',             require('./driverRoutes'));
+router.use('/fleet_assignments',   require('./fleetAssignmentRoutes'));
+
+// Logistics Core Foundation (Phase 3): itemized cost ledger, incidents, RMA returns.
+router.use('/shipment_charges', require('./shipmentChargeRoutes'));
+router.use('/incidents',        require('./incidentRoutes'));
+router.use('/returns',          require('./returnRoutes'));
+
 // Phase 2 — Trust, Verification & Compliance Foundation: Verification Center
 // dashboard (per-org checklist across identity/company/tax/bank/address/factory/
 // warehouse/products/documents/compliance/risk/trust-score) + the country-

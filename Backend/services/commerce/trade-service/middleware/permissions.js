@@ -30,6 +30,9 @@ const LOGISTICS_PERMISSIONS = Object.freeze({
     FLEET_MANAGE: 'logistics:fleet:manage',
     TRACKING_MANAGE: 'logistics:tracking:manage',
     REPORT_EXPORT: 'logistics:report:export',
+    // Phase 3 additions:
+    INCIDENT_MANAGE: 'logistics:incident:manage',
+    RETURN_MANAGE: 'logistics:return:manage',
 });
 
 const ADMIN_BYPASS_ROLES = new Set(['admin', 'owner', 'super_admin']);

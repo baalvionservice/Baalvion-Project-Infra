@@ -5,6 +5,7 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { parseListQuery } = require('../utils/pagination');
 const { createAddressSchema, updateAddressSchema } = require('../validators/address.schema');
+const { auditLogistics } = require('../utils/logisticsAudit');
 
 function isAdmin(req) {
     const roles = (req.auth && req.auth.roles) || [];
@@ -91,6 +92,7 @@ const create = async (req, res, next) => {
             ...fromApi(parsed.data),
             ...(tenantId ? { tenant_id: tenantId } : {}),
         });
+        await auditLogistics(req, 'logistics_address.created', 'logistics_address', row.id, { addressType: row.address_type });
         return sendSuccess(req, res, toApi(row), 201);
     } catch (err) { return next(err); }
 };
@@ -104,6 +106,7 @@ const update = async (req, res, next) => {
         const updates = fromApi(parsed.data);
         Object.keys(updates).forEach((k) => updates[k] === undefined && delete updates[k]);
         await row.update(updates);
+        await auditLogistics(req, 'logistics_address.updated', 'logistics_address', row.id, { fields: Object.keys(updates) });
         return sendSuccess(req, res, toApi(row));
     } catch (err) { return next(err); }
 };
@@ -113,6 +116,7 @@ const remove = async (req, res, next) => {
         const row = await fetchAddressOwned(req.params.id, req, next);
         if (!row) return undefined;
         await row.destroy();
+        await auditLogistics(req, 'logistics_address.deleted', 'logistics_address', row.id);
         return sendSuccess(req, res, { id: row.id, deleted: true });
     } catch (err) { return next(err); }
 };
