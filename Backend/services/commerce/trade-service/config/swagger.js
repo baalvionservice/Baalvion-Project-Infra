@@ -57,6 +57,8 @@ function buildSpec() {
                 { name: 'Containers' }, { name: 'Packages' }, { name: 'Addresses' }, { name: 'Tracking' },
                 { name: 'Warehouses' }, { name: 'Inventory Movements' }, { name: 'Vehicles' }, { name: 'Drivers' },
                 { name: 'Fleet Assignments' }, { name: 'Shipment Charges' }, { name: 'Incidents' }, { name: 'Returns' },
+                { name: 'Freight Carrier Directory' }, { name: 'Freight Rate Engine' }, { name: 'Freight Quotes' },
+                { name: 'Carrier Performance' },
             ],
         },
         apis: [path.join(__dirname, '..', 'routes', '*.js')],

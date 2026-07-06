@@ -32,6 +32,8 @@ const manage = requirePermission(LOGISTICS_PERMISSIONS.WAREHOUSE_MANAGE);
  *             properties:
  *               warehouseId: { type: string, format: uuid }
  *               packageId: { type: string, format: uuid }
+ *               fromBinId: { type: string, format: uuid, description: "WMS Phase A: source bin (outbound/transfer)" }
+ *               toBinId: { type: string, format: uuid, description: "WMS Phase A: destination bin (inbound/transfer)" }
  *               movementType: { type: string, enum: [inbound, outbound, transfer, adjustment] }
  *               quantity: { type: number }
  *     responses:

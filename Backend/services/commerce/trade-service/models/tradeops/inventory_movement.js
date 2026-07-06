@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
         warehouse_id: { type: DataTypes.UUID, allowNull: false },
         package_id: { type: DataTypes.UUID },
         shipment_id: { type: DataTypes.UUID },
+        // WMS Phase A: bin-level tracking. An `inbound` movement (putaway
+        // completion) only ever populates to_bin_id; `outbound` only
+        // from_bin_id; both populated on a bin-to-bin `transfer` (Phase B).
+        from_bin_id: { type: DataTypes.UUID },
+        to_bin_id: { type: DataTypes.UUID },
         movement_type: {
             type: DataTypes.TEXT,
             allowNull: false,
@@ -34,6 +39,8 @@ module.exports = (sequelize, DataTypes) => {
         InventoryMovement.belongsTo(db.Warehouse, { as: 'warehouse', foreignKey: 'warehouse_id' });
         InventoryMovement.belongsTo(db.LogisticsPackage, { as: 'package', foreignKey: 'package_id' });
         InventoryMovement.belongsTo(db.TradeShipment, { as: 'shipment', foreignKey: 'shipment_id' });
+        InventoryMovement.belongsTo(db.WarehouseBin, { as: 'fromBin', foreignKey: 'from_bin_id' });
+        InventoryMovement.belongsTo(db.WarehouseBin, { as: 'toBin', foreignKey: 'to_bin_id' });
     };
 
     return InventoryMovement;

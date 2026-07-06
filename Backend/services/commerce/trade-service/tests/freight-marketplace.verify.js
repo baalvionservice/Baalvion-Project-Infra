@@ -66,11 +66,17 @@ const oceanReq = (overrides = {}) => ({
         assert.deepStrictEqual(exp, ['dhl', 'fedex', 'ups']);
         assert.strictEqual(schema.carriersForMode(null).length, 4);
     });
-    await t('normalizedQuote factory enforces carrier + mode', () => {
+    await t('normalizedQuote factory enforces a non-empty carrier + a known mode', () => {
         const q = schema.normalizedQuote({ carrier: schema.CARRIER.DHL, mode: schema.MODE.EXPRESS, amount: 100, transit_days: 3 });
         assert.strictEqual(q.carrier, 'dhl');
         assert.strictEqual(q.amount, 100);
-        assert.throws(() => schema.normalizedQuote({ carrier: 'bogus' }));
+        // Freight Management (Phase 3, Prompt 2): carrier is no longer restricted to
+        // VALID_CARRIERS — a dynamically registered carrier (any non-empty string,
+        // quoted via genericConnector.js) must normalize successfully too.
+        const dyn = schema.normalizedQuote({ carrier: 'msc', mode: schema.MODE.OCEAN, amount: 50, transit_days: 20 });
+        assert.strictEqual(dyn.carrier, 'msc');
+        assert.throws(() => schema.normalizedQuote({ carrier: '' }));
+        assert.throws(() => schema.normalizedQuote({ carrier: null }));
         assert.throws(() => schema.normalizedQuote({ carrier: schema.CARRIER.DHL, mode: 'teleport' }));
     });
     await t('normalizedBooking factory enforces carrier + status', () => {
