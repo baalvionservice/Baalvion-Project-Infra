@@ -1,4 +1,6 @@
 // Mock news data for development
+import { articleArtDataUri } from "@baalvion/illustrations";
+
 export interface NewsArticle {
   id: string;
   title: string;
@@ -11,12 +13,11 @@ export interface NewsArticle {
   content?: string;
 }
 
-export const mockNewsData: NewsArticle[] = [
+const rawMockNewsData: Omit<NewsArticle, "image">[] = [
   {
     id: "1",
     title: "Stock Market Hits Record High as Tech Shares Surge",
     description: "Major technology companies led the market rally today, with the S&P 500 reaching new all-time highs amid strong earnings reports.",
-    image: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=450&fit=crop",
     source: "Market Watch",
     publishedAt: "2024-01-15T14:30:00Z",
     category: "Markets",
@@ -27,7 +28,6 @@ export const mockNewsData: NewsArticle[] = [
     id: "2", 
     title: "Federal Reserve Signals Potential Rate Cut in Coming Months",
     description: "Fed officials hint at monetary policy adjustments as inflation shows signs of cooling across multiple sectors.",
-    image: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=800&h=450&fit=crop",
     source: "Financial Times",
     publishedAt: "2024-01-15T13:15:00Z",
     category: "Economy",
@@ -38,7 +38,6 @@ export const mockNewsData: NewsArticle[] = [
     id: "3",
     title: "Bitcoin Surges Past $50,000 as Institutional Adoption Grows",
     description: "Cryptocurrency markets rally as major corporations announce Bitcoin treasury allocations and ETF approvals continue.",
-    image: "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=800&h=450&fit=crop",
     source: "Crypto Daily",
     publishedAt: "2024-01-15T12:45:00Z",
     category: "Crypto",
@@ -49,7 +48,6 @@ export const mockNewsData: NewsArticle[] = [
     id: "4",
     title: "Major Bank Reports Strong Q4 Earnings Despite Economic Headwinds",
     description: "JPMorgan Chase beats analyst expectations with robust trading revenue and lower-than-expected loan losses.",
-    image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=800&h=450&fit=crop",
     source: "Banking News",
     publishedAt: "2024-01-15T11:20:00Z",
     category: "Banking",
@@ -60,7 +58,6 @@ export const mockNewsData: NewsArticle[] = [
     id: "5",
     title: "AI Startup Raises $500M in Series C Funding Round",
     description: "OpenAI competitor secures massive funding from venture capital firms, valuing the company at $5 billion.",
-    image: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&h=450&fit=crop",
     source: "TechCrunch",
     publishedAt: "2024-01-15T10:30:00Z",
     category: "Startups",
@@ -71,7 +68,6 @@ export const mockNewsData: NewsArticle[] = [
     id: "6",
     title: "Global Markets Mixed as Asian Stocks Decline",
     description: "European markets open higher while Asian indices close lower amid concerns over Chinese economic data.",
-    image: "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=800&h=450&fit=crop",
     source: "Reuters",
     publishedAt: "2024-01-15T09:15:00Z",
     category: "GlobalMarkets",
@@ -82,7 +78,6 @@ export const mockNewsData: NewsArticle[] = [
     id: "7",
     title: "Housing Market Shows Signs of Recovery in Major Cities",
     description: "Real estate prices stabilize as mortgage rates decline and inventory levels improve across metropolitan areas.",
-    image: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&h=450&fit=crop",
     source: "Real Estate Weekly",
     publishedAt: "2024-01-15T08:45:00Z",
     category: "RealEstate",
@@ -93,7 +88,6 @@ export const mockNewsData: NewsArticle[] = [
     id: "8",
     title: "Personal Finance: 5 Investment Strategies for 2024",
     description: "Financial advisors share top recommendations for building wealth in the current economic environment.",
-    image: "https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=800&h=450&fit=crop",
     source: "Money Magazine",
     publishedAt: "2024-01-15T07:30:00Z",
     category: "PersonalFinance",
@@ -101,6 +95,14 @@ export const mockNewsData: NewsArticle[] = [
     content: "As we move through 2024, financial advisors are recommending several key investment strategies to help individuals..."
   }
 ];
+
+// Original, deterministic artwork per article (no stock/placeholder images) —
+// generated from each article's own title/category, computed after the literal
+// above since object literals can't reference their own sibling properties.
+export const mockNewsData: NewsArticle[] = rawMockNewsData.map((article) => ({
+  ...article,
+  image: articleArtDataUri({ title: article.title, category: article.category, seed: article.id }),
+}));
 
 // Generate more mock data for pagination
 export function generateMockNews(page: number = 1, limit: number = 10): NewsArticle[] {

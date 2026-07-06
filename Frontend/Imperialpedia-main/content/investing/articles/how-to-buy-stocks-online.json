@@ -1,0 +1,84 @@
+{
+  "topicNumber": 8,
+  "title": "How to Buy Stocks Online",
+  "slug": "how-to-buy-stocks-online",
+  "seo": {
+    "seoTitle": "How to Buy Stocks Online: Step-by-Step Guide",
+    "metaDescription": "From opening a brokerage account to placing your first order, here's exactly how buying stocks online works, including order types you should understand.",
+    "focusKeyword": "how to buy stocks online",
+    "secondaryKeywords": ["how to buy your first stock", "online brokerage account", "market order vs limit order", "buying shares online"],
+    "searchIntent": "Informational/transactional — searchers want the concrete mechanical steps to place a real order.",
+    "schemaRecommendation": "Article + HowTo"
+  },
+  "excerpt": "Buying a stock online takes four steps: open a brokerage account, verify your identity, fund the account, and place your order. Here's what each step actually involves.",
+  "intro": "The mechanics of buying a stock online are simpler than most first-timers expect — the entire process, from opening an account to owning your first share, can realistically be completed within a single afternoon. This guide walks through each step, including the order types you'll be asked to choose from when you place your first trade.",
+  "sections": [
+    {
+      "heading": "Step 1: Open a Brokerage Account",
+      "paragraphs": [
+        "Choose a reputable, regulated online brokerage — in the U.S., confirm the firm is a member of FINRA and covered by SIPC, which protects your securities (not against market losses, but against brokerage failure) up to a set limit. The application typically asks for your Social Security number, employment information, and some basic financial details, and can usually be completed online in under fifteen minutes."
+      ]
+    },
+    {
+      "heading": "Step 2: Verify Your Identity",
+      "paragraphs": [
+        "Brokerages are legally required to verify your identity before you can trade, a process called Know Your Customer (KYC). This typically involves uploading a photo of a government-issued ID and sometimes a proof of address. Verification is usually completed within a day or two, though some brokerages approve accounts almost instantly."
+      ]
+    },
+    {
+      "heading": "Step 3: Fund Your Account",
+      "paragraphs": [
+        "Link a bank account and transfer funds, typically via ACH transfer, which usually takes one to three business days to clear before you can trade with that money. Some brokerages offer instant access to a limited amount of deposited funds for trading purposes while the transfer is still settling in the background."
+      ]
+    },
+    {
+      "heading": "Step 4: Place Your Order",
+      "paragraphs": [
+        "Search for the company's ticker symbol, decide how many shares (or dollar amount, if fractional shares are supported) you want to buy, and choose an order type. A market order buys immediately at the current available price, which is simple but means you accept whatever price is available at that exact moment. A limit order lets you set the maximum price you're willing to pay, and the trade only executes if the stock reaches that price or lower — giving you more control at the cost of the order possibly not filling at all if the price never drops that low."
+      ],
+      "callout": {
+        "title": "For beginners, market orders on liquid stocks are usually fine",
+        "text": "For large, actively traded stocks, the difference between the last price and the actual execution price is typically tiny. Limit orders become more important for less liquid stocks or during periods of high volatility."
+      }
+    },
+    {
+      "heading": "After the Order Executes",
+      "paragraphs": [
+        "Once your order fills, the shares appear in your account, usually within seconds for a market order on a liquid stock. From there, most brokerages let you set up automatic recurring purchases if you want to keep investing on a schedule, which is a practical way to apply consistent [dollar-cost averaging](/articles/what-is-dollar-cost-averaging) without manually placing every trade."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Opening a brokerage account, verifying identity, and funding it can typically be completed within a few days total.",
+    "Confirm any brokerage you use is regulated and SIPC-protected before depositing funds.",
+    "A market order executes immediately at the current price; a limit order only executes at your specified price or better.",
+    "ACH bank transfers to fund an account typically take one to three business days to fully clear.",
+    "Most brokerages support automatic recurring purchases, making consistent investing easier to maintain."
+  ],
+  "faq": [
+    {
+      "question": "Is it safe to buy stocks online?",
+      "answer": "Yes, through a regulated, SIPC-member brokerage. Use strong account security practices like two-factor authentication, and always verify you're on the brokerage's official website or app before entering login credentials."
+    },
+    {
+      "question": "What's the difference between a market order and a limit order?",
+      "answer": "A market order executes immediately at the best available current price. A limit order only executes at a price you specify or better, giving you price control at the risk the order may not fill if the market never reaches your price."
+    },
+    {
+      "question": "How long does it take for a stock purchase to complete?",
+      "answer": "For actively traded stocks during market hours, a market order typically fills within seconds. Funding your account beforehand via bank transfer is usually the slower step, often taking one to three business days."
+    }
+  ],
+  "conclusion": "Buying stocks online has become straightforward enough that the biggest remaining obstacle for most people is simply getting started. Choose a regulated brokerage, complete the identity verification, fund the account, and place your order using whichever order type fits your comfort level. Once you've done it once, every subsequent purchase takes only a minute or two.",
+  "internalLinks": [
+    { "anchor": "how to start investing in stocks", "slug": "how-to-start-investing-in-stocks" },
+    { "anchor": "how much money you need to start investing", "slug": "how-much-money-do-you-need-to-start-investing" },
+    { "anchor": "common stock investing mistakes", "slug": "common-stock-investing-mistakes" },
+    { "anchor": "how to build a stock portfolio", "slug": "how-to-build-a-stock-portfolio" }
+  ],
+  "externalSources": [
+    { "name": "FINRA — Brokerage Account Basics", "url": "https://www.finra.org/investors" },
+    { "name": "Securities Investor Protection Corporation (SIPC)", "url": "https://www.sipc.org/" }
+  ],
+  "wordCountEstimate": 710
+}

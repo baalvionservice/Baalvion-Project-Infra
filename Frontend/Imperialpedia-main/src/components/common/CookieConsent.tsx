@@ -35,7 +35,15 @@ export const CookieConsent = () => {
   const handleConsent = (choice: 'accepted' | 'rejected') => {
     localStorage.setItem('imperialpedia_cookie_consent', choice);
     setIsVisible(false);
-    
+
+    // Propagate the choice to the Baalvion unified-analytics tracker (GA-style
+    // consent mode). Rejected → analytics/ad/personalization denied; the tracker
+    // then stops sending events for this visitor.
+    const granted = choice === 'accepted';
+    (window as unknown as { baalvion?: { consent?: (c: Record<string, boolean>) => void } })
+      .baalvion?.consent?.({ analytics: granted, ad: granted, personalization: granted });
+
+
     if (choice === 'accepted') {
       // Broadcast engagement to the analytics cluster
       trackEvent({

@@ -31,6 +31,20 @@ db.CmsWebsiteMember   = require('./cmsWebsiteMember')(sequelize, DataTypes);
 db.CmsWebsiteIntegration = require('./cmsWebsiteIntegration')(sequelize, DataTypes);
 db.CmsMediaReference  = require('./cmsMediaReference')(sequelize, DataTypes);
 db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
+db.CmsAuthor          = require('./cmsAuthor')(sequelize, DataTypes);
+
+// ── Unified Analytics Platform (schema `analytics`) ───────────────────────────
+// Standalone event spine — no Sequelize associations to the `cms` tables (they
+// join by website_id/organization_id value, cross-schema). Scoped at the service
+// layer (loadCmsRole membership + orgFilter), same as the rest of cms-service.
+db.AnalyticsEvent          = require('./analyticsEvent')(sequelize, DataTypes);
+db.AnalyticsSession        = require('./analyticsSession')(sequelize, DataTypes);
+db.AnalyticsVisitor        = require('./analyticsVisitor')(sequelize, DataTypes);
+db.AnalyticsProviderMetric = require('./analyticsProviderMetric')(sequelize, DataTypes);
+db.AnalyticsRollupDaily    = require('./analyticsRollupDaily')(sequelize, DataTypes);
+db.AnalyticsRollupMonthly  = require('./analyticsRollupMonthly')(sequelize, DataTypes);
+db.AnalyticsAnomaly           = require('./analyticsAnomaly')(sequelize, DataTypes);
+db.AnalyticsProviderSyncState = require('./analyticsProviderSyncState')(sequelize, DataTypes);
 
 // ── Associations ─────────────────────────────────────────────────────────────
 
@@ -40,7 +54,9 @@ db.CmsWebsite.hasMany(db.CmsTag,           { foreignKey: 'websiteId', as: 'tags'
 db.CmsWebsite.hasMany(db.CmsContent,       { foreignKey: 'websiteId', as: 'contents' });
 db.CmsWebsite.hasMany(db.CmsWebsiteMember, { foreignKey: 'websiteId', as: 'members' });
 db.CmsWebsite.hasMany(db.CmsSeoRedirect,   { foreignKey: 'websiteId', as: 'redirects' });
+db.CmsWebsite.hasMany(db.CmsAuthor,        { foreignKey: 'websiteId', as: 'authors' });
 
+db.CmsAuthor.belongsTo(db.CmsWebsite,   { foreignKey: 'websiteId', as: 'website' });
 db.CmsCategory.belongsTo(db.CmsWebsite, { foreignKey: 'websiteId', as: 'website' });
 db.CmsTag.belongsTo(db.CmsWebsite,      { foreignKey: 'websiteId', as: 'website' });
 db.CmsContent.belongsTo(db.CmsWebsite,  { foreignKey: 'websiteId', as: 'website' });

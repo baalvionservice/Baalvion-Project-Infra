@@ -50,6 +50,18 @@ module.exports = {
     security: {
         ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 200),
     },
+    // Unified Analytics Platform. Workers are gated so the same image runs as an
+    // API replica (workers off) or a dedicated worker replica. Retention windows
+    // (days) drive the nightly partition-drop + sweep; rollup_monthly is kept.
+    analytics: {
+        workersEnabled: process.env.ANALYTICS_WORKERS !== 'false',
+        retention: {
+            rawEventDays: Number(process.env.ANALYTICS_RETENTION_RAW_DAYS || 400),
+            sessionDays: Number(process.env.ANALYTICS_RETENTION_SESSION_DAYS || 400),
+            providerMetricDays: Number(process.env.ANALYTICS_RETENTION_PROVIDER_DAYS || 760),
+            rollupDailyDays: Number(process.env.ANALYTICS_RETENTION_ROLLUP_DAILY_DAYS || 760),
+        },
+    },
     media: {
         serviceUrl: process.env.MEDIA_SERVICE_URL || 'http://localhost:3012',
     },
@@ -65,6 +77,14 @@ module.exports = {
         secret: process.env.REVALIDATE_SECRET || null,
         webhooks: parseJson(process.env.REVALIDATE_WEBHOOKS, {}),
         timeoutMs: Number(process.env.REVALIDATE_TIMEOUT_MS || 5000),
+    },
+    // Draft/unpublished content preview for the admin CMS editor's live-preview iframe.
+    // cms-service signs a short-lived HMAC token scoped to one website+slug; the target
+    // site's frontend never holds this secret, it only relays the token back here to
+    // validate + fetch in one call (GET /public/:websiteSlug/content/:slug/preview).
+    preview: {
+        secret: process.env.CMS_PREVIEW_SECRET || null,
+        ttlMs: Number(process.env.CMS_PREVIEW_TTL_MS || 15 * 60 * 1000),
     },
     notifications: {
         serviceUrl: process.env.NOTIFICATION_SERVICE_URL || 'http://localhost:3013',

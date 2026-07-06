@@ -197,7 +197,11 @@ function wordCount(spec) {
   return parts.join(' ').split(/\s+/).filter(Boolean).length;
 }
 
-function buildContentDoc(spec, { contentType, categoryId, appendAuthor }) {
+// `artwork` (optional) = { outDir, category, publicPrefix }. Only passed by
+// generate-static-content.cjs, which has filesystem access and needs a real committed
+// .svg per article; seed-personal-finance.cjs (which POSTs to the live CMS) omits it
+// and lets the cms-service create/update hook generate + store artwork server-side.
+function buildContentDoc(spec, { contentType, categoryId, appendAuthor, artwork }) {
   const seo = spec.seo || {};
   const keywords = [seo.focusKeyword, ...(seo.secondaryKeywords || [])].filter(Boolean).slice(0, 15);
   const doc = {
@@ -226,6 +230,16 @@ function buildContentDoc(spec, { contentType, categoryId, appendAuthor }) {
     },
   };
   if (categoryId) doc.categoryId = categoryId;
+  if (artwork && contentType === 'article') {
+    const { writeArticleArtFile } = require('@baalvion/illustrations');
+    const path = require('path');
+    const outPath = path.join(artwork.outDir, `${spec.slug}.svg`);
+    writeArticleArtFile(
+      { title: doc.title, category: artwork.category, tags: keywords, excerpt: doc.excerpt, seed: spec.slug },
+      outPath,
+    );
+    doc.featuredImage = `${artwork.publicPrefix}/${spec.slug}.svg`;
+  }
   return doc;
 }
 

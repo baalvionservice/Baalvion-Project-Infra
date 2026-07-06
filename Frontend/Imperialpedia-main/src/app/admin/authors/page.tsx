@@ -12,14 +12,15 @@ import {
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
+import { personSilhouetteDataUri } from '@baalvion/illustrations';
 
 export default function AuthorManagement() {
   const [search, setSearch] = useState('');
   
   const mockAuthors = [
-    { id: 'a1', name: "Eleanor Vance", handle: "econvance", expertise: ["Macro", "SEO"], articles: 120, verified: true, avatar: "https://picsum.photos/seed/eleanor/100/100" },
-    { id: 'a2', name: "Julian Wealth", handle: "wealth_builder", expertise: ["Investing", "Bonds"], articles: 85, verified: true, avatar: "https://picsum.photos/seed/julian/100/100" },
-    { id: 'a3', name: "Sarah Crypto", handle: "defiqueen", expertise: ["DeFi", "Web3"], articles: 42, verified: false, avatar: "https://picsum.photos/seed/sarah/100/100" },
+    { id: 'a1', name: "Eleanor Vance", handle: "econvance", expertise: ["Macro", "SEO"], articles: 120, verified: true, avatar: personSilhouetteDataUri({ name: "Eleanor Vance", seed: "a1" }) },
+    { id: 'a2', name: "Julian Wealth", handle: "wealth_builder", expertise: ["Investing", "Bonds"], articles: 85, verified: true, avatar: personSilhouetteDataUri({ name: "Julian Wealth", seed: "a2" }) },
+    { id: 'a3', name: "Sarah Crypto", handle: "defiqueen", expertise: ["DeFi", "Web3"], articles: 42, verified: false, avatar: personSilhouetteDataUri({ name: "Sarah Crypto", seed: "a3" }) },
   ];
 
   const handleVerify = (name: string) => {

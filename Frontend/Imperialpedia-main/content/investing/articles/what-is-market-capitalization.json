@@ -1,0 +1,77 @@
+{
+  "topicNumber": 7,
+  "title": "What Is Market Capitalization?",
+  "slug": "what-is-market-capitalization",
+  "seo": {
+    "seoTitle": "What Is Market Capitalization? Explained Simply",
+    "metaDescription": "Market capitalization measures the total value the market places on a company. Learn how it's calculated, why it matters, and how company size affects risk.",
+    "focusKeyword": "what is market capitalization",
+    "secondaryKeywords": ["market cap explained", "large cap vs small cap", "how to calculate market cap", "market cap categories"],
+    "searchIntent": "Informational — a foundational definitional query for new investors.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Market capitalization is simply a company's share price multiplied by its total shares outstanding — a single number that tells you how the market currently values the entire business.",
+  "intro": "Market capitalization, usually shortened to 'market cap,' is one of the first terms every new investor encounters, and thankfully it's also one of the simplest to understand. It represents the total dollar value the stock market currently places on an entire company, and it's a far more meaningful measure of company size than share price alone.",
+  "sections": [
+    {
+      "heading": "How Market Cap Is Calculated",
+      "paragraphs": [
+        "Market capitalization equals a company's current share price multiplied by its total number of outstanding shares. A company with 1 billion shares outstanding trading at $50 per share has a market cap of $50 billion. This is why comparing companies by share price alone is misleading — a $500 stock with only 10 million shares outstanding has a market cap of just $5 billion, smaller than a $20 stock with 1 billion shares outstanding, which carries a $20 billion market cap."
+      ]
+    },
+    {
+      "heading": "The Standard Market Cap Categories",
+      "paragraphs": [
+        "Companies are commonly grouped into size categories: large-cap companies are generally valued above $10 billion and include well-established, widely known businesses; mid-cap companies typically fall between $2 billion and $10 billion and often represent businesses in a stronger growth phase; small-cap companies are usually valued under $2 billion and tend to carry higher growth potential alongside higher volatility and risk. Some investors also track micro-cap and mega-cap as further subdivisions at the extreme ends of this spectrum."
+      ]
+    },
+    {
+      "heading": "Why Market Cap Affects Risk and Volatility",
+      "paragraphs": [
+        "Larger companies generally have more diversified revenue streams, established market positions, and greater access to capital, which tends to make their stock prices less volatile day to day. Smaller companies can grow revenue and earnings much faster in percentage terms, but they're also more vulnerable to competition, economic downturns, and financing difficulties, which is reflected in typically higher price swings."
+      ],
+      "callout": {
+        "title": "Market cap isn't the same as company revenue",
+        "text": "A company's market cap reflects what investors are willing to pay for future profits, not its current sales figures. A smaller-revenue company with strong growth expectations can carry a larger market cap than a bigger, slower-growing business."
+      }
+    },
+    {
+      "heading": "Why Market Cap Matters for Diversification",
+      "paragraphs": [
+        "Spreading investments across different market cap categories — not just different industries — is a meaningful form of diversification, since large-cap and small-cap stocks often perform differently across economic cycles. Many broad-market index funds intentionally include exposure across the full market cap spectrum, while others specifically target only large-cap or only small-cap companies, which is worth checking when [building a stock portfolio](/articles/how-to-build-a-stock-portfolio)."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Market cap equals share price multiplied by total shares outstanding — it reflects total company value, not share price alone.",
+    "Large-cap companies are generally valued above $10 billion; small-cap companies are usually under $2 billion.",
+    "Larger companies tend to be less volatile; smaller companies can grow faster but carry more risk.",
+    "Market cap reflects investor expectations about future profit, not just current revenue.",
+    "Diversifying across market cap sizes, not just industries, is a meaningful risk-management strategy."
+  ],
+  "faq": [
+    {
+      "question": "Is a higher market cap always better?",
+      "answer": "Not necessarily — it depends on your goals. Large-cap companies typically offer more stability, while small-cap companies offer higher growth potential alongside higher risk. Neither is universally better; they serve different roles in a portfolio."
+    },
+    {
+      "question": "Can market cap change without the company doing anything?",
+      "answer": "Yes. Since market cap is calculated using the current share price, it changes constantly throughout each trading day as the stock price moves, even without any change to the underlying business."
+    },
+    {
+      "question": "What's the difference between market cap and enterprise value?",
+      "answer": "Market cap only reflects equity value. Enterprise value adds a company's debt and subtracts its cash, giving a more complete picture of what it would cost to acquire the entire business, including its obligations."
+    }
+  ],
+  "conclusion": "Market capitalization is one of the most useful quick-reference numbers in investing precisely because it's so simple: multiply share price by shares outstanding, and you know exactly how the market currently values a business. Understanding where a company falls on the large-cap to small-cap spectrum gives you an immediate sense of its likely risk and volatility profile before you look at any other metric.",
+  "internalLinks": [
+    { "anchor": "how to analyze a stock", "slug": "how-to-analyze-a-stock" },
+    { "anchor": "growth stocks vs value stocks", "slug": "growth-stocks-vs-value-stocks" },
+    { "anchor": "best stocks for beginners", "slug": "best-stocks-for-beginners" },
+    { "anchor": "high-risk vs low-risk stocks", "slug": "high-risk-vs-low-risk-stocks" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 690
+}

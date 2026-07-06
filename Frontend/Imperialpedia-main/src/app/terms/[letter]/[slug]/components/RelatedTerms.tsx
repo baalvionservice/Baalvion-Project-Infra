@@ -3,6 +3,7 @@ import { Term } from "@/lib/data/terms";
 import { getTermUrl } from "@/lib/data/utils";
 import Image from "next/image";
 import { CategoryBadge } from "@/app/news/NewsArticleCard";
+import { articleArtDataUri } from "@baalvion/illustrations";
 
 interface RelatedTermsProps {
   terms: Term[];
@@ -28,7 +29,14 @@ export default function RelatedTerms({ terms }: RelatedTermsProps) {
           >
             <div className=" h-32 w-full aspect-square ">
               <Image
-                src={term?.featuredImageUrl || "https://picsum.photos/300/300"}
+                src={
+                  term?.featuredImageUrl ||
+                  articleArtDataUri({
+                    title: term?.title ?? term?.slug ?? "term",
+                    category: term?.categoryNames,
+                    seed: term?.slug ?? "term",
+                  })
+                }
                 alt={term.title}
                 width={200}
                 height={200}

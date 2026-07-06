@@ -20,6 +20,7 @@ router.get('/pending', loadCmsRole, requireCmsRole('cms_reviewer'), wfCtrl.listP
 
 // Single content — /cms/websites/:websiteId/content/:contentId
 router.get('/:contentId', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getOne);
+router.get('/:contentId/preview-token', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getPreviewToken);
 router.patch('/:contentId', loadCmsRole, requireCmsRole('cms_contributor'), validate(updateContentSchema), ctrl.update);
 router.put('/:contentId/autosave', loadCmsRole, requireCmsRole('cms_contributor'), validate(autosaveContentSchema), ctrl.autosave);
 router.delete('/:contentId', loadCmsRole, requireCmsRole('cms_editor'), ctrl.remove);

@@ -12,7 +12,7 @@ import { safeInternalPath } from '@/lib/safe-redirect';
  * and the API (authoritative). Route classification lives in `@/lib/route-access` so the edge and
  * the guard share one source of truth and can never drift.
  */
-const AUTH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'refresh_token';
+const AUTH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
 
 export async function middleware(request: NextRequest): Promise<NextResponse> {
   const { pathname } = request.nextUrl;

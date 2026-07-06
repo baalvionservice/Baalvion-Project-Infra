@@ -27,6 +27,25 @@ const PROVIDER_REQUIRED = {
     'google-oauth': ['clientId', 'clientSecret'],
     'facebook-oauth': ['clientId', 'clientSecret'],
     'github-oauth': ['clientId', 'clientSecret'],
+    // Unified Analytics providers (category 'analytics'). The Analytics platform's
+    // connector catalog (connectors/registry.PROVIDER_CATALOG) is the authoritative
+    // per-provider required-key list; these entries let the console Test button
+    // verify the secret half is present for the common OAuth/token providers.
+    ga4: ['refreshToken'],
+    gsc: ['refreshToken'],
+    gtm: ['accountId', 'containerId', 'refreshToken'],
+    'google-ads': ['developerToken', 'refreshToken'],
+    adsense: ['refreshToken'],
+    'google-news': ['siteUrl', 'refreshToken'],
+    'merchant-center': ['merchantId', 'refreshToken'],
+    clarity: ['apiToken'],
+    'bing-webmaster': ['apiKey'],
+    'meta-pixel': ['adAccountId', 'accessToken'],
+    'linkedin-insight': ['adAccountId', 'accessToken'],
+    'x-pixel': ['apiKey', 'apiSecretKey', 'accessToken', 'accessTokenSecret', 'adAccountId'],
+    'pinterest-tag': ['adAccountId', 'accessToken'],
+    'tiktok-pixel': ['advertiserId', 'accessToken'],
+    cloudflare: ['apiToken'],
 };
 
 /**

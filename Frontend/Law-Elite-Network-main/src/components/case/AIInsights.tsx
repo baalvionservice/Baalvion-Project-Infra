@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { getCaseInsights } from '@/services/ai/aiService';
 import Link from 'next/link';
 import Image from 'next/image';
+import { resolvePersonImage } from '@/lib/article-art';
 
 interface AIInsightsProps {
   caseData: any;
@@ -112,7 +113,7 @@ export default function AIInsights({ caseData }: AIInsightsProps) {
                 <CardContent className="p-4 flex flex-col items-center text-center space-y-3">
                   <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-white/10 group-hover:border-accent/50 transition-all shadow-xl">
                     <Image 
-                      src={lawyer.profileImage || `https://picsum.photos/seed/${lawyer.id}/200/200`} 
+                      src={resolvePersonImage({ avatarUrl: lawyer.profileImage, name: lawyer.name, id: lawyer.id })}
                       alt={lawyer.name}
                       fill
                       className="object-cover"

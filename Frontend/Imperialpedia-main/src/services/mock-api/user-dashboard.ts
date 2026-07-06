@@ -1,5 +1,6 @@
 import { ApiResponse } from '@/types';
 import { UserDashboardData, UserPortfolioData, UserAlertsAndNotificationsData, UserPersonalizedData } from '@/types/user-system';
+import { personSilhouetteDataUri } from '@baalvion/illustrations';
 
 /**
  * @fileOverview Mock service for retrieving personalized user dashboard data.
@@ -25,7 +26,7 @@ export const getMockUserDashboard = async (): Promise<ApiResponse<UserDashboardD
         name: "Deepak Kumar",
         email: "deepak.kumar@example.com",
         subscription_tier: "Pro",
-        avatar: "https://picsum.photos/seed/deepak/200/200"
+        avatar: personSilhouetteDataUri({ name: "Deepak Kumar", seed: "deepak" })
       },
       watchlists_overview: [
         { id: 'w1', asset: 'Bitcoin', symbol: 'BTC', currentValue: '$64,250.00', change: '+2.4%', isPositive: true, sentiment: 'Bullish' },

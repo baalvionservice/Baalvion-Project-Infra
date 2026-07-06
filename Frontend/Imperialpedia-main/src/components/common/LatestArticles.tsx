@@ -4,6 +4,7 @@ import { NewsArticle, newsArticles } from "@/lib/data.news";
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
+import { articleArtDataUri } from "@baalvion/illustrations";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,8 +28,11 @@ const podcastEpisodes: PodcastEpisode[] = [
     episodeNumber: 285,
     date: "Mar 16, 2026",
     slug: "behind-the-bitcoin-breakdown",
-    imageUrl:
-      "https://picsum.photos/90/90",
+    imageUrl: articleArtDataUri({
+      title: "Behind the Bitcoin Breakdown",
+      category: "Podcast",
+      seed: "behind-the-bitcoin-breakdown",
+    }),
   },
   {
     id: "2",
@@ -49,8 +53,11 @@ const podcastEpisodes: PodcastEpisode[] = [
 ];
 
 const sentimentData = {
-  imageUrl:
-    "https://picsum.photos/600/320",
+  imageUrl: articleArtDataUri({
+    title: "Quarterly Investor Sentiment Survey",
+    category: "Original Research",
+    seed: "investor-sentiment-survey",
+  }),
   category: "Original Research",
   title: "Quarterly Investor Sentiment Survey",
   excerpt:
@@ -59,8 +66,11 @@ const sentimentData = {
 };
 
 const promoCard = {
-  imageUrl:
-    "https://picsum.photos/600/320",
+  imageUrl: articleArtDataUri({
+    title: "Invest Like Her: Portfolios That Match Your Life",
+    category: "Editorial",
+    seed: "invest-like-her",
+  }),
   title: "Invest Like Her: Portfolios That Match Your Life",
   description:
     "Discover how women can build smarter investment portfolios that match their real lives.",
@@ -77,7 +87,14 @@ function ArticleCard({ article }: { article: NewsArticle }) {
         className="relative block w-full h-[148px] overflow-hidden bg-gray-100"
       >
         <Image
-          src={article.imageUrl || "https://picsum.photos/220/148"}
+          src={
+            article.imageUrl ||
+            articleArtDataUri({
+              title: article.title,
+              category: article.category,
+              seed: article.id ?? article.title,
+            })
+          }
           alt={article.title}
           fill
           className="object-cover hover:scale-[1.03] transition-transform duration-300"
@@ -319,7 +336,11 @@ export default function LatestArticles() {
         {/* Right: device mockup image */}
         <div className="relative w-full md:flex-1 h-[260px] md:h-[320px]">
           <Image
-            src="https://picsum.photos/600/400"
+            src={articleArtDataUri({
+              title: "Imperialpedia Stock Market Simulator",
+              category: "Editorial",
+              seed: "stock-market-simulator",
+            })}
             alt="Imperialpedia Stock Market Simulator"
             fill
             className="object-contain object-center md:object-left-bottom"

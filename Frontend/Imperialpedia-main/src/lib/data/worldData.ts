@@ -1,3 +1,5 @@
+import { articleArtDataUri } from "@baalvion/illustrations";
+
 export const marketIndicators = [
   {
     name: "Dow Jones",
@@ -118,7 +120,7 @@ export const worldMarkets = [
   },
 ];
 
-export const featuredNews = [
+const rawFeaturedNews = [
   {
     id: 1,
     category: "MARKETS",
@@ -126,8 +128,6 @@ export const featuredNews = [
       "S&P 500 surges past 5,200 as Fed signals rate cuts remain on the table for 2024",
     summary:
       "Wall Street rallied sharply Friday after Federal Reserve officials suggested that interest rate cuts are still possible this year despite stubborn inflation readings.",
-    image:
-      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
     time: "2 hours ago",
     author: "Sarah Johnson",
     tag: "BREAKING",
@@ -139,8 +139,6 @@ export const featuredNews = [
       "U.S. jobs report blows past expectations with 303,000 new positions added in March",
     summary:
       "The American economy added far more jobs than expected last month, complicating the Fed's path to cutting interest rates.",
-    image:
-      "https://images.unsplash.com/photo-1521790945508-bf2a36314e85?w=800&q=80",
     time: "4 hours ago",
     author: "Michael Torres",
     tag: null,
@@ -152,13 +150,19 @@ export const featuredNews = [
       "Nvidia shares climb 5% as AI chip demand continues to exceed all supply forecasts",
     summary:
       "The chipmaker's stock reached new all-time highs after analysts raised price targets citing insatiable demand for its H100 GPU.",
-    image:
-      "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80",
     time: "5 hours ago",
     author: "Lisa Chen",
     tag: null,
   },
 ];
+
+// Original, deterministic artwork (no stock/placeholder images) — generated from
+// each item's own headline/category, computed after the literal above since object
+// literals can't reference their own sibling properties.
+export const featuredNews = rawFeaturedNews.map((item) => ({
+  ...item,
+  image: articleArtDataUri({ title: item.headline, category: item.category, seed: String(item.id) }),
+}));
 
 export const latestNews = [
   {
@@ -181,7 +185,7 @@ export const latestNews = [
     time: "12:18 PM ET",
     category: "ECONOMY",
     headline:
-      "Fed's Bowman says she needs to see 'several more months' of good inflation data before cuts",
+      "A Fed governor signals more inflation data is needed before any rate cuts",
     positive: null,
   },
   {
@@ -277,7 +281,7 @@ export const latestNews = [
   },
 ];
 
-export const newsGridSections = [
+const rawNewsGridSections = [
   {
     section: "Politics & Policy",
     color: "#003153",
@@ -287,9 +291,7 @@ export const newsGridSections = [
         headline:
           "House passes emergency foreign aid bill, sending it to Senate for final vote",
         time: "1h ago",
-        image:
-          "https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=400&q=80",
-      },
+          },
       {
         id: 31,
         headline:
@@ -322,9 +324,7 @@ export const newsGridSections = [
         headline:
           "Apple delays rollout of AI features in Europe due to regulatory concerns",
         time: "30m ago",
-        image:
-          "https://images.unsplash.com/photo-1562408590-e32931084e23?w=400&q=80",
-      },
+          },
       {
         id: 41,
         headline:
@@ -357,9 +357,7 @@ export const newsGridSections = [
         headline:
           "Inflation holds near 3.5% in March, keeping Fed rate cuts further out of reach",
         time: "45m ago",
-        image:
-          "https://images.unsplash.com/photo-1607944024060-0450380ddd33?w=400&q=80",
-      },
+          },
       {
         id: 51,
         headline:
@@ -392,9 +390,7 @@ export const newsGridSections = [
         headline:
           "OPEC+ extends production cuts through June, pushing oil toward $90 a barrel",
         time: "1h ago",
-        image:
-          "https://images.unsplash.com/photo-1606159068539-43f36b99d1b2?w=400&q=80",
-      },
+          },
       {
         id: 61,
         headline:
@@ -419,6 +415,16 @@ export const newsGridSections = [
     ],
   },
 ];
+
+// Original, deterministic artwork for every grid item (no stock/placeholder images,
+// and no more blank "no image" cards) — computed after the literal above.
+export const newsGridSections = rawNewsGridSections.map((section) => ({
+  ...section,
+  items: section.items.map((item) => ({
+    ...item,
+    image: articleArtDataUri({ title: item.headline, category: section.section, seed: String(item.id) }),
+  })),
+}));
 
 export const watchlistItems = [
   {
@@ -479,14 +485,12 @@ export const watchlistItems = [
   },
 ];
 
-export const topStories = [
+const rawTopStories = [
   {
     id: 70,
     category: "INVESTING",
     headline:
       "Here's exactly what to buy as the S&P 500 enters bull market territory, according to top strategists",
-    image:
-      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=600&q=80",
     time: "6 hours ago",
   },
   {
@@ -494,8 +498,6 @@ export const topStories = [
     category: "REAL ESTATE",
     headline:
       "Mortgage rates hit 7.1% — the highest since November. Here's what experts say to do now",
-    image:
-      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600&q=80",
     time: "7 hours ago",
   },
   {
@@ -503,20 +505,21 @@ export const topStories = [
     category: "PERSONAL FINANCE",
     headline:
       "High-yield savings accounts are still paying over 5%. Here are the best rates right now",
-    image:
-      "https://images.unsplash.com/photo-1579621970795-87facc2f976d?w=600&q=80",
     time: "8 hours ago",
   },
   {
     id: 73,
     category: "TECH",
     headline:
-      "Sam Altman's vision for OpenAI: 'We want AGI for all of humanity, not just a few'",
-    image:
-      "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=80",
+      "OpenAI's Sam Altman reiterates goal of AGI benefiting all of humanity",
     time: "9 hours ago",
   },
 ];
+
+export const topStories = rawTopStories.map((item) => ({
+  ...item,
+  image: articleArtDataUri({ title: item.headline, category: item.category, seed: String(item.id) }),
+}));
 
 export const navCategories = [
   "Markets",

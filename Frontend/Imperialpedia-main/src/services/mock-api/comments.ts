@@ -1,5 +1,6 @@
 import { ApiResponse } from '@/types';
 import { CommentIntelligenceData, IntelligenceCommentNode } from '@/types/community';
+import { personSilhouetteDataUri } from '@baalvion/illustrations';
 
 /**
  * @fileOverview Mock service for the Advanced Comment Intelligence system.
@@ -10,7 +11,7 @@ const mockComments: IntelligenceCommentNode[] = [
     id: 'ci-1',
     comment_id: 1,
     username: 'Daniel Foster',
-    avatar: 'https://picsum.photos/seed/daniel/100/100',
+    avatar: personSilhouetteDataUri({ name: 'Daniel Foster', seed: 'daniel' }),
     reputation: 8500,
     reputationScore: 8500,
     badge: 'Expert Contributor',
@@ -28,7 +29,7 @@ const mockComments: IntelligenceCommentNode[] = [
         id: 'ci-1-1',
         comment_id: 2,
         username: 'Julian Wealth',
-        avatar: 'https://picsum.photos/seed/wealth/100/100',
+        avatar: personSilhouetteDataUri({ name: 'Julian Wealth', seed: 'wealth' }),
         reputation: 9200,
         reputationScore: 9200,
         badge: 'Verified Expert',
@@ -46,7 +47,7 @@ const mockComments: IntelligenceCommentNode[] = [
     id: 'ci-2',
     comment_id: 3,
     username: 'Emily Chen',
-    avatar: 'https://picsum.photos/seed/emily/100/100',
+    avatar: personSilhouetteDataUri({ name: 'Emily Chen', seed: 'emily' }),
     reputation: 4200,
     reputationScore: 4200,
     badge: 'Trusted Member',
@@ -63,7 +64,7 @@ const mockComments: IntelligenceCommentNode[] = [
     id: 'ci-3',
     comment_id: 4,
     username: 'Sarah Crypto',
-    avatar: 'https://picsum.photos/seed/sarah/100/100',
+    avatar: personSilhouetteDataUri({ name: 'Sarah Crypto', seed: 'sarah' }),
     reputation: 6800,
     reputationScore: 6800,
     badge: 'Expert Contributor',

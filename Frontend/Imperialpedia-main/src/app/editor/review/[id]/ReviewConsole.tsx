@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/design-system/typography/text";
 import { Input } from "@/components/ui/input";
+import { personSilhouetteDataUri } from "@baalvion/illustrations";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -237,7 +238,7 @@ export function ReviewConsole({ submission }: ReviewConsoleProps) {
                     <div className="flex items-center gap-5">
                       <Avatar className="h-16 w-16 rounded-2xl border-2 border-background ring-1 ring-white/10 shadow-xl">
                         <AvatarImage
-                          src={`https://picsum.photos/seed/${submission.author}/100/100`}
+                          src={personSilhouetteDataUri({ name: submission.author, seed: submission.author })}
                         />
                         <AvatarFallback>
                           {submission.author.charAt(0)}

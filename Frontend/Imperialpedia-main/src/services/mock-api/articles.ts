@@ -4,6 +4,7 @@ import {
   SubmittedArticle,
   ArticleStatus,
 } from "@/modules/content-engine/types/article";
+import { articleArtDataUri } from "@baalvion/illustrations";
 
 /**
  * @fileOverview Mock service for managing article data.
@@ -22,7 +23,12 @@ const mockArticles: Article[] = [
     category: "Economics",
     authorId: "creator-1",
     tags: ["macro", "interest-rates", "recession"],
-    featuredImage: "https://picsum.photos/seed/yield/800/600",
+    featuredImage: articleArtDataUri({
+      title: "Understanding Yield Curve Inversion",
+      category: "Economics",
+      tags: ["macro", "interest-rates", "recession"],
+      seed: "art-1",
+    }),
     publishedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     status: "published" as ArticleStatus,
@@ -38,7 +44,12 @@ const mockArticles: Article[] = [
     category: "Investing",
     authorId: "creator-2",
     tags: ["wealth-building", "basics", "savings"],
-    featuredImage: "https://picsum.photos/seed/compound/800/600",
+    featuredImage: articleArtDataUri({
+      title: "The Power of Compound Interest",
+      category: "Investing",
+      tags: ["wealth-building", "basics", "savings"],
+      seed: "art-2",
+    }),
     publishedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     status: "published" as ArticleStatus,
@@ -54,7 +65,12 @@ const mockArticles: Article[] = [
     category: "Economics",
     authorId: "creator-1",
     tags: ["macro", "crypto", "banking"],
-    featuredImage: "https://picsum.photos/seed/banking/800/600",
+    featuredImage: articleArtDataUri({
+      title: "The Future of Central Banking in a Digital Age",
+      category: "Economics",
+      tags: ["macro", "crypto", "banking"],
+      seed: "art-sub-1",
+    }),
     publishedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     status: "review" as ArticleStatus,

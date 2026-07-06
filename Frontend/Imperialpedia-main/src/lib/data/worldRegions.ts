@@ -6,6 +6,7 @@ import {
   watchlistItems,
   worldMarkets,
 } from "./worldData";
+import { articleArtDataUri } from "@baalvion/illustrations";
 
 /**
  * Region-aware data for the CNBC-style World page
@@ -95,15 +96,6 @@ export function resolveRegion(raw?: string | null): RegionConfig {
 
 const AS_OF = "As of Apr 8, 2026 12:45 PM ET";
 
-// Known-good finance imagery reused from the base dataset so nothing 404s.
-const IMG = {
-  markets: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80",
-  economy: "https://images.unsplash.com/photo-1521790945508-bf2a36314e85?w=800&q=80",
-  tech: "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?w=800&q=80",
-  energy: "https://images.unsplash.com/photo-1606159068539-43f36b99d1b2?w=800&q=80",
-  policy: "https://images.unsplash.com/photo-1555848962-6e79363ec58f?w=800&q=80",
-} as const;
-
 const ind = (
   name: string,
   value: string,
@@ -173,7 +165,7 @@ const INDICATORS: Record<RegionId, Indicator[]> = {
   ],
 };
 
-const FEATURED: Record<RegionId, FeaturedStory[]> = {
+const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image?: string }>> = {
   world: featuredNews as FeaturedStory[],
   us: [
     {
@@ -183,7 +175,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "S&P 500 climbs to a fresh record as megacap tech powers Wall Street higher",
       summary:
         "Strength in Nvidia, Microsoft and Apple lifted the benchmark to an all-time high as traders dialed back fears over the timing of Federal Reserve rate cuts.",
-      image: IMG.markets,
       time: "1 hour ago",
       author: "Sarah Johnson",
       tag: "BREAKING",
@@ -195,7 +186,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "U.S. payrolls smash forecasts with 303,000 jobs added; jobless rate dips to 3.8%",
       summary:
         "The labor market showed renewed strength in March, complicating the Fed's path toward easing later this year.",
-      image: IMG.economy,
       time: "3 hours ago",
       author: "Michael Torres",
       tag: null,
@@ -207,7 +197,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "Nvidia adds $200 billion in market value as AI chip orders outpace supply",
       summary:
         "Analysts raised price targets again, citing data-center demand that continues to run well ahead of production.",
-      image: IMG.tech,
       time: "4 hours ago",
       author: "Lisa Chen",
       tag: null,
@@ -221,7 +210,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "European stocks hit a record as the ECB signals a June rate cut is firmly on the table",
       summary:
         "The STOXX 600 closed at an all-time high after policymakers struck a dovish tone on the outlook for inflation across the euro zone.",
-      image: IMG.markets,
       time: "2 hours ago",
       author: "Henrik Brandt",
       tag: "BREAKING",
@@ -233,7 +221,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "Euro-zone inflation cools to 2.4%, clearing the path for summer easing",
       summary:
         "Headline prices fell closer to the ECB's 2% target, reinforcing market bets on a first cut as soon as June.",
-      image: IMG.economy,
       time: "3 hours ago",
       author: "Camille Laurent",
       tag: null,
@@ -245,7 +232,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "Brent crude steadies near $87 as traders weigh OPEC+ cuts against soft demand",
       summary:
         "Oil held its gains as supply discipline from producers offset signs of weaker industrial activity in Germany.",
-      image: IMG.energy,
       time: "5 hours ago",
       author: "Diego Fuentes",
       tag: null,
@@ -259,7 +245,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "Nikkei surges past 38,000 as a weak yen lifts Japanese exporters to record highs",
       summary:
         "Tokyo led regional gains as the currency's slide boosted the earnings outlook for automakers and electronics giants.",
-      image: IMG.markets,
       time: "2 hours ago",
       author: "Kenji Nakamura",
       tag: "BREAKING",
@@ -271,7 +256,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "China's exports rebound 5% in March, easing fears of a deeper slowdown",
       summary:
         "Stronger overseas shipments offered a tentative sign of stabilization for the world's second-largest economy.",
-      image: IMG.economy,
       time: "4 hours ago",
       author: "Mei Ling",
       tag: null,
@@ -283,7 +267,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "TSMC jumps on blowout AI demand, lifting Asian chip suppliers across the board",
       summary:
         "The contract chipmaker's results rippled through the region, sending Samsung and SK Hynix higher in Seoul.",
-      image: IMG.tech,
       time: "6 hours ago",
       author: "Park Ji-ho",
       tag: null,
@@ -297,7 +280,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "Hang Seng leads Asia higher as Beijing unveils fresh stimulus for the property sector",
       summary:
         "Mainland and Hong Kong equities rallied after authorities outlined new measures to stabilize the troubled real-estate market.",
-      image: IMG.markets,
       time: "1 hour ago",
       author: "Mei Ling",
       tag: "BREAKING",
@@ -309,7 +291,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "China's GDP grows 5.3% in the first quarter, topping analyst expectations",
       summary:
         "The stronger-than-expected print eased concerns about momentum, though property remained a persistent drag.",
-      image: IMG.economy,
       time: "3 hours ago",
       author: "Wang Hao",
       tag: null,
@@ -321,7 +302,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "Alibaba and Tencent rally as China's tech regulators signal a lighter touch",
       summary:
         "Internet heavyweights climbed after officials indicated the years-long crackdown on the sector was easing.",
-      image: IMG.tech,
       time: "5 hours ago",
       author: "Lin Yu",
       tag: null,
@@ -335,7 +315,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "Emerging-market stocks rally as the dollar eases and Fed rate-cut bets revive",
       summary:
         "A softer greenback drew investors back to higher-yielding assets, lifting equities from Mumbai to São Paulo.",
-      image: IMG.markets,
       time: "2 hours ago",
       author: "Priya Nair",
       tag: "BREAKING",
@@ -347,7 +326,6 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "India's Sensex tops 74,000 as foreign inflows return at a record pace",
       summary:
         "Overseas funds piled back into Indian equities, betting on resilient growth and a stable policy backdrop.",
-      image: IMG.economy,
       time: "4 hours ago",
       author: "Priya Nair",
       tag: null,
@@ -359,13 +337,25 @@ const FEATURED: Record<RegionId, FeaturedStory[]> = {
         "Brazil's Bovespa slips as commodity exporters weigh on the benchmark",
       summary:
         "Lower iron-ore and oil prices dragged on heavyweight miners and producers, snapping a three-day winning streak.",
-      image: IMG.energy,
       time: "6 hours ago",
       author: "João Pereira",
       tag: null,
     },
   ],
 };
+
+// Original, deterministic artwork per story (no stock/placeholder images) —
+// generated from each story's own headline/category, computed after the literal
+// above since object literals can't reference their own sibling properties.
+const FEATURED: Record<RegionId, FeaturedStory[]> = Object.fromEntries(
+  Object.entries(rawFeatured).map(([region, stories]) => [
+    region,
+    stories.map((story) => ({
+      ...story,
+      image: story.image ?? articleArtDataUri({ title: story.headline, category: story.category, seed: String(story.id) }),
+    })),
+  ]),
+) as Record<RegionId, FeaturedStory[]>;
 
 const AMERICAS: MarketRegionGroup = {
   region: "Americas",

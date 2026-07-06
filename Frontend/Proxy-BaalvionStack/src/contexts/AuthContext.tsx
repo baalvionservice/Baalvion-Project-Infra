@@ -12,7 +12,7 @@ interface AuthContextType {
   accessToken: string | null;
   isAuthenticated: boolean;
   isInitialized: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthUser>;
   register: (email: string, password: string, fullName: string, plan?: string) => Promise<RegisterResult>;
   logout: () => Promise<void>;
   loginWithTokens: (tokens: AuthTokens) => void;
@@ -61,7 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
-    apply(await authClient.login(email, password));
+    const tokens = await authClient.login(email, password);
+    apply(tokens);
+    return tokens.user;
   }, [apply]);
 
   const register = useCallback(async (email: string, password: string, fullName: string, plan?: string) => {

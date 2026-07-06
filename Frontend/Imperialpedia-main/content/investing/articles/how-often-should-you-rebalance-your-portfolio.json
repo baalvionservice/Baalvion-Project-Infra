@@ -1,0 +1,83 @@
+{
+  "topicNumber": 15,
+  "title": "How Often Should You Rebalance Your Portfolio?",
+  "slug": "how-often-should-you-rebalance-your-portfolio",
+  "seo": {
+    "seoTitle": "How Often Should You Rebalance Your Portfolio?",
+    "metaDescription": "Rebalancing keeps your portfolio aligned with your target risk level. Here's how often to do it and the two main approaches to deciding when.",
+    "focusKeyword": "how often should you rebalance your portfolio",
+    "secondaryKeywords": ["portfolio rebalancing explained", "when to rebalance investments", "how to rebalance a portfolio", "asset allocation drift"],
+    "searchIntent": "Informational — investors with an existing portfolio want a practical schedule and method for maintenance.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Rebalancing resets your portfolio back to its target allocation after market movements shift it out of line. Most investors do this either annually or when allocations drift past a set threshold.",
+  "intro": "Over time, different investments in your portfolio grow at different rates, gradually shifting your actual allocation away from your original target — a stock-heavy year, for instance, can leave your portfolio more aggressive than you originally intended. Rebalancing is the process of realigning your holdings back to that target, and while it sounds like a technical chore, the schedule for doing it is genuinely simple once you pick an approach.",
+  "sections": [
+    {
+      "heading": "Why Portfolios Drift From Their Target",
+      "paragraphs": [
+        "If you start with a 70% stocks and 30% bonds allocation and stocks significantly outperform bonds over the following year, your portfolio might drift to 80% stocks and 20% bonds without you making a single trade. This drift isn't inherently bad — it happened because stocks performed well — but it does mean your portfolio now carries more risk than you originally chose, which matters if that risk level no longer matches your comfort or timeline."
+      ]
+    },
+    {
+      "heading": "The Calendar-Based Approach",
+      "paragraphs": [
+        "The simplest method is rebalancing on a fixed schedule — commonly once a year, sometimes twice — regardless of how far your allocation has drifted. This approach is easy to remember, requires minimal ongoing monitoring, and avoids the temptation to constantly tinker with your portfolio based on short-term market noise."
+      ]
+    },
+    {
+      "heading": "The Threshold-Based Approach",
+      "paragraphs": [
+        "An alternative method rebalances only when an allocation drifts beyond a specific threshold — for example, if any asset class moves more than 5 percentage points away from its target. This approach responds more precisely to actual drift rather than an arbitrary date, but requires checking your allocation periodically to know when that threshold has been crossed."
+      ],
+      "callout": {
+        "title": "Either approach is reasonable — consistency matters most",
+        "text": "There's no single correct answer between calendar-based and threshold-based rebalancing. What matters far more is picking one method and actually sticking with it, rather than rebalancing reactively based on emotion or market headlines."
+      }
+    },
+    {
+      "heading": "Rebalancing Has Tax and Cost Implications",
+      "paragraphs": [
+        "In a taxable account, selling appreciated investments to rebalance can trigger capital gains taxes, so many investors prefer to rebalance primarily within tax-advantaged retirement accounts where possible, or by directing new contributions toward underweighted assets rather than selling overweighted ones. This ties directly into the broader process of [building and maintaining a stock portfolio](/articles/how-to-build-a-stock-portfolio), where rebalancing is simply the ongoing maintenance step after the initial structure is in place."
+      ]
+    },
+    {
+      "heading": "Set a Reminder So It Actually Happens",
+      "paragraphs": [
+        "The most common rebalancing failure isn't choosing the wrong method — it's simply forgetting to do it at all. Set a recurring calendar reminder tied to a memorable date, such as your birthday or the start of the new year, so the review happens automatically rather than depending on you noticing the drift yourself. A five-minute check once or twice a year is all a calendar-based approach really requires."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Rebalancing resets your portfolio back to its intended target allocation after market movements shift it out of line.",
+    "A calendar-based approach rebalances on a fixed schedule, commonly once a year.",
+    "A threshold-based approach rebalances only once an allocation drifts a set percentage from its target.",
+    "Consistency in whichever method you choose matters more than which specific approach you pick.",
+    "In taxable accounts, directing new contributions toward underweighted assets can rebalance without triggering capital gains taxes from selling."
+  ],
+  "faq": [
+    {
+      "question": "Is it bad to rebalance too often?",
+      "answer": "Rebalancing too frequently can increase transaction costs and, in taxable accounts, trigger unnecessary capital gains taxes, without meaningfully improving results compared to a reasonable annual or threshold-based schedule."
+    },
+    {
+      "question": "Can I rebalance without selling anything?",
+      "answer": "Yes — directing new contributions toward whichever asset class has become underweighted is a tax-efficient way to gradually rebalance a taxable account without triggering capital gains from selling appreciated positions."
+    },
+    {
+      "question": "Do retirement accounts have different rebalancing considerations?",
+      "answer": "Yes — rebalancing within tax-advantaged accounts like a 401(k) or IRA doesn't trigger capital gains taxes, which is why many investors prefer to do more active rebalancing there compared to taxable brokerage accounts."
+    }
+  ],
+  "conclusion": "Rebalancing isn't about reacting to every market move — it's a periodic maintenance step that keeps your portfolio's actual risk level matched to what you originally intended. Whether you choose a simple annual schedule or a threshold-based trigger, the important part is picking one approach and following it consistently, rather than letting your allocation drift indefinitely or overreacting to short-term volatility.",
+  "internalLinks": [
+    { "anchor": "how to build a stock portfolio", "slug": "how-to-build-a-stock-portfolio" },
+    { "anchor": "common stock investing mistakes", "slug": "common-stock-investing-mistakes" },
+    { "anchor": "high-risk vs low-risk stocks", "slug": "high-risk-vs-low-risk-stocks" },
+    { "anchor": "how to invest during a recession", "slug": "how-to-invest-during-a-recession" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 700
+}

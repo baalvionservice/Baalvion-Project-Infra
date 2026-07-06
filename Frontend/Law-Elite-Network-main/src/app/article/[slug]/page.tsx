@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { articlesPublicApi } from '@/lib/api/client';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { AIAnswersCard } from '@/components/knowledge/AIAnswersCard';
@@ -15,8 +15,7 @@ import {
   ChevronDown,
   ChevronUp,
   BookOpen,
-  List,
-  ChevronRight
+  List
 } from 'lucide-react';
 import {
   Popover,
@@ -27,6 +26,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import seedData from '../../../../docs/seed-data.json';
+import { getArticleBySlug } from '@/data/law-content';
+import { getAuthorByName } from '@/data/authors';
+import { resolveArticleImage } from '@/lib/article-art';
 
 interface TOCItem {
   id: string;
@@ -51,6 +53,9 @@ function generateFallbackContent(title: string): string {
 
 export default function ArticleDeepDivePage() {
   const { slug } = useParams();
+  const searchParams = useSearchParams();
+  const previewToken = searchParams.get('previewToken');
+  const previewExp = searchParams.get('previewExp');
 
   const [article, setArticle] = useState<any>(null);
   const [articleLoading, setArticleLoading] = useState(true);
@@ -65,11 +70,16 @@ export default function ArticleDeepDivePage() {
     if (!slug) return;
     setArticleLoading(true);
 
-    // Try law-service first, then CMS-managed articles (admin-platform console),
-    // then the static seed — so console-published articles open correctly.
+    // Source-of-truth order: central CMS (admin.baalvion.com) FIRST, then
+    // law-service, then the bundled editorial library, then the static seed.
+    // The CMS is authoritative so anything published/edited in the admin console
+    // wins over the legacy law-service record.
     const fromCms = async () => {
       try {
-        const r = await fetch(`/api/cms/articles/${slug}`);
+        const previewQs = previewToken && previewExp
+          ? `?previewToken=${encodeURIComponent(previewToken)}&previewExp=${encodeURIComponent(previewExp)}`
+          : '';
+        const r = await fetch(`/api/cms/articles/${slug}${previewQs}`);
         if (r.ok) {
           const j = await r.json();
           if (j?.data) return j.data;
@@ -79,23 +89,33 @@ export default function ArticleDeepDivePage() {
       }
       return null;
     };
+    const fromLawService = async () => {
+      try {
+        const res = await articlesPublicApi.get(slug as string);
+        return res.data?.data || null;
+      } catch {
+        return null;
+      }
+    };
     const fromSeed = () => {
       const seedMatch = (seedData as any).articles?.find((a: any) => a.slug === slug);
       return seedMatch
         ? { ...seedMatch, content: seedMatch.content || generateFallbackContent(seedMatch.title), updatedAt: "February 12, 2025" }
         : null;
     };
+    // Bundled editorial library (full HTML content) is the offline baseline.
+    const fromBundled = () => getArticleBySlug(slug as string);
 
-    articlesPublicApi.get(slug as string)
-      .then(async (res) => {
-        const item = res.data?.data || null;
-        setArticle(item || (await fromCms()) || fromSeed());
-      })
-      .catch(async () => {
-        setArticle((await fromCms()) || fromSeed());
-      })
-      .finally(() => setArticleLoading(false));
-  }, [slug]);
+    (async () => {
+      try {
+        const resolved =
+          (await fromCms()) || (await fromLawService()) || fromBundled() || fromSeed();
+        setArticle(resolved);
+      } finally {
+        setArticleLoading(false);
+      }
+    })();
+  }, [slug, previewToken, previewExp]);
 
   useEffect(() => {
     const optimizeContent = async () => {
@@ -151,6 +171,7 @@ export default function ArticleDeepDivePage() {
 
   const category = article?.category;
   const subcategory = article?.subcategory;
+  const matchedAuthor = article?.author ? getAuthorByName(article.author) : null;
 
   if (articleLoading && !article) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -217,34 +238,47 @@ export default function ArticleDeepDivePage() {
                     By
                     <Popover>
                       <PopoverTrigger asChild>
-                        <span className="font-bold text-blue-600 uppercase cursor-pointer border-b border-blue-600 hover:text-blue-800 transition-colors leading-none">
-                          JULIA KAGAN
+                        <span className="font-bold text-blue-700 cursor-pointer border-b border-blue-600 hover:text-blue-900 transition-colors leading-none">
+                          {article.author || 'Law Elite Editorial'}
                         </span>
                       </PopoverTrigger>
-                      <PopoverContent className="w-[420px] p-0 shadow-2xl border-slate-200 rounded-none bg-white overflow-hidden" align="start" sideOffset={8}>
-                        <div className="p-8 space-y-6">
-                          <div className="flex gap-6">
-                            <div className="relative w-24 h-24 shrink-0 bg-slate-100 overflow-hidden">
-                              <Image
-                                src="https://picsum.photos/seed/julia-kagan-editorial/200/200"
-                                alt="Julia Kagan"
-                                fill
-                                className="object-cover grayscale"
-                              />
-                            </div>
-                            <div className="space-y-4">
-                              <p className="text-[15px] leading-relaxed text-slate-700 font-medium">
-                                Julia Kagan is a distinguished legal and financial journalist and former senior editor of strategic dossiers within the global professional network.
+                      <PopoverContent className="w-[400px] p-0 shadow-2xl border-slate-200 rounded-lg bg-white overflow-hidden" align="start" sideOffset={8}>
+                        <div className="p-7 space-y-3">
+                          <p className="font-headline text-lg font-bold text-slate-900">
+                            {article.author || 'Law Elite Editorial'}
+                          </p>
+                          {matchedAuthor ? (
+                            <>
+                              <p className="text-[12px] font-bold uppercase tracking-wide text-blue-700">
+                                {matchedAuthor.title}
                               </p>
-                              <Link href="#" className="text-blue-600 text-[15px] font-bold flex items-center gap-1 hover:underline group">
-                                Full Bio <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                              <p className="text-[12px] text-slate-500">{matchedAuthor.credentials}</p>
+                              <p className="text-[14px] leading-relaxed text-slate-600 line-clamp-4">
+                                {matchedAuthor.bio}
+                              </p>
+                              {matchedAuthor.expertise.length > 0 && (
+                                <p className="text-[12px] text-slate-500">
+                                  Focus: {matchedAuthor.expertise.join(', ')}
+                                </p>
+                              )}
+                              <Link
+                                href={`/author/${matchedAuthor.slug}`}
+                                className="inline-block text-[13px] font-bold text-blue-700 hover:text-blue-900 transition-colors"
+                              >
+                                View full profile →
                               </Link>
-                            </div>
-                          </div>
+                            </>
+                          ) : (
+                            <p className="text-[14px] leading-relaxed text-slate-600">
+                              Part of the Law Elite Network editorial team. Our guides are
+                              researched and reviewed for accuracy and clarity, then kept current as
+                              laws change. They provide general legal information, not legal advice.
+                            </p>
+                          )}
                         </div>
                       </PopoverContent>
                     </Popover>
-                    Updated {article.updatedAt || article.updated_at || "February 12, 2025"}
+                    Updated {article.updatedAt || article.updated_at || 'February 12, 2025'}
                   </div>
                 </div>
 
@@ -280,7 +314,7 @@ export default function ArticleDeepDivePage() {
                 <figure className="pt-6">
                   <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
                     <Image
-                      src={`https://picsum.photos/seed/${article.id}/1200/800`}
+                      src={resolveArticleImage(article)}
                       alt={article.title}
                       fill
                       className="object-cover"
@@ -305,7 +339,11 @@ export default function ArticleDeepDivePage() {
                 />
               </div>
 
-              <RelatedArticles />
+              <RelatedArticles
+                currentSlug={slug as string}
+                categorySlug={category?.slug}
+                categoryName={category?.name}
+              />
             </article>
 
           </div>

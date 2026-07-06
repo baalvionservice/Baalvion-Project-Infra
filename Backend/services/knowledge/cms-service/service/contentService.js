@@ -1,5 +1,8 @@
 'use strict';
+const path = require('path');
 const { Op } = require('sequelize');
+const { hmacSign } = require('@baalvion/crypto');
+const { writeArticleArtFile } = require('@baalvion/illustrations');
 const { CmsContent, CmsCategory, CmsTag, CmsWorkflow, CmsContentRevision, CmsWebsite, sequelize } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
@@ -7,6 +10,30 @@ const revalidateService = require('./revalidateService');
 const config = require('../config/appConfig');
 const { slugify } = require('../utils/slugify');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
+const { UPLOAD_DIR, PUBLIC_BASE } = require('./mediaService');
+
+// URL prefix used for auto-generated article artwork — also doubles as the marker
+// that lets updateContent() tell "we generated this" apart from an editor's own
+// upload, so regeneration on title/category change never clobbers a manual image.
+const GENERATED_ART_PREFIX = '/uploads/generated-art/';
+
+// Resolves the primary category name + tag names for keyword-based icon selection.
+// Best-effort: falls back to empty values rather than failing content creation.
+async function _artworkContext(cats, tagIds) {
+    const [category, tags] = await Promise.all([
+        cats[0] ? CmsCategory.findByPk(cats[0], { attributes: ['name'] }) : null,
+        tagIds?.length ? CmsTag.findAll({ where: { id: { [Op.in]: tagIds } }, attributes: ['name'] }) : [],
+    ]);
+    return { categoryName: category?.name || null, tagNames: (tags || []).map((t) => t.name) };
+}
+
+function _generateArtwork({ id, title, excerpt, categoryName, tagNames }) {
+    writeArticleArtFile(
+        { title, category: categoryName, tags: tagNames, excerpt, seed: id },
+        path.join(UPLOAD_DIR, 'generated-art', `${id}.svg`),
+    );
+    return `${PUBLIC_BASE}${GENERATED_ART_PREFIX}${id}.svg`;
+}
 
 async function listContent(websiteId, query = {}) {
     const { page, limit, offset } = parsePagination(query);
@@ -54,6 +81,25 @@ async function getContent(websiteId, contentId) {
     return data;
 }
 
+/**
+ * Issues a short-lived HMAC token scoped to this content's website+slug, for the admin
+ * CMS live-preview iframe. The token (not the underlying CMS_PREVIEW_SECRET) is what
+ * reaches the browser and the target site — only cms-service ever holds the secret.
+ */
+async function getPreviewToken(websiteId, contentId) {
+    if (!config.preview.secret) throw new AppError('FORBIDDEN', 'Preview is not configured', 403);
+
+    const content = await CmsContent.findOne({ where: { id: contentId, websiteId }, attributes: ['id', 'slug'] });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+
+    const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
+    if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
+
+    const exp = Date.now() + config.preview.ttlMs;
+    const token = hmacSign(`${website.slug}:${content.slug}:${exp}`, config.preview.secret);
+    return { slug: content.slug, domain: website.domain, exp, token };
+}
+
 // Find a slug that is unique within the website, appending -2, -3, ... on collision.
 // This makes it impossible to error out when creating two items with the same title
 // (e.g. two co-founders with identical names) — the slug is silently disambiguated.
@@ -93,6 +139,15 @@ async function createContent(websiteId, userId, body) {
             status: 'draft', revisionCount: 0, viewCount: 0,
         }, { transaction: t });
 
+        // The CMS must never fall back to stock/placeholder imagery — if the author
+        // didn't attach a featured image, generate original branded artwork from the
+        // article's own title/category/tags instead (see @baalvion/illustrations).
+        if (!featuredImage) {
+            const { categoryName, tagNames } = await _artworkContext(cats, tagIds);
+            const generatedUrl = _generateArtwork({ id: c.id, title, excerpt, categoryName, tagNames });
+            await c.update({ featuredImage: generatedUrl }, { transaction: t });
+        }
+
         await CmsWorkflow.create({ contentId: c.id, currentState: 'draft', submittedBy: userId }, { transaction: t });
         return c;
     });
@@ -127,6 +182,29 @@ async function updateContent(websiteId, contentId, userId, body) {
     }
 
     const oldTagIds = content.tagIds || [];
+
+    // Regenerate auto-generated artwork when the title or category changes so the
+    // image keeps matching the content — but only when the current image is one we
+    // generated (empty, or under the generated-art prefix). An editor's manually
+    // uploaded featuredImage is never touched, and an explicit featuredImage in this
+    // same update always wins over regeneration.
+    const isOurArtwork = !content.featuredImage || content.featuredImage.includes(GENERATED_ART_PREFIX);
+    const titleChanged = body.title !== undefined && body.title !== content.title;
+    const categoryChanged = body.categoryId !== undefined && body.categoryId !== content.categoryId;
+    if (body.featuredImage === undefined && isOurArtwork && (titleChanged || categoryChanged)) {
+        const { categoryName, tagNames } = await _artworkContext(
+            body.categoryIds ?? content.categoryIds ?? [],
+            body.tagIds ?? content.tagIds ?? [],
+        );
+        body.featuredImage = _generateArtwork({
+            id: content.id,
+            title: body.title ?? content.title,
+            excerpt: body.excerpt ?? content.excerpt,
+            categoryName,
+            tagNames,
+        });
+    }
+
     await content.update({ ...body, lastEditedBy: userId });
 
     if (body.tagIds) {
@@ -222,4 +300,4 @@ function _normalizeCategoryIds(categoryIds, categoryId) {
     return [...new Set(merged.filter(Boolean))];
 }
 
-module.exports = { listContent, getContent, createContent, updateContent, autosaveContent, deleteContent, bulkUpdate, incrementViewCount };
+module.exports = { listContent, getContent, getPreviewToken, createContent, updateContent, autosaveContent, deleteContent, bulkUpdate, incrementViewCount };

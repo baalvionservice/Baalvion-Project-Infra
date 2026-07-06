@@ -1,6 +1,7 @@
 import * as mockApi from '@/services/mock-api/community';
 import { ApiResponse, CommunityData, CommunityRankingsData, AssetSentiment, UserSentimentVote, DiscussionNode, ReputationSystemData, DebateNode, DebateLeaderboardEntry } from '@/types';
 import { errorHandler } from '@/lib/errors/error-handler';
+import { personSilhouetteDataUri } from '@baalvion/illustrations';
 
 /**
  * @fileOverview Community/engagement data. Discussions are LIVE from imperialpedia-service's
@@ -30,7 +31,7 @@ function postToDiscussion(p: {
     title: p.title,
     category,
     author: p.author_name || 'Member',
-    authorAvatar: `https://picsum.photos/seed/${encodeURIComponent(p.author_name || String(p.id))}/80/80`,
+    authorAvatar: personSilhouetteDataUri({ name: p.author_name || String(p.id), seed: String(p.id) }),
     comments,
     likes,
     views: likes * 8 + comments * 3,

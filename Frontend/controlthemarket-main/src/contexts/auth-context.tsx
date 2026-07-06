@@ -221,6 +221,16 @@ async function fetchCtmProfileFields(userId: string): Promise<Partial<User> | nu
   }
 }
 
+// Platform admins (identity roles super_admin / admin / platform_admin → app-role 'admin')
+// must NOT be downgraded by the ctm profile role, whose column default is 'candidate'. The
+// identity role is authoritative for admin access; the ctm profile only enriches the app-role
+// for candidate/company users. Without this, the platform superadmin opens /admin on the first
+// login (no profile yet) but gets bounced to a candidate/company dashboard on every login after
+// mirrorCtmProfile has created a default 'candidate' profile row.
+function keepPlatformAdmin(ctmUser: User, identityRole: UserRole): void {
+  if (identityRole === 'admin') ctmUser.role = 'admin';
+}
+
 // Merge ctm profile fields onto the identity-derived user.
 function applyProfile(ctmUser: User, prof: Partial<User> | null): void {
   if (!prof) return;
@@ -417,8 +427,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const freshUser: ProxyUser = meResp?.user ?? meResp;
             if (!freshUser?.userId && !freshUser?.id) return;
             const ctmUser = mapProxyUserToCTM(freshUser);
+            const identityRole = ctmUser.role;
             // Adopt app-role, companyId, onboarding/consent flags + profile from the ctm profile.
             applyProfile(ctmUser, await fetchCtmProfileFields(ctmUser.id));
+            keepPlatformAdmin(ctmUser, identityRole);
             if (cancelled) return;
             setUser(ctmUser);
             setCtmScopeCookies(ctmUser);
@@ -493,10 +505,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (token) storeToken(token);
     const proxyUser: ProxyUser = raw?.user ?? raw;
     const ctmUser = mapProxyUserToCTM(proxyUser);
+    const identityRole = ctmUser.role;
     // Adopt app-role, companyId, onboarding/consent flags + profile from the ctm profile
     // (identity only knows org role 'owner'). Onboarding flags MUST be applied to avoid
     // the redirect guard bouncing the user to the onboarding flow.
     applyProfile(ctmUser, await fetchCtmProfileFields(ctmUser.id));
+    keepPlatformAdmin(ctmUser, identityRole);
     setUser(ctmUser);
     setCtmScopeCookies(ctmUser);
     mirrorCtmProfile(ctmUser); // name/email only — never clobbers the profile role

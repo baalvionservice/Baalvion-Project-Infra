@@ -2,7 +2,7 @@
 
 import { use, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, KeyRound, Plug, CreditCard, MessageSquare, Sparkles, ShieldCheck, Trash2, CheckCircle2, XCircle, LogIn } from 'lucide-react';
+import { ArrowLeft, KeyRound, Plug, CreditCard, MessageSquare, Sparkles, ShieldCheck, Trash2, CheckCircle2, XCircle, LogIn, BarChart3 } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -35,6 +35,7 @@ const CATEGORY_ICON: Record<IntegrationCategory, typeof Plug> = {
   ai: Sparkles,
   webhook: Plug,
   oauth: LogIn,
+  analytics: BarChart3,
   other: Plug,
 };
 

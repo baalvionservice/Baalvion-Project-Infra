@@ -38,6 +38,24 @@ api.baalvion.com {
 		reverse_proxy app-platform:3018
 	}
 
+	# Public CMS media delivery (UNAUTHENTICATED) — featuredImage/generated-art files referenced
+	# by published content must be fetchable by anonymous site visitors and social/search
+	# crawlers, not just by logged-in admin sessions. cms-service serves UPLOAD_DIR statically
+	# at /uploads/** (see mediaService.js).
+	@cms_media path /uploads/*
+	handle @cms_media {
+		reverse_proxy app-platform:3018
+	}
+
+	# Public analytics collector (UNAUTHENTICATED first-party beacon). The live sites load the
+	# tracker (/api/v1/collect.js) and POST page/scroll/vitals/ecommerce events to /api/v1/collect;
+	# the OpenAPI contract is public too. The reporting API (/api/v1/cms/.../analytics/*) stays
+	# auth-gated (reached via the admin BFF), and the vault (/api/v1/internal/*) is denied above.
+	@cms_collect path /api/v1/collect /api/v1/collect.js /api/v1/analytics/openapi.json
+	handle @cms_collect {
+		reverse_proxy app-platform:3018
+	}
+
 	# Payment public surface (Java PSP gateway, app-payments:3015 — runs under --profile payments):
 	# initiate a charge, read its status, receive provider webhooks (HMAC-verified inside the svc).
 	# Money-OUT (refund/capture) + actuator are denied at the edge (listed first → first match wins).
@@ -48,6 +66,17 @@ api.baalvion.com {
 	@pay path /v1/gateway/payments /v1/gateway/payments/* /v1/gateway/webhooks/*
 	handle @pay {
 		reverse_proxy app-payments:3015
+	}
+
+	# CTM (controlthemarket.com) login BFF. The Vercel FE proxies /auth-bff/* to the code-default
+	# AUTH_PROXY_TARGET = api.baalvion.com/api/v1/identity/auth/v1/auth, which otherwise falls into
+	# the proxy-service BFF below and 401s ("No bearer token"). Route it to the identity auth-gateway
+	# (app-identity:3026) instead: strip the namespaced prefix, remap onto /auth/* (login|refresh|me|
+	# logout) — the gateway BFF that issues the session cookies the FE expects.
+	@identity_auth_bff path /api/v1/identity/auth/v1/auth /api/v1/identity/auth/v1/auth/*
+	handle @identity_auth_bff {
+		uri replace /api/v1/identity/auth/v1/auth /auth
+		reverse_proxy app-identity:3026
 	}
 
 	# Everything else → the consumer/admin BFF (proxy-service, session-gated) — unchanged.

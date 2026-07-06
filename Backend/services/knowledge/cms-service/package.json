@@ -12,15 +12,19 @@
     "seed": "sequelize-cli db:seed:all",
     "seed:undo": "sequelize-cli db:seed:undo:all",
     "build:ts": "tsc -p tsconfig.json",
-    "type-check": "tsc -p tsconfig.json --noEmit"
+    "type-check": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test \"test/**/*.test.js\""
   },
   "dependencies": {
     "@baalvion/telemetry": "workspace:*",
     "@baalvion/graceful-shutdown": "workspace:*",
+    "@baalvion/crypto": "workspace:*",
     "express-rate-limit": "^7.5.0",
     "@baalvion/auth-node": "workspace:*",
     "@baalvion/sdk": "workspace:*",
     "@baalvion/upload": "workspace:*",
+    "@baalvion/email": "workspace:*",
+    "@baalvion/illustrations": "workspace:*",
     "bullmq": "^5.52.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",

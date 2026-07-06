@@ -1,6 +1,7 @@
 import { ReviewArticle } from "@/types/Review";
+import { withReviewArt } from "./withReviewArt";
 
-export const bestOnlineBrokersReview: ReviewArticle = {
+export const bestOnlineBrokersReview: ReviewArticle = withReviewArt({
   pageType: "review",
   slug: "best-online-brokers",
   title: "Best Online Brokers of April 2026",
@@ -13,8 +14,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
   reviewedBy: {
     name: "Marcus Reid",
     title: "Senior Investing Editor",
-    avatarUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&q=80",
   },
   factCheckedBy: {
     name: "Linda Zhao",
@@ -35,8 +34,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
       providerId: "fidelity",
       categoryLabel: "Best Overall",
       providerName: "Fidelity Investments",
-      logoUrl:
-        "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=80&q=80",
       summaryBlurb:
         "No commissions, excellent research, and top-rated service.",
       ctaUrl: "https://www.fidelity.com",
@@ -46,8 +43,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
       providerId: "schwab",
       categoryLabel: "Best for Long-Term Investors",
       providerName: "Charles Schwab",
-      logoUrl:
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=80&q=80",
       summaryBlurb:
         "Full-service investing with fractional shares and strong research.",
       ctaUrl: "https://www.schwab.com",
@@ -57,8 +52,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
       providerId: "ibkr",
       categoryLabel: "Best for Active Traders",
       providerName: "Interactive Brokers",
-      logoUrl:
-        "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&q=80",
       summaryBlurb: "Ultra-low margin rates and professional-grade tools.",
       ctaUrl: "https://www.interactivebrokers.com",
       ctaLabel: "Open an Account",
@@ -67,8 +60,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
       providerId: "robinhood",
       categoryLabel: "Best for Beginners",
       providerName: "Robinhood",
-      logoUrl:
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=80&q=80",
       summaryBlurb:
         "Zero commissions with a clean app for first-time investors.",
       ctaUrl: "https://www.robinhood.com",
@@ -79,7 +70,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
     {
       id: "fidelity",
       name: "Fidelity Investments",
-      logoUrl: "https://picsum.photos/seed/fidelity/320/120",
       categoryLabels: [
         "Best Overall",
         "Best for ETFs",
@@ -135,7 +125,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
     {
       id: "schwab",
       name: "Charles Schwab",
-      logoUrl: "https://picsum.photos/seed/schwab/320/120",
       categoryLabels: ["Best for Long-Term Investors", "Best IRA Account"],
       overallScore: 4.7,
       fastFacts: [
@@ -176,7 +165,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
     {
       id: "ibkr",
       name: "Interactive Brokers",
-      logoUrl: "https://picsum.photos/seed/interactive-brokers/320/120",
       categoryLabels: [
         "Best for Active Traders",
         "Best for International Trading",
@@ -219,7 +207,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
     {
       id: "robinhood",
       name: "Robinhood",
-      logoUrl: "https://picsum.photos/seed/robinhood/320/120",
       categoryLabels: ["Best for Beginners", "Best Mobile App"],
       overallScore: 4.1,
       fastFacts: [
@@ -261,7 +248,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
   comparisonRows: [
     {
       providerName: "Fidelity Investments",
-      logoUrl: "https://picsum.photos/seed/fidelity/320/120",
       specs: {
         "Stock Trades": "$0",
         "Account Min.": "$0",
@@ -274,7 +260,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
     },
     {
       providerName: "Charles Schwab",
-      logoUrl: "https://picsum.photos/seed/schwab/320/120",
       specs: {
         "Stock Trades": "$0",
         "Account Min.": "$0",
@@ -287,7 +272,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
     },
     {
       providerName: "Interactive Brokers",
-      logoUrl: "https://picsum.photos/seed/interactive-brokers/320/120",
       specs: {
         "Stock Trades": "$0 / $0.005",
         "Account Min.": "$0",
@@ -300,7 +284,6 @@ export const bestOnlineBrokersReview: ReviewArticle = {
     },
     {
       providerName: "Robinhood",
-      logoUrl: "https://picsum.photos/seed/robinhood/320/120",
       specs: {
         "Stock Trades": "$0",
         "Account Min.": "$0",
@@ -335,4 +318,4 @@ export const bestOnlineBrokersReview: ReviewArticle = {
         "A standard brokerage account has no contribution limits but no tax advantages. An IRA offers tax advantages — either tax-deductible contributions (Traditional IRA) or tax-free growth and withdrawals (Roth IRA) — but has annual contribution limits ($7,000 in 2026) and early withdrawal restrictions.",
     },
   ],
-};
+});

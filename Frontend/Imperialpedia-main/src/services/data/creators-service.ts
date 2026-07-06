@@ -3,6 +3,7 @@ import { CreatorProfile, ApiResponse, CreatorLeaderboard, CreatorVerification } 
 import { TopCreator } from "@/types/analytics";
 import { errorHandler } from "@/lib/errors/error-handler";
 import authClient from "@/lib/auth-client";
+import { personSilhouetteDataUri } from "@baalvion/illustrations";
 
 /**
  * @fileOverview Creator data — LIVE from imperialpedia-service (`/creators`), where each row
@@ -41,7 +42,12 @@ function rowToProfile(r: Row): CreatorProfile | null {
     displayName: r.display_name || `Creator ${r.user_id ?? ""}`,
     title: "Contributor",
     bio: r.bio || "",
-    avatar: r.avatar_url || `https://picsum.photos/seed/creator-${r.user_id}/200/200`,
+    avatar:
+      r.avatar_url ||
+      personSilhouetteDataUri({
+        name: r.display_name || `Creator ${r.user_id ?? ""}`,
+        seed: String(r.user_id),
+      }),
     joinedDate: r.created_at || new Date().toISOString(),
     specialties: Array.isArray(r.specialization) ? r.specialization : [],
     category: "General",

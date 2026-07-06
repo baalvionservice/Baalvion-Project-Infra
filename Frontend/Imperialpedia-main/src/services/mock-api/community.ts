@@ -1,4 +1,5 @@
 import { ApiResponse } from '@/types';
+import { personSilhouetteDataUri } from '@baalvion/illustrations';
 import { 
   CommunityData, 
   Comment, 
@@ -30,7 +31,7 @@ const mockComments: Comment[] = [
     reputation: 1240,
     reputationScore: 1240,
     badge: 'Elite Analyst',
-    avatar: 'https://picsum.photos/seed/user1/200/200',
+    avatar: personSilhouetteDataUri({ name: 'MarketWatchdog', seed: 'user1' }),
     timestamp: '2h ago',
     content: 'The 2-10 spread inversion is widening. Historical data suggests a 12-18 month lead time to a full fiscal contraction.',
     text: 'The 2-10 spread inversion is widening. Historical data suggests a 12-18 month lead time to a full fiscal contraction.',
@@ -47,7 +48,7 @@ const mockComments: Comment[] = [
         reputation: 8500,
         reputationScore: 8500,
         badge: 'Verified Expert',
-        avatar: 'https://picsum.photos/seed/wealth/200/200',
+        avatar: personSilhouetteDataUri({ name: 'Julian Wealth', seed: 'wealth' }),
         timestamp: '1h ago',
         content: 'Correct, but we should also consider the high consumer cash reserves which might buffer the landing.',
         text: 'Correct, but we should also consider the high consumer cash reserves which might buffer the landing.',
@@ -65,7 +66,7 @@ const mockComments: Comment[] = [
     reputation: 3200,
     reputationScore: 3200,
     badge: 'Precision Lead',
-    avatar: 'https://picsum.photos/seed/alpha/200/200',
+    avatar: personSilhouetteDataUri({ name: 'AlphaHunter', seed: 'alpha' }),
     timestamp: '4h ago',
     content: 'Retail is heavily shorting this level. Liquidity grab to the upside seems inevitable before any real correction.',
     text: 'Retail is heavily shorting this level. Liquidity grab to the upside seems inevitable before any real correction.',
@@ -82,7 +83,7 @@ const mockDiscussions: DiscussionNode[] = [
     title: "Will Bitcoin hit $100k this cycle?",
     category: "Cryptocurrency",
     author: "David Kim",
-    authorAvatar: "https://picsum.photos/seed/david/100/100",
+    authorAvatar: personSilhouetteDataUri({ name: "David Kim", seed: "david" }),
     comments: 284,
     likes: 1250,
     views: 18200,
@@ -96,7 +97,7 @@ const mockDiscussions: DiscussionNode[] = [
     title: "Are AI stocks in a technical bubble?",
     category: "Stocks",
     author: "Sophia Martinez",
-    authorAvatar: "https://picsum.photos/seed/sophia/100/100",
+    authorAvatar: personSilhouetteDataUri({ name: "Sophia Martinez", seed: "sophia" }),
     comments: 192,
     likes: 840,
     views: 13400,
@@ -132,11 +133,11 @@ const mockDebates: DebateNode[] = [
     summary: "A structured clash between institutional-adoption bulls and regulatory-headwind bears.",
     moderator_notes: "Focus on spot ETF flows vs. potential QT tightening cycles.",
     bull_arguments: [
-      { id: 'arg-1', user: "Julian Wealth", avatar: "https://picsum.photos/seed/julian/100/100", role: "Expert Analyst", reputation: 8500, content: "The institutional bid from Spot ETFs creates a supply-demand imbalance that hasn't been priced in. 100k is the psychological floor.", likes: 42, replies: 12, timestamp: "2h ago" },
-      { id: 'arg-2', user: "Sarah Crypto", avatar: "https://picsum.photos/seed/sarah/100/100", role: "Analyst", reputation: 3200, content: "Post-halving cycles historically show 3x returns. We're only 40% into the expansion phase.", likes: 15, replies: 4, timestamp: "1h ago" }
+      { id: 'arg-1', user: "Julian Wealth", avatar: personSilhouetteDataUri({ name: "Julian Wealth", seed: "julian" }), role: "Expert Analyst", reputation: 8500, content: "The institutional bid from Spot ETFs creates a supply-demand imbalance that hasn't been priced in. 100k is the psychological floor.", likes: 42, replies: 12, timestamp: "2h ago" },
+      { id: 'arg-2', user: "Sarah Crypto", avatar: personSilhouetteDataUri({ name: "Sarah Crypto", seed: "sarah" }), role: "Analyst", reputation: 3200, content: "Post-halving cycles historically show 3x returns. We're only 40% into the expansion phase.", likes: 15, replies: 4, timestamp: "1h ago" }
     ],
     bear_arguments: [
-      { id: 'arg-3', user: "Eleanor Vance", avatar: "https://picsum.photos/seed/eleanor/100/100", role: "Market Strategist", reputation: 9200, content: "Inflation remains sticky. If the Fed maintains 'Higher for Longer', the liquidity needed for a 100k push won't materialize.", likes: 38, replies: 8, timestamp: "3h ago" }
+      { id: 'arg-3', user: "Eleanor Vance", avatar: personSilhouetteDataUri({ name: "Eleanor Vance", seed: "eleanor" }), role: "Market Strategist", reputation: 9200, content: "Inflation remains sticky. If the Fed maintains 'Higher for Longer', the liquidity needed for a 100k push won't materialize.", likes: 38, replies: 8, timestamp: "3h ago" }
     ],
     timeline: [
       { timestamp: "2026-03-10", event: "Debate node established.", type: "start" },
@@ -161,9 +162,9 @@ const mockDebates: DebateNode[] = [
 ];
 
 const mockDebateLeaderboard: DebateLeaderboardEntry[] = [
-  { rank: 1, name: "Andrew Collins", debates_won: 14, reputation: 91, avatar: "https://picsum.photos/seed/andrew/100/100" },
-  { rank: 2, name: "Lina Rodriguez", debates_won: 11, reputation: 88, avatar: "https://picsum.photos/seed/lina/100/100" },
-  { rank: 3, name: "Mark Sterling", debates_won: 9, reputation: 82, avatar: "https://picsum.photos/seed/mark/100/100" }
+  { rank: 1, name: "Andrew Collins", debates_won: 14, reputation: 91, avatar: personSilhouetteDataUri({ name: "Andrew Collins", seed: "andrew" }) },
+  { rank: 2, name: "Lina Rodriguez", debates_won: 11, reputation: 88, avatar: personSilhouetteDataUri({ name: "Lina Rodriguez", seed: "lina" }) },
+  { rank: 3, name: "Mark Sterling", debates_won: 9, reputation: 82, avatar: personSilhouetteDataUri({ name: "Mark Sterling", seed: "mark" }) }
 ];
 
 export const getDebates = async (): Promise<ApiResponse<DebateNode[]>> => {
@@ -186,7 +187,7 @@ const mockReputationData: ReputationSystemData = {
     id: 'u-current',
     name: 'Eleanor Vance',
     username: 'econvance',
-    avatar: 'https://picsum.photos/seed/eleanor/200/200',
+    avatar: personSilhouetteDataUri({ name: 'Eleanor Vance', seed: 'econvance' }),
     reputation_score: 92,
     level: 'Community Authority',
     followers: 21500,

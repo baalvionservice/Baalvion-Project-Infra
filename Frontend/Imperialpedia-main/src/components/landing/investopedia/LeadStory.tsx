@@ -1,11 +1,12 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { articleArtDataUri } from "@baalvion/illustrations";
 import type { Article } from "./types";
 import { ArticleCard } from "./ArticleCard";
 
-const img = (seed: string, w: number, h: number) =>
-  `https://picsum.photos/seed/${encodeURIComponent(seed)}/${w}/${h}`;
+const img = (article: Article) =>
+  articleArtDataUri({ title: article.title, category: article.category, seed: article.imageSeed });
 
 type Props = {
   lead: Article;
@@ -25,7 +26,7 @@ export function LeadStory({ lead, secondary }: Props) {
           <Link href={lead.href} className="group block">
             <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
               <Image
-                src={img(lead.imageSeed, 1280, 720)}
+                src={img(lead)}
                 alt=""
                 fill
                 priority

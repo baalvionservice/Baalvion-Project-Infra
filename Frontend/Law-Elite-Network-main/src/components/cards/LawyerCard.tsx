@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star, Briefcase, MapPin, ShieldCheck, ChevronRight, CheckCircle2, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { resolvePersonImage } from '@/lib/article-art';
 
 interface LawyerCardProps {
   lawyer: {
@@ -57,7 +58,7 @@ function LawyerCardComponent({ lawyer }: LawyerCardProps) {
         <div className="relative w-16 h-16 shrink-0">
           <div className="w-full h-full rounded-2xl overflow-hidden border border-slate-200 group-hover:border-blue-400 transition-all duration-500 shadow-inner">
             <Image 
-              src={lawyer.profileImage || `https://picsum.photos/seed/${lawyer.id}/200/200`} 
+              src={resolvePersonImage({ avatarUrl: lawyer.profileImage, name: lawyer.name, id: lawyer.id })}
               alt={lawyer.name}
               fill
               className="object-cover group-hover:scale-110 transition-transform duration-700"

@@ -119,6 +119,141 @@ const OVERRIDES: Record<string, TopicCopy> = {
       'Tax planning, brackets, deductions, and filing strategy to keep more of what you earn.',
     metaTitle: 'Tax News, Planning & Filing Guides',
   },
+  budgeting: {
+    tag: 'BUDGETING',
+    title: 'Budgeting',
+    description:
+      'Practical budgeting methods, templates, and frameworks to plan your spending, hit savings goals, and stay in control of your money.',
+    metaTitle: 'Budgeting Tips, Templates & Strategies',
+    metaDescription:
+      'Learn practical budgeting methods, from the 50/30/20 rule to zero-based budgeting, and build a spending plan that actually sticks.',
+  },
+  fed: {
+    tag: 'FEDERAL RESERVE',
+    title: 'The Federal Reserve',
+    description:
+      "Fed policy decisions, interest-rate moves, and what the FOMC's actions mean for borrowing costs, savings yields, and the broader economy.",
+    metaTitle: 'Federal Reserve News & Interest Rate Policy',
+    metaDescription:
+      'Track Federal Reserve interest-rate decisions, FOMC statements, and analysis of how monetary policy affects loans, savings, and markets.',
+  },
+  savings: {
+    tag: 'SAVINGS',
+    title: 'Savings',
+    description:
+      'Savings accounts, CDs, and strategies to grow your emergency fund and short-term cash while keeping pace with inflation.',
+    metaTitle: 'Savings Accounts, Rates & Strategy',
+    metaDescription:
+      'Compare savings account types and APYs, and learn how to build an emergency fund that keeps pace with inflation.',
+  },
+  'market-news': {
+    tag: 'MARKET NEWS',
+    title: 'Market News',
+    description:
+      'Daily coverage of equities, bonds, commodities, and the macro events moving global markets.',
+    metaTitle: 'Market News & Daily Financial Coverage',
+    metaDescription:
+      'Stay current on stock, bond, and commodity markets with daily coverage of the economic events and earnings that move prices.',
+  },
+  'live-market-news': {
+    tag: 'LIVE MARKETS',
+    title: 'Live Market News',
+    description:
+      'Real-time market updates and same-day analysis of the stories moving stocks, rates, and currencies.',
+    metaTitle: 'Live Market News & Real-Time Analysis',
+    metaDescription:
+      'Follow live market-moving news as it happens, with same-day analysis of stocks, interest rates, and currency moves.',
+  },
+  mortgages: {
+    tag: 'MORTGAGES',
+    title: 'Mortgages',
+    description:
+      "Fixed vs. adjustable rates, refinancing, and what today's mortgage market means for homebuyers and owners.",
+    metaTitle: 'Mortgage Rates, Guides & Homebuying News',
+    metaDescription:
+      'Mortgage rate trends, fixed vs. adjustable comparisons, and refinancing guidance for homebuyers and current homeowners.',
+  },
+  'interest-rates': {
+    tag: 'INTEREST RATES',
+    title: 'Interest Rates',
+    description:
+      'How benchmark rates move, why they change, and what higher or lower rates mean for loans, savings, and investments.',
+    metaTitle: 'Interest Rate News & Analysis',
+    metaDescription:
+      'Understand how interest rate changes affect mortgages, credit cards, savings yields, and investment returns.',
+  },
+  debt: {
+    tag: 'DEBT',
+    title: 'Debt Management',
+    description:
+      'Strategies for paying down credit cards, loans, and other debt — from the snowball method to consolidation and beyond.',
+    metaTitle: 'Debt Payoff Strategies & Management Guides',
+    metaDescription:
+      'Practical strategies for paying down debt faster, including the snowball and avalanche methods, consolidation, and credit-card payoff plans.',
+  },
+  gdp: {
+    tag: 'GDP',
+    title: 'GDP & Economic Growth',
+    description:
+      "What gross domestic product measures, how it's calculated, and what quarterly GDP data reveals about the health of the economy.",
+    metaTitle: 'GDP News & Economic Growth Analysis',
+    metaDescription:
+      'Track GDP growth data and understand what quarterly economic output figures mean for jobs, inflation, and markets.',
+  },
+  unemployment: {
+    tag: 'UNEMPLOYMENT',
+    title: 'Unemployment & Jobs',
+    description:
+      'Labor market data, unemployment claims, and what hiring trends signal about the direction of the economy.',
+    metaTitle: 'Unemployment & Jobs Market News',
+    metaDescription:
+      'Labor market coverage including unemployment claims, payroll data, and what hiring trends mean for the broader economy.',
+  },
+  options: {
+    tag: 'OPTIONS',
+    title: 'Options Trading',
+    description:
+      'Calls, puts, and strategy basics for investors using options to hedge risk or generate income.',
+    metaTitle: 'Options Trading News & Strategy Guides',
+    metaDescription:
+      'Options trading explained — calls, puts, spreads, and how investors use options to hedge risk or generate income.',
+  },
+  'company-news': {
+    tag: 'COMPANY NEWS',
+    title: 'Company News',
+    description:
+      'Earnings, leadership changes, and corporate developments from the companies that move markets.',
+    metaTitle: 'Company News & Corporate Earnings',
+    metaDescription:
+      'Corporate earnings, leadership changes, and company developments from the businesses driving stock market moves.',
+  },
+  news: {
+    tag: 'NEWS',
+    title: 'Financial News',
+    description:
+      'The latest financial and economic headlines, curated and explained for everyday investors.',
+    metaTitle: 'Financial News & Market Headlines',
+    metaDescription:
+      'The latest financial news and market headlines, explained in plain language for everyday investors.',
+  },
+  inflation: {
+    tag: 'INFLATION',
+    title: 'Inflation',
+    description:
+      "What's driving prices higher or lower, how inflation is measured, and what it means for your budget and investments.",
+    metaTitle: 'Inflation News & Analysis',
+    metaDescription:
+      'Understand what drives inflation, how CPI and PCE are measured, and what rising or falling prices mean for your money.',
+  },
+  earnings: {
+    tag: 'EARNINGS',
+    title: 'Earnings',
+    description:
+      'Quarterly earnings reports, guidance, and the numbers behind the companies driving market performance.',
+    metaTitle: 'Earnings News & Quarterly Reports',
+    metaDescription:
+      'Quarterly earnings coverage — revenue, profit, and guidance from the companies that move the stock market.',
+  },
 };
 
 /** Map a topic slug to the closest static NewsCategory for the fallback feed. */

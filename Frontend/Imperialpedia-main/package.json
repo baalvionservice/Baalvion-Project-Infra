@@ -16,6 +16,7 @@
                 },
     "dependencies":  {
                          "@baalvion/auth-sdk":  "workspace:*",
+                         "@baalvion/illustrations":  "workspace:*",
                          "@genkit-ai/google-genai":  "^1.28.0",
                          "@heroicons/react":  "^2.2.0",
                          "@hookform/resolvers":  "^4.1.3",

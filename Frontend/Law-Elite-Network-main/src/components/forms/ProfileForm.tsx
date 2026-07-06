@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Camera, Loader2, Save, User, Phone } from "lucide-react";
+import { resolvePersonImage } from "@/lib/article-art";
 
 interface ProfileFormProps {
   onUpdate?: () => void;
@@ -66,7 +67,7 @@ export default function ProfileForm({ onUpdate }: ProfileFormProps) {
     try {
       // Simulation of a professional portrait uplink
       await new Promise(resolve => setTimeout(resolve, 1500));
-      const mockImageUrl = `https://picsum.photos/seed/${Date.now()}/400/400`;
+      const mockImageUrl = resolvePersonImage({ name: user.name, id: user.id });
       
       await updateUserProfile(user.id, { profileImage: mockImageUrl });
       

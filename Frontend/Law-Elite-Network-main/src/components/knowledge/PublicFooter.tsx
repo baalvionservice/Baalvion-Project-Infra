@@ -2,14 +2,14 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { 
-  Facebook, 
-  Instagram, 
-  Linkedin, 
-  Youtube, 
-  Gavel,
+import {
+  Facebook,
+  Instagram,
+  Linkedin,
+  Youtube,
   ChevronRight
 } from 'lucide-react';
+import { LawEliteMark } from '@/components/icons/LawEliteMark';
 
 /**
  * @fileOverview High-Fidelity Editorial Footer
@@ -29,9 +29,9 @@ export function PublicFooter() {
             <div className="md:col-span-4 space-y-10">
               <Link href="/" className="flex items-center gap-3 group">
                 <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-2xl">
-                  <Gavel className="text-[#222b3e] w-6 h-6" />
+                  <LawEliteMark className="w-6 h-6" />
                 </div>
-                <span className="text-3xl font-bold tracking-tighter font-serif italic">
+                <span className="text-3xl font-bold tracking-tighter font-serif">
                   Law <span className="text-white/90">Elite</span>
                 </span>
               </Link>
@@ -74,18 +74,61 @@ export function PublicFooter() {
             <div className="md:col-span-2 space-y-4 text-[11px] font-medium text-white/70">
               <ul className="space-y-3">
                 <li><Link href="/about-us" className="hover:text-white transition-colors">About Us</Link></li>
+                <li><Link href="/authors" className="hover:text-white transition-colors">Our Contributors</Link></li>
+                <li><Link href="/contact-us" className="hover:text-white transition-colors">Contact Us</Link></li>
                 <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
-                <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/advertise" className="hover:text-white transition-colors">Advertise</Link></li>
+                <li><Link href="/editorial-standards" className="hover:text-white transition-colors">Editorial Standards</Link></li>
+                <li><Link href="/editorial-process" className="hover:text-white transition-colors">Editorial Process</Link></li>
               </ul>
             </div>
 
             <div className="md:col-span-3 space-y-4 text-[11px] font-medium text-white/70">
               <ul className="space-y-3">
-                <li><Link href="/editorial-process" className="hover:text-white transition-colors">Editorial Process</Link></li>
-                <li><Link href="/contact-us" className="hover:text-white transition-colors">Contact Us</Link></li>
+                <li><Link href="/corrections" className="hover:text-white transition-colors">Corrections</Link></li>
+                <li><Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
                 <li><Link href="/terms-of-service" className="hover:text-white transition-colors">Terms of Service</Link></li>
                 <li><Link href="/disclaimer" className="hover:text-white transition-colors">Disclaimer</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Legal & Compliance: full-width band, kept out of the 12-col grid above
+              since 12 additional links would otherwise force an unbalanced 18-unit row */}
+          <div className="mt-14 pt-10 border-t border-white/10 grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-8">
+            <div className="space-y-4 text-[11px] font-medium text-white/70">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Trust &amp; Compliance</p>
+              <ul className="space-y-3">
+                <li><Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link></li>
+                <li><Link href="/ai-usage-policy" className="hover:text-white transition-colors">AI Usage Policy</Link></li>
+                <li><Link href="/dmca-policy" className="hover:text-white transition-colors">DMCA Policy</Link></li>
+                <li><Link href="/copyright-policy" className="hover:text-white transition-colors">Copyright Policy</Link></li>
+              </ul>
+            </div>
+
+            <div className="space-y-4 text-[11px] font-medium text-white/70">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Accessibility &amp; Sourcing</p>
+              <ul className="space-y-3">
+                <li><Link href="/accessibility" className="hover:text-white transition-colors">Accessibility Statement</Link></li>
+                <li><Link href="/source-attribution-policy" className="hover:text-white transition-colors">Source Attribution Policy</Link></li>
+                <li><Link href="/diversity-policy" className="hover:text-white transition-colors">Diversity Policy</Link></li>
+              </ul>
+            </div>
+
+            <div className="space-y-4 text-[11px] font-medium text-white/70">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Editorial Disclosures</p>
+              <ul className="space-y-3">
+                <li><Link href="/affiliate-disclosure" className="hover:text-white transition-colors">Affiliate Disclosure</Link></li>
+                <li><Link href="/sponsored-content-policy" className="hover:text-white transition-colors">Sponsored Content Policy</Link></li>
+                <li><Link href="/ownership-disclosure" className="hover:text-white transition-colors">Ownership Disclosure</Link></li>
+              </ul>
+            </div>
+
+            <div className="space-y-4 text-[11px] font-medium text-white/70">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/50">Community</p>
+              <ul className="space-y-3">
+                <li><Link href="/conflict-of-interest-policy" className="hover:text-white transition-colors">Conflict of Interest Policy</Link></li>
+                <li><Link href="/comment-policy" className="hover:text-white transition-colors">Comment & Review Policy</Link></li>
               </ul>
             </div>
           </div>
