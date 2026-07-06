@@ -11,7 +11,15 @@ module.exports = (sequelize, DataTypes) => {
         doc_type: {
             type: DataTypes.TEXT,
             allowNull: false,
-            validate: { isIn: [['commercial_invoice', 'packing_list', 'bill_of_lading', 'certificate_of_origin', 'insurance_document', 'other']] },
+            // Kept in sync with the chk_documents_doc_type CHECK constraint — the
+            // original 6 trade doc types (migration 011) plus the Phase 2 KYC/
+            // verification doc types added additively in migration 025.
+            validate: { isIn: [[
+                'commercial_invoice', 'packing_list', 'bill_of_lading', 'certificate_of_origin', 'insurance_document', 'other',
+                'government_id', 'passport', 'driving_license', 'selfie',
+                'tax_certificate', 'bank_letter', 'utility_bill', 'lease_agreement',
+                'product_certificate', 'quality_certificate', 'safety_certificate', 'inspection_report',
+            ]] },
         },
         title: { type: DataTypes.TEXT },
         description: { type: DataTypes.TEXT },

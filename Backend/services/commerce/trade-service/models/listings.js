@@ -26,6 +26,10 @@ module.exports = (sequelize, DataTypes) => {
         paymentTerms: { type: DataTypes.JSONB, defaultValue: [] },
         certifications: { type: DataTypes.JSONB, defaultValue: [] },
         pricingTiers: { type: DataTypes.JSONB, defaultValue: [] },
+        // Product media/specs (spec: images/videos/specifications) — migration 023.
+        images: { type: DataTypes.JSONB, defaultValue: [] },
+        videos: { type: DataTypes.JSONB, defaultValue: [] },
+        specifications: { type: DataTypes.JSONB, defaultValue: {} },
         status: { type: DataTypes.ENUM('active', 'draft', 'archived'), defaultValue: 'active' },
     }, {
         schema: 'trade',

@@ -151,6 +151,110 @@ db.ComplianceAssessment    = require('./tradeops/compliance_assessment')(sequeli
 db.RouteOptimization       = require('./tradeops/route_optimization')(sequelize, Sequelize.DataTypes);
 db.RouteOptimizationEvent  = require('./tradeops/route_optimization_event')(sequelize, Sequelize.DataTypes);
 
+// ── Tasks (Phase 1 Trade Agent workspace) — schema `tradeops` ────────────────
+// Generic tenant-scoped to-do tracking. Carries tenant_id → auto-scoped by the
+// tenant hooks below (NOT in TENANT_EXCLUDED).
+db.Task = require('./tradeops/task')(sequelize, Sequelize.DataTypes);
+
+// ── Support / ticketing (Phase 1 Buyer workspace) — schema `tradeops` ────────
+// Self-service support tickets + threaded replies. Both carry tenant_id →
+// auto-scoped by the tenant hooks below (NOT in TENANT_EXCLUDED).
+db.SupportTicket        = require('./tradeops/support_ticket')(sequelize, Sequelize.DataTypes);
+db.SupportTicketMessage = require('./tradeops/support_ticket_message')(sequelize, Sequelize.DataTypes);
+
+// ── Purchase Orders (Phase 1 core-commerce alignment) — schema `tradeops` ────
+// The formal buyer→seller order document generated after a quotation is accepted;
+// distinct from trade.orders (fulfillment tracking). Carries tenant_id → auto-scoped
+// by the tenant hooks below (NOT in TENANT_EXCLUDED).
+db.PurchaseOrder = require('./tradeops/purchase_order')(sequelize, Sequelize.DataTypes);
+
+// ── Phase 2: Trust, Verification & Compliance Foundation — schema `tradeops` ──
+// Verification Center: per-org-per-category status cache (VerificationChecklistItem,
+// carries tenant_id → auto-scoped by the tenant hooks below) + the country-
+// configurable tax-identifier catalog (TaxIdType — GLOBAL reference data, no
+// tenant_id, like HsCode). See migration 025 + service/verification/checklist.js.
+db.VerificationChecklistItem = require('./tradeops/verification_checklist_item')(sequelize, Sequelize.DataTypes);
+db.TaxIdType                 = require('./tradeops/tax_id_type')(sequelize, Sequelize.DataTypes);
+
+// Identity Verification (Step 2) — per-user KYC, optionally tagged with the org
+// context it was submitted under. Carries tenant_id → auto-scoped by the tenant
+// hooks below.
+db.IdentityVerification = require('./tradeops/identity_verification')(sequelize, Sequelize.DataTypes);
+
+// Company Verification + Director/Beneficial-Owner Verification (Step 3) —
+// workflow wrapper 1:1 with Organization, plus its stakeholders. Both carry
+// tenant_id → auto-scoped by the tenant hooks below.
+db.CompanyVerification = require('./tradeops/company_verification')(sequelize, Sequelize.DataTypes);
+db.CompanyStakeholder  = require('./tradeops/company_stakeholder')(sequelize, Sequelize.DataTypes);
+
+// Tax Verification (Step 4) — org tax identifiers keyed against TaxIdType. Carries
+// tenant_id → auto-scoped by the tenant hooks below.
+db.TaxRegistration = require('./tradeops/tax_registration')(sequelize, Sequelize.DataTypes);
+
+// Bank Verification (Step 5) — envelope-encrypted account numbers (see
+// service/verification/bank.js). Carries tenant_id → auto-scoped by the tenant
+// hooks below.
+db.BankAccount = require('./tradeops/bank_account')(sequelize, Sequelize.DataTypes);
+
+// Address Verification (Step 6) — registered/corporate/factory/warehouse/branch
+// addresses + their supporting-document evidence. Both carry tenant_id →
+// auto-scoped by the tenant hooks below.
+db.VerifiedAddress  = require('./tradeops/verified_address')(sequelize, Sequelize.DataTypes);
+db.AddressEvidence  = require('./tradeops/address_evidence')(sequelize, Sequelize.DataTypes);
+
+// Factory & Warehouse Verification (Step 7) — production/warehouse profile beyond
+// a bare address. Carries tenant_id → auto-scoped by the tenant hooks below.
+db.Facility = require('./tradeops/facility')(sequelize, Sequelize.DataTypes);
+
+// Product & Certificate Verification (Step 8) — quality/safety/product certs,
+// optionally classified against the existing HS Code Intelligence Engine. Carries
+// tenant_id → auto-scoped by the tenant hooks below.
+db.ProductCertificate = require('./tradeops/product_certificate')(sequelize, Sequelize.DataTypes);
+
+// Compliance Engine (Step 10) — data-driven onboarding rules layered on the
+// existing sanctions/KYC screening engine. ComplianceRule is global config (no
+// tenant_id); ComplianceRuleEvaluation carries tenant_id → auto-scoped by the
+// tenant hooks below.
+db.ComplianceRule           = require('./tradeops/compliance_rule')(sequelize, Sequelize.DataTypes);
+db.ComplianceRuleEvaluation = require('./tradeops/compliance_rule_evaluation')(sequelize, Sequelize.DataTypes);
+
+// Fraud Detection (Step 11) — duplicate company/tax-ID/bank-account, suspicious
+// login, multi-account-same-identity, suspicious document alerts. Carries
+// tenant_id → auto-scoped by the tenant hooks below.
+db.FraudSignal = require('./tradeops/fraud_signal')(sequelize, Sequelize.DataTypes);
+
+// Risk Assessment Engine (Step 12) — append-only org risk scoring history. Carries
+// tenant_id → auto-scoped by the tenant hooks below.
+db.OrgRiskAssessment = require('./tradeops/org_risk_assessment')(sequelize, Sequelize.DataTypes);
+
+// Trust Score Engine (Step 13) — append-only 0-100 composite score history.
+// Carries tenant_id → auto-scoped by the tenant hooks below.
+db.TrustScore = require('./tradeops/trust_score')(sequelize, Sequelize.DataTypes);
+
+// Reputation System (Step 14) — buyer/seller/agent ratings + denormalized
+// per-org-per-role summary. Both carry tenant_id → auto-scoped by the tenant hooks
+// below.
+db.ReputationRating = require('./tradeops/reputation_rating')(sequelize, Sequelize.DataTypes);
+db.ReputationSummary = require('./tradeops/reputation_summary')(sequelize, Sequelize.DataTypes);
+
+// Manual Review Console (Step 15) — human-facing review decision log wrapping
+// approve/reject/request-info/escalate over every reviewable entity above.
+// Carries tenant_id → auto-scoped by the tenant hooks below.
+db.ReviewAction = require('./tradeops/review_action')(sequelize, Sequelize.DataTypes);
+
+// ── Logistics Core Foundation, Phase 1 (containers, packages, addresses, GPS
+// tracking) — schema `tradeops`. Container/LogisticsPackage/LogisticsAddress
+// carry tenant_id -> auto-scoped by the tenant hooks below. TrackingEvent also
+// carries tenant_id (high-volume, append-only telemetry, auto-scoped like
+// ShipmentEvent). LogisticsRolePermission is GLOBAL reference data (no
+// tenant_id, like HsCode) documenting the role -> permission catalog consumed
+// by middleware/permissions.js.
+db.Container              = require('./tradeops/container')(sequelize, Sequelize.DataTypes);
+db.LogisticsPackage       = require('./tradeops/package')(sequelize, Sequelize.DataTypes);
+db.LogisticsAddress       = require('./tradeops/address')(sequelize, Sequelize.DataTypes);
+db.TrackingEvent          = require('./tradeops/tracking_event')(sequelize, Sequelize.DataTypes);
+db.LogisticsRolePermission = require('./tradeops/logistics_role_permission')(sequelize, Sequelize.DataTypes);
+
 Object.values(db).forEach(model => {
     if (model && model.associate) model.associate(db);
 });
@@ -163,20 +267,28 @@ const { currentTenant } = require('../middleware/tenantContext');
 // Excluded from blunt single-tenant scoping:
 //  - User/AuditLog: auth is pre-tenant; audit is a single global hash chain.
 //  - Listing/Rfq: marketplace + discovery are cross-tenant by design.
-//  - Deal/Quotation/Message: buyer↔seller dual-party negotiation (visible to
-//    both orgs) — these need participant-based authorization, not a tenant_id
-//    filter (tracked as a follow-up). Organization is shared counterparty data.
+//  - Deal/Quotation/Message/PurchaseOrder: buyer↔seller dual-party negotiation
+//    (visible to both orgs) — these need participant-based authorization, not a
+//    tenant_id filter (tracked as a follow-up). Organization is shared
+//    counterparty data. PurchaseOrder is stamped with the BUYER's tenant_id at
+//    creation, so without this exclusion the seller's own tenant context would
+//    get auto-injected into every read/write and silently 404 the seller out of
+//    a PO they are a legitimate party to — purchaseOrderController.fetchPoOwned
+//    already does its own buyer_org_id/seller_org_id participant check.
 // Everything else (Order/Escrow/Shipment/Document/Payment/ComplianceCase/
 // Dispute/Wallet/Notification/Collection) is a private single-owner record and
 // IS tenant-scoped.
 const TENANT_EXCLUDED = new Set([
     'User', 'AuditLog', 'Sequelize', 'sequelize',
-    'Listing', 'Rfq', 'Deal', 'Quotation', 'Message', 'Organization',
+    'Listing', 'Rfq', 'Deal', 'Quotation', 'Message', 'Organization', 'PurchaseOrder',
     // Carrier: shared logistics marketplace (global registry, no tenant_id) — like Listing.
     'Carrier',
     // RefreshToken: auth/session management is pre-tenant and scoped by user_id
     // explicitly (the refresh endpoint has no valid access token / tenant ctx).
     'RefreshToken',
+    // LogisticsRolePermission: global role->permission catalog reference data,
+    // no tenant_id — like HsCode.
+    'LogisticsRolePermission',
 ]);
 
 const tenantAttr = (model) => {

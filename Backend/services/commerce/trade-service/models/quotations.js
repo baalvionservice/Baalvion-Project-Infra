@@ -14,8 +14,11 @@ module.exports = (sequelize, DataTypes) => {
         deliveryTime: { type: DataTypes.STRING },
         message: { type: DataTypes.TEXT },
         trustScore: { type: DataTypes.INTEGER, defaultValue: 820 },
+        validUntil: { type: DataTypes.DATE },
+        paymentTerms: { type: DataTypes.STRING(255) },
+        moq: { type: DataTypes.INTEGER },
         status: {
-            type: DataTypes.ENUM('pending', 'accepted', 'rejected'),
+            type: DataTypes.ENUM('pending', 'accepted', 'rejected', 'countered'),
             defaultValue: 'pending',
         },
     }, {

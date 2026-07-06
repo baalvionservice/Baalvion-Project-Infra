@@ -13,8 +13,11 @@ const resolveOrg = (idOrCode) =>
 // Profile fields a non-platform admin may set. Identity (id/tenant_id/code) and compliance
 // fields (kyc_status/risk_score/status) are deliberately excluded — they are assigned
 // server-side or via the platform-only KYC endpoint, never via client-supplied body.
-const ORG_CREATABLE_FIELDS = ['tenant_id', 'code', 'name', 'type', 'country', 'registration_number', 'contact_email'];
-const ORG_UPDATABLE_FIELDS = ['name', 'type', 'country', 'registration_number', 'contact_email'];
+// Phase 1 company-profile fields (legal_name/industry/business_type/company_size/
+// website) are self-serve — a company completing onboarding sets its own profile.
+const COMPANY_PROFILE_FIELDS = ['legal_name', 'industry', 'business_type', 'company_size', 'website'];
+const ORG_CREATABLE_FIELDS = ['tenant_id', 'code', 'name', 'type', 'country', 'registration_number', 'contact_email', ...COMPANY_PROFILE_FIELDS];
+const ORG_UPDATABLE_FIELDS = ['name', 'type', 'country', 'registration_number', 'contact_email', ...COMPANY_PROFILE_FIELDS];
 
 // Returns a NEW object containing only the allowlisted keys present on the source.
 const pick = (obj, fields) =>
@@ -48,7 +51,11 @@ const getOrg = async (req, res, next) => {
     try {
         const org = await resolveOrg(req.params.id);
         if (!org) return next(new AppError('NOT_FOUND', 'Organization not found', 404));
-        return sendSuccess(req, res, org);
+        // Phase 2 integration (additive only): verified badge / trust score / risk
+        // level / reputation surfaced alongside the existing profile fields — no
+        // change to any field already returned here.
+        const verification = await require('../service/verification/badge').getPublicSummary(org.id);
+        return sendSuccess(req, res, { ...org.toJSON(), verification });
     } catch (err) {
         return next(err);
     }

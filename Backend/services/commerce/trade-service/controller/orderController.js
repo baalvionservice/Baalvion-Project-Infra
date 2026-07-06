@@ -86,7 +86,18 @@ const updateOrderStatus = async (req, res, next) => {
         if (!order) return undefined;
         const { status } = req.body;
         if (!status) return next(new AppError('BAD_REQUEST', 'status is required', 400));
+        const before = order.status;
         await order.update({ status });
+        // Notify the other party to this order (spec: order-status-change notifications).
+        const callerOrg = callerTenantId(req);
+        const recipient = order.buyer_org_id === callerOrg ? order.seller_org_id : order.buyer_org_id;
+        if (recipient) {
+            await db.Notification.create({
+                tenant_id: order.tenant_id, recipient_org_id: recipient, type: 'order_status_update',
+                title: 'Order status updated', message: `Order #${order.id} moved from '${before}' to '${status}'`,
+                entity_type: 'order', entity_id: String(order.id),
+            });
+        }
         return sendSuccess(req, res, order);
     } catch (err) {
         return next(err);

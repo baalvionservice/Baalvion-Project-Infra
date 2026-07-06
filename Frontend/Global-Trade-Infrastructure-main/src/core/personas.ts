@@ -232,10 +232,10 @@ export const PERSONAS: PersonaDef[] = [
     accent: 'text-blue-400',
     nav: [
       '/buyer/dashboard', '/marketplace', '/discovery', '/buyer/rfqs',
-      '/sourcing', '/suppliers', '/deals', '/negotiations', '/messages',
+      '/sourcing', '/suppliers', '/products', '/deals', '/negotiations', '/messages',
       '/orders', '/trade-ops', '/logistics-shipment', '/shipments', '/customs',
       '/payments', '/escrow', '/financials/invoices', '/insurance',
-      '/compliance', '/documents', '/intelligence-hub', '/profile',
+      '/compliance', '/documents', '/notifications', '/support', '/intelligence-hub', '/profile',
     ],
   },
   {
@@ -251,7 +251,7 @@ export const PERSONAS: PersonaDef[] = [
       '/marketplace', '/deals', '/negotiations', '/messages', '/orders', '/trade-ops',
       '/logistics-shipment', '/shipments', '/carriers', '/customs',
       '/payments', '/escrow', '/financials/invoices', '/insurance',
-      '/compliance', '/documents', '/intelligence-hub', '/profile',
+      '/compliance', '/documents', '/notifications', '/intelligence-hub', '/profile',
     ],
   },
   {
@@ -263,9 +263,9 @@ export const PERSONAS: PersonaDef[] = [
     icon: Users,
     accent: 'text-purple-400',
     nav: [
-      '/agent/dashboard', '/agent/requests', '/marketplace', '/discovery',
+      '/agent/dashboard', '/agent/requests', '/agent/tasks', '/marketplace', '/discovery',
       '/deals', '/negotiations', '/messages', '/suppliers', '/orders',
-      '/logistics-shipment', '/documents', '/intelligence-hub', '/profile',
+      '/logistics-shipment', '/documents', '/notifications', '/intelligence-hub', '/profile',
     ],
   },
 
