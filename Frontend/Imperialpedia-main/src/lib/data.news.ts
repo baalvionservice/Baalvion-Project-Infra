@@ -41,6 +41,10 @@ export interface NewsArticle {
   keyTakeaways?: string[];
   body: NewsBodyBlock[];
   tags?: string[];
+  /** View count, when the source (CMS) tracks it — omit from UI when absent rather than fabricating a number. */
+  views?: number;
+  /** Raw CMS custom fields (e.g. `breaking`, `videoUrl`) passed through for data-gated UI like the breaking ticker and video carousel. */
+  customFields?: Record<string, unknown>;
 }
 
 // ── Body block types ──────────────────────────────────────────────────────────
