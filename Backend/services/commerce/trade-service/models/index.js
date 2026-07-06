@@ -255,6 +255,25 @@ db.LogisticsAddress       = require('./tradeops/address')(sequelize, Sequelize.D
 db.TrackingEvent          = require('./tradeops/tracking_event')(sequelize, Sequelize.DataTypes);
 db.LogisticsRolePermission = require('./tradeops/logistics_role_permission')(sequelize, Sequelize.DataTypes);
 
+// ── Logistics Core Foundation, Phase 2 (warehouses, fleet) — schema
+// `tradeops`. All five carry tenant_id -> auto-scoped by the tenant hooks
+// below. Distinct from db.Facility (Phase 2 Trust/Verification: an org's
+// DECLARED factory/warehouse profile for KYC review) — Warehouse is the
+// operational record inventory/containers actually reference.
+db.Warehouse          = require('./tradeops/warehouse')(sequelize, Sequelize.DataTypes);
+db.InventoryMovement  = require('./tradeops/inventory_movement')(sequelize, Sequelize.DataTypes);
+db.Vehicle            = require('./tradeops/vehicle')(sequelize, Sequelize.DataTypes);
+db.Driver             = require('./tradeops/driver')(sequelize, Sequelize.DataTypes);
+db.FleetAssignment    = require('./tradeops/fleet_assignment')(sequelize, Sequelize.DataTypes);
+
+// ── Logistics Core Foundation, Phase 3 (cost ledger, incidents, returns) —
+// schema `tradeops`. All three carry tenant_id -> auto-scoped by the tenant
+// hooks below. ShipmentReturn is registered under that name (not `Return`) to
+// avoid the reserved word.
+db.ShipmentCharge = require('./tradeops/shipment_charge')(sequelize, Sequelize.DataTypes);
+db.Incident       = require('./tradeops/incident')(sequelize, Sequelize.DataTypes);
+db.ShipmentReturn = require('./tradeops/return')(sequelize, Sequelize.DataTypes);
+
 Object.values(db).forEach(model => {
     if (model && model.associate) model.associate(db);
 });

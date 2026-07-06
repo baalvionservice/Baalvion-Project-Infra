@@ -15,6 +15,7 @@ const QUEUE_NAMES = [
     'customs_submission', // customs gateway filing pipeline → ICEGATE/ACE/CDS/Mirsal (Prompt 9)
     'dispatch_webhook',   // dispatch orchestration lifecycle webhook fan-out (Prompt 11)
     'verification_monitor', // Phase 2 Continuous Monitoring — recompute compliance/risk/trust + expiry/fraud scans
+    'tracking_sync', // Logistics Core Foundation (Phase 2) — async/bulk GPS + carrier-webhook tracking-event ingestion
 ];
 const DLQ = 'dead-letter';
 
