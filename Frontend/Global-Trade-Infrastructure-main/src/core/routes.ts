@@ -11,6 +11,7 @@ import {
   Landmark, LockKeyhole, BarChart3, Database, Radio, Gavel, Scale, Siren, Server,
   Workflow, Cpu, RefreshCw, Ship, Building2, Radar, Boxes, GitBranch, FileCheck,
   Network, Eye, BadgeCheck, Users, Inbox, ClipboardCheck, Bell, Plug, LifeBuoy, Package,
+  MapPinned, Gauge, Thermometer, FileDown,
 } from 'lucide-react';
 
 export type RouteCategory =
@@ -103,6 +104,16 @@ export const ROUTE_REGISTRY: RouteMetadata[] = [
   { path: '/shipments', label: 'Shipments', icon: Ship, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
   { path: '/carriers', label: 'Carriers', icon: Truck, roles: TRADE, category: 'LOGISTICS' },
   { path: '/customs', label: 'Customs', icon: BadgeCheck, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+
+  // ── SHIPMENT TRACKING & GLOBAL VISIBILITY PLATFORM ──
+  { path: '/logistics-shipment/global-tracking', label: 'Global Tracking Dashboard', icon: Radar, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/geofences', label: 'Geofences', icon: MapPinned, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/alerts', label: 'Alert Center', icon: Bell, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/eta', label: 'ETA Prediction', icon: Gauge, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/iot-monitoring', label: 'IoT Monitoring', icon: Thermometer, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/proof-of-delivery', label: 'Proof of Delivery', icon: PackageCheck, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/analytics', label: 'Tracking Analytics', icon: BarChart3, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/reports', label: 'Tracking Reports', icon: FileDown, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
 
   // ── FREIGHT MANAGEMENT ──
   { path: '/logistics-shipment/freight', label: 'Freight Dashboard', icon: Ship, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },

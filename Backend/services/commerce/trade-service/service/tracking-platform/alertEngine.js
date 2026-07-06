@@ -8,7 +8,6 @@
  */
 const db = require('../../models');
 const realtime = require('../../realtime');
-const { emitLogisticsEvent } = require('../events/logisticsEvents');
 
 const ALERT_TYPES = [
     'gps_lost', 'offline', 'geofence_enter', 'geofence_exit', 'delay',
@@ -52,10 +51,6 @@ async function createAlert({ shipmentId, alertType, severity = 'medium', message
 
     await realtime.publish(`shipment:${shipmentId}`, 'alert', {
         id: alert.id, shipmentId, alertType, severity, message, triggeredAt: alert.triggered_at,
-    });
-
-    await emitLogisticsEvent('logisticsTrackingUpdated', {
-        shipmentId, source: 'alert', alertType, severity, tenantId: alert.tenant_id,
     });
 
     try {
