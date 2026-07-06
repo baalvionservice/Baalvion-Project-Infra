@@ -20,6 +20,7 @@ const { IndiaConnector } = require('../service/customs/connectors/indiaConnector
 const { USConnector } = require('../service/customs/connectors/usConnector');
 const { EUConnector } = require('../service/customs/connectors/euConnector');
 const { UAEConnector } = require('../service/customs/connectors/uaeConnector');
+const { ChinaConnector } = require('../service/customs/connectors/chinaConnector');
 
 const noop = () => Promise.resolve();
 // Fast connectors: zero-delay retry backoff so the harness is instant + deterministic.
@@ -27,6 +28,7 @@ const india = new IndiaConnector({ sleep: noop });
 const us = new USConnector({ sleep: noop });
 const eu = new EUConnector({ sleep: noop });
 const uae = new UAEConnector({ sleep: noop });
+const china = new ChinaConnector({ sleep: noop });
 
 let pass = 0;
 let fail = 0;
@@ -75,17 +77,24 @@ const uaeDecl = (simulate) => ({
     line_items: [{ hs_code: '610910', description: 'Cotton T-shirts', quantity: 5000, unit: 'PCS', unit_value: 20, origin_country: 'IN' }],
     metadata: simulate ? { simulate } : {},
 });
+const chinaDecl = (simulate) => ({
+    entry_type: 'import', destination_country: 'CN', origin_country: 'DE', incoterm: 'FOB',
+    currency: 'CNY', customs_value: 800000, reference: 'CN-REF-1',
+    importer: { name: 'Acme Trading (Shanghai) Co Ltd', tax_id: '91310000MA1K3XYZ12', country: 'CN' },
+    line_items: [{ hs_code: '8471300000', description: 'Laptops', quantity: 200, unit: 'PCS', unit_value: 2500, origin_country: 'DE' }],
+    metadata: simulate ? { simulate } : {},
+});
 
 (async () => {
     // ── schema vocabulary ────────────────────────────────────────────────────
     section('schema');
-    await t('channelForCountry routes IN/US/AE + EU members', () => {
+    await t('channelForCountry routes IN/US/AE/CN + EU members', () => {
         assert.strictEqual(schema.channelForCountry('IN'), schema.CHANNEL.ICEGATE);
         assert.strictEqual(schema.channelForCountry('us'), schema.CHANNEL.ACE);
         assert.strictEqual(schema.channelForCountry('AE'), schema.CHANNEL.UAE_MIRSAL);
         assert.strictEqual(schema.channelForCountry('DE'), schema.CHANNEL.EU_CDS);
         assert.strictEqual(schema.channelForCountry('FR'), schema.CHANNEL.EU_CDS);
-        assert.strictEqual(schema.channelForCountry('CN'), null);
+        assert.strictEqual(schema.channelForCountry('CN'), schema.CHANNEL.CHINA_SINGLE_WINDOW);
     });
     await t('normalizedResponse factory enforces channel + status', () => {
         const r = schema.normalizedResponse({ channel: schema.CHANNEL.ACE, status: schema.STATUS.ACCEPTED, accepted: true, gateway_reference: 'ENT1' });
@@ -139,7 +148,7 @@ const uaeDecl = (simulate) => ({
         assert.throws(() => new CustomsConnector({ channel: schema.CHANNEL.ACE }), /abstract/);
     });
     await t('every connector extends CustomsConnector', () => {
-        [india, us, eu, uae].forEach((c) => assert.ok(c instanceof CustomsConnector));
+        [india, us, eu, uae, china].forEach((c) => assert.ok(c instanceof CustomsConnector));
     });
 
     // ── connector jurisdiction validation ─────────────────────────────────────
@@ -159,6 +168,12 @@ const uaeDecl = (simulate) => ({
     await t('Mirsal requires business code / TRN', async () => {
         const d = uaeDecl(); delete d.importer.tax_id;
         await assert.rejects(uae.submit(d), (e) => e.kind === schema.FAILURE_KIND.VALIDATION && e.messages.some((m) => m.code === 'AE_MISSING_BUSINESS_CODE'));
+    });
+    await t('China Single Window requires USCC + 10-digit HS', async () => {
+        const d = chinaDecl(); delete d.importer.tax_id;
+        await assert.rejects(china.submit(d), (e) => e.kind === schema.FAILURE_KIND.VALIDATION && e.messages.some((m) => m.code === 'CN_MISSING_USCC'));
+        const d2 = chinaDecl(); d2.line_items[0].hs_code = '847130'; // too short (6 digits)
+        await assert.rejects(china.submit(d2), (e) => e.kind === schema.FAILURE_KIND.VALIDATION && e.messages.some((m) => m.code === 'CN_SHORT_HS'));
     });
 
     // ── happy-path submission + response normalization ────────────────────────
@@ -190,9 +205,15 @@ const uaeDecl = (simulate) => ({
         assert.strictEqual(normalized.accepted, true);
         assert.ok(/^DXB/.test(normalized.gateway_reference));
     });
-    await t('all four gateways normalize to the SAME shape', async () => {
+    await t('China Single Window accepts → normalized accepted with declaration number', async () => {
+        const { normalized } = await china.submit(chinaDecl());
+        assert.strictEqual(normalized.channel, 'china_single_window');
+        assert.strictEqual(normalized.accepted, true);
+        assert.ok(/^CN/.test(normalized.gateway_reference));
+    });
+    await t('all five gateways normalize to the SAME shape', async () => {
         const keys = ['channel', 'status', 'accepted', 'gateway_reference', 'gateway_status', 'messages', 'retryable', 'received_at', 'raw'];
-        for (const [c, d] of [[india, indiaDecl()], [us, usDecl()], [eu, euDecl()], [uae, uaeDecl()]]) {
+        for (const [c, d] of [[india, indiaDecl()], [us, usDecl()], [eu, euDecl()], [uae, uaeDecl()], [china, chinaDecl()]]) {
             const { normalized } = await c.submit(d);
             assert.deepStrictEqual(Object.keys(normalized).sort(), [...keys].sort());
         }
@@ -244,7 +265,7 @@ const uaeDecl = (simulate) => ({
         assert.ok(registry.getConnectorForCountry('US') instanceof USConnector);
         assert.ok(registry.getConnectorForCountry('NL') instanceof EUConnector);
         assert.ok(registry.getConnectorForCountry('AE') instanceof UAEConnector);
-        assert.strictEqual(registry.getConnectorForCountry('CN'), null);
+        assert.ok(registry.getConnectorForCountry('CN') instanceof ChinaConnector);
     });
     await t('registry is pluggable — register + reset an override', () => {
         const fake = new USConnector({ gatewayName: 'FAKE' });
@@ -254,9 +275,9 @@ const uaeDecl = (simulate) => ({
         assert.notStrictEqual(registry.getConnectorByChannel(schema.CHANNEL.ACE), fake);
         assert.ok(registry.getConnectorByChannel(schema.CHANNEL.ACE) instanceof USConnector);
     });
-    await t('supportedChannels lists all four gateways', () => {
+    await t('supportedChannels lists all five gateways', () => {
         const chans = registry.supportedChannels().sort();
-        assert.deepStrictEqual(chans, ['ace', 'eu_cds', 'icegate', 'mirsal']);
+        assert.deepStrictEqual(chans, ['ace', 'china_single_window', 'eu_cds', 'icegate', 'mirsal']);
     });
 
     // ── summary ───────────────────────────────────────────────────────────────

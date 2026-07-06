@@ -62,6 +62,7 @@ interface CmsContent {
   category?: { id: string; name: string; slug: string } | null;
   status: string;
   publishedAt?: string | null;
+  viewCount?: number;
 }
 
 export interface CmsSitePage {
@@ -103,6 +104,24 @@ async function listContent(params: Record<string, string | number> = {}): Promis
   }
   const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
   return j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+}
+
+/**
+ * Same as `listContent`, but also surfaces the response's pagination total so
+ * callers (the /news infinite-scroll feed) can tell when there's another page.
+ */
+async function listContentPaged(
+  params: Record<string, string | number> = {},
+): Promise<{ items: CmsContent[]; total: number }> {
+  const qs = new URLSearchParams();
+  qs.set('limit', String(params.limit ?? 200));
+  for (const [k, v] of Object.entries(params)) {
+    if (k !== 'limit') qs.set(k, String(v));
+  }
+  const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
+  const items = j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+  const total = typeof j?.pagination?.total === 'number' ? j.pagination.total : items.length;
+  return { items, total };
 }
 
 function blocksToHtml(blocks?: Block[]): string {
@@ -184,6 +203,10 @@ export interface CmsArticle {
    * to a stock/placeholder image) when this is absent.
    */
   featuredImage?: string;
+  /** View count, when the CMS tracks it — omit from UI when absent rather than fabricating a number. */
+  views?: number;
+  /** Raw CMS custom fields (e.g. `breaking`, `videoUrl`) passed through for data-gated UI like the breaking ticker and video carousel. */
+  customFields?: Record<string, any>;
 }
 
 function toArticle(c: CmsContent): CmsArticle {
@@ -205,6 +228,8 @@ function toArticle(c: CmsContent): CmsArticle {
     updatedAt: c.publishedAt ?? undefined,
     contentType: c.contentType,
     featuredImage: c.featuredImage ?? undefined,
+    views: typeof c.viewCount === 'number' ? c.viewCount : undefined,
+    customFields: c.customFields ?? undefined,
   };
 }
 
@@ -234,6 +259,18 @@ export async function cmsGetNews(limit = 50): Promise<CmsArticle[]> {
   return items
     .map(toArticle)
     .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+}
+
+/** Paginated news content for the /news infinite-scroll feed. */
+export async function cmsGetNewsPage(
+  page: number,
+  limit = 12,
+): Promise<{ items: CmsArticle[]; hasMore: boolean }> {
+  const { items, total } = await listContentPaged({ contentType: 'news', page, limit });
+  const sorted = items
+    .map(toArticle)
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  return { items: sorted, hasMore: page * limit < total };
 }
 
 /**

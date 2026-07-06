@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import seedData from '../../../docs/seed-data.json';
 import { useAuth } from '@/hooks/useAuth';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { sharedSignInUrl } from '@/lib/shared-auth';
 
 /**
@@ -109,6 +110,7 @@ export function PublicNavbar() {
             <span className="hidden lg:block w-px h-5 bg-slate-200" />
 
             <LanguageSwitcher />
+            <ThemeToggle />
 
             {isAuthenticated ? (
               <Link href={dashboardHref}>

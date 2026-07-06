@@ -10,7 +10,7 @@ import {
   ShieldCheck, Globe, History, Settings, Compass, Zap, Activity, Crosshair,
   Landmark, LockKeyhole, BarChart3, Database, Radio, Gavel, Scale, Siren, Server,
   Workflow, Cpu, RefreshCw, Ship, Building2, Radar, Boxes, GitBranch, FileCheck,
-  Network, Eye, BadgeCheck, Users, Inbox, ClipboardCheck, Bell, Plug,
+  Network, Eye, BadgeCheck, Users, Inbox, ClipboardCheck, Bell, Plug, LifeBuoy, Package,
 } from 'lucide-react';
 
 export type RouteCategory =
@@ -72,6 +72,7 @@ export const ROUTE_REGISTRY: RouteMetadata[] = [
   { path: '/marketplace/prices', label: 'Market Prices', icon: BarChart3, roles: TRADE, category: 'MARKETPLACE' },
   { path: '/discovery/radar', label: 'Opportunity Radar', icon: Radar, roles: TRADE, category: 'MARKETPLACE' },
   { path: '/discovery/signals', label: 'Market Signals', icon: Zap, roles: TRADE, category: 'MARKETPLACE' },
+  { path: '/products', label: 'Products', icon: Package, roles: [USER_ROLES.BUYER_NODE], category: 'MARKETPLACE' },
 
   // ── SOURCING ──
   { path: '/buyer/rfqs', label: 'Buyer RFQs', icon: FileText, roles: [USER_ROLES.BUYER_NODE], category: 'SOURCING' },
@@ -91,6 +92,7 @@ export const ROUTE_REGISTRY: RouteMetadata[] = [
   { path: '/trade-management', label: 'Trade Management', icon: Workflow, roles: [...TRADE, ...ADMIN], category: 'EXECUTION' },
   { path: '/trade-ops', label: 'Trade Operations', icon: Ship, roles: [...TRADE, ...ADMIN], category: 'EXECUTION' },
   { path: '/agents', label: 'Agent Marketplace', icon: Users, roles: TRADE, category: 'EXECUTION' },
+  { path: '/agent/tasks', label: 'Tasks', icon: ClipboardCheck, roles: [USER_ROLES.AGENT, ...ADMIN], category: 'EXECUTION' },
   { path: '/field/operations', label: 'Field Operations', icon: Crosshair, roles: ADMIN, category: 'EXECUTION' },
 
   // ── LOGISTICS ──
@@ -185,6 +187,8 @@ export const ROUTE_REGISTRY: RouteMetadata[] = [
   // ── SETTINGS ──
   { path: '/profile', label: 'Profile & Organization', icon: Settings, roles: [...TRADE, ...ADMIN], category: 'ADMINISTRATION' },
   { path: '/settings/integrations', label: 'Integrations', icon: Plug, roles: [...TRADE, ...ADMIN], category: 'ADMINISTRATION' },
-  { path: '/settings/notifications', label: 'Notifications', icon: Bell, roles: [...TRADE, ...ADMIN], category: 'ADMINISTRATION' },
+  { path: '/settings/notifications', label: 'Notification Preferences', icon: Bell, roles: [...TRADE, ...ADMIN], category: 'ADMINISTRATION' },
   { path: '/settings/security', label: 'Account Security', icon: LockKeyhole, roles: [...TRADE, ...ADMIN], category: 'ADMINISTRATION' },
+  { path: '/notifications', label: 'Notifications', icon: Bell, roles: [...TRADE, USER_ROLES.AGENT, ...ADMIN], category: 'ADMINISTRATION' },
+  { path: '/support', label: 'Support', icon: LifeBuoy, roles: [USER_ROLES.BUYER_NODE, ...ADMIN], category: 'ADMINISTRATION' },
 ];

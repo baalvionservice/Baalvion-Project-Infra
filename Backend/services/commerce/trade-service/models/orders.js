@@ -11,8 +11,15 @@ module.exports = (sequelize, DataTypes) => {
         price: { type: DataTypes.DECIMAL(15, 4) },
         total_value: { type: DataTypes.DECIMAL(20, 2) },
         currency: { type: DataTypes.STRING(10), defaultValue: 'USD' },
+        // Phase 1 spec flow (draft/processing/ready_to_ship/dispatched/in_transit/
+        // completed) added alongside the original values in migration 023 — additive,
+        // nothing already stored is invalidated.
         status: {
-            type: DataTypes.ENUM('pending', 'confirmed', 'in_production', 'shipped', 'delivered', 'cancelled'),
+            type: DataTypes.ENUM(
+                'draft', 'pending', 'confirmed', 'processing', 'in_production',
+                'ready_to_ship', 'dispatched', 'shipped', 'in_transit', 'delivered',
+                'completed', 'cancelled',
+            ),
             defaultValue: 'pending',
         },
         fulfillment_state: {

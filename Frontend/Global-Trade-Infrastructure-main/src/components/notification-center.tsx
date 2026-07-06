@@ -17,14 +17,14 @@ import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
-const icons = {
+const icons: Record<string, typeof MessageSquare> = {
   message: MessageSquare,
   deal: CheckCircle2,
   order: Package,
   system: AlertTriangle,
 };
 
-const colors = {
+const colors: Record<string, string> = {
   message: 'text-blue-500 bg-blue-50',
   deal: 'text-green-500 bg-green-50',
   order: 'text-purple-500 bg-purple-50',
@@ -72,7 +72,7 @@ export function NotificationCenter() {
             </div>
           ) : (
             notifications.map((n) => {
-              const Icon = (icons as any)[n.type];
+              const Icon = icons[n.type] ?? AlertTriangle;
               return (
                 <DropdownMenuItem 
                   key={n.id} 
@@ -82,7 +82,7 @@ export function NotificationCenter() {
                   )}
                   onClick={() => handleRead(n.id)}
                 >
-                  <div className={cn("p-2 rounded-full shrink-0", (colors as any)[n.type])}>
+                  <div className={cn("p-2 rounded-full shrink-0", colors[n.type])}>
                     <Icon className="h-4 w-4" />
                   </div>
                   <div className="flex-1 space-y-1 overflow-hidden">
@@ -103,8 +103,8 @@ export function NotificationCenter() {
           )}
         </div>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="justify-center text-xs text-primary font-medium focus:text-primary">
-          View All Notifications
+        <DropdownMenuItem asChild className="justify-center text-xs text-primary font-medium focus:text-primary">
+          <Link href="/notifications">View All Notifications</Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

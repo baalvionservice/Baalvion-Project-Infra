@@ -10,7 +10,8 @@
  *   - RS256 (auth-service):  canonical `org_id` is mapped to `tenantId` (compat layer).
  * Async because RS256 verification fetches JWKS. HS256 issuance + utils/jwtserver.js UNCHANGED.
  *
- *  - role admin/owner/super_admin -> bypass (sees all tenants)
+ *  - role admin/owner/super_admin/reviewer -> bypass (sees all tenants; reviewer
+ *    added for the Phase 2 Manual Review Console, which is inherently cross-org)
  *  - no/invalid token             -> no tenant (no auto-scoping; protected routes still 401 in authMiddleware)
  */
 const { AsyncLocalStorage } = require('async_hooks');
@@ -35,7 +36,7 @@ async function tenantContext(req, res, next) {
             ctx.role = (a.roles && a.roles[0]) || null;
             ctx.userId = a.userId;
             ctx.orgCode = (a.claims && a.claims.orgCode) || null;
-            ctx.bypass = (a.roles || []).some((r) => r === 'admin' || r === 'owner' || r === 'super_admin');
+            ctx.bypass = (a.roles || []).some((r) => r === 'admin' || r === 'owner' || r === 'super_admin' || r === 'reviewer');
             ctx.source = a.source;
         } catch { /* invalid token → anonymous (no scoping); protected routes still 401 in authMiddleware */ }
     } else {
@@ -48,7 +49,7 @@ async function tenantContext(req, res, next) {
             ctx.tenantId = a.orgId || null;
             ctx.role = (a.roles && a.roles[0]) || null;
             ctx.userId = a.userId;
-            ctx.bypass = (a.roles || []).some((r) => r === 'admin' || r === 'owner' || r === 'super_admin');
+            ctx.bypass = (a.roles || []).some((r) => r === 'admin' || r === 'owner' || r === 'super_admin' || r === 'reviewer');
             ctx.source = 'gateway';
         }
     }

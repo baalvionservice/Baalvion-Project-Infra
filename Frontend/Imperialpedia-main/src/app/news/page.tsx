@@ -1,10 +1,17 @@
-import { NewsArticle, newsArticles, NewsCategory } from "@/lib/data.news";
-import { getPublishedNews } from "@/services/data/cms-public";
+import { newsArticles, NewsCategory } from "@/lib/data.news";
+import { getPublishedNews, listCmsContent, cmsContentToNews } from "@/services/data/cms-public";
 import { buildMetadata } from "@/lib/seo";
-import { formatDate } from "@/services/format-date";
-import Image from "next/image";
-import Link from "next/link";
-import { ExploreNewsSection } from "./ExploreNewsSection";
+import { env } from "@/config/env";
+
+import { BreakingTicker } from "@/components/news/BreakingTicker";
+import { NewsHero } from "@/components/news/NewsHero";
+import { TrendingRail } from "@/components/news/TrendingRail";
+import { CategorySection } from "@/components/news/CategorySection";
+import { TodayHighlights } from "@/components/news/TodayHighlights";
+import { VideoCarousel } from "@/components/news/VideoCarousel";
+import { LatestFeed } from "@/components/news/LatestFeed";
+import { NewsSidebar } from "@/components/news/NewsSidebar";
+import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
 
 export const metadata = buildMetadata({
   title: "Financial News and Analysis",
@@ -12,104 +19,25 @@ export const metadata = buildMetadata({
     "Stay informed with the latest financial news, market insights, and expert analysis. Our news section covers global markets, economic trends, and investment strategies to help you make informed decisions.",
 });
 
-const CATEGORY_COLORS: Record<NewsCategory, string> = {
-  Markets: "bg-blue-100 text-blue-700",
-  Economy: "bg-green-100 text-green-700",
-  Stocks: "bg-violet-100 text-violet-700",
-  Crypto: "bg-orange-100 text-orange-700",
-  PersonalFinance: "bg-teal-100 text-teal-700",
-  RealEstate: "bg-rose-100 text-rose-700",
-  ETFs: "bg-indigo-100 text-indigo-700",
-  Bonds: "bg-yellow-100 text-yellow-700",
-  Guides: "bg-gray-100 text-gray-700",
-  Editorial: "bg-pink-100 text-pink-700",
-};
-
-// ─── Sub-components ──────────────────────────────────────────────────────────
-
-function CategoryBadge({ category }: { category: NewsCategory }) {
-  return (
-    <span
-      className={`inline-block text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded ${CATEGORY_COLORS[category]}`}
-    >
-      {category}
-    </span>
-  );
-}
-
-/** Large hero card — the featured article */
-function FeaturedArticleCard({ article }: { article: NewsArticle }) {
-  return (
-    <Link href={`/${article.slug}`} className="group block">
-      <div className="relative w-full md:mt-6 overflow-hidden aspect-[16/9] lg:aspect-[21/9]">
-        <Image
-          src={article.imageUrl}
-          alt={article.title}
-          fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
-          sizes="(max-width: 768px) 100vw, 75vw"
-          priority
-        />
-        {/* gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-      </div>
-      {/* text */}
-      <div className="py-5 space-y-3">
-        <CategoryBadge category={article.category} />
-        <h2 className="text-foreground text-2xl md:text-3xl font-bold leading-snug max-w-2xl group-hover:underline underline-offset-4">
-          {article.title}
-        </h2>
-
-        <p className="text-gray-500 text-xs">
-          By {article.author.name} · {formatDate(article.publishedAt)}
-        </p>
-      </div>
-    </Link>
-  );
-}
-
-/** Horizontal card (image left, text right) — for the sidebar list */
-function HorizontalArticleCard({ article }: { article: NewsArticle }) {
-  return (
-    <Link
-      href={`/${article.slug}`}
-      className="group flex gap-3 items-center py-4 border-b border-gray-100 last:border-none"
-    >
-      <div className="relative flex-shrink-0 w-32 h-full overflow-hidden">
-        <Image
-          src={article.imageUrl}
-          alt={article.title}
-          fill
-          className="object-cover h-full w-full transition-transform duration-300 group-hover:scale-105"
-          sizes="96px"
-        />
-      </div>
-      <div className="flex-1 min-w-0 space-y-1">
-        <CategoryBadge category={article.category} />
-        <h3 className="text-sm font-semibold text-foreground leading-snug group-hover:underline line-clamp-2">
-          {article.title}
-        </h3>
-        <div className="text-foreground text-sm">
-          By <span className="">{article.author.name}</span> ·{" "}
-          {formatDate(article.publishedAt)}
-        </div>
-      </div>
-    </Link>
-  );
-}
-
-// ─── Page ────────────────────────────────────────────────────────────────────
+const FEED_PAGE_SIZE = 12;
+const NICHE_CATEGORIES: NewsCategory[] = [
+  "Markets",
+  "Economy",
+  "Stocks",
+  "Crypto",
+  "PersonalFinance",
+  "RealEstate",
+  "ETFs",
+  "Bonds",
+];
 
 export default async function NewsPage() {
   // Live editorial news published from admin-platform via the CMS; fall back to the
   // static set while no `news` content is published yet (incremental rollout).
-  const liveNews = await getPublishedNews();
+  const liveNews = await getPublishedNews(60);
   const newsList = liveNews.length > 0 ? liveNews : newsArticles;
 
   const featured = newsList.find((a) => a.featured) ?? newsList[0];
-  const rest = newsList.filter((a) => a.slug !== featured?.slug);
-  const sidebarArticles = rest.slice(0, 3);
-  const gridArticles = rest.slice(3);
 
   if (!featured) {
     return (
@@ -120,41 +48,75 @@ export default async function NewsPage() {
     );
   }
 
+  const rest = newsList.filter((a) => a.slug !== featured.slug);
+  const trending = rest.slice(0, 12);
+
+  // Initial page of the paginated "Latest News" feed (SSR first page; the client
+  // component fetches subsequent pages from /api/news/latest).
+  let initialFeed = rest;
+  let initialHasMore = false;
+  try {
+    const { items, total } = await listCmsContent({ contentType: "news", page: 1, limit: FEED_PAGE_SIZE });
+    if (items.length) {
+      initialFeed = items.map(cmsContentToNews);
+      initialHasMore = FEED_PAGE_SIZE < total;
+    }
+  } catch {
+    // keep the static fallback slice
+  }
+
+  const base = (env.siteUrl || "https://imperialpedia.com").replace(/\/$/, "");
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    itemListElement: newsList.slice(0, 25).map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      name: a.title,
+      url: `${base}/${a.slug}`,
+    })),
+  };
+
   return (
-    <div className=" min-h-screen">
-      {/* ── Hero header ── */}
-      <div className=" pt-14  pb-5 lg:pt-20 text-center px-4">
-        <h1 className="text-3xl lg:text-4xl font-bold tracking-wide">News</h1>
-        <p className="mt-3 text-foreground text-base lg:text-lg max-w-2xl mx-auto">
-          Follow the latest market-moving news and the companies that are making
-          it happen.
-        </p>
-      </div>
+    <div className="min-h-screen">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }} />
 
-      {/* ── Main content ── */}
-      <div className="max-w-7xl mx-auto px-4 py-4 space-y-12">
-        {/* ── Top section: featured + sidebar ── */}
+      <BreakingTicker articles={newsList} />
+
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-16">
+        {/* Hero + trending */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Sidebar latest */}
-          <aside className="flex flex-col">
-            {sidebarArticles.map((article) => (
-              <HorizontalArticleCard key={article.id} article={article} />
-            ))}
-          </aside>
-          {/* Featured (takes 2/3 width) */}
           <div className="lg:col-span-2">
-            <FeaturedArticleCard article={featured} />
+            <NewsHero article={featured} />
           </div>
+          <TrendingRail articles={trending} />
         </section>
 
-        {/* ── Article grid ── */}
-        <section className="pb-4 md:pb-12">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
-            Explore News
-          </h2>
+        {/* Niche category rails */}
+        {NICHE_CATEGORIES.map((category) => (
+          <CategorySection
+            key={category}
+            category={category}
+            articles={newsList.filter((a) => a.category === category)}
+          />
+        ))}
 
-          <ExploreNewsSection articles={gridArticles} />
+        <TodayHighlights articles={rest} />
+
+        <VideoCarousel articles={newsList} />
+
+        {/* Latest news + sidebar */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <h2 className="mb-6 text-sm font-bold uppercase tracking-widest text-muted-foreground">
+              Latest News
+            </h2>
+            <LatestFeed initialArticles={initialFeed} initialHasMore={initialHasMore} />
+          </div>
+          <NewsSidebar articles={newsList} />
         </section>
+
+        <NewsletterBand />
       </div>
     </div>
   );

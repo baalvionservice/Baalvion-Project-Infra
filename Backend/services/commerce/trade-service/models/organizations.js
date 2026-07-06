@@ -6,6 +6,13 @@ module.exports = (sequelize, DataTypes) => {
         // Stable external code (e.g. 'COMP-101') the frontend addresses orgs by.
         code: { type: DataTypes.STRING(64), unique: true },
         name: { type: DataTypes.STRING(255), allowNull: false },
+        // Phase 1 company-profile fields (spec: legal name / industry / business
+        // type / company size / website) — added in migration 023.
+        legal_name: { type: DataTypes.STRING(255) },
+        industry: { type: DataTypes.STRING(120) },
+        business_type: { type: DataTypes.STRING(120) },
+        company_size: { type: DataTypes.STRING(40) },
+        website: { type: DataTypes.STRING(255) },
         type: {
             type: DataTypes.ENUM('buyer', 'seller', 'carrier', 'bank', 'insurer', 'regulator'),
         },
@@ -26,6 +33,10 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.VIRTUAL,
             get() { return this.getDataValue('kyc_status'); },
         },
+        // Phase 2 Verification Center rollup (migration 025) — flips true once every
+        // checklist category (identity/company/tax/bank/.../trust_score) is approved.
+        verified_badge: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        badge_issued_at: { type: DataTypes.DATE },
     }, {
         schema: 'trade',
         tableName: 'organizations',

@@ -332,9 +332,11 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
       raw.featuredImage ||
       articleArtDataUri({ title: raw.title, category: raw.category?.name, tags: raw.tagIds, excerpt: raw.excerpt, seed: raw.id }),
     slug: raw.slug,
-    featured: false,
+    featured: cf.featured === true,
     body: blocksToNewsBody(raw.contentBlocks),
     tags: raw.tagIds ?? [],
+    views: typeof raw.viewCount === 'number' ? raw.viewCount : undefined,
+    customFields: raw.customFields ?? undefined,
   };
 }
 

@@ -9,8 +9,10 @@ const path = require('path');
 const config = require('../config/appConfig');
 
 // ── Trade document taxonomy ──────────────────────────────────────────────────
-// The five first-class trade documents plus an escape hatch. These map 1:1 to the
-// doc_type CHECK constraint in migration 011.
+// The five first-class trade documents plus an escape hatch, plus the Phase 2 KYC/
+// verification doc types (identity, tax, bank, facility, product certs) added
+// additively in migration 025. These map 1:1 to the doc_type CHECK constraint in
+// tradeops.documents (migrations 011 + 025).
 const DOC_TYPES = Object.freeze([
     'commercial_invoice',   // Invoice
     'packing_list',         // Packing List
@@ -18,6 +20,9 @@ const DOC_TYPES = Object.freeze([
     'certificate_of_origin',// Certificate of Origin
     'insurance_document',   // Insurance Docs
     'other',
+    'government_id', 'passport', 'driving_license', 'selfie',
+    'tax_certificate', 'bank_letter', 'utility_bill', 'lease_agreement',
+    'product_certificate', 'quality_certificate', 'safety_certificate', 'inspection_report',
 ]);
 
 const CLASSIFICATIONS = Object.freeze(['PUBLIC', 'OPERATIONAL', 'CONFIDENTIAL', 'RESTRICTED']);

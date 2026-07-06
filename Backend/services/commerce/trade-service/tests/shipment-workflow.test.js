@@ -27,8 +27,14 @@ describe('stateMachine (pure, deterministic)', () => {
         ['DELIVERED', 'complete', 'COMPLETED'],
     ];
 
-    test('exposes the 13 canonical states', () => {
-        expect(sm.ALL_STATES).toHaveLength(13);
+    test('exposes the 13 canonical states plus the Phase 1 granular sub-stages', () => {
+        // 13 original happy-path/terminal states + 7 optional granular sub-stages
+        // (Logistics Core Foundation, Phase 1 — see stateMachine.js header comment).
+        expect(sm.ALL_STATES).toHaveLength(20);
+        expect(sm.ALL_STATES).toEqual(expect.arrayContaining([
+            'CARRIER_ASSIGNED', 'PICKUP_SCHEDULED', 'PICKED_UP', 'CONTAINER_STUFFING',
+            'TRANSSHIPMENT', 'PORT_ARRIVAL', 'OUT_FOR_DELIVERY',
+        ]));
         expect(sm.INITIAL_STATE).toBe('CREATED');
         expect(sm.TERMINAL_STATES).toEqual(expect.arrayContaining(['COMPLETED', 'FAILED']));
     });

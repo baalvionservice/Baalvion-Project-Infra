@@ -16,6 +16,7 @@ const { IndiaConnector } = require('./indiaConnector');
 const { USConnector } = require('./usConnector');
 const { EUConnector } = require('./euConnector');
 const { UAEConnector } = require('./uaeConnector');
+const { ChinaConnector } = require('./chinaConnector');
 
 // channel → factory (lazy: construct once, on demand).
 const FACTORIES = {
@@ -23,6 +24,7 @@ const FACTORIES = {
     [CHANNEL.ACE]: () => new USConnector(),
     [CHANNEL.EU_CDS]: () => new EUConnector(),
     [CHANNEL.UAE_MIRSAL]: () => new UAEConnector(),
+    [CHANNEL.CHINA_SINGLE_WINDOW]: () => new ChinaConnector(),
 };
 
 const instances = {};
@@ -68,6 +70,7 @@ function resetConnectors() {
     FACTORIES[CHANNEL.ACE] = () => new USConnector();
     FACTORIES[CHANNEL.EU_CDS] = () => new EUConnector();
     FACTORIES[CHANNEL.UAE_MIRSAL] = () => new UAEConnector();
+    FACTORIES[CHANNEL.CHINA_SINGLE_WINDOW] = () => new ChinaConnector();
 }
 
 /** The channels the registry can currently serve. */
@@ -87,4 +90,5 @@ module.exports = {
     USConnector,
     EUConnector,
     UAEConnector,
+    ChinaConnector,
 };
