@@ -33,9 +33,11 @@ const markRead = async (req, res, next) => {
 
 const markAllRead = async (req, res, next) => {
     try {
-        const { recipient_org_id } = req.body;
-        const where = { is_read: false };
-        if (recipient_org_id) where.recipient_org_id = recipient_org_id;
+        // Scope from the authenticated caller's own org — never trust a client-supplied
+        // recipient_org_id, which would let any caller mark another org's notifications read.
+        const recipientOrgId = (req.auth && (req.auth.orgId || req.auth.tenantId)) || null;
+        if (!recipientOrgId) return next(new AppError('UNAUTHORIZED', 'Authenticated org context required', 401));
+        const where = { is_read: false, recipient_org_id: recipientOrgId };
         const [affectedCount] = await db.Notification.update({ is_read: true }, { where });
         return sendSuccess(req, res, { updated: affectedCount });
     } catch (err) {

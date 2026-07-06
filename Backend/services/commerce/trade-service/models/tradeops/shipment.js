@@ -23,6 +23,8 @@ module.exports = (sequelize, DataTypes) => {
         destination_port: { type: DataTypes.TEXT },
         origin_country: { type: DataTypes.TEXT },
         destination_country: { type: DataTypes.TEXT },
+        pickup_address_id: { type: DataTypes.UUID },
+        delivery_address_id: { type: DataTypes.UUID },
         status: {
             type: DataTypes.TEXT,
             allowNull: false,
@@ -65,6 +67,12 @@ module.exports = (sequelize, DataTypes) => {
         Shipment.hasMany(db.ShipmentEvent, { as: 'events', foreignKey: 'shipment_id' });
         Shipment.hasMany(db.ShipmentDocument, { as: 'documents', foreignKey: 'shipment_id' });
         Shipment.hasMany(db.ShipmentStatusHistory, { as: 'statusHistory', foreignKey: 'shipment_id' });
+        // Logistics Core Foundation, Phase 1:
+        Shipment.belongsTo(db.LogisticsAddress, { as: 'pickupAddress', foreignKey: 'pickup_address_id' });
+        Shipment.belongsTo(db.LogisticsAddress, { as: 'deliveryAddress', foreignKey: 'delivery_address_id' });
+        Shipment.hasMany(db.Container, { as: 'containers', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.LogisticsPackage, { as: 'packages', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.TrackingEvent, { as: 'trackingEvents', foreignKey: 'shipment_id' });
     };
 
     return Shipment;

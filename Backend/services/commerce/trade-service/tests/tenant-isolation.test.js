@@ -1,52 +1,40 @@
 'use strict';
 const request = require('supertest');
 const app = require('../index');
-const { signAccessToken } = require('../utils/jwtserver');
+const { gatewayHeaders } = require('./helpers/gatewayAuth');
 
-const demo = signAccessToken({ id: 1, email: 'd@x', role: 'operator', tenantId: 'T-DEMO', orgCode: 'COMP-101' }, '1h');
-const other = signAccessToken({ id: 7, email: 'o@x', role: 'operator', tenantId: 'T-JESTOTHER', orgCode: 'COMP-101' }, '1h');
-const admin = signAccessToken({ id: 9, email: 'a@x', role: 'admin', tenantId: 'T-DEMO', orgCode: 'COMP-555' }, '1h');
+// orders' own HTTP surface is retired (routes/orderRoutes.js → 410 Gone; fulfillment
+// moved to order-execution-service). The mount is a path-less catch-all middleware
+// that runs BEFORE any auth check, so every method/path/identity combination gets
+// the same 410 — that auth-independence is itself the property worth asserting.
+// The dual-party/tenant-scoping concern this suite used to cover for orders is now
+// covered for the live entity in purchase-orders.test.js.
+const demo = gatewayHeaders({ userId: 'u-demo', orgId: 'T-DEMO', roles: ['client'] });
+const admin = gatewayHeaders({ userId: 'u-admin', orgId: 'T-DEMO', roles: ['admin'] });
 
-describe('tenant isolation (orders)', () => {
-    let orderId;
-
-    it('creates an order under T-DEMO', async () => {
-        const r = await request(app).post('/v1/orders').set('Authorization', `Bearer ${demo}`)
-            .send({ deal_id: 'JT', product: 'JEST-ISO', quantity: 1, price: 1, total_value: 1, currency: 'USD', status: 'pending' });
-        expect(r.status).toBe(201);
-        expect(r.body.data.tenant_id).toBe('T-DEMO');
-        orderId = r.body.data.id;
-    });
-
-    it('blocks anonymous reads (401)', async () => {
+describe('orders HTTP surface is retired (410 GONE)', () => {
+    it('GONE for anonymous callers', async () => {
         const r = await request(app).get('/v1/orders');
-        expect(r.status).toBe(401);
+        expect(r.status).toBe(410);
+        expect(r.body.error.code).toBe('GONE');
     });
 
-    it('hides the order from another tenant (404)', async () => {
-        const r = await request(app).get(`/v1/orders/${orderId}`).set('Authorization', `Bearer ${other}`);
-        expect(r.status).toBe(404);
+    it('GONE for an authenticated caller (list)', async () => {
+        const r = await request(app).get('/v1/orders').set(demo);
+        expect(r.status).toBe(410);
     });
 
-    it('does not leak it in another tenant list', async () => {
-        const r = await request(app).get('/v1/orders').set('Authorization', `Bearer ${other}`);
-        expect(r.status).toBe(200);
-        const leaked = (r.body.data.items || []).some((o) => String(o.id) === String(orderId));
-        expect(leaked).toBe(false);
+    it('GONE for an admin caller (get by id)', async () => {
+        const r = await request(app).get('/v1/orders/1').set(admin);
+        expect(r.status).toBe(410);
     });
 
-    it('allows the owning tenant (200)', async () => {
-        const r = await request(app).get(`/v1/orders/${orderId}`).set('Authorization', `Bearer ${demo}`);
-        expect(r.status).toBe(200);
-    });
-
-    it('lets admin bypass and see it', async () => {
-        const r = await request(app).get(`/v1/orders/${orderId}`).set('Authorization', `Bearer ${admin}`);
-        expect(r.status).toBe(200);
-    });
-
-    afterAll(async () => {
+    it('GONE on write attempts (create) — no order is ever persisted', async () => {
+        const r = await request(app).post('/v1/orders').set(demo)
+            .send({ deal_id: 'JT', product: 'JEST-ISO', quantity: 1, price: 1, total_value: 1, currency: 'USD', status: 'pending' });
+        expect(r.status).toBe(410);
         const db = require('../models');
-        await db.Order.destroy({ where: { deal_id: 'JT' } });
+        const leaked = await db.Order.findOne({ where: { deal_id: 'JT' } });
+        expect(leaked).toBeNull();
     });
 });

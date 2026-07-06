@@ -55,6 +55,7 @@ const CHANNEL = Object.freeze({
     ACE: 'ace',           // United States — CBP ACE (Automated Commercial Environment)
     EU_CDS: 'eu_cds',     // European Union — UCC Customs Declaration System / ICS2
     UAE_MIRSAL: 'mirsal', // United Arab Emirates — Dubai Customs Mirsal 2
+    CHINA_SINGLE_WINDOW: 'china_single_window', // China — GACC / International Trade Single Window
 });
 
 const VALID_CHANNELS = Object.freeze(Object.values(CHANNEL));
@@ -88,6 +89,7 @@ const COUNTRY_CHANNEL = Object.freeze({
     IN: CHANNEL.ICEGATE,
     US: CHANNEL.ACE,
     AE: CHANNEL.UAE_MIRSAL,
+    CN: CHANNEL.CHINA_SINGLE_WINDOW,
     ...Object.fromEntries(EU_MEMBER_STATES.map((c) => [c, CHANNEL.EU_CDS])),
 });
 

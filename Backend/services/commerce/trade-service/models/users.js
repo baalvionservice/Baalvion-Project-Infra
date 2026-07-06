@@ -5,8 +5,11 @@ module.exports = (sequelize, DataTypes) => {
         email: { type: DataTypes.STRING(255), allowNull: false, unique: true },
         password_hash: { type: DataTypes.TEXT, allowNull: false },
         full_name: { type: DataTypes.STRING(255), defaultValue: '' },
+        // 'buyer'/'seller'/'trade_agent' (Phase 1 spec roles) added in migration 023;
+        // 'reviewer' (Phase 2 Manual Review Console) added in migration 038 — all
+        // additive, no existing role removed.
         role: {
-            type: DataTypes.ENUM('admin', 'operator', 'client'),
+            type: DataTypes.ENUM('admin', 'operator', 'client', 'buyer', 'seller', 'trade_agent', 'reviewer'),
             defaultValue: 'operator',
         },
         tenant_id: { type: DataTypes.STRING(64), allowNull: false, defaultValue: 'T-DEMO' },

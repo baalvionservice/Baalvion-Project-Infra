@@ -14,6 +14,7 @@ const QUEUE_NAMES = [
     'document_scan',    // document-engine virus scan → release/quarantine (Prompt 4)
     'customs_submission', // customs gateway filing pipeline → ICEGATE/ACE/CDS/Mirsal (Prompt 9)
     'dispatch_webhook',   // dispatch orchestration lifecycle webhook fan-out (Prompt 11)
+    'verification_monitor', // Phase 2 Continuous Monitoring — recompute compliance/risk/trust + expiry/fraud scans
 ];
 const DLQ = 'dead-letter';
 
