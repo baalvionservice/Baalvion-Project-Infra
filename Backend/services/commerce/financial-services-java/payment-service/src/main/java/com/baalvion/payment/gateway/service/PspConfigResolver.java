@@ -119,7 +119,7 @@ public class PspConfigResolver {
       // to instead fail hard (422) for any tenant lacking its own configured provider.
       if (globalFallbackEnabled && hasGlobalKeys(provider)) {
         log.warn("No CMS payment config for site={} provider={} — falling back to GLOBAL default credentials (mock={})",
-          slug, provider, pspProperties.isMock());
+          sanitizeForLog(slug), sanitizeForLog(provider), pspProperties.isMock());
         return globalConfig(provider);
       }
       throw new PspConfigNotFoundException(provider, slug);
@@ -217,5 +217,10 @@ public class PspConfigResolver {
       return out;
     }
     return new LinkedHashMap<>();
+  }
+
+  /** Strip CR/LF/tab so request-derived values can't forge extra log lines/fields. */
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replaceAll("[\r\n\t]", "_");
   }
 }
