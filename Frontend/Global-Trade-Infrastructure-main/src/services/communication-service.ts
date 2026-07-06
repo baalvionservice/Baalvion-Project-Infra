@@ -48,6 +48,48 @@ export interface Notification {
   acknowledgedAt?: string;
 }
 
+/**
+ * The trade-service Notification model is flat snake_case (title/message/entity_type/
+ * entity_id/is_read/created_at); the UI speaks a richer camelCase shape with a derived
+ * deep link. These adapters translate between the two.
+ */
+function mapNotificationType(raw: any): Notification['type'] {
+  const t = String(raw?.type || raw?.entity_type || '').toLowerCase();
+  if (t.includes('ticket') || t.includes('message')) return 'message';
+  if (t.includes('deal')) return 'deal';
+  if (t.includes('order')) return 'order';
+  if (t.includes('compliance')) return 'compliance';
+  if (t.includes('payment') || t.includes('invoice') || t.includes('finance')) return 'finance';
+  if (t.includes('shipment') || t.includes('logistics')) return 'logistics';
+  return 'system';
+}
+
+function entityLink(entityType?: string, entityId?: string): string {
+  if (!entityType || !entityId) return '';
+  switch (entityType) {
+    case 'task': return `/agent/tasks/${entityId}`;
+    case 'support_ticket': return `/support/${entityId}`;
+    case 'rfq': return `/buyer/rfqs/${entityId}`;
+    case 'order': return `/orders/${entityId}`;
+    case 'deal': return `/deals/${entityId}`;
+    default: return '';
+  }
+}
+
+function mapNotificationFromApi(raw: any): Notification {
+  return {
+    id: String(raw?.id),
+    type: mapNotificationType(raw),
+    title: raw?.title || '',
+    description: raw?.message || raw?.description || '',
+    isRead: Boolean(raw?.is_read ?? raw?.isRead),
+    createdAt: raw?.created_at || raw?.createdAt || new Date().toISOString(),
+    link: raw?.link || entityLink(raw?.entity_type, raw?.entity_id),
+    severity: 'medium',
+    acknowledgedAt: raw?.acknowledged_at,
+  };
+}
+
 class CommunicationService {
   private static instance: CommunicationService;
 
@@ -164,16 +206,27 @@ class CommunicationService {
   /**
    * Retrieves multi-priority notifications for the current institution.
    */
-  async getNotifications(companyId: string): Promise<Notification[]> {
+  async getNotifications(companyId: string, params: Record<string, any> = {}): Promise<Notification[]> {
     const res = await apiClient.get<unknown>('/notifications', {
-      companyId,
-      sortBy: 'createdAt',
-      order: 'desc'
+      recipient_org_id: companyId,
+      ...params,
     });
     // /notifications is a paginated typed resource → { data: { items, total, page, limit } }.
     // Tolerate both the paginated envelope and a bare array so the header never crashes.
-    const d = res.data as { items?: Notification[] } | Notification[] | null;
-    return Array.isArray(d) ? d : (d?.items ?? []);
+    const d = res.data as { items?: any[] } | any[] | null;
+    const items = Array.isArray(d) ? d : (d?.items ?? []);
+    return items.map(mapNotificationFromApi);
+  }
+
+  /** Marks a single notification read (real endpoint: PATCH /notifications/:id/read). */
+  async markNotificationRead(id: string): Promise<void> {
+    await apiClient.patch(`/notifications/${id}/read`, {});
+  }
+
+  /** Marks every unread notification for the caller's own org read. */
+  async markAllNotificationsRead(): Promise<number> {
+    const res = await apiClient.post<{ updated: number }>('/notifications/mark-all-read', {});
+    return res.data?.updated ?? 0;
   }
 }
 
@@ -188,9 +241,10 @@ export const getConversations = async (): Promise<Conversation[]> => {
 export const getConversationById = (id: string) => apiClient.getDoc<Conversation>('/conversations', id).then(r => r.data);
 export const getConversationMessages = (id: string) => communicationService.getMessages(id);
 export const postMessage = (id: string, sender: string, content: string) => communicationService.sendMessage(id, sender, content);
-export const getNotifications = async (): Promise<Notification[]> => {
+export const getNotifications = async (params?: Record<string, any>): Promise<Notification[]> => {
   const orgId = await resolveSessionOrgId();
-  return orgId ? communicationService.getNotifications(orgId) : [];
+  return orgId ? communicationService.getNotifications(orgId, params) : [];
 };
-export const markNotificationAsRead = (id: string) => apiClient.patch(`/notifications/${id}`, { isRead: true });
+export const markNotificationAsRead = (id: string) => communicationService.markNotificationRead(id);
+export const markAllNotificationsRead = () => communicationService.markAllNotificationsRead();
 export const provisionWarRoom = (data: any) => communicationService.provisionWarRoom(data);

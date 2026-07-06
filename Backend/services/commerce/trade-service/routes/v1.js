@@ -10,6 +10,7 @@ router.use('/quotations',    require('./quotationRoutes'));
 router.use('/chat_messages', require('./messageRoutes'));
 router.use('/deals',         require('./dealRoutes'));
 router.use('/orders',        require('./orderRoutes'));
+router.use('/purchase_orders', require('./purchaseOrderRoutes'));
 router.use('/escrows',       require('./escrowRoutes'));
 router.use('/shipments',     require('./shipmentRoutes'));
 router.use('/documents',     require('./documentRoutes'));
@@ -19,6 +20,10 @@ router.use('/disputes',      require('./disputeRoutes'));
 router.use('/wallets',       require('./walletRoutes'));
 router.use('/notifications', require('./notificationRoutes'));
 router.use('/admin',         require('./adminRoutes'));
+
+// Phase 1 — Tasks (trade-agent workspace) + Support ticketing (buyer workspace).
+router.use('/tasks',            require('./taskRoutes'));
+router.use('/support_tickets',  require('./supportRoutes'));
 
 // Bespoke aggregation + provider endpoints (single objects, not collection arrays).
 router.get('/platform_stats', require('../controller/statsController').platformStats);
@@ -130,6 +135,38 @@ router.use('/compliance_agent', require('./complianceAgentRoutes'));
 // the caller commit a route (handing off to the Prompt 10 freight marketplace to
 // book its first leg). Network descriptor is public at /network.
 router.use('/route_optimizations', require('./logisticsRoutes'));
+
+// Logistics Core Foundation (Phase 1): containers, packages, general-purpose
+// address book (distinct from /verified_addresses, which is KYC evidence), and
+// GPS/carrier tracking events. Extends the existing shipment/customs/freight
+// stack above rather than duplicating it.
+router.use('/containers',      require('./containerRoutes'));
+router.use('/packages',        require('./packageRoutes'));
+router.use('/logistics_addresses', require('./addressRoutes'));
+router.use('/tracking_events', require('./trackingRoutes'));
+
+// Phase 2 — Trust, Verification & Compliance Foundation: Verification Center
+// dashboard (per-org checklist across identity/company/tax/bank/address/factory/
+// warehouse/products/documents/compliance/risk/trust-score) + the country-
+// configurable tax-identifier catalog it reads from.
+router.use('/verification_center',    require('./verificationCenterRoutes'));
+router.use('/tax_id_types',           require('./taxIdTypeRoutes'));
+router.use('/identity_verifications', require('./identityVerificationRoutes'));
+router.use('/company_verifications', require('./companyVerificationRoutes'));
+router.use('/company_stakeholders',  require('./companyStakeholderRoutes'));
+router.use('/tax_registrations',     require('./taxRegistrationRoutes'));
+router.use('/bank_accounts',         require('./bankAccountRoutes'));
+router.use('/verified_addresses',    require('./verifiedAddressRoutes'));
+router.use('/facilities',            require('./facilityRoutes'));
+router.use('/product_certificates',  require('./productCertificateRoutes'));
+router.use('/compliance_rules',      require('./complianceRuleRoutes'));
+router.use('/fraud_signals',         require('./fraudSignalRoutes'));
+router.use('/risk_assessments',      require('./riskAssessmentRoutes'));
+router.use('/trust_scores',          require('./trustScoreRoutes'));
+router.use('/reputation',            require('./reputationRoutes'));
+router.use('/review_actions',        require('./reviewActionRoutes'));
+router.use('/compliance_dashboard',  require('./complianceDashboardRoutes'));
+router.use('/monitoring',            require('./monitoringRoutes'));
 
 // Generic persistence store — MUST be last so it only catches collections that
 // have no bespoke typed route above (alerts, risk_signals, contracts, ...).

@@ -12,6 +12,8 @@ module.exports = (sequelize, DataTypes) => {
         type: { type: DataTypes.STRING, defaultValue: 'text' },
         offerData: { type: DataTypes.JSONB },
         metadata: { type: DataTypes.JSONB, defaultValue: {} },
+        isRead: { type: DataTypes.BOOLEAN, defaultValue: false },
+        readAt: { type: DataTypes.DATE },
     }, {
         schema: 'trade',
         tableName: 'chat_messages',

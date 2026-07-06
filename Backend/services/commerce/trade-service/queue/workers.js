@@ -6,7 +6,7 @@
 const crypto = require('crypto');
 const { Worker } = require('bullmq');
 const connection = require('./connection');
-const { deadLetter } = require('./index');
+const { deadLetter, enqueue } = require('./index');
 const providers = require('../providers');
 const cache = require('../cache');
 const { recordAudit } = require('../utils/audit');
@@ -92,6 +92,13 @@ const PROCESSORS = {
     // / failed) and advances the persisted delivery row. Throws on failure so BullMQ
     // retries; an exhausted job lands the row failed (and is dead-lettered).
     dispatch_webhook: async (job) => require('../service/dispatch/webhookDispatcher').processDelivery(job),
+
+    // Phase 2 Continuous Monitoring (Step 19): recomputes compliance/risk/trust
+    // score for every org with verification activity, expires overdue checklist
+    // items, and re-scans for excessive-failed-login fraud signals. Registered as
+    // a repeatable job below (every 6h); also triggerable on demand via
+    // POST /v1/monitoring/run for the same underlying cycle.
+    verification_monitor: async () => require('../service/verification/monitor').runCycle(),
 };
 
 const workers = [];
@@ -117,6 +124,14 @@ function startWorkers() {
     }
     // eslint-disable-next-line no-console
     console.log(`[queue] started ${workers.length} workers: ${Object.keys(PROCESSORS).join(', ')}`);
+
+    // Repeatable job (BullMQ dedupes by jobId + repeat options, so this is safe to
+    // call on every boot). Six hours balances staleness against load — expiry/
+    // fraud/risk/compliance drift over hours, not seconds, so no tighter cadence
+    // is needed.
+    enqueue('verification_monitor', 'cycle', {}, { repeat: { every: 6 * 60 * 60 * 1000 }, jobId: 'verification-monitor-cycle' })
+        .catch((err) => console.error('[queue] failed to register verification_monitor repeatable job:', err.message));
+
     return workers;
 }
 

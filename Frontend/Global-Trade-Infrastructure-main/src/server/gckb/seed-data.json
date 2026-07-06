@@ -13,7 +13,8 @@
     { "code": "FR", "name": "France", "attributes": { "alpha2": "FR", "alpha3": "FRA", "numericCode": "250", "officialName": "French Republic", "capital": "Paris", "region": "Europe", "subregion": "Western Europe", "currencyCodes": ["EUR"], "languageCodes": ["fr"], "timezoneCodes": ["Europe/Paris"], "dialingCode": "+33", "flagEmoji": "🇫🇷" } },
     { "code": "GB", "name": "United Kingdom", "attributes": { "alpha2": "GB", "alpha3": "GBR", "numericCode": "826", "officialName": "United Kingdom of Great Britain and Northern Ireland", "capital": "London", "region": "Europe", "subregion": "Northern Europe", "currencyCodes": ["GBP"], "languageCodes": ["en"], "timezoneCodes": ["Europe/London"], "dialingCode": "+44", "flagEmoji": "🇬🇧" } },
     { "code": "CA", "name": "Canada", "attributes": { "alpha2": "CA", "alpha3": "CAN", "numericCode": "124", "officialName": "Canada", "capital": "Ottawa", "region": "Americas", "subregion": "Northern America", "currencyCodes": ["CAD"], "languageCodes": ["en", "fr"], "timezoneCodes": ["America/Toronto"], "dialingCode": "+1", "flagEmoji": "🇨🇦" } },
-    { "code": "AU", "name": "Australia", "attributes": { "alpha2": "AU", "alpha3": "AUS", "numericCode": "036", "officialName": "Commonwealth of Australia", "capital": "Canberra", "region": "Oceania", "subregion": "Australia and New Zealand", "currencyCodes": ["AUD"], "languageCodes": ["en"], "timezoneCodes": ["Australia/Sydney"], "dialingCode": "+61", "flagEmoji": "🇦🇺" } }
+    { "code": "AU", "name": "Australia", "attributes": { "alpha2": "AU", "alpha3": "AUS", "numericCode": "036", "officialName": "Commonwealth of Australia", "capital": "Canberra", "region": "Oceania", "subregion": "Australia and New Zealand", "currencyCodes": ["AUD"], "languageCodes": ["en"], "timezoneCodes": ["Australia/Sydney"], "dialingCode": "+61", "flagEmoji": "🇦🇺" } },
+    { "code": "CN", "name": "China", "attributes": { "alpha2": "CN", "alpha3": "CHN", "numericCode": "156", "officialName": "People's Republic of China", "capital": "Beijing", "region": "Asia", "subregion": "Eastern Asia", "currencyCodes": ["CNY"], "languageCodes": ["zh"], "timezoneCodes": ["Asia/Shanghai"], "dialingCode": "+86", "flagEmoji": "🇨🇳" } }
   ],
   "currencies": [
     { "code": "INR", "name": "Indian Rupee", "attributes": { "alpha": "INR", "numericCode": "356", "minorUnits": 2, "symbol": "₹" } },
@@ -24,7 +25,8 @@
     { "code": "EUR", "name": "Euro", "attributes": { "alpha": "EUR", "numericCode": "978", "minorUnits": 2, "symbol": "€" } },
     { "code": "GBP", "name": "Pound Sterling", "attributes": { "alpha": "GBP", "numericCode": "826", "minorUnits": 2, "symbol": "£" } },
     { "code": "CAD", "name": "Canadian Dollar", "attributes": { "alpha": "CAD", "numericCode": "124", "minorUnits": 2, "symbol": "C$" } },
-    { "code": "AUD", "name": "Australian Dollar", "attributes": { "alpha": "AUD", "numericCode": "036", "minorUnits": 2, "symbol": "A$" } }
+    { "code": "AUD", "name": "Australian Dollar", "attributes": { "alpha": "AUD", "numericCode": "036", "minorUnits": 2, "symbol": "A$" } },
+    { "code": "CNY", "name": "Renminbi", "attributes": { "alpha": "CNY", "numericCode": "156", "minorUnits": 2, "symbol": "¥" } }
   ],
   "authorities": [
     { "code": "cbic", "name": "Central Board of Indirect Taxes and Customs", "countryCode": "IN", "attributes": { "kind": "CUSTOMS", "website": "https://www.cbic.gov.in", "jurisdiction": "Customs & GST" } },
@@ -38,6 +40,8 @@
     { "code": "hmrc", "name": "HM Revenue & Customs", "countryCode": "GB", "attributes": { "kind": "CUSTOMS", "website": "https://www.gov.uk/government/organisations/hm-revenue-customs" } },
     { "code": "cbsa", "name": "Canada Border Services Agency", "countryCode": "CA", "attributes": { "kind": "CUSTOMS", "website": "https://www.cbsa-asfc.gc.ca" } },
     { "code": "abf", "name": "Australian Border Force", "countryCode": "AU", "attributes": { "kind": "CUSTOMS", "website": "https://www.abf.gov.au" } },
+    { "code": "gacc", "name": "General Administration of Customs China", "countryCode": "CN", "attributes": { "kind": "CUSTOMS", "website": "http://english.customs.gov.cn", "jurisdiction": "Customs & Single Window" } },
+    { "code": "mofcom", "name": "Ministry of Commerce", "countryCode": "CN", "attributes": { "kind": "COMMERCE", "website": "http://english.mofcom.gov.cn", "jurisdiction": "Foreign trade policy, licensing" } },
     { "code": "wco", "name": "World Customs Organization", "attributes": { "kind": "STANDARDS", "website": "https://www.wcoomd.org", "jurisdiction": "Global (HS nomenclature)" } }
   ],
   "ports": [
@@ -54,7 +58,9 @@
     { "code": "FRLEH", "name": "Port of Le Havre", "countryCode": "FR", "attributes": { "kind": "SEAPORT", "unlocode": "FRLEH", "latitude": 49.4830, "longitude": 0.1170 } },
     { "code": "GBFXT", "name": "Port of Felixstowe", "countryCode": "GB", "attributes": { "kind": "SEAPORT", "unlocode": "GBFXT", "latitude": 51.9540, "longitude": 1.3110 } },
     { "code": "CAVAN", "name": "Port of Vancouver", "countryCode": "CA", "attributes": { "kind": "SEAPORT", "unlocode": "CAVAN", "latitude": 49.2890, "longitude": -123.1110 } },
-    { "code": "AUMEL", "name": "Port of Melbourne", "countryCode": "AU", "attributes": { "kind": "SEAPORT", "unlocode": "AUMEL", "latitude": -37.8330, "longitude": 144.9170 } }
+    { "code": "AUMEL", "name": "Port of Melbourne", "countryCode": "AU", "attributes": { "kind": "SEAPORT", "unlocode": "AUMEL", "latitude": -37.8330, "longitude": 144.9170 } },
+    { "code": "CNSHA", "name": "Port of Shanghai", "countryCode": "CN", "attributes": { "kind": "SEAPORT", "unlocode": "CNSHA", "latitude": 31.2304, "longitude": 121.4737, "capacityNote": "World's busiest container port" } },
+    { "code": "CNPVG", "name": "Shanghai Pudong International Airport", "countryCode": "CN", "attributes": { "kind": "AIRPORT", "iata": "PVG", "icao": "ZSPD" } }
   ],
   "agreements": [
     { "code": "IND-UAE-CEPA", "name": "India–UAE Comprehensive Economic Partnership Agreement", "attributes": { "kind": "FTA", "status": "IN_FORCE", "inForceSince": "2022-05-01", "memberCountryCodes": ["IN", "AE"], "rulesOfOriginSummary": "Product-specific rules; generally 40% qualifying value content with change of tariff heading.", "dutyPreferenceNote": "Phased elimination of tariffs on the vast majority of tariff lines, including gold concession." } },
@@ -90,6 +96,10 @@
 
     { "code": "consumption", "name": "Consumption Tax on imports", "countryCode": "JP", "policyType": "tax", "attributes": { "taxName": "Consumption Tax", "taxType": "CONSUMPTION", "ratePercent": 10, "basis": "CIF" } },
     { "code": "mfn-8703", "name": "Customs duty — Motor cars", "countryCode": "JP", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "MFN", "ratePercent": 0, "hsCodes": ["8703"] } },
+
+    { "code": "vat", "name": "Import VAT", "countryCode": "CN", "policyType": "tax", "attributes": { "taxName": "Import VAT", "taxType": "VAT", "ratePercent": 13, "basis": "CIF" } },
+    { "code": "mfn-8471", "name": "Customs duty — Computing equipment", "countryCode": "CN", "policyType": "tariff", "hsCode": "8471", "attributes": { "schedule": "MFN", "ratePercent": 0, "hsCodes": ["8471"] } },
+    { "code": "single-window", "name": "China International Trade Single Window", "countryCode": "CN", "policyType": "digital_api", "attributes": { "system": "China Single Window", "protocol": "REST", "sandbox": true, "docsUrl": "http://english.customs.gov.cn" } },
 
     { "code": "vat", "name": "Einfuhrumsatzsteuer (import VAT)", "countryCode": "DE", "policyType": "tax", "attributes": { "taxName": "Import VAT", "taxType": "VAT", "ratePercent": 19, "basis": "CIF" } },
     { "code": "mfn-8703", "name": "EU common customs tariff — Motor cars", "countryCode": "DE", "policyType": "tariff", "hsCode": "8703", "attributes": { "schedule": "EU CCT", "ratePercent": 10, "hsCodes": ["8703"] } },

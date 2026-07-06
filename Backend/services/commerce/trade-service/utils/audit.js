@@ -4,9 +4,25 @@ const db = require('../models');
 
 const GENESIS = '0'.repeat(64);
 
-// Canonical payload string used for hashing (stable key order).
+// Deep, key-order-independent JSON serialization. Postgres `jsonb` does NOT
+// preserve the client's original object-key insertion order (it re-orders on
+// storage) — a plain `JSON.stringify(metadata)` computed at write time (JS
+// object, original order) will not reproduce the same string once that same
+// value round-trips through a jsonb column and is re-read for verification,
+// even though nothing was tampered with. Sorting keys recursively before
+// stringifying makes the hash immune to that reordering in both directions.
+function stableStringify(value) {
+    if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
+    if (value && typeof value === 'object') {
+        const keys = Object.keys(value).sort();
+        return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(',')}}`;
+    }
+    return JSON.stringify(value);
+}
+
+// Canonical payload string used for hashing (stable key order, incl. nested metadata).
 function canonical(entry) {
-    return JSON.stringify({
+    return stableStringify({
         tenantId: entry.tenantId,
         actorId: entry.actorId,
         action: entry.action,
