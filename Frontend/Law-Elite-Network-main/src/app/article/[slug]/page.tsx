@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
 import { articlesPublicApi } from '@/lib/api/client';
 import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { AIAnswersCard } from '@/components/knowledge/AIAnswersCard';
@@ -27,6 +27,8 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import seedData from '../../../../docs/seed-data.json';
 import { getArticleBySlug } from '@/data/law-content';
+import { getAuthorByName } from '@/data/authors';
+import { resolveArticleImage } from '@/lib/article-art';
 
 interface TOCItem {
   id: string;
@@ -51,6 +53,9 @@ function generateFallbackContent(title: string): string {
 
 export default function ArticleDeepDivePage() {
   const { slug } = useParams();
+  const searchParams = useSearchParams();
+  const previewToken = searchParams.get('previewToken');
+  const previewExp = searchParams.get('previewExp');
 
   const [article, setArticle] = useState<any>(null);
   const [articleLoading, setArticleLoading] = useState(true);
@@ -71,7 +76,10 @@ export default function ArticleDeepDivePage() {
     // wins over the legacy law-service record.
     const fromCms = async () => {
       try {
-        const r = await fetch(`/api/cms/articles/${slug}`);
+        const previewQs = previewToken && previewExp
+          ? `?previewToken=${encodeURIComponent(previewToken)}&previewExp=${encodeURIComponent(previewExp)}`
+          : '';
+        const r = await fetch(`/api/cms/articles/${slug}${previewQs}`);
         if (r.ok) {
           const j = await r.json();
           if (j?.data) return j.data;
@@ -107,7 +115,7 @@ export default function ArticleDeepDivePage() {
         setArticleLoading(false);
       }
     })();
-  }, [slug]);
+  }, [slug, previewToken, previewExp]);
 
   useEffect(() => {
     const optimizeContent = async () => {
@@ -163,6 +171,7 @@ export default function ArticleDeepDivePage() {
 
   const category = article?.category;
   const subcategory = article?.subcategory;
+  const matchedAuthor = article?.author ? getAuthorByName(article.author) : null;
 
   if (articleLoading && !article) return (
     <div className="min-h-screen bg-white flex items-center justify-center">
@@ -238,11 +247,34 @@ export default function ArticleDeepDivePage() {
                           <p className="font-headline text-lg font-bold text-slate-900">
                             {article.author || 'Law Elite Editorial'}
                           </p>
-                          <p className="text-[14px] leading-relaxed text-slate-600">
-                            Part of the Law Elite Network editorial team. Our guides are
-                            researched and reviewed for accuracy and clarity, then kept current as
-                            laws change. They provide general legal information, not legal advice.
-                          </p>
+                          {matchedAuthor ? (
+                            <>
+                              <p className="text-[12px] font-bold uppercase tracking-wide text-blue-700">
+                                {matchedAuthor.title}
+                              </p>
+                              <p className="text-[12px] text-slate-500">{matchedAuthor.credentials}</p>
+                              <p className="text-[14px] leading-relaxed text-slate-600 line-clamp-4">
+                                {matchedAuthor.bio}
+                              </p>
+                              {matchedAuthor.expertise.length > 0 && (
+                                <p className="text-[12px] text-slate-500">
+                                  Focus: {matchedAuthor.expertise.join(', ')}
+                                </p>
+                              )}
+                              <Link
+                                href={`/author/${matchedAuthor.slug}`}
+                                className="inline-block text-[13px] font-bold text-blue-700 hover:text-blue-900 transition-colors"
+                              >
+                                View full profile →
+                              </Link>
+                            </>
+                          ) : (
+                            <p className="text-[14px] leading-relaxed text-slate-600">
+                              Part of the Law Elite Network editorial team. Our guides are
+                              researched and reviewed for accuracy and clarity, then kept current as
+                              laws change. They provide general legal information, not legal advice.
+                            </p>
+                          )}
                         </div>
                       </PopoverContent>
                     </Popover>
@@ -282,7 +314,7 @@ export default function ArticleDeepDivePage() {
                 <figure className="pt-6">
                   <div className="aspect-[16/9] relative overflow-hidden bg-slate-50 rounded-lg">
                     <Image
-                      src={`https://picsum.photos/seed/${article.id}/1200/800`}
+                      src={resolveArticleImage(article)}
                       alt={article.title}
                       fill
                       className="object-cover"
@@ -307,7 +339,11 @@ export default function ArticleDeepDivePage() {
                 />
               </div>
 
-              <RelatedArticles />
+              <RelatedArticles
+                currentSlug={slug as string}
+                categorySlug={category?.slug}
+                categoryName={category?.name}
+              />
             </article>
 
           </div>

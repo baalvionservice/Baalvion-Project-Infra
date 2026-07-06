@@ -1,0 +1,84 @@
+{
+  "topicNumber": 1,
+  "title": "How to Start Investing in Stocks",
+  "slug": "how-to-start-investing-in-stocks",
+  "seo": {
+    "seoTitle": "How to Start Investing in Stocks: A Beginner's Roadmap",
+    "metaDescription": "A clear, step-by-step roadmap for opening your first brokerage account, choosing your first investments, and avoiding the mistakes that trip up new investors.",
+    "focusKeyword": "how to start investing in stocks",
+    "secondaryKeywords": ["stock investing for beginners", "open a brokerage account", "first time investing", "how to buy your first stock"],
+    "searchIntent": "Informational — first-time investors want a concrete sequence of steps, not just theory.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Getting started in the stock market comes down to five concrete steps: setting a goal, picking an account, funding it, choosing your first investments, and staying consistent.",
+  "intro": "Investing in stocks can feel like it requires a finance degree, but the actual mechanics are far simpler than most people expect. The real barrier for most beginners isn't knowledge — it's inertia. This guide breaks the process into five concrete steps so you can go from zero to owning your first shares this week, with the reasoning behind each decision along the way.",
+  "sections": [
+    {
+      "heading": "Step 1: Define What the Money Is For",
+      "paragraphs": [
+        "Before opening any account, decide what the money is actually for and when you'll need it. Money you'll need within the next three to five years — a house down payment, a wedding — generally doesn't belong in stocks, since a downturn could force you to sell at a loss right when you need the cash. Long-term goals like retirement or building wealth over a decade or more are what the stock market is genuinely suited for, because time smooths out short-term volatility."
+      ]
+    },
+    {
+      "heading": "Step 2: Choose the Right Account Type",
+      "paragraphs": [
+        "In the U.S., a workplace 401(k) with an employer match is usually the best starting point if one is available, since the match is an immediate, guaranteed return before your investments even do anything. After capturing any match, an Individual Retirement Account (IRA) offers tax advantages for retirement savings, while a standard taxable brokerage account offers full flexibility with no withdrawal restrictions, at the cost of paying taxes on gains along the way."
+      ],
+      "callout": {
+        "title": "Don't let account choice delay you",
+        "text": "Any of these account types beats not investing at all. If you're unsure which fits best, opening a taxable brokerage account today is better than spending three months researching the perfect structure."
+      }
+    },
+    {
+      "heading": "Step 3: Fund the Account and Set a Contribution Habit",
+      "paragraphs": [
+        "Most major brokerages have eliminated account minimums and per-trade commissions on U.S. stocks and ETFs, so you can start with as little as $20 or $50. The habit matters more than the initial amount — setting up an automatic transfer of a fixed sum every payday, even a small one, builds the discipline that separates successful long-term investors from people who invest sporadically."
+      ]
+    },
+    {
+      "heading": "Step 4: Choose Your First Investments",
+      "paragraphs": [
+        "For a true beginner, a low-cost, broad-market index fund or ETF — one that tracks the S&P 500 or a total U.S. stock market index — is a sensible starting point. It instantly spreads your money across hundreds of companies, which removes the pressure of picking individual winners while you're still learning. Individual stock picking can come later, once you've built a foundation and developed a framework for [analyzing a stock](/articles/how-to-analyze-a-stock) — but it should never be the entire portfolio for a beginner."
+      ]
+    },
+    {
+      "heading": "Step 5: Stay Consistent and Ignore the Noise",
+      "paragraphs": [
+        "The single biggest determinant of long-term investing success isn't stock selection — it's staying invested through downturns instead of panic-selling. Markets historically trend upward over long time horizons despite frequent short-term declines. Checking your portfolio daily tends to amplify anxiety without improving decisions; a quarterly or annual review is plenty for a long-term investor."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Match your account type to your timeline: workplace 401(k) match first, then an IRA, then a taxable brokerage account for anything beyond retirement.",
+    "You don't need a large sum to start — many brokerages have no minimums, and consistency matters far more than your starting amount.",
+    "A broad-market index fund or ETF is a reasonable first investment for most beginners, before moving into individual stock selection.",
+    "Automate your contributions so investing happens on a schedule, not only when you remember or feel motivated.",
+    "Staying invested through market declines has historically mattered more to long-term returns than trying to time entries and exits."
+  ],
+  "faq": [
+    {
+      "question": "How much money do I need to start investing in stocks?",
+      "answer": "Many brokerages now allow you to start with $0 account minimums and buy fractional shares, so you can begin investing with as little as $5–$20. See our full breakdown in [how much money you need to start investing](/articles/how-much-money-do-you-need-to-start-investing)."
+    },
+    {
+      "question": "Is it better to invest in individual stocks or index funds as a beginner?",
+      "answer": "Index funds are generally the safer starting point for beginners because they diversify risk across many companies automatically. Individual stock picking can be added later once you have a research process in place."
+    },
+    {
+      "question": "What's the biggest mistake new investors make?",
+      "answer": "Panic-selling during a market downturn is one of the most damaging mistakes, since it locks in losses that would likely have recovered over time. See [common stock investing mistakes](/articles/common-stock-investing-mistakes) for more."
+    }
+  ],
+  "conclusion": "Starting to invest is less about finding the perfect strategy and more about removing the friction that keeps people on the sidelines. Pick an account, fund it with whatever amount you can commit to consistently, choose a diversified starting investment, and automate the process so it happens without requiring willpower every month. Refine your approach as you learn — but the earliest and most valuable step is simply beginning.",
+  "internalLinks": [
+    { "anchor": "best stocks for beginners", "slug": "best-stocks-for-beginners" },
+    { "anchor": "how much money you need to start investing", "slug": "how-much-money-do-you-need-to-start-investing" },
+    { "anchor": "how to buy stocks online", "slug": "how-to-buy-stocks-online" },
+    { "anchor": "how to build a stock portfolio", "slug": "how-to-build-a-stock-portfolio" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" },
+    { "name": "FINRA Investor Education", "url": "https://www.finra.org/investors" }
+  ],
+  "wordCountEstimate": 720
+}

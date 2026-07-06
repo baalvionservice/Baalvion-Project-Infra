@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Bake the Personal Finance content into a static snapshot committed to the repo:
- *   content/personal-finance/**.json  →  src/generated/personal-finance-content.json
+ * Bake editorial content packs into one static snapshot committed to the repo:
+ *   content/<pack>/**.json  →  src/generated/personal-finance-content.json
  *
  * The snapshot is an array of CMS-public-shaped documents (the exact shape the CMS
  * public delivery API returns), so the frontend's existing converters
@@ -17,14 +17,20 @@ const fs = require('fs');
 const path = require('path');
 const { buildContentDoc } = require('./lib/content-builder.cjs');
 
-const ROOT = path.resolve(__dirname, '..', 'content', 'personal-finance');
-const ARTICLES_DIR = path.join(ROOT, 'articles');
-const PAGES_DIR = path.join(ROOT, 'pages');
+const CONTENT_ROOT = path.resolve(__dirname, '..', 'content');
 const OUT = path.resolve(__dirname, '..', 'src', 'generated', 'personal-finance-content.json');
+const ARTWORK_OUT_DIR = path.resolve(__dirname, '..', 'public', 'images', 'articles');
+
+// One entry per editorial content pack (topic-config.ts category slug). Add a new
+// pack here + a matching `content/<dir>/articles/*.json` folder to bake a new
+// category — everything else (artwork, static-content.ts lookup) is generic.
+const PACKS = [
+  { dir: 'personal-finance', category: { id: 'pf-personal-finance', name: 'Personal Finance', slug: 'personal-finance' } },
+  { dir: 'investing', category: { id: 'inv-investing', name: 'Investing', slug: 'investing' } },
+];
 
 // Fixed timestamp keeps the generated file stable across runs (no spurious git diffs).
 const PUBLISHED = '2026-06-20T00:00:00.000Z';
-const CATEGORY = { id: 'pf-personal-finance', name: 'Personal Finance', slug: 'personal-finance' };
 
 function readSpecs(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -39,14 +45,21 @@ function readSpecs(dir) {
     .sort((a, b) => (a.topicNumber || 0) - (b.topicNumber || 0));
 }
 
-function toCmsContent(spec, contentType) {
-  const doc = buildContentDoc(spec, { contentType, appendAuthor: contentType === 'article' });
+function toCmsContent(spec, contentType, category) {
+  const artwork = contentType === 'article'
+    ? { outDir: ARTWORK_OUT_DIR, category: category.name, publicPrefix: '/images/articles' }
+    : undefined;
+  const doc = buildContentDoc(spec, {
+    contentType,
+    appendAuthor: contentType === 'article',
+    artwork,
+  });
   return {
     id: `static-${spec.slug}`,
     slug: doc.slug,
     title: doc.title,
     excerpt: doc.excerpt,
-    featuredImage: null,
+    featuredImage: doc.featuredImage || null,
     contentType,
     contentBlocks: doc.contentBlocks,
     tagIds: [],
@@ -57,22 +70,38 @@ function toCmsContent(spec, contentType) {
     publishedAt: PUBLISHED,
     updatedAt: PUBLISHED,
     viewCount: 0,
-    category: contentType === 'article' ? CATEGORY : null,
+    category: contentType === 'article' ? category : null,
     customFields: doc.customFields,
   };
 }
 
 function main() {
   const bySlug = (a, b) => a.slug.localeCompare(b.slug);
-  const articles = readSpecs(ARTICLES_DIR).map((s) => toCmsContent(s, 'article')).sort(bySlug);
-  const pages = readSpecs(PAGES_DIR).map((s) => toCmsContent(s, 'page')).sort(bySlug);
-  const all = [...articles, ...pages];
+  let totalArticles = 0;
+  let totalPages = 0;
+  const all = [];
+  const summary = [];
+
+  for (const pack of PACKS) {
+    const root = path.join(CONTENT_ROOT, pack.dir);
+    const articles = readSpecs(path.join(root, 'articles'))
+      .map((s) => toCmsContent(s, 'article', pack.category))
+      .sort(bySlug);
+    const pages = readSpecs(path.join(root, 'pages'))
+      .map((s) => toCmsContent(s, 'page', pack.category))
+      .sort(bySlug);
+    all.push(...articles, ...pages);
+    totalArticles += articles.length;
+    totalPages += pages.length;
+    summary.push(`${pack.dir}: ${articles.length} articles, ${pages.length} pages`);
+  }
+
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   fs.writeFileSync(OUT, JSON.stringify(all));
   const bytes = fs.statSync(OUT).size;
   console.log(
-    `Wrote ${all.length} docs (${articles.length} articles, ${pages.length} pages) → ` +
-      `${path.relative(process.cwd(), OUT)} (${(bytes / 1024).toFixed(0)} KB)`,
+    `Wrote ${all.length} docs (${totalArticles} articles, ${totalPages} pages) → ` +
+      `${path.relative(process.cwd(), OUT)} (${(bytes / 1024).toFixed(0)} KB)\n  ${summary.join('\n  ')}`,
   );
 }
 

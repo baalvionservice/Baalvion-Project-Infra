@@ -4,6 +4,7 @@ import { Category } from '@/modules/content-engine/types/category';
 import { Tag } from '@/modules/content-engine/types/tag';
 import { Breadcrumb } from '../types';
 import { env } from '@/config/env';
+import { slugify } from '@/modules/content-engine/utils/slugify';
 
 /**
  * @fileOverview Service for generating hierarchical breadcrumb paths and schema for all platform routes.
@@ -24,7 +25,7 @@ export const breadcrumbService = {
       items: [
         { name: 'Home', item: '/' },
         { name: 'Intelligence', item: '/articles' },
-        { name: article.category, item: `/categories/${article.category.toLowerCase()}` },
+        { name: article.category, item: `/categories/${slugify(article.category)}` },
         { name: article.title, item: `/articles/${article.slug}` },
       ],
     };

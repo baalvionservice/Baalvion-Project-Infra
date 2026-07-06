@@ -1,4 +1,5 @@
 import { ArticleStatus } from "@/modules/content-engine/types";
+import { articleArtDataUri } from "@baalvion/illustrations";
 
 export type NewsCategory =
   | "Markets"
@@ -40,6 +41,10 @@ export interface NewsArticle {
   keyTakeaways?: string[];
   body: NewsBodyBlock[];
   tags?: string[];
+  /** View count, when the source (CMS) tracks it — omit from UI when absent rather than fabricating a number. */
+  views?: number;
+  /** Raw CMS custom fields (e.g. `breaking`, `videoUrl`) passed through for data-gated UI like the breaking ticker and video carousel. */
+  customFields?: Record<string, unknown>;
 }
 
 // ── Body block types ──────────────────────────────────────────────────────────
@@ -55,7 +60,7 @@ export type NewsBodyBlock =
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 
-export const newsArticles: NewsArticle[] = [
+const rawNewsArticles: Omit<NewsArticle, "imageUrl">[] = [
   {
     id: "1",
     title:
@@ -83,15 +88,13 @@ export const newsArticles: NewsArticle[] = [
         href: "#",
       },
     ],
-    imageUrl:
-      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=80",
     imageCaption: "The Federal Reserve building in Washington, D.C.",
     slug: "fed-holds-rates-inflation-cooling",
     featured: true,
     tags: ["Federal Reserve", "Interest Rates", "Inflation", "FOMC"],
     keyTakeaways: [
       "The FOMC voted unanimously to hold rates at 5.25%–5.50% for the fourth consecutive meeting.",
-      "Fed Chair Powell said inflation is 'moving in the right direction' but isn't yet at the 2% target.",
+      "The post-meeting statement described inflation as moving in the right direction but not yet at the 2% target.",
       "Markets now price in two rate cuts before year-end, down from three a month ago.",
       "The next meeting is scheduled for late April, with another data-dependent pause expected.",
     ],
@@ -104,19 +107,18 @@ export const newsArticles: NewsArticle[] = [
         type: "paragraph",
         text: "The Federal Open Market Committee voted 12-0 to hold the federal funds rate in the 5.25% to 5.50% target range — the fourth consecutive meeting at which officials have chosen to stand pat after one of the most aggressive tightening cycles in the Fed's history.",
       },
-      { type: "heading", text: "Powell: 'We Are Not There Yet'" },
+      { type: "heading", text: "'Not There Yet': The Committee's Tone" },
       {
         type: "paragraph",
-        text: "In a press conference following the decision, Fed Chair Jerome Powell struck a measured tone, acknowledging that inflation has fallen significantly from its peak while emphasizing that the job is not yet complete.",
-      },
-      {
-        type: "quote",
-        text: "Inflation has eased substantially from its peak. We want to be more confident that inflation is moving sustainably toward 2% before we begin to dial back our restrictive policy.",
-        attribution: "Jerome Powell, Federal Reserve Chair",
+        text: "In the press conference following the decision, the Fed's leadership struck a measured tone, acknowledging that inflation has fallen significantly from its peak while emphasizing that the committee wants more evidence before declaring victory. The post-meeting statement noted that officials need greater confidence that inflation is moving sustainably toward the 2% target before beginning to dial back the current restrictive policy stance.",
       },
       {
         type: "paragraph",
         text: "The latest consumer price index showed inflation running at 2.8% annually in February, down sharply from the 9.1% peak recorded in June 2022, but still above the Fed's target. Core inflation, which strips out volatile food and energy prices, remained stickier at 3.2%.",
+      },
+      {
+        type: "paragraph",
+        text: "That gap between headline and core inflation is exactly why the committee has been reluctant to commit to a cutting timeline. Shelter costs — which make up roughly a third of the core CPI basket — have been especially slow to cool, even as goods prices and energy costs have retreated from their post-pandemic highs. Fed officials have repeatedly said they are watching services inflation, and shelter in particular, as the key holdout category standing between the current reading and the 2% goal.",
       },
       { type: "heading", text: "Market Reaction" },
       {
@@ -145,6 +147,15 @@ export const newsArticles: NewsArticle[] = [
         type: "paragraph",
         text: "The next Fed meeting is scheduled for April 29–30. Investors will be closely watching the March CPI report, due April 10, for clues on whether the path to rate cuts is opening up or closing further.",
       },
+      { type: "heading", text: "Why the Fed Moves So Cautiously" },
+      {
+        type: "paragraph",
+        text: "It's worth understanding why a central bank would hold rates steady even after inflation has fallen so far from its peak. Cutting too early risks re-igniting price pressures and forcing a second round of even more painful tightening later — a mistake the Fed made in the 1970s, when it eased policy prematurely and inflation came roaring back. Cutting too late, on the other hand, risks unnecessarily choking off growth and pushing unemployment higher. The Fed's dual mandate — stable prices and maximum employment — means every meeting is a balancing act between these two risks, and officials have been explicit that they would rather hold rates a few months longer than reverse course and have to hike again.",
+      },
+      {
+        type: "paragraph",
+        text: "This is also why a single inflation report rarely moves the committee. Policymakers look for a sustained trend across multiple months and multiple data series — CPI, the Fed's preferred PCE price index, wage growth, and measures of inflation expectations — before they're willing to declare that the fight is won. A hot reading in March, after a string of cooler months, would likely delay cuts further; a second consecutive cool reading would strengthen the case for the committee's first cut of the cycle.",
+      },
     ],
   },
   {
@@ -156,8 +167,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "James Okafor", title: "Markets Reporter" },
     publishedAt: "2026-03-15T12:00:00Z",
     readTimeMinutes: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1590283603385-17ffb3a7f29f?w=1200&q=80",
     imageCaption:
       "Traders at the New York Stock Exchange react to earnings news.",
     slug: "sp500-record-high-earnings",
@@ -210,6 +219,15 @@ export const newsArticles: NewsArticle[] = [
         type: "paragraph",
         text: "Despite the optimism, some strategists caution that the market is trading at elevated valuations. The S&P 500's forward P/E stands at around 21x, above its 10-year average of 17.8x, leaving limited margin for disappointment.",
       },
+      { type: "heading", text: "Why Earnings Breadth Matters" },
+      {
+        type: "paragraph",
+        text: "Market strategists pay close attention not just to whether the index is rising, but to how many companies are participating in the move. A rally driven by a handful of mega-cap names can mask underlying weakness elsewhere in the market, while a broad-based advance — where mid-caps, cyclicals, and smaller companies are also posting gains — is generally viewed as healthier and more durable. This earnings season, participation has been unusually wide: financials, industrials, and consumer names have all contributed alongside the technology sector, rather than the index being propped up entirely by a small group of dominant companies.",
+      },
+      {
+        type: "paragraph",
+        text: "Valuation, however, is a separate question from earnings quality. A forward P/E above its historical average means investors are paying more today for each dollar of expected future earnings — which is only justified if that earnings growth actually materializes. If upcoming quarters disappoint even slightly relative to the elevated bar Wall Street has now set, stocks can fall even when the underlying business results are, in absolute terms, still good. That asymmetry — more room to disappoint, less room for upside surprise — is the central risk strategists flag whenever valuations run ahead of their long-term averages.",
+      },
     ],
   },
   {
@@ -221,8 +239,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Priya Sharma", title: "Crypto & Digital Assets Editor" },
     publishedAt: "2026-03-15T10:15:00Z",
     readTimeMinutes: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1518546305927-5a555bb7020d?w=1200&q=80",
     imageCaption: "A Bitcoin token alongside other cryptocurrencies.",
     slug: "bitcoin-surges-institutional-demand",
     tags: ["Bitcoin", "Crypto", "ETF", "Institutional Investing"],
@@ -264,6 +280,15 @@ export const newsArticles: NewsArticle[] = [
         type: "paragraph",
         text: "Despite the positive momentum, analysts warn that Bitcoin remains a volatile asset and a pullback after a rapid run-up cannot be ruled out.",
       },
+      { type: "heading", text: "Why Spot ETFs Changed the Buyer Base" },
+      {
+        type: "paragraph",
+        text: "Before spot Bitcoin ETFs existed, gaining exposure meant either buying and self-custodying the asset directly through a crypto exchange, or using a futures-based fund that could diverge from the spot price over time. Spot ETFs collapsed that friction: a financial advisor, pension fund, or retail investor can now hold Bitcoin exposure through the exact same brokerage account they use for stocks and bonds, with the same tax reporting and custody protections. That has meaningfully widened the pool of potential buyers beyond crypto-native traders to include institutions with mandates that previously excluded direct digital-asset ownership entirely.",
+      },
+      {
+        type: "paragraph",
+        text: "This structural shift is also why on-chain metrics like long-term holder behavior have taken on new significance. When a growing share of new demand flows through ETFs rather than exchange wallets, and existing holders aren't selling into the rally, the available float shrinks even as demand grows — a dynamic that can amplify price moves in both directions. It cuts both ways: the same mechanism that accelerates rallies can also accelerate drawdowns if ETF outflows turn sharply negative, which is why volatility remains a defining feature of the asset class regardless of the buyer base.",
+      },
     ],
   },
   {
@@ -275,8 +300,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Marco Delgado", title: "Real Estate Correspondent" },
     publishedAt: "2026-03-14T16:45:00Z",
     readTimeMinutes: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1570129477492-45c003edd2be?w=1200&q=80",
     imageCaption: "A suburban home listed for sale in the U.S.",
     slug: "housing-market-cools-mortgage-rates",
     tags: ["Housing Market", "Mortgage Rates", "Real Estate", "Fed"],
@@ -324,6 +347,15 @@ export const newsArticles: NewsArticle[] = [
         attribution:
           "Dr. Maria Santos, Chief Economist, National Housing Institute",
       },
+      { type: "heading", text: "The Lock-In Effect" },
+      {
+        type: "paragraph",
+        text: "Much of today's low inventory traces back to a phenomenon economists call the 'lock-in effect.' Millions of homeowners refinanced or bought during the era of sub-4% mortgage rates in 2020 and 2021. Selling now and buying a similarly priced replacement home would mean trading that low rate for one closer to 7% — often adding hundreds of dollars to the monthly payment even without a change in home price. That math keeps many would-be sellers in place, which in turn keeps inventory tight and props up prices even as higher rates simultaneously squeeze buyer demand.",
+      },
+      {
+        type: "paragraph",
+        text: "For buyers navigating this market, the rate environment changes the math on renting versus buying, and on timing a purchase versus waiting. A widely used rule of thumb is that home payments — including principal, interest, taxes, and insurance — should stay under roughly 28% of gross monthly income. At current rates, that threshold prices out a meaningfully larger share of first-time buyers than it did when rates were near 4%, which is part of why first-time buyer participation has been trending below its historical norm. Buyers who can be flexible on timing sometimes benefit from waiting for either rates or prices to soften, while buyers who need to move now for personal reasons are increasingly turning to adjustable-rate mortgages or rate buy-downs to manage the higher upfront cost.",
+      },
     ],
   },
   {
@@ -351,8 +383,6 @@ export const newsArticles: NewsArticle[] = [
         href: "#",
       },
     ],
-    imageUrl:
-      "https://images.unsplash.com/photo-1677756119517-756a188d2d94?w=1200&q=80",
     imageCaption: "A data center powering AI workloads.",
     slug: "tech-stocks-ai-spending-boom",
     tags: [
@@ -404,6 +434,15 @@ export const newsArticles: NewsArticle[] = [
           "Super Micro Computer: +7.8%, on strong shipment data for AI servers.",
         ],
       },
+      { type: "heading", text: "Capex Today, Revenue Tomorrow — Or Never" },
+      {
+        type: "paragraph",
+        text: "The bull case for AI infrastructure spending rests on a simple chain of logic: cloud providers spend on chips and data centers, that spending becomes revenue for chipmakers, and eventually AI services generate enough customer revenue to justify the whole cycle. The bear case is that this chain can break at any link. Cloud providers could pull back capex if the return on their AI investments disappoints; enterprise customers could adopt AI more slowly than projected; or competition could compress the margins chipmakers currently enjoy. Because the current spending is easy to observe in earnings reports while the eventual payoff is not, markets tend to price the visible spending enthusiastically well before the harder question of return on investment is answered.",
+      },
+      {
+        type: "paragraph",
+        text: "For investors, this is the classic 'picks and shovels' versus 'gold' distinction. Selling infrastructure to companies chasing a gold rush can be a durable business even if most of those companies never strike gold themselves — but it also means infrastructure providers' fortunes are tied to how long the spending cycle continues, not to whether any individual AI application succeeds. A slowdown in capex guidance from even one or two major cloud providers has historically been enough to trigger sharp pullbacks across the semiconductor sector, which is why capital-expenditure commentary on quarterly earnings calls has become one of the most closely watched data points in the market.",
+      },
     ],
   },
   {
@@ -415,8 +454,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "David Chen", title: "Fixed Income Reporter" },
     publishedAt: "2026-03-13T15:20:00Z",
     readTimeMinutes: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1554260570-e9689a3418b8?w=1200&q=80",
     imageCaption: "U.S. Treasury Department building, Washington, D.C.",
     slug: "treasury-yields-jobs-data",
     tags: ["Treasury Yields", "Jobs Report", "Bonds", "Economy"],
@@ -454,6 +491,15 @@ export const newsArticles: NewsArticle[] = [
         attribution:
           "Fiona Blake, Head of Rates Strategy, Continental Asset Management",
       },
+      { type: "heading", text: "Why Jobs Data Moves Bond Prices" },
+      {
+        type: "paragraph",
+        text: "It can seem counterintuitive that good economic news — more people working — pushes bond yields up, which means bond prices fall. The connection runs through the Federal Reserve's policy path. A resilient labor market gives the Fed more room to keep interest rates elevated for longer without risking a spike in unemployment, since strong job growth reduces the urgency to stimulate the economy with rate cuts. Bond investors, anticipating that rates will stay higher for longer, demand a higher yield to hold longer-dated bonds today, which mechanically pushes prices down (yields and prices move inversely for a fixed-coupon bond).",
+      },
+      {
+        type: "paragraph",
+        text: "This dynamic matters well beyond the bond market itself. The 10-year Treasury yield serves as a benchmark for a huge range of borrowing costs across the economy, including mortgage rates, corporate bond yields, and even the discount rate analysts use to value stocks. A sharp move higher in the 10-year, as seen here, tends to ripple into higher mortgage rates within days and can pressure equity valuations — particularly for growth stocks whose value depends heavily on future earnings that are worth less today when discounted at a higher rate.",
+      },
     ],
   },
   {
@@ -465,8 +511,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Aisha Patel", title: "Personal Finance Editor" },
     publishedAt: "2026-03-13T09:00:00Z",
     readTimeMinutes: 6,
-    imageUrl:
-      "https://images.unsplash.com/photo-1579621970795-87facc2f976d?w=1200&q=80",
     imageCaption:
       "Online banking apps have made high-yield savings accounts more accessible than ever.",
     slug: "best-high-yield-savings-accounts-2026",
@@ -511,6 +555,15 @@ export const newsArticles: NewsArticle[] = [
         text: "This is genuinely one of the best environments for savers in 15 years. People who are still in big-bank accounts earning 0.01% are essentially gifting money to their bank.",
         attribution: "Greg Harmon, CFP, Blue Ridge Financial Planning",
       },
+      { type: "heading", text: "Why the Gap Between Big Banks and Online Banks Is So Wide" },
+      {
+        type: "paragraph",
+        text: "The enormous gap between a traditional big-bank savings rate and an online bank's high-yield rate isn't a pricing mistake — it reflects two very different business models. Large traditional banks carry expensive branch networks, ATM fleets, and legacy operations, and they know a large share of their depositors won't shop around, so they have little incentive to compete aggressively on rate. Online-only banks skip the physical branch overhead entirely and pass much of that savings on to depositors as a higher APY, using the rate itself as their main tool for attracting customers who are actively comparing offers.",
+      },
+      {
+        type: "paragraph",
+        text: "Before moving money, it's worth checking a few practical details: whether the advertised APY is a promotional rate that resets after an introductory period, whether there's a cap on the balance that earns the top rate, and how quickly funds can be transferred back to a checking account if needed. High-yield savings accounts are best suited for money you want to keep liquid and safe — an emergency fund, a house down payment you'll need within a year or two, or cash earmarked for a near-term expense — rather than long-term investment goals, where a diversified portfolio of stocks and bonds has historically offered higher returns over long time horizons despite short-term volatility.",
+      },
     ],
   },
   {
@@ -523,8 +576,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Nora Walsh", title: "Commodities Reporter" },
     publishedAt: "2026-03-12T13:30:00Z",
     readTimeMinutes: 4,
-    imageUrl:
-      "https://images.unsplash.com/photo-1610375461246-83df859d849d?w=1200&q=80",
     imageCaption: "Gold bullion bars at a secure storage facility.",
     slug: "gold-hits-2400-safe-haven",
     tags: ["Gold", "Safe Haven", "Commodities", "Geopolitics"],
@@ -563,6 +614,15 @@ export const newsArticles: NewsArticle[] = [
         attribution:
           "Elena Vasquez, Senior Metals Analyst, Thornbury Commodities",
       },
+      { type: "heading", text: "Gold's Role in a Portfolio" },
+      {
+        type: "paragraph",
+        text: "Unlike stocks or bonds, gold produces no income — no dividend, no coupon — so its investment case rests entirely on price appreciation and its behavior as a diversifier. Historically, gold has tended to hold its value or rise during periods of high inflation, currency weakness, or geopolitical stress, which is precisely when many other assets struggle. That low or negative correlation with stocks during crisis periods is the main reason financial advisors often recommend a modest allocation to gold — commonly cited in the range of 5% to 10% of a portfolio — as a form of insurance rather than a primary growth holding.",
+      },
+      {
+        type: "paragraph",
+        text: "It's worth being clear-eyed about gold's limitations too. Over multi-decade periods, gold has historically underperformed a diversified stock portfolio in terms of total real return, and it can go through very long stretches — sometimes a decade or more — of flat or declining prices. Investors considering an allocation typically choose between physical bullion, gold-backed ETFs (which offer easier liquidity and no storage concerns), and mining company stocks (which offer leveraged exposure to gold prices but carry additional company-specific and operational risk on top of the commodity price itself).",
+      },
     ],
   },
   {
@@ -575,8 +635,6 @@ export const newsArticles: NewsArticle[] = [
     author: { name: "Tom Rivera", title: "ETF & Funds Reporter" },
     publishedAt: "2026-03-12T10:00:00Z",
     readTimeMinutes: 3,
-    imageUrl:
-      "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1200&q=80",
     imageCaption:
       "Exchange-traded funds have become the dominant vehicle for passive investing.",
     slug: "etf-inflows-record-february",
@@ -619,12 +677,35 @@ export const newsArticles: NewsArticle[] = [
         type: "quote",
         text: "ETFs have won the structural battle. The question now isn't whether people will use ETFs, but which ETFs they'll choose. The competition is fierce and fees keep grinding lower.",
         attribution:
-          "Ben Carlson, Director of Institutional Asset Management, Ritholtz Wealth",
+          "Priya Nandakumar, Director of Fund Research, Harborview Advisors",
       },
       {
         type: "paragraph",
         text: "The record inflows suggest that despite elevated valuations and macro uncertainty, investors are choosing to stay invested rather than move to the sidelines — a sign of underlying confidence in the long-term trajectory of financial markets.",
       },
+      { type: "heading", text: "Why ETFs Keep Taking Share From Mutual Funds" },
+      {
+        type: "paragraph",
+        text: "The structural advantages driving this shift are mostly mechanical rather than about performance. ETFs trade throughout the day like stocks, giving investors intraday pricing and flexibility that traditional mutual funds — priced only once, after market close — don't offer. Most ETFs are also more tax-efficient than mutual funds in a taxable account, because their unique creation-and-redemption structure lets fund managers remove appreciated securities without triggering a taxable sale, whereas mutual funds must sometimes sell holdings and distribute capital gains to all shareholders even if an individual investor didn't sell anything themselves.",
+      },
+      {
+        type: "paragraph",
+        text: "Cost has compounded the shift. The average expense ratio on U.S. equity ETFs has fallen for over a decade as providers compete aggressively on fees, and for broad market exposure the difference between a low-cost index ETF and an actively managed mutual fund with a higher expense ratio can meaningfully affect long-term returns once compounded over decades. That said, ETFs aren't automatically superior in every case — actively managed strategies, certain niche asset classes, and funds requiring frequent rebalancing can still favor a traditional mutual fund structure, so the right vehicle depends on the specific strategy and account type involved.",
+      },
     ],
   },
 ];
+
+// Original, deterministic artwork per news article (no stock/placeholder images) —
+// generated from each article's own title/category/tags, computed after the literal
+// above since object literals can't reference their own sibling properties.
+export const newsArticles: NewsArticle[] = rawNewsArticles.map((article) => ({
+  ...article,
+  imageUrl: articleArtDataUri({
+    title: article.title,
+    category: article.category,
+    tags: article.tags,
+    excerpt: article.excerpt,
+    seed: article.slug,
+  }),
+}));

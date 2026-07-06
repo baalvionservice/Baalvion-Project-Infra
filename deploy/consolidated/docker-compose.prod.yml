@@ -160,6 +160,11 @@ services:
     environment: { <<: [*db, *redis] }
     mem_limit: 1536m
     mem_reservation: 768m
+    # cms-service writes uploaded media + generated-art SVGs to a path inside the app
+    # image's own writable layer (UPLOAD_DIR in mediaService.js). Without a named volume
+    # here, every container recreate (every deploy) silently wipes all of it.
+    volumes:
+      - cms_uploads:/app/Backend/services/knowledge/cms-service/uploads
     healthcheck:
       test: ["CMD","node","-e","require('http').get('http://127.0.0.1:3021/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
       interval: 30s
@@ -307,3 +312,4 @@ volumes:
   kafkadata:
   caddy_data:
   caddy_config:
+  cms_uploads:

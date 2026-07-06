@@ -6,11 +6,20 @@ import { Source_Serif_4 } from "next/font/google";
 import { cn } from "@/lib/utils";
 import RootLayoutClient from "@/components/common/RootLayoutClient";
 import { Analytics } from "@/components/common/Analytics";
+import UnifiedAnalytics from "@/components/common/UnifiedAnalytics";
 import { getSiteAdsenseClient } from "@/services/data/cms-public";
+
+const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || "imperialpedia";
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.siteUrl),
-  icons: { icon: 'data:,' },
+  icons: {
+    icon: [
+      { url: '/brand/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: '/brand/apple-icon.png',
+  },
   title: {
     default: 'Imperialpedia — The Financial Intelligence Network',
     template: '%s | Imperialpedia',
@@ -111,7 +120,6 @@ export default async function RootLayout({
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
         <meta name="theme-color" content="#ffffff" />
-        <link rel="preconnect" href="https://images.unsplash.com" />
       </head>
 
       <body className="font-ui bg-background text-foreground antialiased min-h-screen flex flex-col">
@@ -144,6 +152,7 @@ export default async function RootLayout({
 
         <RootLayoutClient>{children}</RootLayoutClient>
         <Analytics adsenseClient={adsenseClient} />
+        <UnifiedAnalytics slug={CMS_SLUG} />
       </body>
     </html>
   );

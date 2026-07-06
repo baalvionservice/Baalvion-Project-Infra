@@ -1,10 +1,12 @@
 'use strict';
 const { Op } = require('sequelize');
+const { hmacSign, safeCompare } = require('@baalvion/crypto');
 const { CmsWebsite, CmsContent, CmsCategory, CmsTag, CmsAuthor } = require('../models');
 const { AppError } = require('../utils/errors');
 const cache = require('./cacheService');
 const config = require('../config/appConfig');
 const contentService = require('./contentService');
+const contentEvents = require('./analytics/contentEvents');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 
 async function _resolveWebsite(websiteSlug) {
@@ -18,6 +20,7 @@ async function getPublicContent(websiteSlug, slug) {
     const cached = await cache.get(cacheKey);
     if (cached) {
         await contentService.incrementViewCount(cached.id);
+        void contentEvents.recordContentView(websiteSlug, cached); // fire-and-forget, fail-open
         return cached;
     }
 
@@ -31,7 +34,33 @@ async function getPublicContent(websiteSlug, slug) {
     const data = content.toJSON();
     await cache.set(cacheKey, data, config.cache.publicTtl);
     await contentService.incrementViewCount(content.id);
+    void contentEvents.recordContentView(websiteSlug, data); // fire-and-forget, fail-open
     return data;
+}
+
+/**
+ * Draft-safe content fetch for the admin CMS live-preview iframe. Gated by a short-lived
+ * HMAC token (issued via contentService.getPreviewToken) instead of user auth, so the
+ * target site's own frontend can call this without ever holding CMS_PREVIEW_SECRET.
+ * Unlike getPublicContent, this ignores status/visibility — previewing drafts is the point.
+ */
+async function getPreviewContent(websiteSlug, slug, exp, token) {
+    if (!config.preview.secret) throw new AppError('FORBIDDEN', 'Preview is not configured', 403);
+    if (!exp || !token) throw new AppError('FORBIDDEN', 'Invalid preview token', 403);
+    if (Date.now() > Number(exp)) throw new AppError('FORBIDDEN', 'Preview token expired', 403);
+
+    const expected = hmacSign(`${websiteSlug}:${slug}:${exp}`, config.preview.secret);
+    if (!safeCompare(expected, String(token))) {
+        throw new AppError('FORBIDDEN', 'Invalid preview token', 403);
+    }
+
+    const website = await _resolveWebsite(websiteSlug);
+    const content = await CmsContent.findOne({
+        where: { websiteId: website.id, slug },
+        include: [{ model: CmsCategory, as: 'category', attributes: ['id', 'name', 'slug'] }],
+    });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+    return content.toJSON();
 }
 
 async function listPublicContent(websiteSlug, query = {}) {
@@ -112,4 +141,4 @@ async function getPublicWebsiteInfo(websiteSlug) {
     return { id, name, slug, domain, description, config: cfg, branding, modules };
 }
 
-module.exports = { getPublicContent, listPublicContent, getPublicCategory, getPublicWebsiteInfo, listPublicAuthors, getPublicAuthor };
+module.exports = { getPublicContent, getPreviewContent, listPublicContent, getPublicCategory, getPublicWebsiteInfo, listPublicAuthors, getPublicAuthor };

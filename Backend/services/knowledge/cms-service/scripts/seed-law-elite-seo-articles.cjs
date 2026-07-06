@@ -38,6 +38,23 @@ const flags = { export: FLAG('export'), dryRun: FLAG('dry-run'), update: FLAG('u
 
 const HOUSE_AUTHOR = { name: 'Law Elite Editorial', title: 'Legal Research & Editorial Desk', site: 'LawEliteNetwork.com' };
 
+// Mirrors scripts/seedLawEliteAuthors.cjs — frontmatter `author: <slug>` resolves
+// to one of these real, credentialed bylines (E-E-A-T) instead of the generic
+// house byline. Keep in sync if that authors list changes.
+const AUTHORS_BY_SLUG = {
+  'elena-rossi': { name: 'Elena Rossi', slug: 'elena-rossi', title: 'Corporate & Securities Editor', credentials: 'LL.M. Corporate Law · 12+ years covering company and securities law' },
+  'marcus-hale': { name: 'Marcus Hale', slug: 'marcus-hale', title: 'Technology & Data Protection Editor', credentials: 'J.D. · 10+ years in technology, IP, and privacy law' },
+  'priya-menon': { name: 'Priya Menon', slug: 'priya-menon', title: 'Startups & Venture Contributor', credentials: 'LL.B. · Startup and early-stage venture legal writer' },
+  'sofia-almeida': { name: 'Sofia Almeida', slug: 'sofia-almeida', title: 'Family Law Editor', credentials: 'LL.M. Family Law · 14+ years writing on family and matrimonial law' },
+  'rajesh-iyer': { name: 'Rajesh Iyer', slug: 'rajesh-iyer', title: 'Family & Children’s Law Contributor', credentials: 'LL.B. · Family law writer focused on custody and child welfare' },
+  'eleanor-whitfield': { name: 'Eleanor Whitfield', slug: 'eleanor-whitfield', title: 'Estate Planning & Probate Editor', credentials: 'LL.M. · 15+ years in wills, trusts, and estate planning' },
+  'priya-nair': { name: 'Priya Nair', slug: 'priya-nair', title: 'Senior Legal Editor', credentials: 'LL.M. · 13+ years across commercial, tax, employment, and IP law' },
+  'daniel-okafor': { name: 'Daniel Okafor', slug: 'daniel-okafor', title: 'Criminal & Regulatory Editor', credentials: 'J.D. · 11+ years writing on criminal, tax, and regulatory law' },
+  'daniel-okoro': { name: 'Daniel Okoro', slug: 'daniel-okoro', title: 'Employment Law Contributor', credentials: 'LL.B. · Employment and workplace-rights writer' },
+  'aisha-rahman': { name: 'Aisha Rahman', slug: 'aisha-rahman', title: 'Criminal Justice Contributor', credentials: 'J.D. · Criminal justice and procedure writer' },
+  'marcus-whitfield': { name: 'Marcus Whitfield', slug: 'marcus-whitfield', title: 'Dispute Resolution Editor', credentials: 'LL.M. Dispute Resolution · Arbitration and mediation writer' },
+};
+
 // ── minimal frontmatter parser (title/metaTitle/metaDescription/slug/category/keywords) ──
 function parseFrontmatter(raw) {
   const m = raw.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
@@ -93,6 +110,12 @@ function buildDoc(a) {
   const words = wordCount(a.body);
   const keywords = Array.isArray(a.meta.keywords) ? a.meta.keywords : [];
   const alphabet = (a.title || '#').trim().charAt(0).toUpperCase();
+  const author = AUTHORS_BY_SLUG[a.meta.author] || HOUSE_AUTHOR;
+  // Real taxonomy category (business-corporate, tax-finance, ...) so the article
+  // shows up under the matching /law/[categorySlug] hub and its breadcrumb —
+  // falls back to the run-wide legal-guides bucket when a file doesn't set one.
+  const categorySlug = a.meta.categorySlug ? slugify(a.meta.categorySlug) : undefined;
+  const categoryName = a.meta.category || (categorySlug ? undefined : CATEGORY_NAME);
   return {
     title: a.title,
     slug: a.slug,
@@ -101,7 +124,7 @@ function buildDoc(a) {
     visibility: 'public',
     seoMetadata: { title: a.meta.metaTitle || a.title, description: a.meta.metaDescription || a.excerpt, keywords },
     customFields: {
-      author: HOUSE_AUTHOR,
+      author,
       wordCount: words,
       readingTime: `${Math.max(1, Math.round(words / 200))} min read`,
       focusKeyword: keywords[0] || '',
@@ -110,6 +133,7 @@ function buildDoc(a) {
       category: a.meta.category || CATEGORY_NAME,
       schemaRecommendation: 'Article',
     },
+    ...(categorySlug ? { categorySlug, categoryName: categoryName || a.meta.category } : {}),
     contentBlocks,
   };
 }

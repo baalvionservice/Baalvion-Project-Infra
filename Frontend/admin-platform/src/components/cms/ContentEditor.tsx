@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Save, Search, Clock, History, Settings2, Tag as TagIcon, Eye, Pencil, Send, Globe } from 'lucide-react';
+import { Save, Search, Clock, History, Settings2, Tag as TagIcon, Eye, Pencil, Send, Globe, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import BlockBuilder from './BlockBuilder';
 import ContentPreview from './ContentPreview';
+import LivePreviewFrame from './LivePreviewFrame';
 import SeoPanel from './SeoPanel';
 import RevisionHistory from './RevisionHistory';
 import WorkflowPanel from './WorkflowPanel';
@@ -28,9 +29,10 @@ interface Props {
   content: ContentItem;
   userRole?: CmsRole;
   websiteTitleSuffix?: string;
+  websiteDomain?: string | null;
 }
 
-export default function ContentEditor({ content, userRole, websiteTitleSuffix }: Props) {
+export default function ContentEditor({ content, userRole, websiteTitleSuffix, websiteDomain }: Props) {
   const { mutate: save, isPending: isSaving } = useUpdateContent(content.id);
   const { mutate: runTransition, isPending: isTransitioning } = useWorkflowTransition();
   const autosave = useAutosave(content.id);
@@ -48,7 +50,7 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
   const [categoryIds, setCategoryIds] = useState<string[]>(content.categoryIds ?? []);
   const [tagIds, setTagIds] = useState<string[]>(content.tagIds ?? []);
   const [customFields, setCustomFields] = useState<Record<string, unknown>>(content.customFields ?? {});
-  const [mode, setMode] = useState<'edit' | 'preview'>('edit');
+  const [mode, setMode] = useState<'edit' | 'preview' | 'live'>('edit');
 
   const autoSlug = (val: string) =>
     val.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -114,14 +116,36 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
             )}
           </div>
           <div className="flex items-center gap-2">
+            {mode !== 'edit' && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-7 gap-1.5 text-xs"
+                onClick={() => setMode('edit')}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+                Edit
+              </Button>
+            )}
             <Button
               variant={mode === 'preview' ? 'default' : 'ghost'}
               size="sm"
               className="h-7 gap-1.5 text-xs"
-              onClick={() => setMode((m) => (m === 'edit' ? 'preview' : 'edit'))}
+              onClick={() => setMode((m) => (m === 'preview' ? 'edit' : 'preview'))}
             >
-              {mode === 'edit' ? <Eye className="h-3.5 w-3.5" /> : <Pencil className="h-3.5 w-3.5" />}
-              {mode === 'edit' ? 'Preview' : 'Edit'}
+              <Eye className="h-3.5 w-3.5" />
+              Preview
+            </Button>
+            <Button
+              variant={mode === 'live' ? 'default' : 'ghost'}
+              size="sm"
+              className="h-7 gap-1.5 text-xs"
+              disabled={!websiteDomain}
+              title={websiteDomain ? 'See the real site render this item, including unpublished edits' : 'This website has no live domain configured'}
+              onClick={() => setMode((m) => (m === 'live' ? 'edit' : 'live'))}
+            >
+              <Radio className="h-3.5 w-3.5" />
+              Live
             </Button>
             <Separator orientation="vertical" className="h-5" />
             <Button
@@ -171,6 +195,11 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
         </div>
 
         {/* Content area */}
+        {mode === 'live' ? (
+          <div className="flex-1 overflow-hidden">
+            <LivePreviewFrame contentId={content.id} websiteDomain={websiteDomain} />
+          </div>
+        ) : (
         <ScrollArea className="flex-1">
           {mode === 'preview' ? (
             <div className="bg-white">
@@ -213,6 +242,7 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix }:
           </div>
           )}
         </ScrollArea>
+        )}
       </div>
 
       {/* Side panel */}

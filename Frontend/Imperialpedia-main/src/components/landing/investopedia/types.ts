@@ -7,7 +7,7 @@ export type Article = {
   category: string;
   /** Optional summary / dek */
   dek?: string;
-  /** picsum.photos seed for deterministic editorial art */
+  /** Seed for deterministic, locally-generated editorial art */
   imageSeed: string;
   /** Optional byline */
   author?: string;

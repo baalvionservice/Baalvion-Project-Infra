@@ -3,6 +3,7 @@ import { Inter, Cormorant_Garamond } from "next/font/google";
 import { headers } from "next/headers";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
+import UnifiedAnalytics from "@/components/UnifiedAnalytics";
 import { AppProvider } from "@/lib/store";
 import {
   normalizeCountry,
@@ -153,6 +154,7 @@ export default async function RootLayout({
       <body className="font-body antialiased bg-background text-foreground overflow-x-hidden selection:bg-gold selection:text-white">
         <AppProvider>{children}</AppProvider>
         <Toaster />
+        <UnifiedAnalytics slug={process.env.NEXT_PUBLIC_CMS_WEBSITE_SLUG || "amarise-maison-avenue"} />
       </body>
     </html>
   );

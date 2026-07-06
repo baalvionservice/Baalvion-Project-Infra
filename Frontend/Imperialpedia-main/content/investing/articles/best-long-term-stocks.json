@@ -1,0 +1,83 @@
+{
+  "topicNumber": 10,
+  "title": "Best Long-Term Stocks",
+  "slug": "best-long-term-stocks",
+  "seo": {
+    "seoTitle": "Best Long-Term Stocks: What to Look For",
+    "metaDescription": "Instead of chasing hot tickers, learn the durable traits that make a stock worth holding for a decade or more.",
+    "focusKeyword": "best long-term stocks",
+    "secondaryKeywords": ["long term stock investing", "buy and hold stocks", "stocks to hold for 10 years", "long term investment strategy"],
+    "searchIntent": "Informational/commercial — investors want criteria for durable long-term holdings, not just a ticker list.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "The 'best' long-term stocks share common traits — durable competitive advantages, consistent profitability, and manageable debt — rather than being a fixed list of names.",
+  "intro": "Any list of 'best long-term stocks' published today will look different in five years, because businesses, industries, and valuations all change. What doesn't change is the underlying criteria that make a company worth holding through multiple market cycles. This guide focuses on those durable traits so you can evaluate long-term candidates yourself, at any point in time.",
+  "sections": [
+    {
+      "heading": "Look for a Durable Competitive Advantage",
+      "paragraphs": [
+        "Warren Buffett popularized the term 'economic moat' to describe a company's sustainable edge over competitors — something that makes it difficult for rivals to steal market share or profit margin. This might be a strong brand, high switching costs for customers, network effects, or proprietary technology. Companies with a genuine moat tend to maintain profitability over long periods precisely because competitors can't easily erode their advantage."
+      ]
+    },
+    {
+      "heading": "Prioritize Consistent, Growing Profitability",
+      "paragraphs": [
+        "A long-term holding should show a track record of profitability through multiple economic environments, not just during favorable conditions. Companies that maintained or grew earnings through past recessions demonstrate a resilience that's genuinely useful information for a decade-long holding period, since you'll almost certainly experience at least one more downturn during that time."
+      ]
+    },
+    {
+      "heading": "Check for Manageable, Sensible Debt Levels",
+      "paragraphs": [
+        "Heavily indebted companies are more vulnerable during downturns and rising-rate environments, since a larger share of their cash flow must go toward debt service regardless of how the business is performing. For a genuine long-term holding, look for debt levels that are reasonable relative to industry peers and earnings, giving the company room to invest in growth or weather a rough stretch without financial strain."
+      ],
+      "callout": {
+        "title": "Long-term doesn't mean 'never sell'",
+        "text": "Buying for the long term doesn't mean ignoring major changes in a company's fundamentals. If the original reasons you invested — the moat, the profitability, the balance sheet — genuinely deteriorate, it's reasonable to reassess, even in a long-term strategy."
+      }
+    },
+    {
+      "heading": "Consider Reinvestment and Growth Runway",
+      "paragraphs": [
+        "A company that can reinvest its profits at attractive rates of return — expanding into new markets, developing new products — compounds shareholder value more effectively over a decade than one with limited room to grow. This is closely tied to understanding [growth versus value characteristics](/articles/growth-stocks-vs-value-stocks), since a genuine long-term holding often blends durable current profitability with a credible path to future expansion."
+      ]
+    },
+    {
+      "heading": "Patience Is Part of the Strategy",
+      "paragraphs": [
+        "Even the strongest long-term holdings go through multi-year stretches of flat or disappointing performance, often for reasons unrelated to the quality of the underlying business — broader market sentiment, sector rotation, or temporary headwinds all play a role. Investors who sell during these stretches out of frustration frequently miss the eventual recovery. Reviewing your original investment thesis periodically, rather than reacting to short-term price action, is what separates genuine long-term investing from simply holding on and hoping."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "A durable competitive advantage, or 'economic moat,' helps a company defend its profitability over long periods.",
+    "Look for consistent profitability across multiple economic cycles, not just favorable conditions.",
+    "Manageable debt levels relative to industry peers give a company flexibility during downturns.",
+    "A credible growth runway for reinvesting profits compounds value more effectively over a decade.",
+    "Long-term investing doesn't mean ignoring major deterioration in a company's fundamentals if it genuinely occurs."
+  ],
+  "faq": [
+    {
+      "question": "How long is 'long-term' in stock investing?",
+      "answer": "Most financial educators define long-term investing as a horizon of at least five to ten years, which gives enough time to ride out multiple market cycles and benefit from compounding."
+    },
+    {
+      "question": "Should I buy individual stocks or an index fund for the long term?",
+      "answer": "A broad-market index fund is a reasonable long-term default for most investors since it diversifies away single-company risk. Individual long-term stock picks can complement this once you've built research skills."
+    },
+    {
+      "question": "Do long-term stocks need to pay dividends?",
+      "answer": "No — some of the strongest long-term holdings reinvest all profits into growth rather than paying dividends. Whether dividends matter depends on your personal goals; see [dividend stocks for passive income](/articles/dividend-stocks-for-passive-income) for that specific angle."
+    }
+  ],
+  "conclusion": "Rather than searching for a fixed list of 'best' long-term stocks, build a habit of evaluating any candidate against durable criteria: a real competitive advantage, consistent profitability through different economic conditions, sensible debt levels, and room to keep growing. Companies that check these boxes today may not be the same ones that check them in a decade — which is exactly why understanding the criteria matters more than memorizing any particular list.",
+  "internalLinks": [
+    { "anchor": "growth stocks vs value stocks", "slug": "growth-stocks-vs-value-stocks" },
+    { "anchor": "dividend stocks for passive income", "slug": "dividend-stocks-for-passive-income" },
+    { "anchor": "what is dollar-cost averaging", "slug": "what-is-dollar-cost-averaging" },
+    { "anchor": "how to build a stock portfolio", "slug": "how-to-build-a-stock-portfolio" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 700
+}

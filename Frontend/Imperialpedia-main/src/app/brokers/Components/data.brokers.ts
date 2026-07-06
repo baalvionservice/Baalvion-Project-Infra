@@ -1,4 +1,11 @@
 import { NewsArticle } from "@/lib/data.news";
+import { articleArtDataUri, personSilhouetteDataUri } from "@baalvion/illustrations";
+
+// Raw guide shape omits the fields that withReviewArt-style generated art fills
+// in below (avatarUrl, imageUrl) — see the `brokerGuides` export at the bottom.
+type RawBrokerGuide = Omit<NewsArticle, "imageUrl" | "author"> & {
+  author: Omit<NewsArticle["author"], "avatarUrl">;
+};
 
 export type Broker = {
   slug: string;
@@ -97,7 +104,7 @@ export const brokers: Broker[] = [
   },
 ];
 
-export const brokerGuides: NewsArticle[] = [
+const rawBrokerGuides: RawBrokerGuide[] = [
   {
     id: "guide-1",
     title: "What Is a Broker? A Complete Beginner’s Guide",
@@ -107,16 +114,12 @@ export const brokerGuides: NewsArticle[] = [
     category: "Guides",
     author: {
       name: "Sameer Basnet",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1607746882042-944635dfe10e?w=200&q=80&auto=format",
     },
 
     publishedAt: "2026-03-15",
     updatedAt: "2026-03-16",
     readTimeMinutes: 8,
 
-    imageUrl:
-      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=80&auto=format",
     imageCaption: "Stock market charts representing broker activity",
 
     slug: "what-is-a-broker",
@@ -139,7 +142,11 @@ export const brokerGuides: NewsArticle[] = [
 
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1559526324-593bc073d938?w=1200&q=80&auto=format",
+        url: articleArtDataUri({
+          title: "Financial dashboards and trading analytics",
+          category: "Guides",
+          seed: "what-is-a-broker-inline",
+        }),
         caption: "Financial dashboards and trading analytics",
       },
 
@@ -200,15 +207,11 @@ export const brokerGuides: NewsArticle[] = [
     category: "Guides",
     author: {
       name: "Finance Editorial Team",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=200&q=80&auto=format",
     },
 
     publishedAt: "2026-03-10",
     readTimeMinutes: 6,
 
-    imageUrl:
-      "https://images.unsplash.com/photo-1640161704729-cbe966a08476?w=1200&q=80&auto=format",
     imageCaption: "Comparing broker platforms and tools",
 
     slug: "choose-best-broker",
@@ -245,7 +248,11 @@ export const brokerGuides: NewsArticle[] = [
 
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1518186233392-c232efbf2373?w=1200&q=80&auto=format",
+        url: articleArtDataUri({
+          title: "Analyzing charts before choosing a broker",
+          category: "Guides",
+          seed: "choose-best-broker-inline",
+        }),
         caption: "Analyzing charts before choosing a broker",
       },
 
@@ -300,15 +307,11 @@ export const brokerGuides: NewsArticle[] = [
     category: "Guides",
     author: {
       name: "Regulatory Compliance Expert",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=200&q=80&auto=format",
     },
 
     publishedAt: "2026-03-12",
     readTimeMinutes: 7,
 
-    imageUrl:
-      "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=1200&q=80&auto=format",
     imageCaption: "Secure financial documents and regulatory compliance",
 
     slug: "broker-regulation-safety",
@@ -346,7 +349,11 @@ export const brokerGuides: NewsArticle[] = [
 
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=1200&q=80&auto=format",
+        url: articleArtDataUri({
+          title: "Regulatory compliance and financial security",
+          category: "Guides",
+          seed: "broker-regulation-safety-inline",
+        }),
         caption: "Regulatory compliance and financial security",
       },
 
@@ -385,15 +392,11 @@ export const brokerGuides: NewsArticle[] = [
     category: "Guides",
     author: {
       name: "Trading Technology Analyst",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80&auto=format",
     },
 
     publishedAt: "2026-03-14",
     readTimeMinutes: 9,
 
-    imageUrl:
-      "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=1200&q=80&auto=format",
     imageCaption: "Advanced trading platforms and analytics",
 
     slug: "advanced-trading-tools",
@@ -432,7 +435,11 @@ export const brokerGuides: NewsArticle[] = [
 
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1200&q=80&auto=format",
+        url: articleArtDataUri({
+          title: "Professional trading workstation setup",
+          category: "Guides",
+          seed: "advanced-trading-tools-inline",
+        }),
         caption: "Professional trading workstation setup",
       },
 
@@ -461,15 +468,11 @@ export const brokerGuides: NewsArticle[] = [
     category: "Guides",
     author: {
       name: "Crypto Market Specialist",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=80&auto=format",
     },
 
     publishedAt: "2026-03-16",
     readTimeMinutes: 8,
 
-    imageUrl:
-      "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=1200&q=80&auto=format",
     imageCaption: "Cryptocurrency trading platforms",
 
     slug: "crypto-brokers-guide",
@@ -508,7 +511,11 @@ export const brokerGuides: NewsArticle[] = [
 
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1200&q=80&auto=format",
+        url: articleArtDataUri({
+          title: "Blockchain technology and crypto security",
+          category: "Guides",
+          seed: "crypto-brokers-guide-inline",
+        }),
         caption: "Blockchain technology and crypto security",
       },
 
@@ -537,15 +544,11 @@ export const brokerGuides: NewsArticle[] = [
     category: "Guides",
     author: {
       name: "Global Markets Correspondent",
-      avatarUrl:
-        "https://images.unsplash.com/photo-1521791136064-7986c2920216?w=200&q=80&auto=format",
     },
 
     publishedAt: "2026-03-18",
     readTimeMinutes: 10,
 
-    imageUrl:
-      "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=1200&q=80&auto=format",
     imageCaption: "Global financial markets and international trading",
 
     slug: "international-investing-brokers",
@@ -583,7 +586,11 @@ export const brokerGuides: NewsArticle[] = [
 
       {
         type: "image",
-        url: "https://images.unsplash.com/photo-1614028674026-a65e31bfd27c?w=1200&q=80&auto=format",
+        url: articleArtDataUri({
+          title: "World map showing global financial centers",
+          category: "Guides",
+          seed: "international-investing-brokers-inline",
+        }),
         caption: "World map showing global financial centers",
       },
 
@@ -614,3 +621,21 @@ export const brokerGuides: NewsArticle[] = [
     ],
   },
 ];
+
+// Original, deterministic artwork per guide (no stock/placeholder images) —
+// an abstract silhouette avatar for the author and generated cover art for
+// the guide's own featured image, mirroring the pattern used in data.news.ts.
+export const brokerGuides: NewsArticle[] = rawBrokerGuides.map((guide) => ({
+  ...guide,
+  author: {
+    ...guide.author,
+    avatarUrl: personSilhouetteDataUri({ name: guide.author.name, seed: guide.slug }),
+  },
+  imageUrl: articleArtDataUri({
+    title: guide.title,
+    category: guide.category,
+    tags: guide.tags,
+    excerpt: guide.excerpt,
+    seed: guide.slug,
+  }),
+}));

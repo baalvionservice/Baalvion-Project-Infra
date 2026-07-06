@@ -36,7 +36,12 @@ on:
 
 concurrency:
   group: deploy-consolidated
-  cancel-in-progress: false
+  # true (was false): a run parked at the production approval gate must NOT block newer
+  # deploys. With false, an un-approved "waiting" run holds the group indefinitely and every
+  # subsequent push queues behind it with zero jobs (the deadlock seen 2026-06-29 → 07-02).
+  # With true, a new push cancels the older waiting/in-flight run so the latest commit always
+  # wins — approve the newest run's gate, never an ancient one.
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -309,7 +314,40 @@ jobs:
               -e PGSSLMODE=require \
               app-identity \
               node /app/Backend/services/identity/auth-service/scripts/bootstrapSuperAdmin.js
-            echo "::notice title=Superadmin seeded::${SA_EMAIL} asserted with role=super_admin."
+            echo "::notice title=Superadmin seeded::${SA_EMAIL} asserted in identity auth-service (role=super_admin)."
+            # proxy.baalvionstack.com authenticates against proxy-service's OWN user store
+            # (public.users on app-edge-realtime), NOT the identity auth-service — so seed the
+            # platform_admin there too, or the /admin console stays locked out even though the
+            # identity super-admin exists. platform_admin (not super_admin) because it expands
+            # to ['*'] in proxy-service RBAC.
+            $COMPOSE exec -T \
+              -e SUPERADMIN_EMAIL="${SA_EMAIL}" \
+              -e SUPERADMIN_PASSWORD="${SA_PASS}" \
+              app-edge-realtime \
+              node /app/Backend/services/infrastructure/proxy-service/scripts/bootstrapPlatformAdmin.js
+            echo "::notice title=Platform-admin seeded::${SA_EMAIL} asserted in proxy-service (role=platform_admin)."
+
+      - name: Apply cms-service migrations (incl. Unified Analytics schema)
+        if: steps.gate.outputs.ready == 'true'
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          # cms-service carries the Unified Analytics schema (migrations 20260014/15/16,
+          # schema `analytics`). sequelize-cli ships in the image (built --prod=false) and
+          # SequelizeMeta skips already-applied migrations, so this is safe + idempotent to
+          # run every deploy. The analytics migrations are additive-only (new schema/tables),
+          # so running after the roll never breaks the live code path.
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-core
+            COMPOSE="docker compose --env-file deploy/consolidated/.env \
+              -f deploy/consolidated/docker-compose.prod.yml \
+              -f deploy/consolidated/docker-compose.ssl-override.yml"
+            $COMPOSE exec -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/cms-service && npm run migrate"
+            echo "::notice title=Migrations applied::cms-service migrations (incl. analytics 20260014/15/16) run on app-platform."
 
       - name: Smoke test public ingress
         if: steps.gate.outputs.ready == 'true'

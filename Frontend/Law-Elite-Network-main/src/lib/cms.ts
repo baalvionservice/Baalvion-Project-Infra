@@ -62,6 +62,7 @@ interface CmsContent {
   category?: { id: string; name: string; slug: string } | null;
   status: string;
   publishedAt?: string | null;
+  viewCount?: number;
 }
 
 export interface CmsSitePage {
@@ -103,6 +104,24 @@ async function listContent(params: Record<string, string | number> = {}): Promis
   }
   const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
   return j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+}
+
+/**
+ * Same as `listContent`, but also surfaces the response's pagination total so
+ * callers (the /news infinite-scroll feed) can tell when there's another page.
+ */
+async function listContentPaged(
+  params: Record<string, string | number> = {},
+): Promise<{ items: CmsContent[]; total: number }> {
+  const qs = new URLSearchParams();
+  qs.set('limit', String(params.limit ?? 200));
+  for (const [k, v] of Object.entries(params)) {
+    if (k !== 'limit') qs.set(k, String(v));
+  }
+  const j = await fetchJSON(`${BASE}/content?${qs.toString()}`);
+  const items = j && Array.isArray(j.data) ? (j.data as CmsContent[]) : [];
+  const total = typeof j?.pagination?.total === 'number' ? j.pagination.total : items.length;
+  return { items, total };
 }
 
 function blocksToHtml(blocks?: Block[]): string {
@@ -169,15 +188,32 @@ export interface CmsArticle {
   /** Rendered HTML body for the article detail page. */
   content: string;
   category?: { name: string; slug?: string };
+  /** Named byline (E-E-A-T) — matches the bundled/law-service string convention. */
+  author?: string;
   readingTime?: string;
   featured?: boolean;
   updatedAt?: string;
+  /** CMS content type, e.g. 'article' or 'news' — drives NewsArticle JSON-LD. */
+  contentType?: string;
+  /**
+   * Real featured image set in the CMS admin panel, if any. Was previously
+   * dropped during normalization — every renderer had to synthesize a picsum
+   * placeholder instead, so admin-set images never appeared on the site. Now
+   * carried through; renderers should fall back to `articleArtDataUri` (never
+   * to a stock/placeholder image) when this is absent.
+   */
+  featuredImage?: string;
+  /** View count, when the CMS tracks it — omit from UI when absent rather than fabricating a number. */
+  views?: number;
+  /** Raw CMS custom fields (e.g. `breaking`, `videoUrl`) passed through for data-gated UI like the breaking ticker and video carousel. */
+  customFields?: Record<string, any>;
 }
 
 function toArticle(c: CmsContent): CmsArticle {
   const cf = c.customFields || {};
   const rawLetter = (cf.alphabet || (c.title || '#').charAt(0) || '#').toString().toUpperCase();
   const alphabet = /[A-Z]/.test(rawLetter.charAt(0)) ? rawLetter.charAt(0) : '#';
+  const author = typeof cf.author === 'string' ? cf.author : cf.author?.name;
   return {
     id: c.id,
     slug: c.slug,
@@ -186,19 +222,27 @@ function toArticle(c: CmsContent): CmsArticle {
     alphabet,
     content: blocksToHtml(c.contentBlocks),
     category: c.category ? { name: c.category.name, slug: c.category.slug } : undefined,
+    author: typeof author === 'string' ? author : undefined,
     readingTime: typeof cf.readingTime === 'string' ? cf.readingTime : undefined,
     featured: !!cf.featured,
     updatedAt: c.publishedAt ?? undefined,
+    contentType: c.contentType,
+    featuredImage: c.featuredImage ?? undefined,
+    views: typeof c.viewCount === 'number' ? c.viewCount : undefined,
+    customFields: c.customFields ?? undefined,
   };
 }
 
-/** List published encyclopedia articles, optionally filtered to one A–Z letter. */
-export async function cmsGetArticles(letter?: string): Promise<CmsArticle[]> {
+/** List published encyclopedia articles, optionally filtered to one A–Z letter and/or category. */
+export async function cmsGetArticles(letter?: string, categorySlug?: string): Promise<CmsArticle[]> {
   const items = await listContent({ contentType: 'article', limit: 200 });
   let arts = items.map(toArticle);
   if (letter) {
     const L = letter.toUpperCase().charAt(0);
     arts = arts.filter((a) => a.alphabet === L);
+  }
+  if (categorySlug) {
+    arts = arts.filter((a) => a.category?.slug === categorySlug);
   }
   return arts.sort((a, b) => a.title.localeCompare(b.title));
 }
@@ -207,6 +251,37 @@ export async function cmsGetArticles(letter?: string): Promise<CmsArticle[]> {
 export async function cmsGetArticleBySlug(slug: string): Promise<CmsArticle | null> {
   const c = await getContent(slug);
   return c ? toArticle(c) : null;
+}
+
+/** List published news content (contentType: 'news'), most recent first. */
+export async function cmsGetNews(limit = 50): Promise<CmsArticle[]> {
+  const items = await listContent({ contentType: 'news', limit });
+  return items
+    .map(toArticle)
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+}
+
+/** Paginated news content for the /news infinite-scroll feed. */
+export async function cmsGetNewsPage(
+  page: number,
+  limit = 12,
+): Promise<{ items: CmsArticle[]; hasMore: boolean }> {
+  const { items, total } = await listContentPaged({ contentType: 'news', page, limit });
+  const sorted = items
+    .map(toArticle)
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  return { items: sorted, hasMore: page * limit < total };
+}
+
+/**
+ * Draft-safe article fetch for the admin CMS live-preview iframe. `exp`/`token` come from
+ * the preview URL (issued by cms-service, validated there too) — this app never holds
+ * CMS_PREVIEW_SECRET, it only relays the token back to cms-service's preview endpoint.
+ */
+export async function cmsGetPreviewContent(slug: string, exp: string, token: string): Promise<CmsArticle | null> {
+  const qs = new URLSearchParams({ exp, token }).toString();
+  const j = await fetchJSON(`${BASE}/content/${encodeURIComponent(slug)}/preview?${qs}`);
+  return j && j.data ? toArticle(j.data as CmsContent) : null;
 }
 
 // ── Author / contributor profiles (E-E-A-T) ──────────────────────────────────

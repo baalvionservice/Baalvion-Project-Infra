@@ -124,7 +124,6 @@ or **CSV** and every row is created, categorized, and published in one go.
     "title": "Example Article Title",
     "categorySlug": "banking",
     "excerpt": "One-line summary used in cards and SEO.",
-    "featuredImage": "https://picsum.photos/seed/example/1200/675",
     "body": "First paragraph.\n\nSecond paragraph.",
     "publish": true
   }
@@ -134,8 +133,8 @@ or **CSV** and every row is created, categorized, and published in one go.
 ### CSV format (header row required)
 
 ```csv
-title,categorySlug,excerpt,featuredImage,body,publish
-Example Article Title,banking,One-line summary,https://picsum.photos/seed/x/1200/675,"First paragraph.\nSecond paragraph.",true
+title,categorySlug,excerpt,body,publish
+Example Article Title,banking,One-line summary,"First paragraph.\nSecond paragraph.",true
 ```
 
 **Field reference**
@@ -147,7 +146,7 @@ Example Article Title,banking,One-line summary,https://picsum.photos/seed/x/1200
 | `type` | — | Defaults to `article`. |
 | `categorySlug` | — | Must match an existing category slug (e.g. `banking`). |
 | `excerpt` | — | Summary + SEO description. |
-| `featuredImage` | — | Image URL (use an allowed host — see §6). |
+| `featuredImage` | — | Optional. Leave blank to auto-generate original branded artwork from the title/category/tags (see §6) — most articles should omit this. |
 | `body` | — | Plain text; blank lines (`\n\n`) become separate paragraphs. |
 | `publish` | — | `true` publishes now (default). `false` leaves it as a draft. |
 | `scheduledAt` | — | ISO date/time to schedule instead of publishing now. |
@@ -175,12 +174,16 @@ Knowledge-graph nodes — **companies, people, places** — keyed by **type** an
 
 ## 6. Images & media
 
-- Prefer the **Media** library (upload once, reuse).
-- If you paste an image **URL**, it must be on an **allowed host** (the site only
-  loads images from approved domains for security/performance). Safe choices:
-  your own uploaded media, `images.unsplash.com`, `picsum.photos`,
-  `placehold.co`, `imperialpedia.com`.
-- Always add **alt text** (accessibility + SEO).
+- **Leave `featuredImage` blank.** The CMS automatically generates original,
+  on-brand artwork for every article from its title, category, and tags the
+  moment you publish (or re-generates it if you rename the article later) — no
+  stock photos, no external image hosts, nothing to source or upload.
+- Prefer the **Media** library only when you need a *specific* real photo
+  (e.g. an executive headshot, a screenshot). Uploaded media is served from
+  this site's own storage — external image URLs (Unsplash, Picsum, Placehold,
+  or any other third-party host) are not allowed, for licensing and
+  performance reasons.
+- Always add **alt text** (accessibility + SEO) for any image you do upload.
 - Use landscape images around **1200×675** for featured/hero images.
 
 ---

@@ -1,6 +1,7 @@
 import { ReviewArticle } from "@/types/Review";
+import { withReviewArt } from "./withReviewArt";
 
-export const bestMortgageRates: ReviewArticle = {
+export const bestMortgageRates: ReviewArticle = withReviewArt({
   pageType: "review",
   slug: "best-crypto-exchanges",
   title: "Best Cryptocurrency Exchanges of April 2026",
@@ -13,7 +14,6 @@ export const bestMortgageRates: ReviewArticle = {
   reviewedBy: {
     name: "Alex Torres",
     title: "Senior Crypto Editor",
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80",
   },
   factCheckedBy: { name: "Priya Nair", title: "Blockchain Analyst" },
   methodologyLink: "#methodology",
@@ -25,7 +25,6 @@ export const bestMortgageRates: ReviewArticle = {
       providerId: "coinbase",
       categoryLabel: "Best Overall",
       providerName: "Coinbase",
-      logoUrl: "https://images.unsplash.com/photo-1516245834210-c4c142787335?w=80&q=80",
       summaryBlurb: "Most trusted US exchange with a beginner-friendly interface.",
       ctaUrl: "https://www.coinbase.com",
       ctaLabel: "Start Trading",
@@ -34,7 +33,6 @@ export const bestMortgageRates: ReviewArticle = {
       providerId: "kraken",
       categoryLabel: "Best for Security",
       providerName: "Kraken",
-      logoUrl: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=80&q=80",
       summaryBlurb: "Industry-leading security with zero major hacks since 2011.",
       ctaUrl: "https://www.kraken.com",
       ctaLabel: "Start Trading",
@@ -43,7 +41,6 @@ export const bestMortgageRates: ReviewArticle = {
       providerId: "binanceus",
       categoryLabel: "Best for Low Fees",
       providerName: "Binance.US",
-      logoUrl: "https://images.unsplash.com/photo-1629877521896-4f035d0c2c3c?w=80&q=80",
       summaryBlurb: "Lowest trading fees with the largest coin selection.",
       ctaUrl: "https://www.binance.us",
       ctaLabel: "Start Trading",
@@ -52,7 +49,6 @@ export const bestMortgageRates: ReviewArticle = {
       providerId: "gemini",
       categoryLabel: "Best for Beginners",
       providerName: "Gemini",
-      logoUrl: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=80&q=80",
       summaryBlurb: "Clean interface, strong regulation, and easy onboarding.",
       ctaUrl: "https://www.gemini.com",
       ctaLabel: "Start Trading",
@@ -62,7 +58,6 @@ export const bestMortgageRates: ReviewArticle = {
     {
       id: "coinbase",
       name: "Coinbase",
-      logoUrl: "https://images.unsplash.com/photo-1516245834210-c4c142787335?w=80&q=80",
       categoryLabels: ["Best Overall", "Best for US Investors"],
       overallScore: 4.7,
       fastFacts: [
@@ -101,7 +96,6 @@ export const bestMortgageRates: ReviewArticle = {
     {
       id: "kraken",
       name: "Kraken",
-      logoUrl: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=80&q=80",
       categoryLabels: ["Best for Security", "Best for Advanced Traders"],
       overallScore: 4.6,
       fastFacts: [
@@ -139,7 +133,6 @@ export const bestMortgageRates: ReviewArticle = {
     {
       id: "binanceus",
       name: "Binance.US",
-      logoUrl: "https://images.unsplash.com/photo-1629877521896-4f035d0c2c3c?w=80&q=80",
       categoryLabels: ["Best for Low Fees"],
       overallScore: 4.3,
       fastFacts: [
@@ -173,7 +166,6 @@ export const bestMortgageRates: ReviewArticle = {
     {
       id: "gemini",
       name: "Gemini",
-      logoUrl: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=80&q=80",
       categoryLabels: ["Best for Beginners", "Best Regulated Exchange"],
       overallScore: 4.4,
       fastFacts: [
@@ -212,28 +204,24 @@ export const bestMortgageRates: ReviewArticle = {
   comparisonRows: [
     {
       providerName: "Coinbase",
-      logoUrl: "https://images.unsplash.com/photo-1516245834210-c4c142787335?w=80&q=80",
       specs: { "Trading Fee": "0.5–1.5%", Coins: "240+", "Min. Deposit": "$2", Staking: "Yes", Score: "4.7/5" },
       overallScore: 4.7,
       ctaUrl: "https://www.coinbase.com",
     },
     {
       providerName: "Kraken",
-      logoUrl: "https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=80&q=80",
       specs: { "Trading Fee": "0.16–0.26%", Coins: "200+", "Min. Deposit": "$10", Staking: "Yes", Score: "4.6/5" },
       overallScore: 4.6,
       ctaUrl: "https://www.kraken.com",
     },
     {
       providerName: "Binance.US",
-      logoUrl: "https://images.unsplash.com/photo-1629877521896-4f035d0c2c3c?w=80&q=80",
       specs: { "Trading Fee": "0.1%", Coins: "120+", "Min. Deposit": "$10", Staking: "Limited", Score: "4.3/5" },
       overallScore: 4.3,
       ctaUrl: "https://www.binance.us",
     },
     {
       providerName: "Gemini",
-      logoUrl: "https://images.unsplash.com/photo-1621761191319-c6fb62004040?w=80&q=80",
       specs: { "Trading Fee": "0.2–0.4%", Coins: "70+", "Min. Deposit": "$0", Staking: "Yes", Score: "4.4/5" },
       overallScore: 4.4,
       ctaUrl: "https://www.gemini.com",
@@ -261,4 +249,4 @@ export const bestMortgageRates: ReviewArticle = {
         "Gemini and Coinbase are the most beginner-friendly US exchanges. Both have clean interfaces, strong regulation, and educational resources. Coinbase's Earn program lets you learn about new coins and earn small amounts for free.",
     },
   ],
-};
+});

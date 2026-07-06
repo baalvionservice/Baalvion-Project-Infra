@@ -69,6 +69,12 @@ export const useUpdateContent = (id: string) => {
   });
 };
 
+// Live-preview iframe token — no toast, callers handle their own loading/error UI.
+export const useRequestPreviewToken = () =>
+  useMutation({
+    mutationFn: (id: string) => cmsContentApi.previewToken(id).then((r) => r.data.data),
+  });
+
 export const useDeleteContent = () => {
   const qc = useQueryClient();
   return useMutation({

@@ -1,6 +1,7 @@
 import { ReviewArticle } from "@/types/Review";
+import { withReviewArt } from "./withReviewArt";
 
-export const bestCdRatesReview: ReviewArticle = {
+export const bestCdRatesReview: ReviewArticle = withReviewArt({
   pageType: "review",
   slug: "best-cd-rates",
   title: "Best CD Rates of April 2026",
@@ -13,7 +14,6 @@ export const bestCdRatesReview: ReviewArticle = {
   reviewedBy: {
     name: "Sarah Mitchell",
     title: "Senior Banking Editor",
-    avatarUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80",
   },
   factCheckedBy: { name: "James Okafor", title: "Certified Financial Planner" },
   methodologyLink: "#methodology",
@@ -25,7 +25,6 @@ export const bestCdRatesReview: ReviewArticle = {
       providerId: "marcus",
       categoryLabel: "Best Overall",
       providerName: "Marcus by Goldman Sachs",
-      logoUrl: "https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?w=80&q=80",
       summaryBlurb: "Top APY with no minimum deposit and no fees.",
       ctaUrl: "https://www.marcus.com",
       ctaLabel: "Open Account",
@@ -34,7 +33,6 @@ export const bestCdRatesReview: ReviewArticle = {
       providerId: "ally",
       categoryLabel: "Best No-Penalty CD",
       providerName: "Ally Bank",
-      logoUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=80&q=80",
       summaryBlurb: "No-penalty CD option and competitive rates across all terms.",
       ctaUrl: "https://www.ally.com",
       ctaLabel: "Open Account",
@@ -43,7 +41,6 @@ export const bestCdRatesReview: ReviewArticle = {
       providerId: "discover",
       categoryLabel: "Best for Beginners",
       providerName: "Discover Bank",
-      logoUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&q=80",
       summaryBlurb: "Easy online setup with strong customer service.",
       ctaUrl: "https://www.discover.com",
       ctaLabel: "Open Account",
@@ -52,7 +49,6 @@ export const bestCdRatesReview: ReviewArticle = {
       providerId: "synchrony",
       categoryLabel: "Best Bump-Rate CD",
       providerName: "Synchrony Bank",
-      logoUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=80&q=80",
       summaryBlurb: "Bump-rate CD lets you take advantage of rate increases.",
       ctaUrl: "https://www.synchronybank.com",
       ctaLabel: "Open Account",
@@ -62,7 +58,6 @@ export const bestCdRatesReview: ReviewArticle = {
     {
       id: "marcus",
       name: "Marcus by Goldman Sachs",
-      logoUrl: "https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?w=80&q=80",
       categoryLabels: ["Best Overall", "Best High-Yield CD"],
       overallScore: 4.8,
       fastFacts: [
@@ -101,7 +96,6 @@ export const bestCdRatesReview: ReviewArticle = {
     {
       id: "ally",
       name: "Ally Bank",
-      logoUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=80&q=80",
       categoryLabels: ["Best No-Penalty CD", "Best for Flexible Terms"],
       overallScore: 4.6,
       fastFacts: [
@@ -138,7 +132,6 @@ export const bestCdRatesReview: ReviewArticle = {
     {
       id: "discover",
       name: "Discover Bank",
-      logoUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&q=80",
       categoryLabels: ["Best for Beginners"],
       overallScore: 4.4,
       fastFacts: [
@@ -171,7 +164,6 @@ export const bestCdRatesReview: ReviewArticle = {
     {
       id: "synchrony",
       name: "Synchrony Bank",
-      logoUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=80&q=80",
       categoryLabels: ["Best Bump-Rate CD"],
       overallScore: 4.5,
       fastFacts: [
@@ -205,28 +197,24 @@ export const bestCdRatesReview: ReviewArticle = {
   comparisonRows: [
     {
       providerName: "Marcus by Goldman Sachs",
-      logoUrl: "https://images.unsplash.com/photo-1541354329998-f4d9a9f9297f?w=80&q=80",
       specs: { APY: "5.10%", Term: "12 mo", "Min. Deposit": "$0", "Early Withdrawal": "270 days", Score: "4.8/5" },
       overallScore: 4.8,
       ctaUrl: "https://www.marcus.com",
     },
     {
       providerName: "Ally Bank",
-      logoUrl: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=80&q=80",
       specs: { APY: "4.90%", Term: "3 mo – 5 yr", "Min. Deposit": "$0", "Early Withdrawal": "None", Score: "4.6/5" },
       overallScore: 4.6,
       ctaUrl: "https://www.ally.com",
     },
     {
       providerName: "Discover Bank",
-      logoUrl: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=80&q=80",
       specs: { APY: "4.70%", Term: "3 mo – 10 yr", "Min. Deposit": "$2,500", "Early Withdrawal": "6–18 mo", Score: "4.4/5" },
       overallScore: 4.4,
       ctaUrl: "https://www.discover.com",
     },
     {
       providerName: "Synchrony Bank",
-      logoUrl: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=80&q=80",
       specs: { APY: "4.85%", Term: "12–60 mo", "Min. Deposit": "$0", "Early Withdrawal": "90–365 days", Score: "4.5/5" },
       overallScore: 4.5,
       ctaUrl: "https://www.synchronybank.com",
@@ -259,4 +247,4 @@ export const bestCdRatesReview: ReviewArticle = {
         "CD rates have been gradually declining from their 2023–2024 highs as the Federal Reserve has signaled potential rate cuts. However, rates remain historically attractive. Locking in a longer-term CD now can protect your yield if rates continue to fall.",
     },
   ],
-};
+});

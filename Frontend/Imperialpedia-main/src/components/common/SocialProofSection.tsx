@@ -6,23 +6,26 @@ import { Text } from '@/design-system/typography/text';
 import LogoCard from './LogoCard';
 import { useTranslation } from 'react-i18next';
 import { ShieldCheck } from 'lucide-react';
+import { initialsBadgeDataUri } from '@baalvion/illustrations';
 
 /**
  * @fileOverview Landing Page Social Proof Section.
  * Showcases institutional partners, investors, and media features.
- * 
+ *
  * TODO: AI-powered dynamic social proof based on user segment (Phase 2)
  * TODO: Personalized logos or press features based on regional detection
  * TODO: Analytics tracking for logo interactions and traversal
  */
 
+// Monogram badges stand in for real press-outlet logos — we can't legitimately
+// reproduce third-party trademarked logos ourselves.
 const logos = [
-  { src: "https://placehold.co/200x80/1C1822/FFFFFF/png?text=FORBES", alt: "Forbes" },
-  { src: "https://placehold.co/200x80/1C1822/FFFFFF/png?text=BLOOMBERG", alt: "Bloomberg" },
-  { src: "https://placehold.co/200x80/1C1822/FFFFFF/png?text=REUTERS", alt: "Reuters" },
-  { src: "https://placehold.co/200x80/1C1822/FFFFFF/png?text=TECHCRUNCH", alt: "TechCrunch" },
-  { src: "https://placehold.co/200x80/1C1822/FFFFFF/png?text=WIRED", alt: "Wired" },
-  { src: "https://placehold.co/200x80/1C1822/FFFFFF/png?text=CNBC", alt: "CNBC" },
+  { src: initialsBadgeDataUri({ label: "Forbes", seed: "forbes" }), alt: "Forbes" },
+  { src: initialsBadgeDataUri({ label: "Bloomberg", seed: "bloomberg" }), alt: "Bloomberg" },
+  { src: initialsBadgeDataUri({ label: "Reuters", seed: "reuters" }), alt: "Reuters" },
+  { src: initialsBadgeDataUri({ label: "TechCrunch", seed: "techcrunch" }), alt: "TechCrunch" },
+  { src: initialsBadgeDataUri({ label: "Wired", seed: "wired" }), alt: "Wired" },
+  { src: initialsBadgeDataUri({ label: "CNBC", seed: "cnbc" }), alt: "CNBC" },
 ];
 
 export default function SocialProofSection() {

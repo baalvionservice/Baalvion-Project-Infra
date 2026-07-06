@@ -20,6 +20,7 @@ import {
 import { TopCreator } from "@/types/analytics";
 import { Notification } from "@/modules/content-engine/types/article";
 import { TrustRankedContributor, ContributorTrustData } from "@/types/trust";
+import { personSilhouetteDataUri } from "@baalvion/illustrations";
 
 /**
  * @fileOverview Mock service for managing creator profiles, stats, and discovery data.
@@ -33,7 +34,7 @@ const mockCreators: CreatorProfile[] = [
     title: "Senior Market Analyst",
     company: "Roberts Asset Management",
     bio: "Specializing in equity research and macro-economic cycles. Over 12 years of institutional experience. Focused on identifying asymmetric yield opportunities.",
-    avatar: "https://picsum.photos/seed/michael/200/200",
+    avatar: personSilhouetteDataUri({ name: "Michael Roberts", seed: "michael" }),
     joinedDate: "2022-10-15T00:00:00Z",
     specialties: ["Equity Research", "Macroeconomics", "Portfolio Management"],
     category: "Economics",
@@ -88,7 +89,7 @@ const mockCreators: CreatorProfile[] = [
     title: "Crypto Research Analyst",
     company: "Independent Analyst",
     bio: "Focused on blockchain protocol architecture and the transition to algorithmic fiscal policy. Analyzing the intersection of DeFi and institutional finance.",
-    avatar: "https://picsum.photos/seed/elena/200/200",
+    avatar: personSilhouetteDataUri({ name: "Elena Garcia", seed: "elena" }),
     joinedDate: "2023-03-20T00:00:00Z",
     specialties: ["Cryptocurrency", "Blockchain", "Risk Management"],
     category: "Crypto",
@@ -132,7 +133,7 @@ const mockCreators: CreatorProfile[] = [
     displayName: "Sarah Mitchell",
     title: "Market Strategist",
     bio: "Specializing in macro-economic cycles and global interest rate arbitrage. Over 15 years of institutional research experience.",
-    avatar: "https://picsum.photos/seed/sarah/200/200",
+    avatar: personSilhouetteDataUri({ name: "Sarah Mitchell", seed: "sarah" }),
     joinedDate: "2023-01-15T00:00:00Z",
     specialties: ["Macroeconomics", "Market Analysis", "Bonds"],
     category: "Economics",
@@ -175,7 +176,7 @@ const mockCreators: CreatorProfile[] = [
     displayName: "Eleanor Vance",
     title: "Lead Administrator",
     bio: "Lead Administrator and Content Strategist at Imperialpedia. Focused on platform growth and institutional research.",
-    avatar: "https://picsum.photos/seed/eleanor/200/200",
+    avatar: personSilhouetteDataUri({ name: "Eleanor Vance", seed: "eleanor" }),
     joinedDate: "2022-12-01T00:00:00Z",
     specialties: ["Economics", "Growth", "Strategy"],
     category: "Economics",
@@ -208,7 +209,7 @@ const mockTrustDirectory: TrustRankedContributor[] = [
     id: "cont-1",
     name: "Dr. Andrew Miller",
     username: "amiller_phd",
-    avatar: "https://picsum.photos/seed/andrew/200/200",
+    avatar: personSilhouetteDataUri({ name: "Dr. Andrew Miller", seed: "andrew" }),
     title: "Macro Economic Analyst",
     trust_score: 93,
     verification: ["Identity Verified", "Credentials Verified"],
@@ -219,7 +220,7 @@ const mockTrustDirectory: TrustRankedContributor[] = [
     id: "cont-2",
     name: "Laura Chen",
     username: "lchen_crypto",
-    avatar: "https://picsum.photos/seed/laura/200/200",
+    avatar: personSilhouetteDataUri({ name: "Laura Chen", seed: "laura" }),
     title: "Cryptocurrency Researcher",
     trust_score: 87,
     verification: ["Identity Verified", "Professional Verified"],
@@ -230,7 +231,7 @@ const mockTrustDirectory: TrustRankedContributor[] = [
     id: "cont-3",
     name: "Eleanor Vance",
     username: "econvance",
-    avatar: "https://picsum.photos/seed/eleanor/200/200",
+    avatar: personSilhouetteDataUri({ name: "Eleanor Vance", seed: "econvance" }),
     title: "Market Strategist",
     trust_score: 98,
     verification: [
@@ -557,7 +558,7 @@ export const getCreatorSettings = async (
     name: "Eleanor Vance",
     displayName: "Eleanor Vance",
     bio: "Lead Administrator and Content Strategist at Imperialpedia.",
-    profileImage: "https://picsum.photos/seed/eleanor/200/200",
+    profileImage: personSilhouetteDataUri({ name: "Eleanor Vance", seed: "u-1" }),
     email: "eleanor@imperialpedia.com",
     notifications: {
       engagement: true,
@@ -585,7 +586,7 @@ export const getFollowers = async (
       id: "f-1",
       name: "Julian Wealth",
       username: "wealthbuilder",
-      profileImage: "https://picsum.photos/seed/wealth/200/200",
+      profileImage: personSilhouetteDataUri({ name: "Julian Wealth", seed: "wealth" }),
       followedAt: "2024-03-01T10:00:00Z",
       status: "following",
       category: "Investing",
@@ -594,7 +595,7 @@ export const getFollowers = async (
       id: "f-2",
       name: "Sarah Crypto",
       username: "defianalyst",
-      profileImage: "https://picsum.photos/seed/defi/200/200",
+      profileImage: personSilhouetteDataUri({ name: "Sarah Crypto", seed: "defi" }),
       followedAt: "2024-03-05T14:30:00Z",
       status: "not_following",
       category: "Crypto",
@@ -615,7 +616,7 @@ export const getFollowing = async (
       id: "f-1",
       name: "Julian Wealth",
       username: "wealthbuilder",
-      profileImage: "https://picsum.photos/seed/wealth/200/200",
+      profileImage: personSilhouetteDataUri({ name: "Julian Wealth", seed: "wealth" }),
       followedAt: "2024-03-01T10:00:00Z",
       status: "following",
       category: "Investing",
@@ -733,7 +734,7 @@ const mockPendingVerifications: CreatorVerification[] = [
   {
     creatorId: "u-4",
     creatorName: "Wealth Builder",
-    creatorAvatar: "https://picsum.photos/seed/wealth/200/200",
+    creatorAvatar: personSilhouetteDataUri({ name: "Wealth Builder", seed: "wealth" }),
     verified: false,
     requestedAt: "2024-03-10T10:00:00Z",
     status: "pending",

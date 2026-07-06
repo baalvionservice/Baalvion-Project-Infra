@@ -29,6 +29,7 @@ import ReviewForm from '@/components/review/ReviewForm';
 import BookingModal from '@/components/booking/BookingModal';
 import { getReviewsByLawyer, getAverageRating } from '@/services/reviewService';
 import { useAuthStore } from '@/store/authStore';
+import { resolvePersonImage } from '@/lib/article-art';
 
 interface LawyerDetailProps {
   lawyer: {
@@ -103,7 +104,7 @@ export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
         <div className="relative">
           <div className="w-32 h-32 rounded-2xl p-1 bg-gradient-to-tr from-blue-600 to-slate-900 shadow-2xl overflow-hidden">
             <Avatar className="w-full h-full rounded-xl border-4 border-white">
-              <AvatarImage src={lawyer.profileImage || lawyer.avatar || `https://picsum.photos/seed/${lawyer.id}/200/200`} />
+              <AvatarImage src={resolvePersonImage({ avatarUrl: lawyer.profileImage || lawyer.avatar, name: lawyer.name, id: lawyer.id })} />
               <AvatarFallback className="bg-slate-100 text-blue-600 text-3xl font-bold italic rounded-xl">
                 {lawyer.name.charAt(0)}
               </AvatarFallback>

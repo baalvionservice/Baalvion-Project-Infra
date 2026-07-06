@@ -9,6 +9,7 @@ import { PublicFooter } from '@/components/knowledge/PublicFooter';
 import { Linkedin, Twitter, BookOpen, Loader2 } from 'lucide-react';
 import { getAuthorBySlug, authorNameToSlug, type LawAuthor } from '@/data/authors';
 import { getAllArticles, type LawArticle } from '@/data/law-content';
+import { resolveArticleImage, resolvePersonImage } from '@/lib/article-art';
 
 export default function AuthorProfilePage() {
   const { slug } = useParams();
@@ -74,7 +75,7 @@ export default function AuthorProfilePage() {
     .filter((a) => authorNameToSlug(a.author) === author.slug)
     .sort((a, b) => b.views - a.views);
 
-  const avatar = author.avatarUrl || `https://picsum.photos/seed/${author.avatarSeed}/600/600`;
+  const avatar = resolvePersonImage({ avatarUrl: author.avatarUrl, name: author.name, avatarSeed: author.avatarSeed });
   const bioParagraphs = author.bio.split('\n').map((p) => p.trim()).filter(Boolean);
 
   return (
@@ -150,7 +151,7 @@ export default function AuthorProfilePage() {
                     <div className="bg-white border border-slate-200 overflow-hidden shadow-sm group-hover:shadow-md transition-all duration-300 flex flex-col h-full">
                       <div className="relative aspect-[3/2] overflow-hidden bg-slate-100">
                         <Image
-                          src={`https://picsum.photos/seed/${art.imageSeed}/400/260`}
+                          src={resolveArticleImage({ title: art.title, category: art.category, id: art.id })}
                           alt={art.title}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-500"

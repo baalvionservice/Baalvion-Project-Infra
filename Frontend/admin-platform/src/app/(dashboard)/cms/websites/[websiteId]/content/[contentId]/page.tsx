@@ -143,6 +143,7 @@ export default function ContentEditorPage({
         <ContentEditor
           content={content}
           websiteTitleSuffix={website?.config?.seoDefaults?.titleSuffix}
+          websiteDomain={website?.domain}
         />
       </div>
     </div>

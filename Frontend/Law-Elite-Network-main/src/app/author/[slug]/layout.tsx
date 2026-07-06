@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { getAuthorBySlug } from '@/data/authors';
 import { cmsGetAuthorBySlug } from '@/lib/cms';
+import { resolvePersonImage } from '@/lib/article-art';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
@@ -25,8 +26,7 @@ export async function generateMetadata(
   }
   const title = `${a.name}${a.title ? ` — ${a.title}` : ''}`;
   const description = String(a.bio || `${a.name} writes legal-education guides for Law Elite Network.`).slice(0, 200);
-  const image = (a as { avatarUrl?: string }).avatarUrl
-    || `https://picsum.photos/seed/${(a as { avatarSeed?: string }).avatarSeed || slug}/600/600`;
+  const image = resolvePersonImage({ avatarUrl: (a as { avatarUrl?: string }).avatarUrl, name: a.name, avatarSeed: (a as { avatarSeed?: string }).avatarSeed || slug });
   return {
     title,
     description,
@@ -43,8 +43,7 @@ export default async function AuthorLayout(
   const { slug } = await params;
   const a = await resolveAuthor(slug);
   const url = `${SITE}/author/${slug}`;
-  const image = a && ((a as { avatarUrl?: string }).avatarUrl
-    || `https://picsum.photos/seed/${(a as { avatarSeed?: string }).avatarSeed || slug}/600/600`);
+  const image = a && resolvePersonImage({ avatarUrl: (a as { avatarUrl?: string }).avatarUrl, name: a.name, avatarSeed: (a as { avatarSeed?: string }).avatarSeed || slug });
   const sameAs = a?.social ? [a.social.linkedin, a.social.x].filter(Boolean) : undefined;
 
   const personLd = a && {

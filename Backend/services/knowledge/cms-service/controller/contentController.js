@@ -23,6 +23,13 @@ const getOne = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+const getPreviewToken = async (req, res, next) => {
+    try {
+        const result = await contentService.getPreviewToken(req.params.websiteId, req.params.contentId);
+        return sendSuccess(req, res, result);
+    } catch (err) { return next(err); }
+};
+
 const update = async (req, res, next) => {
     try {
         const content = await contentService.updateContent(req.params.websiteId, req.params.contentId, req.user.id, req.validated);
@@ -51,4 +58,4 @@ const bulk = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { list, create, getOne, update, autosave, remove, bulk };
+module.exports = { list, create, getOne, getPreviewToken, update, autosave, remove, bulk };

@@ -6,10 +6,16 @@
  *   GET {IMP_API}/glossary/term/:slug                            → data (full term detail)
  *
  * Response envelope is `{ success, data, meta }`. These run server-side (RSC) — the
- * service is reachable on localhost without CORS. Failures degrade gracefully: the
- * list returns `[]` and a missing/erroring term returns `undefined` so the detail
- * page can call `notFound()`.
+ * service is reachable on localhost without CORS. Failures degrade gracefully to a
+ * bundled local fallback set (glossary-fallback.ts) — the same pattern `/terms/*`
+ * uses via terms.ts — so `/glossary/[slug]` doesn't hard 404 when the live service
+ * is unreachable or NEXT_PUBLIC_IMPERIALPEDIA_API_URL isn't configured.
  */
+
+import {
+  glossaryFallbackListItems,
+  getFallbackGlossaryTermBySlug,
+} from './glossary-fallback';
 
 const IMP_API =
   process.env.NEXT_PUBLIC_IMPERIALPEDIA_API_URL ||
@@ -96,11 +102,12 @@ export async function listGlossaryTerms(
       headers: { Accept: 'application/json' },
       cache: 'no-store',
     });
-    if (!res.ok) return [];
+    if (!res.ok) return glossaryFallbackListItems;
     const json = (await res.json()) as Envelope<{ items?: GlossaryListItem[] }>;
-    return json?.data?.items ?? [];
+    const items = json?.data?.items ?? [];
+    return items.length ? items : glossaryFallbackListItems;
   } catch {
-    return [];
+    return glossaryFallbackListItems;
   }
 }
 
@@ -116,10 +123,10 @@ export async function getGlossaryTermBySlug(
       `${IMP_API}/glossary/term/${encodeURIComponent(slug)}`,
       { headers: { Accept: 'application/json' }, cache: 'no-store' },
     );
-    if (!res.ok) return undefined;
+    if (!res.ok) return getFallbackGlossaryTermBySlug(slug);
     const json = (await res.json()) as Envelope<GlossaryTerm | null>;
-    return json?.data ?? undefined;
+    return json?.data ?? getFallbackGlossaryTermBySlug(slug);
   } catch {
-    return undefined;
+    return getFallbackGlossaryTermBySlug(slug);
   }
 }

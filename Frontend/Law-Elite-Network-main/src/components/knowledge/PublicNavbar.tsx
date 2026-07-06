@@ -4,7 +4,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { categoriesPublicApi, subcategoriesPublicApi } from '@/lib/api/client';
 import {
-  Scale,
   Menu,
   X,
   ChevronRight,
@@ -13,11 +12,13 @@ import {
   UserPlus,
   LayoutDashboard,
 } from 'lucide-react';
+import { LawEliteMark } from '@/components/icons/LawEliteMark';
 import SearchBar from '../search/SearchBar';
 import { cn } from '@/lib/utils';
 import seedData from '../../../docs/seed-data.json';
 import { useAuth } from '@/hooks/useAuth';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { sharedSignInUrl } from '@/lib/shared-auth';
 
 /**
@@ -82,8 +83,8 @@ export function PublicNavbar() {
       <div className="border-b border-slate-100">
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl h-[60px] flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-3 shrink-0 group">
-            <div className="w-10 h-10 rounded-md bg-[#0B1F3A] flex items-center justify-center shadow-sm group-hover:bg-blue-800 transition-colors">
-              <Scale className="text-white w-5 h-5" />
+            <div className="w-10 h-10 rounded-md bg-[#0F2440] flex items-center justify-center shadow-sm group-hover:bg-blue-900 transition-colors">
+              <LawEliteMark variant="white" className="w-6 h-6" />
             </div>
             <div className="flex flex-col -space-y-0.5">
               <span className="font-headline text-[1.35rem] font-extrabold tracking-tight text-slate-900 leading-none">
@@ -109,6 +110,7 @@ export function PublicNavbar() {
             <span className="hidden lg:block w-px h-5 bg-slate-200" />
 
             <LanguageSwitcher />
+            <ThemeToggle />
 
             {isAuthenticated ? (
               <Link href={dashboardHref}>
@@ -158,6 +160,12 @@ export function PublicNavbar() {
             className="flex items-center h-full px-3 text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
           >
             Home
+          </Link>
+          <Link
+            href="/news"
+            className="flex items-center h-full px-3 text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
+          >
+            News
           </Link>
           {categories.slice(0, 8).map((cat) => (
             <div
@@ -255,6 +263,13 @@ export function PublicNavbar() {
               className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
             >
               Find a Lawyer
+            </Link>
+            <Link
+              href="/news"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
+            >
+              News
             </Link>
             <p className="pt-4 pb-2 px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-news-600">
               Topics

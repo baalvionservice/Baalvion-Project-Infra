@@ -105,7 +105,10 @@ const nextConfig: NextConfig = {
               `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''} https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com`,
               "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://adservice.google.com",
               "style-src 'self' 'unsafe-inline'",
-              "img-src 'self' data: https://picsum.photos https://images.unsplash.com https://placehold.co https://imperialpedia.com https://www.investopedia.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net",
+              // 'self' + data: (inline generated SVG artwork) + imperialpedia.com +
+              // api.baalvion.com (cms-service-hosted generated artwork) are the only
+              // image sources — no stock/placeholder/third-party image hosts.
+              "img-src 'self' data: https://imperialpedia.com https://api.baalvion.com https://www.google-analytics.com https://*.googlesyndication.com https://*.g.doubleclick.net",
               "font-src 'self'",
               // Dev: allow the local imperialpedia-service (:3004) and cms-service (:3018)
               // that client components (Market Movers, community, search) fetch directly.
@@ -119,34 +122,18 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Only self (imperialpedia.com) and the cms-service origin that hosts
+    // auto-generated article artwork — no stock/placeholder/third-party hosts.
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "placehold.co",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "picsum.photos",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "www.investopedia.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
         hostname: "imperialpedia.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "api.baalvion.com",
         port: "",
         pathname: "/**",
       },
@@ -156,7 +143,10 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60,
-    dangerouslyAllowSVG: false,
+    // Every SVG served through next/image here is our own deterministically generated
+    // artwork (@baalvion/illustrations) — never user-uploaded — so it's safe to allow;
+    // `contentSecurityPolicy` below still sandboxes the optimized-image response.
+    dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   // Performance optimizations

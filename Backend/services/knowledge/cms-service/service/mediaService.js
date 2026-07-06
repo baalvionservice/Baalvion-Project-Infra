@@ -158,5 +158,5 @@ async function deleteFolder(orgId, id) {
 module.exports = {
     saveUpload, listFiles, getFile, updateFile, deleteFile, bulkDelete, signedUrl,
     listFolders, createFolder, deleteFolder,
-    UPLOAD_DIR,
+    UPLOAD_DIR, PUBLIC_BASE,
 };

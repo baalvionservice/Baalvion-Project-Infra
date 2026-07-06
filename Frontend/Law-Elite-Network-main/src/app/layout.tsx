@@ -2,6 +2,7 @@
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { AuthProvider } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import { I18nProvider } from '@/i18n/I18nProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { Navbar } from '@/components/navbar';
@@ -9,15 +10,21 @@ import NotificationToastListener from '@/components/notifications/NotificationTo
 import { AIChatAssistantWrapper } from '@/components/ai/AIChatAssistantWrapper';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
 import { cmsGetAdsenseClient } from '@/lib/cms';
+import UnifiedAnalytics from '@/components/UnifiedAnalytics';
 import './globals.css';
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_WEBSITE_SLUG || 'law-elite-network';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  // Suppress any favicon (no icon logo in the browser tab). `data:,` is an empty
-  // resource, so the browser renders no icon and stops requesting /favicon.ico.
-  icons: { icon: 'data:,' },
+  icons: {
+    icon: [
+      { url: '/brand/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: '/brand/apple-icon.png',
+  },
   title: {
     default: 'Law Elite Network | Global Legal Intelligence',
     template: '%s | Law Elite Network',
@@ -78,7 +85,6 @@ const organizationJsonLd = {
   '@type': 'LegalService',
   name: 'Law Elite Network',
   url: SITE_URL,
-  // TODO: add real logo asset — /logo.png does not yet exist in this app (no public/ dir).
   logo: `${SITE_URL}/logo.png`,
   description:
     "The world's most distinguished legal knowledge and practitioner discovery platform.",
@@ -148,7 +154,7 @@ export default async function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
         />
       </head>
-      <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-white text-slate-900 overflow-x-hidden">
+      <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground overflow-x-hidden">
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-6 focus:py-3 focus:bg-blue-700 focus:text-white focus:rounded-xl focus:font-bold focus:shadow-2xl"
@@ -156,25 +162,28 @@ export default async function RootLayout({
           Skip to main content
         </a>
 
-        <AuthProvider>
-          <I18nProvider>
-            <div className="flex flex-col min-h-screen relative">
-              <Navbar />
+        <ThemeProvider>
+          <AuthProvider>
+            <I18nProvider>
+              <div className="flex flex-col min-h-screen relative">
+                <Navbar />
 
-              <main id="main-content" className="flex-1">
-                {children}
-              </main>
+                <main id="main-content" className="flex-1">
+                  {children}
+                </main>
 
-              <Suspense fallback={null}>
-                <AIChatAssistantWrapper />
-              </Suspense>
+                <Suspense fallback={null}>
+                  <AIChatAssistantWrapper />
+                </Suspense>
 
-              <NotificationToastListener />
-              <ImpersonationBanner />
-            </div>
-            <Toaster />
-          </I18nProvider>
-        </AuthProvider>
+                <NotificationToastListener />
+                <ImpersonationBanner />
+              </div>
+              <Toaster />
+            </I18nProvider>
+          </AuthProvider>
+        </ThemeProvider>
+        <UnifiedAnalytics slug={CMS_SLUG} />
       </body>
     </html>
   );

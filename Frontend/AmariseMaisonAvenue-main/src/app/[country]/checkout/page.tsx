@@ -72,6 +72,21 @@ export default function CheckoutPage() {
   const { toast } = useToast();
 
   const [step, setStep] = useState(1);
+
+  // Unified-analytics funnel: fire begin_checkout once per session when the
+  // checkout mounts (fire-and-forget via the first-party tracker).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      if (sessionStorage.getItem("_ba_begin_checkout")) return;
+      sessionStorage.setItem("_ba_begin_checkout", "1");
+    } catch {
+      /* ignore storage errors */
+    }
+    (window as unknown as { baalvion?: { track?: (e: string, p?: Record<string, unknown>) => void } })
+      .baalvion?.track?.("begin_checkout");
+  }, []);
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
 
@@ -467,6 +482,18 @@ export default function CheckoutPage() {
             saveErr
           );
         });
+    }
+
+    // Unified-analytics purchase event (ecommerce module). Fire-and-forget via the
+    // first-party tracker's public API; fully guarded so it never affects checkout.
+    if (typeof window !== "undefined") {
+      const ba = (window as unknown as {
+        baalvion?: { track?: (event: string, props?: Record<string, unknown>) => void };
+      }).baalvion;
+      ba?.track?.("purchase", {
+        value: totalYield,
+        metadata: { orderId: order.id, orderNumber: order.orderNumber ?? null },
+      });
     }
 
     toast({ title: "Order Confirmed", description: `Order ${order.id} confirmed.` });

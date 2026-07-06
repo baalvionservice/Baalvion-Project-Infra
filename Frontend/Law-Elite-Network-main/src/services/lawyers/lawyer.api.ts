@@ -4,6 +4,7 @@
  * Maps the backend (snake_case `legal.lawyers`) onto the shape the UI expects.
  */
 import { publicClient } from '@/lib/api/client';
+import { resolvePersonImage } from '@/lib/article-art';
 
 const unwrapList = (res: any): any[] => {
   const d = res?.data?.data;
@@ -53,7 +54,7 @@ export function adaptLawyer(l: any) {
     languages: l.languages || [],
     barNumber: l.bar_number || null,
     bio: l.bio || '',
-    profileImage: l.profile_photo || `https://picsum.photos/seed/lawyer${l.id}/400/400`,
+    profileImage: resolvePersonImage({ avatarUrl: l.profile_photo, name: l.name, id: l.id }),
     isVerified: !!l.verified,
     available: l.status === 'active',
     status: l.status,

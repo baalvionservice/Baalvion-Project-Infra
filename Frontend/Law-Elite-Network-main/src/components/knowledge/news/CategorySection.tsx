@@ -21,16 +21,16 @@ export function CategorySection({ name, slug, articles }: CategorySectionProps) 
 
   return (
     <section className="mb-14">
-      <div className="flex items-end justify-between border-b-2 border-slate-900 pb-2 mb-6">
+      <div className="flex items-end justify-between border-b-2 border-slate-900 dark:border-slate-100 pb-2 mb-6">
         <div className="flex items-center gap-3">
           <span className="w-1.5 h-6 bg-news-600 rounded-sm" />
-          <h2 className="font-headline text-xl md:text-2xl font-extrabold tracking-tight text-slate-900 m-0">
+          <h2 className="font-headline text-xl md:text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white m-0">
             {name}
           </h2>
         </div>
         <Link
           href={`/law/${slug}`}
-          className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-blue-700 hover:text-news-600 transition-colors"
+          className="inline-flex items-center gap-1.5 text-[12px] font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400 hover:text-news-600 transition-colors"
         >
           View all <ArrowRight className="w-3.5 h-3.5" />
         </Link>

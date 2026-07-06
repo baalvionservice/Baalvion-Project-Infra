@@ -106,6 +106,12 @@ export const cmsContentApi = {
     return { ...res, data: { ...res.data, data: toContentItem(res.data.data) } };
   },
 
+  // Short-lived HMAC token for the live-preview iframe — see cms-service contentService.getPreviewToken.
+  previewToken: (id: string) =>
+    cmsApiClient.get<ApiResponse<{ slug: string; domain: string | null; exp: number; token: string }>>(
+      `/cms/websites/${wid()}/content/${id}/preview-token`,
+    ),
+
   create: async (payload: CreateContentPayload) => {
     const res = await cmsApiClient.post<ApiResponse<RawContent>>(
       `/cms/websites/${payload.websiteId}/content`, toCreateBody(payload),
