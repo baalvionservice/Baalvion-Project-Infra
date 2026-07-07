@@ -43,6 +43,22 @@ export const disputeResolutionArticles: LawArticle[] = [
 <h2>How Jurisdictions Approach the Choice</h2>
 <ul><li><strong>United States:</strong> Strong statutory support for arbitration, and many consumer and employment contracts contain arbitration clauses — though courts and regulators continue to debate their fairness.</li><li><strong>United Kingdom:</strong> A mature arbitration framework and London's standing as a leading arbitral seat make both routes well developed.</li><li><strong>European Union:</strong> Court judgments move relatively freely between member states under EU rules, which can make litigation more attractive for intra-EU disputes.</li><li><strong>India:</strong> Arbitration has been actively reformed to speed up enforcement and reduce court interference.</li><li><strong>Singapore:</strong> A globally favored seat for international arbitration, supported by the SIAC and arbitration-friendly courts.</li></ul>
 
+<h2>Drafting the Clause: Details That Matter Later</h2>
+<p>An arbitration clause that looks like standard boilerplate can quietly determine the entire shape of a future dispute. Beyond simply choosing arbitration, a well-drafted clause specifies the seat (which sets the procedural law and the courts with supervisory jurisdiction), the governing institution and rules (ICC, SIAC, LCIA, or ad hoc under UNCITRAL rules), the number of arbitrators, the language of proceedings, and — often overlooked — whether the parties want expedited procedures for smaller claims. A vague or contradictory clause (naming two different seats, or referencing an institution's rules while specifying incompatible procedures) is one of the most common sources of expensive preliminary disputes about arbitration itself, before the underlying dispute is even reached.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I appeal an arbitration award if I think the arbitrator got the law wrong?</strong> Generally no — most systems allow challenges only on narrow procedural grounds (fraud, lack of jurisdiction, a serious breach of due process), not because a party disagrees with the arbitrator's reasoning or legal conclusions.</p>
+<p><strong>Is arbitration always confidential?</strong> Not automatically everywhere — confidentiality is often a product of the chosen institutional rules or an express clause in the contract, not a universal legal default, so parties who want privacy guaranteed should say so explicitly.</p>
+<p><strong>Can I choose arbitration after a dispute has already started, even without a clause?</strong> Yes — parties can agree to arbitrate an existing dispute through a separate "submission agreement" even if their original contract said nothing about arbitration, provided both sides consent.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>UNCITRAL Model Law on International Commercial Arbitration</li>
+<li>New York Convention on the Recognition and Enforcement of Foreign Arbitral Awards (1958)</li>
+<li>International Chamber of Commerce (ICC), Rules of Arbitration</li>
+<li>Singapore International Arbitration Centre (SIAC), Arbitration Rules</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Decide the forum before signing, not after a dispute erupts. Review the dispute-resolution clause in any significant contract and consider whether arbitration's privacy and cross-border enforceability outweigh litigation's appeal rights and lower upfront cost. For international deals, identify a neutral seat and a reputable arbitral institution, and confirm both parties' countries are New York Convention members. Because clause wording determines what you can enforce later, have a qualified lawyer draft or review it.</p>
 
@@ -98,6 +114,22 @@ export const disputeResolutionArticles: LawArticle[] = [
 
 <h2>When Mediation May Not Fit</h2>
 <ul><li>When one party needs a binding precedent or a public ruling on a point of law.</li><li>When there is a severe power imbalance or risk of bad-faith negotiation.</li><li>When urgent injunctive relief — such as freezing assets — is required, which only a court can grant.</li></ul>
+
+<h2>Choosing and Preparing a Mediator</h2>
+<p>The mediator's background often matters as much as the process itself. Commercial disputes benefit from a mediator with subject-matter fluency (construction, employment, intellectual property), while family disputes benefit from one trained specifically in family dynamics and, where children are involved, child-inclusive practice. Most jurisdictions have professional accreditation bodies or panels that vet mediator training and experience — checking a mediator's credentials and asking for references from similar cases is a reasonable and common step. Preparation matters too: parties who arrive with a clear sense of their own underlying interests (not just their opening demand) and a realistic view of their best alternative if mediation fails tend to reach durable settlements far more often than those who show up expecting the mediator to simply split the difference.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Is anything said in mediation ever usable in court later?</strong> Generally no — most jurisdictions treat mediation communications as privileged and inadmissible if the case proceeds to litigation, though the final signed settlement agreement itself is not privileged and is enforceable.</p>
+<p><strong>Can a court force me to mediate?</strong> In many systems, yes — courts increasingly require a genuine attempt at mediation before a trial date is set, though this generally cannot force a party to actually settle, only to participate in good faith.</p>
+<p><strong>What happens if the other side won't negotiate honestly?</strong> A skilled mediator will usually recognise stalling or bad-faith tactics and can end the session, but if either side suspects this going in, mediation may not be the right tool — a more structured process, like arbitration, may serve better.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>United Nations, Singapore Convention on Mediation (2019)</li>
+<li>UK Civil Mediation Council, accreditation and standards</li>
+<li>American Bar Association, Section of Dispute Resolution</li>
+<li>India, Mediation Act 2023</li>
+</ul>
 
 <h2>Practical Next Steps</h2>
 <p>Consider mediation early, especially where preserving a relationship or controlling cost matters. Check whether your contract contains a mediation clause or whether your local courts require an attempt before trial. Choose an accredited, experienced mediator suited to the subject matter, and prepare by clarifying your real interests and your best alternative if no deal is reached. Once terms are agreed, make sure the settlement is written clearly and signed so it is enforceable. Because enforceability rules differ, have a qualified lawyer review the agreement.</p>

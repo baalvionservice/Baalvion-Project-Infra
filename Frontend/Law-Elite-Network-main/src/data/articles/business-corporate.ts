@@ -55,6 +55,22 @@ export const businessCorporateArticles: LawArticle[] = [
 <li>Ignoring deadlock between equal owners, with no tie-breaker or buyout route.</li>
 </ul>
 
+<h2>Deadlock and Dispute Resolution</h2>
+<p>Two-founder or 50/50 joint-venture companies face a particular risk: deadlock, where neither side can outvote the other. A well-drafted agreement anticipates this with a tiered response — first a mandatory negotiation period, then mediation, and only as a last resort a mechanism such as a "shotgun" or "Russian roulette" clause, where one owner names a price and the other must either buy at that price or sell at it. Without a pre-agreed route out of deadlock, the only remaining option is often expensive litigation or a forced winding-up of the company, which destroys value for everyone.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Do I need a shareholder agreement if the company already has articles of association?</strong> Yes. Articles are typically a public, fairly generic template; a shareholder agreement is private and can go into far more detail on deadlock, valuation, and exit than most standard articles ever address.</p>
+<p><strong>What happens if a new investor never signs the existing agreement?</strong> They are simply not bound by it. Well-drafted agreements require every incoming shareholder to sign a deed of adherence before shares are transferred or newly issued to them, closing this gap.</p>
+<p><strong>Can a shareholder agreement override statutory minority-shareholder protections?</strong> No. It can add extra protection on top of the law, but it cannot remove statutory remedies — such as relief for unfair prejudice or oppression — that legislation grants directly to shareholders.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>OECD, <em>Principles of Corporate Governance</em></li>
+<li>UK Companies Act 2006 and Companies House guidance on articles of association</li>
+<li>Delaware General Corporation Law, Title 8 (U.S.)</li>
+<li>India, Companies Act 2013</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Map out the realistic scenarios that could divide the owners — a death, a sale, a falling out, a need for more capital — and check that the draft answers each one. Make sure the agreement and the constitution are consistent, that valuation and exit mechanics are concrete, and that every current and future owner is bound. Then have it reviewed by a lawyer familiar with company law where the business is incorporated.</p>
 
@@ -119,6 +135,22 @@ export const businessCorporateArticles: LawArticle[] = [
 <li>Missing annual filing deadlines, which can lead to penalties or being struck off.</li>
 </ul>
 
+<h2>Registered Agents, Compliance Calendars, and Piercing the Corporate Veil</h2>
+<p>Many jurisdictions require a company to maintain a registered agent or officer who can reliably receive legal notices and government correspondence — missing a lawsuit notice because it went to an abandoned address is a real and recurring problem for small companies. Beyond the initial filing, most registries expect an annual return or confirmation statement, updated filings whenever directors or major shareholders change, and timely corporate tax filings even in years with no profit. Courts in most jurisdictions will also disregard limited liability — a process often called "piercing the corporate veil" — when owners treat the company as a personal wallet, fail to keep separate accounts, or use the entity to commit fraud. Maintaining clean separation between personal and business finances from day one is the simplest way to keep that protection intact.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I change my company's structure later, for example from a sole proprietorship to a limited company?</strong> Usually yes, through a formal conversion or by incorporating a new entity and transferring the business into it, though this can trigger tax consequences and requires re-papering contracts, so it is best planned rather than left until growth forces the issue.</p>
+<p><strong>Do I have to incorporate in the country where I actually do business?</strong> Not always — many founders incorporate in one jurisdiction (for investor familiarity or tax treaty reasons) while operating elsewhere — but doing so usually creates a duty to register as a "foreign" or "overseas" company in every place you actually trade, hire staff, or hold a physical presence.</p>
+<p><strong>What is the minimum ongoing cost of keeping a company in good standing?</strong> At minimum, expect an annual registry filing fee, accounting/bookkeeping costs to prepare accounts, and — depending on jurisdiction — a registered-agent fee; skipping any of these is what typically leads to administrative dissolution.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>UK Companies House, incorporation and filing guidance</li>
+<li>U.S. Internal Revenue Service, entity classification (Form 8832) guidance</li>
+<li>India Ministry of Corporate Affairs, company incorporation portal</li>
+<li>OECD, <em>Guidelines for Multinational Enterprises</em></li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Start by clarifying your goals: liability protection, tax efficiency, and whether you plan to bring in investors. Match those goals to a structure, confirm the registration requirements in the country where you will operate, and put a calendar in place for ongoing filings from day one. A short consultation with a local lawyer or accountant before filing can prevent costly restructuring later.</p>
 
@@ -179,6 +211,22 @@ export const businessCorporateArticles: LawArticle[] = [
 <li>Splitting equity with no vesting, then losing a co-founder early.</li>
 <li>Leaving IP in personal hands or with unpaid contractors.</li>
 <li>Raising money informally without regard to securities exemptions.</li>
+</ul>
+
+<h2>The Cap Table as a Living Document</h2>
+<p>A capitalization table — the ledger of who owns what — starts simple but grows complicated fast once options, convertible notes, and multiple funding rounds enter the picture. Investors expect a clean, fully reconciled cap table before they will negotiate a priced round, because it is the single source of truth for dilution, control, and eventual exit proceeds. Founders should track every option grant, note conversion, and share transfer in one place from the first day, rather than reconstructing it retroactively when a term sheet arrives. A messy cap table is one of the most common reasons due diligence stalls or a round closes late.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Do all co-founders need the same vesting schedule?</strong> Not necessarily, but most investors expect broadly similar terms for all founders — a schedule that is far more generous to one founder than another is a common flag raised during diligence.</p>
+<p><strong>Is a SAFE the same thing as equity?</strong> No. A SAFE is a contractual right to receive equity in the future, typically upon a priced round or exit — it is not itself a share and does not usually carry voting rights until it converts.</p>
+<p><strong>What is a "priced round" and why does it matter?</strong> It is a fundraising round where investors and the company agree a specific valuation and price per share, as opposed to a convertible instrument that defers that number — it matters because it resets the cap table and typically triggers conversion of any outstanding notes or SAFEs.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Securities and Exchange Commission, Regulation D private-placement exemptions</li>
+<li>UK HMRC, Seed Enterprise Investment Scheme (SEIS) and Enterprise Investment Scheme (EIS) guidance</li>
+<li>Y Combinator, SAFE (Simple Agreement for Future Equity) primer and template documents</li>
+<li>India, Foreign Exchange Management Act (FEMA) rules on startup investment</li>
 </ul>
 
 <h2>Practical Next Steps</h2>
