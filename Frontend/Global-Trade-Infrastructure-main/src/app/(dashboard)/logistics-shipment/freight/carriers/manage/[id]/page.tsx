@@ -36,7 +36,7 @@ export default function CarrierDetailPage() {
   const [serviceOpen, setServiceOpen] = useState(false);
   const [serviceForm, setServiceForm] = useState({ serviceType: '', transportMode: 'ocean' as TransportMode, baseFee: '', ratePerKg: '', transitTimeDays: '' });
   const [regionOpen, setRegionOpen] = useState(false);
-  const [regionForm, setRegionForm] = useState({ regionType: 'country', originCode: '', destinationCode: '' });
+  const [regionForm, setRegionForm] = useState<{ regionType: 'country' | 'lane' | 'port_pair'; originCode: string; destinationCode: string }>({ regionType: 'country', originCode: '', destinationCode: '' });
 
   if (isLoading) return <main className="p-6"><p className="text-sm text-muted-foreground">Loading carrier…</p></main>;
   if (!carrier) return <main className="p-6"><p className="text-sm text-muted-foreground">Carrier not found.</p></main>;
@@ -159,7 +159,7 @@ export default function CarrierDetailPage() {
               <div className="space-y-4 py-2">
                 <div className="space-y-2">
                   <Label>Region Type</Label>
-                  <Select value={regionForm.regionType} onValueChange={(v) => setRegionForm((f) => ({ ...f, regionType: v }))}>
+                  <Select value={regionForm.regionType} onValueChange={(v) => setRegionForm((f) => ({ ...f, regionType: v as typeof f.regionType }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value="country">Country</SelectItem>

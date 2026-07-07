@@ -117,11 +117,19 @@ const recentEvents = async (req, res, next) => {
 };
 
 // GET /tracking_dashboard/alerts — active alerts feed for the dashboard widget.
+// Maps to the same camelCase shape shipmentAlertController.js's toApi() produces,
+// since the frontend's ShipmentAlert type (src/api/tracking-platform.ts) expects it.
 const alerts = async (req, res, next) => {
     try {
         const limit = Number(req.query.limit) || 20;
         const rows = await db.ShipmentAlert.findAll({ where: { status: 'active' }, order: [['triggered_at', 'DESC']], limit });
-        return res.json({ success: true, data: rows });
+        const data = rows.map((r) => ({
+            id: r.id, shipmentId: r.shipment_id, alertType: r.alert_type, severity: r.severity,
+            message: r.message, status: r.status, triggeredAt: r.triggered_at,
+            acknowledgedBy: r.acknowledged_by, acknowledgedAt: r.acknowledged_at, resolvedAt: r.resolved_at,
+            metadata: r.metadata,
+        }));
+        return res.json({ success: true, data });
     } catch (err) { return next(err); }
 };
 

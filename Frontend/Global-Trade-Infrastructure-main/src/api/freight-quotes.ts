@@ -92,7 +92,7 @@ export function useRateRules(params: { ruleType?: string; carrierId?: string; ac
   return useQuery({ queryKey: qk.freightQuotes.rateRules(params), queryFn: () => freightRateApi.listRules(params) });
 }
 
-function useRateRuleMutation<TVars>(fn: (vars: TVars) => Promise<unknown>) {
+function useRateRuleMutation<TVars, TResult>(fn: (vars: TVars) => Promise<TResult>) {
   const qc = useQueryClient();
   return useMutation({ mutationFn: fn, onSuccess: () => qc.invalidateQueries({ queryKey: qk.freightQuotes.all }) });
 }
