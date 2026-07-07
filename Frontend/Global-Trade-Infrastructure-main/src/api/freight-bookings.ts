@@ -153,7 +153,7 @@ export function useFreightBookingEvents(id: string | undefined) {
   });
 }
 
-function useBookingMutation<TVars>(fn: (vars: TVars) => Promise<unknown>) {
+function useBookingMutation<TVars, TResult>(fn: (vars: TVars) => Promise<TResult>) {
   const qc = useQueryClient();
   return useMutation({ mutationFn: fn, onSuccess: () => qc.invalidateQueries({ queryKey: qk.freightBookings.all }) });
 }

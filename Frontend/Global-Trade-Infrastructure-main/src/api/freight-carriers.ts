@@ -109,7 +109,7 @@ export interface CarrierListParams {
 }
 
 export const freightCarrierApi = {
-  list: (params: CarrierListParams = {}) => tradeApi.list<Carrier>('/freight/carrier-directory', params),
+  list: (params: CarrierListParams = {}) => tradeApi.list<Carrier>('/freight/carrier-directory', params as Record<string, string | number>),
   get: (id: string) => tradeApi.get<Carrier>(`/freight/carrier-directory/${id}`),
   create: (body: CreateCarrierBody) => tradeApi.post<Carrier>('/freight/carrier-directory', body),
   update: (id: string, body: Partial<CreateCarrierBody>) => tradeApi.patch<Carrier>(`/freight/carrier-directory/${id}`, body),
@@ -119,7 +119,7 @@ export const freightCarrierApi = {
   addRegion: (id: string, body: Partial<CarrierRegion> & { regionType: string }) =>
     tradeApi.post<CarrierRegion>(`/freight/carrier-directory/${id}/regions`, body),
   performanceList: (params: { carrierId?: string; page?: number; limit?: number } = {}) =>
-    tradeApi.list<CarrierPerformanceSnapshot>('/freight/carrier-performance', params),
+    tradeApi.list<CarrierPerformanceSnapshot>('/freight/carrier-performance', params as Record<string, string | number>),
   performanceLatest: (carrierId: string) =>
     tradeApi.get<CarrierPerformanceSnapshot>(`/freight/carrier-performance/${carrierId}/latest`),
   refreshPerformance: (periodDays?: number) =>
@@ -128,7 +128,7 @@ export const freightCarrierApi = {
 
 export function useCarriers(params: CarrierListParams = {}, opts: { enabled?: boolean } = {}) {
   return useQuery({
-    queryKey: qk.freightCarriers.list(params),
+    queryKey: qk.freightCarriers.list(params as Record<string, unknown>),
     queryFn: () => freightCarrierApi.list(params),
     enabled: opts.enabled ?? true,
   });
@@ -158,7 +158,7 @@ export function useCarrierPerformanceList(params: { carrierId?: string } = {}) {
   });
 }
 
-function useCarrierMutation<TVars>(fn: (vars: TVars) => Promise<unknown>) {
+function useCarrierMutation<TVars, TResult>(fn: (vars: TVars) => Promise<TResult>) {
   const qc = useQueryClient();
   return useMutation({ mutationFn: fn, onSuccess: () => qc.invalidateQueries({ queryKey: qk.freightCarriers.all }) });
 }
