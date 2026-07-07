@@ -103,15 +103,15 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
         void (async () => {
             const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
             const websiteSlug = website ? website.slug : null;
+            // Shared across the revalidate webhook and the search-engine ping below —
+            // both want the same canonical content URL(s).
+            const { paths, urls: contentUrls } = revalidateService.pathsForContent(content, website && website.domain);
             // Bust the public delivery cache so published edits appear immediately on the
             // live site instead of waiting out the 10-minute public TTL.
             if (websiteSlug) {
                 try { await cache.delPattern(`cms:public:${websiteSlug}:*`); } catch { /* fail-open */ }
                 // Tell the website's frontend to revalidate build-cached (ISR) pages now.
-                try {
-                    const { paths, urls } = revalidateService.pathsForContent(content, website && website.domain);
-                    revalidateService.dispatch(websiteSlug, { paths, urls });
-                } catch { /* fail-open — never affects the committed transition */ }
+                try { revalidateService.dispatch(websiteSlug, { paths, urls: contentUrls }); } catch { /* fail-open — never affects the committed transition */ }
             }
             emitSafe(eventType, {
                 websiteId,
@@ -122,10 +122,18 @@ async function transition(websiteId, contentId, userId, userLevel, action, notes
                 state: result.workflow.currentState,
                 action,
             }, { tenantId: websiteSlug });
-            // SEO indexing trigger: notify search engines immediately on publish.
-            if (action === 'publish') {
-                try { require('./seoPingService').pingForWebsite(website); } catch { /* fail-open */ }
-            }
+            // SEO indexing trigger: notify search engines immediately on publish (IndexNow +
+            // Google Indexing API, URL_UPDATED), or tell Google to drop the URL on
+            // unpublish/archive (URL_DELETED). Includes the specific content URL, not just
+            // the homepage, so the actual new/changed page gets submitted.
+            try {
+                const seoPingService = require('./seoPingService');
+                if (action === 'publish') {
+                    seoPingService.pingForWebsite(website, contentUrls);
+                } else {
+                    seoPingService.pingRemovalForWebsite(website, contentUrls);
+                }
+            } catch { /* fail-open */ }
         })().catch((err) => {
             // Event emission must never affect the request, but a dropped event
             // (e.g. the slug lookup hit a DB error) should still be observable.

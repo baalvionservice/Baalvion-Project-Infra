@@ -67,6 +67,22 @@ export const taxFinanceExtraArticles: LawArticle[] = [
 <li>Missing reporting deadlines, which in some countries are tight for property sales.</li>
 </ul>
 
+<h2>Tax-Loss Harvesting and Wash-Sale Rules</h2>
+<p>Investors with both gains and losses in a portfolio can often reduce their overall tax bill by deliberately realizing losses to offset realized gains — a strategy commonly called tax-loss harvesting. However, most systems that allow this also include an anti-abuse rule (in the U.S., the "wash sale" rule) that disallows the loss if the investor buys back a substantially identical asset within a short window before or after the sale, closing the obvious loophole of selling purely to bank a tax loss while keeping the same economic position. The exact rules — what counts as "substantially identical," the length of the restricted window, and whether it applies across account types (including retirement accounts) — vary by jurisdiction, so a harvesting strategy should be checked against current local rules rather than assumed to work identically everywhere.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Do I owe capital gains tax when I inherit an asset?</strong> Generally not at the moment of inheritance itself — many systems instead adjust ("step up" or otherwise reset) the asset's cost basis to its value at the date of death, so tax is only calculated on gains after that point when the heir eventually sells, though rules vary by country.</p>
+<p><strong>Is selling my primary home always tax-free?</strong> Not always fully — many jurisdictions offer a substantial exemption on gains from a main home (sometimes with residency-period requirements), but the exemption may be capped, may not apply to a second home, or may be reduced if part of the property was used for business or rented out.</p>
+<p><strong>Does currency exchange count as a capital gain?</strong> In some jurisdictions, yes — converting between currencies, or holding foreign-currency accounts that fluctuate in value, can trigger a taxable gain or loss in certain systems, which often surprises taxpayers who don't think of currency as an "asset" in the ordinary sense.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Internal Revenue Service, Topic No. 409 (capital gains and losses)</li>
+<li>UK HMRC, Capital Gains Tax guidance</li>
+<li>India, Income Tax Act 1961, capital gains provisions and indexation rules</li>
+<li>OECD, taxation of capital gains comparative reports</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Before selling a significant asset, work out the likely gain, check which exemptions and reliefs apply, and confirm the reporting deadline in your country. Keep records of what you paid, the costs of buying and selling, and any improvements, as these reduce the taxable gain. For large disposals, business sales, or assets across borders, take advice from a tax professional early, because timing a sale and structuring it correctly can make a substantial difference to the tax due.</p>
 
@@ -123,6 +139,22 @@ export const taxFinanceExtraArticles: LawArticle[] = [
 
 <h2>What This Means for Businesses</h2>
 <p>If you sell goods or services, the system in your country shapes your obligations. Under VAT or GST, you may need to register once you pass a threshold, charge tax on sales, keep invoices to claim input credits, and file regular returns. Under sales tax, you may need to register where you have a sufficient presence, collect tax at the correct local rate, and manage resale exemptions. Selling across borders or online adds further rules about where tax is due.</p>
+
+<h2>Cross-Border E-Commerce and Digital Sales</h2>
+<p>Online selling has significantly complicated both systems. In the U.S., the concept of "economic nexus" — established after a landmark Supreme Court decision — now requires many out-of-state online sellers to collect sales tax once they cross a threshold of sales or transactions into a state, even without any physical presence there, a major shift from the older physical-presence rule. In VAT/GST systems, most jurisdictions now require foreign sellers of digital services (software, streaming, e-books) to register and charge local VAT/GST directly to consumers, often through simplified single-registration schemes designed for exactly this cross-border digital-sales problem. A business selling online across multiple countries should assume registration obligations exist in more places than its home country alone, rather than defaulting to charging only local tax.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Do small businesses have to register for VAT or collect sales tax?</strong> Usually only above a registration or nexus threshold — most systems exempt very small sellers below a defined turnover or transaction count, though the exact threshold and what counts toward it varies significantly by jurisdiction.</p>
+<p><strong>Can a business get a VAT refund if it pays more input tax than it collects in output tax?</strong> Yes, in most VAT/GST systems — a net input-tax position typically results in a refund or a credit carried forward, which is common for exporters (who often sell without charging local VAT but still pay it on their own inputs).</p>
+<p><strong>Is GST the same thing as VAT?</strong> Functionally, yes — GST (Goods and Services Tax) is essentially a VAT-style system under a different name, used by countries including India, Australia, and Canada, applying the same staged-collection, input-credit logic as VAT elsewhere.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Supreme Court, <em>South Dakota v. Wayfair, Inc.</em> (2018)</li>
+<li>UK HMRC, VAT guidance and registration thresholds</li>
+<li>India, Central Goods and Services Tax Act 2017</li>
+<li>OECD, International VAT/GST Guidelines</li>
+</ul>
 
 <h2>Practical Next Steps</h2>
 <p>Identify whether your country uses VAT, GST, or sales tax, and find the registration threshold and rates that apply to what you sell. Keep clean records of the tax you charge and, under VAT or GST, the tax you pay on inputs so you can claim credits. Where you sell into multiple regions or countries, take professional advice early, because cross-border indirect tax is a frequent source of unexpected liabilities and penalties.</p>

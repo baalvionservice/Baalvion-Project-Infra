@@ -69,6 +69,22 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
 <li>Assuming the same rules apply everywhere when protections vary sharply by region.</li>
 </ul>
 
+<h2>Emergency Protections and Moratoriums</h2>
+<p>Ordinary eviction timelines can be temporarily overridden during declared emergencies. Many jurisdictions imposed eviction moratoriums during public health crises, and some maintain standing emergency provisions for situations like natural disasters, giving tenants additional time or specific protections beyond what normal law provides. These measures are typically time-limited and narrowly targeted (for example, covering only non-payment tied to a documented emergency hardship), so a tenant relying on one should confirm it is still in effect and that their specific situation qualifies, rather than assuming a general protection applies indefinitely.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can a landlord evict a tenant just to sell the property?</strong> In many jurisdictions, yes, through a specific notice ground (often requiring longer notice than an eviction for cause), but rules vary considerably — some rent-controlled markets restrict this ground or require the sale to close within a certain time.</p>
+<p><strong>What happens to a tenant's belongings left behind after an eviction?</strong> Most jurisdictions require the landlord to store abandoned property for a defined period and make reasonable efforts to notify the tenant before disposing of or selling it — simply discarding everything immediately is often itself unlawful.</p>
+<p><strong>Does an eviction show up on my record permanently?</strong> It depends on the jurisdiction and outcome — a filed eviction case (even one the tenant ultimately won or settled) can appear in tenant-screening databases for years in some places, which is one more reason to contest a wrongful eviction rather than simply moving out to avoid a hearing.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. National Low Income Housing Coalition, eviction process and tenant protections by state</li>
+<li>UK Renters' Rights Act and Housing Act 1988, Section 21/Section 8 notice procedures</li>
+<li>India, state-level Rent Control Acts and Model Tenancy Act 2021</li>
+<li>UN-Habitat, comparative housing and tenure security reports</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Whether you are a landlord or a tenant, start by identifying the exact notice and grounds rules where the property is located, since these control everything that follows. Keep written records of rent, communications, and repairs. Landlords should follow each step precisely; tenants should respond promptly and attend hearings. Given the variation in local law and the stakes involved, advice from a housing lawyer or tenant-support service early in the process is well worth seeking.</p>
 
@@ -135,6 +151,22 @@ export const propertyRealEstateExtra2Articles: LawArticle[] = [
 <li>Assuming a general POA survives incapacity when it may not.</li>
 <li>Failing to meet formalities, so a bank or registry refuses to accept the document.</li>
 <li>Not keeping records, leaving the agent open to suspicion of misuse.</li>
+</ul>
+
+<h2>Springing vs Immediate Powers of Attorney</h2>
+<p>A durable POA can be structured to take effect in one of two ways. An immediate POA gives the agent authority as soon as it is signed, which is useful when the principal wants ongoing help managing affairs right away, but it also means the agent has real power well before any incapacity occurs. A "springing" POA, by contrast, only takes effect once a specified triggering event happens — typically a doctor's certification that the principal has lost capacity — offering more protection against premature or unauthorized use, at the cost of potential delay and dispute at the exact moment the document is needed, if the triggering condition is contested. Neither structure is universally better; the right choice depends heavily on how much the principal trusts the agent and how quickly authority might realistically be needed.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I have more than one agent under a single power of attorney?</strong> Yes — many principals name co-agents who must act jointly (adding a layer of mutual oversight) or independently (adding convenience but reducing that oversight), and it is common to name a successor agent in case the first choice becomes unavailable.</p>
+<p><strong>Does a power of attorney let my agent change my will?</strong> No — an agent's authority under a POA ends at death, and even during the principal's life, POA authority generally does not extend to making, revoking, or amending a will, which remains a personal act only the principal (with testamentary capacity) can perform.</p>
+<p><strong>Can I revoke a power of attorney at any time?</strong> Yes, as long as you still have mental capacity — revocation is typically done in writing, and it is important to notify the agent and any institutions (banks, land registries) relying on the original document, since they may continue to honor it until formally informed of the revocation.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Uniform Power of Attorney Act (model legislation adopted variably by states)</li>
+<li>UK Mental Capacity Act 2005, Lasting Power of Attorney provisions</li>
+<li>India, Powers-of-Attorney Act 1882 and registration requirements under the Registration Act 1908</li>
+<li>Hague Conference on Private International Law, cross-border protection of adults instruments</li>
 </ul>
 
 <h2>Practical Next Steps</h2>
