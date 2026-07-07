@@ -69,6 +69,22 @@ export const technologyIpExtra2Articles: LawArticle[] = [
 <li>Underestimating the cost and time of obtaining and maintaining patents in multiple countries.</li>
 </ul>
 
+<h2>The PCT Route: A Single Application, Many Countries</h2>
+<p>Filing separately in every country of interest on day one is expensive and often premature, before an inventor knows which markets are commercially worth pursuing. The Patent Cooperation Treaty (PCT), administered by WIPO, addresses this by letting an applicant file a single international application that preserves a filing date across more than 150 member states, while deferring the expensive step of entering each individual national or regional phase for up to 30 months. This buys time to search for licensees or investors, refine the claims based on an international search report, and make more informed decisions about which specific countries justify the cost of a full national patent application — without losing the original priority date in the process.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I patent an idea before I've built a working prototype?</strong> Generally yes — most systems require the application to describe the invention in enough detail that someone skilled in the field could make and use it, not an actual working model, though having tested the concept helps ensure the description is accurate and complete.</p>
+<p><strong>What is a provisional patent application?</strong> Available in some systems (notably the U.S.), it is a lower-cost, less formal filing that establishes an early filing date and allows use of "patent pending" status, giving the inventor up to a year to file the full, formal application — useful for locking in priority while still developing or funding the invention.</p>
+<p><strong>Do software and business methods qualify for patent protection?</strong> It varies significantly by jurisdiction and is one of the most contested areas of patent law — some systems allow software patents when tied to a specific technical improvement, while others exclude software and abstract business methods more broadly, making this an area where jurisdiction-specific advice is especially important.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>World Intellectual Property Organization (WIPO), Patent Cooperation Treaty guidance</li>
+<li>U.S. Patent and Trademark Office, patent basics and application process</li>
+<li>European Patent Office, Unitary Patent system guidance</li>
+<li>India, Patents Act 1970 (as amended)</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>If you have an invention worth protecting, keep it confidential and document its development before doing anything public. Carry out a prior-art search to test whether it is genuinely new, and decide which markets actually matter to you. Because the claims and procedure are technical and the stakes are high, working with a qualified patent attorney or agent — ideally before any public disclosure — is one of the most valuable investments an inventor can make.</p>
 

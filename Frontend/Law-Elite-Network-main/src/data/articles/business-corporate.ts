@@ -220,6 +220,7 @@ export const businessCorporateArticles: LawArticle[] = [
 <p><strong>Do all co-founders need the same vesting schedule?</strong> Not necessarily, but most investors expect broadly similar terms for all founders — a schedule that is far more generous to one founder than another is a common flag raised during diligence.</p>
 <p><strong>Is a SAFE the same thing as equity?</strong> No. A SAFE is a contractual right to receive equity in the future, typically upon a priced round or exit — it is not itself a share and does not usually carry voting rights until it converts.</p>
 <p><strong>What is a "priced round" and why does it matter?</strong> It is a fundraising round where investors and the company agree a specific valuation and price per share, as opposed to a convertible instrument that defers that number — it matters because it resets the cap table and typically triggers conversion of any outstanding notes or SAFEs.</p>
+<p><strong>Does every startup need a lawyer from day one?</strong> Not necessarily for the very earliest stage, but the cost of proper incorporation, founder agreements, and IP assignment documents is modest compared to the cost of unwinding a messy cap table or a founder dispute later — most experienced advisers recommend engaging counsel before, not after, the first outside dollar comes in.</p>
 
 <h2>Sources & Further Reading</h2>
 <ul>

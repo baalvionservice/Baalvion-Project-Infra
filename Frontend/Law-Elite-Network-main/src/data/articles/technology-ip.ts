@@ -47,6 +47,22 @@ export const technologyIpArticles: LawArticle[] = [
 <h2>Enforcement Basics</h2>
 <p>Both rights are enforced primarily by the owner, usually starting with a cease-and-desist letter and escalating to civil litigation if needed. Trademark disputes turn on the likelihood of consumer confusion, while copyright disputes turn on whether protected expression was actually copied. Remedies can include injunctions, damages, and orders to destroy infringing goods, though the specifics vary widely by jurisdiction.</p>
 
+<h2>Where Patents and Trade Secrets Fit In</h2>
+<p>Trademarks and copyright are only two of the four main pillars of intellectual property, and confusing them with the other two is just as common. A patent protects a new, useful, and non-obvious invention or process — not a brand or a creative work — and requires a formal application demonstrating novelty over prior art, generally lasting around 20 years from filing rather than indefinitely. A trade secret, by contrast, protects confidential business information (a formula, a customer list, a manufacturing process) for as long as it remains genuinely secret and reasonable steps are taken to protect it — there is no registration and no fixed term, but the protection evaporates the moment the information becomes public through legitimate means. A single product can involve all four types of protection simultaneously: a patent on the underlying technology, a trademark on the brand name, copyright on the marketing materials and software, and trade secret protection over the exact manufacturing process.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I trademark a name that's already copyrighted by someone else?</strong> Potentially yes — the two rights protect different things, so a company name that happens to match a copyrighted book title, for instance, may still be registrable as a trademark if it isn't already used as a trademark by someone else in a way that would cause confusion.</p>
+<p><strong>Do I need to register copyright for it to exist?</strong> No — in most countries copyright exists automatically the moment an original work is fixed in a tangible form, but formal registration (where available) is still valuable because it typically creates a public record of ownership and is often a prerequisite for filing an infringement lawsuit.</p>
+<p><strong>What happens if I use a trademark without registering it?</strong> Depending on the jurisdiction, you may still acquire limited "common law" rights through actual use in commerce, but these rights are typically narrower in geographic scope and harder to enforce than a registered trademark, which is why registration is strongly recommended once a brand has real commercial value.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>World Intellectual Property Organization (WIPO), Madrid System guidance</li>
+<li>U.S. Patent and Trademark Office, trademark basics</li>
+<li>Berne Convention for the Protection of Literary and Artistic Works</li>
+<li>India, Trade Marks Act 1999 and Copyright Act 1957</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Identify which asset you are trying to protect: if it is a brand name or logo, focus on trademark registration in the markets where you operate; if it is creative content, document authorship and consider voluntary copyright registration where it strengthens enforcement. For cross-border protection, explore the Madrid System for trademarks and rely on the Berne framework for copyright, and seek tailored advice before filing.</p>
 
@@ -90,6 +106,23 @@ export const technologyIpArticles: LawArticle[] = [
 
 <h2>Jurisdictional Variation</h2>
 <p>The EU&apos;s General Data Protection Regulation set a widely copied template, but it is not universal. India&apos;s framework, Brazil&apos;s LGPD, and various other national and state laws each have their own definitions, thresholds, and enforcement bodies. Some laws apply extraterritorially, reaching organizations abroad that target or monitor people within the jurisdiction. Penalties range from corrective orders to substantial fines, so the same data practice can carry very different legal risk depending on where the affected people are.</p>
+
+<h2>Data Breach Notification Duties</h2>
+<p>A significant portion of modern privacy law is dedicated specifically to what happens after something goes wrong. Most frameworks impose a strict, short deadline — commonly 72 hours under GDPR-style rules — for notifying a data protection regulator once an organization becomes aware of a breach likely to risk individuals' rights, and separately require notifying the affected individuals themselves where the risk is high. Failing to detect or report a breach promptly is frequently treated as seriously as the breach itself, since regulators view timely notification as essential to letting affected people take protective steps (changing passwords, watching for fraud) quickly. Organizations are increasingly expected to have an incident-response plan ready before a breach happens, not improvised during one, since the notification clock typically starts running immediately upon discovery.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Does data privacy law apply to a small business, or only large companies?</strong> Most frameworks apply regardless of size, though some include reduced obligations or exemptions for very small organizations processing limited data — assuming privacy law "doesn't apply to us" because a business is small is a common and risky misconception.</p>
+<p><strong>Can I be forced to delete data if a customer asks?</strong> Generally yes, under a "right to erasure," but this right is not absolute — an organization can often retain data where there's a legal obligation to keep it (tax records, for instance) or another overriding legitimate interest, so the request must be assessed rather than automatically granted or refused.</p>
+<p><strong>Do cookies and website tracking count as personal data?</strong> Frequently yes — many privacy frameworks treat persistent identifiers like cookies and device fingerprints as personal data when they can be linked to an individual's behavior, which is why cookie-consent banners have become near-universal on websites serving regulated jurisdictions.</p>
+<p><strong>Can I be held personally liable as a business owner for a privacy violation?</strong> In cases of serious, knowing non-compliance, some frameworks do allow regulators to pursue individual officers or directors in addition to the organization itself, particularly where governance failures were deliberate or grossly negligent rather than an isolated honest mistake.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>EU General Data Protection Regulation (GDPR), full text and guidance</li>
+<li>India, Digital Personal Data Protection Act 2023</li>
+<li>Brazil, Lei Geral de Proteção de Dados (LGPD)</li>
+<li>U.S. state privacy laws (e.g., California Consumer Privacy Act) comparative guidance</li>
+</ul>
 
 <h2>Practical Next Steps</h2>
 <p>If your organization handles personal data, start by mapping what you collect, why, and where it flows. Identify a lawful basis for each use, publish a clear privacy notice, build a process for handling individual rights requests, and confirm your security and breach-response measures. Because obligations vary by jurisdiction and evolve quickly, treat privacy compliance as an ongoing program and seek qualified advice for cross-border operations.</p>

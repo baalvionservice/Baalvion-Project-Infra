@@ -70,6 +70,7 @@ export const employmentLaborExtraArticles: LawArticle[] = [
 <p><strong>Is a non-compete enforceable if I was laid off, not fired for cause?</strong> In many jurisdictions this matters — some courts are less willing to enforce a non-compete against an employee terminated through no fault of their own, viewing it as unfair to both block someone from working and deny them the job that funded their livelihood.</p>
 <p><strong>Can my employer make me sign a non-compete after I've already started the job?</strong> They can ask, but in many jurisdictions a new restriction requires new consideration — some extra benefit beyond continued employment — or it may not be enforceable, particularly where the employee had no real choice but to sign.</p>
 <p><strong>Do non-competes apply to freelancers and contractors?</strong> They can, but enforcement is often even more limited than for employees, since contractors are by definition running independent businesses — a broad restriction on independent economic activity faces extra scrutiny.</p>
+<p><strong>Will a court rewrite an unreasonable non-compete instead of voiding it entirely?</strong> In some jurisdictions, yes — a practice sometimes called "blue-penciling" lets a court narrow an overbroad clause to a reasonable scope rather than striking it down completely, though other jurisdictions refuse to rewrite unreasonable clauses at all and simply void them outright, which is one more reason the applicable jurisdiction matters so much.</p>
 
 <h2>Sources & Further Reading</h2>
 <ul>

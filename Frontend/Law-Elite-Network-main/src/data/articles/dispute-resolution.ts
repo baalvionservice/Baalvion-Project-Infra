@@ -122,6 +122,7 @@ export const disputeResolutionArticles: LawArticle[] = [
 <p><strong>Is anything said in mediation ever usable in court later?</strong> Generally no — most jurisdictions treat mediation communications as privileged and inadmissible if the case proceeds to litigation, though the final signed settlement agreement itself is not privileged and is enforceable.</p>
 <p><strong>Can a court force me to mediate?</strong> In many systems, yes — courts increasingly require a genuine attempt at mediation before a trial date is set, though this generally cannot force a party to actually settle, only to participate in good faith.</p>
 <p><strong>What happens if the other side won't negotiate honestly?</strong> A skilled mediator will usually recognise stalling or bad-faith tactics and can end the session, but if either side suspects this going in, mediation may not be the right tool — a more structured process, like arbitration, may serve better.</p>
+<p><strong>Is mediation appropriate for disputes involving a serious power imbalance?</strong> It requires caution — a skilled mediator can adjust the process to protect a more vulnerable party, but where there is a history of intimidation or coercion (common in some family disputes), a more structured, rights-based process with formal safeguards may better protect the weaker party's genuine interests.</p>
 
 <h2>Sources & Further Reading</h2>
 <ul>

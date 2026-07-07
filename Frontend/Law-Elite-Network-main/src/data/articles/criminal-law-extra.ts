@@ -148,6 +148,7 @@ export const criminalLawExtraArticles: LawArticle[] = [
 <p><strong>Can a misdemeanor become a felony if it's a repeat offense?</strong> Yes — many jurisdictions escalate certain misdemeanors to felony status on a second or subsequent conviction (common with offenses like DUI or domestic violence), even when the underlying conduct is identical.</p>
 <p><strong>Does a felony conviction always mean prison time?</strong> No — many jurisdictions allow probation, suspended sentences, or alternative programs for lower-level felonies, particularly for first-time offenders, though the felony label and its collateral consequences typically remain regardless of whether time is actually served.</p>
 <p><strong>Can a felony conviction be reduced or expunged later?</strong> In many jurisdictions, yes — some allow reclassification to a misdemeanor after a period of compliance, or expungement/sealing of the record entirely, though eligibility rules vary widely by offense type and jurisdiction.</p>
+<p><strong>Does a misdemeanor conviction ever show up on background checks?</strong> Often yes, at least for a period — many employment and housing background checks include misdemeanors, not just felonies, which is one reason even a "minor" conviction is worth taking seriously and, where available, pursuing expungement once eligible.</p>
 
 <h2>Sources & Further Reading</h2>
 <ul>

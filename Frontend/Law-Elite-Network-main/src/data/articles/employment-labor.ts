@@ -133,6 +133,7 @@ export const employmentLaborArticles: LawArticle[] = [
 <p><strong>Can I be fired for poor performance without any warning?</strong> In at-will jurisdictions, often yes; in jurisdictions requiring fair process, usually no — most such systems expect documented performance concerns, a chance to improve, and a fair procedure before dismissal on performance grounds.</p>
 <p><strong>Does resigning instead of being fired affect my rights?</strong> It can — a genuine resignation is generally not treated as a dismissal, though "constructive dismissal" claims exist in many systems where an employer's conduct was so bad that resignation was effectively forced, which courts treat as equivalent to firing.</p>
 <p><strong>Is severance pay required by law?</strong> It depends entirely on the jurisdiction and circumstances — some countries mandate statutory severance for redundancy or unfair dismissal, while others leave it purely to contract or employer discretion.</p>
+<p><strong>Does an employer have to give a reason at the moment of dismissal?</strong> Requirements vary — some jurisdictions require the reason to be stated in writing at the time, while others allow it to emerge later during a tribunal claim, though a reason that shifts or contradicts itself over time is often treated as suspicious evidence of an unlawful underlying motive.</p>
 
 <h2>Sources & Further Reading</h2>
 <ul>
