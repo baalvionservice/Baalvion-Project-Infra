@@ -1,10 +1,18 @@
+import { existsSync } from 'fs';
+import { join } from 'path';
 import { articleArtDataUri, personSilhouetteDataUri } from '@baalvion/illustrations';
+
+const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
+// `pnpm run generate:article-art` (wired into `build`) writes one PNG per bundled
+// article here, keyed by slug — see scripts/generate-article-art.ts.
+const ARTICLE_ART_DIR = join(process.cwd(), 'public', 'article-art');
 
 /**
  * Resolves an article's real featured image (from the CMS, law-service, or bundled
- * data — whatever field a given source uses) and only falls back to original,
- * deterministically-generated artwork when none is set. Never falls back to a
- * stock/placeholder image.
+ * data — whatever field a given source uses), then the pre-generated static PNG for
+ * bundled articles (a real crawlable raster URL, required for og:image/NewsArticle.image
+ * — social crawlers don't reliably fetch SVG data URIs), and only falls back to the
+ * inline SVG data URI when neither exists. Never falls back to a stock/placeholder image.
  */
 export function resolveArticleImage(article: {
   featuredImage?: string | null;
@@ -19,6 +27,10 @@ export function resolveArticleImage(article: {
 } | null | undefined): string {
   const real = article?.featuredImage || article?.cover_image || article?.image_url;
   if (real) return real;
+
+  if (article?.slug && existsSync(join(ARTICLE_ART_DIR, `${article.slug}.png`))) {
+    return `${SITE}/article-art/${article.slug}.png`;
+  }
 
   const seed = String(article?.imageSeed || article?.id || article?.slug || 'law-elite-network');
   return articleArtDataUri({

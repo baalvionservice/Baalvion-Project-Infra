@@ -1,22 +1,33 @@
 import type { Metadata } from 'next';
 import { cmsGetArticleBySlug } from '@/lib/cms';
 import { getAuthorByName } from '@/data/authors';
-import { articleArtDataUri } from '@baalvion/illustrations';
+import { resolveArticleImage } from '@/lib/article-art';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
+// Hard cap so a slow/hung law-service response falls back to the humanized-slug
+// title instead of blocking metadata generation and the page render.
+const FETCH_TIMEOUT_MS = 4000;
+
 async function fetchFromLawService(slug: string): Promise<any | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
     // /articles/:slug resolves by slug (the ?slug= list filter is not applied server-side).
-    const r = await fetch(`${API}/articles/${encodeURIComponent(slug)}`, { next: { revalidate: 3600 } });
+    const r = await fetch(`${API}/articles/${encodeURIComponent(slug)}`, {
+      next: { revalidate: 3600 },
+      signal: controller.signal,
+    });
     if (!r.ok) return null;
     const j = await r.json();
     return j?.data ?? null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -58,11 +69,10 @@ export async function generateMetadata(
   const title = a.title;
   const description = String(a.excerpt || a.title).slice(0, 300);
   const authorName = (typeof a.author === 'string' ? a.author : a.author?.name) || a.author_name || undefined;
-  // Data-URI SVG art is a placeholder here — social crawlers need a real crawlable
-  // raster URL for og:image, which this app doesn't generate yet (tracked as a
-  // follow-up, same gap flagged on Imperialpedia). At minimum this is never a
-  // stock/placeholder image.
-  const ogImage = a.cover_image || a.image_url || articleArtDataUri({ title, category: a.category?.name, seed: String(a.id || slug) });
+  // Prefers a real, admin-set image, then the pre-generated static PNG for bundled
+  // articles (a real crawlable raster URL — required for og:image/NewsArticle.image),
+  // and only falls back to the inline SVG data URI when neither exists.
+  const ogImage = resolveArticleImage({ ...a, title, slug });
   return {
     title,
     description,

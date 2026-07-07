@@ -7,15 +7,23 @@ const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
 const titleCase = (s: string) => s.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
+// Hard cap so a slow/hung law-service response falls back to bundled/seed
+// naming instead of blocking metadata generation and the page render.
+const FETCH_TIMEOUT_MS = 4000;
+
 async function fetchJson(path: string): Promise<any[]> {
   if (!/^https?:\/\//i.test(`${API}${path}`)) return [];
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const r = await fetch(`${API}${path}`, { next: { revalidate: 3600 } });
+    const r = await fetch(`${API}${path}`, { next: { revalidate: 3600 }, signal: controller.signal });
     if (!r.ok) return [];
     const j = await r.json();
     return Array.isArray(j?.data) ? j.data : (j?.data?.items || []);
   } catch {
     return [];
+  } finally {
+    clearTimeout(timer);
   }
 }
 

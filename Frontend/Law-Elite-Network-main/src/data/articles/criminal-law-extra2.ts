@@ -66,6 +66,22 @@ export const criminalLawExtra2Articles: LawArticle[] = [
 <li>Not taking a first charge seriously, which can worsen any later offence.</li>
 </ul>
 
+<h2>Challenging a DUI/DWI Charge</h2>
+<p>A charge is not automatically a conviction — defence lawyers routinely scrutinise whether the traffic stop itself was lawful, whether the breath or blood testing equipment was properly calibrated and maintained, whether the officer followed the required observation period before testing, and whether the chain of custody for any blood sample was preserved correctly. Procedural errors at any of these stages can lead to a reading being excluded or a charge being reduced, even where the driver was, in fact, impaired. This is why the specific facts of the stop and the testing process matter just as much as the number on the printout.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I be charged with DUI for prescription medication?</strong> Yes — most laws cover any substance that impairs your ability to drive safely, not just alcohol or illegal drugs, so a legally prescribed medication can still support a charge if it affected your driving.</p>
+<p><strong>Does a DUI conviction affect more than my driving licence?</strong> Often, yes — depending on the jurisdiction, it can affect employment (especially jobs requiring driving), professional licensing, immigration status for non-citizens, and insurance premiums for years afterward.</p>
+<p><strong>Is a breathalyzer reading always accurate?</strong> Not necessarily — factors like device calibration, mouth alcohol, certain medical conditions, and improper administration can all affect readings, which is why results are frequently challenged in contested cases.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. National Highway Traffic Safety Administration, impaired-driving data and BAC standards</li>
+<li>UK Road Traffic Act 1988 (drink-driving provisions)</li>
+<li>European Transport Safety Council, blood-alcohol limit comparisons by country</li>
+<li>India, Motor Vehicles Act 1988 (as amended)</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>The safest approach is prevention: if you have been drinking or taking impairing medication, do not drive. If you are charged, learn the precise offence and limit that apply where it happened, gather any documentation, and speak with a criminal defence lawyer early — procedural details around testing and stops can significantly affect the outcome.</p>
 
@@ -130,6 +146,22 @@ export const criminalLawExtra2Articles: LawArticle[] = [
 <li>State clearly and politely if you do not consent to a search.</li>
 <li>Ask to see a warrant where one should exist.</li>
 <li>Note officers' details, the time, and exactly what was searched or taken.</li>
+</ul>
+
+<h2>What Happens When a Search Goes Too Far</h2>
+<p>When police exceed the scope of a warrant, search without any lawful basis, or coerce consent, the remedy in many jurisdictions is exclusion of the resulting evidence — often called the "fruit of the poisonous tree" doctrine in common-law systems, where not just the directly seized item but anything discovered because of it can be thrown out. This is a significant reason defence lawyers scrutinise the paperwork and circumstances of every search closely: a technically unlawful search can unravel an otherwise strong prosecution case. That said, courts also recognise good-faith exceptions in some systems, where officers reasonably relying on a warrant later found defective may still have the evidence admitted, so the outcome is fact-specific rather than automatic.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can police search my phone just because they arrested me?</strong> Increasingly, no — many courts now require a separate warrant specifically for digital device searches, treating phones differently from physical items due to the sheer volume of personal data they hold.</p>
+<p><strong>Do I have to let police into my home if they don't have a warrant?</strong> Generally no, unless a recognised exception applies (emergency, hot pursuit, or your genuine consent) — you can ask to see the warrant and are typically entitled to refuse entry absent one.</p>
+<p><strong>Is it true that saying nothing during a search looks suspicious?</strong> No — clearly and politely stating that you do not consent to a search is the exercise of a legal right, not an admission of guilt, and it preserves your ability to challenge the search later if it proceeds anyway.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Constitution, Fourth Amendment, and <em>Riley v. California</em> (2014) on phone searches</li>
+<li>UK Police and Criminal Evidence Act 1984 (PACE), search and seizure codes</li>
+<li>EU Charter of Fundamental Rights, Article 7 (respect for private life)</li>
+<li>India, Bharatiya Nagarik Suraksha Sanhita, search and seizure provisions</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

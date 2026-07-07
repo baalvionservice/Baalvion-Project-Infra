@@ -48,6 +48,22 @@ export const familyPersonalArticles: LawArticle[] = [
 <h2>Contested Versus Uncontested</h2>
 <p>An <strong>uncontested divorce</strong>, where spouses agree on all terms, is typically quicker and far less expensive. A <strong>contested divorce</strong> requires the court to decide disputed issues and can take months or years. Many couples use <strong>mediation</strong> or <strong>collaborative divorce</strong>, structured processes that keep decisions in the couple's hands and out of a courtroom.</p>
 
+<h2>Prenuptial and Postnuptial Agreements</h2>
+<p>Many divorces are shaped years in advance by an agreement signed before or during the marriage. A prenuptial agreement, signed before the wedding, and a postnuptial agreement, signed afterward, let a couple define in advance how property will be divided and whether spousal support will be paid if the marriage ends — often overriding the default equitable-distribution or community-property rules that would otherwise apply. Courts in most jurisdictions will enforce these agreements provided both sides had independent legal advice, made full financial disclosure to each other, and were not pressured into signing at the last minute (a common challenge to prenups signed the night before the wedding). An agreement that leaves one spouse with unconscionably little, or that tries to override child support (which belongs to the child, not the parents, and generally cannot be waived), is likely to be struck down or narrowed even where the rest of the agreement holds.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Do I need my spouse's agreement to get divorced?</strong> No, in most no-fault systems one spouse can proceed even if the other objects, though a contested case will typically take longer than one where both sides cooperate.</p>
+<p><strong>Can a divorce be reversed once finalized?</strong> Rarely, and only in narrow circumstances such as fraud or a clear procedural defect — remarriage to the same person is usually the only practical way to restore the marital status once a divorce is final.</p>
+<p><strong>Does adultery affect the financial settlement even in a no-fault system?</strong> Usually not directly — most no-fault systems separate the question of why the marriage ended from how assets are divided, though egregious financial misconduct connected to an affair (like spending joint funds on it) can sometimes be considered.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>UK Divorce, Dissolution and Separation Act 2020</li>
+<li>U.S. Uniform Marriage and Divorce Act (model legislation adopted variably by states)</li>
+<li>India, Hindu Marriage Act 1955 and Special Marriage Act 1954</li>
+<li>Hague Conference on Private International Law, cross-border family law instruments</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Start by gathering financial records, identifying the court with proper jurisdiction over your residence, and clarifying your priorities for property and any children. Consider an early consultation with a family lawyer or accredited mediator to understand your local rules, and resist signing any agreement before you fully understand its long-term effect. Acting deliberately, rather than reacting to pressure, usually produces a fairer and more durable outcome.</p>
 
@@ -92,6 +108,22 @@ export const familyPersonalArticles: LawArticle[] = [
 
 <h2>Preparing Responsibly</h2>
 <p>Parents who focus on the child rather than on "winning" tend to fare better. Useful steps include keeping a calm record of caregiving involvement, avoiding disparaging the other parent in front of the child, and demonstrating willingness to cooperate. Courts notice flexibility and hostility alike.</p>
+
+<h2>The Role of Custody Evaluators and Guardians ad Litem</h2>
+<p>In contested cases, courts frequently appoint an independent professional — variously called a custody evaluator, guardian ad litem, or (in England and Wales) a Cafcass officer — to investigate the family's circumstances and report back with a recommendation. This typically involves separate interviews with each parent, observation of the child with each parent, and sometimes home visits or input from teachers and doctors. While a judge is not bound to follow the evaluator's recommendation, it carries significant weight in practice, so cooperating fully and honestly with the evaluation process (rather than treating the evaluator as an adversary) is generally in every parent's interest.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>At what age can a child decide which parent to live with?</strong> There is rarely a fixed age — courts consider a child's stated preference alongside their maturity and the reasons behind it, with the weight given to that preference increasing gradually through adolescence rather than switching on at a specific birthday.</p>
+<p><strong>Can grandparents or other relatives seek custody or visitation rights?</strong> In many jurisdictions, yes, under specific statutory provisions, though the bar is generally higher than for a parent, and courts remain focused on the child's best interests rather than a relative's own wishes.</p>
+<p><strong>What happens if one parent moves to another country with the child without consent?</strong> This can constitute international child abduction under instruments like the Hague Convention on the Civil Aspects of International Child Abduction, which provides a fast-track mechanism in signatory countries to return a wrongfully removed child to their habitual residence.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>Hague Convention on the Civil Aspects of International Child Abduction (1980)</li>
+<li>UK Children Act 1989, welfare checklist</li>
+<li>U.S. Uniform Child Custody Jurisdiction and Enforcement Act (UCCJEA)</li>
+<li>India, Guardians and Wards Act 1890</li>
+</ul>
 
 <h2>Practical Next Steps</h2>
 <p>Draft a realistic parenting plan that prioritises the child's routine and stability, and try to agree it directly or through mediation before involving a judge. Where safety is a concern, document it and seek advice promptly. Consult a family lawyer about your local rules on custody and relocation, since terminology and procedure vary, and remember that arrangements can be revised as your child grows.</p>
@@ -143,6 +175,22 @@ export const familyPersonalArticles: LawArticle[] = [
 
 <h2>Keeping a Will Current</h2>
 <p>A will is not a one-time task. Marriage, divorce, the birth of children, and significant changes in assets can all affect it—and in some jurisdictions, marriage automatically revokes an earlier will. Review your will after any major life event and update it properly rather than scribbling changes on the original, which can invalidate it.</p>
+
+<h2>Trusts as a Complement to a Will</h2>
+<p>For larger or more complex estates, a will is often paired with one or more trusts — legal arrangements where a trustee holds and manages assets for named beneficiaries, either during your lifetime (a living or "inter vivos" trust) or created by your will itself (a testamentary trust). Trusts can serve several practical purposes a simple will cannot: assets placed in a properly structured living trust generally avoid the probate process entirely, passing directly to beneficiaries; a trust can hold funds for a minor or vulnerable beneficiary until they reach a specified age or milestone rather than handing over a lump sum at eighteen; and in some jurisdictions, trusts offer estate-tax planning advantages. Trusts add complexity and cost, so they are generally worth considering once an estate involves significant assets, minor beneficiaries, or a wish for more control over how and when an inheritance is received, rather than for every straightforward estate.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I write my own will without a lawyer?</strong> In many jurisdictions, yes, and low-value, straightforward estates are often handled this way — but the formalities (witnessing, signing) must be followed exactly, since a technical defect can invalidate the whole document even if the intent was clear.</p>
+<p><strong>What happens to jointly owned property when one owner dies?</strong> It depends on how the property is titled — property held as "joint tenants with right of survivorship" typically passes automatically to the surviving owner outside the will and probate entirely, while property held as "tenants in common" passes through the deceased's estate according to their will.</p>
+<p><strong>Can a will be challenged after death?</strong> Yes — common grounds include lack of mental capacity at signing, undue influence, improper execution (witnessing defects), or a more recent will superseding it, though successfully challenging a properly executed will is generally difficult without strong evidence.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>UK Wills Act 1837 (as amended) and Law Commission wills reform proposals</li>
+<li>U.S. Uniform Probate Code (model legislation adopted variably by states)</li>
+<li>India, Indian Succession Act 1925</li>
+<li>Society of Trust and Estate Practitioners (STEP), cross-border estate planning guidance</li>
+</ul>
 
 <h2>Practical Next Steps</h2>
 <p>List your assets and the people you want to provide for, then decide on executors and, if relevant, guardians. For straightforward estates a professionally checked template may suffice, but for blended families, business interests, or cross-border assets, consult a qualified will-writer or solicitor. Store the signed original safely, tell your executor where to find it, and revisit it whenever your life circumstances change.</p>
