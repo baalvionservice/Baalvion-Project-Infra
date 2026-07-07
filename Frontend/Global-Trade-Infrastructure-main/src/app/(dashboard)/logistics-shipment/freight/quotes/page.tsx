@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useFreightQuotes, FreightQuoteStatus } from '@/api';
 import { FreightNavTabs } from '../_components/freight-nav-tabs';
-import { QUOTE_STATUS_COLORS, modeMeta } from '../_components/mode-utils';
+import { QUOTE_STATUS_COLORS, modeMeta, safeFormatDate } from '../_components/mode-utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 
 const STATUS_OPTIONS: { value: FreightQuoteStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All Statuses' },
@@ -83,7 +82,7 @@ export default function FreightQuotesPage() {
                       <TableCell>{q.items?.length ?? 0}</TableCell>
                       <TableCell>{best ? `${best.currency} ${best.totalAmount.toLocaleString()}` : '—'}</TableCell>
                       <TableCell><Badge variant="outline" className={cn('text-[9px] capitalize', QUOTE_STATUS_COLORS[q.status])}>{q.status}</Badge></TableCell>
-                      <TableCell className="text-muted-foreground text-xs">{format(new Date(q.createdAt), 'MMM d, yyyy')}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">{safeFormatDate(q.createdAt, 'MMM d, yyyy')}</TableCell>
                     </TableRow>
                   );
                 })}

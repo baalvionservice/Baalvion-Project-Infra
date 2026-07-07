@@ -5,7 +5,22 @@
  * union the backend's freight quote flow validates against.
  */
 import { Ship, Plane, TrainFront, Truck, PackageCheck, Network, LucideIcon } from 'lucide-react';
+import { format } from 'date-fns';
 import type { TransportMode } from '@/api/freight-carriers';
+
+/**
+ * Format a date string that may be null, missing, or malformed. `date-fns`'s
+ * `format()` throws `RangeError: Invalid time value` on an invalid Date rather
+ * than returning a fallback — every freight page renders event/booking timestamps
+ * straight from the API, so this guards the whole render tree from a single bad
+ * timestamp crashing the page.
+ */
+export function safeFormatDate(value: string | null | undefined, pattern: string, fallback = '—'): string {
+  if (!value) return fallback;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return fallback;
+  return format(date, pattern);
+}
 
 export interface ModeMeta {
   mode: TransportMode;

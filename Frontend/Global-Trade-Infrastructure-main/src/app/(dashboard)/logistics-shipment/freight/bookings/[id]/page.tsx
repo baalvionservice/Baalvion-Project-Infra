@@ -3,14 +3,13 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useFreightBooking, useFreightBookingEvents, useRetryFreightBooking, useCancelFreightBooking } from '@/api';
 import { FreightNavTabs } from '../../_components/freight-nav-tabs';
-import { BOOKING_STATUS_COLORS, modeMeta } from '../../_components/mode-utils';
+import { BOOKING_STATUS_COLORS, modeMeta, safeFormatDate } from '../../_components/mode-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronLeft, RotateCcw, XCircle, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 
 export default function FreightBookingDetailPage() {
   const params = useParams<{ id: string }>();
@@ -68,7 +67,7 @@ export default function FreightBookingDetailPage() {
         <Card className="shadow-none border"><CardContent className="p-4"><p className="text-[10px] uppercase text-muted-foreground font-bold">Amount</p><p className="text-lg font-bold">{booking.amount != null ? `${booking.currency} ${booking.amount.toLocaleString()}` : '—'}</p></CardContent></Card>
         <Card className="shadow-none border"><CardContent className="p-4"><p className="text-[10px] uppercase text-muted-foreground font-bold">Service Level</p><p className="text-lg font-bold">{booking.service_level ?? '—'}</p></CardContent></Card>
         <Card className="shadow-none border"><CardContent className="p-4"><p className="text-[10px] uppercase text-muted-foreground font-bold">Chargeable Weight</p><p className="text-lg font-bold">{booking.chargeable_weight_kg ?? '—'} kg</p></CardContent></Card>
-        <Card className="shadow-none border"><CardContent className="p-4"><p className="text-[10px] uppercase text-muted-foreground font-bold">Est. Delivery</p><p className="text-lg font-bold">{booking.estimated_delivery ? format(new Date(booking.estimated_delivery), 'MMM d, yyyy') : '—'}</p></CardContent></Card>
+        <Card className="shadow-none border"><CardContent className="p-4"><p className="text-[10px] uppercase text-muted-foreground font-bold">Est. Delivery</p><p className="text-lg font-bold">{safeFormatDate(booking.estimated_delivery, 'MMM d, yyyy')}</p></CardContent></Card>
       </div>
 
       {booking.carriers_attempted && booking.carriers_attempted.length > 1 && (
@@ -101,7 +100,7 @@ export default function FreightBookingDetailPage() {
                   <div className="pb-4">
                     <p className="text-xs font-bold capitalize">{e.event_type.replace('_', ' ')} {e.carrier ? `· ${e.carrier}` : ''}</p>
                     <p className="text-[10px] text-muted-foreground">{e.message}</p>
-                    <p className="text-[9px] text-muted-foreground mt-0.5">{format(new Date(e.created_at), 'MMM d, yyyy HH:mm')}</p>
+                    <p className="text-[9px] text-muted-foreground mt-0.5">{safeFormatDate(e.created_at, 'MMM d, yyyy HH:mm')}</p>
                   </div>
                 </div>
               ))}

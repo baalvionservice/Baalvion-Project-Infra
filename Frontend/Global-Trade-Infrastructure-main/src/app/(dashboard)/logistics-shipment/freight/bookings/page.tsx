@@ -4,13 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useFreightBookings, BookingStatus } from '@/api';
 import { FreightNavTabs } from '../_components/freight-nav-tabs';
-import { BOOKING_STATUS_COLORS, modeMeta } from '../_components/mode-utils';
+import { BOOKING_STATUS_COLORS, modeMeta, safeFormatDate } from '../_components/mode-utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 
 const STATUS_OPTIONS: { value: BookingStatus | 'all'; label: string }[] = [
   { value: 'all', label: 'All Statuses' },
@@ -70,8 +69,8 @@ export default function FreightBookingsPage() {
                       <TableCell className="font-mono text-xs">{b.tracking_number ?? '—'}</TableCell>
                       <TableCell className="text-xs">{b.amount != null ? `${b.currency} ${b.amount.toLocaleString()}` : '—'}</TableCell>
                       <TableCell><Badge variant="outline" className={cn('text-[9px] capitalize', BOOKING_STATUS_COLORS[b.status])}>{b.status.replace('_', ' ')}</Badge></TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{b.estimated_delivery ? format(new Date(b.estimated_delivery), 'MMM d, yyyy') : '—'}</TableCell>
-                      <TableCell className="text-xs text-muted-foreground">{format(new Date(b.created_at), 'MMM d, yyyy')}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{safeFormatDate(b.estimated_delivery, 'MMM d, yyyy')}</TableCell>
+                      <TableCell className="text-xs text-muted-foreground">{safeFormatDate(b.created_at, 'MMM d, yyyy')}</TableCell>
                     </TableRow>
                   );
                 })}

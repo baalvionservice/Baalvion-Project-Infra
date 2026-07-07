@@ -3,13 +3,12 @@
 import { useState } from 'react';
 import { useFreightBookings, useFreightBookingEvents } from '@/api';
 import { FreightNavTabs } from '../_components/freight-nav-tabs';
-import { BOOKING_STATUS_COLORS, modeMeta } from '../_components/mode-utils';
+import { BOOKING_STATUS_COLORS, modeMeta, safeFormatDate } from '../_components/mode-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Search, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
 
 const STATUS_LADDER = ['booking', 'booked', 'confirmed', 'in_transit', 'delivered'];
 
@@ -96,7 +95,7 @@ export default function FreightTrackingPage() {
                     events.map((e) => (
                       <div key={e.id} className="flex justify-between text-xs">
                         <span className="capitalize font-bold">{e.event_type.replace('_', ' ')}</span>
-                        <span className="text-muted-foreground">{format(new Date(e.created_at), 'MMM d, HH:mm')}</span>
+                        <span className="text-muted-foreground">{safeFormatDate(e.created_at, 'MMM d, HH:mm')}</span>
                       </div>
                     ))
                   )}
