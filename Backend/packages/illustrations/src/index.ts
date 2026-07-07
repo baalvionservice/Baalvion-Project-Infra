@@ -67,6 +67,37 @@ export function writeArticleArtFile(input: ArticleInput, absOutPath: string): Ge
   return art;
 }
 
+/**
+ * Node-only: rasterizes the generated SVG to a PNG and writes it to `absOutPath`.
+ * Social crawlers (Facebook/Twitter/Google News) need a real crawlable raster
+ * `og:image`/`NewsArticle.image` — SVG data URIs are not reliably accepted. Defaults
+ * to 1200x630 (the standard OG image size); the 800x600 source viewBox is abstract
+ * geometric art, so a `cover` crop to a wider aspect ratio is visually safe.
+ */
+export async function writeArticleArtRaster(
+  input: ArticleInput,
+  absOutPath: string,
+  size: { width: number; height: number } = { width: 1200, height: 630 },
+): Promise<GeneratedArt> {
+  // Required lazily, same reasoning as writeArticleArtFile above — keeps sharp (a
+  // native Node addon) out of any bundler graph that only needs the pure SVG/data-URI
+  // helpers.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const fs = require('fs') as typeof import('fs');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const path = require('path') as typeof import('path');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const sharp = require('sharp') as typeof import('sharp');
+
+  const art = generateArticleArt(input);
+  fs.mkdirSync(path.dirname(absOutPath), { recursive: true });
+  await sharp(Buffer.from(art.svg))
+    .resize(size.width, size.height, { fit: 'cover' })
+    .png()
+    .toFile(absOutPath);
+  return art;
+}
+
 /** Isomorphic (no fs): a self-contained inline image, safe for `<img src>` anywhere. */
 export function articleArtDataUri(input: ArticleInput): string {
   const { svg } = generateArticleArt(input);

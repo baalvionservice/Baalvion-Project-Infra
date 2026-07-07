@@ -54,6 +54,22 @@ export const employmentLaborArticles: LawArticle[] = [
 <h2>How the Rules Differ by Country</h2>
 <p>Jurisdiction shapes how much a contract can actually control the relationship. In most of the United States, employment is "at will," meaning either side can usually end it at any time for almost any lawful reason, so written contracts are less universal for ordinary staff. By contrast, the United Kingdom, the European Union, and India impose stronger statutory protections — required notice, paid leave, and limits on dismissal — that apply even when the contract is silent. The same clause can therefore mean very different things depending on where you work.</p>
 
+<h2>What Happens When a Contract Is Silent</h2>
+<p>No contract covers every situation, and gaps are filled by "implied terms" — obligations courts read into the relationship even though nobody wrote them down. Common implied terms include a duty of mutual trust and confidence, an obligation on the employer to provide a safe workplace, and a duty on the employee to serve faithfully and follow reasonable instructions. Custom and practice — how things have actually been done at the company over time — can also fill gaps, for example an unwritten but consistently honored bonus scheme. Because implied terms are less certain than an express clause, the safer approach for both sides is to write down anything genuinely important rather than relying on what a court might later infer.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can my employer change my contract terms without my agreement?</strong> Generally no — most jurisdictions treat unilateral changes to core terms (pay, hours, duties) as a breach, though minor administrative updates or changes reserved by an express flexibility clause may be permitted.</p>
+<p><strong>Is a probationary period a separate contract?</strong> No — it is a clause within the same contract that typically allows shorter notice or a simpler dismissal process during an initial period, but core statutory protections (like anti-discrimination law) still apply from day one in most systems.</p>
+<p><strong>What if I never received a written contract at all?</strong> The employment relationship and its core statutory rights still exist regardless — you can typically still request a written statement of terms, and many jurisdictions penalize employers who fail to provide one within the required timeframe.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>UK Employment Rights Act 1996, written statement of particulars</li>
+<li>EU Directive 2019/1152 on transparent and predictable working conditions</li>
+<li>India, Code on Wages 2019 and Industrial Relations Code 2020</li>
+<li>U.S. Department of Labor, employment law guidance by state</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Before signing, read the whole document, ask for clarification on anything vague, and keep a copy for your records. Pay particular attention to pay, notice, and any clause that restricts you after you leave. If the contract involves significant restrictions, equity, or unusual terms — or if it appears to undercut your statutory rights — have it reviewed by a qualified employment lawyer in your country before you commit.</p>
 
@@ -109,6 +125,23 @@ export const employmentLaborArticles: LawArticle[] = [
 <h2>What to Do If You Believe You Were Wrongfully Fired</h2>
 <p>If a dismissal feels unlawful, acting quickly and methodically matters, because legal deadlines for claims can be short.</p>
 <ul><li>Write down what happened, including dates, names, and what was said</li><li>Gather contracts, emails, performance reviews, and any warning letters</li><li>Note any comments suggesting a discriminatory or retaliatory motive</li><li>Check the time limit for filing a complaint in your jurisdiction</li></ul>
+
+<h2>Settlement Agreements and Severance</h2>
+<p>Many wrongful-termination disputes end not in a tribunal but in a negotiated settlement, often called a severance or settlement agreement. In exchange for a payment (and sometimes a reference letter), the employee typically waives the right to bring further claims related to the employment. Because signing away a legal claim is a serious step, many jurisdictions require the employee to receive independent legal advice — sometimes paid for by the employer — before such a waiver is valid. It is worth resisting pressure to sign quickly: a rushed settlement offered "today only" is a common tactic, and a properly advised employee is often able to negotiate meaningfully better terms than the first offer.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I be fired for poor performance without any warning?</strong> In at-will jurisdictions, often yes; in jurisdictions requiring fair process, usually no — most such systems expect documented performance concerns, a chance to improve, and a fair procedure before dismissal on performance grounds.</p>
+<p><strong>Does resigning instead of being fired affect my rights?</strong> It can — a genuine resignation is generally not treated as a dismissal, though "constructive dismissal" claims exist in many systems where an employer's conduct was so bad that resignation was effectively forced, which courts treat as equivalent to firing.</p>
+<p><strong>Is severance pay required by law?</strong> It depends entirely on the jurisdiction and circumstances — some countries mandate statutory severance for redundancy or unfair dismissal, while others leave it purely to contract or employer discretion.</p>
+<p><strong>Does an employer have to give a reason at the moment of dismissal?</strong> Requirements vary — some jurisdictions require the reason to be stated in writing at the time, while others allow it to emerge later during a tribunal claim, though a reason that shifts or contradicts itself over time is often treated as suspicious evidence of an unlawful underlying motive.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Equal Employment Opportunity Commission, retaliation and discrimination guidance</li>
+<li>UK Employment Rights Act 1996, unfair dismissal provisions and ACAS Code of Practice</li>
+<li>India, Industrial Disputes Act 1947 (now consolidated under the Industrial Relations Code 2020)</li>
+<li>International Labour Organization, Termination of Employment Convention (No. 158)</li>
+</ul>
 
 <h2>Practical Next Steps</h2>
 <p>Start by preserving evidence and reviewing your contract and any company policy on dismissal. Many countries offer a government body, tribunal, or labour authority where complaints can be lodged, often with strict deadlines. Because the rules and time limits vary so widely, speak to a qualified employment lawyer in your jurisdiction early — ideally before you sign any settlement or release — so you understand your options while a claim is still possible.</p>

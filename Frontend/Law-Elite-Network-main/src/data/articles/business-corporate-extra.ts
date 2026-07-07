@@ -61,6 +61,22 @@ export const businessCorporateExtraArticles: LawArticle[] = [
 <li>Assuming one country's "LLC" exists or is taxed the same way elsewhere.</li>
 </ul>
 
+<h2>Converting Between Structures</h2>
+<p>It is common for a business to start as an LLC for simplicity and later convert to a corporation once it seeks venture funding — most U.S. states allow a statutory conversion that preserves the entity's history, contracts, and tax ID, though the process still requires new governing documents, a share issuance to replace membership interests, and often a fresh EIN or tax registration. Converting the other way, from corporation to LLC, is rarer and can trigger a taxable liquidation in some jurisdictions, so it is worth choosing carefully at the outset rather than assuming conversion is always cheap or tax-neutral.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can a single person own an LLC or corporation?</strong> Yes — both structures support a single owner (a "single-member LLC" or a sole shareholder corporation) in most jurisdictions, though single-member LLCs face closer scrutiny on the corporate-veil question since there is no other member to demonstrate the entity's separateness.</p>
+<p><strong>Does an LLC protect a member who personally guarantees a business loan?</strong> No — a personal guarantee is a separate contractual promise that sits outside the liability shield, so the guarantor remains personally on the hook for that specific debt regardless of entity type.</p>
+<p><strong>Is an S-corporation a different entity from a corporation?</strong> No — "S-corp" is a U.S. federal tax election available to an eligible corporation (or LLC electing corporate tax treatment), not a separate legal entity type; it changes how profits are taxed, not the underlying liability structure.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Internal Revenue Service, LLC and S-corporation tax election guidance</li>
+<li>UK Companies House, private limited company guidance</li>
+<li>Germany, GmbH-Gesetz (Limited Liability Companies Act)</li>
+<li>India, Limited Liability Partnership Act 2008 and Companies Act 2013</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Start from your goals: do you want maximum tax flexibility and light admin, or are you building toward outside investment and scale? Map those goals to the entities actually available where you will operate, and confirm the tax treatment with a local accountant before filing. A short consultation with a lawyer or tax adviser at the outset is far cheaper than restructuring during a funding round.</p>
 
@@ -124,6 +140,22 @@ export const businessCorporateExtraArticles: LawArticle[] = [
 <li>Omitting standard exceptions, making the agreement look unreasonable.</li>
 <li>Setting no time limit, or one so long it becomes unenforceable.</li>
 <li>Trying to use an NDA to hide illegal conduct, which is void in many jurisdictions.</li>
+</ul>
+
+<h2>Remedies When an NDA Is Breached</h2>
+<p>When confidential information leaks, damages alone are often inadequate — by the time a court awards compensation, a competitor may already have used the secret to launch a rival product. For that reason, NDAs typically state that the disclosing party may seek injunctive relief (a court order to stop further use or disclosure) in addition to monetary damages, and many include a acknowledgment that breach causes irreparable harm to support a fast injunction application. Some agreements also specify liquidated damages — a pre-agreed dollar figure — to avoid the difficulty of proving the actual financial loss caused by a leak, though courts in several jurisdictions will strike down a liquidated-damages clause that functions as a penalty rather than a genuine pre-estimate of loss.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Is a verbal NDA enforceable?</strong> In many jurisdictions a verbal confidentiality promise can be legally binding, but it is far harder to prove what was actually agreed — a signed written NDA remains the standard for anything commercially significant.</p>
+<p><strong>How is an NDA different from a non-compete clause?</strong> An NDA restricts the use and disclosure of specific information; a non-compete restricts where or for whom someone can work afterward. The two are often signed together but are separate promises, and non-competes face far stricter enforceability limits in most jurisdictions.</p>
+<p><strong>Can I be asked to sign an NDA before a job interview?</strong> Yes, particularly at companies discussing unreleased products — this is standard practice, provided the scope is limited to genuinely confidential material discussed in the interview rather than an attempt to restrict the candidate's future employment generally.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Defend Trade Secrets Act 2016</li>
+<li>UK Trade Secrets (Enforcement, etc.) Regulations 2018</li>
+<li>EU Trade Secrets Directive (2016/943)</li>
+<li>India, Indian Contract Act 1872, sections on restraint of trade</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

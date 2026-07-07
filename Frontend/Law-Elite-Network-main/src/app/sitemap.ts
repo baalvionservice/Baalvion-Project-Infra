@@ -113,25 +113,44 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Subcategory routes: emit `/law/{categorySlug}/{subSlug}` for every category+subcategory
   // pair that has at least one article. Derived from the bundled baseline (always present)
   // unioned with any taxonomy slugs the live API returns — deduped by the composite path.
-  const taxonomyPairs = new Map<string, string>(); // `${cat}/${sub}` -> route URL
-  const addPair = (catSlug?: string, subSlug?: string) => {
+  // lastModified tracks the most recently updated article in that pairing (bundled dates are
+  // human strings like "March 12, 2026", which Date.parse handles natively) rather than the
+  // request time, so the signal reflects real content freshness.
+  const taxonomyPairs = new Map<string, { url: string; lastModified: Date }>(); // `${cat}/${sub}` -> entry
+  const addPair = (catSlug?: string, subSlug?: string, updated?: string) => {
     if (!catSlug || !subSlug) return;
-    taxonomyPairs.set(`${catSlug}/${subSlug}`, `${BASE_URL}/law/${catSlug}/${subSlug}`);
+    const key = `${catSlug}/${subSlug}`;
+    const parsed = updated ? new Date(updated) : null;
+    const candidate = parsed && !Number.isNaN(parsed.getTime()) ? parsed : new Date(0);
+    const existing = taxonomyPairs.get(key);
+    if (!existing || candidate > existing.lastModified) {
+      taxonomyPairs.set(key, { url: `${BASE_URL}/law/${catSlug}/${subSlug}`, lastModified: candidate });
+    }
   };
-  getAllArticles().forEach((a) => addPair(a.category?.slug, a.subcategory?.slug));
-  articles.forEach((a) => addPair(a.category?.slug, a.subcategory?.slug));
+  getAllArticles().forEach((a) => addPair(a.category?.slug, a.subcategory?.slug, a.updatedAt));
+  articles.forEach((a) => addPair(a.category?.slug, a.subcategory?.slug, a.updated_at || a.updatedAt));
 
-  const subcategoryRoutes: MetadataRoute.Sitemap = Array.from(taxonomyPairs.values()).map((url) => ({
-    url,
-    lastModified: new Date(),
+  const subcategoryRoutes: MetadataRoute.Sitemap = Array.from(taxonomyPairs.values()).map((entry) => ({
+    url: entry.url,
+    lastModified: entry.lastModified.getTime() > 0 ? entry.lastModified : new Date(),
     changeFrequency: 'weekly',
     priority: 0.55,
   }));
 
   // Author profile pages — one per contributor for E-E-A-T discoverability.
+  // lastModified tracks the author's most recently updated bundled article (authors
+  // have no timestamp of their own) rather than the request time.
+  const latestByAuthor = new Map<string, Date>();
+  getAllArticles().forEach((a) => {
+    const parsed = new Date(a.updatedAt);
+    if (Number.isNaN(parsed.getTime())) return;
+    const existing = latestByAuthor.get(a.author);
+    if (!existing || parsed > existing) latestByAuthor.set(a.author, parsed);
+  });
+
   const authorRoutes: MetadataRoute.Sitemap = getAllAuthors().map((a) => ({
     url: `${BASE_URL}/author/${a.slug}`,
-    lastModified: new Date(),
+    lastModified: latestByAuthor.get(a.name) || new Date(),
     changeFrequency: 'monthly',
     priority: 0.45,
   }));

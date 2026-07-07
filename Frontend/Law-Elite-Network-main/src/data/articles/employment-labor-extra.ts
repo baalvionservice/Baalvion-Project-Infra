@@ -63,6 +63,23 @@ export const employmentLaborExtraArticles: LawArticle[] = [
 <li>For employees, signing without realising how the clause could limit future work.</li>
 </ul>
 
+<h2>The Recent Shift Away from Non-Competes</h2>
+<p>Regulatory attitudes toward non-competes have shifted markedly in recent years, generally trending toward restriction rather than expansion. Several U.S. states have banned or sharply limited non-competes for most workers, and federal regulators have periodically proposed broader bans, reflecting a growing view that these clauses suppress wages and mobility more than they protect genuine trade secrets. The practical effect is that employers increasingly rely on narrower, more defensible tools — confidentiality agreements, non-solicitation clauses, and garden-leave provisions (paid notice periods that keep a departing employee away from a competitor temporarily without an outright post-employment ban) — rather than broad non-competes that face a rising risk of being struck down or banned outright.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Is a non-compete enforceable if I was laid off, not fired for cause?</strong> In many jurisdictions this matters — some courts are less willing to enforce a non-compete against an employee terminated through no fault of their own, viewing it as unfair to both block someone from working and deny them the job that funded their livelihood.</p>
+<p><strong>Can my employer make me sign a non-compete after I've already started the job?</strong> They can ask, but in many jurisdictions a new restriction requires new consideration — some extra benefit beyond continued employment — or it may not be enforceable, particularly where the employee had no real choice but to sign.</p>
+<p><strong>Do non-competes apply to freelancers and contractors?</strong> They can, but enforcement is often even more limited than for employees, since contractors are by definition running independent businesses — a broad restriction on independent economic activity faces extra scrutiny.</p>
+<p><strong>Will a court rewrite an unreasonable non-compete instead of voiding it entirely?</strong> In some jurisdictions, yes — a practice sometimes called "blue-penciling" lets a court narrow an overbroad clause to a reasonable scope rather than striking it down completely, though other jurisdictions refuse to rewrite unreasonable clauses at all and simply void them outright, which is one more reason the applicable jurisdiction matters so much.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Federal Trade Commission, non-compete clause rulemaking materials</li>
+<li>UK Government consultation on non-compete clause reform</li>
+<li>India, Indian Contract Act 1872, Section 27 (restraint of trade)</li>
+<li>OECD, employment protection legislation database</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>If you are an employee asked to sign a non-compete, read it closely, note its duration, area, and the activities it restricts, and ask whether it is realistic given how you intend to earn a living. If you are an employer, tailor any restriction narrowly to a genuine interest, as a tight, defensible clause beats a broad one that collapses in court. Because enforceability swings so much by jurisdiction, have any significant non-compete reviewed by an employment lawyer where the work is based before signing or relying on it.</p>
 
@@ -124,6 +141,22 @@ export const employmentLaborExtraArticles: LawArticle[] = [
 <li>Treating long-term, full-time contractors exactly like staff while denying them employee rights.</li>
 <li>Overlooking intermediate categories such as the UK "worker" status.</li>
 <li>Ignoring that tax authorities and employment tribunals may reach different conclusions.</li>
+</ul>
+
+<h2>The Gig Economy and Platform Work</h2>
+<p>Ride-hailing, delivery, and freelance-marketplace platforms have pushed the employee/contractor question into the spotlight worldwide, because platform workers often sit uncomfortably between the two categories — they choose their own hours like a contractor, but are frequently subject to algorithmic direction, rating systems, and deactivation policies that resemble employer control. Several high-profile court rulings and new regulations across the US, UK, and EU have addressed this directly, in some cases classifying platform workers as employees or an intermediate "worker" category entitled to minimum wage and paid leave, while other rulings have upheld contractor status. The law in this specific area is still actively evolving, so platform-based classification questions deserve particularly current, jurisdiction-specific advice rather than general assumptions.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I be both an employee and a contractor for the same company?</strong> Generally no for the same role, but a person could be an employee in one capacity and a genuine independent contractor providing an unrelated service to the same company — the classification is assessed per relationship, not per person.</p>
+<p><strong>Who decides whether I've been misclassified — a court or a tax authority?</strong> Both can, independently, and using somewhat different tests — a tax authority's finding on withholding obligations does not automatically bind an employment tribunal's finding on statutory employment rights, which is part of why misclassification disputes can be procedurally complex.</p>
+<p><strong>If I'm reclassified as an employee, do I get back pay for past benefits?</strong> Often yes — successful misclassification claims frequently include retroactive claims for unpaid holiday, minimum wage shortfalls, or pension contributions covering the period the misclassification occurred, subject to any applicable limitation period.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Department of Labor, independent contractor classification under the Fair Labor Standards Act</li>
+<li>UK Supreme Court, <em>Uber BV v Aslam</em> (2021) on worker status</li>
+<li>EU Directive 2024/2831 on platform work</li>
+<li>India, Code on Social Security 2020, gig and platform worker provisions</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

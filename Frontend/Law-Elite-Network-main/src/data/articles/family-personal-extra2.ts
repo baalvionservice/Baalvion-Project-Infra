@@ -71,6 +71,22 @@ export const familyPersonalExtra2Articles: LawArticle[] = [
 <li>Relying on an informal arrangement that cannot be enforced if the other side stops paying.</li>
 </ul>
 
+<h2>Tax Treatment of Spousal Support</h2>
+<p>How alimony is taxed can materially change its real value, and the rules have shifted in recent years in several major jurisdictions. In the United States, for divorce agreements executed after 2018, alimony is no longer deductible by the payer nor taxable to the recipient at the federal level — a significant reversal from the prior decades-long rule, and agreements signed before that date may still follow the old treatment depending on transitional provisions. Other countries vary widely: some treat maintenance as taxable income to the recipient and deductible for the payer, while others do not tax it at all. Because this can shift the real cost or benefit of a proposed support figure substantially, it is worth confirming current tax treatment before finalizing an amount, rather than assuming the pre-tax number is what either side will actually experience.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Does alimony continue if the paying spouse retires?</strong> Retirement is generally treated as a substantial change in circumstances that can support a modification request, though courts examine whether the retirement is reasonable and in good faith (age-appropriate) rather than an attempt to avoid paying support.</p>
+<p><strong>Can alimony be awarded in a short marriage?</strong> It's less common but not impossible — length of marriage is one factor among several, and a short marriage with a significant income disparity or where one spouse gave up a career opportunity can still support an award, particularly rehabilitative support.</p>
+<p><strong>Is alimony different for same-sex marriages?</strong> No — where same-sex marriage is legally recognized, spousal support principles generally apply identically regardless of the spouses' genders.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Tax Cuts and Jobs Act of 2017, alimony tax treatment provisions</li>
+<li>UK Matrimonial Causes Act 1973, financial provision on divorce</li>
+<li>EU Council Regulation 4/2009 on maintenance obligations (Brussels regime)</li>
+<li>India, Hindu Adoptions and Maintenance Act 1956</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>If you expect spousal support to be an issue, gather a clear picture of both spouses' income, assets, and needs, since these drive the outcome. Learn how your jurisdiction approaches support — guidelines or discretion — and keep any agreement properly documented. Because awards turn heavily on local law and individual facts, advice from a family lawyer early on usually leads to fairer, more durable arrangements.</p>
 
@@ -129,6 +145,22 @@ export const familyPersonalExtra2Articles: LawArticle[] = [
 <li>Assuming a revocable trust protects assets from creditors or cuts taxes — it usually does not.</li>
 <li>Believing a trust replaces a will entirely, leaving gaps like guardianship of children.</li>
 <li>Using a generic template across borders where trust law differs or does not exist.</li>
+</ul>
+
+<h2>Who a Living Trust Actually Makes Sense For</h2>
+<p>Living trusts are frequently marketed as something everyone needs, but the cost-benefit calculation differs by situation. They tend to be most valuable for people who own real estate in more than one state or country (each additional property can mean an additional, separate probate process without a trust), those who place a high value on keeping their affairs private, families with a member who has special needs requiring carefully structured long-term distributions, and anyone who wants a clear, court-free mechanism for managing their affairs if they become incapacitated before death. Conversely, a person with a modest, single-property estate in a jurisdiction where probate is inexpensive and fast may find the upfront cost and ongoing funding discipline of a trust outweighs its benefit — a well-drafted will may be all that is needed.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Does a living trust protect my assets from a lawsuit while I'm alive?</strong> Generally no for a revocable trust — because you retain full control and can revoke it at any time, courts generally treat the assets as still yours for creditor and lawsuit purposes; asset protection typically requires an irrevocable structure, with its own significant trade-offs.</p>
+<p><strong>Do I still need a power of attorney if I have a living trust?</strong> Yes — a trust only covers assets actually placed into it, while a financial power of attorney and a healthcare directive cover decisions and assets the trust doesn't reach, so the documents are complementary, not substitutes for each other.</p>
+<p><strong>Can I be my own trustee?</strong> Yes, for a revocable living trust this is the norm — most people name themselves as the initial trustee and only involve a successor trustee once they die or become incapacitated.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Uniform Trust Code (model legislation adopted variably by states)</li>
+<li>UK Trustee Act 2000 and HMRC trust taxation guidance</li>
+<li>Hague Convention on the Law Applicable to Trusts and on their Recognition (1985)</li>
+<li>India, Indian Trusts Act 1882</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

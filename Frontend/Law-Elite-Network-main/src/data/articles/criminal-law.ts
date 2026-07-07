@@ -57,6 +57,23 @@ export const criminalLawArticles: LawArticle[] = [
 <h2>What Happens If Conditions Are Broken</h2>
 <p>Failing to appear or breaching a condition is treated seriously. The court may issue a warrant, revoke bail, forfeit any money or surety pledged, and order the person detained until trial. A breach can also count against future bail applications.</p>
 
+<h2>Applying for Bail and What to Expect at the Hearing</h2>
+<p>A bail hearing is typically brief but consequential — often the accused's first real chance to argue for release is measured in minutes, not hours. Prosecutors present the case against release (flight risk, danger to the public, strength of evidence), and the defence responds with proposed conditions, sureties, and community ties. Where bail is refused, most systems allow a further application if circumstances change — for example, a new address, a job offer, or an offer of a more substantial surety — rather than requiring the accused to wait indefinitely for trial. In many jurisdictions there is also a right to renew a bail application before a higher court if the first is refused, so an initial refusal is not always final.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can bail be granted for any offence?</strong> No — in most systems, the most serious offences (murder, certain violent or terrorism-related charges) carry a presumption against bail, or a much higher bar to clear, reflecting the greater flight risk and public-safety concern.</p>
+<p><strong>Do I get my bail money back if I'm found guilty?</strong> Generally yes — a cash bail deposit is a guarantee of appearance, not a fine, so it is usually returned once the case concludes, provided every condition was honored, regardless of the verdict.</p>
+<p><strong>Can bail conditions be changed after they're set?</strong> Yes — either side can apply to vary conditions if circumstances change, such as needing to travel for work or a change of address, though the court retains discretion to refuse a variation that increases risk.</p>
+<p><strong>Does having a lawyer at the bail hearing actually change the outcome?</strong> In practice, often yes — a lawyer familiar with local bail practice can propose concrete, credible conditions (a suitable surety, a verified address, a realistic curfew) that a self-represented defendant may not think to offer, and can respond immediately to the prosecutor's specific objections rather than leaving them unanswered.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Bail Reform Act of 1984 and subsequent state risk-assessment reforms</li>
+<li>UK Bail Act 1976</li>
+<li>India, Bharatiya Nagarik Suraksha Sanhita (bailable/non-bailable offence classification)</li>
+<li>Council of Europe, pre-trial detention guidance</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>If you or someone you know is facing a bail decision, find out who makes the decision locally, what conditions are realistic, and whether a surety is needed. Gather proof of address, employment, and community ties early, keep a clear record of every condition imposed, and never miss a court date — punctual compliance is the single most important factor in keeping bail and in any later application.</p>
 <p><em>This article is general legal information, not legal advice. Laws differ by country and change over time — consult a qualified lawyer licensed in your jurisdiction before acting.</em></p>`,
@@ -117,6 +134,25 @@ export const criminalLawArticles: LawArticle[] = [
 
 <h2>Consequences Beyond Prison</h2>
 <p>A conviction rarely ends with a custodial sentence alone. Courts and regulators may order repayment, confiscate assets traced to the offence, impose substantial fines, and bar individuals from acting as company directors or holding professional licences. Companies themselves can face prosecution, monitoring, and reputational damage that outlasts any fine.</p>
+
+<h2>The Role of Whistleblowers and Self-Reporting</h2>
+<p>Many major white-collar prosecutions begin not with a regulator's own investigation but with an insider coming forward — an employee, contractor, or competitor who reports suspected wrongdoing. Recognising this, most developed legal systems now offer whistleblower protections against retaliation and, in some regimes, a share of any financial penalty recovered. Companies that discover wrongdoing internally increasingly weigh voluntary self-disclosure to regulators, since many enforcement regimes offer reduced penalties, deferred prosecution agreements, or non-prosecution agreements to organisations that report promptly, cooperate fully, and remediate the underlying control failures — a materially different outcome than waiting to be caught.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Is a business mistake the same as white-collar crime?</strong> No — an honest error in judgment, even a costly one, is not a crime; prosecutors must show dishonesty or knowing deception, not merely that a decision turned out badly.</p>
+<p><strong>Can a company be prosecuted, not just the individuals involved?</strong> Yes — many jurisdictions now impose direct corporate criminal liability, including offences for failing to prevent bribery or fraud committed by employees, even where senior management didn't know.</p>
+<p><strong>How long can these investigations take?</strong> Often years — the document volume, the need for forensic tracing of funds across accounts and borders, and cross-agency cooperation on international cases mean white-collar investigations are typically far slower than street-crime prosecutions.</p>
+<p><strong>Are white-collar penalties usually less severe than for violent crime?</strong> Not necessarily — while there is no physical victim at the moment of the offense, sentencing in major fraud, bribery, and money-laundering cases increasingly reflects the scale of financial harm and the number of victims affected, and lengthy custodial sentences are common for large-scale schemes.</p>
+<p><strong>Can a company be held criminally liable for an employee's white-collar crime committed without management's knowledge?</strong> Increasingly, yes, in a growing number of jurisdictions — corporate criminal liability regimes and "failure to prevent" offenses now hold organizations accountable for not having adequate controls in place, shifting the burden toward proving a company had reasonable prevention procedures rather than requiring prosecutors to show senior management personally knew of the wrongdoing.</p>
+<p><strong>Is it a crime to simply suspect wrongdoing and not report it?</strong> Rules vary, but in several regulated industries (finance, accounting, legal services) professionals carry an affirmative statutory duty to report certain suspected offenses like money laundering, and failing to do so can itself carry criminal or professional consequences, separate from any liability for the underlying wrongdoing, and separate again from any civil claim a harmed party might bring.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Department of Justice, Foreign Corrupt Practices Act enforcement guidance</li>
+<li>UK Bribery Act 2010 and Serious Fraud Office guidance</li>
+<li>India, Prevention of Money Laundering Act 2002</li>
+<li>Financial Action Task Force (FATF), anti-money-laundering recommendations</li>
+</ul>
 
 <h2>Practical Next Steps</h2>
 <p>If you encounter suspected financial wrongdoing, preserve records, avoid altering or deleting anything, and seek advice before acting on incomplete information. Organisations should maintain clear anti-fraud controls, reporting channels, and audit practices, while individuals under scrutiny should obtain specialist legal advice early, because cooperation, disclosure, and timing can significantly affect the outcome.</p>
