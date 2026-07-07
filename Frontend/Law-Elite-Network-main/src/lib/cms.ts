@@ -29,14 +29,22 @@ const FETCH_TIMEOUT_MS = 4000;
 // is treated as "no ad client" so we never emit a broken AdSense tag.
 const ADSENSE_RE = /^ca-pub-\d{10,20}$/;
 
+// AdSense application in progress (Google Search Console verification) for this
+// property. Publisher IDs are not secrets — Google's own onboarding instructs
+// pasting this exact value directly into every page's HTML — so a code-level
+// default is safe. The CMS admin panel (Website → SEO → Monetization) or
+// NEXT_PUBLIC_ADSENSE_CLIENT still take priority and can replace it without a
+// redeploy once the site is managed there.
+const DEFAULT_ADSENSE_CLIENT = 'ca-pub-8968452296456450';
+
 /**
  * Per-site AdSense publisher ID, managed in the CMS admin panel
  * (Website → SEO → Monetization) and exposed on the public website-info endpoint
  * `GET {CMS_PUBLIC_URL}/{site}` as `config.ads.adsensePublisherId`.
  *
- * Falls back to NEXT_PUBLIC_ADSENSE_CLIENT when the CMS is unreachable or unset.
- * Returns null when no valid ID is available (callers then render no ad markup).
- * Cached for an hour rather than `no-store` so it doesn't force dynamic rendering.
+ * Falls back to NEXT_PUBLIC_ADSENSE_CLIENT, then DEFAULT_ADSENSE_CLIENT, when
+ * the CMS is unreachable or unset. Cached for an hour rather than `no-store` so
+ * it doesn't force dynamic rendering.
  */
 export async function cmsGetAdsenseClient(): Promise<string | null> {
   const envFallback = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
@@ -54,7 +62,8 @@ export async function cmsGetAdsenseClient(): Promise<string | null> {
   } finally {
     clearTimeout(timer);
   }
-  return envFallback && ADSENSE_RE.test(envFallback) ? envFallback : null;
+  if (envFallback && ADSENSE_RE.test(envFallback)) return envFallback;
+  return DEFAULT_ADSENSE_CLIENT;
 }
 
 interface Block { id: string; type: string; order: number; content: Record<string, any> }
