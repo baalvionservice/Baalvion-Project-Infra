@@ -51,6 +51,22 @@ export const propertyRealEstateArticles: LawArticle[] = [
 <h2>Budget for the True Cost</h2>
 <p>The purchase price is rarely the final figure. Buyers commonly face stamp duty or transfer tax, registration fees, legal charges, and sometimes capital-gains clearances from the seller's side. In the UK this includes Stamp Duty Land Tax; in India, stamp duty and registration charges that vary by state; across the EU, transfer taxes differing by member state. Factoring these in early prevents a nasty shortfall at completion.</p>
 
+<h2>Title Insurance and Survivorship Searches</h2>
+<p>In systems that rely on a chain of historical deeds rather than a conclusive government register — most notably the United States — title insurance is the standard protection against defects that even a careful search might miss, such as a forged deed somewhere in the chain, an undisclosed heir with a competing claim, or a clerical error in the public record. A lender's title policy protects the mortgage lender, while an owner's policy (usually optional but strongly advisable) protects the buyer's own equity. Even in registered-title systems, it is worth specifically searching for unregistered interests that can still bind a buyer in some jurisdictions — certain short leases, rights acquired by long use, or interests of a person in actual occupation of the property who was never asked to consent to the sale.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I back out after signing a purchase contract?</strong> It depends entirely on the contract's conditions and the jurisdiction's rules — many systems allow a cooling-off period or make the contract conditional on financing or survey results, but once those conditions are satisfied or waived, walking away can forfeit your deposit or expose you to a claim for damages.</p>
+<p><strong>Do I need a physical survey if there's already a government land registry entry?</strong> Yes, in most cases — a land registry entry confirms who legally owns the property and its registered boundaries, but it does not confirm physical condition, structural issues, or whether a boundary fence actually matches the registered line.</p>
+<p><strong>What is escrow and do I need it?</strong> Escrow is a neutral third party holding funds and documents until all conditions of the sale are met, reducing the risk that either side pays or hands over title before the other performs — it is standard practice in many jurisdictions and strongly advisable wherever it isn't mandatory.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>American Land Title Association, title insurance consumer guidance</li>
+<li>UK HM Land Registry, guidance on registered and unregistered land</li>
+<li>India, Registration Act 1908 and state stamp duty schedules</li>
+<li>RICS (Royal Institution of Chartered Surveyors), property survey standards</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Before committing, obtain the title documents and a current register extract, run encumbrance and planning searches, and have a qualified conveyancer or property lawyer review the contract. Insist on written answers to your questions, keep copies of every document, and do not release funds until your adviser confirms the title is clean and the transfer is properly registered. A few weeks of careful checking is cheap insurance against years of litigation.</p>
 
@@ -99,6 +115,22 @@ export const propertyRealEstateArticles: LawArticle[] = [
 
 <h2>Eviction Must Follow the Law</h2>
 <p>Even where a landlord has valid grounds, ending a tenancy is a legal process, not a private act. Typically the landlord must give written notice for the correct period and, if you do not leave, obtain a court or tribunal order before any removal by an authorised officer. So-called <strong>self-help evictions</strong> — changing locks, removing belongings, or intimidation — are prohibited in most systems. Tenants facing notice should seek advice quickly, as strict deadlines often apply to challenging it.</p>
+
+<h2>Fixed-Term vs Periodic Tenancies</h2>
+<p>The type of tenancy you hold significantly affects your rights when it comes to renewal, rent increases, and ending the arrangement. A fixed-term tenancy runs for a set period (commonly six or twelve months) and generally cannot be ended early by either side without cause or a break clause. Once the fixed term expires without a new agreement, many jurisdictions automatically convert it into a periodic (often month-to-month) tenancy, under which either side typically owes only a shorter statutory notice period to end things. Rent increases usually cannot happen mid-fixed-term unless the contract specifically allows it, but become easier for a landlord to propose once the tenancy is periodic — understanding which type currently applies to you is essential before assuming a right you don't actually have.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can my landlord raise the rent whenever they want?</strong> Generally no — most jurisdictions require advance written notice of a rent increase and, in rent-controlled areas, cap how much and how often it can rise; a mid-fixed-term increase without a contractual basis is usually not enforceable.</p>
+<p><strong>What can my landlord legally deduct from my deposit?</strong> Typically only unpaid rent and damage beyond normal wear and tear — a landlord generally cannot charge for routine cleaning, minor scuffs, or the natural aging of carpets and paint over the tenancy.</p>
+<p><strong>Can I be evicted for complaining about repairs?</strong> In most jurisdictions, no — many systems specifically prohibit "retaliatory eviction," where a landlord tries to remove a tenant shortly after a legitimate complaint or repair request, treating it as an unlawful motive even if a technical notice period was otherwise followed.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>UK Housing Act 1988 and Renters' Rights Act reforms</li>
+<li>U.S. Department of Housing and Urban Development, tenant rights resources by state</li>
+<li>India, Model Tenancy Act 2021</li>
+<li>EU Fundamental Rights Agency, housing rights comparative reports</li>
+</ul>
 
 <h2>Practical Next Steps</h2>
 <p>Read your agreement in full, keep a written record of every payment and request, and photograph the property at the start and end of the tenancy. Learn the basic landlord-tenant rules for your specific city or country, since they vary widely, and contact a local tenants' advice service or housing lawyer the moment a serious dispute or eviction notice arises. Acting early and in writing is your strongest protection.</p>
