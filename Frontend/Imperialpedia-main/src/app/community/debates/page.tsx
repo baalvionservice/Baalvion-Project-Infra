@@ -5,6 +5,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/community/debates',
   title: 'Market Debate Arena | Community Hub',
   description: 'Participate in structured financial debates. Explore Bullish vs Bearish cases, vote on strategic arguments, and earn reputation in the Imperialpedia arena.',
 });

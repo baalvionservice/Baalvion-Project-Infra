@@ -7,6 +7,7 @@ import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard"
 import HeadingSection from "@/components/layout/HeadingSection";
 
 export const metadata = buildMetadata({
+  canonical: '/reviews',
   title: "Financial Product Reviews and Comparisons",
   description:
     "Stay informed with the latest financial product reviews, service comparisons, and expert analysis. Our reviews section covers brokers, banks, credit cards, and financial services.",

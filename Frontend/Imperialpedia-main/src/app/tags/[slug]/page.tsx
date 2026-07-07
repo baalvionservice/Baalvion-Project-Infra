@@ -36,6 +36,7 @@ export async function generateMetadata({ params }: TagRouteProps): Promise<Metad
   return buildMetadata({
     title: `${tag.name} Intelligence`,
     description: tag.description || `Explore expert analysis and financial insights related to ${tag.name}.`,
+    canonical: `/tags/${slug}`,
   });
 }
 

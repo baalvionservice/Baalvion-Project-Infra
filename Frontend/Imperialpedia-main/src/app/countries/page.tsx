@@ -11,6 +11,7 @@ import { Metadata } from 'next';
 import { Globe } from 'lucide-react';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/countries',
   title: 'Sovereign Nodes Index | Countries',
   description: 'Traverse global economic profiles and geopolitical insights across our 200+ sovereign nodes.',
 });

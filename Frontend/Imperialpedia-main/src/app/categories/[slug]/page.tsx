@@ -44,6 +44,7 @@ export async function generateMetadata({
   return buildMetadata({
     title: `${category.name} Intelligence`,
     description: category.description,
+    canonical: `/categories/${slug}`,
   });
 }
 

@@ -6,6 +6,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/community/leaderboard',
   title: 'Community Leaderboard | Imperialpedia',
   description: 'Tracking the most impactful financial minds and contributors in the Imperialpedia Intelligence Network.',
 });

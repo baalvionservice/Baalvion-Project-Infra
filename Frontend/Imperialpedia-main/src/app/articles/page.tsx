@@ -12,6 +12,7 @@ import { Metadata } from 'next';
  * Dynamic metadata for the articles listing page.
  */
 export const metadata: Metadata = buildMetadata({
+  canonical: '/articles',
   title: 'Financial Intelligence Library',
   description: 'Explore our comprehensive collection of expert-led financial articles, market analyses, and economic insights.',
 });

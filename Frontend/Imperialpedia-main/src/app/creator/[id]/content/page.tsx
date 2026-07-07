@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: CreatorContentPageProps): Pro
   return buildMetadata({
     title: `${creator.displayName} Intelligence Archive`,
     description: `Browse all expert financial analysis and intelligence reports published by ${creator.displayName} on the Imperialpedia Index.`,
+    canonical: `/creator/${id}/content`,
   });
 }
 

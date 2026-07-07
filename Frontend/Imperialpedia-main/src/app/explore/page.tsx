@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/explore',
   title: "Explore Global Knowledge",
   description:
     "Navigate the Imperialpedia Index. Discover countries, companies, industries, and technologies across our 1M+ intelligence nodes.",

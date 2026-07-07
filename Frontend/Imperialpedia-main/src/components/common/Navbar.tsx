@@ -135,7 +135,11 @@ export const Navbar = () => {
   const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
   const pathname = usePathname();
   const { currentUser } = useAppStore();
-  const isAdmin = currentUser?.role === "admin";
+  const isHome = pathname === "/";
+  // Keep the homepage's header free of account chrome (admin link, sign-in) —
+  // AdSense/Google News review lands there first and account/login UI reads
+  // as a gated member area rather than open editorial content.
+  const isAdmin = !isHome && currentUser?.role === "admin";
 
   useEffect(() => {
     setIsMobileOpen(false);
@@ -213,12 +217,14 @@ export const Navbar = () => {
                 </Link>
               )}
 
-              <button
-                onClick={() => window.location.assign(sharedSignInUrl())}
-                className="hidden sm:inline-flex items-center h-9 px-3 text-sm font-semibold text-foreground hover:text-primary transition-colors"
-              >
-                Sign In
-              </button>
+              {!isHome && (
+                <button
+                  onClick={() => window.location.assign(sharedSignInUrl())}
+                  className="hidden sm:inline-flex items-center h-9 px-3 text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                >
+                  Sign In
+                </button>
+              )}
               <Link
                 href="/premium/subscribe"
                 className="inline-flex items-center h-9 px-4 rounded-sm bg-accent text-accent-foreground text-sm font-bold hover:brightness-95 transition-all"
@@ -332,12 +338,14 @@ export const Navbar = () => {
                 </div>
               ))}
               <div className="p-4 space-y-2">
-                <button
-                  onClick={() => window.location.assign(sharedSignInUrl())}
-                  className="block w-full text-center h-10 leading-10 rounded-sm border border-border font-semibold"
-                >
-                  Sign In
-                </button>
+                {!isHome && (
+                  <button
+                    onClick={() => window.location.assign(sharedSignInUrl())}
+                    className="block w-full text-center h-10 leading-10 rounded-sm border border-border font-semibold"
+                  >
+                    Sign In
+                  </button>
+                )}
                 <Link
                   href="/premium/subscribe"
                   className="block w-full text-center h-10 leading-10 rounded-sm bg-accent text-accent-foreground font-bold"

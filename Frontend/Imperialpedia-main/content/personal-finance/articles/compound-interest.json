@@ -1,0 +1,148 @@
+{
+  "topicNumber": 21,
+  "title": "Compound Interest Explained: How Your Money Grows Itself",
+  "slug": "compound-interest",
+  "seo": {
+    "seoTitle": "Compound Interest Explained: Formula, Examples & How to Use It",
+    "metaDescription": "Compound interest is the engine behind almost every wealth-building strategy. Learn the formula, see real dollar examples, and find out how to make it work for you instead of against you.",
+    "focusKeyword": "compound interest",
+    "secondaryKeywords": [
+      "compound interest formula",
+      "compound interest calculator",
+      "compound interest examples",
+      "simple interest vs compound interest",
+      "how does compound interest work",
+      "power of compounding",
+      "compounding frequency"
+    ],
+    "searchIntent": "Informational — users want to understand what compound interest is, how it's calculated, and how to use it to grow savings or avoid it working against them in debt",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Compound interest is interest earned on interest — and it's the single biggest reason early, consistent saving beats almost every other financial strategy. Here's the formula, real examples, and how to put it to work.",
+  "intro": "Albert Einstein is often (probably apocryphally) credited with calling **compound interest** the eighth wonder of the world. Whether or not he actually said it, the sentiment holds up: compounding is the closest thing personal finance has to magic, and it's available to literally anyone with a savings account or investment portfolio.\n\nThe idea is simple on the surface — you earn interest not just on the money you put in, but on the interest that money has already earned. But the effect of that simple mechanic, played out over years or decades, is anything but simple. Two people who save the exact same amount of money can end up with wildly different balances depending on nothing more than *when* they started.\n\nThis guide breaks down exactly how compound interest works, the formula behind it, what changes when it compounds daily versus annually, and — just as importantly — how the same mechanic works against you when you're carrying credit card debt instead of a savings balance.",
+  "tableOfContents": [
+    "What Compound Interest Actually Means",
+    "The Compound Interest Formula",
+    "Simple Interest vs Compound Interest",
+    "Why Compounding Frequency Matters",
+    "The Time Advantage: Why Starting Early Wins",
+    "Compound Interest Working Against You: Debt",
+    "How to Put Compound Interest to Work"
+  ],
+  "sections": [
+    {
+      "heading": "What Compound Interest Actually Means",
+      "paragraphs": [
+        "Compound interest is interest calculated on both the original amount you deposited (the principal) and all the interest that principal has already earned. Contrast that with simple interest, which is only ever calculated on the original principal, no matter how long the money sits.",
+        "Say you deposit $1,000 in an account paying 5% interest once a year. After year one, you have $1,050. With simple interest, year two would add another flat $50, landing you at $1,100. With compound interest, year two calculates 5% on the full $1,050 — not just the original $1,000 — so you earn $52.50, landing you at $1,102.50. The extra $2.50 seems trivial in year two. It stops being trivial by year twenty."
+      ]
+    },
+    {
+      "heading": "The Compound Interest Formula",
+      "paragraphs": [
+        "The standard compound interest formula is A = P(1 + r/n)^(nt), where A is the final amount, P is the principal, r is the annual interest rate (as a decimal), n is the number of times interest compounds per year, and t is the number of years.",
+        "Plug in $1,000 principal, a 5% rate, monthly compounding (n = 12), over 10 years: A = 1000 × (1 + 0.05/12)^(12×10) ≈ $1,647. Compare that to the same inputs with simple interest — 1000 + (1000 × 0.05 × 10) = $1,500. That $147 gap is the entire reason compounding gets so much attention."
+      ],
+      "callout": {
+        "title": "You don't need to do the math by hand",
+        "text": "Every major bank and brokerage offers a free compound interest calculator online. Use the formula to understand *why* the number is what it is — use the calculator to actually plan."
+      }
+    },
+    {
+      "heading": "Simple Interest vs Compound Interest",
+      "paragraphs": [
+        "Simple interest shows up in a handful of specific products — some auto loans and short-term personal loans use it — but almost everything else in consumer finance, from savings accounts to credit cards to most mortgages, uses some form of compounding.",
+        "The practical takeaway: when you're saving or investing, you want the highest compounding frequency you can get. When you're borrowing, you want the lowest — and ideally, you want to pay down principal fast enough that compounding barely has time to work against you."
+      ],
+      "table": {
+        "caption": "Simple vs Compound Interest on $5,000 at 6% Over 20 Years",
+        "headers": ["Interest Type", "Ending Balance", "Total Interest Earned"],
+        "rows": [
+          ["Simple interest", "$11,000", "$6,000"],
+          ["Compound annually", "$16,036", "$11,036"],
+          ["Compound monthly", "$16,610", "$11,610"]
+        ]
+      }
+    },
+    {
+      "heading": "Why Compounding Frequency Matters",
+      "paragraphs": [
+        "The 'n' in the formula — how often interest compounds — has a real, measurable effect. Daily compounding beats monthly, which beats quarterly, which beats annual, assuming the stated annual rate is identical. This is why the Annual Percentage Yield (APY) matters more than the plain interest rate when comparing savings accounts: APY already bakes in the compounding frequency, so it's the true apples-to-apples number.",
+        "The difference between compounding frequencies shrinks as the stated rate gets lower and grows as it gets higher, but it's rarely the deciding factor between two accounts. A meaningfully higher rate with less frequent compounding will almost always beat a lower rate compounded daily. Compare the APY, not the compounding schedule, when you're shopping for [a high-yield savings account](/articles/high-yield-savings-accounts)."
+      ]
+    },
+    {
+      "heading": "The Time Advantage: Why Starting Early Wins",
+      "paragraphs": [
+        "Time is the single most powerful variable in the compound interest formula, more powerful than the rate itself in most realistic scenarios. Consider two savers: one invests $200 a month starting at age 25 and stops entirely at 35 (10 years, $24,000 total contributed). The other waits until 35 and invests $200 a month all the way to 65 (30 years, $72,000 total contributed).",
+        "Assuming a 7% average annual return, the early saver — who contributed $48,000 less — ends up with roughly $350,000 at 65. The late starter, despite contributing three times as much money, ends up with around $245,000. The early saver wins by over $100,000, purely because their money had a decade of extra compounding time before the second saver even began."
+      ],
+      "quote": {
+        "text": "It's not about timing the market. It's about time in the market — and specifically, how many years your money has to compound before you need it.",
+        "cite": "General principle in personal finance education"
+      }
+    },
+    {
+      "heading": "Compound Interest Working Against You: Debt",
+      "paragraphs": [
+        "The exact same mechanic that builds wealth in a savings account destroys it in high-interest debt. Credit cards typically compound daily, and at a 20-25% APR, an unpaid balance grows fast — and grows on top of itself. A $5,000 balance at 22% APR, making only minimum payments, can take over a decade to pay off and cost more in interest than the original purchase amount.",
+        "This is precisely why [choosing the best credit card](/articles/choosing-the-best-credit-card) and paying the statement balance in full every month matters so much: you get the convenience and rewards without ever letting compounding work against you. If you're already carrying a balance, understanding [credit card fees and interest](/articles/credit-card-fees-and-interest) is the first step toward getting out."
+      ]
+    },
+    {
+      "heading": "How to Put Compound Interest to Work",
+      "paragraphs": [
+        "Three levers control how much compounding does for you: how much you contribute, how long you leave it invested, and what rate of return you earn. Of the three, time is the one most people underestimate and most regret not using sooner.",
+        "Practically, that means: open a [high-yield savings account](/articles/high-yield-savings-accounts) for your emergency fund and short-term cash so it's at least compounding at a competitive rate instead of sitting idle. Automate contributions to retirement and investment accounts so compounding starts the moment money hits your paycheck rather than whenever you get around to it manually. And if you're carrying revolving debt, treat killing it as effectively earning a guaranteed, tax-free return equal to the interest rate you're paying — which is usually the best 'investment' available to you."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Compound interest is interest earned on both your original principal and all previously accumulated interest — it grows on itself.",
+    "The formula is A = P(1 + r/n)^(nt); the more frequently interest compounds (n), the faster your balance grows at the same stated rate.",
+    "Time is the most powerful lever in the formula — starting a decade earlier can outperform contributing three times as much money later.",
+    "Use APY, not the stated interest rate, to compare savings products — APY already accounts for compounding frequency.",
+    "Compounding works against you in high-interest debt exactly as powerfully as it works for you in savings — pay down high-APR balances aggressively.",
+    "Automating contributions the moment income arrives lets compounding start immediately instead of whenever you remember to save manually."
+  ],
+  "faq": [
+    {
+      "question": "What is compound interest in simple terms?",
+      "answer": "It's interest calculated on your original deposit plus all the interest that deposit has already earned, so your balance grows faster over time than it would with simple interest, which only ever applies to the original amount."
+    },
+    {
+      "question": "What is the formula for compound interest?",
+      "answer": "A = P(1 + r/n)^(nt), where A is the ending balance, P is the principal, r is the annual interest rate as a decimal, n is how many times per year it compounds, and t is the number of years."
+    },
+    {
+      "question": "How often does interest typically compound?",
+      "answer": "It varies by product. Many savings accounts compound daily and credit the interest monthly; some CDs compound monthly or quarterly. Credit cards typically compound daily, which is part of why unpaid balances grow so quickly."
+    },
+    {
+      "question": "Is compound interest good or bad?",
+      "answer": "Neither — it's neutral. It's excellent when you're the one earning it, in a savings or investment account. It's damaging when you're the one paying it, on a credit card balance or high-interest loan."
+    },
+    {
+      "question": "How can I calculate compound interest without doing the math myself?",
+      "answer": "Use a free compound interest calculator from any major bank, brokerage, or the Consumer Financial Protection Bureau's website. Enter your principal, rate, compounding frequency, and time horizon to see the projected balance."
+    },
+    {
+      "question": "Does compound interest matter more than the interest rate itself?",
+      "answer": "Time in the market and consistent contributions generally matter more than small differences in rate or compounding frequency. A modestly lower rate with a decade of extra time will usually outperform a higher rate started later."
+    }
+  ],
+  "conclusion": "Compound interest rewards exactly one behavior: starting early and staying consistent. It doesn't require a high income, a complicated strategy, or perfect market timing — it requires time, and time is the one resource that only gets more expensive the longer you wait to use it.\n\nIf you're just getting the habit started, pair it with [a real monthly budget](/articles/how-to-create-a-monthly-budget) so there's always something to compound, and make sure your short-term cash is sitting in [a high-yield savings account](/articles/high-yield-savings-accounts) rather than earning close to nothing. If debt is compounding against you instead, that's the first fire to put out — every dollar of high-interest debt you clear is a guaranteed return no investment account can promise you.",
+  "internalLinks": [
+    { "anchor": "high-yield savings accounts", "slug": "high-yield-savings-accounts" },
+    { "anchor": "choosing the best credit card", "slug": "choosing-the-best-credit-card" },
+    { "anchor": "credit card fees and interest", "slug": "credit-card-fees-and-interest" },
+    { "anchor": "how to create a monthly budget", "slug": "how-to-create-a-monthly-budget" },
+    { "anchor": "how much money do you need to retire", "slug": "how-much-money-do-you-need-to-retire" },
+    { "anchor": "how to build wealth from scratch", "slug": "how-to-build-wealth-from-scratch" }
+  ],
+  "externalSources": [
+    { "name": "Consumer Financial Protection Bureau — Compound Interest", "url": "https://www.consumerfinance.gov/" },
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov Compound Interest Calculator", "url": "https://www.investor.gov/financial-tools-calculators/calculators/compound-interest-calculator" }
+  ],
+  "wordCountEstimate": 1550
+}

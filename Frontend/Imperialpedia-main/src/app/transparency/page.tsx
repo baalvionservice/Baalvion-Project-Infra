@@ -5,6 +5,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/transparency',
   title: 'Platform Transparency Hub | Governance & Trust',
   description: 'Explore the Imperialpedia transparency index. Audit platform moderation statistics, editorial activity, and community governance data in real-time.',
 });

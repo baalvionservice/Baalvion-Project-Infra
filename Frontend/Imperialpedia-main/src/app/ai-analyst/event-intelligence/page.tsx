@@ -5,6 +5,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/ai-analyst/event-intelligence',
   title: 'Event Intelligence Hub | Catalyst & Earnings Index',
   description: 'Monitor upcoming market catalysts and audit corporate earnings performance. Real-time EPS variance analysis and impact detection for 1M+ nodes.',
 });
