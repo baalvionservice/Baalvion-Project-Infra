@@ -1,0 +1,112 @@
+{
+  "topicNumber": 22,
+  "title": "How Crude Oil Prices Affect the Broader Economy",
+  "slug": "crude-oil-prices-and-the-economy",
+  "seo": {
+    "seoTitle": "How Oil Prices Affect Inflation, Growth, and Markets",
+    "metaDescription": "Oil price swings ripple through inflation, consumer spending, and entire industries. Here's exactly how crude oil prices connect to the broader economy.",
+    "focusKeyword": "crude oil prices and the economy",
+    "secondaryKeywords": [
+      "how oil prices affect inflation",
+      "oil price shock",
+      "OPEC and the economy",
+      "gas prices and consumer spending"
+    ],
+    "searchIntent": "Informational — users wanting to understand how changes in crude oil prices ripple through inflation, consumer spending, and the broader economy",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Oil touches nearly every part of the economy through transportation and manufacturing costs. Here's exactly how a price swing at the pump ripples outward.",
+  "intro": "Crude oil remains one of the most consequential commodities for the broader economy, since it's a direct input into transportation, manufacturing, and countless downstream products. A sustained spike or drop in oil prices doesn't just affect what you pay at the gas pump — it ripples through inflation data, consumer spending patterns, and entire industries.",
+  "tableOfContents": [
+    "Why Oil Prices Matter So Much",
+    "Oil Price Shocks and Inflation",
+    "The Effect on Consumer Spending",
+    "Winners and Losers by Industry",
+    "What Drives Oil Prices",
+    "How Economies Have Become Less Oil-Dependent Over Time"
+  ],
+  "sections": [
+    {
+      "heading": "Why Oil Prices Matter So Much",
+      "paragraphs": [
+        "Oil is embedded in the cost structure of transportation (fuel for shipping, trucking, and air travel), manufacturing (plastics and countless petrochemical inputs), and agriculture (fuel for equipment and fertilizer production). A sustained change in oil prices therefore touches a wide swath of the economy indirectly, well beyond the direct cost of gasoline itself."
+      ]
+    },
+    {
+      "heading": "Oil Price Shocks and Inflation",
+      "paragraphs": [
+        "A sharp, sustained rise in oil prices is a classic driver of [cost-push inflation](/articles/causes-of-inflation), since higher fuel and input costs get passed through into the prices of a wide range of goods and services, not just energy itself. Because energy prices are also volatile and heavily influenced by geopolitical events, they're specifically excluded from [core inflation measures](/articles/inflation-measurement) — though a prolonged oil shock can still meaningfully affect the headline inflation figure that households actually experience."
+      ]
+    },
+    {
+      "heading": "The Effect on Consumer Spending",
+      "paragraphs": [
+        "Higher gas prices act somewhat like an additional tax on households, leaving less disposable income for other spending — a dynamic that can weigh on consumer spending broadly, particularly for lower-income households who spend a larger share of their budget on transportation and energy costs relative to higher-income households."
+      ]
+    },
+    {
+      "heading": "Winners and Losers by Industry",
+      "paragraphs": [
+        "Rising oil prices generally benefit energy-producing companies and regions, while weighing on industries with high fuel exposure, like airlines, shipping, and trucking, whose operating costs rise directly. Falling oil prices flip the picture: energy producers face pressure while transportation-heavy industries and consumers benefit from lower costs."
+      ],
+      "table": {
+        "caption": "Who Benefits and Who's Hurt by Rising Oil Prices",
+        "headers": ["Rising Oil Prices Help", "Rising Oil Prices Hurt"],
+        "rows": [
+          ["Energy producers and exporting regions", "Airlines, shipping, and trucking companies"],
+          ["Alternative energy investment appeal", "Consumers, especially lower-income households"],
+          ["Oil-exporting national economies", "Manufacturing with heavy petrochemical inputs"]
+        ]
+      }
+    },
+    {
+      "heading": "What Drives Oil Prices",
+      "paragraphs": [
+        "Oil prices respond to global supply and demand, production decisions by OPEC and other major producers, geopolitical events affecting supply regions, currency fluctuations (since oil is typically priced in U.S. dollars globally), and shifting demand tied to the broader pace of global economic growth. This mix of factors is part of why oil prices can be genuinely difficult to forecast, even for specialists closely tracking the market."
+      ]
+    },
+    {
+      "heading": "How Economies Have Become Less Oil-Dependent Over Time",
+      "paragraphs": [
+        "Many developed economies have gradually reduced their oil intensity — the amount of oil consumed per unit of economic output — through efficiency improvements, a shift toward service-based industries, and growing adoption of alternative energy sources. This reduced dependency means oil price swings, while still significant, generally have a somewhat smaller relative impact on major developed economies today than they did during earlier oil shock episodes, though the effect remains meaningful, particularly for transportation-heavy sectors and lower-income households."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Oil is embedded in transportation, manufacturing, and agriculture costs, giving price swings a wide-reaching economic effect.",
+    "Sustained oil price spikes are a classic driver of cost-push inflation, even though energy is excluded from core inflation measures.",
+    "Higher gas prices act like an additional tax on households, disproportionately affecting lower-income consumers.",
+    "Rising oil prices benefit energy producers but hurt transportation-heavy industries like airlines and shipping.",
+    "Oil prices are driven by global supply and demand, OPEC decisions, geopolitical events, and currency fluctuations.",
+    "Developed economies have gradually reduced their oil intensity, somewhat softening (but not eliminating) the impact of price swings."
+  ],
+  "faq": [
+    {
+      "question": "How do oil prices affect inflation?",
+      "answer": "Rising oil prices raise transportation and manufacturing costs, which get passed through into a wide range of goods and services, contributing to cost-push inflation even though energy itself is excluded from core inflation measures."
+    },
+    {
+      "question": "Which industries are hurt most by rising oil prices?",
+      "answer": "Airlines, shipping, and trucking companies face directly higher operating costs, while consumers — especially lower-income households — see a larger share of their budget absorbed by transportation and energy costs."
+    },
+    {
+      "question": "What determines oil prices?",
+      "answer": "Global supply and demand, production decisions by OPEC and other major producers, geopolitical events, currency fluctuations, and the overall pace of global economic growth all factor into oil price movements."
+    },
+    {
+      "question": "Has the economy become less sensitive to oil prices over time?",
+      "answer": "Somewhat — many developed economies have reduced their oil intensity through efficiency gains and a shift toward services, though oil price swings still have a meaningful economic effect, particularly on transportation-heavy sectors."
+    }
+  ],
+  "conclusion": "Oil's outsized economic influence comes from its position as a foundational input across transportation, manufacturing, and agriculture — which is exactly why a single commodity's price swings show up in inflation reports, consumer spending data, and entire industries' earnings all at once. Even as economies have grown somewhat less oil-dependent over time, it remains one of the more consequential commodities to watch for anyone tracking the broader economic picture.",
+  "internalLinks": [
+    { "anchor": "causes of inflation", "slug": "causes-of-inflation" },
+    { "anchor": "inflation measurement", "slug": "inflation-measurement" },
+    { "anchor": "global economy", "slug": "global-economy" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Energy Information Administration", "url": "https://www.eia.gov/" },
+    { "name": "International Energy Agency", "url": "https://www.iea.org/" }
+  ],
+  "wordCountEstimate": 1350
+}

@@ -1,0 +1,106 @@
+{
+  "topicNumber": 8,
+  "title": "The Unemployment Rate: How It's Measured and What It Really Shows",
+  "slug": "unemployment-rate",
+  "seo": {
+    "seoTitle": "The Unemployment Rate Explained: How It's Calculated and Its Blind Spots",
+    "metaDescription": "The unemployment rate is more nuanced than 'percent of people without a job.' Here's exactly how it's measured, U-3 vs U-6, and what the headline number misses.",
+    "focusKeyword": "unemployment rate",
+    "secondaryKeywords": [
+      "how is unemployment rate calculated",
+      "U-3 vs U-6 unemployment",
+      "labor force participation rate",
+      "underemployment"
+    ],
+    "searchIntent": "Informational — users wanting to understand exactly how the unemployment rate is measured and its known limitations",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "The unemployment rate everyone quotes is only one of several official measures — and it excludes people you might expect it to include. Here's exactly how it's calculated.",
+  "intro": "The **unemployment rate** — the figure quoted in nearly every jobs report headline — measures the percentage of the labor force that is jobless and actively seeking work. That definition contains two important qualifiers that change the number significantly: 'labor force' and 'actively seeking,' both of which exclude groups of people many would intuitively expect to be counted.\n\nThis guide breaks down exactly how the headline rate is calculated, the broader measures that capture a fuller picture, and what the number does and doesn't tell you about labor market health.",
+  "tableOfContents": [
+    "How the Unemployment Rate Is Calculated",
+    "The Labor Force Participation Rate",
+    "U-3 vs U-6: The Broader Measures",
+    "Who Isn't Counted in the Headline Rate",
+    "What a Low Unemployment Rate Doesn't Guarantee"
+  ],
+  "sections": [
+    {
+      "heading": "How the Unemployment Rate Is Calculated",
+      "paragraphs": [
+        "The official rate, published monthly by the Bureau of Labor Statistics, divides the number of unemployed people by the total labor force (employed plus unemployed people actively looking for work), then multiplies by 100. Someone is only counted as unemployed if they don't currently have a job and have actively looked for work within the past four weeks."
+      ]
+    },
+    {
+      "heading": "The Labor Force Participation Rate",
+      "paragraphs": [
+        "The labor force participation rate measures the share of the working-age population that is either employed or actively looking for work — everyone else, including retirees, students, and people who've stopped looking for work entirely, falls outside the labor force and outside the unemployment rate calculation. A falling participation rate can flatter the headline unemployment number even when the underlying job market hasn't genuinely improved, since people leaving the labor force (rather than finding jobs) also lowers the reported rate."
+      ]
+    },
+    {
+      "heading": "U-3 vs U-6: The Broader Measures",
+      "paragraphs": [
+        "The commonly cited 'unemployment rate' is technically the U-3 measure. The Bureau of Labor Statistics also publishes U-6, a broader figure that includes discouraged workers (people who've stopped looking because they believe no jobs are available), other marginally attached workers, and people working part-time who would prefer full-time work (underemployment). U-6 is consistently higher than U-3 and offers a fuller picture of labor market slack."
+      ],
+      "table": {
+        "caption": "U-3 vs U-6 Unemployment",
+        "headers": ["Measure", "What It Includes"],
+        "rows": [
+          ["U-3 (headline rate)", "Unemployed, actively looking for work in the past 4 weeks"],
+          ["U-6 (broader measure)", "U-3 plus discouraged workers, marginally attached workers, and underemployed part-time workers"]
+        ]
+      }
+    },
+    {
+      "heading": "Who Isn't Counted in the Headline Rate",
+      "paragraphs": [
+        "People who want a job but haven't searched in the past four weeks, people who've given up looking entirely, and people working part-time involuntarily (but who technically have a job) are all excluded from the U-3 headline figure, even though many would intuitively describe some of these situations as a form of unemployment or underemployment. This is exactly why U-6 and the labor force participation rate are worth checking alongside the headline number, especially during periods when the two measures start to diverge meaningfully."
+      ],
+      "callout": {
+        "title": "Watch for divergence between U-3 and participation",
+        "text": "If the unemployment rate is falling at the same time the labor force participation rate is also falling, some of the improvement may reflect people leaving the labor force rather than finding jobs — worth checking both figures together."
+      }
+    },
+    {
+      "heading": "What a Low Unemployment Rate Doesn't Guarantee",
+      "paragraphs": [
+        "A low headline unemployment rate doesn't necessarily mean wages are rising, that available jobs match workers' skills and experience, or that people are working as many hours as they'd like. Wage growth data, job openings figures, and quits rates (how many people are voluntarily leaving jobs, often a sign of confidence in finding a better one) all add context the headline rate alone doesn't provide. See [what causes unemployment](/articles/causes-of-unemployment) for the different underlying types worth distinguishing, and [employment and economic growth](/articles/employment-and-economic-growth) for how the labor market connects to broader GDP trends."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "The headline unemployment rate (U-3) only counts people without a job who've actively searched within the past four weeks.",
+    "The labor force participation rate tracks a separate but related figure — the share of the working-age population employed or looking for work.",
+    "U-6 is a broader measure including discouraged workers, marginally attached workers, and involuntary part-time employment.",
+    "A falling headline rate combined with a falling participation rate can indicate people leaving the labor force rather than genuine improvement.",
+    "A low unemployment rate doesn't guarantee rising wages or that available jobs match workers' skills — check wage growth and job openings data too."
+  ],
+  "faq": [
+    {
+      "question": "What's the difference between U-3 and U-6 unemployment?",
+      "answer": "U-3 is the commonly cited headline rate, counting only people actively looking for work in the past four weeks. U-6 is broader, adding discouraged workers, marginally attached workers, and involuntary part-time employees."
+    },
+    {
+      "question": "Why doesn't the unemployment rate count everyone without a job?",
+      "answer": "It's designed to measure active labor supply — people who don't have a job but are actively seeking one. People who've stopped looking, retired, or are in school aren't counted since they're not currently part of the labor force by this definition."
+    },
+    {
+      "question": "How often is the unemployment rate released?",
+      "answer": "The U.S. Bureau of Labor Statistics releases the figure monthly, typically as part of the broader jobs report on the first Friday of the month."
+    },
+    {
+      "question": "Can the unemployment rate fall for the 'wrong' reason?",
+      "answer": "Yes — if it falls primarily because people are leaving the labor force (no longer counted as unemployed) rather than because more people are finding jobs, that's generally viewed as a less positive signal than a decline driven by hiring."
+    }
+  ],
+  "conclusion": "The unemployment rate is a genuinely useful headline figure, but like GDP, it's a simplified snapshot of something far more complex. Checking it alongside the labor force participation rate, U-6, and wage growth data gives a considerably fuller picture of labor market health than the single number alone — and helps explain why 'the unemployment rate is low' and 'the job market feels tough' can both be true at the same time.",
+  "internalLinks": [
+    { "anchor": "causes of unemployment", "slug": "causes-of-unemployment" },
+    { "anchor": "employment and economic growth", "slug": "employment-and-economic-growth" },
+    { "anchor": "complete guide to economic indicators", "slug": "complete-guide-to-economic-indicators" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Bureau of Labor Statistics — Employment Situation", "url": "https://www.bls.gov/news.release/empsit.toc.htm" }
+  ],
+  "wordCountEstimate": 1350
+}

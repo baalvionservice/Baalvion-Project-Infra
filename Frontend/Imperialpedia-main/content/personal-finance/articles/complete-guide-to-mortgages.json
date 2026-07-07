@@ -3,7 +3,7 @@
   "title": "The Complete Guide to Mortgages",
   "slug": "complete-guide-to-mortgages",
   "seo": {
-    "seoTitle": "Mortgages Explained: Types, Rates, Down Payments & the Full Process",
+    "seoTitle": "Mortgages Explained: Types, Rates & Down Payments",
     "metaDescription": "A complete guide to mortgages — how they work, the different loan types, what actually determines your rate, and what to expect from application to closing.",
     "focusKeyword": "mortgages",
     "secondaryKeywords": [
@@ -25,8 +25,10 @@
     "Conventional, FHA, VA, and USDA Loans",
     "Down Payments and Private Mortgage Insurance",
     "What Determines Your Mortgage Rate",
+    "15-Year vs 30-Year Terms",
     "The Mortgage Application Process",
-    "Costs Beyond the Monthly Payment"
+    "Costs Beyond the Monthly Payment",
+    "Homeowners Insurance and Escrow"
   ],
   "sections": [
     {
@@ -50,12 +52,32 @@
       ],
       "table": {
         "caption": "Common Mortgage Types at a Glance",
-        "headers": ["Loan Type", "Typical Minimum Down Payment", "Best For"],
+        "headers": [
+          "Loan Type",
+          "Typical Minimum Down Payment",
+          "Best For"
+        ],
         "rows": [
-          ["Conventional", "3-20%", "Buyers with strong credit and stable income"],
-          ["FHA", "3.5%", "First-time buyers or those with lower credit scores"],
-          ["VA", "0%", "Eligible veterans and active-duty service members"],
-          ["USDA", "0%", "Buyers in eligible rural/suburban areas"]
+          [
+            "Conventional",
+            "3-20%",
+            "Buyers with strong credit and stable income"
+          ],
+          [
+            "FHA",
+            "3.5%",
+            "First-time buyers or those with lower credit scores"
+          ],
+          [
+            "VA",
+            "0%",
+            "Eligible veterans and active-duty service members"
+          ],
+          [
+            "USDA",
+            "0%",
+            "Buyers in eligible rural/suburban areas"
+          ]
         ]
       }
     },
@@ -67,21 +89,42 @@
       ]
     },
     {
+      "heading": "Shopping Multiple Lenders",
+      "paragraphs": [
+        "Rate and fee offers can vary meaningfully between lenders for the exact same borrower and property, which is why comparing at least a handful of lenders — banks, credit unions, and online lenders — before committing is worth the modest time investment. Getting rate quotes from several lenders within a short window (commonly 14 to 45 days depending on the credit scoring model used) is generally treated as a single inquiry for credit scoring purposes, removing the concern that shopping around will meaningfully hurt your score."
+      ]
+    },
+    {
       "heading": "What Determines Your Mortgage Rate",
       "paragraphs": [
         "Your credit score, down payment size, loan type, loan term, and debt-to-income ratio all factor into your individual rate, layered on top of broader market conditions that move rates up or down for everyone. See [mortgage interest rates](/articles/mortgage-interest-rates) for a full breakdown of how these factors interact and how much difference a stronger credit profile can make."
       ]
     },
     {
+      "heading": "15-Year vs 30-Year Terms",
+      "paragraphs": [
+        "A 30-year term is the most common choice, spreading payments out for lower monthly costs and greater flexibility, at the expense of paying considerably more total interest over the life of the loan. A 15-year term carries a meaningfully higher monthly payment but a lower interest rate in most cases and a dramatically shorter path to being mortgage-free, with total interest paid often less than half of what the same loan amount would cost on a 30-year term.",
+        "The right choice depends on cash flow flexibility and other financial priorities — a 30-year term with the option to make extra principal payments when convenient offers similar payoff flexibility to a 15-year term without the mandatory higher payment, which is why some buyers deliberately choose the 30-year term for its lower required payment while voluntarily paying it down faster."
+      ]
+    },
+    {
       "heading": "The Mortgage Application Process",
       "paragraphs": [
-        "Getting pre-approved before house hunting establishes your realistic budget and signals to sellers you're a serious buyer. Once you're under contract, the lender orders an appraisal to confirm the home's value, verifies your income and assets, and underwrites the full application before issuing final approval. The process from application to closing typically takes several weeks, and providing complete documentation promptly is the single biggest factor in keeping it on schedule."
+        "Getting pre-approved before house hunting establishes your realistic budget and signals to sellers you're a serious buyer. Once you're under contract, the lender orders an appraisal to confirm the home's value, verifies your income and assets, and underwrites the full application before issuing final approval. The process from application to closing typically takes several weeks, and providing complete documentation promptly is the single biggest factor in keeping it on schedule. See [the mortgage approval process](/articles/mortgage-approval-process) for a detailed, step-by-step walkthrough of pre-approval, underwriting, and the most common reasons applications get denied."
       ]
     },
     {
       "heading": "Costs Beyond the Monthly Payment",
       "paragraphs": [
         "Closing costs — lender fees, title insurance, appraisal and inspection fees, prepaid taxes and insurance — typically run a meaningful percentage of the loan amount and are due at closing, separate from the down payment. Budget for these explicitly rather than assuming the down payment is the only cash needed at the closing table, and confirm well ahead of time exactly which costs your specific lender and locality require."
+      ]
+    },
+    {
+      "heading": "Homeowners Insurance and Escrow",
+      "paragraphs": [
+        "Lenders require homeowners insurance for the life of the loan, since the home is their collateral, and the annual premium is typically collected monthly through the same escrow account that handles property taxes rather than paid separately as a lump sum. Escrow accounts are recalculated periodically (commonly once a year) as property tax assessments and insurance premiums change, which is why a mortgage payment that started at a fixed amount can still shift over time even on a fixed-rate loan — the principal-and-interest portion stays constant, but the escrow portion adjusts to actual tax and insurance costs.",
+        "Some borrowers with a large enough down payment can opt out of an escrow account and pay taxes and insurance directly, though many lenders require escrow below a certain equity threshold, and even where it's optional, escrow removes the responsibility of budgeting for large lump-sum tax and insurance bills yourself.",
+        "Lenders are generally required to provide an annual escrow analysis statement detailing exactly how the account was funded and spent over the prior year, along with the reasoning behind any change to your required monthly payment going forward — worth reviewing each year to confirm the projected tax and insurance figures look reasonable rather than assuming the adjustment is automatically correct."
       ]
     }
   ],
@@ -113,19 +156,48 @@
     {
       "question": "How long does it take to close on a mortgage?",
       "answer": "Typically several weeks from a signed purchase agreement to closing, assuming documentation is provided promptly and the appraisal and underwriting process proceed without delays."
+    },
+    {
+      "question": "Is a 15-year or 30-year mortgage better?",
+      "answer": "A 15-year term saves considerably on total interest and builds equity faster but requires a higher monthly payment. A 30-year term offers more flexibility with a lower required payment, and borrowers can still pay it down faster voluntarily."
+    },
+    {
+      "question": "Why did my mortgage payment change even though I have a fixed rate?",
+      "answer": "The principal-and-interest portion stays fixed, but if your payment includes an escrow account for taxes and insurance, that portion is recalculated periodically as tax assessments and insurance premiums change, which can shift your total payment."
     }
   ],
   "conclusion": "A mortgage is a decades-long financial commitment, which makes the upfront decisions — loan type, rate structure, down payment size — worth taking seriously rather than defaulting to whatever a lender first proposes. Understanding how amortization, PMI, and rate factors actually work puts you in a position to compare offers meaningfully instead of just comparing a single advertised rate.\n\nOnce you understand the mechanics here, [mortgage interest rates](/articles/mortgage-interest-rates) and [refinancing a mortgage](/articles/refinancing-a-mortgage) go into more depth on getting the best rate now and revisiting that decision later if market conditions shift in your favor.",
   "internalLinks": [
-    { "anchor": "mortgage interest rates", "slug": "mortgage-interest-rates" },
-    { "anchor": "refinancing a mortgage", "slug": "refinancing-a-mortgage" },
-    { "anchor": "how much money do you need to retire", "slug": "how-much-money-do-you-need-to-retire" },
-    { "anchor": "compound interest", "slug": "compound-interest" }
+    {
+      "anchor": "mortgage interest rates",
+      "slug": "mortgage-interest-rates"
+    },
+    {
+      "anchor": "refinancing a mortgage",
+      "slug": "refinancing-a-mortgage"
+    },
+    {
+      "anchor": "how much money do you need to retire",
+      "slug": "how-much-money-do-you-need-to-retire"
+    },
+    {
+      "anchor": "compound interest",
+      "slug": "compound-interest"
+    }
   ],
   "externalSources": [
-    { "name": "Consumer Financial Protection Bureau — Mortgages", "url": "https://www.consumerfinance.gov/owning-a-home/" },
-    { "name": "U.S. Department of Housing and Urban Development — FHA Loans", "url": "https://www.hud.gov/buying" },
-    { "name": "U.S. Department of Veterans Affairs — VA Home Loans", "url": "https://www.va.gov/housing-assistance/home-loans/" }
+    {
+      "name": "Consumer Financial Protection Bureau — Mortgages",
+      "url": "https://www.consumerfinance.gov/owning-a-home/"
+    },
+    {
+      "name": "U.S. Department of Housing and Urban Development — FHA Loans",
+      "url": "https://www.hud.gov/buying"
+    },
+    {
+      "name": "U.S. Department of Veterans Affairs — VA Home Loans",
+      "url": "https://www.va.gov/housing-assistance/home-loans/"
+    }
   ],
   "wordCountEstimate": 1650
 }
