@@ -32,3 +32,9 @@ regexTarget = "match"
 regexes = [
   '''RS256-signed''',
 ]
+
+[[allowlists]]
+description = "help-baalvion API docs — placeholder curl examples (YOUR_API_KEY / env vars, no real credential)"
+paths = [
+  '''Frontend/help-baalvion/src/app/\(docs\)/api/.*\.tsx''',
+]
