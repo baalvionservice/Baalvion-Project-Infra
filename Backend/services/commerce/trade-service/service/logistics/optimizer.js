@@ -123,6 +123,7 @@ function optimize(input = {}, opts = {}) {
         cheapest: ranked.cheapest,
         fastest: ranked.fastest,
         balanced: ranked.balanced,
+        green: ranked.green,
         recommended: ranked.recommended,
         errors: [],
         warnings,

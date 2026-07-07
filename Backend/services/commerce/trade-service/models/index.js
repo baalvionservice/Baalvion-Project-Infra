@@ -274,6 +274,59 @@ db.ShipmentCharge = require('./tradeops/shipment_charge')(sequelize, Sequelize.D
 db.Incident       = require('./tradeops/incident')(sequelize, Sequelize.DataTypes);
 db.ShipmentReturn = require('./tradeops/return')(sequelize, Sequelize.DataTypes);
 
+// ── Freight Management, Phase 1 (Phase 3, Prompt 2) — schema `tradeops` ───────
+// CarrierDirectory/CarrierService/CarrierRegion/CarrierPerformance are GLOBAL
+// reference data (no tenant_id → skipped by the tenant hooks below, like HsCode) —
+// the dynamic carrier registry every tenant reads, replacing the hardcoded
+// CARRIER_PROFILES object in service/freight/schema.js. Registered as
+// `CarrierDirectory` (not `Carrier`) to avoid colliding with the legacy
+// db.Carrier (schema `trade`, string PK, read-only shim kept live).
+// FreightRateRule/FreightRate/FreightQuote/FreightQuoteItem/FreightComparison all
+// carry tenant_id → auto-scoped by the tenant hooks below (NOT in TENANT_EXCLUDED);
+// a tenant's negotiated rates and quote requests are private.
+db.CarrierDirectory  = require('./tradeops/carrier')(sequelize, Sequelize.DataTypes);
+db.CarrierService    = require('./tradeops/carrier_service')(sequelize, Sequelize.DataTypes);
+db.CarrierRegion     = require('./tradeops/carrier_region')(sequelize, Sequelize.DataTypes);
+db.CarrierPerformance = require('./tradeops/carrier_performance')(sequelize, Sequelize.DataTypes);
+db.FreightRateRule    = require('./tradeops/freight_rate_rule')(sequelize, Sequelize.DataTypes);
+db.FreightRate        = require('./tradeops/freight_rate')(sequelize, Sequelize.DataTypes);
+db.FreightQuoteRequest = require('./tradeops/freight_quote')(sequelize, Sequelize.DataTypes);
+db.FreightQuoteItem   = require('./tradeops/freight_quote_item')(sequelize, Sequelize.DataTypes);
+db.FreightComparison  = require('./tradeops/freight_comparison')(sequelize, Sequelize.DataTypes);
+
+// ── Warehouse Management System, Phase A (Phase 3, Prompt 3) — schema
+// `tradeops`. Location hierarchy (WarehouseZone/WarehouseBin, the latter
+// self-referencing via parent_bin_id), receiving (GoodsReceiptNote/
+// GoodsReceiptLine) and the rule-based putaway engine's persisted output
+// (PutawayTask). All five carry tenant_id -> auto-scoped by the tenant hooks
+// below (NOT in TENANT_EXCLUDED).
+db.WarehouseZone      = require('./tradeops/warehouse_zone')(sequelize, Sequelize.DataTypes);
+db.WarehouseBin       = require('./tradeops/warehouse_bin')(sequelize, Sequelize.DataTypes);
+db.GoodsReceiptNote   = require('./tradeops/goods_receipt_note')(sequelize, Sequelize.DataTypes);
+db.GoodsReceiptLine   = require('./tradeops/goods_receipt_line')(sequelize, Sequelize.DataTypes);
+db.PutawayTask        = require('./tradeops/putaway_task')(sequelize, Sequelize.DataTypes);
+
+// ── Shipment Tracking & Global Visibility Platform (Phase 3, Prompt 6) —
+// schema `tradeops`. Geofence/GeofenceEvent add zone entry/exit/dwell
+// detection on top of the existing TrackingEvent stream. ShipmentCheckpoint
+// adds dwell/delay-aware physical stops. ShipmentAlert/ShipmentNotification
+// are the alert ledger + per-channel delivery fan-out. IotDevice/IotSensorLog
+// add sensor telemetry. ProofOfDelivery captures delivery evidence.
+// EtaPrediction/DelayEvent are the live in-transit ETA + delay-cause history.
+// ShipmentRoute is the planned/actual multi-leg journey. All carry tenant_id
+// -> auto-scoped by the tenant hooks below (NOT in TENANT_EXCLUDED).
+db.Geofence             = require('./tradeops/geofence')(sequelize, Sequelize.DataTypes);
+db.GeofenceEvent        = require('./tradeops/geofence_event')(sequelize, Sequelize.DataTypes);
+db.ShipmentCheckpoint   = require('./tradeops/shipment_checkpoint')(sequelize, Sequelize.DataTypes);
+db.ShipmentAlert        = require('./tradeops/shipment_alert')(sequelize, Sequelize.DataTypes);
+db.ShipmentNotification = require('./tradeops/shipment_notification')(sequelize, Sequelize.DataTypes);
+db.IotDevice            = require('./tradeops/iot_device')(sequelize, Sequelize.DataTypes);
+db.IotSensorLog         = require('./tradeops/iot_sensor_log')(sequelize, Sequelize.DataTypes);
+db.ProofOfDelivery      = require('./tradeops/proof_of_delivery')(sequelize, Sequelize.DataTypes);
+db.EtaPrediction        = require('./tradeops/eta_prediction')(sequelize, Sequelize.DataTypes);
+db.DelayEvent           = require('./tradeops/delay_event')(sequelize, Sequelize.DataTypes);
+db.ShipmentRoute        = require('./tradeops/shipment_route')(sequelize, Sequelize.DataTypes);
+
 Object.values(db).forEach(model => {
     if (model && model.associate) model.associate(db);
 });
@@ -308,6 +361,12 @@ const TENANT_EXCLUDED = new Set([
     // LogisticsRolePermission: global role->permission catalog reference data,
     // no tenant_id — like HsCode.
     'LogisticsRolePermission',
+    // Freight Management (Phase 3, Prompt 2): CarrierDirectory/CarrierService/
+    // CarrierRegion/CarrierPerformance are shared reference data (no tenant_id) —
+    // like Carrier/HsCode. FreightRateRule/FreightRate/FreightQuoteRequest/
+    // FreightQuoteItem/FreightComparison DO carry tenant_id and are intentionally
+    // NOT excluded (a tenant's negotiated rates and quotes are private).
+    'CarrierDirectory', 'CarrierService', 'CarrierRegion', 'CarrierPerformance',
 ]);
 
 const tenantAttr = (model) => {

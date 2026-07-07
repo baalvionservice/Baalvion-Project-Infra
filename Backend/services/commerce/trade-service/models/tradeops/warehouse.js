@@ -47,6 +47,11 @@ module.exports = (sequelize, DataTypes) => {
     Warehouse.associate = (db) => {
         Warehouse.belongsTo(db.LogisticsAddress, { as: 'address', foreignKey: 'address_id' });
         Warehouse.hasMany(db.InventoryMovement, { as: 'movements', foreignKey: 'warehouse_id' });
+        // WMS Phase A: location hierarchy + receiving.
+        Warehouse.hasMany(db.WarehouseZone, { as: 'zones', foreignKey: 'warehouse_id' });
+        Warehouse.hasMany(db.WarehouseBin, { as: 'bins', foreignKey: 'warehouse_id' });
+        Warehouse.hasMany(db.GoodsReceiptNote, { as: 'goodsReceiptNotes', foreignKey: 'warehouse_id' });
+        Warehouse.hasMany(db.PutawayTask, { as: 'putawayTasks', foreignKey: 'warehouse_id' });
     };
 
     return Warehouse;

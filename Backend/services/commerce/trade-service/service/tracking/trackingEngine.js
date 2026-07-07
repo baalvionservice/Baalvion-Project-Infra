@@ -75,6 +75,13 @@ async function recordTrackingEvent(payload = {}) {
         tenantId: row.tenant_id,
     });
 
+    // Shipment Tracking & Global Visibility Platform: best-effort geofence
+    // evaluation off every GPS ping. Never blocks/fails the tracking write.
+    try {
+        const { evaluateGeofences } = require('../tracking-platform/geofenceEngine');
+        await evaluateGeofences(row);
+    } catch { /* non-fatal */ }
+
     return row;
 }
 

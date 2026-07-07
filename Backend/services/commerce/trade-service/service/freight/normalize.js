@@ -21,11 +21,16 @@ const { MODE, VALID_MODES, num } = require('./schema');
 const ISO2 = /^[A-Za-z]{2}$/;
 
 // Dimensional divisors (cm³ per kg) by mode — the industry-standard volumetric factors.
+// RAIL mirrors ROAD's container-based billing; MULTIMODAL uses the same approximation
+// since its actual divisor depends on which legs it composes (Phase 2 concern once
+// multi-leg multimodal quoting is wired to the route optimizer).
 const DIM_DIVISOR = Object.freeze({
     [MODE.EXPRESS]: 5000,
     [MODE.AIR]: 6000,
     [MODE.ROAD]: 3000,
     [MODE.OCEAN]: 1000, // 1 CBM ≈ 1000 kg revenue-ton equivalence
+    [MODE.RAIL]: 3000,
+    [MODE.MULTIMODAL]: 3000,
 });
 
 /** Normalize a country to ISO-3166 alpha-2 upper-case (null when unusable). */

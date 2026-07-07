@@ -23,6 +23,7 @@ function callerTenantId(req) {
 function toApi(r) {
     return {
         id: r.id, warehouseId: r.warehouse_id, packageId: r.package_id, shipmentId: r.shipment_id,
+        fromBinId: r.from_bin_id, toBinId: r.to_bin_id,
         movementType: r.movement_type, quantity: Number(r.quantity), unit: r.unit,
         referenceType: r.reference_type, referenceId: r.reference_id,
         occurredAt: r.occurred_at, notes: r.notes, metadata: r.metadata, createdAt: r.created_at,
@@ -37,6 +38,8 @@ const list = async (req, res, next) => {
         if (req.query.packageId) where.package_id = req.query.packageId;
         if (req.query.shipmentId) where.shipment_id = req.query.shipmentId;
         if (req.query.movementType) where.movement_type = req.query.movementType;
+        if (req.query.fromBinId) where.from_bin_id = req.query.fromBinId;
+        if (req.query.toBinId) where.to_bin_id = req.query.toBinId;
         if (!isAdmin(req)) {
             const tenantId = callerTenantId(req);
             if (tenantId) where.tenant_id = tenantId;
@@ -78,6 +81,8 @@ const create = async (req, res, next) => {
             warehouse_id: warehouseId,
             package_id: b.packageId ?? b.package_id,
             shipment_id: b.shipmentId ?? b.shipment_id,
+            from_bin_id: b.fromBinId ?? b.from_bin_id,
+            to_bin_id: b.toBinId ?? b.to_bin_id,
             movement_type: movementType,
             quantity,
             unit: b.unit || 'unit',
