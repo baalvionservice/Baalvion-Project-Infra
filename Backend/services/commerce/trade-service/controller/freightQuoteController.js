@@ -147,10 +147,17 @@ const create = async (req, res, next) => {
         const body = parsed.data;
         const tenantId = callerTenantId(req);
 
+        // service/freight/normalize.js's normalizePiece() reads snake_case piece
+        // fields (weight_kg/length_cm/...) — the API validator accepts camelCase,
+        // so bridge each piece explicitly rather than passing it through as-is.
+        const snakeCasePieces = (body.pieces || []).map((p) => ({
+            quantity: p.quantity, weight_kg: p.weightKg, length_cm: p.lengthCm, width_cm: p.widthCm, height_cm: p.heightCm,
+        }));
+
         const request = Object.assign(norm.normalizeShipmentRequest({
             mode: body.transportMode, incoterm: body.incoterm, currency: body.currency,
             declared_value: body.declaredValue, origin: body.origin, destination: body.destination,
-            pieces: body.pieces, total_weight_kg: body.totalWeightKg, ready_date: body.expectedPickup,
+            pieces: snakeCasePieces, total_weight_kg: body.totalWeightKg, ready_date: body.expectedPickup,
         }), { insurance_requested: body.insuranceRequested });
 
         const quoteRow = await db.FreightQuoteRequest.create({
