@@ -5,6 +5,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/community/reputation',
   title: 'Community Reputation Hub | Authority Matrix',
   description: 'Track your authority score, earn achievement badges, and discover top-ranking contributors in the Imperialpedia meritocracy.',
 });

@@ -1,0 +1,125 @@
+{
+  "topicNumber": 31,
+  "title": "What Causes Inflation? A Clear Breakdown",
+  "slug": "causes-of-inflation",
+  "seo": {
+    "seoTitle": "What Causes Inflation? Demand-Pull, Cost-Push & Monetary Explained",
+    "metaDescription": "Inflation isn't one thing with one cause. Here's a clear breakdown of demand-pull, cost-push, and monetary inflation, and what actually drives rising prices.",
+    "focusKeyword": "causes of inflation",
+    "secondaryKeywords": [
+      "what causes inflation",
+      "demand-pull inflation",
+      "cost-push inflation",
+      "money supply and inflation",
+      "supply chain inflation",
+      "inflation explained"
+    ],
+    "searchIntent": "Informational — users wanting to understand the underlying economic mechanisms that cause inflation",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Inflation gets blamed on a single culprit in every news cycle, but it's rarely just one thing. Here's a clear breakdown of the actual mechanisms — demand, cost, money supply, and expectations — that drive rising prices.",
+  "intro": "**Inflation** — the general rise in prices across an economy over time — is often discussed as if it has one single cause, usually whichever explanation fits the political narrative of the moment. In reality, economists generally point to a handful of distinct mechanisms that can each drive inflation on their own or compound with the others: too much demand chasing limited goods, rising costs of production, an expanding money supply, and self-reinforcing expectations.\n\nUnderstanding these mechanisms separately makes it much easier to interpret why prices are rising in any given period, and what — if anything — is actually being done about it.",
+  "tableOfContents": [
+    "Demand-Pull Inflation",
+    "Cost-Push Inflation",
+    "Monetary Inflation: The Role of Money Supply",
+    "Built-In Inflation and Expectations",
+    "Supply Chain Disruptions",
+    "How These Causes Interact in the Real World"
+  ],
+  "sections": [
+    {
+      "heading": "Demand-Pull Inflation",
+      "paragraphs": [
+        "Demand-pull inflation happens when demand for goods and services grows faster than the economy's ability to supply them, pulling prices up. This commonly occurs during periods of strong economic growth, low unemployment, and rising wages, when consumers and businesses have more money to spend relative to what's actually available to buy.",
+        "Government stimulus spending and low interest rates can also fuel demand-pull pressure by putting more money in consumers' hands or making borrowing cheaper, encouraging more spending and investment than the supply side can immediately absorb."
+      ]
+    },
+    {
+      "heading": "Cost-Push Inflation",
+      "paragraphs": [
+        "Cost-push inflation originates on the supply side: when the cost of producing goods rises — due to higher wages, more expensive raw materials, or increased energy costs — businesses pass those higher costs on to consumers through higher prices. A sharp rise in oil prices, for instance, ripples through transportation and manufacturing costs across nearly the entire economy.",
+        "Unlike demand-pull inflation, cost-push inflation can occur even during periods of weak economic growth, which is part of why it's historically been one of the more difficult inflation types for policymakers to address without also slowing growth further."
+      ],
+      "table": {
+        "caption": "Demand-Pull vs Cost-Push at a Glance",
+        "headers": ["Type", "Origin", "Typical Trigger"],
+        "rows": [
+          ["Demand-pull", "Consumer/business demand", "Strong growth, low unemployment, easy credit"],
+          ["Cost-push", "Production costs", "Rising wages, energy, or raw material costs"]
+        ]
+      }
+    },
+    {
+      "heading": "Monetary Inflation: The Role of Money Supply",
+      "paragraphs": [
+        "A widely cited economic principle holds that when the money supply grows meaningfully faster than the economy's actual output of goods and services, the result tends to be inflation — more money chasing the same or slower-growing quantity of goods pushes prices up over time.",
+        "Central banks, including the Federal Reserve in the U.S., influence the money supply and borrowing costs through tools like interest rate changes and asset purchases. When a central bank raises interest rates, it generally cools spending and borrowing, which works against inflationary pressure — one of the primary levers policymakers use to manage it."
+      ]
+    },
+    {
+      "heading": "Built-In Inflation and Expectations",
+      "paragraphs": [
+        "Once inflation has been running for a while, it can become partly self-reinforcing: workers negotiate higher wages to keep up with rising prices, and businesses raise prices further to cover those higher labor costs, in a cycle sometimes called a wage-price spiral. Expectations matter too — if businesses and consumers broadly expect prices to keep rising, that expectation alone can influence pricing and wage decisions, making inflation more persistent even after the original trigger fades."
+      ],
+      "callout": {
+        "title": "Why the Fed watches inflation expectations closely",
+        "text": "Central banks pay close attention to surveyed inflation expectations precisely because expectations can become a self-fulfilling driver of continued inflation, independent of the original cause."
+      }
+    },
+    {
+      "heading": "Supply Chain Disruptions",
+      "paragraphs": [
+        "A more recent and highly visible driver of inflation is supply chain disruption — when the physical flow of goods, components, or raw materials is interrupted by events like natural disasters, geopolitical conflict, or global health crises. Reduced supply against steady or growing demand pushes prices up, functioning similarly to cost-push inflation but originating from logistical bottlenecks rather than direct cost increases in production inputs."
+      ]
+    },
+    {
+      "heading": "How These Causes Interact in the Real World",
+      "paragraphs": [
+        "Real-world inflationary periods are rarely driven by just one of these mechanisms in isolation. A period of strong demand (demand-pull) combined with a supply chain disruption (cost-push) and loose monetary conditions (monetary) can compound into inflation meaningfully higher than any single factor would produce alone — which is exactly why diagnosing 'the' cause of any specific inflationary period tends to be more nuanced than headlines suggest.",
+        "Understanding which mechanisms are actively in play helps explain both why inflation happens and why it fades: demand-pull pressure eases as growth cools, cost-push pressure eases as input costs stabilize, and monetary-driven inflation typically responds, with a lag, to central bank tightening. Tracking how [inflation affects your own savings](/articles/how-inflation-affects-your-savings) is the practical, personal-finance side of the same story."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Demand-pull inflation occurs when demand grows faster than supply, often during strong economic growth and easy credit conditions.",
+    "Cost-push inflation originates from rising production costs — wages, raw materials, energy — that businesses pass on as higher prices.",
+    "Money supply growing faster than economic output is a classic monetary driver of inflation, one central banks actively manage.",
+    "Built-in inflation and expectations can make price increases self-reinforcing through wage-price spirals, independent of the original trigger.",
+    "Supply chain disruptions act similarly to cost-push inflation, driven by logistics rather than direct input cost increases.",
+    "Real inflationary periods usually combine several of these mechanisms at once, which is why single-cause explanations rarely tell the full story."
+  ],
+  "faq": [
+    {
+      "question": "What is the main cause of inflation?",
+      "answer": "There isn't a single main cause — inflation typically results from some combination of demand-pull pressure, cost-push pressure, money supply growth, and self-reinforcing expectations, with the dominant factor varying by period."
+    },
+    {
+      "question": "What is demand-pull inflation?",
+      "answer": "Inflation caused when demand for goods and services grows faster than the economy can supply them, pulling prices upward — often seen during strong economic growth and low unemployment."
+    },
+    {
+      "question": "What is cost-push inflation?",
+      "answer": "Inflation caused by rising production costs — wages, raw materials, energy — that businesses pass on to consumers as higher prices, which can occur even during slower economic growth."
+    },
+    {
+      "question": "Does printing money cause inflation?",
+      "answer": "When the money supply grows meaningfully faster than the economy's actual output of goods and services, it tends to contribute to inflation, since more money is chasing a similar quantity of goods."
+    },
+    {
+      "question": "How does the Federal Reserve fight inflation?",
+      "answer": "Primarily through monetary policy tools like raising interest rates, which cools borrowing and spending, and adjusting its balance sheet — working against demand-pull and monetary-driven inflationary pressure with a lag."
+    }
+  ],
+  "conclusion": "Inflation is better understood as a set of overlapping mechanisms than a single force with one cause — demand, cost, money supply, and expectations all play a role, and any given inflationary period usually involves more than one of them at once. Recognizing which mechanisms are driving a specific period makes it far easier to interpret economic news accurately rather than accepting whichever single explanation is being repeated most loudly.\n\nOn the personal finance side, the mechanism matters less than the effect: [how inflation affects your savings](/articles/how-inflation-affects-your-savings) and what to do about it — keeping cash in a [high-yield savings account](/articles/high-yield-savings-accounts) rather than letting it lose purchasing power sitting idle — is the practical response regardless of which underlying cause is dominant this time around.",
+  "internalLinks": [
+    { "anchor": "how inflation affects your savings", "slug": "how-inflation-affects-your-savings" },
+    { "anchor": "high-yield savings accounts", "slug": "high-yield-savings-accounts" },
+    { "anchor": "compound interest", "slug": "compound-interest" }
+  ],
+  "externalSources": [
+    { "name": "Federal Reserve — Monetary Policy", "url": "https://www.federalreserve.gov/monetarypolicy.htm" },
+    { "name": "U.S. Bureau of Labor Statistics — Consumer Price Index", "url": "https://www.bls.gov/cpi/" }
+  ],
+  "wordCountEstimate": 1450
+}

@@ -63,6 +63,9 @@ const nextConfig: NextConfig = {
       { source: '/editor/:path*', destination: `${admin}/cms/workflows`, permanent: false },
       { source: '/writer', destination: `${admin}/cms/posts`, permanent: false },
       { source: '/writer/:path*', destination: `${admin}/cms/posts`, permanent: false },
+      // /home was a duplicate second homepage implementation (retired) — the
+      // canonical homepage is /.
+      { source: '/home', destination: '/', permanent: true },
       // Back-compat: the old query-param World URLs now live at clean paths.
       // /world?region=us → /world/us, /world?region=world → /world.
       {

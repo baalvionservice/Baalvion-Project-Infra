@@ -6,6 +6,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/community/contests',
   title: 'Community Polls & Contests | Imperialpedia',
   description: 'Participate in market forecasts, prediction challenges, and community-led financial contests to earn reputation nodes.',
 });

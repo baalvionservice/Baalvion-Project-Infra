@@ -5,6 +5,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/community/sentiment',
   title: 'Market Sentiment Pulse | Community Hub',
   description: 'Track real-time crowd perception for financial assets. Participate in Bull vs Bear voting and analyze sentiment drift across global market nodes.',
 });

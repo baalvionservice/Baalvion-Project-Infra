@@ -9,6 +9,7 @@ import { Metadata } from 'next';
 import { Grid as GridIcon } from 'lucide-react';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/topics',
   title: 'Global Topic Index | Financial Intelligence Directory',
   description: 'Explore our master directory of financial topics. Thousands of expert-vetted definitions, guides, and insights categorized for at-scale discovery.',
 });

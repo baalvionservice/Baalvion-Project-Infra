@@ -9,6 +9,7 @@ import { Metadata } from 'next';
 import { Users as UsersIcon } from 'lucide-react';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/creators',
   title: 'Expert Creator Network',
   description: 'Connect with the world\'s leading financial minds. Browse our directory of verified experts, analysts, and wealth strategists.',
 });

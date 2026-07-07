@@ -2,6 +2,7 @@ import OutlineGenerator from '@/modules/content-engine/components/OutlineGenerat
 import { buildMetadata } from '@/lib/seo';
 
 export const metadata = buildMetadata({
+  canonical: '/outline',
   title: 'AI Content Outline Tool',
   description: 'Use generative AI to structure your financial articles and discover high-impact SEO topics.',
 });

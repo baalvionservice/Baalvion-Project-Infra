@@ -12,6 +12,7 @@ import { Cpu } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/technologies',
   title: 'Innovation Cluster Index | Technologies',
   description: 'Trace the evolution of innovation from generative AI to quantum computing and blockchain.',
 });

@@ -139,7 +139,7 @@ const Footer = () => {
           {alphabet.map((letter) => (
             <Link
               key={letter}
-              href={`/glossary/${letter === "#" ? "num" : letter.toLowerCase()}`}
+              href={`/glossary#letter-${letter}`}
               className="hover:underline text-3xl p-5"
             >
               {letter}

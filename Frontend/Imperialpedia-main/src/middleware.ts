@@ -13,6 +13,9 @@ import type { NextRequest } from 'next/server';
  */
 const REFRESH_COOKIE = process.env.NEXT_PUBLIC_REFRESH_COOKIE_NAME || 'baalvion_refresh';
 const PROTECTED_PREFIXES = ['/admin', '/creator/dashboard', '/editor', '/writer', '/premium'];
+// /premium/subscribe is the public pricing/upsell page — it must stay reachable by
+// anonymous visitors (and crawlers) or nobody can see what they'd be paying for.
+const PUBLIC_EXCEPTIONS = ['/premium/subscribe'];
 
 // The retired per-app /admin panel redirects to the central admin-platform
 // console. The console URL is env-driven so production points at the real CMS;
@@ -49,7 +52,9 @@ export function middleware(request: NextRequest) {
   }
 
   // 2) Coarse auth gate on protected areas
-  if (PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))) {
+  const isProtected = PROTECTED_PREFIXES.some((p) => pathname.startsWith(p));
+  const isPublicException = PUBLIC_EXCEPTIONS.includes(pathname);
+  if (isProtected && !isPublicException) {
     const hasSession = Boolean(request.cookies.get(REFRESH_COOKIE)?.value);
     if (!hasSession) {
       const signInUrl = request.nextUrl.clone();

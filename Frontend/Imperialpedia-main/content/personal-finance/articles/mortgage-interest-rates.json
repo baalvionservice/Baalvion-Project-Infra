@@ -1,0 +1,126 @@
+{
+  "topicNumber": 28,
+  "title": "Mortgage Interest Rates: What Determines Yours and How to Get a Better One",
+  "slug": "mortgage-interest-rates",
+  "seo": {
+    "seoTitle": "Mortgage Interest Rates Explained: What Affects Yours & How to Lower It",
+    "metaDescription": "Mortgage rates are shaped by the broader market and your personal financial profile. Here's exactly what moves rates, what you control, and how to secure a better one.",
+    "focusKeyword": "mortgage interest rates",
+    "secondaryKeywords": [
+      "how mortgage rates are determined",
+      "how to get a lower mortgage rate",
+      "mortgage points",
+      "credit score and mortgage rate",
+      "APR vs interest rate mortgage"
+    ],
+    "searchIntent": "Informational/commercial — users wanting to understand what drives their mortgage rate and how to secure the lowest one available to them",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Mortgage rates move for reasons entirely outside your control and reasons entirely within it. Here's how to tell the difference — and what actually moves the needle on the rate you're offered.",
+  "intro": "Mortgage rates are set by a combination of broad economic forces — inflation expectations, Federal Reserve policy, bond market conditions — and your individual financial profile: credit score, down payment, loan type, and debt levels. The first category is completely outside any individual borrower's control. The second is almost entirely within it, and it's where the real opportunity to secure a meaningfully better rate lives.\n\nThis guide separates the two, explains what actually moves rates broadly, and walks through the concrete steps that improve the rate a lender offers you specifically.",
+  "tableOfContents": [
+    "What Moves Mortgage Rates Broadly",
+    "What You Control: Credit Score and Debt-to-Income",
+    "Loan Type, Term, and Down Payment",
+    "Mortgage Points: Buying Down Your Rate",
+    "Interest Rate vs APR",
+    "How to Actually Get a Lower Rate"
+  ],
+  "sections": [
+    {
+      "heading": "What Moves Mortgage Rates Broadly",
+      "paragraphs": [
+        "Mortgage rates generally track the bond market, particularly long-term Treasury yields, and respond to inflation expectations and Federal Reserve policy signals, even though the Fed doesn't directly set mortgage rates the way it sets short-term rates. When inflation is expected to run hot, rates tend to rise; when the economic outlook weakens and rate cuts are expected, mortgage rates often ease in anticipation.",
+        "None of this is something an individual borrower can influence — but understanding it helps explain why the rate your neighbor got last year, or the rate advertised on the news, may look completely different from what you're quoted today."
+      ]
+    },
+    {
+      "heading": "What You Control: Credit Score and Debt-to-Income",
+      "paragraphs": [
+        "Within the market environment on any given day, your credit score is the single largest factor lenders use to price your individual rate. Borrowers in the highest credit tiers routinely receive noticeably better rates than those in lower tiers, even on an identical loan amount and property.",
+        "Your debt-to-income ratio (DTI) — total monthly debt payments divided by gross monthly income — also matters significantly. A lower DTI signals more capacity to absorb the new mortgage payment and typically supports a better rate and easier approval."
+      ],
+      "callout": {
+        "title": "Check your credit report before applying",
+        "text": "Pull your credit reports and dispute any errors well before you apply. A single incorrect late payment or an outdated balance can meaningfully lower your score and the rate you're offered."
+      }
+    },
+    {
+      "heading": "Loan Type, Term, and Down Payment",
+      "paragraphs": [
+        "Shorter loan terms (15-year vs 30-year) typically carry lower rates in exchange for a higher monthly payment. A larger down payment can also improve your rate, both by reducing the lender's risk and, on conventional loans, by helping you avoid or reduce private mortgage insurance. Government-backed loan types (FHA, VA, USDA) have their own rate and insurance structures that can be more or less favorable depending on your specific financial profile — see [the complete guide to mortgages](/articles/complete-guide-to-mortgages) for how each type compares."
+      ]
+    },
+    {
+      "heading": "Mortgage Points: Buying Down Your Rate",
+      "paragraphs": [
+        "Discount points let you pay an upfront fee at closing in exchange for a lower interest rate for the life of the loan. Each point typically costs a percentage of the loan amount and reduces the rate by a modest fixed amount, though the exact math varies by lender.",
+        "Whether points make sense depends entirely on how long you plan to keep the loan: the upfront cost needs enough time to be recovered through the lower monthly payment before it's worth it. If you expect to sell or refinance within a few years, paying for points rarely pays off; if you're confident you'll hold the loan long-term, it often does."
+      ],
+      "table": {
+        "caption": "When Paying for Mortgage Points Tends to Make Sense",
+        "headers": ["Situation", "Points Generally Worth It?"],
+        "rows": [
+          ["Planning to stay 10+ years", "Yes, if you have the upfront cash"],
+          ["Planning to sell or refinance in 2-3 years", "Usually not"],
+          ["Tight on cash for closing", "Rarely — preserve cash instead"],
+          ["Rates expected to fall soon", "Consider waiting to refinance instead"]
+        ]
+      }
+    },
+    {
+      "heading": "Interest Rate vs APR",
+      "paragraphs": [
+        "The interest rate reflects only the cost of borrowing the principal. The Annual Percentage Rate (APR) rolls in the interest rate plus most lender fees and closing costs, expressed as a yearly rate — making it the more accurate number for comparing loan offers from different lenders, since a lower rate with high fees can have a higher APR than a slightly higher rate with minimal fees."
+      ]
+    },
+    {
+      "heading": "How to Actually Get a Lower Rate",
+      "paragraphs": [
+        "Improve your credit score before applying by paying down revolving balances and correcting any report errors. Save for a larger down payment where feasible. Shop multiple lenders — rate quotes for the same borrower can vary meaningfully between lenders on the same day, and getting several quotes within a short window typically counts as a single credit inquiry for scoring purposes. Compare APR, not just the headline rate, and run the numbers on points if you're confident about your timeline.",
+        "Rates are also worth revisiting after closing: if market rates drop meaningfully after you've locked in, [refinancing a mortgage](/articles/refinancing-a-mortgage) can capture the savings, provided the refinance costs are outweighed by the new rate's benefit over your remaining time in the home."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Mortgage rates move broadly with the bond market, inflation expectations, and Fed policy — none of which an individual borrower controls.",
+    "Your credit score and debt-to-income ratio are the biggest levers you do control when it comes to the rate you're personally offered.",
+    "Shorter loan terms and larger down payments generally support lower rates and can reduce or avoid mortgage insurance.",
+    "Mortgage points trade an upfront fee for a lower rate — worth it mainly if you're confident you'll hold the loan long enough to recoup the cost.",
+    "Compare APR, not just the interest rate, since APR includes fees and gives the true cost of a loan offer.",
+    "Shopping multiple lenders within a short window typically counts as one credit inquiry and can meaningfully change the rate you're offered."
+  ],
+  "faq": [
+    {
+      "question": "What is a good mortgage interest rate?",
+      "answer": "\"Good\" is relative to current market conditions at the time you're borrowing — the more useful comparison is how your rate compares to other current offers for your credit profile, loan type, and term, not to rates from a different rate environment."
+    },
+    {
+      "question": "Does my credit score really affect my mortgage rate that much?",
+      "answer": "Yes — it's typically the single largest factor within your control. Borrowers in the top credit tiers routinely receive noticeably better rates than those in lower tiers on an identical loan."
+    },
+    {
+      "question": "Are mortgage points worth paying for?",
+      "answer": "Only if you're confident you'll hold the loan long enough for the lower monthly payment to recover the upfront cost — generally a multi-year time horizon. If you might sell or refinance soon, points usually aren't worth it."
+    },
+    {
+      "question": "Should I compare interest rate or APR when shopping for a mortgage?",
+      "answer": "APR, since it includes most lender fees and closing costs alongside the interest rate, giving a more complete picture of the loan's true cost."
+    },
+    {
+      "question": "How many lenders should I get mortgage quotes from?",
+      "answer": "Most guidance suggests at least three to four, since rate offers for the same borrower can vary meaningfully between lenders. Getting quotes within a focused window typically counts as a single inquiry for credit scoring purposes."
+    }
+  ],
+  "conclusion": "Mortgage rates are shaped by forces you can't influence and factors you absolutely can. The market-wide piece sets the baseline everyone is working with on a given day; your credit score, debt-to-income ratio, down payment, and choice of lender determine where you land relative to that baseline.\n\nBefore you lock in a rate, get your credit report in order, shop multiple lenders, compare APR rather than the headline number, and run the real math on points if you're weighing them. And once you're in the loan, keep an eye on the market — [refinancing a mortgage](/articles/refinancing-a-mortgage) later, if conditions improve, is always an option worth revisiting.",
+  "internalLinks": [
+    { "anchor": "complete guide to mortgages", "slug": "complete-guide-to-mortgages" },
+    { "anchor": "refinancing a mortgage", "slug": "refinancing-a-mortgage" },
+    { "anchor": "compound interest", "slug": "compound-interest" }
+  ],
+  "externalSources": [
+    { "name": "Consumer Financial Protection Bureau — Mortgages", "url": "https://www.consumerfinance.gov/owning-a-home/" },
+    { "name": "Federal Reserve Bank — Mortgage Rate Data (FRED)", "url": "https://fred.stlouisfed.org/" }
+  ],
+  "wordCountEstimate": 1500
+}
