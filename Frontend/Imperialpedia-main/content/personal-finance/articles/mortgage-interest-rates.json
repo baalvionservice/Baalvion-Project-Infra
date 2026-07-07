@@ -3,7 +3,7 @@
   "title": "Mortgage Interest Rates: What Determines Yours and How to Get a Better One",
   "slug": "mortgage-interest-rates",
   "seo": {
-    "seoTitle": "Mortgage Interest Rates Explained: What Affects Yours & How to Lower It",
+    "seoTitle": "Mortgage Interest Rates: What Affects Yours",
     "metaDescription": "Mortgage rates are shaped by the broader market and your personal financial profile. Here's exactly what moves rates, what you control, and how to secure a better one.",
     "focusKeyword": "mortgage interest rates",
     "secondaryKeywords": [
@@ -24,6 +24,7 @@
     "Loan Type, Term, and Down Payment",
     "Mortgage Points: Buying Down Your Rate",
     "Interest Rate vs APR",
+    "Rate Locks: Protecting Your Rate Before Closing",
     "How to Actually Get a Lower Rate"
   ],
   "sections": [
@@ -32,6 +33,13 @@
       "paragraphs": [
         "Mortgage rates generally track the bond market, particularly long-term Treasury yields, and respond to inflation expectations and Federal Reserve policy signals, even though the Fed doesn't directly set mortgage rates the way it sets short-term rates. When inflation is expected to run hot, rates tend to rise; when the economic outlook weakens and rate cuts are expected, mortgage rates often ease in anticipation.",
         "None of this is something an individual borrower can influence — but understanding it helps explain why the rate your neighbor got last year, or the rate advertised on the news, may look completely different from what you're quoted today."
+      ]
+    },
+    {
+      "heading": "Adjustable-Rate Mortgages and Rate Risk",
+      "paragraphs": [
+        "An adjustable-rate mortgage typically offers a lower initial rate than a comparable fixed-rate loan, but that rate adjusts periodically after an introductory period based on a reference index plus a margin set by the lender. Most ARMs include caps limiting how much the rate can move at each adjustment and over the life of the loan, which bounds the worst-case scenario but doesn't eliminate the underlying risk that your payment could rise meaningfully if rates move against you.",
+        "Borrowers considering an ARM should model the maximum possible payment under the loan's cap structure, not just the attractive introductory rate, and honestly assess whether that worst-case payment would still be manageable — the lower initial rate only pays off if your plans (selling, refinancing, or comfortably absorbing a higher payment) actually play out as expected. ARM terms are often described with two numbers, such as 5/1 or 7/6, indicating the length of the initial fixed period and how frequently the rate adjusts afterward — understanding this notation is worth confirming with your loan officer before assuming you know exactly when your rate could first change."
       ]
     },
     {
@@ -59,12 +67,27 @@
       ],
       "table": {
         "caption": "When Paying for Mortgage Points Tends to Make Sense",
-        "headers": ["Situation", "Points Generally Worth It?"],
+        "headers": [
+          "Situation",
+          "Points Generally Worth It?"
+        ],
         "rows": [
-          ["Planning to stay 10+ years", "Yes, if you have the upfront cash"],
-          ["Planning to sell or refinance in 2-3 years", "Usually not"],
-          ["Tight on cash for closing", "Rarely — preserve cash instead"],
-          ["Rates expected to fall soon", "Consider waiting to refinance instead"]
+          [
+            "Planning to stay 10+ years",
+            "Yes, if you have the upfront cash"
+          ],
+          [
+            "Planning to sell or refinance in 2-3 years",
+            "Usually not"
+          ],
+          [
+            "Tight on cash for closing",
+            "Rarely — preserve cash instead"
+          ],
+          [
+            "Rates expected to fall soon",
+            "Consider waiting to refinance instead"
+          ]
         ]
       }
     },
@@ -72,6 +95,13 @@
       "heading": "Interest Rate vs APR",
       "paragraphs": [
         "The interest rate reflects only the cost of borrowing the principal. The Annual Percentage Rate (APR) rolls in the interest rate plus most lender fees and closing costs, expressed as a yearly rate — making it the more accurate number for comparing loan offers from different lenders, since a lower rate with high fees can have a higher APR than a slightly higher rate with minimal fees."
+      ]
+    },
+    {
+      "heading": "Rate Locks: Protecting Your Rate Before Closing",
+      "paragraphs": [
+        "Once you've chosen a lender and rate, a rate lock guarantees that specific rate for a set period — commonly 30 to 60 days — protecting you from rate increases while your loan moves through underwriting to closing. If rates fall after you lock, some lenders offer a one-time 'float down' option to capture a portion of the improvement, though this varies by lender and often carries a fee.",
+        "Locking too early, before you're confident the closing timeline will hold, risks the lock expiring before closing, which can require an extension (sometimes at a cost) or re-locking at a potentially less favorable current rate. Coordinate the lock timing with your loan officer once your closing date is reasonably firm, and ask specifically what the extension policy and cost look like before you lock, so there are no surprises if the closing timeline shifts for reasons outside your control. Some lenders also offer a longer initial lock period for a modest fee, which can be worth considering if you expect the closing process to take longer than the standard 30 to 60 days, particularly for new construction or a more complex transaction. Ask your loan officer to walk through the specific lock terms in writing rather than relying on a verbal summary, since the fee structure for extensions and float-downs varies enough between lenders that assumptions carried over from a previous mortgage may not apply this time. Getting the specifics in writing also protects you if a disagreement arises later about what was actually promised at the time of the lock, which matters more than it might seem given how much money a rate difference can represent over a 30-year term."
       ]
     },
     {
@@ -110,17 +140,44 @@
     {
       "question": "How many lenders should I get mortgage quotes from?",
       "answer": "Most guidance suggests at least three to four, since rate offers for the same borrower can vary meaningfully between lenders. Getting quotes within a focused window typically counts as a single inquiry for credit scoring purposes."
+    },
+    {
+      "question": "What is a mortgage rate lock?",
+      "answer": "A guarantee from your lender that your quoted rate won't change for a set period, commonly 30 to 60 days, protecting you from rate increases while your loan moves through underwriting to closing."
+    },
+    {
+      "question": "What happens if my rate lock expires before closing?",
+      "answer": "You may need to pay for an extension or re-lock at the current rate, which could be higher or lower than your original lock. Coordinating the lock timing with a realistic closing date helps avoid this."
+    },
+    {
+      "question": "How risky is an adjustable-rate mortgage?",
+      "answer": "It depends on the rate caps and your plans — model the maximum possible payment under the loan's cap structure, not just the introductory rate, and confirm you could comfortably manage that worst-case scenario if your plans to sell or refinance change."
     }
   ],
   "conclusion": "Mortgage rates are shaped by forces you can't influence and factors you absolutely can. The market-wide piece sets the baseline everyone is working with on a given day; your credit score, debt-to-income ratio, down payment, and choice of lender determine where you land relative to that baseline.\n\nBefore you lock in a rate, get your credit report in order, shop multiple lenders, compare APR rather than the headline number, and run the real math on points if you're weighing them. And once you're in the loan, keep an eye on the market — [refinancing a mortgage](/articles/refinancing-a-mortgage) later, if conditions improve, is always an option worth revisiting.",
   "internalLinks": [
-    { "anchor": "complete guide to mortgages", "slug": "complete-guide-to-mortgages" },
-    { "anchor": "refinancing a mortgage", "slug": "refinancing-a-mortgage" },
-    { "anchor": "compound interest", "slug": "compound-interest" }
+    {
+      "anchor": "complete guide to mortgages",
+      "slug": "complete-guide-to-mortgages"
+    },
+    {
+      "anchor": "refinancing a mortgage",
+      "slug": "refinancing-a-mortgage"
+    },
+    {
+      "anchor": "compound interest",
+      "slug": "compound-interest"
+    }
   ],
   "externalSources": [
-    { "name": "Consumer Financial Protection Bureau — Mortgages", "url": "https://www.consumerfinance.gov/owning-a-home/" },
-    { "name": "Federal Reserve Bank — Mortgage Rate Data (FRED)", "url": "https://fred.stlouisfed.org/" }
+    {
+      "name": "Consumer Financial Protection Bureau — Mortgages",
+      "url": "https://www.consumerfinance.gov/owning-a-home/"
+    },
+    {
+      "name": "Federal Reserve Bank — Mortgage Rate Data (FRED)",
+      "url": "https://fred.stlouisfed.org/"
+    }
   ],
   "wordCountEstimate": 1500
 }

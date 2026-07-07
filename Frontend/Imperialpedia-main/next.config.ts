@@ -66,6 +66,18 @@ const nextConfig: NextConfig = {
       // /home was a duplicate second homepage implementation (retired) — the
       // canonical homepage is /.
       { source: '/home', destination: '/', permanent: true },
+      // Consolidate near-duplicate article topics into one comprehensive guide
+      // each, instead of publishing several thin pages that would cannibalize
+      // the same search intent.
+      { source: '/articles/emergency-funds', destination: '/articles/emergency-fund-guide', permanent: true },
+      { source: '/articles/gdp-growth', destination: '/articles/complete-guide-to-gdp', permanent: true },
+      { source: '/articles/gdp-limitations', destination: '/articles/complete-guide-to-gdp', permanent: true },
+      { source: '/articles/nominal-vs-real-gdp', destination: '/articles/complete-guide-to-gdp', permanent: true },
+      { source: '/articles/economic-growth', destination: '/articles/complete-guide-to-gdp', permanent: true },
+      { source: '/articles/loan-types-explained', destination: '/articles/complete-guide-to-personal-loans', permanent: true },
+      { source: '/articles/loan-eligibility-and-approval', destination: '/articles/complete-guide-to-personal-loans', permanent: true },
+      { source: '/articles/loan-repayment-strategies', destination: '/articles/complete-guide-to-personal-loans', permanent: true },
+      { source: '/articles/managing-student-loan-debt', destination: '/articles/student-loan-repayment-plans', permanent: true },
       // Back-compat: the old query-param World URLs now live at clean paths.
       // /world?region=us → /world/us, /world?region=world → /world.
       {

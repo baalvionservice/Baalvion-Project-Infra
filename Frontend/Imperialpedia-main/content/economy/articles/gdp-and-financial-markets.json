@@ -1,0 +1,104 @@
+{
+  "topicNumber": 3,
+  "title": "How GDP Data Moves Financial Markets",
+  "slug": "gdp-and-financial-markets",
+  "seo": {
+    "seoTitle": "How GDP Reports Move Stocks, Bonds, and Currencies",
+    "metaDescription": "GDP releases can swing stocks, bonds, and currencies within minutes. Here's how investors interpret the number, why 'good news can be bad news,' and what to actually watch.",
+    "focusKeyword": "GDP and financial markets",
+    "secondaryKeywords": [
+      "how GDP affects stock market",
+      "GDP report market reaction",
+      "GDP and bond yields",
+      "economic data and investing"
+    ],
+    "searchIntent": "Informational/commercial — investors wanting to understand how to interpret GDP releases in the context of markets and portfolio decisions",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "A GDP report can move stocks, bonds, and currencies within minutes of release — but not always in the direction you'd expect. Here's how markets actually process the number.",
+  "intro": "When a GDP report comes out stronger or weaker than expected, markets often move immediately — sometimes counterintuitively. A strong GDP print can trigger a stock sell-off, and a weak one can spark a rally. Understanding why requires looking past the headline number to what it implies about the path of interest rates, corporate earnings, and risk appetite.\n\nThis guide breaks down how each major asset class typically reacts to GDP data and why the relationship isn't always as straightforward as \"good number, stocks go up.\"",
+  "tableOfContents": [
+    "Why 'Good News' Can Be 'Bad News' for Stocks",
+    "How Bond Markets React to GDP",
+    "Currency Markets and GDP Surprises",
+    "GDP Estimates vs Actuals: Why Expectations Matter More Than the Number",
+    "How Long-Term Investors Should Actually Use GDP Data"
+  ],
+  "sections": [
+    {
+      "heading": "Why 'Good News' Can Be 'Bad News' for Stocks",
+      "paragraphs": [
+        "Stock markets don't just price in current conditions — they price in expectations about future interest rates and corporate earnings. A GDP report that comes in unexpectedly strong can signal an overheating economy, raising concern that a central bank will respond with tighter monetary policy (higher interest rates), which increases borrowing costs for companies and can compress valuations. In that context, strong growth can trigger a sell-off precisely because it raises the odds of less accommodative policy ahead.",
+        "Conversely, weaker-than-expected GDP can sometimes be read as increasing the odds of interest rate cuts or continued low rates, which can support stock valuations even though it reflects a slower economy — the so-called 'bad news is good news' dynamic that shows up periodically in market coverage."
+      ]
+    },
+    {
+      "heading": "How Bond Markets React to GDP",
+      "paragraphs": [
+        "Bond yields tend to move in a fairly direct relationship with growth and inflation expectations: stronger-than-expected GDP growth often pushes yields higher, since it can signal both more inflation pressure and a reduced likelihood of rate cuts, both of which make existing lower-yielding bonds less attractive by comparison. Weaker GDP typically has the opposite effect, pulling yields down as investors anticipate easier monetary policy ahead.",
+        "This dynamic is why bond markets are often described as pricing in economic data faster and more directly than equity markets — the relationship between growth and yields is more mechanical, whereas stock reactions depend more on the specific narrative investors attach to the number at that moment."
+      ]
+    },
+    {
+      "heading": "Currency Markets and GDP Surprises",
+      "paragraphs": [
+        "A country's currency often strengthens on stronger-than-expected GDP data, since it raises the relative attractiveness of holding assets denominated in that currency (partly through the same higher-interest-rate expectations discussed above). Weaker GDP tends to weigh on the currency for the mirror-image reason. These effects compound with other countries' data releases — a currency's value is always relative to another currency, so a strong domestic GDP report matters most in the context of how other major economies are performing at the same time."
+      ]
+    },
+    {
+      "heading": "GDP Estimates vs Actuals: Why Expectations Matter More Than the Number",
+      "paragraphs": [
+        "Markets react to the *surprise*, not the absolute figure — a GDP growth rate of 2% can trigger a rally if analysts expected 1%, or a sell-off if they expected 3%. This is why financial media consistently reports both the actual GDP figure and the consensus economist forecast side by side; the gap between them, not the number itself, usually explains the market's reaction."
+      ],
+      "callout": {
+        "title": "Watch the revision, not just the initial release",
+        "text": "Initial GDP estimates get revised as more complete data arrives. A market reaction to an initial release can partially reverse once a revision comes in meaningfully different, which is worth remembering before overreacting to any single data point."
+      }
+    },
+    {
+      "heading": "How Long-Term Investors Should Actually Use GDP Data",
+      "paragraphs": [
+        "For a long-term investor, a single GDP report is rarely worth reacting to directly — day-to-day market moves around a data release are frequently reversed within days or weeks as the broader narrative develops. What matters more is the trend across several quarters: is growth accelerating, decelerating, or stable, and how does that align with your existing asset allocation and risk tolerance.",
+        "Trying to trade around individual GDP releases is closer to short-term speculation than investing, and even professional traders with faster access to information and execution find it a genuinely difficult game to consistently win. A more productive use of GDP data is context: understanding whether the broader economic backdrop supports or challenges your existing long-term thesis, not a signal to make abrupt portfolio changes."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "GDP reports move markets based on the surprise relative to expectations, not the absolute number itself.",
+    "Strong GDP can trigger stock sell-offs if it raises expectations of tighter monetary policy; weak GDP can spark rallies for the opposite reason.",
+    "Bond yields tend to move directly with growth and inflation expectations — stronger GDP often pushes yields higher.",
+    "Currencies often strengthen on stronger-than-expected domestic GDP, relative to how other major economies are performing.",
+    "Initial GDP estimates get revised, and short-term market reactions to a single report often reverse as more data comes in.",
+    "Long-term investors are better served watching the multi-quarter trend than trying to trade around individual GDP releases."
+  ],
+  "faq": [
+    {
+      "question": "Why does the stock market sometimes fall on good GDP news?",
+      "answer": "Because strong growth can raise expectations of tighter monetary policy (higher interest rates), which increases borrowing costs for companies and can compress valuations — outweighing the positive signal of stronger economic activity."
+    },
+    {
+      "question": "How do bond yields react to GDP data?",
+      "answer": "Generally, stronger-than-expected GDP pushes yields higher (reflecting growth and inflation expectations), while weaker GDP tends to pull yields lower as investors anticipate easier monetary policy."
+    },
+    {
+      "question": "Should I change my investment strategy based on a single GDP report?",
+      "answer": "Generally no — short-term market reactions to individual data releases often reverse, and GDP figures get revised. The multi-quarter trend is far more useful for long-term investment decisions than any single report."
+    },
+    {
+      "question": "Why do markets react to the GDP 'surprise' rather than the number itself?",
+      "answer": "Asset prices already reflect the consensus expectation ahead of the release. The market only needs to reprice based on the gap between what was expected and what was actually reported."
+    }
+  ],
+  "conclusion": "GDP releases matter to markets not because of the raw number, but because of what they imply about the future path of interest rates, corporate earnings, and risk appetite — which is exactly why reactions can seem counterintuitive on the surface. For most investors, the practical takeaway isn't to trade the release itself, but to track the broader trend across several quarters and let [the complete guide to GDP](/articles/complete-guide-to-gdp) and [economic indicators](/articles/complete-guide-to-economic-indicators) inform the bigger picture your portfolio strategy is built on.",
+  "internalLinks": [
+    { "anchor": "complete guide to gdp", "slug": "complete-guide-to-gdp" },
+    { "anchor": "complete guide to economic indicators", "slug": "complete-guide-to-economic-indicators" },
+    { "anchor": "market indicators", "slug": "market-indicators" },
+    { "anchor": "complete guide to monetary policy", "slug": "complete-guide-to-monetary-policy" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Bureau of Economic Analysis", "url": "https://www.bea.gov/" },
+    { "name": "Federal Reserve Bank of St. Louis — FRED", "url": "https://fred.stlouisfed.org/" }
+  ],
+  "wordCountEstimate": 1350
+}

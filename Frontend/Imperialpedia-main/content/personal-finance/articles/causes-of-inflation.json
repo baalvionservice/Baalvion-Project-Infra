@@ -3,7 +3,7 @@
   "title": "What Causes Inflation? A Clear Breakdown",
   "slug": "causes-of-inflation",
   "seo": {
-    "seoTitle": "What Causes Inflation? Demand-Pull, Cost-Push & Monetary Explained",
+    "seoTitle": "What Causes Inflation? Explained Simply",
     "metaDescription": "Inflation isn't one thing with one cause. Here's a clear breakdown of demand-pull, cost-push, and monetary inflation, and what actually drives rising prices.",
     "focusKeyword": "causes of inflation",
     "secondaryKeywords": [
@@ -25,9 +25,17 @@
     "Monetary Inflation: The Role of Money Supply",
     "Built-In Inflation and Expectations",
     "Supply Chain Disruptions",
+    "How Inflation Is Measured and Tracked",
     "How These Causes Interact in the Real World"
   ],
   "sections": [
+    {
+      "heading": "Why Inflation Is Measured the Way It Is",
+      "paragraphs": [
+        "Before getting into causes, it's worth understanding why inflation is treated as such a central economic concern in the first place: a stable, predictable price level allows households and businesses to plan confidently, borrow and lend at meaningful interest rates, and make long-term decisions without prices themselves becoming a major source of uncertainty. When inflation runs too hot or too unpredictably, that planning function breaks down — wages negotiated a year ago can lose real value quickly, and businesses struggle to price contracts and long-term commitments accurately.",
+        "This is exactly why central banks target a specific, publicly communicated inflation rate rather than simply trying to keep prices as low as possible — a known, stable target gives households and businesses a shared reference point to plan around, which itself supports the more stable economic conditions the target is meant to produce."
+      ]
+    },
     {
       "heading": "Demand-Pull Inflation",
       "paragraphs": [
@@ -43,10 +51,22 @@
       ],
       "table": {
         "caption": "Demand-Pull vs Cost-Push at a Glance",
-        "headers": ["Type", "Origin", "Typical Trigger"],
+        "headers": [
+          "Type",
+          "Origin",
+          "Typical Trigger"
+        ],
         "rows": [
-          ["Demand-pull", "Consumer/business demand", "Strong growth, low unemployment, easy credit"],
-          ["Cost-push", "Production costs", "Rising wages, energy, or raw material costs"]
+          [
+            "Demand-pull",
+            "Consumer/business demand",
+            "Strong growth, low unemployment, easy credit"
+          ],
+          [
+            "Cost-push",
+            "Production costs",
+            "Rising wages, energy, or raw material costs"
+          ]
         ]
       }
     },
@@ -71,6 +91,13 @@
       "heading": "Supply Chain Disruptions",
       "paragraphs": [
         "A more recent and highly visible driver of inflation is supply chain disruption — when the physical flow of goods, components, or raw materials is interrupted by events like natural disasters, geopolitical conflict, or global health crises. Reduced supply against steady or growing demand pushes prices up, functioning similarly to cost-push inflation but originating from logistical bottlenecks rather than direct cost increases in production inputs."
+      ]
+    },
+    {
+      "heading": "How Inflation Is Measured and Tracked",
+      "paragraphs": [
+        "Inflation is most commonly tracked through the Consumer Price Index (CPI), which measures the average change in prices paid by consumers for a fixed basket of goods and services, and the Personal Consumption Expenditures (PCE) price index, the Federal Reserve's preferred gauge. Both are also reported in a 'core' version that strips out food and energy prices, which tend to be more volatile month to month, to give a clearer read on the underlying trend beneath short-term noise.",
+        "Understanding which measure a given headline is citing matters, since CPI and PCE can show meaningfully different readings in the same month due to differences in scope and how frequently their underlying basket weights are updated — a gap worth being aware of before assuming two different inflation figures reported in the same news cycle are contradictory rather than simply measuring slightly different things. Both measures are also reported on a year-over-year basis alongside the more volatile month-over-month figure, and the year-over-year number is generally the more reliable one for understanding the underlying trend rather than a single month's noise. Economists also watch the month-over-month annualized rate for early signs of acceleration or deceleration, since it reacts faster than the year-over-year figure, which still reflects months from a year ago that may no longer be representative of current conditions. Watching all three views together — headline, core, and the recent monthly trend — gives a more complete read than fixating on any single figure from one release. A single hot or cool monthly print rarely changes the overall picture on its own — it's a sustained shift across several consecutive releases that generally signals a genuine change in the underlying trend worth reacting to, rather than ordinary month-to-month statistical noise that reverses itself in the following release once the underlying data settles down."
       ]
     },
     {
@@ -109,17 +136,44 @@
     {
       "question": "How does the Federal Reserve fight inflation?",
       "answer": "Primarily through monetary policy tools like raising interest rates, which cools borrowing and spending, and adjusting its balance sheet — working against demand-pull and monetary-driven inflationary pressure with a lag."
+    },
+    {
+      "question": "What's the difference between CPI and core CPI?",
+      "answer": "Headline CPI includes all categories, including volatile food and energy prices. Core CPI strips those out to give a clearer read on the underlying inflation trend beneath short-term price swings."
+    },
+    {
+      "question": "Can inflation happen even with low unemployment?",
+      "answer": "Yes — low unemployment and strong wage growth are actually classic demand-pull inflation conditions, since more people earning and spending money can push demand ahead of what the economy can supply."
+    },
+    {
+      "question": "Why does stable inflation matter so much to policymakers?",
+      "answer": "Predictable prices allow households and businesses to plan, borrow, and lend confidently. When inflation runs too hot or unpredictably, wages and contracts lose real value faster than expected, undermining the planning function a stable price level normally provides."
     }
   ],
   "conclusion": "Inflation is better understood as a set of overlapping mechanisms than a single force with one cause — demand, cost, money supply, and expectations all play a role, and any given inflationary period usually involves more than one of them at once. Recognizing which mechanisms are driving a specific period makes it far easier to interpret economic news accurately rather than accepting whichever single explanation is being repeated most loudly.\n\nOn the personal finance side, the mechanism matters less than the effect: [how inflation affects your savings](/articles/how-inflation-affects-your-savings) and what to do about it — keeping cash in a [high-yield savings account](/articles/high-yield-savings-accounts) rather than letting it lose purchasing power sitting idle — is the practical response regardless of which underlying cause is dominant this time around.",
   "internalLinks": [
-    { "anchor": "how inflation affects your savings", "slug": "how-inflation-affects-your-savings" },
-    { "anchor": "high-yield savings accounts", "slug": "high-yield-savings-accounts" },
-    { "anchor": "compound interest", "slug": "compound-interest" }
+    {
+      "anchor": "how inflation affects your savings",
+      "slug": "how-inflation-affects-your-savings"
+    },
+    {
+      "anchor": "high-yield savings accounts",
+      "slug": "high-yield-savings-accounts"
+    },
+    {
+      "anchor": "compound interest",
+      "slug": "compound-interest"
+    }
   ],
   "externalSources": [
-    { "name": "Federal Reserve — Monetary Policy", "url": "https://www.federalreserve.gov/monetarypolicy.htm" },
-    { "name": "U.S. Bureau of Labor Statistics — Consumer Price Index", "url": "https://www.bls.gov/cpi/" }
+    {
+      "name": "Federal Reserve — Monetary Policy",
+      "url": "https://www.federalreserve.gov/monetarypolicy.htm"
+    },
+    {
+      "name": "U.S. Bureau of Labor Statistics — Consumer Price Index",
+      "url": "https://www.bls.gov/cpi/"
+    }
   ],
   "wordCountEstimate": 1450
 }

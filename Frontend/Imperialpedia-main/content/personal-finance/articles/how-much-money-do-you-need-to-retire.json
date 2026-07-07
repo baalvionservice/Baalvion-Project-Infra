@@ -24,7 +24,9 @@
     "Building Your Real Number From Your Expenses",
     "Where Social Security Fits In",
     "Adjusting for Healthcare and Longevity",
-    "Building Your Retirement Portfolio to Get There"
+    "How Your Number Changes If You Retire Early",
+    "Building Your Retirement Portfolio to Get There",
+    "Revisiting Your Number Over Time"
   ],
   "sections": [
     {
@@ -59,6 +61,13 @@
       ]
     },
     {
+      "heading": "Accounting for Multiple Income Sources",
+      "paragraphs": [
+        "Beyond Social Security, some retirees have additional guaranteed or semi-guaranteed income sources — a pension, rental income, part-time consulting — that further reduce the portion of expenses your investment portfolio needs to cover. Each additional reliable income stream should be subtracted from your total expected expenses the same way Social Security is, before applying the 25x rule to whatever gap remains, since it's the actual portfolio-funded gap that determines your real savings target, not your gross expected spending.",
+        "Be conservative when counting less certain income sources, like part-time consulting you may or may not continue indefinitely, and lean more heavily on truly guaranteed sources when calculating the portion of your number your portfolio absolutely must cover on its own. A pension with a cost-of-living adjustment can be treated with nearly the same confidence as Social Security, while a pension without one erodes in real value over time and deserves a more conservative treatment in your projections. Rental income sits somewhere in between, since it can rise with market rents over time but also carries vacancy and maintenance risk that a fixed pension payment doesn't, which is worth reflecting in how heavily you weight it toward covering essential versus discretionary expenses. Matching guaranteed income against essential costs and more variable income against discretionary spending gives the plan a natural cushion if any single source underperforms expectations, without requiring the entire plan to be rebuilt from scratch every time any single piece shifts unexpectedly."
+      ]
+    },
+    {
       "heading": "Where Social Security Fits In",
       "paragraphs": [
         "For most U.S. retirees, Social Security covers a meaningful share of retirement income, which means your portfolio doesn't need to fund 100% of your expected expenses on its own. Subtracting your estimated annual Social Security benefit from your total expected expenses, then applying the 25x rule to the remaining gap, produces a more realistic and often smaller portfolio target than ignoring it entirely.",
@@ -77,10 +86,22 @@
       ]
     },
     {
+      "heading": "How Your Number Changes If You Retire Early",
+      "paragraphs": [
+        "Retiring before the traditional range changes the math in two compounding ways: your portfolio has fewer years of contributions to grow before you start withdrawing, and it needs to last considerably longer once withdrawals begin. Early retirees also typically can't rely on Social Security or Medicare for a stretch of years, meaning healthcare costs — usually covered partially by Medicare after 65 — must be fully self-funded until eligibility begins.",
+        "This doesn't make early retirement unrealistic, but it does mean the 25x target needs to be applied more conservatively, often supplemented with a lower planned withdrawal rate than the standard 4% guideline, precisely because the money needs to stretch across more uncertain years without the safety nets available to a traditional-age retiree."
+      ]
+    },
+    {
       "heading": "Building Your Retirement Portfolio to Get There",
       "paragraphs": [
-        "Whatever your target number turns out to be, [compound interest](/articles/compound-interest) is the primary force that gets you there — consistent contributions started early do far more work than larger contributions started late. Automating contributions to a 401(k) or IRA, capturing any employer match in full, and increasing your contribution rate whenever your income grows are the practical steps that turn a target number from theoretical into achievable.",
-        "Revisit your number periodically — every few years, or after a major life change — since your expected expenses, healthcare needs, and Social Security estimate will all shift over time."
+        "Whatever your target number turns out to be, [compound interest](/articles/compound-interest) is the primary force that gets you there — consistent contributions started early do far more work than larger contributions started late. Automating contributions to a 401(k) or IRA, capturing any employer match in full, and increasing your contribution rate whenever your income grows are the practical steps that turn a target number from theoretical into achievable. See [building a retirement portfolio](/articles/building-a-retirement-portfolio) for how to actually structure the investments themselves once you're contributing consistently."
+      ]
+    },
+    {
+      "heading": "Revisiting Your Number Over Time",
+      "paragraphs": [
+        "Your retirement number isn't a one-time calculation — revisit it every few years, or after a major life change (a new home, a health event, a shift in career plans), since your expected expenses, healthcare needs, and Social Security estimate will all shift over time. Treat it as a working estimate that gets more accurate as retirement gets closer, not a fixed target set once in your twenties and never touched again."
       ]
     }
   ],
@@ -112,6 +133,14 @@
     {
       "question": "What's the biggest factor in reaching my retirement number?",
       "answer": "Time. Starting contributions early lets compound growth do most of the work; starting later requires meaningfully larger contributions to reach the same target."
+    },
+    {
+      "question": "Does retiring early change how much I need?",
+      "answer": "Yes — an early retirement portfolio has fewer years to grow before withdrawals begin, needs to last longer, and often must cover healthcare costs independently before Medicare eligibility, which generally calls for a more conservative target and withdrawal rate."
+    },
+    {
+      "question": "How often should I recalculate my retirement number?",
+      "answer": "Every few years, or after a major life change like a new home, health event, or career shift — your expenses, healthcare needs, and Social Security estimate all evolve, so the number should be treated as a periodically updated estimate rather than fixed once and forgotten."
     }
   ],
   "conclusion": "The honest answer to how much you need to retire is: it depends on your expenses, adjusted for Social Security, healthcare, and how long your retirement needs to last — not a number borrowed from a headline. Building your own figure using the 25x rule against your real expected spending gives you an actual target to work toward, rather than an arbitrary one to feel anxious about.\n\nOnce you have that number, the path there is the same regardless of its size: automate contributions, capture any employer match, and let [compound interest](/articles/compound-interest) do the heavy lifting over time. Revisit the number periodically, and adjust as your real life — not a generic average — evolves.",
