@@ -24,6 +24,7 @@ export async function generateMetadata({
   return buildMetadata({
     title: `${match.label} News — Live Updates`,
     description: `Live ${match.label} financial news, analysis, and key insights streamed in real time.`,
+    canonical: `/latest/${category.toLowerCase()}`,
   });
 }
 

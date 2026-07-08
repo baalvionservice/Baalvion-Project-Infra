@@ -12,6 +12,7 @@ import { Factory } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/industries',
   title: 'Market Architecture Index | Industries',
   description: 'Explore global market segments and sector-specific intelligence nodes.',
 });

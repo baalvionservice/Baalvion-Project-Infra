@@ -1,0 +1,112 @@
+{
+  "topicNumber": 13,
+  "title": "How Central Bank Interest Rates Actually Work",
+  "slug": "central-bank-interest-rates",
+  "seo": {
+    "seoTitle": "Central Bank Interest Rates: How the Fed Funds Rate Moves the Economy",
+    "metaDescription": "The federal funds rate is a single number that ripples through the entire economy. Here's exactly how the transmission mechanism works, step by step.",
+    "focusKeyword": "central bank interest rates",
+    "secondaryKeywords": [
+      "federal funds rate explained",
+      "how the Fed raises interest rates",
+      "interest rate transmission mechanism",
+      "Fed rate decisions"
+    ],
+    "searchIntent": "Informational — users wanting to understand exactly how a central bank's benchmark rate decision translates into real-world borrowing costs",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "A single number set by a committee in Washington ends up changing your credit card rate, your mortgage quote, and your savings account yield. Here's the transmission mechanism, step by step.",
+  "intro": "When the Federal Reserve announces a change to the federal funds rate, it's setting a target for the rate banks charge each other for overnight loans — not directly setting your mortgage rate or credit card APR. Understanding how that one number ripples outward through the entire financial system is the key to understanding why 'the Fed raised rates' translates into higher costs across seemingly unrelated products within days or weeks.",
+  "tableOfContents": [
+    "What the Federal Funds Rate Actually Is",
+    "Step One: Bank-to-Bank Lending Costs",
+    "Step Two: Prime Rate and Consumer Lending",
+    "Step Three: Bond Markets and Longer-Term Rates",
+    "Why Some Rates Move Faster Than Others",
+    "How to Use This When Planning Your Own Finances"
+  ],
+  "sections": [
+    {
+      "heading": "What the Federal Funds Rate Actually Is",
+      "paragraphs": [
+        "The federal funds rate is the interest rate banks charge each other for short-term, typically overnight, loans of reserves held at the Fed. It doesn't directly apply to any consumer product, but it functions as the anchor rate from which most other borrowing costs in the economy are ultimately priced, layer by layer."
+      ]
+    },
+    {
+      "heading": "Step One: Bank-to-Bank Lending Costs",
+      "paragraphs": [
+        "When the Fed raises its target range, the actual cost for banks to borrow reserves from each other rises correspondingly, achieved through the [open market operations](/articles/open-market-operations) the Fed conducts to keep rates trading near the target. This is the first, most direct link in the chain — everything downstream builds on this cost of funds for the banking system."
+      ]
+    },
+    {
+      "heading": "Step Two: Prime Rate and Consumer Lending",
+      "paragraphs": [
+        "Banks set their prime rate — the rate offered to their most creditworthy customers — at a level that moves in step with the federal funds rate, typically a fixed margin above it. Many consumer products, including most variable-rate credit cards and some personal loans and lines of credit, are priced directly off the prime rate, which is why credit card APRs tend to adjust within one or two billing cycles of a Fed rate change."
+      ]
+    },
+    {
+      "heading": "Step Three: Bond Markets and Longer-Term Rates",
+      "paragraphs": [
+        "Longer-term rates — including [mortgage rates](/articles/mortgage-interest-rates) — are influenced by the federal funds rate but respond more directly to the bond market, particularly long-term Treasury yields, which reflect investors' expectations about growth and inflation over many years, not just the current short-term rate. This is why mortgage rates sometimes move in advance of an actual Fed decision (as markets price in an expected move) or fail to move much even after a rate change that was already fully anticipated."
+      ]
+    },
+    {
+      "heading": "Why Some Rates Move Faster Than Others",
+      "paragraphs": [
+        "The speed and size of the pass-through varies by product. Variable-rate products tied directly to the prime rate adjust almost immediately. Savings account yields, particularly at competitive [high-yield savings accounts](/articles/high-yield-savings-accounts), tend to adjust within weeks as banks compete for deposits. Fixed-rate products already issued (an existing fixed-rate mortgage, for instance) don't change at all — only new originations reflect the updated rate environment."
+      ],
+      "table": {
+        "caption": "Typical Speed of Fed Rate Pass-Through",
+        "headers": ["Product", "Typical Response Time"],
+        "rows": [
+          ["Variable-rate credit cards", "Within 1-2 billing cycles"],
+          ["Savings/HYSA yields", "Days to a few weeks"],
+          ["New mortgage rates", "Often move in anticipation, tied more to bond yields"],
+          ["Existing fixed-rate loans", "No change — only new originations are affected"]
+        ]
+      }
+    },
+    {
+      "heading": "How to Use This When Planning Your Own Finances",
+      "paragraphs": [
+        "Understanding the transmission chain helps set realistic expectations: don't expect your existing fixed-rate mortgage to change with a Fed announcement, but do expect a new HYSA or credit card offer to reflect it fairly quickly. If you're planning a major borrowing decision — a mortgage, a large personal loan — tracking the broader rate environment and its likely direction, not just the most recent Fed meeting outcome, gives a more useful read on where your actual rate offer is likely headed."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "The federal funds rate is a bank-to-bank lending rate that serves as the anchor for most other borrowing costs in the economy.",
+    "The prime rate moves in step with the federal funds rate, and many variable consumer products are priced directly off it.",
+    "Longer-term rates like mortgages respond more to bond market yields and inflation expectations than the fed funds rate directly.",
+    "Variable-rate products adjust fastest; savings yields adjust within weeks; existing fixed-rate loans don't change at all.",
+    "Mortgage rates can move in anticipation of a Fed decision, since bond markets price in expectations ahead of the actual announcement."
+  ],
+  "faq": [
+    {
+      "question": "Does the Fed directly set mortgage rates?",
+      "answer": "No — mortgage rates are influenced by the federal funds rate but respond more directly to long-term bond market yields and inflation expectations, which is why the two don't always move in perfect lockstep."
+    },
+    {
+      "question": "How quickly do credit card rates change after a Fed decision?",
+      "answer": "Typically within one or two billing cycles, since most variable-rate cards are priced directly off the prime rate, which moves in step with the federal funds rate."
+    },
+    {
+      "question": "Will my existing fixed-rate loan change if the Fed raises rates?",
+      "answer": "No — a fixed-rate loan you already have locks in that rate for its term. Fed rate changes only affect new loans originated after the change."
+    },
+    {
+      "question": "Why do mortgage rates sometimes move before a Fed announcement?",
+      "answer": "Bond markets price in expectations about future Fed decisions ahead of time, so mortgage rates — tied more closely to bond yields — can shift in anticipation of a move that hasn't officially happened yet."
+    }
+  ],
+  "conclusion": "A single rate decision made by a committee doesn't instantly rewrite every price in the economy — it moves through a chain, starting with bank-to-bank lending costs, then the prime rate and consumer products tied to it, then longer-term rates shaped by bond markets. Understanding that chain is what separates \"the Fed raised rates\" as a headline from a genuinely useful read on how and when it affects your specific financial decisions.",
+  "internalLinks": [
+    { "anchor": "complete guide to monetary policy", "slug": "complete-guide-to-monetary-policy" },
+    { "anchor": "monetary policy tools", "slug": "monetary-policy-tools" },
+    { "anchor": "mortgage interest rates", "slug": "mortgage-interest-rates" },
+    { "anchor": "high-yield savings accounts", "slug": "high-yield-savings-accounts" }
+  ],
+  "externalSources": [
+    { "name": "Federal Reserve — Federal Funds Rate", "url": "https://www.federalreserve.gov/monetarypolicy/openmarket.htm" }
+  ],
+  "wordCountEstimate": 1400
+}

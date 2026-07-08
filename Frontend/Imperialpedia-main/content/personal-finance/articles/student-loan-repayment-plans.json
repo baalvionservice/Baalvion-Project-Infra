@@ -1,0 +1,207 @@
+{
+  "topicNumber": 32,
+  "title": "Student Loan Repayment Plans: Which One Actually Fits You",
+  "slug": "student-loan-repayment-plans",
+  "seo": {
+    "seoTitle": "Student Loan Repayment Plans Compared",
+    "metaDescription": "Standard, graduated, extended, and income-driven repayment plans all work differently. Here's how to figure out which one actually fits your situation.",
+    "focusKeyword": "student loan repayment plans",
+    "secondaryKeywords": [
+      "income-driven repayment",
+      "standard repayment plan",
+      "student loan forgiveness",
+      "managing student loan debt",
+      "federal student loan options"
+    ],
+    "searchIntent": "Commercial/informational — borrowers actively trying to choose or switch between federal student loan repayment plans",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Federal student loans offer several repayment structures, and picking the wrong one can cost thousands in extra interest — or leave money on the table if you'd qualify for forgiveness. Here's how to choose.",
+  "intro": "Federal student loan borrowers aren't locked into a single repayment structure — several plans exist, each trading off monthly payment size against total interest paid and time to payoff differently. Choosing the right one depends on your income, your loan balance, and whether you're pursuing a forgiveness program, making this one of the more consequential decisions in managing student debt.",
+  "tableOfContents": [
+    "The Standard Repayment Plan",
+    "Graduated and Extended Repayment Plans",
+    "Income-Driven Repayment Plans",
+    "How Income-Driven Plans Connect to Loan Forgiveness",
+    "Federal Loan Consolidation",
+    "Deferment and Forbearance: Options When You're Struggling",
+    "Avoiding Default",
+    "How to Actually Choose",
+    "Managing Debt Beyond Just Picking a Plan"
+  ],
+  "sections": [
+    {
+      "heading": "The Standard Repayment Plan",
+      "paragraphs": [
+        "The standard plan sets a fixed monthly payment over a set term, typically ten years, designed to pay off the loan in full within that window. It results in the least total interest paid of any plan (assuming payments are made on schedule) but carries the highest monthly payment relative to the other options, which can be a genuine strain for borrowers with a lower income relative to their loan balance."
+      ]
+    },
+    {
+      "heading": "Private vs Federal Student Loans",
+      "paragraphs": [
+        "Everything covered here — the standard, graduated, extended, and income-driven plans, along with forgiveness programs — applies specifically to federal student loans, issued or guaranteed by the government. Private student loans, issued by banks and other private lenders, don't offer these same flexible repayment structures or forgiveness options; terms are set individually by the lender and are typically far less flexible if your financial situation changes.",
+        "If you're not sure which type of loan you have, checking the National Student Loan Data System (for federal loans) or your original loan documents clarifies this before you assume a federal repayment option or forgiveness program applies to a loan that may actually be private. Many borrowers carry both types after financing part of their education privately, which means a single overall repayment strategy often needs to address federal loans (using the plans covered here) and private loans (using refinancing or direct extra payments) separately, since the tools available for each differ substantially. Keeping a clear record of which loans are federal and which are private — including servicer, balance, and rate for each — makes it considerably easier to apply the right strategy to the right loan rather than treating the combined balance as a single undifferentiated debt. A simple spreadsheet listing each loan's servicer, balance, rate, and current plan takes only a few minutes to set up and pays off considerably whenever you need to make a decision about any single loan without re-deriving the full picture from scratch. Updating it after any recertification, plan switch, or payment change keeps it a reliable reference rather than a one-time snapshot that quietly goes stale and stops reflecting your actual situation over the many years a typical repayment term actually runs."
+      ]
+    },
+    {
+      "heading": "Graduated and Extended Repayment Plans",
+      "paragraphs": [
+        "A graduated plan starts with a lower payment that increases every two years, on the theory that income typically rises over a career — useful for borrowers expecting meaningful income growth but who need lower payments in the near term. An extended plan stretches the standard ten-year term out further (commonly up to 25 years for eligible balances), lowering the monthly payment but increasing total interest paid over the life of the loan considerably compared to the standard plan."
+      ]
+    },
+    {
+      "heading": "Income-Driven Repayment Plans",
+      "paragraphs": [
+        "Income-driven repayment (IDR) plans set your monthly payment as a percentage of your discretionary income, recalculated annually based on your income and family size, with any remaining balance forgiven after a set number of years (commonly 20 to 25, depending on the specific plan and loan type). These plans can dramatically lower monthly payments for borrowers with a high debt-to-income ratio, though they typically result in more total interest paid over a longer period if the balance isn't forgiven early through a separate program."
+      ],
+      "table": {
+        "caption": "Repayment Plan Types at a Glance",
+        "headers": [
+          "Plan Type",
+          "Payment Structure",
+          "Best For"
+        ],
+        "rows": [
+          [
+            "Standard",
+            "Fixed payment, 10 years",
+            "Borrowers who can afford higher payments and want to minimize total interest"
+          ],
+          [
+            "Graduated",
+            "Starts low, increases every 2 years",
+            "Borrowers expecting meaningful income growth"
+          ],
+          [
+            "Extended",
+            "Fixed or graduated, up to 25 years",
+            "Lower monthly payment, higher total interest"
+          ],
+          [
+            "Income-driven",
+            "Percentage of discretionary income",
+            "Borrowers with high debt relative to income, or pursuing forgiveness"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "How Income-Driven Plans Connect to Loan Forgiveness",
+      "paragraphs": [
+        "Beyond the forgiveness built into IDR plans themselves after the full repayment term, borrowers working in qualifying public service jobs may be eligible for Public Service Loan Forgiveness (PSLF), which can forgive remaining balances after 120 qualifying payments — generally requiring enrollment in an income-driven plan to maximize the forgiven amount. Because eligibility rules and qualifying payment counts have specific requirements, borrowers pursuing PSLF should confirm their employer and payment history through the official federal student aid resources rather than assuming eligibility."
+      ],
+      "callout": {
+        "title": "Recertify your income every year",
+        "text": "Income-driven plans require annual recertification of your income and family size. Missing this deadline can cause your payment to reset to a much higher amount, so mark the date and recertify on time every year."
+      }
+    },
+    {
+      "heading": "Federal Loan Consolidation",
+      "paragraphs": [
+        "A Direct Consolidation Loan combines multiple federal loans into a single loan with one monthly payment, at a fixed rate that's a weighted average of the rates on the original loans, rounded up slightly. Consolidation doesn't lower your rate the way refinancing can, but it simplifies management, can restore eligibility for certain income-driven plans or forgiveness programs for loan types that wouldn't otherwise qualify, and can help borrowers who've defaulted regain good standing.",
+        "The tradeoff is that consolidating loans that already qualify for a specific forgiveness program can sometimes reset the clock on qualifying payments already made, so it's worth confirming how consolidation would interact with any forgiveness progress before proceeding."
+      ]
+    },
+    {
+      "heading": "Deferment and Forbearance: Options When You're Struggling",
+      "paragraphs": [
+        "Deferment and forbearance both temporarily pause or reduce payments during genuine financial hardship, unemployment, or other qualifying circumstances, without the immediate consequences of missing a payment outright. The key difference is interest: on certain loan types, interest doesn't accrue during deferment, while it typically continues accruing during forbearance regardless of loan type, meaning forbearance can meaningfully increase your total balance if used for an extended period.",
+        "These options are meant as a temporary bridge during genuine hardship, not a long-term substitute for a repayment plan that actually fits your income — switching to an income-driven plan is usually the better long-term solution if the underlying issue is that your income doesn't support your current required payment."
+      ]
+    },
+    {
+      "heading": "Avoiding Default",
+      "paragraphs": [
+        "Federal student loans typically enter default after an extended period of no payments, at which point the consequences escalate significantly: the full balance can become due immediately, wage garnishment and tax refund seizure become possible, and your credit is damaged substantially. Default is also far harder to reverse than it is to prevent — reach out to your loan servicer proactively the moment payments become difficult, since switching plans, requesting deferment or forbearance, or pursuing consolidation are all meaningfully easier before default than the loan rehabilitation process required afterward."
+      ],
+      "callout": {
+        "title": "Contact your servicer before you miss a payment",
+        "text": "Loan servicers have options available before a payment is missed that become considerably more limited afterward. Reaching out proactively at the first sign of financial strain is the single most effective way to avoid default entirely."
+      }
+    },
+    {
+      "heading": "How to Actually Choose",
+      "paragraphs": [
+        "If you can comfortably afford the standard payment, it minimizes total interest and gets you debt-free fastest. If your income is genuinely tight relative to your balance, an income-driven plan can prevent default and keep payments manageable, especially if you're also pursuing PSLF. Graduated and extended plans sit in between, useful for specific situations (expected income growth, or simply needing a lower payment without formally enrolling in an income-driven plan) but rarely the optimal choice for minimizing total cost if a lower-interest alternative like [refinancing](/articles/refinancing-a-mortgage) — for private loans only, since refinancing federal loans forfeits federal protections — is realistically available."
+      ]
+    },
+    {
+      "heading": "Managing Debt Beyond Just Picking a Plan",
+      "paragraphs": [
+        "Whichever plan you choose, treating any extra available cash as an opportunity to pay down principal faster (when that's your goal) reduces total interest paid regardless of the underlying plan structure. If you're instead prioritizing loan forgiveness through an income-driven plan, minimizing your payment rather than overpaying is generally the more strategic approach, since extra payments don't accelerate forgiveness timelines. Building [an emergency fund](/articles/emergency-fund-guide) alongside your student loan strategy protects you from needing to skip a payment during an unexpected financial shock."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "The standard 10-year plan minimizes total interest but carries the highest monthly payment of the standard options.",
+    "Graduated plans start low and rise over time; extended plans stretch the term out, lowering payments but raising total interest.",
+    "Income-driven repayment sets payments as a percentage of discretionary income, with forgiveness after 20-25 years depending on the plan.",
+    "Public Service Loan Forgiveness can forgive remaining balances after 120 qualifying payments for eligible public service employees.",
+    "Choosing the right plan depends on whether you're prioritizing minimizing total interest or maximizing affordability and forgiveness eligibility.",
+    "If pursuing loan forgiveness, minimizing your payment is generally more strategic than overpaying, since extra payments don't speed up forgiveness."
+  ],
+  "faq": [
+    {
+      "question": "Which student loan repayment plan is the cheapest overall?",
+      "answer": "The standard 10-year plan typically results in the least total interest paid, assuming you can comfortably afford the higher monthly payment it requires."
+    },
+    {
+      "question": "How does income-driven repayment work?",
+      "answer": "Your monthly payment is set as a percentage of your discretionary income, recalculated annually, with any remaining balance forgiven after 20 to 25 years depending on the specific plan and loan type."
+    },
+    {
+      "question": "Can I switch repayment plans later?",
+      "answer": "Yes, federal student loan borrowers can generally switch plans as their financial situation changes, though it's worth understanding how a switch affects your progress toward any forgiveness program you may be pursuing."
+    },
+    {
+      "question": "Should I refinance my student loans?",
+      "answer": "Refinancing can lower your rate for private loans, but refinancing federal loans forfeits access to federal protections like income-driven repayment and forgiveness programs — worth weighing carefully before refinancing federal debt specifically."
+    },
+    {
+      "question": "What is Public Service Loan Forgiveness?",
+      "answer": "A federal program that can forgive remaining student loan balances after 120 qualifying monthly payments for borrowers employed in qualifying public service jobs, generally while enrolled in an income-driven repayment plan."
+    },
+    {
+      "question": "What's the difference between deferment and forbearance?",
+      "answer": "Both temporarily pause or reduce payments, but interest typically doesn't accrue during deferment on certain loan types, while it generally continues accruing during forbearance — making forbearance more costly if used for an extended period."
+    },
+    {
+      "question": "What happens if I default on a federal student loan?",
+      "answer": "The full balance can become due immediately, wage garnishment and tax refund seizure become possible, and your credit is damaged significantly. Contacting your servicer before missing payments is far easier than the rehabilitation process required after default."
+    },
+    {
+      "question": "Do private student loans qualify for income-driven repayment or forgiveness?",
+      "answer": "No — these flexible repayment structures and forgiveness programs apply specifically to federal student loans. Private loans are governed by terms set individually by the lender, which are typically far less flexible."
+    }
+  ],
+  "conclusion": "There's no single best student loan repayment plan — the right choice depends on whether your priority is minimizing total interest, maximizing monthly affordability, or positioning for loan forgiveness. Reassessing your plan whenever your income or goals change, and pairing whichever plan you choose with [a real monthly budget](/articles/how-to-create-a-monthly-budget) and [an emergency fund](/articles/emergency-fund-guide), keeps your student debt from being the single point of failure in your broader financial plan.",
+  "internalLinks": [
+    {
+      "anchor": "emergency fund guide",
+      "slug": "emergency-fund-guide"
+    },
+    {
+      "anchor": "how to create a monthly budget",
+      "slug": "how-to-create-a-monthly-budget"
+    },
+    {
+      "anchor": "complete guide to personal loans",
+      "slug": "complete-guide-to-personal-loans"
+    },
+    {
+      "anchor": "debt snowball vs debt avalanche",
+      "slug": "debt-snowball-vs-debt-avalanche"
+    }
+  ],
+  "externalSources": [
+    {
+      "name": "Federal Student Aid — Repayment Plans",
+      "url": "https://studentaid.gov/manage-loans/repayment/plans"
+    },
+    {
+      "name": "Federal Student Aid — Public Service Loan Forgiveness",
+      "url": "https://studentaid.gov/manage-loans/forgiveness-cancellation/public-service"
+    }
+  ],
+  "wordCountEstimate": 1550
+}

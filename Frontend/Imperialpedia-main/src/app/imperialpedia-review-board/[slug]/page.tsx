@@ -22,6 +22,7 @@ export async function generateMetadata({
   return buildMetadata({
     title: `${profile.name} — Imperialpedia`,
     description: `${profile.name} — ${profile.currently}. Expertise: ${profile.expertise}.`,
+    canonical: `/imperialpedia-review-board/${slug}`,
   });
 }
 
