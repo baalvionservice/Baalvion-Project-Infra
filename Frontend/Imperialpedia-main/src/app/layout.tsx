@@ -120,6 +120,9 @@ export default async function RootLayout({
           content="width=device-width, initial-scale=1, viewport-fit=cover"
         />
         <meta name="theme-color" content="#ffffff" />
+        {adsenseClient && (
+          <meta name="google-adsense-account" content={adsenseClient} />
+        )}
       </head>
 
       <body className="font-ui bg-background text-foreground antialiased min-h-screen flex flex-col">
