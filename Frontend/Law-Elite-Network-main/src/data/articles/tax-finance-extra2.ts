@@ -64,6 +64,22 @@ export const taxFinanceExtra2Articles: LawArticle[] = [
 <li>Assuming a deduction in one country exists or works the same way in another.</li>
 </ul>
 
+<h2>Above-the-Line vs Below-the-Line Deductions</h2>
+<p>Not all deductions are created equal in how they interact with the rest of a tax return. Some deductions (often called "above-the-line" in systems that use that terminology) reduce your gross income before other calculations, such as certain retirement-account contributions or specific business expenses for the self-employed — these are generally available whether or not you itemize. "Below-the-line" deductions, by contrast, are only available if you itemize and forgo the standard deduction, and they can also affect other calculations that key off a different income figure (such as eligibility for other credits or phase-outs). Understanding which category a specific deduction falls into is important, because a large "below-the-line" deduction is worthless if the standard deduction is already larger than the sum of all itemized items.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I deduct my home office if I work remotely for an employer?</strong> Rules vary significantly and have tightened in several jurisdictions — many now restrict home-office deductions to genuinely self-employed individuals or specific qualifying conditions, so an ordinary remote employee often cannot claim this even though a freelancer working from the same room might.</p>
+<p><strong>What happens if I claim a deduction I later find out wasn't actually allowed?</strong> Voluntarily correcting an amended return before an audit is discovered is generally treated far more leniently than having the error found during an examination — most systems have a formal amendment process specifically for this.</p>
+<p><strong>Do charitable donations need to be to a registered charity to be deductible?</strong> In most jurisdictions, yes — donations to informal causes, individuals, or unregistered organizations typically don't qualify, even if the cause is genuinely charitable in spirit, so checking an organization's registered status before donating (if the deduction matters to you) is worthwhile.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Internal Revenue Service, Publication 501 (standard deduction) and Schedule A itemizing guidance</li>
+<li>UK HMRC, Self Assessment allowable expenses guidance</li>
+<li>India, Income Tax Act 1961, Chapter VI-A deductions</li>
+<li>OECD, Tax Policy Reforms comparative reports</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Begin by listing the deductions you may genuinely qualify for under your local rules, and compare itemising against any standard deduction. Keep organised records throughout the year rather than scrambling at filing time. For anything beyond a simple return — self-employment, investments, or cross-border income — a qualified accountant or tax adviser can ensure you claim everything you are entitled to without crossing the line into a risky position.</p>
 
@@ -128,6 +144,22 @@ export const taxFinanceExtra2Articles: LawArticle[] = [
 <li>Failing to keep records, so legitimate figures cannot be proven.</li>
 <li>Volunteering excessive information beyond what was actually requested.</li>
 <li>Treating an honest-error audit as a disaster, rather than a process to work through.</li>
+</ul>
+
+<h2>Statute of Limitations on Audits</h2>
+<p>Tax authorities generally cannot audit a return indefinitely — most systems set a statutory window (commonly around three years from filing, though this varies by jurisdiction) after which a routine audit can no longer be opened. This limitation period is usually extended or removed entirely in cases involving a substantial understatement of income, a failure to file a return at all, or suspected fraud, which is one reason keeping records well beyond the minimum required period is generally good practice for anyone with a complex return. Knowing the applicable limitation period also matters when deciding how long to retain supporting documents — discarding records the moment the minimum period technically ends can leave you unable to defend a return if a longer-window exception turns out to apply.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Do I need a lawyer or accountant present during an audit?</strong> It's not always required for a simple correspondence audit, but for anything involving significant sums, a field audit, or any hint of a fraud allegation, professional representation is strongly advisable — representatives can also often communicate with the tax authority on your behalf, reducing direct exposure.</p>
+<p><strong>Can an audit result in criminal charges?</strong> Rarely, and typically only where the tax authority finds evidence of willful, deliberate evasion rather than an honest mistake — most audits, even ones that result in additional tax owed, are resolved civilly through an assessment and payment, not a criminal referral.</p>
+<p><strong>What if I can't afford to pay the additional tax an audit finds I owe?</strong> Most tax authorities offer payment plans or installment agreements rather than expecting immediate full payment — proactively requesting one is usually far better than ignoring the bill, which typically leads to escalating penalties and enforcement action.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Internal Revenue Service, audit process and taxpayer rights guidance</li>
+<li>UK HMRC, Compliance Checks factsheets and Taxpayers' Charter</li>
+<li>India, Income Tax Act 1961, scrutiny assessment and appeal provisions</li>
+<li>OECD Forum on Tax Administration, audit and compliance guidance</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

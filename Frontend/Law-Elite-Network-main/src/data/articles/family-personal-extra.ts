@@ -67,6 +67,22 @@ export const familyPersonalExtraArticles: LawArticle[] = [
 <li>Trying to control custody or waive child support, which courts ignore.</li>
 </ul>
 
+<h2>Postnuptial Agreements and Sunset Clauses</h2>
+<p>Couples who did not sign a prenup are not out of options — a postnuptial agreement, signed after the wedding, can achieve much the same goal, and is also sometimes used to address a specific event during the marriage, such as one spouse starting a business or receiving a large inheritance. Some agreements also include a "sunset clause," under which certain provisions expire or weaken after a set number of years of marriage, reflecting a view that a couple's fairness expectations may reasonably change over a long marriage. Whether courts respect a sunset clause, and how postnups are scrutinized compared to prenups (sometimes more strictly, since the leverage dynamic between spouses differs once already married), depends heavily on the jurisdiction.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can a prenup cover what happens if one spouse is unfaithful?</strong> Some jurisdictions allow narrowly tailored financial consequences tied to specific conduct, but many courts are reluctant to enforce clauses that function as a penalty for personal behavior rather than addressing genuine financial planning.</p>
+<p><strong>Does a prenup need to be updated after having children?</strong> The agreement itself may not need new signatures, but its provisions on spousal support and asset division should be reviewed against the family's new reality — and remember a prenup cannot govern child custody or child support regardless of when it was signed.</p>
+<p><strong>Is a prenup a sign the marriage is likely to fail?</strong> No — it is a risk-management tool, similar in spirit to insurance, used increasingly by couples of all backgrounds, not only those with significant wealth or a previous divorce.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>Uniform Premarital and Marital Agreements Act (U.S. model legislation)</li>
+<li>UK Supreme Court, <em>Radmacher v Granatino</em> (2010)</li>
+<li>India, Special Marriage Act 1954 (contractual marital arrangements)</li>
+<li>European Union Regulation 2016/1103 on matrimonial property regimes</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>If you are considering a prenup, start the conversation early and approach it as joint planning rather than a one-sided demand. Make full financial disclosure, allow plenty of time before the wedding, and ensure each partner has their own lawyer. Because enforceability varies so much by country, have the agreement drafted and reviewed by a family-law specialist where you intend to live, and revisit it after major life changes such as children or a significant change in wealth.</p>
 
@@ -131,6 +147,22 @@ export const familyPersonalExtraArticles: LawArticle[] = [
 <li>Relying on an informal, undocumented arrangement that is hard to enforce later.</li>
 <li>Failing to disclose income honestly, which can lead to recalculation and penalties.</li>
 <li>Assuming support automatically ends at a set age without checking local rules.</li>
+</ul>
+
+<h2>Cross-Border Enforcement</h2>
+<p>Child support disputes become significantly more complex when one parent lives in a different country. To address this, many nations participate in international enforcement frameworks — such as the Hague Convention on the International Recovery of Child Support — that allow a support order made in one member country to be recognized and enforced in another, without requiring the receiving parent to bring an entirely new case abroad. Even so, cross-border cases typically take longer, may require additional documentation (certified translations, proof of parentage), and enforcement mechanisms like wage garnishment can be harder to apply against income earned in a different country. Parents in this situation benefit from early advice specifically experienced in international family law, rather than assuming domestic enforcement tools will simply transfer across the border.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Does child support continue if the paying parent has more children with someone else?</strong> Existing support obligations generally continue, though some formulas allow a modest adjustment to account for new dependents — a new relationship or new children rarely eliminates an existing child's entitlement.</p>
+<p><strong>Can support be modified if the paying parent's income drops?</strong> Yes, typically through a formal modification request showing a genuine, often involuntary, change in circumstances — a voluntary pay cut or job change taken specifically to reduce support obligations is generally scrutinized and may not be accepted.</p>
+<p><strong>Is child support taxable income for the receiving parent?</strong> In most jurisdictions, no — child support is typically treated as neither deductible for the payer nor taxable for the recipient, unlike spousal support, which is taxed differently depending on the jurisdiction and, in some places, the date of the agreement.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>Hague Convention on the International Recovery of Child Support and Family Maintenance (2007)</li>
+<li>UK Child Maintenance Service, calculation guidance</li>
+<li>U.S. Office of Child Support Enforcement, state guideline models</li>
+<li>India, Protection of Women from Domestic Violence Act 2005 (maintenance provisions)</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

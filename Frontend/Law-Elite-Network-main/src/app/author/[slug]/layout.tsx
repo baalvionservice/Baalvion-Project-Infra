@@ -55,6 +55,12 @@ export default async function AuthorLayout(
     jobTitle: a.title || undefined,
     description: a.bio || undefined,
     knowsAbout: a.expertise && a.expertise.length ? a.expertise : undefined,
+    // Bar admission / experience line — shown to human readers under the byline
+    // (see the `credentials` field on CmsAuthor/LawAuthor) but previously absent
+    // from structured data, so crawlers had no machine-readable E-E-A-T signal.
+    hasCredential: a.credentials
+      ? { '@type': 'EducationalOccupationalCredential', name: a.credentials }
+      : undefined,
     sameAs: sameAs && sameAs.length ? sameAs : undefined,
     worksFor: { '@type': 'Organization', name: 'Law Elite Network', url: SITE },
   };
