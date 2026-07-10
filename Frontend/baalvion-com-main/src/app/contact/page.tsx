@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
 import { PageShell } from '@/components/page/page-shell';
 import { ContactForm } from '@/components/contact/contact-form';
-import { CONTACT } from '@/lib/content';
+import { CONTACT, ROUTES } from '@/lib/content';
 import { CONTACT_PAGE } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Contact',
   description:
     'Contact Baalvion. Reach support, business, privacy, security, or legal directly, or send a message. We aim to respond within two business days.',
-  alternates: { canonical: '/contact' },
-};
+  path: ROUTES.contact,
+});
 
 export default function ContactPage() {
   return (

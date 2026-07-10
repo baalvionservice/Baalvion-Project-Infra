@@ -19,6 +19,7 @@ export const SITE = {
 export const EXTERNAL = {
   about: 'https://about.baalvion.com',
   ir: 'https://ir.baalvion.com',
+  talent: 'https://jobs.baalvion.com',
 } as const;
 
 /**
@@ -33,6 +34,16 @@ export const ROUTES = {
   contact: '/contact',
   email: '/email',
   security: '/security',
+  trust: '/trust',
+  trustGovernance: '/trust/governance',
+  trustReliability: '/trust/reliability',
+  solutions: '/solutions',
+  solutionsEnterprises: '/solutions/enterprises',
+  solutionsFinancial: '/solutions/financial-institutions',
+  solutionsGovernments: '/solutions/governments',
+  partners: '/partners',
+  investors: '/investors',
+  careers: '/careers',
   signin: '/signin',
   register: '/register',
   recovery: '/account/recovery',
@@ -55,11 +66,73 @@ export const CONTACT = {
   regions: ['Americas', 'EMEA', 'APAC'],
 } as const;
 
-export const NAV = [
+export interface NavChild {
+  label: string;
+  href: string;
+  description: string;
+}
+
+export interface NavItem {
+  label: string;
+  href: string;
+  /** Present only on items that open a mega-menu panel. */
+  children?: NavChild[];
+  /** Optional link shown at the foot of the panel, e.g. "View the full network". */
+  more?: { label: string; href: string };
+}
+
+/**
+ * Primary navigation. Items with `children` render as a mega-menu disclosure;
+ * items without render as a plain link. Every href resolves to a real page —
+ * no speculative IA, nothing built ahead of the content that justifies it.
+ */
+export const NAV: NavItem[] = [
   { label: 'Company', href: ROUTES.about },
-  { label: 'Platform', href: ROUTES.services },
-  { label: 'Network', href: '/#network' },
-  { label: 'Email', href: ROUTES.email },
+  {
+    label: 'Platform',
+    href: ROUTES.services,
+    children: [
+      { label: 'Trade Infrastructure', href: `${ROUTES.services}#trade`, description: 'The rails beneath global commerce.' },
+      { label: 'Market & Financial Systems', href: `${ROUTES.services}#markets`, description: 'Settlement, ledgers, and the discipline beneath capital.' },
+      { label: 'Ecosystem Platforms', href: `${ROUTES.services}#ecosystem`, description: 'Where institutions connect, transact, and operate.' },
+      { label: 'Intelligence Systems', href: `${ROUTES.services}#intelligence`, description: 'Judgment, encoded into infrastructure.' },
+    ],
+    more: { label: 'All platform & services', href: ROUTES.services },
+  },
+  {
+    label: 'Solutions',
+    href: ROUTES.solutions,
+    children: [
+      { label: 'Enterprises & Institutions', href: ROUTES.solutionsEnterprises, description: 'Operating environments built for institutional dependence.' },
+      { label: 'Financial Institutions', href: ROUTES.solutionsFinancial, description: 'Settlement and ledgering built to institutional tolerance.' },
+      { label: 'Governments & Regulators', href: ROUTES.solutionsGovernments, description: 'Infrastructure designed to be examined.' },
+      { label: 'Partners', href: ROUTES.partners, description: 'Extend the foundation into markets we do not reach alone.' },
+      { label: 'Investors', href: ROUTES.investors, description: 'A long-horizon foundation, evaluated on its own terms.' },
+    ],
+  },
+  {
+    label: 'Trust Center',
+    href: ROUTES.trust,
+    children: [
+      { label: 'Security', href: ROUTES.security, description: 'Passwordless auth, encryption, isolation, least-privilege access.' },
+      { label: 'Governance', href: ROUTES.trustGovernance, description: 'Jurisdiction, accountability, and regulatory posture.' },
+      { label: 'Reliability', href: ROUTES.trustReliability, description: 'What is live, what is being built, stated plainly.' },
+      { label: 'Legal & Policies', href: ROUTES.privacy, description: 'Terms, privacy, cookies, and data protection.' },
+    ],
+  },
+  {
+    label: 'Network',
+    href: '/#network',
+    children: [
+      { label: 'Global Trade', href: 'https://trade.baalvion.com', description: 'Cross-border trade infrastructure and settlement.' },
+      { label: 'Mining & Resources', href: 'https://mining.baalvion.com', description: 'Resource and commodity operations infrastructure.' },
+      { label: 'Markets', href: 'https://market.baalvion.com', description: 'Financial and market systems at institutional tolerance.' },
+      { label: 'Talent', href: EXTERNAL.talent, description: 'The connective layer for institutional talent.' },
+      { label: 'Connect', href: 'https://connect.baalvion.com', description: 'Where institutions and counterparties transact.' },
+      { label: 'Enterprise Access', href: 'https://dashboard.baalvion.com', description: 'The operator’s command surface.' },
+    ],
+    more: { label: 'View the full network + independent brands', href: '/#network' },
+  },
   { label: 'Contact', href: ROUTES.contact },
 ] as const;
 
@@ -417,7 +490,7 @@ export const INSIGHT: {
 };
 
 export const CLOSING = {
-  folio: '§ 08',
+  folio: '§ 09',
   label: 'Orientation',
   headline: 'Built to be depended on',
   body: 'Baalvion is the foundation beneath a multi-domain operating group — infrastructure designed for permanence, governed for trust, and held for the long horizon. Whether you are evaluating the foundation, partnering across a platform, or studying how it is governed, the institutional record begins here.',
@@ -434,7 +507,7 @@ export const FOOTER = {
       links: [
         { label: 'About', href: ROUTES.about },
         { label: 'Platform & Services', href: ROUTES.services },
-        { label: 'The Network', href: '/#network' },
+        { label: 'Solutions', href: ROUTES.solutions },
         { label: 'Investor Relations', href: EXTERNAL.ir },
       ],
     },
@@ -451,9 +524,9 @@ export const FOOTER = {
       title: 'Support',
       links: [
         { label: 'Contact', href: ROUTES.contact },
-        { label: 'Security', href: ROUTES.security },
-        { label: 'Status', href: ROUTES.contact },
-        { label: 'support@baalvion.com', href: `mailto:${CONTACT.support}` },
+        { label: 'Trust Center', href: ROUTES.trust },
+        { label: 'Partners', href: ROUTES.partners },
+        { label: 'Careers', href: ROUTES.careers },
       ],
     },
     {

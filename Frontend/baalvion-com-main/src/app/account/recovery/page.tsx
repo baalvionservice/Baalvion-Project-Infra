@@ -2,13 +2,15 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { AuthShell } from '@/components/auth/auth-shell';
 import { CONTACT, ROUTES } from '@/lib/content';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Account access & recovery',
   description:
     'Regain access to your Baalvion account. Sign-in is passwordless, so there is no password to reset — request a fresh one-time code by email to get back in.',
-  robots: { index: false, follow: false },
-};
+  path: ROUTES.recovery,
+  noindex: true,
+});
 
 const STEPS = [
   'Go to sign in and enter the email address on your account.',

@@ -2,14 +2,15 @@ import type { Metadata } from 'next';
 import { PageShell } from '@/components/page/page-shell';
 import { LegalArticle } from '@/components/page/legal-article';
 import { LEGAL_DOCS } from '@/lib/legal';
+import { pageMetadata } from '@/lib/seo';
 
 const doc = LEGAL_DOCS.privacy;
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: doc.title,
   description: doc.summary,
-  alternates: { canonical: '/legal/privacy' },
-};
+  path: '/legal/privacy',
+});
 
 export default function PrivacyPage() {
   return (

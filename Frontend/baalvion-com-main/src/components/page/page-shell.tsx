@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { SiteHeader } from '@/components/site-header';
 import { SiteFooter } from '@/components/site-footer';
+import { Breadcrumbs, type Crumb } from './breadcrumbs';
 
 interface PageShellProps {
   /** Engraved folio, e.g. "§ 01". */
@@ -11,21 +12,24 @@ interface PageShellProps {
   eyebrow?: string;
   title: string;
   lede?: string;
+  /** Intermediate parents between Home and this page, e.g. [{ label: 'Trust Center', href: '/trust' }]. */
+  breadcrumbs?: Crumb[];
   children: ReactNode;
 }
 
 /**
  * Standard frame for every standalone page: the running header, a ledger-style
- * page header (folio + eyebrow + running head + lede), the page body, and the
- * colophon footer. Top padding clears the fixed masthead.
+ * page header (breadcrumb + folio + eyebrow + running head + lede), the page
+ * body, and the colophon footer. Top padding clears the fixed masthead.
  */
-export function PageShell({ folio, label, eyebrow, title, lede, children }: PageShellProps) {
+export function PageShell({ folio, label, eyebrow, title, lede, breadcrumbs, children }: PageShellProps) {
   return (
     <>
       <SiteHeader />
       <main id="main" tabIndex={-1} className="outline-none">
         <header className="relative border-b hairline-strong bg-ink-deep">
           <div className="site-container pb-12 pt-28 md:pb-16 md:pt-36">
+            {breadcrumbs && <Breadcrumbs items={breadcrumbs} current={label} />}
             <p className="mono-label mb-4 text-accent">
               {folio} · {label}
             </p>

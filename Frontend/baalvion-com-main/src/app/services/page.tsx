@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { PageShell } from '@/components/page/page-shell';
 import { ROUTES } from '@/lib/content';
 import { SERVICES } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Platform & Services',
   description:
     'The four domains Baalvion operates — trade infrastructure, market and financial systems, ecosystem platforms, and intelligence systems — on one operational fabric with a single passwordless account layer.',
-  alternates: { canonical: '/services' },
-};
+  path: ROUTES.services,
+});
 
 export default function ServicesPage() {
   return (
@@ -25,7 +26,7 @@ export default function ServicesPage() {
         <div className="site-container py-16 md:py-20">
           <div className="grid gap-px lg:grid-cols-2">
             {SERVICES.domains.map((d) => (
-              <article key={d.title} className="bg-surface p-8 md:p-10">
+              <article key={d.title} id={d.id} className="scroll-mt-24 bg-surface p-8 md:p-10">
                 <p className="mono-label mb-4 text-accent">{d.index}</p>
                 <h2 className="display-h3 mb-1">{d.title}</h2>
                 <p className="mono-caption mb-5">{d.tagline}</p>

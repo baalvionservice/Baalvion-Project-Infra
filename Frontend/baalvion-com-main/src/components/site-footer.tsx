@@ -1,5 +1,10 @@
+import Link from 'next/link';
 import { FOOTER, SITE } from '@/lib/content';
 import { Wordmark } from './wordmark';
+
+function isInternal(href: string): boolean {
+  return href.startsWith('/');
+}
 
 /** The colophon — the plinth at the base of the charter. */
 export function SiteFooter() {
@@ -18,16 +23,27 @@ export function SiteFooter() {
           <nav key={column.title} aria-label={column.title}>
             <p className="mono-label mb-4">{column.title}</p>
             <ul className="space-y-3">
-              {column.links.map((link) => (
-                <li key={link.label}>
-                  <a
-                    href={link.href}
-                    className="text-sm text-foreground/80 transition-colors duration-200 hover:text-accent active:text-accent-ink"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
+              {column.links.map((link) =>
+                isInternal(link.href) ? (
+                  <li key={link.label}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-foreground/80 transition-colors duration-200 hover:text-accent active:text-accent-ink"
+                    >
+                      {link.label}
+                    </Link>
+                  </li>
+                ) : (
+                  <li key={link.label}>
+                    <a
+                      href={link.href}
+                      className="text-sm text-foreground/80 transition-colors duration-200 hover:text-accent active:text-accent-ink"
+                    >
+                      {link.label}
+                    </a>
+                  </li>
+                )
+              )}
             </ul>
           </nav>
         ))}
