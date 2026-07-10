@@ -8,6 +8,10 @@
 const fx = require('./fx');
 const tracking = require('./tracking');
 const esign = require('./esign');
+const notificationChannels = require('./notificationChannels');
+const weather = require('./weather');
+const traffic = require('./traffic');
+const gps = require('../service/tracking-platform/geoProviders/gps');
 
 // Declared integrations + the env key that activates 'live' mode.
 const REGISTRY = [
@@ -19,6 +23,17 @@ const REGISTRY = [
     { name: 'ocr', key: 'OCR_API_KEY', note: 'Document OCR/extraction' },
     { name: 'tracking', key: 'TRACKING_API_KEY', note: 'Carrier shipment tracking (live aggregator or simulated)', impl: tracking },
     { name: 'esign', key: 'ESIGN_API_KEY', note: 'E-signature for B/L + contracts (DocuSeal/Adobe Sign)', impl: esign },
+    { name: 'whatsapp', key: 'WHATSAPP_API_KEY', note: 'Shipment alert delivery via WhatsApp Business API' },
+    { name: 'slack', key: 'SLACK_WEBHOOK_URL', note: 'Shipment alert delivery via Slack incoming webhook' },
+    { name: 'teams', key: 'TEAMS_WEBHOOK_URL', note: 'Shipment alert delivery via Microsoft Teams incoming webhook' },
+    { name: 'tracking_webhook', key: 'TRACKING_WEBHOOK_URL', note: 'Generic outbound webhook for shipment alert fan-out' },
+    { name: 'weather', key: 'OPENWEATHER_API_KEY', note: 'Weather signal for ETA prediction (live aggregator or simulated)', impl: weather },
+    { name: 'traffic', key: 'TOMTOM_TRAFFIC_API_KEY', note: 'Traffic signal for ETA prediction (live aggregator or simulated)', impl: traffic },
+    { name: 'gps_google', key: 'GOOGLE_MAPS_API_KEY', note: 'Live GPS position lookup via Google Maps' },
+    { name: 'gps_mapbox', key: 'MAPBOX_ACCESS_TOKEN', note: 'Live GPS position lookup via Mapbox' },
+    { name: 'gps_tomtom', key: 'TOMTOM_API_KEY', note: 'Live GPS position lookup via TomTom' },
+    { name: 'gps_here', key: 'HERE_API_KEY', note: 'Live GPS position lookup via HERE' },
+    { name: 'gps_traccar', key: 'TRACCAR_API_URL', note: 'Live GPS position lookup via a self-hosted Traccar server' },
 ];
 
 function mode(entry) {
@@ -56,4 +71,4 @@ async function healthAll() {
     return { generatedAt: new Date().toISOString(), cache: cache.health(), providers: [live, ...others] };
 }
 
-module.exports = { fx, tracking, esign, validateEnv, logEnvReport, healthAll, REGISTRY };
+module.exports = { fx, tracking, esign, notificationChannels, weather, traffic, gps, validateEnv, logEnvReport, healthAll, REGISTRY };

@@ -32,5 +32,15 @@ module.exports = (sequelize, DataTypes) => {
         timestamps: true,
     });
 
+    // shipment_id is client-supplied, unvalidated free text (see
+    // controller/insuranceController.js) and its column type (TEXT) doesn't
+    // match either candidate target: trade.shipments.id (legacy, INTEGER) or
+    // tradeops.shipments.id (UUID). Deliberately NOT adding a belongsTo here —
+    // a hard FK would risk failing migration against existing data of unknown
+    // shape, and even a soft (`constraints: false`) association would emit a
+    // broken `text = uuid` JOIN against tradeops.shipments at query time.
+    // Resolving which table is authoritative (and normalizing the column type
+    // to match) is a data-migration task, not a same-pass schema addition.
+
     return InsurancePolicy;
 };

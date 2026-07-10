@@ -29,8 +29,10 @@ export function LogisticsPanel({ shipmentId, shipment, mayEdit }: { shipmentId: 
   async function runOptimize() {
     try {
       await optimize.mutateAsync({
-        origin: { hub: shipment?.origin ?? undefined },
-        destination: { hub: shipment?.destination ?? undefined },
+        request: {
+          origin: { hub: shipment?.origin ?? undefined },
+          destination: { hub: shipment?.destination ?? undefined },
+        },
         shipment_id: shipmentId,
       });
       toast({ title: 'Routes optimized' });
@@ -86,7 +88,7 @@ export function LogisticsPanel({ shipmentId, shipment, mayEdit }: { shipmentId: 
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(['cheapest', 'fastest', 'balanced'] as RouteStrategy[]).map((strategy) => {
+                  {(['cheapest', 'fastest', 'balanced', 'green'] as RouteStrategy[]).map((strategy) => {
                     const route = latest[strategy] as RouteCandidate | null | undefined;
                     if (!route) return null;
                     const chosen = latest.selected_strategy === strategy;
@@ -95,7 +97,7 @@ export function LogisticsPanel({ shipmentId, shipment, mayEdit }: { shipmentId: 
                         <TableCell className="text-xs font-medium capitalize">{strategy}</TableCell>
                         <TableCell className="text-xs">{route.legs?.length ?? 0}</TableCell>
                         <TableCell className="text-xs">{formatCurrency(route.total_cost ?? 0, 'USD')}</TableCell>
-                        <TableCell className="text-xs">{route.total_eta_days ?? '—'}</TableCell>
+                        <TableCell className="text-xs">{route.total_transit_days ?? '—'}</TableCell>
                         <TableCell className="text-right">
                           {chosen ? (
                             <Badge variant="default"><CheckCircle2 className="mr-1 h-3 w-3" /> Chosen</Badge>

@@ -15,6 +15,12 @@ const QUEUE_NAMES = [
     'customs_submission', // customs gateway filing pipeline → ICEGATE/ACE/CDS/Mirsal (Prompt 9)
     'dispatch_webhook',   // dispatch orchestration lifecycle webhook fan-out (Prompt 11)
     'verification_monitor', // Phase 2 Continuous Monitoring — recompute compliance/risk/trust + expiry/fraud scans
+    'tracking_sync', // Logistics Core Foundation (Phase 2) — async/bulk GPS + carrier-webhook tracking-event ingestion
+    'freight_carrier_performance_refresh', // Freight Management (Phase 3, Prompt 2) — periodic carrier performance aggregate
+    'iot_ingest',      // Shipment Tracking Platform (Phase 3, Prompt 6) — async/bulk IoT sensor-reading ingestion
+    'eta_predict',     // Shipment Tracking Platform — periodic live ETA re-prediction sweep
+    'delay_sweep',     // Shipment Tracking Platform — periodic delay-cause detection sweep
+    'notification_dispatch', // Shipment Tracking Platform — async retry of a failed alert-channel notification
 ];
 const DLQ = 'dead-letter';
 
