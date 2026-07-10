@@ -255,6 +255,20 @@ export const NAVIGATION: NavGroup[] = [
           { title: 'Analytics', href: '/cms/websites/imperialpedia/analytics', iconName: 'BarChart3' },
         ],
       },
+      {
+        title: 'News Intelligence',
+        href: '/news-intelligence',
+        iconName: 'Radar',
+        children: [
+          { title: 'Overview', href: '/news-intelligence',          iconName: 'LayoutDashboard' },
+          { title: 'Sources',  href: '/news-intelligence/sources',  iconName: 'Rss'              },
+          { title: 'Articles', href: '/news-intelligence/articles', iconName: 'Newspaper'        },
+          { title: 'Trending', href: '/news-intelligence/trending', iconName: 'TrendingUp'       },
+          { title: 'AI',       href: '/news-intelligence/ai',       iconName: 'Sparkles'         },
+          { title: 'Images',   href: '/news-intelligence/images',   iconName: 'Image'            },
+          { title: 'SEO',      href: '/news-intelligence/seo',      iconName: 'Search'           },
+        ],
+      },
     ],
   },
   {

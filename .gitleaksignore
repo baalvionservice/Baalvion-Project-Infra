@@ -8,3 +8,9 @@
 # token sitting next to the word "keys". Suppressed by fingerprint so genuine
 # secrets anywhere else still fail the scan.
 41506bb14f25ebeb6d1a59dd607b60bc1a2244ce:Frontend/Global-Trade-Infrastructure-main/docs/engines/CERTIFICATE-REGISTRY.md:generic-api-key:193
+
+# Baalvion Intelligence "Getting Started" docs page. The curl example shows the
+# literal placeholder `YOUR_API_KEY` as the Authorization header value — not a
+# real credential. gitleaks' curl-auth-header rule flags the header shape
+# itself regardless of placeholder content.
+522afe17975d21c14c758d511c5ef96cc7548896:Frontend/baalvion-intelligence/src/app/(marketing)/docs/getting-started/page.tsx:curl-auth-header:8
