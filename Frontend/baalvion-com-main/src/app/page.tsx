@@ -8,6 +8,7 @@ import { Principles } from '@/components/sections/principles';
 import { Presence } from '@/components/sections/presence';
 import { Network } from '@/components/sections/network';
 import { Insight } from '@/components/sections/insight';
+import { Audiences } from '@/components/sections/audiences';
 import { Closing } from '@/components/sections/closing';
 
 export default function HomePage() {
@@ -23,6 +24,7 @@ export default function HomePage() {
         <Presence />
         <Network />
         <Insight />
+        <Audiences />
         <Closing />
       </main>
       <SiteFooter />

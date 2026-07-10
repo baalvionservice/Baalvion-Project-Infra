@@ -25,7 +25,7 @@ export default function ServicesPage() {
         <div className="site-container py-16 md:py-20">
           <div className="grid gap-px lg:grid-cols-2">
             {SERVICES.domains.map((d) => (
-              <article key={d.title} className="bg-surface p-8 md:p-10">
+              <article key={d.title} id={d.id} className="scroll-mt-24 bg-surface p-8 md:p-10">
                 <p className="mono-label mb-4 text-accent">{d.index}</p>
                 <h2 className="display-h3 mb-1">{d.title}</h2>
                 <p className="mono-caption mb-5">{d.tagline}</p>

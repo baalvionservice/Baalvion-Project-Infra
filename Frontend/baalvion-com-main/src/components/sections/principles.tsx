@@ -1,6 +1,7 @@
+import Link from 'next/link';
 import { SectionShell } from '@/components/structure/section-shell';
 import { Reveal } from '@/components/reveal';
-import { PRINCIPLES } from '@/lib/content';
+import { PRINCIPLES, ROUTES } from '@/lib/content';
 
 export function Principles() {
   return (
@@ -32,6 +33,19 @@ export function Principles() {
           </Reveal>
         ))}
       </div>
+
+      <Reveal delay={PRINCIPLES.items.length * 60}>
+        <p className="body mt-8">
+          Governance, isolation, and accountability are detailed in full in the{' '}
+          <Link
+            href={ROUTES.trust}
+            className="text-foreground underline decoration-line-strong underline-offset-4 transition-colors hover:text-accent hover:decoration-accent"
+          >
+            Trust Center
+          </Link>
+          .
+        </p>
+      </Reveal>
     </SectionShell>
   );
 }

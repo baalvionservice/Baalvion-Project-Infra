@@ -19,6 +19,7 @@ export default function SecurityPage() {
       eyebrow={SECURITY.eyebrow}
       title={SECURITY.title}
       lede={SECURITY.lede}
+      breadcrumbs={[{ label: 'Trust Center', href: ROUTES.trust }]}
     >
       {/* Practices */}
       <section className="border-b hairline bg-ink">
