@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { PageShell } from '@/components/page/page-shell';
 import { ROUTES } from '@/lib/content';
 import { ABOUT } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'About Baalvion',
   description:
     'Baalvion is a multi-jurisdiction holding company for foundational infrastructure — the systems beneath global trade, markets, and digital ecosystems. Read our mission, vision, and values.',
-  alternates: { canonical: '/about' },
-};
+  path: ROUTES.about,
+});
 
 export default function AboutPage() {
   return (

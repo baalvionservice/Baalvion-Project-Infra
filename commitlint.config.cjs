@@ -31,6 +31,9 @@ module.exports = {
         "chore",
         "revert",
         "style",
+        // "merge: bring in main (PR #...)" is this repo's established convention
+        // for merge commits that reconcile a long-lived branch with main.
+        "merge",
       ],
     ],
   },
