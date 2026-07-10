@@ -8,20 +8,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { usageSummary } from "@/lib/mock-data";
 
-const FULL_KEY = "bvi_live_51H8x2K9pQ7mZrT3vLwYc4bN0sJdF6gA";
+function generateMockKey(): string {
+  return `bvi_demo_${Math.random().toString(36).slice(2, 34)}`;
+}
 
 function mask(key: string): string {
   return `${key.slice(0, 12)}${"•".repeat(key.length - 16)}${key.slice(-4)}`;
 }
 
 export function ApiKeysView() {
-  const [key, setKey] = useState(FULL_KEY);
+  const [key, setKey] = useState(() => generateMockKey());
   const [revealed, setRevealed] = useState(false);
   const [revoked, setRevoked] = useState(false);
 
   function regenerate() {
-    const nextKey = `bvi_live_${Math.random().toString(36).slice(2, 34)}`;
-    setKey(nextKey);
+    setKey(generateMockKey());
     setRevoked(false);
     setRevealed(false);
   }
