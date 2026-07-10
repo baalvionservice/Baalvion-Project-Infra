@@ -68,6 +68,10 @@ export const tradeApi = {
   post: <T>(path: string, body: unknown = {}): Promise<T> => unwrap<T>(apiClient.post<T>(path, body)),
   patch: <T>(path: string, body: unknown = {}): Promise<T> => unwrap<T>(apiClient.patch<T>(path, body)),
   put: <T>(path: string, body: unknown = {}): Promise<T> => unwrap<T>(apiClient.put<T>(path, body)),
+  // apiClient.delete() is typed ApiResponse<boolean> (a generic ack), but every
+  // trade-service DELETE handler actually returns a small object envelope
+  // (e.g. { id, deleted: true }) — callers supply T for that real shape.
+  delete: <T>(path: string): Promise<T> => unwrap<T>(apiClient.delete(path) as unknown as Promise<import('@/types/api').ApiResponse<T>>),
 };
 
 /** A human-readable message from any thrown error (TradeApiError, Error, or unknown). */

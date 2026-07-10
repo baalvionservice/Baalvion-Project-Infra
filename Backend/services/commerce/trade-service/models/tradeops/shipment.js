@@ -73,6 +73,23 @@ module.exports = (sequelize, DataTypes) => {
         Shipment.hasMany(db.Container, { as: 'containers', foreignKey: 'shipment_id' });
         Shipment.hasMany(db.LogisticsPackage, { as: 'packages', foreignKey: 'shipment_id' });
         Shipment.hasMany(db.TrackingEvent, { as: 'trackingEvents', foreignKey: 'shipment_id' });
+        // Logistics Core Foundation, Phase 2:
+        Shipment.hasMany(db.FleetAssignment, { as: 'fleetAssignments', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.InventoryMovement, { as: 'inventoryMovements', foreignKey: 'shipment_id' });
+        // Logistics Core Foundation, Phase 3:
+        Shipment.hasMany(db.ShipmentCharge, { as: 'charges', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.Incident, { as: 'incidents', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.ShipmentReturn, { as: 'returns', foreignKey: 'shipment_id' });
+        // Shipment Tracking & Global Visibility Platform:
+        Shipment.hasMany(db.ShipmentCheckpoint, { as: 'checkpoints', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.ShipmentAlert, { as: 'alerts', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.ShipmentNotification, { as: 'notifications', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.IotDevice, { as: 'iotDevices', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.ProofOfDelivery, { as: 'proofOfDelivery', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.EtaPrediction, { as: 'etaPredictions', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.DelayEvent, { as: 'delayEvents', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.ShipmentRoute, { as: 'routes', foreignKey: 'shipment_id' });
+        Shipment.hasMany(db.GeofenceEvent, { as: 'geofenceEvents', foreignKey: 'shipment_id' });
     };
 
     return Shipment;

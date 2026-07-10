@@ -143,10 +143,12 @@ function isOperationInScope(operation, access, partyOrgIds = []) {
  * status-transition history + workflow transitions, normalised to one shape.
  */
 async function getTimeline(shipmentId) {
-    const [events, history, workflow] = await Promise.all([
+    const [events, history, workflow, trackingEvents, checkpoints] = await Promise.all([
         db.ShipmentEvent.findAll({ where: { shipment_id: shipmentId }, order: [['occurred_at', 'ASC']] }),
         db.ShipmentStatusHistory.findAll({ where: { shipment_id: shipmentId }, order: [['changed_at', 'ASC']] }),
         db.ShipmentWorkflow.findOne({ where: { shipment_id: shipmentId } }),
+        db.TrackingEvent.findAll({ where: { shipment_id: shipmentId }, order: [['occurred_at', 'ASC']] }),
+        db.ShipmentCheckpoint.findAll({ where: { shipment_id: shipmentId }, order: [['sequence', 'ASC']] }),
     ]);
 
     const entries = [];
@@ -193,6 +195,37 @@ async function getTimeline(shipmentId) {
                 to: t.to_state,
                 actor: t.actor,
                 id: t.id,
+            });
+        }
+    }
+
+    // Shipment Tracking & Global Visibility Platform: fold in GPS/carrier pings
+    // and physical checkpoints so this stays the single merged timeline rather
+    // than growing a second competing endpoint.
+    for (const g of trackingEvents) {
+        entries.push({
+            kind: 'tracking',
+            at: g.occurred_at,
+            title: g.event_type,
+            description: g.description,
+            location: (g.latitude != null || g.location_label)
+                ? { name: g.location_label, lat: g.latitude, lng: g.longitude } : null,
+            source: g.source,
+            id: g.id,
+        });
+    }
+    for (const c of checkpoints) {
+        if (c.arrived_at) {
+            entries.push({
+                kind: 'checkpoint', at: c.arrived_at, title: `Arrived: ${c.name || c.checkpoint_type}`,
+                checkpointType: c.checkpoint_type, id: `${c.id}:arrive`,
+            });
+        }
+        if (c.departed_at) {
+            entries.push({
+                kind: 'checkpoint', at: c.departed_at, title: `Departed: ${c.name || c.checkpoint_type}`,
+                checkpointType: c.checkpoint_type, delayMinutes: c.delay_minutes, waitingMinutes: c.waiting_minutes,
+                id: `${c.id}:depart`,
             });
         }
     }

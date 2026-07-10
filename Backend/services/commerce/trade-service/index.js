@@ -87,6 +87,7 @@ app.get('/health/ready', async (req, res) => {
     }
 });
 app.get('/metrics', metricsHandler);
+require('./config/swagger').mountSwagger(app);
 
 app.use('/v1', v1Routes);
 app.use('/api/v1', v1Routes);
@@ -110,6 +111,12 @@ const start = async () => {
         if (process.env.QUEUE_WORKERS !== 'false') {
             require('./queue/workers').startWorkers();
         }
+        // Logistics Core Foundation (Phase 4) — drains tradeops.event_outbox to the
+        // configured event bus (no-ops if @baalvion/events isn't installed yet, or
+        // if EVENT_TRANSPORT is unset — see service/events/logisticsEvents.js).
+        if (process.env.LOGISTICS_EVENT_RELAY !== 'false') {
+            require('./service/events/logisticsEvents').startLogisticsEventRelay();
+        }
     } catch (err) {
         console.error('[trade-service] DB connection failed:', err.message);
         process.exit(1);
@@ -123,6 +130,11 @@ const start = async () => {
         if (process.env.QUEUE_WORKERS !== 'false') {
             const { stopWorkers } = require('./queue/workers');
             if (typeof stopWorkers === 'function') await stopWorkers();
+        }
+    });
+    registerShutdown('logistics-event-relay', async () => {
+        if (process.env.LOGISTICS_EVENT_RELAY !== 'false') {
+            await require('./service/events/logisticsEvents').stopLogisticsEventRelay();
         }
     });
     registerShutdown('db', async () => { if (db.sequelize && db.sequelize.close) await db.sequelize.close(); });

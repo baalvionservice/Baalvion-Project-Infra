@@ -5,6 +5,7 @@
  */
 'use client';
 
+import 'leaflet/dist/leaflet.css';
 import { DashboardHeader } from "./_components/header";
 import { DashboardSidebar } from "./_components/sidebar";
 import { WorkspaceShell } from "./_components/workspace-shell";

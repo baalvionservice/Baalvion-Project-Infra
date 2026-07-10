@@ -1,15 +1,18 @@
 'use strict';
 /**
- * Logistics Core Foundation (Phase 1) — GPS/carrier tracking events. Append-only
+ * Logistics Core Foundation — GPS/carrier tracking events. Append-only
  * (no update/delete): TrackingEvent has no `paranoid`/`updatedAt`, matching
- * ShipmentEvent's high-volume audit-log shape.
+ * ShipmentEvent's high-volume audit-log shape. `create` (Phase 1) writes
+ * synchronously; `ingest` (Phase 2) enqueues onto the `tracking_sync` BullMQ
+ * queue for bulk/async ingestion — both funnel through the same
+ * service/tracking/trackingEngine.js logic.
  */
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const { parseListQuery } = require('../utils/pagination');
-
-const TRACKING_SOURCES = ['carrier_webhook', 'gps_device', 'manual'];
+const { recordTrackingEvent } = require('../service/tracking/trackingEngine');
+const { enqueue } = require('../queue');
 
 function isAdmin(req) {
     const roles = (req.auth && req.auth.roles) || [];
@@ -63,43 +66,42 @@ const get = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// Synchronous single-event write — low-volume, needs an immediate confirmed
+// response (e.g. a dispatcher manually logging a checkpoint).
 const create = async (req, res, next) => {
     try {
         const b = req.body || {};
-        if (!b.shipmentId && !b.shipment_id) return next(new AppError('BAD_REQUEST', 'shipmentId is required', 400));
-        const source = b.source || 'manual';
-        if (!TRACKING_SOURCES.includes(source)) {
-            return next(new AppError('VALIDATION_ERROR', `source must be one of: ${TRACKING_SOURCES.join(', ')}`, 400));
-        }
-        if (!b.eventType && !b.event_type) return next(new AppError('BAD_REQUEST', 'eventType is required', 400));
         const tenantId = callerTenantId(req);
-        const row = await db.TrackingEvent.create({
-            shipment_id: b.shipmentId ?? b.shipment_id,
-            container_id: b.containerId ?? b.container_id,
-            source,
-            event_type: b.eventType ?? b.event_type,
-            description: b.description,
-            latitude: b.latitude,
-            longitude: b.longitude,
-            location_label: b.locationLabel ?? b.location_label,
-            occurred_at: b.occurredAt ?? b.occurred_at ?? new Date(),
-            raw_payload: b.rawPayload ?? b.raw_payload ?? {},
-            created_by: req.auth && req.auth.userId,
-            ...(tenantId ? { tenant_id: tenantId } : {}),
-        });
-        // Best-effort: keep the shipment's headline location current.
-        if (row.latitude != null || row.longitude != null || row.location_label) {
-            try {
-                const shipment = await db.TradeShipment.findByPk(row.shipment_id);
-                if (shipment) {
-                    await shipment.update({
-                        metadata: { ...(shipment.metadata || {}), lastKnownLocation: row.location_label || `${row.latitude},${row.longitude}`, lastTrackedAt: row.occurred_at },
-                    });
-                }
-            } catch { /* non-fatal */ }
-        }
+        const row = await recordTrackingEvent({ ...b, tenantId, createdBy: req.auth && req.auth.userId });
         return sendSuccess(req, res, toApi(row), 201);
+    } catch (err) {
+        if (err.message === 'shipmentId is required' || err.message === 'eventType is required') {
+            return next(new AppError('BAD_REQUEST', err.message, 400));
+        }
+        if (err.message.startsWith('source must be one of')) {
+            return next(new AppError('VALIDATION_ERROR', err.message, 400));
+        }
+        return next(err);
+    }
+};
+
+// Async batch ingestion — enqueues each ping onto the `tracking_sync` BullMQ
+// queue (queue/index.js + queue/workers.js) instead of writing N rows inline,
+// so a bulk carrier-integration job (or a webhook receiver upstream of this
+// service) isn't blocked on synchronous DB writes per ping.
+const ingest = async (req, res, next) => {
+    try {
+        const events = Array.isArray(req.body) ? req.body : (req.body && req.body.events);
+        if (!Array.isArray(events) || events.length === 0) {
+            return next(new AppError('BAD_REQUEST', 'events must be a non-empty array', 400));
+        }
+        const tenantId = callerTenantId(req);
+        const createdBy = req.auth && req.auth.userId;
+        const jobs = await Promise.all(
+            events.map((e) => enqueue('tracking_sync', 'record', { ...e, tenantId, createdBy })),
+        );
+        return sendSuccess(req, res, { queued: jobs.length }, 202);
     } catch (err) { return next(err); }
 };
 
-module.exports = { list, get, create };
+module.exports = { list, get, create, ingest };

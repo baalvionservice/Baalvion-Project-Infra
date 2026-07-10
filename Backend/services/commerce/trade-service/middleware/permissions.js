@@ -30,6 +30,26 @@ const LOGISTICS_PERMISSIONS = Object.freeze({
     FLEET_MANAGE: 'logistics:fleet:manage',
     TRACKING_MANAGE: 'logistics:tracking:manage',
     REPORT_EXPORT: 'logistics:report:export',
+    // Phase 3 additions:
+    INCIDENT_MANAGE: 'logistics:incident:manage',
+    RETURN_MANAGE: 'logistics:return:manage',
+    // Freight Management additions (Phase 3, Prompt 2):
+    FREIGHT_CARRIER_MANAGE: 'logistics:freight_carrier:manage',
+    FREIGHT_RATE_MANAGE: 'logistics:freight_rate:manage',
+    FREIGHT_QUOTE_CREATE: 'logistics:freight_quote:create',
+    // Warehouse Management System additions (Phase 3, Prompt 3):
+    WAREHOUSE_ZONE_MANAGE: 'logistics:warehouse:zone_manage',
+    WAREHOUSE_RECEIVE: 'logistics:warehouse:receive',
+    WAREHOUSE_PUTAWAY: 'logistics:warehouse:putaway',
+    // Shipment Tracking & Global Visibility Platform additions (Phase 3, Prompt 6):
+    GEOFENCE_MANAGE: 'logistics:geofence:manage',
+    CHECKPOINT_MANAGE: 'logistics:checkpoint:manage',
+    ALERT_MANAGE: 'logistics:alert:manage',
+    IOT_MANAGE: 'logistics:iot:manage',
+    POD_CAPTURE: 'logistics:pod:capture',
+    ETA_VIEW: 'logistics:eta:view',
+    TRACKING_SEARCH: 'logistics:tracking:search',
+    TRACKING_REPORT_EXPORT: 'logistics:tracking_report:export',
 });
 
 const ADMIN_BYPASS_ROLES = new Set(['admin', 'owner', 'super_admin']);
