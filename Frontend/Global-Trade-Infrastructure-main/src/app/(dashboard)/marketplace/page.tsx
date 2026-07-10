@@ -9,6 +9,7 @@
 import { useEffect, useState } from 'react';
 import { marketplaceService, MarketplaceListing } from '@/services/marketplace-service';
 import { matchingService, MatchResult } from '@/services/matching-service';
+import { resolveSessionOrgId } from '@/services/session-org';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -51,9 +52,10 @@ export default function MarketplacePage() {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      const orgId = await resolveSessionOrgId();
       const [lData, mData] = await Promise.all([
         marketplaceService.getListings(),
-        matchingService.getMatches('COMP-101') 
+        orgId ? matchingService.getMatches(orgId) : Promise.resolve([]),
       ]);
       setListings(lData);
       setMatches(mData);
