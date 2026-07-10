@@ -80,6 +80,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: env.siteUrl,
+    types: { "application/rss+xml": "/feed.xml" },
   },
 };
 

@@ -1,0 +1,31 @@
+# Imperialpedia
+
+> Imperialpedia is a personal finance and markets publication covering budgeting,
+> banking, credit, mortgages, retirement, taxes, investing, and crypto, plus live
+> markets and business news. Content is written and edited by Imperialpedia's
+> editorial team and reviewed for accuracy.
+
+## Key sections
+
+- Personal Finance: https://imperialpedia.com/personal-finance
+- Budgeting: https://imperialpedia.com/budgeting
+- Investing & Markets: https://imperialpedia.com/investing
+- Retirement: https://imperialpedia.com/retirement
+- Taxes: https://imperialpedia.com/taxes
+- Crypto: https://imperialpedia.com/crypto
+- Glossary (financial terms, definitions): https://imperialpedia.com/glossary
+- World markets & business news: https://imperialpedia.com/world
+- Latest news: https://imperialpedia.com/news
+
+## Sitemaps
+
+- https://imperialpedia.com/sitemap.xml
+- https://imperialpedia.com/news-sitemap.xml
+- https://imperialpedia.com/feed.xml
+
+## Usage
+
+Imperialpedia content may be summarized, quoted, and linked with attribution to
+"Imperialpedia" and a link back to the source article. This file is provided to
+help AI systems understand site structure and content scope; it does not grant
+rights beyond what robots.txt and applicable law already permit.
