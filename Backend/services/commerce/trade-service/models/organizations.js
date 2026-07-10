@@ -37,6 +37,10 @@ module.exports = (sequelize, DataTypes) => {
         // checklist category (identity/company/tax/bank/.../trust_score) is approved.
         verified_badge: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
         badge_issued_at: { type: DataTypes.DATE },
+        // Migration 043 — cached account-service (financial-services-java) BUSINESS
+        // account UUID, lazily provisioned by lib/accountProvisioning.js the first
+        // time this org needs an escrow/ledger money movement.
+        ledger_account_id: { type: DataTypes.UUID },
     }, {
         schema: 'trade',
         tableName: 'organizations',

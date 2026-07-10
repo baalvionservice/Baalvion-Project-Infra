@@ -40,6 +40,10 @@ public class FinancedInvoice {
   @Column(name = "invoice_number", nullable = false, length = 120)
   private String invoiceNumber;
 
+  /** GTI order/deal correlation key (e.g. the trade-service order id) — mirrors bnpl_plans.order_ref. */
+  @Column(name = "order_ref", length = 255)
+  private String orderRef;
+
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)
   @Builder.Default
