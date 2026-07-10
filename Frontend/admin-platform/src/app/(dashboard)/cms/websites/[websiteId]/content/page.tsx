@@ -285,38 +285,6 @@ export default function WebsiteContentPage({
         />
       </div>
 
-      {/* Category quick-filters — jump straight to a section (Board of Directors, News, …) */}
-      {categories && categories.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-xs font-medium text-muted-foreground">Sections:</span>
-          <button
-            type="button"
-            onClick={() => { setCategoryFilter(''); setPage(1); }}
-            className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-              categoryFilter === ''
-                ? 'border-primary bg-primary text-primary-foreground'
-                : 'border-border bg-background text-muted-foreground hover:bg-muted'
-            }`}
-          >
-            All
-          </button>
-          {categories.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => { setCategoryFilter(c.id); setPage(1); }}
-              className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-                categoryFilter === c.id
-                  ? 'border-primary bg-primary text-primary-foreground'
-                  : 'border-border bg-background text-muted-foreground hover:bg-muted'
-              }`}
-            >
-              {c.name}
-            </button>
-          ))}
-        </div>
-      )}
-
       {isError && (
         <div className="flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
           <span>Couldn&apos;t load content for this website.</span>
@@ -363,6 +331,27 @@ export default function WebsiteContentPage({
         }
         filters={
           <div className="flex gap-2">
+            {categories && categories.length > 0 && (
+              <Select
+                value={categoryFilter || '__all__'}
+                onValueChange={(v) => {
+                  setCategoryFilter(v === '__all__' ? '' : v);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className="h-8 w-40">
+                  <SelectValue placeholder="Section" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">All Sections</SelectItem>
+                  {categories.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
             <Select
               value={typeFilter || '__all__'}
               onValueChange={(v) => setTypeFilter(v === '__all__' ? '' : (v as ContentItemType))}
