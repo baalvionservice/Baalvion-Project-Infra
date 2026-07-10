@@ -1,0 +1,149 @@
+{
+  "topicNumber": 34,
+  "title": "How to Build a Retirement Portfolio",
+  "slug": "building-a-retirement-portfolio",
+  "seo": {
+    "seoTitle": "How to Build a Retirement Portfolio at Any Age",
+    "metaDescription": "Once you know your retirement number, here's how to actually invest to reach it — asset allocation, diversification, and how your mix should shift as you age.",
+    "focusKeyword": "retirement portfolio",
+    "secondaryKeywords": [
+      "retirement asset allocation",
+      "how to invest for retirement",
+      "401k portfolio",
+      "target date funds",
+      "diversification for retirement"
+    ],
+    "searchIntent": "Informational/commercial — users wanting practical guidance on how to structure their retirement investment portfolio",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Knowing your retirement number is only half the equation — here's how to actually invest to reach it, including asset allocation and how your mix should evolve over time.",
+  "intro": "Once you have a sense of [how much you need to retire](/articles/how-much-money-do-you-need-to-retire), the next question is how to actually invest to get there. Building a retirement portfolio isn't about picking a handful of exciting stocks — it's about choosing a sensible asset allocation, diversifying within it, and adjusting that mix as retirement gets closer.",
+  "tableOfContents": [
+    "Asset Allocation: The Single Biggest Decision",
+    "Stocks, Bonds, and Cash: What Each Role Does",
+    "Diversification Within Asset Classes",
+    "Target-Date Funds: The Simple Default Option",
+    "How Your Allocation Should Shift With Age",
+    "Tax-Advantaged Account Types and Where to Hold What",
+    "Rebalancing: Keeping Your Allocation on Target",
+    "Common Mistakes in Building a Retirement Portfolio"
+  ],
+  "sections": [
+    {
+      "heading": "Asset Allocation: The Single Biggest Decision",
+      "paragraphs": [
+        "Asset allocation — how you divide your portfolio between stocks, bonds, and cash — has historically been shown to explain the vast majority of a portfolio's long-term return variability, far more than the specific individual securities chosen within each category. This is exactly why getting the broad allocation right matters more than trying to pick winning individual stocks."
+      ]
+    },
+    {
+      "heading": "Stocks, Bonds, and Cash: What Each Role Does",
+      "paragraphs": [
+        "Stocks offer the highest long-term growth potential but come with meaningfully higher short-term volatility, making them best suited for money with a long time horizon before it's needed. Bonds offer more stability and income, generally cushioning a portfolio during stock market downturns, though with lower long-term growth potential. Cash and cash equivalents (like a [high-yield savings account](/articles/high-yield-savings-accounts)) provide stability and immediate liquidity but offer the lowest long-term growth, making them appropriate mainly for near-term spending needs rather than long-term retirement growth."
+      ]
+    },
+    {
+      "heading": "How Much Should You Actually Contribute",
+      "paragraphs": [
+        "Beyond the allocation question, the contribution rate itself matters enormously — a well-diversified portfolio funded with too little money still won't reach a meaningful retirement target. A common starting guideline suggests aiming for 10-15% of gross income directed toward retirement accounts over a working career, though the right number for you depends on when you started, your target retirement age, and how much [compound interest](/articles/compound-interest) has already had a chance to work in your favor.",
+        "At minimum, contribute enough to capture your full employer 401(k) match if one is available — it's effectively an immediate, guaranteed return that no allocation decision can replicate, and failing to capture it is one of the most common and costly retirement planning mistakes. As income grows over a career, increasing your contribution percentage rather than letting it stay fixed in dollar terms keeps your savings rate scaling proportionally, which matters considerably more to your eventual balance than fine-tuning the specific funds within your allocation. Many employer plans support automatic annual contribution increases, sometimes called auto-escalation, which removes the need to remember and manually adjust the percentage each year as your income changes. Enabling auto-escalation at a modest annual increment, timed to coincide with your typical raise cycle, applies the same automation principle that makes payday transfers effective to the accumulation side of retirement saving specifically. Checking in on your overall contribution rate once a year, alongside your broader financial review, ensures auto-escalation is actually keeping pace with your goals rather than defaulting to whatever increment the plan initially set. Combining automated escalation with an annual manual check-in captures the best of both approaches — consistency without requiring active attention most of the time, paired with periodic human judgment when circumstances genuinely warrant a bigger change than the automatic increment alone would produce, such as a promotion, a bonus, or paying off a major debt that frees up meaningful monthly cash flow."
+      ]
+    },
+    {
+      "heading": "Diversification Within Asset Classes",
+      "paragraphs": [
+        "Beyond the broad stock-bond-cash split, diversification within each category matters too — spreading stock holdings across company sizes, sectors, and geographies (domestic and international) reduces the risk of any single company or sector dragging down the whole portfolio. Low-cost, broad-market index funds are a common way to achieve this diversification without needing to research and pick individual companies."
+      ],
+      "table": {
+        "caption": "General Role of Each Major Asset Class",
+        "headers": ["Asset Class", "Primary Role", "Volatility"],
+        "rows": [
+          ["Stocks", "Long-term growth", "Higher"],
+          ["Bonds", "Stability and income", "Moderate"],
+          ["Cash/HYSA", "Liquidity and near-term needs", "Lowest"]
+        ]
+      }
+    },
+    {
+      "heading": "Target-Date Funds: The Simple Default Option",
+      "paragraphs": [
+        "A target-date fund automatically adjusts its stock-to-bond mix over time, becoming more conservative as the fund's named target retirement year approaches, without requiring you to manually rebalance. These funds are widely available in employer-sponsored retirement plans and offer a genuinely reasonable, low-effort default for investors who don't want to actively manage their own allocation — though it's worth checking the specific fund's glide path and fees, since these vary between providers."
+      ]
+    },
+    {
+      "heading": "How Your Allocation Should Shift With Age",
+      "paragraphs": [
+        "A common general guideline suggests gradually shifting toward a higher bond allocation as retirement approaches, reducing the portfolio's exposure to a sharp market downturn right before or during the years you'll actually be withdrawing from it — a risk known as sequence-of-returns risk. Younger investors, with decades before they'll need the money, can generally afford a higher stock allocation, since they have time to ride out short-term volatility in exchange for higher long-term growth potential."
+      ]
+    },
+    {
+      "heading": "Tax-Advantaged Account Types and Where to Hold What",
+      "paragraphs": [
+        "A traditional 401(k) or IRA reduces your taxable income in the year you contribute, with withdrawals taxed as ordinary income in retirement. A Roth 401(k) or Roth IRA takes contributions after tax but lets withdrawals in retirement, including all investment growth, come out entirely tax-free. Which is better depends heavily on whether you expect your tax rate to be higher or lower in retirement than it is now — a genuinely uncertain call for most people decades out, which is why many planners suggest holding some balance in both types for flexibility.",
+        "For taxable brokerage accounts beyond tax-advantaged space, it's generally more tax-efficient to hold investments that generate less taxable income annually (like broad stock index funds) there, while keeping higher-income-generating assets (like bonds) inside tax-advantaged accounts where that income isn't taxed each year — a practice sometimes called asset location, distinct from asset allocation."
+      ]
+    },
+    {
+      "heading": "Rebalancing: Keeping Your Allocation on Target",
+      "paragraphs": [
+        "Over time, different assets grow at different rates, causing your actual allocation to drift from your intended target — a strong multi-year stock rally, for instance, can leave a portfolio meaningfully more stock-heavy than originally planned. Rebalancing means periodically buying and selling to bring the allocation back to target, which also has the effect of systematically selling some of what's recently outperformed and buying more of what's lagged, a disciplined version of buying low and selling high.",
+        "Common approaches include rebalancing on a fixed schedule (annually is common) or when an asset class drifts beyond a set threshold (for example, five percentage points from target) — either approach works, and target-date funds handle this automatically as part of their structure. In a taxable account, rebalancing by selling appreciated assets can trigger capital gains taxes, so directing new contributions toward whichever asset class is currently underweight is often a more tax-efficient way to rebalance than selling and buying within a taxable account specifically."
+      ]
+    },
+    {
+      "heading": "Common Mistakes in Building a Retirement Portfolio",
+      "paragraphs": [
+        "Common mistakes include being too conservative too early (missing out on decades of growth potential by holding too much cash or bonds while young), panic-selling during a market downturn (locking in losses instead of riding out the recovery), failing to rebalance periodically as allocations drift from their targets, and not increasing contributions as income grows. Pairing a sound allocation with consistent contributions and [the power of compound interest](/articles/compound-interest) over a long time horizon does more heavy lifting than trying to time the market or chase the latest hot investment."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Asset allocation — the stock, bond, and cash mix — explains most of a portfolio's long-term return variability, more than individual security selection.",
+    "Stocks offer higher long-term growth with more volatility; bonds offer stability; cash offers liquidity but the lowest growth potential.",
+    "Diversifying within each asset class (across company sizes, sectors, and geographies) reduces single-company or single-sector risk.",
+    "Target-date funds automatically shift allocation over time and offer a reasonable low-effort default for many investors.",
+    "A common guideline shifts toward more bonds as retirement approaches, reducing exposure to a downturn right before withdrawals begin.",
+    "Consistency and time in the market typically matter more than trying to time it or chase individual hot investments."
+  ],
+  "faq": [
+    {
+      "question": "What's the most important decision in building a retirement portfolio?",
+      "answer": "Asset allocation — the split between stocks, bonds, and cash — has historically explained the majority of a portfolio's long-term return variability, more than individual investment selection."
+    },
+    {
+      "question": "Are target-date funds a good option?",
+      "answer": "For many investors, yes — they automatically adjust the stock-bond mix over time without requiring manual rebalancing, offering a reasonable, low-effort default, though it's worth checking the specific fund's fees and glide path."
+    },
+    {
+      "question": "Should young investors hold mostly stocks?",
+      "answer": "Generally, a higher stock allocation is common for younger investors with decades before retirement, since they have time to recover from short-term volatility in exchange for higher long-term growth potential."
+    },
+    {
+      "question": "What is sequence-of-returns risk?",
+      "answer": "The risk that a market downturn occurring right before or during retirement, when you're withdrawing funds, can have an outsized negative impact compared to the same downturn occurring earlier in your investing timeline."
+    },
+    {
+      "question": "Should I choose a traditional or Roth retirement account?",
+      "answer": "It depends on whether you expect your tax rate to be higher or lower in retirement than today. Since that's genuinely uncertain for most people, many planners suggest holding a balance in both for flexibility."
+    },
+    {
+      "question": "How often should I rebalance my portfolio?",
+      "answer": "Common approaches include rebalancing on a fixed annual schedule or whenever an asset class drifts a set amount, such as five percentage points, from its target — both are reasonable, and target-date funds handle this automatically."
+    },
+    {
+      "question": "How much of my income should I contribute to retirement?",
+      "answer": "A common starting guideline is 10-15% of gross income over a working career, adjusted based on when you started and your target retirement age — but at minimum, always contribute enough to capture your full employer 401(k) match if one is offered."
+    }
+  ],
+  "conclusion": "Building a retirement portfolio comes down to a few durable principles: get the broad stock-bond-cash allocation right, diversify within each category, adjust the mix as retirement approaches, and stay consistent rather than reactive during market swings. From here, [how much money you need to retire](/articles/how-much-money-do-you-need-to-retire) sets the target, and [retirement income planning](/articles/retirement-income-planning-strategies) covers how to actually draw down what you've built once you get there.",
+  "internalLinks": [
+    { "anchor": "how much money do you need to retire", "slug": "how-much-money-do-you-need-to-retire" },
+    { "anchor": "retirement income planning strategies", "slug": "retirement-income-planning-strategies" },
+    { "anchor": "compound interest", "slug": "compound-interest" },
+    { "anchor": "high-yield savings accounts", "slug": "high-yield-savings-accounts" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" },
+    { "name": "FINRA — Asset Allocation", "url": "https://www.finra.org/investors" }
+  ],
+  "wordCountEstimate": 1500
+}

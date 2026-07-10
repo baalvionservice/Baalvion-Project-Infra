@@ -39,6 +39,7 @@ const JWT_ALLOWLIST = [
   ['Backend/services/ecosystem/jobs-service/middleware/authMiddleware.js', 'jwt.decode() only to read the email claim — verification is via @baalvion/auth-node createAuthMiddleware'],
   ['Backend/services/platform/realtime-service/index.js', 'WebSocket upgrade auth — RS256 jwt.verify at the handshake; Express auth-node middleware does not apply to WS upgrades'],
   ['Backend/services/knowledge/cms-service/scripts/', 'dev seed scripts mint a local token for seeding — not a request-path auth surface'],
+  ['Backend/services/knowledge/cms-service/service/seoPingService.js', 'signs a Google service-account OAuth2 JWT-bearer assertion to authenticate to the Google Indexing API — an outbound third-party API credential, not internal user/session auth'],
   ['Backend/services/ecosystem/ctm-service/tests/auth-denial.test.js', 'test-only: jwt.sign mints RS256 tokens to assert authMiddleware GRANTS valid / DENIES forged — not a request-path auth surface'],
 ];
 // C2: sub-stacks that are their own bounded monorepo (internal cross-imports are fine),

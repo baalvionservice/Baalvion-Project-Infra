@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: FollowersPageProps): Promise<
   return buildMetadata({
     title: `${creator.displayName}'s Network | Expert Intelligence Index`,
     description: `Explore the professional network of ${creator.displayName}. See who follows their financial research and who they trust for market analysis.`,
+    canonical: `/creator/${id}/followers`,
   });
 }
 

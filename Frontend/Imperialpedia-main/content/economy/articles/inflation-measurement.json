@@ -1,0 +1,106 @@
+{
+  "topicNumber": 19,
+  "title": "How Inflation Is Actually Measured: CPI, PCE, and Core Inflation",
+  "slug": "inflation-measurement",
+  "seo": {
+    "seoTitle": "How Inflation Is Measured: CPI vs PCE vs Core Inflation",
+    "metaDescription": "CPI, PCE, and core inflation all measure something slightly different. Here's exactly how each is calculated and why the Fed prefers one over the others.",
+    "focusKeyword": "inflation measurement",
+    "secondaryKeywords": [
+      "CPI explained",
+      "PCE price index",
+      "core inflation vs headline inflation",
+      "how is inflation calculated"
+    ],
+    "searchIntent": "Informational — users wanting to understand exactly how the different official inflation measures are calculated and why they sometimes differ",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "CPI, PCE, and 'core' inflation all show up in the same news cycle, often with different numbers. Here's exactly what each one measures and why they don't always agree.",
+  "intro": "When inflation makes headlines, it's often unclear which specific measure is being cited — the Consumer Price Index (CPI), the Personal Consumption Expenditures (PCE) price index, or a 'core' version of either that strips out certain categories. Each measures inflation slightly differently, and understanding those differences explains why you'll sometimes see two inflation headlines on the same day that don't quite agree.",
+  "tableOfContents": [
+    "The Consumer Price Index (CPI)",
+    "The PCE Price Index",
+    "Why CPI and PCE Sometimes Diverge",
+    "Core Inflation: Stripping Out Food and Energy",
+    "Which Measure Should You Actually Pay Attention To"
+  ],
+  "sections": [
+    {
+      "heading": "The Consumer Price Index (CPI)",
+      "paragraphs": [
+        "CPI, published monthly by the Bureau of Labor Statistics, tracks the average change in prices paid by urban consumers for a fixed basket of goods and services — housing, food, transportation, medical care, and more — weighted according to how much a typical household actually spends on each category. Because the basket weights are updated periodically rather than continuously, CPI can be slower to reflect real-time shifts in consumer buying patterns."
+      ]
+    },
+    {
+      "heading": "The PCE Price Index",
+      "paragraphs": [
+        "The Personal Consumption Expenditures price index, published by the Bureau of Economic Analysis, is the Federal Reserve's preferred inflation gauge. It covers a broader scope of spending than CPI (including spending made on someone's behalf, like employer-provided health insurance) and uses a methodology that updates its basket weights more frequently, better capturing how consumers substitute between goods as relative prices shift — for instance, buying more chicken and less beef if beef prices rise sharply."
+      ]
+    },
+    {
+      "heading": "Why CPI and PCE Sometimes Diverge",
+      "paragraphs": [
+        "Because of differences in scope, weighting methodology, and update frequency, CPI and PCE can show meaningfully different inflation readings in the same month, even though they're both measuring the same underlying economy. Housing tends to carry a larger weight in CPI than in PCE, for example, which means a period of rapidly changing housing costs can push the two measures further apart than usual."
+      ],
+      "table": {
+        "caption": "CPI vs PCE at a Glance",
+        "headers": ["", "CPI", "PCE"],
+        "rows": [
+          ["Published by", "Bureau of Labor Statistics", "Bureau of Economic Analysis"],
+          ["Scope", "Urban consumer out-of-pocket spending", "Broader — includes spending made on consumers' behalf"],
+          ["Basket updates", "Less frequent", "More frequent, better captures substitution"],
+          ["Used by the Fed", "Widely cited, but not the primary target", "The Fed's preferred inflation gauge"]
+        ]
+      }
+    },
+    {
+      "heading": "Core Inflation: Stripping Out Food and Energy",
+      "paragraphs": [
+        "Both CPI and PCE are also reported in a 'core' version that excludes food and energy prices, which tend to be more volatile month to month due to factors like weather and geopolitical supply disruptions rather than broader underlying inflation trends. Core inflation is often viewed as a better read on the underlying inflation trend, since it filters out short-term noise — though it's sometimes criticized for excluding categories, like food and gas, that households feel directly and frequently."
+      ]
+    },
+    {
+      "heading": "Which Measure Should You Actually Pay Attention To",
+      "paragraphs": [
+        "For understanding Federal Reserve policy decisions specifically, core PCE is the most relevant figure, since it's the Fed's stated preferred gauge relative to its 2% target. For a more direct read on your own day-to-day cost of living, headline CPI — including food and energy — may feel more representative of lived experience, even if it's noisier month to month. Watching the trend across a few months, rather than reacting to any single monthly print, applies to all of these measures equally. See [causes of inflation](/articles/causes-of-inflation) for the underlying mechanisms driving whatever the number shows, and [inflation vs deflation](/articles/inflation-vs-deflation) for the broader context of why the direction matters."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "CPI, published monthly by the BLS, tracks a fixed basket of consumer goods and services based on typical household spending.",
+    "PCE, the Fed's preferred gauge, has a broader scope and updates its basket weights more frequently to capture consumer substitution.",
+    "CPI and PCE can diverge meaningfully due to differences in scope and weighting, particularly around categories like housing.",
+    "Core inflation strips out volatile food and energy prices to give a clearer read on the underlying inflation trend.",
+    "Core PCE is most relevant for understanding Fed policy; headline CPI may feel more representative of everyday cost-of-living experience."
+  ],
+  "faq": [
+    {
+      "question": "What's the difference between CPI and PCE?",
+      "answer": "CPI tracks a fixed basket of consumer out-of-pocket spending and is published by the Bureau of Labor Statistics. PCE has a broader scope, updates its weighting more frequently to capture substitution, and is published by the Bureau of Economic Analysis. It's the Fed's preferred inflation gauge."
+    },
+    {
+      "question": "Why does the Fed prefer PCE over CPI?",
+      "answer": "PCE's methodology adjusts more dynamically to how consumers substitute between goods as relative prices change, which many economists view as a more accurate reflection of the true cost of living over time."
+    },
+    {
+      "question": "What is core inflation?",
+      "answer": "A version of CPI or PCE that excludes food and energy prices, which are more volatile month to month, to give a clearer read on the underlying inflation trend."
+    },
+    {
+      "question": "Why would food and energy be excluded from an inflation measure?",
+      "answer": "Their prices can swing sharply due to weather, geopolitical events, or supply disruptions unrelated to broader economic conditions, which can obscure the underlying inflation trend if included in a headline monthly figure."
+    }
+  ],
+  "conclusion": "CPI, PCE, and their core variants all measure inflation, but with different scope and methodology — which is exactly why they sometimes tell slightly different stories in the same news cycle. Knowing which one applies to a given headline, and why, turns a confusing barrage of inflation numbers into a genuinely coherent picture of where prices are actually headed.",
+  "internalLinks": [
+    { "anchor": "causes of inflation", "slug": "causes-of-inflation" },
+    { "anchor": "inflation vs deflation", "slug": "inflation-vs-deflation" },
+    { "anchor": "complete guide to monetary policy", "slug": "complete-guide-to-monetary-policy" },
+    { "anchor": "complete guide to economic indicators", "slug": "complete-guide-to-economic-indicators" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Bureau of Labor Statistics — CPI", "url": "https://www.bls.gov/cpi/" },
+    { "name": "U.S. Bureau of Economic Analysis — PCE", "url": "https://www.bea.gov/data/personal-consumption-expenditures-price-index" }
+  ],
+  "wordCountEstimate": 1400
+}

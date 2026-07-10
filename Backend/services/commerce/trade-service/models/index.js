@@ -25,6 +25,7 @@ db.Rfq             = require('./rfqs')(sequelize, Sequelize.DataTypes);
 db.Deal            = require('./deals')(sequelize, Sequelize.DataTypes);
 db.Order           = require('./orders')(sequelize, Sequelize.DataTypes);
 db.Escrow          = require('./escrows')(sequelize, Sequelize.DataTypes);
+db.FinancedInvoice = require('./financedInvoices')(sequelize, Sequelize.DataTypes);
 db.Shipment        = require('./shipments')(sequelize, Sequelize.DataTypes);
 db.Document        = require('./documents')(sequelize, Sequelize.DataTypes);
 db.Payment         = require('./payments')(sequelize, Sequelize.DataTypes);

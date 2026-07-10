@@ -27,6 +27,7 @@ const ARTWORK_OUT_DIR = path.resolve(__dirname, '..', 'public', 'images', 'artic
 const PACKS = [
   { dir: 'personal-finance', category: { id: 'pf-personal-finance', name: 'Personal Finance', slug: 'personal-finance' } },
   { dir: 'investing', category: { id: 'inv-investing', name: 'Investing', slug: 'investing' } },
+  { dir: 'economy', category: { id: 'econ-economy', name: 'Economy', slug: 'economy' } },
 ];
 
 // Fixed timestamp keeps the generated file stable across runs (no spurious git diffs).

@@ -61,6 +61,22 @@ export const criminalLawExtraArticles: LawArticle[] = [
 <h2>After the Arrest</h2>
 <p>Once in custody you may be questioned, searched, and processed. You generally retain the right to legal advice throughout, the right to be held in humane conditions, and the right to be brought before a court within a legally defined period rather than detained indefinitely. If you believe your rights were breached — for example, if questioning continued after you asked for a lawyer — note the details, as they can affect whether evidence is later admitted.</p>
 
+<h2>What Happens If Police Ignore Your Rights</h2>
+<p>A rights violation does not automatically end a case, but it can have real consequences. In many jurisdictions, evidence or a confession obtained after a valid request for a lawyer was ignored, or after questioning continued despite an invocation of silence, can be excluded from trial under an "exclusionary rule" or its local equivalent. Separately, unlawful arrest or detention can itself support a civil claim against the police or a formal complaint to an oversight body. None of this is automatic — it depends on the specific facts being documented and raised by defence counsel at the right procedural moment, which is one more reason detailed notes taken as soon as possible after release are valuable.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Do I have to answer basic questions like my name and address?</strong> In most jurisdictions, yes — the right to silence covers questions that could incriminate you in the offence under investigation, not basic identification, and refusing to identify yourself can itself be an offence in some places.</p>
+<p><strong>Can I be arrested without being told any reason at all?</strong> Generally no — some jurisdictions allow the specific reason to be given shortly after the physical arrest rather than at the exact moment of restraint, but an arrest with no explanation at any point is a strong basis to challenge its lawfulness.</p>
+<p><strong>What if I can't afford a lawyer?</strong> Most systems provide some form of publicly funded legal aid or a duty solicitor/public defender for anyone in custody who cannot pay — ask for this explicitly; it is a right, not a favor.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Supreme Court, <em>Miranda v. Arizona</em> (1966)</li>
+<li>UK Police and Criminal Evidence Act 1984 (PACE) and accompanying Codes of Practice</li>
+<li>EU Directive 2013/48/EU on the right of access to a lawyer</li>
+<li>India, Constitution Article 22 and Code of Criminal Procedure arrest safeguards</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Learn the basic arrest rules for the country and region where you live or travel, since the warnings and time limits differ. If you or someone you know is arrested, prioritise three things: stay calm and non-resistant, clearly invoke the right to silence and a lawyer, and keep a careful record of what happened. Contact a criminal defence lawyer as soon as possible, because early advice often shapes the entire outcome.</p>
 
@@ -124,6 +140,23 @@ export const criminalLawExtraArticles: LawArticle[] = [
 
 <h2>Why the Same Act Can Be Charged Differently</h2>
 <p>Prosecutors often have discretion, and facts matter. The value stolen, whether a weapon was used, whether someone was injured, and a person's prior record can all push an offence from one category to another. This is why two superficially similar incidents can lead to very different charges, and why early legal advice can influence how a case is framed.</p>
+
+<h2>"Wobbler" Offences and Plea Negotiation</h2>
+<p>Some offences, sometimes informally called "wobblers," can be charged as either a misdemeanor or a felony depending on the prosecutor's assessment of the facts and, in some jurisdictions, the court's ultimate sentencing decision. This flexibility is a significant point of leverage in plea negotiations: a defendant facing a wobbler felony charge may be able to negotiate a plea to the misdemeanor version, substantially reducing both the immediate sentence and the long-term collateral consequences. Whether this is realistic depends heavily on the specific facts, the defendant's record, and local charging practices — another reason the classification a prosecutor initially chooses is rarely the final word.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can a misdemeanor become a felony if it's a repeat offense?</strong> Yes — many jurisdictions escalate certain misdemeanors to felony status on a second or subsequent conviction (common with offenses like DUI or domestic violence), even when the underlying conduct is identical.</p>
+<p><strong>Does a felony conviction always mean prison time?</strong> No — many jurisdictions allow probation, suspended sentences, or alternative programs for lower-level felonies, particularly for first-time offenders, though the felony label and its collateral consequences typically remain regardless of whether time is actually served.</p>
+<p><strong>Can a felony conviction be reduced or expunged later?</strong> In many jurisdictions, yes — some allow reclassification to a misdemeanor after a period of compliance, or expungement/sealing of the record entirely, though eligibility rules vary widely by offense type and jurisdiction.</p>
+<p><strong>Does a misdemeanor conviction ever show up on background checks?</strong> Often yes, at least for a period — many employment and housing background checks include misdemeanors, not just felonies, which is one reason even a "minor" conviction is worth taking seriously and, where available, pursuing expungement once eligible.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Department of Justice, Bureau of Justice Statistics, offense classification data</li>
+<li>UK Criminal Law Act 1967 (abolition of the felony/misdemeanor distinction)</li>
+<li>India, Bharatiya Nyaya Sanhita, offence classification</li>
+<li>American Bar Association, criminal justice standards on collateral consequences</li>
+</ul>
 
 <h2>Practical Next Steps</h2>
 <p>If you are facing a charge, find out precisely how the offence is classified where you are, because that determines the realistic range of outcomes and the procedure ahead. Take the collateral consequences seriously, not just the headline sentence, and gather any documents relevant to your case. Speak to a criminal defence lawyer early — the classification of a charge is sometimes negotiable, and skilled, timely advice can materially change the result.</p>

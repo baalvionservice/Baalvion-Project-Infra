@@ -65,6 +65,22 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
 <li>Forgetting that winning may still require separate enforcement to actually get paid.</li>
 </ul>
 
+<h2>What If You Are the One Being Sued</h2>
+<p>Receiving a small claims notice is not the moment to ignore the mail. Most systems set a strict deadline to respond — often just a few weeks — and failing to respond typically results in a default judgment against you, with no opportunity to present your side at all. If you believe the claim is wrong, respond within the deadline, gather your own evidence (proof of payment, correspondence, photos of the disputed goods), and consider whether a counter-claim is appropriate if you believe you are actually owed money by the claimant. Many jurisdictions also allow a simple settlement offer to be made even after a claim is filed, which can resolve the matter before a hearing is ever needed.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I appeal a small claims decision?</strong> Appeal rights are usually narrow — often limited to a serious procedural error or a clear mistake of law — reflecting the system's design for fast, final resolution of low-value disputes rather than repeated review.</p>
+<p><strong>Can a business sue or be sued in small claims court?</strong> Yes, in most jurisdictions — small claims procedures are available to businesses as well as individuals, though some systems cap how many claims a business can file in a given period to prevent the court being used as a routine debt-collection tool.</p>
+<p><strong>Do I need to hire a process server to notify the defendant?</strong> It depends on the jurisdiction — many small claims systems handle service themselves (by mail or court officer) as part of the filing fee, while others require the claimant to arrange it, so check the local rules before assuming it's automatic.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. National Center for State Courts, small claims court self-help resources</li>
+<li>UK HM Courts & Tribunals Service, small claims track guidance</li>
+<li>EU Regulation (EC) No 861/2007, European Small Claims Procedure</li>
+<li>India, Consumer Protection Act 2019, consumer commission forums</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Start by confirming your local monetary limit and the correct forum for your dispute. Send a clear demand letter and keep a copy, then gather every document that supports your claim. Present your case calmly and factually at the hearing. While lawyers are often unnecessary, a brief consultation or free advice service can help for borderline or higher-value claims — and always weigh whether the other side can realistically pay before you invest your time.</p>
 
@@ -129,6 +145,22 @@ export const disputeResolutionExtra2Articles: LawArticle[] = [
 <li>Ignoring opt-out notices, then being bound by a small settlement.</li>
 <li>Overlooking that individual recovery may be modest even in a large case.</li>
 <li>Expecting US-style class actions to be available identically in other countries.</li>
+</ul>
+
+<h2>How Settlements Are Distributed</h2>
+<p>When a class action settles, the money rarely goes straight to class members. A court must first approve the settlement as fair, reasonable, and adequate, often after a hearing where objectors can raise concerns. Approved legal fees (frequently a percentage of the total fund, subject to court scrutiny) and administrative costs of notifying and paying the class come out first, and any remainder is distributed according to a claims process — which often requires class members to file a proof-of-claim form rather than receiving payment automatically. This is why headline settlement figures in the hundreds of millions can translate into modest individual payments, and why claims processes with low response rates sometimes leave unclaimed funds to be redistributed or donated (a "cy-près" award) rather than paid out to the class at all.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Do I have to pay anything to join a class action?</strong> No — class counsel typically fund the litigation themselves in exchange for a court-approved fee from any eventual recovery, so class members generally bear no upfront cost.</p>
+<p><strong>What if I already signed an arbitration agreement — can I still join a class action?</strong> Often no — many arbitration clauses include a class-action waiver, requiring individual arbitration instead, and several jurisdictions' courts have upheld these waivers even for otherwise small, hard-to-litigate individual claims.</p>
+<p><strong>How long do class actions typically take?</strong> Frequently several years — certification disputes, discovery across a large class, and appeals of certification decisions all add time well beyond what a single-plaintiff case would take.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Federal Rules of Civil Procedure, Rule 23 (class actions)</li>
+<li>UK Civil Procedure Rules, Group Litigation Orders</li>
+<li>EU Directive 2020/1828 on representative actions for consumers</li>
+<li>India, Code of Civil Procedure 1908, Order I Rule 8 (representative suits)</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

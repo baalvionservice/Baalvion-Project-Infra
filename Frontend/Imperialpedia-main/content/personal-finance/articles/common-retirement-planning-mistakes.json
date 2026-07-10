@@ -1,0 +1,184 @@
+{
+  "topicNumber": 36,
+  "title": "Common Retirement Planning Mistakes to Avoid",
+  "slug": "common-retirement-planning-mistakes",
+  "seo": {
+    "seoTitle": "Common Retirement Planning Mistakes",
+    "metaDescription": "From starting too late to underestimating healthcare costs, here are the most common retirement planning mistakes — and the practical fix for each one.",
+    "focusKeyword": "retirement planning mistakes",
+    "secondaryKeywords": [
+      "retirement mistakes to avoid",
+      "common 401k mistakes",
+      "retirement planning errors",
+      "how to fix retirement planning mistakes"
+    ],
+    "searchIntent": "Informational — users wanting to identify and avoid common errors in their own retirement planning",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Most retirement shortfalls trace back to a handful of avoidable, well-documented mistakes. Here's the list, and the practical fix for each one.",
+  "intro": "Retirement planning failures rarely come from one dramatic decision — they usually accumulate from a handful of common, avoidable mistakes repeated over years or decades. Recognizing these patterns early gives you time to correct course, which is considerably easier than trying to fix a significant shortfall in the final years before retirement.",
+  "tableOfContents": [
+    "Starting Too Late",
+    "Not Capturing the Full Employer Match",
+    "Being Too Conservative (or Too Aggressive) With Investments",
+    "Underestimating Healthcare Costs",
+    "Cashing Out a 401(k) When Changing Jobs",
+    "Not Having a Withdrawal Strategy",
+    "Ignoring Inflation's Long-Term Effect",
+    "Claiming Social Security Without a Real Strategy",
+    "Underestimating How Long Retirement Will Last",
+    "Not Accounting for Taxes on Withdrawals",
+    "Relying on a Single Income Source",
+    "Not Having an Estate Plan"
+  ],
+  "sections": [
+    {
+      "heading": "Starting Too Late",
+      "paragraphs": [
+        "Because [compound interest](/articles/compound-interest) rewards time above almost everything else, delaying retirement contributions by even five or ten years can require dramatically larger contributions later to reach the same target. The fix is straightforward, if not always easy: start contributing something now, even a modest amount, rather than waiting for a 'better' time that may never arrive."
+      ]
+    },
+    {
+      "heading": "Not Capturing the Full Employer Match",
+      "paragraphs": [
+        "Failing to contribute enough to a 401(k) to receive the full employer match is effectively leaving free, guaranteed money on the table — a return most other investments can't match. If budget constraints make maximizing contributions difficult, contributing at least enough to capture the full match should generally be the first priority before other financial goals."
+      ]
+    },
+    {
+      "heading": "Being Too Conservative (or Too Aggressive) With Investments",
+      "paragraphs": [
+        "Holding too much cash or too many bonds while young sacrifices decades of growth potential unnecessarily. Holding too aggressive an allocation too close to retirement increases vulnerability to a poorly timed market downturn right before you need the money. See [building a retirement portfolio](/articles/building-a-retirement-portfolio) for how allocation should generally shift as retirement approaches."
+      ]
+    },
+    {
+      "heading": "Underestimating Healthcare Costs",
+      "paragraphs": [
+        "Healthcare expenses in retirement are frequently underestimated, and they tend to rise faster than general inflation while also often increasing with age. Building a specific healthcare buffer into your retirement number, beyond general living expenses, helps avoid a significant and often underappreciated gap in an otherwise reasonable plan."
+      ]
+    },
+    {
+      "heading": "Cashing Out a 401(k) When Changing Jobs",
+      "paragraphs": [
+        "Cashing out a 401(k) balance instead of rolling it into a new employer's plan or an IRA triggers taxes and, if you're under the applicable age, an early withdrawal penalty — on top of permanently losing years of future compound growth on that money. A direct rollover avoids the tax hit and penalty while keeping the funds working toward retirement."
+      ],
+      "callout": {
+        "title": "Always do a direct rollover",
+        "text": "When changing jobs, request a direct trustee-to-trustee rollover of your 401(k) rather than taking a distribution yourself, which avoids mandatory withholding and the risk of missing the rollover deadline."
+      }
+    },
+    {
+      "heading": "Not Having a Withdrawal Strategy",
+      "paragraphs": [
+        "Reaching retirement with a solid portfolio but no plan for how to draw it down sustainably is a common gap — see [retirement income planning strategies](/articles/retirement-income-planning-strategies) for the decumulation side of the equation, which is genuinely a separate skill from accumulation."
+      ]
+    },
+    {
+      "heading": "Ignoring Inflation's Long-Term Effect",
+      "paragraphs": [
+        "A retirement number calculated in today's dollars, without accounting for inflation over a multi-decade time horizon, can significantly understate what you'll actually need by the time you retire. See [how inflation affects your savings](/articles/how-inflation-affects-your-savings) for why this matters, and build inflation adjustments into any long-term retirement projection rather than using static, non-adjusted figures."
+      ]
+    },
+    {
+      "heading": "Claiming Social Security Without a Real Strategy",
+      "paragraphs": [
+        "Claiming Social Security at 62 out of habit or impatience, without modeling how delaying would affect lifetime income, can leave meaningful guaranteed income on the table — particularly costly for the higher earner in a couple, since it also affects the survivor benefit. Running the numbers on a few claiming ages before deciding is worth the modest time investment given the size of the decision."
+      ]
+    },
+    {
+      "heading": "Underestimating How Long Retirement Will Last",
+      "paragraphs": [
+        "Planning around a 20-year retirement when you or your spouse may live meaningfully longer risks running out of money in the later years, exactly when you're least able to return to work or absorb a shortfall. Building in a longer planning horizon than feels intuitively necessary, or using a more conservative withdrawal rate as a buffer, protects against this specific risk without requiring you to guess your own lifespan precisely."
+      ]
+    },
+    {
+      "heading": "Not Accounting for Taxes on Withdrawals",
+      "paragraphs": [
+        "Some savers mentally treat their entire traditional 401(k) or IRA balance as spendable, forgetting that withdrawals are taxed as ordinary income — meaning the real, spendable value of that balance is meaningfully less than the number on the account statement. Planning your retirement income with this tax drag factored in from the start avoids an unpleasant surprise once withdrawals actually begin. See [retirement income planning strategies](/articles/retirement-income-planning-strategies) for how strategic withdrawal sequencing across account types can help manage this."
+      ]
+    },
+    {
+      "heading": "Relying on a Single Income Source",
+      "paragraphs": [
+        "Building a retirement plan around a single income source — just a pension, or just Social Security, or just a portfolio — leaves little room to absorb an unexpected change to that one source, whether a policy change, a market downturn, or a pension plan's funding status shifting unfavorably. Diversifying across multiple income streams where possible (Social Security, personal savings, and potentially a pension or part-time work) spreads that risk rather than concentrating your entire retirement security in one place. This is a version of the same diversification logic applied within an investment portfolio, extended to income sources themselves rather than just asset classes. Part-time or consulting work in the early years of retirement is one of the more underused options here, since even modest supplemental income can meaningfully reduce portfolio withdrawals during exactly the years sequence-of-returns risk matters most, and it doesn't need to be full-time or permanent to make a meaningful dent in how hard your portfolio has to work during those early, more vulnerable years."
+      ]
+    },
+    {
+      "heading": "Not Having an Estate Plan",
+      "paragraphs": [
+        "Retirement planning often focuses entirely on accumulating and spending down assets during your own lifetime, overlooking what happens to remaining assets afterward. Without basic estate planning documents — a will, updated beneficiary designations on retirement accounts, and potentially a power of attorney for financial and healthcare decisions — assets can end up distributed according to default state law rather than your actual wishes, and loved ones can face unnecessary legal complexity during an already difficult time. Reviewing and updating beneficiary designations specifically is worth doing after any major life change, since these designations generally override what is written in a will. An outdated beneficiary form naming a former spouse or a closed account can direct assets in a way that contradicts your current wishes entirely, regardless of how carefully the will itself is written. A power of attorney and healthcare directive matter just as much as the will itself, since they determine who can make financial and medical decisions on your behalf if you're ever unable to, and without them a court may need to appoint someone, on a timeline and with a process your family doesn't control. None of these documents require significant expense or complexity to put in place, and revisiting them every few years, or after any major life event like a marriage, divorce, or new child, keeps the plan aligned with your actual current wishes rather than a snapshot from years earlier. Many states offer inexpensive or free basic estate planning resources for this exact reason, and an attorney is really only necessary once your situation involves meaningful complexity, like a blended family, a business, or a special needs dependent — situations where a generic template genuinely can't anticipate the specific provisions your family actually needs, and the cost of getting professional input up front is minor compared to the cost of an estate dispute later."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Starting retirement contributions late requires dramatically larger contributions later to reach the same target, due to lost compounding time.",
+    "Not capturing a full employer 401(k) match means leaving effectively guaranteed, free returns unclaimed.",
+    "Investment allocation should generally shift from growth-focused when young to more conservative as retirement approaches.",
+    "Healthcare costs are commonly underestimated in retirement planning and deserve a specific budget buffer.",
+    "Cashing out a 401(k) when changing jobs triggers taxes and penalties and permanently forfeits future compound growth.",
+    "A withdrawal strategy and inflation-adjusted planning are just as important as the accumulation phase itself."
+  ],
+  "faq": [
+    {
+      "question": "What is the single biggest retirement planning mistake?",
+      "answer": "Starting too late is widely considered the most costly mistake, since it forfeits the compounding time that does the most work in building a retirement portfolio."
+    },
+    {
+      "question": "Should I cash out my 401(k) when I change jobs?",
+      "answer": "Generally no — a direct rollover into your new employer's plan or an IRA avoids taxes and early withdrawal penalties while keeping your retirement savings invested and growing."
+    },
+    {
+      "question": "How much should I budget for healthcare in retirement?",
+      "answer": "More than general living expense estimates typically suggest — healthcare costs tend to rise faster than general inflation and increase with age, so building in a specific buffer beyond your baseline retirement number is a common recommendation."
+    },
+    {
+      "question": "Is it a mistake to claim Social Security at 62?",
+      "answer": "Not automatically, but claiming without modeling the tradeoff against delaying (which increases your benefit up to age 70) can leave meaningful lifetime income on the table, especially for higher earners."
+    },
+    {
+      "question": "How long should I plan for my retirement savings to last?",
+      "answer": "Longer than feels intuitively necessary — planning around a 20-year retirement can leave you exposed if you or a spouse lives meaningfully longer. A longer horizon or more conservative withdrawal rate provides a buffer against this uncertainty."
+    },
+    {
+      "question": "Do I have to pay taxes on my 401(k) withdrawals?",
+      "answer": "Yes, traditional 401(k) and IRA withdrawals are taxed as ordinary income, meaning the real spendable value of the balance is less than the account statement shows — an important factor to plan around rather than overlook."
+    },
+    {
+      "question": "Do I need an estate plan if I'm not wealthy?",
+      "answer": "Yes — basic documents like a will, updated beneficiary designations, and a power of attorney matter regardless of net worth, since without them assets can be distributed according to default state law rather than your actual wishes."
+    },
+    {
+      "question": "Why does relying on one retirement income source carry risk?",
+      "answer": "A single source — just a pension, or just Social Security — leaves little room to absorb an unexpected change to that source. Diversifying across multiple income streams spreads that risk instead of concentrating it in one place."
+    }
+  ],
+  "conclusion": "Most retirement shortfalls aren't the result of one bad decision — they accumulate from a handful of common, well-documented mistakes repeated over years. Reviewing this list periodically, and correcting course early rather than late, is one of the highest-leverage things you can do for your eventual retirement outcome.",
+  "internalLinks": [
+    {
+      "anchor": "how much money do you need to retire",
+      "slug": "how-much-money-do-you-need-to-retire"
+    },
+    {
+      "anchor": "building a retirement portfolio",
+      "slug": "building-a-retirement-portfolio"
+    },
+    {
+      "anchor": "retirement income planning strategies",
+      "slug": "retirement-income-planning-strategies"
+    },
+    {
+      "anchor": "compound interest",
+      "slug": "compound-interest"
+    }
+  ],
+  "externalSources": [
+    {
+      "name": "U.S. Department of Labor — Retirement Savings",
+      "url": "https://www.dol.gov/general/topic/retirement"
+    },
+    {
+      "name": "Social Security Administration",
+      "url": "https://www.ssa.gov/"
+    }
+  ],
+  "wordCountEstimate": 1400
+}

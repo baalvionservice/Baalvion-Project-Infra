@@ -74,6 +74,7 @@ public class InvoiceFinanceService {
       .reference(generateReference(tenantId))
       .idempotencyKey(idem)
       .invoiceNumber(req.getInvoiceNumber())
+      .orderRef(req.getOrderRef())
       .sellerId(req.getSellerId())
       .sellerName(req.getSellerName())
       .debtorId(req.getDebtorId())
@@ -156,7 +157,7 @@ public class InvoiceFinanceService {
 
     // Real money movement: financier → seller for the advance amount.
     outbox.enqueue(tenantId, "credit.invoice.funded", id.toString(), DisbursementEvent.builder()
-      .invoiceId(id).tenantId(tenantId).beneficiaryId(inv.getSellerId())
+      .invoiceId(id).tenantId(tenantId).beneficiaryId(inv.getSellerId()).orderRef(inv.getOrderRef())
       .amount(inv.getAdvanceAmount()).currency(inv.getCurrency()).reference(inv.getReference()).build());
     return InvoiceResponse.from(saved);
   }
@@ -184,7 +185,7 @@ public class InvoiceFinanceService {
       BigDecimal netReserve = inv.getReserveAmount().subtract(inv.getFeeAmount()).max(BigDecimal.ZERO);
       log.info("Invoice fully collected: ref={}, tenant={}, remitting net reserve={} to seller", inv.getReference(), tenantId, netReserve);
       outbox.enqueue(tenantId, "credit.invoice.collected", id.toString(), DisbursementEvent.builder()
-        .invoiceId(id).tenantId(tenantId).beneficiaryId(inv.getSellerId())
+        .invoiceId(id).tenantId(tenantId).beneficiaryId(inv.getSellerId()).orderRef(inv.getOrderRef())
         .amount(netReserve).currency(inv.getCurrency()).reference(inv.getReference()).build());
     }
     return InvoiceResponse.from(invoiceRepository.save(inv));
@@ -276,6 +277,7 @@ public class InvoiceFinanceService {
     private UUID invoiceId;
     private UUID tenantId;
     private UUID beneficiaryId;
+    private String orderRef;
     private BigDecimal amount;
     private String currency;
     private String reference;

@@ -1,0 +1,127 @@
+{
+  "topicNumber": 4,
+  "title": "The Complete Guide to Economic Indicators",
+  "slug": "complete-guide-to-economic-indicators",
+  "seo": {
+    "seoTitle": "Economic Indicators Explained: The Full Dashboard Economists Watch",
+    "metaDescription": "GDP, CPI, unemployment, PMI, consumer confidence — here's the full dashboard of economic indicators, what each one measures, and how they fit together.",
+    "focusKeyword": "economic indicators",
+    "secondaryKeywords": [
+      "leading economic indicators",
+      "lagging indicators",
+      "coincident indicators",
+      "key economic data",
+      "how to read economic reports"
+    ],
+    "searchIntent": "Informational — users wanting a complete overview of the major economic indicators and how they're used together to assess the economy",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "No single economic indicator tells the full story. Here's the complete dashboard — leading, lagging, and coincident indicators — and how economists read them together.",
+  "intro": "Economic indicators are the data points used to assess the current state and likely direction of an economy — everything from GDP and inflation to consumer confidence and manufacturing activity. Individually, each one offers a partial view. Together, they form a dashboard that economists, investors, and policymakers use to triangulate where the economy actually stands and where it's likely headed.\n\nThis guide organizes the major indicators into the three categories economists use to classify them — leading, coincident, and lagging — and explains what each one actually measures.",
+  "tableOfContents": [
+    "Leading, Coincident, and Lagging Indicators",
+    "GDP: The Headline Output Measure",
+    "Inflation Indicators: CPI and PCE",
+    "Labor Market Indicators",
+    "Manufacturing and Business Activity Indicators",
+    "Consumer and Sentiment Indicators",
+    "Reading the Dashboard Together"
+  ],
+  "sections": [
+    {
+      "heading": "Leading, Coincident, and Lagging Indicators",
+      "paragraphs": [
+        "Leading indicators tend to change before the broader economy does, making them useful for forecasting — stock market performance, building permits, and new manufacturing orders are common examples. Coincident indicators move roughly in step with the current state of the economy, like GDP and personal income. Lagging indicators change after the economy has already shifted, confirming a trend rather than predicting it — the unemployment rate is a classic example, since businesses typically adjust hiring after demand has already changed."
+      ],
+      "table": {
+        "caption": "Indicator Types at a Glance",
+        "headers": ["Type", "Timing", "Examples"],
+        "rows": [
+          ["Leading", "Changes before the economy", "Stock prices, building permits, new orders"],
+          ["Coincident", "Moves with the current economy", "GDP, personal income, industrial production"],
+          ["Lagging", "Confirms a trend after it happens", "Unemployment rate, CPI, corporate profits"]
+        ]
+      }
+    },
+    {
+      "heading": "GDP: The Headline Output Measure",
+      "paragraphs": [
+        "Gross Domestic Product is the broadest coincident indicator, measuring the total value of goods and services produced. It's reported quarterly and remains the single most-cited number for describing overall economic size and direction. See [the complete guide to GDP](/articles/complete-guide-to-gdp) for the full breakdown."
+      ]
+    },
+    {
+      "heading": "Inflation Indicators: CPI and PCE",
+      "paragraphs": [
+        "The Consumer Price Index (CPI) tracks the average change in prices paid by consumers for a fixed basket of goods and services, and is the most widely cited inflation measure. The Personal Consumption Expenditures (PCE) price index is the Federal Reserve's preferred inflation gauge, using a methodology that adjusts more dynamically as consumers substitute between goods. Both are lagging-to-coincident indicators, reflecting price changes that have already occurred. See [inflation measurement](/articles/inflation-measurement) for how each is actually calculated."
+      ]
+    },
+    {
+      "heading": "Labor Market Indicators",
+      "paragraphs": [
+        "The unemployment rate is the headline labor indicator but is technically lagging, since hiring and firing decisions typically follow — rather than lead — changes in demand. Initial jobless claims (new unemployment insurance filings) are watched more closely as a real-time, leading signal of labor market stress, since they update weekly rather than monthly. Job openings and wage growth data round out the picture of labor market tightness. See [the unemployment rate](/articles/unemployment-rate) for the full measurement breakdown."
+      ]
+    },
+    {
+      "heading": "Manufacturing and Business Activity Indicators",
+      "paragraphs": [
+        "Purchasing Managers' Index (PMI) surveys ask business leaders about current conditions and expectations, offering a fast, forward-looking read on manufacturing and services activity well before official GDP data catches up. A PMI reading above 50 generally indicates expansion; below 50 indicates contraction. New durable goods orders and industrial production round out the picture of the production side of the economy."
+      ]
+    },
+    {
+      "heading": "Consumer and Sentiment Indicators",
+      "paragraphs": [
+        "Consumer confidence and sentiment surveys gauge how households feel about current and future economic conditions, which correlates with future spending intentions — making them a genuinely useful leading indicator, since consumer spending makes up the majority of GDP in most developed economies. Retail sales data provides a more direct, near-real-time read on actual consumer spending behavior rather than sentiment alone."
+      ],
+      "callout": {
+        "title": "Sentiment doesn't always predict behavior perfectly",
+        "text": "Consumer sentiment surveys can diverge from actual spending in the short term — people sometimes report pessimism while continuing to spend largely as before. Use sentiment as one input, not a standalone forecast."
+      }
+    },
+    {
+      "heading": "Reading the Dashboard Together",
+      "paragraphs": [
+        "No single indicator, on its own, reliably describes the state of the economy — GDP can look strong while leading indicators are already softening, or unemployment can stay low even as coincident data starts to weaken, since it's a lagging measure. The practical approach economists use is triangulation: checking whether leading, coincident, and lagging indicators broadly agree on direction, and treating divergence between them as a signal to look closer rather than pick whichever number confirms an existing view."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Indicators fall into three categories: leading (predictive), coincident (real-time), and lagging (confirmatory).",
+    "GDP is the broadest coincident measure of total economic output, reported quarterly.",
+    "CPI and PCE are the two primary inflation measures; PCE is the Federal Reserve's preferred gauge.",
+    "The unemployment rate is technically a lagging indicator; weekly jobless claims offer a faster, more leading read on labor market stress.",
+    "PMI surveys give a fast, forward-looking read on manufacturing and services activity ahead of official GDP data.",
+    "No single indicator tells the full story — economists triangulate across leading, coincident, and lagging data to assess direction."
+  ],
+  "faq": [
+    {
+      "question": "What is the most important economic indicator?",
+      "answer": "There isn't a single most important one — GDP, inflation (CPI/PCE), and the unemployment rate are the three most closely watched, but they're most useful read together rather than individually."
+    },
+    {
+      "question": "What's the difference between a leading and lagging indicator?",
+      "answer": "Leading indicators tend to change before the broader economy shifts (useful for forecasting); lagging indicators change after the economy has already shifted (useful for confirming a trend)."
+    },
+    {
+      "question": "What does a PMI reading above 50 mean?",
+      "answer": "It generally indicates expansion in the sector being surveyed (manufacturing or services); a reading below 50 indicates contraction."
+    },
+    {
+      "question": "Why does the Fed prefer PCE over CPI for inflation?",
+      "answer": "PCE uses a methodology that adjusts more dynamically for consumer substitution between goods (buying more of what's gotten relatively cheaper), which many economists consider a more accurate reflection of the true cost of living over time."
+    }
+  ],
+  "conclusion": "Reading the economy well isn't about finding the one number that tells the whole story — it's about knowing which category each indicator falls into and whether they're broadly agreeing or diverging. Once you can place a given data release into the leading-coincident-lagging framework, economic news becomes a genuinely readable dashboard rather than a stream of disconnected headlines.\n\nFrom here, [the complete guide to the economy](/articles/complete-guide-to-the-economy) ties these indicators to the policy responses they trigger, and [market indicators](/articles/market-indicators) covers the parallel set of signals investors watch specifically within financial markets.",
+  "internalLinks": [
+    { "anchor": "complete guide to gdp", "slug": "complete-guide-to-gdp" },
+    { "anchor": "inflation measurement", "slug": "inflation-measurement" },
+    { "anchor": "unemployment rate", "slug": "unemployment-rate" },
+    { "anchor": "market indicators", "slug": "market-indicators" },
+    { "anchor": "complete guide to the economy", "slug": "complete-guide-to-the-economy" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Bureau of Labor Statistics", "url": "https://www.bls.gov/" },
+    { "name": "U.S. Bureau of Economic Analysis", "url": "https://www.bea.gov/" },
+    { "name": "The Conference Board — Leading Economic Index", "url": "https://www.conference-board.org/topics/us-leading-indicators" }
+  ],
+  "wordCountEstimate": 1550
+}

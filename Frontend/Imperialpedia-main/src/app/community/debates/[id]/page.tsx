@@ -13,6 +13,7 @@ export async function generateMetadata({ params }: DebatePageProps): Promise<Met
   return buildMetadata({
     title: `Debate Room ${id} | Community Hub`,
     description: 'Explore active financial debates. Analyze Bull vs Bear arguments and participate in the community consensus.',
+    canonical: `/community/debates/${id}`,
   });
 }
 

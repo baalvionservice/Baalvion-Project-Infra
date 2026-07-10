@@ -1,0 +1,110 @@
+{
+  "topicNumber": 14,
+  "title": "Open Market Operations: How the Fed Actually Moves Rates Day to Day",
+  "slug": "open-market-operations",
+  "seo": {
+    "seoTitle": "Open Market Operations Explained: How the Fed Hits Its Rate Target",
+    "metaDescription": "The Fed announces a rate target, but open market operations are the daily mechanism that actually gets the market rate there. Here's exactly how it works.",
+    "focusKeyword": "open market operations",
+    "secondaryKeywords": [
+      "how the Fed controls interest rates",
+      "repo operations",
+      "Fed securities buying and selling",
+      "how monetary policy is implemented"
+    ],
+    "searchIntent": "Informational — users wanting to understand the specific mechanism the Fed uses to implement its announced interest rate target",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "The Fed announces a target rate, but announcing it doesn't make it real — open market operations are the daily buying and selling that actually gets the market rate there.",
+  "intro": "When the Federal Open Market Committee announces a target range for the federal funds rate, that announcement alone doesn't automatically make banks lend to each other at that rate. **Open market operations** — the buying and selling of government securities — are the actual, ongoing mechanism the Federal Reserve uses to guide the real market rate toward its announced target.",
+  "tableOfContents": [
+    "What Open Market Operations Actually Are",
+    "Buying Securities: Adding Liquidity",
+    "Selling Securities: Withdrawing Liquidity",
+    "Repo and Reverse Repo Operations",
+    "How This Differs From Quantitative Easing",
+    "Why This Mechanism Matters to You"
+  ],
+  "sections": [
+    {
+      "heading": "What Open Market Operations Actually Are",
+      "paragraphs": [
+        "Open market operations involve the Federal Reserve Bank of New York, acting on behalf of the FOMC, buying or selling U.S. government securities (primarily Treasury securities) in the open market. These transactions change the amount of reserves in the banking system, which in turn influences the rate banks charge each other for overnight loans — nudging the real-world rate toward the FOMC's announced target."
+      ]
+    },
+    {
+      "heading": "Buying Securities: Adding Liquidity",
+      "paragraphs": [
+        "When the Fed buys securities from banks, it pays for them by crediting the selling bank's reserve account — effectively injecting new reserves into the banking system. With more reserves available, banks have less need to borrow from each other, which pushes the overnight lending rate down, supporting a lower federal funds rate target."
+      ]
+    },
+    {
+      "heading": "Selling Securities: Withdrawing Liquidity",
+      "paragraphs": [
+        "The reverse operation — selling securities — withdraws reserves from the banking system as buyers pay the Fed, reducing the pool of reserves. With fewer reserves available, competition among banks for overnight funds increases, pushing the rate up toward a higher target."
+      ],
+      "table": {
+        "caption": "Open Market Operations at a Glance",
+        "headers": ["Action", "Effect on Reserves", "Effect on Rates"],
+        "rows": [
+          ["Fed buys securities", "Increases bank reserves", "Pushes rates down"],
+          ["Fed sells securities", "Decreases bank reserves", "Pushes rates up"]
+        ]
+      }
+    },
+    {
+      "heading": "Repo and Reverse Repo Operations",
+      "paragraphs": [
+        "Beyond outright buying and selling, the Fed also uses repurchase agreements (repos) and reverse repos as shorter-term tools to manage reserves day to day. In a repo, the Fed temporarily buys securities with an agreement to sell them back later, injecting short-term liquidity. A reverse repo does the opposite, temporarily withdrawing liquidity. These tools give the Fed finer, more frequent control over reserve levels than outright permanent purchases or sales alone."
+      ]
+    },
+    {
+      "heading": "How This Differs From Quantitative Easing",
+      "paragraphs": [
+        "Open market operations are the routine, day-to-day mechanism used to keep the federal funds rate near its target under normal conditions. [Quantitative easing](/articles/quantitative-easing) is a distinct, larger-scale version of asset purchases, typically deployed when the federal funds rate is already near zero and the Fed wants to provide additional stimulus by directly influencing longer-term rates — a different scale and purpose from routine open market operations, even though both involve buying government securities."
+      ]
+    },
+    {
+      "heading": "Why This Mechanism Matters to You",
+      "paragraphs": [
+        "You'll never directly interact with an open market operation, but it's the invisible daily process that makes the Fed's announced rate target an economic reality rather than just a stated goal. Understanding that the headline rate target and the actual implementation are two separate things helps explain why the effective federal funds rate can occasionally trade slightly outside the announced target range for short periods, before operations bring it back in line."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Open market operations are the Fed's day-to-day buying and selling of government securities to keep the actual market rate near its announced target.",
+    "Buying securities injects reserves into the banking system, pushing rates down; selling withdraws reserves, pushing rates up.",
+    "Repo and reverse repo operations give the Fed finer, shorter-term control over reserve levels between larger operations.",
+    "Open market operations are routine and ongoing, distinct in scale and purpose from quantitative easing.",
+    "The announced rate target and its real-world implementation are two separate steps — operations are what connects them."
+  ],
+  "faq": [
+    {
+      "question": "What are open market operations?",
+      "answer": "The Federal Reserve's practice of buying and selling government securities to influence the level of reserves in the banking system, which in turn moves the actual federal funds rate toward its announced target."
+    },
+    {
+      "question": "How do open market operations affect interest rates?",
+      "answer": "Buying securities adds reserves to the banking system, pushing rates down. Selling securities withdraws reserves, pushing rates up — the Fed uses whichever direction is needed to hit its target."
+    },
+    {
+      "question": "What is a repurchase agreement (repo) in this context?",
+      "answer": "A short-term transaction where the Fed temporarily buys securities with an agreement to sell them back later, injecting short-term liquidity into the banking system between larger operations."
+    },
+    {
+      "question": "Is quantitative easing the same as open market operations?",
+      "answer": "They both involve buying securities, but quantitative easing is a larger-scale tool typically used when rates are already near zero, aimed at influencing longer-term rates directly — a different scale and purpose from routine day-to-day operations."
+    }
+  ],
+  "conclusion": "The Fed's rate announcement is the headline, but open market operations are the quiet, continuous mechanism that actually makes it real in the banking system — buying and selling securities to nudge reserves, and with them, the real-world rate, toward the announced target. It's a good example of how much of monetary policy's real work happens well outside the press conference.",
+  "internalLinks": [
+    { "anchor": "quantitative easing", "slug": "quantitative-easing" },
+    { "anchor": "monetary policy tools", "slug": "monetary-policy-tools" },
+    { "anchor": "central bank interest rates", "slug": "central-bank-interest-rates" },
+    { "anchor": "complete guide to monetary policy", "slug": "complete-guide-to-monetary-policy" }
+  ],
+  "externalSources": [
+    { "name": "Federal Reserve Bank of New York — Open Market Operations", "url": "https://www.newyorkfed.org/markets/domestic-market-operations" }
+  ],
+  "wordCountEstimate": 1300
+}

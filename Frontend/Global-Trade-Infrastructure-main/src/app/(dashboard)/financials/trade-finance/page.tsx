@@ -7,19 +7,25 @@
 
 import { useEffect, useState } from 'react';
 import { tradeFinanceService } from '@/modules/financials/services/trade-finance.service';
+import { tradeFinanceService as realTradeFinanceService } from '@/services/trade-finance-service';
 import { underwritingService } from '@/modules/financials/services/underwriting.service';
+import { resolveSessionOrgId } from '@/services/session-org';
 import { TradeFinanceInstrument, CreditProfile } from '@/modules/financials/types/financial.types';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { 
-  Landmark, 
-  FileText, 
-  ShieldCheck, 
-  Zap, 
-  Activity, 
-  Loader2, 
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import {
+  Landmark,
+  FileText,
+  ShieldCheck,
+  Zap,
+  Activity,
+  Loader2,
   ArrowRight,
   TrendingUp,
   Scale,
@@ -36,16 +42,35 @@ export default function TradeFinanceOperationsPage() {
   const [instruments, setInstruments] = useState<TradeFinanceInstrument[]>([]);
   const [profile, setProfile] = useState<CreditProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [noSession, setNoSession] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      tradeFinanceService.getActiveInstruments('COMP-101'),
-      underwritingService.calculateCreditProfile('COMP-101')
-    ]).then(([inst, prof]) => {
+    const fetchData = async () => {
+      const orgId = await resolveSessionOrgId();
+      if (!orgId) {
+        setNoSession(true);
+        setLoading(false);
+        return;
+      }
+      const [inst, prof] = await Promise.all([
+        tradeFinanceService.getActiveInstruments(orgId),
+        underwritingService.calculateCreditProfile(orgId),
+      ]);
       setInstruments(inst);
       setProfile(prof);
-    }).finally(() => setLoading(false));
+      setLoading(false);
+    };
+    fetchData();
   }, []);
+
+  if (noSession) {
+    return (
+      <div className="h-full flex flex-col items-center justify-center gap-6 bg-background">
+        <Lock className="h-12 w-12 text-muted-foreground opacity-20" />
+        <p className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Sign in to view trade finance instruments.</p>
+      </div>
+    );
+  }
 
   if (loading || !profile) {
     return (
@@ -71,9 +96,7 @@ export default function TradeFinanceOperationsPage() {
           <Button variant="outline" className="h-12 px-6 border-2 font-black uppercase tracking-widest text-xs bg-background shadow-md">
             <History className="mr-3 h-4 w-4" /> Finality Log
           </Button>
-          <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">
-            <Plus className="mr-3 h-5 w-5" /> Request Instrument
-          </Button>
+          <RequestInstrumentDialog />
         </div>
       </div>
 
@@ -235,5 +258,76 @@ export default function TradeFinanceOperationsPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function RequestInstrumentDialog() {
+  const { toast } = useToast();
+  const [open, setOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [invoiceId, setInvoiceId] = useState('');
+  const [orderRef, setOrderRef] = useState('');
+  const [debtorName, setDebtorName] = useState('');
+  const [amount, setAmount] = useState('');
+
+  const valid = invoiceId.trim() && debtorName.trim() && Number(amount) > 0;
+
+  async function submit() {
+    setSubmitting(true);
+    try {
+      const orgId = await resolveSessionOrgId();
+      await realTradeFinanceService.requestInvoiceFinancing({
+        invoiceId: invoiceId.trim(),
+        orderRef: orderRef.trim() || undefined,
+        debtorName: debtorName.trim(),
+        companyId: orgId || undefined,
+        amount: Number(amount),
+      });
+      toast({ title: 'Financing request submitted', description: 'Credit-service is assessing the receivable.' });
+      setOpen(false);
+      setInvoiceId(''); setOrderRef(''); setDebtorName(''); setAmount('');
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Request failed.';
+      toast({ variant: 'destructive', title: 'Request failed', description: message });
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="h-12 px-6 bg-primary text-white font-black uppercase tracking-widest text-xs shadow-md hover:scale-[1.02] transition-all">
+          <Plus className="mr-3 h-5 w-5" /> Request Instrument
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader><DialogTitle>Request Invoice Financing</DialogTitle></DialogHeader>
+        <div className="space-y-3 py-2">
+          <div className="space-y-1.5">
+            <Label className="text-xs">Invoice Number</Label>
+            <Input value={invoiceId} onChange={(e) => setInvoiceId(e.target.value)} placeholder="INV-2026-0042" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Order Reference (optional)</Label>
+            <Input value={orderRef} onChange={(e) => setOrderRef(e.target.value)} placeholder="Links this financing request to a GTI order" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Debtor Name</Label>
+            <Input value={debtorName} onChange={(e) => setDebtorName(e.target.value)} placeholder="Buyer / debtor institution" />
+          </div>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Face Amount (USD)</Label>
+            <Input type="number" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="50000" />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={submitting}>Cancel</Button>
+          <Button onClick={submit} disabled={submitting || !valid}>
+            {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null} Submit
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

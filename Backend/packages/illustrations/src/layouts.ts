@@ -23,8 +23,20 @@ function svgShell(palette: Palette, body: string): string {
   );
 }
 
+// Category names like "Business & Corporate" contain raw XML special characters —
+// without escaping, the emitted SVG is invalid XML. This was previously masked
+// because the SVG was only ever consumed as a data-URI string (lenient browser
+// parsing), but strict XML parsers (e.g. librsvg, used by sharp for rasterization)
+// reject it outright.
+function escapeXmlText(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
 function kickerText(kicker: string, palette: Palette, x: number, y: number): string {
-  const label = kicker.toUpperCase();
+  const label = escapeXmlText(kicker.toUpperCase());
   return (
     `<text x="${x}" y="${y}" font-family="Helvetica, Arial, sans-serif" font-size="20" ` +
     `font-weight="700" letter-spacing="2" fill="${palette.accent}">${label}</text>`

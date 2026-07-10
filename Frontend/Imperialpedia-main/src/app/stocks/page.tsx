@@ -8,6 +8,7 @@ import { stockFaqs } from "@/lib/data/data.faq";
 import { ExploreStocksSection } from "./components/ExploreStocksSection";
 
 export const metadata = buildMetadata({
+  canonical: '/stocks',
   title: "Stocks News and Analysis | Imperial Finance",
   description:
     "Stay informed with the latest financial news, market insights, and expert analysis. Our news section covers global markets, economic trends, and investment strategies to help you make informed decisions.",

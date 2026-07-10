@@ -6,6 +6,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/community/rankings',
   title: 'Network Rankings & Leaderboards | Community Hub',
   description: 'Explore the platform meritocracy. See top-ranking analysts, expert authors, and influential community members based on real-time intelligence impact.',
 });

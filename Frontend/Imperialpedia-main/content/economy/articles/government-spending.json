@@ -1,0 +1,111 @@
+{
+  "topicNumber": 17,
+  "title": "How Government Spending Works and Why It Matters to the Economy",
+  "slug": "government-spending",
+  "seo": {
+    "seoTitle": "Government Spending Explained: Budget, Deficits, and Economic Impact",
+    "metaDescription": "Where does government spending actually go, how is the budget deficit different from the national debt, and how does spending affect the broader economy?",
+    "focusKeyword": "government spending",
+    "secondaryKeywords": [
+      "federal budget explained",
+      "budget deficit vs national debt",
+      "mandatory vs discretionary spending",
+      "how government spending affects the economy"
+    ],
+    "searchIntent": "Informational — users wanting to understand how government budgets and spending decisions work and their broader economic effects",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Government spending is one of the four components of GDP and a constant subject of political debate. Here's how the budget actually breaks down, and how spending decisions ripple through the economy.",
+  "intro": "Government spending is one of the four components that make up [GDP](/articles/complete-guide-to-gdp), and its size, composition, and financing are among the most consistently debated topics in economic policy. This guide covers how government spending is categorized, the difference between the budget deficit and the national debt, and how spending decisions affect the broader economy.",
+  "tableOfContents": [
+    "Mandatory vs Discretionary Spending",
+    "Where the Money Actually Goes",
+    "Budget Deficit vs National Debt",
+    "How Government Spending Affects GDP",
+    "Crowding Out: The Debate Over Too Much Spending",
+    "Spending as a Fiscal Policy Tool"
+  ],
+  "sections": [
+    {
+      "heading": "Mandatory vs Discretionary Spending",
+      "paragraphs": [
+        "Mandatory spending covers programs required by existing law — in the U.S., this includes Social Security, Medicare, and Medicaid — and represents the majority of the federal budget, growing or shrinking automatically based on eligibility and program rules rather than an annual funding decision. Discretionary spending covers programs that Congress must actively fund each year through the appropriations process, including defense and a wide range of other federal agencies and programs."
+      ]
+    },
+    {
+      "heading": "Where the Money Actually Goes",
+      "paragraphs": [
+        "Beyond the mandatory-discretionary split, spending also breaks down by function: social insurance and safety net programs, national defense, interest payments on existing debt, and a wide range of other categories including education, transportation, and scientific research. Interest payments, in particular, have drawn increasing attention as their share of the budget has grown alongside the overall level of government debt."
+      ]
+    },
+    {
+      "heading": "Budget Deficit vs National Debt",
+      "paragraphs": [
+        "The budget deficit is the difference between what the government spends and what it collects in revenue during a single fiscal year — spending more than it collects produces a deficit for that year. The national debt is the cumulative total of all past deficits (minus any surpluses) that haven't been paid off, accumulated over the government's entire history. A useful analogy: the deficit is like a single year's overspending on a credit card, while the debt is the total accumulated balance across every year combined."
+      ],
+      "table": {
+        "caption": "Budget Deficit vs National Debt",
+        "headers": ["Concept", "What It Measures", "Timeframe"],
+        "rows": [
+          ["Budget deficit", "Spending minus revenue in one year", "Single fiscal year"],
+          ["National debt", "Cumulative total of all past deficits", "Entire history, running total"]
+        ]
+      }
+    },
+    {
+      "heading": "How Government Spending Affects GDP",
+      "paragraphs": [
+        "As one of the four components in the GDP calculation, an increase in government spending directly adds to measured output, and it can also have a further multiplier effect as that spending becomes income for contractors, employees, and suppliers, who then spend a portion of it themselves. This is exactly why spending is a tool available for [fiscal policy during recessions](/articles/fiscal-policy-during-recessions) — it has a direct, near-immediate effect on measured economic activity."
+      ]
+    },
+    {
+      "heading": "Crowding Out: The Debate Over Too Much Spending",
+      "paragraphs": [
+        "One ongoing debate concerns 'crowding out' — the concern that heavy government borrowing to finance spending can push up interest rates and reduce the funds available for private investment, partially offsetting the stimulative effect of the spending itself. The extent and conditions under which crowding out occurs is genuinely debated among economists, with many arguing it's more of a risk during a fully-employed, non-recessionary economy than during a downturn when there's more economic slack to absorb the additional spending without competing significantly with private borrowing."
+      ]
+    },
+    {
+      "heading": "Spending as a Fiscal Policy Tool",
+      "paragraphs": [
+        "Beyond its steady-state role funding government functions, spending is also actively used as a deliberate fiscal policy lever — increased during recessions to support demand, and in principle moderated during strong expansions to avoid contributing to overheating, though political dynamics make spending considerably easier to increase than to reduce in practice. See [fiscal policy during recessions](/articles/fiscal-policy-during-recessions) for how this plays out specifically during downturns."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Mandatory spending (Social Security, Medicare, Medicaid) makes up the majority of the federal budget and doesn't require annual funding decisions.",
+    "Discretionary spending, including defense, must be actively funded each year through the congressional appropriations process.",
+    "The budget deficit measures a single year's spending minus revenue; the national debt is the cumulative total of all past deficits.",
+    "Government spending directly adds to GDP and can generate a further multiplier effect through subsequent rounds of spending.",
+    "Crowding out — heavy borrowing pushing up rates and reducing private investment — is a genuine but debated risk, more relevant outside of recessions.",
+    "Spending is a deliberate fiscal policy tool during downturns, though politically easier to increase than to reduce."
+  ],
+  "faq": [
+    {
+      "question": "What's the difference between the budget deficit and the national debt?",
+      "answer": "The deficit is the gap between spending and revenue in a single year. The national debt is the cumulative total of all past deficits (minus surpluses) accumulated over the government's entire history."
+    },
+    {
+      "question": "What is mandatory spending?",
+      "answer": "Spending required by existing law, such as Social Security, Medicare, and Medicaid in the U.S., which grows or shrinks based on program eligibility rules rather than an annual funding vote."
+    },
+    {
+      "question": "Does government spending directly affect GDP?",
+      "answer": "Yes — government spending is one of the four components used to calculate GDP, and it can also generate a further multiplier effect as the initial spending becomes income that gets partly re-spent elsewhere in the economy."
+    },
+    {
+      "question": "What is 'crowding out'?",
+      "answer": "The concern that heavy government borrowing can push up interest rates and reduce funds available for private investment, partially offsetting the economic benefit of the spending itself — a risk considered more relevant outside of recessions."
+    }
+  ],
+  "conclusion": "Government spending is both a routine, ongoing function of running a country and an active fiscal policy tool that gets deployed more aggressively during downturns. Understanding the split between mandatory and discretionary spending, and the distinction between the deficit and the debt, makes budget debates considerably easier to follow than the often oversimplified way they're covered in the news.",
+  "internalLinks": [
+    { "anchor": "fiscal policy during recessions", "slug": "fiscal-policy-during-recessions" },
+    { "anchor": "complete guide to gdp", "slug": "complete-guide-to-gdp" },
+    { "anchor": "complete guide to the economy", "slug": "complete-guide-to-the-economy" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Congressional Budget Office", "url": "https://www.cbo.gov/" },
+    { "name": "U.S. Department of the Treasury — Fiscal Data", "url": "https://fiscaldata.treasury.gov/" }
+  ],
+  "wordCountEstimate": 1400
+}

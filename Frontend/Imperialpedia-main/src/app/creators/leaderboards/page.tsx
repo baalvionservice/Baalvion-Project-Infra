@@ -9,6 +9,7 @@ import { Metadata } from 'next';
 import { Trophy } from 'lucide-react';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/creators/leaderboards',
   title: 'Creator Intelligence Leaderboards',
   description: 'Tracking the most impactful financial minds on the Imperialpedia network. Rankings by revenue, reach, and expert engagement.',
 });

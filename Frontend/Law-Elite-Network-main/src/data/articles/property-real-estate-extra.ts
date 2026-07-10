@@ -63,6 +63,22 @@ export const propertyRealEstateExtraArticles: LawArticle[] = [
 <h2>Why Easements Matter to Buyers</h2>
 <p>Before buying property, it is essential to know what easements benefit or burden it. An easement crossing the land you are buying may limit where you can build or fence, while an easement benefiting the property may be vital for access. Because these rights often bind future owners, they should appear in your due-diligence searches of the title and land register.</p>
 
+<h2>Terminating or Modifying an Easement</h2>
+<p>Easements are not always permanent. They can end through express release (the dominant owner formally gives it up, usually in writing), through merger (if the same person comes to own both the dominant and servient land, the easement generally disappears since you cannot hold a right against yourself), through abandonment (though courts typically require clear evidence of intent to abandon, not just years of non-use), or by court order where circumstances have changed so much that the easement no longer serves a practical purpose. Because these routes are narrow and fact-specific, an easement a buyer finds inconvenient should never be assumed to have lapsed simply because it hasn't been actively used recently — confirming its current status is a due-diligence question, not an assumption to make casually.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I build over or block an easement on my own land?</strong> Generally no — building in a way that unreasonably interferes with the dominant owner's use of the easement (blocking a right of way, for instance) can lead to a court order requiring removal, regardless of whether you obtained a building permit for the structure itself.</p>
+<p><strong>Do I need to pay for an easement across my property?</strong> Not automatically — some easements are granted for payment as part of a negotiated deal, while others (created by necessity or long use) carry no compensation requirement, depending on how and why the right arose.</p>
+<p><strong>Is an easement the same as a license to use land?</strong> No — a license is typically personal and revocable at the landowner's discretion, while an easement is a property right that generally survives a change of ownership on either side and is far harder to revoke unilaterally.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>UK Law of Property Act 1925 and Land Registration Act 2002</li>
+<li>U.S. Restatement (Third) of Property: Servitudes</li>
+<li>India, Indian Easements Act 1882</li>
+<li>International Bar Association, comparative real property law resources</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>If you are buying or developing land, obtain the title documents and search for any registered easements, and walk the boundaries to spot informal paths or pipes that might hint at unregistered rights. Where an easement is unclear or disputed, get it documented in writing rather than relying on past practice. For anything contentious — a blocked right of way, a prescriptive claim, or a development that an easement constrains — consult a property lawyer in the relevant jurisdiction before you commit.</p>
 
@@ -126,6 +142,22 @@ export const propertyRealEstateExtraArticles: LawArticle[] = [
 <li><strong>United Kingdom:</strong> Landlords must keep the structure, exterior, and key installations in repair, and homes must be fit for human habitation.</li>
 <li><strong>European Union:</strong> Member states set their own tenancy codes, generally placing structural and essential repairs on the landlord.</li>
 <li><strong>India:</strong> Rent-control and model tenancy provisions typically require landlords to handle major repairs while tenants manage minor upkeep.</li>
+</ul>
+
+<h2>Appliances, Fixtures, and Furnished Lettings</h2>
+<p>Repair responsibility for appliances often depends on who supplied them and whether they are considered "fixtures" (built into the property, like a fitted oven) or "chattels" (freestanding items, like a portable heater the tenant brought). Landlord-supplied appliances in a furnished or part-furnished letting are typically the landlord's responsibility to repair or replace when they fail through normal use, while anything the tenant brought into the property is theirs alone to maintain. This distinction is a frequent source of disputes in furnished rentals, so a detailed inventory at move-in — noting what belongs to whom and its condition — is worth the modest time it takes to prepare.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I withhold rent until my landlord makes a repair?</strong> This is risky and jurisdiction-dependent — some places have a formal "repair and deduct" or rent-escrow procedure that must be followed exactly, while simply stopping payment without following the legal process can itself expose the tenant to an eviction claim for non-payment.</p>
+<p><strong>Who pays for pest control?</strong> It generally depends on the cause — infestations linked to a structural issue (a hole letting pests in) are typically the landlord's responsibility, while those caused by tenant behavior (food storage, cleanliness) are typically the tenant's.</p>
+<p><strong>What happens if a repair makes the property temporarily unlivable?</strong> Many jurisdictions require the landlord to arrange alternative accommodation or reduce rent proportionally for the affected period, particularly where the loss of habitability (no heat, no water) was not caused by the tenant.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. implied warranty of habitability case law and state landlord-tenant statutes</li>
+<li>UK Homes (Fitness for Human Habitation) Act 2018</li>
+<li>India, Model Tenancy Act 2021, repair and maintenance provisions</li>
+<li>Chartered Institute of Housing, repair responsibility guidance</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

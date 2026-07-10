@@ -5,6 +5,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/ai-analyst/scenario-modeling',
   title: 'AI Scenario Modeler | Dual-Case Intelligence',
   description: 'Generate side-by-side Bull and Bear scenarios for financial assets. Analyze key drivers, structural risks, and probability scores using institutional-grade AI modeling.',
 });
