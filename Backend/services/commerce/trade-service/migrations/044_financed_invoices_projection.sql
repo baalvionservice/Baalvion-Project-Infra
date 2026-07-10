@@ -23,3 +23,11 @@ CREATE TABLE IF NOT EXISTS trade.financed_invoices (
 
 CREATE UNIQUE INDEX IF NOT EXISTS uk_financed_invoices_ref ON trade.financed_invoices (invoice_ref);
 CREATE INDEX IF NOT EXISTS idx_financed_invoices_order ON trade.financed_invoices (order_id);
+
+-- Fail-closed tenant RLS (R1), same generated pattern as 007_rls_tenant_isolation.sql.
+ALTER TABLE "trade"."financed_invoices" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "trade"."financed_invoices" FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "tenant_isolation" ON "trade"."financed_invoices";
+CREATE POLICY "tenant_isolation" ON "trade"."financed_invoices"
+    USING ((current_setting('app.tenant_bypass', true) = 'on') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND "tenant_id"::text = current_setting('app.current_tenant', true)))
+    WITH CHECK ((current_setting('app.tenant_bypass', true) = 'on') OR (current_setting('app.current_tenant', true) IS NOT NULL AND current_setting('app.current_tenant', true) <> '' AND "tenant_id"::text = current_setting('app.current_tenant', true)));
