@@ -9,6 +9,21 @@
 # secrets anywhere else still fail the scan.
 41506bb14f25ebeb6d1a59dd607b60bc1a2244ce:Frontend/Global-Trade-Infrastructure-main/docs/engines/CERTIFICATE-REGISTRY.md:generic-api-key:193
 
+# help-baalvion API docs pages. gitleaks' curl-auth-header rule flags the
+# `Authorization: Bearer <token>` line inside static code-sample snippets
+# shown to developers reading the docs. No real credential is present.
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/orders/page.tsx:curl-auth-header:86
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/orders/page.tsx:curl-auth-header:103
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/tasks/page.tsx:curl-auth-header:75
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/listings/page.tsx:curl-auth-header:78
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/users/page.tsx:curl-auth-header:70
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/users/page.tsx:curl-auth-header:92
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/notifications/page.tsx:curl-auth-header:65
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/webhooks/page.tsx:curl-auth-header:34
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/code-examples/page.tsx:curl-auth-header:28
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/code-examples/page.tsx:curl-auth-header:61
+95175c24536c14d192a2429b64722e23ac091888:Frontend/help-baalvion/src/app/(docs)/api/authentication/page.tsx:curl-auth-header:35
+
 # Baalvion Intelligence "Getting Started" docs page. The curl example shows the
 # literal placeholder `YOUR_API_KEY` as the Authorization header value — not a
 # real credential. gitleaks' curl-auth-header rule flags the header shape
