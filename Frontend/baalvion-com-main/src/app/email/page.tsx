@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { PageShell } from '@/components/page/page-shell';
 import { ROUTES } from '@/lib/content';
 import { EMAIL } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Email Communications',
   description:
     'How and why Baalvion sends email. We send transactional email only — account verification, one-time sign-in codes, security alerts, recovery, and service notifications. We never send unsolicited bulk email or spam.',
-  alternates: { canonical: '/email' },
-};
+  path: ROUTES.email,
+});
 
 export default function EmailPage() {
   return (

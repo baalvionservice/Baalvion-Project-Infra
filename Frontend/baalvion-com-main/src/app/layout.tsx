@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { SITE, EXTERNAL, NETWORK } from '@/lib/content';
+import { SITE, EXTERNAL, NETWORK, CONTACT } from '@/lib/content';
 import { fraunces, interTight, plexMono } from './fonts';
 import { Substrate } from '@/components/structure/substrate';
 import './globals.css';
@@ -42,11 +42,23 @@ const organizationSchema = {
   description: SITE.description,
   logo: `${SITE.url}/icon.svg`,
   slogan: SITE.tagline,
+  foundingDate: '2026',
+  areaServed: CONTACT.regions,
   sameAs: [
     EXTERNAL.about,
     EXTERNAL.ir,
     ...NETWORK.groups.flatMap((g) => g.entries.map((e) => e.href)),
   ],
+};
+
+const websiteSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  inLanguage: 'en-US',
+  publisher: { '@type': 'Organization', name: SITE.name, url: SITE.url },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -59,6 +71,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
         <noscript>
           <style>{`.reveal{opacity:1;transform:none}`}</style>

@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { PageShell } from '@/components/page/page-shell';
 import { CONTACT, ROUTES } from '@/lib/content';
 import { SECURITY } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Security',
   description:
     'How Baalvion protects your data and account: passwordless authentication, encryption in transit, tenant isolation, least-privilege access, and responsible disclosure.',
-  alternates: { canonical: '/security' },
-};
+  path: ROUTES.security,
+});
 
 export default function SecurityPage() {
   return (
@@ -19,6 +20,7 @@ export default function SecurityPage() {
       eyebrow={SECURITY.eyebrow}
       title={SECURITY.title}
       lede={SECURITY.lede}
+      breadcrumbs={[{ label: 'Trust Center', href: ROUTES.trust }]}
     >
       {/* Practices */}
       <section className="border-b hairline bg-ink">

@@ -47,6 +47,7 @@ export const ABOUT = {
 /* ─────────────────────────── Services / Platform ─────────────────────────── */
 
 export interface ServiceCapability {
+  id: string;
   index: string;
   title: string;
   tagline: string;
@@ -62,6 +63,7 @@ export const SERVICES = {
   lede: 'Each domain is an engineered system in its own right — and every one is wired back to the same core of identity, governance, settlement, and intelligence.',
   domains: [
     {
+      id: 'trade',
       index: '01',
       title: 'Trade Infrastructure',
       tagline: 'The rails beneath global commerce.',
@@ -69,6 +71,7 @@ export const SERVICES = {
       capabilities: ['Customs & documentation', 'Cross-border settlement', 'Compliance & sanctions screening', 'Logistics orchestration'],
     },
     {
+      id: 'markets',
       index: '02',
       title: 'Market & Financial Systems',
       tagline: 'The discipline beneath capital.',
@@ -76,6 +79,7 @@ export const SERVICES = {
       capabilities: ['Pricing & FX', 'Treasury & wallets', 'Double-entry ledgering', 'Reconciliation & settlement'],
     },
     {
+      id: 'ecosystem',
       index: '03',
       title: 'Ecosystem Platforms',
       tagline: 'Where institutions connect and operate.',
@@ -83,6 +87,7 @@ export const SERVICES = {
       capabilities: ['Identity & access', 'Organisation & tenant management', 'Operations dashboards', 'Counterparty connection'],
     },
     {
+      id: 'intelligence',
       index: '04',
       title: 'Intelligence Systems',
       tagline: 'Judgment, encoded into infrastructure.',
@@ -204,4 +209,272 @@ export const CONTACT_PAGE = {
       'Established 2026. Postal correspondence available on request.',
     ],
   },
+} as const;
+
+/* ─────────────────────────── Trust Center ─────────────────────────── */
+
+export interface TrustCard {
+  title: string;
+  body: string;
+  href: string;
+}
+
+export const TRUST_CENTER = {
+  folio: '§ 06',
+  label: 'Trust Center',
+  eyebrow: 'Security, governance & reliability',
+  title: 'Trust, engineered into the foundation.',
+  lede: 'Security, governance, and reliability are not disclosures added after the fact — across every domain Baalvion operates, they are architecture, applied to a single standard.',
+  intro: 'This is the single index for how Baalvion protects accounts, structures accountability, and describes its own stage honestly. If you are reviewing Baalvion ahead of a partnership, an account, or an investment, start here.',
+  faq: [
+    {
+      question: 'What is Baalvion?',
+      answer: 'Baalvion is a multi-jurisdiction holding company for foundational infrastructure, designing, building, and operating the systems beneath global trade, markets, and digital ecosystems. It is organised as a corporate layer, a platform layer, and a portfolio of independent brands.',
+    },
+    {
+      question: 'Is authentication on Baalvion passwordless?',
+      answer: 'Yes. There are no stored passwords to steal — identity is verified with short-lived, one-time email codes and signed sessions, across every platform in the network.',
+    },
+    {
+      question: 'How is tenant data isolated?',
+      answer: 'Each organisation’s data is isolated with row-level controls so tenants, currencies, and jurisdictions stay separated — treated as architecture rather than configuration.',
+    },
+    {
+      question: 'What stage is Baalvion at?',
+      answer: 'Baalvion is an established, actively operated foundation (2026) — four operating domains, six live platforms, and five independent brands, held under a multi-jurisdiction posture. We describe scale in terms of what is architecturally true today.',
+    },
+    {
+      question: 'Does Baalvion hold formal security or regulatory certifications?',
+      answer: 'Certifications and regulatory registrations are disclosed here as, and only as, they are obtained. Baalvion does not claim standards it has not been independently assessed against.',
+    },
+  ],
+} as const;
+
+/* ─────────────────────────── Trust — Governance ─────────────────────────── */
+
+export interface StructureBlock {
+  title: string;
+  body: string;
+}
+
+export const GOVERNANCE = {
+  folio: '§ 07',
+  label: 'Governance',
+  eyebrow: 'Regulatory posture',
+  title: 'Governance is architecture, not an afterthought.',
+  lede: 'Baalvion is structured as a multi-jurisdiction holding company: a corporate apex, an operating platform layer, and a portfolio of independent brands — each accountable, isolated, and held to the same standard.',
+  structure: {
+    label: 'How the foundation is structured',
+    body: 'A corporate layer sets standard, governance, and stewardship. A platform layer operates the systems institutions run on. A portfolio of independent brands extends the foundation into distinct markets, each operated at arm’s length, sharing infrastructure and discipline rather than identity. No layer inherits authority it has not been given; each is accountable for what it operates.',
+  },
+  isolation: {
+    label: 'Jurisdiction & isolation',
+    body: 'Baalvion is built to operate across borders, not merely to reach them. Data residency, tenant isolation, regulatory regimes, and sanctions posture are treated as architecture rather than configuration — each tenant, each currency, and each jurisdiction stays isolated from the next by design, not by policy alone.',
+  },
+  accountability: {
+    label: 'Accountability',
+    items: [
+      'Every account on the network is authenticated through one identity layer, so access and its audit trail are never fragmented across domains.',
+      'Sensitive actions are logged and access is scoped to least privilege, in line with the practices published on the Security page.',
+      'Formal certifications and regulatory registrations are disclosed here as, and only as, they are obtained — we do not claim standards we have not been independently assessed against.',
+    ],
+  },
+} as const;
+
+/* ─────────────────────────── Trust — Reliability ─────────────────────────── */
+
+export const RELIABILITY = {
+  folio: '§ 08',
+  label: 'Platform Reliability',
+  eyebrow: 'Architecture & stage',
+  title: 'What is live, what is being built, stated plainly.',
+  lede: 'Baalvion operates real infrastructure today and is actively extending it. We describe the difference between the two directly, rather than let one borrow credibility from the other.',
+  today: {
+    label: 'The operating fabric, today',
+    body: 'Each of the four domains — Trade, Markets, Ecosystem, and Intelligence — corresponds to a live platform in the network, reachable from the homepage index. These are operating environments, not concept pages: they carry their own uptime, their own release cadence, and their own operational scope.',
+  },
+  identity: {
+    label: 'The identity layer',
+    body: 'One passwordless account authenticates every user across every platform and property in the network. Identity is centralised and verified by one-time email code rather than a stored password — a deliberate, live piece of shared infrastructure underneath everything else described on this site.',
+  },
+  principle: {
+    label: 'The reliability standard',
+    body: 'Permanence over momentum: infrastructure is judged by what it withstands, not what it promises. Systems before features: we solve for the whole, because coherent, composable infrastructure outlasts any single product built on it.',
+  },
+  stage: {
+    label: 'Our stage, stated honestly',
+    body: 'Baalvion is an established, actively operated foundation (2026) — four operating domains, six live platforms, and five independent brands, held under a multi-jurisdiction posture. We describe scale in terms of what is architecturally true today, and update this page as that changes.',
+  },
+} as const;
+
+/* ─────────────────────────── Solutions ─────────────────────────── */
+
+export interface AudienceCard {
+  title: string;
+  body: string;
+  href: string;
+}
+
+export const SOLUTIONS_HUB = {
+  folio: '§ 09',
+  label: 'Solutions',
+  eyebrow: 'Who engages with the foundation',
+  title: 'One foundation. Built for every counterpart that depends on it.',
+  lede: 'Baalvion is engaged differently depending on who you are — an institution operating on one of our platforms, a financial partner, a regulator, a partner extending the network, or an investor evaluating the foundation itself. The foundation is the same; how you meet it differs.',
+  audiences: [
+    { title: 'Enterprises & Institutions', body: 'Operating environments built for institutional dependence, across trade, markets, ecosystem, and intelligence.', href: '/solutions/enterprises' },
+    { title: 'Financial Institutions', body: 'Settlement, ledgering, and reconciliation built to institutional tolerance.', href: '/solutions/financial-institutions' },
+    { title: 'Governments & Regulators', body: 'Infrastructure designed to be examined — isolation and compliance as structural properties, not disclosures.', href: '/solutions/governments' },
+    { title: 'Partners', body: 'Extend the foundation into a market or capability we do not reach alone.', href: '/partners' },
+    { title: 'Investors', body: 'A long-horizon foundation, evaluated on its own terms.', href: '/investors' },
+  ] as AudienceCard[],
+} as const;
+
+export interface SolutionSection {
+  heading: string;
+  body: string;
+}
+
+export interface SolutionPage {
+  folio: string;
+  label: string;
+  eyebrow: string;
+  title: string;
+  lede: string;
+  sections: SolutionSection[];
+  closing: string;
+  cta: { label: string; href: string };
+  ctaSecondary?: { label: string; href: string };
+}
+
+export const SOLUTIONS_ENTERPRISES: SolutionPage = {
+  folio: '§ 10',
+  label: 'Solutions — Enterprises & Institutions',
+  eyebrow: 'For enterprises & institutions',
+  title: 'Operating environments built for institutional dependence.',
+  lede: 'If your organisation runs on one of Baalvion’s platforms — trade, markets, ecosystem, or intelligence — you are depending on infrastructure engineered for permanence, not a product optimised for growth metrics.',
+  sections: [
+    {
+      heading: 'Built on one operational fabric',
+      body: 'Every platform in the network is wired back to the same core of identity, governance, settlement, and intelligence. Adopting one domain does not mean integrating with an isolated product — it means joining a fabric designed to extend coherently as your dependence on it grows.',
+    },
+    {
+      heading: 'One identity, one audit trail',
+      body: 'A single passwordless Baalvion account authenticates your organisation’s access across every platform it uses. Access is scoped to least privilege and sensitive actions are logged, so accountability is never fragmented across the systems you depend on.',
+    },
+    {
+      heading: 'Isolation you can rely on',
+      body: 'Tenant isolation, data residency, and jurisdictional posture are structural properties of the platform layer, not configuration options — detailed in full on the Governance and Security pages of the Trust Center.',
+    },
+  ],
+  closing: 'See the domain your organisation would run on, or review the isolation and access model behind it.',
+  cta: { label: 'Explore Platform & Services', href: '/services' },
+  ctaSecondary: { label: 'Review the Trust Center', href: '/trust' },
+};
+
+export const SOLUTIONS_FINANCIAL: SolutionPage = {
+  folio: '§ 11',
+  label: 'Solutions — Financial Institutions',
+  eyebrow: 'For financial institutions',
+  title: 'Settlement, ledgering, and reconciliation built to institutional tolerance.',
+  lede: 'Baalvion’s Market & Financial Systems domain is designed for counterparties that must reconcile to the cent — deterministic ledgering, server-authoritative money movement, and treasury infrastructure built for institutional scrutiny.',
+  sections: [
+    {
+      heading: 'Correctness before convenience',
+      body: 'Pricing, treasury, ledgering, and reconciliation are built to institutional tolerances. Every money movement is server-authoritative and traceable — a question of correctness first, not a UI convenience layered over an unreliable core.',
+    },
+    {
+      heading: 'Reconcilable by design',
+      body: 'Double-entry ledgering and reconciliation are foundational to the domain, not an add-on report generated after the fact. This is the same discipline described on the Reliability page of the Trust Center, applied specifically to money movement.',
+    },
+    {
+      heading: 'Where this connects',
+      body: 'Market & Financial Systems shares its identity, isolation, and governance model with every other domain in the network — reviewed in full on the Governance page.',
+    },
+  ],
+  closing: 'Review the domain directly, or speak to the team accountable for it.',
+  cta: { label: 'Explore Market & Financial Systems', href: '/services#markets' },
+  ctaSecondary: { label: 'Speak to the foundation', href: '/contact' },
+};
+
+export const SOLUTIONS_GOVERNMENTS: SolutionPage = {
+  folio: '§ 12',
+  label: 'Solutions — Governments & Regulators',
+  eyebrow: 'For governments & regulators',
+  title: 'Infrastructure designed to be examined.',
+  lede: 'Baalvion treats regulatory engagement as a first-class input, not a constraint applied after the fact. Isolation, jurisdictional posture, and compliance are structural properties of the foundation, and we welcome scrutiny of how they are implemented.',
+  sections: [
+    {
+      heading: 'Compliance as architecture',
+      body: 'Compliance and sanctions screening are part of the Trade Infrastructure domain’s core design, not a bolt-on integration — and the same isolation principle applies across every other domain the foundation operates.',
+    },
+    {
+      heading: 'Multi-jurisdiction by design',
+      body: 'Data residency, tenant isolation, and jurisdiction-specific regulatory regimes are treated as architecture rather than configuration, detailed in full on the Governance page of the Trust Center.',
+    },
+    {
+      heading: 'A direct channel',
+      body: 'Regulatory and government enquiries are routed to the same team accountable for legal and compliance posture — reach us directly rather than through a general enquiry form.',
+    },
+  ],
+  closing: 'Review how governance is structured, or reach the team directly.',
+  cta: { label: 'Review Governance', href: '/trust/governance' },
+  ctaSecondary: { label: 'Contact the foundation', href: '/contact' },
+};
+
+/* ─────────────────────────── Partners ─────────────────────────── */
+
+export const PARTNERS_PAGE: SolutionPage = {
+  folio: '§ 13',
+  label: 'Partners',
+  eyebrow: 'Extend the foundation',
+  title: 'Extend the foundation, without extending the risk.',
+  lede: 'Baalvion’s platform layer and independent brand portfolio both depend on external partners — technology integrators, financial institutions, and operators who extend a domain into a market we do not reach alone.',
+  sections: [
+    {
+      heading: 'Platform integration partners',
+      body: 'Organisations that connect their own systems to a Baalvion platform — extending trade, market, ecosystem, or intelligence infrastructure into workflows we do not build ourselves.',
+    },
+    {
+      heading: 'Financial & settlement partners',
+      body: 'Institutions that participate in or extend the Market & Financial Systems domain, where reconciliation, custody, and settlement discipline matter most.',
+    },
+    {
+      heading: 'Portfolio & brand operators',
+      body: 'The independent brands in the network are operated at arm’s length under the foundation’s standard. Partnership at this layer means operating a distinct brand while sharing infrastructure and discipline, not identity.',
+    },
+  ],
+  closing: 'Tell us which layer you’re looking to extend, and we’ll route it to the right team.',
+  cta: { label: 'Start a partnership conversation', href: '/contact' },
+};
+
+/* ─────────────────────────── Investors ─────────────────────────── */
+
+export const INVESTORS_PAGE = {
+  folio: '§ 14',
+  label: 'Investors',
+  eyebrow: 'The long-horizon thesis',
+  title: 'A long-horizon foundation, evaluated on its own terms.',
+  lede: 'Baalvion is built and capitalised for permanence rather than a cycle. This page states the posture plainly; the full long-horizon thesis is maintained at ir.baalvion.com.',
+  points: [
+    'Four operating domains — trade, markets, ecosystem, and intelligence — wired to one operational fabric rather than assembled as unrelated bets.',
+    'A three-layer structure (corporate, platform, portfolio) that lets independent brands compound the foundation’s infrastructure without diluting its standard.',
+    'Governance, isolation, and accountability designed in from the foundation up — reviewed in full in the Trust Center.',
+    'Capital, ownership, and decisions held for continuity: the foundation is structured so that patience compounds rather than erodes.',
+  ],
+  cta: { label: 'Read the long-horizon thesis', href: 'https://ir.baalvion.com' },
+  ctaSecondary: { label: 'Investor enquiries', href: 'mailto:hello@baalvion.com' },
+} as const;
+
+/* ─────────────────────────── Careers ─────────────────────────── */
+
+export const CAREERS_PAGE = {
+  folio: '§ 15',
+  label: 'Careers',
+  eyebrow: 'Work across the foundation',
+  title: 'Work on infrastructure meant to outlast you.',
+  lede: 'Baalvion does not host its own listings on this page — talent across the network is coordinated through the Talent platform, the same connective layer described in Platform & Services.',
+  body: 'Roles across the foundation span all four domains: trade and logistics engineering, market and financial systems, ecosystem and identity platforms, and applied intelligence — alongside the governance, security, and operating functions that hold the foundation together. Open roles, across the corporate layer, the platform layer, and the portfolio, are listed on the Talent platform.',
+  cta: { label: 'View open roles on the Talent platform', href: 'https://jobs.baalvion.com' },
+  ctaSecondary: { label: 'Introduce yourself directly', href: 'mailto:hello@baalvion.com' },
 } as const;
