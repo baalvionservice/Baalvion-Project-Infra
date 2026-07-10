@@ -51,6 +51,44 @@ export const structuredData = {
     })),
   }),
 
+  newsArticle: (data: {
+    title: string;
+    description: string;
+    image: string;
+    authorName: string;
+    datePublished: string;
+    dateModified?: string;
+  }): StructuredData => ({
+    '@context': 'https://schema.org',
+    '@type': 'NewsArticle',
+    headline: data.title,
+    description: data.description,
+    image: [data.image],
+    author: [
+      {
+        '@type': 'Person',
+        name: data.authorName,
+      },
+    ],
+    publisher: {
+      '@type': 'Organization',
+      name: 'Imperialpedia',
+      logo: { '@type': 'ImageObject', url: 'https://imperialpedia.com/logo.png' },
+    },
+    datePublished: data.datePublished,
+    dateModified: data.dateModified || data.datePublished,
+  }),
+
+  /**
+   * `speakable` property value to merge into an Article/NewsArticle node
+   * (points AI-assistant/voice speakable extraction at the headline + description).
+   * Not a standalone top-level entity — spread into the parent schema object.
+   */
+  speakable: (cssSelector: string[] = ['h1', '[data-article-description]']) => ({
+    '@type': 'SpeakableSpecification',
+    cssSelector,
+  }),
+
   faq: (questions: { question: string; answer: string }[]): StructuredData => ({
     '@context': 'https://schema.org',
     '@type': 'FAQPage',

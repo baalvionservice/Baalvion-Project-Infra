@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { cmsGetArticleBySlug } from '@/lib/cms';
 import { getAuthorByName } from '@/data/authors';
 import { resolveArticleImage } from '@/lib/article-art';
+import { extractFaqFromHtml } from '@/lib/seo/faq-extractor';
 
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
@@ -50,6 +51,7 @@ async function fetchArticle(slug: string): Promise<any | null> {
       updated_at: cms.updatedAt,
       published_at: cms.updatedAt,
       cover_image: cms.featuredImage,
+      body: cms.content,
     };
   }
   return fetchFromLawService(slug);
@@ -104,17 +106,37 @@ export default async function ArticleLayout(
   const authorLd = matchedAuthor
     ? { '@type': 'Person', name: matchedAuthor.name, url: `${SITE}/author/${matchedAuthor.slug}` }
     : { '@type': 'Organization', name: 'Law Elite Network' };
+  const articleImage = a ? resolveArticleImage({ ...a, title: a.title, slug }) : undefined;
   const jsonLd = a && {
     '@context': 'https://schema.org',
     '@type': a.contentType === 'news' ? 'NewsArticle' : 'Article',
     headline: a.title,
     description: a.excerpt || undefined,
+    image: articleImage ? [articleImage] : undefined,
     datePublished: a.published_at || undefined,
     dateModified: a.updated_at || a.published_at || undefined,
     mainEntityOfPage: `${SITE}/article/${slug}`,
     author: authorLd,
     publisher: { '@type': 'Organization', name: 'Law Elite Network', logo: { '@type': 'ImageObject', url: `${SITE}/logo.png` } },
+    // Voice/AI-assistant readability: points speakable extraction at the
+    // headline and excerpt so assistants can read a short summary aloud.
+    speakable: {
+      '@type': 'SpeakableSpecification',
+      cssSelector: ['h1', '[data-article-excerpt]'],
+    },
   };
+  const faqPairs = a ? extractFaqFromHtml(a.body) : [];
+  const faqLd = faqPairs.length
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: faqPairs.map((f) => ({
+          '@type': 'Question',
+          name: f.question,
+          acceptedAnswer: { '@type': 'Answer', text: f.answer },
+        })),
+      }
+    : null;
   // Breadcrumb trail: Home → (category hub, when known) → Article.
   const cat = a?.category;
   const crumbs: Array<{ name: string; item: string }> = [{ name: 'Home', item: SITE }];
@@ -136,6 +158,9 @@ export default async function ArticleLayout(
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       )}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }} />
+      {faqLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
+      )}
       {children}
     </>
   );
