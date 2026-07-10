@@ -265,6 +265,7 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     category: raw.category?.name ?? 'General',
     tags: raw.tagIds ?? [],
     status: 'published' as ArticleStatus,
+    contentType: raw.contentType,
     readingTime: Math.max(1, Math.round(words / 200)),
     // The CMS never falls back to stock/placeholder imagery — cms-service generates
     // real original artwork on create/update (@baalvion/illustrations); this inline

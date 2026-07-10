@@ -1,4 +1,4 @@
-import { articleArtDataUri } from "@baalvion/illustrations";
+import { categoryImage } from "./categoryImage";
 
 export const marketIndicators = [
   {
@@ -156,12 +156,12 @@ const rawFeaturedNews = [
   },
 ];
 
-// Original, deterministic artwork (no stock/placeholder images) — generated from
-// each item's own headline/category, computed after the literal above since object
+// Real, self-hosted category photography (no generated artwork, no stock/
+// placeholder images) — computed after the literal above since object
 // literals can't reference their own sibling properties.
 export const featuredNews = rawFeaturedNews.map((item) => ({
   ...item,
-  image: articleArtDataUri({ title: item.headline, category: item.category, seed: String(item.id) }),
+  image: categoryImage(item.category),
 }));
 
 export const latestNews = [
@@ -416,13 +416,13 @@ const rawNewsGridSections = [
   },
 ];
 
-// Original, deterministic artwork for every grid item (no stock/placeholder images,
-// and no more blank "no image" cards) — computed after the literal above.
+// Real, self-hosted category photography for every grid item (no generated
+// artwork, no blank "no image" cards) — computed after the literal above.
 export const newsGridSections = rawNewsGridSections.map((section) => ({
   ...section,
   items: section.items.map((item) => ({
     ...item,
-    image: articleArtDataUri({ title: item.headline, category: section.section, seed: String(item.id) }),
+    image: categoryImage(section.section),
   })),
 }));
 
@@ -518,7 +518,7 @@ const rawTopStories = [
 
 export const topStories = rawTopStories.map((item) => ({
   ...item,
-  image: articleArtDataUri({ title: item.headline, category: item.category, seed: String(item.id) }),
+  image: categoryImage(item.category),
 }));
 
 export const navCategories = [

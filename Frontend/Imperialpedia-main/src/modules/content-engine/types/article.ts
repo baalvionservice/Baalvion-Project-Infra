@@ -21,6 +21,8 @@ export interface Article {
   status: ArticleStatus;
   readingTime: number; // in minutes
   featuredImage: string;
+  /** CMS content type ('article' | 'news' | ...) — drives NewsArticle vs Article JSON-LD. */
+  contentType?: string;
 
   // SEO specific fields
   seoTitle?: string;
