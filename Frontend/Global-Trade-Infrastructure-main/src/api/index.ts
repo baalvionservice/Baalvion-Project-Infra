@@ -18,3 +18,6 @@ export * from './hscodes';
 export * from './logistics';
 export * from './customs';
 export * from './dispatch';
+export * from './freight-carriers';
+export * from './freight-quotes';
+export * from './freight-bookings';

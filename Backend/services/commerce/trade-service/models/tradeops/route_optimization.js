@@ -20,7 +20,10 @@ module.exports = (sequelize, DataTypes) => {
         request: { type: DataTypes.JSONB, allowNull: false, defaultValue: {} },
         strategy: {
             type: DataTypes.TEXT,
-            validate: { isIn: [['cheapest', 'fastest', 'balanced']] },
+            // 'green' added in Phase 3, Prompt 2 (Freight Management) — minimizes
+            // co2_kg, which the optimizer already computed per route but only
+            // exposed informationally until this strategy was added.
+            validate: { isIn: [['cheapest', 'fastest', 'balanced', 'green']] },
         },
         status: {
             type: DataTypes.TEXT,
@@ -29,9 +32,10 @@ module.exports = (sequelize, DataTypes) => {
             validate: { isIn: [['optimized', 'selected', 'failed']] },
         },
         routes: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },  // ranked candidate snapshot
-        cheapest: { type: DataTypes.JSONB },                                     // the three picks
+        cheapest: { type: DataTypes.JSONB },                                     // the four picks
         fastest: { type: DataTypes.JSONB },
         balanced: { type: DataTypes.JSONB },
+        green: { type: DataTypes.JSONB },                                        // added in Phase 3, Prompt 2 — see migration 051
         recommended: { type: DataTypes.JSONB },
         selected_strategy: { type: DataTypes.TEXT },                             // set on selection
         selected_route: { type: DataTypes.JSONB },

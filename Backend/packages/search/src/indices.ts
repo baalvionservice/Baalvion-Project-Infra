@@ -6,6 +6,9 @@ export const INDICES = {
   PRODUCTS:  'baalvion_products',
   COMPANIES: 'baalvion_companies',
   CREATORS:  'baalvion_creators',
+  // Logistics Core Foundation (trade-service, Phase 4).
+  SHIPMENTS:  'baalvion_shipments',
+  CONTAINERS: 'baalvion_containers',
 } as const;
 
 export type IndexName = (typeof INDICES)[keyof typeof INDICES];
@@ -92,6 +95,36 @@ export const INDEX_MAPPINGS: Record<IndexName, object> = {
       orgId:       { type: 'keyword' },
     },
   },
+
+  [INDICES.SHIPMENTS]: {
+    properties: {
+      shipmentNo:         { type: 'keyword' },
+      trackingNumber:     { type: 'keyword' },
+      status:             { type: 'keyword' },
+      mode:               { type: 'keyword' },
+      carrierName:        { type: 'text', fields: { keyword: { type: 'keyword' } } },
+      originCountry:      { type: 'keyword' },
+      destinationCountry: { type: 'keyword' },
+      originPort:         { type: 'text', fields: { keyword: { type: 'keyword' } } },
+      destinationPort:    { type: 'text', fields: { keyword: { type: 'keyword' } } },
+      estimatedArrival:   { type: 'date' },
+      tenantId:           { type: 'keyword' },
+      orgId:              { type: 'keyword' },
+    },
+  },
+
+  [INDICES.CONTAINERS]: {
+    properties: {
+      containerNumber: { type: 'keyword' },
+      isoCode:         { type: 'keyword' },
+      containerType:   { type: 'keyword' },
+      status:          { type: 'keyword' },
+      currentLocation: { type: 'text', fields: { keyword: { type: 'keyword' } } },
+      shipmentId:      { type: 'keyword' },
+      tenantId:        { type: 'keyword' },
+      orgId:           { type: 'keyword' },
+    },
+  },
 };
 
 // ─── Document Shape Interfaces ────────────────────────────────────────────────
@@ -148,4 +181,32 @@ export interface CreatorDocument {
   rates?:      { hourly?: number; project?: number; currency?: string };
   isAvailable: boolean;
   orgId:       string;
+}
+
+// ─── Logistics Core Foundation (trade-service, Phase 4) ──────────────────────
+
+export interface ShipmentDocument {
+  shipmentNo:          string;
+  trackingNumber:      string | null;
+  status:               string;
+  mode:                 string | null;
+  carrierName:          string | null;
+  originCountry:        string | null;
+  destinationCountry:   string | null;
+  originPort:           string | null;
+  destinationPort:      string | null;
+  estimatedArrival:     string | null; // ISO-8601
+  tenantId:             string;
+  orgId:                string;
+}
+
+export interface ContainerDocument {
+  containerNumber: string;
+  isoCode:         string | null;
+  containerType:   string;
+  status:          string;
+  currentLocation: string | null;
+  shipmentId:      string | null;
+  tenantId:        string;
+  orgId:           string;
 }

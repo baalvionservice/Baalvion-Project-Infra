@@ -21,14 +21,22 @@ describe('INDICES constants', () => {
     expect(INDICES.CREATORS).toBe('baalvion_creators');
   });
 
+  it('exports SHIPMENTS index name', () => {
+    expect(INDICES.SHIPMENTS).toBe('baalvion_shipments');
+  });
+
+  it('exports CONTAINERS index name', () => {
+    expect(INDICES.CONTAINERS).toBe('baalvion_containers');
+  });
+
   it('all index names start with baalvion_', () => {
     for (const name of Object.values(INDICES)) {
       expect(name).toMatch(/^baalvion_/);
     }
   });
 
-  it('has exactly 5 indices', () => {
-    expect(Object.keys(INDICES)).toHaveLength(5);
+  it('has exactly 7 indices', () => {
+    expect(Object.keys(INDICES)).toHaveLength(7);
   });
 });
 

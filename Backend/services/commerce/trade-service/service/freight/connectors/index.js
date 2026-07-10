@@ -19,6 +19,7 @@ const { DhlConnector } = require('./dhlConnector');
 const { FedexConnector } = require('./fedexConnector');
 const { UpsConnector } = require('./upsConnector');
 const { MaerskConnector } = require('./maerskConnector');
+const { GenericConnector, DEFAULT_RATE_CARD } = require('./genericConnector');
 
 // carrier → factory (lazy: construct once, on demand).
 const FACTORIES = {
@@ -85,16 +86,70 @@ function supportedCarriers() {
     return VALID_CARRIERS.filter((c) => typeof FACTORIES[c] === 'function');
 }
 
+// carrier connector_key → coded connector factory. Used ONLY by
+// buildConnectorForCarrier() below, for the Carrier Directory (Phase 3, Prompt 2)
+// quote flow — kept separate from FACTORIES/getConnectorByCarrier so the existing
+// freight-marketplace booking path (bound to schema.CARRIER's 4-carrier enum) is
+// untouched.
+const CODED_CONNECTOR_FACTORIES = {
+    [CARRIER.DHL]: () => new DhlConnector(),
+    [CARRIER.FEDEX]: () => new FedexConnector(),
+    [CARRIER.UPS]: () => new UpsConnector(),
+    [CARRIER.MAERSK]: () => new MaerskConnector(),
+};
+
+/**
+ * Build the connector for a DYNAMIC carrier row (tradeops.carriers, migration 047).
+ * If `carrierRow.connector_key` matches a bespoke coded connector (dhl/fedex/ups/
+ * maersk), that connector is used; otherwise the carrier is served by
+ * GenericConnector, so "any carrier dynamically" always produces a connector — no
+ * carrier onboarding is blocked on writing new integration code.
+ *
+ * @param {object} carrierRow  a tradeops.carriers row (plain object or Sequelize instance)
+ * @param {object} [opts]
+ * @param {Array}  [opts.services]  matching tradeops.carrier_services rows (rate cards)
+ * @returns {CarrierConnector}
+ */
+function buildConnectorForCarrier(carrierRow, opts = {}) {
+    const row = carrierRow && carrierRow.toJSON ? carrierRow.toJSON() : carrierRow;
+    const key = row && row.connector_key;
+    if (key && CODED_CONNECTOR_FACTORIES[key]) return CODED_CONNECTOR_FACTORIES[key]();
+
+    const rateCardsByMode = {};
+    (opts.services || []).forEach((svc) => {
+        const s = svc && svc.toJSON ? svc.toJSON() : svc;
+        if (!s || !s.transport_mode) return;
+        rateCardsByMode[s.transport_mode] = {
+            service: s.service_type || 'STANDARD',
+            base_fee: Number(s.base_fee) || DEFAULT_RATE_CARD.base_fee,
+            rate_per_kg: Number(s.rate_per_kg) || 2.5,
+            fuel_pct: 0.12,
+            transit: s.transit_time_days || 7,
+        };
+    });
+
+    return new GenericConnector({
+        carrier: row.code,
+        carrierName: row.name,
+        modes: Array.isArray(row.modes) ? row.modes : undefined,
+        reliability: row.reliability_score,
+        rateCardsByMode,
+        credentialEnvPrefix: row.credential_env_prefix || null,
+    });
+}
+
 module.exports = {
     getConnectorByCarrier,
     eligibleConnectors,
     registerConnector,
     resetConnectors,
     supportedCarriers,
+    buildConnectorForCarrier,
     // re-export the connector classes for direct use / testing
     CarrierConnector,
     DhlConnector,
     FedexConnector,
     UpsConnector,
     MaerskConnector,
+    GenericConnector,
 };

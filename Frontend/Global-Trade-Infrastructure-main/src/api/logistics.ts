@@ -8,25 +8,42 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { tradeApi } from './client';
 import { qk } from './keys';
 
-export type RouteStrategy = 'cheapest' | 'fastest' | 'balanced';
+export type RouteStrategy = 'cheapest' | 'fastest' | 'balanced' | 'green';
 
+/** Mirrors service/logistics/schema.js's normalizedLeg() — one carrier-served hop. */
 export interface RouteLeg {
-  origin: string;
-  destination: string;
-  carrier_id?: string;
-  carrier_name?: string;
-  mode?: string;
-  cost?: number;
-  eta_days?: number;
+  from: string;
+  to: string;
+  mode: string;
+  carrier: string | null;
+  carrier_name: string | null;
+  distance_km: number;
+  transit_days: number;
+  cost: number;
+  currency: string;
+  reliability: number;
+  co2_kg: number;
+  estimated: boolean;
 }
 
+/** Mirrors service/logistics/schema.js's normalizedRoute() — an end-to-end candidate. */
 export interface RouteCandidate {
   id: string;
   legs: RouteLeg[];
+  hops: number;
+  path: string[];
+  modes: string[];
+  carriers: string[];
   total_cost: number;
-  total_eta_days: number;
-  score?: number;
-  strategy?: RouteStrategy;
+  total_transit_days: number;
+  total_distance_km: number;
+  reliability: number;
+  co2_kg: number;
+  currency: string;
+  transfers: number;
+  estimated: boolean;
+  score: number | null;
+  score_breakdown: { cost: number; speed: number; reliability: number } | null;
 }
 
 export interface RouteWarning {
@@ -39,6 +56,7 @@ export interface OptimizationResult {
   cheapest?: RouteCandidate | null;
   fastest?: RouteCandidate | null;
   balanced?: RouteCandidate | null;
+  green?: RouteCandidate | null;
   recommended?: RouteCandidate | null;
   warnings?: RouteWarning[];
 }
@@ -84,12 +102,25 @@ export interface LogisticsNetwork {
   lane_count: number;
 }
 
-export interface QuoteBody {
-  origin: { country?: string; hub?: string };
-  destination: { country?: string; hub?: string };
+/** Mirrors service/logistics/normalize.js's canonical optimization request. */
+export interface OptimizationRequest {
+  reference?: string;
+  origin: { country?: string; city?: string; hub?: string };
+  destination: { country?: string; city?: string; hub?: string };
   weight_kg?: number;
-  modes?: string[];
+  ready_date?: string;
+  allowed_modes?: string[];
+  currency?: string;
+}
+
+/** POST body for both /preview and /route_optimizations — `strategy` is a SIBLING of `request`, not nested inside it. */
+export interface QuoteBody {
+  request: OptimizationRequest;
+  strategy?: RouteStrategy;
+  weights?: { cost?: number; speed?: number; reliability?: number };
   shipment_id?: string;
+  order_id?: string;
+  trade_operation_id?: string;
 }
 
 export const logisticsApi = {

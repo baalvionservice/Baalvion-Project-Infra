@@ -335,7 +335,13 @@ export type EventType =
   | 'payment.refunded'
   | 'payment.ledger.recorded'
   // ── Notifications ──
-  | 'notification.dispatched';
+  | 'notification.dispatched'
+  // ── Logistics Core Foundation (trade-service, Phase 4) ──
+  | 'logistics.container.status_changed'
+  | 'logistics.fleet.assignment_started'
+  | 'logistics.fleet.assignment_completed'
+  | 'logistics.tracking.updated'
+  | 'logistics.shipment.charge_approved';
 
 // ─── Pagination & Responses ───────────────────────────────────────────────────
 

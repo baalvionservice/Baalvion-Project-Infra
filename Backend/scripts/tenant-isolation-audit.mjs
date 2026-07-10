@@ -25,6 +25,17 @@ const TENANT_COLUMNS = ['tenant_id', 'org_id', 'organization_id'];
 // `target` = Maven build output (a stale duplicate of src/main/resources migrations).
 const IGNORE_DIRS = new Set(['node_modules', '.git', 'dist', 'build', '.next', 'coverage', 'target']);
 
+// Tables that are deliberately excluded from RLS by documented design, not by
+// oversight. Each entry must carry the same rationale as the migration's own
+// comment so the exception stays auditable independent of this script.
+//
+// `tradeops.event_outbox` — @baalvion/events' createPgOutboxStore contract
+// (packages/events/src/pgOutboxStore.ts). The relay reads cross-tenant by
+// design, so the table is relay-internal and isolated by owner-only grants +
+// the tenant-scoped org_id column, not RLS — same decision as the Java
+// finance suite's relay tables. See migrations/046_logistics_core_event_outbox.sql.
+const RLS_EXEMPT_TABLES = new Set(['event_outbox']);
+
 /** Recursively collect *.sql files under a directory. */
 async function collectSql(dir, out = []) {
   let entries;
@@ -169,6 +180,7 @@ async function audit(roots) {
       const tenantTables = findTenantTables(combined, fileOf);
 
       for (const [name, file] of tenantTables) {
+        if (RLS_EXEMPT_TABLES.has(name)) continue;
         scoped++;
         const missing = [];
         if (!cov.enabled.has(name)) missing.push('ENABLE ROW LEVEL SECURITY');

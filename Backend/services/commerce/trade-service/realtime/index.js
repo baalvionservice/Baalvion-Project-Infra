@@ -87,8 +87,13 @@ async function canJoin(ctx, room) {
         return !!deal && (deal.buyer_org_id === ctx.orgCode || deal.seller_org_id === ctx.orgCode);
     }
     if (kind === 'shipment') {
-        const s = await db.Shipment.findByPk(id);
-        return !!s && s.tenant_id === ctx.tenantId;
+        // Shipment rooms are shared by both shipment concepts (legacy
+        // trade.shipments and tradeops.shipments/TradeShipment) — the id
+        // format doesn't disambiguate them, so check whichever one has it.
+        const s = await db.Shipment.findByPk(id).catch(() => null);
+        if (s) return s.tenant_id === ctx.tenantId;
+        const ts = await db.TradeShipment.findByPk(id).catch(() => null);
+        return !!ts && ts.tenant_id === ctx.tenantId;
     }
     return false;
 }

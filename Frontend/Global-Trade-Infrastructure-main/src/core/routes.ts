@@ -11,6 +11,7 @@ import {
   Landmark, LockKeyhole, BarChart3, Database, Radio, Gavel, Scale, Siren, Server,
   Workflow, Cpu, RefreshCw, Ship, Building2, Radar, Boxes, GitBranch, FileCheck,
   Network, Eye, BadgeCheck, Users, Inbox, ClipboardCheck, Bell, Plug, LifeBuoy, Package,
+  MapPinned, Gauge, Thermometer, FileDown,
 } from 'lucide-react';
 
 export type RouteCategory =
@@ -20,6 +21,7 @@ export type RouteCategory =
   | 'NEGOTIATIONS'
   | 'EXECUTION'
   | 'LOGISTICS'
+  | 'WAREHOUSE'
   | 'FINANCE'
   | 'COMPLIANCE'
   | 'INTELLIGENCE'
@@ -49,6 +51,7 @@ export const CATEGORY_ORDER: { key: RouteCategory; label: string }[] = [
   { key: 'NEGOTIATIONS', label: 'Negotiations' },
   { key: 'EXECUTION', label: 'Orders & Execution' },
   { key: 'LOGISTICS', label: 'Logistics' },
+  { key: 'WAREHOUSE', label: 'Warehouse Management' },
   { key: 'FINANCE', label: 'Finance & Treasury' },
   { key: 'COMPLIANCE', label: 'Compliance & Risk' },
   { key: 'INTELLIGENCE', label: 'Intelligence' },
@@ -101,6 +104,39 @@ export const ROUTE_REGISTRY: RouteMetadata[] = [
   { path: '/shipments', label: 'Shipments', icon: Ship, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
   { path: '/carriers', label: 'Carriers', icon: Truck, roles: TRADE, category: 'LOGISTICS' },
   { path: '/customs', label: 'Customs', icon: BadgeCheck, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+
+  // ── SHIPMENT TRACKING & GLOBAL VISIBILITY PLATFORM ──
+  { path: '/logistics-shipment/global-tracking', label: 'Global Tracking Dashboard', icon: Radar, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/geofences', label: 'Geofences', icon: MapPinned, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/alerts', label: 'Alert Center', icon: Bell, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/eta', label: 'ETA Prediction', icon: Gauge, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/iot-monitoring', label: 'IoT Monitoring', icon: Thermometer, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/proof-of-delivery', label: 'Proof of Delivery', icon: PackageCheck, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/analytics', label: 'Tracking Analytics', icon: BarChart3, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/reports', label: 'Tracking Reports', icon: FileDown, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+
+  // ── FREIGHT MANAGEMENT ──
+  { path: '/logistics-shipment/freight', label: 'Freight Dashboard', icon: Ship, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/quotes', label: 'Freight Quotes', icon: FileText, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/carriers', label: 'Carrier Marketplace', icon: Store, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/carriers/manage', label: 'Carrier Management', icon: Building2, roles: ADMIN, category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/rate-engine', label: 'Rate Engine', icon: Database, roles: ADMIN, category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/bookings', label: 'Freight Bookings', icon: PackageCheck, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/route-optimizer', label: 'Route Optimizer', icon: GitBranch, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/analytics', label: 'Freight Analytics', icon: BarChart3, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/schedules', label: 'Freight Schedules', icon: Radio, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/capacity', label: 'Freight Capacity', icon: Boxes, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/mode/ocean', label: 'Ocean Freight', icon: Ship, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/mode/air', label: 'Air Freight', icon: Zap, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/mode/rail', label: 'Rail Freight', icon: GitBranch, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/mode/road', label: 'Truck Freight', icon: Truck, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/mode/express', label: 'Courier', icon: PackageCheck, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+  { path: '/logistics-shipment/freight/mode/multimodal', label: 'Multimodal', icon: Network, roles: [...TRADE, ...ADMIN], category: 'LOGISTICS' },
+
+  // ── WAREHOUSE MANAGEMENT (Phase A) ──
+  { path: '/warehouse-management', label: 'Warehouse Map', icon: Boxes, roles: [...TRADE, ...ADMIN], category: 'WAREHOUSE' },
+  { path: '/warehouse-management/receiving', label: 'Receiving', icon: PackageCheck, roles: [...TRADE, ...ADMIN], category: 'WAREHOUSE' },
+  { path: '/warehouse-management/putaway', label: 'Putaway Tasks', icon: ClipboardCheck, roles: [...TRADE, ...ADMIN], category: 'WAREHOUSE' },
 
   // ── FINANCE ──
   { path: '/payments', label: 'Payments', icon: Wallet, roles: [...TRADE, ...ADMIN], category: 'FINANCE' },
