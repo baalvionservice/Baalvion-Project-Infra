@@ -5,12 +5,16 @@
  * verification state back to readiness.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { tradeApi } from './client';
+import { tradeApi, unwrap } from './client';
+import { apiClient } from '@/lib/api-client';
 import { qk } from './keys';
 
 export type DocType =
   | 'commercial_invoice' | 'packing_list' | 'bill_of_lading'
-  | 'certificate_of_origin' | 'insurance_document' | 'other';
+  | 'certificate_of_origin' | 'insurance_document' | 'other'
+  | 'government_id' | 'passport' | 'driving_license' | 'selfie'
+  | 'tax_certificate' | 'bank_letter' | 'utility_bill' | 'lease_agreement'
+  | 'product_certificate' | 'quality_certificate' | 'safety_certificate' | 'inspection_report';
 
 export type DocStatus =
   | 'draft' | 'scanning' | 'available' | 'quarantined'
@@ -101,6 +105,22 @@ export const documentsApi = {
   /** Upload a new version as JSON (base64/url-backed). Binary uploads go directly via apiClient. */
   addVersion: (id: string, body: Record<string, unknown>) =>
     tradeApi.post(`/trade_documents/${id}/versions`, body),
+  /**
+   * Uploads real file bytes as a new version — the raw-binary path the backend engine expects
+   * (Content-Type + X-File-Name header, body = the file itself, not JSON). Goes through
+   * `apiClient` directly since `tradeApi`'s helpers always JSON-encode the body.
+   */
+  uploadVersion: (id: string, file: File) =>
+    unwrap<{ document: Pick<TradeDocument, 'id' | 'status' | 'current_version'>; version: DocumentVersion }>(
+      apiClient.request(`/trade_documents/${id}/versions`, {
+        method: 'POST',
+        body: file,
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
+          'X-File-Name': file.name,
+        },
+      }),
+    ),
   verify: (id: string, note?: string) => tradeApi.patch<TradeDocument>(`/trade_documents/${id}/verify`, { note }),
   reject: (id: string, reason: string) => tradeApi.patch<TradeDocument>(`/trade_documents/${id}/reject`, { reason }),
 };

@@ -2,14 +2,40 @@
 
 import { useState, useEffect } from 'react';
 import { getKYCStatus, submitKYC, KYCStatus } from '@/services/compliance-service';
+import { documentsApi } from '@/api/documents';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { ShieldCheck, User, Building, FileUp, CheckCircle2, Loader2, Clock, AlertCircle } from 'lucide-react';
+import { ShieldCheck, User, Building, FileUp, CheckCircle2, Loader2, Clock, AlertCircle, FileCheck2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+
+interface RepresentativeDetails {
+  fullName: string;
+  dateOfBirth: string;
+  nationality: string;
+  officialEmail: string;
+}
+
+interface CompanyCredentials {
+  registrationNumber: string;
+  incorporationDate: string;
+  hqAddress: string;
+  taxResidency: string;
+}
+
+type UploadSlot = 'governmentId' | 'businessLicense';
+
+interface UploadState {
+  file: File | null;
+  documentId: string | null;
+  uploading: boolean;
+  error: string | null;
+}
+
+const EMPTY_UPLOAD: UploadState = { file: null, documentId: null, uploading: false, error: null };
 
 export default function KYCPage() {
   const [status, setStatus] = useState<KYCStatus>('not_started');
@@ -17,6 +43,17 @@ export default function KYCPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
+
+  const [representative, setRepresentative] = useState<RepresentativeDetails>({
+    fullName: '', dateOfBirth: '', nationality: '', officialEmail: '',
+  });
+  const [company, setCompany] = useState<CompanyCredentials>({
+    registrationNumber: '', incorporationDate: '', hqAddress: '', taxResidency: '',
+  });
+  const [uploads, setUploads] = useState<Record<UploadSlot, UploadState>>({
+    governmentId: { ...EMPTY_UPLOAD },
+    businessLicense: { ...EMPTY_UPLOAD },
+  });
 
   useEffect(() => {
     getKYCStatus()
@@ -27,10 +64,36 @@ export default function KYCPage() {
   const handleNext = () => setStep(prev => prev + 1);
   const handleBack = () => setStep(prev => prev - 1);
 
+  const step1Valid = representative.fullName.trim() && representative.dateOfBirth
+    && representative.nationality.trim() && representative.officialEmail.trim();
+  const step2Valid = company.registrationNumber.trim() && company.incorporationDate
+    && company.hqAddress.trim() && company.taxResidency.trim();
+  const uploadsValid = uploads.governmentId.documentId && uploads.businessLicense.documentId;
+
+  async function handleFileSelect(slot: UploadSlot, docType: 'government_id' | 'other', title: string, file: File) {
+    setUploads(prev => ({ ...prev, [slot]: { ...prev[slot], file, uploading: true, error: null } }));
+    try {
+      const doc = await documentsApi.create({ doc_type: docType, title, classification: 'CONFIDENTIAL' });
+      await documentsApi.uploadVersion(doc.id, file);
+      setUploads(prev => ({ ...prev, [slot]: { file, documentId: doc.id, uploading: false, error: null } }));
+    } catch (e) {
+      const message = e instanceof Error ? e.message : 'Upload failed.';
+      setUploads(prev => ({ ...prev, [slot]: { file: null, documentId: null, uploading: false, error: message } }));
+      toast({ variant: 'destructive', title: 'Upload failed', description: message });
+    }
+  }
+
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      await submitKYC({});
+      await submitKYC({
+        representative,
+        company,
+        documentIds: {
+          governmentId: uploads.governmentId.documentId,
+          businessLicense: uploads.businessLicense.documentId,
+        },
+      });
       setStatus('pending');
       toast({ title: "KYC Submitted", description: "Your verification is now being reviewed by compliance." });
     } catch (e) {
@@ -128,19 +191,36 @@ export default function KYCPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Full Legal Name</Label>
-                    <Input placeholder="As per government ID" />
+                    <Input
+                      placeholder="As per government ID"
+                      value={representative.fullName}
+                      onChange={(e) => setRepresentative(prev => ({ ...prev, fullName: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Date of Birth</Label>
-                    <Input type="date" />
+                    <Input
+                      type="date"
+                      value={representative.dateOfBirth}
+                      onChange={(e) => setRepresentative(prev => ({ ...prev, dateOfBirth: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Nationality</Label>
-                    <Input placeholder="e.g. Singaporean" />
+                    <Input
+                      placeholder="e.g. Singaporean"
+                      value={representative.nationality}
+                      onChange={(e) => setRepresentative(prev => ({ ...prev, nationality: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Official Email</Label>
-                    <Input type="email" placeholder="institution@email.com" />
+                    <Input
+                      type="email"
+                      placeholder="institution@email.com"
+                      value={representative.officialEmail}
+                      onChange={(e) => setRepresentative(prev => ({ ...prev, officialEmail: e.target.value }))}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -159,19 +239,35 @@ export default function KYCPage() {
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Company Registration Number (UEN)</Label>
-                    <Input placeholder="e.g. 201201234K" />
+                    <Input
+                      placeholder="e.g. 201201234K"
+                      value={company.registrationNumber}
+                      onChange={(e) => setCompany(prev => ({ ...prev, registrationNumber: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Date of Incorporation</Label>
-                    <Input type="date" />
+                    <Input
+                      type="date"
+                      value={company.incorporationDate}
+                      onChange={(e) => setCompany(prev => ({ ...prev, incorporationDate: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>HQ Address</Label>
-                    <Input placeholder="Street, City, Postcode" />
+                    <Input
+                      placeholder="Street, City, Postcode"
+                      value={company.hqAddress}
+                      onChange={(e) => setCompany(prev => ({ ...prev, hqAddress: e.target.value }))}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label>Tax Residency</Label>
-                    <Input placeholder="Primary Jurisdiction" />
+                    <Input
+                      placeholder="Primary Jurisdiction"
+                      value={company.taxResidency}
+                      onChange={(e) => setCompany(prev => ({ ...prev, taxResidency: e.target.value }))}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -188,16 +284,18 @@ export default function KYCPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-4">
-                  <div className="p-4 border-2 border-dashed rounded-lg text-center space-y-2 hover:bg-accent/5 transition-colors">
-                     <p className="text-sm font-semibold">Government Issued ID (Representative)</p>
-                     <p className="text-xs text-muted-foreground">Passport or National ID card. Max 5MB PDF/JPG.</p>
-                     <Button variant="outline" size="sm">Select File</Button>
-                  </div>
-                  <div className="p-4 border-2 border-dashed rounded-lg text-center space-y-2 hover:bg-accent/5 transition-colors">
-                     <p className="text-sm font-semibold">Business License / Certificate of Inc.</p>
-                     <p className="text-xs text-muted-foreground">Certified copy of registration. Max 5MB PDF.</p>
-                     <Button variant="outline" size="sm">Select File</Button>
-                  </div>
+                  <UploadSlotCard
+                    label="Government Issued ID (Representative)"
+                    hint="Passport or National ID card. Max 5MB PDF/JPG."
+                    state={uploads.governmentId}
+                    onSelect={(file) => handleFileSelect('governmentId', 'government_id', 'Government Issued ID', file)}
+                  />
+                  <UploadSlotCard
+                    label="Business License / Certificate of Inc."
+                    hint="Certified copy of registration. Max 5MB PDF."
+                    state={uploads.businessLicense}
+                    onSelect={(file) => handleFileSelect('businessLicense', 'other', 'Business License / Certificate of Incorporation', file)}
+                  />
                 </div>
                 <div className="p-4 bg-orange-50 border border-orange-100 rounded-lg flex items-start gap-3 text-orange-700">
                   <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
@@ -212,9 +310,14 @@ export default function KYCPage() {
           <CardFooter className="bg-muted/30 border-t justify-between p-6">
             <Button variant="outline" onClick={handleBack} disabled={step === 1 || submitting}>Back</Button>
             {step < 3 ? (
-              <Button onClick={handleNext}>Continue</Button>
+              <Button
+                onClick={handleNext}
+                disabled={(step === 1 && !step1Valid) || (step === 2 && !step2Valid)}
+              >
+                Continue
+              </Button>
             ) : (
-              <Button onClick={handleSubmit} disabled={submitting}>
+              <Button onClick={handleSubmit} disabled={submitting || !uploadsValid}>
                 {submitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ShieldCheck className="mr-2 h-4 w-4" />}
                 Submit for Verification
               </Button>
@@ -223,5 +326,44 @@ export default function KYCPage() {
         </Card>
       </div>
     </main>
+  );
+}
+
+function UploadSlotCard({ label, hint, state, onSelect }: {
+  label: string;
+  hint: string;
+  state: UploadState;
+  onSelect: (file: File) => void;
+}) {
+  const inputId = `upload-${label.replace(/\W+/g, '-').toLowerCase()}`;
+  return (
+    <div className="p-4 border-2 border-dashed rounded-lg text-center space-y-2 hover:bg-accent/5 transition-colors">
+      <p className="text-sm font-semibold">{label}</p>
+      <p className="text-xs text-muted-foreground">{hint}</p>
+      <input
+        id={inputId}
+        type="file"
+        accept="application/pdf,image/png,image/jpeg"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onSelect(file);
+          e.target.value = '';
+        }}
+      />
+      {state.documentId ? (
+        <div className="flex items-center justify-center gap-2 text-xs font-medium text-green-600">
+          <FileCheck2 className="h-4 w-4" /> {state.file?.name} uploaded
+        </div>
+      ) : (
+        <Button variant="outline" size="sm" disabled={state.uploading} asChild>
+          <label htmlFor={inputId} className="cursor-pointer">
+            {state.uploading ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : null}
+            {state.uploading ? 'Uploading…' : 'Select File'}
+          </label>
+        </Button>
+      )}
+      {state.error && <p className="text-xs text-destructive">{state.error}</p>}
+    </div>
   );
 }
