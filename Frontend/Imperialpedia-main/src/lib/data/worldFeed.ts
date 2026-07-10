@@ -15,7 +15,7 @@
  */
 
 import type { CmsContent } from "@/services/data/cms-public";
-import { articleArtDataUri } from "@baalvion/illustrations";
+import { categoryImage } from "./categoryImage";
 import {
   getWorldData,
   resolveRegion,
@@ -183,7 +183,7 @@ interface Quote {
   prev: number;
 }
 
-async function fetchYahooQuote(symbol: string): Promise<Quote> {
+export async function fetchYahooQuote(symbol: string): Promise<Quote> {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
     symbol,
   )}?interval=1d&range=5d`;
@@ -324,7 +324,7 @@ const decodeEntities = (s: string): string =>
     .replace(/&amp;/g, "&")
     .trim();
 
-async function googleNews(query: string, max: number): Promise<RawArticle[]> {
+export async function googleNews(query: string, max: number): Promise<RawArticle[]> {
   const url =
     `https://news.google.com/rss/search?q=${encodeURIComponent(
       query + " when:2d",
@@ -381,7 +381,7 @@ const SECTION_DEFS: { section: string; cats: string[] }[] = [
   { section: "Energy & Climate", cats: ["ENERGY"] },
 ];
 
-function relativeTime(ms: number): string {
+export function relativeTime(ms: number): string {
   if (!Number.isFinite(ms)) return "recently";
   const diffMin = Math.max(1, Math.round((Date.now() - ms) / 60000));
   if (diffMin < 60) return `${diffMin}m ago`;
@@ -391,26 +391,27 @@ function relativeTime(ms: number): string {
 }
 
 // next/image + the app CSP only allow a short list of image hosts. Article
-// thumbnails come from arbitrary news domains, so we never hotlink them — we map
-// each story to original, deterministically-generated artwork instead (and pass
-// through a remote image only when its host is already allowlisted, e.g. the CMS).
+// thumbnails come from arbitrary news domains (or third-party placeholder
+// services like picsum.photos), so we never hotlink them — we fall back to
+// real, self-hosted category photography instead (and pass through a remote
+// image only when its host is already allowlisted, e.g. the CMS's own CDN).
 const ALLOWED_IMG_HOSTS = new Set(["imperialpedia.com", "api.baalvion.com"]);
 
-/** Pass a remote image through only if its host is allowlisted, else generate
- * original artwork from the story's own title/category so next/image + CSP
- * never break and no stock/placeholder image is ever hotlinked. */
-function safeImage(url: string | null | undefined, category: string, title: string): string {
+/** Pass a remote image through only if its host is allowlisted, else fall
+ * back to a real, self-hosted category photo (public/images/world/categories)
+ * so next/image + CSP never break and no third-party image is ever hotlinked. */
+function safeImage(url: string | null | undefined, category: string, _title: string): string {
   if (url) {
     try {
       if (ALLOWED_IMG_HOSTS.has(new URL(url).hostname)) return url;
     } catch {
-      /* malformed URL → fall through to generated artwork */
+      /* malformed URL → fall through to the category photo */
     }
   }
-  return articleArtDataUri({ title, category, seed: title });
+  return categoryImage(category);
 }
 
-function classifyCategory(title: string): string {
+export function classifyCategory(title: string): string {
   const t = title.toLowerCase();
   if (/bitcoin|crypto|ethereum|token/.test(t)) return "CRYPTO";
   if (/\bai\b|chip|nvidia|apple|tech|software|semiconductor/.test(t)) return "TECH";
