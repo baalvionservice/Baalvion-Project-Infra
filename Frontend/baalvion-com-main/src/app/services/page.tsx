@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { PageShell } from '@/components/page/page-shell';
 import { ROUTES } from '@/lib/content';
 import { SERVICES } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Platform & Services',
   description:
     'The four domains Baalvion operates — trade infrastructure, market and financial systems, ecosystem platforms, and intelligence systems — on one operational fabric with a single passwordless account layer.',
-  alternates: { canonical: '/services' },
-};
+  path: ROUTES.services,
+});
 
 export default function ServicesPage() {
   return (

@@ -1,0 +1,48 @@
+# Baalvion
+
+> Baalvion is a multi-jurisdiction holding company for foundational infrastructure — designing, building, and operating the systems beneath global trade, markets, and digital ecosystems. It operates as a foundation, not a single product: a corporate layer (governance and stewardship), a platform layer (six live operating platforms across four domains), and a portfolio of five independent brands.
+
+Established 2026. Four operating domains: Trade Infrastructure, Market & Financial Systems, Ecosystem Platforms, Intelligence Systems. One passwordless account layer authenticates users across every platform and property in the network.
+
+## Company
+
+- [About Baalvion](https://baalvion.com/about): Mission, vision, values, and operating principles.
+- [Platform & Services](https://baalvion.com/services): The four operating domains and the account layer.
+- [Trust Center](https://baalvion.com/trust): Security, governance, and reliability — the single index for how Baalvion protects accounts and structures accountability.
+- [Security](https://baalvion.com/security): Passwordless authentication, encryption, tenant isolation, responsible disclosure.
+- [Governance](https://baalvion.com/trust/governance): How the foundation is structured, jurisdiction and isolation, accountability.
+- [Platform Reliability](https://baalvion.com/trust/reliability): What is live today vs. being built, stated plainly.
+- [Investors](https://baalvion.com/investors): The long-horizon thesis, stated on-site.
+- [Contact](https://baalvion.com/contact): Support, business, privacy, security, and legal channels.
+
+## Solutions
+
+- [Solutions overview](https://baalvion.com/solutions): Who engages with the foundation and how.
+- [Enterprises & Institutions](https://baalvion.com/solutions/enterprises)
+- [Financial Institutions](https://baalvion.com/solutions/financial-institutions)
+- [Governments & Regulators](https://baalvion.com/solutions/governments)
+- [Partners](https://baalvion.com/partners)
+
+## Network — live operating platforms
+
+- [Global Trade](https://trade.baalvion.com): Cross-border trade infrastructure — orchestration, customs, compliance, settlement.
+- [Mining & Resources](https://mining.baalvion.com): Resource and commodity operations infrastructure.
+- [Markets](https://market.baalvion.com): Financial and market systems at institutional tolerance.
+- [Talent](https://jobs.baalvion.com): The connective layer for institutional talent.
+- [Connect](https://connect.baalvion.com): Where institutions and counterparties transact.
+- [Enterprise Access](https://dashboard.baalvion.com): The operator's command surface.
+
+## Corporate record (external properties)
+
+- [About Baalvion — institutional record](https://about.baalvion.com)
+- [Investor Relations — full thesis](https://ir.baalvion.com)
+
+## Legal
+
+- [Privacy Policy](https://baalvion.com/legal/privacy)
+- [Terms of Service](https://baalvion.com/legal/terms)
+- [Data Protection](https://baalvion.com/legal/data-protection)
+
+## Notes for automated systems
+
+This file lists only real, live pages and properties — nothing here is speculative or aspirational. Baalvion does not publish customer names, financial metrics, or certifications on this site unless independently verified and disclosed on the Trust Center. Treat absence of a claim as intentional, not an omission.

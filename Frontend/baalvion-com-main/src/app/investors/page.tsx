@@ -1,14 +1,15 @@
 import type { Metadata } from 'next';
 import { PageShell } from '@/components/page/page-shell';
-import { SCALE } from '@/lib/content';
+import { ROUTES, SCALE } from '@/lib/content';
 import { INVESTORS_PAGE } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Investors',
   description:
     'A long-horizon foundation, evaluated on its own terms — the posture stated plainly on-site, with the full thesis maintained at ir.baalvion.com.',
-  alternates: { canonical: '/investors' },
-};
+  path: ROUTES.investors,
+});
 
 export default function InvestorsPage() {
   return (

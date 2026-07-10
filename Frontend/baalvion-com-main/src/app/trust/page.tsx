@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { PageShell } from '@/components/page/page-shell';
 import { CONTACT, ROUTES } from '@/lib/content';
 import { TRUST_CENTER } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Trust Center',
   description:
     'The single index for how Baalvion protects accounts, structures accountability, and describes its own stage honestly — security, governance, reliability, and legal.',
-  alternates: { canonical: '/trust' },
-};
+  path: ROUTES.trust,
+});
 
 const CARDS = [
   {
@@ -34,6 +35,16 @@ const CARDS = [
   },
 ];
 
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: TRUST_CENTER.faq.map((item) => ({
+    '@type': 'Question',
+    name: item.question,
+    acceptedAnswer: { '@type': 'Answer', text: item.answer },
+  })),
+};
+
 export default function TrustCenterPage() {
   return (
     <PageShell
@@ -43,6 +54,10 @@ export default function TrustCenterPage() {
       title={TRUST_CENTER.title}
       lede={TRUST_CENTER.lede}
     >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <section className="border-b hairline bg-ink">
         <div className="site-container py-16 md:py-20">
           <p className="lead max-w-3xl">{TRUST_CENTER.intro}</p>
@@ -62,6 +77,22 @@ export default function TrustCenterPage() {
                   View {card.title.toLowerCase()} <span aria-hidden="true">→</span>
                 </p>
               </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b hairline bg-ink-deep">
+        <div className="site-container py-16 md:py-20">
+          <h2 className="running-head mb-10 max-w-2xl">Questions, answered directly.</h2>
+          <div className="divide-y divide-line border-t hairline">
+            {TRUST_CENTER.faq.map((item) => (
+              <div key={item.question} className="py-6">
+                <h3 className="display-h3 mb-2 text-[clamp(1.05rem,0.95rem+0.4vw,1.35rem)]">
+                  {item.question}
+                </h3>
+                <p className="body">{item.answer}</p>
+              </div>
             ))}
           </div>
         </div>

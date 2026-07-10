@@ -226,6 +226,28 @@ export const TRUST_CENTER = {
   title: 'Trust, engineered into the foundation.',
   lede: 'Security, governance, and reliability are not disclosures added after the fact — across every domain Baalvion operates, they are architecture, applied to a single standard.',
   intro: 'This is the single index for how Baalvion protects accounts, structures accountability, and describes its own stage honestly. If you are reviewing Baalvion ahead of a partnership, an account, or an investment, start here.',
+  faq: [
+    {
+      question: 'What is Baalvion?',
+      answer: 'Baalvion is a multi-jurisdiction holding company for foundational infrastructure, designing, building, and operating the systems beneath global trade, markets, and digital ecosystems. It is organised as a corporate layer, a platform layer, and a portfolio of independent brands.',
+    },
+    {
+      question: 'Is authentication on Baalvion passwordless?',
+      answer: 'Yes. There are no stored passwords to steal — identity is verified with short-lived, one-time email codes and signed sessions, across every platform in the network.',
+    },
+    {
+      question: 'How is tenant data isolated?',
+      answer: 'Each organisation’s data is isolated with row-level controls so tenants, currencies, and jurisdictions stay separated — treated as architecture rather than configuration.',
+    },
+    {
+      question: 'What stage is Baalvion at?',
+      answer: 'Baalvion is an established, actively operated foundation (2026) — four operating domains, six live platforms, and five independent brands, held under a multi-jurisdiction posture. We describe scale in terms of what is architecturally true today.',
+    },
+    {
+      question: 'Does Baalvion hold formal security or regulatory certifications?',
+      answer: 'Certifications and regulatory registrations are disclosed here as, and only as, they are obtained. Baalvion does not claim standards it has not been independently assessed against.',
+    },
+  ],
 } as const;
 
 /* ─────────────────────────── Trust — Governance ─────────────────────────── */

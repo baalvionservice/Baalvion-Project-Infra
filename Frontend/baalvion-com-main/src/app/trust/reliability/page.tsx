@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { PageShell } from '@/components/page/page-shell';
 import { ROUTES } from '@/lib/content';
 import { RELIABILITY } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Platform Reliability',
   description:
     'What is live today across the Baalvion network, how the identity layer works, and how we describe our own stage — stated plainly, not blurred with what is still being built.',
-  alternates: { canonical: '/trust/reliability' },
-};
+  path: ROUTES.trustReliability,
+});
 
 const BLOCKS = [RELIABILITY.today, RELIABILITY.identity, RELIABILITY.principle, RELIABILITY.stage];
 

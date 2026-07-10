@@ -3,13 +3,14 @@ import { PageShell } from '@/components/page/page-shell';
 import { SolutionSections } from '@/components/page/solution-sections';
 import { ROUTES } from '@/lib/content';
 import { SOLUTIONS_GOVERNMENTS } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Solutions for Governments & Regulators',
   description:
     'Infrastructure designed to be examined — compliance, jurisdictional isolation, and a direct regulatory channel into Baalvion’s governance posture.',
-  alternates: { canonical: '/solutions/governments' },
-};
+  path: ROUTES.solutionsGovernments,
+});
 
 export default function GovernmentsSolutionPage() {
   const page = SOLUTIONS_GOVERNMENTS;

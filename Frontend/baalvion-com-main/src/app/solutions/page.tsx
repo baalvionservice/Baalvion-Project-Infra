@@ -1,14 +1,16 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { PageShell } from '@/components/page/page-shell';
+import { ROUTES } from '@/lib/content';
 import { SOLUTIONS_HUB } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Solutions',
   description:
     'How Baalvion is engaged by enterprises and institutions, financial institutions, governments and regulators, partners, and investors.',
-  alternates: { canonical: '/solutions' },
-};
+  path: ROUTES.solutions,
+});
 
 export default function SolutionsPage() {
   return (

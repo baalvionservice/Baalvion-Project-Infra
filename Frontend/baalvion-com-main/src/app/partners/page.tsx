@@ -3,13 +3,14 @@ import { PageShell } from '@/components/page/page-shell';
 import { SolutionSections } from '@/components/page/solution-sections';
 import { ROUTES } from '@/lib/content';
 import { PARTNERS_PAGE } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Partners',
   description:
     'Platform integration partners, financial and settlement partners, and portfolio brand operators — how partnership works across the Baalvion foundation.',
-  alternates: { canonical: '/partners' },
-};
+  path: ROUTES.partners,
+});
 
 export default function PartnersPage() {
   const page = PARTNERS_PAGE;

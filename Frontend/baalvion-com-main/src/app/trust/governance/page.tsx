@@ -3,13 +3,14 @@ import Link from 'next/link';
 import { PageShell } from '@/components/page/page-shell';
 import { CONTACT, ROUTES } from '@/lib/content';
 import { GOVERNANCE } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Governance',
   description:
     'How Baalvion is structured, how jurisdiction and tenant isolation are treated as architecture, and how accountability is enforced across the foundation.',
-  alternates: { canonical: '/trust/governance' },
-};
+  path: ROUTES.trustGovernance,
+});
 
 export default function GovernancePage() {
   return (

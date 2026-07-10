@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
 import { PageShell } from '@/components/page/page-shell';
+import { ROUTES } from '@/lib/content';
 import { CAREERS_PAGE } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Careers',
   description:
     'Work across the Baalvion foundation — trade and logistics engineering, market and financial systems, ecosystem and identity platforms, and applied intelligence. Open roles are listed on the Talent platform.',
-  alternates: { canonical: '/careers' },
-};
+  path: ROUTES.careers,
+});
 
 export default function CareersPage() {
   return (

@@ -3,13 +3,14 @@ import { PageShell } from '@/components/page/page-shell';
 import { SolutionSections } from '@/components/page/solution-sections';
 import { ROUTES } from '@/lib/content';
 import { SOLUTIONS_ENTERPRISES } from '@/lib/site-pages';
+import { pageMetadata } from '@/lib/seo';
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: 'Solutions for Enterprises & Institutions',
   description:
     'Operating environments built for institutional dependence — one identity layer, tenant isolation, and governance shared across every Baalvion platform.',
-  alternates: { canonical: '/solutions/enterprises' },
-};
+  path: ROUTES.solutionsEnterprises,
+});
 
 export default function EnterprisesSolutionPage() {
   const page = SOLUTIONS_ENTERPRISES;
