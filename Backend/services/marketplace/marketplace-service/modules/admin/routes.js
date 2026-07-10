@@ -7,10 +7,11 @@ const { z } = require('zod');
 const db = require('../../models');
 const { authMiddleware } = require('../../middleware/authMiddleware');
 const { validate } = require('../../middleware/validate');
-const { sendSuccess, sendPaginated } = require('../../utils/response');
+const { sendSuccess, sendPaginated, sendDeleted } = require('../../utils/response');
 const { AppError } = require('../../utils/errors');
 const { parseListQuery, paginate } = require('../../utils/query');
 const { isStaff, isPlatform } = require('../../utils/authz');
+const investorInvitationService = require('../../service/investorInvitationService');
 
 const requireStaff = (req, res, next) => (isStaff(req.user) ? next() : next(new AppError('FORBIDDEN', 'Compliance/admin role required', 403)));
 
@@ -84,6 +85,41 @@ router.patch('/investors/:id/review', validate({ body: investorReviewSchema }), 
             accreditation_status: data.accreditation_status || (approve ? 'verified' : inv.accreditation_status),
         });
         return sendSuccess(req, res, inv);
+    } catch (err) { return next(err); }
+});
+
+// ── Investor invitations (admin-triggered onboarding invites) ─────────────────
+const sendInvestorInviteSchema = z.object({
+    email: z.string().email(),
+    investorType: z.enum(['angel', 'vc', 'family_office', 'pe', 'institutional', 'corporate', 'strategic']).default('angel'),
+    note: z.string().max(1000).optional(),
+});
+router.get('/investors/invitations', async (req, res, next) => {
+    try {
+        const result = await investorInvitationService.listInvitations({
+            orgId: req.user.orgId, isPlatform: isPlatform(req.user), query: req.query,
+        });
+        return sendPaginated(req, res, result);
+    } catch (err) { return next(err); }
+});
+router.post('/investors/invitations', validate({ body: sendInvestorInviteSchema }), async (req, res, next) => {
+    try {
+        const row = await investorInvitationService.sendInvitation({
+            orgId: req.user.orgId,
+            data: req.valid.body,
+            // req.user only carries id/orgId/roles — sendInvitation falls back to a
+            // generic inviter name when no name/email is resolvable here.
+            invitedBy: { id: req.user.id },
+        });
+        return sendSuccess(req, res, row, 201);
+    } catch (err) { return next(err); }
+});
+router.delete('/investors/invitations/:id', async (req, res, next) => {
+    try {
+        const result = await investorInvitationService.revokeInvitation({
+            orgId: req.user.orgId, isPlatform: isPlatform(req.user), id: req.params.id,
+        });
+        return sendDeleted(req, res, result);
     } catch (err) { return next(err); }
 });
 

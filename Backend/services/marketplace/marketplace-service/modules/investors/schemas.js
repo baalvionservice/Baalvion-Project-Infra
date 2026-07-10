@@ -5,6 +5,8 @@ const createSchema = z.object({
     type: z.enum(['angel', 'vc', 'family_office', 'pe', 'institutional', 'corporate', 'strategic']),
     legal_name: z.string().min(2).max(300),
     country: z.string().length(2).optional(),
+    // Present when onboarding started from an admin-sent investor invitation link.
+    invite_token: z.string().length(64).optional(),
 });
 
 // Core editable fields (compliance-managed status fields are not accepted here).

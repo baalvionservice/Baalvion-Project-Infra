@@ -24,6 +24,7 @@ db.Founder = require('./founder')(sequelize, Sequelize.DataTypes);
 db.CompanyDocument = require('./companyDocument')(sequelize, Sequelize.DataTypes);
 db.Investor = require('./investor')(sequelize, Sequelize.DataTypes);
 db.InvestorProfile = require('./investorProfile')(sequelize, Sequelize.DataTypes);
+db.InvestorInvitation = require('./investorInvitation')(sequelize, Sequelize.DataTypes);
 db.InvestmentPreference = require('./investmentPreference')(sequelize, Sequelize.DataTypes);
 db.Opportunity = require('./opportunity')(sequelize, Sequelize.DataTypes);
 db.Deal = require('./deal')(sequelize, Sequelize.DataTypes);

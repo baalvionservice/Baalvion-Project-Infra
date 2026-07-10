@@ -12,6 +12,8 @@ module.exports = {
     schema: 'marketplace',
     // Fallback org for self-service onboarding before a platform identity exists.
     defaultOrgId: process.env.MARKETPLACE_DEFAULT_ORG_ID || '52c76e5c-0668-4492-ba20-23e7ee16f49b',
+    // Public investor-facing frontend — invitation emails link here to start onboarding.
+    appUrl: process.env.MARKETPLACE_APP_URL || 'http://localhost:3000',
     pagination: {
         defaultLimit: Number(process.env.MARKETPLACE_DEFAULT_LIMIT || 20),
         maxLimit: Number(process.env.MARKETPLACE_MAX_LIMIT || 100),

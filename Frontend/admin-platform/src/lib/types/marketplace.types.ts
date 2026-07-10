@@ -56,3 +56,19 @@ export interface MpOpportunity {
 export const COMPANY_STATUSES: CompanyStatus[] = ['draft', 'submitted', 'approved', 'rejected', 'suspended'];
 export const INVESTOR_STATUSES: InvestorStatus[] = ['pending', 'submitted', 'approved', 'rejected'];
 export const MP_LABEL = (s?: string | null) => (s ? s.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : '—');
+
+export type InvestorType = MpInvestor['type'];
+export const INVESTOR_TYPES: InvestorType[] = ['angel', 'vc', 'family_office', 'pe', 'institutional', 'corporate', 'strategic'];
+
+export type InvestorInvitationStatus = 'pending' | 'accepted' | 'revoked' | 'expired';
+export interface MpInvestorInvitation {
+  id: string;
+  email: string;
+  investorType: InvestorType;
+  note?: string | null;
+  status: InvestorInvitationStatus;
+  invitedBy: string;
+  expiresAt: string;
+  acceptedAt: string | null;
+  createdAt: string;
+}

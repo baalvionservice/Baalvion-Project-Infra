@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { marketplaceAdminApi } from '@/lib/api/marketplace';
+import type { InvestorType } from '@/lib/types/marketplace.types';
 
 type Q = { page?: number; limit?: number; status?: string };
 const onErr = (e: { message: string }) => toast.error(e.message);
@@ -43,6 +44,31 @@ export const useReviewInvestor = () => {
     mutationFn: ({ id, action, note }: { id: string; action: 'approve' | 'reject'; note?: string }) =>
       marketplaceAdminApi.reviewInvestor(id, { action, note }).then((r) => r.data.data),
     onSuccess: (_d, v) => { qc.invalidateQueries({ queryKey: mpInvestorKeys.all }); toast.success(`Investor ${v.action === 'approve' ? 'approved' : 'rejected'}`); },
+    onError: onErr,
+  });
+};
+
+export const mpInvestorInviteKeys = { all: ['marketplace', 'investor-invitations'] as const };
+export const useMpInvestorInvitations = (p?: Q) =>
+  useQuery({
+    queryKey: [...mpInvestorInviteKeys.all, p],
+    queryFn: () => marketplaceAdminApi.investorInvitations(p).then((r) => r.data.data),
+    placeholderData: keepPreviousData,
+  });
+export const useInviteInvestor = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (body: { email: string; investorType: InvestorType; note?: string }) =>
+      marketplaceAdminApi.inviteInvestor(body).then((r) => r.data.data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: mpInvestorInviteKeys.all }); toast.success('Invitation sent'); },
+    onError: onErr,
+  });
+};
+export const useRevokeInvestorInvitation = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => marketplaceAdminApi.revokeInvestorInvitation(id).then((r) => r.data.data),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: mpInvestorInviteKeys.all }); toast.success('Invitation revoked'); },
     onError: onErr,
   });
 };

@@ -6,6 +6,7 @@ const { AppError } = require('../utils/errors');
 const { parseListQuery, paginate } = require('../utils/query');
 const { assertOwnerOrStaff } = require('../utils/authz');
 const { screenAml, submitKyc } = require('../integrations/compliance');
+const { redeemInvitation } = require('./investorInvitationService');
 
 const SORTABLE = ['created_at', 'updated_at', 'legal_name', 'type', 'status', 'country'];
 
@@ -29,17 +30,20 @@ async function getById({ id, user }) {
 
 // Onboarding — runs AML screening immediately and submits KYC.
 async function create({ data, user }) {
+    const { invite_token, ...investorData } = data;
     const org_id = user?.orgId || config.defaultOrgId;
-    const aml = await screenAml({ legalName: data.legal_name, country: data.country });
+    const aml = await screenAml({ legalName: investorData.legal_name, country: investorData.country });
     const kyc = await submitKyc({ subjectType: 'investor', subjectId: 'pending' });
     const row = await db.Investor.create({
-        ...data,
+        ...investorData,
         org_id,
         created_by: user?.id || 'self',
         status: 'submitted',
         aml_status: aml.status === 'clear' ? 'clear' : 'review',
         kyc_status: kyc,
     });
+    // Best-effort — an expired/unknown/already-used token should never block onboarding.
+    if (invite_token) await redeemInvitation(invite_token).catch(() => null);
     return { investor: row, aml };
 }
 
