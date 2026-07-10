@@ -2,7 +2,7 @@
 const router = require('express').Router();
 const { authMiddleware, requireRole } = require('../middleware/authMiddleware');
 const {
-    listOrgs, getOrg, createOrg, updateOrg, deleteOrg, updateKyc,
+    listOrgs, getOrg, createOrg, updateOrg, deleteOrg, updateKyc, getLedgerAccount,
 } = require('../controller/organizationController');
 
 // The org directory is tenant data (names, KYC verdicts, risk scores) — it was previously
@@ -20,5 +20,8 @@ router.patch('/:id',      authMiddleware, requireRole('admin', 'owner', 'super_a
 router.patch('/:id/kyc',  authMiddleware, requireRole('super_admin'), updateKyc);
 // Deleting a tenant org is a destructive platform-level action.
 router.delete('/:id',     authMiddleware, requireRole('super_admin'), deleteOrg);
+// Resolves/provisions the org's account-service ledger account — a precursor to any
+// escrow/ledger money movement, so gated the same as other money-adjacent org actions.
+router.post('/:id/ledger-account', authMiddleware, requireRole('admin', 'owner', 'super_admin'), getLedgerAccount);
 
 module.exports = router;

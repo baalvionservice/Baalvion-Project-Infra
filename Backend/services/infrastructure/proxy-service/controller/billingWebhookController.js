@@ -40,6 +40,9 @@ function timingSafeEqual(a, b) {
 }
 
 async function razorpayWebhook(req, res) {
+    // Tracks a FRESH idempotency claim so the catch can release it on apply-failure (otherwise the
+    // orphaned claim dedups Razorpay's retry → payment captured, never fulfilled). See internalFulfillController.
+    let claimedId = null;
     try {
         const raw = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body || '');
         const signature = req.headers['x-razorpay-signature'];
@@ -98,6 +101,7 @@ async function razorpayWebhook(req, res) {
             if (!claim.fresh) {
                 return res.status(200).json({ received: true, idempotent: true });
             }
+            claimedId = paymentId;
         }
 
         if (kind === 'credit') {
@@ -126,7 +130,9 @@ async function razorpayWebhook(req, res) {
         logger.info(`[billing-webhook] activated org=${orgId} plan=${planSlug} via payment=${paymentId} status=${sub && sub.status}`);
         return res.status(200).json({ received: true, activated: true, status: sub && sub.status });
     } catch (e) {
-        // 500 so the provider retries (idempotency above makes retries safe).
+        // Release the (unapplied) claim so Razorpay's retry can re-fulfill. releaseEvent only deletes rows
+        // still applied=FALSE, so it can never undo a completed activation. 500 → Razorpay retries.
+        if (claimedId) { try { await dedup.releaseEvent('razorpay', claimedId); } catch (_) { /* best-effort */ } }
         logger.error('[billing-webhook] handler error:', e.message);
         return res.status(500).json({ error: { code: 'WEBHOOK_ERROR', message: 'internal error' } });
     }

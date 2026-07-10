@@ -3,6 +3,7 @@ import { useAuthStore } from '@/lib/store/authStore';
 import { decodeJwtClaims } from '@/lib/utils/jwt';
 import type {
   LoginPayload,
+  RegisterPayload,
   LoginResponse,
   AuthUser,
   MfaVerifyPayload,
@@ -80,6 +81,20 @@ const enrichFromToken = (user: AuthUser): AuthUser => {
 export const authApi = {
   login: async (payload: LoginPayload) => {
     const res = await authClient.post<ApiResponse<BackendLoginData>>('/login', payload);
+    const raw = res.data.data;
+    const normalized: LoginResponse = {
+      user: toAuthUser(raw.user),
+      accessToken: raw.accessToken ?? raw.token ?? '',
+      expiresIn: toExpiresIn(raw.expiresAt),
+      org: null,
+    };
+    return { ...res, data: { ...res.data, data: normalized } } as typeof res & {
+      data: ApiResponse<LoginResponse>;
+    };
+  },
+
+  register: async (payload: RegisterPayload) => {
+    const res = await authClient.post<ApiResponse<BackendLoginData>>('/register', payload);
     const raw = res.data.data;
     const normalized: LoginResponse = {
       user: toAuthUser(raw.user),

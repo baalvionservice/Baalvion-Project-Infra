@@ -15,7 +15,7 @@
  */
 
 import type { CmsContent } from "@/services/data/cms-public";
-import { articleArtDataUri } from "@baalvion/illustrations";
+import { categoryImage } from "./categoryImage";
 import {
   getWorldData,
   resolveRegion,
@@ -183,7 +183,7 @@ interface Quote {
   prev: number;
 }
 
-async function fetchYahooQuote(symbol: string): Promise<Quote> {
+export async function fetchYahooQuote(symbol: string): Promise<Quote> {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
     symbol,
   )}?interval=1d&range=5d`;
@@ -324,7 +324,7 @@ const decodeEntities = (s: string): string =>
     .replace(/&amp;/g, "&")
     .trim();
 
-async function googleNews(query: string, max: number): Promise<RawArticle[]> {
+export async function googleNews(query: string, max: number): Promise<RawArticle[]> {
   const url =
     `https://news.google.com/rss/search?q=${encodeURIComponent(
       query + " when:2d",
@@ -381,7 +381,7 @@ const SECTION_DEFS: { section: string; cats: string[] }[] = [
   { section: "Energy & Climate", cats: ["ENERGY"] },
 ];
 
-function relativeTime(ms: number): string {
+export function relativeTime(ms: number): string {
   if (!Number.isFinite(ms)) return "recently";
   const diffMin = Math.max(1, Math.round((Date.now() - ms) / 60000));
   if (diffMin < 60) return `${diffMin}m ago`;
@@ -391,26 +391,27 @@ function relativeTime(ms: number): string {
 }
 
 // next/image + the app CSP only allow a short list of image hosts. Article
-// thumbnails come from arbitrary news domains, so we never hotlink them — we map
-// each story to original, deterministically-generated artwork instead (and pass
-// through a remote image only when its host is already allowlisted, e.g. the CMS).
+// thumbnails come from arbitrary news domains (or third-party placeholder
+// services like picsum.photos), so we never hotlink them — we fall back to
+// real, self-hosted category photography instead (and pass through a remote
+// image only when its host is already allowlisted, e.g. the CMS's own CDN).
 const ALLOWED_IMG_HOSTS = new Set(["imperialpedia.com", "api.baalvion.com"]);
 
-/** Pass a remote image through only if its host is allowlisted, else generate
- * original artwork from the story's own title/category so next/image + CSP
- * never break and no stock/placeholder image is ever hotlinked. */
-function safeImage(url: string | null | undefined, category: string, title: string): string {
+/** Pass a remote image through only if its host is allowlisted, else fall
+ * back to a real, self-hosted category photo (public/images/world/categories)
+ * so next/image + CSP never break and no third-party image is ever hotlinked. */
+function safeImage(url: string | null | undefined, category: string, _title: string): string {
   if (url) {
     try {
       if (ALLOWED_IMG_HOSTS.has(new URL(url).hostname)) return url;
     } catch {
-      /* malformed URL → fall through to generated artwork */
+      /* malformed URL → fall through to the category photo */
     }
   }
-  return articleArtDataUri({ title, category, seed: title });
+  return categoryImage(category);
 }
 
-function classifyCategory(title: string): string {
+export function classifyCategory(title: string): string {
   const t = title.toLowerCase();
   if (/bitcoin|crypto|ethereum|token/.test(t)) return "CRYPTO";
   if (/\bai\b|chip|nvidia|apple|tech|software|semiconductor/.test(t)) return "TECH";
@@ -435,9 +436,10 @@ interface NewsBundle {
   sections: WorldData["sections"];
 }
 
-async function buildNews(region: RegionId): Promise<NewsBundle | null> {
-  // ONE Google News RSS call per region (cached), bucketed below.
-  const arts = await googleNews(REGION_QUERY[region], 50);
+/** Shared by every wire-style source (news-service, Google News RSS): buckets
+ * a flat article list into the hero/latest/sectioned-grid shape the World
+ * page renders. */
+function bundleFromArticles(arts: RawArticle[]): NewsBundle | null {
   if (arts.length < 4) return null;
 
   const featured: FeaturedStory[] = arts.slice(0, 3).map((a, i) => {
@@ -482,6 +484,59 @@ async function buildNews(region: RegionId): Promise<NewsBundle | null> {
   }).filter((s) => s.items.length > 0);
 
   return { featured, latest, sections };
+}
+
+async function buildNews(region: RegionId): Promise<NewsBundle | null> {
+  // ONE Google News RSS call per region (cached), bucketed below.
+  const arts = await googleNews(REGION_QUERY[region], 50);
+  return bundleFromArticles(arts);
+}
+
+// ── news-service (real-time wire ingestion: TechCrunch, BBC, MarketWatch, ──
+// Wired, MIT News, Krebs, NASA, etc.) — the dedicated wire-ingestion backend
+// at Backend/services/knowledge/news-service, polled every 15 min via BullMQ.
+// Preferred over the inline Google News RSS scrape below: it's deduped,
+// persisted, and query-able by category/region rather than re-fetched per
+// request. Falls back to null (→ googleNews) if the service or its DB is
+// unreachable, so a news-service outage never breaks the World page.
+
+const NEWS_SERVICE_URL = process.env.NEWS_SERVICE_URL || "http://localhost:3045";
+const NEWS_SERVICE_INTERNAL_KEY = process.env.NEWS_SERVICE_INTERNAL_KEY || "";
+
+const REGION_WIRE_KEYWORD: Record<RegionId, string | undefined> = {
+  world: undefined,
+  us: "wall street",
+  europe: "europe",
+  asia: "asia",
+  china: "china",
+  emerging: "emerging markets",
+};
+
+interface WireArticle {
+  title: string;
+  url: string;
+  published_at: string;
+  source?: { name?: string } | null;
+}
+
+async function buildWireNews(region: RegionId): Promise<NewsBundle | null> {
+  if (!NEWS_SERVICE_INTERNAL_KEY) return null;
+  const q = new URLSearchParams({ limit: "50" });
+  const keyword = REGION_WIRE_KEYWORD[region];
+  if (keyword) q.set("keyword", keyword);
+  const res = await fetch(`${NEWS_SERVICE_URL}/internal/v1/news?${q.toString()}`, {
+    headers: { "X-Internal-Key": NEWS_SERVICE_INTERNAL_KEY },
+    next: { revalidate: 120 },
+  });
+  if (!res.ok) throw new Error(`news-service ${res.status}`);
+  const env = (await res.json()) as { data?: WireArticle[] };
+  const arts: RawArticle[] = (env.data ?? []).map((a) => ({
+    title: a.title,
+    url: a.url,
+    ms: Date.parse(a.published_at) || Date.now(),
+    domain: a.source?.name,
+  }));
+  return bundleFromArticles(arts);
 }
 
 // ── CMS as the PRIMARY, admin-controlled news source ────────────────────────
@@ -674,10 +729,15 @@ export async function getWorldDataLive(raw?: string | null): Promise<WorldData> 
     safe(() => buildCmsNews(region.id)),
   ]);
 
-  // Admin/CMS wins. Reach for Google News only when the CMS is empty AND the
-  // admin left the wire-service fallback enabled.
+  // Admin/CMS wins. When it's empty and the admin left the wire fallback
+  // enabled, prefer the dedicated news-service wire (real, deduped, persisted
+  // ingestion) over the inline Google News RSS scrape, which is now just the
+  // last-resort fallback if news-service itself is unreachable.
   let news = cmsNews;
-  if (!news && newsFallbackEnabled) news = await safe(() => buildNews(region.id));
+  if (!news && newsFallbackEnabled) {
+    news = await safe(() => buildWireNews(region.id));
+    if (!news) news = await safe(() => buildNews(region.id));
+  }
 
   const markets = indicators ? buildMarkets(region.id, indicators, defs) : fallback.markets;
 

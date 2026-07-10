@@ -1,8 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { getOptimizedImageSizes, isMobileDevice } from "@/lib/performance";
+import { useState, useEffect, useRef } from "react";
+import { getOptimizedImageSizes } from "@/lib/performance";
 
 interface OptimizedImageProps {
   src: string;
@@ -28,15 +28,26 @@ export function OptimizedImage({
   quality = 75,
   ...props
 }: OptimizedImageProps) {
-  const [isMobile, setIsMobile] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
+  // Priority images are LCP candidates — render them at full opacity
+  // immediately instead of fading in, so the fade transition never delays
+  // the measured Largest Contentful Paint.
+  const [isLoaded, setIsLoaded] = useState(priority);
+  const imgRef = useRef<HTMLImageElement>(null);
 
+  // The browser can decode and paint an <img> (especially instant inline
+  // data: URIs) before React finishes hydrating and attaches `onLoad` below.
+  // When that happens the native load event fires into the void and the
+  // image is stuck at opacity-0 forever. Catch that case on mount/src-change.
   useEffect(() => {
-    setIsMobile(isMobileDevice());
-  }, []);
+    if (imgRef.current?.complete) setIsLoaded(true);
+  }, [src]);
 
-  const optimizedSizes = sizes || getOptimizedImageSizes(isMobile);
-  const optimizedQuality = isMobile ? Math.min(quality, 60) : quality;
+  // The `sizes` string already encodes device-width breakpoints, so the
+  // browser picks the right srcset entry itself with no JS device detection
+  // needed. Deriving `quality` from client-side device sniffing instead made
+  // the optimized-image URL change post-hydration, forcing a second network
+  // fetch of the same image right after the first one landed.
+  const optimizedSizes = sizes || getOptimizedImageSizes();
 
   return (
     <div className={`relative overflow-hidden ${className}`}>
@@ -44,16 +55,17 @@ export function OptimizedImage({
         <div className="absolute inset-0 bg-gray-200 animate-pulse" />
       )}
       <Image
+        ref={imgRef}
         src={src}
         alt={alt}
         width={width}
         height={height}
         fill={fill}
-        className={`transition-opacity duration-300 ${
-          isLoaded ? "opacity-100" : "opacity-0"
-        }`}
+        className={`${
+          priority ? "" : "transition-opacity duration-300"
+        } ${isLoaded ? "opacity-100" : "opacity-0"}`}
         sizes={optimizedSizes}
-        quality={optimizedQuality}
+        quality={quality}
         priority={priority}
         loading={priority ? "eager" : "lazy"}
         onLoad={() => setIsLoaded(true)}

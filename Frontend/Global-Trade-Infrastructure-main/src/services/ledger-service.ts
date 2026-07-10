@@ -1,8 +1,13 @@
 /**
  * @file ledger-service.ts
  * @description The authoritative, immutable source of truth for all institutional financial movements.
+ *
+ * Ledger is owned by the Java ledger-service (financial-services-java, /api/v1/ledger) — same
+ * retirement pattern as escrow (see escrow-service.ts header). Real entries are double-entry:
+ * every post needs BOTH a debitAccountId and a creditAccountId (account-service UUIDs, not org
+ * ids). There is no generic single-sided "debit company X" endpoint on the real ledger.
  */
-import { apiClient } from '@/lib/api-client';
+import { financeClient } from '@/lib/finance-client';
 import { logger, metricsService } from './observability-service';
 
 export type LedgerTransactionType = 'debit' | 'credit';
@@ -22,58 +27,55 @@ export interface LedgerEntry {
 }
 
 /**
- * Records a financial movement in the immutable platform ledger.
- * This is the only system-sanctioned method to mutate institutional balances.
+ * Posts a real double-entry ledger entry. This is the only system-sanctioned way to move
+ * money between two account-service accounts outside of the escrow hold/release/refund
+ * lifecycle (which posts its own entries server-side via the Kafka event listener).
  */
-export async function recordTransaction(entry: Omit<LedgerEntry, 'id' | 'createdAt'>): Promise<LedgerEntry> {
-  logger.info('LedgerService', `Executing ${entry.type} for ${entry.companyId}`, { amount: entry.amount, ref: entry.referenceId });
+export async function postLedgerEntry(entry: {
+  transactionRef: string;
+  debitAccountId: string;
+  creditAccountId: string;
+  amount: number;
+  currency: string;
+  entryType: string;
+  description?: string;
+}): Promise<LedgerEntry> {
+  logger.info('LedgerService', `Posting ${entry.entryType}: ${entry.debitAccountId} -> ${entry.creditAccountId}`, { amount: entry.amount, ref: entry.transactionRef });
 
-  // 1. Persist the ledger entry (Immutable Record). The cryptographic hash is
-  // the ledger backend's responsibility — a client-generated value would be a
-  // fake integrity proof, so it is not sent.
-  const res = await apiClient.post<LedgerEntry>('/ledger_entries', {
-    ...entry,
-  });
-  
+  const res = await financeClient.post<any>('/ledger/entries', entry);
   if (!res.success || !res.data) {
-    logger.error('LedgerService', `LEDGER_COMMIT_FAILED: Ref ${entry.referenceId}`);
-    throw new Error('Ledger recording critical failure.');
+    logger.error('LedgerService', `LEDGER_COMMIT_FAILED: Ref ${entry.transactionRef}`);
+    throw new Error(res.error?.message || 'Ledger recording critical failure.');
   }
 
-  const ledgerRecord = res.data;
-
-  // 2. Synchronize Wallet Balance (Consistency Logic)
-  await syncWalletBalance(entry.companyId, entry.type, entry.amount, entry.currency);
-
-  // 3. Record Operational Metrics
   metricsService.recordMetric('ledger_transaction_volume', entry.amount);
-  
-  return ledgerRecord;
+  const posted = res.data;
+  return {
+    id: String(posted.id ?? ''),
+    companyId: '',
+    type: 'debit',
+    amount: entry.amount,
+    currency: entry.currency,
+    referenceType: 'order',
+    referenceId: entry.transactionRef,
+    description: entry.description || '',
+    createdAt: posted.createdAt || new Date().toISOString(),
+  };
 }
 
 /**
- * Ensures the institutional wallet matches the sum of ledger entries.
+ * @deprecated Superseded by {@link postLedgerEntry}. This single-sided shape (one company, no
+ * counterparty account) predates the real integration and cannot be mapped onto the real
+ * double-entry ledger — a post needs both a debitAccountId and a creditAccountId. Money
+ * movements tied to an escrow now happen automatically server-side when the hold is created/
+ * released (see escrow-service.ts); there is no remaining in-app caller for a bare "record a
+ * transaction for company X" call. Throws instead of silently no-op'ing so any surviving caller
+ * fails loudly rather than believing money moved when it did not.
  */
-async function syncWalletBalance(companyId: string, type: LedgerTransactionType, amount: number, currency: string) {
-  const walletRes = await apiClient.get<any[]>('/wallets', { companyId, currency });
-  const wallet = walletRes.data?.[0];
-
-  if (!wallet) {
-    logger.error('LedgerService', `SYNC_FAILURE: Wallet not found for company ${companyId}`);
-    throw new Error('Institutional wallet out of sync with ledger.');
-  }
-
-  const newBalance = type === 'credit' 
-    ? wallet.balance + amount 
-    : wallet.balance - amount;
-
-  if (newBalance < 0) {
-    logger.warn('LedgerService', `INSUFFICIENT_FUNDS: Company ${companyId} attempt to debit ${amount}`);
-    throw new Error('Transaction denied: Insufficient institutional liquidity.');
-  }
-
-  await apiClient.patch(`/wallets/${wallet.id}`, { 
-    balance: newBalance,
-    updatedAt: new Date().toISOString()
-  });
+export async function recordTransaction(_entry: Omit<LedgerEntry, 'id' | 'createdAt'>): Promise<LedgerEntry> {
+  throw new Error(
+    'recordTransaction is retired: the real ledger requires a debit AND credit account id. ' +
+    'Use postLedgerEntry(), or — for escrow funds — rely on the automatic server-side posting ' +
+    'that already happens when an escrow hold is created/released.'
+  );
 }

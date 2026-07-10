@@ -6,7 +6,7 @@ import {
   watchlistItems,
   worldMarkets,
 } from "./worldData";
-import { articleArtDataUri } from "@baalvion/illustrations";
+import { categoryImage } from "./categoryImage";
 
 /**
  * Region-aware data for the CNBC-style World page
@@ -344,15 +344,15 @@ const rawFeatured: Record<RegionId, Array<Omit<FeaturedStory, "image"> & { image
   ],
 };
 
-// Original, deterministic artwork per story (no stock/placeholder images) —
-// generated from each story's own headline/category, computed after the literal
-// above since object literals can't reference their own sibling properties.
+// Real, self-hosted category photography per story (no generated artwork, no
+// stock/placeholder images) — computed after the literal above since object
+// literals can't reference their own sibling properties.
 const FEATURED: Record<RegionId, FeaturedStory[]> = Object.fromEntries(
   Object.entries(rawFeatured).map(([region, stories]) => [
     region,
     stories.map((story) => ({
       ...story,
-      image: story.image ?? articleArtDataUri({ title: story.headline, category: story.category, seed: String(story.id) }),
+      image: story.image ?? categoryImage(story.category),
     })),
   ]),
 ) as Record<RegionId, FeaturedStory[]>;

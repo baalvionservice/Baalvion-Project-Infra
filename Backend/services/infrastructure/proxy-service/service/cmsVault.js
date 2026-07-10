@@ -14,7 +14,11 @@ const config = require('../config/appConfig');
 const logger = require('./logger');
 
 const CMS_BASE_URL = (process.env.CMS_BASE_URL || 'http://localhost:3011/api/v1').replace(/\/$/, '');
-const INTERNAL_SECRET = process.env.INTERNAL_SERVICE_SECRET || 'baalvion-internal-dev-secret';
+// Inter-service secret: this module presents x-internal-secret to the CMS to retrieve
+// DECRYPTED PSP keys, so a default/unset secret in a deployed env would let anyone who knows
+// the committed literal impersonate proxy-service and pull live merchant credentials.
+// Centralized resolution fails fast at boot for any deployed NODE_ENV. See service/internalSecret.js.
+const { SECRET: INTERNAL_SECRET } = require('./internalSecret');
 const SITE_SLUG = process.env.PAYMENT_SITE_SLUG || 'proxy-baalvionstack';
 const CACHE_TTL_MS = 60_000;
 

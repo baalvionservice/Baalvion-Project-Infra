@@ -215,6 +215,11 @@ const serviceClients = {
   // vendors, affiliates, appointments). Mounts at /api/v1; all reads/mutations require a
   // staff bearer (forwarded by attachToken). Brand defaults to `amarise-luxe` server-side.
   crm: makeServiceClient('crm', 3063),
+  // news-service is Baalvion Intelligence's ingestion + News API (Backend/services/knowledge/news-service).
+  // The public `/v1/news` API is API-key gated (external developer consumers); admin-platform instead
+  // uses the internal `/v1/admin/*` surface, RS256-verified like every other service here (requireRole
+  // admin/super_admin), forwarded by the shared attachToken interceptor.
+  news: makeServiceClient('news', 3045, '/v1/admin'),
 };
 
 Object.values(serviceClients).forEach((client) => {

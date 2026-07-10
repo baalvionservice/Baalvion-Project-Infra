@@ -95,7 +95,7 @@ app:
   audit:
     # Topic pattern the aggregator subscribes to ({domain}.{entity}.{event}).
     # Lowercase-only tail excludes uppercase `.DLT` topics (handled by the DLT monitor).
-    topic-pattern: (payments|ledger|settlement|escrow|account)\.[a-z.]+
+    topic-pattern: (payments|ledger|settlement|escrow|account|credit)\.[a-z.]+
     # Search backend: "postgres" (JSONB+GIN, default) or "elasticsearch"
     # (also set spring.elasticsearch.uris when enabling ES).
     search: ${AUDIT_SEARCH:postgres}

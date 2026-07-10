@@ -162,9 +162,42 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Mobile performance optimizations — serve modern formats + right-sized
+    // variants instead of one oversized source image to every device.
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
     // Every SVG served through next/image here is our own deterministically generated
     // artwork (@baalvion/illustrations) — never user-uploaded — so it's safe to allow.
     dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+  },
+  experimental: {
+    optimizePackageImports: ['@/components', '@/lib'],
+  },
+  compress: true,
+  poweredByHeader: false,
+  webpack: (config, { dev, isServer }) => {
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            priority: -10,
+            chunks: 'all',
+          },
+        },
+      };
+    }
+    return config;
   },
 };
 

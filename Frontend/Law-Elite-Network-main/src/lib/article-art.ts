@@ -1,11 +1,13 @@
-import { existsSync } from 'fs';
-import { join } from 'path';
 import { articleArtDataUri, personSilhouetteDataUri } from '@baalvion/illustrations';
+import { getAllArticles } from '@/data/law-content';
 
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 // `pnpm run generate:article-art` (wired into `build`) writes one PNG per bundled
-// article here, keyed by slug — see scripts/generate-article-art.ts.
-const ARTICLE_ART_DIR = join(process.cwd(), 'public', 'article-art');
+// article — see scripts/generate-article-art.ts. It iterates getAllArticles()
+// unconditionally, so that same slug set (not a filesystem check, which would
+// pull Node's `fs` into the client bundle of every caller) tells us which
+// slugs have a generated PNG.
+const BUNDLED_ARTICLE_SLUGS = new Set(getAllArticles().map((a) => a.slug));
 
 /**
  * Resolves an article's real featured image (from the CMS, law-service, or bundled
@@ -28,7 +30,7 @@ export function resolveArticleImage(article: {
   const real = article?.featuredImage || article?.cover_image || article?.image_url;
   if (real) return real;
 
-  if (article?.slug && existsSync(join(ARTICLE_ART_DIR, `${article.slug}.png`))) {
+  if (article?.slug && BUNDLED_ARTICLE_SLUGS.has(article.slug)) {
     return `${SITE}/article-art/${article.slug}.png`;
   }
 

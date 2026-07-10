@@ -33,15 +33,23 @@ const SITE_SLUG = process.env.NEXT_PUBLIC_CMS_SITE_SLUG || 'imperialpedia';
 // broken AdSense tag.
 const ADSENSE_RE = /^ca-pub-\d{10,20}$/;
 
+// AdSense application in progress (Google Search Console verification) for this
+// property. Publisher IDs are not secrets — Google's own onboarding instructs
+// pasting this exact value directly into every page's HTML — so a code-level
+// default is safe. The CMS admin panel (Website → SEO → Monetization) or
+// NEXT_PUBLIC_ADSENSE_CLIENT still take priority and can replace it without a
+// redeploy once the site is managed there.
+const DEFAULT_ADSENSE_CLIENT = 'ca-pub-8968452296456450';
+
 /**
  * Per-site AdSense publisher ID, managed in the CMS admin panel
  * (Website → SEO → Monetization) and exposed on the public website-info endpoint
  * `GET {CMS_PUBLIC_URL}/{site}` as `config.ads.adsensePublisherId`.
  *
- * Falls back to the NEXT_PUBLIC_ADSENSE_CLIENT env var when the CMS is unreachable
- * or hasn't been configured yet. Returns null when no valid ID is available, so
- * callers render no ad markup at all. Cached for an hour (revalidate) rather than
- * `no-store` so it doesn't opt the whole site into dynamic rendering.
+ * Falls back to NEXT_PUBLIC_ADSENSE_CLIENT, then DEFAULT_ADSENSE_CLIENT, when
+ * the CMS is unreachable or hasn't been configured yet. Cached for an hour
+ * (revalidate) rather than `no-store` so it doesn't opt the whole site into
+ * dynamic rendering.
  */
 export async function getSiteAdsenseClient(): Promise<string | null> {
   const envFallback = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
@@ -58,7 +66,8 @@ export async function getSiteAdsenseClient(): Promise<string | null> {
   } catch {
     // CMS unreachable — fall through to env fallback below.
   }
-  return envFallback && ADSENSE_RE.test(envFallback) ? envFallback : null;
+  if (envFallback && ADSENSE_RE.test(envFallback)) return envFallback;
+  return DEFAULT_ADSENSE_CLIENT;
 }
 
 // ── cms-service wire shapes ─────────────────────────────────────────────────
@@ -256,6 +265,7 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     category: raw.category?.name ?? 'General',
     tags: raw.tagIds ?? [],
     status: 'published' as ArticleStatus,
+    contentType: raw.contentType,
     readingTime: Math.max(1, Math.round(words / 200)),
     // The CMS never falls back to stock/placeholder imagery — cms-service generates
     // real original artwork on create/update (@baalvion/illustrations); this inline
