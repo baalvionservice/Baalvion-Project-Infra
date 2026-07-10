@@ -40,6 +40,9 @@ interface DataTableProps<TData> {
   onPageChange?: (page: number) => void;
   selectable?: boolean;
   onSelectionChange?: (rows: TData[]) => void;
+  /** Controlled search value/handler — see DataTableToolbar for the server-search contract. */
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export default function DataTable<TData>({
@@ -56,6 +59,8 @@ export default function DataTable<TData>({
   onPageChange,
   selectable = false,
   onSelectionChange,
+  searchValue,
+  onSearchChange,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -98,6 +103,8 @@ export default function DataTable<TData>({
         searchPlaceholder={searchPlaceholder}
         filters={filters}
         toolbar={toolbar}
+        searchValue={searchValue}
+        onSearchChange={onSearchChange}
       />
       <div className="rounded-md border bg-background">
         <Table>

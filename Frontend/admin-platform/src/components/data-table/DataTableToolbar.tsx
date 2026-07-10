@@ -11,6 +11,14 @@ interface Props<T> {
   searchPlaceholder?: string;
   filters?: React.ReactNode;
   toolbar?: React.ReactNode;
+  /**
+   * When provided, the search box is controlled by the caller (e.g. to drive a
+   * server-side query) instead of filtering the currently loaded page client-side.
+   * Required together — a value with no handler (or vice versa) falls back to the
+   * default client-side column filter.
+   */
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export default function DataTableToolbar<T>({
@@ -19,8 +27,16 @@ export default function DataTableToolbar<T>({
   searchPlaceholder = 'Search...',
   filters,
   toolbar,
+  searchValue,
+  onSearchChange,
 }: Props<T>) {
-  const isFiltered = table.getState().columnFilters.length > 0;
+  const isServerSearch = onSearchChange !== undefined;
+  const isFiltered = table.getState().columnFilters.length > 0 || (isServerSearch && !!searchValue);
+
+  const handleClear = () => {
+    table.resetColumnFilters();
+    onSearchChange?.('');
+  };
 
   return (
     <div className="flex items-center justify-between gap-2">
@@ -28,8 +44,16 @@ export default function DataTableToolbar<T>({
         {searchColumn && (
           <Input
             placeholder={searchPlaceholder}
-            value={(table.getColumn(searchColumn)?.getFilterValue() as string) ?? ''}
-            onChange={(e) => table.getColumn(searchColumn)?.setFilterValue(e.target.value)}
+            value={
+              isServerSearch
+                ? (searchValue ?? '')
+                : ((table.getColumn(searchColumn)?.getFilterValue() as string) ?? '')
+            }
+            onChange={(e) =>
+              isServerSearch
+                ? onSearchChange(e.target.value)
+                : table.getColumn(searchColumn)?.setFilterValue(e.target.value)
+            }
             className="h-8 w-[200px] lg:w-[280px]"
           />
         )}
@@ -38,7 +62,7 @@ export default function DataTableToolbar<T>({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => table.resetColumnFilters()}
+            onClick={handleClear}
             className="h-8 px-2 text-xs"
           >
             Clear

@@ -8,6 +8,7 @@ const { slugify } = require('../utils/slugify');
 const { parsePagination, buildPaginated } = require('../utils/pagination');
 const identityService = require('./identityService');
 const { emitSafe, CmsEvents } = require('../platform/events');
+const db = require('../models');
 
 /**
  * Resolve a caller "scope" into the org filter for a website query.
@@ -40,6 +41,32 @@ async function enrichMembers(members) {
     });
 }
 
+// Real per-website content/member counts for the websites list (replaces the prior
+// always-0 placeholder — see getStats below for the single-website equivalent).
+async function attachCounts(rows) {
+    const websiteIds = rows.map((w) => w.id);
+    if (websiteIds.length === 0) return rows.map((w) => ({ ...w.toJSON(), contentCount: 0, memberCount: 0 }));
+
+    const [contentRows, memberRows] = await Promise.all([
+        db.sequelize.query(
+            'SELECT website_id AS "websiteId", COUNT(*)::int AS count FROM cms.cms_contents WHERE website_id = ANY(:ids) GROUP BY website_id',
+            { replacements: { ids: websiteIds }, type: db.Sequelize.QueryTypes.SELECT },
+        ),
+        db.sequelize.query(
+            'SELECT website_id AS "websiteId", COUNT(*)::int AS count FROM cms.cms_website_members WHERE website_id = ANY(:ids) GROUP BY website_id',
+            { replacements: { ids: websiteIds }, type: db.Sequelize.QueryTypes.SELECT },
+        ),
+    ]);
+    const contentCountMap = new Map(contentRows.map((r) => [r.websiteId, r.count]));
+    const memberCountMap = new Map(memberRows.map((r) => [r.websiteId, r.count]));
+
+    return rows.map((w) => ({
+        ...w.toJSON(),
+        contentCount: contentCountMap.get(w.id) ?? 0,
+        memberCount: memberCountMap.get(w.id) ?? 0,
+    }));
+}
+
 async function listWebsites(scope, query = {}) {
     const { page, limit, offset } = parsePagination(query);
     const { status, search } = query;
@@ -51,7 +78,8 @@ async function listWebsites(scope, query = {}) {
         where, limit, offset,
         order: [['createdAt', 'DESC']],
     });
-    return buildPaginated(rows, count, { page, limit });
+    const enriched = await attachCounts(rows);
+    return buildPaginated(enriched, count, { page, limit });
 }
 
 async function getWebsite(websiteId, scope) {
@@ -208,7 +236,6 @@ async function searchUsers(websiteId, scope, q) {
 }
 
 // Real per-website content/media counts for the dashboard (replaces the prior 404).
-const db = require('../models');
 async function getStats(websiteId) {
     const C = db.CmsContent;
     const [totalContent, publishedContent, draftContent, scheduledContent, pendingReview] = await Promise.all([

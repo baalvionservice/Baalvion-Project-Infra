@@ -109,9 +109,6 @@ export default function WebsiteCard({ website, onDelete, onSelect }: Props) {
           >
             {website.status}
           </Badge>
-          <Badge variant="secondary" className="text-xs capitalize">
-            {website.plan}
-          </Badge>
         </div>
 
         <div className="mt-3 flex items-center gap-4 text-xs text-muted-foreground">

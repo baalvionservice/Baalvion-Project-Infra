@@ -38,6 +38,7 @@ import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useWebsiteCategories } from '@/lib/queries/cms-taxonomy.queries';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
+import { useDebounce } from '@/lib/hooks/useDebounce';
 import { formatDate } from '@/lib/utils/format';
 import type { ContentItem, ContentItemType, ContentWorkflowStatus } from '@/lib/types/cms-content.types';
 
@@ -52,6 +53,8 @@ export default function WebsiteContentPage({
   const setActiveWebsiteId = useCmsStore((s) => s.setActiveWebsiteId);
   useEffect(() => { setActiveWebsiteId(websiteId); }, [websiteId, setActiveWebsiteId]);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState('');
+  const debouncedSearch = useDebounce(search, 400);
   const [typeFilter, setTypeFilter] = useState<ContentItemType | ''>('');
   const [statusFilter, setStatusFilter] = useState<ContentWorkflowStatus | ''>('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
@@ -64,14 +67,19 @@ export default function WebsiteContentPage({
 
   const { data: website } = useWebsite(websiteId);
   const { data: categories } = useWebsiteCategories(websiteId);
-  const { data, isLoading, refetch } = useContentList({
+  const { data, isLoading, isError, refetch } = useContentList({
     websiteId,
     page,
     limit: 20,
+    search: debouncedSearch || undefined,
     type: typeFilter || undefined,
     status: statusFilter || undefined,
     categoryId: categoryFilter || undefined,
   });
+
+  // Reset to page 1 whenever the effective search term changes, otherwise a
+  // narrower result set can leave the user stranded on a page past the new total.
+  useEffect(() => { setPage(1); }, [debouncedSearch]);
   const { mutate: create, isPending: isCreating } = useCreateContent();
   const { mutate: remove } = useDeleteContent();
   const { mutate: duplicate } = useDuplicateContent();
@@ -255,7 +263,13 @@ export default function WebsiteContentPage({
         </Button>
         <PageHeader
           title="Content"
-          description={`${data?.pagination.total ?? 0} items`}
+          description={
+            isError
+              ? 'Failed to load content — check your connection and try again.'
+              : isLoading
+                ? 'Loading…'
+                : `${data?.pagination.total ?? 0} items`
+          }
           actions={
             <div className="flex gap-2">
               <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
@@ -303,12 +317,23 @@ export default function WebsiteContentPage({
         </div>
       )}
 
+      {isError && (
+        <div className="flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
+          <span>Couldn&apos;t load content for this website.</span>
+          <Button size="sm" variant="outline" onClick={() => refetch()}>
+            Retry
+          </Button>
+        </div>
+      )}
+
       <DataTable
         columns={columns}
         data={data?.data ?? []}
         isLoading={isLoading}
         searchColumn="title"
         searchPlaceholder="Search content..."
+        searchValue={search}
+        onSearchChange={setSearch}
         totalCount={data?.pagination.total}
         page={page}
         onPageChange={setPage}
