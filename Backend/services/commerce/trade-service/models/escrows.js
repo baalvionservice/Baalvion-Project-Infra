@@ -16,6 +16,13 @@ module.exports = (sequelize, DataTypes) => {
         released_at: { type: DataTypes.DATE },
         release_conditions: { type: DataTypes.JSONB, defaultValue: {} },
         mandate_hash: { type: DataTypes.TEXT },
+        // Migration 043 — correlation keys for the escrow.hold.* webhook projection.
+        // escrow_ref is assigned by the caller (unique per tenant on the Java side,
+        // e.g. `ESCROW-ORDER-{orderId}`) and is the primary match key since it is
+        // known before the Java escrow is created; java_escrow_id backfills once the
+        // escrow.hold.created event confirms the Java-side id.
+        escrow_ref: { type: DataTypes.TEXT },
+        java_escrow_id: { type: DataTypes.UUID },
     }, {
         schema: 'trade',
         tableName: 'escrows',

@@ -30,6 +30,8 @@ export interface InvoiceFinancing {
   finance_id: string;
   companyId: string;
   invoiceId: string;
+  /** GTI order/deal correlation key this financing request is tied to, if any. */
+  orderRef?: string;
   amount: number;
   status: 'PENDING' | 'APPROVED' | 'FUNDED' | 'REPAID';
   financierId: string;
@@ -80,6 +82,7 @@ function toInvoice(inv: ApiInvoice): InvoiceFinancing {
     finance_id: inv.reference,
     companyId: inv.sellerName,
     invoiceId: inv.invoiceNumber,
+    orderRef: inv.orderRef,
     amount: num(inv.faceAmount),
     status: mapInvoiceStatus(inv.status),
     financierId: '',
@@ -149,17 +152,19 @@ export const tradeFinanceService = {
 
   /**
    * Submits a receivable for financing (credit-service). Risk is assessed server-side; the
-   * response carries the approved advance, fee and reserve.
+   * response carries the approved advance, fee and reserve. `orderRef` links the financing
+   * request back to the real GTI order/deal it was raised against, when known.
    */
-  async requestInvoiceFinancing(data: Partial<InvoiceFinancing>): Promise<InvoiceFinancing> {
+  async requestInvoiceFinancing(data: Partial<InvoiceFinancing> & { debtorName?: string; dueDate?: string }): Promise<InvoiceFinancing> {
     logger.info('FinanceService', `INVOICE_FINANCING_REQUEST: ${data.companyId}`);
     const inv = await credit.submitInvoice({
       invoiceNumber: data.invoiceId || `INV-${Date.now()}`,
+      orderRef: data.orderRef,
       sellerName: data.companyId || 'Seller',
-      debtorName: 'Debtor',
+      debtorName: data.debtorName || 'Debtor',
       faceAmount: num(data.amount),
       currency: 'USD',
-      dueDate: new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10),
+      dueDate: data.dueDate || new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10),
     });
     return toInvoice(inv);
   },

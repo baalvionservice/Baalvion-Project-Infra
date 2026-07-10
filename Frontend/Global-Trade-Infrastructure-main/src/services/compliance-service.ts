@@ -27,7 +27,14 @@ export const complianceService = {
   /**
    * Submits institutional documentation and initializes a governance approval request.
    */
-  async submitKYC(data: { companyId: string; documentType: string; fileName: string }): Promise<void> {
+  async submitKYC(data: {
+    companyId: string;
+    documentType: string;
+    fileName: string;
+    representative?: { fullName: string; dateOfBirth: string; nationality: string; officialEmail: string };
+    company?: { registrationNumber: string; incorporationDate: string; hqAddress: string; taxResidency: string };
+    documentIds?: { governmentId: string | null; businessLicense: string | null };
+  }): Promise<void> {
     logger.info('ComplianceService', `Initializing KYC audit for ${data.companyId}`);
 
     // 1. Record the verification attempt
@@ -87,13 +94,22 @@ export async function getKYCStatus() {
   return res.data?.verificationStatus || 'not_started';
 }
 
-export async function submitKYC(payload: any) {
+export interface KYCSubmission {
+  representative: { fullName: string; dateOfBirth: string; nationality: string; officialEmail: string };
+  company: { registrationNumber: string; incorporationDate: string; hqAddress: string; taxResidency: string };
+  documentIds: { governmentId: string | null; businessLicense: string | null };
+}
+
+export async function submitKYC(payload: KYCSubmission) {
   // KYC mutates the org record — must target the authenticated org, never a fixed demo tenant.
   const companyId = await requireSessionOrgId();
   return complianceService.submitKYC({
     companyId,
-    documentType: payload.type || 'Identity Proof',
-    fileName: payload.fileName || 'institutional_identity.pdf'
+    documentType: 'government_id',
+    fileName: payload.documentIds.governmentId || 'unknown',
+    representative: payload.representative,
+    company: payload.company,
+    documentIds: payload.documentIds,
   });
 }
 

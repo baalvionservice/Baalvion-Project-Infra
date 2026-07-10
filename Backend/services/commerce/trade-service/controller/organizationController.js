@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const { getOrCreateLedgerAccount } = require('../lib/accountProvisioning');
 
 // Resolve an org by integer PK or by external code ('COMP-101').
 const resolveOrg = (idOrCode) =>
@@ -111,4 +112,25 @@ const updateKyc = async (req, res, next) => {
     }
 };
 
-module.exports = { listOrgs, getOrg, createOrg, updateOrg, deleteOrg, updateKyc };
+// Resolves (lazily provisioning on first call) the org's account-service ledger account UUID.
+// The frontend calls this before constructing an escrow/ledger request, since those need real
+// account ids, not org ids (see lib/accountProvisioning.js).
+const getLedgerAccount = async (req, res, next) => {
+    try {
+        const org = await resolveOrg(req.params.id);
+        if (!org) return next(new AppError('NOT_FOUND', 'Organization not found', 404));
+        if (!ownsOrg(req, org)) {
+            return next(new AppError('FORBIDDEN', 'Organization belongs to another tenant', 403));
+        }
+        const ctx = {
+            tenantId: req.auth && req.auth.tenantId,
+            bearer: (req.headers.authorization || '').split(' ')[1] || undefined,
+        };
+        const ledgerAccountId = await getOrCreateLedgerAccount(org, ctx);
+        return sendSuccess(req, res, { orgId: org.id, ledgerAccountId });
+    } catch (err) {
+        return next(err);
+    }
+};
+
+module.exports = { listOrgs, getOrg, createOrg, updateOrg, deleteOrg, updateKyc, getLedgerAccount };

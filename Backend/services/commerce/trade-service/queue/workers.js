@@ -99,6 +99,56 @@ const PROCESSORS = {
     // a repeatable job below (every 6h); also triggerable on demand via
     // POST /v1/monitoring/run for the same underlying cycle.
     verification_monitor: async () => require('../service/verification/monitor').runCycle(),
+
+    // Logistics Core Foundation (Phase 2) — async/bulk tracking-event ingestion.
+    // Same recordTrackingEvent() logic the synchronous POST /tracking_events uses
+    // (service/tracking/trackingEngine.js); a thrown error here retries via BullMQ
+    // and eventually dead-letters, same as every other processor in this file.
+    tracking_sync: async (job) => require('../service/tracking/trackingEngine').recordTrackingEvent(job.data),
+
+    // Freight Management (Phase 3, Prompt 2) — periodic carrier performance
+    // aggregate (on-time %, ETA accuracy, cancellation rate) from freight_bookings,
+    // denormalized onto carriers.performance_score. Registered as a repeatable job
+    // below (daily), same pattern as verification_monitor.
+    freight_carrier_performance_refresh: async (job) => require('../service/freight/carrierPerformance').runCycle(job.data || {}),
+
+    // Shipment Tracking & Global Visibility Platform (Phase 3, Prompt 6) —
+    // async/bulk IoT sensor-reading ingestion, same ingestReading() logic the
+    // synchronous POST /iot_devices/:id/readings uses.
+    iot_ingest: async (job) => require('../service/tracking-platform/iotIngestEngine').ingestReading(job.data),
+
+    // Periodic live ETA re-prediction across active shipments. Registered as a
+    // repeatable job below (hourly) — ETA-relevant signals (carrier on-time
+    // rate, open delays, weather/traffic) drift on the order of hours, not
+    // minutes, matching the cadence choice already made for
+    // freight_carrier_performance_refresh.
+    eta_predict: async (job) => {
+        const etaEngine = require('../service/tracking-platform/etaPredictionEngine');
+        if (job.data && job.data.shipmentId) return etaEngine.predictEta(job.data.shipmentId);
+        const db = require('../models');
+        const { Op } = require('sequelize');
+        const { ACTIVE_STATUSES } = require('../service/tracking-platform/delayDetectionEngine');
+        const shipments = await db.TradeShipment.findAll({ where: { status: { [Op.in]: ACTIVE_STATUSES } }, limit: 500 });
+        let computed = 0;
+        for (const s of shipments) { await etaEngine.predictEta(s.id); computed += 1; }
+        return { computed };
+    },
+
+    // Periodic delay-cause detection sweep across active TradeShipments — same
+    // sweepDelays() logic the synchronous POST /delay_events/sweep uses.
+    delay_sweep: async () => require('../service/tracking-platform/delayDetectionEngine').sweepDelays(),
+
+    // Async retry of a failed alert-channel notification (queued by
+    // notificationDispatcher when a live channel call throws).
+    notification_dispatch: async (job) => {
+        const db = require('../models');
+        const notificationChannels = require('../providers/notificationChannels');
+        const row = await db.ShipmentNotification.findByPk(job.data.notificationId);
+        if (!row) return null;
+        await notificationChannels.send(row.channel, { message: (row.payload || {}).message });
+        await row.update({ status: 'sent', sent_at: new Date() });
+        return row;
+    },
 };
 
 const workers = [];
@@ -131,6 +181,20 @@ function startWorkers() {
     // is needed.
     enqueue('verification_monitor', 'cycle', {}, { repeat: { every: 6 * 60 * 60 * 1000 }, jobId: 'verification-monitor-cycle' })
         .catch((err) => console.error('[queue] failed to register verification_monitor repeatable job:', err.message));
+
+    // Freight carrier performance: on-time/cancellation/ETA drift over a rolling
+    // 30-day window changes on the order of days, not hours — daily is sufficient
+    // and matches the cost/latency tradeoff verification_monitor already made.
+    enqueue('freight_carrier_performance_refresh', 'cycle', {}, { repeat: { every: 24 * 60 * 60 * 1000 }, jobId: 'freight-carrier-performance-cycle' })
+        .catch((err) => console.error('[queue] failed to register freight_carrier_performance_refresh repeatable job:', err.message));
+
+    // Shipment Tracking Platform: hourly ETA re-prediction + delay sweep across
+    // active shipments — frequent enough to catch a developing delay same-day,
+    // without re-scoring every shipment on every tracking ping.
+    enqueue('eta_predict', 'sweep', {}, { repeat: { every: 60 * 60 * 1000 }, jobId: 'eta-predict-sweep' })
+        .catch((err) => console.error('[queue] failed to register eta_predict repeatable job:', err.message));
+    enqueue('delay_sweep', 'sweep', {}, { repeat: { every: 60 * 60 * 1000 }, jobId: 'delay-sweep-cycle' })
+        .catch((err) => console.error('[queue] failed to register delay_sweep repeatable job:', err.message));
 
     return workers;
 }
