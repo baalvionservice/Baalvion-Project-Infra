@@ -49,11 +49,11 @@ async function attachCounts(rows) {
 
     const [contentRows, memberRows] = await Promise.all([
         db.sequelize.query(
-            'SELECT website_id AS "websiteId", COUNT(*)::int AS count FROM cms.cms_contents WHERE website_id = ANY(:ids) GROUP BY website_id',
+            'SELECT website_id AS "websiteId", COUNT(*)::int AS count FROM cms.cms_contents WHERE website_id IN (:ids) GROUP BY website_id',
             { replacements: { ids: websiteIds }, type: db.Sequelize.QueryTypes.SELECT },
         ),
         db.sequelize.query(
-            'SELECT website_id AS "websiteId", COUNT(*)::int AS count FROM cms.cms_website_members WHERE website_id = ANY(:ids) GROUP BY website_id',
+            'SELECT website_id AS "websiteId", COUNT(*)::int AS count FROM cms.cms_website_members WHERE website_id IN (:ids) GROUP BY website_id',
             { replacements: { ids: websiteIds }, type: db.Sequelize.QueryTypes.SELECT },
         ),
     ]);
