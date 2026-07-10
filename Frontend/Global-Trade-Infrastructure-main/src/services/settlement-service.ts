@@ -1,87 +1,34 @@
 /**
  * @file settlement-service.ts
- * @description High-fidelity settlement engine. 
- * Orchestrates the final release of funds from Escrow to Seller wallets.
+ * @description Settlement engine for a single deal's escrow release.
+ *
+ * The real financial-services-java SettlementController (/api/v1/settlement) is a bulk batch/
+ * bank-file API (createBatch -> generate -> submit) for scheduled ACH/wire disbursement runs —
+ * a different concern from releasing one deal's escrow. For a single order, "getting paid" IS
+ * the escrow release: escrow-service fires `escrow.hold.released` on Kafka, which the real
+ * ledger-service consumer posts as the actual credit to the beneficiary account. There is no
+ * separate client-side settlement step to orchestrate — the batch API is a treasury/ops-console
+ * concern for a later phase, not part of the per-deal buyer/seller flow.
  */
-import { apiClient } from '@/lib/api-client';
-import { toList } from '@/lib/api-list';
-import { recordTransaction } from './ledger-service';
-import { workflowEngine } from '@/orchestration/workflow-engine';
+import { releaseEscrow } from './escrow-service';
 import { logger, metricsService } from './observability-service';
-import { USER_ROLES } from '@/core/roles';
 
 export type SettlementStatus = 'pending' | 'processing' | 'settled' | 'failed';
 
-export interface Settlement {
-  id: string;
-  escrowId: string;
-  sellerId: string;
-  amount: number;
-  currency: string;
-  status: SettlementStatus;
-  settledAt?: string;
-}
-
 /**
- * Triggers the settlement release process via the Execution Kernel.
+ * Releases the deal's escrow, which triggers the real (server-side, async) credit to the
+ * seller's ledger account. Returns true once the release call to escrow-service succeeds;
+ * false on any failure (invalid state, network, etc.) so the caller can surface an error
+ * without the operation half-completing.
  */
 export async function triggerSettlement(escrowId: string, actorId: string): Promise<boolean> {
-  logger.info('Settlement_Engine', `INITIATING_RELEASE: Escrow ${escrowId}`);
-
-  const escrowRes = await apiClient.getDoc<any>('/escrows', escrowId);
-  const escrow = escrowRes.data;
-
-  if (!escrow) throw new Error('Escrow mandate not found.');
-
-  // 1. Transition to RELEASED via Kernel (Triggers GST Matrix check)
-  const released = await workflowEngine.transition({
-    domain: 'SETTLEMENT',
-    entityId: escrowId,
-    from: escrow.status,
-    to: 'RELEASED',
-    actorId,
-    actorRole: USER_ROLES.BANK_ADMIN, // Only Banks can release
-    requestId: `REL-${escrowId}-${Date.now()}`,
-    expectedVersion: escrow.version
-  } as any);
-
-  if (!released) return false;
-
+  logger.info('Settlement_Engine', `INITIATING_RELEASE: Escrow ${escrowId} by ${actorId}`);
   try {
-    // 2. Execute Ledger Handshake (Credit Seller)
-    await recordTransaction({
-      companyId: escrow.sellerId,
-      type: 'credit',
-      amount: escrow.amount,
-      currency: escrow.currency,
-      referenceType: 'order',
-      referenceId: escrow.orderId,
-      description: `Settlement Release: Verified delivery for Order ${escrow.orderId}`
-    });
-
-    // 3. Auto-Advance to SETTLED (Terminal State)
-    await workflowEngine.transition({
-      domain: 'SETTLEMENT',
-      entityId: escrowId,
-      from: 'RELEASED',
-      to: 'SETTLED',
-      actorId: 'SYSTEM_TREASURY',
-      actorRole: USER_ROLES.SUPER_ADMIN,
-      payload: { settledAt: new Date().toISOString() }
-    });
-
+    const escrow = await releaseEscrow(escrowId);
     metricsService.recordMetric('capital_release_finalized', escrow.amount);
     return true;
-
   } catch (error: any) {
-    logger.error('Settlement_Engine', `FINALIZE_FAILURE: ${error.message}`);
-    // In production, this triggers the Compensation Engine
+    logger.error('Settlement_Engine', `RELEASE_FAILURE: ${error.message}`);
     return false;
   }
-}
-
-export async function getSettlements(companyId?: string): Promise<Settlement[]> {
-  const params = companyId ? { sellerId: companyId } : {};
-  const res = await apiClient.get<Settlement[]>('/settlements', params);
-  return toList(res);
 }

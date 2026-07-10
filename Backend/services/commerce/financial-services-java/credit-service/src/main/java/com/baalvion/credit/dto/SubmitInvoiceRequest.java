@@ -19,6 +19,9 @@ public class SubmitInvoiceRequest {
   @NotBlank
   private String invoiceNumber;
 
+  /** GTI order/deal correlation key so this financing can be traced back to a real trade. */
+  private String orderRef;
+
   private UUID sellerId;
 
   @NotBlank

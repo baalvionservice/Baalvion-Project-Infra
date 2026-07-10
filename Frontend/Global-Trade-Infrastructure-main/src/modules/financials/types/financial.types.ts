@@ -3,8 +3,6 @@
  * @description Authoritative data contracts for Institutional Financial Operations, Liquidity, and Trade Finance.
  */
 
-export type SettlementStatus = 'PENDING' | 'LOCKED' | 'RELEASED' | 'DISPUTED' | 'REFUNDED' | 'FINALIZED' | 'SETTLED';
-
 export type CurrencyCode = 'USD' | 'EUR' | 'SGD' | 'INR' | 'CNY' | 'GBP' | 'JPY' | 'AED';
 
 export type InstrumentType = 'LETTER_OF_CREDIT' | 'INVOICE_FINANCE' | 'PO_FINANCE' | 'TRADE_CREDIT' | 'FACTORING';
@@ -18,20 +16,6 @@ export interface WalletNode {
   jurisdiction: string;
   lastSync: string;
   trustScore: number;
-}
-
-export interface EscrowMandate {
-  id: string;
-  orderId: string;
-  buyerId: string;
-  sellerId: string;
-  amount: number;
-  currency: CurrencyCode;
-  status: SettlementStatus;
-  releaseCondition: 'MILESTONE_VERIFIED' | 'ARBITRATION_ORDER' | 'MANUAL_OVERRIDE';
-  complianceSignature: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface TradeFinanceInstrument {
