@@ -73,6 +73,10 @@ const STRATEGY = Object.freeze({
     CHEAPEST: 'cheapest',  // minimize total_cost
     FASTEST: 'fastest',    // minimize total_transit_days
     BALANCED: 'balanced',  // composite of cost + speed + reliability (the recommended pick)
+    // Freight Management (Phase 3, Prompt 2): minimize co2_kg. CO2 was already
+    // computed per leg/route (EMISSION_FACTORS below) but was informational-only
+    // until this strategy made it a first-class selectable ranking.
+    GREEN: 'green',
 });
 const VALID_STRATEGIES = Object.freeze(Object.values(STRATEGY));
 
@@ -228,6 +232,7 @@ function optimizationResult(out = {}) {
         cheapest: out.cheapest || null,
         fastest: out.fastest || null,
         balanced: out.balanced || null,
+        green: out.green || null,
         recommended: out.recommended || null,
         errors: Object.freeze(Array.isArray(out.errors) ? out.errors : []),
         warnings: Object.freeze(Array.isArray(out.warnings) ? out.warnings : []),

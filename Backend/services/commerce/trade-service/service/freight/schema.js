@@ -75,10 +75,18 @@ const VALID_CARRIERS = Object.freeze(Object.values(CARRIER));
 
 // ── Transport modes. ─────────────────────────────────────────────────────────
 const MODE = Object.freeze({
-    EXPRESS: 'express', // time-definite door-to-door parcel/express
+    EXPRESS: 'express', // time-definite door-to-door parcel/express (courier)
     AIR: 'air',         // air freight
     OCEAN: 'ocean',     // sea / container freight
-    ROAD: 'road',       // ground / road haulage
+    ROAD: 'road',       // ground / road haulage (truck)
+    // Freight Management (Phase 3, Prompt 2): RAIL/MULTIMODAL are quote-flow-only —
+    // no coded connector (dhl/fedex/ups/maersk) serves either, so only a
+    // dynamically registered Carrier Directory entry (genericConnector.js) with
+    // these in its `modes` can be quoted for them. NOT added to freight_bookings'
+    // mode CHECK constraint (migration 016) — booking commitment for these two
+    // modes is Phase 2 (booking-engine deepening), same as the rest of that gap.
+    RAIL: 'rail',
+    MULTIMODAL: 'multimodal',
 });
 
 const VALID_MODES = Object.freeze(Object.values(MODE));
@@ -219,7 +227,13 @@ function normalizedQuote(q = {}) {
         raw = {},
     } = q;
 
-    if (!VALID_CARRIERS.includes(carrier)) {
+    // Freight Management (Phase 3, Prompt 2): carrier is validated as a non-empty
+    // identifier rather than the fixed VALID_CARRIERS whitelist, so a dynamically
+    // registered carrier (tradeops.carriers, quoted via genericConnector.js) can
+    // still produce a normalized quote — "any carrier dynamically", per the Carrier
+    // Directory's design goal. VALID_CARRIERS remains the allowlist for which
+    // carriers have a bespoke CODED connector (dhl/fedex/ups/maersk).
+    if (!carrier || typeof carrier !== 'string') {
         throw new Error(`normalizedQuote(): unknown carrier '${carrier}'`);
     }
     if (!VALID_MODES.includes(mode)) {
@@ -266,7 +280,10 @@ function normalizedBooking(b = {}) {
         raw = {},
     } = b;
 
-    if (!VALID_CARRIERS.includes(carrier)) {
+    // See the matching comment in normalizedQuote() above — a dynamic carrier
+    // (genericConnector.js) is validated as a non-empty identifier, not the fixed
+    // VALID_CARRIERS whitelist.
+    if (!carrier || typeof carrier !== 'string') {
         throw new Error(`normalizedBooking(): unknown carrier '${carrier}'`);
     }
     if (!Object.values(STATUS).includes(status)) {

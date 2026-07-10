@@ -20,32 +20,50 @@ const CMS_BASE = process.env.CMS_PUBLIC_URL?.trim()
 const SITE = process.env.CMS_WEBSITE_SLUG || 'law-elite-network';
 const BASE = `${CMS_BASE}/${SITE}`;
 
+// Hard cap on every CMS fetch so a slow/hung CMS degrades to the caller's
+// fallback instead of hanging the page — this module backs the root layout
+// (every page on the site), so an unguarded fetch here blocks the whole site.
+const FETCH_TIMEOUT_MS = 4000;
+
 // Validates Google's publisher-ID shape ("ca-pub-" + 10–20 digits). Anything else
 // is treated as "no ad client" so we never emit a broken AdSense tag.
 const ADSENSE_RE = /^ca-pub-\d{10,20}$/;
+
+// AdSense application in progress (Google Search Console verification) for this
+// property. Publisher IDs are not secrets — Google's own onboarding instructs
+// pasting this exact value directly into every page's HTML — so a code-level
+// default is safe. The CMS admin panel (Website → SEO → Monetization) or
+// NEXT_PUBLIC_ADSENSE_CLIENT still take priority and can replace it without a
+// redeploy once the site is managed there.
+const DEFAULT_ADSENSE_CLIENT = 'ca-pub-8968452296456450';
 
 /**
  * Per-site AdSense publisher ID, managed in the CMS admin panel
  * (Website → SEO → Monetization) and exposed on the public website-info endpoint
  * `GET {CMS_PUBLIC_URL}/{site}` as `config.ads.adsensePublisherId`.
  *
- * Falls back to NEXT_PUBLIC_ADSENSE_CLIENT when the CMS is unreachable or unset.
- * Returns null when no valid ID is available (callers then render no ad markup).
- * Cached for an hour rather than `no-store` so it doesn't force dynamic rendering.
+ * Falls back to NEXT_PUBLIC_ADSENSE_CLIENT, then DEFAULT_ADSENSE_CLIENT, when
+ * the CMS is unreachable or unset. Cached for an hour rather than `no-store` so
+ * it doesn't force dynamic rendering.
  */
 export async function cmsGetAdsenseClient(): Promise<string | null> {
   const envFallback = process.env.NEXT_PUBLIC_ADSENSE_CLIENT?.trim();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const r = await fetch(BASE, { next: { revalidate: 3600 } });
+    const r = await fetch(BASE, { next: { revalidate: 3600 }, signal: controller.signal });
     if (r.ok) {
       const j = (await r.json()) as { data?: { config?: { ads?: { adsensePublisherId?: string } } } };
       const fromCms = j?.data?.config?.ads?.adsensePublisherId?.trim();
       if (fromCms && ADSENSE_RE.test(fromCms)) return fromCms;
     }
   } catch {
-    // CMS unreachable — fall through to env fallback.
+    // CMS unreachable or timed out — fall through to env fallback.
+  } finally {
+    clearTimeout(timer);
   }
-  return envFallback && ADSENSE_RE.test(envFallback) ? envFallback : null;
+  if (envFallback && ADSENSE_RE.test(envFallback)) return envFallback;
+  return DEFAULT_ADSENSE_CLIENT;
 }
 
 interface Block { id: string; type: string; order: number; content: Record<string, any> }
@@ -82,12 +100,16 @@ export interface CmsHomepage {
 }
 
 async function fetchJSON(url: string): Promise<any | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const r = await fetch(url, { cache: 'no-store' });
+    const r = await fetch(url, { cache: 'no-store', signal: controller.signal });
     if (!r.ok) return null;
     return await r.json();
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 

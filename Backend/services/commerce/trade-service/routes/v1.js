@@ -47,6 +47,18 @@ router.use('/carriers', require('./carrierRoutes'));
 router.get('/shipping_quotes',      freightController.getQuotes);
 router.post('/shipping_selections', freightController.selectCarrier);
 
+// Freight Management (Phase 3, Prompt 2): dynamic Carrier Directory, persisted Rate
+// Engine, persisted Quote Requests (with per-carrier charge breakdown + scored
+// comparison) and Carrier Performance. Mounted at more specific /freight/* prefixes
+// BEFORE freightMarketplaceRoutes below so its generic GET /:id booking-lookup
+// route never shadows these (Express tries router.use() mounts in registration
+// order and falls through only on no match — see routes/v1.js history for the
+// same pattern with the trailing /:collection catch-all).
+router.use('/freight/carrier-directory',   require('./carrierDirectoryRoutes'));
+router.use('/freight/quote-requests',      require('./freightQuoteRoutes'));
+router.use('/freight/carrier-performance', require('./carrierPerformanceRoutes'));
+router.use('/freight', require('./freightRateEngineRoutes')); // /rate-rules, /rate-preview
+
 // Logistics — Freight Marketplace Integration Layer (War Room 4, Prompt 10):
 // carrier abstraction (DHL/FedEx/UPS/Maersk connectors) + quote COMPARISON engine +
 // ETA calculation + the booking workflow with carrier-to-carrier FALLBACK logic.
@@ -145,6 +157,28 @@ router.use('/packages',        require('./packageRoutes'));
 router.use('/logistics_addresses', require('./addressRoutes'));
 router.use('/tracking_events', require('./trackingRoutes'));
 
+// Logistics Core Foundation (Phase 2): operational warehouses + inventory
+// movement ledger, and fleet (vehicles, drivers, assignments).
+router.use('/warehouses',          require('./warehouseRoutes'));
+router.use('/inventory_movements', require('./inventoryMovementRoutes'));
+router.use('/vehicles',            require('./vehicleRoutes'));
+router.use('/drivers',             require('./driverRoutes'));
+router.use('/fleet_assignments',   require('./fleetAssignmentRoutes'));
+
+// Warehouse Management System, Phase A (Phase 3, Prompt 3): location hierarchy
+// (zones/bins, the latter self-referencing aisle->rack->shelf->bin), receiving
+// + Goods Receipt Notes, and the rule-based putaway engine. Extends the
+// existing operational warehouses + inventory movement ledger above.
+router.use('/warehouse_zones',      require('./warehouseZoneRoutes'));
+router.use('/warehouse_bins',       require('./warehouseBinRoutes'));
+router.use('/goods_receipt_notes',  require('./goodsReceiptRoutes'));
+router.use('/putaway_tasks',        require('./putawayRoutes'));
+
+// Logistics Core Foundation (Phase 3): itemized cost ledger, incidents, RMA returns.
+router.use('/shipment_charges', require('./shipmentChargeRoutes'));
+router.use('/incidents',        require('./incidentRoutes'));
+router.use('/returns',          require('./returnRoutes'));
+
 // Phase 2 — Trust, Verification & Compliance Foundation: Verification Center
 // dashboard (per-org checklist across identity/company/tax/bank/address/factory/
 // warehouse/products/documents/compliance/risk/trust-score) + the country-
@@ -167,6 +201,25 @@ router.use('/reputation',            require('./reputationRoutes'));
 router.use('/review_actions',        require('./reviewActionRoutes'));
 router.use('/compliance_dashboard',  require('./complianceDashboardRoutes'));
 router.use('/monitoring',            require('./monitoringRoutes'));
+
+// Shipment Tracking & Global Visibility Platform (Phase 3, Prompt 6): builds
+// on tradeops.shipments (TradeShipment) + the existing TrackingEvent/
+// ShipmentEvent/ShipmentStatusHistory streams above rather than duplicating
+// them. Geofencing, checkpoints-with-dwell, alerts/notifications, IoT, proof
+// of delivery, live ETA re-prediction, delay-cause detection, planned
+// multi-leg routes, cross-entity search, the dashboard KPI/map aggregate, and
+// CSV/JSON report export.
+router.use('/geofences',           require('./geofenceRoutes'));
+router.use('/shipment_checkpoints', require('./shipmentCheckpointRoutes'));
+router.use('/shipment_alerts',      require('./shipmentAlertRoutes'));
+router.use('/iot_devices',          require('./iotDeviceRoutes'));
+router.use('/proof_of_delivery',    require('./proofOfDeliveryRoutes'));
+router.use('/eta_predictions',      require('./etaPredictionRoutes'));
+router.use('/delay_events',         require('./delayEventRoutes'));
+router.use('/shipment_routes',      require('./shipmentRouteRoutes'));
+router.use('/tracking_search',      require('./trackingSearchRoutes'));
+router.use('/tracking_dashboard',   require('./logisticsTrackingDashboardRoutes'));
+router.use('/tracking_reports',     require('./trackingReportRoutes'));
 
 // Generic persistence store — MUST be last so it only catches collections that
 // have no bespoke typed route above (alerts, risk_signals, contracts, ...).

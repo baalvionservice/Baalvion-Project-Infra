@@ -9,6 +9,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/financial-tools',
   title: 'Financial Planning Hub | Imperialpedia',
   description: 'Precision instruments for wealth planning. Explore our suite of compound interest, loan, and investment calculators.',
 });

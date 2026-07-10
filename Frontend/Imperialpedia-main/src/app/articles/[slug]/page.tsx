@@ -11,6 +11,7 @@ import { Article } from "@/modules/content-engine/types";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
 import { schemaService } from "@/modules/seo/services/schema-service";
 import { structuredData } from "@/lib/seo/structured-data";
+import { extractFaqFromHtml } from "@/lib/seo/faq-extractor";
 import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
 import { CommentIntelligenceHub } from "@/modules/content-engine/components/CommentIntelligence/CommentIntelligenceHub";
@@ -80,8 +81,8 @@ export default async function Page({ params }: ArticleRouteProps) {
 
   const breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);
   const articleSchema = schemaService.generateArticleSchema(article);
-  const faqSchema =
-    article.faq && article.faq.length ? structuredData.faq(article.faq) : null;
+  const faqPairs = article.faq?.length ? article.faq : extractFaqFromHtml(article.body);
+  const faqSchema = faqPairs.length ? structuredData.faq(faqPairs) : null;
 
   return (
     <div className="bg-background min-h-screen">

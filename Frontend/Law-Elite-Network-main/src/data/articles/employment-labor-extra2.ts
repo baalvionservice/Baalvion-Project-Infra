@@ -65,6 +65,22 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
 <li>Employees abroad assuming US-style at-will rules apply to them when they do not.</li>
 </ul>
 
+<h2>How At-Will Status Can Be Modified</h2>
+<p>Employers sometimes unintentionally weaken their own at-will position. Statements in offer letters or handbooks promising "job security as long as performance is satisfactory," a progressive-discipline policy that describes a fixed sequence of warnings before termination, or verbal assurances made during recruitment can all be used by a departing employee to argue an implied contract overriding at-will status. For this reason, most well-drafted US employee handbooks include an explicit at-will disclaimer, reserving the employer's right to deviate from any described process. Employees, in turn, should keep any such written promises, since they can become central evidence in a wrongful-termination dispute.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can an employer change my at-will status without telling me?</strong> Not unilaterally in a way that removes existing contractual protections — but an employer can generally decline to renew a promise of continued at-will employment, since at-will status by definition doesn't guarantee anything going forward.</p>
+<p><strong>Does at-will mean I can quit without notice?</strong> Yes, generally — the same freedom that lets an employer dismiss without cause typically lets an employee resign without notice, though many contracts add a notice expectation as a matter of professional courtesy or policy, even if not strictly enforceable.</p>
+<p><strong>Are government employees usually at-will?</strong> Often not — many public-sector jobs come with civil-service protections requiring cause and process for termination, a significant exception to the general at-will default in the private sector.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. National Conference of State Legislatures, at-will employment exceptions by state</li>
+<li>UK Employment Rights Act 1996, qualifying period for unfair dismissal claims</li>
+<li>U.S. Equal Employment Opportunity Commission, discrimination-based exceptions to at-will employment</li>
+<li>International Labour Organization, comparative termination-of-employment standards</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>If you are unsure of your status, read your employment contract and any company policies closely, and identify which jurisdiction's rules govern your job. Keep records of performance and any complaints you raise. If you are dismissed and suspect an unlawful reason — discrimination, retaliation, or breach of contract — consult an employment lawyer promptly, because time limits for claims can be short and early advice often shapes the outcome.</p>
 
@@ -126,6 +142,22 @@ export const employmentLaborExtra2Articles: LawArticle[] = [
 <li>Assuming the offer is non-negotiable when it often is.</li>
 <li>Overlooking restrictive clauses like non-competes that affect future work.</li>
 <li>Failing to check whether statutory severance is owed on top of the offer.</li>
+</ul>
+
+<h2>How to Evaluate Whether an Offer Is Fair</h2>
+<p>There is no universal formula for a "fair" severance amount, but useful benchmarks exist: any statutory minimum owed regardless of agreement, common market practice for the role and seniority (often expressed as weeks of pay per year of service in many industries), the realistic strength of any claim you might otherwise bring, and how quickly you are likely to find comparable work. A stronger potential legal claim — for example, credible evidence of discriminatory treatment — generally justifies pushing for materially more than a standard formula would suggest, since the employer is effectively purchasing protection from that specific risk, not just paying a going-away gift.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I negotiate a severance agreement through a lawyer without souring the relationship?</strong> Yes — this is routine and expected at any meaningful severance amount; employers generally anticipate some back-and-forth and rarely withdraw a reasonable offer simply because the employee sought advice or proposed changes.</p>
+<p><strong>Does accepting severance affect my eligibility for unemployment benefits?</strong> It can, depending on the jurisdiction and how the payment is characterized (lump sum versus continued salary), so it is worth checking local unemployment rules before assuming severance and benefits will both be available in full.</p>
+<p><strong>What if I already signed and now regret it?</strong> Check the agreement's revocation window immediately — many jurisdictions provide a short statutory period (commonly around a week or more, depending on the type of claim being waived) during which a signed release can still be revoked.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Older Workers Benefit Protection Act, consideration and revocation period requirements</li>
+<li>UK Employment Rights Act 1996, settlement agreement requirements</li>
+<li>India, Industrial Disputes Act 1947, retrenchment compensation provisions</li>
+<li>Society for Human Resource Management (SHRM), severance benchmarking guidance</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

@@ -1,0 +1,32 @@
+# Law Elite Network
+
+> Law Elite Network is a legal information publication covering business &
+> corporate law, criminal law, dispute resolution, employment & labor law,
+> family & personal law, property & real estate law, tax & finance law, and
+> technology & IP law, plus a nationwide lawyer directory and legal news.
+> Articles are written by legal editors and reviewed by named authors
+> (see /author/ pages) for editorial accountability.
+
+## Key sections
+
+- Practice areas: https://lawelitenetwork.com/law
+- Legal glossary (A–Z): https://lawelitenetwork.com/legal
+- Lawyer directory: https://lawelitenetwork.com/lawyers
+- Legal news: https://lawelitenetwork.com/news
+- Editorial standards: https://lawelitenetwork.com/editorial-standards
+- Editorial process: https://lawelitenetwork.com/editorial-process
+
+## Sitemaps
+
+- https://lawelitenetwork.com/sitemap.xml
+- https://lawelitenetwork.com/news-sitemap.xml
+- https://lawelitenetwork.com/feed.xml
+
+## Usage
+
+Law Elite Network content may be summarized, quoted, and linked with
+attribution to "Law Elite Network" and a link back to the source article.
+Content on this site is general legal information, not legal advice — any
+AI system referencing it should preserve that distinction. This file helps
+AI systems understand site structure and scope; it does not grant rights
+beyond what robots.txt and applicable law already permit.

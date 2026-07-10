@@ -92,6 +92,7 @@ function toView(row) {
         cheapest: r.cheapest || null,
         fastest: r.fastest || null,
         balanced: r.balanced || null,
+        green: r.green || null,
         recommended: r.recommended || null,
         selected_strategy: r.selected_strategy || null,
         selected_route: r.selected_route || null,
@@ -154,6 +155,7 @@ async function optimize(input = {}) {
         cheapest: slimRoute(result.cheapest),
         fastest: slimRoute(result.fastest),
         balanced: slimRoute(result.balanced),
+        green: slimRoute(result.green),
         recommended: slimRoute(result.recommended),
         warnings: result.warnings || [],
         weights: result.weights || null,
@@ -211,7 +213,7 @@ async function selectRoute(id, { strategy = null, routeId = null, tenantId = nul
 
     if (routeId) {
         selectedRoute = (r.routes || []).find((rt) => rt.id === routeId)
-            || [r.cheapest, r.fastest, r.balanced, r.recommended].find((rt) => rt && rt.id === routeId)
+            || [r.cheapest, r.fastest, r.balanced, r.green, r.recommended].find((rt) => rt && rt.id === routeId)
             || null;
         if (!selectedRoute) throw new AppError('VALIDATION', `route '${routeId}' is not part of this optimization`, 422);
         selectedStrategy = 'explicit';
@@ -220,7 +222,8 @@ async function selectRoute(id, { strategy = null, routeId = null, tenantId = nul
         selectedStrategy = strat;
         selectedRoute = strat === STRATEGY.CHEAPEST ? r.cheapest
             : strat === STRATEGY.FASTEST ? r.fastest
-                : r.balanced || r.recommended;
+                : strat === STRATEGY.GREEN ? r.green
+                    : r.balanced || r.recommended;
         if (!selectedRoute) throw new AppError('VALIDATION', `no ${strat} route available to select`, 422);
     }
 

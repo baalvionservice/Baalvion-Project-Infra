@@ -5,6 +5,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/creators/trust',
   title: 'Trusted Contributors Directory | Authority Matrix',
   description: 'Discover verified experts and high-trust financial analysts. Audit contributor credibility using real-time trust scores and verification milestones.',
 });

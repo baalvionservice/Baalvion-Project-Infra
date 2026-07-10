@@ -65,6 +65,22 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
 <li>Assuming a US-style "LLC" exists, or is taxed the same way, in another country.</li>
 </ul>
 
+<h2>Typical Costs and Timeline</h2>
+<p>State filing fees for an LLC generally range from modest to a few hundred dollars, with some states also charging an annual franchise or report fee regardless of income. Processing time ranges from same-day online approval in some states to several weeks for mailed filings, and expedited processing is usually available for an extra fee. Beyond the state filing itself, budget for a registered-agent service if you use one, an operating agreement (template or lawyer-drafted), and any industry-specific license fees — the total first-year cost for a simple single-member LLC is typically far less than founders expect, but the ongoing annual compliance cost is the number that catches people off guard.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I form an LLC without a lawyer?</strong> Yes — most states allow direct online filing, and many single-owner LLCs are formed this way — but a lawyer is worth engaging once there are multiple members, outside investors, or unusual profit-sharing arrangements that a template operating agreement won't capture correctly.</p>
+<p><strong>What is a "foreign LLC" registration?</strong> It is not about international founders — it means registering your LLC to legally do business in a state other than the one where it was originally formed, required once you have a physical presence, employees, or regular business activity there.</p>
+<p><strong>Do I need an operating agreement if I'm the only member?</strong> Legally, often not — but banks, courts, and potential investors treat its absence as a sign the owner isn't respecting the entity's separateness, which is precisely the argument used to pierce the liability shield.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Small Business Administration, choosing a business structure guidance</li>
+<li>State Secretary of State business registry filing portals (varies by state)</li>
+<li>UK Companies House, private limited company formation guidance</li>
+<li>India Ministry of Corporate Affairs, LLP and private limited company registration</li>
+</ul>
+
 <h2>Practical Next Steps</h2>
 <p>Begin by confirming which entity actually delivers limited liability where you intend to operate, then work through the filing steps in order and keep copies of every document. Set calendar reminders for ongoing filings so the company stays compliant. For anything beyond a simple single-owner business — multiple members, outside investment, or cross-border operations — a short consultation with a local lawyer or accountant before you file is well worth the cost.</p>
 
@@ -125,6 +141,22 @@ export const businessCorporateExtra2Articles: LawArticle[] = [
 <li>Failing to mitigate, which can shrink or eliminate recovery.</li>
 <li>Treating a minor breach as grounds to walk away, then being sued yourself.</li>
 <li>Ignoring remedy or limitation clauses already written into the contract.</li>
+</ul>
+
+<h2>Limitation Periods and Contractual Limits on Recovery</h2>
+<p>Every jurisdiction imposes a limitation period — a deadline, often between three and six years from the breach, after which a claim can no longer be brought — so delaying action risks losing the right to sue entirely regardless of how strong the case is. Many commercial contracts also include their own limits: a cap on total damages, an exclusion of consequential or indirect losses, or a shortened notice period requiring the injured party to flag a breach within days or weeks of discovering it. These clauses are generally enforceable between sophisticated commercial parties, so reviewing them before assuming a remedy is available is essential — a contract that caps liability at the fees paid, for instance, may make a lawsuit for a much larger loss commercially pointless.</p>
+
+<h2>Frequently Asked Questions</h2>
+<p><strong>Can I terminate a contract the moment the other side breaches?</strong> Only for a material breach — terminating over a minor, easily-remedied shortfall can itself become a wrongful termination, exposing you to a counter-claim for breach.</p>
+<p><strong>Do I need to prove exact financial loss to win damages?</strong> Courts require a reasonable basis for the damages figure, not perfect precision — but a claim with no supporting evidence of loss (invoices, lost-profit calculations, replacement-cost quotes) is likely to be reduced to a nominal amount.</p>
+<p><strong>What if the contract has no remedy clause at all?</strong> Default legal remedies (damages, and in limited cases specific performance or rescission) still apply automatically — a remedy clause narrows or clarifies those defaults, it doesn't create rights that wouldn't otherwise exist.</p>
+
+<h2>Sources & Further Reading</h2>
+<ul>
+<li>U.S. Uniform Commercial Code, Article 2 (sale of goods remedies)</li>
+<li>UK Sale of Goods Act 1979 and common-law contract remedies</li>
+<li>India, Specific Relief Act 1963 (as amended) and Indian Contract Act 1872</li>
+<li>UNIDROIT Principles of International Commercial Contracts</li>
 </ul>
 
 <h2>Practical Next Steps</h2>

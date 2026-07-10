@@ -148,6 +148,8 @@ export interface FinancedInvoice {
   tenantId: string;
   reference: string;
   invoiceNumber: string;
+  /** GTI order/deal correlation key — the trade-service order this financing is tied to. */
+  orderRef?: string;
   status: InvoiceStatus;
   sellerName: string;
   debtorName: string;
@@ -170,6 +172,8 @@ export interface FinancedInvoice {
 export interface SubmitInvoiceRequest {
   idempotencyKey?: string;
   invoiceNumber: string;
+  /** GTI order/deal correlation key — required to trace this financing back to a real trade. */
+  orderRef?: string;
   sellerId?: string;
   sellerName: string;
   debtorId?: string;

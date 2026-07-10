@@ -1,0 +1,203 @@
+{
+  "topicNumber": 27,
+  "title": "The Complete Guide to Mortgages",
+  "slug": "complete-guide-to-mortgages",
+  "seo": {
+    "seoTitle": "Mortgages Explained: Types, Rates & Down Payments",
+    "metaDescription": "A complete guide to mortgages — how they work, the different loan types, what actually determines your rate, and what to expect from application to closing.",
+    "focusKeyword": "mortgages",
+    "secondaryKeywords": [
+      "how do mortgages work",
+      "types of mortgages",
+      "mortgage down payment",
+      "fixed vs adjustable rate mortgage",
+      "mortgage approval process",
+      "private mortgage insurance"
+    ],
+    "searchIntent": "Informational — users researching how mortgages work before or during the home-buying process",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "A mortgage is likely the largest loan you'll ever take out — and the type, rate, and terms you choose can affect your finances for decades. Here's the complete picture, from loan types to the closing table.",
+  "intro": "A **mortgage** is a loan secured by the home you're purchasing, meaning the lender can foreclose and take the property if payments stop. In exchange for that security, mortgages carry meaningfully lower rates than unsecured debt and are repaid over long terms — commonly 15 or 30 years — that make homeownership achievable without paying the full purchase price up front.\n\nThe decisions you make around a mortgage — the loan type, the rate structure, the down payment size, whether to pay for points — compound over years and can mean tens of thousands of dollars in difference over the life of the loan. This guide covers the full picture: how mortgages work, the major loan types, what determines your rate, and what the process actually looks like from application to closing.",
+  "tableOfContents": [
+    "How a Mortgage Works",
+    "Fixed-Rate vs Adjustable-Rate Mortgages",
+    "Conventional, FHA, VA, and USDA Loans",
+    "Down Payments and Private Mortgage Insurance",
+    "What Determines Your Mortgage Rate",
+    "15-Year vs 30-Year Terms",
+    "The Mortgage Application Process",
+    "Costs Beyond the Monthly Payment",
+    "Homeowners Insurance and Escrow"
+  ],
+  "sections": [
+    {
+      "heading": "How a Mortgage Works",
+      "paragraphs": [
+        "Each monthly payment is split between principal (paying down the amount borrowed) and interest (the lender's cost of lending), a structure known as amortization. Early in the loan, a much larger share of each payment goes toward interest; that ratio gradually flips as the balance shrinks, so later payments put far more toward principal.",
+        "Most mortgage payments also include property taxes and homeowners insurance, collected monthly into an escrow account and paid on your behalf when due, so the actual required payment is usually higher than principal and interest alone."
+      ]
+    },
+    {
+      "heading": "Fixed-Rate vs Adjustable-Rate Mortgages",
+      "paragraphs": [
+        "A fixed-rate mortgage locks in the same interest rate for the entire loan term — the monthly principal-and-interest payment never changes, which makes budgeting simple and protects you if market rates rise later. An adjustable-rate mortgage (ARM) typically starts with a lower introductory rate for a set period (commonly five, seven, or ten years), after which the rate adjusts periodically based on market conditions, which can raise or lower your payment.",
+        "Fixed-rate loans suit buyers planning to stay long-term or who prioritize payment certainty. ARMs can make sense for buyers confident they'll sell or refinance before the adjustable period begins, in exchange for a lower initial rate — but they carry real risk if plans change and rates rise."
+      ]
+    },
+    {
+      "heading": "Conventional, FHA, VA, and USDA Loans",
+      "paragraphs": [
+        "A conventional loan isn't backed by a government agency and typically requires stronger credit and a larger down payment for the best terms, though options exist with down payments as low as 3%. An FHA loan is government-insured and allows lower credit scores and down payments as low as 3.5%, making it popular with first-time buyers, but requires mortgage insurance for the life of the loan in most cases. A VA loan, available to eligible veterans and service members, often requires no down payment and no mortgage insurance. A USDA loan supports buyers in eligible rural areas with no down payment required for qualifying borrowers."
+      ],
+      "table": {
+        "caption": "Common Mortgage Types at a Glance",
+        "headers": [
+          "Loan Type",
+          "Typical Minimum Down Payment",
+          "Best For"
+        ],
+        "rows": [
+          [
+            "Conventional",
+            "3-20%",
+            "Buyers with strong credit and stable income"
+          ],
+          [
+            "FHA",
+            "3.5%",
+            "First-time buyers or those with lower credit scores"
+          ],
+          [
+            "VA",
+            "0%",
+            "Eligible veterans and active-duty service members"
+          ],
+          [
+            "USDA",
+            "0%",
+            "Buyers in eligible rural/suburban areas"
+          ]
+        ]
+      }
+    },
+    {
+      "heading": "Down Payments and Private Mortgage Insurance",
+      "paragraphs": [
+        "A larger down payment reduces your loan amount, your monthly payment, and often your interest rate. On a conventional loan, putting down less than 20% typically triggers private mortgage insurance (PMI) — an added monthly cost that protects the lender, not you, and is usually cancellable once you reach 20% equity in the home.",
+        "It's rarely worth delaying a home purchase for years solely to avoid PMI if home prices and rates are rising faster than you can save — running both scenarios with a [mortgage calculator](/financial-tools/loan) usually clarifies which path actually costs less over time."
+      ]
+    },
+    {
+      "heading": "Shopping Multiple Lenders",
+      "paragraphs": [
+        "Rate and fee offers can vary meaningfully between lenders for the exact same borrower and property, which is why comparing at least a handful of lenders — banks, credit unions, and online lenders — before committing is worth the modest time investment. Getting rate quotes from several lenders within a short window (commonly 14 to 45 days depending on the credit scoring model used) is generally treated as a single inquiry for credit scoring purposes, removing the concern that shopping around will meaningfully hurt your score."
+      ]
+    },
+    {
+      "heading": "What Determines Your Mortgage Rate",
+      "paragraphs": [
+        "Your credit score, down payment size, loan type, loan term, and debt-to-income ratio all factor into your individual rate, layered on top of broader market conditions that move rates up or down for everyone. See [mortgage interest rates](/articles/mortgage-interest-rates) for a full breakdown of how these factors interact and how much difference a stronger credit profile can make."
+      ]
+    },
+    {
+      "heading": "15-Year vs 30-Year Terms",
+      "paragraphs": [
+        "A 30-year term is the most common choice, spreading payments out for lower monthly costs and greater flexibility, at the expense of paying considerably more total interest over the life of the loan. A 15-year term carries a meaningfully higher monthly payment but a lower interest rate in most cases and a dramatically shorter path to being mortgage-free, with total interest paid often less than half of what the same loan amount would cost on a 30-year term.",
+        "The right choice depends on cash flow flexibility and other financial priorities — a 30-year term with the option to make extra principal payments when convenient offers similar payoff flexibility to a 15-year term without the mandatory higher payment, which is why some buyers deliberately choose the 30-year term for its lower required payment while voluntarily paying it down faster."
+      ]
+    },
+    {
+      "heading": "The Mortgage Application Process",
+      "paragraphs": [
+        "Getting pre-approved before house hunting establishes your realistic budget and signals to sellers you're a serious buyer. Once you're under contract, the lender orders an appraisal to confirm the home's value, verifies your income and assets, and underwrites the full application before issuing final approval. The process from application to closing typically takes several weeks, and providing complete documentation promptly is the single biggest factor in keeping it on schedule. See [the mortgage approval process](/articles/mortgage-approval-process) for a detailed, step-by-step walkthrough of pre-approval, underwriting, and the most common reasons applications get denied."
+      ]
+    },
+    {
+      "heading": "Costs Beyond the Monthly Payment",
+      "paragraphs": [
+        "Closing costs — lender fees, title insurance, appraisal and inspection fees, prepaid taxes and insurance — typically run a meaningful percentage of the loan amount and are due at closing, separate from the down payment. Budget for these explicitly rather than assuming the down payment is the only cash needed at the closing table, and confirm well ahead of time exactly which costs your specific lender and locality require."
+      ]
+    },
+    {
+      "heading": "Homeowners Insurance and Escrow",
+      "paragraphs": [
+        "Lenders require homeowners insurance for the life of the loan, since the home is their collateral, and the annual premium is typically collected monthly through the same escrow account that handles property taxes rather than paid separately as a lump sum. Escrow accounts are recalculated periodically (commonly once a year) as property tax assessments and insurance premiums change, which is why a mortgage payment that started at a fixed amount can still shift over time even on a fixed-rate loan — the principal-and-interest portion stays constant, but the escrow portion adjusts to actual tax and insurance costs.",
+        "Some borrowers with a large enough down payment can opt out of an escrow account and pay taxes and insurance directly, though many lenders require escrow below a certain equity threshold, and even where it's optional, escrow removes the responsibility of budgeting for large lump-sum tax and insurance bills yourself.",
+        "Lenders are generally required to provide an annual escrow analysis statement detailing exactly how the account was funded and spent over the prior year, along with the reasoning behind any change to your required monthly payment going forward — worth reviewing each year to confirm the projected tax and insurance figures look reasonable rather than assuming the adjustment is automatically correct."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Each mortgage payment splits between principal and interest, with the ratio gradually shifting toward principal as the loan matures.",
+    "Fixed-rate mortgages offer payment certainty for the full term; adjustable-rate mortgages start lower but carry rate-change risk later.",
+    "FHA, VA, and USDA loans offer lower or no down payment options for qualifying buyers compared to conventional loans.",
+    "Putting down less than 20% on a conventional loan typically triggers private mortgage insurance, an added monthly cost.",
+    "Your rate depends on credit score, down payment, loan type and term, and debt-to-income ratio, layered on top of market conditions.",
+    "Closing costs are separate from the down payment and should be budgeted for explicitly well before your closing date."
+  ],
+  "faq": [
+    {
+      "question": "What credit score do you need for a mortgage?",
+      "answer": "It varies by loan type — FHA loans can accept scores as low as the high 500s in some cases, while conventional loans typically look for a stronger score to access the best rates. Higher scores generally unlock lower rates across every loan type."
+    },
+    {
+      "question": "How much down payment do I need for a house?",
+      "answer": "It depends on the loan type: conventional loans can go as low as 3%, FHA as low as 3.5%, and VA or USDA loans can require 0% for eligible borrowers. A larger down payment lowers your monthly payment and may avoid mortgage insurance."
+    },
+    {
+      "question": "What is private mortgage insurance (PMI)?",
+      "answer": "An added monthly cost required on most conventional loans when the down payment is under 20%. It protects the lender if you default and can typically be cancelled once you reach 20% equity in the home."
+    },
+    {
+      "question": "Is a fixed-rate or adjustable-rate mortgage better?",
+      "answer": "Fixed-rate suits buyers who want payment certainty and plan to stay long-term. Adjustable-rate can offer a lower initial rate for buyers confident they'll sell or refinance before the rate adjusts, but carries risk if those plans change."
+    },
+    {
+      "question": "How long does it take to close on a mortgage?",
+      "answer": "Typically several weeks from a signed purchase agreement to closing, assuming documentation is provided promptly and the appraisal and underwriting process proceed without delays."
+    },
+    {
+      "question": "Is a 15-year or 30-year mortgage better?",
+      "answer": "A 15-year term saves considerably on total interest and builds equity faster but requires a higher monthly payment. A 30-year term offers more flexibility with a lower required payment, and borrowers can still pay it down faster voluntarily."
+    },
+    {
+      "question": "Why did my mortgage payment change even though I have a fixed rate?",
+      "answer": "The principal-and-interest portion stays fixed, but if your payment includes an escrow account for taxes and insurance, that portion is recalculated periodically as tax assessments and insurance premiums change, which can shift your total payment."
+    }
+  ],
+  "conclusion": "A mortgage is a decades-long financial commitment, which makes the upfront decisions — loan type, rate structure, down payment size — worth taking seriously rather than defaulting to whatever a lender first proposes. Understanding how amortization, PMI, and rate factors actually work puts you in a position to compare offers meaningfully instead of just comparing a single advertised rate.\n\nOnce you understand the mechanics here, [mortgage interest rates](/articles/mortgage-interest-rates) and [refinancing a mortgage](/articles/refinancing-a-mortgage) go into more depth on getting the best rate now and revisiting that decision later if market conditions shift in your favor.",
+  "internalLinks": [
+    {
+      "anchor": "mortgage interest rates",
+      "slug": "mortgage-interest-rates"
+    },
+    {
+      "anchor": "refinancing a mortgage",
+      "slug": "refinancing-a-mortgage"
+    },
+    {
+      "anchor": "how much money do you need to retire",
+      "slug": "how-much-money-do-you-need-to-retire"
+    },
+    {
+      "anchor": "compound interest",
+      "slug": "compound-interest"
+    }
+  ],
+  "externalSources": [
+    {
+      "name": "Consumer Financial Protection Bureau — Mortgages",
+      "url": "https://www.consumerfinance.gov/owning-a-home/"
+    },
+    {
+      "name": "U.S. Department of Housing and Urban Development — FHA Loans",
+      "url": "https://www.hud.gov/buying"
+    },
+    {
+      "name": "U.S. Department of Veterans Affairs — VA Home Loans",
+      "url": "https://www.va.gov/housing-assistance/home-loans/"
+    }
+  ],
+  "wordCountEstimate": 1650
+}

@@ -84,6 +84,44 @@ export interface AbuseActionTriggeredPayload {
   actorId?: string | null;
 }
 
+// ─── Logistics Core Foundation (trade-service, Phase 4) ────────────────────────
+
+export interface ContainerStatusChangedPayload {
+  containerId: string;
+  shipmentId: string | null;
+  previousStatus: string;
+  newStatus: string;
+  tenantId: string;
+}
+
+export interface FleetAssignmentEventPayload {
+  assignmentId: string;
+  vehicleId: string;
+  driverId: string;
+  shipmentId: string | null;
+  tenantId: string;
+}
+
+export interface TrackingUpdatedPayload {
+  shipmentId: string;
+  containerId: string | null;
+  source: 'carrier_webhook' | 'gps_device' | 'manual' | string;
+  latitude?: number | null;
+  longitude?: number | null;
+  locationLabel?: string | null;
+  occurredAt: string;
+  tenantId: string;
+}
+
+export interface ShipmentChargeApprovedPayload {
+  chargeId: string;
+  shipmentId: string;
+  chargeType: string;
+  amount: number;
+  currency: string;
+  tenantId: string;
+}
+
 // ─── Builder ────────────────────────────────────────────────────────────────────
 
 type TypedEvent<K extends EventType, P> = PlatformEvent<P> & { type: K };
@@ -122,6 +160,20 @@ export const DomainEvents = {
     build('provider.health.changed', p, m as object),
   abuseActionTriggered: (p: AbuseActionTriggeredPayload, m?: object) =>
     build('abuse.action.triggered', p, { orgId: p.orgId, ...(m as object) }),
+
+  // Logistics Core Foundation (trade-service, Phase 4) — orgId carries the
+  // trade-service tenant_id (often a slug like 'T-DEMO', not always a UUID);
+  // PlatformEvent.orgId is `string | null` so this is a valid, if looser, use.
+  logisticsContainerStatusChanged: (p: ContainerStatusChangedPayload, m?: object) =>
+    build('logistics.container.status_changed', p, { orgId: p.tenantId, ...(m as object) }),
+  logisticsFleetAssignmentStarted: (p: FleetAssignmentEventPayload, m?: object) =>
+    build('logistics.fleet.assignment_started', p, { orgId: p.tenantId, ...(m as object) }),
+  logisticsFleetAssignmentCompleted: (p: FleetAssignmentEventPayload, m?: object) =>
+    build('logistics.fleet.assignment_completed', p, { orgId: p.tenantId, ...(m as object) }),
+  logisticsTrackingUpdated: (p: TrackingUpdatedPayload, m?: object) =>
+    build('logistics.tracking.updated', p, { orgId: p.tenantId, ...(m as object) }),
+  logisticsShipmentChargeApproved: (p: ShipmentChargeApprovedPayload, m?: object) =>
+    build('logistics.shipment.charge_approved', p, { orgId: p.tenantId, ...(m as object) }),
 };
 
 /** The NATS subject / Kafka topic for an event type (stable, replay-friendly). */

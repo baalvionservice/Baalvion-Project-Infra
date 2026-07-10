@@ -14,9 +14,9 @@ export default {
         // Editorial type system (Investopedia / CNBC inspired):
         // body = Inter (UI), headline = Libre Franklin (Franklin-Gothic display),
         // serif = Source Serif 4 (long-form article reading).
-        body: ['Inter', 'system-ui', 'sans-serif'],
-        headline: ['"Libre Franklin"', 'Inter', 'system-ui', 'sans-serif'],
-        serif: ['"Source Serif 4"', 'Georgia', 'Cambria', 'serif'],
+        body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        headline: ['var(--font-headline)', 'var(--font-body)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-serif)', 'Georgia', 'Cambria', 'serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

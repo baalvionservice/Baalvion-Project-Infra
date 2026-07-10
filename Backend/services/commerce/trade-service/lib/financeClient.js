@@ -75,4 +75,32 @@ function refFromInitiate(result) {
     return result.id || result.transactionRef || result.paymentId || result.payment_id || result.reference || null;
 }
 
-module.exports = { call, initiatePayment, refFromInitiate, enabled: () => config.finance.enabled };
+// account-service: POST /api/v1/accounts (CreateAccountRequest). Used to lazily provision a
+// BUSINESS ledger account for a trade org the first time it needs an escrow/ledger movement
+// (see lib/accountProvisioning.js). Idempotency is the caller's job (cache the returned id).
+async function createAccount(payload, ctx = {}) {
+    return call(config.finance.account, '/api/v1/accounts', {
+        method: 'POST',
+        body: {
+            accountName: payload.accountName,
+            accountType: payload.accountType || 'BUSINESS',
+            currency: payload.currency || 'USD',
+            dailyLimit: payload.dailyLimit,
+            metadata: payload.metadata !== undefined
+                ? (typeof payload.metadata === 'string' ? payload.metadata : JSON.stringify(payload.metadata))
+                : undefined,
+        },
+        tenantId: ctx.tenantId,
+        bearer: ctx.bearer,
+    });
+}
+
+// account-service: GET /api/v1/accounts/:id.
+async function getAccount(accountId, ctx = {}) {
+    return call(config.finance.account, `/api/v1/accounts/${accountId}`, { tenantId: ctx.tenantId, bearer: ctx.bearer });
+}
+
+module.exports = {
+    call, initiatePayment, refFromInitiate, createAccount, getAccount,
+    enabled: () => config.finance.enabled,
+};

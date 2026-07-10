@@ -16,6 +16,7 @@ public class InvoiceResponse {
   private UUID tenantId;
   private String reference;
   private String invoiceNumber;
+  private String orderRef;
   private String status;
   private UUID sellerId;
   private String sellerName;
@@ -47,6 +48,7 @@ public class InvoiceResponse {
       .tenantId(i.getTenantId())
       .reference(i.getReference())
       .invoiceNumber(i.getInvoiceNumber())
+      .orderRef(i.getOrderRef())
       .status(i.getStatus() != null ? i.getStatus().name() : null)
       .sellerId(i.getSellerId())
       .sellerName(i.getSellerName())

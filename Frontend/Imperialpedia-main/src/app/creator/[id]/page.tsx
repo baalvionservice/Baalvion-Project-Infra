@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: CreatorPageProps): Promise<Me
     description: creator.bio,
     ogImage: creator.avatar,
     ogType: 'article', // Using article for personal profile pages can be appropriate or standard website
+    canonical: `/creator/${id}`,
   });
 }
 

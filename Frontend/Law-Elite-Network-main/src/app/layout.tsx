@@ -1,6 +1,8 @@
 
 import React, { Suspense } from "react";
 import type { Metadata } from "next";
+import Script from "next/script";
+import { Inter, Libre_Franklin, Source_Serif_4 } from "next/font/google";
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
 import { I18nProvider } from '@/i18n/I18nProvider';
@@ -11,7 +13,32 @@ import { AIChatAssistantWrapper } from '@/components/ai/AIChatAssistantWrapper';
 import ImpersonationBanner from '@/components/admin/ImpersonationBanner';
 import { cmsGetAdsenseClient } from '@/lib/cms';
 import UnifiedAnalytics from '@/components/UnifiedAnalytics';
+import { cn } from '@/lib/utils';
 import './globals.css';
+
+// Editorial type system: Libre Franklin (Franklin-Gothic display, à la
+// Investopedia/CNBC mastheads) + Inter (UI body) + Source Serif 4 (long-form
+// article reading). Self-hosted via next/font — removes the render-blocking
+// fonts.googleapis.com request + preconnects, adds automatic font-display:
+// swap and preloading of the fonts actually used above the fold.
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-body',
+  display: 'swap',
+});
+const libreFranklin = Libre_Franklin({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-headline',
+  display: 'swap',
+});
+const sourceSerif = Source_Serif_4({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-serif',
+  display: 'swap',
+});
 
 const SITE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 const CMS_SLUG = process.env.NEXT_PUBLIC_CMS_WEBSITE_SLUG || 'law-elite-network';
@@ -77,6 +104,7 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: SITE_URL,
+    types: { 'application/rss+xml': '/feed.xml' },
   },
 };
 
@@ -123,27 +151,15 @@ export default async function RootLayout({
   // Monetization); resolved server-side, hourly-cached, env-fallback inside.
   const ADSENSE_CLIENT = await cmsGetAdsenseClient();
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(inter.variable, libreFranklin.variable, sourceSerif.variable)}
+    >
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Editorial type system: Libre Franklin (Franklin-Gothic display, à la
-            Investopedia/CNBC mastheads) + Inter (UI body) + Source Serif 4
-            (long-form article reading). */}
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Libre+Franklin:wght@400;500;600;700;800;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&display=swap"
-          rel="stylesheet"
-        />
         <meta name="theme-color" content="#1e3a5f" />
         {ADSENSE_CLIENT && (
-          <>
-            <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
-            <script
-              async
-              src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
-              crossOrigin="anonymous"
-            />
-          </>
+          <meta name="google-adsense-account" content={ADSENSE_CLIENT} />
         )}
         <script
           type="application/ld+json"
@@ -155,6 +171,14 @@ export default async function RootLayout({
         />
       </head>
       <body className="font-body antialiased selection:bg-blue-100 selection:text-blue-900 bg-background text-foreground overflow-x-hidden">
+        {ADSENSE_CLIENT && (
+          <Script
+            async
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADSENSE_CLIENT}`}
+            crossOrigin="anonymous"
+            strategy="afterInteractive"
+          />
+        )}
         <a
           href="#main-content"
           className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-6 focus:py-3 focus:bg-blue-700 focus:text-white focus:rounded-xl focus:font-bold focus:shadow-2xl"

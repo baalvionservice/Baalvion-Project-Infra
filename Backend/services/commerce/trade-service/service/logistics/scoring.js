@@ -73,6 +73,11 @@ const byFastest = (routes) => [...routes].sort(
     (a, b) => a.total_transit_days - b.total_transit_days || a.total_cost - b.total_cost || b.reliability - a.reliability,
 );
 
+/** Lowest-emissions-first ordering (tie: cheaper, then faster). Immutable. */
+const byGreen = (routes) => [...routes].sort(
+    (a, b) => a.co2_kg - b.co2_kg || a.total_cost - b.total_cost || a.total_transit_days - b.total_transit_days,
+);
+
 /**
  * Rank a candidate set and produce the full analysis: the scored list plus the three
  * named picks. `strategy` selects which ordering drives the primary `routes` list the
@@ -84,18 +89,22 @@ function rank(routes, { strategy = STRATEGY.BALANCED, weights = DEFAULT_SCORE_WE
     const scored = scoreRoutes(routes, weights);          // balanced order
     const cheapestList = byCheapest(scored);
     const fastestList = byFastest(scored);
+    const greenList = byGreen(scored);
 
     const cheapest = cheapestList[0] || null;
     const fastest = fastestList[0] || null;
     const balanced = scored[0] || null;
+    const green = greenList[0] || null;
 
     const wanted = Object.values(STRATEGY).includes(strategy) ? strategy : STRATEGY.BALANCED;
     const primary = wanted === STRATEGY.CHEAPEST ? cheapestList
         : wanted === STRATEGY.FASTEST ? fastestList
-            : scored;
+            : wanted === STRATEGY.GREEN ? greenList
+                : scored;
     const recommended = wanted === STRATEGY.CHEAPEST ? cheapest
         : wanted === STRATEGY.FASTEST ? fastest
-            : balanced;
+            : wanted === STRATEGY.GREEN ? green
+                : balanced;
 
     return {
         strategy: wanted,
@@ -103,6 +112,7 @@ function rank(routes, { strategy = STRATEGY.BALANCED, weights = DEFAULT_SCORE_WE
         cheapest,
         fastest,
         balanced,
+        green,
         recommended,
         weights: { ...DEFAULT_SCORE_WEIGHTS, ...(weights || {}) },
     };
@@ -113,5 +123,6 @@ module.exports = {
     scoreRoutes,
     byCheapest,
     byFastest,
+    byGreen,
     rank,
 };

@@ -6,14 +6,22 @@ import LawyerProfileClient from './LawyerProfileClient';
 const API = process.env.NEXT_PUBLIC_API_BASE_URL?.trim() || (process.env.NODE_ENV === 'production' ? '' : 'http://localhost:3015/v1');
 const SITE = process.env.NEXT_PUBLIC_APP_URL || 'https://lawelitenetwork.com';
 
+// Hard cap so a slow/hung law-service response degrades to a "not found"
+// fallback instead of blocking metadata generation and the page render.
+const FETCH_TIMEOUT_MS = 4000;
+
 async function fetchLawyer(id: string): Promise<any | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
   try {
-    const r = await fetch(`${API}/lawyers/${id}`, { next: { revalidate: 3600 } });
+    const r = await fetch(`${API}/lawyers/${id}`, { next: { revalidate: 3600 }, signal: controller.signal });
     if (!r.ok) return null;
     const j = await r.json();
     return j?.data ?? null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 

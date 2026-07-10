@@ -12,6 +12,7 @@ import { Building } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/companies',
   title: 'Institutional Nodes Index | Companies',
   description: 'Audit global corporate benchmarks, founding intelligence, and market reach across our enterprise knowledge clusters.',
 });

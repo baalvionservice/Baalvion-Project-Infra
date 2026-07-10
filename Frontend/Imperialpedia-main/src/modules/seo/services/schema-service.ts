@@ -18,7 +18,7 @@ export const schemaService = {
    * Generates Article schema for content engine articles.
    */
   generateArticleSchema: (article: Article) => {
-    return structuredData.article({
+    const base = {
       title: article.title,
       description: article.description,
       image: article.featuredImage || '',
@@ -27,7 +27,12 @@ export const schemaService = {
         (article.authorId === 'creator-1' ? 'The Market Maven' : 'Imperialpedia Expert'),
       datePublished: article.publishedAt || new Date().toISOString(),
       dateModified: article.updatedAt,
-    });
+    };
+    const schema =
+      article.contentType === 'news' ? structuredData.newsArticle(base) : structuredData.article(base);
+    // Voice/AI-assistant readability — points speakable extraction at the
+    // headline + description so assistants can read a short summary aloud.
+    return { ...schema, speakable: structuredData.speakable() };
   },
 
   /**

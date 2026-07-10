@@ -5,6 +5,7 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = buildMetadata({
+  canonical: '/knowledge-map',
   title: 'Global Knowledge Map | Interconnected Intelligence',
   description: 'Explore the interconnected web of financial concepts, assets, and institutional research using the Imperialpedia Knowledge Graph.',
 });

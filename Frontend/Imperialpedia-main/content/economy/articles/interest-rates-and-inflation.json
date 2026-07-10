@@ -1,0 +1,111 @@
+{
+  "topicNumber": 20,
+  "title": "How Interest Rates and Inflation Are Connected",
+  "slug": "interest-rates-and-inflation",
+  "seo": {
+    "seoTitle": "Interest Rates and Inflation: How They Actually Relate",
+    "metaDescription": "Rising rates are supposed to fight inflation, but the relationship is more nuanced than it sounds. Here's how interest rates and inflation actually interact.",
+    "focusKeyword": "interest rates and inflation",
+    "secondaryKeywords": [
+      "how interest rates affect inflation",
+      "real interest rate vs nominal",
+      "Fisher effect",
+      "does raising rates lower inflation"
+    ],
+    "searchIntent": "Informational — users wanting to understand the mechanism connecting interest rate changes and inflation",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Raising interest rates is supposed to fight inflation — but the mechanism, and the lag involved, are more nuanced than the headline explanation usually suggests.",
+  "intro": "Interest rates and inflation are two of the most closely linked concepts in economics, but the relationship runs through several steps rather than a single direct connection. Understanding the mechanism — and the very real time lag involved — explains why raising rates doesn't bring inflation down overnight, and why the 'real' interest rate matters more than the rate you actually see quoted.",
+  "tableOfContents": [
+    "How Higher Rates Are Supposed to Cool Inflation",
+    "The Lag Between Rate Changes and Inflation Effects",
+    "Nominal vs Real Interest Rates",
+    "The Fisher Effect",
+    "Why Rate Hikes Don't Always Work Quickly",
+    "What This Means for Borrowers and Savers"
+  ],
+  "sections": [
+    {
+      "heading": "How Higher Rates Are Supposed to Cool Inflation",
+      "paragraphs": [
+        "When a central bank raises interest rates, borrowing becomes more expensive across the economy — mortgages, business loans, credit cards — which tends to reduce spending and investment. Lower demand relative to supply is the classic mechanism for easing [demand-pull inflationary pressure](/articles/causes-of-inflation): with spending cooling, businesses have less room to keep raising prices without losing customers."
+      ]
+    },
+    {
+      "heading": "The Lag Between Rate Changes and Inflation Effects",
+      "paragraphs": [
+        "Rate changes don't affect inflation immediately — the full impact typically takes many months to fully work through the economy, as existing loans gradually reprice, businesses adjust investment plans, and consumer spending patterns shift. This lag is a genuine complication for policymakers, who have to set policy today based on where they expect inflation to be well into the future, without perfect visibility into how the economy will actually respond."
+      ]
+    },
+    {
+      "heading": "Nominal vs Real Interest Rates",
+      "paragraphs": [
+        "The nominal interest rate is the rate you actually see quoted — on a savings account, a loan, a bond. The real interest rate subtracts expected or actual inflation from the nominal rate, reflecting the true purchasing-power return (or cost) once inflation is accounted for. A savings account paying 3% nominal interest during a period of 4% inflation has a negative real return — you're actually losing purchasing power even though your account balance is growing in dollar terms."
+      ],
+      "table": {
+        "caption": "Nominal vs Real Rate Example",
+        "headers": ["Nominal Rate", "Inflation Rate", "Approximate Real Rate"],
+        "rows": [
+          ["5%", "3%", "~2%"],
+          ["3%", "4%", "~-1% (losing purchasing power)"],
+          ["6%", "2%", "~4%"]
+        ]
+      }
+    },
+    {
+      "heading": "The Fisher Effect",
+      "paragraphs": [
+        "The Fisher effect describes the theoretical relationship in which nominal interest rates adjust to reflect expected inflation, so that real interest rates remain relatively stable over the longer run. In practice, this relationship holds more reliably over long time horizons than in short-term, month-to-month movements, where other factors (central bank policy decisions, market sentiment, global capital flows) can cause nominal and real rates to diverge from what the simple theory would predict."
+      ]
+    },
+    {
+      "heading": "Why Rate Hikes Don't Always Work Quickly",
+      "paragraphs": [
+        "Beyond the standard transmission lag, rate hikes can be slower to cool inflation when the underlying cause isn't primarily demand-driven — [cost-push or supply-chain-driven inflation](/articles/causes-of-inflation), for instance, responds less directly to reduced consumer demand, since the root cause is on the production and supply side rather than excessive spending. This is part of why the same interest rate response can produce different results depending on what's actually driving the inflationary pressure at the time."
+      ]
+    },
+    {
+      "heading": "What This Means for Borrowers and Savers",
+      "paragraphs": [
+        "For savers, the real return on cash matters more than the nominal rate — a [high-yield savings account](/articles/high-yield-savings-accounts) with a strong nominal rate can still lose real value if inflation runs hot enough, which is why comparing your savings rate against the current inflation rate (not just against other banks) gives a more complete picture. For borrowers, understanding that rate hikes work with a lag helps set realistic expectations about how quickly [mortgage rates](/articles/mortgage-interest-rates) and other borrowing costs might respond to a change in the broader inflation picture."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Higher interest rates cool inflation primarily by reducing borrowing and spending, easing demand-side inflationary pressure.",
+    "Rate changes take many months to fully work through the economy — the effect on inflation is never immediate.",
+    "The real interest rate (nominal rate minus inflation) reflects the true purchasing-power return and can be negative even when nominal rates are positive.",
+    "The Fisher effect describes how nominal rates adjust to reflect expected inflation, holding more reliably over long time horizons than short-term movements.",
+    "Rate hikes are less effective against cost-push or supply-driven inflation, since the underlying cause isn't primarily excessive demand."
+  ],
+  "faq": [
+    {
+      "question": "Why do interest rate hikes take so long to reduce inflation?",
+      "answer": "Because the effects work through several steps — repricing loans, shifting business investment, changing consumer spending — that take many months to fully play out across the economy."
+    },
+    {
+      "question": "What is the difference between nominal and real interest rates?",
+      "answer": "The nominal rate is the rate actually quoted. The real rate subtracts inflation from the nominal rate, showing the true purchasing-power return once rising prices are accounted for."
+    },
+    {
+      "question": "Can a savings account lose money in real terms even while earning interest?",
+      "answer": "Yes — if the account's nominal interest rate is lower than the inflation rate, the real return is negative, meaning your money's purchasing power is shrinking even as the account balance grows."
+    },
+    {
+      "question": "Do interest rate hikes always work against inflation?",
+      "answer": "They're most effective against demand-driven inflation. Cost-push or supply-driven inflation responds less directly to reduced demand, since the underlying cause is on the production side rather than excessive spending."
+    }
+  ],
+  "conclusion": "Interest rates and inflation are connected through a real but delayed and sometimes imperfect mechanism — raising rates cools demand, which eases inflationary pressure, but only after a meaningful lag and only reliably for demand-driven causes. Keeping the nominal-versus-real distinction in mind is the single most useful habit for reading both your own savings statement and the broader inflation debate accurately.",
+  "internalLinks": [
+    { "anchor": "causes of inflation", "slug": "causes-of-inflation" },
+    { "anchor": "complete guide to monetary policy", "slug": "complete-guide-to-monetary-policy" },
+    { "anchor": "high-yield savings accounts", "slug": "high-yield-savings-accounts" },
+    { "anchor": "mortgage interest rates", "slug": "mortgage-interest-rates" }
+  ],
+  "externalSources": [
+    { "name": "Federal Reserve — Monetary Policy Report", "url": "https://www.federalreserve.gov/monetarypolicy/mpr_default.htm" }
+  ],
+  "wordCountEstimate": 1400
+}

@@ -13,6 +13,7 @@ module.exports = (sequelize, DataTypes) => {
         order_id: { type: DataTypes.TEXT },
         shipment_id: { type: DataTypes.UUID },
         trade_operation_id: { type: DataTypes.UUID },
+        quote_id: { type: DataTypes.UUID }, // links back to the persisted freight_quotes row (Phase 3, Prompt 2), if any
         carrier: {
             type: DataTypes.TEXT,
             validate: { isIn: [['dhl', 'fedex', 'ups', 'maersk']] },
@@ -67,6 +68,9 @@ module.exports = (sequelize, DataTypes) => {
         }
         if (db.FreightBookingEvent) {
             FreightBooking.hasMany(db.FreightBookingEvent, { as: 'events', foreignKey: 'booking_id' });
+        }
+        if (db.FreightQuoteRequest) {
+            FreightBooking.belongsTo(db.FreightQuoteRequest, { as: 'quote', foreignKey: 'quote_id' });
         }
     };
 

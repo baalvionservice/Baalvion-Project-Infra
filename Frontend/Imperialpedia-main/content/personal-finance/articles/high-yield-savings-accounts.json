@@ -1,0 +1,174 @@
+{
+  "topicNumber": 22,
+  "title": "High-Yield Savings Accounts: How They Work and How to Choose One",
+  "slug": "high-yield-savings-accounts",
+  "seo": {
+    "seoTitle": "High-Yield Savings Accounts: How to Pick the Right One",
+    "metaDescription": "High-yield savings accounts pay far more than traditional banks with the same FDIC protection. Here's how they work, what to look for, and how to choose one.",
+    "focusKeyword": "high-yield savings account",
+    "secondaryKeywords": [
+      "HYSA",
+      "best high yield savings account",
+      "online savings account",
+      "FDIC insured savings",
+      "savings account APY",
+      "online bank vs traditional bank"
+    ],
+    "searchIntent": "Commercial/informational — users comparing savings account options and wanting to understand HYSAs before choosing one",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "A high-yield savings account pays several times the national average rate, with the same government-backed protection as any traditional bank. Here's exactly how they work and what actually separates a good one from a mediocre one.",
+  "intro": "Most traditional brick-and-mortar banks pay a savings rate so low it barely registers — often a small fraction of a percent. A **high-yield savings account (HYSA)**, typically offered by online-only banks and some credit unions, pays meaningfully more — frequently ten to twenty times the traditional average — while carrying the exact same FDIC insurance protection.\n\nThe catch, to the extent there is one, is that these accounts usually don't come with a physical branch to walk into. For money you don't need to touch in person — an emergency fund, a house down payment you're saving toward, cash you're parking between decisions — that tradeoff is almost never a real downside.\n\nThis guide covers how HYSAs actually work, what determines the rate you're offered, how to tell a genuinely good one from a marketing gimmick, and where they fit relative to checking accounts, CDs, and money market accounts.",
+  "tableOfContents": [
+    "How a High-Yield Savings Account Works",
+    "Why Online Banks Can Pay More",
+    "What to Look for When Comparing Accounts",
+    "HYSA vs Checking, CDs, and Money Market Accounts",
+    "Is Your Money Actually Safe?",
+    "Common Mistakes to Avoid",
+    "How to Open One",
+    "HYSAs and Rate Cycles",
+    "Multiple HYSAs: When It Makes Sense"
+  ],
+  "sections": [
+    {
+      "heading": "How a High-Yield Savings Account Works",
+      "paragraphs": [
+        "A high-yield savings account functions exactly like a regular savings account — you deposit money, it earns interest, and you can withdraw it without penalty. The only real difference is the rate. Where a traditional bank might pay a token amount, an HYSA typically pays a rate that at least keeps meaningful pace with, or exceeds, general cost-of-living increases in a given year.",
+        "Interest usually compounds daily and is credited monthly, so [compound interest](/articles/compound-interest) is quietly working in your favor from day one rather than accumulating only once a year.",
+        "Functionally, the account behaves like any other bank deposit account you'd recognize: you can view your balance and transaction history online or through a mobile app, set up direct deposit, and initiate transfers to and from a linked checking account. The interface and day-to-day experience of managing an HYSA is rarely the differentiator between providers — the rate, fee structure, and transfer reliability are what actually matter."
+      ]
+    },
+    {
+      "heading": "Why Online Banks Can Pay More",
+      "paragraphs": [
+        "Online-only banks skip the cost of maintaining a network of physical branches — real estate, tellers, in-person operations — and pass a meaningful share of those savings back to depositors as higher interest rates. Traditional banks, by contrast, often rely on low-rate deposits to fund other parts of their business and have less incentive to compete aggressively on savings yield.",
+        "This isn't a risk trade-off; it's a business-model trade-off. You're not taking on additional risk for the higher rate — you're simply banking with an institution that has a leaner cost structure and a business model built around attracting deposits with rate, not branch convenience."
+      ]
+    },
+    {
+      "heading": "What to Look for When Comparing Accounts",
+      "paragraphs": [
+        "Rate is the headline, but it's not the only thing that matters. A few features separate a genuinely strong account from one that looks good in an ad but disappoints in practice.",
+        "First, confirm the rate is not a temporary 'teaser' that drops sharply after a few months — some accounts advertise an attractive introductory rate that reverts to something unremarkable. Second, check for minimum balance requirements and monthly fees; the best HYSAs have neither. Third, look at withdrawal limits and transfer speed — most banks allow six withdrawals per statement cycle by convention (a holdover from an old federal rule that's since been relaxed but many banks still apply), and transfer times to an external checking account can range from same-day to several business days."
+      ],
+      "table": {
+        "caption": "What Separates a Strong HYSA From a Weak One",
+        "headers": ["Feature", "Strong Account", "Weak Account"],
+        "rows": [
+          ["Rate stability", "Consistent, published rate history", "Teaser rate that drops after 3-6 months"],
+          ["Minimum balance", "None or very low", "High minimum to earn advertised rate"],
+          ["Monthly fees", "None", "Maintenance fee unless balance threshold met"],
+          ["Transfer speed", "1-2 business days", "3+ business days routinely"],
+          ["FDIC insurance", "Clearly disclosed, verifiable", "Unclear or unverifiable"]
+        ]
+      }
+    },
+    {
+      "heading": "HYSA vs Checking, CDs, and Money Market Accounts",
+      "paragraphs": [
+        "A checking account is built for daily spending and transactions, not for earning interest — most pay little to nothing, and that's fine, since liquidity and bill-pay features matter more there than yield. A high-yield savings account fills the gap for money you want accessible but not actively spending: emergency funds, short-term savings goals, and cash reserves.",
+        "Certificates of Deposit (CDs) typically pay a fixed rate for a fixed term but penalize early withdrawal, making them better suited for money you're confident you won't need for a set period. Money market accounts sit between savings and checking — often paying competitive rates while sometimes offering check-writing or debit card access. For most people building or maintaining [an emergency fund](/articles/emergency-fund-guide), the flexibility of a no-penalty HYSA makes it the more practical default."
+      ]
+    },
+    {
+      "heading": "Is Your Money Actually Safe?",
+      "paragraphs": [
+        "Yes, provided the institution is FDIC-insured (or NCUA-insured for credit unions) — coverage protects deposits up to $250,000 per depositor, per institution, per ownership category. This is the exact same protection a traditional bank offers; an online-only bank with FDIC insurance carries no additional risk to your principal.",
+        "Before opening any account, verify insurance status directly using the FDIC's BankFind tool or the NCUA's equivalent for credit unions. It takes under a minute and removes any ambiguity."
+      ],
+      "callout": {
+        "title": "Online-only doesn't mean unregulated",
+        "text": "Online banks are still chartered, regulated financial institutions — many are simply the online-only division of an established bank you may already recognize. FDIC insurance applies identically either way."
+      }
+    },
+    {
+      "heading": "Common Mistakes to Avoid",
+      "paragraphs": [
+        "The most common mistake is chasing the single highest advertised rate without checking whether it's a temporary promotional rate. Rates across competitive HYSAs tend to cluster fairly close together at any given time (they move with broader interest rate conditions), so an outlier that's dramatically higher than everyone else deserves a second look at the fine print.",
+        "The second common mistake is opening the account and then never actually funding it or automating contributions — the best rate in the world does nothing for a $0 balance. Pair the account with automatic transfers so [your budget](/articles/how-to-create-a-monthly-budget) actually routes money there consistently."
+      ]
+    },
+    {
+      "heading": "How to Open One",
+      "paragraphs": [
+        "Opening a HYSA typically takes ten to fifteen minutes online: basic identity verification, linking an existing checking account for the initial deposit and future transfers, and confirming account details. Most online banks have no minimum opening deposit requirement, though a few ask for a modest amount to activate the account.",
+        "Once it's open, set up an automatic recurring transfer on payday so the account builds consistently without requiring an ongoing manual decision every month."
+      ]
+    },
+    {
+      "heading": "HYSAs and Rate Cycles",
+      "paragraphs": [
+        "HYSA rates move with broader interest rate conditions, meaning the rate you sign up for today isn't locked in for the life of the account the way a CD's rate is — it can rise or fall over time as the overall rate environment shifts. This isn't a flaw; it's simply the tradeoff for keeping your money fully liquid rather than committing it to a fixed term.",
+        "During periods when rates are broadly falling, it's worth periodically comparing your current HYSA against newer offers, since providers don't always lower existing customers' rates as quickly or as visibly as they advertise new promotional rates to attract fresh deposits. A rate check once or twice a year takes a few minutes and ensures you're not quietly earning meaningfully less than a comparable, equally safe account elsewhere."
+      ]
+    },
+    {
+      "heading": "Multiple HYSAs: When It Makes Sense",
+      "paragraphs": [
+        "Some savers maintain more than one HYSA — one dedicated to their emergency fund, another for a specific savings goal like a house down payment or a large upcoming purchase. This isn't necessary (many banks support labeled sub-accounts within a single HYSA that achieve the same organizational benefit), but it can be a useful psychological tool if seeing separate account balances helps you avoid dipping into money earmarked for one purpose to cover another.",
+        "If you do maintain more than one account, keep the total across all of them within FDIC insurance limits per institution, and avoid needlessly complicating your financial picture — two or three well-organized accounts is usually the practical ceiling before the added complexity outweighs the organizational benefit."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "High-yield savings accounts pay far more than traditional banks while carrying identical FDIC insurance protection up to $250,000 per depositor.",
+    "Online banks can offer higher rates because they skip the overhead of physical branches, not because they carry more risk.",
+    "Compare rate stability, minimum balance requirements, monthly fees, and transfer speed — not just the headline APY.",
+    "HYSAs are the practical default for emergency funds and short/medium-term savings; CDs suit money you won't touch for a fixed term.",
+    "Always verify FDIC or NCUA insurance directly before opening an account, especially with a less familiar online-only bank.",
+    "Automate transfers into the account so it actually builds — the best rate available does nothing for an account that never gets funded."
+  ],
+  "faq": [
+    {
+      "question": "Is a high-yield savings account worth it?",
+      "answer": "For money you're not actively investing but also don't want sitting idle — an emergency fund, short-term savings goals — yes. The rate difference compared to a traditional savings account compounds meaningfully over time with zero added risk."
+    },
+    {
+      "question": "Are high-yield savings accounts FDIC insured?",
+      "answer": "Yes, as long as the institution is FDIC-insured (or NCUA-insured if it's a credit union), coverage protects up to $250,000 per depositor, per institution — identical to any traditional bank."
+    },
+    {
+      "question": "Can the interest rate on a high-yield savings account change?",
+      "answer": "Yes. Unlike a CD, the rate is variable and can rise or fall with broader interest rate conditions. Check your statement periodically to confirm the rate is still competitive."
+    },
+    {
+      "question": "How much money should I keep in a high-yield savings account?",
+      "answer": "Most people keep their emergency fund and any short-term savings goals there — commonly three to six months of essential expenses, as covered in our emergency fund guide, plus any cash earmarked for near-term purchases."
+    },
+    {
+      "question": "Is there a minimum deposit to open a high-yield savings account?",
+      "answer": "Most online banks have no minimum opening deposit, though a small number require a modest initial amount. Compare a few options, since requirements vary by institution."
+    },
+    {
+      "question": "How is interest paid on a high-yield savings account taxed?",
+      "answer": "Interest earned is taxable as ordinary income in the year it's earned. Your bank will issue a Form 1099-INT if you earn above the reporting threshold in a calendar year."
+    },
+    {
+      "question": "Should I check my HYSA rate periodically?",
+      "answer": "Yes — rates are variable and move with broader interest rate conditions. Checking once or twice a year ensures your account is still competitive, since providers don't always adjust existing customers' rates as visibly as they promote new offers."
+    },
+    {
+      "question": "Is it better to have one HYSA or several?",
+      "answer": "Either works — a single account with labeled sub-accounts achieves the same organizational benefit as multiple separate accounts for most people, though some prefer separate accounts for the psychological clarity of seeing distinct balances for different goals."
+    },
+    {
+      "question": "Can I lose money in a high-yield savings account?",
+      "answer": "Not through market risk — the balance itself is not exposed to market fluctuations and is FDIC-insured up to the coverage limit. The only way purchasing power can decline is if the interest rate earned falls behind the inflation rate over time."
+    }
+  ],
+  "conclusion": "A high-yield savings account is one of the rare financial decisions with almost no downside: identical government-backed protection to any traditional bank, meaningfully better returns, and no added complexity. The only real work involved is comparing a handful of options on rate stability, fees, and transfer speed, then actually automating money into it.\n\nOnce it's open and funded, it becomes the foundation for everything else — your [emergency fund](/articles/emergency-fund-guide) sits there safely while [compounding](/articles/compound-interest) works quietly in the background, and any cash you're setting aside for a near-term goal earns real return instead of losing ground to inflation while it waits.\n\nRevisit the rate periodically, keep the account funded through automation rather than manual transfers, and resist the temptation to chase every marginally higher advertised rate that shows up in an ad — a stable, no-fee account from a reputable, FDIC-insured provider will almost always serve you better over the long run than repeatedly switching institutions for a small, often temporary, rate advantage.",
+  "internalLinks": [
+    { "anchor": "compound interest", "slug": "compound-interest" },
+    { "anchor": "emergency fund guide", "slug": "emergency-fund-guide" },
+    { "anchor": "how to create a monthly budget", "slug": "how-to-create-a-monthly-budget" },
+    { "anchor": "how much savings should you have", "slug": "how-much-savings-should-you-have" },
+    { "anchor": "how inflation affects your savings", "slug": "how-inflation-affects-your-savings" }
+  ],
+  "externalSources": [
+    { "name": "FDIC — Deposit Insurance", "url": "https://www.fdic.gov/resources/deposit-insurance/" },
+    { "name": "National Credit Union Administration — Share Insurance", "url": "https://www.ncua.gov/consumers/share-insurance-coverage" },
+    { "name": "Consumer Financial Protection Bureau", "url": "https://www.consumerfinance.gov/" }
+  ],
+  "wordCountEstimate": 1500
+}

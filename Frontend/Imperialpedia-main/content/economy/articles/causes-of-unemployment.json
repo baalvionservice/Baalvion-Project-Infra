@@ -1,0 +1,114 @@
+{
+  "topicNumber": 9,
+  "title": "What Causes Unemployment? The Four Main Types",
+  "slug": "causes-of-unemployment",
+  "seo": {
+    "seoTitle": "Causes of Unemployment: Frictional, Structural, Cyclical & Seasonal",
+    "metaDescription": "Not all unemployment has the same cause or solution. Here's a clear breakdown of frictional, structural, cyclical, and seasonal unemployment.",
+    "focusKeyword": "causes of unemployment",
+    "secondaryKeywords": [
+      "types of unemployment",
+      "frictional unemployment",
+      "structural unemployment",
+      "cyclical unemployment",
+      "natural rate of unemployment"
+    ],
+    "searchIntent": "Informational — users wanting to understand the different underlying causes and types of unemployment",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Unemployment isn't one problem with one cause — economists distinguish four distinct types, each with a different underlying cause and a different policy response.",
+  "intro": "Not all unemployment looks the same, and lumping it into a single number obscures meaningful differences in cause and remedy. Economists generally distinguish four types: frictional, structural, cyclical, and seasonal — each driven by a different mechanism, and each responding to a different kind of policy or personal response.\n\nUnderstanding which type is dominant at a given moment helps explain both the [headline unemployment rate](/articles/unemployment-rate) and why the appropriate response (waiting it out, retraining, stimulus spending) differs depending on the underlying cause.",
+  "tableOfContents": [
+    "Frictional Unemployment",
+    "Structural Unemployment",
+    "Cyclical Unemployment",
+    "Seasonal Unemployment",
+    "The Natural Rate of Unemployment",
+    "Why the Type Matters More Than the Number"
+  ],
+  "sections": [
+    {
+      "heading": "Frictional Unemployment",
+      "paragraphs": [
+        "Frictional unemployment describes the normal, short-term gap between jobs that occurs as people voluntarily leave one position to search for a better one, graduate and look for their first job, or relocate. It's considered a healthy, unavoidable feature of a functioning labor market rather than a problem to solve — some level of frictional unemployment exists even in a strong economy."
+      ]
+    },
+    {
+      "heading": "Structural Unemployment",
+      "paragraphs": [
+        "Structural unemployment arises from a mismatch between the skills workers have and the skills employers need, often driven by technological change, automation, or a fundamental shift in which industries are growing versus declining. Unlike frictional unemployment, structural unemployment can persist for extended periods since it typically requires retraining, education, or geographic relocation to resolve — changes that take considerably longer than simply finding the next available job."
+      ]
+    },
+    {
+      "heading": "Cyclical Unemployment",
+      "paragraphs": [
+        "Cyclical unemployment rises and falls with the [business cycle](/articles/business-cycles) — businesses lay off workers during a contraction as demand falls, and rehire during an expansion as demand recovers. This is the type most directly targeted by monetary and fiscal policy responses, since it's driven by a temporary, broad-based drop in demand rather than a permanent skills mismatch or normal job-search friction."
+      ]
+    },
+    {
+      "heading": "Seasonal Unemployment",
+      "paragraphs": [
+        "Seasonal unemployment reflects predictable, recurring fluctuations tied to the calendar — agricultural work, retail hiring around the holidays, tourism-dependent jobs. Because it's predictable, it's typically excluded or adjusted for ('seasonally adjusted') in headline unemployment figures, so the reported rate reflects underlying trends rather than expected seasonal swings."
+      ],
+      "table": {
+        "caption": "The Four Types of Unemployment",
+        "headers": ["Type", "Cause", "Typical Duration"],
+        "rows": [
+          ["Frictional", "Normal job search and transitions", "Short-term"],
+          ["Structural", "Skills mismatch, automation, industry shifts", "Can persist without intervention"],
+          ["Cyclical", "Business cycle downturns", "Tied to the length of the contraction"],
+          ["Seasonal", "Predictable calendar-based fluctuations", "Recurring, adjusted for in official data"]
+        ]
+      }
+    },
+    {
+      "heading": "The Natural Rate of Unemployment",
+      "paragraphs": [
+        "The natural rate of unemployment refers to the level of frictional plus structural unemployment that exists even in a healthy, fully-functioning economy — meaning the unemployment rate is very unlikely to reach zero even under ideal conditions. Economists debate the exact natural rate at any given time, but the concept itself is central to monetary policy: when unemployment falls meaningfully below the estimated natural rate, it can signal an overheating labor market and rising inflationary pressure, which is part of what central banks watch when setting interest rate policy."
+      ]
+    },
+    {
+      "heading": "Why the Type Matters More Than the Number",
+      "paragraphs": [
+        "A given unemployment rate can mean very different things depending on which type is driving it. Elevated cyclical unemployment during a recession calls for stimulative monetary and fiscal policy. Elevated structural unemployment calls for retraining programs and education investment — tools that work on a much longer timeline. Confusing the two, or applying the wrong policy tool to the wrong type, is a common source of ineffective economic policy response. See [employment and economic growth](/articles/employment-and-economic-growth) for how the labor market connects more broadly to overall economic output."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Frictional unemployment is the normal, short-term gap between jobs and is considered a healthy feature of the labor market.",
+    "Structural unemployment stems from a skills mismatch and can persist without retraining, education, or relocation.",
+    "Cyclical unemployment rises and falls with the business cycle and is the type most directly targeted by monetary and fiscal policy.",
+    "Seasonal unemployment reflects predictable calendar-based swings and is typically adjusted for in official reported figures.",
+    "The natural rate of unemployment (frictional plus structural) means zero unemployment isn't realistic even in a healthy economy.",
+    "Identifying which type is dominant matters more than the headline number, since each type calls for a different policy response."
+  ],
+  "faq": [
+    {
+      "question": "What are the four types of unemployment?",
+      "answer": "Frictional (normal job transitions), structural (skills mismatch), cyclical (tied to the business cycle), and seasonal (predictable calendar-based fluctuations)."
+    },
+    {
+      "question": "Which type of unemployment is the most concerning?",
+      "answer": "Structural and prolonged cyclical unemployment tend to draw the most policy attention, since frictional and seasonal unemployment are considered normal, healthy features of a functioning labor market."
+    },
+    {
+      "question": "What is the natural rate of unemployment?",
+      "answer": "The level of unemployment (frictional plus structural) that exists even in a fully healthy economy — meaning zero unemployment isn't a realistic or even necessarily desirable target."
+    },
+    {
+      "question": "Can unemployment ever reach zero percent?",
+      "answer": "Not realistically or sustainably — some frictional unemployment always exists as people transition between jobs, and pushing unemployment far below the natural rate can trigger inflationary pressure rather than reflecting genuine economic health."
+    }
+  ],
+  "conclusion": "Treating unemployment as a single undifferentiated number misses the more useful question: what's actually driving it right now? Frictional and seasonal unemployment are normal background noise; structural and cyclical unemployment are the types that call for a deliberate response — and knowing which one is elevated determines whether the right tool is retraining programs, interest rate cuts, or simply time.",
+  "internalLinks": [
+    { "anchor": "unemployment rate", "slug": "unemployment-rate" },
+    { "anchor": "business cycles", "slug": "business-cycles" },
+    { "anchor": "employment and economic growth", "slug": "employment-and-economic-growth" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Bureau of Labor Statistics", "url": "https://www.bls.gov/" },
+    { "name": "Federal Reserve — Labor Market Conditions", "url": "https://www.federalreserve.gov/" }
+  ],
+  "wordCountEstimate": 1350
+}

@@ -55,16 +55,15 @@ function startSchedulerWorker() {
 
         // Bust the public delivery cache + revalidate the frontend so the
         // auto-published post goes live exactly like a manual publish.
+        const { paths, urls: contentUrls } = revalidateService.pathsForContent(content, website && website.domain);
         if (websiteSlug) {
             try { await cache.delPattern(`cms:public:${websiteSlug}:*`); } catch { /* fail-open */ }
-            try {
-                const { paths, urls } = revalidateService.pathsForContent(content, website && website.domain);
-                revalidateService.dispatch(websiteSlug, { paths, urls });
-            } catch { /* fail-open */ }
+            try { revalidateService.dispatch(websiteSlug, { paths, urls: contentUrls }); } catch { /* fail-open */ }
         }
 
-        // SEO indexing trigger: notify search engines immediately on auto-publish too.
-        try { require('../service/seoPingService').pingForWebsite(website); } catch { /* fail-open */ }
+        // SEO indexing trigger: notify search engines immediately on auto-publish too
+        // (IndexNow + Google Indexing API), including the specific content URL.
+        try { require('../service/seoPingService').pingForWebsite(website, contentUrls); } catch { /* fail-open */ }
 
         logger('scheduler').info({ contentId, websiteSlug }, 'auto-published scheduled content');
     }, { connection });

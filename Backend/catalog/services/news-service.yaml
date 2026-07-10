@@ -1,0 +1,22 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: news-service
+  description: Baalvion Intelligence — RSS/press-release/government news ingestion + public News API, API-key authenticated via developer-service.
+  domain: knowledge
+  division: platform-core
+  context: news-intelligence
+  owner: "@baalvion/knowledge"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/knowledge/news-service
+spec:
+  lifecycle: experimental
+  language: node
+  datastores: [postgres, redis]
+  dependsOn: [auth-service, developer-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/news", "/internal/v1/news"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-knowledge, minReplicas: 2, maxReplicas: 10 }
