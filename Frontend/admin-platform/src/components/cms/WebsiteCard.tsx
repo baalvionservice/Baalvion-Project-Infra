@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe, Users, FileText, MoreHorizontal, Settings, Trash2, ExternalLink } from 'lucide-react';
+import { Globe, Users, FileText, MoreHorizontal, Settings, Trash2, ExternalLink, Power, PowerOff } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,6 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useToggleWebsiteStatus } from '@/lib/queries/cms-websites.queries';
 import type { Website } from '@/lib/types/cms-website.types';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -28,6 +29,16 @@ interface Props {
 }
 
 export default function WebsiteCard({ website, onDelete, onSelect }: Props) {
+  const { mutate: toggleStatus, isPending: isToggling } = useToggleWebsiteStatus(website.id);
+  const isActive = website.status === 'active';
+
+  const handleToggleStatus = () => {
+    if (isActive && !window.confirm(`Disable "${website.name}"? Its content will stop being served immediately.`)) {
+      return;
+    }
+    toggleStatus(isActive ? 'inactive' : 'active');
+  };
+
   return (
     <Card className="group hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">
@@ -63,6 +74,19 @@ export default function WebsiteCard({ website, onDelete, onSelect }: Props) {
                   <ExternalLink className="mr-2 h-4 w-4" />
                   View Site
                 </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled={isToggling} onClick={handleToggleStatus}>
+                {isActive ? (
+                  <>
+                    <PowerOff className="mr-2 h-4 w-4" />
+                    Disable
+                  </>
+                ) : (
+                  <>
+                    <Power className="mr-2 h-4 w-4" />
+                    Enable
+                  </>
+                )}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem

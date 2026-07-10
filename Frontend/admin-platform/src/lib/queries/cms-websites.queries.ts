@@ -73,6 +73,23 @@ export const useUpdateWebsite = (id: string) => {
   });
 };
 
+// Activate/suspend a website. Suspending flips cms-service status to 'inactive',
+// which immediately 404s all public content endpoints for that site (see
+// publicService._resolveWebsite) — this is the enable/disable kill switch.
+export const useToggleWebsiteStatus = (id: string) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (nextStatus: 'active' | 'inactive') =>
+      nextStatus === 'active' ? websitesApi.activate(id) : websitesApi.suspend(id),
+    onSuccess: (res, nextStatus) => {
+      qc.setQueryData(websiteKeys.detail(id), res.data.data);
+      qc.invalidateQueries({ queryKey: websiteKeys.all });
+      toast.success(nextStatus === 'active' ? 'Website activated' : 'Website disabled');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
 export const useDeleteWebsite = () => {
   const qc = useQueryClient();
   return useMutation({

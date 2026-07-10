@@ -88,9 +88,18 @@ async function updateWebsite(websiteId, scope, body) {
     const website = await CmsWebsite.findOne({ where: { id: websiteId, ...orgFilter(scope) } });
     if (!website) throw new AppError('NOT_FOUND', 'Website not found', 404);
 
+    const statusChanged = 'status' in body && body.status !== website.status;
+    const { slug } = website;
+
     await website.update(body);
     await cache.del(cache.keys.website(websiteId));
     await cache.delPattern(`cms:websites:org:${website.organizationId}*`);
+    // A status flip (e.g. active -> inactive) must take effect immediately, not
+    // wait out the public content TTL — otherwise a "disabled" site keeps serving
+    // stale cached content/list/category responses for up to publicTtl seconds.
+    if (statusChanged) {
+        await cache.delPattern(`cms:public:${slug}:*`);
+    }
     return website.toJSON();
 }
 

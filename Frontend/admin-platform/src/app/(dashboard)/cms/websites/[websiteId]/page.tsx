@@ -20,13 +20,15 @@ import {
   Send,
   ArrowRight,
   BarChart3,
+  Power,
+  PowerOff,
 } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useWebsite } from '@/lib/queries/cms-websites.queries';
+import { useWebsite, useToggleWebsiteStatus } from '@/lib/queries/cms-websites.queries';
 import { useWorkflowStats } from '@/lib/queries/cms-workflow.queries';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import { useUIStore } from '@/lib/store/uiStore';
@@ -175,6 +177,7 @@ export default function WebsiteDetailPage({
   // slug, so resolve it via the loaded website before hitting those services.
   const canonicalId = website?.id ?? '';
   const { data: workflowStats } = useWorkflowStats(canonicalId);
+  const { mutate: toggleStatus, isPending: isToggling } = useToggleWebsiteStatus(canonicalId);
 
   useEffect(() => {
     if (website) {
@@ -203,6 +206,14 @@ export default function WebsiteDetailPage({
   if (!website) return null;
 
   const pendingCount = workflowStats?.pending ?? 0;
+  const isActive = website.status === 'active';
+
+  const handleToggleStatus = () => {
+    if (isActive && !window.confirm(`Disable "${website.name}"? Its content will stop being served immediately.`)) {
+      return;
+    }
+    toggleStatus(isActive ? 'inactive' : 'active');
+  };
 
   return (
     <div className="space-y-6">
@@ -215,9 +226,34 @@ export default function WebsiteDetailPage({
         </Button>
         <PageHeader
           title={website.name}
+          titleAdornment={
+            <Badge
+              variant="outline"
+              className={`text-xs capitalize ${
+                isActive
+                  ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/20 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-600 border-gray-200'
+              }`}
+            >
+              {website.status}
+            </Badge>
+          }
           description={`You're managing the content for ${website.domain}. Pick a tool below to get started.`}
           actions={
             <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" disabled={isToggling} onClick={handleToggleStatus}>
+                {isActive ? (
+                  <>
+                    <PowerOff className="mr-2 h-4 w-4" />
+                    Disable site
+                  </>
+                ) : (
+                  <>
+                    <Power className="mr-2 h-4 w-4" />
+                    Enable site
+                  </>
+                )}
+              </Button>
               <Button variant="outline" size="sm" asChild>
                 <a href={`https://${website.domain}`} target="_blank" rel="noopener noreferrer">
                   <ExternalLink className="mr-2 h-4 w-4" />
