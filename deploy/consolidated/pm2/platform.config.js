@@ -42,6 +42,19 @@ module.exports = {
     },
     svc('imperialpedia-service', 'knowledge/imperialpedia-service',3004),
     svc('law-service',           'knowledge/law-service',          3015, 256, 384), // multer/S3/ws + billing worker
+    // news-service. Public News API for baalvion-intelligence (signal.baalvion.com), reached via
+    // the news.baalvion.com Caddy route. Its API key auth calls developer-service's
+    // /v1/keys/verify over localhost using INTERNAL_API_KEY — same shared secret on both sides
+    // (box .env), same pattern as RBAC_INTERNAL_API_KEY/AUDIT_INTERNAL_KEY elsewhere in this file.
+    {
+      ...svc('news-service', 'knowledge/news-service', 3045, 224, 320), // BullMQ ingestion worker
+      env: {
+        NODE_ENV: 'production',
+        PORT: '3045',
+        CORS_ORIGINS: 'https://signal.baalvion.com',
+        INTERNAL_API_KEY: process.env.INTERNAL_API_KEY || '',
+      },
+    },
     // infrastructure utilities (non-realtime)
     svc('audit-service',         'infrastructure/audit-service',   3032),
     svc('developer-service',     'infrastructure/developer-service',3042),

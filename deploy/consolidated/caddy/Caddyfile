@@ -207,3 +207,12 @@ admin.baalvion.com {
 #      commerce.baalvion.com   -> app-commerce:3013   (order-service)
 #      trade.baalvion.com      -> app-trade:3052      (order-execution-service)
 #      ir.baalvion.com         -> app-ecosystem:3008  (ir-service)
+
+# ── News Intelligence public API → news-service. Called server-side by the
+# baalvion-intelligence Cloudflare Worker (signal.baalvion.com); each request carries its
+# own Authorization: Bearer <key>, verified by news-service itself against developer-service
+# (see routes/v1: /v1/news, /v1/stats). No session/BFF gating needed at the edge.
+news.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-platform:3045
+}
