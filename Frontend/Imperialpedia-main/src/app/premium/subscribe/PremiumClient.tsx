@@ -28,10 +28,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from '@/components/ui/input';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
+import { startPremiumCheckout } from '@/lib/payments/checkout';
 
 interface PremiumClientProps {
   data: PremiumState;
@@ -48,33 +48,51 @@ export function PremiumClient({ data }: PremiumClientProps) {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const handleTierSelect = (tier: SubscriptionTier) => {
     if (tier.id === data.activeTier) return;
     setSelectedTier(tier);
     setIsCheckoutOpen(true);
     setIsSuccess(false);
+    setCheckoutError(null);
   };
 
   const handleCheckout = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedTier) return;
     setIsProcessing(true);
-    
-    // Simulate payment gateway handshake
-    await new Promise(r => setTimeout(r, 2000));
-    
-    setIsProcessing(false);
-    setIsSuccess(true);
-    
-    toast({
-      title: "Subscription Activated",
-      description: `Welcome to the ${selectedTier?.name} intelligence tier!`,
-    });
+    setCheckoutError(null);
 
-    // Close modal after showing success state
-    setTimeout(() => {
-      setIsCheckoutOpen(false);
-    }, 2500);
+    try {
+      const result = await startPremiumCheckout({
+        tierKey: selectedTier.id,
+        billingCycle: billingCycle === 'yearly' ? 'annual' : 'monthly',
+        onSuccess: () => {
+          setIsSuccess(true);
+          toast({
+            title: "Subscription Activated",
+            description: `Welcome to the ${selectedTier.name} intelligence tier!`,
+          });
+          setTimeout(() => setIsCheckoutOpen(false), 2500);
+        },
+      });
+
+      if (result.status === 'activated') {
+        setIsSuccess(true);
+        toast({
+          title: "Subscription Activated",
+          description: `Welcome to the ${selectedTier.name} intelligence tier!`,
+        });
+        setTimeout(() => setIsCheckoutOpen(false), 2500);
+      }
+      // status === 'modal_open': the Razorpay modal is now showing; onSuccess above fires when the
+      // buyer completes payment there. Real activation is confirmed server-side by the webhook.
+    } catch (err) {
+      setCheckoutError(err instanceof Error ? err.message : 'Unable to start checkout');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return (
@@ -257,42 +275,26 @@ export function PremiumClient({ data }: PremiumClientProps) {
                   </div>
                 </div>
 
-                <div className="space-y-5">
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Cardholder Identity</Label>
-                    <Input placeholder="Enter full name as printed on card" className="bg-background/50 h-12 border-white/5 rounded-xl font-medium" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Card Data Matrix</Label>
-                    <div className="relative group">
-                      <Input placeholder="•••• •••• •••• ••••" className="bg-background/50 h-12 pl-12 font-mono border-white/5 rounded-xl group-focus-within:border-primary/40 transition-all" required />
-                      <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground group-focus-within:text-primary transition-colors" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">Expiry</Label>
-                      <Input placeholder="MM / YY" className="bg-background/50 h-12 border-white/5 rounded-xl text-center font-mono" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground ml-1">CVC</Label>
-                      <Input placeholder="•••" className="bg-background/50 h-12 border-white/5 rounded-xl text-center font-mono" required />
-                    </div>
-                  </div>
-                </div>
-
                 <div className="flex items-start gap-4 p-5 rounded-2xl bg-muted/20 border border-white/5">
-                  <Info className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                  <Text variant="caption" className="text-muted-foreground leading-relaxed italic">
-                    This is a non-functional mock interface for testing. No real transaction will occur. Your financial data is not stored.
+                  <CreditCard className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <Text variant="caption" className="text-muted-foreground leading-relaxed">
+                    Card, UPI and netbanking details are collected securely inside Razorpay&rsquo;s own
+                    checkout window — we never see or store your payment data.
                   </Text>
                 </div>
+
+                {checkoutError && (
+                  <div className="flex items-start gap-4 p-5 rounded-2xl bg-destructive/10 border border-destructive/20">
+                    <Info className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
+                    <Text variant="caption" className="text-destructive leading-relaxed">{checkoutError}</Text>
+                  </div>
+                )}
               </div>
 
               <DialogFooter className="p-8 bg-muted/20 border-t border-white/5 flex gap-3">
                 <Button type="button" variant="ghost" onClick={() => setIsCheckoutOpen(false)} className="h-12 px-8 rounded-xl font-bold">Discard</Button>
                 <Button type="submit" disabled={isProcessing} className="h-12 flex-1 rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all scale-105 active:scale-95">
-                  {isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Verifying...</> : 'Authenticate & Subscribe'}
+                  {isProcessing ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Starting checkout...</> : 'Continue to Secure Checkout'}
                 </Button>
               </DialogFooter>
             </form>
