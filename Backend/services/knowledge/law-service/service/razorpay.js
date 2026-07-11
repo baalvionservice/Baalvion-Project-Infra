@@ -105,9 +105,17 @@ const safeEqual = (a, b) => {
 };
 
 // Checkout callback signature: HMAC_SHA256("order_id|payment_id", key_secret).
+// This is the SOLE gate for accepting a client-supplied signature — every
+// input is validated here (type + presence) before the cryptographic
+// comparison runs, so callers can invoke this unconditionally rather than
+// pre-checking client fields themselves (a user-controlled boolean must
+// never decide whether the crypto check even runs).
 async function verifyPaymentSignature({ orderId, paymentId, signature }) {
     const cfg = await resolveConfig();
-    if (!cfg || !cfg.keySecret || !signature) return false;
+    if (!cfg || !cfg.keySecret) return false;
+    if (typeof signature !== 'string' || !signature) return false;
+    if (typeof paymentId !== 'string' || !paymentId) return false;
+    if (typeof orderId !== 'string' || !orderId) return false;
     const expected = crypto.createHmac('sha256', cfg.keySecret).update(`${orderId}|${paymentId}`).digest('hex');
     return safeEqual(expected, signature);
 }

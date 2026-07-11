@@ -125,19 +125,21 @@ const verifyPayment = async (req, res, next) => {
             if (!client || payment.client_id !== client.id) return next(new AppError('FORBIDDEN', 'Not authorised', 403));
         }
 
-        const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body || {};
+        // razorpay_order_id is deliberately ignored: orderId is always the server's OWN record
+        // (payment.provider_tx_id, stamped in createPayment) — never client-suppliable. Accepting
+        // a client-chosen orderId would let an attacker replay a genuinely-valid signature from a
+        // different (e.g. cheaper) transaction they legitimately paid, to mark THIS payment row
+        // succeeded (a signature-replay/payment-confusion vulnerability, not merely theoretical:
+        // the HMAC only proves paymentId belongs to orderId, not that THIS payment authorized it).
+        const { razorpay_payment_id, razorpay_signature } = req.body || {};
         // When the gateway is configured, signature verification is mandatory — the branch is
         // chosen by the server-side gateway state, NOT by whether the client supplied a signature.
-        // A missing/empty client signature must fail verification, never fall through to settlement.
+        // verifyPaymentSignature is the SOLE gate and validates every field (type + presence)
+        // internally before the cryptographic comparison — called unconditionally here so no
+        // user-controlled boolean ever decides whether that check runs.
         if (await razorpay.isConfigured()) {
-            // Fail closed if the client did not supply the required, well-formed signature
-            // fields. The security decision below is made SOLELY by the server-side
-            // cryptographic check, not by the presence of a user-supplied signature.
-            const hasSignatureFields =
-                typeof razorpay_signature === 'string' && razorpay_signature.length > 0 &&
-                typeof razorpay_payment_id === 'string' && razorpay_payment_id.length > 0;
-            const ok = hasSignatureFields && await razorpay.verifyPaymentSignature({
-                orderId: razorpay_order_id || payment.provider_tx_id,
+            const ok = await razorpay.verifyPaymentSignature({
+                orderId: payment.provider_tx_id,
                 paymentId: razorpay_payment_id,
                 signature: razorpay_signature,
             }) === true;
