@@ -188,6 +188,10 @@ export const caseApi = {
 export const messageApi = {
   list: (params: Record<string, unknown>) => apiClient.get('/messages', { params }),
   send: (data: unknown) => apiClient.post('/messages', data),
+  unreadCount: () => apiClient.get('/messages/unread-count'),
+  upload: (form: FormData) => apiClient.post('/messages/upload', form, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  downloadUrl: (id: string) => apiClient.get(`/messages/${id}/file`),
+  startCall: (data: unknown) => apiClient.post('/messages/call', data),
 };
 
 export const documentApi = {
@@ -202,9 +206,9 @@ export const paymentApi = {
 };
 
 export const subscriptionApi = {
-  get: () => apiClient.get('/subscriptions'),
+  get: (config?: { params?: Record<string, unknown> }) => apiClient.get('/subscriptions', config),
   create: (data: unknown) => apiClient.post('/subscriptions', data),
-  cancel: () => apiClient.post('/subscriptions/cancel'),
+  cancel: (subscriberType?: string) => apiClient.post('/subscriptions/cancel', { subscriberType }),
 };
 
 export const payoutApi = {

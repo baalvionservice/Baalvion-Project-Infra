@@ -30,21 +30,24 @@ const adaptSub = (s: any) => {
   };
 };
 
-export const createSubscription = async (_userId: string, planId: string, _role = 'client') => {
-  const res = await subscriptionApi.create({ tier: planToTier(planId) });
+export const createSubscription = async (_userId: string, planId: string, role = 'client') => {
+  const subscriberType = role === 'lawyer' ? 'lawyer' : 'client';
+  const res = await subscriptionApi.create({ tier: planToTier(planId), subscriberType });
   return adaptSub(res?.data?.data);
 };
 
-export const getUserSubscription = async (_userId?: string) => {
+export const getUserSubscription = async (_userId?: string, role = 'client') => {
   try {
-    const res = await subscriptionApi.get();
+    const subscriberType = role === 'lawyer' ? 'lawyer' : 'client';
+    const res = await subscriptionApi.get({ params: { subscriberType } });
     return adaptSub(res?.data?.data);
   } catch {
     return null;
   }
 };
 
-export const cancelSubscription = async (_userId?: string) => {
-  await subscriptionApi.cancel();
+export const cancelSubscription = async (_userId?: string, role = 'client') => {
+  const subscriberType = role === 'lawyer' ? 'lawyer' : 'client';
+  await subscriptionApi.cancel(subscriberType);
   return { success: true };
 };

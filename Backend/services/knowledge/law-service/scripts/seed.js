@@ -119,6 +119,35 @@ async function seed() {
         lawyers.push(row);
     }
 
+    // ── Geo + practice-area backfill for seeded lawyers (best-effort, matches
+    // the production backfill strategy: unmatched rows stay free-text-only) ──
+    const cityLookup = new Map(
+        (await db.City.findAll({ include: [{ model: db.State, as: 'state' }] }))
+            .map((c) => [`${c.country_code}::${c.name}`, c]),
+    );
+    const practiceAreaByKeyword = new Map(
+        (await db.PracticeArea.findAll()).map((p) => [p.slug, p]),
+    );
+    const SPEC_TO_SLUG = {
+        'criminal law': 'criminal', appeals: 'criminal', 'corporate law': 'corporate',
+        'm&a': 'corporate', 'immigration law': 'immigration', 'family law': 'family',
+        'civil litigation': 'civil', 'intellectual property': 'intellectual-property',
+        patents: 'intellectual-property', arbitration: 'arbitration',
+        'commercial law': 'corporate', 'real estate law': 'real-estate',
+        'tax law': 'tax', compliance: 'tax', 'labor law': 'labour',
+    };
+    for (const l of lawyerSpec) {
+        const row = lawyers[lawyerSpec.indexOf(l)];
+        const city = cityLookup.get(`${l.cc}::${l.city}`);
+        if (city && !row.state_id) await row.update({ state_id: city.state_id, city_id: city.id });
+        const slugs = [...new Set(l.specs.map((s) => SPEC_TO_SLUG[s.toLowerCase()]).filter(Boolean))];
+        const areas = slugs.map((s) => practiceAreaByKeyword.get(s)).filter(Boolean);
+        if (areas.length) {
+            const existing = await row.getPracticeAreas();
+            if (!existing.length) await row.setPracticeAreas(areas);
+        }
+    }
+
     // ── Clients ──────────────────────────────────────────────────────────────────
     const clientSpec = [
         { u: 0, name: 'Maria Gomez', phone: '+1-202-555-0101', location: 'New York, NY', tier: 'PROFESSIONAL' },

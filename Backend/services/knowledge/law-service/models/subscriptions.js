@@ -2,7 +2,15 @@
 module.exports = (sequelize, DataTypes) => {
     const Subscription = sequelize.define('Subscription', {
         id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-        client_id: { type: DataTypes.INTEGER, allowNull: false },
+        client_id: { type: DataTypes.INTEGER, allowNull: true },
+        lawyer_id: { type: DataTypes.INTEGER, allowNull: true },
+        // Which side this subscription belongs to — lets one table serve both the
+        // client billing flow (pre-existing) and the lawyer activation-gate flow
+        // (registration wizard Subscription step) without forking the model.
+        subscriber_type: {
+            type: DataTypes.ENUM('client', 'lawyer'),
+            defaultValue: 'client',
+        },
         tier: {
             type: DataTypes.ENUM('BASIC', 'PROFESSIONAL', 'ENTERPRISE'),
             allowNull: false,
@@ -29,6 +37,7 @@ module.exports = (sequelize, DataTypes) => {
 
     Subscription.associate = (db) => {
         Subscription.belongsTo(db.Client, { foreignKey: 'client_id', as: 'client' });
+        Subscription.belongsTo(db.Lawyer, { foreignKey: 'lawyer_id', as: 'lawyer' });
     };
 
     return Subscription;

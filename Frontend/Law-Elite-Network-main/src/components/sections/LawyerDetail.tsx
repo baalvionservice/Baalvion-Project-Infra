@@ -29,7 +29,11 @@ import ReviewForm from '@/components/review/ReviewForm';
 import BookingModal from '@/components/booking/BookingModal';
 import { getReviewsByLawyer, getAverageRating } from '@/services/reviewService';
 import { useAuthStore } from '@/store/authStore';
+import { useAuthContext } from '@/context/AuthContext';
 import { resolvePersonImage } from '@/lib/article-art';
+import { sendConnectionRequest } from '@/services/connections/connectionService';
+import { useToast } from '@/hooks/use-toast';
+import { UserPlus, Users } from 'lucide-react';
 
 interface LawyerDetailProps {
   lawyer: {
@@ -47,6 +51,12 @@ interface LawyerDetailProps {
     profileImage?: string;
     isVerified?: boolean;
     totalReviews?: number;
+    country?: string | null;
+    state?: { id: number; name: string; code?: string | null } | null;
+    cityRef?: { id: number; name: string } | null;
+    practiceAreas?: { id: number; name: string; slug: string }[];
+    languages?: string[];
+    availableFor?: { consultation?: boolean; case_referral?: boolean; international_collaboration?: boolean };
   };
 }
 
@@ -58,10 +68,27 @@ interface LawyerDetailProps {
 export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { role } = useAuthContext();
+  const { toast } = useToast();
   const [reviews, setReviews] = useState<any[]>([]);
   const [averageRating, setAverageRating] = useState(lawyer.rating?.toString() || "5.0");
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [networkAction, setNetworkAction] = useState<'follow' | 'connect' | null>(null);
+  const [networkSent, setNetworkSent] = useState<{ follow?: boolean; connect?: boolean }>({});
+
+  const handleNetworkRequest = async (relation: 'follow' | 'connect') => {
+    setNetworkAction(relation);
+    try {
+      await sendConnectionRequest(Number(lawyer.id), relation);
+      setNetworkSent((s) => ({ ...s, [relation]: true }));
+      toast({ title: relation === 'follow' ? 'Now following' : 'Connection request sent' });
+    } catch (error: any) {
+      toast({ title: 'Request failed', description: error?.response?.data?.error?.message || error?.message, variant: 'destructive' });
+    } finally {
+      setNetworkAction(null);
+    }
+  };
 
   const loadReviews = async () => {
     setLoadingReviews(true);
@@ -90,12 +117,23 @@ export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
     setIsBookingOpen(true);
   };
 
-  const specs = Array.isArray(lawyer.specialization) 
-    ? lawyer.specialization 
+  const specs = Array.isArray(lawyer.specialization)
+    ? lawyer.specialization
     : [lawyer.specialization];
 
   const city = lawyer.city || lawyer.location || 'Global';
   const fee = lawyer.consultationFee || (lawyer as any).hourlyRate || 5000;
+
+  // Location breadcrumb: Country / State / City — degrades gracefully when a
+  // lawyer predates the geo taxonomy (state/city are null, free-text city stands in).
+  const breadcrumbParts = [lawyer.country, lawyer.state?.name, lawyer.cityRef?.name || lawyer.city].filter(Boolean);
+  const practiceAreaChips = lawyer.practiceAreas?.length ? lawyer.practiceAreas.map((p) => p.name) : specs;
+  const availableFor = lawyer.availableFor || {};
+  const availabilityFlags = [
+    { key: 'consultation', label: 'Consultation', on: availableFor.consultation !== false },
+    { key: 'case_referral', label: 'Case Referral', on: !!availableFor.case_referral },
+    { key: 'international_collaboration', label: 'International Collaboration', on: !!availableFor.international_collaboration },
+  ];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24 md:pb-0">
@@ -127,7 +165,10 @@ export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
           
           <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
             <div className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5 text-blue-600" /> {specs[0]} Practitioner</div>
-            <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-blue-600" /> {city} Jurisdiction</div>
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-blue-600" />
+              {breadcrumbParts.length ? breadcrumbParts.join(' / ') : `${city} Jurisdiction`}
+            </div>
           </div>
           
           <div className="mt-4 flex items-center justify-center md:justify-start gap-1 text-blue-600 text-[10px] font-bold uppercase tracking-widest">
@@ -176,13 +217,36 @@ export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
                   <CalendarCheck className="w-4 h-4 mr-2" />
                   SECURE CONSULTATION
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   className="w-full border-slate-200 hover:bg-slate-50 h-12 font-bold rounded-xl transition-all text-[10px] uppercase tracking-widest text-slate-600"
                 >
                   <MessageSquare className="w-4 h-4 mr-2 text-blue-600" />
                   MESSAGE COUNSEL
                 </Button>
+
+                {role === 'lawyer' && (
+                  <div className="flex gap-2 pt-1">
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-slate-200 hover:bg-slate-50 h-10 text-[9px] font-bold uppercase tracking-widest text-slate-600"
+                      disabled={!!networkAction || networkSent.follow}
+                      onClick={() => handleNetworkRequest('follow')}
+                    >
+                      <Users className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
+                      {networkSent.follow ? 'Following' : 'Follow'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-slate-200 hover:bg-slate-50 h-10 text-[9px] font-bold uppercase tracking-widest text-slate-600"
+                      disabled={!!networkAction || networkSent.connect}
+                      onClick={() => handleNetworkRequest('connect')}
+                    >
+                      <UserPlus className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
+                      {networkSent.connect ? 'Requested' : 'Connect'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -211,17 +275,36 @@ export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
             </CardHeader>
             <CardContent className="pt-8 space-y-8">
               <div className="flex flex-wrap gap-2 mb-4">
-                {specs.map(s => (
+                {practiceAreaChips.map(s => (
                   <Badge key={s} variant="outline" className="bg-blue-50 border-blue-100 text-blue-600 text-[9px] font-bold uppercase tracking-widest py-1 px-3">
                     {s}
                   </Badge>
                 ))}
               </div>
 
+              {!!lawyer.languages?.length && (
+                <div className="flex flex-wrap items-center gap-2 -mt-4">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Languages:</span>
+                  {lawyer.languages.map((l) => (
+                    <Badge key={l} variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 text-[9px] font-bold py-0.5 px-2.5">
+                      {l}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2 -mt-4">
+                {availabilityFlags.filter((f) => f.on).map((f) => (
+                  <span key={f.key} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[9px] font-bold uppercase tracking-widest">
+                    <CheckCircle2 className="w-3 h-3" /> Available for {f.label}
+                  </span>
+                ))}
+              </div>
+
               <div className="text-slate-600 leading-relaxed italic text-sm font-medium whitespace-pre-wrap">
                 {lawyer.bio || `Advocate ${lawyer.name} is a distinguished practitioner specializing in ${specs.join(', ')}. With over ${lawyer.experience} years of expertise in the ${city} jurisdiction, they have consistently demonstrated a commitment to legal excellence and strategic counsel for elite clients and corporate entities.`}
               </div>
-              
+
               <TrustBadges />
 
               {/* Case History Placeholder */}

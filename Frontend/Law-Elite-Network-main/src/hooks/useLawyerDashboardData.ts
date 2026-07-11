@@ -6,7 +6,29 @@ import { getLawyerCases } from '@/services/caseService';
 import { getLawyerBookings } from '@/services/bookingService';
 import { subscribeToNotifications } from '@/services/notifications/notificationService';
 import { getDocumentsByCase } from '@/services/documents/documentService';
-import { subscribeToMessages } from '@/services/chat/chatService';
+import { subscribeToMessages, getUnreadMessageCount } from '@/services/chat/chatService';
+import { getMyLawyerProfile } from '@/services/lawyers/lawyerService';
+import { getPendingReferralCount } from '@/services/caseReferrals/caseReferralService';
+
+// Profile-completion is a real, derived metric from the wizard's own fields —
+// never a fabricated percentage. Weighted evenly across the fields a public
+// profile actually uses.
+const PROFILE_FIELDS: { key: string; check: (p: any) => boolean }[] = [
+  { key: 'bio', check: (p) => !!p?.bio },
+  { key: 'licenseNumber', check: (p) => !!p?.licenseNumber },
+  { key: 'experience', check: (p) => !!p?.experience },
+  { key: 'practiceAreas', check: (p) => Array.isArray(p?.practiceAreas) && p.practiceAreas.length > 0 },
+  { key: 'languages', check: (p) => Array.isArray(p?.languages) && p.languages.length > 0 },
+  { key: 'location', check: (p) => !!(p?.state && p?.cityRef) },
+  { key: 'profileImage', check: (p) => !!p?.hasProfilePhoto },
+  { key: 'verified', check: (p) => !!p?.isVerified },
+];
+
+function computeProfileCompletion(lawyerProfile: any): number {
+  if (!lawyerProfile) return 0;
+  const done = PROFILE_FIELDS.filter((f) => f.check(lawyerProfile)).length;
+  return Math.round((done / PROFILE_FIELDS.length) * 100);
+}
 
 /**
  * @fileOverview useLawyerDashboardData Hook
@@ -15,12 +37,16 @@ import { subscribeToMessages } from '@/services/chat/chatService';
 export function useLawyerDashboardData(userId: string | undefined) {
   const [data, setData] = useState<any>({
     profile: null,
+    lawyerProfile: null,
     cases: [],
     appointments: [],
     messages: [],
     notifications: [],
     recentDocuments: [],
     activities: [],
+    unreadMessages: 0,
+    profileCompletion: 0,
+    referralRequests: 0,
     loading: true,
     error: null
   });
@@ -30,10 +56,13 @@ export function useLawyerDashboardData(userId: string | undefined) {
 
     try {
       // 1. Parallel Fetch for base practitioner data
-      const [profile, cases, appointments] = await Promise.all([
+      const [profile, cases, appointments, lawyerProfile, unreadMessages, referralRequests] = await Promise.all([
         getUserProfile(userId),
         getLawyerCases(userId),
-        getLawyerBookings(userId)
+        getLawyerBookings(userId),
+        getMyLawyerProfile(),
+        getUnreadMessageCount(),
+        getPendingReferralCount(),
       ]);
 
       // 2. Aggregate documents and messages from all assigned cases
@@ -54,6 +83,7 @@ export function useLawyerDashboardData(userId: string | undefined) {
       setData((prev: any) => ({
         ...prev,
         profile,
+        lawyerProfile,
         cases,
         appointments,
         recentDocuments: allDocs.slice(0, 5),
@@ -61,6 +91,9 @@ export function useLawyerDashboardData(userId: string | undefined) {
           total: totalEarnings,
           completed: appointments.filter((a: any) => a.status === 'completed').length
         },
+        unreadMessages,
+        profileCompletion: computeProfileCompletion(lawyerProfile),
+        referralRequests,
         loading: false
       }));
     } catch (err: any) {
@@ -93,7 +126,10 @@ export function useLawyerDashboardData(userId: string | undefined) {
       const today = new Date().toDateString();
       return aptDate === today && a.status === 'confirmed';
     }).length,
-    unreadNotifs: data.notifications.filter((n: any) => !n.isRead).length
+    unreadNotifs: data.notifications.filter((n: any) => !n.isRead).length,
+    unreadMessages: data.unreadMessages ?? 0,
+    profileCompletion: data.profileCompletion ?? 0,
+    referralRequests: data.referralRequests ?? 0,
   };
 
   return { 

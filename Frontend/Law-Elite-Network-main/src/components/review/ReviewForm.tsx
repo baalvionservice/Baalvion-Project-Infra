@@ -14,13 +14,24 @@ interface ReviewFormProps {
   onSuccess: () => void;
 }
 
+const DIMENSIONS: { key: "professionalism" | "communication" | "expertise" | "timeliness"; label: string }[] = [
+  { key: "professionalism", label: "Professionalism" },
+  { key: "communication", label: "Communication" },
+  { key: "expertise", label: "Expertise" },
+  { key: "timeliness", label: "Timeliness" },
+];
+
 /**
  * @fileOverview ReviewForm
- * High-fidelity feedback component for elite clients.
+ * High-fidelity feedback component for elite clients — collects a
+ * four-dimension breakdown (Professionalism / Communication / Expertise /
+ * Timeliness); the overall rating is computed server-side as their average.
  */
 export default function ReviewForm({ lawyerId, user, onSuccess }: ReviewFormProps) {
-  const [rating, setRating] = useState(5);
-  const [hoveredRating, setHoveredRating] = useState(0);
+  const [scores, setScores] = useState<Record<string, number>>({
+    professionalism: 5, communication: 5, expertise: 5, timeliness: 5,
+  });
+  const [hovered, setHovered] = useState<{ dim: string; star: number } | null>(null);
   const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
@@ -36,7 +47,10 @@ export default function ReviewForm({ lawyerId, user, onSuccess }: ReviewFormProp
         lawyerId,
         userId: user.id,
         userName: user.name || "Elite Member",
-        rating,
+        professionalism: scores.professionalism,
+        communication: scores.communication,
+        expertise: scores.expertise,
+        timeliness: scores.timeliness,
         comment,
         createdAt: Date.now(),
       });
@@ -45,7 +59,7 @@ export default function ReviewForm({ lawyerId, user, onSuccess }: ReviewFormProp
         title: "Feedback Synchronized",
         description: "Your testimonial has been verified and added to the practitioner's dossier.",
       });
-      
+
       setComment("");
       onSuccess();
     } catch (error) {
@@ -72,28 +86,32 @@ export default function ReviewForm({ lawyerId, user, onSuccess }: ReviewFormProp
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="space-y-3">
-          <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Professional Rating</Label>
-          <div className="flex gap-2">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onMouseEnter={() => setHoveredRating(star)}
-                onMouseLeave={() => setHoveredRating(0)}
-                onClick={() => setRating(star)}
-                className="transition-transform active:scale-90"
-              >
-                <Star 
-                  className={`w-8 h-8 ${
-                    (hoveredRating || rating) >= star 
-                      ? "fill-accent text-accent" 
-                      : "text-white/10"
-                  } transition-colors duration-200`} 
-                />
-              </button>
-            ))}
-          </div>
+        <div className="space-y-4">
+          {DIMENSIONS.map(({ key, label }) => (
+            <div key={key} className="flex items-center justify-between gap-4">
+              <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</Label>
+              <div className="flex gap-1.5">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onMouseEnter={() => setHovered({ dim: key, star })}
+                    onMouseLeave={() => setHovered(null)}
+                    onClick={() => setScores((s) => ({ ...s, [key]: star }))}
+                    className="transition-transform active:scale-90"
+                  >
+                    <Star
+                      className={`w-5 h-5 ${
+                        (hovered?.dim === key ? hovered.star : scores[key]) >= star
+                          ? "fill-accent text-accent"
+                          : "text-white/10"
+                      } transition-colors duration-200`}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
         </div>
 
         <div className="space-y-3">
@@ -108,8 +126,8 @@ export default function ReviewForm({ lawyerId, user, onSuccess }: ReviewFormProp
           />
         </div>
 
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           disabled={isSubmitting || !comment.trim()}
           className="w-full bg-accent text-accent-foreground hover:bg-accent/90 h-12 font-bold rounded-xl shadow-lg shadow-accent/10"
         >

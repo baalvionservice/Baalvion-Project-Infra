@@ -12,16 +12,30 @@ const adaptReview = (r: any) => ({
   clientId: r.client_id != null ? String(r.client_id) : undefined,
   lawyerId: r.lawyer_id != null ? String(r.lawyer_id) : undefined,
   clientName: r.client?.name || 'Verified Client',
+  userName: r.client?.name || r.reviewerLawyer?.name || 'Verified Client',
   rating: Number(r.rating || 0),
   comment: r.comment,
   createdAt: r.created_at || r.createdAt,
+  professionalism: r.professionalism ?? undefined,
+  communication: r.communication ?? undefined,
+  expertise: r.expertise ?? undefined,
+  timeliness: r.timeliness ?? undefined,
 });
 
 export const addReview = async (review: any) => {
+  const hasBreakdown = [review.professionalism, review.communication, review.expertise, review.timeliness]
+    .every((v) => v !== undefined && v !== null);
   const res = await reviewApi.create({
     booking_id: review.bookingId ?? review.booking_id,
-    rating: Number(review.rating),
     comment: review.comment || '',
+    ...(hasBreakdown
+      ? {
+        professionalism: Number(review.professionalism),
+        communication: Number(review.communication),
+        expertise: Number(review.expertise),
+        timeliness: Number(review.timeliness),
+      }
+      : { rating: Number(review.rating) }),
   });
   return adaptReview(res?.data?.data);
 };

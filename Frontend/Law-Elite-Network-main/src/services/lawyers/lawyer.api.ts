@@ -55,11 +55,23 @@ export function adaptLawyer(l: any) {
     barNumber: l.bar_number || null,
     bio: l.bio || '',
     profileImage: resolvePersonImage({ avatarUrl: l.profile_photo, name: l.name, id: l.id }),
+    // Distinct from `profileImage`, which always resolves to a generated
+    // silhouette fallback — this is only true when a real photo was uploaded.
+    hasProfilePhoto: !!l.profile_photo,
     isVerified: !!l.verified,
     available: l.status === 'active',
     status: l.status,
     availability: l.availability || {},
     createdAt: l.created_at || l.createdAt,
+    // Registration wizard / Phase 3 profile enrichment (present when the
+    // endpoint includes them — /lawyers/:id, /lawyers/me).
+    state: l.state ? { id: l.state.id, name: l.state.name, code: l.state.code } : null,
+    cityRef: l.cityRef ? { id: l.cityRef.id, name: l.cityRef.name } : null,
+    practiceAreas: Array.isArray(l.practiceAreas) ? l.practiceAreas.map((p: any) => ({ id: p.id, name: p.name, slug: p.slug })) : [],
+    availableFor: l.available_for || { consultation: true, case_referral: false, international_collaboration: false },
+    licenseNumber: l.license_number || null,
+    firmName: l.firm_name || null,
+    isIndependent: l.is_independent ?? true,
   };
 }
 
@@ -68,6 +80,10 @@ export const apiCreateLawyer = async (data: {
   name: string; email?: string; specializations?: string[]; experience?: number;
   hourly_rate?: number; bio?: string; jurisdictions?: string[]; languages?: string[];
   country?: string; country_code?: string; city?: string; bar_number?: string;
+  // Registration wizard: Location + Personal + Professional Details steps.
+  state_id?: number; city_id?: number; dob?: string; gender?: string;
+  license_number?: string; firm_name?: string; is_independent?: boolean;
+  practice_area_ids?: string[];
 }) => {
   const { apiClient } = await import('@/lib/api/client');
   const res = await apiClient.post('/lawyers', data);
@@ -84,6 +100,18 @@ export const apiGetLawyerById = async (id: string) => {
   return adaptLawyer(res?.data?.data);
 };
 
+// The authenticated lawyer's own full profile (state/city/practiceAreas/available_for
+// included) — used by the dashboard's profile-completion widget.
+export const apiGetMyLawyerProfile = async () => {
+  const { apiClient } = await import('@/lib/api/client');
+  try {
+    const res = await apiClient.get('/lawyers/me');
+    return adaptLawyer(res?.data?.data);
+  } catch {
+    return null;
+  }
+};
+
 // Global directory: active-lawyer counts per country, for the "browse by country" rail.
 export const apiGetCountries = async (): Promise<{ country: string; countryCode: string; count: number }[]> => {
   const res = await publicClient.get('/lawyers/countries');
@@ -96,19 +124,33 @@ export const apiSearchLawyers = async (filters: {
   maxPrice?: number;
   query?: string;
   countryCode?: string;
+  stateId?: number | string;
+  cityId?: number | string;
+  practiceAreaId?: number | string;
+  minExperience?: number | string;
+  language?: string;
+  verifiedOnly?: boolean;
+  onlineOnly?: boolean;
 }) => {
   const params: Record<string, any> = { limit: 100 };
   if (filters.query) params.q = filters.query;
   if (filters.minRating) params.minRating = filters.minRating;
   if (filters.maxPrice) params.maxRate = filters.maxPrice;
   if (filters.countryCode && filters.countryCode !== 'all') params.countryCode = filters.countryCode;
+  if (filters.stateId) params.stateId = filters.stateId;
+  if (filters.cityId) params.cityId = filters.cityId;
+  if (filters.practiceAreaId) params.practiceAreaId = filters.practiceAreaId;
+  if (filters.minExperience) params.minExperience = filters.minExperience;
+  if (filters.language) params.language = filters.language;
+  if (filters.verifiedOnly) params.verified = 'true';
+  if (filters.onlineOnly) params.online = 'true';
 
   const res = await publicClient.get('/lawyers/search', { params });
   let results = unwrapList(res).map(adaptLawyer);
 
-  // Specialization filtered client-side so short UI labels ("Corporate") still
-  // match richer backend values ("Corporate Law") without a taxonomy mapping.
-  if (filters.specialization && filters.specialization !== 'all') {
+  // Legacy label-substring fallback — only applies when the caller passes the
+  // old free-text `specialization` label instead of a real practiceAreaId.
+  if (filters.specialization && filters.specialization !== 'all' && !filters.practiceAreaId) {
     const needle = String(filters.specialization).toLowerCase();
     results = results.filter((l: any) => (l.specialization || []).some((s: string) => s.toLowerCase().includes(needle)));
   }

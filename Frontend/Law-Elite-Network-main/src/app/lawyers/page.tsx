@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
+import {
   Search,
   SlidersHorizontal,
   Loader2,
@@ -19,7 +19,10 @@ import {
   FilterX,
   Sparkles,
   Gavel,
-  Globe
+  Globe,
+  MapPin,
+  BadgeCheck,
+  Radio,
 } from 'lucide-react';
 import LawyerCard from '@/components/cards/LawyerCard';
 import { searchLawyers, getAllLawyers, getCountries } from '@/services/lawyers/lawyerService';
@@ -27,6 +30,8 @@ import LawyerAutocomplete from '@/components/search/LawyerAutocomplete';
 import { getCaseById } from '@/services/cases/caseService';
 import { rankLawyersForCase } from '@/services/matching/matchingService';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getStates, getCities, type GeoState, type GeoCity } from '@/services/geo/geoService';
+import { getPracticeAreas, type PracticeArea } from '@/services/practiceAreas/practiceAreaService';
 
 /**
  * @fileOverview Lawyer Marketplace
@@ -50,17 +55,44 @@ function LawyerMarketplaceContent() {
   const [activeCase, setActiveCase] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [countries, setCountries] = useState<{ country: string; countryCode: string; count: number }[]>([]);
+  const [states, setStates] = useState<GeoState[]>([]);
+  const [cities, setCities] = useState<GeoCity[]>([]);
+  const [practiceAreas, setPracticeAreas] = useState<PracticeArea[]>([]);
   const [filters, setFilters] = useState({
     specialization: 'all',
     minRating: 'all',
     maxPrice: 'all',
     countryCode: 'all',
+    stateId: 'all',
+    cityId: 'all',
+    practiceAreaId: 'all',
+    minExperience: 'all',
+    language: 'all',
+    verifiedOnly: false,
+    onlineOnly: false,
   });
 
-  // Load the real "browse by country" index once.
+  // Load the real "browse by country" index once, plus the fixed practice-area list.
   useEffect(() => {
     getCountries().then(setCountries).catch(() => setCountries([]));
+    getPracticeAreas().then(setPracticeAreas).catch(() => setPracticeAreas([]));
   }, []);
+
+  // Cascading State -> City, same pattern as the registration wizard.
+  useEffect(() => {
+    setFilters((f) => ({ ...f, stateId: 'all', cityId: 'all' }));
+    setCities([]);
+    if (!filters.countryCode || filters.countryCode === 'all') { setStates([]); return; }
+    getStates(filters.countryCode).then(setStates).catch(() => setStates([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.countryCode]);
+
+  useEffect(() => {
+    setFilters((f) => ({ ...f, cityId: 'all' }));
+    if (!filters.stateId || filters.stateId === 'all') { setCities([]); return; }
+    getCities(Number(filters.stateId)).then(setCities).catch(() => setCities([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters.stateId]);
 
   const fetchLawyers = async (overrides: Partial<typeof filters> = {}) => {
     setLoading(true);
@@ -80,6 +112,13 @@ function LawyerMarketplaceContent() {
       if (f.minRating !== 'all') searchParams.minRating = parseFloat(f.minRating);
       if (f.maxPrice !== 'all') searchParams.maxPrice = parseInt(f.maxPrice);
       if (f.countryCode !== 'all') searchParams.countryCode = f.countryCode;
+      if (f.stateId !== 'all') searchParams.stateId = f.stateId;
+      if (f.cityId !== 'all') searchParams.cityId = f.cityId;
+      if (f.practiceAreaId !== 'all') searchParams.practiceAreaId = f.practiceAreaId;
+      if (f.minExperience !== 'all') searchParams.minExperience = f.minExperience;
+      if (f.language !== 'all') searchParams.language = f.language;
+      if (f.verifiedOnly) searchParams.verifiedOnly = true;
+      if (f.onlineOnly) searchParams.onlineOnly = true;
 
       let data = await searchLawyers(searchParams);
 
@@ -102,14 +141,18 @@ function LawyerMarketplaceContent() {
 
   const handleReset = () => {
     setSearchQuery('');
-    const reset = { specialization: 'all', minRating: 'all', maxPrice: 'all', countryCode: 'all' };
+    const reset = {
+      specialization: 'all', minRating: 'all', maxPrice: 'all', countryCode: 'all',
+      stateId: 'all', cityId: 'all', practiceAreaId: 'all', minExperience: 'all',
+      language: 'all', verifiedOnly: false, onlineOnly: false,
+    };
     setFilters(reset);
     fetchLawyers(reset);
   };
 
   const selectCountry = (cc: string) => {
-    setFilters((f) => ({ ...f, countryCode: cc }));
-    fetchLawyers({ countryCode: cc });
+    setFilters((f) => ({ ...f, countryCode: cc, stateId: 'all', cityId: 'all' }));
+    fetchLawyers({ countryCode: cc, stateId: 'all', cityId: 'all' });
   };
 
   return (
@@ -154,7 +197,7 @@ function LawyerMarketplaceContent() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <Select value={filters.countryCode} onValueChange={selectCountry}>
               <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
                 <div className="flex items-center gap-2">
@@ -170,24 +213,54 @@ function LawyerMarketplaceContent() {
               </SelectContent>
             </Select>
 
-            <Select value={filters.specialization} onValueChange={(val) => setFilters({...filters, specialization: val})}>
+            <Select
+              value={filters.stateId}
+              onValueChange={(val) => { setFilters((f) => ({ ...f, stateId: val, cityId: 'all' })); fetchLawyers({ stateId: val, cityId: 'all' }); }}
+              disabled={!states.length}
+            >
               <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
                 <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="w-3 h-3 text-blue-600" />
-                  <SelectValue placeholder="Legal Domain" />
+                  <MapPin className="w-3 h-3 text-blue-600" />
+                  <SelectValue placeholder={states.length ? 'State' : 'No state data yet'} />
                 </div>
               </SelectTrigger>
-              <SelectContent className="bg-white border-slate-200 text-slate-900">
-                <SelectItem value="all">All Domains</SelectItem>
-                <SelectItem value="Corporate">Corporate Law</SelectItem>
-                <SelectItem value="Criminal">Criminal Defense</SelectItem>
-                <SelectItem value="IP">Intellectual Property</SelectItem>
-                <SelectItem value="Arbitration">Arbitration</SelectItem>
-                <SelectItem value="Tax">Tax Compliance</SelectItem>
+              <SelectContent className="bg-white border-slate-200 text-slate-900 max-h-72">
+                <SelectItem value="all">All States</SelectItem>
+                {states.map((s) => <SelectItem key={s.id} value={String(s.id)}>{s.name}</SelectItem>)}
               </SelectContent>
             </Select>
 
-            <Select value={filters.minRating} onValueChange={(val) => setFilters({...filters, minRating: val})}>
+            <Select
+              value={filters.cityId}
+              onValueChange={(val) => { setFilters((f) => ({ ...f, cityId: val })); fetchLawyers({ cityId: val }); }}
+              disabled={!cities.length}
+            >
+              <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
+                <SelectValue placeholder={cities.length ? 'City' : 'Select a state first'} />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200 text-slate-900 max-h-72">
+                <SelectItem value="all">All Cities</SelectItem>
+                {cities.map((c) => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+
+            <Select
+              value={filters.practiceAreaId}
+              onValueChange={(val) => { setFilters((f) => ({ ...f, practiceAreaId: val })); fetchLawyers({ practiceAreaId: val }); }}
+            >
+              <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
+                <div className="flex items-center gap-2">
+                  <SlidersHorizontal className="w-3 h-3 text-blue-600" />
+                  <SelectValue placeholder="Practice Area" />
+                </div>
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200 text-slate-900 max-h-72">
+                <SelectItem value="all">All Practice Areas</SelectItem>
+                {practiceAreas.map((a) => <SelectItem key={a.id} value={String(a.id)}>{a.name}</SelectItem>)}
+              </SelectContent>
+            </Select>
+
+            <Select value={filters.minRating} onValueChange={(val) => { setFilters({ ...filters, minRating: val }); fetchLawyers({ minRating: val }); }}>
               <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
                 <SelectValue placeholder="Min Rating" />
               </SelectTrigger>
@@ -199,7 +272,7 @@ function LawyerMarketplaceContent() {
               </SelectContent>
             </Select>
 
-            <Select value={filters.maxPrice} onValueChange={(val) => setFilters({...filters, maxPrice: val})}>
+            <Select value={filters.maxPrice} onValueChange={(val) => { setFilters({ ...filters, maxPrice: val }); fetchLawyers({ maxPrice: val }); }}>
               <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
                 <SelectValue placeholder="Max Fee (INR)" />
               </SelectTrigger>
@@ -211,10 +284,53 @@ function LawyerMarketplaceContent() {
               </SelectContent>
             </Select>
 
-            <Button 
-              variant="outline" 
+            <Select value={filters.minExperience} onValueChange={(val) => { setFilters({ ...filters, minExperience: val }); fetchLawyers({ minExperience: val }); }}>
+              <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
+                <SelectValue placeholder="Experience" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200 text-slate-900">
+                <SelectItem value="all">Any Experience</SelectItem>
+                <SelectItem value="5">5+ Years</SelectItem>
+                <SelectItem value="10">10+ Years</SelectItem>
+                <SelectItem value="15">15+ Years</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={filters.language} onValueChange={(val) => { setFilters({ ...filters, language: val }); fetchLawyers({ language: val }); }}>
+              <SelectTrigger className="border-slate-200 h-11 text-[10px] uppercase font-bold tracking-widest bg-slate-50 text-slate-700">
+                <SelectValue placeholder="Language" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-slate-200 text-slate-900">
+                <SelectItem value="all">Any Language</SelectItem>
+                <SelectItem value="English">English</SelectItem>
+                <SelectItem value="Spanish">Spanish</SelectItem>
+                <SelectItem value="Hindi">Hindi</SelectItem>
+                <SelectItem value="Arabic">Arabic</SelectItem>
+                <SelectItem value="Mandarin">Mandarin</SelectItem>
+                <SelectItem value="French">French</SelectItem>
+                <SelectItem value="Portuguese">Portuguese</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => { const v = !filters.verifiedOnly; setFilters((f) => ({ ...f, verifiedOnly: v })); fetchLawyers({ verifiedOnly: v }); }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${filters.verifiedOnly ? 'bg-[#0B1F3A] text-white border-[#0B1F3A]' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'}`}
+            >
+              <BadgeCheck className="w-3.5 h-3.5" /> Verified Lawyers Only
+            </button>
+            <button
+              onClick={() => { const v = !filters.onlineOnly; setFilters((f) => ({ ...f, onlineOnly: v })); fetchLawyers({ onlineOnly: v }); }}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${filters.onlineOnly ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300'}`}
+            >
+              <Radio className="w-3.5 h-3.5" /> Online Now
+            </button>
+            <div className="flex-1" />
+            <Button
+              variant="outline"
               onClick={handleReset}
-              className="h-11 border-slate-200 hover:bg-slate-50 text-[10px] uppercase font-bold tracking-widest text-slate-500"
+              className="h-9 border-slate-200 hover:bg-slate-50 text-[10px] uppercase font-bold tracking-widest text-slate-500"
             >
               <FilterX className="w-3.5 h-3.5 mr-2" /> Reset Refinement
             </Button>

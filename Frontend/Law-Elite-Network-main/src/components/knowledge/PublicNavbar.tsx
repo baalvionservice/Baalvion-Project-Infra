@@ -167,6 +167,12 @@ export function PublicNavbar() {
           >
             News
           </Link>
+          <Link
+            href="/world"
+            className="flex items-center h-full px-3 text-[12px] font-bold uppercase tracking-wider text-white/90 hover:text-white border-b-[3px] border-transparent hover:border-news-600 transition-colors"
+          >
+            World
+          </Link>
           {categories.slice(0, 8).map((cat) => (
             <div
               key={cat.id}
@@ -270,6 +276,13 @@ export function PublicNavbar() {
               className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
             >
               News
+            </Link>
+            <Link
+              href="/world"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block py-3 px-2 text-sm font-bold text-slate-900 border-b border-slate-100"
+            >
+              World
             </Link>
             <p className="pt-4 pb-2 px-2 text-[11px] font-bold uppercase tracking-[0.2em] text-news-600">
               Topics
