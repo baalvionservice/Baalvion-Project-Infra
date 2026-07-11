@@ -96,6 +96,10 @@ services:
       # IndexNow: instant search-engine recrawl on publish. Key file must be hosted at
       # https://<site-domain>/<key>.txt (see Imperialpedia public/13c7ede615e8cf445c4e183a9894e9c4.txt).
       - INDEXNOW_KEY=13c7ede615e8cf445c4e183a9894e9c4
+      # Shared secret validating the x-internal-secret header on /internal/* routes (used by
+      # other services' vault resolvers, e.g. law-service's Razorpay integration). Without this,
+      # config.internalSecret silently falls back to a hardcoded dev placeholder.
+      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
     depends_on:
       postgres:
         condition: service_healthy
@@ -1035,8 +1039,13 @@ services:
       - MINIO_ACCESS_KEY=${MINIO_ROOT_USER:-baalvion}
       - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD:-baalvion_dev_pass}
       - MINIO_BUCKET=${LAW_MINIO_BUCKET:-law-documents}
-      # Razorpay payment gateway — set keys to enable real charges (cards/UPI/netbanking/
-      # wallets/bank). Empty = simulated settlement (fully testable without keys).
+      # Razorpay payment gateway — keys resolve from the CMS admin panel's "Integrations & Keys"
+      # for the law-elite-network website (category=payment, provider=razorpay) via the shared
+      # internal vault API. RAZORPAY_KEY_ID/SECRET/WEBHOOK_SECRET below are only a fallback for
+      # local dev when the vault is unreachable; empty everywhere = simulated settlement.
+      - CMS_BASE_URL=${CMS_BASE_URL:-http://cms-service:3011/api/v1}
+      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET}
+      - PAYMENT_SITE_SLUG=${LAW_PAYMENT_SITE_SLUG:-law-elite-network}
       - RAZORPAY_KEY_ID=${RAZORPAY_KEY_ID:-}
       - RAZORPAY_KEY_SECRET=${RAZORPAY_KEY_SECRET:-}
       - RAZORPAY_WEBHOOK_SECRET=${RAZORPAY_WEBHOOK_SECRET:-}

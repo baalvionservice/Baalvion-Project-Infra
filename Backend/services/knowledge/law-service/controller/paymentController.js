@@ -91,7 +91,7 @@ const createPayment = async (req, res, next) => {
             provider: provider || 'card',
         });
 
-        if (razorpay.isConfigured()) {
+        if (await razorpay.isConfigured()) {
             // Real gateway: open Razorpay Checkout on the client with this order (all payment
             // modes — cards, UPI, netbanking, wallets, bank transfer). Settled on verify/webhook.
             const order = await razorpay.createOrder({
@@ -104,7 +104,7 @@ const createPayment = async (req, res, next) => {
             return sendSuccess(req, res, {
                 ...payment.toJSON(),
                 gateway: 'razorpay',
-                razorpay: { orderId: order.id, keyId: razorpay.keyId(), amount: order.amount, currency: order.currency },
+                razorpay: { orderId: order.id, keyId: await razorpay.keyId(), amount: order.amount, currency: order.currency },
             }, 201);
         }
 
@@ -129,14 +129,14 @@ const verifyPayment = async (req, res, next) => {
         // When the gateway is configured, signature verification is mandatory — the branch is
         // chosen by the server-side gateway state, NOT by whether the client supplied a signature.
         // A missing/empty client signature must fail verification, never fall through to settlement.
-        if (razorpay.isConfigured()) {
+        if (await razorpay.isConfigured()) {
             // Fail closed if the client did not supply the required, well-formed signature
             // fields. The security decision below is made SOLELY by the server-side
             // cryptographic check, not by the presence of a user-supplied signature.
             const hasSignatureFields =
                 typeof razorpay_signature === 'string' && razorpay_signature.length > 0 &&
                 typeof razorpay_payment_id === 'string' && razorpay_payment_id.length > 0;
-            const ok = hasSignatureFields && razorpay.verifyPaymentSignature({
+            const ok = hasSignatureFields && await razorpay.verifyPaymentSignature({
                 orderId: razorpay_order_id || payment.provider_tx_id,
                 paymentId: razorpay_payment_id,
                 signature: razorpay_signature,
@@ -164,11 +164,12 @@ const webhookHandler = async (req, res) => {
         // When the gateway is configured, RAZORPAY_WEBHOOK_SECRET MUST be set.
         // A missing secret is a misconfiguration — reject all webhook calls to prevent
         // an unauthenticated attacker from triggering payment settlement.
-        if (razorpay.isConfigured()) {
-            if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+        if (await razorpay.isConfigured()) {
+            const webhookSecret = await razorpay.resolveWebhookSecret();
+            if (!webhookSecret) {
                 return res.status(500).json({ error: 'webhook secret not configured' });
             }
-            if (!razorpay.verifyWebhookSignature(raw, signature)) {
+            if (!(await razorpay.verifyWebhookSignature(raw, signature))) {
                 return res.status(400).json({ error: 'invalid signature' });
             }
         } else {
