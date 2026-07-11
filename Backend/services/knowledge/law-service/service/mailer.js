@@ -152,6 +152,16 @@ const templates = {
       <p style="margin:24px 0">${btn(`${config.appUrl}/lawyer/dashboard`, 'Go to your dashboard')}</p>`),
     }),
 
+    caseReferral: ({ name, fromName, title, action }) => ({
+        subject: action === 'sent' ? 'New case referral' : `Case referral ${action}`,
+        html: shell(action === 'sent' ? 'You received a case referral' : `Referral ${action}`, `
+      <p>Hi ${esc(name || 'Counsel')},</p>
+      <p>${action === 'sent'
+                ? `<strong>${esc(fromName || 'A colleague')}</strong> sent you a case referral: <strong>${esc(title)}</strong>.`
+                : `Your referral <strong>${esc(title)}</strong> was <strong>${esc(action)}</strong> by ${esc(fromName || 'the recipient')}.`}</p>
+      <p style="margin:24px 0">${btn(`${config.appUrl}/lawyer/referrals`, 'View referrals')}</p>`),
+    }),
+
     payoutProcessed: ({ name, amount, currency, reference }) => ({
         subject: 'Payout processed — Law Elite Network',
         html: shell('Payout on its way', `
@@ -169,6 +179,7 @@ const TEMPLATE_CATEGORY = {
     bookingConfirmation: 'notifications',
     paymentReceipt: 'billing',
     lawyerVerified: 'notifications',
+    caseReferral: 'notifications',
     payoutProcessed: 'billing',
 };
 

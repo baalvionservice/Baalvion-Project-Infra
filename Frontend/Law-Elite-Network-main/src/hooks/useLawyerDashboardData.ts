@@ -8,6 +8,7 @@ import { subscribeToNotifications } from '@/services/notifications/notificationS
 import { getDocumentsByCase } from '@/services/documents/documentService';
 import { subscribeToMessages, getUnreadMessageCount } from '@/services/chat/chatService';
 import { getMyLawyerProfile } from '@/services/lawyers/lawyerService';
+import { getPendingReferralCount } from '@/services/caseReferrals/caseReferralService';
 
 // Profile-completion is a real, derived metric from the wizard's own fields —
 // never a fabricated percentage. Weighted evenly across the fields a public
@@ -55,12 +56,13 @@ export function useLawyerDashboardData(userId: string | undefined) {
 
     try {
       // 1. Parallel Fetch for base practitioner data
-      const [profile, cases, appointments, lawyerProfile, unreadMessages] = await Promise.all([
+      const [profile, cases, appointments, lawyerProfile, unreadMessages, referralRequests] = await Promise.all([
         getUserProfile(userId),
         getLawyerCases(userId),
         getLawyerBookings(userId),
         getMyLawyerProfile(),
         getUnreadMessageCount(),
+        getPendingReferralCount(),
       ]);
 
       // 2. Aggregate documents and messages from all assigned cases
@@ -91,9 +93,7 @@ export function useLawyerDashboardData(userId: string | undefined) {
         },
         unreadMessages,
         profileCompletion: computeProfileCompletion(lawyerProfile),
-        // Wired forward-compatibly: populated once Phase 4 (case-referral
-        // routing) ships its own endpoint; 0 until then, never fabricated.
-        referralRequests: 0,
+        referralRequests,
         loading: false
       }));
     } catch (err: any) {

@@ -20,6 +20,7 @@ router.use('/subscriptions',  require('./subscriptionRoutes'));
 router.use('/reviews',        require('./reviewRoutes'));
 router.use('/notifications',  require('./notificationRoutes'));
 router.use('/referrals',      require('./referralRoutes'));
+router.use('/case-referrals', require('./caseReferralRoutes'));
 router.use('/admin',          require('./adminRoutes'));
 
 module.exports = router;

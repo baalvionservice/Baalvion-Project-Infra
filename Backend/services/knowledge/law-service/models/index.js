@@ -39,6 +39,7 @@ db.Subscription = require('./subscriptions')(sequelize, Sequelize.DataTypes);
 db.Review       = require('./reviews')(sequelize, Sequelize.DataTypes);
 db.Notification = require('./notifications')(sequelize, Sequelize.DataTypes);
 db.Referral     = require('./referrals')(sequelize, Sequelize.DataTypes);
+db.CaseReferral = require('./caseReferrals')(sequelize, Sequelize.DataTypes);
 db.AuditLog     = require('./auditLogs')(sequelize, Sequelize.DataTypes);
 db.LawyerLedger = require('./lawyerLedger')(sequelize, Sequelize.DataTypes);
 db.Payout       = require('./payouts')(sequelize, Sequelize.DataTypes);
