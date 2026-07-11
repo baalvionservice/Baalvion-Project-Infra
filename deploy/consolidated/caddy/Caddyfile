@@ -19,6 +19,16 @@ auth.baalvion.com {
 	reverse_proxy app-identity:3026
 }
 
+# ── auth-service direct surface (consumer social login: Google/Facebook/Discord) ──
+# Sites that talk to auth-service directly (no gateway) reach it here via their own
+# same-origin /auth-bff/* rewrite, exactly like Amarisé — see auth-service's
+# oauthController.js. Keeps the OAuth refresh cookie first-party to the calling site,
+# since the browser only ever sees <site>/auth-bff/*, never this hostname directly.
+auth-api.baalvion.com {
+	encode gzip zstd
+	reverse_proxy app-identity:3001
+}
+
 # ── Consumer + admin BFF → edge-realtime app (proxy-service) ──
 # The session-gated BFF answers /api/* by default, but two surfaces MUST be reachable without a
 # session for the public Vercel sites to work — public CMS delivery and the PSP webhook/initiate

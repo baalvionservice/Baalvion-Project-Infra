@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const OAUTH_ERROR_MESSAGE = "Couldn't sign up with that provider. Please try again.";
 
 export default function SignupPage() {
   const router = useRouter();
@@ -16,6 +18,12 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("oauth_error")) {
+      setError(OAUTH_ERROR_MESSAGE);
+    }
+  }, []);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -41,7 +49,17 @@ export default function SignupPage() {
         <h1 className="text-2xl">Start free</h1>
         <p className="text-sm text-muted-foreground">100 requests/day, no credit card required.</p>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
+        <div className="mt-6">
+          <SocialLoginButtons returnTo="/dashboard/overview" />
+        </div>
+
+        <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          or
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="space-y-2">
             <Label htmlFor="signup-name">Full name</Label>
             <Input id="signup-name" value={name} onChange={(e) => setName(e.target.value)} />
