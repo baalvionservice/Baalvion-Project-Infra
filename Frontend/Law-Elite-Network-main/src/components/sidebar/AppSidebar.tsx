@@ -69,6 +69,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       { title: "Dashboard", url: "/lawyer/dashboard", icon: LayoutDashboard },
       { title: "Case Requests", url: "/lawyer/requests", icon: Inbox },
       { title: "Referrals", url: "/lawyer/referrals", icon: UserPlus },
+      { title: "My Network", url: "/network", icon: Users },
+      { title: "Communities", url: "/groups", icon: MessageSquare },
       { title: "Active Matters", url: "/cases", icon: Briefcase },
       { title: "Schedule", url: "/appointments", icon: CalendarClock },
       { title: "Secure Uplink", url: "/chat", icon: MessageSquare },

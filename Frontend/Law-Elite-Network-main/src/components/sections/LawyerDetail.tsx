@@ -29,7 +29,11 @@ import ReviewForm from '@/components/review/ReviewForm';
 import BookingModal from '@/components/booking/BookingModal';
 import { getReviewsByLawyer, getAverageRating } from '@/services/reviewService';
 import { useAuthStore } from '@/store/authStore';
+import { useAuthContext } from '@/context/AuthContext';
 import { resolvePersonImage } from '@/lib/article-art';
+import { sendConnectionRequest } from '@/services/connections/connectionService';
+import { useToast } from '@/hooks/use-toast';
+import { UserPlus, Users } from 'lucide-react';
 
 interface LawyerDetailProps {
   lawyer: {
@@ -64,10 +68,27 @@ interface LawyerDetailProps {
 export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
   const router = useRouter();
   const { user } = useAuthStore();
+  const { role } = useAuthContext();
+  const { toast } = useToast();
   const [reviews, setReviews] = useState<any[]>([]);
   const [averageRating, setAverageRating] = useState(lawyer.rating?.toString() || "5.0");
   const [loadingReviews, setLoadingReviews] = useState(true);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [networkAction, setNetworkAction] = useState<'follow' | 'connect' | null>(null);
+  const [networkSent, setNetworkSent] = useState<{ follow?: boolean; connect?: boolean }>({});
+
+  const handleNetworkRequest = async (relation: 'follow' | 'connect') => {
+    setNetworkAction(relation);
+    try {
+      await sendConnectionRequest(Number(lawyer.id), relation);
+      setNetworkSent((s) => ({ ...s, [relation]: true }));
+      toast({ title: relation === 'follow' ? 'Now following' : 'Connection request sent' });
+    } catch (error: any) {
+      toast({ title: 'Request failed', description: error?.response?.data?.error?.message || error?.message, variant: 'destructive' });
+    } finally {
+      setNetworkAction(null);
+    }
+  };
 
   const loadReviews = async () => {
     setLoadingReviews(true);
@@ -196,13 +217,36 @@ export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
                   <CalendarCheck className="w-4 h-4 mr-2" />
                   SECURE CONSULTATION
                 </Button>
-                <Button 
+                <Button
                   variant="outline"
                   className="w-full border-slate-200 hover:bg-slate-50 h-12 font-bold rounded-xl transition-all text-[10px] uppercase tracking-widest text-slate-600"
                 >
                   <MessageSquare className="w-4 h-4 mr-2 text-blue-600" />
                   MESSAGE COUNSEL
                 </Button>
+
+                {role === 'lawyer' && (
+                  <div className="flex gap-2 pt-1">
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-slate-200 hover:bg-slate-50 h-10 text-[9px] font-bold uppercase tracking-widest text-slate-600"
+                      disabled={!!networkAction || networkSent.follow}
+                      onClick={() => handleNetworkRequest('follow')}
+                    >
+                      <Users className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
+                      {networkSent.follow ? 'Following' : 'Follow'}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-slate-200 hover:bg-slate-50 h-10 text-[9px] font-bold uppercase tracking-widest text-slate-600"
+                      disabled={!!networkAction || networkSent.connect}
+                      onClick={() => handleNetworkRequest('connect')}
+                    >
+                      <UserPlus className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
+                      {networkSent.connect ? 'Requested' : 'Connect'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
