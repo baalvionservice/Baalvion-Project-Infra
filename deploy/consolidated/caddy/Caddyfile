@@ -79,6 +79,18 @@ api.baalvion.com {
 		reverse_proxy app-identity:3026
 	}
 
+	# Law Elite Network (lawelitenetwork.com) public API. The frontend calls
+	# api.baalvion.com/api/v1/knowledge/law/v1/*; law-service (app-platform:3015) mounts its
+	# own router at /v1 (and /api/v1) and gates each route individually (most lawyer directory/
+	# registration/public routes need no session at all). Without this carve-out the request
+	# falls through to the proxy-service BFF below, which blanket-requires a bearer token and
+	# 401s ("No bearer token provided") before law-service is ever reached.
+	@knowledge_law path /api/v1/knowledge/law /api/v1/knowledge/law/*
+	handle @knowledge_law {
+		uri strip_prefix /api/v1/knowledge/law
+		reverse_proxy app-platform:3015
+	}
+
 	# Everything else → the consumer/admin BFF (proxy-service, session-gated) — unchanged.
 	handle {
 		reverse_proxy app-edge-realtime:4000
