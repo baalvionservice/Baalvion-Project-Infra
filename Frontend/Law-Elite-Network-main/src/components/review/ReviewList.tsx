@@ -59,6 +59,22 @@ export default function ReviewList({ reviews }: ReviewListProps) {
               </div>
             </div>
             
+            {r.professionalism != null && r.communication != null && r.expertise != null && r.timeliness != null && (
+              <div className="mt-3 pl-13 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {([
+                  ["Professionalism", r.professionalism],
+                  ["Communication", r.communication],
+                  ["Expertise", r.expertise],
+                  ["Timeliness", r.timeliness],
+                ] as [string, number][]).map(([label, val]) => (
+                  <div key={label} className="text-center">
+                    <p className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground/60">{label}</p>
+                    <p className="text-xs font-bold text-accent">{val}/5</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="mt-4 pl-13">
               <p className="text-sm text-muted-foreground italic leading-relaxed">
                 "{r.comment}"

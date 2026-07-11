@@ -33,7 +33,7 @@ const ADMIN_FIELDS = {
     bookings:      ['lawyer_id', 'client_id', 'case_id', 'type', 'scheduled_at', 'duration', 'notes', 'status', 'total_amount', 'video_room_id'],
     payments:      ['status', 'provider', 'provider_tx_id', 'notes'],
     subscriptions: ['tier', 'status', 'started_at', 'expires_at', 'client_id', 'lawyer_id', 'subscriber_type'],
-    reviews:       ['rating', 'comment', 'status', 'lawyer_id', 'client_id'],
+    reviews:       ['rating', 'comment', 'status', 'lawyer_id', 'client_id', 'professionalism', 'communication', 'expertise', 'timeliness', 'case_referral_id', 'reviewer_lawyer_id'],
     articles:      ['title', 'slug', 'excerpt', 'content', 'status', 'category_id', 'subcategory_id', 'author_id', 'published_at', 'featured_image', 'tags'],
     categories:    ['name', 'slug', 'description', 'is_active', 'icon', 'order'],
     subcategories: ['name', 'slug', 'description', 'is_active', 'category_id', 'icon', 'order'],

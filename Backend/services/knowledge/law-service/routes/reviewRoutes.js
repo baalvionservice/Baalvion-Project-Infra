@@ -5,5 +5,6 @@ const ctrl = require('../controller/reviewController');
 
 router.get('/',  ctrl.listReviews);
 router.post('/', authMiddleware, ctrl.createReview);
+router.post('/case-referral', authMiddleware, ctrl.createCaseReferralReview);
 
 module.exports = router;
