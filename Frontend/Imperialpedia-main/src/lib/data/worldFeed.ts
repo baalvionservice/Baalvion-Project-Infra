@@ -181,6 +181,8 @@ function coerceDef(x: Partial<SymbolDef> & { symbol?: string; name?: string }): 
 interface Quote {
   price: number;
   prev: number;
+  /** Real regularMarketVolume from Yahoo's chart meta, when present. */
+  volume?: number;
 }
 
 export async function fetchYahooQuote(symbol: string): Promise<Quote> {
@@ -199,6 +201,7 @@ export async function fetchYahooQuote(symbol: string): Promise<Quote> {
           regularMarketPrice?: number;
           chartPreviousClose?: number;
           previousClose?: number;
+          regularMarketVolume?: number;
         };
       }>;
     };
@@ -207,7 +210,7 @@ export async function fetchYahooQuote(symbol: string): Promise<Quote> {
   const price = meta?.regularMarketPrice;
   if (!meta || price == null) throw new Error(`yahoo: no price for ${symbol}`);
   const prev = meta.chartPreviousClose ?? meta.previousClose ?? price;
-  return { price, prev };
+  return { price, prev, volume: meta.regularMarketVolume };
 }
 
 const fmt = (n: number, dec: number) =>
@@ -292,6 +295,7 @@ async function buildWatchlist(
       price: fmt(r.value.price, 2),
       change: (positive ? "+" : "") + pct.toFixed(2) + "%",
       positive,
+      volume: r.value.volume,
     });
   });
   return out.length >= Math.min(5, symbols.length) ? out : null;
@@ -665,6 +669,52 @@ async function buildCmsNews(region: RegionId): Promise<NewsBundle | null> {
   return { featured, latest, sections };
 }
 
+// ── minimum live news floor ─────────────────────────────────────────────────
+// The World page must always carry a healthy, real, dynamically-fetched feed
+// (Google News approval for imperialpedia.com / lawelitenetwork.com depends on
+// active, non-static publishing). CMS content published from the main admin
+// panel always stays first/prioritized; wire/Google News only tops up the
+// remainder so the total never falls below MIN_LIVE_NEWS_ITEMS. No photos or
+// videos are ever pulled from these top-up sources — every item here is
+// text-only (headline/time/category), and any image field elsewhere already
+// resolves through safeImage()/categoryImage() to self-hosted placeholder
+// photography rather than hotlinking real third-party media.
+
+const MIN_LIVE_NEWS_ITEMS = 10;
+
+function newsCount(b: NewsBundle): number {
+  return b.featured.length + b.latest.length;
+}
+
+async function topUpNews(
+  primary: NewsBundle,
+  region: RegionId,
+  target: number,
+): Promise<NewsBundle> {
+  if (newsCount(primary) >= target) return primary;
+
+  const supplement =
+    (await safe(() => buildWireNews(region))) ?? (await safe(() => buildNews(region)));
+  if (!supplement) return primary;
+
+  const seen = new Set(
+    [...primary.featured, ...primary.latest].map((i) => i.headline.toLowerCase()),
+  );
+  const pool: WorldData["latest"] = [
+    ...supplement.latest,
+    ...supplement.featured.map((f, i) => ({
+      id: 4900 + i,
+      time: f.time,
+      category: f.category,
+      headline: f.headline,
+      positive: null as boolean | null,
+    })),
+  ].filter((i) => !seen.has(i.headline.toLowerCase()));
+
+  const need = Math.max(0, target - newsCount(primary));
+  return { ...primary, latest: [...primary.latest, ...pool.slice(0, need)] };
+}
+
 // ── timestamp ───────────────────────────────────────────────────────────────
 
 function nowEt(): string {
@@ -734,6 +784,12 @@ export async function getWorldDataLive(raw?: string | null): Promise<WorldData> 
   // ingestion) over the inline Google News RSS scrape, which is now just the
   // last-resort fallback if news-service itself is unreachable.
   let news = cmsNews;
+  if (news && newsFallbackEnabled) {
+    // CMS is live but thin — top up from wire/Google News so the page always
+    // carries at least MIN_LIVE_NEWS_ITEMS real, dynamically-fetched items.
+    // Admin-published CMS content stays first; this only fills the remainder.
+    news = await topUpNews(news, region.id, MIN_LIVE_NEWS_ITEMS);
+  }
   if (!news && newsFallbackEnabled) {
     news = await safe(() => buildWireNews(region.id));
     if (!news) news = await safe(() => buildNews(region.id));

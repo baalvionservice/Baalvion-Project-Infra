@@ -115,6 +115,25 @@
     color: hsl(var(--primary));
   }
 
+  /* ── World vertical (CNBC-style) type system — scoped to .world-shell so ──
+     the sitewide Investopedia serif theme above is untouched everywhere else.
+     Higher specificity (.world-shell h1 vs bare h1) wins over the editorial
+     serif rule within the same @layer base bucket. */
+  .world-shell h1,
+  .world-shell h2,
+  .world-shell h3,
+  .world-shell h4 {
+    font-family: var(--font-world-sans), Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  .world-shell p {
+    font-family: var(--font-world-body), Lato, sans-serif;
+  }
+  .world-shell .world-kicker {
+    font-family: var(--font-world-condensed), "Barlow Condensed", sans-serif;
+  }
+
   :focus-visible {
     @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
   }

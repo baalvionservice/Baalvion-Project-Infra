@@ -22,10 +22,10 @@ export default function LatestNews({ latest }: { latest: WorldData["latest"] }) 
   return (
     <div className="bg-white h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b-2 border-[#CC0000] bg-white sticky top-[88px] z-10">
+      <div className="flex items-center justify-between px-4 py-3 border-b-2 border-[#ce2b2b] bg-white sticky top-[88px] z-10">
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 bg-[#CC0000] rounded-full animate-pulse" />
-          <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase">Latest News</h2>
+          <span className="w-2 h-2 bg-[#ce2b2b] rounded-full animate-pulse" />
+          <h2 className="world-kicker text-xs font-black tracking-widest text-gray-900 uppercase">Latest News</h2>
         </div>
         <span className="text-[10px] text-gray-400 font-medium">Live</span>
       </div>
@@ -43,11 +43,11 @@ export default function LatestNews({ latest }: { latest: WorldData["latest"] }) 
               </span>
               <span className="text-[10px] text-gray-400 font-mono shrink-0 ml-2">{item.time}</span>
             </div>
-            <p className="text-xs font-semibold leading-snug text-gray-800 group-hover:text-[#CC0000] transition-colors line-clamp-2">
+            <p className="text-xs font-semibold leading-snug text-gray-800 group-hover:text-[#ce2b2b] transition-colors line-clamp-2">
               {item.headline}
             </p>
             {item.positive !== null && (
-              <span className={`text-[10px] font-bold mt-1 block ${item.positive ? "text-green-600" : "text-red-500"}`}>
+              <span className={`text-[10px] font-bold mt-1 block ${item.positive ? "text-[#00a857]" : "text-[#ce2b2b]"}`}>
                 {item.positive ? "▲ BULLISH" : "▼ BEARISH"}
               </span>
             )}
@@ -59,7 +59,7 @@ export default function LatestNews({ latest }: { latest: WorldData["latest"] }) 
       <div className="p-4">
         <button
           onClick={() => setExpanded(!expanded)}
-          className="w-full text-xs font-bold text-[#CC0000] border border-[#CC0000] py-2 hover:bg-[#CC0000] hover:text-white transition-colors rounded-sm tracking-wide"
+          className="world-kicker w-full text-xs font-bold text-[#ce2b2b] border border-[#ce2b2b] py-2 hover:bg-[#ce2b2b] hover:text-white transition-colors rounded-sm tracking-wide"
         >
           {expanded ? "SHOW LESS ▲" : "SHOW MORE ▼"}
         </button>

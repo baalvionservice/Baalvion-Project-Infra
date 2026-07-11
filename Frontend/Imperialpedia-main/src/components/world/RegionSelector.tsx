@@ -21,7 +21,7 @@ export default function RegionSelector({
     <div className="bg-white border-b border-gray-200">
       <div className="max-w-screen-xl mx-auto px-2 sm:px-4">
         <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide">
-          <span className="hidden sm:flex items-center text-[10px] font-black tracking-widest text-gray-400 uppercase pr-3 shrink-0">
+          <span className="world-kicker hidden sm:flex items-center text-[10px] font-black tracking-widest text-gray-400 uppercase pr-3 shrink-0">
             Region
           </span>
           {regions.map((r) => {
@@ -31,10 +31,10 @@ export default function RegionSelector({
                 key={r.id}
                 href={regionPath(r.id)}
                 aria-current={active ? "page" : undefined}
-                className={`whitespace-nowrap text-[11px] sm:text-xs font-bold tracking-wide uppercase px-3 py-3 border-b-[3px] transition-all ${
+                className={`world-kicker whitespace-nowrap text-[11px] sm:text-xs font-bold tracking-wide uppercase px-3 py-3 border-b-[3px] transition-all ${
                   active
-                    ? "border-[#CC0000] text-[#CC0000]"
-                    : "border-transparent text-gray-600 hover:text-[#CC0000] hover:border-gray-300"
+                    ? "border-[#ce2b2b] text-[#ce2b2b]"
+                    : "border-transparent text-gray-600 hover:text-[#ce2b2b] hover:border-gray-300"
                 }`}
               >
                 <span className="sm:hidden">{r.short}</span>
