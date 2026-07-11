@@ -45,6 +45,7 @@ db.DiscussionGroup   = require('./discussionGroups')(sequelize, Sequelize.DataTy
 db.GroupMember       = require('./groupMembers')(sequelize, Sequelize.DataTypes);
 db.GroupPost         = require('./groupPosts')(sequelize, Sequelize.DataTypes);
 db.AuditLog     = require('./auditLogs')(sequelize, Sequelize.DataTypes);
+db.Complaint    = require('./complaints')(sequelize, Sequelize.DataTypes);
 db.LawyerLedger = require('./lawyerLedger')(sequelize, Sequelize.DataTypes);
 db.Payout       = require('./payouts')(sequelize, Sequelize.DataTypes);
 

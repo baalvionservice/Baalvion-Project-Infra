@@ -23,6 +23,7 @@ router.use('/referrals',      require('./referralRoutes'));
 router.use('/case-referrals', require('./caseReferralRoutes'));
 router.use('/connections',    require('./connectionRoutes'));
 router.use('/groups',         require('./groupRoutes'));
+router.use('/complaints',     require('./complaintRoutes'));
 router.use('/admin',          require('./adminRoutes'));
 
 module.exports = router;

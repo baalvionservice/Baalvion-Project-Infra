@@ -9,7 +9,8 @@ import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard, Scale, Users, UserCog, Briefcase, CalendarClock, CreditCard,
   BadgeDollarSign, Star, Newspaper, FolderTree, ListTree, Gift, Megaphone,
-  ScrollText, ShieldAlert, Loader2, LogOut, ShieldCheck,
+  ScrollText, ShieldAlert, Loader2, LogOut, ShieldCheck, AlertTriangle,
+  UserPlus, Globe, MapPin, Tags,
 } from "lucide-react";
 
 type NavItem = { href: string; label: string; icon: React.ElementType };
@@ -34,6 +35,16 @@ const NAV: { section: string; items: NavItem[] }[] = [
       { href: "/admin/cases", label: "Cases", icon: Briefcase },
       { href: "/admin/bookings", label: "Bookings", icon: CalendarClock },
       { href: "/admin/reviews", label: "Reviews", icon: Star },
+      { href: "/admin/case_referrals", label: "Case Referrals", icon: UserPlus },
+      { href: "/admin/complaints", label: "Complaints", icon: AlertTriangle },
+    ],
+  },
+  {
+    section: "Directory",
+    items: [
+      { href: "/admin/states", label: "States", icon: Globe },
+      { href: "/admin/cities", label: "Cities", icon: MapPin },
+      { href: "/admin/practice_areas", label: "Practice Areas", icon: Tags },
     ],
   },
   {

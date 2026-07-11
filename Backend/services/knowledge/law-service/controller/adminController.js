@@ -44,6 +44,7 @@ const ADMIN_FIELDS = {
     discussion_groups: ['name', 'slug', 'description', 'created_by', 'is_active'],
     group_members: ['group_id', 'lawyer_id', 'role'],
     group_posts: ['group_id', 'author_id', 'post_type', 'parent_post_id', 'content'],
+    complaints: ['subject_lawyer_id', 'category', 'description', 'status', 'resolution', 'resolved_by', 'resolved_at'],
     payouts:       ['lawyer_id', 'amount', 'currency', 'status', 'reference', 'notes', 'processed_at'],
     messages:      ['content', 'type', 'case_id', 'booking_id', 'sender_id', 'recipient_id', 'metadata'],
     documents:     ['name', 'type', 'url', 'size', 'category', 'case_id', 'owner_id'],
@@ -83,6 +84,7 @@ const RESOURCES = {
     discussion_groups: { model: 'DiscussionGroup', search: ['name', 'slug'], filters: ['is_active'], order: [['name', 'ASC']] },
     group_members: { model: 'GroupMember', search: [], filters: ['group_id', 'lawyer_id', 'role'], order: [['joined_at', 'DESC']] },
     group_posts: { model: 'GroupPost', search: ['content'], filters: ['group_id', 'author_id', 'post_type'], order: [['created_at', 'DESC']] },
+    complaints: { model: 'Complaint', search: ['description', 'category'], filters: ['status', 'subject_lawyer_id'], include: [L('lawyer')], order: [['created_at', 'DESC']] },
     payouts:       { model: 'Payout',       search: ['reference', 'status'], filters: ['status', 'lawyer_id'], include: [L('lawyer')], order: [['created_at', 'DESC']] },
     ledger:        { model: 'LawyerLedger', search: ['description'], filters: ['entry_type', 'lawyer_id'], include: [L('lawyer')], order: [['created_at', 'DESC']], readonly: true },
     messages:      { model: 'Message',      search: ['content'], filters: ['type', 'case_id', 'booking_id'], order: [['created_at', 'DESC']] },
@@ -202,6 +204,7 @@ const getDashboardStats = async (req, res, next) => {
             totalPayments, succeededPayments,
             totalArticles, publishedArticles,
             totalReviews, totalSubscriptions, activeSubscriptions,
+            totalComplaints, openComplaints, pendingVerifications,
         ] = await Promise.all([
             db.Lawyer.count(), db.Lawyer.count({ where: { status: 'active' } }), db.Lawyer.count({ where: { status: 'pending' } }),
             db.Client.count(),
@@ -210,6 +213,8 @@ const getDashboardStats = async (req, res, next) => {
             db.Payment.count(), db.Payment.count({ where: { status: 'succeeded' } }),
             db.Article.count(), db.Article.count({ where: { status: 'published' } }),
             db.Review.count(), db.Subscription.count(), db.Subscription.count({ where: { status: 'active' } }),
+            db.Complaint.count(), db.Complaint.count({ where: { status: 'open' } }),
+            db.VerificationDocument.count({ where: { status: 'pending' } }),
         ]);
         const revenueRaw = await db.Payment.sum('amount', { where: { status: 'succeeded' } });
         return sendSuccess(req, res, {
@@ -221,6 +226,8 @@ const getDashboardStats = async (req, res, next) => {
             articles: { total: totalArticles, published: publishedArticles },
             reviews: { total: totalReviews },
             subscriptions: { total: totalSubscriptions, active: activeSubscriptions },
+            complaints: { total: totalComplaints, open: openComplaints },
+            verificationQueue: { pending: pendingVerifications },
         });
     } catch (err) { return next(err); }
 };
