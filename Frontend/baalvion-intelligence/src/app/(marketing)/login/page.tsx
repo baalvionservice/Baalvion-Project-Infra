@@ -1,20 +1,28 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SocialLoginButtons } from "@/components/auth/social-login-buttons";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const OAUTH_ERROR_MESSAGE = "Couldn't sign in with that provider. Please try again.";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).has("oauth_error")) {
+      setError(OAUTH_ERROR_MESSAGE);
+    }
+  }, []);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -36,7 +44,17 @@ export default function LoginPage() {
         <h1 className="text-2xl">Welcome back</h1>
         <p className="text-sm text-muted-foreground">Sign in to your Baalvion Intelligence dashboard.</p>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
+        <div className="mt-6">
+          <SocialLoginButtons returnTo="/dashboard/overview" />
+        </div>
+
+        <div className="my-6 flex items-center gap-3 text-xs text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          or
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
           <div className="space-y-2">
             <Label htmlFor="login-email">Email</Label>
             <Input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
