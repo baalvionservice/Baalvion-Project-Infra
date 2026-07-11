@@ -12,6 +12,8 @@ export const getAllLawyers = async () => api.apiGetAllLawyers();
 
 export const getLawyerById = async (id: string) => api.apiGetLawyerById(id);
 
+export const getMyLawyerProfile = async () => api.apiGetMyLawyerProfile();
+
 export const searchLawyers = async (filters: {
   specialization?: string;
   minRating?: number;

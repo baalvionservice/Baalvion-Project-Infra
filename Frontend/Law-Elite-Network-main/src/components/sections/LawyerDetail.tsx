@@ -47,6 +47,12 @@ interface LawyerDetailProps {
     profileImage?: string;
     isVerified?: boolean;
     totalReviews?: number;
+    country?: string | null;
+    state?: { id: number; name: string; code?: string | null } | null;
+    cityRef?: { id: number; name: string } | null;
+    practiceAreas?: { id: number; name: string; slug: string }[];
+    languages?: string[];
+    availableFor?: { consultation?: boolean; case_referral?: boolean; international_collaboration?: boolean };
   };
 }
 
@@ -90,12 +96,23 @@ export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
     setIsBookingOpen(true);
   };
 
-  const specs = Array.isArray(lawyer.specialization) 
-    ? lawyer.specialization 
+  const specs = Array.isArray(lawyer.specialization)
+    ? lawyer.specialization
     : [lawyer.specialization];
 
   const city = lawyer.city || lawyer.location || 'Global';
   const fee = lawyer.consultationFee || (lawyer as any).hourlyRate || 5000;
+
+  // Location breadcrumb: Country / State / City — degrades gracefully when a
+  // lawyer predates the geo taxonomy (state/city are null, free-text city stands in).
+  const breadcrumbParts = [lawyer.country, lawyer.state?.name, lawyer.cityRef?.name || lawyer.city].filter(Boolean);
+  const practiceAreaChips = lawyer.practiceAreas?.length ? lawyer.practiceAreas.map((p) => p.name) : specs;
+  const availableFor = lawyer.availableFor || {};
+  const availabilityFlags = [
+    { key: 'consultation', label: 'Consultation', on: availableFor.consultation !== false },
+    { key: 'case_referral', label: 'Case Referral', on: !!availableFor.case_referral },
+    { key: 'international_collaboration', label: 'International Collaboration', on: !!availableFor.international_collaboration },
+  ];
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-24 md:pb-0">
@@ -127,7 +144,10 @@ export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
           
           <div className="flex flex-wrap justify-center md:justify-start gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
             <div className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5 text-blue-600" /> {specs[0]} Practitioner</div>
-            <div className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5 text-blue-600" /> {city} Jurisdiction</div>
+            <div className="flex items-center gap-1.5">
+              <MapPin className="w-3.5 h-3.5 text-blue-600" />
+              {breadcrumbParts.length ? breadcrumbParts.join(' / ') : `${city} Jurisdiction`}
+            </div>
           </div>
           
           <div className="mt-4 flex items-center justify-center md:justify-start gap-1 text-blue-600 text-[10px] font-bold uppercase tracking-widest">
@@ -211,17 +231,36 @@ export default function LawyerDetail({ lawyer }: LawyerDetailProps) {
             </CardHeader>
             <CardContent className="pt-8 space-y-8">
               <div className="flex flex-wrap gap-2 mb-4">
-                {specs.map(s => (
+                {practiceAreaChips.map(s => (
                   <Badge key={s} variant="outline" className="bg-blue-50 border-blue-100 text-blue-600 text-[9px] font-bold uppercase tracking-widest py-1 px-3">
                     {s}
                   </Badge>
                 ))}
               </div>
 
+              {!!lawyer.languages?.length && (
+                <div className="flex flex-wrap items-center gap-2 -mt-4">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Languages:</span>
+                  {lawyer.languages.map((l) => (
+                    <Badge key={l} variant="outline" className="bg-slate-50 border-slate-200 text-slate-600 text-[9px] font-bold py-0.5 px-2.5">
+                      {l}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2 -mt-4">
+                {availabilityFlags.filter((f) => f.on).map((f) => (
+                  <span key={f.key} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-700 text-[9px] font-bold uppercase tracking-widest">
+                    <CheckCircle2 className="w-3 h-3" /> Available for {f.label}
+                  </span>
+                ))}
+              </div>
+
               <div className="text-slate-600 leading-relaxed italic text-sm font-medium whitespace-pre-wrap">
                 {lawyer.bio || `Advocate ${lawyer.name} is a distinguished practitioner specializing in ${specs.join(', ')}. With over ${lawyer.experience} years of expertise in the ${city} jurisdiction, they have consistently demonstrated a commitment to legal excellence and strategic counsel for elite clients and corporate entities.`}
               </div>
-              
+
               <TrustBadges />
 
               {/* Case History Placeholder */}

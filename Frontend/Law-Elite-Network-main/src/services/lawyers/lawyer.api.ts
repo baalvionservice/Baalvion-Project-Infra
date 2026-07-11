@@ -55,11 +55,23 @@ export function adaptLawyer(l: any) {
     barNumber: l.bar_number || null,
     bio: l.bio || '',
     profileImage: resolvePersonImage({ avatarUrl: l.profile_photo, name: l.name, id: l.id }),
+    // Distinct from `profileImage`, which always resolves to a generated
+    // silhouette fallback — this is only true when a real photo was uploaded.
+    hasProfilePhoto: !!l.profile_photo,
     isVerified: !!l.verified,
     available: l.status === 'active',
     status: l.status,
     availability: l.availability || {},
     createdAt: l.created_at || l.createdAt,
+    // Registration wizard / Phase 3 profile enrichment (present when the
+    // endpoint includes them — /lawyers/:id, /lawyers/me).
+    state: l.state ? { id: l.state.id, name: l.state.name, code: l.state.code } : null,
+    cityRef: l.cityRef ? { id: l.cityRef.id, name: l.cityRef.name } : null,
+    practiceAreas: Array.isArray(l.practiceAreas) ? l.practiceAreas.map((p: any) => ({ id: p.id, name: p.name, slug: p.slug })) : [],
+    availableFor: l.available_for || { consultation: true, case_referral: false, international_collaboration: false },
+    licenseNumber: l.license_number || null,
+    firmName: l.firm_name || null,
+    isIndependent: l.is_independent ?? true,
   };
 }
 
@@ -86,6 +98,18 @@ export const apiGetAllLawyers = async () => {
 export const apiGetLawyerById = async (id: string) => {
   const res = await publicClient.get(`/lawyers/${id}`);
   return adaptLawyer(res?.data?.data);
+};
+
+// The authenticated lawyer's own full profile (state/city/practiceAreas/available_for
+// included) — used by the dashboard's profile-completion widget.
+export const apiGetMyLawyerProfile = async () => {
+  const { apiClient } = await import('@/lib/api/client');
+  try {
+    const res = await apiClient.get('/lawyers/me');
+    return adaptLawyer(res?.data?.data);
+  } catch {
+    return null;
+  }
 };
 
 // Global directory: active-lawyer counts per country, for the "browse by country" rail.

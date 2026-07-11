@@ -22,7 +22,9 @@ import {
   ChevronRight,
   Bell,
   Zap,
-  Target
+  Target,
+  Percent,
+  UserPlus
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -45,15 +47,16 @@ function LawyerDashboardContent() {
   const { user } = useAuthStore();
   const router = useRouter();
   
-  const { 
-    profile, 
-    cases, 
-    appointments, 
+  const {
+    profile,
+    cases,
+    appointments,
     earnings,
     loading,
     stats,
     notifications
   } = useLawyerDashboardData(user?.id);
+  const profileCompletion = stats.profileCompletion ?? 0;
 
   if (loading) {
     return (
@@ -91,11 +94,17 @@ function LawyerDashboardContent() {
         </div>
       </header>
 
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+        <StatCard label="Profile Completion" value={`${profileCompletion}%`} sub="Public Profile Strength" icon={<Percent className="w-4 h-4 text-blue-600" />} />
+        <StatCard label="New Messages" value={stats.unreadMessages} sub="Awaiting Reply" icon={<MessageSquare className="w-4 h-4 text-blue-600" />} />
+        <StatCard label="Referral Requests" value={stats.referralRequests} sub="Case Referrals" icon={<UserPlus className="w-4 h-4 text-emerald-600" />} />
+        <StatCard label="Alert Ledger" value={stats.unreadNotifs} sub="Unread Signals" icon={<Bell className="w-4 h-4 text-red-600" />} />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
         <StatCard label="Assigned Briefs" value={stats.totalCases} sub="Total Dossiers" icon={<Briefcase className="w-4 h-4 text-blue-600" />} />
-        <StatCard label="Active Strategy" value={stats.activeCases} sub="Managed Matters" icon={<TrendingUp className="w-4 h-4 text-emerald-600" />} />
+        <StatCard label="Case Collaboration" value={stats.activeCases} sub="Active Matters" icon={<TrendingUp className="w-4 h-4 text-emerald-600" />} />
         <StatCard label="Today's Session" value={stats.todayApts} sub="Executive Agenda" icon={<Calendar className="w-4 h-4 text-amber-600" />} />
-        <StatCard label="Alert Ledger" value={stats.unreadNotifs} sub="Unread Signals" icon={<Bell className="w-4 h-4 text-red-600" />} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">

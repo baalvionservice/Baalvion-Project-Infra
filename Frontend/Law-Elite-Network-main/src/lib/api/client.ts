@@ -188,6 +188,7 @@ export const caseApi = {
 export const messageApi = {
   list: (params: Record<string, unknown>) => apiClient.get('/messages', { params }),
   send: (data: unknown) => apiClient.post('/messages', data),
+  unreadCount: () => apiClient.get('/messages/unread-count'),
 };
 
 export const documentApi = {

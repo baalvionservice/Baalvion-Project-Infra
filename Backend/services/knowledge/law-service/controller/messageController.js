@@ -90,4 +90,14 @@ const markRead = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listMessages, sendMessage, markRead };
+// "New Messages" dashboard widget — a real count, not derived from mock data.
+const unreadCount = async (req, res, next) => {
+    try {
+        const count = await db.Message.count({
+            where: { receiver_id: String(req.user.id), read_at: null },
+        });
+        return sendSuccess(req, res, { count });
+    } catch (err) { return next(err); }
+};
+
+module.exports = { listMessages, sendMessage, markRead, unreadCount };

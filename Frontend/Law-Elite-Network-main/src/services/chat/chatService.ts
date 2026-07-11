@@ -19,6 +19,16 @@ const adaptMsg = (m: any) => ({
   createdAt: m.created_at || m.createdAt,
 });
 
+/** Real unread-message count for the dashboard's "New Messages" widget. */
+export const getUnreadMessageCount = async (): Promise<number> => {
+  try {
+    const res = await messageApi.unreadCount();
+    return Number(res?.data?.data?.count ?? 0);
+  } catch {
+    return 0;
+  }
+};
+
 export const sendMessage = async (data: { caseId: string; senderId?: string; receiverId?: string; text: string; userRole?: string }) => {
   const res = await messageApi.send({
     content: data.text,

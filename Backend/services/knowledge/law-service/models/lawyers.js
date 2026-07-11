@@ -32,6 +32,12 @@ module.exports = (sequelize, DataTypes) => {
         profile_photo: { type: DataTypes.TEXT },
         languages: { type: DataTypes.ARRAY(DataTypes.TEXT), defaultValue: [] },
         availability: { type: DataTypes.JSONB, defaultValue: {} },
+        // Public-profile "Available for" flags (spec: Consultation / Case
+        // Referral / International Collaboration).
+        available_for: {
+            type: DataTypes.JSONB,
+            defaultValue: { consultation: true, case_referral: false, international_collaboration: false },
+        },
         verified: { type: DataTypes.BOOLEAN, defaultValue: false },
         status: {
             type: DataTypes.ENUM('active', 'suspended', 'pending'),
