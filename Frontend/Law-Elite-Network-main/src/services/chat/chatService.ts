@@ -62,3 +62,32 @@ export const markAsRead = async (messageId: string) => {
   await apiClient.patch(`/messages/${messageId}/read`);
   return { success: true };
 };
+
+/** Real binary chat attachment — streamed to MinIO, returns the created `type:'file'` message. */
+export const uploadChatFile = async (file: File, opts: { caseId?: string; bookingId?: string; receiverId?: string }) => {
+  const form = new FormData();
+  form.append('file', file);
+  if (opts.caseId) form.append('case_id', opts.caseId);
+  if (opts.bookingId) form.append('booking_id', opts.bookingId);
+  if (opts.receiverId) form.append('receiver_id', opts.receiverId);
+  const res = await messageApi.upload(form);
+  return adaptMsg(res?.data?.data);
+};
+
+/** Short-lived presigned download URL for a file message's attachment. */
+export const getChatFileUrl = async (messageId: string): Promise<string> => {
+  const res = await messageApi.downloadUrl(messageId);
+  return res?.data?.data?.url || '';
+};
+
+/** Ad-hoc video/voice call — mints a room for this conversation and drops a call-invite message. */
+export const startChatCall = async (opts: { caseId?: string; bookingId?: string; receiverId?: string; audioOnly?: boolean }) => {
+  const res = await messageApi.startCall({
+    case_id: opts.caseId ? Number(opts.caseId) : undefined,
+    booking_id: opts.bookingId ? Number(opts.bookingId) : undefined,
+    receiver_id: opts.receiverId,
+    audioOnly: !!opts.audioOnly,
+  });
+  const data = res?.data?.data;
+  return { message: adaptMsg(data?.message), room: data?.room };
+};

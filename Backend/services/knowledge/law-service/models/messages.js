@@ -7,8 +7,12 @@ module.exports = (sequelize, DataTypes) => {
         sender_id: { type: DataTypes.TEXT, allowNull: false },
         receiver_id: { type: DataTypes.TEXT, allowNull: false },
         content: { type: DataTypes.TEXT, allowNull: false },
+        // 'call' = a call-invite message (ad-hoc video/voice, spec area 7);
+        // content carries a human-readable label, file_url carries the room
+        // join URL (metadata via a call: prefix would overcomplicate this —
+        // the room is re-derivable any time from the same two participants).
         type: {
-            type: DataTypes.ENUM('text', 'file', 'system'),
+            type: DataTypes.ENUM('text', 'file', 'system', 'call'),
             defaultValue: 'text',
         },
         file_url: { type: DataTypes.TEXT, allowNull: true },

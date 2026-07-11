@@ -189,6 +189,9 @@ export const messageApi = {
   list: (params: Record<string, unknown>) => apiClient.get('/messages', { params }),
   send: (data: unknown) => apiClient.post('/messages', data),
   unreadCount: () => apiClient.get('/messages/unread-count'),
+  upload: (form: FormData) => apiClient.post('/messages/upload', form, { headers: { 'Content-Type': 'multipart/form-data' } }),
+  downloadUrl: (id: string) => apiClient.get(`/messages/${id}/file`),
+  startCall: (data: unknown) => apiClient.post('/messages/call', data),
 };
 
 export const documentApi = {
