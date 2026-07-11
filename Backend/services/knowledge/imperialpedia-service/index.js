@@ -18,7 +18,9 @@ app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ limit: '1mb' }));
+// verify captures the raw body for HMAC signature checks (Razorpay webhook) — the JSON parser
+// only re-serializes, so signing must happen against these exact bytes, not the parsed object.
+app.use(express.json({ limit: '1mb', verify: (req, _res, buf) => { req.rawBody = buf; } }));
 app.use(cookieParser());
 app.use(requestContext);
 app.use(metricsMiddleware);
