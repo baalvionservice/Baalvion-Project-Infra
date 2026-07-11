@@ -5,14 +5,14 @@ export default function MarketTicker({ indicators }: { indicators: Indicator[] }
   const doubled = [...indicators, ...indicators];
 
   return (
-    <div className="bg-[#0a0a0a] border-b border-gray-800 overflow-hidden py-2">
+    <div className="bg-[#071d39] border-b border-[#002f6c] overflow-hidden py-2">
       <div className="ticker-wrapper">
         <div className="ticker-track flex gap-8 animate-ticker whitespace-nowrap">
           {doubled.map((item, i) => (
             <span key={i} className="inline-flex items-center gap-2 text-xs shrink-0 cursor-pointer hover:opacity-80 transition-opacity">
-              <span className="text-gray-400 font-medium tracking-wide">{item.name}</span>
+              <span className="world-kicker text-gray-400 font-semibold tracking-wide">{item.name}</span>
               <span className="text-white font-mono">{item.value}</span>
-              <span className={`font-mono text-[11px] ${item.positive ? "text-green-400" : "text-red-400"}`}>
+              <span className={`font-mono text-[11px] ${item.positive ? "text-[#00a857]" : "text-[#ce2b2b]"}`}>
                 {item.positive ? "▲" : "▼"} {item.change} ({item.percent})
               </span>
               <span className="text-gray-700 ml-2">|</span>

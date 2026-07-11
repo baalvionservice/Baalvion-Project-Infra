@@ -1,10 +1,20 @@
 import HeroFeatured from "@/components/world/HeroFeatured";
 import LatestNews from "@/components/world/LatestNews";
 import MarketIndicatorBar from "@/components/world/MarketIndicatorBar";
+import FeaturedAnalysis from "@/components/world/FeaturedAnalysis";
+import ImperialpediaExplains from "@/components/world/ImperialpediaExplains";
+import MarketMovers from "@/components/world/MarketMovers";
 import MarketsPanel from "@/components/world/MarketsPanel";
+import MarketsSection from "@/components/world/MarketsSection";
 import MarketTicker from "@/components/world/MarketTicker";
 import NewsGrid from "@/components/world/NewsGrid";
+import QuickLinks from "@/components/world/QuickLinks";
+import QuoteFinderMovers from "@/components/world/QuoteFinderMovers";
 import RegionSelector from "@/components/world/RegionSelector";
+import SpecialReports from "@/components/world/SpecialReports";
+import TopVideos from "@/components/world/TopVideos";
+import TrendingNow from "@/components/world/TrendingNow";
+import WorldNewsletter from "@/components/world/WorldNewsletter";
 import { regionPath, type WorldData } from "@/lib/data/worldRegions";
 import { env } from "@/config/env";
 
@@ -74,18 +84,21 @@ export default function WorldView({ data }: { data: WorldData }) {
         {/* Breadcrumb */}
         <div className="bg-white border-b border-gray-200 px-4 py-2">
           <div className="max-w-screen-xl mx-auto flex items-center gap-2">
-            <span className="text-[10px] font-black tracking-widest text-gray-500 uppercase">
+            <span className="world-kicker text-[10px] font-black tracking-widest text-gray-500 uppercase">
               You are here:
             </span>
-            <span className="text-[10px] font-black tracking-widest text-gray-700 uppercase">
+            <span className="world-kicker text-[10px] font-black tracking-widest text-gray-700 uppercase">
               World
             </span>
             <span className="text-gray-300">›</span>
-            <span className="text-[10px] font-black tracking-widest text-[#CC0000] uppercase">
+            <span className="world-kicker text-[10px] font-black tracking-widest text-[#ce2b2b] uppercase">
               {data.region.label}
             </span>
           </div>
         </div>
+
+        {/* Market Movers strip — real live indicator data, biggest movers first */}
+        <MarketMovers indicators={data.indicators} />
       </div>
 
       {/* Main layout — responsive:
@@ -96,18 +109,30 @@ export default function WorldView({ data }: { data: WorldData }) {
         <div className="flex flex-col lg:grid lg:grid-cols-[1fr_280px] gap-px bg-gray-200">
           {/* CENTER — Main content area */}
           <main className="bg-white order-1 min-w-0">
+            <QuickLinks sections={data.sections} />
+
             <HeroFeatured featured={data.featured} />
+
+            <WorldNewsletter />
 
             <div className="px-2 sm:px-4">
               <div className="flex flex-col md:grid md:grid-cols-[200px_1fr] lg:grid-cols-[240px_1fr] gap-4">
                 <aside className="bg-white md:border-l border-gray-200 order-2 md:order-1 min-w-0">
-                  <MarketsPanel markets={data.markets} watchlist={data.watchlist} />
+                  <QuoteFinderMovers watchlist={data.watchlist} />
+                  <MarketsPanel markets={data.markets} watchlist={data.watchlist} indicators={data.indicators} />
+                  <TrendingNow latest={data.latest} />
                 </aside>
                 <div className="order-1 md:order-2 min-w-0">
                   <NewsGrid sections={data.sections} />
                 </div>
               </div>
             </div>
+
+            <MarketsSection watchlist={data.watchlist} />
+            <SpecialReports featured={data.featured} />
+            <TopVideos latest={data.latest} />
+            <FeaturedAnalysis sections={data.sections} />
+            <ImperialpediaExplains latest={data.latest} />
           </main>
 
           {/* Latest News — desktop right rail (lg+) */}
