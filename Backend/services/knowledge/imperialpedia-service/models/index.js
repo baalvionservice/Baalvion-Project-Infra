@@ -31,8 +31,16 @@ db.GlossaryTerm = require('./glossary_terms')(sequelize, DataTypes);
 db.GlossaryExample = require('./glossary_examples')(sequelize, DataTypes);
 db.GlossaryRelation = require('./glossary_relations')(sequelize, DataTypes);
 db.WorldConfig = require('./world_config')(sequelize, DataTypes);
+db.Plan = require('./plans')(sequelize, DataTypes);
+db.Subscription = require('./subscriptions')(sequelize, DataTypes);
+db.Payment = require('./payments')(sequelize, DataTypes);
 
 // Associations
+// Plan -> Subscriptions / Payments -> Subscription (billing)
+db.Plan.hasMany(db.Subscription, { foreignKey: 'plan_id', as: 'subscriptions' });
+db.Subscription.belongsTo(db.Plan, { foreignKey: 'plan_id', as: 'plan' });
+db.Subscription.hasMany(db.Payment, { foreignKey: 'subscription_id', as: 'payments' });
+db.Payment.belongsTo(db.Subscription, { foreignKey: 'subscription_id', as: 'subscription' });
 // Article -> CreatorProfile (author)
 db.Article.belongsTo(db.CreatorProfile, { foreignKey: 'author_id', targetKey: 'user_id', as: 'creatorProfile', constraints: false });
 db.CreatorProfile.hasMany(db.Article, { foreignKey: 'author_id', sourceKey: 'user_id', as: 'articles', constraints: false });
