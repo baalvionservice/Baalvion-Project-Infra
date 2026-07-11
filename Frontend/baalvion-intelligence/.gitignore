@@ -10,3 +10,8 @@ yarn-debug.log*
 yarn-error.log*
 next-env.d.ts
 tsconfig.tsbuildinfo
+
+# Cloudflare / OpenNext
+.open-next/
+.wrangler/
+.dev.vars

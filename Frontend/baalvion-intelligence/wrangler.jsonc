@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "baalvion-intelligence",
+  "compatibility_date": "2026-07-11",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "baalvion-intelligence"
+    }
+  ],
+  "routes": [{ "pattern": "signal.baalvion.com", "custom_domain": true }],
+  "vars": {
+    "NEWS_SERVICE_URL": "https://news.baalvion.com",
+    "NEXT_PRIVATE_MINIMAL_MODE": "1"
+  }
+}
