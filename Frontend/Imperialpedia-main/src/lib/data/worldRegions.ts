@@ -64,6 +64,17 @@ export interface MarketRegionGroup {
   markets: MarketRow[];
 }
 
+export interface WatchlistItem {
+  ticker: string;
+  name: string;
+  price: string;
+  change: string;
+  positive: boolean;
+  /** Real regularMarketVolume from Yahoo's chart API, when available — used
+   * by the "Most Active" table. Undefined for the static fallback set. */
+  volume?: number;
+}
+
 export interface WorldData {
   region: RegionConfig;
   asOf: string;
@@ -72,7 +83,7 @@ export interface WorldData {
   markets: MarketRegionGroup[];
   latest: typeof latestNews;
   sections: typeof newsGridSections;
-  watchlist: typeof watchlistItems;
+  watchlist: WatchlistItem[];
   /** Region ids enabled in the admin World Control panel (undefined = all). */
   enabledRegions?: RegionId[];
 }

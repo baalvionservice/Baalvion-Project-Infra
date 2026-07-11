@@ -1,11 +1,12 @@
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { WorldData } from "@/lib/data/worldRegions";
+import { sectionAnchorId } from "@/components/world/QuickLinks";
 
 export default function NewsGrid({ sections }: { sections: WorldData["sections"] }) {
   return (
     <div className="space-y-6 sm:space-y-8 py-4 sm:py-6 px-2 sm:px-4">
       {sections.map((section) => (
-        <div key={section.section} className="space-y-3 sm:space-y-4">
+        <div key={section.section} id={sectionAnchorId(section.section)} className="space-y-3 sm:space-y-4 scroll-mt-24">
           <h2 className="text-sm sm:text-base font-bold text-gray-900 border-b-2 border-gray-200 pb-2">
             {section.section}
           </h2>
@@ -18,7 +19,7 @@ export default function NewsGrid({ sections }: { sections: WorldData["sections"]
                 {item.image ? (
                   <div className="flex items-start justify-between w-full gap-3 sm:gap-4">
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-sm sm:text-lg font-bold leading-snug text-gray-900 group-hover:underline mt-0.5 line-clamp-3">
+                      <h3 className="text-sm sm:text-lg font-bold leading-snug text-gray-900 group-hover:text-[#ce2b2b] group-hover:underline mt-0.5 line-clamp-3">
                         {item.headline}
                       </h3>
                       <span className="text-[9px] sm:text-[10px] font-black text-gray-400 tracking-wide mt-1 block">
@@ -37,7 +38,7 @@ export default function NewsGrid({ sections }: { sections: WorldData["sections"]
                   </div>
                 ) : (
                   <div className="w-full">
-                    <h3 className="text-sm sm:text-lg font-bold leading-snug text-gray-900 group-hover:underline line-clamp-3">
+                    <h3 className="text-sm sm:text-lg font-bold leading-snug text-gray-900 group-hover:text-[#ce2b2b] group-hover:underline line-clamp-3">
                       {item.headline}
                     </h3>
                     <span className="text-[9px] sm:text-[10px] font-black text-gray-400 tracking-wide mt-1 block">

@@ -21,11 +21,11 @@ export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }
           <div className="absolute bottom-0 left-0 p-3 sm:p-5 text-white">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               {main.tag && (
-                <span className="bg-[#CC0000] text-white text-[9px] sm:text-[10px] font-black tracking-widest px-1.5 sm:px-2 py-0.5">
+                <span className="world-kicker bg-[#ce2b2b] text-white text-[9px] sm:text-[10px] font-black tracking-widest px-1.5 sm:px-2 py-0.5">
                   {main.tag}
                 </span>
               )}
-              <span className="text-[10px] sm:text-[11px] font-bold text-[#FF6B35] tracking-widest uppercase">
+              <span className="world-kicker text-[10px] sm:text-[11px] font-bold text-[#fcb700] tracking-widest uppercase">
                 {main.category}
               </span>
             </div>
@@ -51,10 +51,10 @@ export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }
             key={story.id}
             className="group cursor-pointer p-3 sm:p-4 hover:bg-gray-50 transition-colors"
           >
-            <span className="text-[9px] sm:text-[10px] font-black tracking-widest text-[#CC0000] uppercase">
+            <span className="world-kicker text-[9px] sm:text-[10px] font-black tracking-widest text-[#ce2b2b] uppercase">
               {story.category}
             </span>
-            <h2 className="text-xs sm:text-sm font-semibold leading-snug mt-1 text-gray-900 group-hover:text-[#CC0000] transition-colors line-clamp-3">
+            <h2 className="text-xs sm:text-sm font-semibold leading-snug mt-1 text-gray-900 group-hover:text-[#ce2b2b] transition-colors line-clamp-3">
               {story.headline}
             </h2>
             <p className="text-[11px] sm:text-xs text-gray-500 mt-1.5 line-clamp-2 hidden sm:block">
