@@ -23,6 +23,7 @@ const NAV: { section: string; items: NavItem[] }[] = [
     section: "People",
     items: [
       { href: "/admin/lawyers", label: "Lawyers", icon: Scale },
+      { href: "/admin/verification", label: "Verification Queue", icon: ShieldCheck },
       { href: "/admin/clients", label: "Clients", icon: Users },
       { href: "/admin/users", label: "Users", icon: UserCog },
     ],

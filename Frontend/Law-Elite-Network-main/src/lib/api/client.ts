@@ -202,9 +202,9 @@ export const paymentApi = {
 };
 
 export const subscriptionApi = {
-  get: () => apiClient.get('/subscriptions'),
+  get: (config?: { params?: Record<string, unknown> }) => apiClient.get('/subscriptions', config),
   create: (data: unknown) => apiClient.post('/subscriptions', data),
-  cancel: () => apiClient.post('/subscriptions/cancel'),
+  cancel: (subscriberType?: string) => apiClient.post('/subscriptions/cancel', { subscriberType }),
 };
 
 export const payoutApi = {

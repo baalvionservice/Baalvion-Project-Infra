@@ -12,7 +12,18 @@ module.exports = (sequelize, DataTypes) => {
         country_code: { type: DataTypes.STRING(2) },
         country: { type: DataTypes.STRING(100) },
         city: { type: DataTypes.STRING(120) },
+        // Relational geo (registration wizard Steps 1-3). Nullable: existing rows
+        // keep rendering via the free-text country/city columns above until backfilled.
+        state_id: { type: DataTypes.INTEGER },
+        city_id: { type: DataTypes.INTEGER },
         jurisdictions: { type: DataTypes.ARRAY(DataTypes.TEXT), defaultValue: [] },
+        // Personal Details (registration wizard).
+        dob: { type: DataTypes.DATEONLY },
+        gender: { type: DataTypes.STRING(20) },
+        // Professional Details (registration wizard).
+        license_number: { type: DataTypes.STRING(100) },
+        firm_name: { type: DataTypes.STRING(255) },
+        is_independent: { type: DataTypes.BOOLEAN, defaultValue: true },
         experience: { type: DataTypes.INTEGER, defaultValue: 0 },
         hourly_rate: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0 },
         rating: { type: DataTypes.DECIMAL(3, 2), defaultValue: 0 },
@@ -38,6 +49,16 @@ module.exports = (sequelize, DataTypes) => {
         Lawyer.hasMany(db.Case, { foreignKey: 'lawyer_id', as: 'cases' });
         Lawyer.hasMany(db.Review, { foreignKey: 'lawyer_id', as: 'reviews' });
         Lawyer.hasMany(db.Payment, { foreignKey: 'lawyer_id', as: 'payments' });
+        Lawyer.belongsTo(db.State, { foreignKey: 'state_id', as: 'state' });
+        Lawyer.belongsTo(db.City, { foreignKey: 'city_id', as: 'cityRef' });
+        Lawyer.belongsToMany(db.PracticeArea, {
+            through: db.LawyerPracticeArea,
+            foreignKey: 'lawyer_id',
+            otherKey: 'practice_area_id',
+            as: 'practiceAreas',
+        });
+        Lawyer.hasMany(db.VerificationDocument, { foreignKey: 'lawyer_id', as: 'verificationDocuments' });
+        Lawyer.hasMany(db.Subscription, { foreignKey: 'lawyer_id', as: 'subscriptions' });
     };
 
     return Lawyer;

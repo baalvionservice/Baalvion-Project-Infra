@@ -9,6 +9,7 @@ const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
 const mailer = require('../service/mailer');
 const ledger = require('../service/ledger');
+const { maybeActivateLawyer } = require('../service/lawyerActivation');
 
 // ── Resource registry ────────────────────────────────────────────────────────
 // model     : key in db
@@ -25,13 +26,13 @@ const CAT = (as) => ({ model: 'Category', as, attributes: ['id', 'name', 'slug']
 // Fields not listed here are silently dropped before hitting the ORM.
 // Sensitive columns (id, created_at, updated_at, password_hash, etc.) are excluded.
 const ADMIN_FIELDS = {
-    lawyers:       ['name', 'email', 'phone', 'bio', 'specializations', 'bar_number', 'hourly_rate', 'location', 'languages', 'status', 'verified', 'avatar_url', 'experience_years', 'user_id'],
+    lawyers:       ['name', 'email', 'phone', 'bio', 'specializations', 'bar_number', 'hourly_rate', 'location', 'languages', 'status', 'verified', 'avatar_url', 'experience_years', 'user_id', 'state_id', 'city_id', 'dob', 'gender', 'license_number', 'firm_name', 'is_independent'],
     clients:       ['name', 'email', 'phone', 'location', 'avatar_url', 'subscription_tier', 'user_id'],
     users:         ['email', 'full_name', 'role', 'is_active', 'avatar_url'],
     cases:         ['title', 'description', 'category', 'priority', 'status', 'outcome', 'notes', 'client_id', 'lawyer_id', 'closed_at'],
     bookings:      ['lawyer_id', 'client_id', 'case_id', 'type', 'scheduled_at', 'duration', 'notes', 'status', 'total_amount', 'video_room_id'],
     payments:      ['status', 'provider', 'provider_tx_id', 'notes'],
-    subscriptions: ['tier', 'status', 'started_at', 'expires_at', 'client_id'],
+    subscriptions: ['tier', 'status', 'started_at', 'expires_at', 'client_id', 'lawyer_id', 'subscriber_type'],
     reviews:       ['rating', 'comment', 'status', 'lawyer_id', 'client_id'],
     articles:      ['title', 'slug', 'excerpt', 'content', 'status', 'category_id', 'subcategory_id', 'author_id', 'published_at', 'featured_image', 'tags'],
     categories:    ['name', 'slug', 'description', 'is_active', 'icon', 'order'],
@@ -41,6 +42,10 @@ const ADMIN_FIELDS = {
     payouts:       ['lawyer_id', 'amount', 'currency', 'status', 'reference', 'notes', 'processed_at'],
     messages:      ['content', 'type', 'case_id', 'booking_id', 'sender_id', 'recipient_id', 'metadata'],
     documents:     ['name', 'type', 'url', 'size', 'category', 'case_id', 'owner_id'],
+    states:        ['country_code', 'name', 'code'],
+    cities:        ['state_id', 'country_code', 'name'],
+    practice_areas: ['name', 'slug', 'is_active', 'order'],
+    verification_documents: ['status', 'review_notes', 'reviewed_by', 'reviewed_at'],
 };
 
 // Extract only the allowed fields from a body object for a given resource.
@@ -61,7 +66,7 @@ const RESOURCES = {
     cases:         { model: 'Case',         search: ['title', 'description', 'category'], filters: ['status', 'priority', 'lawyer_id', 'client_id'], include: [C('client'), L('lawyer')], order: [['created_at', 'DESC']] },
     bookings:      { model: 'Booking',      search: ['notes'], filters: ['status', 'type', 'lawyer_id', 'client_id'], include: [C('client'), L('lawyer')], order: [['scheduled_at', 'DESC']] },
     payments:      { model: 'Payment',      search: ['provider', 'provider_tx_id'], filters: ['status', 'currency', 'lawyer_id', 'client_id'], include: [C('client'), L('lawyer')], order: [['created_at', 'DESC']] },
-    subscriptions: { model: 'Subscription', search: [], filters: ['tier', 'status', 'client_id'], include: [C('client')], order: [['created_at', 'DESC']] },
+    subscriptions: { model: 'Subscription', search: [], filters: ['tier', 'status', 'client_id', 'lawyer_id', 'subscriber_type'], include: [C('client'), L('lawyer')], order: [['created_at', 'DESC']] },
     reviews:       { model: 'Review',       search: ['comment'], filters: ['rating', 'lawyer_id', 'client_id'], include: [C('client'), L('lawyer')], order: [['created_at', 'DESC']] },
     articles:      { model: 'Article',      search: ['title', 'slug', 'excerpt'], filters: ['status', 'category_id', 'subcategory_id'], order: [['created_at', 'DESC']] },
     categories:    { model: 'Category',     search: ['name', 'slug', 'description'], filters: ['is_active'], order: [['name', 'ASC']] },
@@ -73,6 +78,10 @@ const RESOURCES = {
     messages:      { model: 'Message',      search: ['content'], filters: ['type', 'case_id', 'booking_id'], order: [['created_at', 'DESC']] },
     documents:     { model: 'Document',     search: ['name', 'type'], filters: ['category', 'case_id'], order: [['created_at', 'DESC']] },
     audit:         { model: 'AuditLog',     search: ['actor_email', 'resource', 'action'], filters: ['action', 'resource'], order: [['created_at', 'DESC']], readonly: true },
+    states:        { model: 'State',        search: ['name', 'code'], filters: ['country_code'], order: [['country_code', 'ASC'], ['name', 'ASC']] },
+    cities:        { model: 'City',         search: ['name'], filters: ['state_id', 'country_code'], order: [['name', 'ASC']] },
+    practice_areas: { model: 'PracticeArea', search: ['name', 'slug'], filters: ['is_active'], order: [['order', 'ASC']] },
+    verification_documents: { model: 'VerificationDocument', search: [], filters: ['status', 'lawyer_id', 'doc_type'], include: [L('lawyer')], order: [['created_at', 'ASC']] },
 };
 
 const resolve = (name) => {
@@ -260,7 +269,21 @@ const setLawyerState = (patch, action) => async (req, res, next) => {
         return sendSuccess(req, res, lawyer);
     } catch (err) { return next(err); }
 };
-const verifyLawyer  = setLawyerState({ verified: true, status: 'active' }, 'verify');
+// Manual admin verify (distinct from the document-review queue in
+// verificationController): sets `verified` but still runs the shared
+// activation gate — a verified lawyer only goes public once an active
+// subscription exists too (registration wizard's Subscription step).
+const verifyLawyer = async (req, res, next) => {
+    try {
+        const lawyer = await db.Lawyer.findByPk(req.params.id);
+        if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found', 404));
+        await lawyer.update({ verified: true });
+        const updated = await maybeActivateLawyer(lawyer.id);
+        await audit(req, 'verify', 'lawyers', lawyer.id, { verified: true, status: updated?.status });
+        if (lawyer.email) mailer.sendTemplate('lawyerVerified', lawyer.email, { name: lawyer.name }).catch(() => {});
+        return sendSuccess(req, res, updated);
+    } catch (err) { return next(err); }
+};
 const suspendLawyer = setLawyerState({ status: 'suspended' }, 'suspend');
 const activateLawyer = setLawyerState({ status: 'active' }, 'activate');
 

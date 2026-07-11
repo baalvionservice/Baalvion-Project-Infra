@@ -13,6 +13,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 const { Op } = require('sequelize');
 const db = require('../models');
+const { maybeActivateLawyer } = require('./lawyerActivation');
 
 const LOCK_KEY = 728193; // arbitrary, stable advisory-lock id for billing
 const ENABLED = String(process.env.BILLING_WORKER_ENABLED || 'true').toLowerCase() === 'true';
@@ -42,16 +43,26 @@ async function runBillingCycle(now = new Date()) {
         let renewed = 0, cancelled = 0, failed = 0;
 
         for (const sub of due) {
+            const isLawyerSub = sub.subscriber_type === 'lawyer';
             const t = await db.sequelize.transaction();
             try {
                 if (sub.cancel_at_period_end) {
                     await sub.update({ status: 'cancelled' }, { transaction: t });
+                    if (isLawyerSub) {
+                        // maybeActivateLawyer runs its own query, so commit first — the
+                        // demotion check must see the just-cancelled subscription.
+                        await t.commit();
+                        await maybeActivateLawyer(sub.lawyer_id);
+                        cancelled++;
+                        continue;
+                    }
                     await db.Client.update({ subscription_tier: 'BASIC' }, { where: { id: sub.client_id }, transaction: t });
                     cancelled++;
                 } else if (Number(sub.price) > 0) {
                     // Record the renewal charge (simulated success until Razorpay subscriptions).
                     await db.Payment.create({
-                        client_id: sub.client_id,
+                        client_id: isLawyerSub ? null : sub.client_id,
+                        lawyer_id: isLawyerSub ? sub.lawyer_id : null,
                         amount: sub.price,
                         currency: sub.currency || 'USD',
                         status: 'succeeded',

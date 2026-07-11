@@ -103,21 +103,51 @@ const countriesSummary = async (req, res, next) => {
 // both ?q= and ?search= directly (req.query is immutable in Express 5).
 const searchLawyers = (req, res, next) => listLawyers(req, res, next);
 
+const PROFILE_INCLUDE = [
+    { model: db.State, as: 'state', attributes: ['id', 'name', 'code'] },
+    { model: db.City, as: 'cityRef', attributes: ['id', 'name'] },
+    { model: db.PracticeArea, as: 'practiceAreas', attributes: ['id', 'name', 'slug'], through: { attributes: [] } },
+];
+
 const getLawyer = async (req, res, next) => {
     try {
-        const lawyer = await db.Lawyer.findByPk(req.params.id);
+        const lawyer = await db.Lawyer.findByPk(req.params.id, { include: PROFILE_INCLUDE });
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found', 404));
         return sendSuccess(req, res, lawyer);
     } catch (err) { return next(err); }
 };
+
+// Resolve practice-area ids/slugs/names to valid PracticeArea rows, and
+// mirror their names into the legacy `specializations` text array so the
+// existing full-text search + Op.contains filtering keeps working unchanged
+// while the join table becomes the source of truth for new features.
+async function resolvePracticeAreas(input) {
+    const raw = Array.isArray(input) ? input : [];
+    if (!raw.length) return [];
+    const { Op } = require('sequelize');
+    return db.PracticeArea.findAll({
+        where: {
+            is_active: true,
+            [Op.or]: [{ id: raw.filter((v) => Number.isInteger(Number(v))).map(Number) }, { slug: raw.map(String) }],
+        },
+    });
+}
 
 const createLawyer = async (req, res, next) => {
     try {
         const existing = await db.Lawyer.findOne({ where: { user_id: String(req.user.id) } });
         if (existing) return next(new AppError('CONFLICT', 'Lawyer profile already exists for this user', 409));
         // Force server-controlled fields; applicants always start pending + unverified.
-        const { rating, total_reviews, verified, status, user_id, ...safe } = req.body || {};
-        const lawyer = await db.Lawyer.create({ ...safe, user_id: String(req.user.id), status: 'pending', verified: false });
+        const { rating, total_reviews, verified, status, user_id, practice_area_ids, ...safe } = req.body || {};
+        const practiceAreas = await resolvePracticeAreas(practice_area_ids);
+        const lawyer = await db.Lawyer.create({
+            ...safe,
+            user_id: String(req.user.id),
+            status: 'pending',
+            verified: false,
+            specializations: practiceAreas.length ? practiceAreas.map((p) => p.name) : (safe.specializations || []),
+        });
+        if (practiceAreas.length) await lawyer.setPracticeAreas(practiceAreas);
         // Promote the local identity to a lawyer-role user (still pending verification for the directory).
         if (req.user.id) await db.User.update({ role: 'lawyer' }, { where: { id: req.user.id } });
         if (lawyer.email) mailer.sendTemplate('welcome', lawyer.email, { name: lawyer.name }).catch(() => {});
@@ -134,7 +164,13 @@ const updateLawyer = async (req, res, next) => {
         }
         const forbidden = ['rating', 'total_reviews', 'verified', 'status'];
         forbidden.forEach(f => delete req.body[f]);
-        await lawyer.update(req.body);
+        const { practice_area_ids, ...rest } = req.body;
+        if (practice_area_ids !== undefined) {
+            const practiceAreas = await resolvePracticeAreas(practice_area_ids);
+            await lawyer.setPracticeAreas(practiceAreas);
+            rest.specializations = practiceAreas.map((p) => p.name);
+        }
+        await lawyer.update(rest);
         return sendSuccess(req, res, lawyer);
     } catch (err) { return next(err); }
 };
@@ -176,15 +212,19 @@ const verifyLawyer = async (req, res, next) => {
         if (!req.user.isAdmin) return next(new AppError('FORBIDDEN', 'Admin only', 403));
         const lawyer = await db.Lawyer.findByPk(req.params.id);
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer not found', 404));
-        await lawyer.update({ verified: true, status: 'active' });
+        await lawyer.update({ verified: true });
+        // Activation also requires an active subscription (registration wizard's
+        // Subscription step) — see service/lawyerActivation.
+        const { maybeActivateLawyer } = require('../service/lawyerActivation');
+        const updated = await maybeActivateLawyer(lawyer.id);
         if (lawyer.email) mailer.sendTemplate('lawyerVerified', lawyer.email, { name: lawyer.name }).catch(() => {});
-        return sendSuccess(req, res, lawyer);
+        return sendSuccess(req, res, updated);
     } catch (err) { return next(err); }
 };
 
 const getMyProfile = async (req, res, next) => {
     try {
-        const lawyer = await db.Lawyer.findOne({ where: { user_id: String(req.user.id) } });
+        const lawyer = await db.Lawyer.findOne({ where: { user_id: String(req.user.id) }, include: PROFILE_INCLUDE });
         if (!lawyer) return next(new AppError('NOT_FOUND', 'Lawyer profile not found', 404));
         return sendSuccess(req, res, lawyer);
     } catch (err) { return next(err); }

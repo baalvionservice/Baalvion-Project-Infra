@@ -68,6 +68,10 @@ export const apiCreateLawyer = async (data: {
   name: string; email?: string; specializations?: string[]; experience?: number;
   hourly_rate?: number; bio?: string; jurisdictions?: string[]; languages?: string[];
   country?: string; country_code?: string; city?: string; bar_number?: string;
+  // Registration wizard: Location + Personal + Professional Details steps.
+  state_id?: number; city_id?: number; dob?: string; gender?: string;
+  license_number?: string; firm_name?: string; is_independent?: boolean;
+  practice_area_ids?: string[];
 }) => {
   const { apiClient } = await import('@/lib/api/client');
   const res = await apiClient.post('/lawyers', data);
