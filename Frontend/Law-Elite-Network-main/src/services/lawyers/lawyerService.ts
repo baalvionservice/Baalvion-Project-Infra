@@ -18,6 +18,13 @@ export const searchLawyers = async (filters: {
   maxPrice?: number;
   query?: string;
   countryCode?: string;
+  stateId?: number | string;
+  cityId?: number | string;
+  practiceAreaId?: number | string;
+  minExperience?: number | string;
+  language?: string;
+  verifiedOnly?: boolean;
+  onlineOnly?: boolean;
 }) => api.apiSearchLawyers(filters);
 
 /** Active-lawyer counts per country, for the global "browse by country" directory. */

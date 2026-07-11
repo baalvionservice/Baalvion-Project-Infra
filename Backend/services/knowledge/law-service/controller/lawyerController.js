@@ -12,6 +12,7 @@ const listLawyers = async (req, res, next) => {
             page = 1, limit = 20,
             specialization, jurisdiction, minRate, maxRate,
             minRating, verified, language, country, countryCode, city,
+            stateId, cityId, practiceAreaId, minExperience, online,
         } = req.query;
         // Accept both ?search= and ?q= (Express 5's req.query is a getter — never mutate it).
         const search = req.query.search || req.query.q;
@@ -22,10 +23,26 @@ const listLawyers = async (req, res, next) => {
         if (countryCode) where.country_code = String(countryCode).toUpperCase();
         if (country) where.country = { [Op.iLike]: `%${country}%` };
         if (city) where.city = { [Op.iLike]: `%${city}%` };
+        if (stateId) where.state_id = Number(stateId);
+        if (cityId) where.city_id = Number(cityId);
         if (verified !== undefined) where.verified = verified === 'true';
         if (minRate) where.hourly_rate = { ...where.hourly_rate, [Op.gte]: Number(minRate) };
         if (maxRate) where.hourly_rate = { ...where.hourly_rate, [Op.lte]: Number(maxRate) };
         if (minRating) where.rating = { [Op.gte]: Number(minRating) };
+        if (minExperience) where.experience = { [Op.gte]: Number(minExperience) };
+        if (practiceAreaId) {
+            where[Op.and] = [
+                ...(where[Op.and] || []),
+                db.sequelize.literal(
+                    `EXISTS (SELECT 1 FROM legal.lawyer_practice_areas lpa WHERE lpa.lawyer_id = "Lawyer"."id" AND lpa.practice_area_id = ${Number(practiceAreaId)})`,
+                ),
+            ];
+        }
+        // Real presence (service/realtime.js live-socket set) — never a fabricated flag.
+        if (online === 'true') {
+            const onlineIds = require('../service/realtime').getOnlineUserIds();
+            where.user_id = { [Op.in]: onlineIds.length ? onlineIds : ['__none__'] };
+        }
 
         // ── Full-text relevance search ───────────────────────────────────────
         // Weighted tsvector (name>specializations>location>bio), prefix-aware so

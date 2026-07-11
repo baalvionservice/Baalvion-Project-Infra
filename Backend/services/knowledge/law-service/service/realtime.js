@@ -121,4 +121,15 @@ function attach(server) {
     return wss;
 }
 
-module.exports = { attach, pushToUser };
+/** Real presence, not a fabricated heuristic: the set of legal.users ids with
+ *  at least one live socket right now. Used by the "Online Now" search filter. */
+function getOnlineUserIds() {
+    return [...clients.keys()];
+}
+
+function isOnline(userId) {
+    const set = clients.get(String(userId));
+    return !!set && set.size > 0;
+}
+
+module.exports = { attach, pushToUser, getOnlineUserIds, isOnline };

@@ -100,19 +100,33 @@ export const apiSearchLawyers = async (filters: {
   maxPrice?: number;
   query?: string;
   countryCode?: string;
+  stateId?: number | string;
+  cityId?: number | string;
+  practiceAreaId?: number | string;
+  minExperience?: number | string;
+  language?: string;
+  verifiedOnly?: boolean;
+  onlineOnly?: boolean;
 }) => {
   const params: Record<string, any> = { limit: 100 };
   if (filters.query) params.q = filters.query;
   if (filters.minRating) params.minRating = filters.minRating;
   if (filters.maxPrice) params.maxRate = filters.maxPrice;
   if (filters.countryCode && filters.countryCode !== 'all') params.countryCode = filters.countryCode;
+  if (filters.stateId) params.stateId = filters.stateId;
+  if (filters.cityId) params.cityId = filters.cityId;
+  if (filters.practiceAreaId) params.practiceAreaId = filters.practiceAreaId;
+  if (filters.minExperience) params.minExperience = filters.minExperience;
+  if (filters.language) params.language = filters.language;
+  if (filters.verifiedOnly) params.verified = 'true';
+  if (filters.onlineOnly) params.online = 'true';
 
   const res = await publicClient.get('/lawyers/search', { params });
   let results = unwrapList(res).map(adaptLawyer);
 
-  // Specialization filtered client-side so short UI labels ("Corporate") still
-  // match richer backend values ("Corporate Law") without a taxonomy mapping.
-  if (filters.specialization && filters.specialization !== 'all') {
+  // Legacy label-substring fallback — only applies when the caller passes the
+  // old free-text `specialization` label instead of a real practiceAreaId.
+  if (filters.specialization && filters.specialization !== 'all' && !filters.practiceAreaId) {
     const needle = String(filters.specialization).toLowerCase();
     results = results.filter((l: any) => (l.specialization || []).some((s: string) => s.toLowerCase().includes(needle)));
   }
