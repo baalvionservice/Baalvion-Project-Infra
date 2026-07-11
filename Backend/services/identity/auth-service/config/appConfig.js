@@ -121,8 +121,8 @@ module.exports = {
         stream: process.env.EVENT_BUS_STREAM || 'baalvion:events',
     },
 
-    // Consumer social login (Google / Facebook). Credentials are resolved per-site from
-    // the CMS vault first (admin panel), then these env vars. See service/oauthLogin.js +
+    // Consumer social login (Google / Facebook / Discord). Credentials are resolved per-site
+    // from the CMS vault first (admin panel), then these env vars. See service/oauthLogin.js +
     // service/oauthProviders.js. Amarisé talks to auth-service directly (no gateway).
     oauth: {
         // Public origin the provider redirects the BROWSER back to. Must serve the SPA AND
@@ -141,6 +141,10 @@ module.exports = {
         facebook: {
             clientId: process.env.FACEBOOK_OAUTH_CLIENT_ID || '',
             clientSecret: process.env.FACEBOOK_OAUTH_CLIENT_SECRET || '',
+        },
+        discord: {
+            clientId: process.env.DISCORD_CLIENT_ID || '',
+            clientSecret: process.env.DISCORD_CLIENT_SECRET || '',
         },
     },
 };

@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Consumer social login (Google / Facebook) for the central identity stack.
+ * Consumer social login (Google / Facebook / Discord) for the central identity stack.
  *
  * Amarisé (and any frontend that talks to auth-service directly) uses this. Mirrors the
  * proxy-service OAuth design, adapted to auth-service repos + issuance:
@@ -21,8 +21,12 @@ const password = require('../utils/password');
 const { issueTokenPair, presentUser } = require('./authService');
 const { AppError } = require('../utils/errors');
 
-const VAULT_PROVIDER = { google: 'google-oauth', facebook: 'facebook-oauth', github: 'github-oauth' };
-const envClientFor = (p) => (p === 'google' ? config.oauth.google : p === 'facebook' ? config.oauth.facebook : null);
+const VAULT_PROVIDER = { google: 'google-oauth', facebook: 'facebook-oauth', github: 'github-oauth', discord: 'discord-oauth' };
+const envClientFor = (p) =>
+  p === 'google' ? config.oauth.google
+  : p === 'facebook' ? config.oauth.facebook
+  : p === 'discord' ? config.oauth.discord
+  : null;
 
 async function resolveClient(provider) {
   try {
@@ -63,7 +67,7 @@ async function exchangeCode(provider, { code, codeVerifier } = {}) {
     redirect_uri: redirectUri(provider),
     grant_type: 'authorization_code',
   });
-  if (codeVerifier && (provider === 'google' || provider === 'facebook')) body.set('code_verifier', codeVerifier);
+  if (codeVerifier && (provider === 'google' || provider === 'facebook' || provider === 'discord')) body.set('code_verifier', codeVerifier);
   const res = await fetch(ep.token, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },

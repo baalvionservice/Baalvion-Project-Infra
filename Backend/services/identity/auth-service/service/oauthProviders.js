@@ -1,14 +1,14 @@
 'use strict';
 
 /**
- * Pure provider metadata + helpers for consumer social login (Google / Facebook).
+ * Pure provider metadata + helpers for consumer social login (Google / Facebook / Discord).
  * Dependency-free (crypto only) so it unit-tests without the DB/config chain.
  * Network + DB work lives in oauthLogin.js. ('github' is retained but dormant.)
  */
 
 const crypto = require('crypto');
 
-const SUPPORTED = ['google', 'facebook', 'github'];
+const SUPPORTED = ['google', 'facebook', 'github', 'discord'];
 const isSupportedProvider = (provider) => SUPPORTED.includes(provider);
 
 const ENDPOINTS = {
@@ -30,6 +30,12 @@ const ENDPOINTS = {
     userInfo: 'https://api.github.com/user',
     emails: 'https://api.github.com/user/emails',
     scope: 'read:user user:email',
+  },
+  discord: {
+    authorize: 'https://discord.com/api/oauth2/authorize',
+    token: 'https://discord.com/api/oauth2/token',
+    userInfo: 'https://discord.com/api/users/@me',
+    scope: 'identify email',
   },
 };
 
@@ -53,12 +59,15 @@ function buildAuthorizeUrl(provider, { clientId, redirectUri, state, codeChallen
       url.searchParams.set('code_challenge_method', 'S256');
     }
   }
-  if (provider === 'facebook' && codeChallenge) {
+  if ((provider === 'facebook' || provider === 'discord') && codeChallenge) {
     url.searchParams.set('code_challenge', codeChallenge);
     url.searchParams.set('code_challenge_method', 'S256');
   }
   if (provider === 'github') {
     url.searchParams.set('allow_signup', 'true');
+  }
+  if (provider === 'discord') {
+    url.searchParams.set('prompt', 'consent');
   }
   return url.toString();
 }
@@ -127,6 +136,17 @@ function normalizeProfile(provider, raw = {}, emails = null) {
       fullName: raw.name || raw.login || '',
       avatarUrl: raw.avatar_url || null,
       emailVerified,
+    };
+  }
+  if (provider === 'discord') {
+    return {
+      provider,
+      providerUserId: raw.id ? String(raw.id) : '',
+      email: raw.email ? String(raw.email).toLowerCase() : '',
+      fullName: raw.global_name || raw.username || '',
+      avatarUrl: raw.avatar && raw.id ? `https://cdn.discordapp.com/avatars/${raw.id}/${raw.avatar}.png` : null,
+      // Discord only issues the `email` scope value once the account's email is verified.
+      emailVerified: raw.verified === true,
     };
   }
   throw new Error(`unsupported provider: ${provider}`);
