@@ -14,10 +14,6 @@ import { structuredData } from "@/lib/seo/structured-data";
 import { extractFaqFromHtml } from "@/lib/seo/faq-extractor";
 import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
-import { CommentIntelligenceHub } from "@/modules/content-engine/components/CommentIntelligence/CommentIntelligenceHub";
-import { ArticleConnectionDisplay } from "@/modules/content-engine/components/KnowledgeGraph/ArticleConnectionDisplay";
-import { Text } from "@/design-system/typography/text";
-import { Zap } from "lucide-react";
 
 interface ArticleRouteProps {
   params: Promise<{ slug: string }>;
@@ -66,7 +62,6 @@ export async function generateStaticParams() {
 
 /**
  * Dynamic Article Route Page Component.
- * Optimized with Advanced Comment Intelligence and Knowledge Graph Integration.
  */
 export default async function Page({ params }: ArticleRouteProps) {
   const { slug } = await params;
@@ -91,34 +86,7 @@ export default async function Page({ params }: ArticleRouteProps) {
       <Container className="py-8">
         <Breadcrumbs breadcrumb={breadcrumbs} />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          <div className="lg:col-span-8">
-            <ArticlePage slug={slug} article={article} />
-
-            {/* Advanced Comment Intelligence System */}
-            <CommentIntelligenceHub articleId={article.id} />
-          </div>
-
-          <aside className="lg:col-span-4 space-y-8">
-            <div className="sticky top-24 space-y-8">
-              {/* Integrated Knowledge Graph Node Access */}
-              <ArticleConnectionDisplay />
-
-              <div className="p-8 rounded-[2rem] bg-primary/5 border border-primary/20 space-y-4">
-                <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest">
-                  <Zap className="h-4 w-4" /> Expert insight
-                </div>
-                <Text
-                  variant="bodySmall"
-                  className="text-muted-foreground leading-relaxed"
-                >
-                  Join the conversation below to discuss specific tactical
-                  executions based on this research node.
-                </Text>
-              </div>
-            </div>
-          </aside>
-        </div>
+        <ArticlePage slug={slug} article={article} />
       </Container>
     </div>
   );

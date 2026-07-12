@@ -8,14 +8,10 @@ import { getArticleBySlug } from "../services/content-service";
 import { ArticleHeader } from "./ArticleHeader";
 import { ArticleBody } from "./ArticleBody";
 import { RelatedArticles } from "./RelatedArticles";
-import { TableOfContents } from "./TableOfContents";
-import { CommunitySection } from "./CommunitySection";
-import { Loader2, AlertCircle, ArrowLeft, Zap } from "lucide-react";
+import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Card, CardContent } from "@/components/ui/card";
-import { Text } from "@/design-system/typography/text";
 
 interface ArticlePageProps {
   slug: string;
@@ -24,7 +20,7 @@ interface ArticlePageProps {
 
 /**
  * Main article page component.
- * Handles data fetching, loading states, and orchestrates header/body/TOC rendering.
+ * Handles data fetching, loading states, and renders the header + body.
  */
 export const ArticlePage = ({
   slug,
@@ -103,73 +99,35 @@ export const ArticlePage = ({
   return (
     <article className="py-12 lg:py-20">
       <Container>
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Main Content Area */}
-          <div className="lg:col-span-8">
-            <ArticleHeader article={article} />
+        <div className="max-w-3xl mx-auto">
+          <ArticleHeader article={article} />
 
-            {/* Mobile TOC: Collapsible card shown only on mobile/tablet */}
-            <div className="lg:hidden mb-8">
-              <Card className="glass-card">
-                <CardContent className="pt-6">
-                  <TableOfContents sections={[]} />
-                </CardContent>
-              </Card>
-            </div>
-
-            {article.body ? (
-              <div
-                className="article-body prose prose-lg dark:prose-invert max-w-none mb-12"
-                // Body is rendered from CMS content blocks (cms-public.blocksToHtml).
-                // Source is internal, editor-authored content published via the CMS.
-                dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(article.body) }}
-              />
-            ) : (
-              <ArticleBody sections={[]} />
-            )}
-
-            <CommunitySection />
-
-            <RelatedArticles
-              currentArticleId={article.id}
-              category={article.category}
+          {article.body ? (
+            <div
+              className="article-body prose prose-lg dark:prose-invert max-w-none mb-12"
+              // Body is rendered from CMS content blocks (cms-public.blocksToHtml).
+              // Source is internal, editor-authored content published via the CMS.
+              dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(article.body) }}
             />
+          ) : (
+            <ArticleBody sections={[]} />
+          )}
+
+          <div className="mt-16 pt-8 border-t text-center">
+            <Button
+              variant="outline"
+              className="rounded-xl h-12 px-8 font-bold"
+              asChild
+            >
+              <Link href="/glossary">Explore Full Glossary</Link>
+            </Button>
           </div>
-
-          {/* Desktop Sidebar TOC */}
-          <aside className="hidden lg:block lg:col-span-4">
-            <div className="sticky top-24 space-y-8">
-              <Card className="glass-card shadow-2xl border-none">
-                <CardContent className="pt-8">
-                  <TableOfContents sections={[]} />
-                </CardContent>
-              </Card>
-
-              <div className="p-8 rounded-[2rem] bg-primary/5 border border-primary/20 space-y-4">
-                <div className="flex items-center gap-2 text-primary font-bold text-sm uppercase tracking-widest">
-                  <Zap className="h-4 w-4" /> Expert insight
-                </div>
-                <Text
-                  variant="caption"
-                  className="text-muted-foreground leading-relaxed"
-                >
-                  Join the conversation below to discuss specific tactical
-                  executions based on this research node.
-                </Text>
-              </div>
-            </div>
-          </aside>
         </div>
 
-        <div className="mt-20 pt-8 border-t text-center">
-          <Button
-            variant="outline"
-            className="rounded-xl h-12 px-8 font-bold"
-            asChild
-          >
-            <Link href="/glossary">Explore Full Glossary</Link>
-          </Button>
-        </div>
+        <RelatedArticles
+          currentArticleId={article.id}
+          category={article.category}
+        />
       </Container>
     </article>
   );
