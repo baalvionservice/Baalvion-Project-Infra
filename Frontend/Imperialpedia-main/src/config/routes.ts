@@ -10,7 +10,7 @@ export const routes = {
     stocks: "/stocks",
     brokers: "/brokers",
     reviews: "/imperialpedia-review-board",
-    articles: "/articles",
+    articles: "/financial-intelligence",
     glossary: "/glossary",
     calculators: "/financial-tools",
     creators: "/creators",

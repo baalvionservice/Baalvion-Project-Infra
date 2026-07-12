@@ -66,6 +66,9 @@ const nextConfig: NextConfig = {
       // /home was a duplicate second homepage implementation (retired) — the
       // canonical homepage is /.
       { source: '/home', destination: '/', permanent: true },
+      // The articles hub moved to /financial-intelligence; individual article
+      // URLs (/articles/<slug>) are unaffected and keep resolving directly.
+      { source: '/articles', destination: '/financial-intelligence', permanent: true },
       // Consolidate near-duplicate article topics into one comprehensive guide
       // each, instead of publishing several thin pages that would cannibalize
       // the same search intent.

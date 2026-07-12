@@ -267,7 +267,7 @@ export function DashboardClient({ data }: DashboardClientProps) {
                   </div>
                 </div>
                 <Button variant="ghost" size="icon" className="rounded-xl group-hover:text-primary" asChild>
-                  <Link href="/articles"><ChevronRight className="h-5 w-5" /></Link>
+                  <Link href="/financial-intelligence"><ChevronRight className="h-5 w-5" /></Link>
                 </Button>
               </CardContent>
             </Card>

@@ -98,7 +98,7 @@ export function NodeDetailPanel({ node, relatedNodes }: NodeDetailPanelProps) {
 
       <CardFooter className="p-8 bg-muted/20 border-t border-white/5">
         <Button className="w-full h-12 rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 group" asChild>
-          <Link href={`/articles`}>
+          <Link href={`/financial-intelligence`}>
             Launch Detailed Audit <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>

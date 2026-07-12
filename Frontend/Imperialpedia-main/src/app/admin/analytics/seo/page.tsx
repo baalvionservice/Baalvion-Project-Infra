@@ -250,7 +250,7 @@ export default function SeoAuthorityDashboardPage() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right pr-8">
-                        <Link href="/articles" className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tighter">
+                        <Link href="/financial-intelligence" className="text-[10px] font-bold text-primary hover:underline uppercase tracking-tighter">
                           {k.target_article} <ExternalLink className="h-2 w-2 ml-1 inline" />
                         </Link>
                       </TableCell>

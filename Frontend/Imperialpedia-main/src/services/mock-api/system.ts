@@ -846,7 +846,7 @@ const mockSeoManagementData: SeoManagementData = {
     },
     {
       page_url: "/articles/yield-curve-2026",
-      parent: "/articles",
+      parent: "/financial-intelligence",
       status: "mock_active",
       last_updated: "2026-03-15 09:30",
     },

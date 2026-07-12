@@ -30,7 +30,7 @@ export async function POST(req: Request) {
 
   // 1) Always refresh the sitemap (new/removed URLs) + the high-churn hubs.
   sitemapService.invalidate();
-  const defaults = ["/", "/news", "/articles", "/sitemap.xml"];
+  const defaults = ["/", "/news", "/financial-intelligence", "/sitemap.xml"];
   const paths = Array.from(new Set([...(body.paths ?? []), ...defaults]));
   const revalidated: string[] = [];
   for (const p of paths) {

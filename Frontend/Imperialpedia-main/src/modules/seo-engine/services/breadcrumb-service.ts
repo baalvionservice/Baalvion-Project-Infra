@@ -24,7 +24,7 @@ export const breadcrumbService = {
     return {
       items: [
         { name: 'Home', item: '/' },
-        { name: 'Intelligence', item: '/articles' },
+        { name: 'Intelligence', item: '/financial-intelligence' },
         { name: article.category, item: `/categories/${slugify(article.category)}` },
         { name: article.title, item: `/articles/${article.slug}` },
       ],
@@ -53,7 +53,7 @@ export const breadcrumbService = {
     return {
       items: [
         { name: 'Home', item: '/' },
-        { name: 'Categories', item: '/articles' },
+        { name: 'Categories', item: '/financial-intelligence' },
         { name: category.name, item: `/categories/${category.slug}` },
       ],
     };
