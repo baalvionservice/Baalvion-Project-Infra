@@ -108,21 +108,21 @@ export const COUNTRY_MARKETPLACE_CONFIGS: Record<string, CountryMarketplace> = {
     country: 'India',
     countryCode: 'IN',
     status: 'OPERATIONAL',
-    payoutKey: 'PROTO-SEC-IND-847',
+    payoutKey: 'NODE-IN-ACTIVE',
     modules: ['mod_creator', 'mod_electronics', 'mod_commodities', 'mod_travel', 'mod_realestate']
   },
   'usa': {
     country: 'United States',
     countryCode: 'US',
     status: 'OPERATIONAL',
-    payoutKey: 'PROTO-SEC-USA-112',
+    payoutKey: 'NODE-US-ACTIVE',
     modules: ['mod_creator', 'mod_electronics', 'mod_realestate']
   },
   'uae': {
     country: 'UAE',
     countryCode: 'AE',
     status: 'OPERATIONAL',
-    payoutKey: 'PROTO-SEC-UAE-991',
+    payoutKey: 'NODE-AE-ACTIVE',
     modules: ['mod_travel', 'mod_realestate']
   }
 };
