@@ -30,6 +30,23 @@ export const NAVIGATION: NavGroup[] = [
     ],
   },
   {
+    label: 'Platform Management',
+    items: [
+      {
+        title: 'Platform Management',
+        href: '/platform-management',
+        iconName: 'Network',
+        roles: ['super_admin', 'owner', 'admin'],
+      },
+      {
+        title: 'Revenue & Payments',
+        href: '/revenue',
+        iconName: 'DollarSign',
+        roles: ['super_admin', 'owner', 'admin'],
+      },
+    ],
+  },
+  {
     label: 'Identity',
     items: [
       {
@@ -244,6 +261,14 @@ export const NAVIGATION: NavGroup[] = [
       // ControlTheMarket runs as its own deployment (controlthemarket.com) with its
       // own admin — open it directly rather than a (non-routable) console panel.
       { title: 'ControlTheMarket',  href: 'https://controlthemarket.com', iconName: 'Trophy', external: true },
+      // GTI (Global Trade Infrastructure) has its own full oversight/governance admin
+      // panels inside its own Next.js app (Firebase App Hosting, not this box) — open
+      // directly, same pattern as ControlTheMarket/Jobs. `trade.baalvion.com` is the
+      // product's intended production domain but is NOT yet wired at the edge (see
+      // docs/architecture/PLATFORM-ARCHITECTURE-REFERENCE.md risk R-C3) — override with
+      // NEXT_PUBLIC_GTI_ADMIN_URL once ops points a real reachable URL (Firebase default
+      // domain or the custom domain once bound) at it.
+      { title: 'GTI (Global Trade)', href: process.env.NEXT_PUBLIC_GTI_ADMIN_URL || 'https://trade.baalvion.com', iconName: 'Globe2', external: true },
       {
         title: 'Imperialpedia',
         href: '/imperialpedia',

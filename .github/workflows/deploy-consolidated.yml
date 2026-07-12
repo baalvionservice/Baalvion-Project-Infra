@@ -189,7 +189,8 @@ jobs:
             NEXT_PUBLIC_SESSION_API_URL=https://admin.baalvion.com/api-bff/identity/session/v1
             NEXT_PUBLIC_OAUTH_URL=https://admin.baalvion.com/api-bff/identity/oauth
             NEXT_PUBLIC_CRM_API_URL=https://admin.baalvion.com/api-bff/ecosystem/crm/api/v1
-            NEXT_PUBLIC_SERVICE_URLS={"jobs":"https://admin.baalvion.com/api-bff/ecosystem/jobs/api/v1","mining":"https://admin.baalvion.com/api-bff/ecosystem/mining/api/v1","imperialpedia":"https://admin.baalvion.com/api-bff/knowledge/imperialpedia/api/v1","realEstate":"https://admin.baalvion.com/api-bff/ecosystem/real-estate/api/v1","brand":"https://admin.baalvion.com/api-bff/ecosystem/brand-connector/api/v1","market":"https://admin.baalvion.com/api-bff/commerce/market/api/v1","ir":"https://admin.baalvion.com/api-bff/ecosystem/ir/api/v1","dashboard":"https://admin.baalvion.com/api-bff/platform/dashboard/api/v1","about":"https://admin.baalvion.com/api-bff/ecosystem/about/api/v1","ctm":"https://admin.baalvion.com/api-bff/ecosystem/ctm/api/v1","commerce":"https://admin.baalvion.com/api-bff/commerce/commerce/api/v1","inventory":"https://admin.baalvion.com/api-bff/commerce/inventory/api/v1","fulfillment":"https://admin.baalvion.com/api-bff/commerce/fulfillment/api/v1","law":"https://admin.baalvion.com/api-bff/knowledge/law/v1","notifications":"https://admin.baalvion.com/api-bff/infrastructure/notification/v1","rbac":"https://admin.baalvion.com/api-bff/identity/rbac/api/v1","audit":"https://admin.baalvion.com/api-bff/infrastructure/audit/v1","crm":"https://admin.baalvion.com/api-bff/ecosystem/crm/api/v1"}
+            NEXT_PUBLIC_SERVICE_URLS={"jobs":"https://admin.baalvion.com/api-bff/ecosystem/jobs/api/v1","mining":"https://admin.baalvion.com/api-bff/ecosystem/mining/api/v1","imperialpedia":"https://admin.baalvion.com/api-bff/knowledge/imperialpedia/api/v1","realEstate":"https://admin.baalvion.com/api-bff/ecosystem/real-estate/api/v1","brand":"https://admin.baalvion.com/api-bff/ecosystem/brand-connector/api/v1","market":"https://admin.baalvion.com/api-bff/commerce/market/api/v1","ir":"https://admin.baalvion.com/api-bff/ecosystem/ir/api/v1","dashboard":"https://admin.baalvion.com/api-bff/platform/dashboard/api/v1","about":"https://admin.baalvion.com/api-bff/ecosystem/about/api/v1","ctm":"https://admin.baalvion.com/api-bff/ecosystem/ctm/api/v1","commerce":"https://admin.baalvion.com/api-bff/commerce/commerce/api/v1","inventory":"https://admin.baalvion.com/api-bff/commerce/inventory/api/v1","fulfillment":"https://admin.baalvion.com/api-bff/commerce/fulfillment/api/v1","law":"https://admin.baalvion.com/api-bff/knowledge/law/v1","notifications":"https://admin.baalvion.com/api-bff/infrastructure/notification/v1","rbac":"https://admin.baalvion.com/api-bff/identity/rbac/api/v1","audit":"https://admin.baalvion.com/api-bff/infrastructure/audit/v1","crm":"https://admin.baalvion.com/api-bff/ecosystem/crm/api/v1","marketplace":"https://admin.baalvion.com/api-bff/marketplace/marketplace/api/v1","news":"https://admin.baalvion.com/api-bff/knowledge/news/v1/admin"}
+            NEXT_PUBLIC_GTI_ADMIN_URL=https://trade.baalvion.com
             NEXT_PUBLIC_APP_ENV=production
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -347,7 +348,13 @@ jobs:
               -f deploy/consolidated/docker-compose.ssl-override.yml"
             $COMPOSE exec -T -e PGSSLMODE=require app-platform \
               sh -lc "cd /app/Backend/services/knowledge/cms-service && npm run migrate"
-            echo "::notice title=Migrations applied::cms-service migrations (incl. analytics 20260014/15/16) run on app-platform."
+            # news-service also lives in app-platform and does NOT auto-migrate on boot
+            # (no sync() in index.js) — same idempotent sequelize-cli pattern as cms-service.
+            # Added 2026-07-12 alongside migration 20260704 (articles.image_url); without this,
+            # feedCollector.js's image_url insert 500s on every ingestion run until it's applied.
+            $COMPOSE exec -T -e PGSSLMODE=require app-platform \
+              sh -lc "cd /app/Backend/services/knowledge/news-service && npm run migrate"
+            echo "::notice title=Migrations applied::cms-service (incl. analytics 20260014/15/16) + news-service migrations run on app-platform."
 
       - name: Smoke test public ingress
         if: steps.gate.outputs.ready == 'true'

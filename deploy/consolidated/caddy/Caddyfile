@@ -203,6 +203,14 @@ admin.baalvion.com {
 	handle_path /api-bff/ecosystem/crm/* {
 		reverse_proxy app-ecosystem:3063
 	}
+	handle_path /api-bff/marketplace/marketplace/* {
+		reverse_proxy app-commerce:3060
+	}
+	# news-service's internal RS256 admin surface (/v1/admin/*) — distinct from the public,
+	# API-key-gated news.baalvion.com site block below (that one serves external consumers).
+	handle_path /api-bff/knowledge/news/* {
+		reverse_proxy app-platform:3045
+	}
 	# CMS public delivery bypasses the session gateway → knowledge/cms-service.
 	handle /api/v1/public/* {
 		reverse_proxy app-platform:3018

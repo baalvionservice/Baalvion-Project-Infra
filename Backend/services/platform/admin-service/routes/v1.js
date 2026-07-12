@@ -12,6 +12,7 @@ router.use(authMiddleware);
 // (which lacks them) and 404s.
 router.use('/admin/feature-flags', require('./featureFlagsRoutes'));
 router.use('/admin/analytics', require('./analyticsRoutes'));
+router.use('/admin/platforms', require('./platformRoutes'));
 router.use('/admin', require('./adminRoutes'));
 router.use('/support', require('./supportRoutes'));
 router.use('/ai', require('./aiRoutes'));

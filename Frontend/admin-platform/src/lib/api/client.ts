@@ -209,8 +209,9 @@ const serviceClients = {
   notifications: makeServiceClient('notifications', 3031, '/v1'),
   // marketplace-service is the investment-marketplace domain (companies, investors,
   // opportunities, deals). Mounts at /api/v1; admin reads/reviews require a staff bearer
-  // (forwarded by attachToken) — see Backend/services/marketplace.
-  marketplace: makeServiceClient('marketplace', 3062),
+  // (forwarded by attachToken) — see Backend/services/marketplace. PM2 port is 3060 (dev
+  // default here matches); prod resolves via NEXT_PUBLIC_SERVICE_URLS regardless.
+  marketplace: makeServiceClient('marketplace', 3060),
   // crm-service is the Amarisé CRM & marketing domain (VIP clients, segments, campaigns,
   // vendors, affiliates, appointments). Mounts at /api/v1; all reads/mutations require a
   // staff bearer (forwarded by attachToken). Brand defaults to `amarise-luxe` server-side.

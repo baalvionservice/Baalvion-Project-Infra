@@ -64,3 +64,45 @@ exports.getTrafficByPage = async (req, res, next) => {
         sendSuccess(req, res, data);
     } catch (err) { next(err); }
 };
+
+exports.getActivationFunnel = async (req, res, next) => {
+    try {
+        const data = await analyticsService.getActivationFunnel(normalizePeriod(req.query.period));
+        sendSuccess(req, res, data);
+    } catch (err) { next(err); }
+};
+
+exports.getRetentionCohorts = async (req, res, next) => {
+    try {
+        const data = await analyticsService.getRetentionCohorts(normalizePeriod(req.query.period));
+        sendSuccess(req, res, data);
+    } catch (err) { next(err); }
+};
+
+exports.getSignupChannels = async (req, res, next) => {
+    try {
+        const data = await analyticsService.getSignupChannels(normalizePeriod(req.query.period));
+        sendSuccess(req, res, data);
+    } catch (err) { next(err); }
+};
+
+exports.getGeography = async (req, res, next) => {
+    try {
+        const data = await analyticsService.getGeography(normalizePeriod(req.query.period));
+        sendSuccess(req, res, data);
+    } catch (err) { next(err); }
+};
+
+exports.getEventTypeBreakdown = async (req, res, next) => {
+    try {
+        const data = await analyticsService.getEventTypeBreakdown(normalizePeriod(req.query.period));
+        sendSuccess(req, res, data);
+    } catch (err) { next(err); }
+};
+
+exports.getPaymentFunnel = async (req, res, next) => {
+    try {
+        const data = await analyticsService.getPaymentFunnel(req.headers.authorization || null);
+        sendSuccess(req, res, data);
+    } catch (err) { next(err); }
+};
