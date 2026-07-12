@@ -16,6 +16,7 @@
 
 import type { CmsContent } from "@/services/data/cms-public";
 import { categoryImage } from "./categoryImage";
+import { safeImageUrl } from "@/lib/safe-image";
 import {
   getWorldData,
   resolveRegion,
@@ -399,20 +400,12 @@ export function relativeTime(ms: number): string {
 // services like picsum.photos), so we never hotlink them — we fall back to
 // real, self-hosted category photography instead (and pass through a remote
 // image only when its host is already allowlisted, e.g. the CMS's own CDN).
-const ALLOWED_IMG_HOSTS = new Set(["imperialpedia.com", "api.baalvion.com"]);
 
 /** Pass a remote image through only if its host is allowlisted, else fall
  * back to a real, self-hosted category photo (public/images/world/categories)
  * so next/image + CSP never break and no third-party image is ever hotlinked. */
 function safeImage(url: string | null | undefined, category: string, _title: string): string {
-  if (url) {
-    try {
-      if (ALLOWED_IMG_HOSTS.has(new URL(url).hostname)) return url;
-    } catch {
-      /* malformed URL → fall through to the category photo */
-    }
-  }
-  return categoryImage(category);
+  return safeImageUrl(url, categoryImage(category));
 }
 
 export function classifyCategory(title: string): string {

@@ -66,6 +66,20 @@ const nextConfig: NextConfig = {
       // /home was a duplicate second homepage implementation (retired) — the
       // canonical homepage is /.
       { source: '/home', destination: '/', permanent: true },
+      // /research-ai was a non-functional stub (noindex, placeholder input box,
+      // never shipped) — retired in favour of the real AI tool suite.
+      { source: '/research-ai', destination: '/ai-analyst', permanent: true },
+      // /markets doesn't exist (the real route is singular) but shows up in
+      // crawl reports — send it home instead of 404ing.
+      { source: '/markets', destination: '/market', permanent: true },
+      // These /categories/<slug> archives 404 because no article's category
+      // taxonomy string slugifies to an exact match — but each has a real,
+      // populated top-level hub page. Send crawlers/visitors there instead.
+      { source: '/categories/bonds', destination: '/bonds', permanent: true },
+      { source: '/categories/etfs', destination: '/etfs', permanent: true },
+      { source: '/categories/options', destination: '/options', permanent: true },
+      { source: '/categories/banking', destination: '/banking', permanent: true },
+      { source: '/categories/personal-finance', destination: '/personal-finance', permanent: true },
       // The entire articles section (hub + every individual article) moved to
       // /financial-intelligence. Old thin-topic consolidations below resolve
       // straight to their final destination in one hop; everything else under

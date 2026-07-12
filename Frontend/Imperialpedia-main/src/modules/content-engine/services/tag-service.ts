@@ -21,20 +21,46 @@ export async function getTags(): Promise<ApiResponse<Tag[]>> {
   };
 }
 
+/** Turns a tag slug like "wealth-building" into a display name "Wealth Building". */
+function humanizeTagSlug(slug: string): string {
+  return slug
+    .split('-')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 /**
- * Fetches a single tag by its slug.
+ * Fetches a single tag by its slug. Curated tags (name/description/SEO copy)
+ * come from MOCK_TAGS; any other slug that real articles are actually tagged
+ * with is still resolved (derived from the slug) instead of 404ing — tag
+ * pages should never break just because a tag wasn't hand-curated.
  */
 export async function getTagBySlug(
   slug: string
 ): Promise<ApiResponse<Tag | null>> {
   await new Promise((resolve) => setTimeout(resolve, 300));
 
-  const tag = MOCK_TAGS.find((t) => t.slug === slug) || null;
+  const curated = MOCK_TAGS.find((t) => t.slug === slug);
+  if (curated) {
+    return { data: curated, status: 200 };
+  }
 
-  return {
-    data: tag,
-    status: tag ? 200 : 404,
+  const matching = await getArticlesByTag(slug);
+  if (matching.data.length === 0) {
+    return { data: null, status: 404 };
+  }
+
+  const name = humanizeTagSlug(slug);
+  const derived: Tag = {
+    id: `tag-${slug}`,
+    slug,
+    name,
+    description: `Expert analysis and financial insights related to ${name}.`,
+    articleCount: matching.data.length,
   };
+
+  return { data: derived, status: 200 };
 }
 
 /**

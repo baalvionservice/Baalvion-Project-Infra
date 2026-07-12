@@ -17,6 +17,7 @@
 import { Article, ArticleStatus } from '@/modules/content-engine/types/article';
 import type { NewsArticle, NewsBodyBlock, NewsCategory } from '@/lib/data.news';
 import { articleArtDataUri } from '@baalvion/illustrations';
+import { safeImageUrl } from '@/lib/safe-image';
 
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
@@ -270,9 +271,10 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     // The CMS never falls back to stock/placeholder imagery — cms-service generates
     // real original artwork on create/update (@baalvion/illustrations); this inline
     // data-URI is only a safety net for rows that somehow still have none.
-    featuredImage:
-      raw.featuredImage ||
+    featuredImage: safeImageUrl(
+      raw.featuredImage,
       articleArtDataUri({ title: raw.title, category: raw.category?.name, tags: raw.tagIds, excerpt: raw.excerpt, seed: raw.id }),
+    ),
     seoTitle: raw.seoMetadata?.title || raw.title,
     seoDescription: raw.seoMetadata?.description || raw.excerpt || '',
     seoKeywords: raw.seoMetadata?.keywords || raw.tagIds || [],
@@ -338,9 +340,10 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     publishedAt: raw.publishedAt ?? raw.updatedAt ?? new Date().toISOString(),
     updatedAt: raw.updatedAt ?? undefined,
     readTimeMinutes: Math.max(1, Math.round(words / 200)),
-    imageUrl:
-      raw.featuredImage ||
+    imageUrl: safeImageUrl(
+      raw.featuredImage,
       articleArtDataUri({ title: raw.title, category: raw.category?.name, tags: raw.tagIds, excerpt: raw.excerpt, seed: raw.id }),
+    ),
     slug: raw.slug,
     featured: cf.featured === true,
     body: blocksToNewsBody(raw.contentBlocks),

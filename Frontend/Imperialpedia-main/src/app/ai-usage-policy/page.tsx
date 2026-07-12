@@ -65,7 +65,7 @@ function AiUsagePolicyFallback() {
               {env.appName} uses AI tools to assist with research aggregation and drafting support —
               summarizing lengthy source material, surfacing related data points, and helping
               structure a first draft. Our{' '}
-              <Link href="/research-ai" className="text-primary hover:underline">
+              <Link href="/ai-analyst" className="text-primary hover:underline">
                 AI Analyst
               </Link>{' '}
               features, which readers can use directly, work the same way: they synthesize public
