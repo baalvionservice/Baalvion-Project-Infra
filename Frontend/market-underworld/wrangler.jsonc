@@ -5,6 +5,15 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-03-25",
   "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    // Next.js's getMiddlewareManifest() does a dynamic require() of
+    // .next/server/middleware-manifest.json, which the Workers runtime can't
+    // support (fails with "Dynamic require ... is not supported" -> every
+    // route 500s). This app has no middleware.ts, so minimal mode (which
+    // skips that lookup) has no functional cost. See
+    // https://github.com/opennextjs/opennextjs-cloudflare/issues/1232
+    "NEXT_PRIVATE_MINIMAL_MODE": "1"
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
