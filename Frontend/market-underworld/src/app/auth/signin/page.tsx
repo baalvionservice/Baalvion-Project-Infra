@@ -10,13 +10,17 @@ import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/context/auth-context'
 import { ApiError } from '@baalvion/auth-sdk'
 
-// Allowlist for the post-login OAuth bounce-back — must be exactly oauth-service's
-// public authorize endpoint, never an arbitrary attacker-supplied destination. This is
-// never navigated to directly: oauth-service's /oauth/authorize needs the hub session
-// cookie, which is scoped to baalvion.com and invisible here on marketunderworld.com.
-// Instead we route through our own same-origin /api/oauth-bridge, which can read this
-// site's httpOnly access_token cookie server-side and complete the exchange itself.
-function isSafeOAuthRedirect(url: string): boolean {
+// Allowlist for the post-login OAuth bounce-back. Two legitimate shapes reach here:
+//  1. oauth-service's own /oauth/authorize (cross-origin, absolute) — its interactive-login
+//     redirect lands here first since /oauth/authorize needs the hub session cookie, which
+//     is scoped to baalvion.com and invisible on marketunderworld.com. We never navigate to
+//     it directly; its params get decomposed and forwarded to our own /api/oauth-bridge,
+//     which can read this site's httpOnly access_token cookie server-side and complete the
+//     exchange itself.
+//  2. our own /api/oauth-bridge (same-origin, relative) — the bridge's loop-back when it
+//     found no cookie the first time (e.g. cookie expired mid-flow); just re-enter it as-is.
+// Anything else is treated as an open-redirect attempt and ignored.
+function isOAuthServiceAuthorizeUrl(url: string): boolean {
   try {
     const parsed = new URL(url)
     return (
@@ -27,6 +31,22 @@ function isSafeOAuthRedirect(url: string): boolean {
   } catch {
     return false
   }
+}
+
+function isOwnOAuthBridgePath(path: string): boolean {
+  return path.startsWith('/api/oauth-bridge?') || path === '/api/oauth-bridge'
+}
+
+const FORWARDED_OAUTH_PARAMS = ['client_id', 'redirect_uri', 'scope', 'state', 'code_challenge', 'code_challenge_method', 'nonce']
+
+function toBridgeUrl(oauthAuthorizeUrl: string): string {
+  const source = new URL(oauthAuthorizeUrl)
+  const bridge = new URL('/api/oauth-bridge', window.location.origin)
+  for (const key of FORWARDED_OAUTH_PARAMS) {
+    const value = source.searchParams.get(key)
+    if (value) bridge.searchParams.set(key, value)
+  }
+  return bridge.toString()
 }
 
 export default function SignIn() {
@@ -45,14 +65,14 @@ export default function SignIn() {
       await login(email, password)
       toast({ title: "Access Granted", description: "Welcome back to the network." })
 
-      // OAuth bounce-back: satellite apps (e.g. the NodeBB forum) send users here via
-      // oauth-service's /oauth/authorize interactive-login redirect, with ?redirect= pointing
-      // back to that same authorize endpoint. Only ever follow it if it's actually that
-      // endpoint — anything else is treated as an open-redirect attempt and ignored. Routed
-      // through our own /api/oauth-bridge (see isSafeOAuthRedirect above for why).
+      // OAuth bounce-back — see the allowlist functions above for the two legitimate shapes.
       const redirect = new URLSearchParams(window.location.search).get('redirect')
-      if (redirect && isSafeOAuthRedirect(redirect)) {
-        window.location.href = `/api/oauth-bridge?target=${encodeURIComponent(redirect)}`
+      if (redirect && isOAuthServiceAuthorizeUrl(redirect)) {
+        window.location.href = toBridgeUrl(redirect)
+        return
+      }
+      if (redirect && isOwnOAuthBridgePath(redirect)) {
+        window.location.href = redirect
         return
       }
 
