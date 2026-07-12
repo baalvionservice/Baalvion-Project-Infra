@@ -78,6 +78,20 @@ api.baalvion.com {
 		reverse_proxy app-payments:3015
 	}
 
+	# Public commerce storefront delivery (UNAUTHENTICATED, read-only) -- real-goods marketplace
+	# frontends (e.g. community.marketunderworld.com) fetch published/public catalog data from
+	# api.baalvion.com/api/v1/commerce/storefront/:storeId/*. commerce-service already mounts this
+	# router without authMiddleware (routes/storefrontRoutes.js) since it is public by design;
+	# this carve-out just exposes it past the session-gated BFF below, same pattern as CMS public.
+	@commerce_storefront path /api/v1/commerce/storefront /api/v1/commerce/storefront/*
+	handle @commerce_storefront {
+		reverse_proxy app-commerce:3012
+	}
+	@commerce_markets path /api/v1/commerce/markets
+	handle @commerce_markets {
+		reverse_proxy app-commerce:3012
+	}
+
 	# CTM (controlthemarket.com) login BFF. The Vercel FE proxies /auth-bff/* to the code-default
 	# AUTH_PROXY_TARGET = api.baalvion.com/api/v1/identity/auth/v1/auth, which otherwise falls into
 	# the proxy-service BFF below and 401s ("No bearer token"). Route it to the identity auth-gateway
@@ -233,4 +247,11 @@ admin.baalvion.com {
 news.baalvion.com {
 	encode gzip zstd
 	reverse_proxy app-platform:3045
+}
+
+# ── Market Underworld community forum → NodeBB (dedicated Postgres, separate
+# entity from the main frontend, per owner directive). ──
+forum.marketunderworld.com {
+	encode gzip zstd
+	reverse_proxy nodebb:4567
 }
