@@ -46,3 +46,12 @@ b267882a0ea4f013063e6a4aa2a941705df447e2:Frontend/help-baalvion/src/app/(docs)/a
 b267882a0ea4f013063e6a4aa2a941705df447e2:Frontend/help-baalvion/src/app/(docs)/api/tasks/page.tsx:curl-auth-header:75
 b267882a0ea4f013063e6a4aa2a941705df447e2:Frontend/help-baalvion/src/app/(docs)/api/webhooks/page.tsx:curl-auth-header:34
 b267882a0ea4f013063e6a4aa2a941705df447e2:Frontend/help-baalvion/src/app/(docs)/api/authentication/page.tsx:curl-auth-header:35
+
+# Market Underworld mock marketplace config. gitleaks' generic-api-key entropy
+# heuristic flagged a cosmetic display string (payoutKey: 'PROTO-SEC-IND-847')
+# shown in an admin mock panel — not a real credential. The value was already
+# replaced with a lower-entropy placeholder in a later commit on this branch,
+# but the original commit remains in this PR's history, so it's suppressed by
+# fingerprint here (the fingerprint pins the specific commit+line, so a real
+# secret introduced anywhere else in this file would still fail the scan).
+838c41c6194b82884b942bcbf5a9c2ff9e20b49e:Frontend/market-underworld/src/data/mockData.ts:generic-api-key:111

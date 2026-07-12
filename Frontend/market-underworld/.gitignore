@@ -56,3 +56,7 @@ coverage/
 .open-next/
 .wrangler/
 .dev.vars
+
+# This app is a pnpm workspace member (root pnpm-lock.yaml) — never an npm island.
+package-lock.json
+yarn.lock
