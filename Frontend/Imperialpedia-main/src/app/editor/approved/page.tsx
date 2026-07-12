@@ -134,7 +134,7 @@ export default function ApprovedArticlesPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <Link
-                      href={`/articles/${article.slug}`}
+                      href={`/financial-intelligence/${article.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline text-xs inline-flex items-center"

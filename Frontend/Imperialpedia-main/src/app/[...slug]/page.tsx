@@ -448,7 +448,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
     return <ReviewLayout review={review} />;
   }
 
-  // ── 2.5. Content-engine articles canonically live at /articles/<slug> —
+  // ── 2.5. Content-engine articles canonically live at /financial-intelligence/<slug> —
   // redirect bare hits there instead of rendering a duplicate copy at this
   // URL. Checked before the news fallback below because the committed
   // article snapshot is also (incorrectly) reachable via staticNewsBySlug,
@@ -456,7 +456,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
   const articleMatch =
     (await articlesService.getArticleBySlug(slug)).data ?? staticArticleBySlug(slug);
   if (articleMatch) {
-    permanentRedirect(`/articles/${slug}`);
+    permanentRedirect(`/financial-intelligence/${slug}`);
   }
 
   // ── 3. News articles (static set, CMS, or committed snapshot) canonically

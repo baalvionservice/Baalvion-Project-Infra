@@ -209,7 +209,7 @@ export function CreatorContentClient({ creator, initialContent }: CreatorContent
                 </div>
                 
                 <Button variant="ghost" size="sm" className="h-8 px-2 text-primary font-bold text-xs group/btn" asChild>
-                  <Link href={item.status === 'published' ? `/articles/${item.slug}` : '#'}>
+                  <Link href={item.status === 'published' ? `/financial-intelligence/${item.slug}` : '#'}>
                     {item.status === 'published' ? 'Read Full' : 'Resume Draft'} 
                     <ArrowUpRight className="ml-1 h-3 w-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
                   </Link>

@@ -19,10 +19,10 @@ export const seoService = {
   getIndexStatus: async (): Promise<IndexStatusNode[]> => {
     await new Promise(r => setTimeout(r, 500));
     return [
-      { url: '/articles/yield-curve-inversion', status: 'Indexed', lastUpdated: '2024-03-14', priority: 0.8 },
+      { url: '/financial-intelligence/yield-curve-inversion', status: 'Indexed', lastUpdated: '2024-03-14', priority: 0.8 },
       { url: '/glossary/stagflation', status: 'Indexed', lastUpdated: '2024-03-12', priority: 0.7 },
       { url: '/financial-tools/compound-interest', status: 'Pending', lastUpdated: '2024-03-15', priority: 0.9 },
-      { url: '/articles/future-of-defi', status: 'Error', lastUpdated: '2024-03-13', priority: 0.8 },
+      { url: '/financial-intelligence/future-of-defi', status: 'Error', lastUpdated: '2024-03-13', priority: 0.8 },
     ];
   },
 

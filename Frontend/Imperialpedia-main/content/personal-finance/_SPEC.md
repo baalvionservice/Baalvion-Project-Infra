@@ -32,7 +32,7 @@ Output **only** raw JSON (no markdown fences, no commentary). It must `JSON.pars
 ## Inline formatting allowed inside paragraph/answer strings (use sparingly)
 
 - `**bold**` for emphasis on key terms.
-- Internal links to other Imperialpedia guides as markdown: `[anchor text](/articles/<slug>)`.
+- Internal links to other Imperialpedia guides as markdown: `[anchor text](/financial-intelligence/<slug>)`.
   Weave in 3–6 contextual internal links using the slug map below. Nothing else — no other HTML,
   no images, no markdown headings inside strings.
 

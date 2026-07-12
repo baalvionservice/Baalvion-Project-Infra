@@ -32,41 +32,41 @@
       "heading": "Output: What GDP Actually Measures",
       "paragraphs": [
         "Gross Domestic Product (GDP) is the total dollar value of all goods and services produced within a country over a given period. It's the single most-watched measure of economic size and growth, reported quarterly and closely tracked for the direction it's moving, not just its absolute level.",
-        "GDP growing steadily is generally read as a healthy, expanding economy. GDP shrinking for two consecutive quarters is one common informal marker some observers use to describe a recession, though the official designation in the U.S. involves a broader set of indicators. See [the complete guide to GDP](/articles/complete-guide-to-gdp) for the full breakdown of how it's calculated and what its limitations are."
+        "GDP growing steadily is generally read as a healthy, expanding economy. GDP shrinking for two consecutive quarters is one common informal marker some observers use to describe a recession, though the official designation in the U.S. involves a broader set of indicators. See [the complete guide to GDP](/financial-intelligence/complete-guide-to-gdp) for the full breakdown of how it's calculated and what its limitations are."
       ]
     },
     {
       "heading": "Prices: Inflation and the Cost of Living",
       "paragraphs": [
         "Inflation is the rate at which prices for goods and services rise over time, measured most commonly through the Consumer Price Index (CPI). A small, steady amount of inflation is generally considered healthy — it's the rapid or unpredictable swings, in either direction, that cause real economic pain.",
-        "Inflation results from a mix of demand growing faster than supply, rising production costs, money supply growth, and self-reinforcing expectations — see [what causes inflation](/articles/causes-of-inflation) for the full breakdown of each mechanism."
+        "Inflation results from a mix of demand growing faster than supply, rising production costs, money supply growth, and self-reinforcing expectations — see [what causes inflation](/financial-intelligence/causes-of-inflation) for the full breakdown of each mechanism."
       ]
     },
     {
       "heading": "Employment: The Labor Market Side",
       "paragraphs": [
         "The unemployment rate and broader labor market data — wage growth, job openings, labor force participation — track how many people are working and how much bargaining power they have. Employment and output are closely linked: businesses hire more when demand for their goods and services rises, and lay off when it falls, making the labor market one of the more reliable read-outs of where the broader economy actually stands.",
-        "See [the unemployment rate](/articles/unemployment-rate) for how it's measured and [what causes unemployment](/articles/causes-of-unemployment) for the different types economists track."
+        "See [the unemployment rate](/financial-intelligence/unemployment-rate) for how it's measured and [what causes unemployment](/financial-intelligence/causes-of-unemployment) for the different types economists track."
       ]
     },
     {
       "heading": "The Business Cycle: Expansion and Contraction",
       "paragraphs": [
-        "Economies don't grow in a straight line — they move through recurring phases of expansion, peak, contraction, and trough, collectively known as the business cycle. Understanding which phase the economy is currently in helps explain why GDP, employment, and inflation data can send seemingly conflicting signals at the same time. See [business cycles](/articles/business-cycles) for the full framework and [recessions and recoveries](/articles/recessions-and-recoveries) for what happens during the contraction and rebound phases specifically."
+        "Economies don't grow in a straight line — they move through recurring phases of expansion, peak, contraction, and trough, collectively known as the business cycle. Understanding which phase the economy is currently in helps explain why GDP, employment, and inflation data can send seemingly conflicting signals at the same time. See [business cycles](/financial-intelligence/business-cycles) for the full framework and [recessions and recoveries](/financial-intelligence/recessions-and-recoveries) for what happens during the contraction and rebound phases specifically."
       ]
     },
     {
       "heading": "Monetary Policy: How Central Banks Steer the Economy",
       "paragraphs": [
         "Central banks, like the Federal Reserve in the U.S., manage the money supply and borrowing costs to keep inflation and employment in a healthy range — a dual mandate in the Fed's case. Their primary tool is adjusting short-term interest rates, which ripple through mortgage rates, business borrowing costs, and consumer credit.",
-        "See [the complete guide to monetary policy](/articles/complete-guide-to-monetary-policy) for how the Fed's toolkit actually works, from interest rate changes to quantitative easing."
+        "See [the complete guide to monetary policy](/financial-intelligence/complete-guide-to-monetary-policy) for how the Fed's toolkit actually works, from interest rate changes to quantitative easing."
       ]
     },
     {
       "heading": "Fiscal Policy: The Government's Other Lever",
       "paragraphs": [
         "Where monetary policy is about money and interest rates, fiscal policy is about government spending and taxation. Governments can stimulate a slowing economy by increasing spending or cutting taxes, or cool an overheating one by doing the reverse — though fiscal policy tends to move more slowly than monetary policy since it typically requires legislative action.",
-        "See [government spending](/articles/government-spending) for how budget decisions work and [fiscal policy during recessions](/articles/fiscal-policy-during-recessions) for how these tools get deployed during a downturn specifically."
+        "See [government spending](/financial-intelligence/government-spending) for how budget decisions work and [fiscal policy during recessions](/financial-intelligence/fiscal-policy-during-recessions) for how these tools get deployed during a downturn specifically."
       ]
     },
     {
@@ -103,7 +103,7 @@
       "answer": "Look at the trend, not a single data point: is GDP growing, is unemployment low and stable, is inflation near target, and are interest rates roughly neutral rather than aggressively high or low? Trends across all four tell a more complete story than any one figure alone."
     }
   ],
-  "conclusion": "The economy can feel like an overwhelming stream of disconnected headlines, but underneath it, there are really only a handful of moving parts: output, prices, employment, and the two policy levers used to manage them. Once you can place a given headline into that framework, the entire news cycle around \"the economy\" becomes dramatically easier to parse.\n\nFrom here, the deep dives on [GDP](/articles/complete-guide-to-gdp), [inflation](/articles/causes-of-inflation), [monetary policy](/articles/complete-guide-to-monetary-policy), and the [business cycle](/articles/business-cycles) go into the mechanics of each piece — useful whether you're trying to understand the next jobs report or just make sense of why your mortgage rate moved.",
+  "conclusion": "The economy can feel like an overwhelming stream of disconnected headlines, but underneath it, there are really only a handful of moving parts: output, prices, employment, and the two policy levers used to manage them. Once you can place a given headline into that framework, the entire news cycle around \"the economy\" becomes dramatically easier to parse.\n\nFrom here, the deep dives on [GDP](/financial-intelligence/complete-guide-to-gdp), [inflation](/financial-intelligence/causes-of-inflation), [monetary policy](/financial-intelligence/complete-guide-to-monetary-policy), and the [business cycle](/financial-intelligence/business-cycles) go into the mechanics of each piece — useful whether you're trying to understand the next jobs report or just make sense of why your mortgage rate moved.",
   "internalLinks": [
     { "anchor": "complete guide to gdp", "slug": "complete-guide-to-gdp" },
     { "anchor": "causes of inflation", "slug": "causes-of-inflation" },

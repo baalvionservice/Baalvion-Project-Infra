@@ -17,7 +17,7 @@
     "schemaRecommendation": "Article + FAQPage"
   },
   "excerpt": "The federal funds rate gets all the headlines, but it's only one tool in a broader kit. Here's every major lever a central bank can pull, and what each one actually does.",
-  "intro": "When people talk about the Fed 'raising rates,' they're usually referring to just one of several tools central banks have available to implement [monetary policy](/articles/complete-guide-to-monetary-policy). This guide is a reference-style breakdown of the full toolkit — from the headline federal funds rate to the less-discussed tools that come into play during unusual conditions.",
+  "intro": "When people talk about the Fed 'raising rates,' they're usually referring to just one of several tools central banks have available to implement [monetary policy](/financial-intelligence/complete-guide-to-monetary-policy). This guide is a reference-style breakdown of the full toolkit — from the headline federal funds rate to the less-discussed tools that come into play during unusual conditions.",
   "tableOfContents": [
     "The Federal Funds Rate",
     "Reserve Requirements",
@@ -30,7 +30,7 @@
     {
       "heading": "The Federal Funds Rate",
       "paragraphs": [
-        "The federal funds rate is the interest rate banks charge each other for overnight loans of reserves, and it's the primary tool the Fed uses to implement policy. The FOMC sets a target range rather than a single fixed number, and influences the actual rate toward that target through open market operations. Changes here ripple through the broader economy, affecting everything from credit card rates to (more indirectly) [mortgage rates](/articles/mortgage-interest-rates). See [central bank interest rates](/articles/central-bank-interest-rates) for a deeper look at exactly how this transmission works."
+        "The federal funds rate is the interest rate banks charge each other for overnight loans of reserves, and it's the primary tool the Fed uses to implement policy. The FOMC sets a target range rather than a single fixed number, and influences the actual rate toward that target through open market operations. Changes here ripple through the broader economy, affecting everything from credit card rates to (more indirectly) [mortgage rates](/financial-intelligence/mortgage-interest-rates). See [central bank interest rates](/financial-intelligence/central-bank-interest-rates) for a deeper look at exactly how this transmission works."
       ]
     },
     {
@@ -48,13 +48,13 @@
     {
       "heading": "Open Market Operations",
       "paragraphs": [
-        "Open market operations — the buying and selling of government securities — are the day-to-day mechanism the Fed uses to keep the actual federal funds rate trading near its target. Buying securities injects money into the banking system (pushing rates down); selling withdraws money (pushing rates up). See [open market operations](/articles/open-market-operations) for the full mechanics of how this works."
+        "Open market operations — the buying and selling of government securities — are the day-to-day mechanism the Fed uses to keep the actual federal funds rate trading near its target. Buying securities injects money into the banking system (pushing rates down); selling withdraws money (pushing rates up). See [open market operations](/financial-intelligence/open-market-operations) for the full mechanics of how this works."
       ]
     },
     {
       "heading": "Quantitative Easing and Tightening",
       "paragraphs": [
-        "Quantitative easing (QE) is a large-scale version of asset purchases, typically used when the standard federal funds rate is already near zero and the Fed wants to provide further stimulus by directly lowering longer-term interest rates and injecting substantial liquidity into the financial system. Quantitative tightening (QT) is the reverse — letting those assets run off the balance sheet or actively selling them to withdraw liquidity and support tighter financial conditions. See [quantitative easing](/articles/quantitative-easing) for a full explanation of when and why it's used."
+        "Quantitative easing (QE) is a large-scale version of asset purchases, typically used when the standard federal funds rate is already near zero and the Fed wants to provide further stimulus by directly lowering longer-term interest rates and injecting substantial liquidity into the financial system. Quantitative tightening (QT) is the reverse — letting those assets run off the balance sheet or actively selling them to withdraw liquidity and support tighter financial conditions. See [quantitative easing](/financial-intelligence/quantitative-easing) for a full explanation of when and why it's used."
       ]
     },
     {

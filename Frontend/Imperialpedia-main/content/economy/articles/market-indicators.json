@@ -17,7 +17,7 @@
     "schemaRecommendation": "Article + FAQPage"
   },
   "excerpt": "Economic indicators track the real economy; market indicators track financial markets themselves — and often move first. Here's what the yield curve, VIX, and other signals actually tell you.",
-  "intro": "Where [economic indicators](/articles/complete-guide-to-economic-indicators) like GDP and unemployment describe the real economy, market indicators describe the financial markets that price and trade around it — and they often move ahead of the economic data, since markets are constantly pricing in expectations about the future.\n\nThis guide covers the market-specific signals that show up constantly in financial news: the yield curve, the VIX, credit spreads, and market breadth — what each measures and what it's historically signaled.",
+  "intro": "Where [economic indicators](/financial-intelligence/complete-guide-to-economic-indicators) like GDP and unemployment describe the real economy, market indicators describe the financial markets that price and trade around it — and they often move ahead of the economic data, since markets are constantly pricing in expectations about the future.\n\nThis guide covers the market-specific signals that show up constantly in financial news: the yield curve, the VIX, credit spreads, and market breadth — what each measures and what it's historically signaled.",
   "tableOfContents": [
     "The Yield Curve and Yield Curve Inversions",
     "The VIX: Wall Street's 'Fear Gauge'",
@@ -93,7 +93,7 @@
       "answer": "Generally not in isolation — these signals have real historical track records but also produce false signals. They're most useful as context alongside your broader investment strategy, not as standalone trading triggers."
     }
   ],
-  "conclusion": "Market indicators give investors a read on how financial markets themselves are pricing risk and expectations — often ahead of the economic data covered in [the complete guide to economic indicators](/articles/complete-guide-to-economic-indicators). None of them are infallible on their own, but together, they form a useful cross-check against the narrative coming from GDP, inflation, and employment data.",
+  "conclusion": "Market indicators give investors a read on how financial markets themselves are pricing risk and expectations — often ahead of the economic data covered in [the complete guide to economic indicators](/financial-intelligence/complete-guide-to-economic-indicators). None of them are infallible on their own, but together, they form a useful cross-check against the narrative coming from GDP, inflation, and employment data.",
   "internalLinks": [
     { "anchor": "complete guide to economic indicators", "slug": "complete-guide-to-economic-indicators" },
     { "anchor": "gdp and financial markets", "slug": "gdp-and-financial-markets" },

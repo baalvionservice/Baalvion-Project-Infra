@@ -16,7 +16,7 @@
     "schemaRecommendation": "Article + FAQPage"
   },
   "excerpt": "Government spending is one of the four components of GDP and a constant subject of political debate. Here's how the budget actually breaks down, and how spending decisions ripple through the economy.",
-  "intro": "Government spending is one of the four components that make up [GDP](/articles/complete-guide-to-gdp), and its size, composition, and financing are among the most consistently debated topics in economic policy. This guide covers how government spending is categorized, the difference between the budget deficit and the national debt, and how spending decisions affect the broader economy.",
+  "intro": "Government spending is one of the four components that make up [GDP](/financial-intelligence/complete-guide-to-gdp), and its size, composition, and financing are among the most consistently debated topics in economic policy. This guide covers how government spending is categorized, the difference between the budget deficit and the national debt, and how spending decisions affect the broader economy.",
   "tableOfContents": [
     "Mandatory vs Discretionary Spending",
     "Where the Money Actually Goes",
@@ -55,7 +55,7 @@
     {
       "heading": "How Government Spending Affects GDP",
       "paragraphs": [
-        "As one of the four components in the GDP calculation, an increase in government spending directly adds to measured output, and it can also have a further multiplier effect as that spending becomes income for contractors, employees, and suppliers, who then spend a portion of it themselves. This is exactly why spending is a tool available for [fiscal policy during recessions](/articles/fiscal-policy-during-recessions) — it has a direct, near-immediate effect on measured economic activity."
+        "As one of the four components in the GDP calculation, an increase in government spending directly adds to measured output, and it can also have a further multiplier effect as that spending becomes income for contractors, employees, and suppliers, who then spend a portion of it themselves. This is exactly why spending is a tool available for [fiscal policy during recessions](/financial-intelligence/fiscal-policy-during-recessions) — it has a direct, near-immediate effect on measured economic activity."
       ]
     },
     {
@@ -67,7 +67,7 @@
     {
       "heading": "Spending as a Fiscal Policy Tool",
       "paragraphs": [
-        "Beyond its steady-state role funding government functions, spending is also actively used as a deliberate fiscal policy lever — increased during recessions to support demand, and in principle moderated during strong expansions to avoid contributing to overheating, though political dynamics make spending considerably easier to increase than to reduce in practice. See [fiscal policy during recessions](/articles/fiscal-policy-during-recessions) for how this plays out specifically during downturns."
+        "Beyond its steady-state role funding government functions, spending is also actively used as a deliberate fiscal policy lever — increased during recessions to support demand, and in principle moderated during strong expansions to avoid contributing to overheating, though political dynamics make spending considerably easier to increase than to reduce in practice. See [fiscal policy during recessions](/financial-intelligence/fiscal-policy-during-recessions) for how this plays out specifically during downturns."
       ]
     }
   ],

@@ -12,7 +12,7 @@ const esc = (s: string): string =>
     .replace(/'/g, "&apos;");
 
 function itemXml(item: CmsContent, baseUrl: string): string {
-  const url = `${baseUrl}/articles/${item.slug}`;
+  const url = `${baseUrl}/financial-intelligence/${item.slug}`;
   const pubDate = item.publishedAt ? new Date(item.publishedAt).toUTCString() : new Date().toUTCString();
   return `  <item>
     <title>${esc(item.title)}</title>

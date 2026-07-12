@@ -163,7 +163,7 @@ function makeBlocks(spec, { appendAuthor }) {
   if (related.length) {
     push('heading', { level: 2, text: 'Related Imperialpedia Guides' });
     const items = related
-      .map((l) => `<li><a href="/articles/${esc(l.slug)}">${esc(l.anchor)}</a></li>`)
+      .map((l) => `<li><a href="/financial-intelligence/${esc(l.slug)}">${esc(l.anchor)}</a></li>`)
       .join('');
     // Article related-lists also link back to the Personal Finance hub for SEO.
     const hub = curated ? '<li><a href="/personal-finance">Explore all Personal Finance guides &rarr;</a></li>' : '';

@@ -24,7 +24,7 @@ export const canonicalService = {
     let path = "";
     switch (type) {
       case "article":
-        path = `/articles/${slug}`;
+        path = `/financial-intelligence/${slug}`;
         break;
       case "glossary":
         path = `/glossary/${slug}`;

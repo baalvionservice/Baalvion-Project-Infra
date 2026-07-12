@@ -29,7 +29,7 @@
     {
       "heading": "What Determines Interest Rates",
       "paragraphs": [
-        "At the broadest level, interest rates reflect the supply and demand for money: when more people want to borrow than there is money available to lend, rates rise; when savings and available capital exceed borrowing demand, rates fall. Central bank policy, inflation expectations, and overall economic growth all feed into where rates settle at a given point in time — see [central bank interest rates](/articles/central-bank-interest-rates) for how policy rates specifically influence this."
+        "At the broadest level, interest rates reflect the supply and demand for money: when more people want to borrow than there is money available to lend, rates rise; when savings and available capital exceed borrowing demand, rates fall. Central bank policy, inflation expectations, and overall economic growth all feed into where rates settle at a given point in time — see [central bank interest rates](/financial-intelligence/central-bank-interest-rates) for how policy rates specifically influence this."
       ]
     },
     {
@@ -47,7 +47,7 @@
     {
       "heading": "Short-Term vs Long-Term Rates",
       "paragraphs": [
-        "Short-term rates are more directly influenced by central bank policy, since they're closely tied to the benchmark rate the central bank actively targets. Long-term rates, like those underlying [mortgage rates](/articles/mortgage-interest-rates), are shaped more by bond market expectations about growth and inflation over many years, which is why they don't always move in lockstep with a central bank's most recent decision."
+        "Short-term rates are more directly influenced by central bank policy, since they're closely tied to the benchmark rate the central bank actively targets. Long-term rates, like those underlying [mortgage rates](/financial-intelligence/mortgage-interest-rates), are shaped more by bond market expectations about growth and inflation over many years, which is why they don't always move in lockstep with a central bank's most recent decision."
       ],
       "table": {
         "caption": "What Mainly Drives Short-Term vs Long-Term Rates",
@@ -61,13 +61,13 @@
     {
       "heading": "How Interest Rates Affect Borrowers and Savers Differently",
       "paragraphs": [
-        "Rising rates are bad news if you're borrowing (higher mortgage, auto loan, or credit card costs) but good news if you're saving (better yields on [high-yield savings accounts](/articles/high-yield-savings-accounts) and CDs). Falling rates flip the picture: cheaper borrowing, but lower returns on cash savings. Almost everyone is on both sides of this to some degree, which is why the net effect of a rate change on any individual household depends heavily on their specific mix of debt and savings."
+        "Rising rates are bad news if you're borrowing (higher mortgage, auto loan, or credit card costs) but good news if you're saving (better yields on [high-yield savings accounts](/financial-intelligence/high-yield-savings-accounts) and CDs). Falling rates flip the picture: cheaper borrowing, but lower returns on cash savings. Almost everyone is on both sides of this to some degree, which is why the net effect of a rate change on any individual household depends heavily on their specific mix of debt and savings."
       ]
     },
     {
       "heading": "Where to Go Deeper",
       "paragraphs": [
-        "This guide is intentionally broad — for the specific mechanics behind different pieces of the picture, see [central bank interest rates](/articles/central-bank-interest-rates) for how policy rates are set and transmitted, [interest rates and inflation](/articles/interest-rates-and-inflation) for the relationship between the two, [mortgage interest rates](/articles/mortgage-interest-rates) for the home-loan-specific picture, and [compound interest](/articles/compound-interest) for how rates compound over time in savings and debt alike."
+        "This guide is intentionally broad — for the specific mechanics behind different pieces of the picture, see [central bank interest rates](/financial-intelligence/central-bank-interest-rates) for how policy rates are set and transmitted, [interest rates and inflation](/financial-intelligence/interest-rates-and-inflation) for the relationship between the two, [mortgage interest rates](/financial-intelligence/mortgage-interest-rates) for the home-loan-specific picture, and [compound interest](/financial-intelligence/compound-interest) for how rates compound over time in savings and debt alike."
       ]
     }
   ],
@@ -96,7 +96,7 @@
       "answer": "Both, depending on your position — bad for borrowers (higher costs on new loans) and good for savers (better yields on savings accounts and CDs). Most people experience some of each effect."
     }
   ],
-  "conclusion": "Interest rates are the connective tissue running through nearly every financial decision — what you pay to borrow, what you earn to save, and how a central bank tries to steer the entire economy. Once you understand the basic supply-and-demand logic and the fixed-versus-variable, short-versus-long distinctions, the more specific topics — [central bank policy](/articles/central-bank-interest-rates), [mortgage rates](/articles/mortgage-interest-rates), [inflation's relationship to rates](/articles/interest-rates-and-inflation) — all build naturally on the same foundation.",
+  "conclusion": "Interest rates are the connective tissue running through nearly every financial decision — what you pay to borrow, what you earn to save, and how a central bank tries to steer the entire economy. Once you understand the basic supply-and-demand logic and the fixed-versus-variable, short-versus-long distinctions, the more specific topics — [central bank policy](/financial-intelligence/central-bank-interest-rates), [mortgage rates](/financial-intelligence/mortgage-interest-rates), [inflation's relationship to rates](/financial-intelligence/interest-rates-and-inflation) — all build naturally on the same foundation.",
   "internalLinks": [
     { "anchor": "central bank interest rates", "slug": "central-bank-interest-rates" },
     { "anchor": "interest rates and inflation", "slug": "interest-rates-and-inflation" },

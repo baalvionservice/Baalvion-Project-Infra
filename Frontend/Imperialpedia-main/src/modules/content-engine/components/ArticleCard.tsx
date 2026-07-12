@@ -19,7 +19,7 @@ interface ArticleCardProps {
  */
 export const ArticleCard = ({ article }: ArticleCardProps) => {
   return (
-    <Link href={`/articles/${article.slug}`} className="group block h-full">
+    <Link href={`/financial-intelligence/${article.slug}`} className="group block h-full">
       <Card className="glass-card flex flex-col h-full overflow-hidden transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl hover:border-primary/40">
         <div className="relative aspect-video w-full overflow-hidden">
           {article.featuredImage ? (

@@ -16,7 +16,7 @@
     "schemaRecommendation": "Article + FAQPage"
   },
   "excerpt": "No modern economy operates in isolation — trade, currency markets, and capital flows connect them all. Here's how the global economy actually functions as a system.",
-  "intro": "Beyond any single country's [domestic economy](/articles/complete-guide-to-the-economy), a whole additional layer of activity connects nations together: trade in goods and services, currency exchange, cross-border investment, and increasingly interdependent supply chains. Understanding this global layer explains why a slowdown in one major economy, a currency move in another, or a shipping disruption halfway around the world can all show up in your own country's economic data.",
+  "intro": "Beyond any single country's [domestic economy](/financial-intelligence/complete-guide-to-the-economy), a whole additional layer of activity connects nations together: trade in goods and services, currency exchange, cross-border investment, and increasingly interdependent supply chains. Understanding this global layer explains why a slowdown in one major economy, a currency move in another, or a shipping disruption halfway around the world can all show up in your own country's economic data.",
   "tableOfContents": [
     "International Trade: Exports, Imports, and Comparative Advantage",
     "Exchange Rates and Currency Markets",
@@ -29,7 +29,7 @@
     {
       "heading": "International Trade: Exports, Imports, and Comparative Advantage",
       "paragraphs": [
-        "Countries trade because of comparative advantage — the idea that a country benefits from specializing in producing what it can make relatively most efficiently, and trading for everything else, even if another country could technically produce every good more efficiently in absolute terms. Net exports (exports minus imports) are one of the four components of [GDP](/articles/complete-guide-to-gdp), meaning trade balances directly affect measured domestic economic output."
+        "Countries trade because of comparative advantage — the idea that a country benefits from specializing in producing what it can make relatively most efficiently, and trading for everything else, even if another country could technically produce every good more efficiently in absolute terms. Net exports (exports minus imports) are one of the four components of [GDP](/financial-intelligence/complete-guide-to-gdp), meaning trade balances directly affect measured domestic economic output."
       ]
     },
     {
@@ -53,7 +53,7 @@
     {
       "heading": "How Global Events Ripple Into Domestic Economies",
       "paragraphs": [
-        "A recession in a major trading partner reduces demand for a country's exports. A currency crisis in one region can trigger capital flight that spreads to other economies perceived as similarly risky, even without a direct connection. A geopolitical conflict affecting a key commodity-producing region can spike prices worldwide, as covered in [how crude oil prices affect the economy](/articles/crude-oil-prices-and-the-economy). This interconnection is exactly why domestic economic forecasts increasingly have to account for conditions well beyond national borders."
+        "A recession in a major trading partner reduces demand for a country's exports. A currency crisis in one region can trigger capital flight that spreads to other economies perceived as similarly risky, even without a direct connection. A geopolitical conflict affecting a key commodity-producing region can spike prices worldwide, as covered in [how crude oil prices affect the economy](/financial-intelligence/crude-oil-prices-and-the-economy). This interconnection is exactly why domestic economic forecasts increasingly have to account for conditions well beyond national borders."
       ],
       "table": {
         "caption": "How Global Events Transmit to Domestic Economies",

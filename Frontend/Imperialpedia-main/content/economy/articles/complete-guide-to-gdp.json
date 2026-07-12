@@ -90,7 +90,7 @@
     {
       "heading": "Why GDP Still Matters Despite the Limitations",
       "paragraphs": [
-        "Even with its known gaps, GDP remains the standard reference point because it's measured consistently, reported frequently, and comparable across time and countries — making it genuinely useful for tracking economic momentum even if it's an incomplete picture of overall prosperity. The practical approach most economists take is treating GDP as one critical input among several, reading it alongside employment, wage growth, and inflation data rather than in isolation. See [GDP and financial markets](/articles/gdp-and-financial-markets) for how investors specifically use GDP releases, and [complete guide to economic indicators](/articles/complete-guide-to-economic-indicators) for the fuller dashboard economists actually watch."
+        "Even with its known gaps, GDP remains the standard reference point because it's measured consistently, reported frequently, and comparable across time and countries — making it genuinely useful for tracking economic momentum even if it's an incomplete picture of overall prosperity. The practical approach most economists take is treating GDP as one critical input among several, reading it alongside employment, wage growth, and inflation data rather than in isolation. See [GDP and financial markets](/financial-intelligence/gdp-and-financial-markets) for how investors specifically use GDP releases, and [complete guide to economic indicators](/financial-intelligence/complete-guide-to-economic-indicators) for the fuller dashboard economists actually watch."
       ]
     }
   ],
@@ -124,7 +124,7 @@
       "answer": "In the U.S., the Bureau of Economic Analysis reports GDP quarterly, with an initial estimate followed by one or more revisions as more complete data becomes available."
     }
   ],
-  "conclusion": "GDP is simultaneously the most important single number in economics and an incomplete one — a precise measure of output that says nothing about who benefits from that output or what it costs elsewhere. Understanding both halves of that truth is what separates a genuinely informed reading of economic news from just repeating the headline growth percentage.\n\nFrom here, [GDP and financial markets](/articles/gdp-and-financial-markets) covers how investors react to GDP releases in real time, and [the complete guide to the economy](/articles/complete-guide-to-the-economy) places GDP in context alongside inflation, employment, and policy.",
+  "conclusion": "GDP is simultaneously the most important single number in economics and an incomplete one — a precise measure of output that says nothing about who benefits from that output or what it costs elsewhere. Understanding both halves of that truth is what separates a genuinely informed reading of economic news from just repeating the headline growth percentage.\n\nFrom here, [GDP and financial markets](/financial-intelligence/gdp-and-financial-markets) covers how investors react to GDP releases in real time, and [the complete guide to the economy](/financial-intelligence/complete-guide-to-the-economy) places GDP in context alongside inflation, employment, and policy.",
   "internalLinks": [
     { "anchor": "gdp and financial markets", "slug": "gdp-and-financial-markets" },
     { "anchor": "complete guide to the economy", "slug": "complete-guide-to-the-economy" },

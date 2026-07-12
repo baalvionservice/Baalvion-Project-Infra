@@ -36,10 +36,10 @@ export const analyticsService = {
   getTopPages: async (): Promise<PageStats[]> => {
     await new Promise(r => setTimeout(r, 400));
     return [
-      { url: '/articles/yield-curve-inversion', views: 12400, uniqueVisitors: 8500, avgTimeOnPage: '4m 32s', bounceRate: 24.5 },
+      { url: '/financial-intelligence/yield-curve-inversion', views: 12400, uniqueVisitors: 8500, avgTimeOnPage: '4m 32s', bounceRate: 24.5 },
       { url: '/glossary/stagflation', views: 8200, uniqueVisitors: 6100, avgTimeOnPage: '2m 15s', bounceRate: 18.2 },
       { url: '/financial-tools/compound-interest', views: 7500, uniqueVisitors: 5200, avgTimeOnPage: '6m 12s', bounceRate: 12.4 },
-      { url: '/articles/future-of-defi', views: 6800, uniqueVisitors: 4900, avgTimeOnPage: '5m 45s', bounceRate: 28.1 },
+      { url: '/financial-intelligence/future-of-defi', views: 6800, uniqueVisitors: 4900, avgTimeOnPage: '5m 45s', bounceRate: 28.1 },
     ];
   },
 

@@ -18,7 +18,7 @@ const mockSearchData: SearchResult[] = [
     title: "Understanding Yield Curve Inversion",
     snippet:
       "A deep dive into what the yield curve tells us about future recessions and market signals.",
-    route: "/articles/understanding-yield-curve-inversion",
+    route: "/financial-intelligence/understanding-yield-curve-inversion",
     category: "Economics",
     author: "The Market Maven",
     tags: ["Macro", "Yield Curve", "Recession"],
@@ -31,7 +31,7 @@ const mockSearchData: SearchResult[] = [
     title: "The Power of Compound Interest",
     snippet:
       "Why starting early is the most important factor in wealth building and long-term capital growth.",
-    route: "/articles/the-power-of-compound-interest",
+    route: "/financial-intelligence/the-power-of-compound-interest",
     category: "Investing",
     author: "Julian Wealth",
     tags: ["Wealth", "Basics", "Savings"],
@@ -44,7 +44,7 @@ const mockSearchData: SearchResult[] = [
     title: "Macro Trends in 2026",
     snippet:
       "Anticipating the structural shifts in global fiscal policy and the next interest rate super-cycle.",
-    route: "/articles/macro-trends-2026",
+    route: "/financial-intelligence/macro-trends-2026",
     category: "Economics",
     author: "Eleanor Vance",
     tags: ["Macro", "Future", "Policy"],
@@ -57,7 +57,7 @@ const mockSearchData: SearchResult[] = [
     title: "DeFi Liquidity Pools Explained",
     snippet:
       "A technical guide to how automated market makers (AMMs) operate in the decentralized landscape.",
-    route: "/articles/defi-liquidity-pools",
+    route: "/financial-intelligence/defi-liquidity-pools",
     category: "Crypto",
     author: "Sarah Crypto",
     tags: ["DeFi", "Web3", "Liquidity"],
@@ -70,7 +70,7 @@ const mockSearchData: SearchResult[] = [
     title: "Passive Income with Dividends",
     snippet:
       "Building a sustainable cash flow engine using high-quality dividend growth stocks.",
-    route: "/articles/dividend-income",
+    route: "/financial-intelligence/dividend-income",
     category: "Investing",
     author: "Dan Income",
     tags: ["Dividends", "Wealth", "Passive Income"],
@@ -83,7 +83,7 @@ const mockSearchData: SearchResult[] = [
     title: "ESG Investing Strategies",
     snippet:
       "How to align your portfolio with environmental, social, and governance principles without sacrificing yield.",
-    route: "/articles/esg-strategies",
+    route: "/financial-intelligence/esg-strategies",
     category: "Investing",
     author: "Julian Wealth",
     tags: ["ESG", "Strategy", "Investing"],
@@ -96,7 +96,7 @@ const mockSearchData: SearchResult[] = [
     title: "The Future of Central Banking",
     snippet:
       "Evaluating the transition to digital currencies and algorithmic monetary policy.",
-    route: "/articles/future-of-central-banking",
+    route: "/financial-intelligence/future-of-central-banking",
     category: "Economics",
     author: "The Market Maven",
     tags: ["Macro", "Banking", "CBDC"],

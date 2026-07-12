@@ -17,7 +17,7 @@
     "schemaRecommendation": "Article + FAQPage"
   },
   "excerpt": "Knowing your retirement number is only half the equation — here's how to actually invest to reach it, including asset allocation and how your mix should evolve over time.",
-  "intro": "Once you have a sense of [how much you need to retire](/articles/how-much-money-do-you-need-to-retire), the next question is how to actually invest to get there. Building a retirement portfolio isn't about picking a handful of exciting stocks — it's about choosing a sensible asset allocation, diversifying within it, and adjusting that mix as retirement gets closer.",
+  "intro": "Once you have a sense of [how much you need to retire](/financial-intelligence/how-much-money-do-you-need-to-retire), the next question is how to actually invest to get there. Building a retirement portfolio isn't about picking a handful of exciting stocks — it's about choosing a sensible asset allocation, diversifying within it, and adjusting that mix as retirement gets closer.",
   "tableOfContents": [
     "Asset Allocation: The Single Biggest Decision",
     "Stocks, Bonds, and Cash: What Each Role Does",
@@ -38,13 +38,13 @@
     {
       "heading": "Stocks, Bonds, and Cash: What Each Role Does",
       "paragraphs": [
-        "Stocks offer the highest long-term growth potential but come with meaningfully higher short-term volatility, making them best suited for money with a long time horizon before it's needed. Bonds offer more stability and income, generally cushioning a portfolio during stock market downturns, though with lower long-term growth potential. Cash and cash equivalents (like a [high-yield savings account](/articles/high-yield-savings-accounts)) provide stability and immediate liquidity but offer the lowest long-term growth, making them appropriate mainly for near-term spending needs rather than long-term retirement growth."
+        "Stocks offer the highest long-term growth potential but come with meaningfully higher short-term volatility, making them best suited for money with a long time horizon before it's needed. Bonds offer more stability and income, generally cushioning a portfolio during stock market downturns, though with lower long-term growth potential. Cash and cash equivalents (like a [high-yield savings account](/financial-intelligence/high-yield-savings-accounts)) provide stability and immediate liquidity but offer the lowest long-term growth, making them appropriate mainly for near-term spending needs rather than long-term retirement growth."
       ]
     },
     {
       "heading": "How Much Should You Actually Contribute",
       "paragraphs": [
-        "Beyond the allocation question, the contribution rate itself matters enormously — a well-diversified portfolio funded with too little money still won't reach a meaningful retirement target. A common starting guideline suggests aiming for 10-15% of gross income directed toward retirement accounts over a working career, though the right number for you depends on when you started, your target retirement age, and how much [compound interest](/articles/compound-interest) has already had a chance to work in your favor.",
+        "Beyond the allocation question, the contribution rate itself matters enormously — a well-diversified portfolio funded with too little money still won't reach a meaningful retirement target. A common starting guideline suggests aiming for 10-15% of gross income directed toward retirement accounts over a working career, though the right number for you depends on when you started, your target retirement age, and how much [compound interest](/financial-intelligence/compound-interest) has already had a chance to work in your favor.",
         "At minimum, contribute enough to capture your full employer 401(k) match if one is available — it's effectively an immediate, guaranteed return that no allocation decision can replicate, and failing to capture it is one of the most common and costly retirement planning mistakes. As income grows over a career, increasing your contribution percentage rather than letting it stay fixed in dollar terms keeps your savings rate scaling proportionally, which matters considerably more to your eventual balance than fine-tuning the specific funds within your allocation. Many employer plans support automatic annual contribution increases, sometimes called auto-escalation, which removes the need to remember and manually adjust the percentage each year as your income changes. Enabling auto-escalation at a modest annual increment, timed to coincide with your typical raise cycle, applies the same automation principle that makes payday transfers effective to the accumulation side of retirement saving specifically. Checking in on your overall contribution rate once a year, alongside your broader financial review, ensures auto-escalation is actually keeping pace with your goals rather than defaulting to whatever increment the plan initially set. Combining automated escalation with an annual manual check-in captures the best of both approaches — consistency without requiring active attention most of the time, paired with periodic human judgment when circumstances genuinely warrant a bigger change than the automatic increment alone would produce, such as a promotion, a bonus, or paying off a major debt that frees up meaningful monthly cash flow."
       ]
     },
@@ -92,7 +92,7 @@
     {
       "heading": "Common Mistakes in Building a Retirement Portfolio",
       "paragraphs": [
-        "Common mistakes include being too conservative too early (missing out on decades of growth potential by holding too much cash or bonds while young), panic-selling during a market downturn (locking in losses instead of riding out the recovery), failing to rebalance periodically as allocations drift from their targets, and not increasing contributions as income grows. Pairing a sound allocation with consistent contributions and [the power of compound interest](/articles/compound-interest) over a long time horizon does more heavy lifting than trying to time the market or chase the latest hot investment."
+        "Common mistakes include being too conservative too early (missing out on decades of growth potential by holding too much cash or bonds while young), panic-selling during a market downturn (locking in losses instead of riding out the recovery), failing to rebalance periodically as allocations drift from their targets, and not increasing contributions as income grows. Pairing a sound allocation with consistent contributions and [the power of compound interest](/financial-intelligence/compound-interest) over a long time horizon does more heavy lifting than trying to time the market or chase the latest hot investment."
       ]
     }
   ],
@@ -134,7 +134,7 @@
       "answer": "A common starting guideline is 10-15% of gross income over a working career, adjusted based on when you started and your target retirement age — but at minimum, always contribute enough to capture your full employer 401(k) match if one is offered."
     }
   ],
-  "conclusion": "Building a retirement portfolio comes down to a few durable principles: get the broad stock-bond-cash allocation right, diversify within each category, adjust the mix as retirement approaches, and stay consistent rather than reactive during market swings. From here, [how much money you need to retire](/articles/how-much-money-do-you-need-to-retire) sets the target, and [retirement income planning](/articles/retirement-income-planning-strategies) covers how to actually draw down what you've built once you get there.",
+  "conclusion": "Building a retirement portfolio comes down to a few durable principles: get the broad stock-bond-cash allocation right, diversify within each category, adjust the mix as retirement approaches, and stay consistent rather than reactive during market swings. From here, [how much money you need to retire](/financial-intelligence/how-much-money-do-you-need-to-retire) sets the target, and [retirement income planning](/financial-intelligence/retirement-income-planning-strategies) covers how to actually draw down what you've built once you get there.",
   "internalLinks": [
     { "anchor": "how much money do you need to retire", "slug": "how-much-money-do-you-need-to-retire" },
     { "anchor": "retirement income planning strategies", "slug": "retirement-income-planning-strategies" },

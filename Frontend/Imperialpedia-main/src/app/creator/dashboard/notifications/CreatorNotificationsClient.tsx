@@ -70,7 +70,7 @@ export function CreatorNotificationsClient({ initialNotifications }: CreatorNoti
   const getRelatedLink = (notif: Notification) => {
     if (!notif.relatedId) return '#';
     if (notif.type === 'follower') return `/creator/${notif.relatedId}`;
-    if (notif.type === 'engagement') return `/articles/${notif.relatedId}`; // Assumes relatedId is article slug
+    if (notif.type === 'engagement') return `/financial-intelligence/${notif.relatedId}`; // Assumes relatedId is article slug
     return '#';
   };
 

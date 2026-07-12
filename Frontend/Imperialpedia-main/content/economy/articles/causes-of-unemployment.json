@@ -17,7 +17,7 @@
     "schemaRecommendation": "Article + FAQPage"
   },
   "excerpt": "Unemployment isn't one problem with one cause — economists distinguish four distinct types, each with a different underlying cause and a different policy response.",
-  "intro": "Not all unemployment looks the same, and lumping it into a single number obscures meaningful differences in cause and remedy. Economists generally distinguish four types: frictional, structural, cyclical, and seasonal — each driven by a different mechanism, and each responding to a different kind of policy or personal response.\n\nUnderstanding which type is dominant at a given moment helps explain both the [headline unemployment rate](/articles/unemployment-rate) and why the appropriate response (waiting it out, retraining, stimulus spending) differs depending on the underlying cause.",
+  "intro": "Not all unemployment looks the same, and lumping it into a single number obscures meaningful differences in cause and remedy. Economists generally distinguish four types: frictional, structural, cyclical, and seasonal — each driven by a different mechanism, and each responding to a different kind of policy or personal response.\n\nUnderstanding which type is dominant at a given moment helps explain both the [headline unemployment rate](/financial-intelligence/unemployment-rate) and why the appropriate response (waiting it out, retraining, stimulus spending) differs depending on the underlying cause.",
   "tableOfContents": [
     "Frictional Unemployment",
     "Structural Unemployment",
@@ -42,7 +42,7 @@
     {
       "heading": "Cyclical Unemployment",
       "paragraphs": [
-        "Cyclical unemployment rises and falls with the [business cycle](/articles/business-cycles) — businesses lay off workers during a contraction as demand falls, and rehire during an expansion as demand recovers. This is the type most directly targeted by monetary and fiscal policy responses, since it's driven by a temporary, broad-based drop in demand rather than a permanent skills mismatch or normal job-search friction."
+        "Cyclical unemployment rises and falls with the [business cycle](/financial-intelligence/business-cycles) — businesses lay off workers during a contraction as demand falls, and rehire during an expansion as demand recovers. This is the type most directly targeted by monetary and fiscal policy responses, since it's driven by a temporary, broad-based drop in demand rather than a permanent skills mismatch or normal job-search friction."
       ]
     },
     {
@@ -70,7 +70,7 @@
     {
       "heading": "Why the Type Matters More Than the Number",
       "paragraphs": [
-        "A given unemployment rate can mean very different things depending on which type is driving it. Elevated cyclical unemployment during a recession calls for stimulative monetary and fiscal policy. Elevated structural unemployment calls for retraining programs and education investment — tools that work on a much longer timeline. Confusing the two, or applying the wrong policy tool to the wrong type, is a common source of ineffective economic policy response. See [employment and economic growth](/articles/employment-and-economic-growth) for how the labor market connects more broadly to overall economic output."
+        "A given unemployment rate can mean very different things depending on which type is driving it. Elevated cyclical unemployment during a recession calls for stimulative monetary and fiscal policy. Elevated structural unemployment calls for retraining programs and education investment — tools that work on a much longer timeline. Confusing the two, or applying the wrong policy tool to the wrong type, is a common source of ineffective economic policy response. See [employment and economic growth](/financial-intelligence/employment-and-economic-growth) for how the labor market connects more broadly to overall economic output."
       ]
     }
   ],

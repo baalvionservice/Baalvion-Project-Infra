@@ -35,7 +35,7 @@
       "heading": "How a High-Yield Savings Account Works",
       "paragraphs": [
         "A high-yield savings account functions exactly like a regular savings account — you deposit money, it earns interest, and you can withdraw it without penalty. The only real difference is the rate. Where a traditional bank might pay a token amount, an HYSA typically pays a rate that at least keeps meaningful pace with, or exceeds, general cost-of-living increases in a given year.",
-        "Interest usually compounds daily and is credited monthly, so [compound interest](/articles/compound-interest) is quietly working in your favor from day one rather than accumulating only once a year.",
+        "Interest usually compounds daily and is credited monthly, so [compound interest](/financial-intelligence/compound-interest) is quietly working in your favor from day one rather than accumulating only once a year.",
         "Functionally, the account behaves like any other bank deposit account you'd recognize: you can view your balance and transaction history online or through a mobile app, set up direct deposit, and initiate transfers to and from a linked checking account. The interface and day-to-day experience of managing an HYSA is rarely the differentiator between providers — the rate, fee structure, and transfer reliability are what actually matter."
       ]
     },
@@ -68,7 +68,7 @@
       "heading": "HYSA vs Checking, CDs, and Money Market Accounts",
       "paragraphs": [
         "A checking account is built for daily spending and transactions, not for earning interest — most pay little to nothing, and that's fine, since liquidity and bill-pay features matter more there than yield. A high-yield savings account fills the gap for money you want accessible but not actively spending: emergency funds, short-term savings goals, and cash reserves.",
-        "Certificates of Deposit (CDs) typically pay a fixed rate for a fixed term but penalize early withdrawal, making them better suited for money you're confident you won't need for a set period. Money market accounts sit between savings and checking — often paying competitive rates while sometimes offering check-writing or debit card access. For most people building or maintaining [an emergency fund](/articles/emergency-fund-guide), the flexibility of a no-penalty HYSA makes it the more practical default."
+        "Certificates of Deposit (CDs) typically pay a fixed rate for a fixed term but penalize early withdrawal, making them better suited for money you're confident you won't need for a set period. Money market accounts sit between savings and checking — often paying competitive rates while sometimes offering check-writing or debit card access. For most people building or maintaining [an emergency fund](/financial-intelligence/emergency-fund-guide), the flexibility of a no-penalty HYSA makes it the more practical default."
       ]
     },
     {
@@ -86,7 +86,7 @@
       "heading": "Common Mistakes to Avoid",
       "paragraphs": [
         "The most common mistake is chasing the single highest advertised rate without checking whether it's a temporary promotional rate. Rates across competitive HYSAs tend to cluster fairly close together at any given time (they move with broader interest rate conditions), so an outlier that's dramatically higher than everyone else deserves a second look at the fine print.",
-        "The second common mistake is opening the account and then never actually funding it or automating contributions — the best rate in the world does nothing for a $0 balance. Pair the account with automatic transfers so [your budget](/articles/how-to-create-a-monthly-budget) actually routes money there consistently."
+        "The second common mistake is opening the account and then never actually funding it or automating contributions — the best rate in the world does nothing for a $0 balance. Pair the account with automatic transfers so [your budget](/financial-intelligence/how-to-create-a-monthly-budget) actually routes money there consistently."
       ]
     },
     {
@@ -157,7 +157,7 @@
       "answer": "Not through market risk — the balance itself is not exposed to market fluctuations and is FDIC-insured up to the coverage limit. The only way purchasing power can decline is if the interest rate earned falls behind the inflation rate over time."
     }
   ],
-  "conclusion": "A high-yield savings account is one of the rare financial decisions with almost no downside: identical government-backed protection to any traditional bank, meaningfully better returns, and no added complexity. The only real work involved is comparing a handful of options on rate stability, fees, and transfer speed, then actually automating money into it.\n\nOnce it's open and funded, it becomes the foundation for everything else — your [emergency fund](/articles/emergency-fund-guide) sits there safely while [compounding](/articles/compound-interest) works quietly in the background, and any cash you're setting aside for a near-term goal earns real return instead of losing ground to inflation while it waits.\n\nRevisit the rate periodically, keep the account funded through automation rather than manual transfers, and resist the temptation to chase every marginally higher advertised rate that shows up in an ad — a stable, no-fee account from a reputable, FDIC-insured provider will almost always serve you better over the long run than repeatedly switching institutions for a small, often temporary, rate advantage.",
+  "conclusion": "A high-yield savings account is one of the rare financial decisions with almost no downside: identical government-backed protection to any traditional bank, meaningfully better returns, and no added complexity. The only real work involved is comparing a handful of options on rate stability, fees, and transfer speed, then actually automating money into it.\n\nOnce it's open and funded, it becomes the foundation for everything else — your [emergency fund](/financial-intelligence/emergency-fund-guide) sits there safely while [compounding](/financial-intelligence/compound-interest) works quietly in the background, and any cash you're setting aside for a near-term goal earns real return instead of losing ground to inflation while it waits.\n\nRevisit the rate periodically, keep the account funded through automation rather than manual transfers, and resist the temptation to chase every marginally higher advertised rate that shows up in an ad — a stable, no-fee account from a reputable, FDIC-insured provider will almost always serve you better over the long run than repeatedly switching institutions for a small, often temporary, rate advantage.",
   "internalLinks": [
     { "anchor": "compound interest", "slug": "compound-interest" },
     { "anchor": "emergency fund guide", "slug": "emergency-fund-guide" },

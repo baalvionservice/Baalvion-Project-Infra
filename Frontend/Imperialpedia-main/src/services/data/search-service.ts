@@ -36,7 +36,7 @@ const routeFor = (type: string, slug: string, name: string): string => {
     case 'review': return `/${slug}`;
     case 'asset': return `/market`;
     case 'author': return `/creators`;
-    case 'article': return `/articles/${slug}`;
+    case 'article': return `/financial-intelligence/${slug}`;
     default: return `/${slug}`;
   }
 };
@@ -78,7 +78,7 @@ export const searchService = {
             type: 'article',
             title: c.title,
             snippet: c.excerpt || '',
-            route: kind === 'article' ? `/articles/${c.slug}` : `/${c.slug}`,
+            route: kind === 'article' ? `/financial-intelligence/${c.slug}` : `/${c.slug}`,
             category: c.category?.name,
             date: c.publishedAt,
           });

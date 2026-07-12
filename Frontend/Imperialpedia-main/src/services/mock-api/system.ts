@@ -771,7 +771,7 @@ const mockCdnManagementData: CdnManagementData = {
       cache_hit_ratio: "88%",
     },
     {
-      page_url: "/articles/macro-outlook-2026",
+      page_url: "/financial-intelligence/macro-outlook-2026",
       cache_status: "mock_cached",
       last_refresh: "2026-03-15 11:30",
       ttl: "7200s",
@@ -822,7 +822,7 @@ const mockSeoManagementData: SeoManagementData = {
       social_preview: "mock_preview_url",
     },
     {
-      page_url: "/articles/yield-curve-2026",
+      page_url: "/financial-intelligence/yield-curve-2026",
       title: "Analyzing the 2026 Yield Curve Inversion",
       meta_description:
         "What the current bond market is telling us about the upcoming fiscal super-cycle.",
@@ -845,7 +845,7 @@ const mockSeoManagementData: SeoManagementData = {
       last_updated: "2026-03-14 15:00",
     },
     {
-      page_url: "/articles/yield-curve-2026",
+      page_url: "/financial-intelligence/yield-curve-2026",
       parent: "/financial-intelligence",
       status: "mock_active",
       last_updated: "2026-03-15 09:30",
@@ -864,7 +864,7 @@ const mockSeoManagementData: SeoManagementData = {
     },
     {
       suggestion: "Increase keyword density for 'fiscal Super-cycle'",
-      page: "/articles/yield-curve-2026",
+      page: "/financial-intelligence/yield-curve-2026",
       status: "mock_suggested",
     },
     {

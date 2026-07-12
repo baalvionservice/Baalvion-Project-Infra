@@ -416,7 +416,7 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                         >
                           <TableCell className="py-5 pl-8">
                             <Link
-                              href={`/articles/${item.slug}`}
+                              href={`/financial-intelligence/${item.slug}`}
                               className="text-sm font-bold text-foreground/90 leading-tight block group-hover:text-primary transition-colors"
                             >
                               {item.title}

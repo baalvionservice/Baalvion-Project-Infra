@@ -252,7 +252,7 @@ export function EventIntelligenceClient() {
                   </CardContent>
                   <CardFooter className="px-8 py-4 bg-muted/10 border-t border-white/5">
                     <Button variant="link" className="p-0 h-auto text-primary text-xs font-bold group/link" asChild>
-                      <a href={`/articles/${earn.symbol.toLowerCase()}-audit`}>
+                      <a href={`/financial-intelligence/${earn.symbol.toLowerCase()}-audit`}>
                         Full Fiscal Analysis <ArrowRight className="ml-1.5 h-3 w-3 transition-transform group-hover/link:translate-x-1" />
                       </a>
                     </Button>

@@ -307,7 +307,7 @@ export const getTopKeywords = async (): Promise<ApiResponse<TopKeyword[]>> => {
     {
       id: "1",
       keyword: "Yield Curve Inversion",
-      page: "/articles/yield-curve",
+      page: "/financial-intelligence/yield-curve",
       rank: 1.2,
       impressions: 125000,
       clicks: 34200,
@@ -691,7 +691,7 @@ export const getTrafficAnalyticsReport = async (): Promise<
       dailyVisits: [{ date: "2024-03-01", visits: 5000 }],
       trafficSources: [{ source: "Google", percent: 45 }],
       topPages: [
-        { page: "/articles/yield-curve", visits: 12400, bounceRate: 24.2 },
+        { page: "/financial-intelligence/yield-curve", visits: 12400, bounceRate: 24.2 },
       ],
     },
     status: 200,

@@ -17,7 +17,7 @@
     "schemaRecommendation": "Article + FAQPage"
   },
   "excerpt": "A recession isn't just 'the economy is bad' — it's a specific, measurable phase with common warning signs and a fairly consistent recovery pattern. Here's what actually happens during each.",
-  "intro": "A **recession** is a significant, broad-based decline in economic activity that lasts more than a few months, typically visible in falling GDP, employment, income, and industrial production. Recessions are a normal, recurring part of the [business cycle](/articles/business-cycles) — uncomfortable, but not unprecedented, and historically always followed by a recovery.\n\nThis guide covers how a recession is officially identified, the common warning signs that tend to appear beforehand, what changes during the downturn itself, and how recoveries typically unfold afterward.",
+  "intro": "A **recession** is a significant, broad-based decline in economic activity that lasts more than a few months, typically visible in falling GDP, employment, income, and industrial production. Recessions are a normal, recurring part of the [business cycle](/financial-intelligence/business-cycles) — uncomfortable, but not unprecedented, and historically always followed by a recovery.\n\nThis guide covers how a recession is officially identified, the common warning signs that tend to appear beforehand, what changes during the downturn itself, and how recoveries typically unfold afterward.",
   "tableOfContents": [
     "How a Recession Is Officially Determined",
     "Common Warning Signs Before a Recession",
@@ -37,7 +37,7 @@
     {
       "heading": "Common Warning Signs Before a Recession",
       "paragraphs": [
-        "No single signal reliably predicts every recession, but a handful of patterns have shown up before many historical downturns: an inverted yield curve (see [market indicators](/articles/market-indicators)), rising initial jobless claims, slowing manufacturing activity (PMI readings dropping below 50), declining consumer confidence, and tightening credit conditions as lenders grow more cautious.",
+        "No single signal reliably predicts every recession, but a handful of patterns have shown up before many historical downturns: an inverted yield curve (see [market indicators](/financial-intelligence/market-indicators)), rising initial jobless claims, slowing manufacturing activity (PMI readings dropping below 50), declining consumer confidence, and tightening credit conditions as lenders grow more cautious.",
         "These signals are probabilistic, not certain — some have appeared without a recession following, and recessions have occurred without every signal flashing in advance. They're best used as a collection of warning signs to watch together, not any single trigger."
       ]
     },
@@ -104,7 +104,7 @@
       "answer": "A V-shaped recovery is a sharp decline followed by an equally sharp rebound. A U-shaped recovery involves a longer period at the bottom with a more gradual climb back to prior levels."
     }
   ],
-  "conclusion": "Recessions are an uncomfortable but historically recurring phase of the [business cycle](/articles/business-cycles) — not a sign that the underlying economic system has permanently broken. Understanding the warning signs, what changes during the downturn, and how recoveries typically unfold makes it easier to keep perspective during a period that, by historical pattern, has always eventually given way to renewed growth.",
+  "conclusion": "Recessions are an uncomfortable but historically recurring phase of the [business cycle](/financial-intelligence/business-cycles) — not a sign that the underlying economic system has permanently broken. Understanding the warning signs, what changes during the downturn, and how recoveries typically unfold makes it easier to keep perspective during a period that, by historical pattern, has always eventually given way to renewed growth.",
   "internalLinks": [
     { "anchor": "business cycles", "slug": "business-cycles" },
     { "anchor": "market indicators", "slug": "market-indicators" },

@@ -58,7 +58,7 @@
     {
       "heading": "Contraction: What Happens During a Downturn",
       "paragraphs": [
-        "During contraction, output shrinks, unemployment rises as businesses cut back, and consumer and business spending pull back further in response — a self-reinforcing pattern in the other direction from expansion. A contraction that's broad-based and lasts more than a few months is generally what's meant by a recession, though the precise, official designation (in the U.S., determined by the National Bureau of Economic Research) considers a range of indicators beyond just GDP. See [recessions and recoveries](/articles/recessions-and-recoveries) for a full breakdown of this phase specifically."
+        "During contraction, output shrinks, unemployment rises as businesses cut back, and consumer and business spending pull back further in response — a self-reinforcing pattern in the other direction from expansion. A contraction that's broad-based and lasts more than a few months is generally what's meant by a recession, though the precise, official designation (in the U.S., determined by the National Bureau of Economic Research) considers a range of indicators beyond just GDP. See [recessions and recoveries](/financial-intelligence/recessions-and-recoveries) for a full breakdown of this phase specifically."
       ]
     },
     {
@@ -77,7 +77,7 @@
     {
       "heading": "How Policymakers Try to Smooth the Cycle",
       "paragraphs": [
-        "Central banks and governments actively try to moderate the extremes of the business cycle — raising interest rates to cool an overheating expansion before it produces excessive inflation, and cutting rates or increasing spending to support the economy during a contraction. See [the complete guide to monetary policy](/articles/complete-guide-to-monetary-policy) and [fiscal policy during recessions](/articles/fiscal-policy-during-recessions) for how these tools are actually deployed at each phase."
+        "Central banks and governments actively try to moderate the extremes of the business cycle — raising interest rates to cool an overheating expansion before it produces excessive inflation, and cutting rates or increasing spending to support the economy during a contraction. See [the complete guide to monetary policy](/financial-intelligence/complete-guide-to-monetary-policy) and [fiscal policy during recessions](/financial-intelligence/fiscal-policy-during-recessions) for how these tools are actually deployed at each phase."
       ]
     }
   ],
@@ -107,7 +107,7 @@
       "answer": "No — cycles are considered a persistent feature of market economies. Policymakers aim to moderate the extremes (smoothing the peaks and troughs) rather than eliminate the cycle altogether."
     }
   ],
-  "conclusion": "The business cycle framework explains why the economy doesn't move in a straight line, and why the same data can look very different depending on which phase you're in. Recognizing the current phase — even imperfectly, since peaks and troughs are usually clearest in hindsight — helps make sense of why certain policy responses, market reactions, and economic headlines are happening now rather than at another point.\n\nFor the phase that gets the most attention, see [recessions and recoveries](/articles/recessions-and-recoveries), and for how policymakers respond at each stage, see [the complete guide to monetary policy](/articles/complete-guide-to-monetary-policy).",
+  "conclusion": "The business cycle framework explains why the economy doesn't move in a straight line, and why the same data can look very different depending on which phase you're in. Recognizing the current phase — even imperfectly, since peaks and troughs are usually clearest in hindsight — helps make sense of why certain policy responses, market reactions, and economic headlines are happening now rather than at another point.\n\nFor the phase that gets the most attention, see [recessions and recoveries](/financial-intelligence/recessions-and-recoveries), and for how policymakers respond at each stage, see [the complete guide to monetary policy](/financial-intelligence/complete-guide-to-monetary-policy).",
   "internalLinks": [
     { "anchor": "recessions and recoveries", "slug": "recessions-and-recoveries" },
     { "anchor": "complete guide to monetary policy", "slug": "complete-guide-to-monetary-policy" },

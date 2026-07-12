@@ -46,8 +46,8 @@ export const getMockUserDashboard = async (): Promise<ApiResponse<UserDashboardD
         history: generateHistory(45000)
       },
       saved_articles: [
-        { id: 'art-1', title: 'Understanding Yield Curve Inversion', route: '/articles/understanding-yield-curve-inversion', category: 'Economics' },
-        { id: 'art-5', title: 'Passive Income with Dividends', route: '/articles/dividend-income', category: 'Investing' },
+        { id: 'art-1', title: 'Understanding Yield Curve Inversion', route: '/financial-intelligence/understanding-yield-curve-inversion', category: 'Economics' },
+        { id: 'art-5', title: 'Passive Income with Dividends', route: '/financial-intelligence/dividend-income', category: 'Investing' },
       ],
       saved_calculators: [
         { id: 'calc-1', name: 'Compound Interest Engine', route: '/financial-tools/compound-interest', type: 'Growth' },

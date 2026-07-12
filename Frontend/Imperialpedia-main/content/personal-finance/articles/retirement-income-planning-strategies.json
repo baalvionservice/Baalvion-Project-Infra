@@ -17,7 +17,7 @@
     "schemaRecommendation": "Article + FAQPage"
   },
   "excerpt": "Saving for retirement and generating income from it are two entirely different problems. Here's how to structure withdrawals, sequence income sources, and avoid running out of money too soon.",
-  "intro": "Decades of accumulating savings and investments — the strategy behind [building a retirement portfolio](/articles/building-a-retirement-portfolio) — solve only half the retirement equation. The other half, often given far less attention, is decumulation: turning that portfolio into a sustainable stream of income that lasts as long as you need it to, without running out too early or leaving an unnecessarily large amount unused.",
+  "intro": "Decades of accumulating savings and investments — the strategy behind [building a retirement portfolio](/financial-intelligence/building-a-retirement-portfolio) — solve only half the retirement equation. The other half, often given far less attention, is decumulation: turning that portfolio into a sustainable stream of income that lasts as long as you need it to, without running out too early or leaving an unnecessarily large amount unused.",
   "tableOfContents": [
     "The Safe Withdrawal Rate",
     "Sequencing Your Income Sources",
@@ -57,7 +57,7 @@
     {
       "heading": "The Bucket Strategy",
       "paragraphs": [
-        "The bucket strategy divides retirement savings into segments based on when the money will be needed: a near-term bucket in cash or [high-yield savings](/articles/high-yield-savings-accounts) covering the next one to two years of expenses, a medium-term bucket in more conservative investments (like bonds) covering the next several years, and a long-term bucket remaining invested in stocks for continued growth. This structure is designed specifically to avoid being forced to sell stocks during a market downturn to cover near-term living expenses — a version of protecting against sequence-of-returns risk."
+        "The bucket strategy divides retirement savings into segments based on when the money will be needed: a near-term bucket in cash or [high-yield savings](/financial-intelligence/high-yield-savings-accounts) covering the next one to two years of expenses, a medium-term bucket in more conservative investments (like bonds) covering the next several years, and a long-term bucket remaining invested in stocks for continued growth. This structure is designed specifically to avoid being forced to sell stocks during a market downturn to cover near-term living expenses — a version of protecting against sequence-of-returns risk."
       ],
       "table": {
         "caption": "A Simple Three-Bucket Structure",
@@ -108,7 +108,7 @@
     {
       "heading": "Adjusting Your Plan as Circumstances Change",
       "paragraphs": [
-        "A retirement income plan isn't a one-time decision — market performance, health changes, and shifting expenses all warrant periodic reassessment. Building in flexibility from the start (being willing to modestly reduce discretionary spending during a market downturn, for instance) tends to produce more resilient outcomes than a completely rigid withdrawal plan that doesn't respond to changing conditions. Reviewing [common retirement planning mistakes](/articles/common-retirement-planning-mistakes) periodically is a useful check against drifting into avoidable errors as your situation evolves."
+        "A retirement income plan isn't a one-time decision — market performance, health changes, and shifting expenses all warrant periodic reassessment. Building in flexibility from the start (being willing to modestly reduce discretionary spending during a market downturn, for instance) tends to produce more resilient outcomes than a completely rigid withdrawal plan that doesn't respond to changing conditions. Reviewing [common retirement planning mistakes](/financial-intelligence/common-retirement-planning-mistakes) periodically is a useful check against drifting into avoidable errors as your situation evolves."
       ]
     }
   ],
@@ -150,7 +150,7 @@
       "answer": "Not necessarily — a flexible approach that trims spending after weak market years and allows more after strong ones can extend how long a portfolio lasts compared to a rigid fixed withdrawal, though it introduces some year-to-year income variability."
     }
   ],
-  "conclusion": "Generating sustainable retirement income is a genuinely different skill from accumulating savings, requiring attention to withdrawal rate, income source sequencing, Social Security timing, and required distributions — all while staying flexible enough to adjust as conditions change. Getting this half of the equation right is just as important as [building the portfolio](/articles/building-a-retirement-portfolio) in the first place.",
+  "conclusion": "Generating sustainable retirement income is a genuinely different skill from accumulating savings, requiring attention to withdrawal rate, income source sequencing, Social Security timing, and required distributions — all while staying flexible enough to adjust as conditions change. Getting this half of the equation right is just as important as [building the portfolio](/financial-intelligence/building-a-retirement-portfolio) in the first place.",
   "internalLinks": [
     {
       "anchor": "building a retirement portfolio",

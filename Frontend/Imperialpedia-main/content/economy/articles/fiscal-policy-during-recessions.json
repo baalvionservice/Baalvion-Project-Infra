@@ -16,7 +16,7 @@
     "schemaRecommendation": "Article + FAQPage"
   },
   "excerpt": "When a recession hits, the central bank isn't the only responder — governments have their own toolkit: spending, tax cuts, and automatic stabilizers. Here's how it actually works.",
-  "intro": "While a central bank fights a recession through [monetary policy](/articles/complete-guide-to-monetary-policy) — cutting interest rates and expanding the money supply — governments have a separate toolkit: fiscal policy, meaning direct spending and tax decisions. The two often work together during a serious downturn, though fiscal policy tends to move more slowly, since it typically requires legislative action rather than a single committee vote.",
+  "intro": "While a central bank fights a recession through [monetary policy](/financial-intelligence/complete-guide-to-monetary-policy) — cutting interest rates and expanding the money supply — governments have a separate toolkit: fiscal policy, meaning direct spending and tax decisions. The two often work together during a serious downturn, though fiscal policy tends to move more slowly, since it typically requires legislative action rather than a single committee vote.",
   "tableOfContents": [
     "What Expansionary Fiscal Policy Looks Like",
     "Automatic Stabilizers vs Discretionary Stimulus",
@@ -68,7 +68,7 @@
     {
       "heading": "How Fiscal and Monetary Policy Interact",
       "paragraphs": [
-        "During severe downturns, fiscal and monetary policy often move in the same supportive direction simultaneously — the central bank cutting rates while the government increases spending — reinforcing each other's stimulative effect. But they can also work at cross purposes: aggressive fiscal stimulus during a period when the central bank is trying to cool inflation, for instance, can partially offset the central bank's efforts, requiring the two policy arms to be reasonably well coordinated to avoid working against each other. See [government spending](/articles/government-spending) for how the broader budget process shapes what's available for this kind of response."
+        "During severe downturns, fiscal and monetary policy often move in the same supportive direction simultaneously — the central bank cutting rates while the government increases spending — reinforcing each other's stimulative effect. But they can also work at cross purposes: aggressive fiscal stimulus during a period when the central bank is trying to cool inflation, for instance, can partially offset the central bank's efforts, requiring the two policy arms to be reasonably well coordinated to avoid working against each other. See [government spending](/financial-intelligence/government-spending) for how the broader budget process shapes what's available for this kind of response."
       ]
     }
   ],

@@ -101,7 +101,7 @@ export const sitemapService = {
 
     articles.forEach((article) => {
       entries.push({
-        loc: `${base}/articles/${article.slug}`,
+        loc: `${base}/financial-intelligence/${article.slug}`,
         lastmod: article.publishedAt?.split("T")[0] || today,
         changefreq: "weekly",
         priority: 0.8,

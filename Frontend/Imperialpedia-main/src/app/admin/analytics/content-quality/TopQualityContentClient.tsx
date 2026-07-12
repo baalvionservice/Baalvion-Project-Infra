@@ -92,7 +92,7 @@ export function TopQualityContentClient({ articles }: TopQualityContentClientPro
                 </TableCell>
                 <TableCell className="text-right pr-8">
                   <Button variant="ghost" size="sm" className="h-8 rounded-xl text-[10px] font-bold uppercase gap-2 text-muted-foreground hover:text-primary transition-all" asChild>
-                    <Link href={`/articles/${item.slug}`}>
+                    <Link href={`/financial-intelligence/${item.slug}`}>
                       Audit Node <ArrowRight className="h-3 w-3" />
                     </Link>
                   </Button>

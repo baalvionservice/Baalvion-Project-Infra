@@ -26,7 +26,7 @@ export const breadcrumbService = {
         { name: 'Home', item: '/' },
         { name: 'Intelligence', item: '/financial-intelligence' },
         { name: article.category, item: `/categories/${slugify(article.category)}` },
-        { name: article.title, item: `/articles/${article.slug}` },
+        { name: article.title, item: `/financial-intelligence/${article.slug}` },
       ],
     };
   },

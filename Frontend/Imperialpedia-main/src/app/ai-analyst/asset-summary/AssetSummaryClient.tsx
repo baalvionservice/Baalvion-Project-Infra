@@ -345,7 +345,7 @@ export function AssetSummaryClient() {
                       asChild
                     >
                       <a
-                        href={`/articles/${asset.symbol.toLowerCase()}-deep-dive`}
+                        href={`/financial-intelligence/${asset.symbol.toLowerCase()}-deep-dive`}
                       >
                         Access Research Node{" "}
                         <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />

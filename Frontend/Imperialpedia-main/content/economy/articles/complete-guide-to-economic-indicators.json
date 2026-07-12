@@ -46,19 +46,19 @@
     {
       "heading": "GDP: The Headline Output Measure",
       "paragraphs": [
-        "Gross Domestic Product is the broadest coincident indicator, measuring the total value of goods and services produced. It's reported quarterly and remains the single most-cited number for describing overall economic size and direction. See [the complete guide to GDP](/articles/complete-guide-to-gdp) for the full breakdown."
+        "Gross Domestic Product is the broadest coincident indicator, measuring the total value of goods and services produced. It's reported quarterly and remains the single most-cited number for describing overall economic size and direction. See [the complete guide to GDP](/financial-intelligence/complete-guide-to-gdp) for the full breakdown."
       ]
     },
     {
       "heading": "Inflation Indicators: CPI and PCE",
       "paragraphs": [
-        "The Consumer Price Index (CPI) tracks the average change in prices paid by consumers for a fixed basket of goods and services, and is the most widely cited inflation measure. The Personal Consumption Expenditures (PCE) price index is the Federal Reserve's preferred inflation gauge, using a methodology that adjusts more dynamically as consumers substitute between goods. Both are lagging-to-coincident indicators, reflecting price changes that have already occurred. See [inflation measurement](/articles/inflation-measurement) for how each is actually calculated."
+        "The Consumer Price Index (CPI) tracks the average change in prices paid by consumers for a fixed basket of goods and services, and is the most widely cited inflation measure. The Personal Consumption Expenditures (PCE) price index is the Federal Reserve's preferred inflation gauge, using a methodology that adjusts more dynamically as consumers substitute between goods. Both are lagging-to-coincident indicators, reflecting price changes that have already occurred. See [inflation measurement](/financial-intelligence/inflation-measurement) for how each is actually calculated."
       ]
     },
     {
       "heading": "Labor Market Indicators",
       "paragraphs": [
-        "The unemployment rate is the headline labor indicator but is technically lagging, since hiring and firing decisions typically follow — rather than lead — changes in demand. Initial jobless claims (new unemployment insurance filings) are watched more closely as a real-time, leading signal of labor market stress, since they update weekly rather than monthly. Job openings and wage growth data round out the picture of labor market tightness. See [the unemployment rate](/articles/unemployment-rate) for the full measurement breakdown."
+        "The unemployment rate is the headline labor indicator but is technically lagging, since hiring and firing decisions typically follow — rather than lead — changes in demand. Initial jobless claims (new unemployment insurance filings) are watched more closely as a real-time, leading signal of labor market stress, since they update weekly rather than monthly. Job openings and wage growth data round out the picture of labor market tightness. See [the unemployment rate](/financial-intelligence/unemployment-rate) for the full measurement breakdown."
       ]
     },
     {
@@ -110,7 +110,7 @@
       "answer": "PCE uses a methodology that adjusts more dynamically for consumer substitution between goods (buying more of what's gotten relatively cheaper), which many economists consider a more accurate reflection of the true cost of living over time."
     }
   ],
-  "conclusion": "Reading the economy well isn't about finding the one number that tells the whole story — it's about knowing which category each indicator falls into and whether they're broadly agreeing or diverging. Once you can place a given data release into the leading-coincident-lagging framework, economic news becomes a genuinely readable dashboard rather than a stream of disconnected headlines.\n\nFrom here, [the complete guide to the economy](/articles/complete-guide-to-the-economy) ties these indicators to the policy responses they trigger, and [market indicators](/articles/market-indicators) covers the parallel set of signals investors watch specifically within financial markets.",
+  "conclusion": "Reading the economy well isn't about finding the one number that tells the whole story — it's about knowing which category each indicator falls into and whether they're broadly agreeing or diverging. Once you can place a given data release into the leading-coincident-lagging framework, economic news becomes a genuinely readable dashboard rather than a stream of disconnected headlines.\n\nFrom here, [the complete guide to the economy](/financial-intelligence/complete-guide-to-the-economy) ties these indicators to the policy responses they trigger, and [market indicators](/financial-intelligence/market-indicators) covers the parallel set of signals investors watch specifically within financial markets.",
   "internalLinks": [
     { "anchor": "complete guide to gdp", "slug": "complete-guide-to-gdp" },
     { "anchor": "inflation measurement", "slug": "inflation-measurement" },

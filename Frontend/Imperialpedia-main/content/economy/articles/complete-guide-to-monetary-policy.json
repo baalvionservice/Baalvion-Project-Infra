@@ -42,13 +42,13 @@
     {
       "heading": "The Monetary Policy Toolkit",
       "paragraphs": [
-        "The primary tool is setting a target range for the federal funds rate — the rate banks charge each other for overnight loans — which influences borrowing costs throughout the economy. Beyond that headline rate, the Fed also uses reserve requirements, the discount rate (what it charges banks directly), and large-scale asset purchases or sales (quantitative easing and quantitative tightening) to influence longer-term borrowing costs and the broader money supply. See [monetary policy tools](/articles/monetary-policy-tools) for a full breakdown of each, and [quantitative easing](/articles/quantitative-easing) and [open market operations](/articles/open-market-operations) for deep dives on two of the more complex tools specifically."
+        "The primary tool is setting a target range for the federal funds rate — the rate banks charge each other for overnight loans — which influences borrowing costs throughout the economy. Beyond that headline rate, the Fed also uses reserve requirements, the discount rate (what it charges banks directly), and large-scale asset purchases or sales (quantitative easing and quantitative tightening) to influence longer-term borrowing costs and the broader money supply. See [monetary policy tools](/financial-intelligence/monetary-policy-tools) for a full breakdown of each, and [quantitative easing](/financial-intelligence/quantitative-easing) and [open market operations](/financial-intelligence/open-market-operations) for deep dives on two of the more complex tools specifically."
       ]
     },
     {
       "heading": "How Rate Decisions Reach Your Wallet",
       "paragraphs": [
-        "When the Fed raises its target rate, borrowing costs rise across the economy with varying speed — credit card APRs and adjustable-rate products tend to move quickly, while [mortgage interest rates](/articles/mortgage-interest-rates) respond more to longer-term bond market expectations than the fed funds rate directly, though the two are related. Savings account yields, particularly at competitive [high-yield savings accounts](/articles/high-yield-savings-accounts), also tend to rise as banks compete harder for deposits in a higher-rate environment."
+        "When the Fed raises its target rate, borrowing costs rise across the economy with varying speed — credit card APRs and adjustable-rate products tend to move quickly, while [mortgage interest rates](/financial-intelligence/mortgage-interest-rates) respond more to longer-term bond market expectations than the fed funds rate directly, though the two are related. Savings account yields, particularly at competitive [high-yield savings accounts](/financial-intelligence/high-yield-savings-accounts), also tend to rise as banks compete harder for deposits in a higher-rate environment."
       ],
       "table": {
         "caption": "How Fed Rate Changes Typically Ripple Through",
@@ -70,7 +70,7 @@
     {
       "heading": "The Limits of Monetary Policy",
       "paragraphs": [
-        "Monetary policy operates with a meaningful lag — changes take months to fully work through the economy, which means central banks are often reacting to data that describes conditions from several months earlier while trying to influence conditions months into the future, a genuinely difficult forecasting challenge. It's also a blunt instrument: raising rates to cool inflation affects the entire economy, not just the specific sectors driving price increases, which is part of why [fiscal policy](/articles/fiscal-policy-during-recessions) — more targeted, though slower to implement — often works alongside monetary policy rather than replacing it."
+        "Monetary policy operates with a meaningful lag — changes take months to fully work through the economy, which means central banks are often reacting to data that describes conditions from several months earlier while trying to influence conditions months into the future, a genuinely difficult forecasting challenge. It's also a blunt instrument: raising rates to cool inflation affects the entire economy, not just the specific sectors driving price increases, which is part of why [fiscal policy](/financial-intelligence/fiscal-policy-during-recessions) — more targeted, though slower to implement — often works alongside monetary policy rather than replacing it."
       ]
     }
   ],
@@ -100,7 +100,7 @@
       "answer": "Expansionary policy lowers rates and increases the money supply to stimulate a weak economy. Contractionary policy raises rates and reduces the money supply to cool inflation in an overheating economy."
     }
   ],
-  "conclusion": "Monetary policy is the mechanism connecting a handful of decisions made in Washington to the interest rate on your savings account, your mortgage, and your credit card — with real lag and real limits, but real, measurable effect. Understanding the goals and toolkit behind it turns Fed announcements from background noise into genuinely useful signal for your own financial decisions.\n\nFrom here, [monetary policy tools](/articles/monetary-policy-tools) goes deeper on the specific mechanisms, and [central bank interest rates](/articles/central-bank-interest-rates) covers the federal funds rate transmission mechanism in more detail.",
+  "conclusion": "Monetary policy is the mechanism connecting a handful of decisions made in Washington to the interest rate on your savings account, your mortgage, and your credit card — with real lag and real limits, but real, measurable effect. Understanding the goals and toolkit behind it turns Fed announcements from background noise into genuinely useful signal for your own financial decisions.\n\nFrom here, [monetary policy tools](/financial-intelligence/monetary-policy-tools) goes deeper on the specific mechanisms, and [central bank interest rates](/financial-intelligence/central-bank-interest-rates) covers the federal funds rate transmission mechanism in more detail.",
   "internalLinks": [
     { "anchor": "monetary policy tools", "slug": "monetary-policy-tools" },
     { "anchor": "central bank interest rates", "slug": "central-bank-interest-rates" },

@@ -167,7 +167,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const articleRoutes: MetadataRoute.Sitemap = articles
     .filter((a) => a?.slug)
-    .map((a) => ({ url: `${BASE}/articles/${a.slug}`, lastModified: a.publishedAt ? new Date(a.publishedAt) : now, changeFrequency: 'weekly', priority: 0.7 }));
+    .map((a) => ({ url: `${BASE}/financial-intelligence/${a.slug}`, lastModified: a.publishedAt ? new Date(a.publishedAt) : now, changeFrequency: 'weekly', priority: 0.7 }));
 
   const newsRoutes: MetadataRoute.Sitemap = news
     .filter((n) => n?.slug)

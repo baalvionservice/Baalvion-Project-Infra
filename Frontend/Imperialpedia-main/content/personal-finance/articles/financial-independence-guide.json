@@ -54,7 +54,7 @@
       ],
       "callout": {
         "title": "Track before you target",
-        "text": "You cannot accurately calculate your FI number until you know your real annual spending. Commit to three months of meticulous expense tracking before locking in your target. Our guide on [how to track expenses](/articles/how-to-track-expenses) walks through the best methods."
+        "text": "You cannot accurately calculate your FI number until you know your real annual spending. Commit to three months of meticulous expense tracking before locking in your target. Our guide on [how to track expenses](/financial-intelligence/how-to-track-expenses) walks through the best methods."
       }
     },
     {
@@ -75,7 +75,7 @@
       "paragraphs": [
         "If there is one lever that controls how fast you reach financial independence, it is your **savings rate** — the percentage of your take-home income that you invest. And the relationship is not linear; it is almost dramatic at the extremes.",
         "Someone saving 10% of their income and earning average market returns needs roughly 40+ years to reach financial independence. Push that to 25% and the timeline drops to around 32 years. At 50%, you are looking at approximately 17 years. At 65–70%, you could be there in under a decade.",
-        "The reason is compounding and the gap it must cross. A higher savings rate attacks the problem from two sides simultaneously: you are investing more money each month *and* you are reducing the spending level your portfolio must eventually sustain. Both effects shrink the FI number and accelerate how fast you reach it. [Building wealth from scratch](/articles/how-to-build-wealth-from-scratch) requires exactly this kind of dual-pressure approach — earn more, spend less, invest the gap."
+        "The reason is compounding and the gap it must cross. A higher savings rate attacks the problem from two sides simultaneously: you are investing more money each month *and* you are reducing the spending level your portfolio must eventually sustain. Both effects shrink the FI number and accelerate how fast you reach it. [Building wealth from scratch](/financial-intelligence/how-to-build-wealth-from-scratch) requires exactly this kind of dual-pressure approach — earn more, spend less, invest the gap."
       ],
       "table": {
         "caption": "Estimated years to financial independence by savings rate (assumes 7% average annual real return, starting from zero)",
@@ -93,7 +93,7 @@
       },
       "callout": {
         "title": "Income matters, but less than you think",
-        "text": "High earners with high spending can lag behind moderate earners with disciplined savings rates. Lifestyle inflation is the silent killer of FIRE timelines. Our overview of [best money habits of millionaires](/articles/best-money-habits-of-millionaires) shows how consistently the wealthiest people resist spending creep."
+        "text": "High earners with high spending can lag behind moderate earners with disciplined savings rates. Lifestyle inflation is the silent killer of FIRE timelines. Our overview of [best money habits of millionaires](/financial-intelligence/best-money-habits-of-millionaires) shows how consistently the wealthiest people resist spending creep."
       }
     },
     {
@@ -122,7 +122,7 @@
       "paragraphs": [
         "Reaching financial independence is, at its mechanical core, an investing problem. The FIRE community has largely converged on a straightforward approach: low-cost, broadly diversified index funds, held in tax-advantaged accounts wherever possible, left alone through market cycles.",
         "The standard playbook starts with maximizing contributions to tax-advantaged retirement accounts — 401(k)s, IRAs, Roth IRAs — before moving to taxable brokerage accounts. This matters especially because early retirees often need to bridge a gap between leaving work and the age at which they can access retirement accounts without penalty (59½ in the U.S.). A taxable brokerage account, funded after maxing tax-advantaged options, provides the flexibility to withdraw without penalty at any age.",
-        "On asset allocation: most FIRE practitioners hold a heavily equity-weighted portfolio during the accumulation phase — 90–100% stocks is not uncommon — and shift gradually toward a more balanced mix of stocks and bonds as they approach or enter the withdrawal phase. The logic is that longer time horizons can absorb volatility, and that higher equity exposure generates higher expected returns over decades. [Passive income ideas](/articles/passive-income-ideas) — dividend-focused investing, real estate, and similar strategies — can supplement a traditional index-fund approach but rarely replace it as the core engine of wealth building.",
+        "On asset allocation: most FIRE practitioners hold a heavily equity-weighted portfolio during the accumulation phase — 90–100% stocks is not uncommon — and shift gradually toward a more balanced mix of stocks and bonds as they approach or enter the withdrawal phase. The logic is that longer time horizons can absorb volatility, and that higher equity exposure generates higher expected returns over decades. [Passive income ideas](/financial-intelligence/passive-income-ideas) — dividend-focused investing, real estate, and similar strategies — can supplement a traditional index-fund approach but rarely replace it as the core engine of wealth building.",
         "The FIRE community's near-consensus around index funds reflects decades of research showing that most active managers underperform their benchmark after fees. The FINRA Investor Education Foundation has consistently noted that fees are the single most reliable predictor of fund underperformance. Keeping expense ratios at 0.05%–0.20% rather than 1–2% sounds minor until you model it over 20–30 years of compounding."
       ]
     },
@@ -134,7 +134,7 @@
         "**Healthcare costs** are the stealth risk for American early retirees specifically. Before Medicare eligibility at 65, you are responsible for sourcing and funding your own health insurance. The Kaiser Family Foundation has tracked marketplace premiums showing that costs for a 50-year-old can run $500–$800+ per month before subsidies, with out-of-pocket maximums of several thousand dollars more. Early retirees need to explicitly budget for this — it can add $10,000–$20,000 annually to spending, which ripples directly into the FI number.",
         "**Lifestyle drift** is a softer risk but a real one. What you want from life at 35 is probably not identical to what you'll want at 50. Some early retirees find the structure and social fabric of work more valuable than they anticipated. Others discover that travel, hobbies, or housing preferences cost more than projected. Building a buffer into your FI number — targeting 3.5% rather than 4% as your withdrawal rate, or holding a slightly larger portfolio than your calculation demands — provides resilience against changing wants.",
         "**Inflation** can erode purchasing power in ways the standard 4% calculation partially accounts for but does not fully capture. The Federal Reserve targets 2% annual inflation, but specific categories — healthcare, housing, education — have historically risen faster. If your spending is concentrated in high-inflation categories, your real withdrawal needs may grow faster than your portfolio adjusts.",
-        "Finally, there is the risk of **one-more-year syndrome** — the opposite problem, where anxiety about running out of money keeps people working long after their numbers are solid. This is a real phenomenon, and it underscores why having a clear, credible plan matters as much as having enough money. See also our [financial goals framework](/articles/financial-goals-framework) for how to structure the planning process so the path forward stays legible."
+        "Finally, there is the risk of **one-more-year syndrome** — the opposite problem, where anxiety about running out of money keeps people working long after their numbers are solid. This is a real phenomenon, and it underscores why having a clear, credible plan matters as much as having enough money. See also our [financial goals framework](/financial-intelligence/financial-goals-framework) for how to structure the planning process so the path forward stays legible."
       ],
       "callout": {
         "title": "Stress-test your plan",
@@ -145,7 +145,7 @@
       "heading": "Taking Your First Steps Toward Financial Independence",
       "paragraphs": [
         "Financial independence is not a destination that requires a perfect starting position. It requires a direction and enough consistent behavior to keep moving in it. The first concrete step is almost always the same: get ruthlessly clear on your numbers. What do you actually spend? What is your current savings rate? What would your FI number be at today's spending level?",
-        "From there, the standard framework applies: eliminate high-interest debt first (the [debt snowball vs. debt avalanche](/articles/debt-snowball-vs-debt-avalanche) comparison is worth understanding before you choose an approach), build a three-to-six-month emergency fund, then systematically invest the maximum your tax-advantaged accounts allow before moving to taxable accounts. The specific vehicles matter less than the habit and the timeline.",
+        "From there, the standard framework applies: eliminate high-interest debt first (the [debt snowball vs. debt avalanche](/financial-intelligence/debt-snowball-vs-debt-avalanche) comparison is worth understanding before you choose an approach), build a three-to-six-month emergency fund, then systematically invest the maximum your tax-advantaged accounts allow before moving to taxable accounts. The specific vehicles matter less than the habit and the timeline.",
         "What separates people who actually reach financial independence from those who hold it as a vague aspiration is almost never intelligence or income. It is clarity about what they want, patience with compounding, and the discipline to avoid collapsing years of progress in a single spending decision. None of those qualities are scarce — they just have to be cultivated deliberately, month by month, until the math takes over."
       ]
     }
