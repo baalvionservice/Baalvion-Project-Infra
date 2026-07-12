@@ -12,11 +12,12 @@ import { fetchReviewBySlug } from "@/lib/data/review-live";
 import { getTermUrl } from "@/lib/data/utils";
 import { fetchTermsByLetter } from "@/lib/data/term-live";
 import { Term } from "@/lib/data/terms";
-import { staticNewsBySlug } from "@/services/data/static-content";
+import { staticArticleBySlug, staticNewsBySlug } from "@/services/data/static-content";
 import Link from "next/link";
 import { env } from "@/config/env";
 import { articleUrl } from "@/lib/data/article-url";
 import { ShareBar } from "@/components/article/ShareBar";
+import { articlesService } from "@/services/data";
 
 // Union type to handle different article types
 type ArticleType = NewsArticle | StocksArticle;
@@ -447,6 +448,17 @@ async function BareSlugPage({ slug }: { slug: string }) {
     return <ReviewLayout review={review} />;
   }
 
+  // ── 2.5. Content-engine articles canonically live at /articles/<slug> —
+  // redirect bare hits there instead of rendering a duplicate copy at this
+  // URL. Checked before the news fallback below because the committed
+  // article snapshot is also (incorrectly) reachable via staticNewsBySlug,
+  // which previously produced a second indexable copy of the same content.
+  const articleMatch =
+    (await articlesService.getArticleBySlug(slug)).data ?? staticArticleBySlug(slug);
+  if (articleMatch) {
+    permanentRedirect(`/articles/${slug}`);
+  }
+
   // ── 3. News articles (static set, CMS, or committed snapshot) canonically
   // live at the dated CNBC-style URL — redirect old/bare `/<slug>` hits there
   // instead of rendering a duplicate copy at this URL.
@@ -462,10 +474,11 @@ async function BareSlugPage({ slug }: { slug: string }) {
     brokerGuides.find((a) => a.slug === slug) ||
     stocksPageData.latest.find((a) => a.slug === slug);
 
-  // Last resort: live editorial news from the CMS, then the committed snapshot —
-  // same redirect treatment as the static set above.
+  // Last resort: live editorial news from the CMS — same redirect treatment
+  // as the static set above. (The committed article snapshot is handled by
+  // the content-engine redirect above, not duplicated here.)
   if (!article) {
-    const cmsMatch = (await getPublishedNewsBySlug(slug)) ?? staticNewsBySlug(slug);
+    const cmsMatch = await getPublishedNewsBySlug(slug);
     if (cmsMatch) {
       permanentRedirect(articleUrl(cmsMatch.publishedAt, slug));
     }
