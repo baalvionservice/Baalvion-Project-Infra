@@ -10,6 +10,25 @@ import { useToast } from '@/hooks/use-toast'
 import { useAuth } from '@/context/auth-context'
 import { ApiError } from '@baalvion/auth-sdk'
 
+// Allowlist for the post-login OAuth bounce-back — must be exactly oauth-service's
+// public authorize endpoint, never an arbitrary attacker-supplied destination. This is
+// never navigated to directly: oauth-service's /oauth/authorize needs the hub session
+// cookie, which is scoped to baalvion.com and invisible here on marketunderworld.com.
+// Instead we route through our own same-origin /api/oauth-bridge, which can read this
+// site's httpOnly access_token cookie server-side and complete the exchange itself.
+function isSafeOAuthRedirect(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return (
+      parsed.protocol === 'https:' &&
+      parsed.hostname === 'api.baalvion.com' &&
+      parsed.pathname.endsWith('/oauth/authorize')
+    )
+  } catch {
+    return false
+  }
+}
+
 export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false)
   const [email, setEmail] = useState('')
@@ -25,6 +44,18 @@ export default function SignIn() {
     try {
       await login(email, password)
       toast({ title: "Access Granted", description: "Welcome back to the network." })
+
+      // OAuth bounce-back: satellite apps (e.g. the NodeBB forum) send users here via
+      // oauth-service's /oauth/authorize interactive-login redirect, with ?redirect= pointing
+      // back to that same authorize endpoint. Only ever follow it if it's actually that
+      // endpoint — anything else is treated as an open-redirect attempt and ignored. Routed
+      // through our own /api/oauth-bridge (see isSafeOAuthRedirect above for why).
+      const redirect = new URLSearchParams(window.location.search).get('redirect')
+      if (redirect && isSafeOAuthRedirect(redirect)) {
+        window.location.href = `/api/oauth-bridge?target=${encodeURIComponent(redirect)}`
+        return
+      }
+
       router.push('/app/home')
     } catch (err) {
       const message = err instanceof ApiError ? err.message : "Invalid credentials. Try again.";

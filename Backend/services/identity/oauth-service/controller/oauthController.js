@@ -115,8 +115,11 @@ exports.authorize = async (req, res, next) => {
         }
 
         // Interactive auth: redirect to the central login UI, which returns here after login.
-        const loginUrl = new URL(`${process.env.AUTH_UI_URL || 'http://localhost:3000'}/login`);
-        loginUrl.searchParams.set('redirect', req.originalUrl);
+        // AUTH_UI_URL is the complete login page URL (not a base to append '/login' to — the
+        // redirect target must be absolute, since the login UI and this OAuth provider are on
+        // different origins and req.originalUrl alone can't be resolved back to this service).
+        const loginUrl = new URL(process.env.AUTH_UI_URL || 'http://localhost:3000/login');
+        loginUrl.searchParams.set('redirect', `${config.oauth.baseUrl}${req.originalUrl}`);
         return res.redirect(loginUrl.toString());
 
     } catch (err) { next(err); }
