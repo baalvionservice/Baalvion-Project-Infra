@@ -92,6 +92,16 @@ api.baalvion.com {
 		reverse_proxy app-commerce:3012
 	}
 
+	# Public OAuth2/OIDC provider surface (oauth-service, UNAUTHENTICATED by design) -- exposes
+	# the actual authorization-code flow endpoints (/oauth/authorize, /oauth/token, /oauth/userinfo)
+	# for relying parties like the NodeBB community forum (nodebb-plugin-sso-oauth2-multiple).
+	# Distinct from the session-gated /api-bff/identity/oauth/* carve-out below, which is only for
+	# the admin console's client-management API (POST/GET/DELETE /v1/clients). Path-prefixed
+	# (not its own subdomain) to avoid provisioning new DNS/TLS just for this.
+	handle_path /oidc-provider/* {
+		reverse_proxy app-identity:3023
+	}
+
 	# CTM (controlthemarket.com) login BFF. The Vercel FE proxies /auth-bff/* to the code-default
 	# AUTH_PROXY_TARGET = api.baalvion.com/api/v1/identity/auth/v1/auth, which otherwise falls into
 	# the proxy-service BFF below and 401s ("No bearer token"). Route it to the identity auth-gateway
@@ -119,6 +129,13 @@ api.baalvion.com {
 	handle {
 		reverse_proxy app-edge-realtime:4000
 	}
+}
+
+# ── Market Underworld community forum → NodeBB (dedicated Postgres, separate
+# entity from the main frontend, per owner directive). ──
+forum.marketunderworld.com {
+	encode gzip zstd
+	reverse_proxy nodebb:4567
 }
 
 # ── Realtime websocket stream → edge-realtime app (socket.io fan-out) ──
@@ -247,11 +264,4 @@ admin.baalvion.com {
 news.baalvion.com {
 	encode gzip zstd
 	reverse_proxy app-platform:3045
-}
-
-# ── Market Underworld community forum → NodeBB (dedicated Postgres, separate
-# entity from the main frontend, per owner directive). ──
-forum.marketunderworld.com {
-	encode gzip zstd
-	reverse_proxy nodebb:4567
 }
