@@ -70,4 +70,39 @@ export const analyticsApi = {
       '/admin/analytics/traffic',
       { params: { period } },
     ),
+
+  activationFunnel: (period?: '7d' | '30d' | '90d') =>
+    adminApiClient.get<ApiResponse<Array<{ step: string; count: number }>>>(
+      '/admin/analytics/funnel',
+      { params: { period } },
+    ),
+
+  retentionCohorts: (period?: '7d' | '30d' | '90d') =>
+    adminApiClient.get<ApiResponse<Array<{ cohortWeek: string; cohortSize: number; retention: number[] }>>>(
+      '/admin/analytics/retention',
+      { params: { period } },
+    ),
+
+  signupChannels: (period?: '7d' | '30d' | '90d') =>
+    adminApiClient.get<ApiResponse<Array<{ channel: string; count: number }>>>(
+      '/admin/analytics/signup-channels',
+      { params: { period } },
+    ),
+
+  geography: (period?: '7d' | '30d' | '90d') =>
+    adminApiClient.get<ApiResponse<Array<{ country: string; users: number }>>>(
+      '/admin/analytics/geography',
+      { params: { period } },
+    ),
+
+  eventTypes: (period?: '7d' | '30d' | '90d') =>
+    adminApiClient.get<ApiResponse<Array<{ event: string; count: number }>>>(
+      '/admin/analytics/event-types',
+      { params: { period } },
+    ),
+
+  paymentFunnel: () =>
+    adminApiClient.get<ApiResponse<{ available: boolean; reason?: string; steps: Array<{ step: string; count: number }> }>>(
+      '/admin/analytics/payment-funnel',
+    ),
 };

@@ -29,5 +29,11 @@ router.get('/revenue',         ctrl.getRevenue);
 router.get('/services/health', ctrl.getServiceHealth);
 router.get('/activity',        ctrl.getRecentActivity);
 router.get('/traffic',         ctrl.getTrafficByPage);
+router.get('/funnel',          ctrl.getActivationFunnel);
+router.get('/retention',       ctrl.getRetentionCohorts);
+router.get('/signup-channels', ctrl.getSignupChannels);
+router.get('/geography',       ctrl.getGeography);
+router.get('/event-types',     ctrl.getEventTypeBreakdown);
+router.get('/payment-funnel',  ctrl.getPaymentFunnel);
 
 module.exports = router;

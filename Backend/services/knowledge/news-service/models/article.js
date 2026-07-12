@@ -7,6 +7,7 @@ module.exports = function (sequelize, DataTypes) {
         url: { type: DataTypes.TEXT, allowNull: false },
         summary_raw: { type: DataTypes.TEXT, allowNull: true },
         summary_ai: { type: DataTypes.TEXT, allowNull: true },
+        image_url: { type: DataTypes.TEXT, allowNull: true },
         published_at: { type: DataTypes.DATE, allowNull: false },
         ingested_at: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
         country: { type: DataTypes.STRING(2), allowNull: true },

@@ -20,6 +20,7 @@ function normalizeItem(source, item) {
         title,
         url,
         summary_raw: item.summary ? item.summary.slice(0, SUMMARY_MAX_LENGTH) : null,
+        image_url: item.imageUrl || null,
         published_at: item.publishedAt ? new Date(item.publishedAt) : new Date(),
         country: source.country,
         language: source.language,

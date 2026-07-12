@@ -8,11 +8,16 @@
 //   - recent activity feed ................... auth.audit_logs (joined to auth.users actor)
 //   - revenue / orders ....................... orders.orders_orders  (ONLY if that schema exists;
 //                                              otherwise honest zeros — never fabricated)
+//   - activation funnel ...................... auth.audit_logs (register/verify/login/mfa events)
+//   - retention cohorts ....................... auth.users + auth.audit_logs login events
+//   - signup method breakdown ................ auth.audit_logs registration events
+//   - geography ............................... auth.sessions.geo_country (session-service geoip)
+//   - event type breakdown .................... auth.audit_logs action distribution
 //
-// Metrics with NO real data source in this database (funnels, retention cohorts,
-// revenue-by-plan, geography) are intentionally NOT served here — the console keeps
-// its own illustrative client-side data for those sections. Anything this module
-// cannot back with real rows returns empty arrays / zeros.
+// Metrics with genuinely NO real data source anywhere in the platform yet (revenue-by-plan
+// beyond what proxy-service billing exposes, marketing-channel/UTM attribution, product-level
+// click events) are intentionally NOT served here. Anything this module cannot back with real
+// rows returns empty arrays / zeros — never a fabricated illustrative dataset.
 //
 // Mirrors adminService.js conventions: raw Sequelize via db.sequelize.query, bind
 // params only, AppError + logger from utils. No mutations, so no audit writes.
@@ -350,6 +355,233 @@ async function getRecentActivity(limit) {
     });
 }
 
+// ── Activation funnel ────────────────────────────────────────────────────────
+// Registered → Verified → First Login → MFA Enabled, all derived from real
+// auth.audit_logs action rows for the registration cohort in the window (never a
+// separate/synthetic dataset). Action taxonomy: user.register / user.email_otp_register /
+// user.oauth_register (registration), user.email_otp_register / user.oauth_register /
+// user.phone_verified (verification is implicit in OTP/OAuth signup, explicit for phone),
+// user.login / user.email_otp_login / user.oauth_login (first login), user.mfa_enabled.
+async function getActivationFunnel(period) {
+    await ensureSchema();
+    const db   = getDb();
+    const days = periodToDays(period);
+    const ivl  = daysInterval(days);
+
+    const row = await db.sequelize.query(
+        `WITH cohort AS (
+            SELECT DISTINCT user_id FROM auth.audit_logs
+            WHERE action IN ('user.register','user.email_otp_register','user.oauth_register')
+              AND created_at > NOW() - INTERVAL '${ivl}'
+              AND user_id IS NOT NULL
+        ),
+        verified AS (
+            SELECT DISTINCT user_id FROM auth.audit_logs
+            WHERE user_id IN (SELECT user_id FROM cohort)
+              AND action IN ('user.email_otp_register','user.oauth_register','user.phone_verified')
+        ),
+        logged_in AS (
+            SELECT DISTINCT user_id FROM auth.audit_logs
+            WHERE user_id IN (SELECT user_id FROM cohort)
+              AND action IN ('user.login','user.email_otp_login','user.oauth_login')
+        ),
+        mfa AS (
+            SELECT DISTINCT user_id FROM auth.audit_logs
+            WHERE user_id IN (SELECT user_id FROM cohort) AND action = 'user.mfa_enabled'
+        )
+        SELECT (SELECT COUNT(*) FROM cohort)::int    AS registered,
+               (SELECT COUNT(*) FROM verified)::int   AS verified,
+               (SELECT COUNT(*) FROM logged_in)::int  AS logged_in,
+               (SELECT COUNT(*) FROM mfa)::int         AS mfa_enabled`,
+        { type: db.sequelize.QueryTypes.SELECT, plain: true }
+    );
+
+    return [
+        { step: 'Registered',  count: num(row.registered) },
+        { step: 'Verified',    count: num(row.verified) },
+        { step: 'First Login', count: num(row.logged_in) },
+        { step: 'MFA Enabled', count: num(row.mfa_enabled) },
+    ];
+}
+
+// ── Retention cohorts ────────────────────────────────────────────────────────
+// Real weekly registration cohorts (auth.users.created_at) against real login events
+// (auth.audit_logs) — % of each cohort that logged in during signup week (W0) and each
+// of the 3 following weeks. Cohorts with zero size are omitted (nothing to divide by).
+async function getRetentionCohorts(period) {
+    await ensureSchema();
+    const db   = getDb();
+    const days = periodToDays(period);
+    const ivl  = daysInterval(days);
+
+    const rows = await db.sequelize.query(
+        `WITH cohort AS (
+            SELECT id AS user_id, date_trunc('week', created_at) AS cohort_week
+            FROM auth.users
+            WHERE created_at > NOW() - INTERVAL '${ivl}' AND status <> 'deleted'
+        ),
+        logins AS (
+            SELECT user_id, date_trunc('week', created_at) AS login_week
+            FROM auth.audit_logs
+            WHERE action IN ('user.login','user.email_otp_login','user.oauth_login')
+        )
+        SELECT to_char(c.cohort_week, 'YYYY-MM-DD') AS cohort_week,
+               COUNT(DISTINCT c.user_id)::int AS cohort_size,
+               COUNT(DISTINCT CASE WHEN l.login_week = c.cohort_week THEN c.user_id END)::int AS w0,
+               COUNT(DISTINCT CASE WHEN l.login_week = c.cohort_week + INTERVAL '1 week' THEN c.user_id END)::int AS w1,
+               COUNT(DISTINCT CASE WHEN l.login_week = c.cohort_week + INTERVAL '2 week' THEN c.user_id END)::int AS w2,
+               COUNT(DISTINCT CASE WHEN l.login_week = c.cohort_week + INTERVAL '3 week' THEN c.user_id END)::int AS w3
+        FROM cohort c
+        LEFT JOIN logins l ON l.user_id = c.user_id
+        GROUP BY c.cohort_week
+        HAVING COUNT(DISTINCT c.user_id) > 0
+        ORDER BY c.cohort_week`,
+        { type: db.sequelize.QueryTypes.SELECT }
+    );
+
+    return rows.map((r) => {
+        const size = num(r.cohort_size);
+        const pct = (n) => (size > 0 ? Math.round((num(n) / size) * 1000) / 10 : 0);
+        return {
+            cohortWeek: r.cohort_week,
+            cohortSize: size,
+            retention: [pct(r.w0), pct(r.w1), pct(r.w2), pct(r.w3)],
+        };
+    });
+}
+
+// ── Signup method breakdown ──────────────────────────────────────────────────
+// Real distribution of HOW users registered (password / email-OTP / OAuth provider),
+// from auth.audit_logs registration events. This is signup-METHOD, not marketing-channel
+// attribution (no UTM/referrer capture exists anywhere in the platform yet) — labeled
+// honestly on the console rather than presented as ad-channel acquisition data.
+async function getSignupChannels(period) {
+    await ensureSchema();
+    const db   = getDb();
+    const days = periodToDays(period);
+    const ivl  = daysInterval(days);
+
+    const rows = await db.sequelize.query(
+        `SELECT
+            CASE
+                WHEN action = 'user.register'            THEN 'Email + Password'
+                WHEN action = 'user.email_otp_register'   THEN 'Email OTP'
+                WHEN action = 'user.oauth_register'
+                     THEN COALESCE(metadata->>'provider', 'OAuth')
+                ELSE action
+            END AS channel,
+            COUNT(*)::int AS count
+         FROM auth.audit_logs
+         WHERE action IN ('user.register','user.email_otp_register','user.oauth_register')
+           AND created_at > NOW() - INTERVAL '${ivl}'
+         GROUP BY channel
+         ORDER BY count DESC`,
+        { type: db.sequelize.QueryTypes.SELECT }
+    );
+
+    return rows.map((r) => ({ channel: r.channel, count: num(r.count) }));
+}
+
+// ── Geography ─────────────────────────────────────────────────────────────────
+// Real session geo data — session-service resolves geo_country via geoip-lite on every
+// session's IP and persists it onto auth.sessions (same Postgres, same 'auth' schema).
+// Distinct-user count per country in the window; NULL/unresolved IPs excluded rather
+// than lumped into a fake "Unknown" bucket with an invented number.
+async function getGeography(period) {
+    await ensureSchema();
+    const db   = getDb();
+    const days = periodToDays(period);
+    const ivl  = daysInterval(days);
+
+    const rows = await db.sequelize.query(
+        `SELECT geo_country AS country, COUNT(DISTINCT user_id)::int AS users
+         FROM auth.sessions
+         WHERE geo_country IS NOT NULL
+           AND created_at > NOW() - INTERVAL '${ivl}'
+         GROUP BY geo_country
+         ORDER BY users DESC
+         LIMIT 20`,
+        { type: db.sequelize.QueryTypes.SELECT }
+    );
+
+    return rows.map((r) => ({ country: r.country, users: num(r.users) }));
+}
+
+// ── Event type breakdown ─────────────────────────────────────────────────────
+// Real distribution of audit_logs action types in the window — the platform's actual
+// event taxonomy (login/register/mfa/password-reset/etc), not synthetic product events
+// (no client-side event tracker exists on admin-platform's own pages yet).
+async function getEventTypeBreakdown(period) {
+    await ensureSchema();
+    const db   = getDb();
+    const days = periodToDays(period);
+    const ivl  = daysInterval(days);
+
+    const rows = await db.sequelize.query(
+        `SELECT action AS event, COUNT(*)::int AS count
+         FROM auth.audit_logs
+         WHERE created_at > NOW() - INTERVAL '${ivl}'
+         GROUP BY action
+         ORDER BY count DESC
+         LIMIT 15`,
+        { type: db.sequelize.QueryTypes.SELECT }
+    );
+
+    return rows.map((r) => ({ event: r.event, count: num(r.count) }));
+}
+
+// ── Payment funnel ────────────────────────────────────────────────────────────
+// financial-services-java's payment-service (Spring Boot, separate DB) is the real
+// system of record for gateway transactions — GET /api/v1/payments?status=X returns a
+// Spring Page whose totalElements gives a real per-status count, queried once per real
+// TransactionStatus enum value (INITIATED/COMPLETED/FAILED/REVERSED — see
+// domain/Transaction.java). Not co-located in this Postgres, so this is an HTTP call,
+// not a SQL join. PAYMENT_SERVICE_URL is unset by default (the service is gated behind
+// the consolidated stack's optional `payments` Docker Compose profile and its exact
+// reachable address isn't confirmed) — 'not_configured' is returned honestly rather
+// than guessing a port. Forwards the caller's own bearer: payment-service is part of the
+// core platform (unlike proxy-service's documented separate self-issued keypair), so a
+// central admin session token is expected to verify there too.
+const PAYMENT_FUNNEL_TIMEOUT_MS = 4000;
+async function getPaymentFunnel(callerBearer) {
+    const baseUrl = process.env.PAYMENT_SERVICE_URL;
+    if (!baseUrl) return { available: false, reason: 'not_configured', steps: [] };
+    if (!callerBearer) return { available: false, reason: 'no_caller_token', steps: [] };
+
+    const statuses = [
+        { key: 'INITIATED', label: 'Initiated' },
+        { key: 'COMPLETED',  label: 'Completed' },
+        { key: 'FAILED',     label: 'Failed' },
+        { key: 'REVERSED',   label: 'Reversed' },
+    ];
+
+    try {
+        const results = await Promise.all(statuses.map(async ({ key, label }) => {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), PAYMENT_FUNNEL_TIMEOUT_MS);
+            try {
+                const resp = await fetch(`${baseUrl}/api/v1/payments?status=${key}&page=0&size=1`, {
+                    signal: controller.signal,
+                    headers: { Authorization: callerBearer },
+                });
+                if (!resp.ok) return { step: label, count: null, httpStatus: resp.status };
+                const body = await resp.json();
+                return { step: label, count: num(body.totalElements) };
+            } finally {
+                clearTimeout(timer);
+            }
+        }));
+
+        if (results.every((r) => r.count === null)) {
+            return { available: false, reason: `http_${results[0].httpStatus}`, steps: [] };
+        }
+        return { available: true, steps: results.map((r) => ({ step: r.step, count: r.count ?? 0 })) };
+    } catch (err) {
+        logger.warn({ err: err.message }, 'analytics: payment funnel fetch failed');
+        return { available: false, reason: err.name === 'AbortError' ? 'timeout' : 'error', steps: [] };
+    }
+}
+
 // ── Service health ───────────────────────────────────────────────────────────
 // The console's ServiceHealth[] is a live infrastructure probe owned by the
 // realtime-service (WebSocket) and the dedicated infra page — NOT something the
@@ -377,4 +609,10 @@ module.exports = {
     getRecentActivity,
     getServiceHealth,
     getTrafficByPage,
+    getActivationFunnel,
+    getRetentionCohorts,
+    getSignupChannels,
+    getGeography,
+    getEventTypeBreakdown,
+    getPaymentFunnel,
 };
