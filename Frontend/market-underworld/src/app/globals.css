@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 225 18% 5%;
+    --foreground: 0 0% 100%;
+    --card: 225 18% 7%;
+    --card-foreground: 0 0% 100%;
+    --popover: 225 18% 5%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 110 100% 54%;
+    --primary-foreground: 225 18% 5%;
+    --secondary: 210 100% 60%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 225 10% 15%;
+    --muted-foreground: 225 10% 65%;
+    --accent: 35 100% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 225 15% 15%;
+    --input: 225 15% 15%;
+    --ring: 110 100% 54%;
+    --radius: 0.5rem;
+
+    /* Brand Colors */
+    --brand-base: #0B0C0F;
+    --brand-surface: #111318;
+    --brand-elevated: #181B21;
+    --brand-border: #252A33;
+    --green-neon: #39FF14;
+    --blue-neon: #3B82F6;
+    --error-neon: #EF4444;
+  }
+}
+
+body {
+  @apply bg-[#0B0C0F] text-white antialiased selection:bg-[#39FF14]/20 selection:text-[#39FF14];
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
+
+.nexus-glow {
+  box-shadow: 0 0 15px rgba(57, 255, 20, 0.15);
+}
+
+.nexus-gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-[#39FF14] to-[#3B82F6];
+}
+
+.nexus-gradient-bg {
+  @apply bg-gradient-to-br from-[#39FF14] to-[#1A7A0A] text-black;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.btn-primary {
+  @apply bg-[#39FF14] text-black font-bold transition-all hover:bg-[#2BE010] active:scale-95 disabled:opacity-50;
+}
+
+.btn-secondary {
+  @apply bg-transparent border border-[#252A33] text-white transition-all hover:border-[#39FF14] hover:text-[#39FF14] active:scale-95;
+}
+
+.mu-card {
+  @apply bg-[#111318] border border-[#252A33] transition-all duration-300 hover:border-[#39FF14]/40;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.scanline::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent, rgba(57, 255, 20, 0.05), transparent);
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+}

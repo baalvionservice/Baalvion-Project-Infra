@@ -1,0 +1,160 @@
+
+{
+  "entities": {
+    "Region": {
+      "title": "Region",
+      "description": "Global geographic region (e.g., South Asia)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "icon": { "type": "string" }
+      },
+      "required": ["id", "name"]
+    },
+    "Country": {
+      "title": "Country",
+      "description": "Sovereign state node within a region",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "regionId": { "type": "string" },
+        "code": { "type": "string" }
+      }
+    },
+    "MarketplaceHub": {
+      "title": "MarketplaceHub",
+      "description": "Country-level marketplace configuration",
+      "type": "object",
+      "properties": {
+        "countryId": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "maintenance", "disabled"] },
+        "activeCategories": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "MarketplaceCategory": {
+      "title": "MarketplaceCategory",
+      "description": "Dynamic commerce sector (e.g., YouTube Marketplace, Real Estate)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "slug": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "status": { "type": "string", "enum": ["active", "disabled"] },
+        "countryId": { "type": "string" }
+      },
+      "required": ["id", "name", "slug", "countryId"]
+    },
+    "CreatorProfile": {
+      "title": "CreatorProfile",
+      "description": "Operator identity for content creators",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "platforms": { "type": "array", "items": { "type": "string" } },
+        "followers": { "type": "number" },
+        "bio": { "type": "string" },
+        "avatar": { "type": "string" },
+        "rating": { "type": "number" },
+        "verified": { "type": "boolean" },
+        "totalEarningsGenerated": { "type": "number" }
+      }
+    },
+    "InvestmentListing": {
+      "title": "InvestmentListing",
+      "description": "Revenue share opportunity listing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "creatorId": { "type": "string" },
+        "title": { "type": "string" },
+        "platform": { "type": "string" },
+        "investmentRequired": { "type": "number" },
+        "expectedRevenue": { "type": "number" },
+        "investorShare": { "type": "number" },
+        "platformFee": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "funded", "closed"] },
+        "isLive": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Listing": {
+      "title": "Listing",
+      "description": "Individual trade asset (Product, Service, or Digital Asset)",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "price": { "type": "number" },
+        "currency": { "type": "string" },
+        "categoryId": { "type": "string" },
+        "countryId": { "type": "string" },
+        "city": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "rating": { "type": "number" },
+        "images": { "type": "array", "items": { "type": "string" } },
+        "status": { "type": "string", "enum": ["approved", "pending", "removed"] },
+        "metadata": { "type": "object" }
+      }
+    },
+    "Order": {
+      "title": "Order",
+      "description": "Escrow transaction record",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "buyerId": { "type": "string" },
+        "sellerId": { "type": "string" },
+        "listingId": { "type": "string" },
+        "price": { "type": "number" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "auth": {
+    "providers": ["google.com", "password"]
+  },
+  "firestore": {
+    "/regions/{regionId}": {
+      "schema": { "$ref": "#/backend/entities/Region" },
+      "description": "Global regions"
+    },
+    "/countries/{countryId}": {
+      "schema": { "$ref": "#/backend/entities/Country" },
+      "description": "Country nodes"
+    },
+    "/marketplaces/{countryId}": {
+      "schema": { "$ref": "#/backend/entities/MarketplaceHub" },
+      "description": "Country-level hub configurations"
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/backend/entities/MarketplaceCategory" },
+      "description": "Dynamic marketplace sectors"
+    },
+    "/creators/{creatorId}": {
+      "schema": { "$ref": "#/backend/entities/CreatorProfile" },
+      "description": "Creator identity nodes"
+    },
+    "/investments/{listingId}": {
+      "schema": { "$ref": "#/backend/entities/InvestmentListing" },
+      "description": "Revenue share trade nodes"
+    },
+    "/listings/{listingId}": {
+      "schema": { "$ref": "#/backend/entities/Listing" },
+      "description": "Trade assets and listings"
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/backend/entities/Order" },
+      "description": "Escrow orders"
+    }
+  }
+}
