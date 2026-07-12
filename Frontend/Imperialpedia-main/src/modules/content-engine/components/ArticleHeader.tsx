@@ -60,7 +60,7 @@ export const ArticleHeader = ({ article }: ArticleHeaderProps) => {
       </div>
 
       {article.featuredImage && (
-        <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden shadow-2xl border bg-muted group mt-12">
+        <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden shadow-2xl border bg-muted group mt-12">
           <Image
             src={article.featuredImage}
             alt={article.title}

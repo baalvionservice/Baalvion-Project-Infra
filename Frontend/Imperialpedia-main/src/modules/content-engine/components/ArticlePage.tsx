@@ -104,7 +104,14 @@ export const ArticlePage = ({
 
           {article.body ? (
             <div
-              className="article-body prose prose-lg dark:prose-invert max-w-none mb-12"
+              className="article-body prose prose-lg dark:prose-invert max-w-none mb-12
+                prose-headings:font-headline prose-headings:tracking-tight
+                prose-p:leading-relaxed prose-p:text-foreground/90
+                prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
+                prose-strong:text-foreground prose-blockquote:not-italic prose-blockquote:font-medium
+                prose-blockquote:border-primary prose-blockquote:text-foreground
+                prose-img:rounded-2xl prose-img:border prose-img:border-border prose-img:shadow-md
+                prose-li:marker:text-primary prose-hr:border-border"
               // Body is rendered from CMS content blocks (cms-public.blocksToHtml).
               // Source is internal, editor-authored content published via the CMS.
               dangerouslySetInnerHTML={{ __html: sanitizeRichHtml(article.body) }}
