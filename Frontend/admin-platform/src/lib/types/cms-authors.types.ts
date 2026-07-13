@@ -20,6 +20,7 @@ export interface WebsiteAuthor {
   credentials?: string;
   bio?: string;
   avatarUrl?: string;
+  videoUrl?: string;
   expertise: string[];
   social?: AuthorSocial;
   seoMetadata?: AuthorSeo;
@@ -38,6 +39,7 @@ export interface CreateAuthorPayload {
   credentials?: string | null;
   bio?: string | null;
   avatarUrl?: string | null;
+  videoUrl?: string | null;
   expertise?: string[];
   social?: AuthorSocial;
   seoMetadata?: AuthorSeo;
@@ -51,6 +53,7 @@ export interface UpdateAuthorPayload {
   credentials?: string | null;
   bio?: string | null;
   avatarUrl?: string | null;
+  videoUrl?: string | null;
   expertise?: string[];
   social?: AuthorSocial;
   seoMetadata?: AuthorSeo;

@@ -36,6 +36,7 @@ interface AuthorForm {
   credentials: string;
   bio: string;
   avatarUrl: string;
+  videoUrl: string;
   expertise: string; // comma-separated in the form
   linkedin: string;
   x: string;
@@ -54,6 +55,7 @@ const DEFAULT_FORM: AuthorForm = {
   credentials: '',
   bio: '',
   avatarUrl: '',
+  videoUrl: '',
   expertise: '',
   linkedin: '',
   x: '',
@@ -110,6 +112,7 @@ export default function WebsiteAuthorsPage({
       credentials: a.credentials ?? '',
       bio: a.bio ?? '',
       avatarUrl: a.avatarUrl ?? '',
+      videoUrl: a.videoUrl ?? '',
       expertise: (a.expertise ?? []).join(', '),
       linkedin: a.social?.linkedin ?? '',
       x: a.social?.x ?? '',
@@ -154,6 +157,7 @@ export default function WebsiteAuthorsPage({
             credentials: form.credentials || null,
             bio: form.bio || null,
             avatarUrl: form.avatarUrl || null,
+            videoUrl: form.videoUrl || null,
             expertise,
             social,
             seoMetadata,
@@ -172,6 +176,7 @@ export default function WebsiteAuthorsPage({
           credentials: form.credentials || null,
           bio: form.bio || null,
           avatarUrl: form.avatarUrl || null,
+          videoUrl: form.videoUrl || null,
           expertise,
           social,
           seoMetadata,
@@ -331,6 +336,15 @@ export default function WebsiteAuthorsPage({
                 placeholder="https://… (square headshot)"
                 value={form.avatarUrl}
                 onChange={(e) => setForm((f) => ({ ...f, avatarUrl: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Video URL (optional)</Label>
+              <Input
+                className="h-8 text-xs"
+                placeholder="https://… (intro reel, YouTube/Vimeo link)"
+                value={form.videoUrl}
+                onChange={(e) => setForm((f) => ({ ...f, videoUrl: e.target.value }))}
               />
             </div>
             <div className="grid grid-cols-2 gap-2">
