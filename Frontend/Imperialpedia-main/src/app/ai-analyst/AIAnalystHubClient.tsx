@@ -6,15 +6,21 @@ import { Text } from '@/design-system/typography/text';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Sparkles, 
-  Zap, 
-  ShieldAlert, 
-  BarChart3, 
-  Globe, 
-  Activity, 
+import {
+  Sparkles,
+  Zap,
+  Globe,
+  Activity,
   ArrowRight,
-  Spline
+  TrendingUp,
+  TrendingDown,
+  GitCompare,
+  Gauge,
+  Layers,
+  Newspaper,
+  PieChart,
+  MessageCircle,
+  CalendarDays,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -26,52 +32,92 @@ import { cn } from '@/lib/utils';
 export default function AIAnalystHubPage() {
   const tools = [
     {
-      title: "Daily AI Briefing",
-      desc: "Real-time synthesis of global signals, news, and social sentiment delivered daily.",
-      href: "/ai-analyst/daily-briefing",
+      title: "Automated Market Recap",
+      desc: "AI-generated synthesis of the day's price action, volume, and standout movers.",
+      href: "/ai-analyst/automated-recap",
+      icon: Activity,
+      color: "text-primary",
+      badge: "Automation"
+    },
+    {
+      title: "Bull Case Generator",
+      desc: "Build a data-backed bullish thesis for any asset in seconds.",
+      href: "/ai-analyst/bull-case",
+      icon: TrendingUp,
+      color: "text-emerald-500",
+      badge: "Bull Case"
+    },
+    {
+      title: "Bear Case Generator",
+      desc: "Surface the downside risks and bearish thesis for any asset.",
+      href: "/ai-analyst/bear-case",
+      icon: TrendingDown,
+      color: "text-destructive",
+      badge: "Bear Case"
+    },
+    {
+      title: "Asset Comparison",
+      desc: "Head-to-head AI comparison of fundamentals, valuation, and momentum.",
+      href: "/ai-analyst/compare",
+      icon: GitCompare,
+      color: "text-secondary",
+      badge: "Comparison"
+    },
+    {
+      title: "Multi-Asset Comparison",
+      desc: "Compare a full basket of assets side-by-side across key metrics.",
+      href: "/ai-analyst/multi-compare",
+      icon: Layers,
+      color: "text-secondary",
+      badge: "Multi-Asset"
+    },
+    {
+      title: "Macro Economic Summary",
+      desc: "AI synthesis of macro indicators, central bank policy, and global signals.",
+      href: "/ai-analyst/macro-summary",
       icon: Globe,
       color: "text-primary",
-      badge: "Top Priority"
+      badge: "Macro"
     },
     {
-      title: "Scenario Modeler",
-      desc: "Generate side-by-side Bull and Bear scenarios for any financial asset in seconds.",
-      href: "/ai-analyst/scenario-modeling",
-      icon: Spline,
-      color: "text-secondary",
-      badge: "Deep Analysis"
-    },
-    {
-      title: "Catalyst Scanner",
-      desc: "Identify upcoming market drivers and regulatory events before they hit the charts.",
-      href: "/ai-analyst/catalyst-detection",
-      icon: Zap,
+      title: "Sector Overview",
+      desc: "Rotate through sector performance, leaders, and laggards at a glance.",
+      href: "/ai-analyst/sector-overview",
+      icon: PieChart,
       color: "text-amber-500",
-      badge: "Alpha Node"
+      badge: "Sector"
     },
     {
-      title: "Risk Detection",
-      desc: "Automated structural audit of asset integrity and liquidity depth anomalies.",
-      href: "/ai-analyst/risk-detection",
-      icon: ShieldAlert,
-      color: "text-destructive",
-      badge: "Safety Node"
-    },
-    {
-      title: "Trend Explainer",
-      desc: "Deconstruct market momentum using institutional-grade technical synthesis.",
-      href: "/ai-analyst/trend-explanation",
-      icon: Activity,
-      color: "text-emerald-500",
-      badge: "Education"
-    },
-    {
-      title: "Earnings Audit",
-      desc: "High-fidelity summaries of corporate fiscal performance and forward guidance.",
-      href: "/ai-analyst/earnings-summary",
-      icon: BarChart3,
+      title: "News Summary Generator",
+      desc: "Condenses breaking financial news into concise, actionable briefs.",
+      href: "/ai-analyst/news-summary",
+      icon: Newspaper,
       color: "text-primary",
-      badge: "Fiscal"
+      badge: "News"
+    },
+    {
+      title: "Social Sentiment Tracker",
+      desc: "Tracks social and retail sentiment shifts across tracked assets.",
+      href: "/ai-analyst/social-sentiment",
+      icon: MessageCircle,
+      color: "text-emerald-500",
+      badge: "Sentiment"
+    },
+    {
+      title: "Weekly Digest Generator",
+      desc: "A single AI-curated recap of the week's most important market moves.",
+      href: "/ai-analyst/weekly-digest",
+      icon: CalendarDays,
+      color: "text-primary",
+      badge: "Digest"
+    },
+    {
+      title: "Model Performance Report",
+      desc: "Transparency report on AI analyst model accuracy and conviction tracking.",
+      href: "/ai-analyst/model-performance",
+      icon: Gauge,
+      color: "text-destructive",
+      badge: "Performance"
     }
   ];
 

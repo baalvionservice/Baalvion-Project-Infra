@@ -1,10 +1,10 @@
 import { ApiResponse } from '@/types';
 import { personSilhouetteDataUri } from '@baalvion/illustrations';
-import { 
-  CommunityData, 
-  Comment, 
-  PredictionContest, 
-  ReputationEntry, 
+import {
+  CommunityData,
+  Comment,
+  PredictionContest,
+  ReputationEntry,
   LeaderboardItem,
   CommunityRankingsData,
   RankedUser,
@@ -14,9 +14,7 @@ import {
   UserSentimentVote,
   DiscussionNode,
   TrendingTopic,
-  ReputationSystemData,
-  DebateNode,
-  DebateLeaderboardEntry
+  ReputationSystemData
 } from '@/types/community';
 
 /**
@@ -116,67 +114,6 @@ const mockTopics: TrendingTopic[] = [
   { name: "Tech Earnings Season", engagement: 4200, count: 9 },
 ];
 
-/**
- * Prompt 66: Debate Room Mock Data
- */
-const mockDebates: DebateNode[] = [
-  {
-    id: 'deb-1',
-    topic: "Will Bitcoin reach $100k this cycle?",
-    asset: "BTC",
-    category: "Cryptocurrency",
-    bull_participants: 4,
-    bear_participants: 3,
-    comments: 182,
-    views: 9400,
-    status: "Active",
-    summary: "A structured clash between institutional-adoption bulls and regulatory-headwind bears.",
-    moderator_notes: "Focus on spot ETF flows vs. potential QT tightening cycles.",
-    bull_arguments: [
-      { id: 'arg-1', user: "Julian Wealth", avatar: personSilhouetteDataUri({ name: "Julian Wealth", seed: "julian" }), role: "Expert Analyst", reputation: 8500, content: "The institutional bid from Spot ETFs creates a supply-demand imbalance that hasn't been priced in. 100k is the psychological floor.", likes: 42, replies: 12, timestamp: "2h ago" },
-      { id: 'arg-2', user: "Sarah Crypto", avatar: personSilhouetteDataUri({ name: "Sarah Crypto", seed: "sarah" }), role: "Analyst", reputation: 3200, content: "Post-halving cycles historically show 3x returns. We're only 40% into the expansion phase.", likes: 15, replies: 4, timestamp: "1h ago" }
-    ],
-    bear_arguments: [
-      { id: 'arg-3', user: "Eleanor Vance", avatar: personSilhouetteDataUri({ name: "Eleanor Vance", seed: "eleanor" }), role: "Market Strategist", reputation: 9200, content: "Inflation remains sticky. If the Fed maintains 'Higher for Longer', the liquidity needed for a 100k push won't materialize.", likes: 38, replies: 8, timestamp: "3h ago" }
-    ],
-    timeline: [
-      { timestamp: "2026-03-10", event: "Debate node established.", type: "start" },
-      { timestamp: "2026-03-12", event: "Julian Wealth posted the Primary Bull Case.", type: "argument" },
-      { timestamp: "2026-03-14", event: "Community vote threshold reached.", type: "vote" }
-    ],
-    community_votes: { bull: 65, bear: 25, neutral: 10 }
-  },
-  {
-    id: 'deb-2',
-    topic: "Is Tesla still overvalued?",
-    asset: "TSLA",
-    category: "Stocks",
-    bull_participants: 2,
-    bear_participants: 4,
-    comments: 124,
-    views: 6800,
-    status: "Active",
-    summary: "Analyzing Tesla as an AI/Robotics play vs. a traditional automotive manufacturer.",
-    bull_arguments: [], bear_arguments: [], timeline: [], community_votes: { bull: 40, bear: 50, neutral: 10 }
-  }
-];
-
-const mockDebateLeaderboard: DebateLeaderboardEntry[] = [
-  { rank: 1, name: "Andrew Collins", debates_won: 14, reputation: 91, avatar: personSilhouetteDataUri({ name: "Andrew Collins", seed: "andrew" }) },
-  { rank: 2, name: "Lina Rodriguez", debates_won: 11, reputation: 88, avatar: personSilhouetteDataUri({ name: "Lina Rodriguez", seed: "lina" }) },
-  { rank: 3, name: "Mark Sterling", debates_won: 9, reputation: 82, avatar: personSilhouetteDataUri({ name: "Mark Sterling", seed: "mark" }) }
-];
-
-export const getDebates = async (): Promise<ApiResponse<DebateNode[]>> => {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  return { data: mockDebates, status: 200 };
-};
-
-export const getDebateLeaderboard = async (): Promise<ApiResponse<DebateLeaderboardEntry[]>> => {
-  await new Promise((resolve) => setTimeout(resolve, 400));
-  return { data: mockDebateLeaderboard, status: 200 };
-};
-
 export const getReputationData = async (): Promise<ApiResponse<ReputationSystemData>> => {
   await new Promise((resolve) => setTimeout(resolve, 500));
   return { data: mockReputationData, status: 200 };
@@ -263,9 +200,7 @@ export const getCommunityData = async (): Promise<ApiResponse<CommunityData>> =>
       reputation_list: [],
       leaderboards_full: [],
       discussions: mockDiscussions,
-      topics: mockTopics,
-      debates: mockDebates,
-      debate_leaderboard: mockDebateLeaderboard
+      topics: mockTopics
     },
     status: 200,
   };

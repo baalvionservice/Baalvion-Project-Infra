@@ -12,7 +12,7 @@ const DEFAULT_TERMS: Term[] = [
   { label: "Interest Rates", href: "/interest-rates" },
   { label: "Bitcoin", href: "/cryptocurrency" },
   { label: "Recession", href: "/economy" },
-  { label: "Dividend", href: "/glossary" },
+  { label: "Dividend", href: "/terms" },
   { label: "Federal Reserve", href: "/fed" },
 ];
 

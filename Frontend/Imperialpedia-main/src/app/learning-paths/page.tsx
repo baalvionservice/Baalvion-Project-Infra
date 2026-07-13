@@ -7,13 +7,12 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
-  GraduationCap, 
-  Map as MapIcon, 
-  Clock, 
-  Layers, 
-  ArrowRight, 
-  ChevronRight, 
-  ShieldCheck, 
+  GraduationCap,
+  Map as MapIcon,
+  Clock,
+  Layers,
+  ArrowRight,
+  ShieldCheck,
   Sparkles,
   Loader2,
   BookOpen,
@@ -21,7 +20,6 @@ import {
 } from 'lucide-react';
 import { getGlobalTopicIndex } from '@/services/mock-api/topics';
 import { LearningPath } from '@/types/topics';
-import Link from 'next/link';
 
 /**
  * Global Learning Paths Hub.
@@ -104,17 +102,14 @@ export default function LearningPathsPage() {
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
                       {path.topics.map((t, i) => (
-                        <Link key={t.slug} href={`/glossary/${t.slug}`}>
-                          <div className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-white/5 hover:border-emerald-500/30 transition-all group/item">
-                            <div className="flex items-center gap-4">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-xs group-hover/item:bg-emerald-500 group-hover/item:text-white transition-all">
-                                {i + 1}
-                              </div>
-                              <Text variant="bodySmall" weight="bold">{t.title}</Text>
+                        <div key={t.slug} className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-white/5 transition-all">
+                          <div className="flex items-center gap-4">
+                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-xs">
+                              {i + 1}
                             </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover/item:opacity-100 -translate-x-2 group-hover/item:translate-x-0 transition-all" />
+                            <Text variant="bodySmall" weight="bold">{t.title}</Text>
                           </div>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   </div>

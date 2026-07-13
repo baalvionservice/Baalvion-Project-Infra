@@ -37,7 +37,7 @@ export const linkService = {
       if (regex.test(linkedHtml)) {
         linkedHtml = linkedHtml.replace(
           regex,
-          `<a href="/glossary/${term.slug}" class="text-primary hover:underline font-bold">${term.term}</a>`
+          `<a href="/terms" class="text-primary hover:underline font-bold">${term.term}</a>`
         );
         linkedSlugs.add(term.slug);
         linkCount++;

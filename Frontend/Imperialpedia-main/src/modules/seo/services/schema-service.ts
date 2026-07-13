@@ -1,5 +1,4 @@
 import { Article } from '@/modules/content-engine/types';
-import { GlossaryTerm } from '../models/glossary-term';
 import { FAQ } from '../models/faq';
 import { structuredData } from '@/lib/seo/structured-data';
 
@@ -33,19 +32,6 @@ export const schemaService = {
     // Voice/AI-assistant readability — points speakable extraction at the
     // headline + description so assistants can read a short summary aloud.
     return { ...schema, speakable: structuredData.speakable() };
-  },
-
-  /**
-   * Generates deep-definition schema for glossary terms.
-   */
-  generateGlossarySchema: (term: GlossaryTerm) => {
-    return structuredData.article({
-      title: `${term.term} Definition & Meaning`,
-      description: term.definition,
-      image: '',
-      authorName: 'Imperialpedia Intelligence Index',
-      datePublished: new Date().toISOString(),
-    });
   },
 
   /**

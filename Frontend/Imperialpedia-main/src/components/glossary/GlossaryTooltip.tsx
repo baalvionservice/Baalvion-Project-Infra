@@ -148,7 +148,7 @@ export function GlossaryTerm({ slug, children, className }: GlossaryTermProps) {
     return <span className={className}>{children}</span>;
   }
 
-  const href = data?.url || `/glossary/${slug}`;
+  const href = data?.url || '/terms';
 
   return (
     <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>

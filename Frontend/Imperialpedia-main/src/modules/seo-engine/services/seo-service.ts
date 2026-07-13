@@ -31,7 +31,6 @@ export const seoService = {
   generateMetadata: (data: SEOPageData, pathPrefix: string): Metadata => {
     // Determine content type for canonical generation
     let contentType: ContentType = 'article';
-    if (pathPrefix.includes('glossary')) contentType = 'glossary';
     if (pathPrefix.includes('calculators')) contentType = 'tool';
     if (pathPrefix.includes('topics')) contentType = 'topic';
 
@@ -50,7 +49,7 @@ export const seoService = {
   /**
    * Generates JSON-LD Structured Data for search engines.
    */
-  generateStructuredData: (data: SEOPageData, type: 'article' | 'glossary' | 'tool' | 'breadcrumb' | 'breadcrumb-list', items?: BreadcrumbItem[]) => {
+  generateStructuredData: (data: SEOPageData, type: 'article' | 'tool' | 'breadcrumb' | 'breadcrumb-list', items?: BreadcrumbItem[]) => {
     switch (type) {
       case 'article':
         return structuredData.article({

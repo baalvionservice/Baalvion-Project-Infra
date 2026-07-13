@@ -126,7 +126,7 @@ export const ArticlePage = ({
               className="rounded-xl h-12 px-8 font-bold"
               asChild
             >
-              <Link href="/glossary">Explore Full Glossary</Link>
+              <Link href="/terms">Explore Full Glossary</Link>
             </Button>
           </div>
         </div>

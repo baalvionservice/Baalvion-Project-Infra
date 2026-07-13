@@ -155,7 +155,7 @@ const mockSearchData: SearchResult[] = [
     title: "Bull Market",
     snippet:
       "A financial market where prices are rising or are expected to rise with widespread optimism.",
-    route: "/glossary/bull-market",
+    route: "/terms",
     category: "Markets",
     tags: ["Markets", "Optimism", "Growth"],
     date: "2024-01-10T08:00:00Z",
@@ -167,7 +167,7 @@ const mockSearchData: SearchResult[] = [
     title: "Quantitative Easing",
     snippet:
       "A form of monetary policy where a central bank purchases at-scale government bonds.",
-    route: "/glossary/quantitative-easing",
+    route: "/terms",
     category: "Economics",
     tags: ["Macro", "Fed", "Policy"],
     date: "2024-03-05T11:00:00Z",

@@ -757,7 +757,7 @@ const mockCdnManagementData: CdnManagementData = {
   ],
   page_cache: [
     {
-      page_url: "/glossary/compound-interest",
+      page_url: "/terms/c/compound-interest",
       cache_status: "mock_cached",
       last_refresh: "2026-03-15 10:00",
       ttl: "3600s",
@@ -804,7 +804,7 @@ const mockCdnManagementData: CdnManagementData = {
 const mockSeoManagementData: SeoManagementData = {
   seo_pages: [
     {
-      page_url: "/glossary/compound-interest",
+      page_url: "/terms/c/compound-interest",
       title: "Compound Interest Definition | Intelligence Index",
       meta_description:
         "Learn how compound interest builds long-term wealth. Explore expert definitions and real-world examples.",
@@ -833,8 +833,8 @@ const mockSeoManagementData: SeoManagementData = {
   ],
   sitemap: [
     {
-      page_url: "/glossary/compound-interest",
-      parent: "/glossary",
+      page_url: "/terms/c/compound-interest",
+      parent: "/terms",
       status: "mock_active",
       last_updated: "2026-03-15 10:00",
     },
@@ -859,7 +859,7 @@ const mockSeoManagementData: SeoManagementData = {
     },
     {
       alert_type: "Duplicate Meta Node",
-      page: "/glossary/interest-rates",
+      page: "/terms/i/interest-rates",
       status: "mock_triggered",
     },
     {
@@ -869,7 +869,7 @@ const mockSeoManagementData: SeoManagementData = {
     },
     {
       suggestion: "Improve meta description CTR mapping",
-      page: "/glossary/compound-interest",
+      page: "/terms/c/compound-interest",
       status: "mock_suggested",
     },
   ],

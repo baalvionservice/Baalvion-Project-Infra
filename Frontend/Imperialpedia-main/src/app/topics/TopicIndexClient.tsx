@@ -19,7 +19,6 @@ import {
   Search,
   Layers,
   Flame,
-  ArrowRight,
   ChevronRight,
   Activity,
   Globe,
@@ -177,55 +176,50 @@ export function TopicIndexClient({ initialData }: TopicIndexClientProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {topics.map((topic) => (
-                        <Link key={topic.id} href={`/glossary/${topic.slug}`}>
-                          <Card className="glass-card border-none hover:border-primary/30 transition-all duration-300 group overflow-hidden h-full">
-                            <CardContent className="p-6 space-y-4">
-                              <div className="flex justify-between items-start">
-                                <Badge
-                                  variant="outline"
-                                  className="text-[8px] font-bold uppercase border-white/10 bg-black/20 text-muted-foreground"
-                                >
-                                  {topic.category}
-                                </Badge>
-                                <div className="flex items-center gap-1 text-[9px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 uppercase">
-                                  Read Node <ArrowRight className="h-3 w-3" />
-                                </div>
-                              </div>
-                              <Text
-                                variant="body"
-                                weight="bold"
-                                className="group-hover:text-primary transition-colors text-lg"
+                        <Card key={topic.id} className="glass-card border-none overflow-hidden h-full">
+                          <CardContent className="p-6 space-y-4">
+                            <div className="flex justify-between items-start">
+                              <Badge
+                                variant="outline"
+                                className="text-[8px] font-bold uppercase border-white/10 bg-black/20 text-muted-foreground"
                               >
-                                {topic.title}
-                              </Text>
-                              <Text
-                                variant="caption"
-                                className="text-muted-foreground line-clamp-2 leading-relaxed italic"
-                              >
-                                "{topic.definition}"
-                              </Text>
+                                {topic.category}
+                              </Badge>
+                            </div>
+                            <Text
+                              variant="body"
+                              weight="bold"
+                              className="text-lg"
+                            >
+                              {topic.title}
+                            </Text>
+                            <Text
+                              variant="caption"
+                              className="text-muted-foreground line-clamp-2 leading-relaxed italic"
+                            >
+                              "{topic.definition}"
+                            </Text>
 
-                              <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                                <div className="flex items-center gap-4 text-[9px] text-muted-foreground font-bold uppercase tracking-tighter">
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="h-3 w-3" />{" "}
-                                    {topic.reading_time}
-                                  </span>
-                                  <span className="flex items-center gap-1">
-                                    <Activity className="h-3 w-3" />{" "}
-                                    {topic.difficulty}
-                                  </span>
-                                </div>
-                                <div className="flex items-center gap-1 text-primary">
-                                  <TrendingUp className="h-3 w-3" />
-                                  <span className="text-[10px] font-mono font-bold">
-                                    {topic.popularity_score}
-                                  </span>
-                                </div>
+                            <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                              <div className="flex items-center gap-4 text-[9px] text-muted-foreground font-bold uppercase tracking-tighter">
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />{" "}
+                                  {topic.reading_time}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <Activity className="h-3 w-3" />{" "}
+                                  {topic.difficulty}
+                                </span>
                               </div>
-                            </CardContent>
-                          </Card>
-                        </Link>
+                              <div className="flex items-center gap-1 text-primary">
+                                <TrendingUp className="h-3 w-3" />
+                                <span className="text-[10px] font-mono font-bold">
+                                  {topic.popularity_score}
+                                </span>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   </div>
@@ -310,19 +304,16 @@ export function TopicIndexClient({ initialData }: TopicIndexClientProps) {
                   <CardContent className="p-10">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {path.topics.map((t, i) => (
-                        <Link key={t.slug} href={`/glossary/${t.slug}`}>
-                          <div className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-white/5 hover:border-primary/30 transition-all group/item">
-                            <div className="flex items-center gap-4">
-                              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-xs group-hover/item:bg-primary group-hover/item:text-white transition-all">
-                                {i + 1}
-                              </div>
-                              <Text variant="bodySmall" weight="bold">
-                                {t.title}
-                              </Text>
+                        <div key={t.slug} className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-white/5 transition-all">
+                          <div className="flex items-center gap-4">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">
+                              {i + 1}
                             </div>
-                            <ChevronRight className="h-4 w-4 text-muted-foreground opacity-0 group-hover/item:opacity-100 -translate-x-2 group-hover/item:translate-x-0 transition-all" />
+                            <Text variant="bodySmall" weight="bold">
+                              {t.title}
+                            </Text>
                           </div>
-                        </Link>
+                        </div>
                       ))}
                     </div>
                   </CardContent>

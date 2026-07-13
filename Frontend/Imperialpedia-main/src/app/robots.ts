@@ -19,7 +19,7 @@ const ALLOW = [
   '/financial-intelligence/',
   '/authors',
   '/authors/',
-  '/glossary/',
+  '/terms/',
   '/topics/',
   '/financial-tools/',
   '/ai-analyst/',

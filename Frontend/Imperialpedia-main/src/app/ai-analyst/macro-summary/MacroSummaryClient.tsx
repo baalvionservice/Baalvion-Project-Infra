@@ -237,8 +237,8 @@ export default function MacroSummaryPage() {
                     How does the macro environment affect specific assets? Run a risk audit to detect structural vulnerabilities.
                   </Text>
                   <Button variant="link" className="p-0 h-auto text-secondary font-bold text-xs group/btn" asChild>
-                    <a href="/ai-analyst/risk-detection">
-                      Launch Risk Scanner <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover/btn:translate-x-1" />
+                    <a href="/ai-analyst">
+                      Explore AI Analyst Hub <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover/btn:translate-x-1" />
                     </a>
                   </Button>
                 </div>

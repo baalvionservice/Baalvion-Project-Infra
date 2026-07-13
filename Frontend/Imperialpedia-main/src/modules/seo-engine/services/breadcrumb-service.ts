@@ -1,5 +1,4 @@
 import { Article } from '@/modules/content-engine/types';
-import { GlossaryTerm } from '@/modules/seo/models/glossary-term';
 import { Breadcrumb } from '../types';
 import { env } from '@/config/env';
 
@@ -23,34 +22,6 @@ export const breadcrumbService = {
         { name: 'Home', item: '/' },
         { name: 'Intelligence', item: '/financial-intelligence' },
         { name: article.title, item: `/financial-intelligence/${article.slug}` },
-      ],
-    };
-  },
-
-  /**
-   * Home / Glossary / [Letter] / [Term]
-   */
-  generateBreadcrumbForGlossary: (term: GlossaryTerm): Breadcrumb => {
-    const letter = term.term.charAt(0).toLowerCase();
-    return {
-      items: [
-        { name: 'Home', item: '/' },
-        { name: 'Glossary', item: '/glossary' },
-        { name: letter.toUpperCase(), item: `/glossary/${letter}` },
-        { name: term.term, item: `/glossary/${term.slug}` },
-      ],
-    };
-  },
-
-  /**
-   * Home / Glossary / [Letter]
-   */
-  generateBreadcrumbForGlossaryLetter: (letter: string): Breadcrumb => {
-    return {
-      items: [
-        { name: 'Home', item: '/' },
-        { name: 'Glossary', item: '/glossary' },
-        { name: `Letter ${letter.toUpperCase()}`, item: `/glossary/${letter.toLowerCase()}` },
       ],
     };
   },

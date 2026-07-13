@@ -25,7 +25,7 @@ export default function TopNav() {
             <span className="text-gray-300">|</span>
             <a href="/personal-finance" className="hover:text-[#ce2b2b] transition-colors px-2 py-1">Personal Finance</a>
             <span className="text-gray-300">|</span>
-            <a href="/glossary" className="hover:text-[#ce2b2b] transition-colors px-2 py-1">Glossary</a>
+            <a href="/terms" className="hover:text-[#ce2b2b] transition-colors px-2 py-1">Glossary</a>
           </nav>
         </div>
         <div className="flex items-center gap-3 text-xs text-gray-500">

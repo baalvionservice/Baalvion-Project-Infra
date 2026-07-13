@@ -6,7 +6,6 @@ import { env } from "@/config/env";
 
 export type ContentType =
   | "article"
-  | "glossary"
   | "tool"
   | "topic";
 
@@ -23,9 +22,6 @@ export const canonicalService = {
     switch (type) {
       case "article":
         path = `/financial-intelligence/${slug}`;
-        break;
-      case "glossary":
-        path = `/glossary/${slug}`;
         break;
       case "tool":
         path = `/calculators/${slug}`;

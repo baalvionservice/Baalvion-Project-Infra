@@ -11,7 +11,7 @@ export const routes = {
     brokers: "/brokers",
     reviews: "/imperialpedia-review-board",
     articles: "/financial-intelligence",
-    glossary: "/glossary",
+    glossary: "/terms",
     calculators: "/financial-tools",
     creators: "/creators",
     learningPaths: "/learning-paths",

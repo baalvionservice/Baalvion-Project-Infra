@@ -14,7 +14,7 @@ export const generateSitemap = () => {
     { url: '/#faq', changefreq: 'weekly', priority: 0.8 },
     { url: '/#pricing', changefreq: 'weekly', priority: 0.8 },
     { url: '/creators', changefreq: 'daily', priority: 0.9 },
-    { url: '/glossary', changefreq: 'daily', priority: 0.9 },
+    { url: '/terms', changefreq: 'daily', priority: 0.9 },
     { url: '/financial-tools', changefreq: 'monthly', priority: 0.7 },
     { url: '/explore', changefreq: 'daily', priority: 0.9 },
     { url: '/ai-analyst', changefreq: 'daily', priority: 0.9 },

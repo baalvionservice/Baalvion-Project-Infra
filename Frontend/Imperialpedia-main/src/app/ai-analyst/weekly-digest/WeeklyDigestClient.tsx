@@ -232,10 +232,10 @@ export default function WeeklyDigestPage() {
                   <Text variant="label" className="text-primary font-bold">Cycle Preparation</Text>
                   <Text variant="h4" className="font-bold">Next Cycle Outlook?</Text>
                   <Text variant="bodySmall" className="text-muted-foreground leading-relaxed block">
-                    Use the Daily Briefing node to stay updated on real-time shifts starting tomorrow morning.
+                    Explore the full AI Analyst Hub to stay updated on real-time shifts starting tomorrow morning.
                   </Text>
                   <Button variant="link" className="text-primary font-bold text-xs" asChild>
-                    <a href="/ai-analyst/daily-briefing">Access Daily Briefing <ArrowRight className="ml-1 h-3 w-3" /></a>
+                    <a href="/ai-analyst">Explore AI Analyst Hub <ArrowRight className="ml-1 h-3 w-3" /></a>
                   </Button>
                 </div>
               </div>

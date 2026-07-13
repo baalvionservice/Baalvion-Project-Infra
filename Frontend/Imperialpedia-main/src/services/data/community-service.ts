@@ -1,5 +1,5 @@
 import * as mockApi from '@/services/mock-api/community';
-import { ApiResponse, CommunityData, CommunityRankingsData, AssetSentiment, UserSentimentVote, DiscussionNode, ReputationSystemData, DebateNode, DebateLeaderboardEntry } from '@/types';
+import { ApiResponse, CommunityData, CommunityRankingsData, AssetSentiment, UserSentimentVote, DiscussionNode, ReputationSystemData } from '@/types';
 import { errorHandler } from '@/lib/errors/error-handler';
 import { personSilhouetteDataUri } from '@baalvion/illustrations';
 
@@ -150,30 +150,6 @@ export const communityService = {
         status: appError.statusCode,
         error: appError.message,
       };
-    }
-  },
-
-  async getDebates(): Promise<ApiResponse<DebateNode[]>> {
-    try {
-      const live = await fetchLive<DebateNode>('/community/debates');
-      if (live.length > 0) return { data: live, status: 200 };
-      return await mockApi.getDebates();
-    } catch (error) {
-      try { return await mockApi.getDebates(); } catch { /* noop */ }
-      const appError = errorHandler.handleError(error);
-      return { data: [], status: appError.statusCode, error: appError.message };
-    }
-  },
-
-  async getDebateLeaderboard(): Promise<ApiResponse<DebateLeaderboardEntry[]>> {
-    try {
-      const live = await fetchLive<DebateLeaderboardEntry>('/community/debates-leaderboard');
-      if (live.length > 0) return { data: live, status: 200 };
-      return await mockApi.getDebateLeaderboard();
-    } catch (error) {
-      try { return await mockApi.getDebateLeaderboard(); } catch { /* noop */ }
-      const appError = errorHandler.handleError(error);
-      return { data: [], status: appError.statusCode, error: appError.message };
     }
   }
 };

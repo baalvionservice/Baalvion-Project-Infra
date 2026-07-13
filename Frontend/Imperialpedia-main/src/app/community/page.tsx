@@ -6,13 +6,12 @@ import { Text } from '@/design-system/typography/text';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  MessageSquare, 
-  Trophy, 
-  Target, 
-  Scale, 
-  Activity, 
+import {
+  Users,
+  MessageSquare,
+  Trophy,
+  Target,
+  Activity,
   ArrowRight
 } from 'lucide-react';
 import Link from 'next/link';
@@ -31,14 +30,6 @@ export default function CommunityHubPage() {
       icon: Activity,
       color: "text-primary",
       badge: "Live Pulse"
-    },
-    {
-      title: "Debate Arena",
-      desc: "Structured market clashes between leading analysts across every indexed taxonomy.",
-      href: "/community/debates",
-      icon: Scale,
-      color: "text-secondary",
-      badge: "Structured"
     },
     {
       title: "Discovery Forums",

@@ -2,7 +2,6 @@
 
 import {
   articlesService,
-  glossaryService,
   calculatorsService,
 } from "@/services/data";
 import { canonicalService, ContentType } from "./canonical-service";
@@ -53,11 +52,6 @@ export const seoAuditService = {
           hasMetadata = !!(art.data?.title && art.data?.description);
           break;
         }
-        case "glossary": {
-          const term = await glossaryService.getTermBySlug(slug);
-          hasMetadata = !!(term.data?.term && term.data?.definition);
-          break;
-        }
         case "tool": {
           const tools = await calculatorsService.getCalculatorList();
           const tool = tools.data.find((t) => t.slug === slug);
@@ -106,10 +100,9 @@ export const seoAuditService = {
     const start = Date.now();
     logger.info("Starting full platform SEO audit...");
 
-    const [articles, glossary, calculators] =
+    const [articles, calculators] =
       await Promise.all([
         articlesService.getArticles(1, 1000),
-        glossaryService.getTerms(1, 1000),
         calculatorsService.getCalculatorList(),
       ]);
 
@@ -118,7 +111,6 @@ export const seoAuditService = {
     // Collect all audit tasks
     const tasks: Promise<SEOAuditResult>[] = [
       ...articles.data.map((p) => this.runAuditForPage(p.slug, "article")),
-      ...glossary.data.map((p) => this.runAuditForPage(p.slug, "glossary")),
       ...calculators.data.map((p) => this.runAuditForPage(p.slug, "tool")),
     ];
 

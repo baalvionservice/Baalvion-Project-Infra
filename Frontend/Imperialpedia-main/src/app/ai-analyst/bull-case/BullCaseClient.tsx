@@ -345,8 +345,8 @@ export default function BullCaseGeneratorPage() {
                     className="p-0 h-auto text-primary text-xs font-bold group"
                     asChild
                   >
-                    <Link href="/financial-tools/portfolio">
-                      Model in Portfolio Architect{" "}
+                    <Link href="/financial-tools">
+                      Explore Financial Tools{" "}
                       <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
                     </Link>
                   </Button>

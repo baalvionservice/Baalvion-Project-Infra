@@ -214,53 +214,6 @@ export interface TrendingTopic {
   count?: number;
 }
 
-/**
- * Prompt 66: Debate Room Types
- */
-export interface DebateArgument {
-  id: string;
-  user: string;
-  avatar: string;
-  role: string;
-  reputation: number;
-  content: string;
-  likes: number;
-  replies: number;
-  timestamp: string;
-}
-
-export interface DebateTimelineEvent {
-  timestamp: string;
-  event: string;
-  type: 'start' | 'argument' | 'vote' | 'end';
-}
-
-export interface DebateNode {
-  id: string;
-  topic: string;
-  asset?: string;
-  category: 'Stocks' | 'Cryptocurrency' | 'Macro' | 'Economy';
-  bull_participants: number;
-  bear_participants: number;
-  comments: number;
-  views: number;
-  status: 'Active' | 'Upcoming' | 'Completed';
-  summary?: string;
-  moderator_notes?: string;
-  bull_arguments: DebateArgument[];
-  bear_arguments: DebateArgument[];
-  timeline: DebateTimelineEvent[];
-  community_votes: { bull: number; bear: number; neutral: number };
-}
-
-export interface DebateLeaderboardEntry {
-  rank: number;
-  name: string;
-  debates_won: number;
-  reputation: number;
-  avatar?: string;
-}
-
 export interface CommunityData {
   comments: Comment[];
   trendingDiscussions: string[];
@@ -272,8 +225,6 @@ export interface CommunityData {
   leaderboards_full: LeaderboardItem[];
   discussions: DiscussionNode[];
   topics: TrendingTopic[];
-  debates: DebateNode[];
-  debate_leaderboard: DebateLeaderboardEntry[];
 }
 
 export interface ReputationContribution {

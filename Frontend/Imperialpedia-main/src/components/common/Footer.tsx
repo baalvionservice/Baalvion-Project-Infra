@@ -77,7 +77,7 @@ const NAV_COLUMNS = [
       { label: 'Personal Finance', href: '/personal-finance' },
       { label: 'Economy', href: '/economy' },
       { label: 'Reviews', href: '/reviews' },
-      { label: 'Dictionary', href: '/glossary' },
+      { label: 'Dictionary', href: '/terms' },
     ],
   },
   {

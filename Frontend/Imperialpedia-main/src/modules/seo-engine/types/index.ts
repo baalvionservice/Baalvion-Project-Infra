@@ -8,7 +8,7 @@ export interface SEOPageData {
   slug: string;
   keywords?: string[];
   image?: string;
-  type?: 'article' | 'website' | 'tool' | 'glossary';
+  type?: 'article' | 'website' | 'tool';
   author?: string;
   publishedAt?: string;
   updatedAt?: string;
