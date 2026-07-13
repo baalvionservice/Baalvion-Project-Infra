@@ -129,39 +129,6 @@ export interface PortfolioDeepDiveData {
 }
 
 /**
- * Prompt 56: Advanced Asset Screeners & Strategy Builder Types
- */
-export interface ScreenerNode {
-  name: string;
-  filters: string[];
-  results: number;
-  last_run?: string;
-}
-
-export interface ScreenerAsset {
-  name: string;
-  symbol: string;
-  price: string;
-  market_cap: string;
-  change_24h: string;
-  volume: string;
-  sentiment: number;
-  momentum: number;
-}
-
-export interface CustomStrategy {
-  strategy_name: string;
-  conditions: string[];
-  status: "mock_active" | "mock_inactive";
-}
-
-export interface ScreenerDashboardData {
-  screeners: ScreenerNode[];
-  assets: ScreenerAsset[];
-  strategies: CustomStrategy[];
-}
-
-/**
  * Prompt 57: Backtesting Engine Types
  */
 export interface BacktestSummary {
@@ -203,44 +170,4 @@ export interface BacktestDashboardData {
   drawdown_chart: { date: string; value: number }[];
   monthly_heatmap: { month: string; year: number; return: number }[];
   saved_backtests: { name: string; last_tested: string; asset: string }[];
-}
-
-/**
- * Prompt 58: Market Heatmap Types
- */
-export interface SectorHeatmapNode {
-  name: string;
-  change: string;
-  market_cap: string;
-  color: "green" | "light_green" | "neutral" | "light_red" | "red";
-  weight: number; // 1-100 for visual sizing
-}
-
-export interface StockHeatmapNode {
-  symbol: string;
-  name: string;
-  change: string;
-  market_cap: string;
-  volume?: string;
-  weight: number;
-}
-
-export interface CapitalFlowItem {
-  sector: string;
-  flow: string;
-  status: "inflow" | "outflow";
-}
-
-export interface RegionPerformance {
-  region: string;
-  performance: string;
-  flow: string;
-  volume: string;
-}
-
-export interface MarketHeatmapData {
-  sectors: SectorHeatmapNode[];
-  stocks: StockHeatmapNode[];
-  capital_flows: CapitalFlowItem[];
-  regions: RegionPerformance[];
 }

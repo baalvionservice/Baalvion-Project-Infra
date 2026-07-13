@@ -3,8 +3,6 @@ import {
   glossaryService,
   calculatorsService,
 } from "@/services/data";
-import { getTags } from "@/modules/content-engine/services/tag-service";
-import { getCategories } from "@/modules/content-engine/services/category-service";
 import { loadCompanies, loadCountries, loadIndustries, loadTechnologies } from "@/lib/data/loaders";
 import { reviewSlugs } from "@/lib/data/review-live";
 import { getPublishedNews } from "@/services/data/cms-public";
@@ -69,7 +67,7 @@ export const sitemapService = {
     const entries: SitemapEntry[] = [];
 
     // 1. Static public pages (every indexable, crawlable route).
-    const corePages = ["", "/glossary", "/about","/advisor-reviews","/ai-analyst","/ai-analyst/asset-summary","/ai-analyst/automated-recap","/ai-analyst/bear-case","/ai-analyst/bull-case","/ai-analyst/catalyst-detection","/ai-analyst/compare","/ai-analyst/daily-briefing","/ai-analyst/earnings-summary","/ai-analyst/event-intelligence","/ai-analyst/macro-summary","/ai-analyst/model-performance","/ai-analyst/multi-compare","/ai-analyst/news-summary","/ai-analyst/risk-detection","/ai-analyst/scenario-modeling","/ai-analyst/sector-overview","/ai-analyst/social-sentiment","/ai-analyst/trend-explanation","/ai-analyst/weekly-digest","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/community","/community/contests","/community/debates","/community/discussions","/community/leaderboard","/community/rankings","/community/reputation","/community/sentiment","/companies","/company-news","/contact","/countries","/creators","/creators/leaderboards","/creators/profile","/creators/trust","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/datasets","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/fiscal-policy","/gdp","/global","/government","/imperialpedia-review-board","/income","/indicators","/industries","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/pricing","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms","/terms-of-service","/topics","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    const corePages = ["", "/glossary", "/about","/advisor-reviews","/ai-analyst","/ai-analyst/asset-summary","/ai-analyst/automated-recap","/ai-analyst/bear-case","/ai-analyst/bull-case","/ai-analyst/catalyst-detection","/ai-analyst/compare","/ai-analyst/daily-briefing","/ai-analyst/earnings-summary","/ai-analyst/event-intelligence","/ai-analyst/macro-summary","/ai-analyst/model-performance","/ai-analyst/multi-compare","/ai-analyst/news-summary","/ai-analyst/risk-detection","/ai-analyst/scenario-modeling","/ai-analyst/sector-overview","/ai-analyst/social-sentiment","/ai-analyst/trend-explanation","/ai-analyst/weekly-digest","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/community","/community/contests","/community/debates","/community/discussions","/community/leaderboard","/community/rankings","/community/reputation","/community/sentiment","/companies","/company-news","/contact","/countries","/creators","/creators/leaderboards","/creators/profile","/creators/trust","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/datasets","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/fiscal-policy","/gdp","/global","/government","/imperialpedia-review-board","/income","/indicators","/industries","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/pricing","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms","/terms-of-service","/topics","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -91,12 +89,10 @@ export const sitemapService = {
     const listSafe = async <T>(p: Promise<{ data: T[] }>): Promise<T[]> => {
       try { return (await p).data ?? []; } catch { return []; }
     };
-    const [articles, glossary, calcs, cats, tags] = await Promise.all([
+    const [articles, glossary, calcs] = await Promise.all([
       listSafe(articlesService.getArticles(1, 1000)),
       listSafe(glossaryService.getTerms(1, 1000)),
       listSafe(calculatorsService.getCalculatorList()),
-      listSafe(getCategories()),
-      listSafe(getTags()),
     ]);
 
     articles.forEach((article) => {
@@ -121,14 +117,6 @@ export const sitemapService = {
 
     calcs.forEach((calc) => {
       entries.push({ loc: `${base}/financial-tools/${calc.slug}`, changefreq: "monthly", priority: 0.9 });
-    });
-
-    cats.forEach((cat) => {
-      entries.push({ loc: `${base}/categories/${cat.slug}`, changefreq: "weekly", priority: 0.6 });
-    });
-
-    tags.forEach((tag) => {
-      entries.push({ loc: `${base}/tags/${tag.slug}`, changefreq: "weekly", priority: 0.6 });
     });
 
     // 3. Structured entities + review guides + published news.

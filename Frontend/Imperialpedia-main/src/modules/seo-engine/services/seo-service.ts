@@ -33,8 +33,6 @@ export const seoService = {
     let contentType: ContentType = 'article';
     if (pathPrefix.includes('glossary')) contentType = 'glossary';
     if (pathPrefix.includes('calculators')) contentType = 'tool';
-    if (pathPrefix.includes('categories')) contentType = 'category';
-    if (pathPrefix.includes('tags')) contentType = 'tag';
     if (pathPrefix.includes('topics')) contentType = 'topic';
 
     const canonical = canonicalService.getCanonicalTag(data.slug, contentType);

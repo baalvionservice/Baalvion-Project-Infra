@@ -179,7 +179,7 @@ const mockSearchData: SearchResult[] = [
     title: "Macroeconomics Matrix",
     snippet:
       "Primary taxonomy node for global economic trends, fiscal policy, and monetary indicators.",
-    route: "/tags/macro",
+    route: "/topics",
     category: "Economics",
     tags: ["Macro", "Taxonomy", "Economics"],
     date: "2023-05-20T10:00:00Z",

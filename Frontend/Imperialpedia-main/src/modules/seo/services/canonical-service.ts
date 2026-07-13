@@ -8,8 +8,6 @@ export type ContentType =
   | "article"
   | "glossary"
   | "tool"
-  | "category"
-  | "tag"
   | "topic";
 
 export const canonicalService = {
@@ -31,12 +29,6 @@ export const canonicalService = {
         break;
       case "tool":
         path = `/calculators/${slug}`;
-        break;
-      case "category":
-        path = `/categories/${slug}`;
-        break;
-      case "tag":
-        path = `/tags/${slug}`;
         break;
       case "topic":
         path = `/topics/${slug}`;

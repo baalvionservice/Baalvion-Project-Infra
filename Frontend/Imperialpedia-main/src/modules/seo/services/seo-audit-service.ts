@@ -5,8 +5,6 @@ import {
   glossaryService,
   calculatorsService,
 } from "@/services/data";
-import { getTags } from "@/modules/content-engine/services/tag-service";
-import { getCategories } from "@/modules/content-engine/services/category-service";
 import { canonicalService, ContentType } from "./canonical-service";
 import { sitemapService } from "./sitemap-service";
 import { logger } from "@/lib/errors/logger";
@@ -66,16 +64,6 @@ export const seoAuditService = {
           hasMetadata = !!(tool?.name && tool?.description);
           break;
         }
-        case "category": {
-          const cat = await getCategoryBySlug(slug);
-          hasMetadata = !!(cat.data?.name && cat.data?.description);
-          break;
-        }
-        case "tag": {
-          const tag = await getTagBySlug(slug);
-          hasMetadata = !!tag.data?.name;
-          break;
-        }
       }
     } catch (e) {
       issues.push(`Page data retrieval failed for slug: ${slug}`);
@@ -118,13 +106,11 @@ export const seoAuditService = {
     const start = Date.now();
     logger.info("Starting full platform SEO audit...");
 
-    const [articles, glossary, calculators, categories, tags] =
+    const [articles, glossary, calculators] =
       await Promise.all([
         articlesService.getArticles(1, 1000),
         glossaryService.getTerms(1, 1000),
         calculatorsService.getCalculatorList(),
-        getCategories(),
-        getTags(),
       ]);
 
     const results: SEOAuditResult[] = [];
@@ -134,8 +120,6 @@ export const seoAuditService = {
       ...articles.data.map((p) => this.runAuditForPage(p.slug, "article")),
       ...glossary.data.map((p) => this.runAuditForPage(p.slug, "glossary")),
       ...calculators.data.map((p) => this.runAuditForPage(p.slug, "tool")),
-      ...categories.data.map((p) => this.runAuditForPage(p.slug, "category")),
-      ...tags.data.map((p) => this.runAuditForPage(p.slug, "tag")),
     ];
 
     const allResults = await Promise.all(tasks);
@@ -166,16 +150,3 @@ export const seoAuditService = {
     return report;
   },
 };
-
-/**
- * Mock helper for category/tag retrieval used within audit
- */
-async function getCategoryBySlug(slug: string) {
-  const cats = await getCategories();
-  return { data: cats.data.find((c) => c.slug === slug) || null };
-}
-
-async function getTagBySlug(slug: string) {
-  const tags = await getTags();
-  return { data: tags.data.find((t) => t.slug === slug) || null };
-}

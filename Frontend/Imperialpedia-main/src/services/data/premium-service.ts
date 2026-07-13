@@ -1,5 +1,5 @@
 import * as mockApi from '@/services/mock-api/premium';
-import { ApiResponse, SubscriptionTier, PremiumState, PremiumReport, PremiumAnalytics, PremiumDashboardData, PortfolioDeepDiveData, ScreenerDashboardData, BacktestDashboardData, MarketHeatmapData } from '@/types/premium';
+import { ApiResponse, SubscriptionTier, PremiumState, PremiumReport, PremiumAnalytics, PremiumDashboardData, PortfolioDeepDiveData, BacktestDashboardData } from '@/types/premium';
 import { errorHandler } from '@/lib/errors/error-handler';
 
 /**
@@ -85,35 +85,9 @@ export const premiumService = {
     }
   },
 
-  async getScreenerData(): Promise<ApiResponse<ScreenerDashboardData | null>> {
-    try {
-      return await mockApi.getScreenerDashboardData();
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
-      return {
-        data: null,
-        status: appError.statusCode,
-        error: appError.message,
-      };
-    }
-  },
-
   async getBacktestData(): Promise<ApiResponse<BacktestDashboardData | null>> {
     try {
       return await mockApi.getBacktestData();
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
-      return {
-        data: null,
-        status: appError.statusCode,
-        error: appError.message,
-      };
-    }
-  },
-
-  async getMarketHeatmap(): Promise<ApiResponse<MarketHeatmapData | null>> {
-    try {
-      return await mockApi.getMarketHeatmapData();
     } catch (error) {
       const appError = errorHandler.handleError(error);
       return {

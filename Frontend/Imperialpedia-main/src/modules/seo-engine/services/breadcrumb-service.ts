@@ -1,10 +1,7 @@
 import { Article } from '@/modules/content-engine/types';
 import { GlossaryTerm } from '@/modules/seo/models/glossary-term';
-import { Category } from '@/modules/content-engine/types/category';
-import { Tag } from '@/modules/content-engine/types/tag';
 import { Breadcrumb } from '../types';
 import { env } from '@/config/env';
-import { slugify } from '@/modules/content-engine/utils/slugify';
 
 /**
  * @fileOverview Service for generating hierarchical breadcrumb paths and schema for all platform routes.
@@ -25,7 +22,6 @@ export const breadcrumbService = {
       items: [
         { name: 'Home', item: '/' },
         { name: 'Intelligence', item: '/financial-intelligence' },
-        { name: article.category, item: `/categories/${slugify(article.category)}` },
         { name: article.title, item: `/financial-intelligence/${article.slug}` },
       ],
     };
@@ -42,32 +38,6 @@ export const breadcrumbService = {
         { name: 'Glossary', item: '/glossary' },
         { name: letter.toUpperCase(), item: `/glossary/${letter}` },
         { name: term.term, item: `/glossary/${term.slug}` },
-      ],
-    };
-  },
-
-  /**
-   * Home / Categories / [Name]
-   */
-  generateBreadcrumbForCategory: (category: Category): Breadcrumb => {
-    return {
-      items: [
-        { name: 'Home', item: '/' },
-        { name: 'Categories', item: '/financial-intelligence' },
-        { name: category.name, item: `/categories/${category.slug}` },
-      ],
-    };
-  },
-
-  /**
-   * Home / Topics / [Name]
-   */
-  generateBreadcrumbForTag: (tag: Tag): Breadcrumb => {
-    return {
-      items: [
-        { name: 'Home', item: '/' },
-        { name: 'Topics', item: '/topics' },
-        { name: tag.name, item: `/tags/${tag.slug}` },
       ],
     };
   },

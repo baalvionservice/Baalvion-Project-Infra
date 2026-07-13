@@ -1,4 +1,4 @@
-import { ApiResponse, SubscriptionTier, PremiumState, PremiumReport, PremiumAnalytics, BacktestingTool, PremiumDashboardData, PortfolioDeepDiveData, ScreenerDashboardData, BacktestDashboardData, MarketHeatmapData } from '@/types/premium';
+import { ApiResponse, SubscriptionTier, PremiumState, PremiumReport, PremiumAnalytics, BacktestingTool, PremiumDashboardData, PortfolioDeepDiveData, BacktestDashboardData } from '@/types/premium';
 
 /**
  * @fileOverview Mock service for managing subscription tiers, premium reports, and advanced analytics.
@@ -281,39 +281,6 @@ export const getPortfolioDeepDiveData = async (): Promise<ApiResponse<PortfolioD
 };
 
 /**
- * Prompt 56: Advanced Asset Screeners & Strategy Builder Mock API
- */
-const mockScreenerData: ScreenerDashboardData = {
-  screeners: [
-    { name: "High Momentum Stocks", filters: ["Momentum > 80", "Volume > 1M"], results: 42, last_run: "2 hours ago" },
-    { name: "Bullish Social Sentiment", filters: ["Sentiment Score > 75"], results: 28, last_run: "1 hour ago" },
-    { name: "Undervalued Growth", filters: ["P/E < 15", "Revenue Growth > 20%"], results: 15, last_run: "4 hours ago" },
-    { name: "High Dividend Yield", filters: ["Yield > 4%", "Payout Ratio < 60%"], results: 34, last_run: "Yesterday" }
-  ],
-  assets: [
-    { name: "Apple Inc.", symbol: "AAPL", price: "175.20", market_cap: "2.8T", change_24h: "+1.2%", volume: "90M", sentiment: 72, momentum: 85 },
-    { name: "Tesla Inc.", symbol: "TSLA", price: "245.50", market_cap: "780B", change_24h: "+2.4%", volume: "65M", sentiment: 81, momentum: 88 },
-    { name: "NVIDIA Corp", symbol: "NVDA", price: "875.25", market_cap: "2.1T", change_24h: "+5.2%", volume: "45M", sentiment: 92, momentum: 95 },
-    { name: "Microsoft", symbol: "MSFT", price: "415.50", market_cap: "3.1T", change_24h: "+0.8%", volume: "22M", sentiment: 68, momentum: 74 },
-    { name: "Alphabet Inc", symbol: "GOOGL", price: "155.30", market_cap: "1.9T", change_24h: "-1.1%", volume: "18M", sentiment: 55, momentum: 62 },
-    { name: "Amazon.com", symbol: "AMZN", price: "178.40", market_cap: "1.8T", change_24h: "+1.5%", volume: "35M", sentiment: 78, momentum: 81 }
-  ],
-  strategies: [
-    { strategy_name: "Oversold Bounce", conditions: ["RSI < 30", "Sentiment Score > 60"], status: "mock_active" },
-    { strategy_name: "Volume Breakout", conditions: ["Volume > 2x Avg", "Price > 200 EMA"], status: "mock_active" },
-    { strategy_name: "Dividend Fortress", conditions: ["Yield > 3.5%", "Debt/Equity < 0.5"], status: "mock_inactive" }
-  ]
-};
-
-export const getScreenerDashboardData = async (): Promise<ApiResponse<ScreenerDashboardData>> => {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-  return {
-    data: mockScreenerData,
-    status: 200,
-  };
-};
-
-/**
  * Prompt 57: Backtesting Engine Mock API
  */
 const mockBacktestData: BacktestDashboardData = {
@@ -368,46 +335,6 @@ export const getBacktestData = async (): Promise<ApiResponse<BacktestDashboardDa
   await new Promise((resolve) => setTimeout(resolve, 800));
   return {
     data: mockBacktestData,
-    status: 200,
-  };
-};
-
-/**
- * Prompt 58: Institutional Market Heatmap Mock API
- */
-const mockHeatmapData: MarketHeatmapData = {
-  sectors: [
-    { name: "Technology", change: "+2.4%", market_cap: "12T", color: "green", weight: 45 },
-    { name: "Financials", change: "-0.8%", market_cap: "5T", color: "light_red", weight: 20 },
-    { name: "Healthcare", change: "+0.5%", market_cap: "4.2T", color: "light_green", weight: 15 },
-    { name: "Energy", change: "+1.1%", market_cap: "3T", color: "light_green", weight: 10 },
-    { name: "Consumer Disc.", change: "+1.8%", market_cap: "2.8T", color: "green", weight: 8 },
-    { name: "Real Estate", change: "-2.4%", market_cap: "1.2T", color: "red", weight: 5 }
-  ],
-  stocks: [
-    { symbol: "AAPL", name: "Apple Inc.", change: "+1.5%", market_cap: "2.8T", weight: 35 },
-    { symbol: "MSFT", name: "Microsoft", change: "+2.1%", market_cap: "2.6T", weight: 30 },
-    { symbol: "NVDA", name: "NVIDIA Corp", change: "+5.2%", market_cap: "2.1T", weight: 20 },
-    { symbol: "GOOGL", name: "Alphabet Inc", change: "+0.8%", market_cap: "1.9T", weight: 15 }
-  ],
-  capital_flows: [
-    { sector: "Technology", flow: "+4.2B", status: "inflow" },
-    { sector: "Energy", flow: "+2.1B", status: "inflow" },
-    { sector: "Financials", flow: "-1.5B", status: "outflow" },
-    { sector: "Healthcare", flow: "-0.8B", status: "outflow" }
-  ],
-  regions: [
-    { region: "North America", performance: "+1.8%", flow: "+12.4B", volume: "450B" },
-    { region: "Europe", performance: "-0.4%", flow: "-2.1B", volume: "120B" },
-    { region: "Asia-Pacific", performance: "+2.2%", flow: "+8.5B", volume: "310B" },
-    { region: "Latin America", performance: "+0.5%", flow: "+0.8B", volume: "45B" }
-  ]
-};
-
-export const getMarketHeatmapData = async (): Promise<ApiResponse<MarketHeatmapData>> => {
-  await new Promise((resolve) => setTimeout(resolve, 600));
-  return {
-    data: mockHeatmapData,
     status: 200,
   };
 };

@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from "react";
 import { GlobalTopicIndexData, TopicNode } from "@/types/topics";
-import { slugify } from "@/modules/content-engine/utils/slugify";
 import {
   Card,
   CardContent,
@@ -270,7 +269,7 @@ export function TopicIndexClient({ initialData }: TopicIndexClientProps) {
                         className="p-0 h-auto text-primary font-bold text-xs group/btn"
                         asChild
                       >
-                        <Link href={`/categories/${slugify(cat.name)}`}>
+                        <Link href="/financial-intelligence">
                           Explore Hub{" "}
                           <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                         </Link>

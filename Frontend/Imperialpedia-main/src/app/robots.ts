@@ -21,8 +21,6 @@ const ALLOW = [
   '/authors/',
   '/glossary/',
   '/topics/',
-  '/categories/',
-  '/tags/',
   '/financial-tools/',
   '/ai-analyst/',
 ];
