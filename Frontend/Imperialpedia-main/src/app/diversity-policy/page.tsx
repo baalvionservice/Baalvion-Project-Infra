@@ -75,13 +75,9 @@ function DiversityPolicyFallback() {
               2. Diversity on the Financial Review Board
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              We aim for our{' '}
-              <Link href="/imperialpedia-review-board" className="text-primary hover:underline">
-                Financial Review Board
-              </Link>{' '}
-              to reflect a range of professional backgrounds and perspectives within personal
-              finance and markets, so that the review process itself benefits from more than one
-              point of view on a given topic.
+              We aim for our Financial Review Board to reflect a range of professional
+              backgrounds and perspectives within personal finance and markets, so that the
+              review process itself benefits from more than one point of view on a given topic.
             </Text>
           </div>
 

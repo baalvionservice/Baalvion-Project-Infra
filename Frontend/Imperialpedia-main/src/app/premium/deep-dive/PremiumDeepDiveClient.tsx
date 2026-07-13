@@ -642,8 +642,8 @@ export function PremiumDeepDiveClient() {
             className="h-12 px-8 rounded-xl font-bold border-primary/30 hover:bg-primary/5 shrink-0"
             asChild
           >
-            <Link href="/ai-analyst">
-              Explore AI Analyst Hub
+            <Link href="/premium/dashboard">
+              Explore Premium Dashboard
             </Link>
           </Button>
         </div>

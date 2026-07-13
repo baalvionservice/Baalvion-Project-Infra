@@ -13,7 +13,6 @@ export * from "./financial-tools";
 export * from "./search";
 export * from "./analytics";
 export * from "./moderation";
-export * from "./community";
 export * from "./editorial";
 export * from "./user-system";
 export * from "./system";

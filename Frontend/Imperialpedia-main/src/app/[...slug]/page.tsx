@@ -468,7 +468,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
   }
 
   let article: ArticleType | undefined =
-    (stocksPageData.featured.slug === slug
+    (stocksPageData.featured?.slug === slug
       ? stocksPageData.featured
       : null) ||
     brokerGuides.find((a) => a.slug === slug) ||

@@ -17,7 +17,6 @@ export const generateSitemap = () => {
     { url: '/terms', changefreq: 'daily', priority: 0.9 },
     { url: '/financial-tools', changefreq: 'monthly', priority: 0.7 },
     { url: '/explore', changefreq: 'daily', priority: 0.9 },
-    { url: '/ai-analyst', changefreq: 'daily', priority: 0.9 },
   ];
 
   const xmlEntries = pages

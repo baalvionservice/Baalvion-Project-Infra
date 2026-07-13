@@ -20,7 +20,6 @@ import { platformConfig } from '@/config/platform';
 const navLinks = [
   { label: 'Home', href: routes.public.home },
   { label: 'Glossary', href: routes.public.glossary },
-  { label: 'AI Content Outline', href: routes.public.outline },
   { label: 'Financial Calculators', href: routes.public.calculators },
   { label: 'Expert Creators', href: routes.public.creators },
 ];

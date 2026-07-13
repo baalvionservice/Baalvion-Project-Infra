@@ -22,7 +22,6 @@ const ALLOW = [
   '/terms/',
   '/topics/',
   '/financial-tools/',
-  '/ai-analyst/',
 ];
 
 const DISALLOW = [

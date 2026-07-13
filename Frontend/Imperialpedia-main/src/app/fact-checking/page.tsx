@@ -77,14 +77,10 @@ function FactCheckingFallback() {
               2. Role of the Financial Review Board
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Our{' '}
-              <Link href="/imperialpedia-review-board" className="text-primary hover:underline">
-                Financial Review Board
-              </Link>{' '}
-              reviews higher-risk articles — retirement, tax, credit, and core investing topics —
-              both before initial publication and on a recurring schedule afterward, checking that
-              cited figures still match the current primary source and that the guidance given
-              remains accurate as rules and rates change.
+              Our Financial Review Board reviews higher-risk articles — retirement, tax, credit,
+              and core investing topics — both before initial publication and on a recurring
+              schedule afterward, checking that cited figures still match the current primary
+              source and that the guidance given remains accurate as rules and rates change.
             </Text>
           </div>
 

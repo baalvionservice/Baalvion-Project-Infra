@@ -49,7 +49,7 @@ function HorizontalArticleCard({
 function FeaturedArticleCard({
   article,
 }: {
-  article: StockPageData["featured"];
+  article: NonNullable<StockPageData["featured"]>;
 }) {
   return (
     <Link href={`/${article.slug}`} className="group block">
@@ -98,19 +98,21 @@ export default function StockPage() {
       {/* ── Main content ── */}
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-12">
         {/* ── Top section: featured + sidebar ── */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Featured (takes 2/3 width) */}
-          <div className="lg:col-span-2">
-            <FeaturedArticleCard article={featured} />
-          </div>
+        {featured && (
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Featured (takes 2/3 width) */}
+            <div className="lg:col-span-2">
+              <FeaturedArticleCard article={featured} />
+            </div>
 
-          {/* Sidebar latest */}
-          <aside className="flex flex-col">
-            {stocksPageData.latest.map((article) => (
-              <HorizontalArticleCard key={article.id} article={article} />
-            ))}
-          </aside>
-        </section>
+            {/* Sidebar latest */}
+            <aside className="flex flex-col">
+              {stocksPageData.latest.map((article) => (
+                <HorizontalArticleCard key={article.id} article={article} />
+              ))}
+            </aside>
+          </section>
+        )}
 
         {/* ── FAQ ── */}
         <section className="w-full pb-4 md:pb-12">

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { NewsletterForm } from './NewsletterForm';
-import { Twitter, Linkedin, Github, Globe, ShieldCheck, Zap } from 'lucide-react';
+import { Twitter, Linkedin, Github, Globe, ShieldCheck } from 'lucide-react';
 
 /**
  * Specialized Landing Page Footer.
@@ -17,15 +17,12 @@ export const LandingFooter = () => {
   const links = {
     platform: [
       { label: 'Discovery Index', href: '/explore' },
-      { icon: Zap, label: 'AI Analyst', href: '/ai-analyst' },
-      { label: 'Market Pulse', href: '/community/sentiment' },
       { label: 'Financial Tools', href: '/financial-tools' },
     ],
     governance: [
       { label: 'Transparency Hub', href: '/transparency' },
       { label: 'Trust Framework', href: '/creators/trust' },
       { label: 'Verified Experts', href: '/creators' },
-      { label: 'Leaderboard', href: '/community/leaderboard' },
     ],
     legal: [
       { label: 'Privacy Protocol', href: '#' },
@@ -73,7 +70,6 @@ export const LandingFooter = () => {
                 {links.platform.map((link) => (
                   <li key={link.label}>
                     <Link href={link.href} className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-2">
-                      {link.icon && <link.icon size={12} className="text-primary" />}
                       {link.label}
                     </Link>
                   </li>

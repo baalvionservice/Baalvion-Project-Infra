@@ -1,5 +1,4 @@
 import { newsArticles } from "@/lib/data.news";
-import { stocksPageData } from "@/lib/data/data.stocks";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -186,7 +185,8 @@ function OtherTopStoriesSection({ stories }: { stories: OtherStory[] }) {
 export const MainNewsSection =  () => {
   const leftArticle: FeaturedArticleProps = newsArticles.find((a) => a.featured)!;
 
-  const rightArticle: FeaturedArticleProps = stocksPageData.featured;
+  const rightArticle: FeaturedArticleProps =
+    newsArticles.find((a) => a.slug !== leftArticle.slug) ?? leftArticle;
   return (
     <section className="w-full bg-background">
       <div className="max-w-[1320px] mx-auto px-4">

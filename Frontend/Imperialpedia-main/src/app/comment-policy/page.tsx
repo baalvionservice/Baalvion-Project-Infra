@@ -63,12 +63,8 @@ function CommentPolicyFallback() {
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               This policy covers article comments and discussion features across{' '}
-              {env.appName}, including our{' '}
-              <Link href="/community" className="text-primary hover:underline">
-                community
-              </Link>{' '}
-              spaces. It applies to every registered user who participates in a public discussion on
-              the site.
+              {env.appName}. It applies to every registered user who participates in a public
+              discussion on the site.
             </Text>
           </div>
 

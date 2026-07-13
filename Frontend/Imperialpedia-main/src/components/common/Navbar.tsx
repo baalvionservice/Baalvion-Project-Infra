@@ -54,7 +54,6 @@ const NAV: NavCategory[] = [
       { label: "Crypto", href: "/crypto" },
       { label: "Economic Calendar", href: "/calendar" },
       { label: "Indicators", href: "/indicators" },
-      { label: "AI Analyst", href: "/ai-analyst" },
       { label: "View all News", href: "/news" },
     ],
   },

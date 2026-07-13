@@ -106,13 +106,11 @@ function EditorialPolicyFallback() {
               4. Final sign-off
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Final sign-off on published content rests with the editorial team, informed by our{' '}
-              <Link href="/imperialpedia-review-board" className="text-primary hover:underline">
-                Financial Review Board
-              </Link>
-              , a group of subject-matter reviewers who check higher-risk topics (tax, retirement,
-              credit, investing fundamentals) before and after publication. No single contributor
-              can publish YMYL (&ldquo;your money, your life&rdquo;) content without that review step.
+              Final sign-off on published content rests with the editorial team, informed by our
+              Financial Review Board, a group of subject-matter reviewers who check higher-risk
+              topics (tax, retirement, credit, investing fundamentals) before and after
+              publication. No single contributor can publish YMYL (&ldquo;your money, your
+              life&rdquo;) content without that review step.
             </Text>
           </div>
 

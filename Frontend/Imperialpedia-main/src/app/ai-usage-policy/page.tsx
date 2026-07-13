@@ -64,12 +64,8 @@ function AiUsagePolicyFallback() {
             <Text variant="body" className="text-muted-foreground leading-relaxed">
               {env.appName} uses AI tools to assist with research aggregation and drafting support —
               summarizing lengthy source material, surfacing related data points, and helping
-              structure a first draft. Our{' '}
-              <Link href="/ai-analyst" className="text-primary hover:underline">
-                AI Analyst
-              </Link>{' '}
-              features, which readers can use directly, work the same way: they synthesize public
-              data to help you explore a topic, not to replace primary sources.
+              structure a first draft. These tools synthesize public data to help our editorial
+              team explore a topic, not to replace primary sources.
             </Text>
           </div>
 

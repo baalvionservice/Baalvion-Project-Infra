@@ -67,7 +67,7 @@ export const sitemapService = {
     const entries: SitemapEntry[] = [];
 
     // 1. Static public pages (every indexable, crawlable route).
-    const corePages = ["", "/about","/advisor-reviews","/ai-analyst","/ai-analyst/automated-recap","/ai-analyst/bear-case","/ai-analyst/bull-case","/ai-analyst/compare","/ai-analyst/macro-summary","/ai-analyst/model-performance","/ai-analyst/multi-compare","/ai-analyst/news-summary","/ai-analyst/sector-overview","/ai-analyst/social-sentiment","/ai-analyst/weekly-digest","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/community","/community/contests","/community/discussions","/community/leaderboard","/community/rankings","/community/reputation","/community/sentiment","/companies","/company-news","/contact","/countries","/creators","/creators/leaderboards","/creators/profile","/creators/trust","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/datasets","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/financial-tools/retirement","/fiscal-policy","/gdp","/global","/government","/imperialpedia-review-board","/income","/indicators","/industries","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/pricing","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms","/terms-of-service","/topics","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
+    const corePages = ["", "/about","/advisor-reviews","/app-reviews","/financial-intelligence","/auto-loans","/bank-reviews","/banking","/banking-reviews","/bonds","/broker-reviews","/brokers","/budgeting","/budgeting-apps","/calendar","/cd-rates","/checking","/commodities","/companies","/company-news","/contact","/countries","/creators","/creators/leaderboards","/creators/profile","/creators/trust","/credit","/credit-card-reviews","/credit-cards","/crypto","/cryptocurrency","/datasets","/debt","/earnings","/economy","/emergency-fund","/estate-planning","/etfs","/explore","/fed","/financial-calculators","/financial-tools","/financial-tools/compound-interest","/financial-tools/inflation","/financial-tools/investment","/financial-tools/loan","/fiscal-policy","/gdp","/global","/government","/income","/indicators","/industries","/inflation","/insurance","/insurance-reviews","/interest-rates","/investing","/knowledge-map","/latest","/learning-paths","/live-market-news","/loan-reviews","/loans","/market-news","/monetary-policy","/money-market","/mortgages","/mutual-funds","/news","/options","/personal-finance","/planning","/politics","/pricing","/privacy-policy","/real-estate","/retirement","/reviews","/robo-advisors","/savings","/stocks","/student-loans","/tax-software","/taxes","/technologies","/terms","/terms-of-service","/topics","/transparency","/unemployment","/world","/world/us","/world/europe","/world/asia","/world/china","/world/emerging"];
     corePages.forEach((path) => {
       entries.push({
         loc: `${base}${path}`,
@@ -77,8 +77,11 @@ export const sitemapService = {
       });
     });
 
-    // A–Z dictionary hubs (Investopedia-style listing pages).
+    // A–Z dictionary hubs (Investopedia-style listing pages). Letters with no
+    // remaining glossary entries are excluded so empty hubs aren't submitted for indexing.
+    const EMPTY_LETTERS = new Set(["o", "q", "p", "l", "m", "f", "c", "d", "z", "v", "w", "r", "s", "u"]);
     ["num", ..."abcdefghijklmnopqrstuvwxyz".split("")].forEach((l) => {
+      if (EMPTY_LETTERS.has(l)) return;
       entries.push({ loc: `${base}/terms-beginning-with-${l}`, changefreq: "weekly", priority: 0.5 });
     });
 

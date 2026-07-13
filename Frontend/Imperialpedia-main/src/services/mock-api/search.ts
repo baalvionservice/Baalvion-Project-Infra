@@ -138,18 +138,6 @@ const mockSearchData: SearchResult[] = [
     views: 120000,
   },
   {
-    id: "calc-retirement",
-    type: "calculator",
-    title: "Nest Egg Architect",
-    snippet:
-      "Project your retirement corpus based on savings, rates, and time horizons.",
-    route: "/financial-tools/retirement",
-    category: "Retirement",
-    tags: ["Retirement", "Strategy", "Future"],
-    date: "2023-11-05T14:30:00Z",
-    views: 95000,
-  },
-  {
     id: "term-1",
     type: "glossary",
     title: "Bull Market",

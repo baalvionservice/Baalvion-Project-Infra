@@ -68,13 +68,10 @@ function ConflictOfInterestPolicyFallback() {
               1. Disclosure obligations
             </Text>
             <Text variant="body" className="text-muted-foreground leading-relaxed">
-              Writers, editors, and members of our{' '}
-              <Link href="/imperialpedia-review-board" className="text-primary hover:underline">
-                Financial Review Board
-              </Link>{' '}
-              are required to disclose any personal financial interest — a holding, an advisory
-              role, a paid relationship — relevant to a topic they write about or review before
-              contributing to that content.
+              Writers, editors, and members of our Financial Review Board are required to
+              disclose any personal financial interest — a holding, an advisory role, a paid
+              relationship — relevant to a topic they write about or review before contributing
+              to that content.
             </Text>
           </div>
 

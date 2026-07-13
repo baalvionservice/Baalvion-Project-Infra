@@ -153,7 +153,7 @@ export const TOPIC_GROUPS: TopicGroup[] = [
   },
   {
     title: "Markets & AI",
-    href: "/ai-analyst",
+    href: "/market-news",
     articles: [
       {
         title: "Earnings season playbook: what moves a stock on report day",
@@ -161,13 +161,6 @@ export const TOPIC_GROUPS: TopicGroup[] = [
         category: "Earnings",
         dek: "Beats, guidance, and the numbers that matter.",
         imageSeed: "earnings-playbook",
-      },
-      {
-        title: "AI Analyst: get an instant bull and bear case on any asset",
-        href: "/ai-analyst",
-        category: "AI Tools",
-        dek: "Two-sided analysis in seconds, not hours.",
-        imageSeed: "ai-analyst-tool",
       },
       {
         title: "Live market news: tracking the moves as they happen",
