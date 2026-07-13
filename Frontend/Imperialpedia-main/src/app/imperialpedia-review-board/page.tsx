@@ -38,14 +38,6 @@ export default function ReviewBoardPage() {
 
       <div className="mt-8">
         <h3 className="text-3xl mb-3">Who is On the Board?</h3>
-        <p className="mb-3 leading-7 tracking-wide">
-          The Financial Review Board includes experts with more than 100 years
-          of combined financial experience, across every facet of the economy
-          and personal finances. These experts were carefully selected based on
-          their credentials and ability to communicate complex information to a
-          broad readership to ensure our articles are empowering, unbiased,
-          accurate, and inclusive.
-        </p>
         {reviewBoardMembers.map((member) => {
           return <SingleProfile key={member.name} profile={member} />;
         })}
