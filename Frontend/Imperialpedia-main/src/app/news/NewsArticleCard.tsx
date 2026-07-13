@@ -38,7 +38,7 @@ export function ArticleCard({ article }: { article: NewsArticle }) {
           {article.excerpt}
         </p>
         <p className="text-xs text-gray-400">
-          By {article.author.name} · {formatDate(article.publishedAt)}
+          By {article.author.name} · {formatDate(article.publishedAt)} · {article.readTimeMinutes} min read
         </p>
       </div>
     </Link>

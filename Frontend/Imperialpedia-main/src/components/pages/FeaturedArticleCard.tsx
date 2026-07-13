@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { CategoryBadge } from "./CategoriesBadge";
 import { NewsArticle } from "@/lib/data.news";
+import { formatDate } from "@/services/format-date";
 
 /** Large hero card — the featured article */
 export function FeaturedArticleCard({ article }: { article: NewsArticle }) {
@@ -26,7 +27,9 @@ export function FeaturedArticleCard({ article }: { article: NewsArticle }) {
             {article.title}
           </h2>
   
-          <p className="text-gray-500 text-xs">By {article.author.name}</p>
+          <p className="text-gray-500 text-xs">
+            By {article.author.name} · {formatDate(article.publishedAt)} · {article.readTimeMinutes} min read
+          </p>
         </div>
       </Link>
     );
