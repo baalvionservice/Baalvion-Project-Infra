@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import BlockBuilder from './BlockBuilder';
+import DocumentEditor from './document-editor/DocumentEditor';
 import ContentPreview from './ContentPreview';
 import LivePreviewFrame from './LivePreviewFrame';
 import SeoPanel from './SeoPanel';
@@ -237,8 +237,8 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix, w
 
             <Separator />
 
-            {/* Block builder */}
-            <BlockBuilder blocks={blocks} onChange={handleBlocksChange} />
+            {/* Document editor */}
+            <DocumentEditor blocks={blocks} onChange={handleBlocksChange} />
           </div>
           )}
         </ScrollArea>
