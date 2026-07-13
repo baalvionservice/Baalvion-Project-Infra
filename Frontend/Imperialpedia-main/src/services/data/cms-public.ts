@@ -225,18 +225,21 @@ const esc = (s: unknown): string =>
 function blockToHtml(b: CmsBlock): string {
   const c = b.content || {};
   switch (b.type) {
+    // paragraph/heading/quote/callout text is authored as trusted HTML by the CMS rich-text
+    // editor (bold/links/lists), same trust level as the raw `html` block below — must not
+    // be escaped or that formatting renders as literal text on the live site.
     case 'paragraph':
-      return `<p>${esc(c.text)}</p>`;
+      return `<p>${(c.text as string) || ''}</p>`;
     case 'heading': {
       const level = Math.min(Math.max(Number(c.level) || 2, 1), 6);
-      return `<h${level}>${esc(c.text)}</h${level}>`;
+      return `<h${level}>${(c.text as string) || ''}</h${level}>`;
     }
     case 'quote':
-      return `<blockquote><p>${esc(c.text)}</p>${c.cite ? `<cite>${esc(c.cite)}</cite>` : ''}</blockquote>`;
+      return `<blockquote><p>${(c.text as string) || ''}</p>${c.cite ? `<cite>${esc(c.cite)}</cite>` : ''}</blockquote>`;
     case 'code':
       return `<pre><code>${esc(c.code)}</code></pre>`;
     case 'callout':
-      return `<div class="callout callout-${esc(c.variant) || 'info'}">${esc(c.text)}</div>`;
+      return `<div class="callout callout-${esc(c.variant) || 'info'}">${(c.text as string) || ''}</div>`;
     case 'divider':
       return '<hr />';
     case 'image':
@@ -368,6 +371,14 @@ function blocksToNewsBody(blocks?: CmsBlock[]): NewsBodyBlock[] {
         break;
       case 'code':
         if (c.code) out.push({ type: 'paragraph', text: String(c.code) });
+        break;
+      case 'html':
+        // News renders block.text as plain JSX text (no dangerouslySetInnerHTML), unlike
+        // the Article path — strip tags instead of dumping raw markup as visible text.
+        if (c.html) {
+          const stripped = String(c.html).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+          if (stripped) out.push({ type: 'paragraph', text: stripped });
+        }
         break;
       default:
         if (c.text) out.push({ type: 'paragraph', text: String(c.text) });
