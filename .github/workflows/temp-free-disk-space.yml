@@ -1,0 +1,32 @@
+name: (temp) Free disk space on core EC2
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  free-space:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Prune unused Docker images/build cache over SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          script: |
+            set -uo pipefail
+            echo "===== disk usage before ====="
+            df -h /
+            echo "===== docker disk usage before ====="
+            docker system df
+            echo "===== pruning dangling/unused images (containers + named volumes untouched) ====="
+            docker image prune -af
+            echo "===== pruning build cache ====="
+            docker builder prune -af
+            echo "===== pruning stopped containers ====="
+            docker container prune -f
+            echo "===== disk usage after ====="
+            df -h /
+            echo "===== docker disk usage after ====="
+            docker system df
