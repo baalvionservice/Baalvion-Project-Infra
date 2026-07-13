@@ -20,24 +20,11 @@ export const routes = {
     aiTools: "/ai-analyst",
     outline: "/ai-analyst/content-outline",
   },
-  platform: {
-    dashboard: "/dashboard",
-    recommendations: "/dashboard/recommendations",
-    portfolio: "/dashboard/portfolio",
-    alerts: "/dashboard/alerts",
-  },
   premium: {
     subscribe: "/premium/subscribe",
     heatmap: "/premium/market-heatmap",
     screener: "/premium/screener",
     backtesting: "/premium/backtesting",
     reports: "/premium/reports",
-  },
-  admin: {
-    dashboard: "/admin/dashboard",
-    analytics: "/admin/analytics/command-center",
-    quality: "/admin/analytics/content-quality",
-    moderation: "/admin/control/moderation/ai-hub",
-    infrastructure: "/admin/control/infrastructure",
   },
 };

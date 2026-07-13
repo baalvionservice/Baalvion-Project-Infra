@@ -18,7 +18,7 @@ export const dynamic = "force-dynamic";
 function SignInForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect") || "/dashboard";
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const [formData, setFormData] = useState({
     email: "",
