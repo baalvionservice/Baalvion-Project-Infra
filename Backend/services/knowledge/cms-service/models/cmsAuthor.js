@@ -19,6 +19,7 @@ module.exports = function (sequelize, DataTypes) {
         credentials: { type: DataTypes.STRING(300), allowNull: true },
         bio: { type: DataTypes.TEXT, allowNull: true },
         avatarUrl: { type: DataTypes.TEXT, allowNull: true },
+        videoUrl: { type: DataTypes.TEXT, allowNull: true },
         // Array of focus areas, e.g. ["Business & Corporate", "Tax & Finance"].
         expertise: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
         // { x?: string, linkedin?: string }

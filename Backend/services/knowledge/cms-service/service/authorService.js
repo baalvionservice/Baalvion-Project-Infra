@@ -25,6 +25,7 @@ async function createAuthor(websiteId, body) {
         credentials: body.credentials ?? null,
         bio: body.bio ?? null,
         avatarUrl: body.avatarUrl ?? null,
+        videoUrl: body.videoUrl ?? null,
         expertise: body.expertise || [],
         social: body.social || {},
         seoMetadata: body.seoMetadata || {},

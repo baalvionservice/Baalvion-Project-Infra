@@ -65,12 +65,15 @@ async function getPreviewContent(websiteSlug, slug, exp, token) {
 
 async function listPublicContent(websiteSlug, query = {}) {
     const { page, limit, offset } = parsePagination(query);
-    const { categorySlug, tag, search, contentType } = query;
+    const { categorySlug, tag, search, contentType, authorSlug } = query;
 
     const website = await _resolveWebsite(websiteSlug);
     const where = { websiteId: website.id, status: 'published', visibility: 'public' };
 
     if (contentType) where.contentType = contentType;
+    // Content references an author profile via customFields.authorSlug (see cmsAuthor.js) —
+    // Postgres JSONB path match via Sequelize's nested-object syntax on a JSON column.
+    if (authorSlug) where.customFields = { authorSlug };
     if (search) {
         where[Op.or] = [
             { title: { [Op.iLike]: `%${search}%` } },
@@ -113,7 +116,7 @@ async function getPublicCategory(websiteSlug, categorySlug) {
 }
 
 // Public author/contributor profiles for E-E-A-T bylines and /author pages.
-const AUTHOR_ATTRS = ['id', 'slug', 'name', 'title', 'credentials', 'bio', 'avatarUrl', 'expertise', 'social', 'seoMetadata'];
+const AUTHOR_ATTRS = ['id', 'slug', 'name', 'title', 'credentials', 'bio', 'avatarUrl', 'videoUrl', 'expertise', 'social', 'seoMetadata'];
 
 async function listPublicAuthors(websiteSlug) {
     const website = await _resolveWebsite(websiteSlug);
