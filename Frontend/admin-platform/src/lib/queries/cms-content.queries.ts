@@ -19,6 +19,7 @@ export const contentKeys = {
   list: (params?: ContentListParams) => [...contentKeys.all, 'list', params] as const,
   detail: (id: string) => [...contentKeys.all, 'detail', id] as const,
   revisions: (id: string) => [...contentKeys.all, 'revisions', id] as const,
+  deletionRequests: (websiteId: string) => [...contentKeys.all, 'deletion-requests', websiteId] as const,
 };
 
 export const useContentList = (params: ContentListParams) =>
@@ -119,6 +120,39 @@ export const useBulkDeleteContent = () => {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
       toast.success('Items deleted');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useDeletionRequests = (websiteId: string) =>
+  useQuery({
+    queryKey: contentKeys.deletionRequests(websiteId),
+    queryFn: () => cmsContentApi.deletionRequests.list(websiteId).then((r) => r.data.data),
+    enabled: !!websiteId,
+  });
+
+export const useRequestContentDeletion = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, note }: { id: string; note?: string }) => cmsContentApi.deletionRequests.request(id, note),
+    onSuccess: (res) => {
+      qc.setQueryData(contentKeys.detail(res.data.data.id), res.data.data);
+      qc.invalidateQueries({ queryKey: contentKeys.all });
+      toast.success('Deletion requested — an editor will review it');
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
+export const useDismissDeletionRequest = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => cmsContentApi.deletionRequests.dismiss(id),
+    onSuccess: (res) => {
+      qc.setQueryData(contentKeys.detail(res.data.data.id), res.data.data);
+      qc.invalidateQueries({ queryKey: contentKeys.all });
+      toast.success('Deletion request dismissed');
     },
     onError: (e: { message: string }) => toast.error(e.message),
   });

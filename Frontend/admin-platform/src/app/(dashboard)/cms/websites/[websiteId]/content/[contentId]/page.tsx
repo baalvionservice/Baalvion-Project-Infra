@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import ContentEditor from '@/components/cms/ContentEditor';
 import { useContentItem } from '@/lib/queries/cms-content.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
+import { useCmsPermissions } from '@/lib/queries/cms-permissions.queries';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
 
@@ -38,6 +39,7 @@ export default function ContentEditorPage({
 
   const { data: website } = useWebsite(websiteId);
   const { data: content, isLoading } = useContentItem(contentId);
+  const permissions = useCmsPermissions(websiteId);
 
   useEffect(() => {
     setActiveContent(contentId);
@@ -142,6 +144,8 @@ export default function ContentEditorPage({
       <div className="flex-1 overflow-hidden">
         <ContentEditor
           content={content}
+          userRole={permissions.myRole ?? undefined}
+          canPublish={permissions.canPublish}
           websiteTitleSuffix={website?.config?.seoDefaults?.titleSuffix}
           websiteDomain={website?.domain}
         />

@@ -17,6 +17,8 @@ import RevisionHistory from './RevisionHistory';
 import WorkflowPanel from './WorkflowPanel';
 import ContentClassificationPanel from './ContentClassificationPanel';
 import CustomFieldsPanel from './CustomFieldsPanel';
+import ReviewerPanel from './ReviewerPanel';
+import CitationsPanel from './CitationsPanel';
 import ContentWorkflowBadge from './ContentWorkflowBadge';
 import { useUpdateContent, useAutosave } from '@/lib/queries/cms-content.queries';
 import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
@@ -28,15 +30,22 @@ import type { CmsRole } from '@/lib/types/cms-website.types';
 interface Props {
   content: ContentItem;
   userRole?: CmsRole;
+  /** Can this user publish/schedule/unpublish (cms_publisher+)? Gates the toolbar's
+   *  primary action — contributors/authors below that level get "Submit for Review"
+   *  instead of a "Publish" button that would just 403 when they click it. */
+  canPublish?: boolean;
   websiteTitleSuffix?: string;
   websiteDomain?: string | null;
 }
 
-export default function ContentEditor({ content, userRole, websiteTitleSuffix, websiteDomain }: Props) {
+export default function ContentEditor({ content, userRole, canPublish, websiteTitleSuffix, websiteDomain }: Props) {
   const { mutate: save, isPending: isSaving } = useUpdateContent(content.id);
   const { mutate: runTransition, isPending: isTransitioning } = useWorkflowTransition();
   const autosave = useAutosave(content.id);
   const isPublished = content.status === 'published';
+  // Matches the backend's submit_for_review transition `from` states (see cms-service
+  // workflowService.js TRANSITIONS) — only offer the button when it would actually work.
+  const canSubmitForReview = content.status === 'draft' || content.status === 'changes_requested';
   const { hasUnsavedChanges, lastAutosaveAt, markUnsaved, activeSidePanel, toggleSidePanel } =
     useCmsStore();
 
@@ -93,6 +102,15 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix, w
       {
         onSuccess: () =>
           runTransition({ contentId: content.id, action: isPublished ? 'unpublish' : 'publish' }),
+      },
+    );
+  };
+
+  const handleSubmitForReview = () => {
+    save(
+      { title, slug, excerpt, blocks, seo, categoryIds, tagIds, customFields },
+      {
+        onSuccess: () => runTransition({ contentId: content.id, action: 'submit_for_review' }),
       },
     );
   };
@@ -180,16 +198,29 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix, w
               <Save className="h-3.5 w-3.5" />
               {isSaving ? 'Saving...' : 'Save'}
             </Button>
-            {isPublished ? (
-              <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs" onClick={handlePublish} disabled={isSaving || isTransitioning} title="Take this off the public site">
-                <Globe className="h-3.5 w-3.5" />
-                {isTransitioning ? 'Working…' : 'Unpublish'}
+            {canPublish ? (
+              isPublished ? (
+                <Button variant="outline" size="sm" className="h-7 gap-1.5 text-xs" onClick={handlePublish} disabled={isSaving || isTransitioning} title="Take this off the public site">
+                  <Globe className="h-3.5 w-3.5" />
+                  {isTransitioning ? 'Working…' : 'Unpublish'}
+                </Button>
+              ) : (
+                <Button size="sm" className="h-7 gap-1.5 text-xs" onClick={handlePublish} disabled={isSaving || isTransitioning} title="Save and publish — goes live on the site">
+                  <Send className="h-3.5 w-3.5" />
+                  {isSaving || isTransitioning ? 'Publishing…' : 'Save & Publish'}
+                </Button>
+              )
+            ) : canSubmitForReview ? (
+              // Contributor/author: can't publish, so the primary action moves them
+              // into the approval queue instead of dead-ending on a 403.
+              <Button size="sm" className="h-7 gap-1.5 text-xs" onClick={handleSubmitForReview} disabled={isSaving || isTransitioning} title="Save and send to a publisher for review — you can't publish directly">
+                <Send className="h-3.5 w-3.5" />
+                {isSaving || isTransitioning ? 'Submitting…' : 'Save & Submit for Review'}
               </Button>
             ) : (
-              <Button size="sm" className="h-7 gap-1.5 text-xs" onClick={handlePublish} disabled={isSaving || isTransitioning} title="Save and publish — goes live on the site">
-                <Send className="h-3.5 w-3.5" />
-                {isSaving || isTransitioning ? 'Publishing…' : 'Save & Publish'}
-              </Button>
+              <span className="text-xs text-muted-foreground px-1" title="A publisher or admin needs to act on this next">
+                Awaiting {content.status === 'pending_review' ? 'review' : content.status.replace(/_/g, ' ')}
+              </span>
             )}
           </div>
         </div>
@@ -279,6 +310,15 @@ export default function ContentEditor({ content, userRole, websiteTitleSuffix, w
                   onTagsChange={(ids) => { setTagIds(ids); markUnsaved(); }}
                 />
                 <CustomFieldsPanel
+                  value={customFields}
+                  onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                />
+                <ReviewerPanel
+                  websiteId={content.websiteId}
+                  value={customFields}
+                  onChange={(v) => { setCustomFields(v); markUnsaved(); }}
+                />
+                <CitationsPanel
                   value={customFields}
                   onChange={(v) => { setCustomFields(v); markUnsaved(); }}
                 />

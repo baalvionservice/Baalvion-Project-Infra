@@ -5,7 +5,7 @@ const wfCtrl = require('../controller/workflowController');
 const revCtrl = require('../controller/revisionController');
 const { loadCmsRole, requireCmsRole } = require('../middleware/cmsAccess');
 const { validate } = require('../middleware/validate');
-const { createContentSchema, updateContentSchema, autosaveContentSchema, bulkUpdateSchema } = require('../validators/contentSchemas');
+const { createContentSchema, updateContentSchema, autosaveContentSchema, bulkUpdateSchema, requestDeletionSchema } = require('../validators/contentSchemas');
 const { transitionSchema } = require('../validators/workflowSchemas');
 
 const router = Router({ mergeParams: true }); // receives websiteId from parent
@@ -18,12 +18,18 @@ router.post('/bulk', loadCmsRole, requireCmsRole('cms_editor'), validate(bulkUpd
 // Pending approvals — /cms/websites/:websiteId/content/pending
 router.get('/pending', loadCmsRole, requireCmsRole('cms_reviewer'), wfCtrl.listPending);
 
+// Deletion requests — /cms/websites/:websiteId/content/deletion-requests. Contributors/authors
+// can't DELETE (requires cms_editor+ below); this is their alternative + the editor's queue.
+router.get('/deletion-requests', loadCmsRole, requireCmsRole('cms_editor'), ctrl.listDeletionRequests);
+
 // Single content — /cms/websites/:websiteId/content/:contentId
 router.get('/:contentId', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getOne);
 router.get('/:contentId/preview-token', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getPreviewToken);
 router.patch('/:contentId', loadCmsRole, requireCmsRole('cms_contributor'), validate(updateContentSchema), ctrl.update);
 router.put('/:contentId/autosave', loadCmsRole, requireCmsRole('cms_contributor'), validate(autosaveContentSchema), ctrl.autosave);
 router.delete('/:contentId', loadCmsRole, requireCmsRole('cms_editor'), ctrl.remove);
+router.post('/:contentId/request-deletion', loadCmsRole, requireCmsRole('cms_contributor'), validate(requestDeletionSchema), ctrl.requestDeletion);
+router.post('/:contentId/dismiss-deletion-request', loadCmsRole, requireCmsRole('cms_editor'), ctrl.dismissDeletionRequest);
 
 // Workflow — /cms/websites/:websiteId/content/:contentId/workflow
 router.get('/:contentId/workflow', loadCmsRole, requireCmsRole('cms_viewer'), wfCtrl.getWorkflow);

@@ -39,6 +39,9 @@ module.exports = function (sequelize, DataTypes) {
         viewCount: { type: DataTypes.BIGINT, allowNull: false, defaultValue: 0 },
         revisionCount: { type: DataTypes.INTEGER, allowNull: false, defaultValue: 0 },
         customFields: { type: DataTypes.JSONB, allowNull: true, defaultValue: {} },
+        deletionRequestedBy: { type: DataTypes.BIGINT, allowNull: true },
+        deletionRequestedAt: { type: DataTypes.DATE, allowNull: true },
+        deletionRequestNote: { type: DataTypes.TEXT, allowNull: true },
     }, {
         sequelize,
         tableName: 'cms_contents',

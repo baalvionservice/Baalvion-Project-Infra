@@ -32,10 +32,12 @@ export default function WorkflowPanel({ contentId, currentStatus, userRole, sche
   const [note, setNote] = useState('');
   const [scheduledDate, setScheduledDate] = useState(scheduledAt ?? '');
 
+  // Fail closed: an unresolved role must show NO actions, not every action. The old
+  // `!userRole || ...` fallback did the opposite — anyone whose role hadn't loaded yet
+  // saw every transition (including Publish/Archive) and only found out they lacked
+  // permission when the backend rejected the click with a 403.
   const availableTransitions = WORKFLOW_TRANSITIONS.filter(
-    (t) =>
-      t.from === currentStatus &&
-      (!userRole || t.requiredRoles.includes(userRole))
+    (t) => t.from === currentStatus && !!userRole && t.requiredRoles.includes(userRole)
   );
 
   const handleConfirm = () => {

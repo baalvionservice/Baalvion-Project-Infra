@@ -95,6 +95,11 @@ export interface ContentItem {
   viewCount: number;
   revisionCount: number;
   customFields: Record<string, unknown>;
+  // Set when a lower CMS role (contributor/author, who can't DELETE outright) has
+  // flagged this item for an editor/admin to review and remove.
+  deletionRequestedBy?: number | null;
+  deletionRequestedAt?: string | null;
+  deletionRequestNote?: string | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -67,4 +67,8 @@ const bulkUpdateSchema = z.object({
     categoryId: z.string().uuid().optional(),
 });
 
-module.exports = { createContentSchema, updateContentSchema, autosaveContentSchema, bulkUpdateSchema };
+const requestDeletionSchema = z.object({
+    note: z.string().max(600).optional(),
+});
+
+module.exports = { createContentSchema, updateContentSchema, autosaveContentSchema, bulkUpdateSchema, requestDeletionSchema };

@@ -301,6 +301,41 @@ async function bulkUpdate(websiteId, userId, { ids, action, categoryId }) {
     return { updated: contents.length };
 }
 
+// Lower CMS roles (contributor/author) can't DELETE (requires cms_editor+ at the route),
+// so this is their alternative: flag content for an editor/admin to review and act on.
+// Additive-only — never mutates status or blocks any other operation on the content.
+async function requestDeletion(websiteId, contentId, userId, note) {
+    const content = await CmsContent.findOne({ where: { id: contentId, websiteId } });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+
+    await content.update({
+        deletionRequestedBy: userId,
+        deletionRequestedAt: new Date(),
+        deletionRequestNote: note || null,
+    });
+    await cache.del(cache.keys.content(contentId));
+    return content.toJSON();
+}
+
+// Editor+/admin declines the request without deleting — clears the flag, content is untouched.
+async function dismissDeletionRequest(websiteId, contentId) {
+    const content = await CmsContent.findOne({ where: { id: contentId, websiteId } });
+    if (!content) throw new AppError('NOT_FOUND', 'Content not found', 404);
+
+    await content.update({ deletionRequestedBy: null, deletionRequestedAt: null, deletionRequestNote: null });
+    await cache.del(cache.keys.content(contentId));
+    return content.toJSON();
+}
+
+async function listDeletionRequests(websiteId) {
+    const rows = await CmsContent.findAll({
+        where: { websiteId, deletionRequestedAt: { [Op.ne]: null } },
+        order: [['deletionRequestedAt', 'DESC']],
+        attributes: { exclude: ['contentBlocks'] },
+    });
+    return rows.map((r) => r.toJSON());
+}
+
 async function incrementViewCount(contentId) {
     await CmsContent.increment('viewCount', { where: { id: contentId } });
     await cache.del(cache.keys.content(contentId));
@@ -329,4 +364,7 @@ function _normalizeCategoryIds(categoryIds, categoryId) {
     return [...new Set(merged.filter(Boolean))];
 }
 
-module.exports = { listContent, getContent, getPreviewToken, createContent, updateContent, autosaveContent, deleteContent, bulkUpdate, incrementViewCount };
+module.exports = {
+    listContent, getContent, getPreviewToken, createContent, updateContent, autosaveContent, deleteContent,
+    bulkUpdate, incrementViewCount, requestDeletion, dismissDeletionRequest, listDeletionRequests,
+};

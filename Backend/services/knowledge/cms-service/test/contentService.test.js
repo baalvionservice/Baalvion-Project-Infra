@@ -49,6 +49,10 @@ function matches(where, row) {
     }
     if (where.websiteId && row.websiteId !== where.websiteId) return false;
     if (where.slug && row.slug !== where.slug) return false;
+    if (where.deletionRequestedAt && typeof where.deletionRequestedAt === 'object') {
+        // Unset (undefined) is NULL in a real DB column too — `IS NOT NULL` excludes it.
+        if (Op.ne in where.deletionRequestedAt && where.deletionRequestedAt[Op.ne] === null && row.deletionRequestedAt == null) return false;
+    }
     return true;
 }
 
@@ -231,4 +235,71 @@ test('bulkUpdate assign_category rejects an unknown target category', async () =
         /Category not found/,
     );
     assert.equal(categoryRows.get('cat-a').contentCount, 1);
+});
+
+// ── Deletion requests — contributors/authors can't DELETE (requires cms_editor+ at the
+// route), so this is their alternative: flag content for an editor/admin to act on. ────
+test('requestDeletion flags content without deleting or changing its status', async () => {
+    const contentService = loadService();
+    const a = await contentService.createContent(WEBSITE_ID, 'user-1', {
+        title: 'Article A', contentType: 'news', featuredImage: 'https://example.com/x.png', categoryIds: ['cat-a'],
+    });
+
+    const flagged = await contentService.requestDeletion(WEBSITE_ID, a.id, 'user-2', 'This is outdated and wrong.');
+
+    assert.equal(flagged.deletionRequestedBy, 'user-2');
+    assert.ok(flagged.deletionRequestedAt);
+    assert.equal(flagged.deletionRequestNote, 'This is outdated and wrong.');
+    assert.equal(flagged.status, 'draft');
+    assert.ok(contentRows.has(a.id), 'content must still exist — requesting deletion never deletes it');
+});
+
+test('requestDeletion works without a note', async () => {
+    const contentService = loadService();
+    const a = await contentService.createContent(WEBSITE_ID, 'user-1', {
+        title: 'Article A', contentType: 'news', featuredImage: 'https://example.com/x.png', categoryIds: ['cat-a'],
+    });
+
+    const flagged = await contentService.requestDeletion(WEBSITE_ID, a.id, 'user-2', undefined);
+    assert.equal(flagged.deletionRequestNote, null);
+});
+
+test('dismissDeletionRequest clears the flag and leaves content otherwise untouched', async () => {
+    const contentService = loadService();
+    const a = await contentService.createContent(WEBSITE_ID, 'user-1', {
+        title: 'Article A', contentType: 'news', featuredImage: 'https://example.com/x.png', categoryIds: ['cat-a'],
+    });
+    await contentService.requestDeletion(WEBSITE_ID, a.id, 'user-2', 'Please remove.');
+
+    const dismissed = await contentService.dismissDeletionRequest(WEBSITE_ID, a.id);
+
+    assert.equal(dismissed.deletionRequestedBy, null);
+    assert.equal(dismissed.deletionRequestedAt, null);
+    assert.equal(dismissed.deletionRequestNote, null);
+    assert.ok(contentRows.has(a.id));
+});
+
+test('listDeletionRequests returns only flagged content for the given website', async () => {
+    const contentService = loadService();
+    const a = await contentService.createContent(WEBSITE_ID, 'user-1', {
+        title: 'Flagged', contentType: 'news', featuredImage: 'https://example.com/x.png', categoryIds: ['cat-a'],
+    });
+    const b = await contentService.createContent(WEBSITE_ID, 'user-1', {
+        title: 'Not flagged', contentType: 'news', featuredImage: 'https://example.com/x.png', categoryIds: ['cat-a'],
+    });
+    await contentService.requestDeletion(WEBSITE_ID, a.id, 'user-2', 'Remove this.');
+
+    const requests = await contentService.listDeletionRequests(WEBSITE_ID);
+
+    assert.equal(requests.length, 1);
+    assert.equal(requests[0].id, a.id);
+    assert.notEqual(requests.some((r) => r.id === b.id), true);
+});
+
+test('requestDeletion on unknown content throws NOT_FOUND', async () => {
+    const contentService = loadService();
+    await assert.rejects(
+        () => contentService.requestDeletion(WEBSITE_ID, 'does-not-exist', 'user-2', 'note'),
+        /Content not found/,
+    );
 });

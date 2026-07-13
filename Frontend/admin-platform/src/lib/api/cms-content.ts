@@ -27,7 +27,9 @@ interface RawContent {
   featuredImage?: string | null; contentType: ContentItem['type']; contentBlocks?: unknown[];
   tagIds?: string[]; seoMetadata?: Record<string, unknown>; status: ContentItem['status'];
   visibility?: string; scheduledAt?: string | null; publishedAt?: string | null;
-  viewCount?: string | number; revisionCount?: number; customFields?: Record<string, unknown>; createdAt: string; updatedAt: string;
+  viewCount?: string | number; revisionCount?: number; customFields?: Record<string, unknown>;
+  deletionRequestedBy?: number | string | null; deletionRequestedAt?: string | null; deletionRequestNote?: string | null;
+  createdAt: string; updatedAt: string;
 }
 
 const author = (id: string | number | null | undefined) =>
@@ -58,6 +60,9 @@ const toContentItem = (r: RawContent): ContentItem => ({
   viewCount: Number(r.viewCount ?? 0),
   revisionCount: r.revisionCount ?? 0,
   customFields: (r.customFields ?? {}) as Record<string, unknown>,
+  deletionRequestedBy: r.deletionRequestedBy != null ? Number(r.deletionRequestedBy) : null,
+  deletionRequestedAt: r.deletionRequestedAt ?? null,
+  deletionRequestNote: r.deletionRequestNote ?? null,
   createdAt: r.createdAt,
   updatedAt: r.updatedAt,
 });
@@ -174,4 +179,24 @@ export const cmsContentApi = {
 
   bulkDelete: (ids: string[]) =>
     cmsApiClient.post<ApiResponse<void>>(`/cms/websites/${wid()}/content/bulk`, { ids, action: 'delete' }),
+
+  // Deletion requests — the alternative for roles below cms_editor, who can't call `delete` above.
+  deletionRequests: {
+    list: async (websiteId: string) => {
+      const res = await cmsApiClient.get<ApiResponse<RawContent[]>>(`/cms/websites/${websiteId}/content/deletion-requests`);
+      return { ...res, data: { ...res.data, data: (res.data.data ?? []).map(toContentItem) } };
+    },
+
+    request: async (id: string, note?: string) => {
+      const res = await cmsApiClient.post<ApiResponse<RawContent>>(
+        `/cms/websites/${wid()}/content/${id}/request-deletion`, { ...(note ? { note } : {}) },
+      );
+      return { ...res, data: { ...res.data, data: toContentItem(res.data.data) } };
+    },
+
+    dismiss: async (id: string) => {
+      const res = await cmsApiClient.post<ApiResponse<RawContent>>(`/cms/websites/${wid()}/content/${id}/dismiss-deletion-request`);
+      return { ...res, data: { ...res.data, data: toContentItem(res.data.data) } };
+    },
+  },
 };

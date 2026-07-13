@@ -61,6 +61,10 @@ export interface CmsPermissions {
   canPublish: boolean; // can publish / schedule
   canEditContent: boolean;
   canManageMedia: boolean;
+  // Matches cms-service's `DELETE /:contentId` gate (requireCmsRole('cms_editor')).
+  // Below this level, the console offers "Request Deletion" instead of a Delete button
+  // that would just 403.
+  canDelete: boolean;
 }
 
 interface ResolveArgs {
@@ -82,5 +86,6 @@ export function resolveCmsPermissions({ myRole, platformRole }: ResolveArgs): Cm
     canPublish: isManager || level >= CMS_ROLE_LEVEL.cms_publisher,
     canEditContent: isManager || level >= CMS_ROLE_LEVEL.cms_author,
     canManageMedia: isManager || level >= CMS_ROLE_LEVEL.cms_author,
+    canDelete: platformAdmin || level >= CMS_ROLE_LEVEL.cms_editor,
   };
 }

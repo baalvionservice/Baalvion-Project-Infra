@@ -58,4 +58,28 @@ const bulk = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { list, create, getOne, getPreviewToken, update, autosave, remove, bulk };
+const listDeletionRequests = async (req, res, next) => {
+    try {
+        const result = await contentService.listDeletionRequests(req.params.websiteId);
+        return sendSuccess(req, res, result);
+    } catch (err) { return next(err); }
+};
+
+const requestDeletion = async (req, res, next) => {
+    try {
+        const content = await contentService.requestDeletion(req.params.websiteId, req.params.contentId, req.user.id, req.validated?.note);
+        return sendSuccess(req, res, content);
+    } catch (err) { return next(err); }
+};
+
+const dismissDeletionRequest = async (req, res, next) => {
+    try {
+        const content = await contentService.dismissDeletionRequest(req.params.websiteId, req.params.contentId);
+        return sendSuccess(req, res, content);
+    } catch (err) { return next(err); }
+};
+
+module.exports = {
+    list, create, getOne, getPreviewToken, update, autosave, remove, bulk,
+    listDeletionRequests, requestDeletion, dismissDeletionRequest,
+};

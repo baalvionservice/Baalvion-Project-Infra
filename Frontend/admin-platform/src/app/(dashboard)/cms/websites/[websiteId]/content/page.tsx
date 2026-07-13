@@ -3,7 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { ColumnDef } from '@tanstack/react-table';
-import { Plus, MoreHorizontal, Copy, Trash2, ArrowLeft, Upload, Send, Archive } from 'lucide-react';
+import { Plus, MoreHorizontal, Copy, Trash2, ArrowLeft, Upload, Send, Archive, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import PageHeader from '@/components/common/PageHeader';
 import DataTable from '@/components/data-table/DataTable';
@@ -32,10 +32,19 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useContentList, useCreateContent, useDeleteContent, useDuplicateContent } from '@/lib/queries/cms-content.queries';
+import {
+  useContentList,
+  useCreateContent,
+  useDeleteContent,
+  useDuplicateContent,
+  useRequestContentDeletion,
+  useDismissDeletionRequest,
+} from '@/lib/queries/cms-content.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
-import { useWebsiteCategories } from '@/lib/queries/cms-taxonomy.queries';
+import { useCmsPermissions } from '@/lib/queries/cms-permissions.queries';
+import CategoryFilterCombobox from '@/components/cms/CategoryFilterCombobox';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import { useDebounce } from '@/lib/hooks/useDebounce';
@@ -64,9 +73,11 @@ export default function WebsiteContentPage({
   const [newType, setNewType] = useState<ContentItemType>('post');
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [bulkBusy, setBulkBusy] = useState(false);
+  const [deletionRequestFor, setDeletionRequestFor] = useState<ContentItem | null>(null);
+  const [deletionNote, setDeletionNote] = useState('');
 
   const { data: website } = useWebsite(websiteId);
-  const { data: categories } = useWebsiteCategories(websiteId);
+  const permissions = useCmsPermissions(websiteId);
   const { data, isLoading, isError, refetch } = useContentList({
     websiteId,
     page,
@@ -83,6 +94,8 @@ export default function WebsiteContentPage({
   const { mutate: create, isPending: isCreating } = useCreateContent();
   const { mutate: remove } = useDeleteContent();
   const { mutate: duplicate } = useDuplicateContent();
+  const { mutate: requestDeletion, isPending: isRequestingDeletion } = useRequestContentDeletion();
+  const { mutate: dismissDeletionRequest } = useDismissDeletionRequest();
 
   // Selection is reported from DataTable during render — only update state when the
   // id set actually changes, otherwise we'd trigger an infinite re-render loop.
@@ -184,7 +197,21 @@ export default function WebsiteContentPage({
     {
       accessorKey: 'status',
       header: 'Status',
-      cell: ({ row }) => <ContentWorkflowBadge status={row.original.status} />,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1.5">
+          <ContentWorkflowBadge status={row.original.status} />
+          {row.original.deletionRequestedAt && (
+            <Badge
+              variant="outline"
+              className="gap-1 text-[10px] text-destructive border-destructive/40"
+              title={row.original.deletionRequestNote || 'Deletion requested'}
+            >
+              <AlertTriangle className="h-3 w-3" />
+              Deletion requested
+            </Badge>
+          )}
+        </div>
+      ),
     },
     {
       accessorKey: 'author',
@@ -222,13 +249,34 @@ export default function WebsiteContentPage({
                 Duplicate
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={() => remove(item.id)}
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
+              {permissions.canDelete ? (
+                <>
+                  <DropdownMenuItem
+                    className="text-destructive"
+                    onClick={() => remove(item.id)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete
+                  </DropdownMenuItem>
+                  {item.deletionRequestedAt && (
+                    <DropdownMenuItem onClick={() => dismissDeletionRequest(item.id)}>
+                      <AlertTriangle className="mr-2 h-4 w-4" />
+                      Dismiss deletion request
+                    </DropdownMenuItem>
+                  )}
+                </>
+              ) : (
+                // Contributor/author roles can't DELETE (backend requires cms_editor+) —
+                // this is their alternative, so clicking never just 403s with no path forward.
+                <DropdownMenuItem
+                  className="text-destructive"
+                  disabled={!!item.deletionRequestedAt}
+                  onClick={() => { setDeletionNote(''); setDeletionRequestFor(item); }}
+                >
+                  <AlertTriangle className="mr-2 h-4 w-4" />
+                  {item.deletionRequestedAt ? 'Deletion already requested' : 'Request Deletion'}
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         );
@@ -317,41 +365,30 @@ export default function WebsiteContentPage({
               <Button size="sm" variant="outline" disabled={bulkBusy} onClick={bulkArchive}>
                 <Archive className="mr-1.5 h-3.5 w-3.5" /> Archive
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="text-destructive"
-                disabled={bulkBusy}
-                onClick={bulkDelete}
-              >
-                <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
-              </Button>
+              {permissions.canDelete && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="text-destructive"
+                  disabled={bulkBusy}
+                  onClick={bulkDelete}
+                >
+                  <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Delete
+                </Button>
+              )}
             </div>
           ) : undefined
         }
         filters={
           <div className="flex gap-2">
-            {categories && categories.length > 0 && (
-              <Select
-                value={categoryFilter || '__all__'}
-                onValueChange={(v) => {
-                  setCategoryFilter(v === '__all__' ? '' : v);
-                  setPage(1);
-                }}
-              >
-                <SelectTrigger className="h-8 w-40">
-                  <SelectValue placeholder="Section" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="__all__">All Sections</SelectItem>
-                  {categories.map((c) => (
-                    <SelectItem key={c.id} value={c.id}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <CategoryFilterCombobox
+              websiteId={websiteId}
+              value={categoryFilter}
+              onChange={(id) => {
+                setCategoryFilter(id);
+                setPage(1);
+              }}
+            />
             <Select
               value={typeFilter || '__all__'}
               onValueChange={(v) => setTypeFilter(v === '__all__' ? '' : (v as ContentItemType))}
@@ -446,6 +483,47 @@ export default function WebsiteContentPage({
         onOpenChange={setImportOpen}
         onImported={() => refetch()}
       />
+
+      {/* Request deletion dialog — the alternative to Delete for roles below cms_editor */}
+      <Dialog open={!!deletionRequestFor} onOpenChange={(o) => !o && setDeletionRequestFor(null)}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Request deletion</DialogTitle>
+            <DialogDescription>
+              &quot;{deletionRequestFor?.title}&quot; won&apos;t be deleted yet — an editor or admin will
+              review your request and remove it, or dismiss the request.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-1.5">
+            <Label className="text-xs">Reason (optional)</Label>
+            <Textarea
+              className="text-xs min-h-[80px]"
+              placeholder="Why should this be deleted?"
+              value={deletionNote}
+              onChange={(e) => setDeletionNote(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" size="sm" onClick={() => setDeletionRequestFor(null)}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              disabled={isRequestingDeletion}
+              onClick={() => {
+                if (!deletionRequestFor) return;
+                requestDeletion(
+                  { id: deletionRequestFor.id, note: deletionNote.trim() || undefined },
+                  { onSuccess: () => setDeletionRequestFor(null) },
+                );
+              }}
+            >
+              {isRequestingDeletion ? 'Requesting…' : 'Request Deletion'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
