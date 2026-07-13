@@ -74,6 +74,10 @@ const addMemberSchema = z
         userId: z.number().int().positive().optional(),
         email: z.string().email().optional(),
         role: cmsRoleEnum.default('cms_author'),
+        // Optional invite-email note. invitationService/mailer already support it
+        // end-to-end (see cmsInvitation.personalNote) — this schema just needs to stop
+        // stripping the field before it reaches the controller.
+        personalNote: z.string().max(600).optional(),
     })
     .refine((d) => d.userId != null || (d.email != null && d.email !== ''), {
         message: 'Provide an email (or userId) of the person to invite',

@@ -71,9 +71,13 @@ async function listPublicContent(websiteSlug, query = {}) {
     const where = { websiteId: website.id, status: 'published', visibility: 'public' };
 
     if (contentType) where.contentType = contentType;
-    // Content references an author profile via customFields.authorSlug (see cmsAuthor.js) —
-    // Postgres JSONB path match via Sequelize's nested-object syntax on a JSON column.
-    if (authorSlug) where.customFields = { authorSlug };
+    // Content references an author profile via customFields.authorSlug (see cmsAuthor.js).
+    // `where.customFields = { authorSlug }` would compare the WHOLE jsonb column for
+    // equality against `{authorSlug}` — customFields always has other keys too (faq,
+    // author, editorialTeam, ...), so that never matched and author-filtered listings
+    // (e.g. "more from this author") silently returned zero results. The dot-path key
+    // is Sequelize's documented syntax for a JSONB `->>` field match on Postgres.
+    if (authorSlug) where['customFields.authorSlug'] = authorSlug;
     if (search) {
         where[Op.or] = [
             { title: { [Op.iLike]: `%${search}%` } },

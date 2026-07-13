@@ -1,14 +1,31 @@
 'use strict';
-const { CmsAuthor } = require('../models');
+const { Op, fn, col, literal } = require('sequelize');
+const { CmsAuthor, CmsContent } = require('../models');
 const { AppError } = require('../utils/errors');
 const { slugify } = require('../utils/slugify');
+
+// Content links to an author profile only loosely, via customFields.authorSlug (there is
+// no FK — see cmsAuthor.js) — so unlike categories/tags, contentCount can't be kept in
+// sync incrementally without duplicating that JSONB-matching logic on every content write.
+// Computing it at read time from a GROUP BY is simple and can never drift out of sync.
+async function _contentCountsBySlug(websiteId) {
+    const authorSlugExpr = literal(`"custom_fields"->>'authorSlug'`);
+    const rows = await CmsContent.findAll({
+        attributes: [[authorSlugExpr, 'authorSlug'], [fn('COUNT', col('id')), 'count']],
+        where: { websiteId, [Op.and]: [literal(`"custom_fields"->>'authorSlug' IS NOT NULL`)] },
+        group: [authorSlugExpr],
+        raw: true,
+    });
+    return new Map(rows.map((r) => [r.authorSlug, Number(r.count)]));
+}
 
 async function listAuthors(websiteId) {
     const authors = await CmsAuthor.findAll({
         where: { websiteId },
         order: [['sortOrder', 'ASC'], ['name', 'ASC']],
     });
-    return authors.map((a) => a.toJSON());
+    const counts = await _contentCountsBySlug(websiteId);
+    return authors.map((a) => ({ ...a.toJSON(), contentCount: counts.get(a.slug) ?? 0 }));
 }
 
 async function createAuthor(websiteId, body) {

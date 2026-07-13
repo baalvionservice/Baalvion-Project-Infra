@@ -153,6 +153,7 @@ async function createContent(websiteId, userId, body) {
     });
 
     if (tagIds?.length) await _incrementTagUsage(websiteId, tagIds, 1);
+    if (cats.length) await _incrementCategoryCount(websiteId, cats, 1);
 
     return content.toJSON();
 }
@@ -182,6 +183,7 @@ async function updateContent(websiteId, contentId, userId, body) {
     }
 
     const oldTagIds = content.tagIds || [];
+    const oldCategoryIds = content.categoryIds || [];
 
     // Regenerate auto-generated artwork when the title or category changes so the
     // image keeps matching the content — but only when the current image is one we
@@ -212,6 +214,13 @@ async function updateContent(websiteId, contentId, userId, body) {
         const added = body.tagIds.filter((id) => !oldTagIds.includes(id));
         if (removed.length) await _incrementTagUsage(websiteId, removed, -1);
         if (added.length) await _incrementTagUsage(websiteId, added, 1);
+    }
+
+    if (body.categoryIds) {
+        const removedCats = oldCategoryIds.filter((id) => !body.categoryIds.includes(id));
+        const addedCats = body.categoryIds.filter((id) => !oldCategoryIds.includes(id));
+        if (removedCats.length) await _incrementCategoryCount(websiteId, removedCats, -1);
+        if (addedCats.length) await _incrementCategoryCount(websiteId, addedCats, 1);
     }
 
     await cache.del(cache.keys.content(contentId));
@@ -250,6 +259,7 @@ async function deleteContent(websiteId, contentId) {
     }
 
     if (content.tagIds?.length) await _incrementTagUsage(websiteId, content.tagIds, -1);
+    if (content.categoryIds?.length) await _incrementCategoryCount(websiteId, content.categoryIds, -1);
 
     await content.destroy();
     await cache.del(cache.keys.content(contentId));
@@ -269,10 +279,20 @@ async function bulkUpdate(websiteId, userId, { ids, action, categoryId }) {
             await CmsContent.destroy({ where: { id: { [Op.in]: ids }, websiteId } });
             break;
         }
-        case 'assign_category':
+        case 'assign_category': {
             if (!categoryId) throw new AppError('VALIDATION_ERROR', 'categoryId is required for assign_category action', 400);
+            const targetExists = await CmsCategory.count({ where: { id: categoryId, websiteId } });
+            if (!targetExists) throw new AppError('NOT_FOUND', 'Category not found', 404);
+
+            const changing = contents.filter((c) => c.categoryId !== categoryId);
             await CmsContent.update({ categoryId, lastEditedBy: userId }, { where: { id: { [Op.in]: ids }, websiteId } });
+
+            await Promise.all(
+                changing.filter((c) => c.categoryId).map((c) => _incrementCategoryCount(websiteId, [c.categoryId], -1)),
+            );
+            if (changing.length) await _incrementCategoryCount(websiteId, [categoryId], changing.length);
             break;
+        }
         default:
             throw new AppError('VALIDATION_ERROR', `Unknown bulk action: ${action}`, 400);
     }
@@ -290,6 +310,15 @@ async function _incrementTagUsage(websiteId, tagIds, delta) {
     if (!tagIds.length) return;
     await CmsTag.increment('usageCount', { by: delta, where: { id: { [Op.in]: tagIds }, websiteId } });
     await cache.del(cache.keys.tagList(websiteId));
+}
+
+// Keeps CmsCategory.contentCount (shown in the admin taxonomy tree) in sync with actual
+// content assignments. Mirrors _incrementTagUsage — same category tree cache key
+// taxonomyService.listCategories() reads, so it must be busted on every change.
+async function _incrementCategoryCount(websiteId, categoryIds, delta) {
+    if (!categoryIds.length) return;
+    await CmsCategory.increment('contentCount', { by: delta, where: { id: { [Op.in]: categoryIds }, websiteId } });
+    await cache.del(cache.keys.categoryTree(websiteId));
 }
 
 // Merge an explicit categoryIds array with the legacy single categoryId into one
