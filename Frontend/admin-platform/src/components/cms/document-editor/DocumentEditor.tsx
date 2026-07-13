@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
+import DOMPurify from 'isomorphic-dompurify';
 import type { ContentBlock } from '@/lib/types/cms-content.types';
 import { documentEditorExtensions } from './extensions';
 import { blocksToTiptapContent, tiptapContentToBlocks } from './converters';
@@ -15,24 +16,18 @@ interface Props {
 
 const AUTOSAVE_DEBOUNCE_MS = 400;
 
-// Strips inline styles, foreign classes, data-* attributes and span/font wrappers from pasted
-// HTML (ChatGPT/Word/Google Docs paste garbage) — ported from RichTextEditor.tsx's proven
-// paste sanitizer rather than rewriting it.
+// Sanitizes pasted HTML (ChatGPT/Word/Google Docs paste garbage) via DOMPurify — strips
+// dangerous tags/attributes plus inline styles, foreign classes, and data-* cruft that bring
+// invisible text colors and junk markup. Unwraps span/font (keeps their text, drops the tag).
+// A hand-rolled regex-strip loop previously did this and was flagged by CodeQL as an
+// incomplete sanitizer (crafted input could survive the strip and still contain `<script`) —
+// DOMPurify is the battle-tested tool for this, not a bigger regex.
 function sanitizePastedHtml(html: string): string {
-  let prev: string;
-  let out = html
-    .replace(/\s(?:style|class|lang|dir|align|id)="[^"]*"/gi, '')
-    .replace(/\s(?:style|class|lang|dir|align|id)='[^']*'/gi, '')
-    .replace(/\sdata-[\w-]+="[^"]*"/gi, '')
-    .replace(/\sdata-[\w-]+='[^']*'/gi, '');
-  do {
-    prev = out;
-    out = out
-      .replace(/<!--[\s\S]*?-->/g, '')
-      .replace(/<\/?(?:html|head|body|meta|link|style|script|o:p|xml)\b[^>]*>/gi, '')
-      .replace(/<\/?(?:span|font)\b[^>]*>/gi, '');
-  } while (out !== prev);
-  return out;
+  return DOMPurify.sanitize(html, {
+    ALLOW_DATA_ATTR: false,
+    FORBID_TAGS: ['font', 'span'],
+    FORBID_ATTR: ['style', 'class', 'lang', 'dir', 'align', 'id'],
+  });
 }
 
 export default function DocumentEditor({ blocks, onChange }: Props) {
