@@ -1,4 +1,4 @@
-import { CategoryFeed } from "@/components/pages/CategoryFeed";
+import { EconomyHub } from "@/components/pages/EconomyHub";
 import { topicMeta } from "@/lib/topic-config";
 import { buildMetadata } from "@/lib/seo";
 
@@ -11,5 +11,5 @@ export const metadata = buildMetadata(topicMeta(SLUG));
 export const dynamic = 'force-dynamic';
 
 export default function Page() {
-  return <CategoryFeed slug={SLUG} />;
+  return <EconomyHub />;
 }

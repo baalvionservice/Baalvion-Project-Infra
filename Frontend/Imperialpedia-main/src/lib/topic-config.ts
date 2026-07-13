@@ -35,12 +35,174 @@ function titleize(slug: string): string {
 const OVERRIDES: Record<string, TopicCopy> = {
   banking: {
     tag: 'BANKING',
-    title: 'Banking & Financial Services',
+    title: 'Banking',
     description:
-      'Navigate the banking landscape with insights on savings accounts, loans, credit products, and financial services to optimize your banking experience.',
-    metaTitle: 'Banking News and Financial Services',
+      'Understand savings, checking accounts, credit cards, loans, mortgages, and banking products with clear explanations, comparisons, and practical financial guidance.',
+    metaTitle: 'Banking Guide | Savings Accounts, Credit Cards, Loans & More',
     metaDescription:
-      'The latest banking news, financial services updates, and industry analysis — savings, loans, credit cards, and banking regulation.',
+      'Learn how banking products work, compare savings accounts, credit cards, loans, mortgages, and find smarter ways to manage your money.',
+  },
+  checking: {
+    tag: 'CHECKING ACCOUNTS',
+    title: 'Checking Accounts',
+    description:
+      'Compare checking account types, fees, and features, and learn how everyday banking accounts work.',
+    metaTitle: 'Checking Accounts — Guides & Comparisons',
+    metaDescription:
+      'Understand checking account fees, features, and how to choose the right everyday banking account for your needs.',
+  },
+  'credit-cards': {
+    tag: 'CREDIT CARDS',
+    title: 'Credit Cards',
+    description:
+      'How credit cards work, interest and rewards explained, and how to use credit responsibly.',
+    metaTitle: 'Credit Cards — Guides, Rewards & Interest Explained',
+    metaDescription:
+      'Learn how credit cards work, how interest and rewards are calculated, and how to choose and use a credit card wisely.',
+  },
+  loans: {
+    tag: 'PERSONAL LOANS',
+    title: 'Personal Loans',
+    description:
+      'How personal loans work, interest rates, fees, and when a loan makes sense versus other borrowing options.',
+    metaTitle: 'Personal Loans — Rates, Fees & Guides',
+    metaDescription:
+      'Understand how personal loans work, what determines your interest rate, and how to compare loan offers.',
+  },
+  'auto-loans': {
+    tag: 'AUTO LOANS',
+    title: 'Auto Loans',
+    description:
+      'Car loan basics — rates, terms, and new-vs-used financing — to help you borrow smarter for a vehicle.',
+    metaTitle: 'Auto Loans — Rates, Terms & Guides',
+    metaDescription:
+      'Learn how auto loans work, compare new vs. used car financing, and find ways to secure a better interest rate.',
+  },
+  'student-loans': {
+    tag: 'STUDENT LOANS',
+    title: 'Student Loans',
+    description:
+      'Federal and private student loans, repayment plans, and strategies for managing education debt.',
+    metaTitle: 'Student Loans — Repayment & Guides',
+    metaDescription:
+      'Compare federal and private student loans, understand repayment plans, and learn strategies for managing student debt.',
+  },
+  'cd-rates': {
+    tag: 'CDS',
+    title: 'Certificates of Deposit (CDs)',
+    description:
+      'How CDs work, current rate trends, and CD ladder strategies for growing savings safely.',
+    metaTitle: 'CD Rates — Certificates of Deposit Explained',
+    metaDescription:
+      'Learn how certificates of deposit work, compare CD rates, and explore CD ladder strategies for steady, low-risk returns.',
+  },
+  'money-market': {
+    tag: 'MONEY MARKET',
+    title: 'Money Market Accounts',
+    description:
+      'How money market accounts work and when they make sense versus savings accounts and CDs.',
+    metaTitle: 'Money Market Accounts Explained',
+    metaDescription:
+      'Understand how money market accounts work and how they compare to savings accounts and CDs.',
+  },
+  'banking-reviews': {
+    tag: 'BANKING REVIEWS',
+    title: 'Banking Reviews',
+    description:
+      'Independent reviews of banks, credit cards, loans, and banking apps to help you compare real options.',
+    metaTitle: 'Banking Reviews — Banks, Cards & Apps Compared',
+    metaDescription:
+      'Independent, editorially reviewed comparisons of banks, credit cards, loans, and banking apps.',
+  },
+  'bank-reviews': {
+    tag: 'BANK REVIEWS',
+    title: 'Bank Reviews',
+    description:
+      'In-depth reviews of banks and credit unions, covering fees, rates, features, and who each is best for.',
+    metaTitle: 'Bank Reviews — Fees, Rates & Features Compared',
+    metaDescription:
+      'Independent bank reviews covering fees, interest rates, features, and who each bank is best suited for.',
+  },
+  'credit-card-reviews': {
+    tag: 'CREDIT CARD REVIEWS',
+    title: 'Credit Card Reviews',
+    description:
+      'Reviews of cashback, travel, and secured credit cards, with real pros, cons, and fee breakdowns.',
+    metaTitle: 'Credit Card Reviews — Rewards, Fees & Ratings',
+    metaDescription:
+      'Independent credit card reviews covering rewards, fees, interest rates, and who each card is best for.',
+  },
+  'loan-reviews': {
+    tag: 'LOAN REVIEWS',
+    title: 'Loan Reviews',
+    description:
+      'Reviews of personal loan, auto loan, and mortgage lenders, comparing rates, fees, and eligibility.',
+    metaTitle: 'Loan Reviews — Lenders Compared',
+    metaDescription:
+      'Independent lender reviews comparing rates, fees, and eligibility across personal, auto, and mortgage loans.',
+  },
+  'app-reviews': {
+    tag: 'APP REVIEWS',
+    title: 'Banking App Reviews',
+    description:
+      'Reviews of banking and budgeting apps, covering features, security, and ease of use.',
+    metaTitle: 'Banking App Reviews — Features & Security Compared',
+    metaDescription:
+      'Independent reviews of banking and budgeting apps, covering features, security, fees, and usability.',
+  },
+  reviews: {
+    tag: 'REVIEWS',
+    title: 'Financial Reviews',
+    description:
+      'Independent reviews and comparisons of banks, brokers, credit cards, loans, investment platforms, apps, and financial services to help you make smarter money decisions.',
+    metaTitle: 'Financial Product Reviews & Comparisons',
+    metaDescription:
+      'Independent reviews and comparisons of banks, brokers, credit cards, loans, robo-advisors, and financial apps to help you choose with confidence.',
+  },
+  'broker-reviews': {
+    tag: 'BROKER REVIEWS',
+    title: 'Broker Reviews',
+    description:
+      'Independent reviews of online brokers, comparing fees, platforms, investment options, and who each is best for.',
+    metaTitle: 'Broker Reviews — Fees, Platforms & Ratings Compared',
+    metaDescription:
+      'Independent broker reviews covering fees, account types, investment options, and trading platforms.',
+  },
+  'insurance-reviews': {
+    tag: 'INSURANCE REVIEWS',
+    title: 'Insurance Reviews',
+    description:
+      'Independent reviews of life, auto, and home insurers, comparing coverage, pricing factors, and who each is best for.',
+    metaTitle: 'Insurance Reviews — Coverage & Ratings Compared',
+    metaDescription:
+      'Independent insurance company reviews covering coverage options, policy types, and who each insurer is best suited for.',
+  },
+  'advisor-reviews': {
+    tag: 'ADVISOR REVIEWS',
+    title: 'Financial Advisor Reviews',
+    description:
+      'Independent reviews of financial advisory firms and services, comparing fees, minimums, and services offered.',
+    metaTitle: 'Financial Advisor Reviews — Fees & Services Compared',
+    metaDescription:
+      'Independent reviews of financial advisory firms, comparing advisory fees, account minimums, and services offered.',
+  },
+  'robo-advisors': {
+    tag: 'ROBO-ADVISOR REVIEWS',
+    title: 'Robo-Advisor Reviews',
+    description:
+      'Independent reviews of automated investing platforms, comparing management fees, portfolio options, and tax features.',
+    metaTitle: 'Robo-Advisor Reviews — Fees & Features Compared',
+    metaDescription:
+      'Independent robo-advisor reviews covering management fees, portfolio construction, tax-loss harvesting, and account minimums.',
+  },
+  'tax-software': {
+    tag: 'TAX SOFTWARE REVIEWS',
+    title: 'Tax Software Reviews',
+    description:
+      'Independent reviews of tax filing software, comparing pricing, ease of use, and support for complex tax situations.',
+    metaTitle: 'Tax Software Reviews — Pricing & Features Compared',
+    metaDescription:
+      'Independent tax software reviews comparing pricing tiers, ease of use, and support for itemized deductions and self-employment income.',
   },
   investing: {
     tag: 'INVESTING',
@@ -53,8 +215,46 @@ const OVERRIDES: Record<string, TopicCopy> = {
     tag: 'ECONOMY',
     title: 'The Economy',
     description:
-      'Macro forces explained — growth, inflation, employment, central-bank policy, and what the data means for your money.',
+      'Understand the forces shaping markets and everyday life — GDP, inflation, unemployment, interest rates, central banks, and global economic trends explained clearly.',
     metaTitle: 'Economy News & Macroeconomic Analysis',
+    metaDescription:
+      'Understand GDP, inflation, unemployment, interest rates, central banks, and global economic trends — explained clearly for beginners and investors alike.',
+  },
+  indicators: {
+    tag: 'ECONOMIC INDICATORS',
+    title: 'Economic Indicators',
+    description:
+      'CPI, PPI, retail sales, consumer confidence, PMI, and the data investors watch to read the health of the economy.',
+    metaTitle: 'Economic Indicators Explained',
+    metaDescription:
+      'Learn how CPI, PPI, retail sales, consumer confidence, and other leading and lagging indicators reveal the direction of the economy.',
+  },
+  'fiscal-policy': {
+    tag: 'FISCAL POLICY',
+    title: 'Fiscal Policy',
+    description:
+      'Government spending, taxation, budget deficits, and the national debt — and how fiscal decisions ripple through the economy.',
+    metaTitle: 'Fiscal Policy Explained',
+    metaDescription:
+      'Understand government spending, taxation, budget deficits, and national debt, and how fiscal policy decisions affect growth and inflation.',
+  },
+  'monetary-policy': {
+    tag: 'MONETARY POLICY',
+    title: 'Monetary Policy',
+    description:
+      'How central banks manage the money supply — interest rates, quantitative easing, and inflation targeting explained.',
+    metaTitle: 'Monetary Policy Explained',
+    metaDescription:
+      'Learn how central banks use interest rates, quantitative easing, and inflation targeting to manage the money supply and the broader economy.',
+  },
+  global: {
+    tag: 'GLOBAL ECONOMY',
+    title: 'Global Economy',
+    description:
+      'International trade, currency exchange rates, supply chains, and how economies around the world affect each other.',
+    metaTitle: 'Global Economy News & Analysis',
+    metaDescription:
+      'Coverage of international trade, currency exchange rates, global supply chains, and emerging markets shaping the world economy.',
   },
   crypto: {
     tag: 'CRYPTO',
@@ -74,8 +274,10 @@ const OVERRIDES: Record<string, TopicCopy> = {
     tag: 'PERSONAL FINANCE',
     title: 'Personal Finance',
     description:
-      'Practical money guidance — budgeting, saving, debt, credit, and the decisions that compound over a lifetime.',
-    metaTitle: 'Personal Finance News, Tips & Guides',
+      'Practical money guidance — budgeting, saving, debt, credit, retirement, and the decisions that compound over a lifetime.',
+    metaTitle: 'Personal Finance Guide | Budgeting, Saving, Debt & More',
+    metaDescription:
+      'Learn how to budget, save, manage debt, build credit, and plan for retirement with clear, practical personal finance guidance.',
   },
   stocks: {
     tag: 'STOCKS',
@@ -150,10 +352,10 @@ const OVERRIDES: Record<string, TopicCopy> = {
     tag: 'MARKET NEWS',
     title: 'Market News',
     description:
-      'Daily coverage of equities, bonds, commodities, and the macro events moving global markets.',
-    metaTitle: 'Market News & Daily Financial Coverage',
+      'Coverage of stocks, earnings, economic data, central banks, commodities, crypto, and global markets — explained in plain English.',
+    metaTitle: 'Market News | Stocks, Economy, Earnings & Global Markets',
     metaDescription:
-      'Stay current on stock, bond, and commodity markets with daily coverage of the economic events and earnings that move prices.',
+      'Latest market news covering stocks, earnings, Federal Reserve decisions, inflation, commodities, crypto, and global markets explained clearly.',
   },
   'live-market-news': {
     tag: 'LIVE MARKETS',
@@ -190,6 +392,15 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Debt Payoff Strategies & Management Guides',
     metaDescription:
       'Practical strategies for paying down debt faster, including the snowball and avalanche methods, consolidation, and credit-card payoff plans.',
+  },
+  credit: {
+    tag: 'CREDIT SCORES',
+    title: 'Credit Scores',
+    description:
+      'How credit scores are calculated, what moves them up or down, and how to build and protect your credit over time.',
+    metaTitle: 'Credit Scores — How They Work & How to Improve Them',
+    metaDescription:
+      'Learn how credit scores are calculated, what factors help or hurt your score, and practical steps to build and protect your credit.',
   },
   gdp: {
     tag: 'GDP',
@@ -365,7 +576,6 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   'money-management': 'PersonalFinance',
   income: 'PersonalFinance',
   taxes: 'PersonalFinance',
-  'tax-software': 'PersonalFinance',
   'estate-planning': 'PersonalFinance',
   planning: 'PersonalFinance',
   retirement: 'PersonalFinance',
@@ -374,6 +584,7 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   'auto-loans': 'PersonalFinance',
   insurance: 'PersonalFinance',
   // Reviews / guides
+  reviews: 'Guides',
   'advisor-reviews': 'Guides',
   'app-reviews': 'Guides',
   'bank-reviews': 'Guides',
@@ -383,6 +594,7 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   'insurance-reviews': 'Guides',
   'loan-reviews': 'Guides',
   'robo-advisors': 'Guides',
+  'tax-software': 'Guides',
   'financial-calculators': 'Guides',
   calendar: 'Guides',
 };

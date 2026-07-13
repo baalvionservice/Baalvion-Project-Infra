@@ -26,7 +26,11 @@ export function FeaturedArticleCard({ article }: { article: NewsArticle }) {
           <h2 className="text-foreground text-2xl md:text-3xl font-bold leading-snug max-w-2xl group-hover:underline underline-offset-4">
             {article.title}
           </h2>
-  
+          {article.excerpt && (
+            <p className="max-w-2xl text-sm text-gray-600 leading-relaxed line-clamp-2">
+              {article.excerpt}
+            </p>
+          )}
           <p className="text-gray-500 text-xs">
             By {article.author.name} · {formatDate(article.publishedAt)} · {article.readTimeMinutes} min read
           </p>
