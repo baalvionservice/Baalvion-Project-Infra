@@ -3,12 +3,10 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Search, ChevronDown, LayoutDashboard } from "lucide-react";
+import { Menu, X, Search, ChevronDown } from "lucide-react";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 import { SearchModal } from "@/components/search/SearchModal";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/lib/state/app-store";
-import { sharedSignInUrl } from "@/lib/shared-auth";
 
 type NavLink = { label: string; href: string };
 type NavCategory = {
@@ -133,12 +131,6 @@ export const Navbar = () => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
   const pathname = usePathname();
-  const { currentUser } = useAppStore();
-  const isHome = pathname === "/";
-  // Keep the homepage's header free of account chrome (admin link, sign-in) —
-  // AdSense/Google News review lands there first and account/login UI reads
-  // as a gated member area rather than open editorial content.
-  const isAdmin = !isHome && currentUser?.role === "admin";
 
   useEffect(() => {
     setIsMobileOpen(false);
@@ -206,30 +198,6 @@ export const Navbar = () => {
               >
                 <Search className="h-5 w-5" />
               </button>
-
-              {isAdmin && (
-                <Link
-                  href="/admin"
-                  className="hidden md:inline-flex items-center gap-1.5 h-9 px-3 text-sm font-semibold text-foreground hover:text-primary transition-colors"
-                >
-                  <LayoutDashboard className="h-4 w-4" /> Admin
-                </Link>
-              )}
-
-              {!isHome && (
-                <button
-                  onClick={() => window.location.assign(sharedSignInUrl())}
-                  className="hidden sm:inline-flex items-center h-9 px-3 text-sm font-semibold text-foreground hover:text-primary transition-colors"
-                >
-                  Sign In
-                </button>
-              )}
-              <Link
-                href="/premium/subscribe"
-                className="inline-flex items-center h-9 px-4 rounded-sm bg-accent text-accent-foreground text-sm font-bold hover:brightness-95 transition-all"
-              >
-                Subscribe
-              </Link>
             </div>
           </div>
         </div>
@@ -336,22 +304,6 @@ export const Navbar = () => {
                   )}
                 </div>
               ))}
-              <div className="p-4 space-y-2">
-                {!isHome && (
-                  <button
-                    onClick={() => window.location.assign(sharedSignInUrl())}
-                    className="block w-full text-center h-10 leading-10 rounded-sm border border-border font-semibold"
-                  >
-                    Sign In
-                  </button>
-                )}
-                <Link
-                  href="/premium/subscribe"
-                  className="block w-full text-center h-10 leading-10 rounded-sm bg-accent text-accent-foreground font-bold"
-                >
-                  Subscribe
-                </Link>
-              </div>
             </div>
           </div>
         </div>
