@@ -69,9 +69,18 @@ const nextConfig: NextConfig = {
       // /research-ai was a non-functional stub (noindex, placeholder input box,
       // never shipped) — retired in favour of the real AI tool suite.
       { source: '/research-ai', destination: '/ai-analyst', permanent: true },
-      // /markets doesn't exist (the real route is singular) but shows up in
-      // crawl reports — send it home instead of 404ing.
-      { source: '/markets', destination: '/market', permanent: true },
+      // /market and /markets were both retired when the standalone markets page
+      // was removed in favour of the dynamic /market-news hub (see commit
+      // 7383eadc) — Search Console still has both indexed. /markets used to
+      // 301 to /market, which no longer exists, producing a dead redirect
+      // chain (308 → 404); both now resolve straight to the real hub.
+      { source: '/market', destination: '/market-news', permanent: true },
+      { source: '/markets', destination: '/market-news', permanent: true },
+      // /financial-tools/portfolio and /financial-tools/retirement were the
+      // old locations before the calculators hub was reorganized — the tools
+      // now live at the top level.
+      { source: '/financial-tools/portfolio', destination: '/portfolio', permanent: true },
+      { source: '/financial-tools/retirement', destination: '/retirement', permanent: true },
       // These /categories/<slug> archives 404 because no article's category
       // taxonomy string slugifies to an exact match — but each has a real,
       // populated top-level hub page. Send crawlers/visitors there instead.
