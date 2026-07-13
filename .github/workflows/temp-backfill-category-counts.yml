@@ -1,71 +1,31 @@
-name: (temp) Backfill category content-count
+name: (temp) Bust cms category-tree cache
 
 on:
-  workflow_dispatch:
-    inputs:
-      apply:
-        description: 'Type "apply" to run the real UPDATE. Anything else stays read-only (preview only).'
-        required: true
-        default: "preview"
+  workflow_dispatch: {}
 
 jobs:
-  backfill:
+  bust-cache:
     runs-on: ubuntu-latest
     environment: production
     steps:
-      - name: Preview + (optionally) apply the recomputed counts
+      - name: Delete cms:categories:* keys from Redis so the backfilled counts show immediately
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.CORE_EC2_HOST }}
           username: ${{ secrets.CORE_EC2_USER }}
           key: ${{ secrets.CORE_EC2_SSH_KEY }}
-          envs: APPLY
           script: |
             set -euo pipefail
             cd /opt/baalvion-core
             COMPOSE="docker compose --env-file deploy/consolidated/.env \
               -f deploy/consolidated/docker-compose.prod.yml \
               -f deploy/consolidated/docker-compose.ssl-override.yml"
-            cat <<'JS' | $COMPOSE exec -T -e PGSSLMODE=require app-platform sh -lc "cat > /tmp/backfill-counts.js"
-            const { sequelize } = require('/app/Backend/services/knowledge/cms-service/models');
-            const APPLY = process.env.APPLY === 'apply';
-            const CTE = `
-              WITH content_categories AS (
-                SELECT cc.id AS content_id, (cat_id_text)::uuid AS cat_id
-                FROM cms.cms_contents cc,
-                     LATERAL jsonb_array_elements_text(COALESCE(cc.category_ids, '[]'::jsonb)) AS cat_id_text
-                UNION
-                SELECT cc.id, cc.category_id
-                FROM cms.cms_contents cc
-                WHERE cc.category_id IS NOT NULL
-              ),
-              counts AS (
-                SELECT cat_id, COUNT(*) AS cnt FROM content_categories GROUP BY cat_id
-              )
-            `;
+            cat <<'JS' | $COMPOSE exec -T -e PGSSLMODE=require app-platform sh -lc "cat > /tmp/bust-cache.js"
+            const cache = require('/app/Backend/services/knowledge/cms-service/service/cacheService');
             (async () => {
-              if (!APPLY) {
-                const [rows] = await sequelize.query(`${CTE}
-                  SELECT COUNT(*) AS would_change FROM cms.cms_categories c
-                  JOIN counts ON counts.cat_id = c.id
-                  WHERE counts.cnt <> c.content_count;
-                `);
-                console.log('PREVIEW ONLY (APPLY env was not "apply") — rows that would change:', rows[0].would_change);
-                process.exit(0);
-              }
-              const result = await sequelize.query(`${CTE}
-                UPDATE cms.cms_categories c
-                SET content_count = counts.cnt
-                FROM counts
-                WHERE c.id = counts.cat_id AND counts.cnt <> c.content_count
-                RETURNING c.id, c.name, c.content_count;
-              `);
-              const rows = result[0];
-              console.log(`Updated ${rows.length} categories.`);
-              console.table(rows.slice(0, 80));
+              await cache.delPattern('cms:categories:*');
+              console.log('Busted cms:categories:* cache keys.');
               process.exit(0);
             })().catch((e) => { console.error(e); process.exit(1); });
             JS
-            $COMPOSE exec -T -e PGSSLMODE=require -e APPLY="${APPLY}" app-platform node /tmp/backfill-counts.js
-        env:
-          APPLY: ${{ github.event.inputs.apply }}
+            $COMPOSE exec -T -e PGSSLMODE=require app-platform node /tmp/bust-cache.js
