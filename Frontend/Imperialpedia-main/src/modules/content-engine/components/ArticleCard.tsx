@@ -8,11 +8,19 @@ import { Badge } from '@/components/ui/badge';
 import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
 import { Calendar, Clock, ArrowRight } from 'lucide-react';
-import { format } from 'date-fns';
 
 interface ArticleCardProps {
   article: Article;
 }
+
+// Pinned to UTC — see ArticleHeader.tsx for why: an unpinned local-time format
+// here diverges between SSR and hydration and throws a React #418 crash.
+const cardDateFormatter = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
 
 /**
  * A sophisticated card component to display article previews in listings.
@@ -58,7 +66,7 @@ export const ArticleCard = ({ article }: ArticleCardProps) => {
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
               <Text variant="caption">
-                {article.publishedAt ? format(new Date(article.publishedAt), 'MMM d, yyyy') : 'Recent'}
+                {article.publishedAt ? cardDateFormatter.format(new Date(article.publishedAt)) : 'Recent'}
               </Text>
             </div>
             <div className="flex items-center gap-1.5">

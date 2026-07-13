@@ -34,7 +34,9 @@ const routeFor = (type: string, slug: string, name: string): string => {
       return `/terms/${/^[0-9]/.test(c) ? 'num' : c}/${slug}`;
     }
     case 'review': return `/${slug}`;
-    case 'asset': return `/market`;
+    // No per-asset detail route exists yet — point at the real markets overview
+    // page instead of the dead `/market` (no such route in src/app).
+    case 'asset': return `/market-news`;
     case 'author': return `/creators`;
     case 'article': return `/financial-intelligence/${slug}`;
     default: return `/${slug}`;
