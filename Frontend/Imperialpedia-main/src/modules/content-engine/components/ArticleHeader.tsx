@@ -2,12 +2,14 @@
 
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
 import { Badge } from '@/components/ui/badge';
 import { Clock, Calendar, User } from 'lucide-react';
 import { format } from 'date-fns';
 import { TagList } from './TagList';
+import { authors } from '@/config/authors';
 
 interface ArticleHeaderProps {
   article: Article;
@@ -39,10 +41,23 @@ export const ArticleHeader = ({ article }: ArticleHeaderProps) => {
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-primary" />
             <Text variant="bodySmall" className="font-medium">
-              Expert: <span className="text-foreground">{article.authorId}</span>
+              By{' '}
+              {(() => {
+                // Prefer the author this article is actually tagged with
+                // (customFields.authorSlug); fall back to the site's default author.
+                const slug = article.authorSlug || authors[0]?.slug;
+                const name = article.authorName || authors[0]?.name || 'Imperialpedia';
+                return slug ? (
+                  <Link href={`/authors/${slug}`} className="text-foreground hover:text-primary transition-colors">
+                    {name}
+                  </Link>
+                ) : (
+                  <span className="text-foreground">{name}</span>
+                );
+              })()}
             </Text>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Calendar className="w-4 h-4 text-primary" />
             <Text variant="bodySmall">

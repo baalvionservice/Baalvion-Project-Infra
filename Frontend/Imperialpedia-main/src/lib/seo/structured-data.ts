@@ -102,6 +102,32 @@ export const structuredData = {
     })),
   }),
 
+  person: (data: {
+    name: string;
+    jobTitle: string;
+    description: string;
+    url: string;
+    image?: string;
+    sameAs?: string[];
+  }): StructuredData => ({
+    '@context': 'https://schema.org',
+    '@type': 'ProfilePage',
+    mainEntity: {
+      '@type': 'Person',
+      name: data.name,
+      jobTitle: data.jobTitle,
+      description: data.description,
+      url: data.url,
+      image: data.image,
+      sameAs: data.sameAs,
+      worksFor: {
+        '@type': 'Organization',
+        name: 'Imperialpedia',
+        url: 'https://imperialpedia.com',
+      },
+    },
+  }),
+
   softwareApp: (data: { name: string; description: string; url: string; category?: string }): StructuredData => ({
     '@context': 'https://schema.org',
     '@type': 'SoftwareApplication',

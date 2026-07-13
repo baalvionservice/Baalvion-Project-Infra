@@ -14,6 +14,7 @@ export interface Article {
   body?: string; // Full content body
   authorId: ID;
   authorName?: string; // Display author (e.g. CMS customFields.author.name)
+  authorSlug?: string; // Links the byline to /authors/[slug] (CMS customFields.authorSlug)
   publishedAt?: Timestamp;
   updatedAt: Timestamp;
   category: string;

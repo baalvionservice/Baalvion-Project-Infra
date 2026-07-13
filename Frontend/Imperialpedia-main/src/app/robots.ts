@@ -17,6 +17,8 @@ const ALLOW = [
   '/budgeting',
   '/financial-intelligence',
   '/financial-intelligence/',
+  '/authors',
+  '/authors/',
   '/glossary/',
   '/topics/',
   '/categories/',

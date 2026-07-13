@@ -84,6 +84,7 @@ const NAV_COLUMNS = [
     label: 'Company',
     links: [
       { label: 'About Us', href: '/about' },
+      { label: 'Our Authors', href: '/authors' },
       { label: 'Privacy Policy', href: '/privacy-policy' },
     ],
   },

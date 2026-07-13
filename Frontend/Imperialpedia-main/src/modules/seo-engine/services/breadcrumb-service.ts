@@ -86,6 +86,19 @@ export const breadcrumbService = {
   },
 
   /**
+   * Home / Authors / [Name]
+   */
+  generateBreadcrumbForAuthor: (authorName: string, authorSlug: string): Breadcrumb => {
+    return {
+      items: [
+        { name: 'Home', item: '/' },
+        { name: 'Authors', item: '/authors' },
+        { name: authorName, item: `/authors/${authorSlug}` },
+      ],
+    };
+  },
+
+  /**
    * Generates JSON-LD schema for a breadcrumb.
    */
   generateBreadcrumbSchema: (breadcrumb: Breadcrumb) => {

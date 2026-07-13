@@ -109,6 +109,54 @@ export const articlesService = {
     }
   },
 
+  async getArticlesByAuthor(
+    authorSlug: string,
+    page = 1,
+    limit = 100
+  ): Promise<PaginatedResponse<Article>> {
+    try {
+      const { items, total } = await listCmsContent({
+        contentType: "article",
+        authorSlug,
+        page,
+        limit,
+      });
+      return {
+        data: items.map(cmsContentToArticle),
+        success: true,
+        message: "Articles retrieved successfully",
+        statusCode: 200,
+        timestamp: nowIso(),
+        pagination: {
+          currentPage: page,
+          totalPages: Math.max(1, Math.ceil(total / limit)),
+          pageSize: limit,
+          totalItems: total,
+          hasNextPage: page * limit < total,
+          hasPreviousPage: page > 1,
+        },
+      };
+    } catch (error) {
+      const appError = errorHandler.handleError(error);
+      return {
+        data: [],
+        success: false,
+        statusCode: appError.statusCode,
+        message: appError.message,
+        timestamp: nowIso(),
+        path: "/api/articles",
+        pagination: {
+          currentPage: page,
+          totalPages: 0,
+          pageSize: limit,
+          totalItems: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+    }
+  },
+
   async getFeaturedArticles(): Promise<ApiResponse<Article[]>> {
     try {
       const { items } = await listCmsContent({ contentType: "article", limit: 6 });

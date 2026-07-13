@@ -125,6 +125,22 @@ export interface CmsListParams {
   limit?: number;
   search?: string;
   categorySlug?: string;
+  authorSlug?: string;
+}
+
+// Admin-managed author/contributor profile (cms_authors) — powers /authors pages.
+export interface CmsAuthor {
+  id: string;
+  slug: string;
+  name: string;
+  title?: string | null;
+  credentials?: string | null;
+  bio?: string | null;
+  avatarUrl?: string | null;
+  videoUrl?: string | null;
+  expertise?: string[];
+  social?: { x?: string; linkedin?: string } | null;
+  seoMetadata?: { title?: string; description?: string; keywords?: string[]; ogImage?: string; noIndex?: boolean } | null;
 }
 
 // ── low-level fetchers (throw on transport/5xx so callers can fall back) ─────
@@ -155,6 +171,7 @@ export async function listCmsContent(
   if (params.limit) q.set('limit', String(params.limit));
   if (params.search) q.set('search', params.search);
   if (params.categorySlug) q.set('categorySlug', params.categorySlug);
+  if (params.authorSlug) q.set('authorSlug', params.authorSlug);
   const qs = q.toString();
   const env = await cmsFetch<CmsListEnvelope>(`/content${qs ? `?${qs}` : ''}`);
   return { items: env.data ?? [], total: env.pagination?.total ?? (env.data?.length ?? 0) };
@@ -163,6 +180,37 @@ export async function listCmsContent(
 export async function getCmsContentBySlug(slug: string): Promise<CmsContent> {
   const env = await cmsFetch<CmsItemEnvelope>(`/content/${encodeURIComponent(slug)}`);
   return env.data;
+}
+
+// ── Author/contributor profiles (cms_authors, admin-managed) ────────────────
+interface CmsAuthorListEnvelope {
+  success: boolean;
+  data: CmsAuthor[];
+}
+
+interface CmsAuthorItemEnvelope {
+  success: boolean;
+  data: CmsAuthor;
+}
+
+/** All active authors for this site, ordered by sortOrder then name. [] on any failure. */
+export async function getPublicAuthors(): Promise<CmsAuthor[]> {
+  try {
+    const env = await cmsFetch<CmsAuthorListEnvelope>('/authors');
+    return env.data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/** A single active author profile by slug, or null if unknown/unreachable. */
+export async function getPublicAuthorBySlug(slug: string): Promise<CmsAuthor | null> {
+  try {
+    const env = await cmsFetch<CmsAuthorItemEnvelope>(`/authors/${encodeURIComponent(slug)}`);
+    return env.data ?? null;
+  } catch {
+    return null;
+  }
 }
 
 // ── block → HTML (trusted, internally-authored content) ─────────────────────
@@ -253,6 +301,7 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     .map((f) => ({ question: String(f.question), answer: String(f.answer) }));
   const author = cf.author as { name?: unknown } | undefined;
   const authorName = author && typeof author.name === 'string' ? author.name : undefined;
+  const authorSlug = typeof cf.authorSlug === 'string' ? cf.authorSlug : undefined;
   return {
     id: raw.id,
     slug: raw.slug,
@@ -261,6 +310,7 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     body: blocksToHtml(raw.contentBlocks) || undefined,
     authorId: String(raw.authorId ?? 'imperialpedia'),
     authorName,
+    authorSlug,
     publishedAt: raw.publishedAt ?? undefined,
     updatedAt: raw.updatedAt ?? raw.publishedAt ?? new Date().toISOString(),
     category: raw.category?.name ?? 'General',

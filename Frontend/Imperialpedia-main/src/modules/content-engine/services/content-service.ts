@@ -18,6 +18,8 @@ function mapToArticleModel(raw: any): Article {
     title: raw.title,
     description: raw.description || raw.excerpt || "",
     authorId: raw.authorId || "unknown",
+    authorName: raw.authorName,
+    authorSlug: raw.authorSlug,
     publishedAt: raw.publishedAt,
     updatedAt: raw.updatedAt || raw.publishedAt || new Date().toISOString(),
     category: raw.category || "General",
@@ -39,6 +41,22 @@ export async function getArticles(
   limit?: number
 ): Promise<PaginatedResponse<Article>> {
   const response = await articlesService.getArticles(page, limit);
+
+  return {
+    ...response,
+    data: response.data.map(mapToArticleModel),
+  };
+}
+
+/**
+ * Fetches every published article attributed to an author profile (by slug).
+ */
+export async function getArticlesByAuthor(
+  authorSlug: string,
+  page?: number,
+  limit?: number
+): Promise<PaginatedResponse<Article>> {
+  const response = await articlesService.getArticlesByAuthor(authorSlug, page, limit);
 
   return {
     ...response,

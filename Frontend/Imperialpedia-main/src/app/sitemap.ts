@@ -1,5 +1,7 @@
 import { MetadataRoute } from 'next';
 import { env } from '@/config/env';
+import { getAllAuthors } from '@/config/authors';
+import { getPublicAuthors } from '@/services/data/cms-public';
 
 // Render at request time, never at build time. This route fetches from
 // imperialpedia-service + cms-service, and a build-time fetch against an
@@ -52,6 +54,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: `${BASE}/`, lastModified: now, changeFrequency: 'daily', priority: 1.0 },
     { url: `${BASE}/financial-intelligence`, lastModified: now, changeFrequency: 'hourly', priority: 0.9 },
+    { url: `${BASE}/authors`, lastModified: now, changeFrequency: 'weekly', priority: 0.6 },
     { url: `${BASE}/news`, lastModified: now, changeFrequency: 'hourly', priority: 0.9 },
     { url: `${BASE}/market`, lastModified: now, changeFrequency: 'hourly', priority: 0.9 },
     { url: `${BASE}/explore`, lastModified: now, changeFrequency: 'daily', priority: 0.8 },
@@ -173,6 +176,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((n) => n?.slug)
     .map((n) => ({ url: `${BASE}/${n.slug}`, lastModified: n.publishedAt ? new Date(n.publishedAt) : now, changeFrequency: 'daily', priority: 0.8 }));
 
+  // Admin-managed authors (cms_authors), falling back to the static roster when none exist yet.
+  const liveAuthors = await getPublicAuthors();
+  const authorSlugs = new Set<string>([
+    ...liveAuthors.map((a) => a.slug),
+    ...(liveAuthors.length ? [] : getAllAuthors().map((a) => a.slug)),
+  ]);
+  const authorRoutes: MetadataRoute.Sitemap = [...authorSlugs].map((slug) => ({
+    url: `${BASE}/authors/${slug}`,
+    lastModified: now,
+    changeFrequency: 'weekly',
+    priority: 0.6,
+  }));
+
   const all: MetadataRoute.Sitemap = [
     ...staticRoutes,
     ...entRoutes(companies, '/companies', 0.7),
@@ -183,6 +199,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...reviewRoutes,
     ...articleRoutes,
     ...newsRoutes,
+    ...authorRoutes,
   ];
 
   // Dedupe by URL.
