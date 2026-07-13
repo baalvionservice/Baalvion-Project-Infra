@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Text } from '@/design-system/typography/text';
 import { Article } from '../types';
 import { Badge } from '@/components/ui/badge';
-import { Clock, Calendar, User } from 'lucide-react';
+import { Clock, Calendar, User, RefreshCw } from 'lucide-react';
 import { TagList } from './TagList';
 import { authors } from '@/config/authors';
 
@@ -26,6 +26,15 @@ const publishedDateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
   timeZone: 'UTC',
 });
+
+// Only worth surfacing "Updated" when it's a different calendar day than "Published" —
+// otherwise it's noise (every article's updatedAt starts equal to publishedAt).
+const isMeaningfullyUpdated = (publishedAt?: string, updatedAt?: string): boolean => {
+  if (!updatedAt || !publishedAt) return false;
+  const published = publishedDateFormatter.format(new Date(publishedAt));
+  const updated = publishedDateFormatter.format(new Date(updatedAt));
+  return published !== updated;
+};
 
 /**
  * Renders the top portion of an article, including metadata and featured image.
@@ -76,6 +85,15 @@ export const ArticleHeader = ({ article }: ArticleHeaderProps) => {
               {article.publishedAt ? publishedDateFormatter.format(new Date(article.publishedAt)) : 'Recently'}
             </Text>
           </div>
+
+          {isMeaningfullyUpdated(article.publishedAt, article.updatedAt) && (
+            <div className="flex items-center gap-2">
+              <RefreshCw className="w-4 h-4 text-primary" />
+              <Text variant="bodySmall">
+                Updated {publishedDateFormatter.format(new Date(article.updatedAt))}
+              </Text>
+            </div>
+          )}
 
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-primary" />

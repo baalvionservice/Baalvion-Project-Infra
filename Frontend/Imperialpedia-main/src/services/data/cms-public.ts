@@ -18,6 +18,7 @@ import { Article, ArticleStatus } from '@/modules/content-engine/types/article';
 import type { NewsArticle, NewsBodyBlock, NewsCategory } from '@/lib/data.news';
 import { articleArtDataUri } from '@baalvion/illustrations';
 import { safeImageUrl } from '@/lib/safe-image';
+import { getAuthorBySlug as getStaticAuthorBySlug } from '@/config/authors';
 
 // In production default to the API gateway's public delivery host (not localhost,
 // and not an empty string that silently forced the built-in fallback). A deploy
@@ -231,6 +232,61 @@ export async function getPublicAuthorBySlug(slug: string): Promise<CmsAuthor | n
   }
 }
 
+// Author profile shape used across the author page and article-page credibility card —
+// merges the admin-managed cms_authors record (preferred) with the small static roster in
+// config/authors.ts (fallback for when the CMS has no record yet or is unreachable).
+export interface ResolvedAuthor {
+  slug: string;
+  name: string;
+  title: string;
+  bio: string;
+  credentials?: string;
+  expertise?: string[];
+  avatarUrl?: string;
+  videoUrl?: string;
+  social: { twitter?: string; linkedin?: string; website?: string };
+}
+
+/**
+ * Resolves an author profile from the live CMS (admin-managed — see admin-platform's
+ * CMS → Websites → Authors screen) first, falling back to the small static roster in
+ * src/config/authors.ts when the CMS has no record yet or is unreachable.
+ */
+export async function resolveAuthor(slug: string): Promise<ResolvedAuthor | null> {
+  const live = await getPublicAuthorBySlug(slug);
+  if (live) {
+    return {
+      slug: live.slug,
+      name: live.name,
+      title: live.title || 'Contributor',
+      bio: live.bio || '',
+      credentials: live.credentials || undefined,
+      expertise: live.expertise?.length ? live.expertise : undefined,
+      avatarUrl: live.avatarUrl || undefined,
+      videoUrl: live.videoUrl || undefined,
+      social: { twitter: live.social?.x || undefined, linkedin: live.social?.linkedin || undefined },
+    };
+  }
+
+  const fallback = getStaticAuthorBySlug(slug);
+  if (fallback) {
+    return {
+      slug: fallback.slug,
+      name: fallback.name,
+      title: fallback.title,
+      bio: fallback.bio,
+      avatarUrl: fallback.avatarUrl,
+      social: {
+        twitter: fallback.social?.twitter,
+        linkedin: fallback.social?.linkedin,
+        website: fallback.social?.website,
+      },
+    };
+  }
+
+  return null;
+}
+
 // ── block → HTML (trusted, internally-authored content) ─────────────────────
 const esc = (s: unknown): string =>
   String(s ?? '')
@@ -323,6 +379,13 @@ export function cmsContentToArticle(raw: CmsContent): Article {
   const author = cf.author as { name?: unknown } | undefined;
   const authorName = author && typeof author.name === 'string' ? author.name : undefined;
   const authorSlug = typeof cf.authorSlug === 'string' ? cf.authorSlug : undefined;
+  const reviewerSlug = typeof cf.reviewerSlug === 'string' ? cf.reviewerSlug : undefined;
+  const reviewedAt = typeof cf.reviewedAt === 'string' ? cf.reviewedAt : undefined;
+  const rawCitations = Array.isArray(cf.citations) ? (cf.citations as unknown[]) : [];
+  const citations = rawCitations
+    .map((c) => c as { title?: unknown; url?: unknown })
+    .filter((c) => c && typeof c.title === 'string' && typeof c.url === 'string')
+    .map((c) => ({ title: String(c.title), url: String(c.url) }));
   return {
     id: raw.id,
     slug: raw.slug,
@@ -332,6 +395,9 @@ export function cmsContentToArticle(raw: CmsContent): Article {
     authorId: String(raw.authorId ?? 'imperialpedia'),
     authorName,
     authorSlug,
+    reviewerSlug,
+    reviewedAt,
+    citations: citations.length ? citations : undefined,
     publishedAt: raw.publishedAt ?? undefined,
     updatedAt: raw.updatedAt ?? raw.publishedAt ?? new Date().toISOString(),
     category: raw.category?.name ?? 'General',

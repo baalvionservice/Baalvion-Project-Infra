@@ -10,8 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { ArticleList } from '@/modules/content-engine/components';
 import { getArticles, getArticlesByAuthor } from '@/modules/content-engine/services';
 import { staticArticleList } from '@/services/data/static-content';
-import { getPublicAuthorBySlug, getPublicAuthors } from '@/services/data/cms-public';
-import { getAllAuthors, getAuthorBySlug } from '@/config/authors';
+import { getPublicAuthors, resolveAuthor } from '@/services/data/cms-public';
+import { getAllAuthors } from '@/config/authors';
 import { buildMetadata } from '@/lib/seo';
 import { JsonLd } from '@/modules/seo-engine/components/JsonLd';
 import { Breadcrumbs } from '@/modules/seo-engine/components/Breadcrumbs';
@@ -23,55 +23,6 @@ import { Twitter, Linkedin, Globe, PlayCircle, BadgeCheck, Newspaper } from 'luc
 
 interface AuthorPageProps {
   params: Promise<{ slug: string }>;
-}
-
-interface ResolvedAuthor {
-  slug: string;
-  name: string;
-  title: string;
-  bio: string;
-  avatarUrl?: string;
-  videoUrl?: string;
-  social: { twitter?: string; linkedin?: string; website?: string };
-}
-
-/**
- * Resolves an author profile from the live CMS (admin-managed — see
- * admin-platform's CMS → Websites → Authors screen) first, falling back to the
- * small static roster in src/config/authors.ts when the CMS has no record yet
- * or is unreachable.
- */
-async function resolveAuthor(slug: string): Promise<ResolvedAuthor | null> {
-  const live = await getPublicAuthorBySlug(slug);
-  if (live) {
-    return {
-      slug: live.slug,
-      name: live.name,
-      title: live.title || 'Contributor',
-      bio: live.bio || '',
-      avatarUrl: live.avatarUrl || undefined,
-      videoUrl: live.videoUrl || undefined,
-      social: { twitter: live.social?.x || undefined, linkedin: live.social?.linkedin || undefined },
-    };
-  }
-
-  const fallback = getAuthorBySlug(slug);
-  if (fallback) {
-    return {
-      slug: fallback.slug,
-      name: fallback.name,
-      title: fallback.title,
-      bio: fallback.bio,
-      avatarUrl: fallback.avatarUrl,
-      social: {
-        twitter: fallback.social?.twitter,
-        linkedin: fallback.social?.linkedin,
-        website: fallback.social?.website,
-      },
-    };
-  }
-
-  return null;
 }
 
 const initials = (name: string) =>

@@ -15,6 +15,9 @@ export interface Article {
   authorId: ID;
   authorName?: string; // Display author (e.g. CMS customFields.author.name)
   authorSlug?: string; // Links the byline to /authors/[slug] (CMS customFields.authorSlug)
+  reviewerSlug?: string; // Editorial reviewer — CMS customFields.reviewerSlug, links to /authors/[slug]
+  reviewedAt?: Timestamp; // CMS customFields.reviewedAt — when the reviewer signed off
+  citations?: { title: string; url: string }[]; // Sources cited — CMS customFields.citations
   publishedAt?: Timestamp;
   updatedAt: Timestamp;
   category: string;

@@ -1,6 +1,8 @@
 import { Article } from '@/modules/content-engine/types';
 import { FAQ } from '../models/faq';
 import { structuredData } from '@/lib/seo/structured-data';
+import type { ResolvedAuthor } from '@/services/data/cms-public';
+import { env } from '@/config/env';
 
 /**
  * @fileOverview Specialized service for generating pSEO-optimized JSON-LD schemas.
@@ -14,9 +16,11 @@ export const schemaService = {
   },
   
   /**
-   * Generates Article schema for content engine articles.
+   * Generates Article schema for content engine articles. Pass the resolved reviewer
+   * profile (from cms-public.resolveAuthor(article.reviewerSlug)) to emit `reviewedBy` —
+   * the E-E-A-T editorial-review signal for YMYL finance content.
    */
-  generateArticleSchema: (article: Article) => {
+  generateArticleSchema: (article: Article, reviewer?: ResolvedAuthor | null) => {
     const base = {
       title: article.title,
       description: article.description,
@@ -26,6 +30,9 @@ export const schemaService = {
         (article.authorId === 'creator-1' ? 'The Market Maven' : 'Imperialpedia Expert'),
       datePublished: article.publishedAt || new Date().toISOString(),
       dateModified: article.updatedAt,
+      reviewedBy: reviewer
+        ? { name: reviewer.name, url: `${env.siteUrl}/authors/${reviewer.slug}` }
+        : undefined,
     };
     const schema =
       article.contentType === 'news' ? structuredData.newsArticle(base) : structuredData.article(base);

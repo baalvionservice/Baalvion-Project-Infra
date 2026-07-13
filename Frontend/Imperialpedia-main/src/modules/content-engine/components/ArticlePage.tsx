@@ -8,14 +8,22 @@ import { getArticleBySlug } from "../services/content-service";
 import { ArticleHeader } from "./ArticleHeader";
 import { ArticleBody } from "./ArticleBody";
 import { RelatedArticles } from "./RelatedArticles";
+import { AuthorCredibilityCard } from "./AuthorCredibilityCard";
+import { SourcesCited } from "./SourcesCited";
 import { Loader2, AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import type { ResolvedAuthor } from "@/services/data/cms-public";
 
 interface ArticlePageProps {
   slug: string;
   article?: Article | null;
+  /** Full author/reviewer profiles, server-resolved by the route (bio, credentials,
+   *  expertise) — powers the AuthorCredibilityCard. Undefined when rendered client-side
+   *  without an initial article (loading fallback path never has these). */
+  author?: ResolvedAuthor | null;
+  reviewer?: ResolvedAuthor | null;
 }
 
 /**
@@ -25,6 +33,8 @@ interface ArticlePageProps {
 export const ArticlePage = ({
   slug,
   article: initialArticle,
+  author,
+  reviewer,
 }: ArticlePageProps) => {
   const [article, setArticle] = useState<Article | null>(
     initialArticle || null
@@ -102,6 +112,8 @@ export const ArticlePage = ({
         <div className="max-w-3xl mx-auto">
           <ArticleHeader article={article} />
 
+          {author && <AuthorCredibilityCard author={author} reviewer={reviewer} reviewedAt={article.reviewedAt} />}
+
           {article.body ? (
             <div
               className="article-body prose prose-lg dark:prose-invert max-w-none mb-12
@@ -119,6 +131,8 @@ export const ArticlePage = ({
           ) : (
             <ArticleBody sections={[]} />
           )}
+
+          {article.citations?.length ? <SourcesCited citations={article.citations} /> : null}
 
           <div className="mt-16 pt-8 border-t text-center">
             <Button

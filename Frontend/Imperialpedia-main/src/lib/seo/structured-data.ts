@@ -24,6 +24,7 @@ export const structuredData = {
     authorName: string;
     datePublished: string;
     dateModified?: string;
+    reviewedBy?: { name: string; url?: string };
   }): StructuredData => ({
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -38,6 +39,9 @@ export const structuredData = {
     ],
     datePublished: data.datePublished,
     dateModified: data.dateModified || data.datePublished,
+    ...(data.reviewedBy && {
+      reviewedBy: { '@type': 'Person', name: data.reviewedBy.name, url: data.reviewedBy.url },
+    }),
   }),
 
   breadcrumb: (items: { name: string; item: string }[]): StructuredData => ({
@@ -58,6 +62,7 @@ export const structuredData = {
     authorName: string;
     datePublished: string;
     dateModified?: string;
+    reviewedBy?: { name: string; url?: string };
   }): StructuredData => ({
     '@context': 'https://schema.org',
     '@type': 'NewsArticle',
@@ -77,6 +82,9 @@ export const structuredData = {
     },
     datePublished: data.datePublished,
     dateModified: data.dateModified || data.datePublished,
+    ...(data.reviewedBy && {
+      reviewedBy: { '@type': 'Person', name: data.reviewedBy.name, url: data.reviewedBy.url },
+    }),
   }),
 
   /**

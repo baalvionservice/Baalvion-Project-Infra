@@ -14,6 +14,7 @@ import { structuredData } from "@/lib/seo/structured-data";
 import { extractFaqFromHtml } from "@/lib/seo/faq-extractor";
 import { staticArticleBySlug } from "@/services/data/static-content";
 import { canonicalService } from "@/modules/seo/services/canonical-service";
+import { resolveAuthor } from "@/services/data/cms-public";
 
 interface ArticleRouteProps {
   params: Promise<{ slug: string }>;
@@ -74,8 +75,13 @@ export default async function Page({ params }: ArticleRouteProps) {
     notFound();
   }
 
+  const [author, reviewer] = await Promise.all([
+    article.authorSlug ? resolveAuthor(article.authorSlug) : Promise.resolve(null),
+    article.reviewerSlug ? resolveAuthor(article.reviewerSlug) : Promise.resolve(null),
+  ]);
+
   const breadcrumbs = breadcrumbService.generateBreadcrumbForArticle(article);
-  const articleSchema = schemaService.generateArticleSchema(article);
+  const articleSchema = schemaService.generateArticleSchema(article, reviewer);
   const faqPairs = article.faq?.length ? article.faq : extractFaqFromHtml(article.body);
   const faqSchema = faqPairs.length ? structuredData.faq(faqPairs) : null;
 
@@ -86,7 +92,7 @@ export default async function Page({ params }: ArticleRouteProps) {
       <Container className="py-8">
         <Breadcrumbs breadcrumb={breadcrumbs} />
 
-        <ArticlePage slug={slug} article={article} />
+        <ArticlePage slug={slug} article={article} author={author} reviewer={reviewer} />
       </Container>
     </div>
   );
