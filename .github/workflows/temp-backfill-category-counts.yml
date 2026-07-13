@@ -1,0 +1,53 @@
+name: (temp) Preview category content-count backfill
+
+on:
+  workflow_dispatch: {}
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Read-only preview of the recomputed counts (no writes)
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.CORE_EC2_HOST }}
+          username: ${{ secrets.CORE_EC2_USER }}
+          key: ${{ secrets.CORE_EC2_SSH_KEY }}
+          script: |
+            set -euo pipefail
+            cd /opt/baalvion-core
+            COMPOSE="docker compose --env-file deploy/consolidated/.env \
+              -f deploy/consolidated/docker-compose.prod.yml \
+              -f deploy/consolidated/docker-compose.ssl-override.yml"
+            cat <<'JS' | $COMPOSE exec -T -e PGSSLMODE=require app-platform sh -lc "cat > /tmp/preview-counts.js"
+            const { sequelize } = require('/app/Backend/services/knowledge/cms-service/models');
+            (async () => {
+              const [rows] = await sequelize.query(`
+                WITH content_categories AS (
+                  SELECT cc.id AS content_id, (cat_id_text)::uuid AS cat_id
+                  FROM cms.cms_contents cc,
+                       LATERAL jsonb_array_elements_text(COALESCE(cc.category_ids, '[]'::jsonb)) AS cat_id_text
+                  UNION
+                  SELECT cc.id, cc.category_id
+                  FROM cms.cms_contents cc
+                  WHERE cc.category_id IS NOT NULL
+                ),
+                counts AS (
+                  SELECT cat_id, COUNT(*) AS cnt FROM content_categories GROUP BY cat_id
+                )
+                SELECT w.slug AS website, c.name AS category, c.content_count AS current_stored, COALESCE(counts.cnt, 0) AS real_count
+                FROM cms.cms_categories c
+                JOIN cms.cms_websites w ON w.id = c.website_id
+                LEFT JOIN counts ON counts.cat_id = c.id
+                WHERE COALESCE(counts.cnt, 0) <> c.content_count
+                ORDER BY w.slug, real_count DESC;
+              `);
+              console.log(`Rows that WOULD change: ${rows.length}`);
+              console.table(rows.slice(0, 80));
+              const totalRealContent = rows.reduce((s, r) => s + Number(r.real_count), 0);
+              console.log(`Sum of real_count across changed rows: ${totalRealContent}`);
+              process.exit(0);
+            })().catch((e) => { console.error(e); process.exit(1); });
+            JS
+            $COMPOSE exec -T -e PGSSLMODE=require app-platform node /tmp/preview-counts.js
