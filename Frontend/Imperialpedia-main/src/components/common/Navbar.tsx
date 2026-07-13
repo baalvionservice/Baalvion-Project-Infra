@@ -37,7 +37,6 @@ const NAV: NavCategory[] = [
       { label: "Retirement", href: "/retirement" },
       { label: "Portfolio", href: "/portfolio" },
       { label: "Brokers", href: "/brokers" },
-      { label: "View all Investing", href: "/investing" },
     ],
   },
   {
@@ -52,7 +51,6 @@ const NAV: NavCategory[] = [
       { label: "Crypto", href: "/crypto" },
       { label: "Economic Calendar", href: "/calendar" },
       { label: "Indicators", href: "/indicators" },
-      { label: "View all News", href: "/news" },
     ],
   },
   {
@@ -70,7 +68,6 @@ const NAV: NavCategory[] = [
       { label: "Auto Loans", href: "/auto-loans" },
       { label: "Student Loans", href: "/student-loans" },
       { label: "Banking Reviews", href: "/banking-reviews" },
-      { label: "View all Banking", href: "/banking" },
     ],
   },
   {
@@ -78,16 +75,14 @@ const NAV: NavCategory[] = [
     label: "Personal Finance",
     href: "/personal-finance",
     links: [
-      { label: "How to Create a Monthly Budget", href: "/financial-intelligence/how-to-create-a-monthly-budget" },
-      { label: "50/30/20 Budget Rule", href: "/financial-intelligence/50-30-20-budget-rule-explained" },
-      { label: "Emergency Fund Guide", href: "/financial-intelligence/emergency-fund-guide" },
-      { label: "How to Build Wealth From Scratch", href: "/financial-intelligence/how-to-build-wealth-from-scratch" },
-      { label: "Debt Snowball vs Avalanche", href: "/financial-intelligence/debt-snowball-vs-debt-avalanche" },
       { label: "Budgeting", href: "/budgeting" },
       { label: "Debt Management", href: "/debt" },
       { label: "Credit Scores", href: "/credit" },
+      { label: "Emergency Fund", href: "/emergency-fund" },
+      { label: "Wealth Building", href: "/wealth-building" },
+      { label: "Budget Rules", href: "/budget-rules" },
+      { label: "Debt Repayment Strategies", href: "/debt-repayment-strategies" },
       { label: "Calculators", href: "/financial-calculators" },
-      { label: "View all Personal Finance", href: "/personal-finance" },
     ],
   },
   {
@@ -104,7 +99,6 @@ const NAV: NavCategory[] = [
       { label: "Fiscal Policy", href: "/fiscal-policy" },
       { label: "Monetary Policy", href: "/monetary-policy" },
       { label: "Global Economy", href: "/global" },
-      { label: "View all Economy", href: "/economy" },
     ],
   },
   {
@@ -120,7 +114,6 @@ const NAV: NavCategory[] = [
       { label: "Robo-Advisors", href: "/robo-advisors" },
       { label: "App Reviews", href: "/app-reviews" },
       { label: "Tax Software", href: "/tax-software" },
-      { label: "View all Reviews", href: "/reviews" },
     ],
   },
 ];

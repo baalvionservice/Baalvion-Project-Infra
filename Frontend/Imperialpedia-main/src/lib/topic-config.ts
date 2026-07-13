@@ -254,6 +254,33 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaDescription:
       'Quarterly earnings coverage — revenue, profit, and guidance from the companies that move the stock market.',
   },
+  'wealth-building': {
+    tag: 'WEALTH BUILDING',
+    title: 'Wealth Building',
+    description:
+      'Long-term strategies for growing net worth — saving rate, investing discipline, income growth, and the habits that compound over decades.',
+    metaTitle: 'Wealth Building Strategies & Guides',
+    metaDescription:
+      'Practical wealth-building strategies covering saving rate, investing discipline, income growth, and the habits that compound over a lifetime.',
+  },
+  'budget-rules': {
+    tag: 'BUDGET RULES',
+    title: 'Budget Rules',
+    description:
+      'Proven budgeting frameworks — from the 50/30/20 rule to zero-based budgeting — for allocating income with a clear system.',
+    metaTitle: 'Budget Rules & Frameworks Explained',
+    metaDescription:
+      'Compare proven budget rules and frameworks, including the 50/30/20 rule and zero-based budgeting, to find the system that fits your income.',
+  },
+  'debt-repayment-strategies': {
+    tag: 'DEBT REPAYMENT',
+    title: 'Debt Repayment Strategies',
+    description:
+      'Side-by-side comparisons of debt payoff methods — snowball, avalanche, and consolidation — to help you pick the fastest path out of debt.',
+    metaTitle: 'Debt Repayment Strategies Compared',
+    metaDescription:
+      'Compare debt repayment strategies including the snowball method, avalanche method, and consolidation to find the fastest path out of debt.',
+  },
 };
 
 /** Map a topic slug to the closest static NewsCategory for the fallback feed. */
@@ -304,6 +331,9 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   'cd-rates': 'PersonalFinance',
   'money-market': 'PersonalFinance',
   'emergency-fund': 'PersonalFinance',
+  'wealth-building': 'PersonalFinance',
+  'budget-rules': 'PersonalFinance',
+  'debt-repayment-strategies': 'PersonalFinance',
   income: 'PersonalFinance',
   taxes: 'PersonalFinance',
   'tax-software': 'PersonalFinance',
@@ -326,7 +356,6 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   'robo-advisors': 'Guides',
   'financial-calculators': 'Guides',
   calendar: 'Guides',
-  'moratage-gates': 'Guides',
 };
 
 export function topicCopy(slug: string): TopicCopy {

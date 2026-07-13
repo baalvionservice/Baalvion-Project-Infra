@@ -2,7 +2,7 @@ import { CategoryFeed } from "@/components/pages/CategoryFeed";
 import { topicMeta } from "@/lib/topic-config";
 import { buildMetadata } from "@/lib/seo";
 
-const SLUG = "moratage-gates";
+const SLUG = "budget-rules";
 
 export const metadata = buildMetadata(topicMeta(SLUG));
 
