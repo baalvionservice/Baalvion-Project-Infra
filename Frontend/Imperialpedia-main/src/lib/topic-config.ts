@@ -281,6 +281,33 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaDescription:
       'Compare debt repayment strategies including the snowball method, avalanche method, and consolidation to find the fastest path out of debt.',
   },
+  planning: {
+    tag: 'FINANCIAL PLANNING',
+    title: 'Financial Planning',
+    description:
+      'Goal-based money planning — setting priorities, building a plan around income and life changes, and tracking progress over time.',
+    metaTitle: 'Financial Planning Guides & Strategy',
+    metaDescription:
+      'Financial planning guides covering goal-setting, life-stage planning, and how to build a money plan that adapts as your income and priorities change.',
+  },
+  'financial-independence': {
+    tag: 'FINANCIAL INDEPENDENCE',
+    title: 'Financial Independence',
+    description:
+      'Building toward work-optional income — savings rate, investment growth, and the paths (including FIRE) people use to reach financial independence.',
+    metaTitle: 'Financial Independence & FIRE Guides',
+    metaDescription:
+      'Guides to financial independence — savings rate, investment growth, and the different FIRE strategies people use to reach work-optional income.',
+  },
+  'money-management': {
+    tag: 'MONEY MANAGEMENT',
+    title: 'Money Management',
+    description:
+      'Everyday money habits and systems — tracking spending, organizing accounts, and building the discipline that keeps a financial plan on track.',
+    metaTitle: 'Money Management Tips & Habits',
+    metaDescription:
+      'Practical money management tips covering spending trackers, account organization, and the everyday habits that keep a financial plan on track.',
+  },
 };
 
 /** Map a topic slug to the closest static NewsCategory for the fallback feed. */
@@ -334,6 +361,8 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   'wealth-building': 'PersonalFinance',
   'budget-rules': 'PersonalFinance',
   'debt-repayment-strategies': 'PersonalFinance',
+  'financial-independence': 'PersonalFinance',
+  'money-management': 'PersonalFinance',
   income: 'PersonalFinance',
   taxes: 'PersonalFinance',
   'tax-software': 'PersonalFinance',
