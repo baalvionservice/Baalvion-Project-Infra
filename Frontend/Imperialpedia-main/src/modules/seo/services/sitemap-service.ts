@@ -92,8 +92,31 @@ export const sitemapService = {
     const listSafe = async <T>(p: Promise<{ data: T[] }>): Promise<T[]> => {
       try { return (await p).data ?? []; } catch { return []; }
     };
+    // The requested `limit` is a ceiling, not a guarantee — cms-service caps page
+    // size at 100 server-side regardless of what's asked for, so a single
+    // `getPage(1, 1000)` call silently truncates to the first 100 items and drops
+    // the rest from the sitemap. Walk `pagination.totalPages` to collect everything.
+    const listAllPages = async <T>(
+      getPage: (page: number, limit: number) => Promise<{ data: T[]; pagination?: { totalPages: number } }>,
+    ): Promise<T[]> => {
+      try {
+        const first = await getPage(1, 1000);
+        const items = [...(first.data ?? [])];
+        const totalPages = first.pagination?.totalPages ?? 1;
+        for (let page = 2; page <= totalPages; page++) {
+          try {
+            items.push(...((await getPage(page, 1000)).data ?? []));
+          } catch {
+            break;
+          }
+        }
+        return items;
+      } catch {
+        return [];
+      }
+    };
     const [articles, glossary, calcs] = await Promise.all([
-      listSafe(articlesService.getArticles(1, 1000)),
+      listAllPages(articlesService.getArticles),
       listSafe(glossaryService.getTerms(1, 1000)),
       listSafe(calculatorsService.getCalculatorList()),
     ]);

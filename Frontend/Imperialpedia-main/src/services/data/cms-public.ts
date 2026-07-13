@@ -144,7 +144,15 @@ export interface CmsAuthor {
 }
 
 // ── low-level fetchers (throw on transport/5xx so callers can fall back) ─────
-async function cmsFetch<T>(path: string): Promise<T> {
+// A brief backend blip (deploy rollover, DB reconnect, one dropped connection)
+// otherwise turns straight into a hard 404 on the very next line — callers only
+// distinguish "not found" from "unreachable" by HTTP status, and a network
+// error or 5xx looks identical to "give up" unless retried first. One retry
+// after a short delay absorbs that class of transient failure without masking
+// a real 404 (which short-circuits below, before the retry loop).
+const TRANSIENT_RETRY_DELAY_MS = 300;
+
+async function cmsFetchOnce<T>(path: string): Promise<T> {
   const res = await fetch(`${CMS_PUBLIC_URL}/${SITE_SLUG}${path}`, {
     headers: { Accept: 'application/json' },
     // Content is editorial and changes on publish — keep it fresh, not statically frozen.
@@ -160,6 +168,16 @@ async function cmsFetch<T>(path: string): Promise<T> {
     throw new Error(`cms-service ${res.status} for ${path}`);
   }
   return res.json() as Promise<T>;
+}
+
+async function cmsFetch<T>(path: string): Promise<T> {
+  try {
+    return await cmsFetchOnce<T>(path);
+  } catch (error) {
+    if ((error as { status?: number })?.status === 404) throw error;
+    await new Promise((resolve) => setTimeout(resolve, TRANSIENT_RETRY_DELAY_MS));
+    return cmsFetchOnce<T>(path);
+  }
 }
 
 export async function listCmsContent(
