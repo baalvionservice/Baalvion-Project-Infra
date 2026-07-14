@@ -1,0 +1,100 @@
+{
+  "topicNumber": 3,
+  "section": "Market Metrics",
+  "title": "Price-to-Book (P/B) Ratio Explained",
+  "slug": "price-to-book-ratio-explained",
+  "seo": {
+    "seoTitle": "Price-to-Book (P/B) Ratio Explained Simply",
+    "metaDescription": "The P/B ratio compares a stock's price to its book value per share. Learn the formula, what a reasonable range looks like, and where it falls short.",
+    "focusKeyword": "price-to-book ratio",
+    "secondaryKeywords": ["P/B ratio explained", "book value per share", "how to calculate price to book", "what is a good P/B ratio", "PB ratio vs PE ratio"],
+    "searchIntent": "Informational — investors researching value-investing metrics and balance-sheet-based valuation.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "The price-to-book ratio compares a stock's market price to its accounting book value per share, a metric long favored by value investors for spotting potential bargains.",
+  "intro": "Before earnings-based metrics like the P/E ratio dominated stock analysis, investors leaned heavily on book value — literally, what a company's assets were worth on paper if you subtracted its liabilities. The price-to-book ratio, or P/B, is the metric built around that idea, and it's still a staple in the toolkit of value-oriented investors decades later.\n\nWhere P/E asks 'how much am I paying for a dollar of profit,' P/B asks a different question: 'how much am I paying for a dollar of net assets the company already owns.' The two metrics complement each other because they measure valuation from completely different angles.",
+  "sections": [
+    {
+      "heading": "The Formula, Step by Step",
+      "paragraphs": [
+        "The price-to-book ratio equals a stock's current share price divided by its book value per share. Book value per share is calculated by taking total shareholders' equity (total assets minus total liabilities) and dividing it by the number of shares outstanding. A P/B of 1 means the stock trades exactly at its accounting book value; a P/B above 1 means investors are paying a premium over the company's net asset value, and below 1 means the stock trades at a discount to it."
+      ]
+    },
+    {
+      "heading": "A Worked Example",
+      "paragraphs": [
+        "Two hypothetical companies illustrate how differently this can play out even at similar share prices."
+      ],
+      "table": {
+        "caption": "Illustrative example — not real company data",
+        "headers": ["Metric", "Company X", "Company Y"],
+        "rows": [
+          ["Shareholders' equity", "$2 billion", "$500 million"],
+          ["Shares outstanding", "100 million", "100 million"],
+          ["Book value per share", "$20", "$5"],
+          ["Share price", "$30", "$30"],
+          ["P/B ratio", "1.5", "6.0"]
+        ]
+      },
+      "callout": {
+        "title": "Same price, very different asset backing",
+        "text": "Company Y trades at four times the premium to its book value compared to Company X, even though both stocks cost the same $30 per share — a reminder that share price alone tells you nothing about valuation."
+      }
+    },
+    {
+      "heading": "What Counts as a Reasonable Range",
+      "paragraphs": [
+        "A P/B ratio near or below 1 has traditionally been viewed as a signal of a potential value opportunity, since it suggests you'd be paying at or under the company's stated net asset value. But this varies dramatically by industry: capital-intensive businesses like banks or manufacturers, which hold substantial physical or financial assets, tend to trade closer to book value, while asset-light businesses such as software companies routinely trade at high multiples of book value because their real value lies in intangibles like brand, code, and customer relationships that accounting book value doesn't fully capture."
+      ]
+    },
+    {
+      "heading": "How to Find and Calculate It",
+      "paragraphs": [
+        "Shareholders' equity appears directly on a company's balance sheet in its 10-Q or 10-K filing, usually labeled 'total stockholders' equity.' Divide that figure by shares outstanding (also disclosed in the filing) to get book value per share, then divide the current share price by that number. Most brokerage platforms and finance sites calculate P/B automatically, but building it manually once helps you understand exactly what's driving the number for a company you're researching."
+      ]
+    },
+    {
+      "heading": "Limitations to Watch For",
+      "paragraphs": [
+        "Book value is an accounting figure, not a market one, and it can badly understate or overstate a company's real worth. Intangible assets like patents, brand value, and goodwill are often recorded conservatively or not at all, which makes P/B a poor fit for evaluating technology, media, or service-based companies. It's also sensitive to accounting choices around depreciation and asset write-downs, meaning two companies with genuinely similar underlying assets can report different book values simply due to how conservatively they've depreciated equipment over time."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "P/B ratio = share price ÷ book value per share, where book value per share is shareholders' equity divided by shares outstanding.",
+    "A P/B near or below 1 has traditionally signaled a potential value opportunity, though context always matters.",
+    "Asset-heavy industries like banking typically trade closer to book value than asset-light ones like software.",
+    "Shareholders' equity and shares outstanding both come directly from a company's 10-Q or 10-K balance sheet.",
+    "Book value is an accounting measure and can miss the real worth of intangible assets like brand or intellectual property.",
+    "P/B works best paired with other metrics rather than used as a standalone valuation signal."
+  ],
+  "faq": [
+    {
+      "question": "Is a P/B ratio below 1 always a good buying opportunity?",
+      "answer": "Not necessarily. A low P/B can reflect a genuine value opportunity, or it can reflect a company with declining prospects that the market has correctly discounted. Investigate why the ratio is low before treating it as an automatic buy signal."
+    },
+    {
+      "question": "Why do tech companies usually have high P/B ratios?",
+      "answer": "Technology companies often have relatively few physical assets on their balance sheets compared to their actual market value, which comes largely from intangible assets like software, patents, and brand recognition that accounting rules record conservatively or exclude entirely."
+    },
+    {
+      "question": "How is P/B different from P/E?",
+      "answer": "P/E compares price to a company's earnings (profit flow), while P/B compares price to its net assets (a balance-sheet snapshot). They answer different questions, and using both together often gives a fuller valuation picture than either alone."
+    },
+    {
+      "question": "Does P/B work well for every industry?",
+      "answer": "No — it's most meaningful for asset-heavy industries like banking, insurance, and manufacturing, where book value closely tracks real economic worth. It's far less reliable for asset-light service or technology businesses."
+    }
+  ],
+  "conclusion": "Price-to-book ratio remains a useful lens precisely because it looks at a company from the balance sheet rather than the income statement, catching things that pure earnings-based metrics can miss. Just remember its blind spot: it undervalues businesses whose real worth sits in intangible assets rather than physical ones, so lean on it more heavily for asset-heavy industries and less for asset-light ones.",
+  "internalLinks": [
+    { "anchor": "P/E ratio explained", "slug": "price-to-earnings-ratio-explained" },
+    { "anchor": "return on equity explained", "slug": "roe-explained" },
+    { "anchor": "return on assets explained", "slug": "roa-explained" },
+    { "anchor": "net income explained", "slug": "net-income-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — EDGAR", "url": "https://www.sec.gov/edgar/search/" }
+  ],
+  "wordCountEstimate": 750
+}

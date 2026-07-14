@@ -1,0 +1,95 @@
+{
+  "topicNumber": 1,
+  "section": "Investing Strategies",
+  "title": "Buy and Hold Strategy Explained",
+  "slug": "buy-and-hold-strategy",
+  "seo": {
+    "seoTitle": "Buy and Hold Strategy Explained: How It Works",
+    "metaDescription": "The buy and hold strategy means purchasing quality stocks and holding through market swings. Learn how it works, who it suits, and its real trade-offs.",
+    "focusKeyword": "buy and hold strategy",
+    "secondaryKeywords": ["long term investing", "passive stock strategy", "hold stocks long term", "buy and hold investing", "long term stock holding"],
+    "searchIntent": "Informational — searchers want to understand how the strategy works before deciding whether to use it.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "The buy and hold strategy is about buying solid businesses and resisting the urge to trade around every market wobble, letting compounding do the heavy lifting over years.",
+  "intro": "A **buy and hold strategy** sounds almost too simple to be a strategy at all: you buy shares of a company or fund, and then you don't sell for years, sometimes decades. But that simplicity is deceptive, because the hardest part isn't the buying — it's the holding, especially when a position drops 30% and every instinct says to get out.\n\nThis approach has produced some of the most durable wealth in market history, not because it predicts anything better than other methods, but because it removes the constant temptation to react. The question isn't whether it works in theory. It's whether you can actually live with it.",
+  "sections": [
+    {
+      "heading": "What Buy and Hold Actually Means",
+      "paragraphs": [
+        "At its core, this strategy treats a stock purchase as ownership in a business rather than a bet on next week's price movement. You research a company, decide it's worth owning, buy shares, and then largely leave the position alone — reinvesting dividends, ignoring daily headlines, and revisiting the thesis only occasionally, maybe once or twice a year. There's no attempt to time entries or exits around economic news or short-term sentiment."
+      ]
+    },
+    {
+      "heading": "Who This Strategy Actually Suits",
+      "paragraphs": [
+        "It suits investors with a long runway — often a decade or more before they'll need the money — and a temperament that can tolerate watching a position lose a third of its value without panicking. It also suits people who'd rather spend an evening reading a 10-K than watching intraday charts. If checking your portfolio daily makes you anxious enough to second-guess every dip, this style tends to reduce that friction simply by giving you less to do."
+      ]
+    },
+    {
+      "heading": "How It's Executed in Practice",
+      "paragraphs": [
+        "Most buy-and-hold investors build positions gradually, often through regular contributions rather than one large lump sum, and lean on tools like dividend reinvestment plans to keep compounding automatic. Rebalancing happens rarely — maybe annually — and mostly to keep asset allocation in line with a plan rather than to chase performance. The discipline isn't in picking winners perfectly; it's in resisting the urge to trade in and out based on mood or headlines."
+      ]
+    },
+    {
+      "heading": "The Case For It",
+      "paragraphs": [
+        "Fewer transactions mean fewer taxable events, lower brokerage costs over time, and less exposure to the well-documented tendency of active traders to underperform by buying high and selling low out of emotion. It also frees up an enormous amount of time and mental energy that would otherwise go into monitoring positions. Warren Buffett has long described his ideal holding period as effectively forever, and while few investors match his track record, the underlying logic — let good businesses compound without interference — holds up regardless of who's applying it."
+      ]
+    },
+    {
+      "heading": "The Case Against It",
+      "paragraphs": [
+        "The obvious risk is holding through a genuine, permanent decline rather than a temporary dip — a company that's actually losing its competitive position, not just having a bad quarter. Buy and hold offers no built-in mechanism for cutting losses, so mistakes can compound just as thoroughly as winners do. It also demands patience that's genuinely hard to sustain during multi-year stretches of flat or negative returns, which happen even to broadly diversified, well-chosen portfolios."
+      ],
+      "callout": {
+        "title": "Holding isn't the same as ignoring",
+        "text": "Buy and hold doesn't mean never checking your thesis. It means checking it on a calm schedule instead of reacting to every headline."
+      }
+    },
+    {
+      "heading": "Buy and Hold vs Momentum Trading",
+      "paragraphs": [
+        "The clearest contrast is with a [momentum investing strategy](/financial-intelligence/momentum-investing-strategy), which does the opposite: it actively rotates into whatever is currently rising and out of whatever is falling, on the theory that trends tend to persist for a while. Buy and hold investors view that turnover as unnecessary cost and risk; momentum investors view long holding periods as leaving gains on the table during strong trends and ignoring warning signs during weak ones. Neither is wrong so much as built on a different bet about what markets actually reward."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Buy and hold means purchasing quality businesses and resisting the urge to trade around short-term price swings.",
+    "It suits investors with a long time horizon and the temperament to sit through meaningful drawdowns.",
+    "Lower turnover means lower taxes and trading costs compared with more active approaches.",
+    "The main risk is holding through a genuine business decline rather than a temporary setback.",
+    "Occasional, scheduled thesis reviews are healthy — the strategy discourages reacting, not thinking.",
+    "It contrasts sharply with momentum investing, which actively trades in and out based on price trends."
+  ],
+  "faq": [
+    {
+      "question": "Is buy and hold the same as passive investing?",
+      "answer": "Not exactly. Passive investing usually refers to owning index funds that track a market benchmark automatically. Buy and hold can apply to individual stocks you've researched yourself, though many buy-and-hold investors also use index funds as their core holding."
+    },
+    {
+      "question": "How long do you need to hold a stock for this to count as buy and hold?",
+      "answer": "There's no official cutoff, but most practitioners think in terms of years rather than months — typically five years or longer, with many holding for a decade or more absent a major change in the underlying business."
+    },
+    {
+      "question": "Does buy and hold mean never selling?",
+      "answer": "No. It means selling is rare and deliberate — usually because the original investment thesis has broken down, not because of a rough month or a scary headline. Rebalancing or funding a near-term goal are also legitimate reasons to sell."
+    },
+    {
+      "question": "What's the biggest mistake buy-and-hold investors make?",
+      "answer": "Confusing patience with denial — continuing to hold a company whose fundamentals have genuinely deteriorated simply because selling feels like admitting a mistake. Reviewing your thesis periodically helps catch this before losses compound further."
+    }
+  ],
+  "conclusion": "Buy and hold isn't exciting, and that's precisely the point. It trades the thrill of active trading for lower costs, fewer emotional decisions, and the quiet compounding that happens when good businesses are simply left alone to grow. Whether it's right for you comes down to time horizon and temperament more than any calculation — can you genuinely sit through a serious drawdown without selling at the worst possible moment? If the honest answer is yes, this remains one of the simplest, most tax-efficient ways to build wealth over decades.",
+  "internalLinks": [
+    { "anchor": "momentum investing strategy", "slug": "momentum-investing-strategy" },
+    { "anchor": "value investing strategy", "slug": "value-investing-strategy" },
+    { "anchor": "passive investing explained", "slug": "passive-investing-explained" },
+    { "anchor": "index investing strategy", "slug": "index-investing-strategy" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 800
+}

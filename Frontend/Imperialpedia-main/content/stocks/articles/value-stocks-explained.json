@@ -1,0 +1,105 @@
+{
+  "topicNumber": 2,
+  "section": "Types of Stocks",
+  "title": "Value Stocks Explained",
+  "slug": "value-stocks-explained",
+  "seo": {
+    "seoTitle": "Value Stocks Explained: Definition, Traits & Examples",
+    "metaDescription": "Value stocks trade below what their fundamentals suggest they're worth. Learn how value investing works, where to find these stocks, and the risks involved.",
+    "focusKeyword": "value stocks",
+    "secondaryKeywords": ["value stock definition", "what are value stocks", "value investing", "undervalued stocks", "value stock examples", "value trap"],
+    "searchIntent": "Informational — investors researching what value stocks are and how value investing works before applying the strategy.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Value stocks trade for less than their fundamentals suggest they're worth, and buying them cheap while waiting for the market to catch up is one of the oldest strategies in investing.",
+  "intro": "Value investing has produced some of the best-known names in the history of the stock market, Warren Buffett chief among them, and the core idea has barely changed since Benjamin Graham first formalized it decades ago: buy solid businesses for less than they're actually worth, then wait. Value stocks are shares that trade at a discount relative to a company's earnings, assets, or cash flow, often because the market has overlooked or temporarily soured on the business.\n\nThe appeal is straightforward — you're paying less for the same underlying earnings power. The difficulty is telling a genuinely undervalued company apart from one that's cheap because it's actually in decline, a distinction that trips up even experienced investors.",
+  "sections": [
+    {
+      "heading": "What Defines a Value Stock",
+      "paragraphs": [
+        "A value stock trades at a low price relative to standard measures of what the underlying business is worth — its price-to-earnings ratio, price-to-book ratio, or free cash flow yield are all lower than the market average or the company's own historical norm. The idea is that the market price hasn't caught up with the company's real fundamentals, and that gap will eventually close as more investors notice.",
+        "Unlike growth stocks, value companies are typically already profitable, often with a long operating history rather than a speculative future story. Many pay steady dividends, since there's less need to reinvest every dollar into rapid expansion."
+      ]
+    },
+    {
+      "heading": "Where Value Stocks Tend to Show Up",
+      "paragraphs": [
+        "Value stocks cluster in mature, established industries: financials, energy, industrials, and consumer staples all produce recurring examples. Banks, insurers, industrial manufacturers, and large energy producers frequently trade at value-style multiples because their growth is steady rather than explosive, and their businesses are well understood by the market rather than surrounded by speculation.",
+        "That doesn't mean value stocks are boring by definition, only that their appeal rests on current profitability and price rather than a dramatic growth narrative."
+      ],
+      "table": {
+        "caption": "Growth vs value at a glance",
+        "headers": ["Trait", "Growth stocks", "Value stocks"],
+        "rows": [
+          ["Valuation", "Higher P/E, priced on future earnings", "Lower P/E, priced on current fundamentals"],
+          ["Dividends", "Rare, profits reinvested", "More common, steady payouts"],
+          ["Typical sectors", "Tech, biotech, emerging industries", "Financials, energy, industrials"],
+          ["Best environment", "Low rates, optimism", "Rising rates, uncertainty"]
+        ]
+      }
+    },
+    {
+      "heading": "The Value Trap: When Cheap Isn't Actually a Bargain",
+      "paragraphs": [
+        "The single biggest risk in value investing is mistaking a business in genuine decline for one that's merely out of favor. A stock can look statistically cheap and still be a poor investment if revenue is permanently shrinking, the industry is being disrupted, or debt is piling up faster than earnings can cover it. Investors call this a value trap — the price stays low not because the market is wrong, but because the market is right."
+      ],
+      "callout": {
+        "title": "Cheap and undervalued aren't the same thing",
+        "text": "A falling share price alone tells you nothing. Check whether revenue, margins, and debt are stable before assuming a low valuation represents a genuine bargain."
+      }
+    },
+    {
+      "heading": "How to Evaluate a Value Stock Before Buying",
+      "paragraphs": [
+        "Start with whether earnings and revenue have actually been stable or growing modestly, not shrinking. Check the balance sheet for manageable debt relative to earnings, and look at the dividend history for consistency rather than just a high current yield, since an unusually high yield can signal the market expects a dividend cut. Our companion guide on [how to analyze a stock](/financial-intelligence/how-to-analyze-a-stock) covers exactly which figures to check and where to find them."
+      ]
+    },
+    {
+      "heading": "Value Stocks vs Other Investing Styles",
+      "paragraphs": [
+        "Value is most commonly discussed opposite growth investing, and the two styles have historically traded leadership depending on interest rates and economic conditions. See our full [growth stocks vs value stocks](/financial-intelligence/growth-stocks-vs-value-stocks) comparison for how each performs across market cycles. Many value stocks also happen to be [blue-chip stocks](/financial-intelligence/blue-chip-stocks-explained) or steady [dividend stocks](/financial-intelligence/dividend-stocks-explained), since the categories overlap more than they conflict."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Value stocks trade at a discount relative to earnings, assets, or cash flow compared to the broader market.",
+    "They're typically already profitable and more likely to pay steady dividends than growth stocks.",
+    "Value stocks cluster in mature industries like financials, energy, and industrials.",
+    "A value trap is a stock that looks cheap but is actually declining — the low price reflects real business problems, not market oversight.",
+    "Stable earnings, manageable debt, and a consistent dividend history are better signals than a low price alone.",
+    "Value has historically held up better than growth during rising-rate and uncertain economic periods."
+  ],
+  "faq": [
+    {
+      "question": "Is a value stock always a good buy just because it's cheap?",
+      "answer": "No. A low price relative to earnings only signals potential value if the underlying business is genuinely sound. A cheap stock attached to a declining business is a value trap, not a bargain — always check whether revenue and margins are stable first."
+    },
+    {
+      "question": "Do value stocks pay dividends?",
+      "answer": "Many do, since established, profitable companies with slower growth often return excess cash to shareholders. See our guide to [dividend stocks](/financial-intelligence/dividend-stocks-explained) for how that income stream works."
+    },
+    {
+      "question": "How do you find value stocks?",
+      "answer": "Screening tools that filter for low price-to-earnings or price-to-book ratios relative to the market are a common starting point, but the screen only identifies candidates — you still need to check the underlying business health before buying."
+    },
+    {
+      "question": "Are value stocks safer than growth stocks?",
+      "answer": "They tend to be less volatile on average, since valuations rest on current rather than future earnings, but \"safer\" isn't absolute — a value stock in a genuinely declining industry can still lose significant value."
+    },
+    {
+      "question": "What's the difference between value stocks and blue-chip stocks?",
+      "answer": "They overlap frequently but aren't identical. Blue-chip refers to large, well-established, financially strong companies regardless of valuation, while value refers specifically to a stock trading cheap relative to its fundamentals. See [blue-chip stocks explained](/financial-intelligence/blue-chip-stocks-explained) for the distinction."
+    }
+  ],
+  "conclusion": "Value investing rewards patience and homework in roughly equal measure — the discount only pays off if the underlying business is actually sound and the market simply hasn't caught up yet. Before buying anything because it looks cheap, take the extra step of confirming the fundamentals hold up, since that single check is what separates a genuine bargain from a value trap.",
+  "internalLinks": [
+    { "anchor": "growth stocks explained", "slug": "growth-stocks-explained" },
+    { "anchor": "growth stocks vs value stocks", "slug": "growth-stocks-vs-value-stocks" },
+    { "anchor": "dividend stocks explained", "slug": "dividend-stocks-explained" },
+    { "anchor": "blue-chip stocks explained", "slug": "blue-chip-stocks-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 800
+}

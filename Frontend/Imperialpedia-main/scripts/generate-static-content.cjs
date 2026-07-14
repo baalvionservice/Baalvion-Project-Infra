@@ -28,6 +28,7 @@ const PACKS = [
   { dir: 'personal-finance', category: { id: 'pf-personal-finance', name: 'Personal Finance', slug: 'personal-finance' } },
   { dir: 'investing', category: { id: 'inv-investing', name: 'Investing', slug: 'investing' } },
   { dir: 'economy', category: { id: 'econ-economy', name: 'Economy', slug: 'economy' } },
+  { dir: 'stocks', category: { id: 'stk-stocks', name: 'Stocks', slug: 'stocks' } },
 ];
 
 // Fixed timestamp keeps the generated file stable across runs (no spurious git diffs).

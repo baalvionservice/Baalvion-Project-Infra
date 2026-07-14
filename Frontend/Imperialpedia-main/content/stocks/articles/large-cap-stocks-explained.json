@@ -1,0 +1,103 @@
+{
+  "topicNumber": 11,
+  "section": "Types of Stocks",
+  "title": "Large-Cap Stocks Explained",
+  "slug": "large-cap-stocks-explained",
+  "seo": {
+    "seoTitle": "Large-Cap Stocks Explained: Definition & Benefits",
+    "metaDescription": "Large-cap stocks are the biggest publicly traded companies by market value. Learn the typical thresholds, why they anchor most portfolios, and the trade-offs.",
+    "focusKeyword": "large-cap stocks",
+    "secondaryKeywords": ["large cap stock definition", "what are large cap stocks", "large cap vs small cap", "S&P 500 large cap", "mega cap stocks", "large cap risk"],
+    "searchIntent": "Informational — investors researching what qualifies as a large-cap stock and why these companies anchor most diversified portfolios.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Large-cap stocks are the biggest publicly traded companies by market value, forming the backbone of most major stock indexes and diversified portfolios.",
+  "intro": "Ask most people to name a stock, and they'll almost certainly name a large-cap company — the household names with decades of history, global operations, and total market values reaching into the hundreds of billions of dollars. Large-cap stocks are shares in the biggest publicly traded companies by market capitalization, and their sheer scale gives them an outsized role in broad market indexes like the S&P 500.\n\nBecause so much of the market's total value sits in relatively few large-cap companies, understanding this category matters even for investors who never plan to pick an individual stock, simply because index funds are so heavily weighted toward them.",
+  "sections": [
+    {
+      "heading": "What Counts as a Large-Cap Stock",
+      "paragraphs": [
+        "Large-cap status is based on market capitalization — share price multiplied by total shares outstanding — and generally refers to companies with a market value in the tens of billions of dollars or more. Within the category, an informal subgroup called mega-cap stocks refers to the handful of companies whose market value runs into the hundreds of billions or beyond, a group of names most people would recognize instantly."
+      ]
+    },
+    {
+      "heading": "Market-Cap Categories at a Glance",
+      "paragraphs": [
+        "As with small and mid-cap, these thresholds are common conventions rather than fixed legal definitions, and they shift gradually as the overall market grows."
+      ],
+      "table": {
+        "caption": "Typical market-cap size categories",
+        "headers": ["Category", "Approximate market cap range"],
+        "rows": [
+          ["Small-cap", "Roughly $300 million to $2 billion"],
+          ["Mid-cap", "Roughly $2 billion to $10 billion"],
+          ["Large-cap", "Roughly $10 billion and above"],
+          ["Mega-cap", "Roughly $200 billion and above"]
+        ]
+      }
+    },
+    {
+      "heading": "Why Large-Cap Stocks Anchor Most Portfolios",
+      "paragraphs": [
+        "Large-cap companies tend to have diversified revenue streams, established global operations, deep analyst coverage, and enough financial strength to weather a difficult year without an existential threat to the business. That combination of scale and stability is why large-cap stocks dominate broad market indexes and why most diversified portfolios, whether built from individual stocks or index funds, hold a substantial weighting toward this category."
+      ],
+      "callout": {
+        "title": "Index weighting matters more than most realize",
+        "text": "Because major indexes like the S&P 500 are weighted by market capitalization, the largest handful of companies can represent a disproportionate share of the index's total movement."
+      }
+    },
+    {
+      "heading": "The Trade-Off: Limited Room for Explosive Growth",
+      "paragraphs": [
+        "The same scale that provides stability also makes rapid percentage growth mathematically harder — doubling revenue from an already-massive base requires finding enormous amounts of new business, which gets progressively more difficult the larger a company becomes. Investors seeking the kind of outsized percentage gains associated with smaller companies typically look toward small-cap or growth stocks instead, accepting more risk in exchange for more room to expand."
+      ]
+    },
+    {
+      "heading": "Large-Cap in Context: Related Categories",
+      "paragraphs": [
+        "Large-cap overlaps heavily with [blue-chip stocks](/financial-intelligence/blue-chip-stocks-explained), since size and reputation for stability tend to go together, and with [dividend stocks](/financial-intelligence/dividend-stocks-explained), since mature large companies often return excess cash to shareholders. It sits opposite [small-cap](/financial-intelligence/small-cap-stocks-explained) and [mid-cap stocks](/financial-intelligence/mid-cap-stocks-explained) on the size spectrum."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Large-cap stocks are companies with a market capitalization generally in the tens of billions of dollars or more.",
+    "Mega-cap is an informal subgroup for companies valued at roughly $200 billion or above.",
+    "Large-cap stocks dominate major market indexes like the S&P 500 because those indexes are weighted by market value.",
+    "Their scale and stability make large-cap stocks a common anchor for diversified portfolios.",
+    "The trade-off for that stability is typically slower percentage growth compared to smaller companies.",
+    "Large-cap overlaps significantly with the blue-chip and dividend stock categories."
+  ],
+  "faq": [
+    {
+      "question": "What is considered a large-cap stock?",
+      "answer": "By common convention, a large-cap stock has a market capitalization of roughly $10 billion or more, though the exact threshold varies somewhat by index provider and shifts as overall market values grow over time."
+    },
+    {
+      "question": "What is a mega-cap stock?",
+      "answer": "Mega-cap is an informal term for the largest companies within the large-cap category, generally those valued at roughly $200 billion or more — a small group of globally recognized names."
+    },
+    {
+      "question": "Are large-cap stocks safer than small-cap stocks?",
+      "answer": "Generally yes, in the sense that they tend to be less volatile and have more financial cushion, though no individual stock is risk-free, and large companies can still decline significantly if their industry or execution falters."
+    },
+    {
+      "question": "Do large-cap stocks pay dividends?",
+      "answer": "Many do, since mature, profitable large companies often return excess cash to shareholders rather than reinvesting all of it into growth. See [dividend stocks explained](/financial-intelligence/dividend-stocks-explained) for how that works."
+    },
+    {
+      "question": "Why do index funds hold so much in large-cap stocks?",
+      "answer": "Most broad market indexes, including the S&P 500, are weighted by market capitalization, meaning the largest companies represent a proportionally larger share of the index and its overall performance."
+    }
+  ],
+  "conclusion": "Large-cap stocks are the market's heavyweights — big enough to anchor major indexes and diversified portfolios alike, with the financial strength to absorb a rough year without the business itself being threatened. The trade-off is a lower ceiling for rapid growth, which is exactly why many investors pair large-cap stability with smaller, faster-growing companies elsewhere in a portfolio.",
+  "internalLinks": [
+    { "anchor": "blue-chip stocks explained", "slug": "blue-chip-stocks-explained" },
+    { "anchor": "mid-cap stocks explained", "slug": "mid-cap-stocks-explained" },
+    { "anchor": "small-cap stocks explained", "slug": "small-cap-stocks-explained" },
+    { "anchor": "dividend stocks explained", "slug": "dividend-stocks-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 790
+}

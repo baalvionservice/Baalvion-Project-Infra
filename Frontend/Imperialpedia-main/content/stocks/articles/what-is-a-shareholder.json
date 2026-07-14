@@ -1,0 +1,94 @@
+{
+  "topicNumber": 8,
+  "section": "Stock Basics",
+  "title": "What Is a Shareholder?",
+  "slug": "what-is-a-shareholder",
+  "seo": {
+    "seoTitle": "What Is a Shareholder? Rights and Responsibilities",
+    "metaDescription": "A shareholder is anyone who owns at least one share of a company. Learn what rights that ownership grants and how shareholders differ from stakeholders.",
+    "focusKeyword": "what is a shareholder",
+    "secondaryKeywords": ["shareholder definition", "shareholder rights", "stakeholder vs shareholder", "majority shareholder", "shareholder of record", "beneficial owner of stock"],
+    "searchIntent": "Informational — beginners wanting a clear definition of what shareholder status actually confers.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "A shareholder is any individual or institution that owns at least one share of a company's stock, giving them a legal claim on its earnings and, often, a vote.",
+  "intro": "Buy a single share of any public company and you technically become a shareholder — the term isn't reserved for wealthy insiders or activist investors. It simply means you hold a legal ownership stake, however small, in that business.",
+  "sections": [
+    {
+      "heading": "The Basic Definition",
+      "paragraphs": [
+        "A shareholder, also called a stockholder, is any person or entity that owns shares of a corporation's stock. That ownership can be a single share bought through a brokerage app or millions of shares held by a pension fund. The size of the stake doesn't change the legal category — it changes the practical influence that comes with it."
+      ]
+    },
+    {
+      "heading": "What Rights Come With Being a Shareholder",
+      "paragraphs": [
+        "Depending on the class of stock held, shareholders typically get a proportional claim on company earnings and assets, the right to vote on major decisions, and access to certain company information like annual reports. Our detailed guide on shareholder voting rights covers how that voting process actually works in practice."
+      ],
+      "callout": {
+        "title": "Rights scale, but they don't disappear",
+        "text": "Even a single share carries real legal rights — you're entitled to vote, to receive any declared dividend, and to a share of assets if the company is ever liquidated."
+      }
+    },
+    {
+      "heading": "Shareholder of Record vs. Beneficial Owner",
+      "paragraphs": [
+        "Most retail investors are \"beneficial owners\" — their shares are held in \"street name\" by the brokerage, which is the official shareholder of record. The brokerage still passes through voting rights and dividends to the actual investor, but legally, it's the intermediary holding the registered position. This system exists mainly for efficiency, letting trades settle quickly without re-registering paperwork for every transaction."
+      ]
+    },
+    {
+      "heading": "Shareholder vs. Stakeholder",
+      "paragraphs": [
+        "These terms get used interchangeably in casual conversation, but they mean different things. A shareholder specifically owns equity in the company. A stakeholder is a broader category that includes employees, customers, suppliers, and the community — anyone affected by the company's decisions, whether or not they own stock. Every shareholder is a stakeholder, but not every stakeholder is a shareholder."
+      ]
+    },
+    {
+      "heading": "Types of Shareholders",
+      "paragraphs": [
+        "Shareholders range from individual retail investors to institutional players like mutual funds, pension funds, and hedge funds, which collectively own the majority of most large public companies. A \"majority shareholder\" holds more than 50% of a company's voting shares and can typically control board decisions outright, while \"minority shareholders\" hold smaller stakes and rely on collective votes and legal protections to have influence."
+      ]
+    },
+    {
+      "heading": "Legal Protections for Minority Shareholders",
+      "paragraphs": [
+        "Because majority shareholders can otherwise dominate corporate decisions, most jurisdictions build in protections for smaller shareholders: rights to inspect certain company records, standing to sue for breach of fiduciary duty, and, in some structures, appraisal rights that let a minority shareholder demand fair value for their shares during a forced buyout. These protections don't eliminate the influence gap between large and small holders, but they prevent a majority shareholder from acting with complete disregard for everyone else's stake."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "A shareholder is anyone who owns at least one share of a company's stock, regardless of stake size.",
+    "Shareholder rights typically include a claim on earnings, a vote, and access to company disclosures.",
+    "Most retail investors are beneficial owners, with the brokerage listed as the official shareholder of record.",
+    "Shareholders are a specific type of stakeholder; not all stakeholders own equity in the company.",
+    "Majority shareholders hold over 50% of voting shares and can generally control board decisions.",
+    "Institutional investors collectively hold the majority of shares in most large public companies."
+  ],
+  "faq": [
+    {
+      "question": "Do I need a minimum number of shares to be considered a shareholder?",
+      "answer": "No. Owning even a single share, or a fractional share, legally makes you a shareholder with the rights attached to that share class, though your practical influence scales with how much you own."
+    },
+    {
+      "question": "What's the difference between a shareholder and a stakeholder?",
+      "answer": "A shareholder owns equity in the company. A stakeholder is anyone affected by the company's actions — including employees and customers — whether or not they own any stock. All shareholders are stakeholders, but the reverse isn't true."
+    },
+    {
+      "question": "Can a shareholder lose more money than they invested?",
+      "answer": "No, for common stock — losses are limited to the amount invested. This limited liability is one of the defining protections of owning shares rather than, say, being a general partner in a business."
+    },
+    {
+      "question": "What is a majority shareholder?",
+      "answer": "A majority shareholder owns more than 50% of a company's voting shares, giving them effective control over board elections and most corporate decisions, subject to legal protections for minority shareholders."
+    }
+  ],
+  "conclusion": "Shareholder status isn't reserved for institutions or the wealthy — buying a single share through any brokerage app makes you one, with real, if proportionally small, legal rights. Understanding what that status actually entitles you to is the first step toward using it, whether that means voting your shares or simply following the reports you're entitled to receive.",
+  "internalLinks": [
+    { "anchor": "what is a stock", "slug": "what-is-a-stock" },
+    { "anchor": "shareholder voting rights", "slug": "shareholder-voting-rights" },
+    { "anchor": "outstanding shares explained", "slug": "outstanding-shares-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 750
+}

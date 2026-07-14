@@ -1,0 +1,112 @@
+{
+  "topicNumber": 1,
+  "section": "Stock Analysis",
+  "title": "Fundamental Analysis Explained",
+  "slug": "fundamental-analysis-explained",
+  "seo": {
+    "seoTitle": "Fundamental Analysis Explained: A Practical Guide",
+    "metaDescription": "Fundamental analysis judges a stock by the business behind it — earnings, debt, and valuation — not the price chart. Here's how it actually works, in plain terms.",
+    "focusKeyword": "fundamental analysis",
+    "secondaryKeywords": ["fundamental analysis explained", "stock fundamentals", "how to value a stock", "financial statement analysis", "fundamental vs technical analysis", "earnings and valuation"],
+    "searchIntent": "Informational — investors want to understand the method itself, not just a checklist of ratios.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Fundamental analysis means judging a stock by the health of the business behind it — earnings, debt, and valuation — rather than by its price chart.",
+  "intro": "Fundamental analysis is the practice of judging a stock by the business behind it — its revenue, its profit, how much debt it carries, and what price you're being asked to pay for a claim on its future earnings. It's the approach long associated with buy-and-hold investors, and it rests on a fairly simple premise: over enough time, a stock's price tends to drift toward the value of the underlying company, even when the two disagree sharply over any single quarter.\n\nThat premise is also the method's biggest weakness. Markets can stay disconnected from the numbers for years, and a stock that looks cheap on paper can stay cheap indefinitely if nothing forces the market to notice. Still, for anyone planning to hold a position longer than a few weeks, some grasp of the underlying business is hard to skip — which is why this approach sits at the center of most long-term investing frameworks, including our broader [how to analyze a stock](/financial-intelligence/how-to-analyze-a-stock) framework.",
+  "sections": [
+    {
+      "heading": "What Fundamental Analysis Actually Measures",
+      "paragraphs": [
+        "At its core, fundamental analysis tries to answer one question: is this business worth more, the same, or less than the market currently says it is? Analysts get there by examining revenue growth, profit margins, return on equity, and free cash flow — the money left over after a company pays for its own operations and reinvestment. None of these numbers alone tells the full story, but together they sketch whether a company is genuinely growing or coasting on past momentum.",
+        "The discipline splits loosely into two layers: quantitative analysis, which pulls hard numbers from financial statements, and qualitative analysis, which considers what doesn't show up on a balance sheet — brand strength, management competence, and how defensible a company's market position really is."
+      ]
+    },
+    {
+      "heading": "The Three Statements Worth Reading",
+      "subsections": [
+        {
+          "heading": "Income Statement",
+          "paragraphs": [
+            "Shows revenue, expenses, and the resulting profit over a period — usually a quarter or a year. Rising revenue with flat or shrinking margins is a common early warning sign worth investigating before it shows up anywhere else."
+          ]
+        },
+        {
+          "heading": "Balance Sheet",
+          "paragraphs": [
+            "A snapshot of what a company owns versus what it owes at a single point in time. The relationship between debt and equity here tells you how much financial cushion a business has if revenue takes an unexpected hit."
+          ]
+        },
+        {
+          "heading": "Cash Flow Statement",
+          "paragraphs": [
+            "Tracks actual cash moving in and out, which matters because a company can report a profit on paper while quietly running out of cash — a gap that trips up more investors than any single ratio."
+          ]
+        }
+      ]
+    },
+    {
+      "heading": "Valuation: What Are You Actually Paying?",
+      "paragraphs": [
+        "Even a wonderful business can be a poor investment if you overpay for it, which is where valuation ratios come in. The price-to-earnings (P/E) ratio compares share price to profit per share; price-to-book compares it to net assets; and the PEG ratio adjusts P/E for expected growth, giving a rough sense of whether a high price is justified by a faster growth rate. None of these numbers means much in isolation — they're only useful compared against a company's own history and its closest industry peers."
+      ],
+      "callout": {
+        "title": "Cheap isn't the same as good",
+        "text": "A low P/E ratio can mean a bargain, or it can mean the market has correctly priced in serious problems. Always ask why a stock looks cheap before assuming it is one."
+      }
+    },
+    {
+      "heading": "Qualitative Factors the Numbers Miss",
+      "paragraphs": [
+        "Spreadsheets can't fully capture whether management allocates capital wisely, whether a brand commands real loyalty, or whether a competitor could undercut the business within a couple of years. The long-running preference among value investors for companies with a durable 'moat' — some structural edge rivals can't easily copy — reflects this: good fundamental analysis blends the numbers with a judgment call about how defensible the business really is."
+      ]
+    },
+    {
+      "heading": "Fundamental Analysis vs. Technical Analysis",
+      "paragraphs": [
+        "Fundamental analysis asks what a business is worth; [technical analysis](/financial-intelligence/technical-analysis-explained) asks what the price chart suggests other traders will do next. The two aren't really rivals — plenty of long-term investors use fundamentals to decide what to buy and technical signals to help time an entry, though how much weight either deserves is a genuinely contested question among professionals, not a settled one."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Fundamental analysis judges a stock by the underlying business — revenue, profit, debt, and cash flow — not by its recent price action.",
+    "The income statement, balance sheet, and cash flow statement each answer a different question about a company's health.",
+    "Valuation ratios like P/E and PEG only mean something compared against a company's history and its industry peers.",
+    "Qualitative factors — management quality, brand strength, competitive moat — matter alongside the hard numbers.",
+    "A low valuation isn't automatically a bargain; the market sometimes prices in real problems accurately.",
+    "Fundamental and technical analysis are often used together rather than treated as opposing camps."
+  ],
+  "faq": [
+    {
+      "question": "Is fundamental analysis better than technical analysis?",
+      "answer": "Neither approach is definitively 'better' — they answer different questions. Fundamental analysis is generally favored for longer holding periods, while technical analysis is more common among short-term traders. Many investors blend both rather than picking a single camp."
+    },
+    {
+      "question": "How long does a basic fundamental analysis take?",
+      "answer": "A reasonable first pass — checking revenue trends, debt levels, and a couple of valuation ratios — can take 15 to 30 minutes per company once you know where to look, mostly on free brokerage or company investor-relations pages."
+    },
+    {
+      "question": "Can fundamental analysis predict short-term price moves?",
+      "answer": "Not reliably. A financially healthy company's stock can still fall in the short term due to broad market sentiment, sector rotation, or unrelated news. Fundamental analysis is generally a tool for longer-horizon decisions, not short-term timing."
+    },
+    {
+      "question": "What's the single most important fundamental metric?",
+      "answer": "There isn't one. Revenue growth, profit margins, debt levels, and valuation all interact, and a company can look strong on one measure while concerning on another — which is why analysts look at the full picture rather than any single number."
+    },
+    {
+      "question": "Do I need accounting knowledge to do fundamental analysis?",
+      "answer": "Basic literacy helps but isn't required to start. Understanding what revenue, net income, and debt-to-equity mean conceptually gets most beginners most of the way; deeper accounting knowledge mainly helps you catch subtler red flags in the footnotes."
+    }
+  ],
+  "conclusion": "Fundamental analysis won't tell you what a stock does tomorrow, and it isn't a guarantee against loss — plenty of fundamentally sound companies have gone through painful multi-year stretches of a falling stock price. What it offers instead is a repeatable way to judge whether you're buying a business worth owning at a price that makes sense, which matters most for anyone planning to hold longer than a headline cycle. Pair it with our broader [how to analyze a stock](/financial-intelligence/how-to-analyze-a-stock) framework for a step-by-step process you can apply to any company.",
+  "internalLinks": [
+    { "anchor": "how to analyze a stock", "slug": "how-to-analyze-a-stock" },
+    { "anchor": "technical analysis explained", "slug": "technical-analysis-explained" },
+    { "anchor": "moving averages explained", "slug": "moving-averages-explained" },
+    { "anchor": "volume analysis explained", "slug": "volume-analysis-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — EDGAR company filings", "url": "https://www.sec.gov/edgar/search-and-access" },
+    { "name": "CFA Institute — Financial Statement Analysis", "url": "https://www.cfainstitute.org/" }
+  ],
+  "wordCountEstimate": 780
+}

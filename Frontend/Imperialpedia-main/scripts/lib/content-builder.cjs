@@ -217,6 +217,7 @@ function buildContentDoc(spec, { contentType, categoryId, appendAuthor, artwork 
     },
     visibility: 'public',
     customFields: {
+      section: spec.section || null,
       focusKeyword: seo.focusKeyword || null,
       secondaryKeywords: seo.secondaryKeywords || [],
       searchIntent: seo.searchIntent || null,

@@ -1,0 +1,95 @@
+{
+  "topicNumber": 4,
+  "section": "Stock Basics",
+  "title": "Fractional Shares: What They Are and How They Work",
+  "slug": "fractional-shares-explained",
+  "seo": {
+    "seoTitle": "Fractional Shares Explained: How They Work",
+    "metaDescription": "Fractional shares let you buy a slice of an expensive stock for a set dollar amount. Here's how they work, what you actually own, and the trade-offs.",
+    "focusKeyword": "fractional shares",
+    "secondaryKeywords": ["fractional share investing", "buy partial shares", "dollar-based investing", "fractional shares dividends", "how fractional shares work"],
+    "searchIntent": "Informational — new investors with limited capital wondering if they can buy expensive stocks.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Fractional shares let you invest a specific dollar amount in a stock rather than buying a full share, opening up expensive companies to investors with modest budgets.",
+  "intro": "A single share of a well-known company can cost anywhere from a few dollars to well over a thousand. Fractional shares solve the obvious problem that creates: instead of needing enough money for one whole share, you can invest a set dollar amount and receive whatever fraction of a share that buys.",
+  "sections": [
+    {
+      "heading": "How Fractional Shares Actually Work",
+      "paragraphs": [
+        "When you place a dollar-based order — say, $50 into a stock trading at $200 — your brokerage buys 0.25 of a share on your behalf. You own that fraction just as you'd own a whole share: it participates in price gains and losses, and it pays a proportional dividend if the company issues one.",
+        "Brokerages typically source these fractions either by pooling many customers' orders into whole-share purchases behind the scenes, or by holding an internal inventory of shares they divide up as needed."
+      ]
+    },
+    {
+      "heading": "What You Can and Can't Do With Them",
+      "paragraphs": [
+        "You can sell a fractional share, hold it, or add to it over time. What you generally can't do is transfer a fractional share to a different brokerage — most transfer systems only move whole shares, so a fraction is often cashed out first if you switch firms. Voting rights on fractional shares are also usually limited or handled differently than for whole shares."
+      ],
+      "callout": {
+        "title": "Check before you switch brokers",
+        "text": "If you're planning to move your account, ask ahead of time how the new brokerage handles existing fractional positions — policies vary and surprises here are common."
+      }
+    },
+    {
+      "heading": "Why They Matter for Beginners",
+      "paragraphs": [
+        "Fractional shares remove one of the biggest early barriers to diversification: needing hundreds or thousands of dollars just to own a single share of a company you believe in. A beginner with $100 a month can now spread that money across ten different stocks instead of concentrating it all in whichever one happens to be cheapest. Our guide on what a stock is covers the ownership concept these fractions are built on."
+      ]
+    },
+    {
+      "heading": "Dividends and Fractional Ownership",
+      "paragraphs": [
+        "Dividend payments scale proportionally with fractional ownership, so 0.25 of a share earns 25% of the per-share dividend. Most brokerages also support fractional dividend reinvestment, meaning even a tiny fraction can compound over time without you needing to manually reinvest each payout."
+      ]
+    },
+    {
+      "heading": "Where Fractional Investing Falls Short",
+      "paragraphs": [
+        "Not every stock or brokerage supports fractional trading, and availability can vary by exchange and security type. Fractional shares also don't come with a physical stock certificate, which matters to a small number of investors who value that tangible proof of ownership — see our piece on stock certificates for more on that tradition."
+      ]
+    },
+    {
+      "heading": "Fractional Shares and Voting Rights",
+      "paragraphs": [
+        "Because fractional shares represent a partial claim rather than a full unit of stock, most brokerages either round down for voting purposes or simply don't pass through a proxy ballot for positions under one whole share. If shareholder voting is genuinely important to you, it's worth checking your specific brokerage's policy, since practices differ, and building a position up to at least one full share resolves the issue entirely."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Fractional shares let you buy a portion of a stock based on a dollar amount rather than a whole-share price.",
+    "You still get proportional exposure to price movement and dividends on the fraction you own.",
+    "Fractional positions often can't be transferred between brokerages the way whole shares can.",
+    "They make diversification realistic for investors with smaller amounts of capital to deploy.",
+    "Dividend reinvestment usually works normally on fractional shares, supporting compounding over time.",
+    "Not all brokerages or securities support fractional share trading."
+  ],
+  "faq": [
+    {
+      "question": "Do fractional shares pay dividends?",
+      "answer": "Yes. A fractional share earns a dividend proportional to the fraction owned. If you hold half a share, you receive half of the per-share dividend payment, typically deposited automatically like any other dividend."
+    },
+    {
+      "question": "Can I vote with a fractional share?",
+      "answer": "Usually not in a meaningful way — many brokerages round fractional positions down for voting purposes, or don't pass voting rights through at all. Check your brokerage's specific policy if shareholder voting matters to you."
+    },
+    {
+      "question": "What happens to fractional shares if I transfer brokerages?",
+      "answer": "Policies vary widely. Some brokerages liquidate fractional positions into cash before a transfer, while others have partnerships allowing the fraction to move intact. Always confirm this before initiating an account transfer."
+    },
+    {
+      "question": "Are fractional shares riskier than whole shares?",
+      "answer": "No — the risk profile is identical per dollar invested. A fractional share of a stock carries exactly the same proportional risk and return characteristics as owning a whole share of the same company."
+    }
+  ],
+  "conclusion": "Fractional shares didn't change what stock ownership means — they just removed the arbitrary barrier of a company's share price. For anyone starting with a modest amount to invest, that shift has made real diversification across expensive, high-quality companies possible in a way it simply wasn't a decade ago.",
+  "internalLinks": [
+    { "anchor": "what is a stock", "slug": "what-is-a-stock" },
+    { "anchor": "common stock explained", "slug": "common-stock-explained" },
+    { "anchor": "stock certificates explained", "slug": "stock-certificates-explained" }
+  ],
+  "externalSources": [
+    { "name": "FINRA — Investor Education", "url": "https://www.finra.org/investors" }
+  ],
+  "wordCountEstimate": 720
+}

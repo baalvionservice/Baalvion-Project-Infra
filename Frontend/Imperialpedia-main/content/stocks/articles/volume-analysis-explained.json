@@ -1,0 +1,98 @@
+{
+  "topicNumber": 10,
+  "section": "Stock Analysis",
+  "title": "Volume Analysis Explained",
+  "slug": "volume-analysis-explained",
+  "seo": {
+    "seoTitle": "Volume Analysis Explained: Reading Trading Volume",
+    "metaDescription": "Trading volume shows how much conviction is behind a price move. Learn how to read volume alongside price, common patterns, and where it can mislead.",
+    "focusKeyword": "volume analysis",
+    "secondaryKeywords": ["trading volume explained", "volume confirmation", "volume price relationship", "on balance volume", "low volume breakout", "reading stock volume"],
+    "searchIntent": "Informational — traders want to understand how to interpret volume alongside price rather than treat it as a standalone number.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Trading volume measures how many shares changed hands, and reading it alongside price is one of the simplest ways to gauge real conviction behind a move.",
+  "intro": "Volume is simply the number of shares traded over a given period, usually shown as bars beneath a price chart. On its own it's just a count, but read alongside price, volume becomes one of the more useful ways to gauge whether a move has real conviction behind it or is running on thin participation that could reverse quickly.",
+  "sections": [
+    {
+      "heading": "The Basic Volume-Price Relationship",
+      "paragraphs": [
+        "The general rule of thumb is that price moves accompanied by rising volume are considered more meaningful than the same moves on falling or below-average volume. A stock climbing steadily on heavy volume suggests broad participation and real demand; the same climb on thin volume suggests fewer participants are driving it, which can make the move easier to reverse once those buyers stop."
+      ],
+      "table": {
+        "caption": "Commonly cited volume-price patterns and their conventional read",
+        "headers": ["Price Action", "Volume", "Common Interpretation"],
+        "rows": [
+          ["Price rising", "Rising volume", "Healthy uptrend with broad participation"],
+          ["Price rising", "Falling volume", "Momentum may be weakening despite the higher price"],
+          ["Price falling", "Rising volume", "Strong selling conviction; often bearish"],
+          ["Price falling", "Falling volume", "Selling pressure may be exhausting itself"],
+          ["Breakout above resistance", "Low volume", "Higher risk of a false breakout"]
+        ]
+      }
+    },
+    {
+      "heading": "Volume as a Breakout Confirmation Tool",
+      "paragraphs": [
+        "When a stock pushes through a well-known [resistance level](/financial-intelligence/support-and-resistance-explained), traders routinely check whether volume spiked alongside the move. A breakout on unusually heavy volume is treated as more credible than the identical price move on ordinary or light volume, since heavy volume suggests a larger number of market participants agreeing on the new direction rather than a handful of trades pushing price through a thin order book."
+      ],
+      "callout": {
+        "title": "Volume confirms; it doesn't predict",
+        "text": "Volume is best used to check a signal you've already spotted from price, a candlestick pattern, or a trend line — not as a standalone reason to buy or sell by itself."
+      }
+    },
+    {
+      "heading": "Volume Divergence and On-Balance Volume",
+      "paragraphs": [
+        "Some analysts track cumulative volume-based tools like on-balance volume, which adds a day's volume when price closes higher and subtracts it when price closes lower, building a running total meant to reveal whether volume is quietly flowing into or out of a stock ahead of a visible price move. When this cumulative measure diverges from price — for instance, price drifting sideways while the volume measure trends up — it's sometimes read as accumulation happening under the surface, though, like other divergence signals, it's more convincing in hindsight than in real time."
+      ]
+    },
+    {
+      "heading": "Where Volume Analysis Goes Wrong",
+      "paragraphs": [
+        "Volume figures can be distorted around options expiration dates, index rebalancing, and other mechanical events that have nothing to do with genuine investor conviction, so an unusual volume spike deserves a quick check for an obvious explanation before being read as a meaningful signal. Volume also tells you how much trading happened, not why — a spike can reflect panic selling, a large institutional trade unwinding a position, or genuine new-information-driven buying, and distinguishing between those requires looking at the surrounding price action and news, not the volume bar alone. This is exactly the kind of layered reasoning our broader [how to analyze a stock](/financial-intelligence/how-to-analyze-a-stock) framework and [technical analysis](/financial-intelligence/technical-analysis-explained) guide walk through in more depth."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Volume measures how many shares traded in a period and is best read alongside price, not on its own.",
+    "Price moves on rising volume are generally considered more meaningful than the same moves on falling or thin volume.",
+    "Breakouts above resistance carry more credibility when accompanied by a genuine volume spike.",
+    "Cumulative tools like on-balance volume try to reveal whether volume is quietly building before a visible price move.",
+    "Volume spikes can come from mechanical events like options expiration, not just genuine investor conviction.",
+    "Volume confirms the strength of an existing signal; it doesn't function well as a standalone predictor."
+  ],
+  "faq": [
+    {
+      "question": "What does high trading volume mean for a stock?",
+      "answer": "High volume generally means more shares changed hands than usual, which is read as a sign of stronger conviction behind whatever price move accompanied it — whether that move is up or down."
+    },
+    {
+      "question": "Is a low-volume breakout reliable?",
+      "answer": "Generally considered less reliable. A price move through resistance on unusually light volume carries a higher risk of being a false breakout that reverses once the initial push runs out of participants."
+    },
+    {
+      "question": "What is on-balance volume?",
+      "answer": "It's a running cumulative total that adds volume on up days and subtracts it on down days, intended to reveal whether volume is building in a direction that hasn't yet shown up clearly in the price itself."
+    },
+    {
+      "question": "Why did volume spike with no major price change?",
+      "answer": "This can happen around options expiration, index fund rebalancing, or large institutional trades that offset each other. Not every volume spike reflects a directional shift in investor sentiment."
+    },
+    {
+      "question": "Should I trade based on volume alone?",
+      "answer": "It's not recommended. Volume works best as a confirmation tool alongside price patterns, support and resistance levels, or trend indicators, rather than as a standalone buy or sell signal."
+    }
+  ],
+  "conclusion": "Volume is one of the simplest pieces of market data available, and reading it alongside price remains one of the more grounded habits in technical analysis — it adds a rough sense of how many participants actually stand behind a given move. It's a confirmation tool rather than a crystal ball, though, and unusual spikes deserve a quick sanity check against the calendar and the news before being read as a meaningful shift in sentiment.",
+  "internalLinks": [
+    { "anchor": "candlestick charts explained", "slug": "candlestick-charts-explained" },
+    { "anchor": "support and resistance explained", "slug": "support-and-resistance-explained" },
+    { "anchor": "macd explained", "slug": "macd-explained" },
+    { "anchor": "technical analysis explained", "slug": "technical-analysis-explained" }
+  ],
+  "externalSources": [
+    { "name": "FINRA — Investor Education", "url": "https://www.finra.org/investors" }
+  ],
+  "wordCountEstimate": 800
+}

@@ -1,0 +1,104 @@
+{
+  "topicNumber": 9,
+  "section": "Beginner Investing",
+  "title": "Risk Management for Stock Investors",
+  "slug": "risk-management-for-stock-investors",
+  "seo": {
+    "seoTitle": "Risk Management for Stock Investors: A Beginner's Guide",
+    "metaDescription": "Managing risk in stock investing isn't about avoiding losses entirely — it's about sizing positions, diversifying, and setting rules before emotion sets in.",
+    "focusKeyword": "risk management for stock investors",
+    "secondaryKeywords": ["how to manage investment risk", "stock market risk tolerance", "position sizing", "reducing portfolio risk", "investment risk vs volatility"],
+    "searchIntent": "Informational — searchers want practical, actionable ways to reduce risk in a stock portfolio.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Risk management in stock investing isn't about eliminating losses — it's a set of practical habits that keep any single mistake from derailing your overall plan.",
+  "intro": "Every stock investment carries risk, and no amount of research eliminates that fact. Risk management isn't about finding some trick that removes risk from the equation — it's a set of practical habits that keep any single bad outcome from being the one that actually hurts you.\n\nThe investors who last decades in the market usually aren't the ones who avoided every loss. They're the ones who structured their portfolios so no individual loss could do lasting damage.",
+  "sections": [
+    {
+      "heading": "Risk Isn't the Same as Volatility",
+      "paragraphs": [
+        "Volatility is how much a stock's price moves around; risk is the chance of a permanent, meaningful loss of capital. A stock can be volatile day to day and still be a perfectly reasonable long-term holding, while a stable-looking stock in a declining business can carry more real risk than its calm price chart suggests.",
+        "Conflating the two leads to bad decisions — selling a volatile but fundamentally sound stock out of discomfort, or holding a quietly deteriorating one because it hasn't moved much yet."
+      ]
+    },
+    {
+      "heading": "Position Sizing: Your First Line of Defense",
+      "paragraphs": [
+        "Position sizing means deciding, in advance, how much of your portfolio any single stock is allowed to represent. Even a stock you're highly confident in shouldn't dominate your holdings, because confidence isn't a guarantee, and companies that looked unshakeable have failed before.",
+        "A common guideline caps any single stock at somewhere around 5-10% of a portfolio for individual investors, though this varies by risk tolerance and how much of the portfolio is otherwise diversified through funds."
+      ],
+      "callout": {
+        "title": "Concentration cuts both ways",
+        "text": "A concentrated bet can produce outsized gains, but it produces outsized losses with equal ease. Position sizing is how you decide how much of that swing you can actually afford."
+      }
+    },
+    {
+      "heading": "Diversification as Structural Risk Management",
+      "paragraphs": [
+        "Spreading money across companies, sectors, and asset classes remains one of the most reliable risk management tools available to ordinary investors, since it directly limits the damage any single bad outcome can do. Our full guide on [diversification](/financial-intelligence/diversification-explained) covers how to think about spreading risk across your holdings.",
+        "Your broader mix between stocks, bonds, and cash — covered in our guide on [portfolio allocation basics](/financial-intelligence/portfolio-allocation-basics) — is another layer of the same idea, applied at the asset-class level rather than the individual-stock level."
+      ]
+    },
+    {
+      "heading": "Setting Rules Before You Need Them",
+      "paragraphs": [
+        "The best risk management decisions happen before you're emotionally invested in the outcome. Deciding in advance how much you're willing to lose on a position, under what conditions you'd sell, and how large any one holding is allowed to grow all remove pressure from moments when your judgment is least reliable.",
+        "Some investors use a mental or literal stop-loss threshold; others rely more on periodic portfolio reviews. Either approach beats deciding in the moment, with a red number flashing on the screen."
+      ],
+      "table": {
+        "caption": "Risk Management Tools at a Glance",
+        "headers": ["Tool", "What It Limits", "When It Helps Most"],
+        "rows": [
+          ["Position sizing", "Damage from any single stock", "Before buying a concentrated position"],
+          ["Diversification", "Company- and sector-specific risk", "Building the overall portfolio structure"],
+          ["Asset allocation", "Broad market volatility exposure", "Setting the stock/bond/cash mix"],
+          ["Pre-set sell rules", "Emotional decision-making under stress", "During a sudden price drop"]
+        ]
+      }
+    },
+    {
+      "heading": "Risk Management Doesn't Mean Playing It Too Safe",
+      "paragraphs": [
+        "Being overly conservative carries its own risk — inflation erodes cash sitting on the sidelines, and an overly cautious portfolio may not grow enough to meet long-term goals like retirement. Good risk management balances protecting against loss with taking on enough risk to actually make progress, rather than avoiding stocks altogether."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Volatility and risk are related but different — a price that moves a lot isn't automatically a bad investment.",
+    "Position sizing limits how much damage any single stock can do to your overall portfolio.",
+    "Diversification across companies and sectors is one of the most reliable risk management tools available.",
+    "Your stock, bond, and cash allocation manages risk at the broader asset-class level.",
+    "Deciding your rules before a downturn hits removes pressure from your least reliable moments.",
+    "Being too conservative carries its own risk, including inflation eroding returns over time."
+  ],
+  "faq": [
+    {
+      "question": "What is the biggest risk management mistake new investors make?",
+      "answer": "Concentrating too much money in a single stock, often one they feel strongly about, without limiting position size. Even good companies occasionally fail or underperform for reasons no one predicted in advance."
+    },
+    {
+      "question": "Should I use stop-loss orders to manage risk?",
+      "answer": "Stop-loss orders can limit downside on individual positions, but they can also trigger sales during short-term volatility in a fundamentally sound stock. Many long-term investors prefer position sizing and diversification over relying on automatic stop-losses."
+    },
+    {
+      "question": "How much of my portfolio should be in one stock?",
+      "answer": "A commonly cited guideline caps individual stock positions around 5-10% of a portfolio, though the right number depends on your overall diversification, risk tolerance, and how much of your portfolio sits in broader index funds."
+    },
+    {
+      "question": "Is it possible to eliminate investment risk entirely?",
+      "answer": "No. Even cash carries the risk of losing purchasing power to inflation over time. Risk management aims to size and diversify risk sensibly, not eliminate it, since some risk is necessary to generate meaningful long-term returns."
+    }
+  ],
+  "conclusion": "Managing risk as a stock investor isn't about finding a formula that guarantees you'll never lose money — that formula doesn't exist. It's about sizing positions sensibly, diversifying across companies and asset classes, and deciding your rules before a downturn tests your resolve. Investors who last aren't the ones who avoided every loss; they're the ones who made sure no single loss could take them out of the game.",
+  "internalLinks": [
+    { "anchor": "diversification", "slug": "diversification-explained" },
+    { "anchor": "portfolio allocation basics", "slug": "portfolio-allocation-basics" },
+    { "anchor": "long-term investing", "slug": "long-term-investing-explained" },
+    { "anchor": "common stock investing mistakes", "slug": "common-stock-investing-mistakes" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" },
+    { "name": "FINRA — Managing Investment Risk", "url": "https://www.finra.org/investors/investing/investing-basics/risk" }
+  ],
+  "wordCountEstimate": 800
+}

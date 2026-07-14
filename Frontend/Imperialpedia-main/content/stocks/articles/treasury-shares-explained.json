@@ -1,0 +1,104 @@
+{
+  "topicNumber": 11,
+  "section": "Stock Basics",
+  "title": "Treasury Shares: What They Are and Why Companies Buy Back Stock",
+  "slug": "treasury-shares-explained",
+  "seo": {
+    "seoTitle": "Treasury Shares: What They Are and Why",
+    "metaDescription": "Treasury shares are stock a company repurchased and holds itself. Learn how buybacks work, why companies do them, and how they affect shareholders.",
+    "focusKeyword": "treasury shares",
+    "secondaryKeywords": ["stock buyback", "treasury stock definition", "share repurchase program", "treasury shares vs outstanding shares", "why do companies buy back stock", "retired shares"],
+    "searchIntent": "Informational — investors trying to understand buyback announcements and how they affect their existing shares.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Treasury shares are stock a company has issued, then bought back and holds itself — removed from the outstanding share count and carrying no voting or dividend rights.",
+  "intro": "Open a company's earnings report and you'll often see a line about a new \"share repurchase program\" worth some large sum. What that program actually creates is treasury stock: shares the company buys back from the open market and holds itself, rather than retiring them entirely or leaving them with outside shareholders.",
+  "sections": [
+    {
+      "heading": "What Treasury Shares Actually Are",
+      "paragraphs": [
+        "Treasury shares are previously issued shares that a company has repurchased and now holds in its own name. They still legally exist, but they're removed from the outstanding share count, carry no voting rights, and receive no dividends — the company effectively holds them in limbo, not as a shareholder in any meaningful sense."
+      ]
+    },
+    {
+      "heading": "Why Companies Buy Back Their Own Stock",
+      "paragraphs": [
+        "Buybacks serve several purposes. They return cash to shareholders as an alternative to dividends, often more tax-efficiently. They can offset the dilution created when a company issues new shares for employee stock compensation. And management sometimes uses buybacks simply because it believes the stock is undervalued relative to the business's actual prospects."
+      ],
+      "callout": {
+        "title": "Buybacks reduce the share count, not company value",
+        "text": "A buyback doesn't create new value — it uses existing cash to shrink the share count, which increases each remaining shareholder's proportional stake in whatever the company is actually worth."
+      }
+    },
+    {
+      "heading": "How Buybacks Affect Existing Shareholders",
+      "paragraphs": [
+        "When a company repurchases shares, its outstanding share count drops, which mechanically increases metrics like earnings per share, since the same net income is now divided among fewer shares. Our companion piece on outstanding shares explains that calculation in more depth. It also modestly increases the proportional ownership stake of every shareholder who didn't sell into the buyback."
+      ]
+    },
+    {
+      "heading": "Treasury Shares vs. Retired Shares",
+      "paragraphs": [
+        "Companies have two options once they've repurchased stock: hold it as treasury shares, which can later be reissued for things like employee compensation or acquisitions, or formally retire the shares, permanently reducing the total ever-issued count. Treasury shares stay on the balance sheet as a contra-equity item; retired shares disappear from the company's records entirely."
+      ],
+      "table": {
+        "caption": "Treasury shares vs. retired shares",
+        "headers": ["Feature", "Treasury Shares", "Retired Shares"],
+        "rows": [
+          ["Can be reissued later", "Yes", "No"],
+          ["Counted in outstanding shares", "No", "No"],
+          ["Appears on balance sheet", "Yes, as contra-equity", "No"],
+          ["Voting or dividend rights", "None", "None, permanently"]
+        ]
+      }
+    },
+    {
+      "heading": "Are Buybacks Always Good for Investors?",
+      "paragraphs": [
+        "Not automatically. A buyback only benefits shareholders if the company is repurchasing shares at a reasonable price relative to its actual value — overpaying for its own stock during a period of inflated prices destroys value just as surely as any other poor capital allocation decision. It's worth checking whether a buyback comes alongside healthy free cash flow or is instead funded by rising debt."
+      ]
+    },
+    {
+      "heading": "How to Spot a Buyback in Company Filings",
+      "paragraphs": [
+        "Companies typically announce a share repurchase program's total authorized dollar amount in an earnings release or press statement, then disclose actual quarterly repurchase activity in their 10-Q and 10-K filings with the SEC. Comparing the change in outstanding shares from one quarter to the next is a quick way to see whether announced buybacks are actually being executed, since companies sometimes authorize large programs but repurchase far less than the headline figure suggests."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Treasury shares are stock a company has repurchased and holds itself, with no voting rights or dividends.",
+    "Buybacks reduce a company's outstanding share count, which can boost earnings per share.",
+    "Companies buy back stock to return cash to shareholders, offset dilution, or because they see the shares as undervalued.",
+    "Treasury shares can be reissued later; retired shares are permanently removed from the company's records.",
+    "A buyback only helps shareholders if shares are repurchased at a reasonable price, not an inflated one.",
+    "Treasury stock is recorded on the balance sheet as a contra-equity item, reducing total shareholder equity."
+  ],
+  "faq": [
+    {
+      "question": "Do treasury shares count toward outstanding shares?",
+      "answer": "No. Treasury shares are specifically excluded from the outstanding share count, since they're held by the company itself rather than by outside shareholders. Only issued shares still held by investors count as outstanding."
+    },
+    {
+      "question": "Can a company sell its treasury shares later?",
+      "answer": "Yes. Companies commonly reissue treasury shares for purposes like employee stock compensation, acquisitions paid for in stock, or raising additional capital, without going through a full new share issuance process."
+    },
+    {
+      "question": "Why do stock buybacks increase earnings per share?",
+      "answer": "Earnings per share is net income divided by outstanding shares. When a company buys back stock, the share count in the denominator shrinks, which mechanically raises EPS even if net income itself hasn't changed."
+    },
+    {
+      "question": "Is a stock buyback the same as a dividend?",
+      "answer": "No. A dividend pays cash directly to shareholders. A buyback instead reduces the number of shares outstanding, which increases each remaining shareholder's proportional stake, and is often considered more tax-efficient than a dividend."
+    }
+  ],
+  "conclusion": "Treasury shares are the quiet result of one of the most common corporate finance moves: a company using its own cash to buy back a piece of itself. Done at a sensible price, it's a legitimate way to return value to shareholders; done at an inflated price, it's simply a poor use of capital wearing a shareholder-friendly label.",
+  "internalLinks": [
+    { "anchor": "outstanding shares explained", "slug": "outstanding-shares-explained" },
+    { "anchor": "floating shares explained", "slug": "floating-shares-explained" },
+    { "anchor": "preferred stock explained", "slug": "preferred-stock-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 790
+}

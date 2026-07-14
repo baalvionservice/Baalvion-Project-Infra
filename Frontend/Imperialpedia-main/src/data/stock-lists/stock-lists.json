@@ -1,0 +1,68 @@
+[
+  {
+    "slug": "top-stocks",
+    "name": "Top Stocks",
+    "description": "Widely held, large-capitalization companies that make up the core of many diversified portfolios.",
+    "matchTags": ["large-cap", "blue-chip"]
+  },
+  {
+    "slug": "trending-stocks",
+    "name": "Trending Stocks",
+    "description": "Companies generating outsized investor attention and trading volume.",
+    "matchTags": ["growth", "meme-stock"]
+  },
+  {
+    "slug": "dividend-stocks",
+    "name": "Dividend Stocks",
+    "description": "Companies with a track record of returning cash to shareholders through regular dividend payments.",
+    "matchTags": ["dividend"]
+  },
+  {
+    "slug": "ai-stocks",
+    "name": "AI Stocks",
+    "description": "Companies building or heavily monetizing artificial intelligence infrastructure and applications.",
+    "matchTags": ["ai-stocks", "AI"]
+  },
+  {
+    "slug": "technology-stocks",
+    "name": "Technology Stocks",
+    "description": "Companies in software, hardware, semiconductors, and internet services.",
+    "matchTags": ["technology-stocks", "chips"]
+  },
+  {
+    "slug": "banking-stocks",
+    "name": "Banking Stocks",
+    "description": "Commercial and investment banks, insurers, and other financial institutions.",
+    "matchTags": ["banking-stocks"]
+  },
+  {
+    "slug": "energy-stocks",
+    "name": "Energy Stocks",
+    "description": "Oil, gas, and utility companies tied to global energy production and consumption.",
+    "matchTags": ["energy-stocks"]
+  },
+  {
+    "slug": "healthcare-stocks",
+    "name": "Healthcare Stocks",
+    "description": "Pharmaceutical, biotechnology, medical device, and health services companies.",
+    "matchTags": ["healthcare-stocks"]
+  },
+  {
+    "slug": "ev-stocks",
+    "name": "EV Stocks",
+    "description": "Electric vehicle manufacturers and the supply chains that support them.",
+    "matchTags": ["ev-stocks"]
+  },
+  {
+    "slug": "semiconductor-stocks",
+    "name": "Semiconductor Stocks",
+    "description": "Chipmakers and the equipment and design companies behind the global semiconductor supply chain.",
+    "matchTags": ["semiconductors", "chips"]
+  },
+  {
+    "slug": "high-growth-stocks",
+    "name": "High Growth Stocks",
+    "description": "Companies prioritizing rapid revenue expansion, often reinvesting earnings rather than paying dividends.",
+    "matchTags": ["growth"]
+  }
+]

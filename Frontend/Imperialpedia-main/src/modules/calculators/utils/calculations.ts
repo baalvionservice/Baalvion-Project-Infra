@@ -131,7 +131,7 @@ export const financialMath = {
         profit: finalValue - a.investment
       };
     });
-    
+
     const totalValue = breakdown.reduce((acc, a) => acc + a.finalValue, 0);
     const totalProfit = totalValue - totalInvestment;
     const weightedReturn = totalInvestment > 0 ? (totalProfit / totalInvestment) * 100 : 0;
@@ -143,5 +143,54 @@ export const financialMath = {
       weightedReturn,
       breakdown
     };
-  }
+  },
+
+  /**
+   * Calculates Compound Annual Growth Rate between a starting and ending value.
+   * Formula: CAGR = (End / Start)^(1 / years) - 1
+   */
+  calculateCAGR: (startValue: number, endValue: number, years: number): number => {
+    if (startValue <= 0 || years <= 0) return 0;
+    return (Math.pow(endValue / startValue, 1 / years) - 1) * 100;
+  },
+
+  /**
+   * Estimates annual and monthly dividend income for a stock position.
+   */
+  calculateDividendIncome: (shares: number, pricePerShare: number, dividendYieldPercent: number) => {
+    const positionValue = shares * pricePerShare;
+    const annualIncome = positionValue * (dividendYieldPercent / 100);
+    return {
+      positionValue,
+      annualIncome,
+      monthlyIncome: annualIncome / 12,
+    };
+  },
+
+  /**
+   * Calculates the maximum share size for a trade given an account's risk budget.
+   * Formula: shares = (account size * risk %) / (entry price - stop-loss price)
+   */
+  calculatePositionSize: (accountSize: number, riskPercent: number, entryPrice: number, stopLossPrice: number) => {
+    const riskAmount = accountSize * (riskPercent / 100);
+    const perShareRisk = Math.abs(entryPrice - stopLossPrice);
+    const shares = perShareRisk > 0 ? Math.floor(riskAmount / perShareRisk) : 0;
+    return {
+      riskAmount,
+      perShareRisk,
+      shares,
+      positionValue: shares * entryPrice,
+    };
+  },
+
+  /**
+   * Calculates realized profit/loss on a stock trade, including fees.
+   */
+  calculateProfitLoss: (shares: number, buyPrice: number, sellPrice: number, fees: number = 0) => {
+    const costBasis = shares * buyPrice;
+    const proceeds = shares * sellPrice;
+    const profitLoss = proceeds - costBasis - fees;
+    const percentReturn = costBasis > 0 ? (profitLoss / costBasis) * 100 : 0;
+    return { costBasis, proceeds, profitLoss, percentReturn };
+  },
 };

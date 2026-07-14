@@ -1,0 +1,97 @@
+{
+  "topicNumber": 7,
+  "section": "Stock Analysis",
+  "title": "Relative Strength Index (RSI) Explained",
+  "slug": "rsi-explained",
+  "seo": {
+    "seoTitle": "RSI Explained: Reading the Relative Strength Index",
+    "metaDescription": "The RSI measures how fast and how far a stock has moved to flag overbought or oversold conditions. Learn how it's built, its thresholds, and its limits.",
+    "focusKeyword": "RSI",
+    "secondaryKeywords": ["relative strength index", "RSI overbought oversold", "RSI indicator explained", "RSI divergence", "how to read RSI", "RSI trading strategy"],
+    "searchIntent": "Informational — traders want to understand what RSI measures and how to interpret it before relying on it.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "The Relative Strength Index gauges how fast and how far a stock has moved recently, flagging conditions traders commonly call overbought or oversold.",
+  "intro": "The Relative Strength Index, universally shortened to RSI, is a momentum indicator that measures the speed and size of recent price changes to judge whether a stock has moved unusually far, unusually fast. Developed by J. Welles Wilder in the late 1970s, it's become one of the most widely referenced indicators in technical analysis, largely because it's plotted on a simple 0-to-100 scale that's easy to read at a glance.",
+  "sections": [
+    {
+      "heading": "How RSI Is Actually Calculated",
+      "paragraphs": [
+        "RSI compares the average size of a stock's up days to the average size of its down days over a set lookback period, most commonly 14 periods. That ratio gets converted into a 0-to-100 scale: readings closer to 100 mean recent gains have dominated recent losses by a wide margin, while readings closer to 0 mean the opposite. You don't need to run the formula by hand — every charting platform plots it automatically — but understanding that it's a ratio of gains to losses, not a price level itself, makes the number far less mysterious."
+      ]
+    },
+    {
+      "heading": "Overbought and Oversold Thresholds",
+      "paragraphs": [
+        "The conventional reading treats RSI above 70 as overbought — suggesting a stock may have risen too far, too fast, and could be due for a pause or pullback — and RSI below 30 as oversold, suggesting the opposite. These are conventions, not hard rules; some traders use 80/20 for a stricter read, and a genuinely strong trending stock can sit above 70 for weeks without ever pulling back."
+      ],
+      "table": {
+        "caption": "Commonly cited RSI thresholds (conventions, not fixed rules)",
+        "headers": ["RSI Reading", "Common Interpretation"],
+        "rows": [
+          ["Above 70", "Often considered overbought; possible pullback"],
+          ["50", "Often treated as a rough midpoint, sometimes used as a trend filter"],
+          ["Below 30", "Often considered oversold; possible bounce"],
+          ["Above 80 / Below 20", "Stricter thresholds some traders prefer for fewer, higher-conviction signals"]
+        ]
+      },
+      "callout": {
+        "title": "Overbought doesn't mean sell",
+        "text": "A stock in a strong uptrend can stay 'overbought' by RSI's definition for a long stretch. Treat the 70/30 thresholds as a prompt to look closer, not an automatic trading signal."
+      }
+    },
+    {
+      "heading": "RSI Divergence: The More Nuanced Signal",
+      "paragraphs": [
+        "Divergence happens when price and RSI move in opposite directions — for example, a stock makes a new high while RSI makes a lower high than its previous peak, suggesting the upward momentum behind the move is weakening even though price is still climbing. Bearish divergence like this, and its mirror-image bullish version at market lows, is considered by many technical traders to be a more meaningful signal than the raw overbought/oversold reading alone, though it's also harder to spot consistently and prone to being seen in hindsight where it wasn't clearly there in real time."
+      ]
+    },
+    {
+      "heading": "Where RSI Gets Traders Into Trouble",
+      "paragraphs": [
+        "The most common mistake is treating an overbought reading as an automatic sell signal in a strong trend, which routinely leads to exiting or shorting a stock that keeps climbing for weeks afterward. RSI also produces noisier, less useful signals in choppy, low-volatility markets, and like most tools built from recent price history, it says more about what's already happened than what happens next. Pairing RSI with [moving averages](/financial-intelligence/moving-averages-explained) for trend context, or [MACD](/financial-intelligence/macd-explained) for a second momentum read, is standard practice for reducing false signals rather than relying on RSI in isolation."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "RSI measures the ratio of recent gains to recent losses on a 0-to-100 scale, most commonly over a 14-period lookback.",
+    "Readings above 70 are conventionally called overbought and below 30 oversold — these are conventions, not fixed rules.",
+    "A stock can stay 'overbought' for a long stretch during a genuinely strong trend without reversing.",
+    "Divergence between price and RSI direction is considered a more nuanced, sometimes more meaningful signal than the raw threshold.",
+    "RSI performs worse in choppy, low-volatility markets and works best combined with trend or other momentum tools.",
+    "Like all technical indicators built from past prices, RSI describes recent behavior more confidently than it predicts future moves."
+  ],
+  "faq": [
+    {
+      "question": "What does RSI above 70 mean?",
+      "answer": "It's conventionally read as an overbought condition, suggesting a stock has risen quickly relative to its recent history. It's not an automatic sell signal — strong trending stocks can remain above 70 for extended stretches."
+    },
+    {
+      "question": "What is RSI divergence?",
+      "answer": "Divergence occurs when price and RSI move in opposite directions, such as price making a new high while RSI makes a lower high. It's considered a possible sign that momentum behind a price move is weakening, though it's harder to spot reliably in real time than in hindsight."
+    },
+    {
+      "question": "What's the best RSI period to use?",
+      "answer": "14 periods is the original and most widely used setting. Shorter periods make RSI more sensitive and noisier; longer periods smooth it out but react more slowly to new price action."
+    },
+    {
+      "question": "Can RSI be used alone to trade stocks?",
+      "answer": "It's generally not recommended as a standalone tool. Most traders combine RSI with trend indicators like moving averages, or confirm signals with volume, since RSI alone produces frequent false signals, especially in trending or choppy markets."
+    },
+    {
+      "question": "Is RSI the same as MACD?",
+      "answer": "No. Both are momentum indicators, but they're built differently and often used together rather than as substitutes — see our separate guide to MACD for how it differs from RSI."
+    }
+  ],
+  "conclusion": "RSI gives traders a simple, standardized way to gauge whether a stock's recent move has been unusually fast or far relative to its own history, which is genuinely useful context. The failure mode is treating the 70/30 thresholds as automatic trading triggers rather than conventions worth checking against the broader trend — a stock can stay overbought through weeks of a strong rally, and oversold through weeks of a genuine decline.",
+  "internalLinks": [
+    { "anchor": "moving averages explained", "slug": "moving-averages-explained" },
+    { "anchor": "macd explained", "slug": "macd-explained" },
+    { "anchor": "bollinger bands explained", "slug": "bollinger-bands-explained" },
+    { "anchor": "how to analyze a stock", "slug": "how-to-analyze-a-stock" }
+  ],
+  "externalSources": [
+    { "name": "FINRA — Investor Education", "url": "https://www.finra.org/investors" }
+  ],
+  "wordCountEstimate": 830
+}

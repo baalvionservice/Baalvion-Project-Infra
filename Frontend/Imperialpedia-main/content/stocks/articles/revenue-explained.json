@@ -1,0 +1,100 @@
+{
+  "topicNumber": 5,
+  "section": "Market Metrics",
+  "title": "Revenue: What It Means for a Public Company",
+  "slug": "revenue-explained",
+  "seo": {
+    "seoTitle": "Revenue Explained: What It Really Measures for Stocks",
+    "metaDescription": "Revenue is the total money a company brings in from its core business before any costs are subtracted. Learn how to read it, and what it doesn't tell you.",
+    "focusKeyword": "revenue",
+    "secondaryKeywords": ["what is revenue", "revenue vs net income", "revenue growth", "top line vs bottom line", "how to find company revenue"],
+    "searchIntent": "Informational — a foundational financial-statement term for new investors reading their first income statement.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Revenue is the total amount of money a company brings in from selling its products or services, before any expenses are subtracted — the starting line of the income statement.",
+  "intro": "Every income statement, no matter the industry, starts in the same place: revenue. It's the total amount of money a company generated from its core business activity during a given period, before rent, salaries, taxes, or anything else gets subtracted. Investors often call it the 'top line' precisely because of where it sits on the page.\n\nRevenue gets treated as a simple number, but reading it well means understanding what counts, what doesn't, and why a growing top line doesn't automatically mean a healthier company underneath it.",
+  "sections": [
+    {
+      "heading": "What Actually Counts as Revenue",
+      "paragraphs": [
+        "Revenue includes money earned from a company's primary business operations — selling products, providing services, or licensing something the company owns. It's recognized under accounting rules when a good or service has actually been delivered, not necessarily when cash changes hands, which is why revenue and cash received in a given period can differ. Money from one-time events like selling off a building or a legal settlement typically isn't counted as revenue at all; it shows up elsewhere on the financial statements as a separate gain or loss."
+      ]
+    },
+    {
+      "heading": "A Worked Example",
+      "paragraphs": [
+        "Here's a simplified illustration of how revenue sits at the top of an income statement, before anything else is subtracted."
+      ],
+      "table": {
+        "caption": "Illustrative example — not real company data",
+        "headers": ["Line item", "Amount"],
+        "rows": [
+          ["Revenue", "$500 million"],
+          ["Cost of goods sold", "$300 million"],
+          ["Gross profit", "$200 million"],
+          ["Operating expenses", "$120 million"],
+          ["Net income", "$60 million (after taxes and other items)"]
+        ]
+      },
+      "callout": {
+        "title": "Revenue is only the starting point",
+        "text": "In this example, only 12% of every revenue dollar ultimately became profit. A company can post huge revenue and still be unprofitable if its costs run higher than what it brings in."
+      }
+    },
+    {
+      "heading": "What Healthy Revenue Growth Looks Like",
+      "paragraphs": [
+        "There's no universal growth rate that defines 'good' revenue performance, since it depends heavily on company size, industry, and stage of maturity. Directionally, consistent revenue growth over multiple years — rather than one standout quarter followed by stagnation — tends to reflect a more durable business. Larger, established companies typically grow revenue more slowly in percentage terms than smaller or newer companies, simply because it takes a much bigger dollar amount to move the needle at scale."
+      ]
+    },
+    {
+      "heading": "Where to Find It",
+      "paragraphs": [
+        "Revenue sits at the very top of the income statement in every 10-Q and 10-K filed with the SEC, sometimes labeled 'net sales' or 'total revenue' depending on the industry. Companies with multiple business segments often break revenue down by segment or geography elsewhere in the filing, which can reveal whether growth is broad-based or concentrated in just one part of the business."
+      ]
+    },
+    {
+      "heading": "Limitations of Looking at Revenue Alone",
+      "paragraphs": [
+        "Revenue says nothing about profitability — a company can grow sales aggressively while losing money on every transaction, particularly common among young, growth-focused companies prioritizing market share. It also doesn't account for how that revenue was generated; heavy discounting or one-time bulk deals can inflate a single quarter's revenue without reflecting the sustainable demand for the underlying product. That's why revenue is almost always read alongside profitability metrics like net income and free cash flow rather than treated as a standalone signal of company health."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Revenue is the total money earned from a company's core business, recognized before expenses and before cash necessarily changes hands.",
+    "It excludes one-time gains like asset sales, which are recorded separately from operating revenue.",
+    "Consistent multi-year revenue growth generally signals a more durable business than a single strong quarter.",
+    "Revenue is disclosed at the top of the income statement in every 10-Q and 10-K SEC filing.",
+    "High revenue doesn't guarantee profitability — costs can exceed revenue even at large sales volumes.",
+    "Revenue is most useful when read alongside profitability and cash flow metrics, not in isolation."
+  ],
+  "faq": [
+    {
+      "question": "Is revenue the same as profit?",
+      "answer": "No. Revenue is the total money brought in from sales before any costs are subtracted. Profit (net income) is what remains after subtracting all expenses, taxes, and other costs from revenue. A company can have high revenue and still report a net loss."
+    },
+    {
+      "question": "Why do investors care about revenue growth specifically?",
+      "answer": "Sustained revenue growth is often an early sign of increasing demand for a company's products or services, which can eventually translate into higher profits if the business manages its costs effectively as it scales."
+    },
+    {
+      "question": "What's the difference between revenue and cash flow?",
+      "answer": "Revenue is recognized when a sale happens, which can occur before cash is actually received (for example, on credit terms). Cash flow tracks the actual movement of cash in and out of the business, which is why the two figures can diverge in a given period."
+    },
+    {
+      "question": "Can a company have revenue but no profit?",
+      "answer": "Yes, and it's common among younger, fast-growing companies. If operating costs, marketing spend, or interest expenses exceed revenue, the company posts a net loss despite having substantial top-line sales."
+    }
+  ],
+  "conclusion": "Revenue is where every company's financial story begins, but it's only the opening chapter. A rising top line is encouraging, but it only becomes meaningful once you check what happened to that money as it flowed down through costs, taxes, and other expenses toward the bottom line.",
+  "internalLinks": [
+    { "anchor": "net income explained", "slug": "net-income-explained" },
+    { "anchor": "free cash flow explained", "slug": "free-cash-flow-explained" },
+    { "anchor": "EPS explained", "slug": "eps-explained" },
+    { "anchor": "return on assets explained", "slug": "roa-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — EDGAR", "url": "https://www.sec.gov/edgar/search/" }
+  ],
+  "wordCountEstimate": 740
+}
