@@ -4,6 +4,7 @@ import { buildMetadata } from "@/lib/seo";
 import Image from "next/image";
 import Link from "next/link";
 import HeadingSection from "@/components/layout/HeadingSection";
+import { parentFor } from "@/lib/topic-config";
 import { stockFaqs } from "@/lib/data/data.faq";
 import { ExploreStocksSection } from "./components/ExploreStocksSection";
 
@@ -89,6 +90,7 @@ export default function StockPage() {
       {/* ── Hero header ── */}
       <HeadingSection
         tag={"INVESTING"}
+        eyebrow={parentFor("stocks")}
         title={"Stocks"}
         description={
           "Stocks represent ownership of a company. Stocks owned either directly or through a mutual fund or ETF, will likely form the majority of most investors’ portfolios."

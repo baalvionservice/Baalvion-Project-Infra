@@ -1,4 +1,5 @@
 import HeadingSection from "@/components/layout/HeadingSection";
+import { parentFor } from "@/lib/topic-config";
 import { brokerGuides } from "./Components/data.brokers";
 import Image from "next/image";
 import Link from "next/link";
@@ -79,7 +80,7 @@ export default function BrokersPage() {
         <div className='min-h-screen'>
 
             {/* Heading */}
-            <HeadingSection tag={"INVESTING"} title={"Brokers"} description="From beginners to advanced traders looking for options trading, international exposure, and alternative investments, there is a brokerage firm for every investor across all levels of experience, income, and risk tolerance. Learn how the best brokers work and which ones are suited to help you reach your financial goals" />
+            <HeadingSection tag={"INVESTING"} eyebrow={parentFor("brokers")} title={"Brokers"} description="From beginners to advanced traders looking for options trading, international exposure, and alternative investments, there is a brokerage firm for every investor across all levels of experience, income, and risk tolerance. Learn how the best brokers work and which ones are suited to help you reach your financial goals" />
 
             {/* ── Main content ── */}
             <div className="max-w-7xl mx-auto px-4 py-4 space-y-12">

@@ -1,8 +1,8 @@
-import { BudgetingHub } from "@/components/pages/BudgetingHub";
+import { CategoryFeed } from "@/components/pages/CategoryFeed";
 import { topicMeta } from "@/lib/topic-config";
 import { buildMetadata } from "@/lib/seo";
 
-const SLUG = "budgeting";
+const SLUG = "budgeting-basics";
 
 export const metadata = buildMetadata(topicMeta(SLUG));
 
@@ -11,5 +11,5 @@ export const metadata = buildMetadata(topicMeta(SLUG));
 export const dynamic = 'force-dynamic';
 
 export default function Page() {
-  return <BudgetingHub />;
+  return <CategoryFeed slug={SLUG} />;
 }
