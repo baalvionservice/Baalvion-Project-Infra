@@ -1,7 +1,7 @@
 import { newsArticles, type NewsArticle } from "@/lib/data.news";
 import { getCategoryArticles } from "@/services/data/cms-public";
 import { staticCategoryNews } from "@/services/data/static-content";
-import { topicCopy, staticCategoryFor } from "@/lib/topic-config";
+import { topicCopy, staticCategoryFor, parentFor } from "@/lib/topic-config";
 import { ExploreNewsSection } from "@/app/news/ExploreNewsSection";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
 import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
@@ -88,7 +88,7 @@ export async function CategoryFeed({ slug }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
-      <HeadingSection tag={copy.tag} title={copy.title} description={copy.description} />
+      <HeadingSection tag={copy.tag} eyebrow={parentFor(slug)} title={copy.title} description={copy.description} />
 
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-12">
         {featured && (

@@ -325,10 +325,73 @@ const OVERRIDES: Record<string, TopicCopy> = {
     tag: 'BUDGETING',
     title: 'Budgeting',
     description:
-      'Practical budgeting methods, templates, and frameworks to plan your spending, hit savings goals, and stay in control of your money.',
+      'Master your money with practical budgeting strategies, expense tracking methods, saving plans, and financial habits that help you spend smarter and reach your goals.',
     metaTitle: 'Budgeting Tips, Templates & Strategies',
     metaDescription:
       'Learn practical budgeting methods, from the 50/30/20 rule to zero-based budgeting, and build a spending plan that actually sticks.',
+  },
+  'budgeting-basics': {
+    tag: 'BUDGETING BASICS',
+    title: 'Budgeting Basics',
+    description:
+      'What a budget actually is, why it matters, and how to build your very first spending plan without feeling overwhelmed.',
+    metaTitle: 'Budgeting Basics — A Beginner’s Guide',
+    metaDescription:
+      'Learn what a budget is, why budgeting matters, and how to start budgeting for the first time with simple, practical steps.',
+  },
+  'monthly-budget': {
+    tag: 'MONTHLY BUDGET',
+    title: 'Monthly Budget',
+    description:
+      'Checklists, calendars, and review habits for building a monthly budget that keeps working month after month, even when income is irregular.',
+    metaTitle: 'Monthly Budget Guides, Checklists & Calendars',
+    metaDescription:
+      'Build and maintain a monthly budget with practical checklists, a budgeting calendar, and a repeatable monthly review process.',
+  },
+  'saving-money': {
+    tag: 'SAVING MONEY',
+    title: 'Saving Money',
+    description:
+      'Practical, everyday ways to cut expenses and save more — from groceries and utilities to transportation and frugal living habits.',
+    metaTitle: 'How to Save Money — Practical Tips & Strategies',
+    metaDescription:
+      'Save more every month with practical tips for cutting expenses on groceries, utilities, and transportation, plus frugal living strategies that stick.',
+  },
+  'family-budget': {
+    tag: 'FAMILY BUDGET',
+    title: 'Family Budget',
+    description:
+      'Budgeting for households, kids, single parents, and couples — practical frameworks for managing money as a family.',
+    metaTitle: 'Family Budgeting Guides — Kids, Couples & Single Parents',
+    metaDescription:
+      'Learn how to build a family budget, manage money with kids, budget as a single parent, and coordinate finances as a couple.',
+  },
+  'student-budget': {
+    tag: 'STUDENT BUDGET',
+    title: 'Student Budget',
+    description:
+      'Budgeting for college, part-time income, and the everyday expenses that come with student life.',
+    metaTitle: 'Student Budgeting Guides — College & Part-Time Income',
+    metaDescription:
+      'Practical budgeting guidance for college students, including part-time income budgets and managing everyday student expenses.',
+  },
+  'budgeting-apps': {
+    tag: 'BUDGET APPS',
+    title: 'Budgeting Apps',
+    description:
+      'Comparisons of budgeting apps, spreadsheets, and manual tracking methods to help you find the system you’ll actually stick with.',
+    metaTitle: 'Best Budgeting Apps & Tracking Methods Compared',
+    metaDescription:
+      'Compare the best budgeting apps, spreadsheet templates, and manual tracking methods to find the budgeting system that fits how you actually manage money.',
+  },
+  'advanced-budgeting': {
+    tag: 'ADVANCED BUDGETING',
+    title: 'Advanced Budgeting',
+    description:
+      'Budgeting strategies for freelancers, small business owners, and navigating inflation, recessions, and annual financial planning.',
+    metaTitle: 'Advanced Budgeting Strategies',
+    metaDescription:
+      'Advanced budgeting guidance for freelancers and small business owners, plus how to budget through inflation, recessions, and annual planning.',
   },
   fed: {
     tag: 'FEDERAL RESERVE',
@@ -392,6 +455,15 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Debt Payoff Strategies & Management Guides',
     metaDescription:
       'Practical strategies for paying down debt faster, including the snowball and avalanche methods, consolidation, and credit-card payoff plans.',
+  },
+  'emergency-fund': {
+    tag: 'EMERGENCY FUND',
+    title: 'Emergency Fund',
+    description:
+      'How much to save, where to keep it, and how to work a fully-funded emergency fund into your monthly budget.',
+    metaTitle: 'Emergency Fund Guides — How Much to Save & Where',
+    metaDescription:
+      'Learn how much to keep in an emergency fund, how to build one into your budget, and when it makes sense to use it.',
   },
   credit: {
     tag: 'CREDIT SCORES',
@@ -560,6 +632,12 @@ export const STATIC_CATEGORY_MAP: Record<string, NewsCategory> = {
   banking: 'PersonalFinance',
   'personal-finance': 'PersonalFinance',
   budgeting: 'PersonalFinance',
+  'budgeting-basics': 'PersonalFinance',
+  'monthly-budget': 'PersonalFinance',
+  'saving-money': 'PersonalFinance',
+  'family-budget': 'PersonalFinance',
+  'student-budget': 'PersonalFinance',
+  'advanced-budgeting': 'PersonalFinance',
   'budgeting-apps': 'PersonalFinance',
   debt: 'PersonalFinance',
   credit: 'PersonalFinance',
@@ -634,4 +712,74 @@ export function topicMeta(slug: string): {
 
 export function staticCategoryFor(slug: string): NewsCategory | undefined {
   return STATIC_CATEGORY_MAP[slug];
+}
+
+/**
+ * Parent-category eyebrow groups (mirrors the nav hierarchy in Navbar.tsx's NAV,
+ * plus the Budgeting hub's own sub-pages, which aren't in the top nav). Drives the
+ * small blue "INVESTING" / "PERSONAL FINANCE" label shown above a subcategory
+ * page's title, linking back to its parent category — e.g. /bonds shows "INVESTING"
+ * linking to /investing, the same way Investopedia labels its category pages.
+ *
+ * A slug listed under more than one group (e.g. "retirement" is reachable from both
+ * Investing and Personal Finance in the nav) resolves to whichever group is listed
+ * first below — one canonical parent per page, since the eyebrow can only show one.
+ */
+interface CategoryGroup {
+  label: string;
+  href: string;
+  children: string[];
+}
+
+const CATEGORY_GROUPS: CategoryGroup[] = [
+  {
+    label: 'INVESTING',
+    href: '/investing',
+    children: ['stocks', 'bonds', 'etfs', 'mutual-funds', 'options', 'commodities', 'cryptocurrency', 'real-estate', 'retirement', 'portfolio', 'brokers'],
+  },
+  {
+    label: 'MARKETS',
+    href: '/market-news',
+    children: ['live-market-news', 'company-news', 'earnings', 'crypto', 'calendar'],
+  },
+  {
+    label: 'BANKING',
+    href: '/banking',
+    children: ['savings', 'checking', 'cd-rates', 'money-market', 'credit-cards', 'loans', 'mortgages', 'auto-loans', 'student-loans', 'banking-reviews'],
+  },
+  {
+    label: 'PERSONAL FINANCE',
+    href: '/personal-finance',
+    children: ['budgeting', 'debt', 'credit', 'planning', 'financial-independence', 'money-management', 'financial-calculators'],
+  },
+  {
+    label: 'ECONOMY',
+    href: '/economy',
+    children: ['indicators', 'fed', 'inflation', 'gdp', 'unemployment', 'interest-rates', 'fiscal-policy', 'monetary-policy', 'global'],
+  },
+  {
+    label: 'REVIEWS',
+    href: '/reviews',
+    children: ['broker-reviews', 'bank-reviews', 'credit-card-reviews', 'loan-reviews', 'insurance-reviews', 'robo-advisors', 'app-reviews', 'tax-software', 'advisor-reviews'],
+  },
+  {
+    label: 'BUDGETING',
+    href: '/budgeting',
+    children: ['budgeting-basics', 'monthly-budget', 'saving-money', 'family-budget', 'student-budget', 'budgeting-apps', 'advanced-budgeting', 'budget-rules'],
+  },
+];
+
+const PARENT_BY_SLUG: Record<string, { label: string; href: string }> = (() => {
+  const map: Record<string, { label: string; href: string }> = {};
+  for (const group of CATEGORY_GROUPS) {
+    for (const child of group.children) {
+      if (!(child in map)) map[child] = { label: group.label, href: group.href };
+    }
+  }
+  return map;
+})();
+
+/** The parent category eyebrow for a subcategory page, or undefined for a top-level page. */
+export function parentFor(slug: string): { label: string; href: string } | undefined {
+  return PARENT_BY_SLUG[slug];
 }

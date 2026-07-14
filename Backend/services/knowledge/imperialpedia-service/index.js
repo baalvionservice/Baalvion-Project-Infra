@@ -12,6 +12,8 @@ const { errorHandler, notFoundHandler } = require('./middleware/errorMiddleware'
 const db = require('./models');
 const { metricsMiddleware, metricsHandler } = require('./middleware/metrics');
 const { initGracefulShutdown, registerShutdown } = require('@baalvion/graceful-shutdown');
+const { initSdk } = require('./platform/sdk');
+const { startEventConsumer, stopEventConsumer } = require('./workers/eventConsumer');
 const app = express();
 const server = http.createServer(app);
 app.set('trust proxy', 1);
@@ -43,6 +45,13 @@ const start = async () => {
     registerShutdown('db', async () => {
         if (db.sequelize && db.sequelize.close) await db.sequelize.close();
     });
+    try {
+        await initSdk();
+        await startEventConsumer();
+        registerShutdown('event-consumer', stopEventConsumer);
+    } catch (err) {
+        console.error('[Imperialpedia] event consumer failed to start:', err.message);
+    }
     initGracefulShutdown(server);
 };
 start();

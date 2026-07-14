@@ -20,4 +20,11 @@ module.exports = {
         password: process.env.DB_PASSWORD || '',
     },
     security: { ipRateLimit: Number(process.env.RATE_LIMIT_IP_MAX || 120) },
+    internalSecret: require('@baalvion/auth-node').requireEnv('INTERNAL_SERVICE_SECRET'),
+    cms: { baseUrl: process.env.CMS_BASE_URL || 'http://localhost:3018/api/v1' },
+    eventBus: {
+        consumerGroup: 'imperialpedia-service',
+        allowedWebsiteSlugs: parseList(process.env.GLOSSARY_SYNC_WEBSITE_SLUGS, ['imperialpedia']),
+    },
+    glossarySync: { maxWords: Number(process.env.GLOSSARY_SYNC_MAX_WORDS || 2) },
 };
