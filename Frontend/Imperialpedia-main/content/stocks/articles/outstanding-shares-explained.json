@@ -1,0 +1,104 @@
+{
+  "topicNumber": 9,
+  "section": "Stock Basics",
+  "title": "Outstanding Shares: Definition and How to Calculate",
+  "slug": "outstanding-shares-explained",
+  "seo": {
+    "seoTitle": "Outstanding Shares: Definition and Calculation",
+    "metaDescription": "Outstanding shares are all shares currently held by investors and insiders. Learn how to find the number and why it matters for valuing a stock.",
+    "focusKeyword": "outstanding shares",
+    "secondaryKeywords": ["shares outstanding definition", "how to calculate outstanding shares", "market capitalization formula", "diluted shares outstanding", "weighted average shares", "authorized vs outstanding shares"],
+    "searchIntent": "Informational — investors trying to understand a figure that appears in every stock's key statistics and market cap calculation.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Outstanding shares are all the shares a company has issued and that are currently held by shareholders, including insiders — the figure used to calculate market capitalization and earnings per share.",
+  "intro": "Look up almost any stock and you'll see a figure labeled \"shares outstanding\" sitting near the market cap and P/E ratio. It's one of the most-used numbers in investing, and one of the least explained — it simply represents every share a company has issued that's currently sitting in someone's hands.",
+  "sections": [
+    {
+      "heading": "What Outstanding Shares Actually Means",
+      "paragraphs": [
+        "Shares outstanding refers to all of a company's stock currently owned by shareholders, including retail investors, institutions, and company insiders like executives and board members. It excludes treasury shares — stock the company has repurchased and holds itself — since those no longer count as owned by outside shareholders. Our separate guide on treasury shares covers that repurchase side of the equation."
+      ]
+    },
+    {
+      "heading": "Authorized vs. Issued vs. Outstanding",
+      "paragraphs": [
+        "These three terms get confused constantly, but they describe a clear progression: authorized shares are the maximum a company's charter permits it to ever issue, issued shares are however many of those it has actually sold or granted, and outstanding shares are the issued shares still held by shareholders right now, after subtracting any treasury shares bought back."
+      ],
+      "table": {
+        "caption": "How the share counts relate to each other",
+        "headers": ["Term", "What It Measures"],
+        "rows": [
+          ["Authorized shares", "Maximum shares the company's charter allows it to issue"],
+          ["Issued shares", "Total shares ever sold or granted to date"],
+          ["Treasury shares", "Issued shares the company has bought back and holds itself"],
+          ["Outstanding shares", "Issued shares minus treasury shares — currently owned by shareholders"]
+        ]
+      }
+    },
+    {
+      "heading": "Why Outstanding Shares Matters",
+      "paragraphs": [
+        "This number is the denominator behind two of the most-cited metrics in investing. Market capitalization is simply the share price multiplied by shares outstanding, and earnings per share is net income divided by that same figure. Get the share count wrong and both of those headline numbers become meaningless."
+      ],
+      "callout": {
+        "title": "Diluted vs. basic share counts",
+        "text": "Companies also report a \"diluted\" share count that adds in stock options, convertible preferred shares, and other instruments that could turn into common stock later. Diluted EPS is usually the more conservative, realistic figure."
+      }
+    },
+    {
+      "heading": "How to Find a Company's Outstanding Share Count",
+      "paragraphs": [
+        "The figure is disclosed on the cover page of every quarterly and annual SEC filing, and it's also listed on the key statistics page of virtually any finance website or brokerage app. Because companies buy back stock and issue new shares over time, this number changes — sometimes meaningfully — from one quarter to the next."
+      ]
+    },
+    {
+      "heading": "What Changes the Outstanding Share Count",
+      "paragraphs": [
+        "New issuance, employee stock option exercises, and convertible securities converting to common stock all increase the count. Buybacks, where a company repurchases its own shares on the open market, decrease it. A shrinking share count, all else equal, increases each remaining shareholder's proportional ownership stake."
+      ]
+    },
+    {
+      "heading": "Outstanding Shares and Stock Splits",
+      "paragraphs": [
+        "A stock split changes the outstanding share count without changing the company's total value. In a 2-for-1 split, outstanding shares double while the price per share is cut in half, so market capitalization stays the same. A reverse split does the opposite, reducing the share count and raising the per-share price, often used by companies trying to meet an exchange's minimum listing price requirement."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Outstanding shares are all shares currently held by shareholders, excluding treasury shares the company holds itself.",
+    "Authorized shares are the legal ceiling; issued shares are what's been sold; outstanding is issued minus treasury.",
+    "Market capitalization equals share price multiplied by shares outstanding.",
+    "Earnings per share divides net income by shares outstanding, usually reported on both a basic and diluted basis.",
+    "Buybacks reduce the outstanding share count; new issuance and option exercises increase it.",
+    "The current figure is always disclosed on the cover of a company's SEC filings."
+  ],
+  "faq": [
+    {
+      "question": "What's the difference between issued shares and outstanding shares?",
+      "answer": "Issued shares are the total ever sold or granted by the company. Outstanding shares are issued shares minus any the company has bought back and now holds as treasury stock. Outstanding is always equal to or less than issued."
+    },
+    {
+      "question": "How does a stock buyback affect outstanding shares?",
+      "answer": "A buyback reduces the outstanding share count because repurchased shares move into treasury stock and are no longer counted as held by outside shareholders. This can boost earnings per share even if net income stays flat."
+    },
+    {
+      "question": "Why do companies report both basic and diluted shares outstanding?",
+      "answer": "Basic shares outstanding count only currently issued shares. Diluted counts add in stock options, warrants, and convertible securities that could become common shares later, giving a more conservative view of per-share metrics."
+    },
+    {
+      "question": "Where can I find a company's current outstanding share count?",
+      "answer": "It's listed on the cover page of the company's most recent 10-Q or 10-K filing with the SEC, and also displayed in the key statistics section of most financial data websites and brokerage platforms."
+    }
+  ],
+  "conclusion": "Outstanding shares might sound like a technical footnote, but it's the number quietly underpinning market cap, earnings per share, and how diluted your ownership becomes over time. Once you know how to find it and what moves it, two of the most commonly cited stock metrics stop being black boxes.",
+  "internalLinks": [
+    { "anchor": "floating shares explained", "slug": "floating-shares-explained" },
+    { "anchor": "treasury shares explained", "slug": "treasury-shares-explained" },
+    { "anchor": "what is a shareholder", "slug": "what-is-a-shareholder" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 790
+}

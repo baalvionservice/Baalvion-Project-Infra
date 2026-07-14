@@ -1,0 +1,82 @@
+[
+  {
+    "slug": "sp-500",
+    "name": "S&P 500",
+    "country": "United States",
+    "operator": "S&P Dow Jones Indices",
+    "launched_year": 1957,
+    "description": "Tracks roughly 500 of the largest publicly traded U.S. companies, weighted by market capitalization. Widely used as the primary benchmark for the overall U.S. stock market.",
+    "methodology": "Market-capitalization weighted; constituents are selected by a committee based on size, liquidity, and profitability criteria rather than a fixed mechanical rule.",
+    "major_sectors": ["Technology", "Healthcare", "Financials", "Consumer Discretionary", "Industrials"]
+  },
+  {
+    "slug": "nasdaq-composite",
+    "name": "Nasdaq Composite",
+    "country": "United States",
+    "operator": "Nasdaq, Inc.",
+    "launched_year": 1971,
+    "description": "Includes essentially every stock listed on the Nasdaq exchange, with a heavy tilt toward technology and growth companies.",
+    "methodology": "Market-capitalization weighted across all Nasdaq-listed common stocks, ADRs, and similar securities.",
+    "major_sectors": ["Technology", "Consumer Discretionary", "Healthcare", "Telecommunications"]
+  },
+  {
+    "slug": "dow-jones",
+    "name": "Dow Jones Industrial Average",
+    "country": "United States",
+    "operator": "S&P Dow Jones Indices",
+    "launched_year": 1896,
+    "description": "One of the oldest U.S. stock market indexes, tracking 30 large, well-established companies chosen to represent the broader economy.",
+    "methodology": "Price-weighted rather than market-cap weighted — higher-priced stocks move the index more than lower-priced ones, a quirk unique among major benchmarks.",
+    "major_sectors": ["Industrials", "Technology", "Financials", "Healthcare", "Consumer Staples"]
+  },
+  {
+    "slug": "russell-2000",
+    "name": "Russell 2000",
+    "country": "United States",
+    "operator": "FTSE Russell",
+    "launched_year": 1984,
+    "description": "Tracks approximately 2,000 small-cap U.S. companies, making it the most widely followed benchmark for smaller, domestically focused businesses.",
+    "methodology": "Market-capitalization weighted, reconstituted annually to capture the smallest 2,000 companies within the broader Russell 3000 universe.",
+    "major_sectors": ["Financials", "Healthcare", "Industrials", "Technology"]
+  },
+  {
+    "slug": "ftse-100",
+    "name": "FTSE 100",
+    "country": "United Kingdom",
+    "operator": "FTSE Russell",
+    "launched_year": 1984,
+    "description": "Tracks the 100 largest companies listed on the London Stock Exchange by market capitalization.",
+    "methodology": "Market-capitalization weighted, reviewed quarterly.",
+    "major_sectors": ["Financials", "Energy", "Consumer Staples", "Materials", "Healthcare"]
+  },
+  {
+    "slug": "nikkei-225",
+    "name": "Nikkei 225",
+    "country": "Japan",
+    "operator": "Nikkei Inc.",
+    "launched_year": 1950,
+    "description": "Japan's most widely cited stock index, tracking 225 large, established companies listed on the Tokyo Stock Exchange.",
+    "methodology": "Price-weighted, similar in spirit to the Dow Jones Industrial Average.",
+    "major_sectors": ["Industrials", "Technology", "Consumer Discretionary", "Financials"]
+  },
+  {
+    "slug": "sensex",
+    "name": "BSE Sensex",
+    "country": "India",
+    "operator": "BSE Limited",
+    "launched_year": 1986,
+    "description": "Tracks 30 large, financially sound companies listed on the Bombay Stock Exchange, serving as India's oldest broad market benchmark.",
+    "methodology": "Free-float market-capitalization weighted.",
+    "major_sectors": ["Financials", "Technology", "Energy", "Consumer Staples"]
+  },
+  {
+    "slug": "nifty-50",
+    "name": "Nifty 50",
+    "country": "India",
+    "operator": "NSE Indices Limited",
+    "launched_year": 1996,
+    "description": "Tracks 50 large-cap companies listed on the National Stock Exchange of India, and alongside the Sensex is one of India's two primary equity benchmarks.",
+    "methodology": "Free-float market-capitalization weighted.",
+    "major_sectors": ["Financials", "Technology", "Energy", "Consumer Discretionary"]
+  }
+]

@@ -4,13 +4,17 @@ import { ID, Slug } from './common';
  * @fileOverview Type definitions for the Financial Tools and Calculators platform.
  */
 
-export type CalculatorType = 
-  | "compound" 
-  | "loan" 
-  | "investment" 
-  | "retirement" 
-  | "portfolio" 
-  | "inflation";
+export type CalculatorType =
+  | "compound"
+  | "loan"
+  | "investment"
+  | "retirement"
+  | "portfolio"
+  | "inflation"
+  | "cagr"
+  | "dividend"
+  | "position-size"
+  | "profit-loss";
 
 export interface FinancialCalculator {
   id: ID;

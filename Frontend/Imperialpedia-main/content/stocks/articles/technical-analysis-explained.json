@@ -1,0 +1,95 @@
+{
+  "topicNumber": 2,
+  "section": "Stock Analysis",
+  "title": "Technical Analysis Explained",
+  "slug": "technical-analysis-explained",
+  "seo": {
+    "seoTitle": "Technical Analysis Explained: How Chart Reading Works",
+    "metaDescription": "Technical analysis studies price charts and trading volume to gauge market sentiment. Learn how it works, its most common tools, and why it's genuinely contested.",
+    "focusKeyword": "technical analysis",
+    "secondaryKeywords": ["technical analysis explained", "chart reading for stocks", "price action trading", "technical indicators", "does technical analysis work", "reading stock charts"],
+    "searchIntent": "Informational — traders and investors want to understand the discipline before trusting any single indicator.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Technical analysis studies price and volume patterns to gauge where a stock might head next — a widely used but genuinely contested approach to reading markets.",
+  "intro": "Technical analysis is the practice of studying a stock's price history and trading volume to judge where it might be headed, on the theory that patterns in past price behavior tend to repeat because human psychology around fear and greed doesn't change much. Rather than asking whether a company is a good business, a technical analyst asks what the chart says about the current balance between buyers and sellers.",
+  "sections": [
+    {
+      "heading": "The Core Idea Behind Chart Reading",
+      "paragraphs": [
+        "Technical analysis rests on three loose premises: that price reflects all currently available information, that prices tend to move in identifiable trends rather than randomly, and that history tends to rhyme because crowd psychology is fairly consistent across market cycles. None of these premises is universally accepted — plenty of respected economists argue markets are close enough to random that chart patterns are closer to pattern recognition on noise than genuine signal.",
+        "In practice, traders use technical analysis to time entries and exits, set stop-loss levels, and gauge momentum, often layering it on top of a fundamental view of the business rather than using it in isolation."
+      ]
+    },
+    {
+      "heading": "The Building Blocks: Charts, Patterns, and Indicators",
+      "paragraphs": [
+        "Most technical analysis starts with reading [candlestick charts](/financial-intelligence/candlestick-charts-explained), which compress a period's open, high, low, and close into a single visual shape. From there, analysts look for [support and resistance](/financial-intelligence/support-and-resistance-explained) levels, draw [trend lines](/financial-intelligence/trend-lines-explained) to track direction, and apply indicators like [moving averages](/financial-intelligence/moving-averages-explained), the [RSI](/financial-intelligence/rsi-explained), and [MACD](/financial-intelligence/macd-explained) to quantify momentum rather than eyeball it."
+      ],
+      "callout": {
+        "title": "No indicator works alone",
+        "text": "Experienced chart readers rarely rely on a single signal. A moving average crossover that lines up with rising volume and a break of resistance carries far more weight than any one of those signals in isolation."
+      }
+    },
+    {
+      "heading": "Why Volume Matters as Much as Price",
+      "paragraphs": [
+        "A price move on heavy trading volume generally reflects broader conviction than the same move on thin volume, which is why [volume analysis](/financial-intelligence/volume-analysis-explained) is treated as a confirmation tool rather than an afterthought. A breakout above resistance on unusually low volume is considered far less reliable than one accompanied by a surge in shares traded."
+      ]
+    },
+    {
+      "heading": "The Honest Limitations",
+      "paragraphs": [
+        "Technical analysis produces false signals constantly — a pattern that has worked reliably for months can fail the moment real capital is committed to trading it, partly because widely-watched levels attract enough traders that the crowd's own behavior distorts the signal. Academic research on the topic is mixed at best; some studies find modest predictive value in certain patterns, others find none once transaction costs are factored in. Treat any technical signal as a probability, not a guarantee, and always pair it with a risk-management plan."
+      ]
+    },
+    {
+      "heading": "How Technical Fits With Fundamental Analysis",
+      "paragraphs": [
+        "Few professional investors treat technical and [fundamental analysis](/financial-intelligence/fundamental-analysis-explained) as an either-or choice. A common approach is using fundamentals to decide what's worth owning and technicals to help decide when to buy or trim a position — see our broader [how to analyze a stock](/financial-intelligence/how-to-analyze-a-stock) guide for how the two fit together in a single process."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Technical analysis studies price and volume history to judge market sentiment, not the underlying business.",
+    "It rests on the premise that price trends and crowd psychology tend to repeat, which is genuinely debated among academics.",
+    "Common tools include candlestick charts, support/resistance, trend lines, moving averages, RSI, and MACD.",
+    "Volume is used to confirm price signals — a move on heavy volume is considered more reliable than the same move on thin volume.",
+    "No single indicator is reliable alone; most technical traders combine several signals before acting.",
+    "Technical and fundamental analysis are often used together rather than as competing philosophies."
+  ],
+  "faq": [
+    {
+      "question": "Does technical analysis actually work?",
+      "answer": "Results are mixed and genuinely contested. Some studies find modest edge in specific patterns under specific conditions; others find no reliable advantage once costs are included. Most professionals treat it as one input among several, not a standalone predictive system."
+    },
+    {
+      "question": "What's the difference between technical and fundamental analysis?",
+      "answer": "Fundamental analysis evaluates a company's financial health and value; technical analysis studies price and volume patterns on a chart. See our guide to fundamental analysis for the other side of the comparison."
+    },
+    {
+      "question": "Do I need technical analysis to invest successfully?",
+      "answer": "No. Many long-term investors never look at a chart and rely entirely on business fundamentals. Technical analysis is more commonly used by shorter-term traders focused on timing entries and exits."
+    },
+    {
+      "question": "What's the best technical indicator for beginners?",
+      "answer": "Moving averages are usually the easiest starting point because they're visually intuitive and reduce short-term noise. RSI and MACD are common next steps once you're comfortable reading a basic price chart."
+    },
+    {
+      "question": "Can technical analysis predict a crash?",
+      "answer": "Not reliably. Chart patterns can flag deteriorating momentum or heavy selling pressure after it's underway, but consistently predicting sudden crashes in advance has no reliable track record in either academic research or professional practice."
+    }
+  ],
+  "conclusion": "Technical analysis gives traders a structured way to read crowd behavior on a price chart, but it's a probabilistic tool, not a crystal ball — false signals are a routine part of using it, not a sign you're doing it wrong. Learning the individual building blocks, from candlesticks to momentum indicators, matters less than understanding how they fit together and how often they disagree with each other.",
+  "internalLinks": [
+    { "anchor": "candlestick charts explained", "slug": "candlestick-charts-explained" },
+    { "anchor": "support and resistance explained", "slug": "support-and-resistance-explained" },
+    { "anchor": "moving averages explained", "slug": "moving-averages-explained" },
+    { "anchor": "how to analyze a stock", "slug": "how-to-analyze-a-stock" }
+  ],
+  "externalSources": [
+    { "name": "FINRA — Technical Analysis Investor Education", "url": "https://www.finra.org/investors" },
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 770
+}

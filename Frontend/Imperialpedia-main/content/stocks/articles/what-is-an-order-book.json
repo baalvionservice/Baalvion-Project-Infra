@@ -1,0 +1,85 @@
+{
+  "topicNumber": 8,
+  "section": "How the Stock Market Works",
+  "title": "What Is an Order Book?",
+  "slug": "what-is-an-order-book",
+  "seo": {
+    "seoTitle": "What Is an Order Book? Stock Trading Explained",
+    "metaDescription": "An order book is the running list of pending buy and sell orders for a stock at every price level. Here's how to read one and why it drives price movement.",
+    "focusKeyword": "what is an order book",
+    "secondaryKeywords": ["order book trading", "level 2 quotes", "market depth", "limit order book", "reading an order book", "order book vs time and sales"],
+    "searchIntent": "Informational — readers want to understand order book mechanics, often after encountering the term in trading platforms.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "An order book is the live, constantly updating list of pending buy and sell orders for a stock, organized by price — it's the raw data behind every quote you see.",
+  "intro": "Every trading platform quote you've ever glanced at — the price, the bid, the ask — is really just a summary of something bigger happening underneath: the **order book**. It's the full, real-time ledger of every pending buy and sell order for a stock, organized by price, and it's constantly being rewritten as new orders arrive, get filled, or get canceled.\n\nMost casual investors never look at a raw order book, but understanding what it is makes concepts like [bid vs ask price](/financial-intelligence/bid-vs-ask-price) and [how and why stock prices change](/financial-intelligence/how-stock-prices-change) click into place much faster.",
+  "sections": [
+    {
+      "heading": "The Basic Structure: Two Sides, Ranked by Price",
+      "paragraphs": [
+        "An order book has two sides: buy orders (bids) and sell orders (asks), each ranked from the best available price outward. The highest bid and lowest ask sit at the top — these are what get quoted as the current market price — while orders further from that midpoint stack below, representing traders willing to buy lower or sell higher than the current market.",
+        "As new orders come in, the exchange's matching engine, described in [how stock exchanges work](/financial-intelligence/how-stock-exchanges-work), checks whether they can immediately match an order on the opposite side. If they can, a trade executes and both matched orders are removed from the book. If not, the new order joins the queue at its price level and waits."
+      ]
+    },
+    {
+      "heading": "Market Depth Shows You More Than the Top Price",
+      "paragraphs": [
+        "\"Market depth,\" sometimes shown as Level 2 quotes on trading platforms, displays multiple price levels on both sides rather than just the single best bid and ask. A deep book — lots of orders stacked at nearby prices — suggests a large trade can go through with relatively little price impact. A thin book, with few orders at each level, means the same trade could move the price sharply."
+      ],
+      "callout": {
+        "title": "Depth isn't guaranteed",
+        "text": "Orders in the book can be canceled at any moment before they execute, so displayed depth isn't a promise that liquidity will still be there when your order arrives."
+      }
+    },
+    {
+      "heading": "How the Order Book Connects to Supply and Demand",
+      "paragraphs": [
+        "The order book is really just supply and demand made visible in real time — every ask represents supply willing to sell at that price, and every bid represents demand willing to buy at that price. Our piece on [supply and demand in the stock market](/financial-intelligence/supply-and-demand-in-stocks) covers the economic forces behind those orders; the order book is where those forces literally show up as data."
+      ]
+    },
+    {
+      "heading": "Order Book vs Time and Sales",
+      "paragraphs": [
+        "It's worth distinguishing the order book (pending, unfilled orders) from the \"time and sales\" or trade tape (a record of trades that already happened). The order book tells you what might happen next; the trade tape tells you what already did. Active traders often watch both together to gauge where buying or selling pressure is building."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "An order book is the real-time list of all pending buy and sell orders for a stock, ranked by price.",
+    "The best bid and best ask at the top of the book become the quoted market price.",
+    "Market depth (Level 2 data) shows multiple price levels beyond just the top bid and ask.",
+    "A deeper order book generally means large trades cause less price movement; a thin one means more.",
+    "Orders can be canceled anytime before execution, so displayed depth isn't guaranteed to remain available.",
+    "The order book shows pending orders, while the trade tape (time and sales) shows completed trades."
+  ],
+  "faq": [
+    {
+      "question": "Can regular investors see a stock's order book?",
+      "answer": "Many brokers offer Level 2 quotes showing market depth, though often as a paid add-on or for more active traders. Basic bid and ask prices, however, are freely visible on nearly every trading platform."
+    },
+    {
+      "question": "Why does my market order sometimes execute at a worse price than expected?",
+      "answer": "If your order size is larger than what's available at the best price in the order book, it will fill against progressively worse prices further down the book — this effect is called slippage and is more pronounced in thinly traded stocks."
+    },
+    {
+      "question": "What happens to an order that never gets matched?",
+      "answer": "It stays in the order book until it's either matched against an opposing order, canceled by the trader who placed it, or expires according to its time-in-force setting, such as end-of-day."
+    },
+    {
+      "question": "Is the order book the same on every exchange?",
+      "answer": "The concept is universal, but the specific matching rules, visible depth, and technology differ by venue — both the [NYSE](/financial-intelligence/nyse-explained) and [Nasdaq](/financial-intelligence/nasdaq-explained) maintain their own order books for the stocks that trade there."
+    }
+  ],
+  "conclusion": "The order book is the unglamorous machinery behind every price you see quoted — a living, constantly shifting ledger of who wants to buy, who wants to sell, and at what price. You don't need to watch it directly to invest successfully, but understanding that it exists explains why prices move the way they do and why large orders sometimes get filled at less favorable prices than expected.",
+  "internalLinks": [
+    { "anchor": "bid vs ask price explained", "slug": "bid-vs-ask-price" },
+    { "anchor": "how stock exchanges work", "slug": "how-stock-exchanges-work" },
+    { "anchor": "supply and demand in the stock market", "slug": "supply-and-demand-in-stocks" },
+    { "anchor": "how and why stock prices change", "slug": "how-stock-prices-change" }
+  ],
+  "externalSources": [
+    { "name": "FINRA", "url": "https://www.finra.org/" },
+    { "name": "Nasdaq", "url": "https://www.nasdaq.com/" }
+  ],
+  "wordCountEstimate": 720
+}

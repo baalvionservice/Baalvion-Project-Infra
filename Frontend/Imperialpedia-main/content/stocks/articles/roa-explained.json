@@ -1,0 +1,98 @@
+{
+  "topicNumber": 9,
+  "section": "Market Metrics",
+  "title": "Return on Assets (ROA) Explained",
+  "slug": "roa-explained",
+  "seo": {
+    "seoTitle": "Return on Assets (ROA) Explained for Investors",
+    "metaDescription": "ROA divides net income by total assets, showing how efficiently a company turns everything it owns into profit. Learn the formula, ranges, and limits.",
+    "focusKeyword": "return on assets",
+    "secondaryKeywords": ["ROA explained", "how to calculate ROA", "what is a good ROA", "ROA vs ROE", "return on assets formula"],
+    "searchIntent": "Informational — a profitability-efficiency metric that isolates operating performance from financing decisions.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Return on assets measures how efficiently a company generates profit from everything it owns, calculated by dividing net income by total assets — debt-funded or not.",
+  "intro": "Return on equity tells you how efficiently a company uses shareholder money, but it has a well-known blind spot: it ignores debt entirely, which means a heavily leveraged company can post an impressive ROE without actually running a more efficient operation. Return on assets, or ROA, closes that gap by measuring profit against everything a company owns, regardless of whether it was funded by shareholders or by borrowed money.\n\nBecause it accounts for the full asset base, ROA is especially useful for comparing companies with different debt levels, or for judging a single company's efficiency trend without the distortion leverage can introduce.",
+  "sections": [
+    {
+      "heading": "The Formula, Explained",
+      "paragraphs": [
+        "Return on assets equals net income divided by average total assets, typically expressed as a percentage. Average total assets is calculated by averaging the beginning and ending total asset figures from the balance sheet for the period being measured. A 6% ROA means the company generated 6 cents of profit for every dollar of assets it controls, whether those assets were purchased with cash, debt, or reinvested profit."
+      ]
+    },
+    {
+      "heading": "A Worked Example",
+      "paragraphs": [
+        "Here's how the calculation plays out, and how it can tell a different story than ROE for the same company."
+      ],
+      "table": {
+        "caption": "Illustrative example — not real company data",
+        "headers": ["Metric", "Company X", "Company Y"],
+        "rows": [
+          ["Net income", "$100 million", "$100 million"],
+          ["Average total assets", "$2 billion", "$800 million"],
+          ["ROA", "5%", "12.5%"]
+        ]
+      },
+      "callout": {
+        "title": "A wider asset base isn't automatically an advantage",
+        "text": "Company X needed two and a half times more total assets than Company Y to produce the same profit — a clear sign of lower asset efficiency, even if both companies reported similar ROE figures."
+      }
+    },
+    {
+      "heading": "What a Reasonable ROA Range Looks Like",
+      "paragraphs": [
+        "ROA tends to run structurally lower for asset-heavy industries — banks, utilities, manufacturers — since they need large asset bases just to operate, while asset-light businesses like software or consulting firms often post much higher ROA because they require relatively few assets to generate revenue. This makes cross-industry ROA comparisons close to meaningless; the more useful comparison is a company against direct competitors in its own industry, or against its own historical trend."
+      ]
+    },
+    {
+      "heading": "Where to Find and Calculate It",
+      "paragraphs": [
+        "Net income comes from the income statement, and total assets come from the balance sheet, both available in a company's 10-Q or 10-K filing with the SEC. Average the beginning and ending total assets for the period, divide net income by that figure, and you have ROA. As with ROE, most finance platforms calculate this for you automatically, though understanding the inputs helps you spot when a change in ROA is driven by a shift in profit versus a shift in the asset base."
+      ]
+    },
+    {
+      "heading": "Limitations Worth Remembering",
+      "paragraphs": [
+        "ROA doesn't account for how effectively a company is using leverage to boost shareholder returns — a company using debt intelligently might show a modest ROA while still delivering strong returns to equity holders through ROE. It's also, like other ratios built on net income, sensitive to accounting choices around depreciation and one-time items that can temporarily inflate or depress the numerator without reflecting a real change in how efficiently assets are being used. And because ROA varies so much by industry, using it to compare a bank against a software company tells you almost nothing useful."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "ROA = net income ÷ average total assets, expressed as a percentage.",
+    "Unlike ROE, it isn't distorted by how much debt a company carries, since it measures against all assets.",
+    "Asset-heavy industries structurally post lower ROA than asset-light ones, so cross-industry comparisons are unreliable.",
+    "Net income and total assets both come from a company's 10-Q or 10-K SEC filing.",
+    "ROA is best compared against direct industry peers or a company's own historical trend.",
+    "Pairing ROA with ROE reveals how much of a company's shareholder return comes from leverage versus genuine efficiency."
+  ],
+  "faq": [
+    {
+      "question": "What is considered a good ROA?",
+      "answer": "It depends heavily on the industry — asset-light businesses naturally post higher ROA than asset-heavy ones like banks or manufacturers. Compare a company's ROA against direct competitors and its own historical range rather than against a universal number."
+    },
+    {
+      "question": "Why is ROA usually lower than ROE for the same company?",
+      "answer": "Total assets typically exceed shareholders' equity because assets are funded partly by debt in addition to equity. Since ROA divides by the larger figure, it's mathematically almost always lower than ROE for any company carrying debt."
+    },
+    {
+      "question": "Is ROA better than ROE?",
+      "answer": "Neither is universally better — they measure different things. ROA isolates operating efficiency from financing decisions, while ROE reflects the return actually delivered to shareholders, including the effects of leverage. Using both together gives a more complete picture."
+    },
+    {
+      "question": "Can ROA be used to compare companies in different industries?",
+      "answer": "Not reliably. Asset-heavy and asset-light industries have structurally different ROA ranges, so comparing a utility company's ROA to a software company's ROA says more about industry structure than about which is better managed."
+    }
+  ],
+  "conclusion": "Return on assets strips out the effect of financing decisions and asks a more basic question: how much profit is a company generating from everything it actually owns? That makes it a valuable cross-check against ROE, especially for spotting whether a company's returns are driven by genuine operating efficiency or by leaning on debt.",
+  "internalLinks": [
+    { "anchor": "return on equity explained", "slug": "roe-explained" },
+    { "anchor": "net income explained", "slug": "net-income-explained" },
+    { "anchor": "revenue explained", "slug": "revenue-explained" },
+    { "anchor": "price-to-book ratio explained", "slug": "price-to-book-ratio-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — EDGAR", "url": "https://www.sec.gov/edgar/search/" }
+  ],
+  "wordCountEstimate": 750
+}

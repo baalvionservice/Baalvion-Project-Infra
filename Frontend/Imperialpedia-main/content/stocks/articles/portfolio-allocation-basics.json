@@ -1,0 +1,103 @@
+{
+  "topicNumber": 8,
+  "section": "Beginner Investing",
+  "title": "Portfolio Allocation Basics",
+  "slug": "portfolio-allocation-basics",
+  "seo": {
+    "seoTitle": "Portfolio Allocation Basics for New Investors",
+    "metaDescription": "Portfolio allocation decides how your money is split between stocks, bonds, and other assets. Here's how to set and maintain one that fits your goals.",
+    "focusKeyword": "portfolio allocation",
+    "secondaryKeywords": ["asset allocation basics", "stock and bond allocation", "how to allocate a portfolio", "age-based asset allocation", "rebalancing a portfolio"],
+    "searchIntent": "Informational — searchers want a framework for splitting investments across asset types.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Portfolio allocation is the decision that matters more than any individual stock pick — how you split money across stocks, bonds, and cash based on your timeline and risk tolerance.",
+  "intro": "Ask ten investors which specific stock to buy and you'll get ten different, often confident, opinions. Ask them how to split money between stocks and bonds based on a specific timeline, and the answer becomes far more grounded in actual research. Portfolio allocation — deciding what percentage of your money goes into which broad category of investment — has more influence on your long-term results than almost any individual stock selection.\n\nIt sounds like a technical topic, but the underlying logic is straightforward: match your mix of assets to how much time you have and how much volatility you can actually stomach.",
+  "sections": [
+    {
+      "heading": "What Allocation Actually Means",
+      "paragraphs": [
+        "Allocation refers to the split of your total portfolio across asset classes — most commonly stocks, bonds, and cash, sometimes extended to real estate or other categories. A portfolio described as \"80/20\" typically means 80% stocks and 20% bonds.",
+        "This is a distinct decision from diversification, which is about spreading risk within an asset class. Allocation is the higher-level split; [diversification](/financial-intelligence/diversification-explained) happens inside each slice of that split."
+      ]
+    },
+    {
+      "heading": "The Two Variables That Drive Allocation",
+      "paragraphs": [
+        "**Time horizon** is the first: money you won't need for 30 years can absorb more short-term volatility than money you'll need in three. **Risk tolerance** is the second — your actual, honest capacity to watch a portfolio drop 20-30% without panic-selling, which is a psychological limit as much as a financial one.",
+        "A long time horizon generally supports a higher stock allocation, since stocks have historically outperformed bonds over long periods despite more short-term swings. A shorter horizon or lower risk tolerance generally calls for more bonds and cash, which are typically less volatile."
+      ],
+      "callout": {
+        "title": "Be honest about risk tolerance, not aspirational",
+        "text": "It's easy to claim a high risk tolerance when markets are calm. The real test is whether you'd actually hold steady during a genuine downturn, not whether you think you would."
+      }
+    },
+    {
+      "heading": "Common Allocation Frameworks",
+      "paragraphs": [
+        "A widely cited rule of thumb suggests subtracting your age from 110 or 120 to estimate a reasonable stock percentage, with the rest in bonds — a 30-year-old might land around 80-90% stocks, an inexact but useful starting point rather than a strict formula.",
+        "Target-date retirement funds automate this by gradually shifting from stock-heavy to bond-heavy as the target year approaches, which is why they've become a popular default in employer retirement plans."
+      ],
+      "table": {
+        "caption": "Illustrative Age-Based Allocation Starting Points",
+        "headers": ["Age Range", "Rough Stock Allocation", "Rough Bond/Cash Allocation"],
+        "rows": [
+          ["20s-30s", "80-90%", "10-20%"],
+          ["40s-50s", "60-75%", "25-40%"],
+          ["60s and beyond", "40-55%", "45-60%"]
+        ]
+      }
+    },
+    {
+      "heading": "Rebalancing to Stay on Target",
+      "paragraphs": [
+        "Allocations drift over time as different assets grow at different rates — a strong year for stocks can turn an intended 70/30 split into 80/20 without you doing anything. Rebalancing means periodically selling a bit of what's grown and buying more of what's lagged to restore your original target, which forces a disciplined form of \"buy low, sell high\" rather than an emotional one.",
+        "Many investors rebalance once a year or when an allocation drifts more than five percentage points from target, whichever comes first."
+      ]
+    },
+    {
+      "heading": "Allocation Isn't a One-Time Decision",
+      "paragraphs": [
+        "Your appropriate allocation shifts as your time horizon shortens and your circumstances change — a job loss, an approaching home purchase, or nearing retirement all justify revisiting the split. Treating allocation as a decision you set once and never touch again is nearly as common a mistake as never setting one at all."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Portfolio allocation is the split of money across stocks, bonds, and other assets, distinct from diversification within each.",
+    "Time horizon and honest risk tolerance are the two main variables that should drive your allocation.",
+    "Longer time horizons generally support higher stock allocations; shorter horizons call for more bonds and cash.",
+    "Age-based rules of thumb offer a rough starting point, not a precise formula.",
+    "Rebalancing periodically restores your target allocation after market movement shifts it out of line.",
+    "Allocation should be revisited as your circumstances and time horizon change, not set once permanently."
+  ],
+  "faq": [
+    {
+      "question": "What is a good portfolio allocation for a beginner?",
+      "answer": "It depends heavily on age and time horizon, but many younger beginners with decades until retirement lean toward 80-90% stocks and the remainder in bonds, gradually shifting toward more bonds as retirement approaches."
+    },
+    {
+      "question": "How often should I rebalance my portfolio?",
+      "answer": "Once a year is a common default, or whenever an asset class drifts more than about five percentage points from its target allocation, whichever happens first. Rebalancing too frequently can add unnecessary transaction costs and tax events."
+    },
+    {
+      "question": "Should 100% of my portfolio be in stocks?",
+      "answer": "It's possible for investors with a very long time horizon and high risk tolerance, but most allocation frameworks include at least some bonds or cash to cushion volatility, particularly as retirement or a major expense approaches."
+    },
+    {
+      "question": "What's the difference between allocation and diversification?",
+      "answer": "Allocation is the split between broad asset classes like stocks, bonds, and cash. Diversification is spreading risk within an asset class, such as owning many different stocks across sectors rather than concentrating in one company."
+    }
+  ],
+  "conclusion": "Portfolio allocation is one of those decisions that feels less exciting than picking a stock but does far more to determine your actual outcomes. Get the split between stocks, bonds, and cash roughly right for your timeline and honest risk tolerance, rebalance periodically, and revisit it as your life changes. That framework will carry more weight over the decades than any individual stock pick you make along the way.",
+  "internalLinks": [
+    { "anchor": "diversification", "slug": "diversification-explained" },
+    { "anchor": "risk management for stock investors", "slug": "risk-management-for-stock-investors" },
+    { "anchor": "dollar-cost averaging explained", "slug": "dollar-cost-averaging-explained" },
+    { "anchor": "how to build a stock portfolio", "slug": "how-to-build-a-stock-portfolio" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" },
+    { "name": "FINRA — Asset Allocation", "url": "https://www.finra.org/investors/investing/investing-basics/asset-allocation" }
+  ],
+  "wordCountEstimate": 800
+}

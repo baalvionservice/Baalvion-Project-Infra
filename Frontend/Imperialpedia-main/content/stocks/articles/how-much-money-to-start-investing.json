@@ -1,0 +1,102 @@
+{
+  "topicNumber": 3,
+  "section": "Beginner Investing",
+  "title": "How Much Money Do You Need to Start Investing in Stocks?",
+  "slug": "how-much-money-to-start-investing",
+  "seo": {
+    "seoTitle": "How Much Money Do You Need to Start Investing?",
+    "metaDescription": "Fractional shares and zero-minimum brokers mean you can start investing in stocks with far less money than most people assume. Here's what actually matters.",
+    "focusKeyword": "how much money to start investing",
+    "secondaryKeywords": ["minimum to invest in stocks", "start investing with little money", "fractional shares", "investing with $100", "how much to invest per month"],
+    "searchIntent": "Informational — searchers assume there's a required minimum and want a realistic answer.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "There's no minimum dollar amount required to start investing in stocks — what matters far more is starting consistently, even with small amounts.",
+  "intro": "\"How much money do I need to start investing?\" is one of the most common questions from new investors, and the honest answer surprises most people: often, none beyond what's already in your checking account. Fractional shares and zero-minimum brokerage accounts have removed the dollar-amount gatekeeping that used to make investing feel like a rich person's activity.\n\nThe more useful question isn't how much you need to start, but how much you should realistically commit given your other financial obligations, and how consistency beats a single large sum.",
+  "sections": [
+    {
+      "heading": "The Old Barrier Is Mostly Gone",
+      "paragraphs": [
+        "A decade ago, buying a single share of a company like Amazon or Berkshire Hathaway required hundreds or thousands of dollars, and many brokers charged a flat commission per trade that ate into small investments. Fractional share investing changed that: most major brokers now let you buy a slice of a share for as little as $1, and commissions on stock trades have largely disappeared.",
+        "This means the technical minimum to start investing today is close to zero. What actually determines whether you're ready has more to do with your financial situation than your account balance."
+      ]
+    },
+    {
+      "heading": "What to Handle Before You Invest",
+      "paragraphs": [
+        "Most financial educators recommend a short checklist before putting money into stocks: have a small emergency fund covering at least a few months of essential expenses, and pay down high-interest debt like credit cards first, since a 20%+ interest rate is a guaranteed cost that's hard for stock returns to reliably beat.",
+        "Money you'll need within the next year or two — for a house down payment, a wedding, tuition — generally doesn't belong in stocks either, since a market downturn could force you to sell at a loss right when you need the cash."
+      ],
+      "callout": {
+        "title": "Investing isn't all-or-nothing",
+        "text": "You don't need your entire financial house in order before buying a single share. Building an emergency fund and starting a small, automatic stock investment can happen at the same time."
+      }
+    },
+    {
+      "heading": "Why Consistency Beats a Big Lump Sum",
+      "paragraphs": [
+        "Investing $50 a month for years tends to build more wealth, and more discipline, than waiting to accumulate a large sum before starting. Regular contributions also smooth out the price you pay over time, a concept covered in depth in our guide to [dollar-cost averaging](/financial-intelligence/dollar-cost-averaging-explained).",
+        "Waiting for the \"right amount\" or the \"right moment\" is one of the more common ways people delay investing for years, quietly losing time that compounding can't get back."
+      ]
+    },
+    {
+      "heading": "Realistic Starting Amounts",
+      "paragraphs": [
+        "There's no universal right number, but a few reference points help. Some people start with a single $25-$100 contribution just to get comfortable with the mechanics. Others set up an automatic transfer of a fixed percentage of each paycheck, which removes the decision-making entirely."
+      ],
+      "table": {
+        "caption": "Example Starting Approaches",
+        "headers": ["Approach", "Typical Amount", "Best For"],
+        "rows": [
+          ["One-time test contribution", "$25-$100", "Getting comfortable with the platform and process"],
+          ["Automatic monthly investing", "$25-$500/month", "Building the habit without relying on willpower"],
+          ["Percentage of paycheck", "5-15% of income", "Scaling contributions automatically as income grows"]
+        ]
+      }
+    },
+    {
+      "heading": "Small Amounts Still Need a Plan",
+      "paragraphs": [
+        "Even a small first investment benefits from thinking about diversification rather than betting it all on one company. A low-cost index fund lets a small amount of money own a slice of hundreds of businesses at once, which is worth understanding before committing to individual stock picks — see our overview of [diversification](/financial-intelligence/diversification-explained) for the reasoning."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Fractional shares and zero-commission trading mean there's effectively no dollar minimum to start investing.",
+    "Build a small emergency fund and pay down high-interest debt before committing money to stocks.",
+    "Money needed within a year or two generally shouldn't be invested in the stock market.",
+    "Consistent small contributions over time typically outperform waiting to save a large lump sum.",
+    "A fixed automatic monthly contribution removes the guesswork and builds the habit.",
+    "Even small first investments benefit from diversification rather than a single stock bet."
+  ],
+  "faq": [
+    {
+      "question": "Can I really start investing with just $1?",
+      "answer": "Yes. Most major brokers support fractional shares, letting you buy a small slice of an expensive stock or ETF with as little as $1. The bigger constraint is usually whether that amount is meaningfully building toward your goals over time."
+    },
+    {
+      "question": "Is $1,000 enough to start investing in stocks?",
+      "answer": "It's more than enough. $1,000 can buy shares (fractional or whole) across several companies or a diversified ETF. What matters more than the starting amount is whether you keep adding to it regularly afterward."
+    },
+    {
+      "question": "Should I pay off debt before investing?",
+      "answer": "For high-interest debt like credit cards, generally yes — the guaranteed cost of that interest usually exceeds likely stock market returns. Lower-interest debt, like some mortgages, is a closer call that depends on your full financial picture."
+    },
+    {
+      "question": "How much should a beginner invest per month?",
+      "answer": "There's no fixed number, but a common starting guideline is 10-15% of take-home income once an emergency fund and high-interest debt are handled. Even 5% consistently invested is a meaningful start for someone just beginning."
+    }
+  ],
+  "conclusion": "The question of how much money you need to start investing has a smaller answer than most people expect: technically, almost nothing. What actually matters is getting your immediate financial footing steady, then committing to regular contributions rather than waiting for some arbitrary amount to feel ready. Start with what you can, automate it, and let time do more of the work than the size of any single deposit.",
+  "internalLinks": [
+    { "anchor": "dollar-cost averaging", "slug": "dollar-cost-averaging-explained" },
+    { "anchor": "diversification", "slug": "diversification-explained" },
+    { "anchor": "opening a brokerage account", "slug": "opening-a-brokerage-account" },
+    { "anchor": "your first stock purchase", "slug": "first-stock-purchase-guide" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" },
+    { "name": "Federal Reserve — Survey of Consumer Finances", "url": "https://www.federalreserve.gov/econres/scfindex.htm" }
+  ],
+  "wordCountEstimate": 760
+}

@@ -1,0 +1,94 @@
+{
+  "topicNumber": 7,
+  "section": "Stock Basics",
+  "title": "Shareholder Voting Rights Explained",
+  "slug": "shareholder-voting-rights",
+  "seo": {
+    "seoTitle": "Shareholder Voting Rights Explained",
+    "metaDescription": "Owning stock usually comes with a vote. Learn how shareholder voting works, what proxy ballots are, and why your vote matters more than you'd think.",
+    "focusKeyword": "shareholder voting rights",
+    "secondaryKeywords": ["proxy voting", "annual shareholder meeting", "one share one vote", "dual-class stock voting", "shareholder proposals", "how to vote your shares"],
+    "searchIntent": "Informational — investors wondering what that annual proxy ballot from their brokerage actually means.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Owning common stock typically grants voting rights on major corporate decisions, exercised at annual meetings or through mailed and electronic proxy ballots.",
+  "intro": "If you own common stock, you've probably received an email or envelope around proxy season asking you to vote on things like board nominees or an executive pay package. Most people click through it quickly, or ignore it entirely — but that ballot represents a real, if usually small, piece of corporate control.",
+  "sections": [
+    {
+      "heading": "What Shareholders Actually Vote On",
+      "paragraphs": [
+        "Common shareholders typically vote on electing directors to the board, approving or rejecting executive compensation packages, ratifying the outside auditor, and weighing in on major structural changes like mergers, stock splits, or amendments to corporate bylaws. Shareholders can also submit their own proposals for a vote, covering everything from environmental policy to governance reforms."
+      ]
+    },
+    {
+      "heading": "How Proxy Voting Works in Practice",
+      "paragraphs": [
+        "Almost nobody attends the actual annual shareholder meeting in person. Instead, companies mail or email a proxy statement, and shareholders vote remotely — by mail, phone, or an online portal — assigning their vote to a proxy who casts it on their behalf according to their instructions. Your brokerage handles the logistics since it's technically the holder of record for shares held in a standard brokerage account."
+      ],
+      "callout": {
+        "title": "Your vote is smaller than you'd think, but real",
+        "text": "A retail investor with a few hundred shares won't swing an election alone, but collectively, retail shareholders can and do influence outcomes, especially on close governance votes."
+      }
+    },
+    {
+      "heading": "One Share, One Vote — Usually",
+      "paragraphs": [
+        "The standard rule is one vote per common share, but plenty of companies deviate from it through dual-class share structures, where founders or insiders hold a class of stock with ten or more votes per share, while public investors hold shares with one vote or none. This lets founders retain control even after selling a majority of the company's economic value to the public. Our companion piece on common stock explains how these share classes typically work."
+      ]
+    },
+    {
+      "heading": "Do Preferred Shareholders Get to Vote?",
+      "paragraphs": [
+        "Usually not, or only in limited circumstances — most preferred stock trades voting rights away in exchange for a fixed, prioritized dividend. Some preferred agreements grant voting rights only if the company misses a set number of dividend payments, as a protective mechanism. See our guide on preferred stock for the full mechanics."
+      ]
+    },
+    {
+      "heading": "Why Bothering to Vote Still Matters",
+      "paragraphs": [
+        "Corporate votes on executive pay, board composition, and shareholder proposals have shifted real outcomes at major companies in recent years, particularly on close votes where institutional investors were split. Voting costs nothing and takes a few minutes — skipping it just hands more relative influence to whoever does show up."
+      ]
+    },
+    {
+      "heading": "Shareholder Activism and Proposals",
+      "paragraphs": [
+        "Beyond routine board and pay votes, shareholders — often organized activist investors or advocacy groups — can formally submit proposals asking a company to change a specific practice, from environmental disclosures to compensation structures. These proposals rarely pass outright on the first attempt, but a strong minority vote can pressure a board into voluntarily adopting the change without a formal mandate, since directors generally prefer to avoid a recurring, embarrassing fight at each annual meeting."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Common stock typically grants one vote per share on board elections, mergers, and other major decisions.",
+    "Most shareholders vote remotely through a proxy ballot rather than attending meetings in person.",
+    "Dual-class share structures let some companies give insiders outsized voting power relative to ownership.",
+    "Preferred shareholders usually have limited or no voting rights, unless specific conditions are triggered.",
+    "Shareholders can submit their own proposals for a vote at the annual meeting.",
+    "Individual votes are small in isolation but add up meaningfully in aggregate, especially on close votes."
+  ],
+  "faq": [
+    {
+      "question": "Do I have to vote my shares?",
+      "answer": "No, voting is optional. If you don't vote, your shares simply aren't counted, and in some cases your broker may vote them in a default way on routine matters, though not on contested issues."
+    },
+    {
+      "question": "How many votes does one share of stock get?",
+      "answer": "Typically one vote per common share, but this isn't universal. Some companies use dual-class structures where different share classes carry different voting weights, sometimes ten or more votes per insider-held share."
+    },
+    {
+      "question": "Can I vote if I own stock through a mutual fund or ETF?",
+      "answer": "Not directly — the fund itself holds the shares and votes on behalf of its investors. Some fund providers now offer pass-through voting programs letting individual investors express preferences, but this remains uncommon."
+    },
+    {
+      "question": "What happens if a shareholder vote is close?",
+      "answer": "Close votes get resolved by the final tally, same as any election — the outcome that receives the required majority (often a simple majority, sometimes higher for major changes) is adopted, and the result is disclosed publicly."
+    }
+  ],
+  "conclusion": "Shareholder voting is one of the few direct levers ordinary investors have over how a public company is run. It won't feel powerful casting one vote among millions, but the aggregate of engaged shareholders has shaped real corporate decisions — and it costs nothing to participate.",
+  "internalLinks": [
+    { "anchor": "what is a shareholder", "slug": "what-is-a-shareholder" },
+    { "anchor": "common stock explained", "slug": "common-stock-explained" },
+    { "anchor": "preferred stock explained", "slug": "preferred-stock-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 760
+}

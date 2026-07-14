@@ -1,0 +1,111 @@
+{
+  "topicNumber": 3,
+  "section": "Stock Basics",
+  "title": "Preferred Stock: Definition and How It Works",
+  "slug": "preferred-stock-explained",
+  "seo": {
+    "seoTitle": "Preferred Stock Explained: How It Works",
+    "metaDescription": "Preferred stock pays a fixed dividend and ranks above common shares in payouts, but usually skips voting rights. Here's how it actually works.",
+    "focusKeyword": "preferred stock",
+    "secondaryKeywords": ["preferred stock definition", "preferred shares", "fixed dividend stock", "callable preferred stock", "preferred vs common stock", "hybrid security"],
+    "searchIntent": "Informational — income-focused investors evaluating a less common, hybrid equity class.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Preferred stock is a hybrid security that pays a fixed dividend and sits ahead of common shares in the payout line, trading voting power for more predictable income.",
+  "intro": "Preferred stock sits in an odd middle ground between a stock and a bond. It's technically equity, but it behaves a lot like a bond, paying a fixed, scheduled dividend rather than fluctuating with the company's fortunes the way common stock does.",
+  "sections": [
+    {
+      "heading": "The Basic Mechanics",
+      "paragraphs": [
+        "When a company issues preferred stock, it sets a fixed dividend rate, expressed either as a dollar amount per share or a percentage of the share's par value. That dividend gets paid before any common stock dividend, and it's usually cumulative, meaning if the company skips a payment, it owes the missed amount before common shareholders see a dime.",
+        "In exchange for that priority, most preferred shares carry no voting rights, so holders don't get a say in board elections or corporate strategy the way common shareholders do."
+      ]
+    },
+    {
+      "heading": "Where Preferred Stock Ranks",
+      "paragraphs": [
+        "In a company's capital structure, preferred stock sits below bonds and other debt but above common stock. If the company is liquidated, bondholders get paid first, preferred shareholders next, and common shareholders last — often left with little or nothing. Our companion article on what a stock is covers this priority ladder in more general terms."
+      ],
+      "callout": {
+        "title": "Bond-like, not bond-safe",
+        "text": "Preferred stock behaves like a bond in cash flow terms, but it doesn't carry the same legal protections. Missed payments don't trigger default the way they would on real debt."
+      }
+    },
+    {
+      "heading": "Callable and Convertible Features",
+      "paragraphs": [
+        "Many preferred issues are callable, meaning the company can buy them back at a set price after a certain date — usually when it can refinance more cheaply elsewhere. Some are also convertible, letting holders exchange preferred shares for a set number of common shares, which lets investors participate in company growth if the stock does well."
+      ]
+    },
+    {
+      "heading": "Preferred Stock vs. Common Stock",
+      "paragraphs": [
+        "The two exist for different investor goals: income and predictability versus growth and voting influence. Our full breakdown of common stock covers that side of the comparison in detail."
+      ],
+      "table": {
+        "caption": "Where preferred stock sits relative to common stock and bonds",
+        "headers": ["Feature", "Bonds", "Preferred Stock", "Common Stock"],
+        "rows": [
+          ["Payment type", "Fixed interest", "Fixed dividend", "Variable dividend"],
+          ["Legal priority", "Highest", "Middle", "Lowest"],
+          ["Voting rights", "None", "Usually none", "Usually yes"],
+          ["Growth upside", "None", "Limited unless convertible", "Unlimited"]
+        ]
+      }
+    },
+    {
+      "heading": "Who Typically Buys Preferred Stock",
+      "paragraphs": [
+        "Preferred shares appeal most to income-focused investors, including retirees who want steadier cash flow than common dividends provide, without taking on the full duration risk of long-term bonds. They're less common in beginner portfolios simply because they trade less frequently and require more homework to evaluate call dates and credit quality."
+      ]
+    },
+    {
+      "heading": "Different Varieties of Preferred Stock",
+      "paragraphs": [
+        "Not all preferred stock is identical. Cumulative preferred requires missed dividends to be paid in full before common shareholders receive anything. Non-cumulative preferred simply forfeits any missed payment permanently. Participating preferred, a rarer type, lets holders receive extra dividends beyond the fixed rate if the company performs unusually well, on top of their guaranteed base payment.",
+        "Adjustable-rate preferred stock ties its dividend to a benchmark interest rate rather than a fixed number, which can help protect income from inflation but also introduces more payment uncertainty than a standard fixed-rate issue."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Preferred stock pays a fixed dividend and ranks ahead of common stock, but behind debt, in payout priority.",
+    "Most preferred shares carry no voting rights, unlike common stock.",
+    "Missed preferred dividends are often cumulative, owed in full before common dividends resume.",
+    "Callable preferred shares can be repurchased by the company after a set date, capping long-term upside.",
+    "Convertible preferred shares can be exchanged for common stock, adding growth potential.",
+    "Preferred stock suits income-focused investors more than growth-focused ones."
+  ],
+  "faq": [
+    {
+      "question": "Is preferred stock safer than common stock?",
+      "answer": "In terms of payout priority and dividend predictability, yes — preferred shareholders get paid before common shareholders. But preferred stock isn't insured or guaranteed the way government bonds are, and its price can still decline."
+    },
+    {
+      "question": "Why don't preferred shares have voting rights?",
+      "answer": "Companies typically design preferred stock this way so they can raise capital without diluting the voting control held by common shareholders, particularly founders and existing board members."
+    },
+    {
+      "question": "What does 'callable' mean for preferred stock?",
+      "answer": "A callable preferred share can be bought back by the issuing company at a predetermined price after a specified date, usually so the company can replace it with cheaper financing. This caps how long an investor can count on receiving that dividend."
+    },
+    {
+      "question": "Can preferred stock lose value like common stock?",
+      "answer": "Yes. While its price tends to be less volatile than common stock, preferred shares can still fall in value, especially if interest rates rise or the company's credit quality weakens."
+    },
+    {
+      "question": "What is the difference between cumulative and non-cumulative preferred stock?",
+      "answer": "Cumulative preferred stock requires any missed dividend payments to accumulate and be paid in full before common shareholders receive anything. Non-cumulative preferred simply forfeits a missed payment permanently, with no obligation for the company to make it up later."
+    }
+  ],
+  "conclusion": "Preferred stock exists to split the difference between a bond's predictability and a stock's ownership stake. It won't deliver the explosive upside of common shares in a company that takes off, but for investors who want steadier, prioritized income without giving up on equity entirely, it fills a real gap in the middle of the risk spectrum.",
+  "internalLinks": [
+    { "anchor": "common stock explained", "slug": "common-stock-explained" },
+    { "anchor": "what is a stock", "slug": "what-is-a-stock" },
+    { "anchor": "treasury shares", "slug": "treasury-shares-explained" },
+    { "anchor": "outstanding shares", "slug": "outstanding-shares-explained" }
+  ],
+  "externalSources": [
+    { "name": "FINRA — Investor Education", "url": "https://www.finra.org/investors" }
+  ],
+  "wordCountEstimate": 750
+}

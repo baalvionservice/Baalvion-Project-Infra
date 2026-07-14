@@ -1,0 +1,85 @@
+{
+  "topicNumber": 5,
+  "section": "How the Stock Market Works",
+  "title": "How and Why Stock Prices Change",
+  "slug": "how-stock-prices-change",
+  "seo": {
+    "seoTitle": "How and Why Stock Prices Change Explained",
+    "metaDescription": "Stock prices move because of continuous trading between buyers and sellers reacting to new information. Here's exactly what causes a stock's price to rise or fall.",
+    "focusKeyword": "why stock prices change",
+    "secondaryKeywords": ["how stock prices are determined", "what moves stock prices", "stock price fluctuation", "earnings and stock price", "market sentiment stocks", "stock volatility explained"],
+    "searchIntent": "Informational — investors want to understand the mechanics behind price movement, not receive price predictions.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Stock prices change because buyers and sellers continuously renegotiate a price based on new information, expectations, and how badly each side wants to trade.",
+  "intro": "Watch any stock ticker for five minutes and the price will move, sometimes several times, without any obvious news at all. That's not a glitch — it's the entire mechanism working exactly as designed. **Stock prices change** because every trade is a fresh negotiation between a buyer and a seller, and the moment that trade completes, it becomes the new reference point for the next one.\n\nThe deeper question isn't really \"how\" prices move — that mechanical process is covered in [how stock exchanges work](/financial-intelligence/how-stock-exchanges-work) — it's what drives buyers and sellers to change their minds about what a stock is worth in the first place.",
+  "sections": [
+    {
+      "heading": "Every Trade Sets a New Price Point",
+      "paragraphs": [
+        "A stock's quoted price is really just the price of the most recent trade. There's no committee approving it — it's whatever a buyer and seller last agreed to. Between trades, the market shows a bid (highest price a buyer will pay) and an ask (lowest price a seller will accept), a gap explained fully in [bid vs ask price explained](/financial-intelligence/bid-vs-ask-price).",
+        "When more buyers are eager to trade at higher prices than sellers are willing to accept, the price ratchets upward trade by trade. When sellers are more eager than buyers, it ratchets down. This is the raw mechanical layer underneath every price move, however small or large."
+      ]
+    },
+    {
+      "heading": "Supply and Demand Set the Direction",
+      "paragraphs": [
+        "Underneath the mechanics sits the more familiar economic force of supply and demand — how many shares people want to buy relative to how many people are willing to sell at a given price. Our companion piece on [supply and demand in the stock market](/financial-intelligence/supply-and-demand-in-stocks) covers this in depth, but the short version is that a fixed supply of shares meeting a surge in buying interest pushes prices up quickly, and the reverse pushes them down."
+      ],
+      "callout": {
+        "title": "It's relative demand, not popularity",
+        "text": "A stock doesn't need to be universally loved to rise — it just needs slightly more buying pressure than selling pressure at that moment."
+      }
+    },
+    {
+      "heading": "New Information Resets Expectations",
+      "paragraphs": [
+        "Prices jump most sharply around earnings reports, economic data releases, and company-specific news because they force a rapid reassessment of what a company is actually worth going forward. A stock price is fundamentally a bet on future cash flows, so anything that changes the outlook for those cash flows — a strong quarter, a product recall, a Federal Reserve interest rate decision — tends to move the price quickly as traders reprice the stock to reflect the new information."
+      ]
+    },
+    {
+      "heading": "Sentiment and Liquidity Add Noise",
+      "paragraphs": [
+        "Not every price move traces back to hard information. Broader market mood, momentum trading, and how many shares are actively available to trade (liquidity) all add short-term noise on top of the fundamental picture. Thinly traded stocks can swing sharply on relatively small orders, while heavily traded ones tend to absorb the same order size with far less movement."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "A stock's price is simply the price of its most recent trade, updated continuously as new trades occur.",
+    "Prices rise when buying pressure exceeds selling pressure and fall when the reverse is true.",
+    "Earnings reports, economic data, and company news move prices because they change expectations about future profits.",
+    "Broader market sentiment and momentum can move prices even without new fundamental information.",
+    "Thinly traded stocks tend to be more volatile than heavily traded ones for the same order size.",
+    "Price and value aren't always the same thing — short-term price swings don't necessarily reflect a company's underlying business."
+  ],
+  "faq": [
+    {
+      "question": "Why does a stock price change even when there's no news?",
+      "answer": "Ordinary buying and selling activity continuously produces small price changes on its own, driven by shifting supply and demand, algorithmic trading, and investor sentiment — not every move requires a news catalyst."
+    },
+    {
+      "question": "Why do stocks drop after good earnings sometimes?",
+      "answer": "If a company's results come in below what investors had already priced in through expectations, the stock can fall even on objectively good numbers, because the market moves on the gap between expectations and reality, not results in isolation."
+    },
+    {
+      "question": "Does trading volume affect how much a price moves?",
+      "answer": "Yes. Low-volume, thinly traded stocks tend to see larger price swings from a given order size, since there are fewer offsetting orders. High-volume stocks generally absorb similar-sized orders with smaller price impact."
+    },
+    {
+      "question": "Who actually sets a stock's price?",
+      "answer": "No single party sets it. It emerges from the continuous matching of buy and sell orders on an exchange, as explained in [how stock exchanges work](/financial-intelligence/how-stock-exchanges-work)."
+    }
+  ],
+  "conclusion": "Stock prices move for layered reasons: the mechanical process of continuous trade matching, the underlying pull of supply and demand, sudden shifts in expectations from new information, and the noisier influence of sentiment and liquidity. None of these operate in isolation — a single earnings report can shift expectations, trigger a wave of buying, and produce dozens of new trades within seconds, each one nudging the price a little further.",
+  "internalLinks": [
+    { "anchor": "supply and demand in the stock market", "slug": "supply-and-demand-in-stocks" },
+    { "anchor": "bid vs ask price explained", "slug": "bid-vs-ask-price" },
+    { "anchor": "how stock exchanges work", "slug": "how-stock-exchanges-work" },
+    { "anchor": "what is an order book", "slug": "what-is-an-order-book" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission", "url": "https://www.sec.gov/" },
+    { "name": "Federal Reserve", "url": "https://www.federalreserve.gov/" }
+  ],
+  "wordCountEstimate": 730
+}

@@ -1,0 +1,90 @@
+{
+  "topicNumber": 5,
+  "section": "Stock Basics",
+  "title": "Stock Certificates: What They Are (And Do You Still Need One)",
+  "slug": "stock-certificates-explained",
+  "seo": {
+    "seoTitle": "Stock Certificates Explained: Do You Need One?",
+    "metaDescription": "Stock certificates are physical proof of share ownership, but most stock today is held electronically. Here's what certificates are and if you need one.",
+    "focusKeyword": "stock certificates",
+    "secondaryKeywords": ["physical stock certificate", "electronic share ownership", "book-entry shares", "DRS registration", "stock certificate collectors", "how to get a stock certificate"],
+    "searchIntent": "Informational — investors curious about proof of ownership or holding old paper certificates from decades past.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "A stock certificate is a paper document proving share ownership. Almost all modern trading skips paper entirely, using electronic book-entry records instead.",
+  "intro": "Decades ago, buying stock meant eventually receiving an ornate paper document with your name, the company's, and the number of shares printed across it. That's a stock certificate — and if you've ever inherited one from a relative or seen one framed on an office wall, you've probably wondered whether it's still worth anything or whether you even need one today.",
+  "sections": [
+    {
+      "heading": "What a Stock Certificate Actually Is",
+      "paragraphs": [
+        "A stock certificate is a legal document certifying that a named individual owns a specific number of shares in a company. It typically includes the company's seal, a certificate number, the share count, and signatures from corporate officers or a transfer agent. Historically, this piece of paper was the only proof of ownership that existed."
+      ]
+    },
+    {
+      "heading": "Why Almost Nobody Uses Them Anymore",
+      "paragraphs": [
+        "Since the late 20th century, the stock market has shifted almost entirely to electronic book-entry ownership, where your brokerage account simply records that you own shares, with no paper involved. This system, run largely through the Depository Trust Company, is faster, cheaper, and eliminates the risk of losing or damaging a physical document that represents real money.",
+        "Today, when you buy a share of common stock or preferred stock through a brokerage, you almost never receive a paper certificate unless you specifically request one — and many companies have stopped issuing them at all."
+      ],
+      "callout": {
+        "title": "Book-entry is the default now",
+        "text": "If you bought stock through an online brokerage in the past twenty years, your shares almost certainly exist only as an electronic record — and that's entirely normal."
+      }
+    },
+    {
+      "heading": "Do You Ever Actually Need One?",
+      "paragraphs": [
+        "For nearly all practical purposes, no. Voting, receiving dividends, and selling shares all work fine through electronic registration. Some investors request physical certificates or Direct Registration System statements for sentimental reasons, as gifts, or because they simply prefer having proof outside the brokerage system, but it typically costs a fee and takes the shares out of easy, quick-trading form."
+      ]
+    },
+    {
+      "heading": "What to Do With an Old Certificate You Find",
+      "paragraphs": [
+        "If you've inherited or discovered an old certificate, the first step is identifying whether the company still exists, was acquired, or changed its name — corporate actions like mergers and stock splits affect what the original shares are now worth. A stock transfer agent can research the certificate's status and help convert it back into modern electronic ownership if the underlying shares are still valid."
+      ]
+    },
+    {
+      "heading": "The Collectible Value of Old Certificates",
+      "paragraphs": [
+        "Separate from any underlying share value, some old certificates have collectible worth on their own, particularly those with elaborate engraving, historical significance, or signatures from notable executives. A small community of collectors, known as scripophilists, buys and sells these documents purely for their design and history, sometimes paying far more than the shares themselves were ever worth as an investment.",
+        "Before assuming an old certificate is worthless simply because the company no longer trades under that name, it's worth checking both angles: whether the underlying shares survived a merger or reorganization, and whether the paper itself holds any collectible value independent of that."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "A stock certificate is a paper document proving you own a specific number of shares in a company.",
+    "Modern stock ownership is almost entirely electronic, tracked through book-entry systems rather than paper.",
+    "You can still request a physical certificate from some companies, usually for a fee.",
+    "Old certificates found among family papers may still represent real, tradeable value.",
+    "A transfer agent can research an old certificate's status and convert it to current electronic ownership.",
+    "Not having a paper certificate does not affect your legal ownership, voting rights, or dividend eligibility."
+  ],
+  "faq": [
+    {
+      "question": "Are stock certificates still legally valid proof of ownership?",
+      "answer": "Yes, an authentic, unaltered certificate remains legal proof of ownership. But because most trading has moved to electronic systems, you'll typically need to work with a transfer agent to convert it into a tradeable book-entry position."
+    },
+    {
+      "question": "Can I still request a paper stock certificate today?",
+      "answer": "Some companies and transfer agents still offer this, often for a fee, but many companies have discontinued the practice entirely in favor of full electronic registration. Check with the specific company or your brokerage."
+    },
+    {
+      "question": "How do I find out if an old stock certificate is worth anything?",
+      "answer": "Contact the company's transfer agent, or a stock research service, with the certificate's details — company name, certificate number, and share count. They can trace whether the company still exists, merged, or was renamed, and what the shares are worth today."
+    },
+    {
+      "question": "Is it risky to hold a physical stock certificate instead of an electronic record?",
+      "answer": "It can be. A lost, stolen, or damaged certificate is harder and more expensive to replace than an electronic record, which is protected by your brokerage's systems and typically insured against certain losses."
+    }
+  ],
+  "conclusion": "Stock certificates aren't extinct, but they're no longer how ownership actually functions for the overwhelming majority of investors. If you own stock through a brokerage account today, your electronic record carries exactly the same legal weight as that old paper document once did — with far less risk of it getting lost in a drawer.",
+  "internalLinks": [
+    { "anchor": "what is a stock", "slug": "what-is-a-stock" },
+    { "anchor": "fractional shares explained", "slug": "fractional-shares-explained" },
+    { "anchor": "what is a shareholder", "slug": "what-is-a-shareholder" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 730
+}

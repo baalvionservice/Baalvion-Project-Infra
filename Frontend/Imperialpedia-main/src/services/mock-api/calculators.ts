@@ -67,6 +67,42 @@ export const mockCalculators: Calculator[] = [
     category: 'Economics',
     icon: 'ArrowUpRight'
   },
+  {
+    id: 'calc-cagr',
+    name: 'CAGR Calculator',
+    slug: 'cagr',
+    type: 'cagr',
+    description: 'Find the compound annual growth rate between a starting and ending investment value.',
+    category: 'Stocks',
+    icon: 'TrendingUp'
+  },
+  {
+    id: 'calc-dividend',
+    name: 'Dividend Calculator',
+    slug: 'dividend',
+    type: 'dividend',
+    description: 'Estimate the annual and monthly dividend income a stock position would generate.',
+    category: 'Stocks',
+    icon: 'Landmark'
+  },
+  {
+    id: 'calc-position-size',
+    name: 'Position Size Calculator',
+    slug: 'position-size',
+    type: 'position-size',
+    description: 'Size a trade based on your account risk budget, entry price, and stop-loss level.',
+    category: 'Stocks',
+    icon: 'Ruler'
+  },
+  {
+    id: 'calc-profit-loss',
+    name: 'Profit/Loss Calculator',
+    slug: 'profit-loss',
+    type: 'profit-loss',
+    description: 'Calculate realized profit or loss on a stock trade, including fees.',
+    category: 'Stocks',
+    icon: 'Calculator'
+  },
 ];
 
 export const getCalculatorList = async (): Promise<ApiResponse<Calculator[]>> => {

@@ -1,6 +1,5 @@
 import { newsArticles, NewsBodyBlock, NewsArticle } from "@/lib/data.news";
 import { getPublishedNewsBySlug } from "@/services/data/cms-public";
-import { stocksPageData, StocksArticle } from "@/lib/data/data.stocks";
 import { buildMetadata } from "@/lib/seo";
 import { formatDate } from "@/services/format-date";
 import Image from "next/image";
@@ -19,8 +18,7 @@ import { articleUrl } from "@/lib/data/article-url";
 import { ShareBar } from "@/components/article/ShareBar";
 import { articlesService } from "@/services/data";
 
-// Union type to handle different article types
-type ArticleType = NewsArticle | StocksArticle;
+type ArticleType = NewsArticle;
 
 type SlugParams = { slug: string[] };
 
@@ -467,12 +465,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
     permanentRedirect(articleUrl(staticNewsMatch.publishedAt, slug));
   }
 
-  let article: ArticleType | undefined =
-    (stocksPageData.featured?.slug === slug
-      ? stocksPageData.featured
-      : null) ||
-    brokerGuides.find((a) => a.slug === slug) ||
-    stocksPageData.latest.find((a) => a.slug === slug);
+  let article: ArticleType | undefined = brokerGuides.find((a) => a.slug === slug);
 
   // Last resort: live editorial news from the CMS — same redirect treatment
   // as the static set above. (The committed article snapshot is handled by

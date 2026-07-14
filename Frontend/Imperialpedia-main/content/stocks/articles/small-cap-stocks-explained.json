@@ -1,0 +1,103 @@
+{
+  "topicNumber": 9,
+  "section": "Types of Stocks",
+  "title": "Small-Cap Stocks Explained",
+  "slug": "small-cap-stocks-explained",
+  "seo": {
+    "seoTitle": "Small-Cap Stocks Explained: Definition & Risks",
+    "metaDescription": "Small-cap stocks are companies with smaller market values and higher growth potential and risk. Learn the typical size thresholds, benefits, and pitfalls.",
+    "focusKeyword": "small-cap stocks",
+    "secondaryKeywords": ["small cap stock definition", "what are small cap stocks", "small cap vs large cap", "small cap market cap range", "russell 2000", "small cap risk"],
+    "searchIntent": "Informational — investors researching what qualifies as a small-cap stock and the risk/reward trade-offs involved.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Small-cap stocks are companies with relatively small total market values, offering more room to grow and more risk of failure than their larger counterparts.",
+  "intro": "Every large company was small once, and part of the appeal of small-cap stocks is the idea of getting in before the rest of the market notices. Small-cap stocks are shares in companies with a relatively small total market value, or market capitalization, and that smaller size comes with both more room to grow quickly and considerably more risk of the business struggling or failing outright.\n\nThe category sits at a genuine inflection point in market-cap investing — smaller than the mid-cap and large-cap companies most index funds are weighted toward, but generally still large enough to trade on a major exchange with real disclosure requirements, unlike the murkier penny stock world.",
+  "sections": [
+    {
+      "heading": "What Counts as a Small-Cap Stock",
+      "paragraphs": [
+        "Market capitalization is calculated by multiplying a company's share price by its total number of outstanding shares, and it's the standard way the market sorts companies by size. While the exact cutoffs shift somewhat by index provider, small-cap generally refers to companies in the lower range of publicly traded market values — smaller than the well-known large-cap names, but still listed on major exchanges."
+      ]
+    },
+    {
+      "heading": "Market-Cap Categories at a Glance",
+      "paragraphs": [
+        "These ranges are commonly used guidelines rather than fixed legal definitions, and different index providers draw the lines slightly differently."
+      ],
+      "table": {
+        "caption": "Typical market-cap size categories",
+        "headers": ["Category", "Approximate market cap range"],
+        "rows": [
+          ["Small-cap", "Roughly $300 million to $2 billion"],
+          ["Mid-cap", "Roughly $2 billion to $10 billion"],
+          ["Large-cap", "Roughly $10 billion and above"]
+        ]
+      }
+    },
+    {
+      "heading": "Why Investors Are Drawn to Small-Cap Stocks",
+      "paragraphs": [
+        "Small companies generally have more room to grow quickly than already-dominant large companies, simply because doubling revenue is a smaller absolute number to achieve from a smaller starting base. Small-cap stocks have historically shown periods of outperforming large-cap stocks over long stretches, particularly coming out of recessions, though that outperformance has come with meaningfully more volatility along the way."
+      ],
+      "callout": {
+        "title": "Small-cap indexes track this category",
+        "text": "The Russell 2000 is the most widely cited small-cap benchmark in the U.S. market, tracking roughly the smallest 2,000 companies in the broader Russell 3000 index."
+      }
+    },
+    {
+      "heading": "The Risks That Come With Smaller Size",
+      "paragraphs": [
+        "Small companies typically have less financial cushion to survive a bad year, less access to cheap capital, thinner analyst coverage, and less name recognition to fall back on than large-cap peers. Their stock prices also tend to be more volatile day to day, since smaller trading volumes mean it takes less buying or selling pressure to move the price meaningfully."
+      ]
+    },
+    {
+      "heading": "Small-Cap in Context: Related Categories",
+      "paragraphs": [
+        "Small-cap is one step up from [penny stocks](/financial-intelligence/penny-stocks-explained) in terms of size and disclosure requirements, and one step below [mid-cap stocks](/financial-intelligence/mid-cap-stocks-explained). Many small-cap companies also carry a [growth stock](/financial-intelligence/growth-stocks-explained) profile, since a smaller company expanding quickly often shows both traits at once.",
+        "Because small-cap companies are less thoroughly covered by Wall Street analysts, mispricings can persist longer than they would for a heavily scrutinized large-cap name — which is exactly why some active fund managers specialize in this segment, betting that diligent research can uncover value the broader market hasn't priced in yet. That same lack of coverage cuts both ways, though, since it's also easier for problems at a small company to go unnoticed until they show up directly in the stock price."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Small-cap stocks are companies with a relatively small total market value, roughly $300 million to $2 billion by common convention.",
+    "Market capitalization is calculated as share price multiplied by total shares outstanding.",
+    "Small-cap companies generally have more room to grow quickly but considerably more risk than large-cap peers.",
+    "The Russell 2000 is the most widely followed U.S. small-cap benchmark.",
+    "Thinner analyst coverage and less financial cushion make small-cap stocks more volatile and harder to research.",
+    "Small-cap stocks often overlap with the growth stock category, since rapid expansion is common at this size."
+  ],
+  "faq": [
+    {
+      "question": "What is considered a small-cap stock?",
+      "answer": "By common convention, a small-cap stock has a total market capitalization roughly between $300 million and $2 billion, though exact cutoffs vary by index provider and shift over time as markets grow."
+    },
+    {
+      "question": "Are small-cap stocks riskier than large-cap stocks?",
+      "answer": "Generally yes. Smaller companies have less financial cushion, thinner analyst coverage, and more volatile share prices, though they also carry more potential for rapid growth than already-large companies."
+    },
+    {
+      "question": "What index tracks small-cap stocks?",
+      "answer": "The Russell 2000 is the most widely cited U.S. small-cap benchmark, tracking roughly the smallest 2,000 companies within the broader Russell 3000 index."
+    },
+    {
+      "question": "How is a small-cap stock different from a penny stock?",
+      "answer": "Small-cap stocks are typically listed on major exchanges with full disclosure requirements, even though they're smaller companies. [Penny stocks](/financial-intelligence/penny-stocks-explained) trade at very low prices, often over-the-counter with far less reporting oversight."
+    },
+    {
+      "question": "Do small-cap stocks pay dividends?",
+      "answer": "Less commonly than large-cap or blue-chip stocks, since smaller companies more often reinvest available cash into growing the business rather than distributing it to shareholders."
+    }
+  ],
+  "conclusion": "Small-cap stocks offer a genuine trade — more room to grow in exchange for meaningfully more risk and less predictability than their larger counterparts. They can play a useful role in a diversified portfolio, but position sizing and research matter more here than almost anywhere else in the market-cap spectrum.",
+  "internalLinks": [
+    { "anchor": "mid-cap stocks explained", "slug": "mid-cap-stocks-explained" },
+    { "anchor": "large-cap stocks explained", "slug": "large-cap-stocks-explained" },
+    { "anchor": "growth stocks explained", "slug": "growth-stocks-explained" },
+    { "anchor": "penny stocks explained", "slug": "penny-stocks-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 780
+}

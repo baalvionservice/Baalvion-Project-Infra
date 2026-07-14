@@ -6,8 +6,11 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { FAQItem } from "@/lib/data/data.faq";
 
+export interface FAQItem {
+    question: string;
+    answer: string;
+}
 
 interface FAQProps {
     data: FAQItem[];

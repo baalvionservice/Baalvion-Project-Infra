@@ -1,0 +1,91 @@
+{
+  "topicNumber": 1,
+  "section": "Stock Basics",
+  "title": "What Is a Stock?",
+  "slug": "what-is-a-stock",
+  "seo": {
+    "seoTitle": "What Is a Stock? A Plain-English Definition",
+    "metaDescription": "A stock is a slice of ownership in a company. Learn what that ownership actually entitles you to, how shares get created, and why prices move.",
+    "focusKeyword": "what is a stock",
+    "secondaryKeywords": ["stock definition", "shares of a company", "stock market basics", "equity ownership", "how stocks work", "buying stock"],
+    "searchIntent": "Informational — beginners searching for a foundational definition before they open a brokerage account.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "A stock is a unit of ownership in a company. Buy one and you legally own a sliver of that business, along with a claim on its future profits.",
+  "intro": "Ask ten people what a stock actually is and most will describe price charts, ticker symbols, or the idea of \"the market going up.\" Few will mention the part that matters most: when you buy a stock, you're buying a real, legal piece of a real company. That distinction sounds obvious once it's stated, but it changes how you should think about every share you ever own.\n\nA **stock** (also called equity or a share) represents a fractional ownership claim on a corporation. Companies issue stock to raise money without taking on debt, and in exchange, buyers get a stake in whatever that company earns, owns, and eventually becomes worth. There's no fixed number of shares a company must issue — it depends entirely on how the business chooses to fund itself.\n\nThis guide covers where stock comes from, what owning it entitles you to, and how that ownership differs depending on the type of share you hold.",
+  "sections": [
+    {
+      "heading": "Where Stock Comes From",
+      "paragraphs": [
+        "When a company incorporates, its founders and early investors receive shares in proportion to what they put in — cash, equipment, or sweat equity. As the business grows and needs more capital, it can issue additional shares to new investors, either privately or, eventually, through a public offering on an exchange like the NYSE or Nasdaq.",
+        "Each new share issued dilutes existing owners slightly, since the company's total value now gets split among more pieces. That's why companies don't print shares endlessly — doing so quietly erodes what current shareholders already hold."
+      ]
+    },
+    {
+      "heading": "What Owning a Share Actually Gets You",
+      "paragraphs": [
+        "Owning stock gives you a proportional claim on the company's assets and earnings, the right to vote on certain corporate matters, and in some cases, a share of profits paid out as dividends. None of this is guaranteed in dollar terms — a stock's value floats with what other investors are willing to pay, based on the company's performance and prospects.",
+        "If the company is liquidated, shareholders are last in line behind bondholders and other creditors, which is part of why stocks carry more risk than bonds and, historically, have offered higher long-term returns to compensate."
+      ],
+      "callout": {
+        "title": "Ownership, not a lottery ticket",
+        "text": "A share isn't a bet on a number moving — it's a legal claim on a business. Its price simply reflects what buyers currently think that claim is worth."
+      }
+    },
+    {
+      "heading": "Common vs. Preferred: Not All Shares Are Equal",
+      "paragraphs": [
+        "Most individual investors own **common stock**, which carries voting rights but ranks behind preferred shareholders when it comes to dividends and liquidation proceeds. Some companies also issue **preferred stock**, which typically pays a fixed dividend and sits higher in the payout order but usually skips voting rights entirely. Our companion pieces on common stock and preferred stock walk through the mechanics of each in more depth."
+      ]
+    },
+    {
+      "heading": "Why Stock Prices Move",
+      "paragraphs": [
+        "A stock's price is simply the most recent point where a buyer and seller agreed to trade. That agreement shifts constantly based on earnings reports, interest rates, industry news, and plain sentiment — optimism or fear about what the company will be worth down the road. Over long stretches, price tends to track earnings growth; over short stretches, it can wander for reasons that have little to do with the underlying business."
+      ]
+    },
+    {
+      "heading": "How People Actually Buy Stock",
+      "paragraphs": [
+        "Today, buying stock means opening an account with a licensed brokerage, funding it, and placing an order for however many shares — or fractional shares — you want. The trade executes on an exchange within seconds, and ownership is recorded electronically rather than through a paper certificate, though certificates still technically exist for anyone who wants one."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "A stock is a legal unit of ownership in a company, not just a number on a chart.",
+    "Companies issue shares to raise capital, and issuing more shares dilutes existing owners.",
+    "Stockholders have a claim on earnings and assets, but that claim is last in line during liquidation.",
+    "Common stock carries voting rights; preferred stock usually trades voting power for a fixed dividend.",
+    "Prices reflect what buyers and sellers currently agree a share is worth, driven by earnings and sentiment.",
+    "Modern stock ownership is recorded electronically through a broker, not via physical certificates."
+  ],
+  "faq": [
+    {
+      "question": "Is a stock the same thing as a share?",
+      "answer": "Yes, in everyday use. \"Stock\" refers to ownership in a company generally, while a \"share\" is one individual unit of that ownership. You own shares of a company's stock — the terms overlap so much that people use them interchangeably."
+    },
+    {
+      "question": "Can a stock's price go to zero?",
+      "answer": "Yes. If a company fails and has no remaining value after paying creditors, common shareholders can lose their entire investment. This is why diversification across many companies matters more than betting heavily on any single stock."
+    },
+    {
+      "question": "Do I need a lot of money to buy stock?",
+      "answer": "No. Many brokerages now offer fractional shares, letting you buy a portion of an expensive stock for as little as a few dollars. See our guide on fractional shares for how that works in practice."
+    },
+    {
+      "question": "What's the difference between stocks and bonds?",
+      "answer": "A stock represents ownership; a bond represents a loan you've made to a company or government. Bondholders get paid before stockholders and generally take less risk, but stockholders have more upside if the business does well."
+    }
+  ],
+  "conclusion": "Strip away the jargon and a stock is simply a receipt for partial ownership of a business. Understanding that — rather than treating shares as abstract numbers that move on a screen — is the single most useful mental shift a new investor can make. Everything else, from voting rights to dividends to why prices swing, follows naturally from that one idea.",
+  "internalLinks": [
+    { "anchor": "common stock", "slug": "common-stock-explained" },
+    { "anchor": "preferred stock", "slug": "preferred-stock-explained" },
+    { "anchor": "what is a shareholder", "slug": "what-is-a-shareholder" },
+    { "anchor": "public vs private companies", "slug": "public-vs-private-companies" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 780
+}

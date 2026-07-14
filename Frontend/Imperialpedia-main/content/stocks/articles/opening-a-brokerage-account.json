@@ -1,0 +1,103 @@
+{
+  "topicNumber": 2,
+  "section": "Beginner Investing",
+  "title": "Opening a Brokerage Account: Step-by-Step Guide",
+  "slug": "opening-a-brokerage-account",
+  "seo": {
+    "seoTitle": "Opening a Brokerage Account: Step-by-Step Guide",
+    "metaDescription": "A practical walkthrough of opening a brokerage account, from choosing a broker and account type to funding it and placing your first trade.",
+    "focusKeyword": "opening a brokerage account",
+    "secondaryKeywords": ["how to open a brokerage account", "best brokerage account for beginners", "brokerage account types", "how to fund a brokerage account", "taxable vs retirement account"],
+    "searchIntent": "Informational/transactional — searchers are ready to open an account and want a clear walkthrough.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Opening a brokerage account is mostly paperwork you can finish in twenty minutes online — the real decisions are which broker and which account type.",
+  "intro": "Opening a brokerage account is the unglamorous gate you have to walk through before any of the fun parts of investing happen. It's also less complicated than it sounds: for most people it's a twenty-minute online form, not a trip to an office or a conversation with a suited advisor.\n\nWhere people actually get stuck is upstream of the form — picking a broker and picking an account type. Get those two decisions right and the rest is just filling in boxes.",
+  "sections": [
+    {
+      "heading": "Choosing a Broker",
+      "paragraphs": [
+        "Most major U.S. brokers — Fidelity, Charles Schwab, Vanguard, and a handful of app-based competitors — offer commission-free stock and ETF trades, no account minimums, and fractional shares. At that point, differences come down to interface, research tools, customer support quality, and whether you want a bank-style relationship or a leaner app experience.",
+        "For a true beginner, the specific broker matters less than actually opening one and starting. Any of the large, regulated brokers will get you where you need to go."
+      ],
+      "callout": {
+        "title": "Check for SIPC coverage",
+        "text": "Confirm your broker is a member of SIPC (Securities Investor Protection Corporation), which protects cash and securities up to $500,000 if the brokerage itself fails — not against investment losses, but against firm insolvency."
+      }
+    },
+    {
+      "heading": "Picking the Right Account Type",
+      "paragraphs": [
+        "A standard **taxable brokerage account** has no contribution limits and no withdrawal restrictions, but you owe capital gains tax on profits when you sell. A **Traditional IRA** or **Roth IRA** offers tax advantages for retirement savings but comes with annual contribution limits and rules around early withdrawals.",
+        "If your employer offers a 401(k) match, that typically comes before any of these — it's an immediate, guaranteed return that a brokerage account can't match. Beyond that, many beginners open a taxable account for flexibility alongside a retirement account for the tax benefit."
+      ],
+      "table": {
+        "caption": "Common Account Types at a Glance",
+        "headers": ["Account Type", "Tax Treatment", "Best For"],
+        "rows": [
+          ["Taxable brokerage", "Capital gains tax on profits", "Flexible investing, no withdrawal restrictions"],
+          ["Traditional IRA", "Tax-deferred growth, taxed on withdrawal", "Retirement savings, possible upfront deduction"],
+          ["Roth IRA", "Tax-free growth and withdrawals in retirement", "Long time horizon, expect higher future tax bracket"]
+        ]
+      }
+    },
+    {
+      "heading": "The Application Process",
+      "paragraphs": [
+        "Applications ask for your Social Security number, employment information, and some basic questions about your investing experience and financial situation — this is a regulatory requirement, not idle curiosity, since brokers must assess suitability under FINRA rules. You'll also select your account type here.",
+        "Approval is typically instant or same-day for standard accounts. Identity verification occasionally takes an extra day if the system flags something for manual review."
+      ]
+    },
+    {
+      "heading": "Funding Your Account",
+      "paragraphs": [
+        "Linking a bank account via ACH transfer is the standard funding method and is free at nearly every major broker, though transfers can take one to three business days to clear. Wire transfers are faster but often carry a fee.",
+        "You don't need a large amount to start. Our guide on [how much money you need to start investing](/financial-intelligence/how-much-money-to-start-investing) breaks down realistic starting amounts, including brokers that support fractional shares for less than the price of a single stock."
+      ]
+    },
+    {
+      "heading": "Setting Up for Your First Trade",
+      "paragraphs": [
+        "Once funds have cleared, you're ready to place a trade. If you're not sure what to buy yet, our guide to [your first stock purchase](/financial-intelligence/first-stock-purchase-guide) walks through the actual buying process step by step, including order types and how much to invest on day one."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Most major brokers now offer commission-free trades, no minimums, and fractional shares.",
+    "Confirm your broker carries SIPC coverage, which protects against firm failure, not market losses.",
+    "Choose between a taxable account and a tax-advantaged retirement account based on your goals and timeline.",
+    "The application asks for identity and financial information because brokers are required to assess suitability.",
+    "ACH bank transfers are the standard, usually free way to fund a new account, though they take a few days.",
+    "You can open an account and start investing with far less money than most people assume."
+  ],
+  "faq": [
+    {
+      "question": "How much money do I need to open a brokerage account?",
+      "answer": "Most major online brokers have no minimum deposit requirement to open an account. You can technically open one with a few dollars, though you'll want enough to buy at least a fractional share of whatever you plan to invest in first."
+    },
+    {
+      "question": "Is it safe to open a brokerage account online?",
+      "answer": "Yes, provided the broker is a registered broker-dealer and SIPC member. Reputable brokers use bank-level encryption and two-factor authentication, and your identity information is subject to the same regulatory protections as a bank application."
+    },
+    {
+      "question": "Can I have more than one brokerage account?",
+      "answer": "Yes, there's no limit on how many brokerage accounts you can hold, whether across different brokers or multiple account types at the same broker. Some investors split taxable and retirement accounts across firms deliberately."
+    },
+    {
+      "question": "How long does it take to open a brokerage account?",
+      "answer": "The application itself usually takes 10-20 minutes, and approval is often instant. Funding and clearing the initial deposit adds a few more business days before you can trade with the full amount."
+    }
+  ],
+  "conclusion": "Opening a brokerage account is the easiest part of investing — it's a form, an ID check, and a bank transfer. The decisions worth spending real time on are which broker fits how you want to manage money and which account type matches your goals and tax situation. Once that account is funded, the actual work of building a portfolio begins.",
+  "internalLinks": [
+    { "anchor": "how much money you need to start investing", "slug": "how-much-money-to-start-investing" },
+    { "anchor": "your first stock purchase", "slug": "first-stock-purchase-guide" },
+    { "anchor": "how to sell stocks", "slug": "how-to-sell-stocks" },
+    { "anchor": "how to buy stocks online", "slug": "how-to-buy-stocks-online" }
+  ],
+  "externalSources": [
+    { "name": "FINRA — Opening an Account", "url": "https://www.finra.org/investors/investing/getting-started/opening-brokerage-account" },
+    { "name": "SIPC — Securities Investor Protection Corporation", "url": "https://www.sipc.org/" }
+  ],
+  "wordCountEstimate": 790
+}

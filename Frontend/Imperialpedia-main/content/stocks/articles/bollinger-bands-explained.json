@@ -1,0 +1,93 @@
+{
+  "topicNumber": 9,
+  "section": "Stock Analysis",
+  "title": "Bollinger Bands Explained",
+  "slug": "bollinger-bands-explained",
+  "seo": {
+    "seoTitle": "Bollinger Bands Explained: How Volatility Bands Work",
+    "metaDescription": "Bollinger Bands wrap a moving average in bands that widen and narrow with volatility. Learn how they're built, the squeeze, and where they mislead.",
+    "focusKeyword": "Bollinger Bands",
+    "secondaryKeywords": ["Bollinger Bands indicator", "Bollinger Band squeeze", "Bollinger Bands trading strategy", "volatility indicator stocks", "standard deviation bands", "how to read Bollinger Bands"],
+    "searchIntent": "Informational — traders want to understand the construction and interpretation of Bollinger Bands, not just the definition.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Bollinger Bands wrap a moving average in two bands that widen and narrow with volatility, giving a visual read on how stretched a price move has become.",
+  "intro": "Bollinger Bands, created by John Bollinger in the 1980s, plot a moving average alongside two outer bands set a certain number of standard deviations above and below it. Because standard deviation is a statistical measure of how spread out price movements have been, the bands automatically widen when a stock gets more volatile and narrow when it settles down, which makes them one of the few popular indicators that adapt to changing market conditions rather than using a fixed distance.",
+  "sections": [
+    {
+      "heading": "The Three Lines That Make Up the Bands",
+      "paragraphs": [
+        "The middle line is typically a 20-period simple moving average. The upper band sits two standard deviations above that average, and the lower band sits two standard deviations below it — settings that can be adjusted, though 20 periods and two standard deviations are the defaults most platforms ship with. Because roughly 90-95% of price action statistically falls within two standard deviations of a moving average under normal conditions, a price touching or exceeding a band is meant to signal a relatively stretched move, not a random one."
+      ]
+    },
+    {
+      "heading": "What Touching a Band Actually Means",
+      "paragraphs": [
+        "A common misreading is treating a touch of the upper band as an automatic sell signal and the lower band as an automatic buy signal. In a strong trend, price can ride along the upper band for an extended stretch without reversing, since the bands are measuring statistical stretch relative to recent volatility, not an absolute ceiling or floor on price."
+      ],
+      "table": {
+        "caption": "How price position relative to the bands is commonly interpreted",
+        "headers": ["Price Behavior", "Common Interpretation"],
+        "rows": [
+          ["Riding the upper band during a strong uptrend", "Trend strength, not automatically a sell signal"],
+          ["Touching the lower band during a strong downtrend", "Trend strength, not automatically a buy signal"],
+          ["Bouncing between bands in a sideways market", "Range-bound conditions; bands act more like support/resistance"],
+          ["Bands narrowing sharply (the squeeze)", "Low volatility; often precedes a sharp move in either direction"]
+        ]
+      }
+    },
+    {
+      "heading": "The Bollinger Band Squeeze",
+      "paragraphs": [
+        "When the bands compress tightly around the moving average, it signals unusually low volatility — a period traders call the squeeze. Historically, extended low-volatility periods tend to resolve into a sharper directional move, though the squeeze itself gives no reliable clue about which direction that move will take. Traders typically wait for price to break clearly above or below the bands, ideally with rising [volume](/financial-intelligence/volume-analysis-explained), before treating a squeeze as confirmation of a new trend rather than just a quiet stretch."
+      ],
+      "callout": {
+        "title": "The squeeze predicts a move, not a direction",
+        "text": "A narrowing set of bands tells you volatility is likely to expand soon. It says nothing on its own about whether that expansion happens to the upside or downside."
+      }
+    },
+    {
+      "heading": "Where Bollinger Bands Fall Short",
+      "paragraphs": [
+        "Because the bands are built from a standard moving average, they carry the same lagging quality as [moving averages](/financial-intelligence/moving-averages-explained) generally, and they're a volatility measure rather than a direction predictor, which is why they're rarely used alone. Pairing Bollinger Bands with [RSI](/financial-intelligence/rsi-explained) for momentum context, or watching whether a band touch coincides with an established trend, is standard practice for avoiding the classic mistake of fading every band touch as though it were a hard limit."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Bollinger Bands plot a moving average with two outer bands set at a chosen number of standard deviations, typically two.",
+    "The bands widen automatically during high volatility and narrow during low volatility, adapting to current conditions.",
+    "Touching a band is not an automatic buy or sell signal — trending stocks can ride along a band for extended stretches.",
+    "A tight squeeze in the bands often precedes a sharp move but doesn't indicate which direction that move will take.",
+    "Bollinger Bands measure volatility and relative price stretch, not direction, and work best combined with other indicators.",
+    "Default settings of 20 periods and two standard deviations can be adjusted, though most platforms use them as a starting point."
+  ],
+  "faq": [
+    {
+      "question": "What does it mean when a stock touches the upper Bollinger Band?",
+      "answer": "It suggests the price has moved a statistically significant distance above its recent average, but it isn't an automatic sell signal — during a strong uptrend, a stock can ride the upper band for a sustained period without reversing."
+    },
+    {
+      "question": "What is a Bollinger Band squeeze?",
+      "answer": "It's when the bands narrow tightly around the moving average, signaling unusually low volatility. Squeezes often precede a sharper directional move, though they don't indicate whether that move will be upward or downward."
+    },
+    {
+      "question": "What settings do Bollinger Bands use by default?",
+      "answer": "Most platforms default to a 20-period simple moving average with bands set two standard deviations above and below it. These settings can be adjusted for shorter or longer timeframes and different volatility sensitivity."
+    },
+    {
+      "question": "Can Bollinger Bands be used alone to trade stocks?",
+      "answer": "They're generally not recommended as a standalone tool. Because they measure volatility rather than direction, traders commonly combine them with momentum indicators like RSI or trend confirmation from moving averages."
+    }
+  ],
+  "conclusion": "Bollinger Bands offer a rare adaptive view of price behavior, expanding and contracting with actual volatility rather than sitting a fixed distance from price. Their real value comes from context — a band touch during a strong trend means something very different from the same touch in a quiet, range-bound market — which is exactly why experienced traders treat the bands as a volatility gauge to combine with other tools, not a standalone buy-or-sell trigger.",
+  "internalLinks": [
+    { "anchor": "moving averages explained", "slug": "moving-averages-explained" },
+    { "anchor": "rsi explained", "slug": "rsi-explained" },
+    { "anchor": "volume analysis explained", "slug": "volume-analysis-explained" },
+    { "anchor": "technical analysis explained", "slug": "technical-analysis-explained" }
+  ],
+  "externalSources": [
+    { "name": "FINRA — Investor Education", "url": "https://www.finra.org/investors" }
+  ],
+  "wordCountEstimate": 800
+}

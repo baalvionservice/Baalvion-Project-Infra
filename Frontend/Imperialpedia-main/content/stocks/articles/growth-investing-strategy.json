@@ -1,0 +1,99 @@
+{
+  "topicNumber": 3,
+  "section": "Investing Strategies",
+  "title": "Growth Investing Strategy Explained",
+  "slug": "growth-investing-strategy",
+  "seo": {
+    "seoTitle": "Growth Investing Strategy Explained: How It Works",
+    "metaDescription": "Growth investing means paying up for companies expected to expand earnings fast. Learn how the strategy works, who it suits, and where it can go wrong.",
+    "focusKeyword": "growth investing strategy",
+    "secondaryKeywords": ["growth stocks", "high growth companies", "growth vs value investing", "earnings growth investing", "GARP investing"],
+    "searchIntent": "Informational — searchers want to understand growth investing methodology and its trade-offs before applying it.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "A growth investing strategy targets companies expected to expand revenue and earnings faster than average, accepting a higher price today for a bigger future payoff.",
+  "intro": "A **growth investing strategy** focuses on companies expected to increase revenue and earnings faster than the broader market, even if that means paying a premium price today. Instead of hunting for a discount, growth investors are betting that a business's expansion will eventually justify — and outrun — whatever multiple they paid to get in.\n\nThe philosophy has roots in the work of Philip Fisher, who argued in the mid-20th century that scalable, innovative companies run by capable management deserved a premium valuation because their future earnings would dwarf what a cheap, stagnant business could ever produce. That logic underpins how growth investors approach markets today, even as the specific industries in favor have shifted many times over.",
+  "sections": [
+    {
+      "heading": "What Growth Investing Actually Means",
+      "paragraphs": [
+        "Growth investors prioritize the trajectory of a business over its current price tag, looking for accelerating revenue, expanding margins, and a large addressable market the company hasn't fully captured yet. Valuation still matters, but it's treated as secondary to the size and durability of the growth opportunity ahead. A stock trading at a high price-to-earnings ratio isn't automatically disqualified — it just needs growth substantial enough to make that multiple reasonable in hindsight."
+      ]
+    },
+    {
+      "heading": "Who This Strategy Suits",
+      "paragraphs": [
+        "It suits investors comfortable with higher volatility and longer stretches of uncertainty, since growth stocks tend to swing harder in both directions than steady, established businesses. It also suits those willing to research industries and competitive dynamics closely, because separating a company with a genuinely widening moat from one riding a temporary trend takes real analytical work, not just following the market's current enthusiasm."
+      ]
+    },
+    {
+      "heading": "How Growth Investors Evaluate Companies",
+      "paragraphs": [
+        "Rather than leaning on price-to-book or dividend yield, growth investors watch revenue growth rates, gross and operating margin trends, total addressable market size, and how efficiently a company converts spending into new customers or revenue. Many also use a blended approach known as GARP — growth at a reasonable price — which still demands growth but refuses to pay any price to get it, borrowing some valuation discipline from the value side of investing."
+      ],
+      "table": {
+        "caption": "Growth vs value investing at a glance",
+        "headers": ["Factor", "Growth Investing", "Value Investing"],
+        "rows": [
+          ["Primary focus", "Future earnings expansion", "Current discount to intrinsic worth"],
+          ["Typical valuation", "Higher P/E, priced for growth", "Lower P/E, priced for skepticism"],
+          ["Volatility", "Generally higher", "Generally lower"],
+          ["Key risk", "Growth slows or fails to arrive", "Business decline masked as a bargain"]
+        ]
+      }
+    },
+    {
+      "heading": "Pros and Risks of Growth Investing",
+      "paragraphs": [
+        "When the growth materializes as expected, the payoff can be substantial, since a rapidly compounding business can outrun almost any entry price paid a few years earlier. The risk sits on the other side of that same coin: if growth disappoints even slightly, a richly valued stock can fall hard and fast, because so much future optimism was already priced in. These stocks are also more sensitive to rising interest rates, which reduce the present value of earnings expected far in the future."
+      ],
+      "callout": {
+        "title": "Growth priced in cuts both ways",
+        "text": "A high valuation isn't inherently reckless if the growth is real — but it leaves far less room for error than a cheaper stock would."
+      }
+    },
+    {
+      "heading": "Growth Investing vs Momentum Investing",
+      "paragraphs": [
+        "Growth investing is sometimes confused with a [momentum investing strategy](/financial-intelligence/momentum-investing-strategy), but they're built on different logic. Growth investors care about a company's underlying fundamentals and long-term trajectory regardless of recent stock price action. Momentum investors care primarily about recent price trends themselves, and will happily buy a stock with mediocre fundamentals if it's been rising, or sell a great business simply because its price has been falling."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Growth investing means paying a premium for companies expected to expand earnings faster than average.",
+    "Valuation still matters, but it's secondary to the size and durability of the growth opportunity.",
+    "The strategy suits investors comfortable with higher volatility and deeper fundamental research.",
+    "GARP blends growth investing with valuation discipline borrowed from value investing.",
+    "The main risk is paying for growth that slows or fails to materialize as expected.",
+    "It differs from momentum investing, which tracks price trends rather than business fundamentals."
+  ],
+  "faq": [
+    {
+      "question": "Is growth investing riskier than value investing?",
+      "answer": "Generally yes, in the sense that growth stocks carry more of their expected value in the future, making them more sensitive to disappointing results or rising interest rates. That said, risk also depends heavily on individual company quality and position sizing, not just the style label."
+    },
+    {
+      "question": "What metrics matter most in growth investing?",
+      "answer": "Revenue growth rate, margin trends, total addressable market, and customer acquisition efficiency tend to matter more than traditional value metrics like price-to-book. Investors also watch whether growth is decelerating or accelerating over recent quarters."
+    },
+    {
+      "question": "Can a stock be both a growth stock and a value stock?",
+      "answer": "Yes — this is essentially what GARP investing targets: a company with real, above-average growth that hasn't yet been fully priced in by the market. These opportunities are less common than pure growth or pure value setups but do appear."
+    },
+    {
+      "question": "Do growth stocks pay dividends?",
+      "answer": "Rarely, at least not significant ones. Growth companies typically reinvest profits into expansion rather than distributing them to shareholders, which is part of why they differ so much from a [dividend investing strategy](/financial-intelligence/dividend-investing-strategy)."
+    }
+  ],
+  "conclusion": "Growth investing asks you to trust a story about the future rather than lean on a discount today, which makes the underlying research more demanding, not less. Done carefully, it rewards investors who can tell durable, scalable growth apart from a fashionable trend. Done carelessly, it's an easy way to overpay for optimism that never shows up in the actual numbers.",
+  "internalLinks": [
+    { "anchor": "value investing strategy", "slug": "value-investing-strategy" },
+    { "anchor": "momentum investing strategy", "slug": "momentum-investing-strategy" },
+    { "anchor": "dividend investing strategy", "slug": "dividend-investing-strategy" },
+    { "anchor": "active investing explained", "slug": "active-investing-explained" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 830
+}

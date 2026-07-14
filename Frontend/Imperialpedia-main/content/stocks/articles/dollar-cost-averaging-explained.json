@@ -1,0 +1,95 @@
+{
+  "topicNumber": 6,
+  "section": "Beginner Investing",
+  "title": "Dollar-Cost Averaging Explained",
+  "slug": "dollar-cost-averaging-explained",
+  "seo": {
+    "seoTitle": "Dollar-Cost Averaging Explained: How It Works",
+    "metaDescription": "Dollar-cost averaging means investing a fixed amount on a regular schedule regardless of price. Here's how it works and when it makes sense.",
+    "focusKeyword": "dollar-cost averaging",
+    "secondaryKeywords": ["what is dollar cost averaging", "DCA investing strategy", "lump sum vs dollar cost averaging", "automatic investing", "average cost per share"],
+    "searchIntent": "Informational — searchers want a clear definition and practical understanding of the strategy.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Dollar-cost averaging means investing the same amount on a fixed schedule regardless of price, which trades the chance of perfect timing for consistency and lower stress.",
+  "intro": "Dollar-cost averaging sounds like a technical term, but it describes something simple: investing a fixed amount of money at regular intervals, no matter what the market is doing that day. $200 on the first of every month, rain or shine, bull market or crash.\n\nIt's popular precisely because it removes a decision that trips up even experienced investors — when to buy. Instead of guessing whether today is a good entry point, you commit to a schedule and let the average work itself out over time.",
+  "sections": [
+    {
+      "heading": "How Dollar-Cost Averaging Works",
+      "paragraphs": [
+        "Say you invest $300 every month into an index fund. Some months the fund's price is higher, so your $300 buys fewer shares. Other months it's lower, so the same $300 buys more shares. Over time, this naturally averages your cost per share rather than betting everything on one entry price.",
+        "This is different from a **lump sum** investment, where you put all your available money in at once. Lump sum investing has historically outperformed dollar-cost averaging in a majority of periods studied, simply because markets trend upward more often than not — but dollar-cost averaging carries less regret risk if you invest a lump sum right before a downturn."
+      ]
+    },
+    {
+      "heading": "Why It Appeals to Beginners Especially",
+      "paragraphs": [
+        "New investors often freeze up trying to time an entry, worried they'll buy right before a drop. Dollar-cost averaging sidesteps that anxiety entirely by making the schedule the decision, not the price. You invest on the date you chose, whether the market is up 5% or down 5% that week.",
+        "It also mirrors how most people actually receive money — through a regular paycheck — making it a natural fit for automatic monthly or biweekly contributions."
+      ],
+      "callout": {
+        "title": "It's already how most retirement accounts work",
+        "text": "If you contribute to a 401(k) with every paycheck, you're already dollar-cost averaging, likely without having used the term for it."
+      }
+    },
+    {
+      "heading": "The Trade-Off Worth Understanding",
+      "paragraphs": [
+        "Dollar-cost averaging isn't a way to guarantee better returns — it's a way to manage behavior and reduce the regret of bad timing. If you already have a large sum sitting in cash and markets tend to rise more often than they fall, investing it all at once statistically tends to produce a higher expected return than spreading it out.",
+        "The reason many people still choose to spread out a large sum anyway is psychological: investing it all right before a downturn is harder to sit through emotionally than a series of smaller entries."
+      ],
+      "table": {
+        "caption": "Lump Sum vs. Dollar-Cost Averaging",
+        "headers": ["Approach", "Statistical Edge", "Emotional Trade-off"],
+        "rows": [
+          ["Lump sum", "Historically higher expected return in most periods", "Full exposure to a possible downturn right after investing"],
+          ["Dollar-cost averaging", "Slightly lower expected return on average", "Smoother entry, less regret if timing is unlucky"]
+        ]
+      }
+    },
+    {
+      "heading": "Putting It Into Practice",
+      "paragraphs": [
+        "Most brokers let you automate dollar-cost averaging directly — set a recurring transfer and a recurring purchase, and the whole process runs without you touching it again. This pairs naturally with a [long-term investing](/financial-intelligence/long-term-investing-explained) mindset, since both strategies rely on staying consistent through market ups and downs rather than reacting to them.",
+        "For an ongoing regular contribution, dollar-cost averaging isn't really an alternative strategy at all — it's simply what happens when you invest a fixed amount from every paycheck."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Dollar-cost averaging means investing a fixed amount on a set schedule regardless of the current price.",
+    "It naturally averages your cost per share instead of betting on a single entry point.",
+    "Lump sum investing has historically produced higher average returns, but with more timing risk.",
+    "Dollar-cost averaging mainly manages behavior and regret, not guaranteed performance.",
+    "Regular paycheck contributions to a retirement account are a real-world form of dollar-cost averaging.",
+    "Automating the schedule through your broker removes the temptation to time individual purchases."
+  ],
+  "faq": [
+    {
+      "question": "Is dollar-cost averaging better than investing a lump sum?",
+      "answer": "Not statistically in most historical periods, since markets rise more often than they fall. Dollar-cost averaging's real advantage is behavioral — it reduces the emotional risk of investing a large sum right before a downturn."
+    },
+    {
+      "question": "How often should I dollar-cost average?",
+      "answer": "Monthly is the most common interval since it lines up with typical pay schedules, but weekly or biweekly works equally well. What matters most is consistency, not the exact frequency chosen."
+    },
+    {
+      "question": "Can dollar-cost averaging lose money?",
+      "answer": "Yes — it manages the timing and behavior side of investing, not the underlying risk of the investment itself. If the asset you're buying declines over the long run, spreading out purchases doesn't prevent a loss."
+    },
+    {
+      "question": "Do I need a lot of money to dollar-cost average?",
+      "answer": "No. The strategy works with any amount, including very small recurring contributions. Many brokers support automatic recurring investments starting at just a few dollars per transaction."
+    }
+  ],
+  "conclusion": "Dollar-cost averaging trades a small amount of statistical upside for a large amount of peace of mind, which for most investors is a reasonable exchange. It removes the guesswork of timing and replaces it with a schedule you can automate and mostly forget about. Whether you're investing your first hundred dollars or contributing to a retirement account for decades, the mechanism is the same: show up consistently and let the average sort itself out.",
+  "internalLinks": [
+    { "anchor": "long-term investing", "slug": "long-term-investing-explained" },
+    { "anchor": "how much money you need to start investing", "slug": "how-much-money-to-start-investing" },
+    { "anchor": "portfolio allocation basics", "slug": "portfolio-allocation-basics" },
+    { "anchor": "opening a brokerage account", "slug": "opening-a-brokerage-account" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" }
+  ],
+  "wordCountEstimate": 740
+}

@@ -1,0 +1,94 @@
+{
+  "topicNumber": 7,
+  "section": "Beginner Investing",
+  "title": "Diversification: Why You Shouldn't Put All Your Eggs in One Basket",
+  "slug": "diversification-explained",
+  "seo": {
+    "seoTitle": "Diversification Explained: Don't Risk It All on One Stock",
+    "metaDescription": "Diversification spreads risk across companies, sectors, and asset types so no single bad outcome sinks your portfolio. Here's how it actually works.",
+    "focusKeyword": "diversification",
+    "secondaryKeywords": ["what is diversification in investing", "how to diversify a portfolio", "diversification vs concentration", "index fund diversification", "sector diversification"],
+    "searchIntent": "Informational — searchers want to understand the concept and how to apply it practically.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "Diversification spreads your money across enough different investments that no single company's bad news can meaningfully sink your portfolio.",
+  "intro": "\"Don't put all your eggs in one basket\" predates modern finance by centuries, but it's never been more applicable than it is to a stock portfolio. Diversification is simply the practice of spreading your money across multiple companies, sectors, and sometimes asset types, so that one basket dropping doesn't break everything.\n\nIt's one of the few ideas in investing that's both intuitively obvious and still routinely ignored, usually by people who got excited about a single stock and let it take over their portfolio without meaning to.",
+  "sections": [
+    {
+      "heading": "What Diversification Actually Reduces",
+      "paragraphs": [
+        "Diversification specifically reduces **company-specific risk** — the risk that one business has a scandal, a failed product, a bad earnings quarter, or goes bankrupt. It does not eliminate **market risk**, the risk that the entire stock market falls together, since a broad downturn tends to pull down diversified and concentrated portfolios alike.",
+        "This distinction matters because it sets realistic expectations: diversification protects you from a single company blowing up your portfolio, not from a broad recession affecting your portfolio at all."
+      ]
+    },
+    {
+      "heading": "Diversifying Across Companies and Sectors",
+      "paragraphs": [
+        "Owning ten stocks is more diversified than owning one, but if all ten are technology companies, you're still exposed to a sector-wide downturn. True diversification spreads holdings across different industries — technology, healthcare, financials, consumer goods, energy — so that a slump in one sector is cushioned by stability or gains elsewhere.",
+        "Company size matters too. Mixing large, established businesses with a smaller allocation to growth-stage companies balances stability against upside potential."
+      ],
+      "callout": {
+        "title": "Diversification isn't about the number of stocks alone",
+        "text": "Twenty stocks in the same industry provide far less real diversification than ten stocks spread across five unrelated sectors."
+      }
+    },
+    {
+      "heading": "The Easiest Path: Index Funds",
+      "paragraphs": [
+        "A broad-market index fund achieves instant diversification by owning hundreds or thousands of companies across every major sector in a single purchase. For most beginners, this is the simplest and most reliable route to a diversified portfolio without having to research and buy dozens of individual companies.",
+        "Even investors who enjoy picking individual stocks often keep a core index fund holding as the diversified foundation of their portfolio, adding individual picks around the edges."
+      ]
+    },
+    {
+      "heading": "Diversifying Beyond Stocks",
+      "paragraphs": [
+        "Full portfolio diversification often extends beyond stocks to bonds, real estate, and sometimes commodities, since these asset classes don't always move in the same direction at the same time. Bonds, in particular, have historically provided a cushion during stock market downturns, though the relationship isn't guaranteed in every environment.",
+        "How much to allocate across these categories depends on your timeline and risk tolerance, which our guide on [portfolio allocation basics](/financial-intelligence/portfolio-allocation-basics) covers in more detail."
+      ]
+    },
+    {
+      "heading": "How Much Diversification Is Enough",
+      "paragraphs": [
+        "Research on portfolio construction generally suggests that most of the company-specific risk reduction from diversification happens within the first 20-30 individual stocks, after which adding more names provides diminishing benefit. This is one reason index funds, which hold far more than that, are considered thoroughly diversified almost by definition."
+      ]
+    }
+  ],
+  "keyTakeaways": [
+    "Diversification reduces company-specific risk but doesn't eliminate broad market risk.",
+    "Spreading holdings across different sectors matters as much as the raw number of stocks owned.",
+    "A broad-market index fund provides instant diversification across hundreds of companies in one purchase.",
+    "Full diversification can extend beyond stocks to bonds, real estate, and other asset classes.",
+    "Most of the risk-reduction benefit from adding individual stocks levels off after roughly 20-30 companies.",
+    "Concentrating too heavily in one stock or sector is one of the more common and avoidable portfolio mistakes."
+  ],
+  "faq": [
+    {
+      "question": "How many stocks do I need to be diversified?",
+      "answer": "Research generally points to around 20-30 individual stocks across different sectors to capture most of the company-specific risk reduction, though a single broad-market index fund achieves comparable or greater diversification in one purchase."
+    },
+    {
+      "question": "Can you be too diversified?",
+      "answer": "In theory, spreading money across an excessive number of overlapping funds or stocks can dilute returns and make a portfolio hard to manage without meaningfully reducing risk further. For most individual investors, this is a far less common problem than being under-diversified."
+    },
+    {
+      "question": "Does diversification protect against a market crash?",
+      "answer": "Not fully. Diversification protects against single-company or single-sector problems, but a broad market crash tends to affect most stocks simultaneously, regardless of how diversified a stock-only portfolio is."
+    },
+    {
+      "question": "Is an index fund automatically diversified?",
+      "answer": "A broad-market index fund tracking hundreds of companies across sectors, like a total stock market or S&P 500 fund, is generally considered well diversified within the stock portion of a portfolio."
+    }
+  ],
+  "conclusion": "Diversification won't protect you from every kind of loss, but it removes the specific, avoidable risk of one company's bad news wiping out a large share of your savings. Whether you build it yourself across individual stocks and sectors or get there in a single purchase through an index fund, the underlying goal is the same: make sure no single basket is carrying all your eggs.",
+  "internalLinks": [
+    { "anchor": "portfolio allocation basics", "slug": "portfolio-allocation-basics" },
+    { "anchor": "risk management for stock investors", "slug": "risk-management-for-stock-investors" },
+    { "anchor": "how to build a stock portfolio", "slug": "how-to-build-a-stock-portfolio" },
+    { "anchor": "best stocks for beginners", "slug": "best-stocks-for-beginners" }
+  ],
+  "externalSources": [
+    { "name": "U.S. Securities and Exchange Commission — Investor.gov", "url": "https://www.investor.gov/" },
+    { "name": "FINRA — Diversification", "url": "https://www.finra.org/investors/investing/investing-basics/diversification" }
+  ],
+  "wordCountEstimate": 770
+}

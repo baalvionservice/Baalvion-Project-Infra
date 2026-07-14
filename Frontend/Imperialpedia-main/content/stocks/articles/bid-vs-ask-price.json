@@ -1,0 +1,99 @@
+{
+  "topicNumber": 7,
+  "section": "How the Stock Market Works",
+  "title": "Bid vs Ask Price Explained",
+  "slug": "bid-vs-ask-price",
+  "seo": {
+    "seoTitle": "Bid vs Ask Price Explained: What the Spread Means",
+    "metaDescription": "The bid is what buyers offer, the ask is what sellers demand, and the gap between them is the spread. Here's how bid vs ask price actually affects your trades.",
+    "focusKeyword": "bid vs ask price",
+    "secondaryKeywords": ["bid ask spread", "what is the ask price", "what is the bid price", "spread meaning stocks", "market order vs limit order", "liquidity and spread"],
+    "searchIntent": "Informational — investors want to understand quoted prices before placing their first trades.",
+    "schemaRecommendation": "Article + FAQPage"
+  },
+  "excerpt": "The bid is the highest price a buyer will pay, the ask is the lowest price a seller will accept, and the gap between them — the spread — quietly affects every trade.",
+  "intro": "Open any stock quote and you'll typically see two prices sitting side by side, not one. That's the **bid vs ask price**, and the small gap between them shapes how much you actually pay or receive on every single trade, even though most beginners never notice it until it costs them something.\n\nThis pairing sits at the center of how exchanges function day to day, tying directly into [what is an order book](/financial-intelligence/what-is-an-order-book) and [how and why stock prices change](/financial-intelligence/how-stock-prices-change).",
+  "sections": [
+    {
+      "heading": "Bid: What Buyers Are Willing to Pay",
+      "paragraphs": [
+        "The bid price is the highest price any buyer currently has an active order to pay for a stock. If you place a sell order at the market price, this is roughly what you'd receive. Multiple buyers can be bidding at different prices simultaneously; the bid you see quoted is always the best (highest) one currently active."
+      ]
+    },
+    {
+      "heading": "Ask: What Sellers Are Willing to Accept",
+      "paragraphs": [
+        "The ask price (sometimes called the offer) is the lowest price any seller currently has an active order to sell at. If you place a buy order at the market price, this is roughly what you'd pay. Like the bid, it represents the best available price among all active sell orders."
+      ],
+      "callout": {
+        "title": "Quick way to remember it",
+        "text": "You sell at the bid and you buy at the ask — the bid is always lower and the ask is always higher, by definition, for a given moment."
+      }
+    },
+    {
+      "heading": "The Spread Is the Cost of Immediacy",
+      "paragraphs": [
+        "The difference between the ask and the bid is called the spread, and it functions as a built-in cost of trading immediately rather than waiting for a better price. On a heavily traded stock like a major index component, the spread might be a single cent; on a thinly traded small-cap stock, it can be a much larger percentage of the share price.",
+        "Market makers and other liquidity providers profit partly from capturing this spread, buying at the bid and selling at the ask across large volumes of trades — which is part of why exchanges encourage their presence, as discussed in [how stock exchanges work](/financial-intelligence/how-stock-exchanges-work)."
+      ]
+    },
+    {
+      "heading": "Why the Spread Widens or Narrows",
+      "paragraphs": [
+        "Spreads tend to narrow when a stock trades heavily and many market participants are actively quoting both sides. They widen during periods of uncertainty, low trading volume, or right around major news events, when market makers demand more compensation for the added risk of holding an unwanted position.",
+        "This same pattern shows up around scheduled events like earnings releases, when market makers often widen quotes ahead of the announcement simply because they don't know which direction the news will push the stock, and they want a bigger cushion in case they end up holding shares they can't immediately offload at a fair price."
+      ],
+      "table": {
+        "caption": "Bid vs ask quick reference",
+        "headers": ["Term", "Meaning", "Who it favors"],
+        "rows": [
+          ["Bid", "Highest price a buyer will currently pay", "Sellers receive this"],
+          ["Ask", "Lowest price a seller will currently accept", "Buyers pay this"],
+          ["Spread", "Ask minus bid", "Market makers/liquidity providers"]
+        ]
+      }
+    }
+  ],
+  "keyTakeaways": [
+    "The bid is the highest price a buyer is currently willing to pay; the ask is the lowest price a seller will accept.",
+    "Selling at market executes near the bid; buying at market executes near the ask.",
+    "The spread — the gap between bid and ask — is effectively the cost of trading immediately rather than waiting.",
+    "Heavily traded stocks tend to have narrow spreads; thinly traded stocks tend to have wider ones.",
+    "Market makers profit in part by capturing the spread across large volumes of trades.",
+    "Spreads widen during uncertainty, low volume, or around major news events."
+  ],
+  "faq": [
+    {
+      "question": "Why did I pay more than the last traded price when I bought a stock?",
+      "answer": "Market buy orders execute at the ask price, which is typically slightly above the last traded price. The gap you experienced is the bid-ask spread, not an error or hidden fee."
+    },
+    {
+      "question": "Does a wide spread mean a stock is risky?",
+      "answer": "Not necessarily risky in the traditional sense, but a wide spread usually signals lower liquidity, meaning it may be harder to buy or sell large quantities without moving the price."
+    },
+    {
+      "question": "Can I avoid paying the spread?",
+      "answer": "Using a limit order instead of a market order lets you specify your own price rather than accepting the current bid or ask, though your order may not execute immediately, or at all, if the market doesn't reach your price."
+    },
+    {
+      "question": "Is the spread the same as a broker commission?",
+      "answer": "No. The spread is a market structure cost tied to liquidity, separate from any commission or fee a broker might charge for executing the trade."
+    },
+    {
+      "question": "Does the spread matter for long-term investors?",
+      "answer": "It matters less if you're buying and holding for years, since the one-time spread cost is small relative to long-term price changes. It matters more for frequent traders, whose repeated spread costs can add up meaningfully over time."
+    }
+  ],
+  "conclusion": "The bid-ask spread is easy to overlook once you're focused on a stock's headline price, but it's a real, constant cost embedded in how every trade executes. Paying attention to it — especially on thinly traded stocks — is a small habit that adds up, particularly for anyone trading frequently or in larger sizes.",
+  "internalLinks": [
+    { "anchor": "what is an order book", "slug": "what-is-an-order-book" },
+    { "anchor": "how and why stock prices change", "slug": "how-stock-prices-change" },
+    { "anchor": "how stock exchanges work", "slug": "how-stock-exchanges-work" },
+    { "anchor": "supply and demand in the stock market", "slug": "supply-and-demand-in-stocks" }
+  ],
+  "externalSources": [
+    { "name": "FINRA", "url": "https://www.finra.org/" },
+    { "name": "U.S. Securities and Exchange Commission", "url": "https://www.sec.gov/" }
+  ],
+  "wordCountEstimate": 700
+}
