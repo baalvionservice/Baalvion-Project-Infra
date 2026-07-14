@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { NewsArticle } from "@/lib/data.news";
 import { formatDate } from "@/services/format-date";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   articles: NewsArticle[];
@@ -37,7 +38,7 @@ export function EarningsCalendarTable({ articles, ctaHref = "/earnings" }: Props
               <tr key={article.id} className="border-b border-gray-50 last:border-none">
                 <td className="max-w-0 px-5 py-3">
                   <Link
-                    href={`/${article.slug}`}
+                    href={newsArticleHref(article)}
                     className="block truncate font-semibold text-foreground hover:underline"
                   >
                     {article.title}

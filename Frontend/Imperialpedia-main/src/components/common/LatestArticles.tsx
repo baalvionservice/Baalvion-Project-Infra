@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState, useEffect } from "react";
 import { articleArtDataUri } from "@baalvion/illustrations";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -83,7 +84,7 @@ function ArticleCard({ article }: { article: NewsArticle }) {
   return (
     <div className="flex-shrink-0 w-[220px] flex flex-col gap-2">
       <Link
-        href={`/${article.slug}`}
+        href={newsArticleHref(article)}
         className="relative block w-full h-[148px] overflow-hidden bg-gray-100"
       >
         <Image
@@ -109,7 +110,7 @@ function ArticleCard({ article }: { article: NewsArticle }) {
         {article.category ?? "Personal Finance News"}
       </div>
 
-      <Link href={`/${article.slug}`}>
+      <Link href={newsArticleHref(article)}>
         <h3 className="text-[14px] font-bold text-foreground hover:text-blue-700 leading-snug transition-colors">
           {article.title}
         </h3>

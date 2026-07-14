@@ -9,6 +9,7 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from "@/components/ui/carousel";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   articles: NewsArticle[];
@@ -17,6 +18,8 @@ type Props = {
 interface VideoItem {
   id: string;
   slug: string;
+  publishedAt: string;
+  contentType?: string;
   title: string;
   thumbnail: string;
   duration?: string;
@@ -29,6 +32,8 @@ function extractVideos(articles: NewsArticle[]): VideoItem[] {
     .map((a) => ({
       id: a.id,
       slug: a.slug,
+      publishedAt: a.publishedAt,
+      contentType: a.contentType,
       title: a.title,
       thumbnail:
         (typeof a.customFields?.videoThumbnail === "string" && a.customFields.videoThumbnail) ||
@@ -51,7 +56,7 @@ export function VideoCarousel({ articles }: Props) {
         <CarouselContent>
           {videos.map((video) => (
             <CarouselItem key={video.id} className="basis-2/3 sm:basis-1/2 lg:basis-1/3">
-              <Link href={`/${video.slug}`} className="group block">
+              <Link href={newsArticleHref(video)} className="group block">
                 <div className="relative aspect-video w-full overflow-hidden rounded-xl">
                   <Image
                     src={video.thumbnail}

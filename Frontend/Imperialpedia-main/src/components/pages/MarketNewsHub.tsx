@@ -28,6 +28,7 @@ import { MarketSnapshot } from "@/components/pages/MarketSnapshot";
 import { TrustBar } from "@/components/pages/TrustBar";
 import { EarningsCalendarTable } from "@/components/pages/market-news/EarningsCalendarTable";
 import { EconomicCalendarTable, type EconomicCalendarRow } from "@/components/pages/EconomicCalendarTable";
+import { newsArticleHref } from "@/lib/data/article-url";
 import { ArticleCard } from "@/app/news/NewsArticleCard";
 import { BreakingTicker } from "@/components/news/BreakingTicker";
 import HeadingSection from "@/components/layout/HeadingSection";
@@ -273,7 +274,7 @@ export async function MarketNewsHub() {
         "@type": "ListItem",
         position: i + 1,
         name: a.title,
-        url: `${base}/${a.slug}`,
+        url: `${base}${newsArticleHref(a)}`,
       })),
     },
   };
@@ -345,7 +346,7 @@ export async function MarketNewsHub() {
                 <ol className="space-y-4">
                   {mostRead.map((article, i) => (
                     <li key={article.id}>
-                      <Link href={`/${article.slug}`} className="group flex gap-3">
+                      <Link href={newsArticleHref(article)} className="group flex gap-3">
                         <span className="text-xl font-black text-gray-200">{i + 1}</span>
                         <div>
                           <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-2">
@@ -369,7 +370,7 @@ export async function MarketNewsHub() {
                 <ol className="space-y-4">
                   {trendingNow.map((article) => (
                     <li key={article.id}>
-                      <Link href={`/${article.slug}`} className="group block">
+                      <Link href={newsArticleHref(article)} className="group block">
                         <p className="text-xs font-semibold text-primary mb-1">{article.category}</p>
                         <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-2">
                           {article.title}
@@ -390,7 +391,7 @@ export async function MarketNewsHub() {
                 <ol className="space-y-4">
                   {editorsPicks.map((article) => (
                     <li key={article.id}>
-                      <Link href={`/${article.slug}`} className="group block">
+                      <Link href={newsArticleHref(article)} className="group block">
                         <p className="text-xs font-semibold text-primary mb-1">{article.category}</p>
                         <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-2">
                           {article.title}
@@ -435,7 +436,7 @@ export async function MarketNewsHub() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               {analysis.map((article) => (
-                <Link key={article.id} href={`/${article.slug}`} className="group flex gap-4">
+                <Link key={article.id} href={newsArticleHref(article)} className="group flex gap-4">
                   <div>
                     <p className="text-xs font-semibold text-primary mb-1">{article.category}</p>
                     <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-2">

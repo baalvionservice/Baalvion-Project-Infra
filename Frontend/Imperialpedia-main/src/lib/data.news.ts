@@ -45,6 +45,13 @@ export interface NewsArticle {
   views?: number;
   /** Raw CMS custom fields (e.g. `breaking`, `videoUrl`) passed through for data-gated UI like the breaking ticker and video carousel. */
   customFields?: Record<string, unknown>;
+  /**
+   * Underlying CMS `contentType` (e.g. `"article"` vs `"news"`), when known — lets
+   * link-building code tell content-engine guides (canonical `/financial-intelligence/<slug>`)
+   * apart from dated news (canonical `/YYYY/MM/DD/<slug>`). Undefined for the bundled
+   * demo `newsArticles` set, which is always dated news. See `newsArticleHref`.
+   */
+  contentType?: string;
 }
 
 // ── Body block types ──────────────────────────────────────────────────────────

@@ -269,6 +269,11 @@ async function bulkUpdate(websiteId, userId, { ids, action, categoryId }) {
     const contents = await CmsContent.findAll({ where: { id: { [Op.in]: ids }, websiteId } });
     if (!contents.length) throw new AppError('NOT_FOUND', 'No content found for given IDs', 404);
 
+    // Snapshot pre-action status: archive/delete/recategorize all change what the
+    // public site should show for anything that was live, and hub pages embedding
+    // these articles need to refresh the same way a single-item edit already does.
+    const wasPublished = contents.filter((c) => c.status === 'published');
+
     switch (action) {
         case 'archive':
             await CmsContent.update({ status: 'archived', lastEditedBy: userId }, { where: { id: { [Op.in]: ids }, websiteId } });
@@ -298,6 +303,23 @@ async function bulkUpdate(websiteId, userId, { ids, action, categoryId }) {
     }
 
     await Promise.all(ids.map((id) => cache.del(cache.keys.content(id))));
+
+    // Mirror updateContent()'s public-cache-bust + ISR-revalidate for anything that
+    // was live before this bulk action, so category/hub pages don't keep serving
+    // stale links to now-archived, deleted, or recategorized articles.
+    if (wasPublished.length) {
+        try {
+            const website = await CmsWebsite.findByPk(websiteId, { attributes: ['slug', 'domain'] });
+            if (website?.slug) {
+                await cache.delPattern(`cms:public:${website.slug}:*`);
+                for (const content of wasPublished) {
+                    const { paths, urls } = revalidateService.pathsForContent(content, website.domain);
+                    revalidateService.dispatch(website.slug, { paths, urls });
+                }
+            }
+        } catch { /* fail-open */ }
+    }
+
     return { updated: contents.length };
 }
 

@@ -3,11 +3,12 @@ import Link from "next/link";
 import { CategoryBadge } from "./CategoriesBadge";
 import { NewsArticle } from "@/lib/data.news";
 import { formatDate } from "@/services/format-date";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 /** Large hero card — the featured article */
 export function FeaturedArticleCard({ article }: { article: NewsArticle }) {
     return (
-      <Link href={`/${article.slug}`} className="group block">
+      <Link href={newsArticleHref(article)} className="group block">
         <div className="relative w-full md:mt-6 overflow-hidden aspect-[16/9] lg:aspect-[21/9]">
           <Image
             src={article.imageUrl}

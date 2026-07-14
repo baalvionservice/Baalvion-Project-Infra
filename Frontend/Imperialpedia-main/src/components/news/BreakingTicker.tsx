@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { NewsArticle } from "@/lib/data.news";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   articles: NewsArticle[];
@@ -47,7 +48,7 @@ export function BreakingTicker({ articles }: Props) {
           {[...items, ...items].map((article, i) => (
             <Link
               key={`${article.id}-${i}`}
-              href={`/${article.slug}`}
+              href={newsArticleHref(article)}
               className="mx-6 text-sm font-medium hover:underline underline-offset-4"
             >
               {article.title}

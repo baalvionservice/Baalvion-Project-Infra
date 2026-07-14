@@ -2,12 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { CategoryBadge } from "./CategoriesBadge";
 import { NewsArticle } from "@/lib/data.news";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 /** Horizontal card (image left, text right) — for the sidebar list */
 export function HorizontalArticleCard({ article }: { article: NewsArticle }) {
   return (
     <Link
-      href={`/${article.slug}`}
+      href={newsArticleHref(article)}
       className="group flex gap-3 items-center py-4 border-b border-gray-100 last:border-none"
     >
       <div className="relative flex-shrink-0 w-32 h-full overflow-hidden">

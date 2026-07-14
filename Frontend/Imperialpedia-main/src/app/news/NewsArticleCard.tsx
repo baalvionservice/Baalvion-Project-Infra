@@ -6,6 +6,7 @@ import Link from "next/link";
 import type { NewsArticle, NewsCategory } from "@/lib/data.news";
 import { formatDate } from "@/services/format-date";
 import { CATEGORY_COLORS } from "@/lib/utils/categories-colors";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 export function CategoryBadge({ category }: { category: NewsCategory }) {
   return (
@@ -19,7 +20,7 @@ export function CategoryBadge({ category }: { category: NewsCategory }) {
 
 export function ArticleCard({ article }: { article: NewsArticle }) {
   return (
-    <Link href={`/${article.slug}`} className="group flex flex-col">
+    <Link href={newsArticleHref(article)} className="group flex flex-col">
       <div className="relative w-full aspect-[16/9] overflow-hidden rounded-xl mb-3">
         <Image
           src={article.imageUrl}

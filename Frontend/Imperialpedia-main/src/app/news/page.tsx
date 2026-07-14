@@ -12,6 +12,7 @@ import { VideoCarousel } from "@/components/news/VideoCarousel";
 import { LatestFeed } from "@/components/news/LatestFeed";
 import { NewsSidebar } from "@/components/news/NewsSidebar";
 import { NewsletterBand } from "@/components/landing/investopedia/NewsletterBand";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 export const metadata = buildMetadata({
   canonical: '/news',
@@ -74,7 +75,7 @@ export default async function NewsPage() {
       "@type": "ListItem",
       position: i + 1,
       name: a.title,
-      url: `${base}/${a.slug}`,
+      url: `${base}${newsArticleHref(a)}`,
     })),
   };
 

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { GitCompareArrows } from "lucide-react";
 import type { NewsArticle } from "@/lib/data.news";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 /** Title pattern for genuine "X vs Y" comparison pieces — used only to surface
  * real published comparisons, never to fabricate one that doesn't exist. */
@@ -39,7 +40,7 @@ export function ComparisonsSection({ articles, heading = "Comparisons" }: Props)
         {articles.map((article) => (
           <Link
             key={article.id}
-            href={`/${article.slug}`}
+            href={newsArticleHref(article)}
             className="group flex items-center justify-between gap-4 rounded-xl border border-gray-100 px-5 py-4 transition-colors hover:border-gray-900"
           >
             <span className="text-sm font-semibold text-foreground group-hover:underline">

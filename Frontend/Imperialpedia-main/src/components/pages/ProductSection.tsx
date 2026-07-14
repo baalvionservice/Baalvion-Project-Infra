@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import type { NewsArticle } from "@/lib/data.news";
 import { ArticleCard } from "@/app/news/NewsArticleCard";
 import { formatDate } from "@/services/format-date";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   slug: string;
@@ -42,7 +43,7 @@ export function ProductSection({ slug, label, icon: Icon, articles }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <Link
-          href={`/${pillar.slug}`}
+          href={newsArticleHref(pillar)}
           className="group flex flex-col justify-between rounded-2xl border border-gray-100 bg-gray-50 p-6 lg:col-span-1"
         >
           <div>

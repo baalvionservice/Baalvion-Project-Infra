@@ -7,6 +7,7 @@ import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
 import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
 import HeadingSection from "@/components/layout/HeadingSection";
 import { env } from "@/config/env";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   /** CMS category slug + topic-config key (e.g. "banking"). */
@@ -65,7 +66,7 @@ export async function CategoryFeed({ slug }: Props) {
         "@type": "ListItem",
         position: i + 1,
         name: a.title,
-        url: `${base}/${a.slug}`,
+        url: `${base}${newsArticleHref(a)}`,
       })),
     },
   };

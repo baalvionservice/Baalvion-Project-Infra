@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import type { NewsArticle } from "@/lib/data.news";
 import { CategoryBadge } from "@/components/pages/CategoriesBadge";
 import { formatDate } from "@/services/format-date";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   article: NewsArticle;
@@ -12,7 +13,7 @@ type Props = {
 /** Large CNN-style featured story: full-bleed image, big headline, dek, CTA. */
 export function NewsHero({ article }: Props) {
   return (
-    <Link href={`/${article.slug}`} className="group block">
+    <Link href={newsArticleHref(article)} className="group block">
       <div className="relative w-full overflow-hidden rounded-2xl aspect-[16/9] lg:aspect-[21/9]">
         <Image
           src={article.imageUrl}

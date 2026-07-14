@@ -30,6 +30,7 @@ import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import FAQItem from "@/components/faq/FAQItem";
 import { env } from "@/config/env";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 const SLUG = "economy";
 const TOPIC_FETCH_LIMIT = 12;
@@ -275,7 +276,7 @@ export async function EconomyHub() {
         "@type": "ListItem",
         position: i + 1,
         name: a.title,
-        url: `${base}/${a.slug}`,
+        url: `${base}${newsArticleHref(a)}`,
       })),
     },
   };

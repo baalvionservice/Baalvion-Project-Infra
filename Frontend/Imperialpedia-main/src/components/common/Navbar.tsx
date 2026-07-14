@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu, X, Search, ChevronDown } from "lucide-react";
 import { ImperialpediaMark } from "@/components/icons/ImperialpediaMark";
 import { SearchModal } from "@/components/search/SearchModal";
@@ -125,11 +125,21 @@ export const Navbar = () => {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     setIsMobileOpen(false);
     setOpenMenu(null);
   }, [pathname]);
+
+  // Mega-menu submenu links only mount once their dropdown opens, so Next.js's
+  // viewport-based auto-prefetch never sees them before the click — every submenu
+  // navigation was a cold RSC + chunk fetch (~1-2s). Prefetch explicitly on hover so
+  // the payload is warm by the time the user clicks.
+  const handleOpenMenu = (cat: NavCategory) => {
+    setOpenMenu(cat.id);
+    cat.links.forEach((l) => router.prefetch(l.href));
+  };
 
   // Keyboard shortcut: ⌘K / Ctrl+K opens search
   useEffect(() => {
@@ -208,7 +218,7 @@ export const Navbar = () => {
                 <li
                   key={cat.id}
                   className="relative"
-                  onMouseEnter={() => setOpenMenu(cat.id)}
+                  onMouseEnter={() => handleOpenMenu(cat)}
                 >
                   <Link
                     href={cat.href}
@@ -271,9 +281,10 @@ export const Navbar = () => {
                   <button
                     type="button"
                     className="flex w-full items-center justify-between px-4 py-3 text-sm font-bold uppercase tracking-wide"
-                    onClick={() =>
-                      setOpenMobileSection((p) => (p === cat.id ? null : cat.id))
-                    }
+                    onClick={() => {
+                      setOpenMobileSection((p) => (p === cat.id ? null : cat.id));
+                      cat.links.forEach((l) => router.prefetch(l.href));
+                    }}
                   >
                     {cat.label}
                     <ChevronDown

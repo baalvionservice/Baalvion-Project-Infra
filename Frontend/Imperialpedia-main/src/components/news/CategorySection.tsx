@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import type { NewsArticle, NewsCategory } from "@/lib/data.news";
 import { CATEGORY_TOPIC_SLUG } from "@/lib/utils/category-topic-slug";
 import { formatDate } from "@/services/format-date";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   category: NewsCategory;
@@ -42,7 +43,7 @@ export function CategorySection({ category, articles }: Props) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <Link href={`/${feature.slug}`} className="group lg:col-span-1 block">
+        <Link href={newsArticleHref(feature)} className="group lg:col-span-1 block">
           <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl">
             <Image
               src={feature.imageUrl}
@@ -63,7 +64,7 @@ export function CategorySection({ category, articles }: Props) {
           <ul className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {small.map((article) => (
               <li key={article.id}>
-                <Link href={`/${article.slug}`} className="group flex gap-3">
+                <Link href={newsArticleHref(article)} className="group flex gap-3">
                   <div className="relative h-16 w-24 shrink-0 overflow-hidden rounded-lg">
                     <Image
                       src={article.imageUrl}

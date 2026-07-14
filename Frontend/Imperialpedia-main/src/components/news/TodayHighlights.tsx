@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Clock, Eye } from "lucide-react";
 import type { NewsArticle } from "@/lib/data.news";
 import { CategoryBadge } from "@/components/pages/CategoriesBadge";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   articles: NewsArticle[];
@@ -20,7 +21,7 @@ export function TodayHighlights({ articles }: Props) {
       </h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {items.map((article) => (
-          <Link key={article.id} href={`/${article.slug}`} className="group flex flex-col">
+          <Link key={article.id} href={newsArticleHref(article)} className="group flex flex-col">
             <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl mb-3">
               <Image
                 src={article.imageUrl}

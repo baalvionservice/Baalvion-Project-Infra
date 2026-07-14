@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { NewsArticle } from "@/lib/data.news";
 import { CATEGORY_TOPIC_SLUG } from "@/lib/utils/category-topic-slug";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   articles: NewsArticle[];
@@ -12,7 +13,7 @@ function ArticleLinkList({ items }: { items: NewsArticle[] }) {
       {items.map((article, i) => (
         <li key={article.id} className="flex gap-3">
           <span className="text-lg font-bold text-muted-foreground/40 leading-none">{i + 1}</span>
-          <Link href={`/${article.slug}`} className="text-sm font-medium leading-snug text-foreground hover:underline">
+          <Link href={newsArticleHref(article)} className="text-sm font-medium leading-snug text-foreground hover:underline">
             {article.title}
           </Link>
         </li>

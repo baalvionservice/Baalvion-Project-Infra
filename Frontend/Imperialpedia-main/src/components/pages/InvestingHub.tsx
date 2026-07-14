@@ -27,6 +27,7 @@ import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import FAQItem from "@/components/faq/FAQItem";
 import { env } from "@/config/env";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 const SLUG = "investing";
 
@@ -168,7 +169,7 @@ export async function InvestingHub() {
         "@type": "ListItem",
         position: i + 1,
         name: a.title,
-        url: `${base}/${a.slug}`,
+        url: `${base}${newsArticleHref(a)}`,
       })),
     },
   };
@@ -238,7 +239,7 @@ export async function InvestingHub() {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {trending.map((article) => (
-                <Link key={article.id} href={`/${article.slug}`} className="group block">
+                <Link key={article.id} href={newsArticleHref(article)} className="group block">
                   <p className="text-xs font-semibold text-primary mb-1">{article.category}</p>
                   <h3 className="text-sm font-bold text-foreground leading-snug group-hover:underline line-clamp-3">
                     {article.title}
@@ -259,7 +260,7 @@ export async function InvestingHub() {
             <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {startInvestingSteps.map((step, i) => (
                 <li key={step.topic.slug}>
-                  <Link href={`/${step.article.slug}`} className="group flex gap-4">
+                  <Link href={newsArticleHref(step.article)} className="group flex gap-4">
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">
                       {i + 1}
                     </span>

@@ -30,6 +30,7 @@ import HeadingSection from "@/components/layout/HeadingSection";
 import { NewsletterForm } from "@/components/landing/NewsletterForm";
 import FAQItem from "@/components/faq/FAQItem";
 import { env } from "@/config/env";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 const SLUG = "reviews";
 const TOPIC_FETCH_LIMIT = 12;
@@ -250,7 +251,8 @@ export async function ReviewsHub() {
         "@type": "ListItem",
         position: i + 1,
         name: a.title,
-        url: `${base}/${a.slug}`,
+        // Reviews resolve at the bare slug; guides/news use their real canonical route.
+        url: `${base}${"pageType" in a ? `/${a.slug}` : newsArticleHref(a)}`,
       })),
     },
   };

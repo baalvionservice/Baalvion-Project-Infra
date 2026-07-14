@@ -1,4 +1,17 @@
 /**
+ * Resolves the real canonical href for a `NewsArticle`-shaped card. The same
+ * shape is used for both dated news (canonical `/YYYY/MM/DD/slug`) and
+ * content-engine guides synced in from the CMS (canonical
+ * `/financial-intelligence/slug`) — cards must not hardcode a bare `/slug`
+ * link, since neither route resolves at that bare path and it 404s once the
+ * article is no longer reachable via the legacy bare-slug redirect chain.
+ */
+export function newsArticleHref(article: { slug: string; publishedAt: string; contentType?: string }): string {
+  if (article.contentType === 'article') return `/financial-intelligence/${article.slug}`;
+  return articleUrl(article.publishedAt, article.slug);
+}
+
+/**
  * Canonical article URL scheme, matching how wire outlets like CNBC path their
  * own article pages (`/YYYY/MM/DD/slug`) instead of a bare `/slug`.
  */

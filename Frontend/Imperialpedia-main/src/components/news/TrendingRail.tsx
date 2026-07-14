@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { NewsArticle } from "@/lib/data.news";
 import { timeAgo } from "@/lib/utils/time-ago";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 type Props = {
   articles: NewsArticle[];
@@ -21,7 +22,7 @@ export function TrendingRail({ articles }: Props) {
         {items.map((article, i) => (
           <li key={article.id}>
             <Link
-              href={`/${article.slug}`}
+              href={newsArticleHref(article)}
               className="group flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors"
             >
               <span className="w-5 shrink-0 text-lg font-bold text-muted-foreground/50">

@@ -495,6 +495,7 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     tags: raw.tagIds ?? [],
     views: typeof raw.viewCount === 'number' ? raw.viewCount : undefined,
     customFields: raw.customFields ?? undefined,
+    contentType: raw.contentType,
   };
 }
 
