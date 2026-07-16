@@ -21,6 +21,8 @@ export interface Article {
   publishedAt?: Timestamp;
   updatedAt: Timestamp;
   category: string;
+  /** The CMS category's own slug (e.g. "bonds") — drives the canonical `/<categorySlug>/<slug>` URL. */
+  categorySlug?: string;
   tags: string[];
   status: ArticleStatus;
   readingTime: number; // in minutes

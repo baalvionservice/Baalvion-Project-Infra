@@ -1,4 +1,5 @@
 import { listCmsContent, type CmsContent } from "@/services/data/cms-public";
+import { articleUrl } from "@/lib/data/article-url";
 import { env } from "@/config/env";
 
 export const revalidate = 300;
@@ -12,7 +13,15 @@ const esc = (s: string): string =>
     .replace(/'/g, "&apos;");
 
 function itemXml(item: CmsContent, baseUrl: string): string {
-  const url = `${baseUrl}/financial-intelligence/${item.slug}`;
+  // Articles canonically live under their real category (/<categorySlug>/<slug>);
+  // news keeps the dated CNBC-style URL — same split `newsArticleHref` uses.
+  const path =
+    item.contentType === "article"
+      ? item.category?.slug
+        ? `/${item.category.slug}/${item.slug}`
+        : `/financial-intelligence/${item.slug}`
+      : articleUrl(item.publishedAt ?? item.updatedAt ?? null, item.slug);
+  const url = `${baseUrl}${path}`;
   const pubDate = item.publishedAt ? new Date(item.publishedAt).toUTCString() : new Date().toUTCString();
   return `  <item>
     <title>${esc(item.title)}</title>

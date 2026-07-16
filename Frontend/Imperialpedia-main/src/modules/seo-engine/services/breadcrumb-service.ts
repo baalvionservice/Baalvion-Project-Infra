@@ -14,14 +14,18 @@ const getAbsoluteUrl = (path: string) => {
 
 export const breadcrumbService = {
   /**
-   * Home / Articles / [Category] / [Title]
+   * Home / [Category] / [Title] — links into the article's real CMS category
+   * page when known (matching its canonical `/<categorySlug>/<slug>` URL),
+   * falling back to the flat Intelligence bucket for uncategorized rows.
    */
   generateBreadcrumbForArticle: (article: Article): Breadcrumb => {
+    const categoryPath = article.categorySlug ? `/${article.categorySlug}` : '/financial-intelligence';
+    const categoryName = article.categorySlug ? article.category : 'Intelligence';
     return {
       items: [
         { name: 'Home', item: '/' },
-        { name: 'Intelligence', item: '/financial-intelligence' },
-        { name: article.title, item: `/financial-intelligence/${article.slug}` },
+        { name: categoryName, item: categoryPath },
+        { name: article.title, item: `${categoryPath}/${article.slug}` },
       ],
     };
   },

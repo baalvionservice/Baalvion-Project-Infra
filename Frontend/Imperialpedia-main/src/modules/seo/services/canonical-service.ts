@@ -12,8 +12,11 @@ export type ContentType =
 export const canonicalService = {
   /**
    * Generates an absolute canonical URL for a given slug and content type.
+   * `categorySlug` (article type only) puts the guide under its real CMS
+   * category — e.g. `/bonds/how-bond-yields-work` — instead of the flat
+   * `/financial-intelligence/` bucket; omit it only for rows with no category.
    */
-  generateCanonicalURL: (slug: string, type: ContentType): string => {
+  generateCanonicalURL: (slug: string, type: ContentType, categorySlug?: string): string => {
     const baseUrl = env.siteUrl.endsWith("/")
       ? env.siteUrl.slice(0, -1)
       : env.siteUrl;
@@ -21,7 +24,7 @@ export const canonicalService = {
     let path = "";
     switch (type) {
       case "article":
-        path = `/financial-intelligence/${slug}`;
+        path = categorySlug ? `/${categorySlug}/${slug}` : `/financial-intelligence/${slug}`;
         break;
       case "tool":
         path = `/calculators/${slug}`;
@@ -39,7 +42,7 @@ export const canonicalService = {
   /**
    * Helper to return the canonical tag URL directly.
    */
-  getCanonicalTag: (slug: string, type: ContentType): string => {
-    return canonicalService.generateCanonicalURL(slug, type);
+  getCanonicalTag: (slug: string, type: ContentType, categorySlug?: string): string => {
+    return canonicalService.generateCanonicalURL(slug, type, categorySlug);
   },
 };

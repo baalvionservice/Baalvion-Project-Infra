@@ -122,8 +122,9 @@ export const sitemapService = {
     ]);
 
     articles.forEach((article) => {
+      const path = article.categorySlug ? `/${article.categorySlug}/${article.slug}` : `/financial-intelligence/${article.slug}`;
       entries.push({
-        loc: `${base}/financial-intelligence/${article.slug}`,
+        loc: `${base}${path}`,
         lastmod: article.publishedAt?.split("T")[0] || today,
         changefreq: "weekly",
         priority: 0.8,

@@ -47,11 +47,18 @@ export interface NewsArticle {
   customFields?: Record<string, unknown>;
   /**
    * Underlying CMS `contentType` (e.g. `"article"` vs `"news"`), when known — lets
-   * link-building code tell content-engine guides (canonical `/financial-intelligence/<slug>`)
+   * link-building code tell content-engine guides (canonical `/<categorySlug>/<slug>`)
    * apart from dated news (canonical `/YYYY/MM/DD/<slug>`). Undefined for the bundled
    * demo `newsArticles` set, which is always dated news. See `newsArticleHref`.
    */
   contentType?: string;
+  /**
+   * The CMS category's own slug (e.g. `"bonds"`, `"cd-rates"`) — distinct from the
+   * coarse display `category` bucket above. Drives the canonical `/<categorySlug>/<slug>`
+   * article URL so a guide's permalink lives under its real topic instead of a flat
+   * `/financial-intelligence/` bucket. Undefined when the CMS row has no category.
+   */
+  categorySlug?: string;
 }
 
 // ── Body block types ──────────────────────────────────────────────────────────

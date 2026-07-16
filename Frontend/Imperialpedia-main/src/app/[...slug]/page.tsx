@@ -17,6 +17,11 @@ import { env } from "@/config/env";
 import { articleUrl } from "@/lib/data/article-url";
 import { ShareBar } from "@/components/article/ShareBar";
 import { articlesService } from "@/services/data";
+import {
+  resolveArticleForDetail,
+  buildArticleDetailMetadata,
+  ArticleDetailContent,
+} from "@/modules/content-engine/render/article-detail";
 
 type ArticleType = NewsArticle;
 
@@ -89,6 +94,14 @@ export async function generateMetadata({ params }: { params: Promise<SlugParams>
       ogImage: article.imageUrl,
       ogType: "article",
     });
+  }
+
+  // Content-engine guides canonically live at /<categorySlug>/<slug> — a
+  // 2-segment path that isn't a real nested route (Next.js always resolves a
+  // more specific static/dynamic route first) falls through here.
+  if (segments.length === 2) {
+    const [, articleSlug] = segments;
+    return buildArticleDetailMetadata(articleSlug);
   }
 
   if (segments.length !== 1) return {};
@@ -446,15 +459,18 @@ async function BareSlugPage({ slug }: { slug: string }) {
     return <ReviewLayout review={review} />;
   }
 
-  // ── 2.5. Content-engine articles canonically live at /financial-intelligence/<slug> —
-  // redirect bare hits there instead of rendering a duplicate copy at this
-  // URL. Checked before the news fallback below because the committed
-  // article snapshot is also (incorrectly) reachable via staticNewsBySlug,
-  // which previously produced a second indexable copy of the same content.
+  // ── 2.5. Content-engine articles canonically live at /<categorySlug>/<slug>
+  // (or /financial-intelligence/<slug> when uncategorized) — redirect bare hits
+  // straight to that final destination instead of chaining through an
+  // intermediate redirect. Checked before the news fallback below because the
+  // committed article snapshot is also (incorrectly) reachable via
+  // staticNewsBySlug, which previously produced a second indexable copy.
   const articleMatch =
     (await articlesService.getArticleBySlug(slug)).data ?? staticArticleBySlug(slug);
   if (articleMatch) {
-    permanentRedirect(`/financial-intelligence/${slug}`);
+    permanentRedirect(
+      articleMatch.categorySlug ? `/${articleMatch.categorySlug}/${slug}` : `/financial-intelligence/${slug}`
+    );
   }
 
   // ── 3. News articles (static set, CMS, or committed snapshot) canonically
@@ -587,6 +603,30 @@ async function BareSlugPage({ slug }: { slug: string }) {
   );
 }
 
+// ─── Category-prefixed guide page (/<categorySlug>/<slug>) ──────────────────
+
+/**
+ * Canonical home for a content-engine guide — e.g. `/bonds/how-bond-yields-work`.
+ * Renders whatever the site's own topic hubs link to; if the requested prefix
+ * doesn't match the article's real CMS category (stale link, wrong guess, or
+ * an uncategorized row with no category-prefixed URL at all), redirects to
+ * the correct canonical instead of serving a second indexable copy.
+ */
+async function CategoryArticlePage({ categorySlug, articleSlug }: { categorySlug: string; articleSlug: string }) {
+  const article = await resolveArticleForDetail(articleSlug);
+  if (!article) notFound();
+
+  const canonicalCategory = article.categorySlug;
+  if (!canonicalCategory) {
+    permanentRedirect(`/financial-intelligence/${articleSlug}`);
+  }
+  if (canonicalCategory !== categorySlug) {
+    permanentRedirect(`/${canonicalCategory}/${articleSlug}`);
+  }
+
+  return <ArticleDetailContent article={article} />;
+}
+
 // ─── Route entry point ────────────────────────────────────────────────────────
 
 export default async function CatchAllSlugPage({ params }: { params: Promise<SlugParams> }) {
@@ -594,6 +634,9 @@ export default async function CatchAllSlugPage({ params }: { params: Promise<Slu
 
   if (isDatedSegments(segments)) {
     return <DatedArticlePage segments={segments} />;
+  }
+  if (segments.length === 2) {
+    return <CategoryArticlePage categorySlug={segments[0]} articleSlug={segments[1]} />;
   }
   if (segments.length !== 1) notFound();
   return <BareSlugPage slug={segments[0]} />;

@@ -74,13 +74,19 @@ export const searchService = {
         }
       }
       const pushContent = (env: { data?: unknown[] } | undefined, kind: string) => {
-        for (const c of (env?.data ?? []) as Array<{ slug: string; title: string; excerpt?: string; category?: { name?: string }; publishedAt?: string }>) {
+        for (const c of (env?.data ?? []) as Array<{ slug: string; title: string; excerpt?: string; category?: { name?: string; slug?: string }; publishedAt?: string }>) {
+          const route =
+            kind === 'article'
+              ? c.category?.slug
+                ? `/${c.category.slug}/${c.slug}`
+                : `/financial-intelligence/${c.slug}`
+              : `/${c.slug}`;
           out.push({
             id: `${kind}-${c.slug}`,
             type: 'article',
             title: c.title,
             snippet: c.excerpt || '',
-            route: kind === 'article' ? `/financial-intelligence/${c.slug}` : `/${c.slug}`,
+            route,
             category: c.category?.name,
             date: c.publishedAt,
           });
