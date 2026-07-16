@@ -17,7 +17,6 @@ export default function TopVideos({ latest }: { latest: WorldData["latest"] }) {
         <span className="world-kicker text-sm font-black tracking-widest text-gray-900 uppercase border-l-4 border-[#ce2b2b] pl-2">
           Imperialpedia Video
         </span>
-        <span className="text-[10px] text-gray-400">Coverage coming soon</span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
         {items.map((item) => (
