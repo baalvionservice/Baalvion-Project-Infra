@@ -15,5 +15,39 @@
     "tags": ["hardware", "tech", "infrastructure"],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "ind-2",
+    "name": "Software",
+    "slug": "software",
+    "type": "industry",
+    "category": "Technology",
+    "description": "Companies that design, develop, and license computer software, including enterprise applications, cloud platforms, and AI systems.",
+    "sector": "Technology",
+    "global_market_size": "$700B",
+    "growth_rate": "11%",
+    "top_countries": ["united-states"],
+    "related_technologies": ["generative-ai", "large-language-models", "machine-learning"],
+    "key_companies": ["microsoft", "openai"],
+    "tags": ["software", "technology", "cloud"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "ind-3",
+    "name": "Finance",
+    "slug": "finance",
+    "type": "industry",
+    "category": "Financial Services",
+    "description": "The industry encompassing banking, insurance, asset management, and payment services that channel capital through the economy.",
+    "sector": "Financial Services",
+    "global_market_size": "$26T",
+    "growth_rate": "6%",
+    "top_countries": ["united-states"],
+    "related_technologies": ["blockchain"],
+    "key_companies": ["berkshire-hathaway"],
+    "tags": ["finance", "banking", "investing"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
   }
 ]

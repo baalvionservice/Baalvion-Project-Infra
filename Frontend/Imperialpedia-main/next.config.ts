@@ -76,6 +76,9 @@ const nextConfig: NextConfig = {
       // chain (308 → 404); both now resolve straight to the real hub.
       { source: '/market', destination: '/market-news', permanent: true },
       { source: '/markets', destination: '/market-news', permanent: true },
+      // Google is a subsidiary of Alphabet, which already has its own entity
+      // page — redirect instead of creating a near-duplicate second profile.
+      { source: '/companies/google', destination: '/companies/alphabet', permanent: true },
       // /financial-tools/portfolio and /financial-tools/retirement were the
       // old locations before the calculators hub was reorganized — the tools
       // now live at the top level.

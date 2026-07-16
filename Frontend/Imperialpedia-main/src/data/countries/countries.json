@@ -17,5 +17,43 @@
     "tags": ["economy", "global", "reserve-currency"],
     "created_at": "2024-01-01T00:00:00Z",
     "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "country-2",
+    "name": "Taiwan",
+    "slug": "taiwan",
+    "type": "country",
+    "category": "Global Economy",
+    "description": "A leading global hub for semiconductor manufacturing, home to the world's largest dedicated chip foundry.",
+    "capital": "Taipei",
+    "region": "Asia",
+    "population": 23900000,
+    "gdp": "$790B",
+    "currency": "New Taiwan Dollar (TWD)",
+    "official_language": "Mandarin Chinese",
+    "industries": ["semiconductors"],
+    "technologies": ["quantum-computing"],
+    "tags": ["asia", "semiconductors", "manufacturing"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
+  },
+  {
+    "id": "country-3",
+    "name": "South Korea",
+    "slug": "south-korea",
+    "type": "country",
+    "category": "Global Economy",
+    "description": "A major exporter of semiconductors, electronics, and automobiles, and home to some of the world's largest memory-chip manufacturers.",
+    "capital": "Seoul",
+    "region": "Asia",
+    "population": 51700000,
+    "gdp": "$1.7T",
+    "currency": "South Korean Won (KRW)",
+    "official_language": "Korean",
+    "industries": ["semiconductors"],
+    "technologies": [],
+    "tags": ["asia", "semiconductors", "manufacturing", "technology"],
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:00:00Z"
   }
 ]
