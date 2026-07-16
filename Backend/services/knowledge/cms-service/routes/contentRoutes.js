@@ -27,6 +27,7 @@ router.get('/:contentId', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getOne
 router.get('/:contentId/preview-token', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.getPreviewToken);
 router.patch('/:contentId', loadCmsRole, requireCmsRole('cms_contributor'), validate(updateContentSchema), ctrl.update);
 router.put('/:contentId/autosave', loadCmsRole, requireCmsRole('cms_contributor'), validate(autosaveContentSchema), ctrl.autosave);
+router.post('/:contentId/duplicate', loadCmsRole, requireCmsRole('cms_contributor'), ctrl.duplicate);
 router.delete('/:contentId', loadCmsRole, requireCmsRole('cms_editor'), ctrl.remove);
 router.post('/:contentId/request-deletion', loadCmsRole, requireCmsRole('cms_contributor'), validate(requestDeletionSchema), ctrl.requestDeletion);
 router.post('/:contentId/dismiss-deletion-request', loadCmsRole, requireCmsRole('cms_editor'), ctrl.dismissDeletionRequest);

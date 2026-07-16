@@ -3,6 +3,7 @@ const { z } = require('zod');
 
 const contentTypeEnum = z.enum(['page', 'post', 'article', 'product', 'event', 'job_listing', 'portfolio_item', 'news', 'doc']);
 const visibilityEnum = z.enum(['public', 'private', 'password']);
+const newsLabelEnum = z.enum(['breaking', 'exclusive', 'live', 'analysis', 'opinion', 'explained', 'bullish', 'bearish']);
 
 const contentBlockSchema = z.object({
     id: z.string(),
@@ -30,6 +31,17 @@ const createContentSchema = z.object({
     slug: z.string().min(1).max(500).regex(/^[a-z0-9-]+$/).optional(),
     excerpt: z.string().max(2000).optional().nullable(),
     featuredImage: z.string().url().optional().nullable(),
+    galleryImages: z.array(z.string().url()).default([]),
+    videoUrl: z.string().url().optional().nullable(),
+    readingTimeMinutes: z.number().int().min(1).max(999).optional().nullable(),
+    isFeatured: z.boolean().default(false),
+    isBreaking: z.boolean().default(false),
+    isTrending: z.boolean().default(false),
+    isEditorsPick: z.boolean().default(false),
+    isPremium: z.boolean().default(false),
+    newsLabels: z.array(newsLabelEnum).default([]),
+    externalSourceName: z.string().max(200).optional().nullable(),
+    externalSourceUrl: z.string().url().optional().nullable(),
     contentType: contentTypeEnum.default('post'),
     contentBlocks: z.array(contentBlockSchema).default([]),
     tagIds: z.array(z.string().uuid()).default([]),
@@ -46,6 +58,17 @@ const updateContentSchema = z.object({
     slug: z.string().min(1).max(500).regex(/^[a-z0-9-]+$/).optional(),
     excerpt: z.string().max(2000).optional().nullable(),
     featuredImage: z.string().url().optional().nullable(),
+    galleryImages: z.array(z.string().url()).optional(),
+    videoUrl: z.string().url().optional().nullable(),
+    readingTimeMinutes: z.number().int().min(1).max(999).optional().nullable(),
+    isFeatured: z.boolean().optional(),
+    isBreaking: z.boolean().optional(),
+    isTrending: z.boolean().optional(),
+    isEditorsPick: z.boolean().optional(),
+    isPremium: z.boolean().optional(),
+    newsLabels: z.array(newsLabelEnum).optional(),
+    externalSourceName: z.string().max(200).optional().nullable(),
+    externalSourceUrl: z.string().url().optional().nullable(),
     contentBlocks: z.array(contentBlockSchema).optional(),
     tagIds: z.array(z.string().uuid()).optional(),
     seoMetadata: seoMetadataSchema.optional(),
@@ -71,4 +94,4 @@ const requestDeletionSchema = z.object({
     note: z.string().max(600).optional(),
 });
 
-module.exports = { createContentSchema, updateContentSchema, autosaveContentSchema, bulkUpdateSchema, requestDeletionSchema };
+module.exports = { createContentSchema, updateContentSchema, autosaveContentSchema, bulkUpdateSchema, requestDeletionSchema, newsLabelEnum };

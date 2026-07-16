@@ -69,6 +69,20 @@ export const BLOCK_REGISTRY: BlockRegistryItem[] = [
   { type: 'button', label: 'Button', icon: 'MousePointer', group: 'embed', defaultContent: { text: 'Click me', href: '', variant: 'default' } },
 ];
 
+export type NewsLabel =
+  | 'breaking'
+  | 'exclusive'
+  | 'live'
+  | 'analysis'
+  | 'opinion'
+  | 'explained'
+  | 'bullish'
+  | 'bearish';
+
+export const NEWS_LABELS: NewsLabel[] = [
+  'breaking', 'exclusive', 'live', 'analysis', 'opinion', 'explained', 'bullish', 'bearish',
+];
+
 export interface ContentAuthor {
   id: number;
   fullName: string;
@@ -83,6 +97,17 @@ export interface ContentItem {
   slug: string;
   excerpt?: string;
   featuredImage?: string;
+  galleryImages: string[];
+  videoUrl?: string;
+  readingTimeMinutes: number | null;
+  isFeatured: boolean;
+  isBreaking: boolean;
+  isTrending: boolean;
+  isEditorsPick: boolean;
+  isPremium: boolean;
+  newsLabels: NewsLabel[];
+  externalSourceName?: string;
+  externalSourceUrl?: string;
   status: ContentWorkflowStatus;
   blocks: ContentBlock[];
   seo: SeoMeta;
@@ -122,6 +147,17 @@ export interface CreateContentPayload {
   slug: string;
   excerpt?: string;
   featuredImage?: string;
+  galleryImages?: string[];
+  videoUrl?: string | null;
+  readingTimeMinutes?: number | null;
+  isFeatured?: boolean;
+  isBreaking?: boolean;
+  isTrending?: boolean;
+  isEditorsPick?: boolean;
+  isPremium?: boolean;
+  newsLabels?: NewsLabel[];
+  externalSourceName?: string | null;
+  externalSourceUrl?: string | null;
   blocks?: ContentBlock[];
   seo?: SeoMeta;
   categoryIds?: string[];
@@ -135,6 +171,17 @@ export interface UpdateContentPayload {
   slug?: string;
   excerpt?: string;
   featuredImage?: string;
+  galleryImages?: string[];
+  videoUrl?: string | null;
+  readingTimeMinutes?: number | null;
+  isFeatured?: boolean;
+  isBreaking?: boolean;
+  isTrending?: boolean;
+  isEditorsPick?: boolean;
+  isPremium?: boolean;
+  newsLabels?: NewsLabel[];
+  externalSourceName?: string | null;
+  externalSourceUrl?: string | null;
   blocks?: ContentBlock[];
   seo?: SeoMeta;
   categoryIds?: string[];

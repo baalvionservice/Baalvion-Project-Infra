@@ -35,6 +35,26 @@ function _generateArtwork({ id, title, excerpt, categoryName, tagNames }) {
     return `${PUBLIC_BASE}${GENERATED_ART_PREFIX}${id}.svg`;
 }
 
+const WORDS_PER_MINUTE = 200;
+
+// Best-effort text extraction from block content — pulls the common text-bearing
+// fields off each block type rather than requiring a full block-type switch.
+function _extractBlockText(block) {
+    const c = block?.content;
+    if (!c) return '';
+    return [c.text, c.caption, c.title, c.subtitle].filter((v) => typeof v === 'string').join(' ');
+}
+
+function _estimateReadingTime(contentBlocks) {
+    const wordCount = (contentBlocks || [])
+        .map(_extractBlockText)
+        .join(' ')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean).length;
+    return wordCount ? Math.max(1, Math.round(wordCount / WORDS_PER_MINUTE)) : null;
+}
+
 async function listContent(websiteId, query = {}) {
     const { page, limit, offset } = parsePagination(query);
     const { status, contentType, categoryId, search, authorId } = query;
@@ -117,8 +137,14 @@ async function _uniqueSlug(websiteId, base, excludeId = null) {
 }
 
 async function createContent(websiteId, userId, body) {
-    const { title, slug: rawSlug, categoryId, categoryIds, contentType, contentBlocks, tagIds, seoMetadata, visibility, scheduledAt, customFields, excerpt, featuredImage } = body;
+    const {
+        title, slug: rawSlug, categoryId, categoryIds, contentType, contentBlocks, tagIds, seoMetadata,
+        visibility, scheduledAt, customFields, excerpt, featuredImage, galleryImages, videoUrl,
+        readingTimeMinutes, isFeatured, isBreaking, isTrending, isEditorsPick, isPremium,
+        newsLabels, externalSourceName, externalSourceUrl,
+    } = body;
     const slug = await _uniqueSlug(websiteId, rawSlug || slugify(title));
+    const readingTime = readingTimeMinutes ?? _estimateReadingTime(contentBlocks);
 
     // An article can sit in multiple categories. `cats` is the full deduped set;
     // `primaryCategoryId` (the first) stays in category_id for backwards compatibility.
@@ -136,6 +162,10 @@ async function createContent(websiteId, userId, body) {
             title, slug, excerpt, featuredImage, contentType,
             contentBlocks, tagIds, seoMetadata, visibility,
             scheduledAt: scheduledAt || null, customFields,
+            galleryImages: galleryImages || [], videoUrl: videoUrl || null, readingTimeMinutes: readingTime,
+            isFeatured: !!isFeatured, isBreaking: !!isBreaking, isTrending: !!isTrending,
+            isEditorsPick: !!isEditorsPick, isPremium: !!isPremium, newsLabels: newsLabels || [],
+            externalSourceName: externalSourceName || null, externalSourceUrl: externalSourceUrl || null,
             status: 'draft', revisionCount: 0, viewCount: 0,
         }, { transaction: t });
 
@@ -207,6 +237,12 @@ async function updateContent(websiteId, contentId, userId, body) {
         });
     }
 
+    // Only recompute reading time from body when the editor changed the body but
+    // didn't explicitly set a reading time themselves (an explicit value always wins).
+    if (body.contentBlocks !== undefined && body.readingTimeMinutes === undefined) {
+        body.readingTimeMinutes = _estimateReadingTime(body.contentBlocks);
+    }
+
     await content.update({ ...body, lastEditedBy: userId });
 
     if (body.tagIds) {
@@ -248,6 +284,37 @@ async function autosaveContent(websiteId, contentId, userId, body) {
     await content.update({ ...body, lastEditedBy: userId });
     await cache.del(cache.keys.content(contentId));
     return { savedAt: new Date().toISOString() };
+}
+
+// Clones an article as a new draft — copies every editorial field but never the
+// original's publish state (starts back at draft, publishedAt/scheduledAt cleared)
+// so a duplicate can never accidentally appear live under a colliding slug.
+async function duplicateContent(websiteId, contentId, userId) {
+    const source = await CmsContent.findOne({ where: { id: contentId, websiteId } });
+    if (!source) throw new AppError('NOT_FOUND', 'Content not found', 404);
+
+    const src = source.toJSON();
+    const slug = await _uniqueSlug(websiteId, `${src.slug}-copy`);
+
+    const clone = await sequelize.transaction(async (t) => {
+        const c = await CmsContent.create({
+            websiteId, categoryId: src.categoryId, categoryIds: src.categoryIds, authorId: userId, lastEditedBy: userId,
+            title: `${src.title} (Copy)`, slug, excerpt: src.excerpt, featuredImage: src.featuredImage,
+            galleryImages: src.galleryImages, videoUrl: src.videoUrl, readingTimeMinutes: src.readingTimeMinutes,
+            contentType: src.contentType, contentBlocks: src.contentBlocks, tagIds: src.tagIds, seoMetadata: src.seoMetadata,
+            visibility: src.visibility, customFields: src.customFields,
+            isFeatured: false, isBreaking: false, isTrending: false, isEditorsPick: src.isEditorsPick, isPremium: src.isPremium,
+            newsLabels: src.newsLabels, externalSourceName: src.externalSourceName, externalSourceUrl: src.externalSourceUrl,
+            status: 'draft', scheduledAt: null, publishedAt: null, revisionCount: 0, viewCount: 0,
+        }, { transaction: t });
+        await CmsWorkflow.create({ contentId: c.id, currentState: 'draft', submittedBy: userId }, { transaction: t });
+        return c;
+    });
+
+    if (src.tagIds?.length) await _incrementTagUsage(websiteId, src.tagIds, 1);
+    if (src.categoryIds?.length) await _incrementCategoryCount(websiteId, src.categoryIds, 1);
+
+    return clone.toJSON();
 }
 
 async function deleteContent(websiteId, contentId) {
@@ -387,6 +454,6 @@ function _normalizeCategoryIds(categoryIds, categoryId) {
 }
 
 module.exports = {
-    listContent, getContent, getPreviewToken, createContent, updateContent, autosaveContent, deleteContent,
+    listContent, getContent, getPreviewToken, createContent, updateContent, autosaveContent, duplicateContent, deleteContent,
     bulkUpdate, incrementViewCount, requestDeletion, dismissDeletionRequest, listDeletionRequests,
 };

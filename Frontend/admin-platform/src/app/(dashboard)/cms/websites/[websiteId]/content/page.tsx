@@ -198,8 +198,17 @@ export default function WebsiteContentPage({
       accessorKey: 'status',
       header: 'Status',
       cell: ({ row }) => (
-        <div className="flex items-center gap-1.5">
+        <div className="flex flex-wrap items-center gap-1.5">
           <ContentWorkflowBadge status={row.original.status} />
+          {row.original.isBreaking && (
+            <Badge className="bg-red-500/15 text-red-500 border-red-500/30 text-[10px]">Breaking</Badge>
+          )}
+          {row.original.isTrending && (
+            <Badge className="bg-orange-500/15 text-orange-500 border-orange-500/30 text-[10px]">Trending</Badge>
+          )}
+          {row.original.isFeatured && (
+            <Badge className="bg-amber-500/15 text-amber-500 border-amber-500/30 text-[10px]">Featured</Badge>
+          )}
           {row.original.deletionRequestedAt && (
             <Badge
               variant="outline"

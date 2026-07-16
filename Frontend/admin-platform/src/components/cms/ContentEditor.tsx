@@ -16,6 +16,7 @@ import SeoPanel from './SeoPanel';
 import RevisionHistory from './RevisionHistory';
 import WorkflowPanel from './WorkflowPanel';
 import ContentClassificationPanel from './ContentClassificationPanel';
+import NewsMetaPanel, { type NewsMeta } from './NewsMetaPanel';
 import CustomFieldsPanel from './CustomFieldsPanel';
 import ReviewerPanel from './ReviewerPanel';
 import CitationsPanel from './CitationsPanel';
@@ -59,7 +60,32 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
   const [categoryIds, setCategoryIds] = useState<string[]>(content.categoryIds ?? []);
   const [tagIds, setTagIds] = useState<string[]>(content.tagIds ?? []);
   const [customFields, setCustomFields] = useState<Record<string, unknown>>(content.customFields ?? {});
+  const [newsMeta, setNewsMeta] = useState<NewsMeta>({
+    galleryImages: content.galleryImages ?? [],
+    videoUrl: content.videoUrl,
+    readingTimeMinutes: content.readingTimeMinutes,
+    isFeatured: content.isFeatured,
+    isBreaking: content.isBreaking,
+    isTrending: content.isTrending,
+    isEditorsPick: content.isEditorsPick,
+    isPremium: content.isPremium,
+    newsLabels: content.newsLabels ?? [],
+    externalSourceName: content.externalSourceName,
+    externalSourceUrl: content.externalSourceUrl,
+  });
   const [mode, setMode] = useState<'edit' | 'preview' | 'live'>('edit');
+
+  // Client-side estimate shown as a placeholder in the panel — the server recomputes
+  // the authoritative value from contentBlocks on save when the field is left blank.
+  const autoReadingTime = (() => {
+    const words = blocks
+      .map((b) => (typeof b.content?.text === 'string' ? b.content.text : ''))
+      .join(' ')
+      .trim()
+      .split(/\s+/)
+      .filter(Boolean).length;
+    return words ? Math.max(1, Math.round(words / 200)) : null;
+  })();
 
   const autoSlug = (val: string) =>
     val.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
@@ -91,6 +117,7 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
       categoryIds,
       tagIds,
       customFields,
+      ...newsMeta,
     });
   };
 
@@ -98,7 +125,7 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
   // the workflow transition so what goes live is exactly what's on screen.
   const handlePublish = () => {
     save(
-      { title, slug, excerpt, blocks, seo, categoryIds, tagIds, customFields },
+      { title, slug, excerpt, blocks, seo, categoryIds, tagIds, customFields, ...newsMeta },
       {
         onSuccess: () =>
           runTransition({ contentId: content.id, action: isPublished ? 'unpublish' : 'publish' }),
@@ -108,7 +135,7 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
 
   const handleSubmitForReview = () => {
     save(
-      { title, slug, excerpt, blocks, seo, categoryIds, tagIds, customFields },
+      { title, slug, excerpt, blocks, seo, categoryIds, tagIds, customFields, ...newsMeta },
       {
         onSuccess: () => runTransition({ contentId: content.id, action: 'submit_for_review' }),
       },
@@ -308,6 +335,11 @@ export default function ContentEditor({ content, userRole, canPublish, websiteTi
                   tagIds={tagIds}
                   onCategoriesChange={(ids) => { setCategoryIds(ids); markUnsaved(); }}
                   onTagsChange={(ids) => { setTagIds(ids); markUnsaved(); }}
+                />
+                <NewsMetaPanel
+                  value={newsMeta}
+                  onChange={(v) => { setNewsMeta(v); markUnsaved(); }}
+                  autoReadingTime={autoReadingTime}
                 />
                 <CustomFieldsPanel
                   value={customFields}

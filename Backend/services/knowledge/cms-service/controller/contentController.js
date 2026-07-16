@@ -44,6 +44,13 @@ const autosave = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+const duplicate = async (req, res, next) => {
+    try {
+        const content = await contentService.duplicateContent(req.params.websiteId, req.params.contentId, req.user.id);
+        return sendSuccess(req, res, content, 201);
+    } catch (err) { return next(err); }
+};
+
 const remove = async (req, res, next) => {
     try {
         await contentService.deleteContent(req.params.websiteId, req.params.contentId);
@@ -80,6 +87,6 @@ const dismissDeletionRequest = async (req, res, next) => {
 };
 
 module.exports = {
-    list, create, getOne, getPreviewToken, update, autosave, remove, bulk,
+    list, create, getOne, getPreviewToken, update, autosave, duplicate, remove, bulk,
     listDeletionRequests, requestDeletion, dismissDeletionRequest,
 };

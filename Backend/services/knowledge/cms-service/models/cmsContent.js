@@ -10,6 +10,17 @@ module.exports = function (sequelize, DataTypes) {
         slug: { type: DataTypes.STRING(500), allowNull: false },
         excerpt: { type: DataTypes.TEXT, allowNull: true },
         featuredImage: { type: DataTypes.TEXT, allowNull: true },
+        galleryImages: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+        videoUrl: { type: DataTypes.TEXT, allowNull: true },
+        readingTimeMinutes: { type: DataTypes.INTEGER, allowNull: true },
+        isFeatured: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        isBreaking: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        isTrending: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        isEditorsPick: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        isPremium: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: false },
+        newsLabels: { type: DataTypes.JSONB, allowNull: false, defaultValue: [] },
+        externalSourceName: { type: DataTypes.TEXT, allowNull: true },
+        externalSourceUrl: { type: DataTypes.TEXT, allowNull: true },
         contentType: {
             type: DataTypes.ENUM(
                 'page', 'post', 'article', 'product', 'event',
@@ -57,6 +68,9 @@ module.exports = function (sequelize, DataTypes) {
             { fields: ['content_type'] },
             { fields: ['published_at'] },
             { fields: ['scheduled_at'] },
+            { fields: ['is_breaking'] },
+            { fields: ['is_trending'] },
+            { fields: ['is_featured'] },
         ],
     });
 };

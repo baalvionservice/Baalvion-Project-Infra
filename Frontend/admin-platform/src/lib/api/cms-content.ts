@@ -6,6 +6,7 @@ import type {
   CreateContentPayload,
   UpdateContentPayload,
   ContentListParams,
+  NewsLabel,
 } from '@/lib/types/cms-content.types';
 import type { ApiResponse, PaginatedResponse } from '@/lib/types/common.types';
 
@@ -24,7 +25,11 @@ const wid = (): string => {
 interface RawContent {
   id: string; websiteId: string; categoryId: string | null; categoryIds?: string[]; authorId: string | number;
   lastEditedBy?: string | number | null; title: string; slug: string; excerpt?: string | null;
-  featuredImage?: string | null; contentType: ContentItem['type']; contentBlocks?: unknown[];
+  featuredImage?: string | null; galleryImages?: string[]; videoUrl?: string | null;
+  readingTimeMinutes?: number | null; isFeatured?: boolean; isBreaking?: boolean; isTrending?: boolean;
+  isEditorsPick?: boolean; isPremium?: boolean; newsLabels?: NewsLabel[];
+  externalSourceName?: string | null; externalSourceUrl?: string | null;
+  contentType: ContentItem['type']; contentBlocks?: unknown[];
   tagIds?: string[]; seoMetadata?: Record<string, unknown>; status: ContentItem['status'];
   visibility?: string; scheduledAt?: string | null; publishedAt?: string | null;
   viewCount?: string | number; revisionCount?: number; customFields?: Record<string, unknown>;
@@ -43,6 +48,17 @@ const toContentItem = (r: RawContent): ContentItem => ({
   slug: r.slug,
   excerpt: r.excerpt ?? undefined,
   featuredImage: r.featuredImage ?? undefined,
+  galleryImages: r.galleryImages ?? [],
+  videoUrl: r.videoUrl ?? undefined,
+  readingTimeMinutes: r.readingTimeMinutes ?? null,
+  isFeatured: !!r.isFeatured,
+  isBreaking: !!r.isBreaking,
+  isTrending: !!r.isTrending,
+  isEditorsPick: !!r.isEditorsPick,
+  isPremium: !!r.isPremium,
+  newsLabels: r.newsLabels ?? [],
+  externalSourceName: r.externalSourceName ?? undefined,
+  externalSourceUrl: r.externalSourceUrl ?? undefined,
   status: r.status,
   blocks: (r.contentBlocks ?? []) as ContentItem['blocks'],
   seo: (r.seoMetadata ?? {}) as ContentItem['seo'],
@@ -74,6 +90,17 @@ const toCreateBody = (p: CreateContentPayload) => ({
   contentType: p.type,
   ...(p.excerpt ? { excerpt: p.excerpt } : {}),
   ...(p.featuredImage ? { featuredImage: p.featuredImage } : {}),
+  ...(p.galleryImages ? { galleryImages: p.galleryImages } : {}),
+  ...(p.videoUrl ? { videoUrl: p.videoUrl } : {}),
+  ...(p.readingTimeMinutes ? { readingTimeMinutes: p.readingTimeMinutes } : {}),
+  ...(p.isFeatured !== undefined ? { isFeatured: p.isFeatured } : {}),
+  ...(p.isBreaking !== undefined ? { isBreaking: p.isBreaking } : {}),
+  ...(p.isTrending !== undefined ? { isTrending: p.isTrending } : {}),
+  ...(p.isEditorsPick !== undefined ? { isEditorsPick: p.isEditorsPick } : {}),
+  ...(p.isPremium !== undefined ? { isPremium: p.isPremium } : {}),
+  ...(p.newsLabels ? { newsLabels: p.newsLabels } : {}),
+  ...(p.externalSourceName ? { externalSourceName: p.externalSourceName } : {}),
+  ...(p.externalSourceUrl ? { externalSourceUrl: p.externalSourceUrl } : {}),
   ...(p.blocks ? { contentBlocks: p.blocks } : {}),
   ...(p.tagIds ? { tagIds: p.tagIds } : {}),
   ...(p.seo ? { seoMetadata: p.seo } : {}),
@@ -87,6 +114,17 @@ const toUpdateBody = (p: UpdateContentPayload) => ({
   ...(p.slug !== undefined ? { slug: p.slug } : {}),
   ...(p.excerpt !== undefined ? { excerpt: p.excerpt } : {}),
   ...(p.featuredImage ? { featuredImage: p.featuredImage } : {}),
+  ...(p.galleryImages !== undefined ? { galleryImages: p.galleryImages } : {}),
+  ...(p.videoUrl !== undefined ? { videoUrl: p.videoUrl } : {}),
+  ...(p.readingTimeMinutes !== undefined ? { readingTimeMinutes: p.readingTimeMinutes } : {}),
+  ...(p.isFeatured !== undefined ? { isFeatured: p.isFeatured } : {}),
+  ...(p.isBreaking !== undefined ? { isBreaking: p.isBreaking } : {}),
+  ...(p.isTrending !== undefined ? { isTrending: p.isTrending } : {}),
+  ...(p.isEditorsPick !== undefined ? { isEditorsPick: p.isEditorsPick } : {}),
+  ...(p.isPremium !== undefined ? { isPremium: p.isPremium } : {}),
+  ...(p.newsLabels !== undefined ? { newsLabels: p.newsLabels } : {}),
+  ...(p.externalSourceName !== undefined ? { externalSourceName: p.externalSourceName } : {}),
+  ...(p.externalSourceUrl !== undefined ? { externalSourceUrl: p.externalSourceUrl } : {}),
   ...(p.blocks !== undefined ? { contentBlocks: p.blocks } : {}),
   ...(p.tagIds !== undefined ? { tagIds: p.tagIds } : {}),
   ...(p.seo !== undefined ? { seoMetadata: p.seo } : {}),
@@ -135,18 +173,9 @@ export const cmsContentApi = {
     cmsApiClient.delete<ApiResponse<void>>(`/cms/websites/${wid()}/content/${id}`),
 
   duplicate: async (id: string) => {
-    // cms-service has no duplicate endpoint — clone via get + create.
-    const websiteId = wid();
-    const src = await cmsApiClient.get<ApiResponse<RawContent>>(`/cms/websites/${websiteId}/content/${id}`);
-    const s = src.data.data;
-    const res = await cmsApiClient.post<ApiResponse<RawContent>>(`/cms/websites/${websiteId}/content`, {
-      title: `${s.title} (Copy)`,
-      slug: `${s.slug}-copy-${Date.now().toString(36)}`,
-      contentType: s.contentType,
-      ...(s.excerpt ? { excerpt: s.excerpt } : {}),
-      ...(Array.isArray(s.contentBlocks) ? { contentBlocks: s.contentBlocks } : {}),
-      ...(s.categoryId ? { categoryId: s.categoryId } : {}),
-    });
+    const res = await cmsApiClient.post<ApiResponse<RawContent>>(
+      `/cms/websites/${wid()}/content/${id}/duplicate`,
+    );
     return { ...res, data: { ...res.data, data: toContentItem(res.data.data) } };
   },
 

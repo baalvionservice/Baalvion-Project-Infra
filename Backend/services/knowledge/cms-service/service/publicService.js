@@ -63,14 +63,32 @@ async function getPreviewContent(websiteSlug, slug, exp, token) {
     return content.toJSON();
 }
 
+// Query-string booleans arrive as strings ("true"/"1") — only an explicit truthy
+// value should filter; absence must mean "don't filter", not "require false".
+function _isTruthyParam(v) {
+    return v === 'true' || v === '1' || v === true;
+}
+
 async function listPublicContent(websiteSlug, query = {}) {
     const { page, limit, offset } = parsePagination(query);
-    const { categorySlug, tag, search, contentType, authorSlug } = query;
+    const {
+        categorySlug, tag, search, contentType, authorSlug,
+        featured, breaking, trending, editorsPick, premium, label, sort,
+    } = query;
 
     const website = await _resolveWebsite(websiteSlug);
     const where = { websiteId: website.id, status: 'published', visibility: 'public' };
 
     if (contentType) where.contentType = contentType;
+    // Homepage-section filters — lets the frontend fetch "Breaking News" / "Trending
+    // Now" / "Featured Articles" / "Editor's Pick" / "Premium" as real CMS queries
+    // instead of a hardcoded slug list (see imperialpedia-dynamic-content-directive).
+    if (_isTruthyParam(featured)) where.isFeatured = true;
+    if (_isTruthyParam(breaking)) where.isBreaking = true;
+    if (_isTruthyParam(trending)) where.isTrending = true;
+    if (_isTruthyParam(editorsPick)) where.isEditorsPick = true;
+    if (_isTruthyParam(premium)) where.isPremium = true;
+    if (label) where.newsLabels = { [Op.contains]: [label] };
     // Content references an author profile via customFields.authorSlug (see cmsAuthor.js).
     // `where.customFields = { authorSlug }` would compare the WHOLE jsonb column for
     // equality against `{authorSlug}` — customFields always has other keys too (faq,
@@ -105,9 +123,13 @@ async function listPublicContent(websiteSlug, query = {}) {
         }
     }
 
+    // sort=views powers "Most Read"/"Trending Now" ranking by real traffic instead
+    // of a curated flag; default stays recency (publishedAt DESC).
+    const order = sort === 'views' ? [['viewCount', 'DESC']] : [['publishedAt', 'DESC']];
+
     const { rows, count } = await CmsContent.findAndCountAll({
         where, include: includes,
-        order: [['publishedAt', 'DESC']],
+        order,
         // Expose customFields so headless frontends can render list/card views
         // (status badges, layers, priorities, etc.). contentBlocks stays excluded
         // for list performance — fetch a single item for the full body.
