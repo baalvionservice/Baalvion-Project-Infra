@@ -233,10 +233,10 @@ export async function InvestingHub() {
         {/* Popular this week */}
         {trending.length > 0 && (
           <section>
-            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               <Flame className="h-4 w-4 text-orange-500" />
               Popular This Week
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {trending.map((article) => (
                 <Link key={article.id} href={newsArticleHref(article)} className="group block">
@@ -254,9 +254,9 @@ export async function InvestingHub() {
         {/* Start Investing learning path */}
         {startInvestingSteps.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Start Investing
-            </h2>
+            </h3>
             <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {startInvestingSteps.map((step, i) => (
                 <li key={step.topic.slug}>
@@ -280,9 +280,9 @@ export async function InvestingHub() {
         {/* Topic explorer — replaces the generic news-type filter with real,
             CMS-fetched investing topics that match the site nav. */}
         <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Explore {isLive ? copy.title : "News"}
-          </h2>
+          </h3>
           <InvestingTopicExplorer
             topics={INVESTING_TOPICS.map(({ slug, label }) => ({ slug, label }))}
             articlesByTopic={articlesByTopic}
@@ -292,10 +292,10 @@ export async function InvestingHub() {
 
         {/* Related tools */}
         <section>
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             <Calculator className="h-4 w-4" />
             Investing Tools
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-3">
             {INVESTING_TOOLS.map((tool) => (
               <Link
@@ -319,9 +319,9 @@ export async function InvestingHub() {
         {/* FAQ — aggregated from CMS article FAQ data */}
         {faqs.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Frequently Asked Questions
-            </h2>
+            </h3>
             <div className="rounded-2xl border border-gray-100 px-4">
               {faqs.map((f) => (
                 <FAQItem key={f.question} question={f.question} answer={f.answer} />
@@ -332,7 +332,7 @@ export async function InvestingHub() {
 
         {/* Newsletter signup */}
         <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">
-          <h2 className="text-lg font-bold text-foreground">Stay Ahead of the Markets</h2>
+          <h3 className="text-lg font-bold text-foreground">Stay Ahead of the Markets</h3>
           <p className="max-w-md text-sm text-muted-foreground">
             Get investing analysis and market moves in your inbox.
           </p>
@@ -341,9 +341,9 @@ export async function InvestingHub() {
 
         {/* Explore More — internal cross-links to the other mega-menu categories */}
         <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Explore More
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             {EXPLORE_MORE.map((link) => (
               <Link

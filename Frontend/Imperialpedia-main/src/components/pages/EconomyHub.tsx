@@ -344,9 +344,9 @@ export async function EconomyHub() {
 
         {featuredGuides.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Featured Economy Guides
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {featuredGuides.map((article) => (
                 <ArticleCard key={article.id} article={article} />
@@ -368,9 +368,9 @@ export async function EconomyHub() {
 
         {latestArticles.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Latest Economy Articles
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {latestArticles.map((article) => (
                 <ArticleCard key={article.id} article={article} />
@@ -381,20 +381,20 @@ export async function EconomyHub() {
 
         {calendarRows.length > 0 && (
           <section>
-            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               <CalendarClock className="h-4 w-4" />
               Economic Calendar
-            </h2>
+            </h3>
             <EconomicCalendarTable rows={calendarRows} />
           </section>
         )}
 
         {/* Economy Explained — evergreen education, never mixed with the news above */}
         <section>
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             <BookOpen className="h-4 w-4" />
             Economy Explained
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-3">
             {ECONOMY_EXPLAINED.map((guide) => (
               <Link
@@ -418,9 +418,9 @@ export async function EconomyHub() {
         {/* FAQ */}
         {faqs.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Frequently Asked Questions
-            </h2>
+            </h3>
             <div className="rounded-2xl border border-gray-100 px-4">
               {faqs.map((f) => (
                 <FAQItem key={f.question} question={f.question} answer={f.answer} />
@@ -431,7 +431,7 @@ export async function EconomyHub() {
 
         {/* Newsletter signup */}
         <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">
-          <h2 className="text-lg font-bold text-foreground">Decode the Economy</h2>
+          <h3 className="text-lg font-bold text-foreground">Decode the Economy</h3>
           <p className="max-w-md text-sm text-muted-foreground">
             Weekly breakdowns of the data and policy decisions shaping the economy.
           </p>
@@ -440,9 +440,9 @@ export async function EconomyHub() {
 
         {/* Explore More — internal cross-links to the other mega-menu categories */}
         <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Explore More
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             {EXPLORE_MORE.map((link) => (
               <Link

@@ -296,7 +296,7 @@ const esc = (s: unknown): string =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-function blockToHtml(b: CmsBlock): string {
+function blockToHtml(b: CmsBlock, headingState: { seenH2: boolean }): string {
   const c = b.content || {};
   switch (b.type) {
     // paragraph/heading/quote/callout text is authored as trusted HTML by the CMS rich-text
@@ -305,7 +305,14 @@ function blockToHtml(b: CmsBlock): string {
     case 'paragraph':
       return `<p>${(c.text as string) || ''}</p>`;
     case 'heading': {
-      const level = Math.min(Math.max(Number(c.level) || 2, 1), 6);
+      let level = Math.min(Math.max(Number(c.level) || 2, 1), 6);
+      // At most one <h2> per article (SEO: single-H2 hierarchy) — the page's own H1
+      // is the title, so the first level-2 section stays H2 and every later one
+      // demotes to H3 rather than repeating H2 for each major section.
+      if (level === 2) {
+        if (headingState.seenH2) level = 3;
+        else headingState.seenH2 = true;
+      }
       return `<h${level}>${(c.text as string) || ''}</h${level}>`;
     }
     case 'quote':
@@ -345,9 +352,10 @@ function blockToHtml(b: CmsBlock): string {
 
 export function blocksToHtml(blocks?: CmsBlock[]): string {
   if (!blocks || !blocks.length) return '';
+  const headingState = { seenH2: false };
   return [...blocks]
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-    .map(blockToHtml)
+    .map((b) => blockToHtml(b, headingState))
     .filter(Boolean)
     .join('\n');
 }

@@ -357,9 +357,9 @@ export async function BankingHub() {
 
         {startHere.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Start Here
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
               {startHere.map((article) => (
                 <ArticleCard key={article.id} article={article} />
@@ -381,10 +381,10 @@ export async function BankingHub() {
 
         {/* Banking Reviews — a dedicated area, never mixed with the guides above */}
         <section>
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             <Star className="h-4 w-4" />
             Banking Reviews
-          </h2>
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {reviewCards.map((r) => (
               <Link
@@ -411,10 +411,10 @@ export async function BankingHub() {
 
         {/* Banking Calculators — real, working tools only */}
         <section>
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             <Calculator className="h-4 w-4" />
             Banking Calculators
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-3">
             {CALCULATORS.map((tool) => (
               <Link
@@ -432,10 +432,10 @@ export async function BankingHub() {
         {/* Banking News — recency-sorted, deliberately separate from the evergreen guides below */}
         {bankingNews.length > 0 && (
           <section>
-            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               <Newspaper className="h-4 w-4" />
               Banking News
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {bankingNews.map((article) => (
                 <Link key={article.id} href={newsArticleHref(article)} className="group block">
@@ -452,10 +452,10 @@ export async function BankingHub() {
 
         {/* Banking Guides — evergreen education, never mixed with news */}
         <section>
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             <BookOpen className="h-4 w-4" />
             Banking Guides
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-3">
             {BANKING_GUIDES.map((guide) => (
               <Link
@@ -479,9 +479,9 @@ export async function BankingHub() {
         {/* FAQ */}
         {faqs.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Frequently Asked Questions
-            </h2>
+            </h3>
             <div className="rounded-2xl border border-gray-100 px-4">
               {faqs.map((f) => (
                 <FAQItem key={f.question} question={f.question} answer={f.answer} />
@@ -492,7 +492,7 @@ export async function BankingHub() {
 
         {/* Newsletter signup */}
         <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">
-          <h2 className="text-lg font-bold text-foreground">Smart Money Updates</h2>
+          <h3 className="text-lg font-bold text-foreground">Smart Money Updates</h3>
           <p className="max-w-md text-sm text-muted-foreground">
             Banking tips, rate changes, and financial guidance delivered weekly.
           </p>
@@ -501,9 +501,9 @@ export async function BankingHub() {
 
         {/* Explore More — internal cross-links to the other mega-menu categories */}
         <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Explore More
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             {EXPLORE_MORE.map((link) => (
               <Link

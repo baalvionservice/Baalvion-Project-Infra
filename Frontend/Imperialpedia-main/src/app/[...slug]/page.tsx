@@ -238,6 +238,21 @@ function BodyBlock({ block }: { block: NewsBodyBlock }) {
   }
 }
 
+// At most one <h2> per article (SEO: single-H2 hierarchy) — the page's own H1 is
+// the title, so the first "heading" block stays H2 and every later one demotes to
+// "subheading" (renders H3) rather than repeating H2 for each major section.
+function demoteExtraHeadings(body: NewsBodyBlock[]): NewsBodyBlock[] {
+  let seenHeading = false;
+  return body.map((block) => {
+    if (block.type !== "heading") return block;
+    if (!seenHeading) {
+      seenHeading = true;
+      return block;
+    }
+    return { ...block, type: "subheading" };
+  });
+}
+
 // ─── Dated CNBC-style article page (/YYYY/MM/DD/slug) ────────────────────────
 
 async function DatedArticlePage({ segments }: { segments: [string, string, string, string] }) {
@@ -354,7 +369,7 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
             </figure>
 
             <div className="prose-none">
-              {article.body.map((block, i) => (
+              {demoteExtraHeadings(article.body).map((block, i) => (
                 <BodyBlock key={i} block={block} />
               ))}
             </div>
@@ -579,7 +594,7 @@ async function BareSlugPage({ slug }: { slug: string }) {
 
             {/* Article body */}
             <div className="prose-none">
-              {article.body.map((block, i) => (
+              {demoteExtraHeadings(article.body).map((block, i) => (
                 <BodyBlock key={i} block={block} />
               ))}
             </div>

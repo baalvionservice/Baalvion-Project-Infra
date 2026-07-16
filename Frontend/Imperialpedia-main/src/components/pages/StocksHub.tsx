@@ -257,7 +257,7 @@ export async function StocksHub() {
             </p>
           </div>
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Why People Invest in Stocks</h2>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Why People Invest in Stocks</h3>
             <p>
               Stocks have historically offered some of the strongest long-run returns of any widely
               available asset class, making them a core building block for retirement savings, education
@@ -265,7 +265,7 @@ export async function StocksHub() {
             </p>
           </div>
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">How Stocks Work</h2>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">How Stocks Work</h3>
             <p>
               Shares trade on exchanges like the NYSE and Nasdaq, where prices move constantly based on
               supply, demand, company performance, and the broader economy. You can buy or sell through a
@@ -273,7 +273,7 @@ export async function StocksHub() {
             </p>
           </div>
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Benefits and Risks</h2>
+            <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Benefits and Risks</h3>
             <p>
               Stocks can appreciate in price and pay dividends, but their value can also fall sharply and
               quickly. Diversification, time horizon, and risk tolerance all shape how much of a portfolio
@@ -293,9 +293,9 @@ export async function StocksHub() {
 
         {/* Browse Stocks Sections */}
         <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Explore Stocks
-          </h2>
+          </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-4">
             {STOCK_SECTIONS.map((s) => (
               <a
@@ -325,10 +325,10 @@ export async function StocksHub() {
 
         {trending.length > 0 && (
           <section>
-            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               <Flame className="h-4 w-4 text-orange-500" />
               Popular This Week
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {trending.map((article) => (
                 <Link key={article.id} href={newsArticleHref(article)} className="group block">
@@ -345,9 +345,9 @@ export async function StocksHub() {
 
         {learningPath.length > 0 && (
           <section id="learning-path">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Learn Stock Investing
-            </h2>
+            </h3>
             <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {learningPath.map((article, i) => (
                 <li key={article.slug}>
@@ -366,9 +366,9 @@ export async function StocksHub() {
         )}
 
         <section id="stock-basics">
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Explore {isLive ? copy.title : "News"}
-          </h2>
+          </h3>
           <InvestingTopicExplorer
             topics={STOCK_SECTIONS.map(({ slug, label }) => ({ slug, label }))}
             articlesByTopic={articlesBySection}
@@ -378,10 +378,10 @@ export async function StocksHub() {
 
         {/* Popular Companies */}
         <section>
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             <Building2 className="h-4 w-4" />
             Popular Companies
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-3">
             {FLAGSHIP_COMPANIES.map((c) => (
               <Link
@@ -403,10 +403,10 @@ export async function StocksHub() {
 
         {/* Popular Indexes */}
         <section>
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             <BarChart3 className="h-4 w-4" />
             Popular Indexes
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-3">
             {MARKET_INDEXES.map((idx) => (
               <Link
@@ -422,10 +422,10 @@ export async function StocksHub() {
 
         {/* Stock Lists */}
         <section>
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             <ListChecks className="h-4 w-4" />
             Stock Lists
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-3">
             {STOCK_LISTS.map((list) => (
               <Link
@@ -441,9 +441,9 @@ export async function StocksHub() {
 
         {/* Key Terms / Glossary */}
         <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Key Terms
-          </h2>
+          </h3>
           <p className="text-sm text-muted-foreground mb-4">
             Look up bull markets, dividends, IPOs, order types, and hundreds of other investing terms in
             the Imperialpedia glossary.
@@ -458,10 +458,10 @@ export async function StocksHub() {
 
         {/* Related tools */}
         <section>
-          <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             <Calculator className="h-4 w-4" />
             Stock Tools
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-3">
             {STOCK_TOOLS.map((tool) => (
               <Link
@@ -485,9 +485,9 @@ export async function StocksHub() {
         {faqPreview.length > 0 && (
           <section>
             <div className="flex items-center justify-between mb-6 pb-2">
-              <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400">
+              <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400">
                 Frequently Asked Questions
-              </h2>
+              </h3>
               {allFaqs.length > faqPreview.length && (
                 <Link href="/stocks/faq" className="text-xs font-semibold text-primary hover:underline">
                   View all {allFaqs.length} FAQs &rarr;
@@ -503,7 +503,7 @@ export async function StocksHub() {
         )}
 
         <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">
-          <h2 className="text-lg font-bold text-foreground">Stay Ahead of the Markets</h2>
+          <h3 className="text-lg font-bold text-foreground">Stay Ahead of the Markets</h3>
           <p className="max-w-md text-sm text-muted-foreground">
             Get stock analysis and market moves in your inbox.
           </p>
@@ -512,9 +512,9 @@ export async function StocksHub() {
 
         {/* Related Topics */}
         <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Related Topics
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             {RELATED_TOPICS.map((link) => (
               <Link

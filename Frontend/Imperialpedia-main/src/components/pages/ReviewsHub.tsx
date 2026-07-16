@@ -305,9 +305,9 @@ export async function ReviewsHub() {
 
         {featuredReviews.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Featured Reviews
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {featuredReviews.map((r) => (
                 <BuyingGuideCard key={r.slug} review={r} />
@@ -345,10 +345,10 @@ export async function ReviewsHub() {
         {/* Buying Guides — every real "Best X Compared" pillar page, real scores only */}
         {allReviews.length > 0 && (
           <section>
-            <h2 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               <BookOpen className="h-4 w-4" />
               Financial Buying Guides
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {allReviews.map((r) => (
                 <BuyingGuideCard key={r.slug} review={r} />
@@ -366,9 +366,9 @@ export async function ReviewsHub() {
         {/* FAQ */}
         {faqs.length > 0 && (
           <section>
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Frequently Asked Questions
-            </h2>
+            </h3>
             <div className="rounded-2xl border border-gray-100 px-4">
               {faqs.map((f) => (
                 <FAQItem key={f.question} question={f.question} answer={f.answer} />
@@ -379,7 +379,7 @@ export async function ReviewsHub() {
 
         {/* Newsletter signup */}
         <section className="flex flex-col items-center gap-4 rounded-2xl bg-gray-50 py-12 text-center">
-          <h2 className="text-lg font-bold text-foreground">Smarter Money Choices</h2>
+          <h3 className="text-lg font-bold text-foreground">Smarter Money Choices</h3>
           <p className="max-w-md text-sm text-muted-foreground">
             Fresh reviews, rankings, and comparisons — sent straight to your inbox.
           </p>
@@ -388,9 +388,9 @@ export async function ReviewsHub() {
 
         {/* Explore More — internal cross-links to the other mega-menu categories */}
         <section>
-          <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+          <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
             Explore More
-          </h2>
+          </h3>
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             {EXPLORE_MORE.map((link) => (
               <Link
