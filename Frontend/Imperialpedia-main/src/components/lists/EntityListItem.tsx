@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Text } from '@/design-system/typography/text';
 import { ArrowRight, Layers } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { entityRouteSegment } from '@/lib/utils/seo';
 
 interface EntityListItemProps {
   name: string;
@@ -21,7 +22,7 @@ interface EntityListItemProps {
  * A refined list item component for knowledge entities.
  */
 export const EntityListItem = ({ name, type, category, description, slug, className }: EntityListItemProps) => {
-  const route = `/${type}s/${slug}`;
+  const route = `/${entityRouteSegment(type)}/${slug}`;
 
   return (
     <Link href={route} className={cn("group block", className)}>

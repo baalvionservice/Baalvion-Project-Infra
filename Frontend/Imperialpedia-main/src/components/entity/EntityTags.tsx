@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Tag as TagIcon, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { entityRouteSegment } from '@/lib/utils/seo';
 
 interface EntityTagsProps {
   entity: any;
@@ -58,7 +59,7 @@ export const EntityTags = ({ entity, type, className }: EntityTagsProps) => {
         <div className="flex flex-wrap gap-2">
           {taxonomyTags.map((tag, idx) => (
             tag.param ? (
-              <Link key={idx} href={`/${type}s?${tag.param}=${tag.value}`}>
+              <Link key={idx} href={`/${entityRouteSegment(type)}?${tag.param}=${tag.value}`}>
                 <Badge 
                   variant="secondary" 
                   className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 transition-all cursor-pointer rounded-xl font-bold text-[10px] uppercase"

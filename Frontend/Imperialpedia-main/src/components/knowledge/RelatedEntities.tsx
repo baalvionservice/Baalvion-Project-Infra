@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ChevronRight, Layers } from 'lucide-react';
 import { Section } from '@/components/ui/Section';
 import { BaseEntity } from '@/types/entity';
+import { entityRouteSegment } from '@/lib/utils/seo';
 
 interface RelatedEntitiesProps {
   entities: BaseEntity[];
@@ -37,7 +38,7 @@ export const RelatedEntities = ({ entities }: RelatedEntitiesProps) => {
             </Text>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {items.map((entity) => (
-                <Link key={entity.slug} href={`/${entity.type}s/${entity.slug}`} className="group">
+                <Link key={entity.slug} href={`/${entityRouteSegment(entity.type)}/${entity.slug}`} className="group">
                   <Card className="glass-card border-none hover:bg-white/5 transition-all duration-300 hover:translate-y-[-4px]">
                     <CardContent className="p-6 flex items-center justify-between">
                       <div className="flex items-center gap-4">

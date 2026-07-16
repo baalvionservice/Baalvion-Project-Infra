@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import { env } from '@/config/env';
+import { entityRouteSegment } from '@/lib/utils/seo';
 
 interface MetadataProps {
   title: string;
@@ -81,7 +82,7 @@ export function generateEntityMetadata(entity: any, type: 'country' | 'company' 
     title: `${entity.name} | ${typeLabel} Profile`,
     description: entity.description || `Explore ${entity.name}'s ${type} profile, industry data, and market impact on Imperialpedia.`,
     keywords: entity.tags || [],
-    slug: `/${type}s/${entity.slug}`,
+    slug: `/${entityRouteSegment(type)}/${entity.slug}`,
     type: 'article',
   });
 }

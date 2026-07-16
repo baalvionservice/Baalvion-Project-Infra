@@ -4,6 +4,7 @@ import { ID } from '@/types/common';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import { Layers } from 'lucide-react';
+import { entityRouteSegment } from '@/lib/utils/seo';
 
 interface RelatedHighlightsProps {
   entityId: ID;
@@ -24,7 +25,7 @@ export const RelatedHighlights = ({ entityId }: RelatedHighlightsProps) => {
       </div>
       <div className="flex flex-wrap gap-2">
         {related.map((node) => (
-          <Link key={node.id} href={`/${node.type}s/${node.slug}`}>
+          <Link key={node.id} href={`/${entityRouteSegment(node.type)}/${node.slug}`}>
             <Badge 
               variant="secondary" 
               className="px-3 py-1 bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary transition-all cursor-pointer rounded-xl font-bold text-[10px] uppercase"
