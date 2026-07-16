@@ -15,6 +15,7 @@ const MODELS_PATH = require.resolve(path.join(__dirname, '..', 'models'));
 
 let contentRows;
 let capturedWhere;
+let findAndCountAllCalls;
 
 function makeModelsStub() {
     const CmsWebsite = {
@@ -28,6 +29,7 @@ function makeModelsStub() {
 
     const CmsContent = {
         async findAndCountAll({ where }) {
+            findAndCountAllCalls += 1;
             capturedWhere = where;
             const authorSlug = where['customFields.authorSlug'];
             const rows = contentRows.filter((r) => {
@@ -39,7 +41,12 @@ function makeModelsStub() {
         },
     };
 
-    const CmsCategory = { async findOne() { return null; } };
+    const CmsCategory = {
+        async findOne({ where }) {
+            if (where.slug === 'stocks') return { id: 'cat-stocks', toJSON: () => ({ id: 'cat-stocks', slug: 'stocks' }) };
+            return null;
+        },
+    };
     const CmsTag = {};
     const CmsAuthor = {};
 
@@ -55,6 +62,7 @@ function loadService() {
 
 beforeEach(() => {
     capturedWhere = null;
+    findAndCountAllCalls = 0;
     contentRows = [
         { id: 'c1', websiteId: 'site-1', title: 'By Jane', customFields: { authorSlug: 'jane-writer', faq: [] } },
         { id: 'c2', websiteId: 'site-1', title: 'By John', customFields: { authorSlug: 'john-analyst' } },
@@ -76,4 +84,24 @@ test('listPublicContent with no authorSlug filter returns all published content'
     const publicService = loadService();
     const { data } = await publicService.listPublicContent('imperialpedia', {});
     assert.equal(data.length, 3);
+});
+
+test('listPublicContent returns an empty result for an unrecognized categorySlug instead of falling back to unfiltered site-wide content', async () => {
+    const publicService = loadService();
+    const { data, pagination } = await publicService.listPublicContent('imperialpedia', { categorySlug: 'not-a-real-category' });
+
+    assert.equal(data.length, 0);
+    assert.equal(pagination.total, 0);
+    // Must short-circuit before ever querying CmsContent — a "no such category" answer
+    // must never be conflated with "run the query with no category restriction".
+    assert.equal(findAndCountAllCalls, 0);
+});
+
+test('listPublicContent still queries and scopes by category when categorySlug matches a real category', async () => {
+    const publicService = loadService();
+    await publicService.listPublicContent('imperialpedia', { categorySlug: 'stocks' });
+
+    assert.equal(findAndCountAllCalls, 1);
+    const andSymbol = Object.getOwnPropertySymbols(capturedWhere).find((s) => s.toString() === 'Symbol(and)');
+    assert.ok(andSymbol, 'expected the category id filter to be applied via Op.and');
 });

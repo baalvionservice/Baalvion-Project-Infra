@@ -96,6 +96,12 @@ async function listPublicContent(websiteSlug, query = {}) {
                 ...(where[Op.and] || []),
                 { [Op.or]: [{ categoryId: cat.id }, { categoryIds: { [Op.contains]: [cat.id] } }] },
             ];
+        } else {
+            // An unrecognized categorySlug must never fall through to an unfiltered,
+            // site-wide query — that silently served every topic page the wrong
+            // (site-wide "most recent") articles instead of an honest empty result,
+            // masking missing categories as if they were populated with real content.
+            return buildPaginated([], 0, { page, limit });
         }
     }
 
