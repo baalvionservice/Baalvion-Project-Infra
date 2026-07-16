@@ -270,6 +270,24 @@ const OVERRIDES: Record<string, TopicCopy> = {
       'The latest on digital assets, blockchain protocols, tokens, and the markets that trade them.',
     metaTitle: 'Cryptocurrency News & Analysis',
   },
+  portfolio: {
+    tag: 'PORTFOLIO',
+    title: 'Portfolio Management',
+    description:
+      'Asset allocation, diversification, risk tolerance, and the ongoing discipline of managing an investment portfolio.',
+    metaTitle: 'Portfolio Management Guides & Strategy',
+    metaDescription:
+      'Learn how to allocate assets, diversify, assess risk tolerance, and manage a portfolio for the long term.',
+  },
+  brokers: {
+    tag: 'BROKERS',
+    title: 'Brokers',
+    description:
+      'How brokers work, what separates full-service from discount platforms, and how to evaluate one before opening an account.',
+    metaTitle: 'Broker Guides — Fees, Regulation & Account Types',
+    metaDescription:
+      'Independent guides to choosing a stock broker — fee structures, regulation, account types, and what beginners should look for.',
+  },
   'personal-finance': {
     tag: 'PERSONAL FINANCE',
     title: 'Personal Finance',
@@ -428,6 +446,15 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Live Market News & Real-Time Analysis',
     metaDescription:
       'Follow live market-moving news as it happens, with same-day analysis of stocks, interest rates, and currency moves.',
+  },
+  calendar: {
+    tag: 'ECONOMIC CALENDAR',
+    title: 'Economic Calendar',
+    description:
+      'Key economic releases and how to read them — FOMC meetings, the jobs report, CPI, and earnings season.',
+    metaTitle: 'Economic Calendar — Key Release Dates Explained',
+    metaDescription:
+      'A guide to the economic calendar — FOMC meeting dates, the jobs report, CPI releases, and earnings season, and why each moves markets.',
   },
   mortgages: {
     tag: 'MORTGAGES',
@@ -590,6 +617,15 @@ const OVERRIDES: Record<string, TopicCopy> = {
     metaTitle: 'Money Management Tips & Habits',
     metaDescription:
       'Practical money management tips covering spending trackers, account organization, and the everyday habits that keep a financial plan on track.',
+  },
+  'financial-calculators': {
+    tag: 'CALCULATORS',
+    title: 'Financial Calculators',
+    description:
+      'How compound interest, retirement, loan, mortgage, and budgeting calculators work — and how to read their results.',
+    metaTitle: 'Financial Calculator Guides — How Each One Works',
+    metaDescription:
+      'Guides to using financial calculators for compound interest, retirement, loans, mortgages, and budgeting, and how to interpret the results.',
   },
 };
 
