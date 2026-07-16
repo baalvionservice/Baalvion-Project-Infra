@@ -1,76 +1,35 @@
 /**
- * Baked editorial content (committed snapshot, multiple categories/packs — see
- * `scripts/generate-static-content.cjs`) — the always-on source that lets the site
- * render its content with NO external CMS (e.g. on Vercel, where the local
- * cms-service is unreachable). A live CMS still takes precedence at request time;
- * this is only used as the fallback.
+ * All content is now served live from the CMS — every category (including stocks
+ * and economy, the last two that used to rely on a baked fallback) is published and
+ * admin-editable in cms-service. The baked CMS-down snapshot this module used to read
+ * (`src/generated/personal-finance-content.json`, produced by the retired
+ * `content/*` spec pipeline) has been removed; these functions now always report
+ * "not found in the fallback" so every caller falls through to the live CMS, which
+ * is also the sole way to author or edit content going forward (via the admin panel).
  *
- * IMPORTANT: import this module ONLY from Server Components / server-side code.
- * It statically imports a ~750 KB JSON snapshot; pulling it into a Client Component
- * would bloat the browser bundle. (`server-only` isn't a dependency here, so this is
- * enforced by convention — keep the importers server-side.)
- *
- * Regenerate after editing content specs:  node scripts/generate-static-content.cjs
+ * If a CMS-down safety net is needed again, `scripts/export-cms-snapshot.cjs` can
+ * export the current live CMS content straight into a fresh baked snapshot.
  */
-import raw from '@/generated/personal-finance-content.json';
-import {
-  type CmsContent,
-  type CmsPage,
-  cmsContentToArticle,
-  cmsContentToNews,
-  blocksToHtml,
-} from './cms-public';
+import type { CmsPage } from './cms-public';
 import type { Article } from '@/modules/content-engine/types/article';
 import type { NewsArticle } from '@/lib/data.news';
 
-const ALL = raw as unknown as CmsContent[];
-const ARTICLES = ALL.filter((c) => c.contentType === 'article');
-const PAGES = ALL.filter((c) => c.contentType === 'page');
-
-/** All baked articles as Article models (live-CMS-identical shape). */
 export function staticArticleList(): Article[] {
-  return ARTICLES.map(cmsContentToArticle);
+  return [];
 }
 
-/** A single baked article by slug, or null if not in the snapshot. */
-export function staticArticleBySlug(slug: string): Article | null {
-  const c = ARTICLES.find((a) => a.slug === slug);
-  return c ? cmsContentToArticle(c) : null;
+export function staticArticleBySlug(_slug: string): Article | null {
+  return null;
 }
 
-/**
- * A single baked article by slug as a NewsArticle card/detail, or null if not in
- * the snapshot. Used by the canonical root `/[slug]` article route so real CMS
- * articles stay reachable when the live CMS is offline (e.g. on Vercel) — mirrors
- * the hybrid fallback already used by `/financial-intelligence/[slug]` and the topic feeds.
- */
-export function staticNewsBySlug(slug: string): NewsArticle | null {
-  const c = ARTICLES.find((a) => a.slug === slug);
-  return c ? cmsContentToNews(c) : null;
+export function staticNewsBySlug(_slug: string): NewsArticle | null {
+  return null;
 }
 
-/**
- * Baked articles for a category, as NewsArticle cards (for topic/hub pages).
- * Matches against each baked article's own category slug (set per content pack in
- * `scripts/generate-static-content.cjs`); omitting `categorySlug` returns everything.
- */
-export function staticCategoryNews(categorySlug?: string): NewsArticle[] {
-  const matching = categorySlug ? ARTICLES.filter((a) => a.category?.slug === categorySlug) : ARTICLES;
-  return matching.map(cmsContentToNews);
+export function staticCategoryNews(_categorySlug?: string): NewsArticle[] {
+  return [];
 }
 
-/** A baked CMS page (About / Contact / Privacy) by slug, or null. */
-export function staticPageBySlug(slug: string): CmsPage | null {
-  const c = PAGES.find((p) => p.slug === slug);
-  if (!c) return null;
-  const bodyHtml = blocksToHtml(c.contentBlocks);
-  if (!bodyHtml) return null;
-  return {
-    title: c.title,
-    bodyHtml,
-    seoTitle: c.seoMetadata?.title || c.title,
-    seoDescription: c.seoMetadata?.description || c.excerpt || '',
-    seoKeywords: c.seoMetadata?.keywords || [],
-    updatedAt: c.updatedAt,
-  };
+export function staticPageBySlug(_slug: string): CmsPage | null {
+  return null;
 }
