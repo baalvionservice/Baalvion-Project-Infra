@@ -42,7 +42,7 @@ export default function StockListsIndexPage() {
                 href={`/stocks/lists/${list.slug}`}
                 className="group block rounded-2xl border border-border p-6 transition-colors hover:border-primary"
               >
-                <h2 className="text-lg font-bold text-foreground group-hover:underline mb-2">{list.name}</h2>
+                <h3 className="text-lg font-bold text-foreground group-hover:underline mb-2">{list.name}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{list.description}</p>
               </Link>
             ))}

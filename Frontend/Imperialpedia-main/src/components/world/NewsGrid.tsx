@@ -5,11 +5,15 @@ import { sectionAnchorId } from "@/components/world/QuickLinks";
 export default function NewsGrid({ sections }: { sections: WorldData["sections"] }) {
   return (
     <div className="space-y-6 sm:space-y-8 py-4 sm:py-6 px-2 sm:px-4">
-      {sections.map((section) => (
+      {sections.map((section, sectionIndex) => {
+        // At most one <h2> per page — only the first section heading stays H2,
+        // the rest demote to H3 (same tag, same visual weight either way here).
+        const SectionHeading = sectionIndex === 0 ? "h2" : "h3";
+        return (
         <div key={section.section} id={sectionAnchorId(section.section)} className="space-y-3 sm:space-y-4 scroll-mt-24">
-          <h2 className="text-sm sm:text-base font-bold text-gray-900 border-b-2 border-gray-200 pb-2">
+          <SectionHeading className="text-sm sm:text-base font-bold text-gray-900 border-b-2 border-gray-200 pb-2">
             {section.section}
-          </h2>
+          </SectionHeading>
           <div className="space-y-3 sm:space-y-4">
             {section.items.map((item) => (
               <article
@@ -50,7 +54,8 @@ export default function NewsGrid({ sections }: { sections: WorldData["sections"]
             ))}
           </div>
         </div>
-      ))}
+        );
+      })}
     </div>
   );
 }

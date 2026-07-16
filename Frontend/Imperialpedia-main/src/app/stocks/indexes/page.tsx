@@ -43,7 +43,7 @@ export default function IndexesPage() {
                 className="group block rounded-2xl border border-border p-6 transition-colors hover:border-primary"
               >
                 <p className="text-xs font-semibold text-primary mb-1">{idx.country}</p>
-                <h2 className="text-lg font-bold text-foreground group-hover:underline mb-2">{idx.name}</h2>
+                <h3 className="text-lg font-bold text-foreground group-hover:underline mb-2">{idx.name}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">{idx.description}</p>
               </Link>
             ))}

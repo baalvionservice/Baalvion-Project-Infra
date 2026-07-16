@@ -24,9 +24,9 @@ export function FeaturedArticleCard({ article }: { article: NewsArticle }) {
         {/* text */}
         <div className="py-5 space-y-3">
           <CategoryBadge category={article.category} />
-          <h2 className="text-foreground text-2xl md:text-3xl font-bold leading-snug max-w-2xl group-hover:underline underline-offset-4">
+          <h3 className="text-foreground text-2xl md:text-3xl font-bold leading-snug max-w-2xl group-hover:underline underline-offset-4">
             {article.title}
-          </h2>
+          </h3>
           {article.excerpt && (
             <p className="max-w-2xl text-sm text-gray-600 leading-relaxed line-clamp-2">
               {article.excerpt}

@@ -320,9 +320,9 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
 
             {article.keyTakeaways && article.keyTakeaways.length > 0 && (
               <div className="mt-6 border border-gray-200 bg-gray-50 rounded-sm p-5">
-                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase mb-3">
+                <h3 className="text-xs font-black tracking-widest text-gray-900 uppercase mb-3">
                   Key Points
-                </h2>
+                </h3>
                 <ul className="space-y-2">
                   {article.keyTakeaways.map((point, i) => (
                     <li key={i} className="flex gap-2.5 text-sm text-gray-700 leading-relaxed">
@@ -392,9 +392,9 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
           <aside className="lg:sticky lg:top-24 lg:self-start space-y-8">
             {relatedArticles.length > 0 && (
               <div>
-                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-[#CC0000] pb-2 mb-4">
+                <h3 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-[#CC0000] pb-2 mb-4">
                   Related News
-                </h2>
+                </h3>
                 <ul className="space-y-4">
                   {relatedArticles.map((a) => (
                     <li key={a.id}>
@@ -414,9 +414,9 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
 
             {article.related && article.related.length > 0 && (
               <div>
-                <h2 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-gray-200 pb-2 mb-4">
+                <h3 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-gray-200 pb-2 mb-4">
                   Read More
-                </h2>
+                </h3>
                 <ul className="space-y-3">
                   {article.related.map((r) => (
                     <li key={r.label}>
@@ -457,9 +457,9 @@ async function BareSlugPage({ slug }: { slug: string }) {
           {terms.map((term) => (
             <div key={term.slug}>
               <Link href={getTermUrl(term.slug)}>
-                <h2 className="mb-2 uppercase hover:underline">
+                <h3 className="mb-2 uppercase hover:underline">
                   {term.seoTitle}
-                </h2>
+                </h3>
               </Link>
             </div>
           ))}
@@ -603,9 +603,9 @@ async function BareSlugPage({ slug }: { slug: string }) {
 
         {relatedArticles && relatedArticles.length > 0 && (
           <section className="pb-4 md:pb-12">
-            <h2 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6 pb-2">
               Related Articles
-            </h2>
+            </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
               {relatedArticles.map((article) => (
                 <ArticleCard key={article.id} article={article} />

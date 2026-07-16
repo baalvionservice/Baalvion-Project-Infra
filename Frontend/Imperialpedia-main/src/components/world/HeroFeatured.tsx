@@ -54,9 +54,9 @@ export default function HeroFeatured({ featured }: { featured: FeaturedStory[] }
             <span className="world-kicker text-[9px] sm:text-[10px] font-black tracking-widest text-[#ce2b2b] uppercase">
               {story.category}
             </span>
-            <h2 className="text-xs sm:text-sm font-semibold leading-snug mt-1 text-gray-900 group-hover:text-[#ce2b2b] transition-colors line-clamp-3">
+            <h3 className="text-xs sm:text-sm font-semibold leading-snug mt-1 text-gray-900 group-hover:text-[#ce2b2b] transition-colors line-clamp-3">
               {story.headline}
-            </h2>
+            </h3>
             <p className="text-[11px] sm:text-xs text-gray-500 mt-1.5 line-clamp-2 hidden sm:block">
               {story.summary}
             </p>

@@ -103,9 +103,9 @@ function DetailPanel({ article }: { article: LiveArticle | null }) {
         </div>
       )}
       <CategoryBadge category={article.category} />
-      <h2 className="mt-3 text-2xl md:text-[1.7rem] font-extrabold text-foreground leading-tight">
+      <h3 className="mt-3 text-2xl md:text-[1.7rem] font-extrabold text-foreground leading-tight">
         {article.title}
-      </h2>
+      </h3>
       <div className="mt-3 mb-5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground pb-5 border-b border-border">
         <span className="bg-muted text-foreground font-semibold px-2 py-0.5 rounded-md">
           {article.sourceName}
