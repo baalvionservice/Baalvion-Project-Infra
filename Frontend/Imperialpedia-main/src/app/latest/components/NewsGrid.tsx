@@ -3,14 +3,20 @@
 import { useEffect } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { NewsCard } from "./NewsCard";
-import { NewsArticle, generateMockNews } from "@/data/mockNews";
+import { newsArticles, type NewsArticle } from "@/lib/data.news";
 
 interface NewsGridProps {
   category?: string;
   searchQuery?: string;
 }
 
-// Mock API function
+/**
+ * Real, CMS-backed page fetch via the same-origin `/api/news/latest` proxy
+ * (avoids browser CORS against cms-service directly). Category/search
+ * narrowing happens client-side over each fetched page, matching how this
+ * grid always behaved; falls back to the bundled demo set only when the
+ * very first page comes back empty (CMS unreachable/offline).
+ */
 const fetchNews = async ({
   pageParam = 1,
   category,
@@ -24,31 +30,40 @@ const fetchNews = async ({
   hasMore: boolean;
   nextPage: number;
 }> => {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 500));
+  let items: NewsArticle[] = [];
+  let hasMore = false;
 
-  const limit = 12;
-  let articles: NewsArticle[] = [];
+  try {
+    const res = await fetch(`/api/news/latest?page=${pageParam}`, { cache: "no-store" });
+    const data = (await res.json()) as { items: NewsArticle[]; hasMore: boolean };
+    items = data.items;
+    hasMore = data.hasMore;
+  } catch {
+    items = [];
+    hasMore = false;
+  }
 
+  // Never truly empty: fall back to the bundled demo set on the first page only.
+  if (pageParam === 1 && items.length === 0) {
+    items = newsArticles;
+    hasMore = false;
+  }
+
+  let articles = items;
   if (searchQuery) {
-    // Mock search functionality
-    articles = generateMockNews(pageParam, limit).filter(
+    const q = searchQuery.toLowerCase();
+    articles = articles.filter(
       (article) =>
-        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        article.description.toLowerCase().includes(searchQuery.toLowerCase())
+        article.title.toLowerCase().includes(q) ||
+        article.excerpt.toLowerCase().includes(q)
     );
   } else if (category && category !== "All") {
-    // Mock category filtering
-    articles = generateMockNews(pageParam, limit).filter(
-      (article) => article.category === category
-    );
-  } else {
-    articles = generateMockNews(pageParam, limit);
+    articles = articles.filter((article) => article.category === category);
   }
 
   return {
     articles,
-    hasMore: pageParam < 5, // Limit to 5 pages for demo
+    hasMore,
     nextPage: pageParam + 1,
   };
 };

@@ -1,11 +1,38 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { NewsCard } from "./NewsCard";
-import { mockNewsData } from "@/data/mockNews";
+import { newsArticles, type NewsArticle } from "@/lib/data.news";
 
+/**
+ * Trending sidebar rail. Starts with the bundled demo set (so the sidebar is
+ * never empty on first paint) and swaps in the real, live CMS-backed page via
+ * the same-origin `/api/news/latest` proxy as soon as it resolves.
+ */
 export function TrendingNews() {
-  // Get top 4 trending articles (mock logic - in real app this would be based on views/engagement)
-  const trendingArticles = mockNewsData.slice(0, 4);
+  const [trendingArticles, setTrendingArticles] = useState<NewsArticle[]>(
+    () => newsArticles.slice(0, 4)
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const res = await fetch("/api/news/latest?page=1", { cache: "no-store" });
+        const data = (await res.json()) as { items: NewsArticle[] };
+        if (!cancelled && data.items.length > 0) {
+          setTrendingArticles(data.items.slice(0, 4));
+        }
+      } catch {
+        // Keep the bundled fallback already in state.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3">
@@ -24,9 +51,8 @@ export function TrendingNews() {
       </div>
 
       <div className="space-y-4">
-        {trendingArticles.map((article, index) => (
+        {trendingArticles.map((article) => (
           <div key={article.id} className="flex items-start gap-3">
-            
             <div className="flex-1">
               <NewsCard article={article} variant="compact" />
             </div>

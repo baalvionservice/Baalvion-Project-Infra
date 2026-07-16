@@ -1,10 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { generateMockNews } from "@/data/mockNews";
+import { newsArticles, type NewsArticle } from "@/lib/data.news";
+import { getCategoryArticles } from "@/services/data/cms-public";
+import { staticCategoryNews } from "@/services/data/static-content";
+import { newsArticleHref } from "@/lib/data/article-url";
 import ExpandingOpportunities from "@/components/news/ExpandingOpportunities";
 import { buildMetadata } from "@/lib/seo";
 import { Metadata } from "next";
 
+const SLUG = "politics";
 
 export const metadata: Metadata = buildMetadata({
   title: 'Politics',
@@ -12,24 +16,32 @@ export const metadata: Metadata = buildMetadata({
   canonical: '/politics',
 });
 
+function formatDate(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInMinutes = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60)
+  );
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes} MIN AGO`;
+  if (diffInHours < 24)
+    return `${diffInHours} HOUR${diffInHours > 1 ? "S" : ""} AGO`;
+  return date
+    .toLocaleDateString("en-US", { month: "short", day: "numeric" })
+    .toUpperCase();
+}
 
-export default function LatestNewsPage() {
-  const newsData = generateMockNews(1, 20);
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMinutes = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60)
-    );
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes} MIN AGO`;
-    if (diffInHours < 24)
-      return `${diffInHours} HOUR${diffInHours > 1 ? "S" : ""} AGO`;
-    return date
-      .toLocaleDateString("en-US", { month: "short", day: "numeric" })
-      .toUpperCase();
-  };
+export default async function LatestNewsPage() {
+  // Live CMS first, then the baked snapshot, then the bundled demo set — same
+  // fallback chain used by every other topic page (see CategoryFeed).
+  let newsData: NewsArticle[] = await getCategoryArticles(SLUG, 40);
+  if (newsData.length === 0) {
+    const baked = staticCategoryNews(SLUG);
+    if (baked.length > 0) newsData = baked;
+  }
+  if (newsData.length === 0) {
+    newsData = newsArticles;
+  }
 
   const heroStory = newsData[0];
   const rightStory = newsData[1];
@@ -51,10 +63,10 @@ export default function LatestNewsPage() {
         <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 md:gap-3 mb-4">
           {heroStory && (
             <div className="min-w-0">
-              <Link href={heroStory.url} className="group block">
+              <Link href={newsArticleHref(heroStory)} className="group block">
                 <div className="aspect-video relative overflow-hidden w-full rounded-sm">
                   <Image
-                    src={heroStory.image}
+                    src={heroStory.imageUrl}
                     alt={heroStory.title}
                     fill
                     className="object-cover"
@@ -67,7 +79,7 @@ export default function LatestNewsPage() {
                 </h2>
               </Link>
               <span className="text-[11px] font-bold text-[#0a6bb5] mr-1.5">
-                {heroStory.source}
+                {heroStory.author.name}
               </span>
               <span className="text-[11px] text-gray-500 uppercase">
                 {formatDate(heroStory.publishedAt)}
@@ -77,10 +89,10 @@ export default function LatestNewsPage() {
 
           {rightStory && (
             <div className="min-w-0 border-t border-gray-200 pt-4 md:border-t-0 md:border-l md:pt-0 md:pl-3">
-              <Link href={rightStory.url} className="group block">
+              <Link href={newsArticleHref(rightStory)} className="group block">
                 <div className="aspect-video md:h-[270px] md:aspect-auto relative overflow-hidden w-full rounded-sm">
                   <Image
-                    src={rightStory.image}
+                    src={rightStory.imageUrl}
                     alt={rightStory.title}
                     fill
                     className="object-cover"
@@ -94,7 +106,7 @@ export default function LatestNewsPage() {
               </Link>
               <div className="mt-1.5">
                 <span className="text-[11px] font-bold text-[#0a6bb5] mr-1.5">
-                  {rightStory.source}
+                  {rightStory.author.name}
                 </span>
                 <span className="text-[11px] text-gray-500 uppercase">
                   {formatDate(rightStory.publishedAt)}
@@ -108,10 +120,10 @@ export default function LatestNewsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-3 border-t border-gray-200 pt-4">
           {midCards.map((article) => (
             <div key={article.id} className="min-w-0">
-              <Link href={article.url} className="group block">
+              <Link href={newsArticleHref(article)} className="group block">
                 <div className="aspect-video relative overflow-hidden w-full mb-1.5 rounded-sm">
                   <Image
-                    src={article.image}
+                    src={article.imageUrl}
                     alt={article.title}
                     fill
                     className="object-cover"
@@ -126,7 +138,7 @@ export default function LatestNewsPage() {
                 </h3>
               </Link>
               <span className="text-[10px] font-bold text-[#0a6bb5] mr-1">
-                {article.source}
+                {article.author.name}
               </span>
               <span className="text-[10px] text-gray-500 uppercase">
                 {formatDate(article.publishedAt)}
@@ -139,10 +151,10 @@ export default function LatestNewsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-3 border-t border-gray-200 pt-4 mt-4">
           {imageTextRow.map((article) => (
             <div key={article.id} className="min-w-0">
-              <Link href={article.url} className="group block">
+              <Link href={newsArticleHref(article)} className="group block">
                 <div className="aspect-video relative overflow-hidden w-full mb-1.5 rounded-sm">
                   <Image
-                    src={article.image}
+                    src={article.imageUrl}
                     alt={article.title}
                     fill
                     className="object-cover"
@@ -168,14 +180,14 @@ export default function LatestNewsPage() {
 
         {/* ── Trending Now ── */}
         <div className="mt-6 pt-4 border-t-[3px] border-yellow-400">
-          <h2 className="text-base sm:text-[18px] font-extrabold tracking-[1px] uppercase text-[#0a2756] mb-4 px-0.5">
+          <h3 className="text-base sm:text-[18px] font-extrabold tracking-[1px] uppercase text-[#0a2756] mb-4 px-0.5">
             Trending Now
-          </h2>
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-0">
             {trendingItems.map((article, i) => (
               <Link
                 key={article.id}
-                href={article.url}
+                href={newsArticleHref(article)}
                 className="group block lg:pl-2 lg:pr-3 lg:border-r-4 lg:border-gray-200 lg:last:border-r-0 min-w-0"
               >
                 <div className="text-2xl sm:text-[28px] font-bold text-gray-300 leading-none mb-2">
@@ -191,16 +203,16 @@ export default function LatestNewsPage() {
 
         {/* More in latest news */}
         <div className="mt-6 pt-4 border-t-[3px] border-yellow-400">
-          <h2 className="text-sm sm:text-[15px] font-bold tracking-[1px] uppercase text-[#0a2756] mb-4 px-0.5">
+          <h3 className="text-sm sm:text-[15px] font-bold tracking-[1px] uppercase text-[#0a2756] mb-4 px-0.5">
             More in Politics
-          </h2>
+          </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-3 mt-4">
             {newsData.slice(11).map((article) => (
               <div key={article.id} className="min-w-0">
-                <Link href={article.url} className="group block">
+                <Link href={newsArticleHref(article)} className="group block">
                   <div className="aspect-video relative overflow-hidden w-full mb-1.5 rounded-sm">
                     <Image
-                      src={article.image}
+                      src={article.imageUrl}
                       alt={article.title}
                       fill
                       className="object-cover"

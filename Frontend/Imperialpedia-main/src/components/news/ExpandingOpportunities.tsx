@@ -1,7 +1,9 @@
 'use client';
 import React, { useRef } from "react";
+import Link from "next/link";
 import { ChevronLeft, ChevronRight, Play } from "lucide-react";
-import { NewsArticle } from "@/data/mockNews";
+import type { NewsArticle } from "@/lib/data.news";
+import { newsArticleHref } from "@/lib/data/article-url";
 
 interface ExpandingOpportunitiesProps {
   news: NewsArticle[];
@@ -31,7 +33,11 @@ const ExpandingOpportunities = ({ news }: ExpandingOpportunitiesProps) => {
     }).toUpperCase();
   };
 
-  const isVideo = (article: NewsArticle) => article.category === "video";
+  const isVideo = (article: NewsArticle) =>
+    typeof article.customFields?.videoUrl === "string" && !!article.customFields.videoUrl;
+
+  const videoDuration = (article: NewsArticle) =>
+    typeof article.customFields?.videoDuration === "string" ? article.customFields.videoDuration : "";
 
   return (
     <div className="w-full py-6">
@@ -65,17 +71,15 @@ const ExpandingOpportunities = ({ news }: ExpandingOpportunitiesProps) => {
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {news.map((article) => (
-          <a
+          <Link
             key={article.id}
-            href={article.url}
-            target="_blank"
-            rel="noopener noreferrer"
+            href={newsArticleHref(article)}
             className="flex-none w-[85vw] sm:w-[300px] max-w-[300px] group cursor-pointer"
           >
             {/* Thumbnail */}
             <div className="relative w-full aspect-video sm:h-[175px] sm:aspect-auto overflow-hidden bg-gray-200">
               <img
-                src={article.image}
+                src={article.imageUrl}
                 alt={article.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
@@ -96,16 +100,16 @@ const ExpandingOpportunities = ({ news }: ExpandingOpportunitiesProps) => {
                       VIDEO
                     </span>
                     <span className="text-[10px] text-white">
-                      {article.content ?? ""}
+                      {videoDuration(article)}
                     </span>
                   </div>
                 </>
               )}
 
               {/* Source badge top-right */}
-              {article.source && (
+              {article.author?.name && (
                 <div className="absolute top-2 right-2 bg-[#1a237e] px-1.5 py-0.5 rounded text-[9px] text-white font-semibold uppercase tracking-wide leading-tight max-w-[90px] text-right">
-                  {article.source}
+                  {article.author.name}
                 </div>
               )}
             </div>
@@ -119,7 +123,7 @@ const ExpandingOpportunities = ({ news }: ExpandingOpportunitiesProps) => {
                 {formatDate(article.publishedAt)}
               </p>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
