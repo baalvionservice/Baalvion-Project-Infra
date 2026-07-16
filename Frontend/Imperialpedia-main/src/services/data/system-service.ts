@@ -1,5 +1,7 @@
 import * as mockApi from '@/services/mock-api/system';
 import * as transparencyMock from '@/services/mock-api/transparency';
+import { articlesService } from '@/services/data/articles-service';
+import { getCreators } from '@/services/data/creators-service';
 import { ApiResponse } from '@/types';
 import { SystemSettings, SystemNotification, AdminAlert, SystemHealth, Backup, AccessLog, ErrorLog, FeatureFlag, NotificationLog, PlatformSettings, AdminActivityLog, SecuritySettings, GlobalNotificationSettings, AuditTrailEntry, FeatureSettings, AdminSession, BrandingSettings, SystemAlert, AdminHomeOverview, SecurityDashboardData, AdminSystemHubData, SecurityMockData, InfrastructureMockData, EdgeComputingData, CdnManagementData, SeoManagementData, ExperimentManagementData, IncidentResponseData, AccessManagementData, LocalizationData, AlertsSystemData, TransparencyData } from '@/types/system';
 import { errorHandler } from '@/lib/errors/error-handler';
@@ -568,16 +570,42 @@ export const systemService = {
     }
   },
 
+  // Real published-article count + real contributor count; the rest of the page is
+  // static policy content (no moderation/editorial/quality analytics backend exists
+  // for Imperialpedia today — see `@/types/system` for why that shape was removed
+  // rather than filled with invented numbers).
   async getTransparencyData(): Promise<ApiResponse<TransparencyData | null>> {
     try {
-      return await transparencyMock.getTransparencyData();
-    } catch (error) {
-      const appError = errorHandler.handleError(error);
+      const [articlesPage, creatorsRes] = await Promise.all([
+        articlesService.getArticles(1, 1),
+        getCreators(),
+      ]);
       return {
-        data: null,
-        status: appError.statusCode,
-        error: appError.message,
+        data: {
+          metrics: {
+            articles_published: articlesPage.pagination?.totalItems ?? 0,
+            contributors: (creatorsRes.data ?? []).length,
+          },
+          policies: [
+            { title: 'Editorial Policy', description: 'How our editorial team sources, reviews, and publishes intelligence content.', href: '/editorial-policy' },
+            { title: 'Ethics Policy', description: 'Our standards for conflicts of interest, sourcing, and journalistic integrity.', href: '/ethics-policy' },
+            { title: 'Comment Policy', description: 'How community discussion and moderation works on Imperialpedia.', href: '/comment-policy' },
+            { title: 'Corrections', description: 'How we handle and disclose factual corrections to published content.', href: '/corrections' },
+          ],
+        },
+        status: 200,
       };
+    } catch (error) {
+      try {
+        return await transparencyMock.getTransparencyData();
+      } catch {
+        const appError = errorHandler.handleError(error);
+        return {
+          data: null,
+          status: appError.statusCode,
+          error: appError.message,
+        };
+      }
     }
   }
 };

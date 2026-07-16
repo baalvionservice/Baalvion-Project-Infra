@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { GraphNode } from "@/types/knowledge-graph";
 import {
   Card,
@@ -38,12 +38,13 @@ export function ExplorerSidebar({
   const [search, setSearch] = useState("");
   const [activeCat, setActiveCat] = useState<string>("All");
 
-  const categories = [
-    "All",
-    "Macroeconomics",
-    "Stock Market",
-    "Cryptocurrency",
-  ];
+  // Real entity categories vary by dataset (company/country/industry/technology), so
+  // derive the filter chips from whatever categories are actually present in `nodes`
+  // instead of a hardcoded finance-topic taxonomy.
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(nodes.map((n) => n.category))).sort()],
+    [nodes],
+  );
 
   const filtered = nodes.filter((n) => {
     const matchesSearch = n.label.toLowerCase().includes(search.toLowerCase());
@@ -144,7 +145,7 @@ export function ExplorerSidebar({
                     variant="outline"
                     className="text-[8px] border-white/5 bg-background/30 h-5 px-1.5 font-mono"
                   >
-                    {node.metrics.articles}
+                    {node.metrics.relations}
                   </Badge>
                   <ChevronRight
                     className={cn(

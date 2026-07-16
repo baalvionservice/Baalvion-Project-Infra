@@ -1,12 +1,10 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Container } from '@/design-system/layout/container';
 import { Text } from '@/design-system/typography/text';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
+import {
   GraduationCap,
   Map as MapIcon,
   Clock,
@@ -14,45 +12,28 @@ import {
   ArrowRight,
   ShieldCheck,
   Sparkles,
-  Loader2,
   BookOpen,
   Target
 } from 'lucide-react';
-import { getGlobalTopicIndex } from '@/services/mock-api/topics';
-import { LearningPath } from '@/types/topics';
+import { getGlobalTopicIndexData } from '@/lib/data/topic-index';
+import { getTermUrl } from '@/lib/data/utils';
+import { buildMetadata } from '@/lib/seo';
+import { Metadata } from 'next';
+import Link from 'next/link';
+
+export const metadata: Metadata = buildMetadata({
+  canonical: '/learning-paths',
+  title: 'Learning Paths | Guided Financial Education',
+  description: 'Master the complex world of finance with curated learning paths built from the Imperialpedia glossary, progressing from foundational concepts to institutional analysis.',
+});
 
 /**
- * Global Learning Paths Hub.
- * Specialized discovery suite for curated educational trajectories across the index.
+ * Global Learning Paths Hub (Server Entry).
+ * Curated educational trajectories built from the real glossary dataset — every
+ * topic listed links to a real, resolvable `/terms/{letter}/{slug}` page.
  */
-export default function LearningPathsPage() {
-  const [paths, setPaths] = useState<LearningPath[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    async function loadData() {
-      try {
-        const response = await getGlobalTopicIndex();
-        if (response.data) setPaths(response.data.learning_paths);
-      } catch (e) {
-        console.error(e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadData();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="py-40 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-12 w-12 text-primary animate-spin" />
-        <Text variant="bodySmall" className="animate-pulse font-bold tracking-widest uppercase text-muted-foreground">
-          Calibrating Learning Nodes...
-        </Text>
-      </div>
-    );
-  }
+export default async function LearningPathsPage() {
+  const { learning_paths: paths } = await getGlobalTopicIndexData();
 
   return (
     <main className="min-h-screen bg-background pt-16 pb-32 animate-in fade-in duration-700">
@@ -71,10 +52,10 @@ export default function LearningPathsPage() {
         </header>
 
         <div className="grid grid-cols-1 gap-12">
-          {paths.map((path, idx) => (
+          {paths.map((path) => (
             <Card key={path.id} className="glass-card border-none shadow-2xl overflow-hidden group hover:border-emerald-500/30 transition-all duration-500">
               <div className="grid grid-cols-1 lg:grid-cols-12">
-                
+
                 {/* Visual Identity Panel */}
                 <div className="lg:col-span-4 p-10 bg-emerald-500/5 border-r border-white/5 flex flex-col justify-center space-y-6 relative overflow-hidden">
                   <div className="absolute top-0 right-0 p-10 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-1000">
@@ -87,7 +68,7 @@ export default function LearningPathsPage() {
                     <Badge className="bg-emerald-500 text-white border-none text-[9px] font-bold uppercase tracking-widest mb-2">Curated Node</Badge>
                     <Text variant="h2" className="text-3xl font-bold">{path.name}</Text>
                     <div className="flex items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-tighter">
-                      <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> 12h Total Depth</span>
+                      <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" /> Self-Paced</span>
                       <span className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-emerald-500" /> {path.topics.length} Nodes</span>
                     </div>
                   </div>
@@ -99,17 +80,22 @@ export default function LearningPathsPage() {
                     <Text variant="body" className="text-lg text-muted-foreground leading-relaxed">
                       {path.description}
                     </Text>
-                    
+
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
                       {path.topics.map((t, i) => (
-                        <div key={t.slug} className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-white/5 transition-all">
+                        <Link
+                          key={t.slug}
+                          href={getTermUrl(t.slug)}
+                          className="flex items-center justify-between p-4 rounded-2xl bg-background/50 border border-white/5 transition-all hover:border-emerald-500/30 hover:bg-background/80 group/topic"
+                        >
                           <div className="flex items-center gap-4">
                             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold text-xs">
                               {i + 1}
                             </div>
-                            <Text variant="bodySmall" weight="bold">{t.title}</Text>
+                            <Text variant="bodySmall" weight="bold" className="group-hover/topic:text-emerald-500 transition-colors">{t.title}</Text>
                           </div>
-                        </div>
+                          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 -translate-x-2 group-hover/topic:opacity-100 group-hover/topic:translate-x-0 transition-all" />
+                        </Link>
                       ))}
                     </div>
                   </div>
@@ -117,10 +103,12 @@ export default function LearningPathsPage() {
                   <div className="pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
                     <div className="flex items-center gap-3">
                       <ShieldCheck className="h-5 w-5 text-emerald-500" />
-                      <Text variant="caption" className="text-muted-foreground font-bold uppercase tracking-widest">Syllabus Verified by Institutional Leads</Text>
+                      <Text variant="caption" className="text-muted-foreground font-bold uppercase tracking-widest">Sourced From the Imperialpedia Glossary</Text>
                     </div>
-                    <Button size="lg" className="h-12 px-8 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-900/20 group/btn">
-                      Start Learning Cycle <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                    <Button size="lg" className="h-12 px-8 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-xl shadow-emerald-900/20 group/btn" asChild>
+                      <Link href={getTermUrl(path.topics[0]?.slug ?? '')}>
+                        Start Learning Cycle <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
+                      </Link>
                     </Button>
                   </div>
                 </div>
@@ -140,11 +128,11 @@ export default function LearningPathsPage() {
           <div className="space-y-2 relative z-10">
             <Text variant="h2" className="text-3xl font-bold">Custom Learning Node?</Text>
             <Text variant="body" className="text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Searching for a specialized taxonomy? Our AI can architect a custom learning path based on your unique goals and risk profile.
+              Searching for a specialized taxonomy? Explore the full <Link href="/topics" className="text-primary underline underline-offset-4">Topic Index</Link> to browse every term in the glossary.
             </Text>
           </div>
-          <Button size="lg" className="h-14 px-10 rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 relative z-10">
-            Generate My Custom Path
+          <Button size="lg" className="h-14 px-10 rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 relative z-10" asChild>
+            <Link href="/topics">Browse Topic Index</Link>
           </Button>
         </div>
       </Container>

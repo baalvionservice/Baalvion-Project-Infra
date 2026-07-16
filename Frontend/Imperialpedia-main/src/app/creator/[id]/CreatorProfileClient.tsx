@@ -38,10 +38,8 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import Link from "next/link";
-import {
-  getCreatorContent,
-  getContributorTrustData,
-} from "@/services/mock-api/creators";
+import { getCreatorContent } from "@/services/data/creators-service";
+import { getContributorTrustData } from "@/services/mock-api/creators";
 import { Input } from "@/components/ui/input";
 import {
   Table,

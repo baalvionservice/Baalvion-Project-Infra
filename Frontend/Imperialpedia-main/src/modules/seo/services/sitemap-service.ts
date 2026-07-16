@@ -1,9 +1,9 @@
 import {
   articlesService,
-  glossaryService,
   calculatorsService,
 } from "@/services/data";
 import { loadCompanies, loadCountries, loadIndustries, loadTechnologies } from "@/lib/data/loaders";
+import { fetchAllTerms } from "@/lib/data/term-live";
 import { reviewSlugs } from "@/lib/data/review-live";
 import { getPublishedNews } from "@/services/data/cms-public";
 import { env } from "@/config/env";
@@ -77,11 +77,27 @@ export const sitemapService = {
       });
     });
 
-    // A–Z dictionary hubs (Investopedia-style listing pages). Letters with no
-    // remaining glossary entries are excluded so empty hubs aren't submitted for indexing.
-    const EMPTY_LETTERS = new Set(["o", "q", "p", "l", "m", "f", "c", "d", "z", "v", "w", "r", "s", "u"]);
+    // 2a. Real glossary terms (static-fallback live set — same source that powers the
+    // `/terms/[letter]/[slug]` pages) drive both the A–Z hub inclusion below and the
+    // individual term entries further down, so the sitemap never submits a hub or a
+    // term URL that doesn't actually resolve.
+    const glossaryTerms = await (async () => {
+      try {
+        return await fetchAllTerms();
+      } catch {
+        return [];
+      }
+    })();
+    const letterOf = (title: string) => {
+      const first = title.charAt(0).toLowerCase();
+      return /^[0-9]/.test(first) ? "num" : first;
+    };
+    const lettersWithTerms = new Set(glossaryTerms.map((t) => letterOf(t.title)));
+
+    // A–Z dictionary hubs (Investopedia-style listing pages). Only letters with at
+    // least one real glossary entry are submitted so empty hubs aren't indexed.
     ["num", ..."abcdefghijklmnopqrstuvwxyz".split("")].forEach((l) => {
-      if (EMPTY_LETTERS.has(l)) return;
+      if (!lettersWithTerms.has(l)) return;
       entries.push({ loc: `${base}/terms-beginning-with-${l}`, changefreq: "weekly", priority: 0.5 });
     });
 
@@ -115,9 +131,8 @@ export const sitemapService = {
         return [];
       }
     };
-    const [articles, glossary, calcs] = await Promise.all([
+    const [articles, calcs] = await Promise.all([
       listAllPages(articlesService.getArticles),
-      listSafe(glossaryService.getTerms(1, 1000)),
       listSafe(calculatorsService.getCalculatorList()),
     ]);
 
@@ -131,11 +146,12 @@ export const sitemapService = {
       });
     });
 
-    glossary.forEach((term) => {
-      const firstChar = term.term.charAt(0).toLowerCase();
-      const letter = /^[0-9]/.test(firstChar) ? "num" : firstChar;
+    // Real glossary terms — matches the actual `/terms/[letter]/[slug]` pages 1:1
+    // (previously sourced from a small hardcoded mock glossary that didn't match the
+    // real term set, which meant submitted URLs could 404).
+    glossaryTerms.forEach((term) => {
       entries.push({
-        loc: `${base}/terms/${letter}/${term.slug}`,
+        loc: `${base}/terms/${letterOf(term.title)}/${term.slug}`,
         lastmod: today,
         changefreq: "monthly",
         priority: 0.7,

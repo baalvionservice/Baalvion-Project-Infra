@@ -1,20 +1,27 @@
 import React from 'react';
 import { Container } from '@/design-system/layout/container';
 import { KnowledgeGraphHub } from '@/modules/content-engine/components/KnowledgeGraph/KnowledgeGraphHub';
+import { knowledgeGraphService } from '@/services/data/knowledge-graph-service';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
+import { Layers } from 'lucide-react';
+import { Text } from '@/design-system/typography/text';
 
 export const metadata: Metadata = buildMetadata({
   canonical: '/knowledge-map',
   title: 'Global Knowledge Map | Interconnected Intelligence',
-  description: 'Explore the interconnected web of financial concepts, assets, and institutional research using the Imperialpedia Knowledge Graph.',
+  description: 'Explore the interconnected web of companies, countries, industries, and technologies using the Imperialpedia Knowledge Graph.',
 });
 
 /**
  * Financial Knowledge Graph Page (Server Entry).
- * Orchestrates the discovery of conceptual relationships across the index.
+ * Orchestrates the discovery of real relationships between Imperialpedia's knowledge
+ * entities (companies, countries, industries, technologies).
  */
-export default function KnowledgeMapPage() {
+export default async function KnowledgeMapPage() {
+  const response = await knowledgeGraphService.getGraphData();
+  const data = response.data ?? { nodes: [], connections: [] };
+
   return (
     <main className="min-h-screen bg-background pt-12">
       <Container>
@@ -25,15 +32,12 @@ export default function KnowledgeMapPage() {
           </div>
           <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Financial Knowledge Graph</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
-            Traverse the semantic hierarchy. Visualize how macro indicators, market players, and intelligence nodes are connected across the 1M+ programmatic index.
+            Traverse the real relationships between companies, countries, industries, and technologies indexed across Imperialpedia.
           </Text>
         </header>
 
-        <KnowledgeGraphHub />
+        <KnowledgeGraphHub initialData={data} />
       </Container>
     </main>
   );
 }
-
-import { Layers } from 'lucide-react';
-import { Text } from '@/design-system/typography/text';

@@ -1,43 +1,30 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
-import { knowledgeGraphService } from '@/services/data/knowledge-graph-service';
+import React, { useState, useMemo } from 'react';
 import { KnowledgeGraphData, NodeSelectionState } from '@/types/knowledge-graph';
 import { GraphVisualizer } from './GraphVisualizer';
 import { NodeDetailPanel } from './NodeDetailPanel';
 import { ExplorerSidebar } from './ExplorerSidebar';
-import { Loader2, Zap, Globe, Layers } from 'lucide-react';
+import { Zap, Globe, Layers } from 'lucide-react';
 import { Text } from '@/design-system/typography/text';
 import { Card } from '@/components/ui/card';
+
+interface KnowledgeGraphHubProps {
+  /** Real graph data fetched server-side (see `/knowledge-map/page.tsx`). */
+  initialData: KnowledgeGraphData;
+}
 
 /**
  * Main terminal for the Financial Knowledge Graph Engine.
  */
-export function KnowledgeGraphHub() {
-  const [data, setData] = useState<KnowledgeGraphData | null>(null);
-  const [loading, setLoading] = useState(true);
+export function KnowledgeGraphHub({ initialData }: KnowledgeGraphHubProps) {
+  const data = initialData;
   const [selection, setSelection] = useState<NodeSelectionState>({
     selectedNodeId: null,
     highlightedIds: []
   });
 
-  useEffect(() => {
-    async function loadGraph() {
-      try {
-        const response = await knowledgeGraphService.getGraphData();
-        if (response.data) setData(response.data);
-      } catch (e) {
-        console.error('Graph sync failed', e);
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadGraph();
-  }, []);
-
   const handleNodeClick = (id: string) => {
-    if (!data) return;
-    
     // Find neighbors
     const neighbors = data.connections
       .filter(c => c.source === id || c.target === id)
@@ -49,24 +36,24 @@ export function KnowledgeGraphHub() {
     });
   };
 
-  const selectedNode = useMemo(() => 
-    data?.nodes.find(n => n.id === selection.selectedNodeId) || null,
+  const selectedNode = useMemo(() =>
+    data.nodes.find(n => n.id === selection.selectedNodeId) || null,
     [data, selection.selectedNodeId]
   );
 
   const relatedNodes = useMemo(() => {
-    if (!selection.selectedNodeId || !data) return [];
-    return data.nodes.filter(n => 
+    if (!selection.selectedNodeId) return [];
+    return data.nodes.filter(n =>
       selection.highlightedIds.includes(n.id) && n.id !== selection.selectedNodeId
     );
   }, [data, selection]);
 
-  if (loading || !data) {
+  if (data.nodes.length === 0) {
     return (
-      <div className="py-40 flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-12 w-12 text-primary animate-spin" />
-        <Text variant="bodySmall" className="animate-pulse font-bold tracking-widest uppercase text-muted-foreground">
-          Establishing Conceptual Handshake...
+      <div className="py-40 flex flex-col items-center justify-center space-y-4 text-center">
+        <Layers className="h-12 w-12 text-muted-foreground" />
+        <Text variant="bodySmall" className="font-bold tracking-widest uppercase text-muted-foreground">
+          No indexed entities available yet
         </Text>
       </div>
     );

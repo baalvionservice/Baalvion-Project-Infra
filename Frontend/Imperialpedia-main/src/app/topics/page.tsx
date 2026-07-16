@@ -2,7 +2,7 @@ import React from 'react';
 import { Container } from '@/design-system/layout/container';
 import { Section } from '@/design-system/layout/section';
 import { Text } from '@/design-system/typography/text';
-import { getGlobalTopicIndex } from '@/services/mock-api/topics';
+import { getGlobalTopicIndexData } from '@/lib/data/topic-index';
 import { TopicIndexClient } from './TopicIndexClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
@@ -19,8 +19,7 @@ export const metadata: Metadata = buildMetadata({
  * Orchestrates the discovery of thousands of financial concepts across alphabetical and categorical matrices.
  */
 export default async function GlobalTopicIndexPage() {
-  const response = await getGlobalTopicIndex();
-  const data = response.data;
+  const data = await getGlobalTopicIndexData();
 
   return (
     <main className="min-h-screen bg-background pt-16">

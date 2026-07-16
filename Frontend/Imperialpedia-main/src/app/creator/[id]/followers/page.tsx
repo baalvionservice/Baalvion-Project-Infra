@@ -1,7 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { Container } from '@/design-system/layout/container';
-import { getCreatorById, getFollowers, getFollowing } from '@/services/mock-api/creators';
+import { getCreatorById, getFollowers, getFollowing } from '@/services/data/creators-service';
 import { FollowersClient } from './FollowersClient';
 import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';

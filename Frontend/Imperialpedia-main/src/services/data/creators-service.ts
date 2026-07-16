@@ -1,5 +1,5 @@
 import * as mockApi from "@/services/mock-api/creators";
-import { CreatorProfile, ApiResponse, CreatorLeaderboard, CreatorVerification } from "@/types";
+import { CreatorProfile, ApiResponse, CreatorLeaderboard, CreatorVerification, CreatorContentItem, Follower } from "@/types";
 import { TopCreator } from "@/types/analytics";
 import { errorHandler } from "@/lib/errors/error-handler";
 import authClient from "@/lib/auth-client";
@@ -140,7 +140,126 @@ export const creatorsService = {
       }
     }
   },
+
+  // Individual creator profile — LIVE-first via the same `/creators` list the
+  // discovery page and leaderboard already use, so `/creator/[id]` always shows the
+  // exact same record as `/creators`. Falls back to the mock set only when the
+  // service is unreachable or has no matching creator yet.
+  async getCreatorById(id: string): Promise<ApiResponse<CreatorProfile | null>> {
+    try {
+      const live = await fetchCreatorProfiles();
+      const found = live.find((c) => c.id === id || c.username === id);
+      if (found) return { data: found, status: 200 };
+      return await mockApi.getCreatorById(id);
+    } catch (error) {
+      try {
+        return await mockApi.getCreatorById(id);
+      } catch {
+        const appError = errorHandler.handleError(error);
+        return { data: null, status: appError.statusCode, error: appError.message };
+      }
+    }
+  },
 };
+
+type ArticleRow = {
+  id?: number | string;
+  title?: string;
+  slug?: string;
+  summary?: string;
+  content?: string;
+  category?: string;
+  tags?: string[];
+  status?: string;
+  published_at?: string;
+  created_at?: string;
+  views_count?: number;
+  likes_count?: number;
+};
+
+function rowToContentItem(r: ArticleRow): CreatorContentItem {
+  return {
+    id: String(r.id ?? r.slug ?? ""),
+    title: r.title || "",
+    body: r.content || r.summary || "",
+    snippet: r.summary || "",
+    category: r.category || "General",
+    tags: Array.isArray(r.tags) ? r.tags : [],
+    status: (r.status === "draft" || r.status === "scheduled" ? r.status : "published") as CreatorContentItem["status"],
+    createdAt: r.published_at || r.created_at || new Date().toISOString(),
+    views: r.views_count || 0,
+    likes: r.likes_count || 0,
+    comments: 0,
+    reads: r.views_count || 0,
+    slug: r.slug || "",
+  };
+}
+
+// Creator's own published articles — LIVE from `/creators/:id/articles`. Falls back
+// to the mock content set (keyed off the mock creator's bundled recentArticles) when
+// the service is unreachable or the creator has no live articles yet.
+export async function getCreatorContent(creatorId: string): Promise<ApiResponse<CreatorContentItem[]>> {
+  try {
+    const res = await fetch(`${IMP_API}/creators/${encodeURIComponent(creatorId)}/articles?limit=100`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(String(res.status));
+    const json = await res.json();
+    const items: ArticleRow[] = json?.data?.items ?? [];
+    if (items.length > 0) return { data: items.map(rowToContentItem), status: 200 };
+    return await mockApi.getCreatorContent(creatorId);
+  } catch (error) {
+    try {
+      return await mockApi.getCreatorContent(creatorId);
+    } catch {
+      const appError = errorHandler.handleError(error);
+      return { data: [], status: appError.statusCode, error: appError.message };
+    }
+  }
+}
+
+// Follower/following graphs — imperialpedia-service has no social-graph endpoint yet,
+// so these attempt the natural REST path first (so they pick up the real data the
+// moment it ships) and fall back to the mock set so the network pages are never empty.
+export async function getFollowers(creatorId: string): Promise<ApiResponse<Follower[]>> {
+  try {
+    const res = await fetch(`${IMP_API}/creators/${encodeURIComponent(creatorId)}/followers`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(String(res.status));
+    const json = await res.json();
+    const items: Follower[] = json?.data ?? [];
+    if (items.length > 0) return { data: items, status: 200 };
+    return await mockApi.getFollowers(creatorId);
+  } catch (error) {
+    try {
+      return await mockApi.getFollowers(creatorId);
+    } catch {
+      const appError = errorHandler.handleError(error);
+      return { data: [], status: appError.statusCode, error: appError.message };
+    }
+  }
+}
+
+export async function getFollowing(creatorId: string): Promise<ApiResponse<Follower[]>> {
+  try {
+    const res = await fetch(`${IMP_API}/creators/${encodeURIComponent(creatorId)}/following`, {
+      cache: "no-store",
+    });
+    if (!res.ok) throw new Error(String(res.status));
+    const json = await res.json();
+    const items: Follower[] = json?.data ?? [];
+    if (items.length > 0) return { data: items, status: 200 };
+    return await mockApi.getFollowing(creatorId);
+  } catch (error) {
+    try {
+      return await mockApi.getFollowing(creatorId);
+    } catch {
+      const appError = errorHandler.handleError(error);
+      return { data: [], status: appError.statusCode, error: appError.message };
+    }
+  }
+}
 
 // Creator leaderboard (ranked directory) — derived from the live creator profiles so it
 // stays consistent with /creators; mock fallback when the service is empty/unreachable.
@@ -222,3 +341,4 @@ export async function decideVerification(creatorId: string, decision: "approve" 
 export const getCreators = creatorsService.getCreators;
 export const getCreatorByUsername = creatorsService.getCreatorByUsername;
 export const getTopCreators = creatorsService.getTopCreators;
+export const getCreatorById = creatorsService.getCreatorById;

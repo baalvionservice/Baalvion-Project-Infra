@@ -1,9 +1,16 @@
 /**
  * @fileOverview Type definitions for the Financial Knowledge Graph Engine.
+ *
+ * Nodes map 1:1 to real Imperialpedia knowledge entities (company/country/industry/
+ * technology, from `@/lib/data/loaders`); connections are derived from each entity's own
+ * real cross-reference fields (competitors, technologies, industry, country, etc. — the
+ * same fields `getRelatedEntities` in loaders.ts already resolves for the entity detail
+ * pages). `category` is intentionally a free string: real entity categories aren't a
+ * fixed finance-topic taxonomy.
  */
 
-export type NodeType = 'concept' | 'asset' | 'article' | 'institution' | 'market' | 'indicator';
-export type NodeCategory = 'Macroeconomics' | 'Stock Market' | 'Cryptocurrency' | 'Personal Finance' | 'Trading';
+export type NodeType = 'company' | 'country' | 'industry' | 'technology';
+export type NodeCategory = string;
 
 export interface GraphNode {
   id: string;
@@ -11,12 +18,15 @@ export interface GraphNode {
   type: NodeType;
   category: NodeCategory;
   description: string;
+  /** Real, computed counts — not live analytics. `relations` is the number of graph
+   * edges touching this node; `tags` is the entity's own real tag count. */
   metrics: {
-    articles: number;
-    concepts: number;
-    experts: number;
+    relations: number;
+    tags: number;
   };
   tags: string[];
+  /** Real slug on the entity's own detail page, e.g. /companies/{slug}. */
+  slug: string;
 }
 
 export interface GraphConnection {

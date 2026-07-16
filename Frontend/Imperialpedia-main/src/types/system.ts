@@ -626,53 +626,26 @@ export interface AlertsSystemData {
 
 /**
  * Prompt 73: Platform Transparency Report Types
+ *
+ * Deliberately slim: `metrics` holds only figures with a real backing source
+ * (published article count, contributor count). Imperialpedia has no moderation/
+ * editorial-review/community-engagement analytics backend today, so this type no
+ * longer models those as numbers — inventing a shape for data that doesn't exist
+ * just re-creates the "fake stat presented as real" bug. `policies` links out to the
+ * platform's genuinely real, static editorial/ethics/moderation policy pages instead.
  */
 export interface TransparencyMetrics {
   articles_published: number;
   contributors: number;
-  editorial_reviews: number;
-  moderation_actions: number;
-  community_reports: number;
-  revisions_made: number;
 }
 
-export interface TransparencyReportNode {
-  id: string;
+export interface TransparencyPolicyLink {
   title: string;
-  period: string;
-  summary: string;
+  description: string;
+  href: string;
 }
 
 export interface TransparencyData {
   metrics: TransparencyMetrics;
-  moderation: {
-    removed: number;
-    flagged: number;
-    warnings: number;
-    restricted: number;
-    resolved: number;
-    trends: { date: string; removed: number; flagged: number }[];
-  };
-  editorial: {
-    submitted: number;
-    approved: number;
-    rejected: number;
-    revised: number;
-    trends: { date: string; approved: number; revised: number }[];
-  };
-  community: {
-    discussions: number;
-    comments: number;
-    votes: number;
-    predictions: number;
-    trends: { date: string; engagement: number }[];
-  };
-  quality: {
-    avg_score: number;
-    verified_pct: number;
-    needs_improvement: number;
-    top_rated: number;
-    trends: { date: string; score: number }[];
-  };
-  reports: TransparencyReportNode[];
+  policies: TransparencyPolicyLink[];
 }

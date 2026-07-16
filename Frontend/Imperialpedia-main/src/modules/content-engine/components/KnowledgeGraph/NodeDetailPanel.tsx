@@ -15,6 +15,7 @@ import {
   Search
 } from 'lucide-react';
 import Link from 'next/link';
+import { entityRouteSegment } from '@/lib/utils/seo';
 
 interface NodeDetailPanelProps {
   node: GraphNode;
@@ -49,18 +50,14 @@ export function NodeDetailPanel({ node, relatedNodes }: NodeDetailPanelProps) {
 
       <CardContent className="p-8 space-y-8 flex-grow">
         {/* Knowledge Depth Indicators */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <div className="p-4 rounded-2xl bg-card/30 border border-white/5 text-center space-y-1">
-            <div className="text-xl font-bold font-mono">{node.metrics.articles}</div>
-            <Text variant="label" className="text-[7px] opacity-50 uppercase font-bold tracking-tighter">Articles</Text>
-          </div>
-          <div className="p-4 rounded-2xl bg-card/30 border border-white/5 text-center space-y-1">
-            <div className="text-xl font-bold font-mono">{node.metrics.concepts}</div>
+            <div className="text-xl font-bold font-mono">{node.metrics.relations}</div>
             <Text variant="label" className="text-[7px] opacity-50 uppercase font-bold tracking-tighter">Relations</Text>
           </div>
           <div className="p-4 rounded-2xl bg-card/30 border border-white/5 text-center space-y-1">
-            <div className="text-xl font-bold font-mono">{node.metrics.experts}</div>
-            <Text variant="label" className="text-[7px] opacity-50 uppercase font-bold tracking-tighter">Experts</Text>
+            <div className="text-xl font-bold font-mono">{node.metrics.tags}</div>
+            <Text variant="label" className="text-[7px] opacity-50 uppercase font-bold tracking-tighter">Tags</Text>
           </div>
         </div>
 
@@ -98,8 +95,8 @@ export function NodeDetailPanel({ node, relatedNodes }: NodeDetailPanelProps) {
 
       <CardFooter className="p-8 bg-muted/20 border-t border-white/5">
         <Button className="w-full h-12 rounded-xl font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 group" asChild>
-          <Link href={`/financial-intelligence`}>
-            Launch Detailed Audit <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <Link href={`/${entityRouteSegment(node.type)}/${node.slug}`}>
+            View Full Profile <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Link>
         </Button>
       </CardFooter>
