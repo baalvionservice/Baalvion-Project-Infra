@@ -44,6 +44,19 @@ export const breadcrumbService = {
   },
 
   /**
+   * Home / [Companies|Countries|Industries|Technologies] / [Entity Name]
+   */
+  generateBreadcrumbForEntity: (entityName: string, entitySlug: string, routeSegment: string, sectionLabel: string): Breadcrumb => {
+    return {
+      items: [
+        { name: 'Home', item: '/' },
+        { name: sectionLabel, item: `/${routeSegment}` },
+        { name: entityName, item: `/${routeSegment}/${entitySlug}` },
+      ],
+    };
+  },
+
+  /**
    * Generates JSON-LD schema for a breadcrumb.
    */
   generateBreadcrumbSchema: (breadcrumb: Breadcrumb) => {

@@ -10,6 +10,7 @@ import { getCountryBySlug } from "@/lib/data/loaders";
 import { generateEntityMetadata } from "@/lib/utils/seo";
 import { structuredData } from "@/lib/seo/structuredData";
 import { JsonLd } from "@/modules/seo-engine/components/JsonLd";
+import { breadcrumbService } from "@/modules/seo-engine/services/breadcrumb-service";
 import { QuickStats } from "@/components/entity/QuickStats";
 import { RelatedHighlights } from "@/components/entity/RelatedHighlights";
 import { AIInsight } from "@/components/ai/AIInsight";
@@ -55,10 +56,13 @@ export default async function Page({ params }: PageProps) {
   ];
 
   const schema = structuredData.entity(country, "country");
+  const breadcrumb = breadcrumbService.generateBreadcrumbForEntity(country.name, country.slug, "countries", "Countries");
+  const breadcrumbSchema = breadcrumbService.generateBreadcrumbSchema(breadcrumb);
 
   return (
     <main className="min-h-screen bg-background pt-20 pb-32">
       <JsonLd data={schema} />
+      <JsonLd data={breadcrumbSchema} />
       <Container>
         <EntityHeader name={country.name} type="Country" tags={country.tags} />
 

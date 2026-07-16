@@ -10,6 +10,7 @@ import { getCompanyBySlug, getRelatedEntities } from '@/lib/data/loaders';
 import { generateEntityMetadata } from '@/lib/utils/seo';
 import { structuredData } from '@/lib/seo/structuredData';
 import { JsonLd } from '@/modules/seo-engine/components/JsonLd';
+import { breadcrumbService } from '@/modules/seo-engine/services/breadcrumb-service';
 import { QuickStats } from '@/components/entity/QuickStats';
 import { RelatedHighlights } from '@/components/entity/RelatedHighlights';
 import { AIInsight } from '@/components/ai/AIInsight';
@@ -52,10 +53,13 @@ export default async function Page({ params }: PageProps) {
   ];
 
   const schema = structuredData.entity(company, 'company');
+  const breadcrumb = breadcrumbService.generateBreadcrumbForEntity(company.name, company.slug, 'companies', 'Companies');
+  const breadcrumbSchema = breadcrumbService.generateBreadcrumbSchema(breadcrumb);
 
   return (
     <main className="min-h-screen bg-background pt-20 pb-32">
       <JsonLd data={schema} />
+      <JsonLd data={breadcrumbSchema} />
       <Container>
         <EntityHeader name={company.name} type="Company" tags={company.tags} />
         
