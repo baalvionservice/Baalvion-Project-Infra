@@ -27,8 +27,22 @@ const ADMIN_CONSOLE_URL =
   process.env.NEXT_PUBLIC_ADMIN_CONSOLE_URL ||
   (IS_PRODUCTION ? '' : 'http://localhost:3030/imperialpedia');
 
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY;
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // IndexNow key verification file — search engines fetch https://<host>/<key>.txt
+  // to confirm domain ownership before trusting any /api/revalidate ping. Without
+  // this route the pings sent from api/revalidate/route.ts are silently discarded.
+  // No app/ route can serve this: a literal `[key]` dynamic segment can't coexist
+  // with the root [...slug] catch-all (Next.js requires siblings to share one
+  // param name), so it's handled here instead, ahead of normal routing.
+  if (INDEXNOW_KEY && pathname === `/${INDEXNOW_KEY}.txt`) {
+    return new NextResponse(INDEXNOW_KEY, {
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+    });
+  }
 
   // Per-app admin RETIRED → central admin-platform console (before the auth gate).
   // Only redirect when the console URL is configured; in production with no env
@@ -75,5 +89,8 @@ export const config = {
     '/editor/:path*',
     '/writer/:path*',
     '/premium/:path*',
+    // IndexNow key verification file (any top-level *.txt request; the handler
+    // above checks it against INDEXNOW_KEY and falls through otherwise).
+    '/:indexnowFile.txt',
   ],
 };
