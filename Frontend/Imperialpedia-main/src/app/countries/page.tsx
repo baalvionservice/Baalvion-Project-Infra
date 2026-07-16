@@ -10,14 +10,21 @@ import { buildMetadata } from '@/lib/seo';
 import { Metadata } from 'next';
 import { Globe } from 'lucide-react';
 
-export const metadata: Metadata = buildMetadata({
-  canonical: '/countries',
-  title: 'Sovereign Nodes Index | Countries',
-  description: 'Traverse global economic profiles and geopolitical insights across our 200+ sovereign nodes.',
-});
-
 interface Props {
   searchParams: Promise<{ page?: string; region?: string }>;
+}
+
+// A static `metadata` export can't see the requested page number, so every
+// paginated result claimed page 1's URL as canonical. Each page now
+// self-canonicalizes to its own ?page=N URL instead.
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await searchParams;
+  const page = parseInt(params.page || '1');
+  return buildMetadata({
+    canonical: page > 1 ? `/countries?page=${page}` : '/countries',
+    title: page > 1 ? `Sovereign Nodes Index | Countries — Page ${page}` : 'Sovereign Nodes Index | Countries',
+    description: 'Traverse global economic profiles and geopolitical insights across our 200+ sovereign nodes.',
+  });
 }
 
 const ITEMS_PER_PAGE = 12;

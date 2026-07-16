@@ -11,14 +11,22 @@ import { Metadata } from 'next';
 import { Building } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-export const metadata: Metadata = buildMetadata({
-  canonical: '/companies',
-  title: 'Institutional Nodes Index | Companies',
-  description: 'Audit global corporate benchmarks, founding intelligence, and market reach across our enterprise knowledge clusters.',
-});
-
 interface Props {
   searchParams: Promise<{ page?: string; industry?: string }>;
+}
+
+// A static `metadata` export can't see the requested page number, so every
+// paginated result claimed page 1's URL as canonical — Google could easily
+// conclude pages 2+ are duplicates of page 1 and never index them. Each page
+// now self-canonicalizes to its own ?page=N URL instead.
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await searchParams;
+  const page = parseInt(params.page || '1');
+  return buildMetadata({
+    canonical: page > 1 ? `/companies?page=${page}` : '/companies',
+    title: page > 1 ? `Institutional Nodes Index | Companies — Page ${page}` : 'Institutional Nodes Index | Companies',
+    description: 'Audit global corporate benchmarks, founding intelligence, and market reach across our enterprise knowledge clusters.',
+  });
 }
 
 const ITEMS_PER_PAGE = 12;

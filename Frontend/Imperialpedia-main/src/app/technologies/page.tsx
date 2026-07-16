@@ -11,14 +11,21 @@ import { Metadata } from 'next';
 import { Cpu } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
-export const metadata: Metadata = buildMetadata({
-  canonical: '/technologies',
-  title: 'Innovation Cluster Index | Technologies',
-  description: 'Trace the evolution of innovation from generative AI to quantum computing and blockchain.',
-});
-
 interface Props {
   searchParams: Promise<{ page?: string; category?: string }>;
+}
+
+// A static `metadata` export can't see the requested page number, so every
+// paginated result claimed page 1's URL as canonical. Each page now
+// self-canonicalizes to its own ?page=N URL instead.
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const params = await searchParams;
+  const page = parseInt(params.page || '1');
+  return buildMetadata({
+    canonical: page > 1 ? `/technologies?page=${page}` : '/technologies',
+    title: page > 1 ? `Innovation Cluster Index | Technologies — Page ${page}` : 'Innovation Cluster Index | Technologies',
+    description: 'Trace the evolution of innovation from generative AI to quantum computing and blockchain.',
+  });
 }
 
 const ITEMS_PER_PAGE = 12;
