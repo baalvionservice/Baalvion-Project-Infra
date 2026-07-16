@@ -134,7 +134,7 @@ export default function SignUpPage() {
               </Text>
             </Link>
             <div className="space-y-2">
-              <Text variant="h1" className="text-3xl font-bold tracking-tight">
+              <Text variant="h1" as="h1" className="text-3xl font-bold tracking-tight">
                 Create your account
               </Text>
               <Text variant="body" className="text-muted-foreground">

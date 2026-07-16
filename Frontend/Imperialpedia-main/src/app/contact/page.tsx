@@ -130,7 +130,7 @@ function ContactFallback() {
               Contact
             </Text>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">
             Get in touch
           </Text>
           <Text variant="body" className="text-muted-foreground text-lg max-w-2xl mx-auto">

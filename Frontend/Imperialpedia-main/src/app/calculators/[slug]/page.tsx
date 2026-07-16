@@ -50,7 +50,7 @@ export default async function Page({ params }: CalculatorPageProps) {
       <Container>
         <header className="mb-12 max-w-3xl">
           <Text variant="label" className="text-secondary mb-4">{calculator.category}</Text>
-          <Text variant="h1" className="mb-6">{calculator.name}</Text>
+          <Text variant="h1" as="h1" className="mb-6">{calculator.name}</Text>
           <Text variant="body" className="text-muted-foreground text-lg">
             {calculator.description}
           </Text>

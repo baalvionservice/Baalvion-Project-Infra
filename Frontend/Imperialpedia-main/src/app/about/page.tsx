@@ -46,7 +46,7 @@ function AboutFallback() {
           <Text variant="label" className="text-[10px] font-bold tracking-widest uppercase text-primary">
             About Imperialpedia
           </Text>
-          <Text variant="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
+          <Text variant="h1" as="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
             Clear financial knowledge, built for everyone
           </Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed max-w-3xl">

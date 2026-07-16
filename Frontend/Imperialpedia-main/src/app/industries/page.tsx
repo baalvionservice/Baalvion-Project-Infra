@@ -67,7 +67,7 @@ export default async function IndustriesListPage({ searchParams }: Props) {
                 Market Sector Nodes
               </Badge>
             </div>
-            <Text variant="h1" className="mb-6">Market Architecture</Text>
+            <Text variant="h1" as="h1" className="mb-6">Market Architecture</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
               Trace the vertical and horizontal integration of global sectors. Audit historical performance and future scalability targets.
             </Text>

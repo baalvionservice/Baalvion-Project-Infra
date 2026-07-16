@@ -35,7 +35,7 @@ export default function ExplorePage() {
             </Text>
           </div>
           <Text
-            variant="h1"
+            variant="h1" as="h1"
             className="text-5xl lg:text-7xl font-bold mb-6 tracking-tight leading-tight"
           >
             Explore <span className="text-primary">Global Knowledge</span>

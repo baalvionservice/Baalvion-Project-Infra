@@ -43,7 +43,7 @@ export async function CmsPage({ slug, eyebrow, fallback, children }: CmsPageProp
               {eyebrow}
             </Text>
           )}
-          <Text variant="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
+          <Text variant="h1" as="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
             {page.title}
           </Text>
         </header>

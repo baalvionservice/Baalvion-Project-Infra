@@ -159,7 +159,7 @@ export function VerificationClient({ initialStatus }: VerificationClientProps) {
               Compliance Engine
             </Text>
           </div>
-          <Text variant="h1" className="text-3xl font-bold">
+          <Text variant="h1" as="h1" className="text-3xl font-bold">
             Expert Authentication
           </Text>
         </div>

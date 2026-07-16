@@ -49,7 +49,7 @@ export default async function StocksFaqPage() {
             <ArrowLeft className="h-4 w-4" /> Back to Stocks
           </Link>
 
-          <Text variant="h1" className="mb-4">Stock Market Frequently Asked Questions</Text>
+          <Text variant="h1" as="h1" className="mb-4">Stock Market Frequently Asked Questions</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed mb-4">
             {faqs.length} answers pulled straight from Imperialpedia&apos;s stock market guides.
           </Text>

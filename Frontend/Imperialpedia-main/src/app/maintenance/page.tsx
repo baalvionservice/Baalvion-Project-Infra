@@ -24,7 +24,7 @@ export default function MaintenancePage() {
           
           <div className="space-y-2">
             <Badge className="bg-secondary/20 text-secondary border-none uppercase tracking-widest text-[10px] font-bold px-3 mb-2">Protocol: Upgrade</Badge>
-            <Text variant="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Index Re-sharding</Text>
+            <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Index Re-sharding</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed max-w-lg mx-auto">
               Imperialpedia is currently undergoing a planned structural upgrade to the **pSEO Ingestion Engine**. Discovery nodes will be unavailable for approximately 45 minutes.
             </Text>

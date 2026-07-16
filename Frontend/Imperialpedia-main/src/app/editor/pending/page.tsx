@@ -38,7 +38,7 @@ export default function PendingReviewsPage() {
     <div className="space-y-8 pb-12">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <Text variant="h1" className="text-3xl font-bold">Review Queue</Text>
+          <Text variant="h1" as="h1" className="text-3xl font-bold">Review Queue</Text>
           <Text variant="bodySmall" className="text-muted-foreground mt-1">
             Prioritize expert submissions for platform-wide publishing.
           </Text>

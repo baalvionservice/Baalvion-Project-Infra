@@ -36,7 +36,7 @@ export default async function FinancialToolsDashboard() {
               </div>
               <Text variant="label" className="font-bold tracking-widest uppercase">Interactive Intelligence</Text>
             </div>
-            <Text variant="h1" className="text-4xl lg:text-7xl font-bold mb-6 tracking-tight">
+            <Text variant="h1" as="h1" className="text-4xl lg:text-7xl font-bold mb-6 tracking-tight">
               Interactive <span className="text-primary">Planning Hub</span>
             </Text>
             <Text variant="body" className="text-muted-foreground text-xl leading-relaxed max-w-3xl">

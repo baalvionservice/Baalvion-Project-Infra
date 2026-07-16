@@ -88,7 +88,7 @@ export default function EditorialAssignmentsPage() {
                 Auditor Registry
               </Text>
             </div>
-            <Text variant="h1" className="text-3xl font-bold tracking-tight">
+            <Text variant="h1" as="h1" className="text-3xl font-bold tracking-tight">
               Resource Management
             </Text>
           </div>

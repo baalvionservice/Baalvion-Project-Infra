@@ -56,7 +56,7 @@ export function FollowersClient({ creator, initialFollowers, initialFollowing }:
               <Users className="h-4 w-4" />
               <Text variant="label" className="text-[10px] font-bold tracking-widest uppercase">Expert Network</Text>
             </div>
-            <Text variant="h1" className="text-3xl font-bold">{creator.displayName}</Text>
+            <Text variant="h1" as="h1" className="text-3xl font-bold">{creator.displayName}</Text>
           </div>
         </div>
         

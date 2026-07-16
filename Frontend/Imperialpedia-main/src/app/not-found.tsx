@@ -25,7 +25,7 @@ export default function NotFound() {
           
           <div className="space-y-2">
             <Badge variant="outline" className="border-destructive/30 text-destructive uppercase tracking-widest text-[10px] font-bold px-3 mb-2">Error 404</Badge>
-            <Text variant="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Node Not Located</Text>
+            <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Node Not Located</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed max-w-lg mx-auto">
               The intelligence node you requested does not exist in the Imperialpedia Index. It may have been de-indexed or moved during a cluster re-shard.
             </Text>

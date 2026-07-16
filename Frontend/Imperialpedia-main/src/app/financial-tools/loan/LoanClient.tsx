@@ -95,7 +95,7 @@ export default function LoanClient() {
               Debt Management
             </Badge>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Loan Repayment Engine</Text>
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Loan Repayment Engine</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
             Analyze your monthly obligations and the total cost of capital for mortgages, personal financing, or auto loans.
           </Text>

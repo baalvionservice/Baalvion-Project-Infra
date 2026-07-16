@@ -48,7 +48,7 @@ function AdvertisingPolicyFallback() {
               Advertising Standards
             </Text>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
+          <Text variant="h1" as="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
             Advertising Policy
           </Text>
           <Text variant="bodySmall" className="text-muted-foreground">

@@ -28,7 +28,7 @@ export default function IndexesPage() {
                 Market Indexes
               </Badge>
             </div>
-            <Text variant="h1" className="mb-6">World Stock Market Indexes</Text>
+            <Text variant="h1" as="h1" className="mb-6">World Stock Market Indexes</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
               An index tracks a basket of stocks to measure how a market or segment of it is performing.
               Explore how the world&apos;s most-followed benchmarks are built.

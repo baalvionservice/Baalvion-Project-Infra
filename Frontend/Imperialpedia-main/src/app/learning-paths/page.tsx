@@ -62,7 +62,7 @@ export default function LearningPathsPage() {
             <GraduationCap className="h-5 w-5" />
             <Text variant="label" className="font-bold tracking-widest uppercase">Structured Discovery</Text>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-7xl font-bold mb-6 tracking-tight">
+          <Text variant="h1" as="h1" className="text-4xl lg:text-7xl font-bold mb-6 tracking-tight">
             Learning <span className="text-emerald-500">Paths</span>
           </Text>
           <Text variant="body" className="text-muted-foreground text-xl leading-relaxed">

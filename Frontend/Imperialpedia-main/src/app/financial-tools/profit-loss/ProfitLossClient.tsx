@@ -65,7 +65,7 @@ export default function ProfitLossClient() {
               Stocks
             </Badge>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Profit/Loss Calculator</Text>
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Profit/Loss Calculator</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
             Calculate the realized profit or loss on a closed stock trade, after fees.
           </Text>

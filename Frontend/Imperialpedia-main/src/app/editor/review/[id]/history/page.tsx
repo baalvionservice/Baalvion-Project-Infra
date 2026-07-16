@@ -168,7 +168,7 @@ export default function VersionHistoryPage({ params }: PageProps) {
                 Version Control Console
               </Text>
             </div>
-            <Text variant="h1" className="text-3xl font-bold tracking-tight">
+            <Text variant="h1" as="h1" className="text-3xl font-bold tracking-tight">
               Audit Archive: {data.articleTitle}
             </Text>
           </div>

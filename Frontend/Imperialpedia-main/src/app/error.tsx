@@ -36,7 +36,7 @@ export default function Error({
           
           <div className="space-y-2">
             <Badge variant="outline" className="border-primary/30 text-primary uppercase tracking-widest text-[10px] font-bold px-3 mb-2">System Exception</Badge>
-            <Text variant="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Cluster Desync</Text>
+            <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Cluster Desync</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed max-w-lg mx-auto">
               We encountered a structural deviation while traversing the knowledge matrix. The security kernel has throttled the current session to ensure index integrity.
             </Text>

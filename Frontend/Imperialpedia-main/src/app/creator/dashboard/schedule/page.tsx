@@ -65,7 +65,7 @@ export default function CreatorSchedulePage() {
             <CalendarCheck className="h-4 w-4" />
             <Text variant="label" className="text-[10px] font-bold tracking-widest uppercase">Logistics Hub</Text>
           </div>
-          <Text variant="h1" className="text-3xl font-bold">Expert Content Calendar</Text>
+          <Text variant="h1" as="h1" className="text-3xl font-bold">Expert Content Calendar</Text>
           <Text variant="bodySmall" className="text-muted-foreground mt-1">
             Orchestrate your publishing velocity and maintain research momentum.
           </Text>

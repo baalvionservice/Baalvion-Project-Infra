@@ -59,7 +59,7 @@ export default async function StockListDetailPage({ params }: PageProps) {
                 Stock List
               </Badge>
             </div>
-            <Text variant="h1" className="mb-6">{list.name}</Text>
+            <Text variant="h1" as="h1" className="mb-6">{list.name}</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
               {list.description} This is an educational grouping, not a recommendation to buy or sell any
               security.

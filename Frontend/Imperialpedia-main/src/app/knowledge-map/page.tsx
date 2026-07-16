@@ -23,7 +23,7 @@ export default function KnowledgeMapPage() {
             <Layers className="h-4 w-4" />
             <Text variant="label" className="text-[10px] font-bold uppercase tracking-widest">Relational Knowledge Engine</Text>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Financial Knowledge Graph</Text>
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Financial Knowledge Graph</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
             Traverse the semantic hierarchy. Visualize how macro indicators, market players, and intelligence nodes are connected across the 1M+ programmatic index.
           </Text>

@@ -67,7 +67,7 @@ export default async function AuthorsPage() {
         <Container>
           <header className="mb-12 max-w-3xl">
             <Text variant="label" className="text-primary mb-4">Masthead</Text>
-            <Text variant="h1" className="mb-6">Our Authors</Text>
+            <Text variant="h1" as="h1" className="mb-6">Our Authors</Text>
             <Text variant="body" className="text-muted-foreground text-lg">
               The writers and analysts researching, reporting, and fact-checking every piece of financial intelligence on Imperialpedia.
             </Text>

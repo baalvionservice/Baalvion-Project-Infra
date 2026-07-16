@@ -155,7 +155,7 @@ export function CreatorProfileClient({ creator }: CreatorProfileClientProps) {
                 <div>
                   <div className="flex flex-wrap items-center gap-3 mb-2">
                     <Text
-                      variant="h1"
+                      variant="h1" as="h1"
                       className="text-4xl lg:text-6xl font-bold tracking-tight"
                     >
                       {creator.displayName}

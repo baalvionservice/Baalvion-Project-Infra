@@ -76,7 +76,7 @@ export default function WriterSubmissionsPage() {
   return (
     <div className="space-y-8 pb-12">
       <header>
-        <Text variant="h1" className="text-3xl font-bold">
+        <Text variant="h1" as="h1" className="text-3xl font-bold">
           Submission Pipeline
         </Text>
         <Text variant="bodySmall" className="text-muted-foreground mt-1">

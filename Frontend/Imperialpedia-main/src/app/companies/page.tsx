@@ -68,7 +68,7 @@ export default async function CompaniesListPage({ searchParams }: Props) {
                 Enterprise Taxonomy
               </Badge>
             </div>
-            <Text variant="h1" className="mb-6">Institutional Intelligence</Text>
+            <Text variant="h1" as="h1" className="mb-6">Institutional Intelligence</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
               Navigate the global corporate architecture. Traverse interconnected nodes of market leaders and emerging institutional players.
             </Text>

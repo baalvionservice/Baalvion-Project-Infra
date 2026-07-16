@@ -89,7 +89,7 @@ export default function InflationClient() {
               Economic Analysis
             </Badge>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Inflation Impact Engine</Text>
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Inflation Impact Engine</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
             Visualize the eroding effects of inflation on your purchasing power and calculate the future equivalent value of today's currency.
           </Text>

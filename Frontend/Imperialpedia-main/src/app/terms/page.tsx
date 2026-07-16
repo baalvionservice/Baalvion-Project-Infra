@@ -54,7 +54,7 @@ export default async function TermsHubPage() {
                 Financial Dictionary
               </Text>
             </div>
-            <Text variant="h1" className="text-4xl lg:text-7xl font-bold tracking-tight">
+            <Text variant="h1" as="h1" className="text-4xl lg:text-7xl font-bold tracking-tight">
               Terms, <span className="text-primary">A to Z</span>
             </Text>
             <Text variant="body" className="mt-6 text-muted-foreground text-xl leading-relaxed max-w-3xl">

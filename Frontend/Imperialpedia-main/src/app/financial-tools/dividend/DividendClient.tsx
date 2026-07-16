@@ -60,7 +60,7 @@ export default function DividendClient() {
               Stocks
             </Badge>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Dividend Calculator</Text>
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Dividend Calculator</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
             Estimate the annual and monthly income a dividend-paying stock position would generate at its current yield.
           </Text>

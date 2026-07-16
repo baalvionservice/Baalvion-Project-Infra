@@ -39,7 +39,7 @@ export default function WriterDraftsPage() {
     <div className="space-y-8 pb-12">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <Text variant="h1" className="text-3xl font-bold">My Personal Studio</Text>
+          <Text variant="h1" as="h1" className="text-3xl font-bold">My Personal Studio</Text>
           <Text variant="bodySmall" className="text-muted-foreground mt-1">
             Manage your in-progress intelligence drafts and research.
           </Text>

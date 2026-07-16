@@ -28,7 +28,7 @@ export default function StockListsIndexPage() {
                 Stock Lists
               </Badge>
             </div>
-            <Text variant="h1" className="mb-6">Browse Stocks by List</Text>
+            <Text variant="h1" as="h1" className="mb-6">Browse Stocks by List</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
               Curated groupings of companies by theme and sector — a starting point for research, not a
               recommendation to buy any specific stock.

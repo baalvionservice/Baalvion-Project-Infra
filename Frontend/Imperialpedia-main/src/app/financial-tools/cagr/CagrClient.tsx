@@ -57,7 +57,7 @@ export default function CagrClient() {
               Stocks
             </Badge>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">CAGR Calculator</Text>
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">CAGR Calculator</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
             Find the smoothed annual growth rate between a starting and ending investment value over any time period.
           </Text>

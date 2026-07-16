@@ -36,7 +36,7 @@ export default async function ArticlesPage() {
         <Container>
           <header className="mb-12 max-w-3xl">
             <Text variant="label" className="text-primary mb-4">Content Engine</Text>
-            <Text variant="h1" className="mb-6">Financial Intelligence</Text>
+            <Text variant="h1" as="h1" className="mb-6">Financial Intelligence</Text>
             <Text variant="body" className="text-muted-foreground text-lg">
               Deep-dive analysis and educational resources curated by the world's leading financial experts and AI-driven insights.
             </Text>

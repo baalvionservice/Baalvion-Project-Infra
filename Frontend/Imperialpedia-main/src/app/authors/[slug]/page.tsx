@@ -125,7 +125,7 @@ export default async function AuthorPage({ params }: AuthorPageProps) {
                 <div className="flex-1 space-y-5">
                   <div>
                     <div className="flex flex-wrap items-center gap-3 mb-2">
-                      <Text variant="h1" className="tracking-tight">{author.name}</Text>
+                      <Text variant="h1" as="h1" className="tracking-tight">{author.name}</Text>
                       <Badge className="bg-primary/10 text-primary border-primary/20 gap-1.5 font-bold uppercase text-[10px] tracking-widest h-6 px-2.5">
                         <BadgeCheck className="h-3.5 w-3.5" /> Staff Writer
                       </Badge>

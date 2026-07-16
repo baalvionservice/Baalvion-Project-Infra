@@ -8,7 +8,7 @@ export default function PricingPage() {
     <main className="min-h-screen bg-background pt-20">
       <Container>
         <Section spacing="sm" className="text-center">
-          <Text variant="h1">Intelligence Access</Text>
+          <Text variant="h1" as="h1">Intelligence Access</Text>
           <Text variant="body" className="text-muted-foreground mt-4 max-w-xl mx-auto">
             Select your tier to unlock the full depth of the Imperialpedia Index.
           </Text>

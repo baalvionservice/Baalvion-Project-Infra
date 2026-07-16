@@ -66,7 +66,7 @@ export default async function CountriesListPage({ searchParams }: Props) {
                 Global Taxonomy
               </Badge>
             </div>
-            <Text variant="h1" className="mb-6">Sovereign Discovery Hub</Text>
+            <Text variant="h1" as="h1" className="mb-6">Sovereign Discovery Hub</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
               Audit the world's most scalable sovereign data index. Traverse interconnected geopolitical nodes and economic benchmarks.
             </Text>

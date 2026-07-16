@@ -48,7 +48,7 @@ function EthicsPolicyFallback() {
               Editorial Ethics
             </Text>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
+          <Text variant="h1" as="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
             Ethics Policy
           </Text>
           <Text variant="bodySmall" className="text-muted-foreground">

@@ -155,7 +155,7 @@ function CreatorEditorContent() {
                 Intelligence Studio
               </Text>
             </div>
-            <Text variant="h1" className="text-3xl font-bold">
+            <Text variant="h1" as="h1" className="text-3xl font-bold">
               {articleId ? "Refine Insight" : "Draft New Intelligence"}
             </Text>
           </div>

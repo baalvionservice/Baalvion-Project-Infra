@@ -58,7 +58,7 @@ export default function EditorHistoryPage() {
     <div className="space-y-8 pb-12">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <Text variant="h1" className="text-3xl font-bold">Review History</Text>
+          <Text variant="h1" as="h1" className="text-3xl font-bold">Review History</Text>
           <Text variant="bodySmall" className="text-muted-foreground mt-1">
             Tracking every editorial milestone in the publishing engine.
           </Text>

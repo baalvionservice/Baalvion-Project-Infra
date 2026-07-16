@@ -104,7 +104,7 @@ export default function CreatorDashboardPage() {
             <Text variant="label" className="text-[10px] font-bold tracking-widest uppercase">Expert command center</Text>
           </div>
           <div className="flex items-center gap-3">
-            <Text variant="h1" className="text-3xl font-bold">Creator Studio</Text>
+            <Text variant="h1" as="h1" className="text-3xl font-bold">Creator Studio</Text>
             <Badge variant="outline" className="bg-secondary/10 text-secondary border-secondary/20 font-bold h-6">
               <ShieldCheck className="mr-1 h-3 w-3" /> Verified Expert
             </Badge>

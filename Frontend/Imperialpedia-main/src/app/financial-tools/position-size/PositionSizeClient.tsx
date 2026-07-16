@@ -63,7 +63,7 @@ export default function PositionSizeClient() {
               Stocks
             </Badge>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Position Size Calculator</Text>
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Position Size Calculator</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
             Work out how many shares to buy so a single trade never risks more than a fixed percentage of your account.
           </Text>

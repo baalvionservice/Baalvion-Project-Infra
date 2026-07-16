@@ -121,7 +121,7 @@ export default function EditorialActivityLogPage() {
                 Audit Trail
               </Text>
             </div>
-            <Text variant="h1" className="text-3xl font-bold tracking-tight">
+            <Text variant="h1" as="h1" className="text-3xl font-bold tracking-tight">
               Editorial Lifecycle Log
             </Text>
           </div>

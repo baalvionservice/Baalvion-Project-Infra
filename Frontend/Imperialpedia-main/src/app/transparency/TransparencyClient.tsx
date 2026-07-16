@@ -100,7 +100,7 @@ export function TransparencyClient() {
           </Text>
         </div>
         <Text
-          variant="h1"
+          variant="h1" as="h1"
           className="text-4xl lg:text-6xl font-bold tracking-tight"
         >
           Transparency Hub

@@ -19,7 +19,7 @@ export const EntityHeader = ({ name, type, tags }: EntityHeaderProps) => {
           {type}
         </Badge>
       </div>
-      <Text variant="h1" className="text-4xl lg:text-7xl font-bold tracking-tight">
+      <Text variant="h1" as="h1" className="text-4xl lg:text-7xl font-bold tracking-tight">
         {name}
       </Text>
       {tags && tags.length > 0 && (

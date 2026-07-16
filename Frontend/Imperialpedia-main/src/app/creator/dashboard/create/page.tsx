@@ -125,7 +125,7 @@ export default function CreateInsightPage() {
             </Link>
           </Button>
           <div>
-            <Text variant="h1" className="text-3xl font-bold">
+            <Text variant="h1" as="h1" className="text-3xl font-bold">
               New Intelligence Insight
             </Text>
             <Text variant="bodySmall" className="text-muted-foreground">

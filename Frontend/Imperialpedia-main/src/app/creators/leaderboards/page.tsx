@@ -31,7 +31,7 @@ export default async function LeaderboardsPage() {
               <Trophy className="h-5 w-5" />
               <Text variant="label" className="font-bold tracking-widest">Platform Meritocracy</Text>
             </div>
-            <Text variant="h1" className="mb-6">Expert Intelligence Rankings</Text>
+            <Text variant="h1" as="h1" className="mb-6">Expert Intelligence Rankings</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
               Recognizing the world's leading financial contributors. Rankings are calculated based on organic intelligence reach, verifiable impact, and creator revenue velocity.
             </Text>

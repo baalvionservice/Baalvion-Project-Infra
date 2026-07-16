@@ -76,7 +76,7 @@ export default function CreatorRevenuePage() {
             <DollarSign className="h-4 w-4" />
             <Text variant="label" className="text-[10px] font-bold tracking-widest uppercase">Monetization Engine</Text>
           </div>
-          <Text variant="h1" className="text-3xl font-bold">Earnings & Payouts</Text>
+          <Text variant="h1" as="h1" className="text-3xl font-bold">Earnings & Payouts</Text>
           <Text variant="bodySmall" className="text-muted-foreground mt-1">
             Track your intelligence revenue and manage your payout logistics.
           </Text>

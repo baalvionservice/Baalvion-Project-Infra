@@ -95,7 +95,7 @@ export default function CompoundInterestClient() {
               Wealth Building
             </Badge>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Compound Interest Engine</Text>
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Compound Interest Engine</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
             Determine the future value of your capital by analyzing the impact of time and compounding frequency on your principal.
           </Text>

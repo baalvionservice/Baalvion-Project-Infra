@@ -8,7 +8,7 @@ import React from 'react';
         <main className="min-h-screen bg-background pt-20">
           <Container>
             <Section spacing="sm">
-              <Text variant="h1">Open Datasets</Text>
+              <Text variant="h1" as="h1">Open Datasets</Text>
               <Text variant="body" className="text-muted-foreground mt-4">
                 High-fidelity data nodes for institutional and independent research.
               </Text>

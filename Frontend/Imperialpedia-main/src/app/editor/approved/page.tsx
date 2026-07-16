@@ -53,7 +53,7 @@ export default function ApprovedArticlesPage() {
   return (
     <div className="space-y-8 pb-12">
       <header>
-        <Text variant="h1" className="text-3xl font-bold">
+        <Text variant="h1" as="h1" className="text-3xl font-bold">
           Approved Intelligence Index
         </Text>
         <Text variant="bodySmall" className="text-muted-foreground mt-1">

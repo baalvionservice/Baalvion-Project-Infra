@@ -67,7 +67,7 @@ export default async function TechnologiesListPage({ searchParams }: Props) {
                 Innovation Nodes
               </Badge>
             </div>
-            <Text variant="h1" className="mb-6">Technical Architecture</Text>
+            <Text variant="h1" as="h1" className="mb-6">Technical Architecture</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
               Explore the backbone of modern advancement. Analyze the intersection of high-velocity research and commercial deployment.
             </Text>

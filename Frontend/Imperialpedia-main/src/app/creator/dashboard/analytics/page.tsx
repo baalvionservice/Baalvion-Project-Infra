@@ -71,7 +71,7 @@ export default function CreatorAnalyticsPage() {
             <TrendingUp className="h-4 w-4" />
             <Text variant="label" className="text-[10px] font-bold tracking-widest">Performance Insights</Text>
           </div>
-          <Text variant="h1" className="text-3xl font-bold">Insights Analytics</Text>
+          <Text variant="h1" as="h1" className="text-3xl font-bold">Insights Analytics</Text>
           <Text variant="bodySmall" className="text-muted-foreground mt-1">
             Track your reach, engagement, and revenue velocity across the platform.
           </Text>

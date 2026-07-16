@@ -48,7 +48,7 @@ function CommentPolicyFallback() {
               Community Guidelines
             </Text>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
+          <Text variant="h1" as="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
             Comment & Community Policy
           </Text>
           <Text variant="bodySmall" className="text-muted-foreground">

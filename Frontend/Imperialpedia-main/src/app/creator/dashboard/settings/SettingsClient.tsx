@@ -57,7 +57,7 @@ export function SettingsClient({ initialSettings }: SettingsClientProps) {
           <Shield className="h-4 w-4" />
           <Text variant="label" className="text-[10px] font-bold tracking-widest uppercase">Expert Control</Text>
         </div>
-        <Text variant="h1" className="text-3xl font-bold">Studio Settings</Text>
+        <Text variant="h1" as="h1" className="text-3xl font-bold">Studio Settings</Text>
         <Text variant="bodySmall" className="text-muted-foreground mt-1">
           Manage your professional identity and intelligence delivery preferences.
         </Text>

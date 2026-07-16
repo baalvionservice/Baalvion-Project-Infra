@@ -103,7 +103,7 @@ export function PremiumClient({ data }: PremiumClientProps) {
           <Zap className="h-4 w-4" />
           <Text variant="label" className="text-[10px] font-bold uppercase tracking-widest">Premium Intelligence</Text>
         </div>
-        <Text variant="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Unlock the Full Index</Text>
+        <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold tracking-tight">Unlock the Full Index</Text>
         <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
           Scale your research with advanced AI tools, real-time portfolio oversight, and exclusive expert intelligence nodes.
         </Text>

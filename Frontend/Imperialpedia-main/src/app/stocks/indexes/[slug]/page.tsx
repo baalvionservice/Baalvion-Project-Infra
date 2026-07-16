@@ -53,7 +53,7 @@ export default async function IndexDetailPage({ params }: PageProps) {
               {idx.country}
             </Badge>
           </div>
-          <Text variant="h1" className="mb-6">{idx.name}</Text>
+          <Text variant="h1" as="h1" className="mb-6">{idx.name}</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed mb-10">
             {idx.description}
           </Text>

@@ -28,7 +28,7 @@ export default function TermsOfServicePage() {
               Legal
             </Text>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
+          <Text variant="h1" as="h1" className="text-4xl lg:text-5xl font-bold tracking-tight">
             Terms of Service
           </Text>
           <Text variant="bodySmall" className="text-muted-foreground">

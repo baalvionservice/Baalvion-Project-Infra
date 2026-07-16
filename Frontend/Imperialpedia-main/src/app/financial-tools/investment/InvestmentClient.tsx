@@ -104,7 +104,7 @@ export default function InvestmentClient() {
               Investment ROI
             </Badge>
           </div>
-          <Text variant="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Investment ROI Engine</Text>
+          <Text variant="h1" as="h1" className="text-4xl lg:text-6xl font-bold mb-4 tracking-tight">Investment ROI Engine</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
             Project your long-term wealth accumulation by modeling recurring contributions against historical market benchmarks.
           </Text>

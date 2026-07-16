@@ -54,7 +54,7 @@ export default function ForgotPasswordPage() {
                   <Mail className="h-8 w-8 text-primary" />
                 </div>
                 <Text
-                  variant="h1"
+                  variant="h1" as="h1"
                   className="text-3xl font-bold tracking-tight"
                 >
                   Check your email
@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
               </Text>
             </Link>
             <div className="space-y-2">
-              <Text variant="h1" className="text-3xl font-bold tracking-tight">
+              <Text variant="h1" as="h1" className="text-3xl font-bold tracking-tight">
                 Forgot password?
               </Text>
               <Text variant="body" className="text-muted-foreground">

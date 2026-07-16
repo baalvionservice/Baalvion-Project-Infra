@@ -70,7 +70,7 @@ export function TrustDirectoryClient() {
             <ShieldCheck className="h-4 w-4" />
             <Text variant="label" className="text-[10px] font-bold tracking-widest uppercase">Verified Authority Index</Text>
           </div>
-          <Text variant="h1" className="text-4xl font-bold tracking-tight">Trusted Contributors</Text>
+          <Text variant="h1" as="h1" className="text-4xl font-bold tracking-tight">Trusted Contributors</Text>
           <Text variant="body" className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
             Explore our curated directory of verified analysts and institutional experts. Trust is quantified via our proprietary precision algorithms.
           </Text>

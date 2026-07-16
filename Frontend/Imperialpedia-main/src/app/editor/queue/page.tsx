@@ -81,7 +81,7 @@ export default function EditorialQueuePage() {
               <FileSearch className="h-4 w-4" />
               <Text variant="label" className="text-[10px] font-bold tracking-widest uppercase">Pipeline Triage</Text>
             </div>
-            <Text variant="h1" className="text-3xl font-bold tracking-tight">Submission Matrix</Text>
+            <Text variant="h1" as="h1" className="text-3xl font-bold tracking-tight">Submission Matrix</Text>
           </div>
         </div>
         <div className="flex items-center gap-3">

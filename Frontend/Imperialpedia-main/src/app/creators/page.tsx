@@ -31,7 +31,7 @@ export default async function CreatorsDiscoveryPage() {
               <UsersIcon className="h-5 w-5" />
               <Text variant="label" className="font-bold tracking-widest">Global Network</Text>
             </div>
-            <Text variant="h1" className="mb-6">Financial Intelligence Experts</Text>
+            <Text variant="h1" as="h1" className="mb-6">Financial Intelligence Experts</Text>
             <Text variant="body" className="text-muted-foreground text-lg leading-relaxed">
               Connect with specialized creators who power the Imperialpedia index. From macro-economists to DeFi analysts, find the expertise you need to navigate the markets.
             </Text>
