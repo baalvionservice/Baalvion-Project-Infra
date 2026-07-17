@@ -1,0 +1,28 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-bg",
+      "description": "Futuristic grid background",
+      "imageUrl": "https://picsum.photos/seed/tech/1920/1080",
+      "imageHint": "cyberpunk grid"
+    },
+    {
+      "id": "avatar-teacher",
+      "description": "Professional avatar for teacher",
+      "imageUrl": "https://picsum.photos/seed/avatar/200/200",
+      "imageHint": "portrait professional"
+    },
+    {
+      "id": "product-sample",
+      "description": "Sample product image",
+      "imageUrl": "https://picsum.photos/seed/product/600/400",
+      "imageHint": "product luxury"
+    },
+    {
+      "id": "course-thumb",
+      "description": "Course thumbnail",
+      "imageUrl": "https://picsum.photos/seed/edu/800/450",
+      "imageHint": "education technology"
+    }
+  ]
+}
