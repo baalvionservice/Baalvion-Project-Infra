@@ -22,8 +22,17 @@ module.exports = {
         user: process.env.DB_USER || 'baalvion',
         password: process.env.DB_PASSWORD || '',
     },
+    // Prefer the discrete REDIS_HOST/PORT/PASSWORD vars every other consolidated
+    // service uses (see cms-service/config/appConfig.js) — that's what's actually
+    // configured in prod. REDIS_URL stays supported for local/docker-compose setups
+    // that prefer a single connection string, but was never set for this service in
+    // prod, which silently pointed the ingestion worker at a nonexistent localhost
+    // Redis (fail-open by design, so the HTTP API kept working while ingestion never ran).
     redis: {
-        url: process.env.REDIS_URL || 'redis://localhost:6379',
+        url: process.env.REDIS_URL || null,
+        host: process.env.REDIS_HOST || 'localhost',
+        port: Number(process.env.REDIS_PORT || 6379),
+        password: process.env.REDIS_PASSWORD || undefined,
     },
     developerService: {
         baseUrl: process.env.DEVELOPER_SERVICE_URL || 'http://localhost:3042',
