@@ -1,5 +1,5 @@
 
-import { Region, Listing, Thread, PremiumPlan } from './types';
+import { Region, Listing, PremiumPlan } from './types';
 
 export const REGIONS: Region[] = [
   { id: 'eap', name: 'East Asia & Pacific', icon: '🌏', description: 'Digital innovation hub focusing on hardware arbitrage and manufacturing loops.' },
@@ -53,39 +53,6 @@ export const MARKETPLACE_LISTINGS: Listing[] = [
   }
 ];
 
-export const FORUM_THREADS: Thread[] = [
-  {
-    id: 't1',
-    title: 'Current State of European Digital Logistics',
-    authorRole: 'Researcher',
-    replies: 142,
-    views: 3402,
-    timestamp: '1 hour ago',
-    country: 'Germany',
-    regionId: 'eca'
-  },
-  {
-    id: 't2',
-    title: 'South Asia Infrastructure Scaling Issues',
-    authorRole: 'Professional',
-    replies: 89,
-    views: 1205,
-    timestamp: '4 hours ago',
-    country: 'India',
-    regionId: 'sa'
-  },
-  {
-    id: 't3',
-    title: 'Middle East Trade Route Digitalization',
-    authorRole: 'Developer',
-    replies: 56,
-    views: 890,
-    timestamp: '6 hours ago',
-    country: 'Saudi Arabia',
-    regionId: 'mena'
-  }
-];
-
 export const PREMIUM_PLANS: PremiumPlan[] = [
   {
     id: 'basic',
@@ -106,15 +73,6 @@ export const PREMIUM_PLANS: PremiumPlan[] = [
     price: '$199/mo',
     features: ['Real-time trade signals', 'Private consulting sessions', 'Zero-fee transactions', 'Global network voting power']
   }
-];
-
-export const ROLES = [
-  { id: 'dev', name: 'Developer', description: 'Builder of systems and protocols.' },
-  { id: 'pro', name: 'Professional', description: 'Industry veteran with deep expertise.' },
-  { id: 'res', name: 'Researcher', description: 'Analytical mind seeking hidden truths.' },
-  { id: 'std', name: 'Student', description: 'Eager mind climbing the knowledge ladder.' },
-  { id: 'tch', name: 'Teacher', description: 'Mentor guiding the next generation.' },
-  { id: 'oth', name: 'Other', description: 'Unique perspective in the underworld.' },
 ];
 
 export const EXPERIENCE_LEVELS = [

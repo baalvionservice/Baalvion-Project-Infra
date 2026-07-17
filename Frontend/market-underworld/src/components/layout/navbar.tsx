@@ -15,6 +15,7 @@ const NAV_ITEMS = [
   { name: 'Marketplace', path: '/marketplace' },
   { name: 'Live Sessions', path: '/live-sessions' },
   { name: 'Forum', path: '/forum' },
+  { name: 'Access', path: '/access' },
   { name: 'About', path: '/about' },
 ];
 

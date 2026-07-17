@@ -214,17 +214,6 @@ export interface Listing {
   seller?: { id: string; name: string; rating: number; reputation: number; isVerified: boolean };
 }
 
-export interface Thread {
-  id: string;
-  title: string;
-  authorRole: string;
-  replies: number;
-  views: number;
-  timestamp: string;
-  country: string;
-  regionId: string;
-}
-
 export interface PremiumPlan {
   id: string;
   name: string;
@@ -279,44 +268,6 @@ export interface Transaction {
   hash: string;
 }
 
-export interface ForumThread {
-  id: string;
-  title: string;
-  preview: string;
-  author: {
-    name: string;
-    avatar: string;
-    role: string;
-    region: string;
-    country: string;
-  };
-  category: string;
-  regionId: string;
-  views: number;
-  replies: number;
-  likes: number;
-  timestamp: string;
-  isPinned?: boolean;
-  isHot?: boolean;
-  isVip?: boolean;
-  isSolved?: boolean;
-  tags: string[];
-}
-
-export interface ForumReply {
-  id: string;
-  threadId: string;
-  content: string;
-  author: {
-    name: string;
-    avatar: string;
-    role: string;
-    region: string;
-    country: string;
-    postsCount: number;
-    memberSince: string;
-  };
-  likes: number;
-  timestamp: string;
-  isBestAnswer?: boolean;
-}
+// Forum thread/reply data now comes from community-service + NodeBB (see
+// src/lib/api/community.ts's ForumThread/ForumPost) — the mock shapes that used to live
+// here have been retired along with src/lib/mock-forum-data.ts.

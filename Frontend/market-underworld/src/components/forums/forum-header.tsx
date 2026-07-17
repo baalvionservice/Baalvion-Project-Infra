@@ -3,19 +3,14 @@
 
 import React from 'react'
 import Link from 'next/link'
-import { 
-  Home, 
-  Users, 
-  Book, 
-  CircleHelp, 
-  Shield, 
-  ShieldCheck, 
-  Megaphone, 
-  Gem, 
-  MessageSquare, 
+import {
+  Home,
+  Book,
+  CircleHelp,
+  ShieldCheck,
+  MessageSquare,
   Search,
   ChevronDown,
-  ChevronRight
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -24,7 +19,7 @@ export const ForumHeader = () => {
     <header className="bg-[#1a2634] border-b border-white/5 pt-10">
       <div className="container mx-auto px-6">
         {/* Brand/Mascot Area */}
-        <div className="flex items-center gap-6 mb-10">
+        <Link href="/" className="flex items-center gap-6 mb-10 w-fit">
           <div className="flex flex-col items-center">
             {/* Mascot SVG */}
             <div className="w-16 h-16 text-[#3498db] mb-2">
@@ -41,41 +36,28 @@ export const ForumHeader = () => {
               <span className="text-[#FF3D57] uppercase mt-1">Underworld</span>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Main Navigation Bar */}
         <div className="bg-[#111b26] border border-white/10 rounded-t-lg flex flex-wrap items-center overflow-hidden">
           <div className="flex flex-wrap flex-1">
-            <NavItem href="/forum" icon={<Home className="w-4 h-4" />} label="Forums" hasChevron />
-            <NavItem href="/forum/users" icon={<Users className="w-4 h-4" />} label="Users" hasChevron />
-            <NavItem href="#" icon={<Book className="w-4 h-4" />} label="Rules" />
-            <NavItem href="#" icon={<CircleHelp className="w-4 h-4" />} label="Arbitration" />
-            <NavItem href="#" icon={<Shield className="w-4 h-4" />} label="AutoGarant" />
-            <NavItem href="#" icon={<ShieldCheck className="w-4 h-4" />} label="Garant-Service" />
-            <NavItem href="#" label="USA BANK/FULLZ" variant="danger" />
-            <NavItem href="#" label="LOOKUP SSN" variant="danger" />
-            <NavItem href="#" label="SKUP E-CODES" variant="danger" />
-            <NavItem href="/forum/advertising" icon={<Megaphone className="w-4 h-4" />} label="Advertising" />
-            <NavItem href="#" icon={<Gem className="w-4 h-4" />} label="Elevation of rights" />
-            <NavItem href="#" icon={<MessageSquare className="w-4 h-4" />} label="Duty" />
+            <NavItem href="/" icon={<Home className="w-4 h-4" />} label="Home" />
+            <NavItem href="/forum" icon={<MessageSquare className="w-4 h-4" />} label="Communities" hasChevron />
+            <NavItem href="/marketplace" icon={<Book className="w-4 h-4" />} label="Marketplace" />
+            <NavItem href="/access" icon={<ShieldCheck className="w-4 h-4" />} label="Get Access" />
           </div>
 
           <div className="flex items-center px-4 border-l border-white/5 gap-6 h-12">
             <Link href="/auth/signin" className="text-[11px] font-bold text-white uppercase hover:text-[#3498db] transition-colors">Entrance</Link>
             <Link href="/auth/registration" className="text-[11px] font-bold text-white uppercase hover:text-[#3498db] transition-colors">Registration</Link>
-            <button className="flex items-center gap-2 text-[#3498db] hover:text-white transition-colors bg-[#1a2634] px-4 py-1.5 rounded-md border border-white/5">
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-global-search'))}
+              className="flex items-center gap-2 text-[#3498db] hover:text-white transition-colors bg-[#1a2634] px-4 py-1.5 rounded-md border border-white/5"
+            >
               <Search className="w-4 h-4" />
               <span className="text-[11px] font-bold uppercase">Search</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Sub Navigation Bar */}
-      <div className="bg-[#2980b9] h-10 border-t border-white/10">
-        <div className="container mx-auto px-6 h-full flex items-center gap-8">
-          <Link href="#" className="text-[11px] font-bold text-white uppercase hover:opacity-80 transition-all">New messages</Link>
-          <Link href="#" className="text-[11px] font-bold text-white uppercase hover:opacity-80 transition-all">Search messages</Link>
         </div>
       </div>
     </header>

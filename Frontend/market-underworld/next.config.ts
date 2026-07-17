@@ -49,6 +49,24 @@ const nextConfig: NextConfig = {
         destination: '/app/home',
         permanent: true,
       },
+      // /forums/* was a duplicate, partially-broken forum tree (mismatched region-id
+      // datasets caused real 404s) — consolidated onto /forum/*, which is now backed by
+      // real community-service + NodeBB data instead of mock region arrays.
+      {
+        source: '/forums',
+        destination: '/forum',
+        permanent: true,
+      },
+      {
+        source: '/forums/thread/:id',
+        destination: '/forum/thread/:id',
+        permanent: true,
+      },
+      {
+        source: '/forums/:slug',
+        destination: '/forum/:slug',
+        permanent: true,
+      },
     ];
   },
 

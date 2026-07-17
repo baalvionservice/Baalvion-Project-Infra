@@ -30,13 +30,14 @@ export const Footer = () => {
           <div>
             <h4 className="text-[10px] font-bold text-semantic-warning uppercase tracking-[0.2em] mb-8">Access Control</h4>
             <ul className="space-y-4 text-xs font-bold text-[#6B7280] uppercase tracking-widest">
+              <li><Link href="/access" className="hover:text-[#39FF14]">Get Access</Link></li>
+              <li><Link href="/auth/signin" className="hover:text-white">Operator Sign In</Link></li>
               <li>
                 <Link href="/demo-access" className="flex items-center gap-2 text-semantic-warning hover:text-white transition-colors">
                   <ShieldAlert className="w-3.5 h-3.5" />
                   Demo Panel Access
                 </Link>
               </li>
-              <li><Link href="/auth/signin" className="hover:text-white">Operator Sign In</Link></li>
             </ul>
           </div>
         </div>

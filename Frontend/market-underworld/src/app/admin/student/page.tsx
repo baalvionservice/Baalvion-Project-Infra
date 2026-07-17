@@ -136,8 +136,8 @@ export default function StudentAdminOverview() {
 
           <NexusCard className="p-8 border-white/5 bg-gradient-to-br from-cyan-500/10 to-transparent">
             <h3 className="font-bold mb-4">Community Engagement</h3>
-            <p className="text-xs text-gray-500 leading-relaxed mb-6">You haven't posted in the South Asia forum this week. Share your progress to earn 50 XP!</p>
-            <Link href="/forums">
+            <p className="text-xs text-gray-500 leading-relaxed mb-6">You haven't posted in your communities this week. Share your progress to earn 50 XP!</p>
+            <Link href="/forum">
               <NexusButton variant="outline" className="w-full border-cyan-500/20 text-cyan-400 text-[10px] uppercase font-bold hover:bg-cyan-500/10">Go to Forums</NexusButton>
             </Link>
           </NexusCard>
