@@ -6,6 +6,7 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 router.get('/', ctrl.listAssets);
 router.post('/', authMiddleware, ctrl.upsertAsset);
 router.get('/:symbol/summary', ctrl.getAssetSummary);
+router.get('/:symbol/detail', ctrl.getAssetDetail);
 router.get('/:symbol', ctrl.getAsset);
 
 module.exports = router;

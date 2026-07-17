@@ -71,6 +71,10 @@ export interface CompanyEntity extends BaseEntity {
   website: string;
   technologies: string[];
   competitors: string[];
+  // Stock ticker, when publicly traded (null for private companies e.g. OpenAI).
+  // Powers the live quote section on /companies/[slug] via imperialpedia-service's
+  // /assets/:symbol (synced from cms-service's live market-data pipeline).
+  ticker?: string | null;
 }
 
 export interface IndustryEntity extends BaseEntity {

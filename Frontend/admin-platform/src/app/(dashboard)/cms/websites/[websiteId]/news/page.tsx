@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
   Plus, Search, RefreshCw, ListChecks, FileText, TrendingUp, TrendingDown,
   Upload as UploadIcon, PenSquare, Clock, AlertTriangle, Radio, Timer,
-  Globe, Database, HeartPulse, ChevronRight, X, Rss,
+  Globe, Database, HeartPulse, ChevronRight, X, Rss, LineChart,
 } from 'lucide-react';
 import {
   Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis,
@@ -20,6 +20,7 @@ import { computeNewsroomStats } from '@/lib/newsroom/stats';
 import KpiCard from '@/components/cms/newsroom/KpiCard';
 import LiveFeed from '@/components/cms/newsroom/LiveFeed';
 import UploadsTable from '@/components/cms/newsroom/UploadsTable';
+import MarketDataPanel from '@/components/cms/newsroom/MarketDataPanel';
 import { cn } from '@/lib/utils/cn';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
@@ -388,6 +389,10 @@ export default function NewsroomDashboardPage({ params }: { params: Promise<{ we
           </div>
         </Panel>
       </div>
+
+      <Panel title="Live Market Data" icon={LineChart} className="mb-5">
+        <MarketDataPanel websiteId={websiteId} />
+      </Panel>
 
       <div className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
         <Panel title="Live News Feed" icon={Radio}>

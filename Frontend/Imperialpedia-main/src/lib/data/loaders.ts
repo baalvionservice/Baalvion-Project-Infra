@@ -174,3 +174,31 @@ export async function getAllCountries() { return loadCountries(); }
 export async function getAllCompanies() { return loadCompanies(); }
 export async function getAllIndustries() { return loadIndustries(); }
 export async function getAllTechnologies() { return loadTechnologies(); }
+
+// --- Live market data (imperialpedia-service /assets, synced from cms-service) ---
+// No static fallback here (unlike entities) — a live price is either real or absent;
+// showing a stale bundled number would misrepresent it as current.
+export interface AssetQuote {
+  symbol: string;
+  name: string;
+  asset_type: string;
+  exchange: string | null;
+  current_price: number | null;
+  change_pct_24h: number | null;
+  market_cap: number | null;
+  volume_24h: number | null;
+  ai_summary: string | null;
+  sentiment: 'bullish' | 'bearish' | 'neutral';
+  last_updated_at: string | null;
+}
+
+export async function getAssetQuote(symbol: string): Promise<AssetQuote | undefined> {
+  try {
+    const res = await fetch(`${IMP_API}/assets/${encodeURIComponent(symbol)}`, { cache: 'no-store' });
+    if (!res.ok) return undefined;
+    const json = await res.json();
+    return json?.data ?? undefined;
+  } catch {
+    return undefined;
+  }
+}

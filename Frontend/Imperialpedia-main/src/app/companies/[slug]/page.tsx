@@ -16,6 +16,7 @@ import { RelatedHighlights } from '@/components/entity/RelatedHighlights';
 import { AIInsight } from '@/components/ai/AIInsight';
 import { EntityAnalytics } from '@/components/entity/EntityAnalytics';
 import { EntityTags } from '@/components/entity/EntityTags';
+import { LiveQuoteCard } from '@/components/entity/LiveQuoteCard';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -78,6 +79,7 @@ export default async function Page({ params }: PageProps) {
 
           <aside className="lg:col-span-4 space-y-10">
             <div className="sticky top-24 space-y-10">
+              {company.ticker && <LiveQuoteCard ticker={company.ticker} />}
               <EntityTags entity={company} type="company" />
               <AIInsight entityType="company" slug={company.slug} />
               <RelatedHighlights entityId={company.id} />

@@ -32,6 +32,7 @@ db.CmsWebsiteIntegration = require('./cmsWebsiteIntegration')(sequelize, DataTyp
 db.CmsMediaReference  = require('./cmsMediaReference')(sequelize, DataTypes);
 db.CmsSeoRedirect     = require('./cmsSeoRedirect')(sequelize, DataTypes);
 db.CmsAuthor          = require('./cmsAuthor')(sequelize, DataTypes);
+db.MarketAsset        = require('./marketAsset')(sequelize, DataTypes);
 
 // ── Unified Analytics Platform (schema `analytics`) ───────────────────────────
 // Standalone event spine — no Sequelize associations to the `cms` tables (they
