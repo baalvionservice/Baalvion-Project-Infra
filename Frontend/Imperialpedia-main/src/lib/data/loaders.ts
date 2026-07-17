@@ -194,7 +194,10 @@ export interface AssetQuote {
 
 export async function getAssetQuote(symbol: string): Promise<AssetQuote | undefined> {
   try {
-    const res = await fetch(`${IMP_API}/assets/${encodeURIComponent(symbol)}`, { cache: 'no-store' });
+    const res = await fetch(`${IMP_API}/assets/${encodeURIComponent(symbol)}`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(6000),
+    });
     if (!res.ok) return undefined;
     const json = await res.json();
     return json?.data ?? undefined;

@@ -22,7 +22,10 @@ export interface MarketAssetRow {
 
 export async function getAllMarketAssets(): Promise<MarketAssetRow[]> {
   try {
-    const res = await fetch(`${IMP_API}/assets?limit=100`, { next: { revalidate: 30 } });
+    const res = await fetch(`${IMP_API}/assets?limit=100`, {
+      next: { revalidate: 30 },
+      signal: AbortSignal.timeout(8000),
+    });
     if (!res.ok) return [];
     const json = await res.json();
     return (json?.data?.items ?? []) as MarketAssetRow[];
@@ -91,6 +94,7 @@ export async function getAssetDetail(symbol: string, range: string): Promise<Ass
   try {
     const res = await fetch(`${IMP_API}/assets/${encodeURIComponent(symbol)}/detail?range=${encodeURIComponent(range)}`, {
       next: { revalidate: 30 },
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return null;
     const json = await res.json();
