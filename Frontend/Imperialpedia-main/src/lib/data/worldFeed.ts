@@ -153,6 +153,7 @@ async function getWorldConfig(): Promise<WorldConfig | null> {
   try {
     const res = await fetch(`${IMPERIALPEDIA_API}/world-config`, {
       next: { revalidate: 120 },
+      signal: AbortSignal.timeout(6000),
     });
     if (!res.ok) return null;
     const json = (await res.json()) as { data?: WorldConfig };
@@ -215,6 +216,7 @@ const CANONICAL_SYMBOL_MAP: Record<string, string> = {
 async function fetchImperialpediaQuote(canonicalSymbol: string): Promise<Quote> {
   const res = await fetch(`${IMPERIALPEDIA_API}/assets/${encodeURIComponent(canonicalSymbol)}`, {
     next: { revalidate: 30 },
+    signal: AbortSignal.timeout(6000),
   });
   if (!res.ok) throw new Error(`assets ${res.status} ${canonicalSymbol}`);
   const json = (await res.json()) as {

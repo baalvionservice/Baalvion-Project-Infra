@@ -87,8 +87,13 @@ async function ensureFresh() {
         const overview = await fetchLiveOverview();
         if (overview) {
             await upsertSummaries(overview);
-            _lastSyncAt = Date.now();
         }
+        // Advance the TTL window on both success AND failure — otherwise a
+        // persistently unreachable cms-service means every single request
+        // re-pays the full fetchLiveOverview() timeout budget forever, with
+        // no backoff (this is what caused the 2026-07-17 /market-news, /world
+        // and /markets/quote hangs in production).
+        _lastSyncAt = Date.now();
     })().finally(() => { _syncInFlight = null; });
     return _syncInFlight;
 }
