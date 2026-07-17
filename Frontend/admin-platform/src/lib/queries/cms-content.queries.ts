@@ -22,12 +22,13 @@ export const contentKeys = {
   deletionRequests: (websiteId: string) => [...contentKeys.all, 'deletion-requests', websiteId] as const,
 };
 
-export const useContentList = (params: ContentListParams) =>
+export const useContentList = (params: ContentListParams, options?: { refetchInterval?: number }) =>
   useQuery({
     queryKey: contentKeys.list(params),
     queryFn: () => cmsContentApi.list(params).then((r) => r.data),
     placeholderData: keepPreviousData,
     enabled: !!params.websiteId,
+    refetchInterval: options?.refetchInterval,
   });
 
 export const useContentItem = (id: string) =>

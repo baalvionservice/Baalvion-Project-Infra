@@ -3,39 +3,65 @@
 import { use, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Radio, TrendingUp, Star, ArrowLeft, FileText } from 'lucide-react';
-import PageHeader from '@/components/common/PageHeader';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils/cn';
-import ContentWorkflowBadge from '@/components/cms/ContentWorkflowBadge';
+import {
+  Plus, Search, RefreshCw, ListChecks, FileText, TrendingUp, TrendingDown,
+  Upload as UploadIcon, PenSquare, Clock, AlertTriangle, Radio, Timer,
+  Globe, Database, HeartPulse, ChevronRight, X,
+} from 'lucide-react';
+import {
+  Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis,
+} from 'recharts';
+import type { LucideIcon } from 'lucide-react';
 import { useContentList } from '@/lib/queries/cms-content.queries';
-import { useWebsite } from '@/lib/queries/cms-websites.queries';
+import { useWebsite, useWebsiteStats, useWebsiteMembers } from '@/lib/queries/cms-websites.queries';
 import { useNewsTaxonomy } from '@/lib/hooks/useNewsTaxonomy';
 import { NEWS_TOPICS, NEWS_REGIONS } from '@/lib/constants/news-taxonomy';
+import { computeNewsroomStats } from '@/lib/newsroom/stats';
+import KpiCard from '@/components/cms/newsroom/KpiCard';
+import LiveFeed from '@/components/cms/newsroom/LiveFeed';
+import UploadsTable from '@/components/cms/newsroom/UploadsTable';
+import { cn } from '@/lib/utils/cn';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
-import { formatDate } from '@/lib/utils/format';
-import type { ContentItem } from '@/lib/types/cms-content.types';
+import type { ContentItem, ContentWorkflowStatus } from '@/lib/types/cms-content.types';
 
-const dayKey = (iso: string) => iso.slice(0, 10);
+const REFRESH_MS = 12_000;
+const BG = '#0F1115';
+const CARD = '#181C22';
+const BORDER = '#242A33';
+const TEXT = '#F5F7FA';
+const MUTED = '#9CA3AF';
+const ACCENT = '#2D7FF9';
+const SUCCESS = '#16C784';
+const WARNING = '#F59E0B';
+const DANGER = '#EF4444';
 
 const RANGES = [
   { id: 'today', label: 'Today', days: 1 },
-  { id: '7d', label: '7 Days', days: 7 },
-  { id: '30d', label: '30 Days', days: 30 },
+  { id: '7d', label: 'Last 7 Days', days: 7 },
+  { id: '30d', label: 'Last 30 Days', days: 30 },
   { id: 'all', label: 'All Time', days: Infinity },
 ] as const;
 type RangeId = (typeof RANGES)[number]['id'];
 
 function withinRange(item: ContentItem, days: number): boolean {
   if (!Number.isFinite(days)) return true;
-  const cutoff = Date.now() - days * 86_400_000;
-  return Date.parse(item.createdAt) >= cutoff;
+  return Date.now() - Date.parse(item.createdAt) <= days * 86_400_000;
 }
 
-export default function NewsDashboardPage({ params }: { params: Promise<{ websiteId: string }> }) {
+function Panel({ title, icon: Icon, children, className }: { title: string; icon?: LucideIcon; children: React.ReactNode; className?: string }) {
+  return (
+    <div className={cn('rounded-xl border p-4', className)} style={{ background: CARD, borderColor: BORDER }}>
+      <div className="mb-3 flex items-center gap-2">
+        {Icon && <Icon className="h-4 w-4" style={{ color: MUTED }} />}
+        <h3 className="text-sm font-semibold" style={{ color: TEXT }}>{title}</h3>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+export default function NewsroomDashboardPage({ params }: { params: Promise<{ websiteId: string }> }) {
   const { websiteId } = use(params);
   const router = useRouter();
   const { setBreadcrumbs } = useUIStore();
@@ -43,20 +69,9 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
   useEffect(() => { setActiveWebsiteId(websiteId); }, [websiteId, setActiveWebsiteId]);
 
   const { data: website } = useWebsite(websiteId);
-  // News Desk is Imperialpedia-only for now — bounce any other site back to its
-  // overview instead of rendering a dashboard scoped to a workflow it doesn't use yet.
   useEffect(() => {
     if (website && website.slug !== 'imperialpedia') router.replace(`/cms/websites/${websiteId}`);
   }, [website, websiteId, router]);
-
-  const { topicIdByName, regionIdBySlug } = useNewsTaxonomy(websiteId);
-  const [range, setRange] = useState<RangeId>('7d');
-  // cms-service caps list requests at 100 — plenty at current news volume; if this
-  // site is ever publishing 100+ news items within 30 days, paginate here instead.
-  const { data, isLoading, isError, refetch } = useContentList({
-    websiteId, page: 1, limit: 100, type: 'news',
-  });
-
   useEffect(() => {
     setBreadcrumbs([
       { label: 'CMS', href: '/cms' },
@@ -65,265 +80,396 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
     ]);
   }, [website, setBreadcrumbs, websiteId]);
 
+  const { topicIdByName, regionIdBySlug } = useNewsTaxonomy(websiteId);
+  const { data: members } = useWebsiteMembers(website?.id ?? '');
+  const { data: siteStats } = useWebsiteStats(website?.id ?? '');
+
+  const [range, setRange] = useState<RangeId>('7d');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<ContentWorkflowStatus | ''>('');
+  const [topicFilter, setTopicFilter] = useState('');
+  const [regionFilter, setRegionFilter] = useState('');
+  const [activity, setActivity] = useState<'hour' | 'day' | 'week'>('day');
+  const [secondsAgo, setSecondsAgo] = useState(0);
+
+  const { data, isLoading, isError, refetch, dataUpdatedAt } = useContentList(
+    { websiteId, page: 1, limit: 100, type: 'news' },
+    { refetchInterval: REFRESH_MS },
+  );
+
+  // "Last updated Xs ago" ticker — independent of the fetch interval itself.
+  useEffect(() => {
+    const id = setInterval(() => setSecondsAgo(Math.round((Date.now() - dataUpdatedAt) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [dataUpdatedAt]);
+
   const allItems = useMemo(() => data?.data ?? [], [data]);
 
-  // id → label lookups for exactly the 13 fixed topics and 6 fixed regions —
-  // anything else assigned to an item (a leftover CMS category) is ignored here,
-  // this table tracks the taxonomy the newsroom actually uses.
   const topicLabelById = useMemo(() => {
     const m = new Map<string, string>();
-    NEWS_TOPICS.forEach((t) => {
-      const id = topicIdByName.get(t.toLowerCase());
-      if (id) m.set(id, t);
-    });
+    NEWS_TOPICS.forEach((t) => { const id = topicIdByName.get(t.toLowerCase()); if (id) m.set(id, t); });
     return m;
   }, [topicIdByName]);
-
   const regionLabelById = useMemo(() => {
     const m = new Map<string, string>();
-    NEWS_REGIONS.forEach((r) => {
-      const id = regionIdBySlug.get(r.slug);
-      if (id) m.set(id, r.label);
-    });
+    NEWS_REGIONS.forEach((r) => { const id = regionIdBySlug.get(r.slug); if (id) m.set(id, r.label); });
     return m;
   }, [regionIdBySlug]);
-
-  const itemTopics = (item: ContentItem) => item.categoryIds.map((id) => topicLabelById.get(id)).filter((v): v is string => !!v);
-  const itemRegion = (item: ContentItem) => item.categoryIds.map((id) => regionLabelById.get(id)).find((v): v is string => !!v);
+  const authorNameById = useMemo(() => {
+    const m = new Map<number, string>();
+    (members ?? []).forEach((mem) => m.set(mem.userId, mem.user.fullName));
+    return m;
+  }, [members]);
 
   const rangeDays = RANGES.find((r) => r.id === range)!.days;
-  const items = useMemo(() => allItems.filter((i) => withinRange(i, rangeDays)), [allItems, rangeDays]);
+  const filteredItems = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return allItems.filter((i) => {
+      if (!withinRange(i, rangeDays)) return false;
+      if (statusFilter && i.status !== statusFilter) return false;
+      if (topicFilter) {
+        const topics = i.categoryIds.map((id) => topicLabelById.get(id));
+        if (!topics.includes(topicFilter)) return false;
+      }
+      if (regionFilter) {
+        const regions = i.categoryIds.map((id) => regionLabelById.get(id));
+        if (!regions.includes(regionFilter)) return false;
+      }
+      if (q && !i.title.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [allItems, rangeDays, statusFilter, topicFilter, regionFilter, search, topicLabelById, regionLabelById]);
 
-  const stats = useMemo(() => {
-    const byTopic = new Map<string, number>(NEWS_TOPICS.map((t) => [t, 0]));
-    const byRegion = new Map<string, number>(NEWS_REGIONS.map((r) => [r.label, 0]));
-    let published = 0;
-    for (const item of items) {
-      itemTopics(item).forEach((t) => byTopic.set(t, (byTopic.get(t) ?? 0) + 1));
-      const region = itemRegion(item);
-      if (region) byRegion.set(region, (byRegion.get(region) ?? 0) + 1);
-      if (item.status === 'published') published += 1;
+  const stats = useMemo(
+    () => computeNewsroomStats(filteredItems, topicLabelById, regionLabelById),
+    [filteredItems, topicLabelById, regionLabelById],
+  );
+
+  const hasFilters = !!(statusFilter || topicFilter || regionFilter || search);
+  const clearFilters = () => { setStatusFilter(''); setTopicFilter(''); setRegionFilter(''); setSearch(''); };
+
+  const activityData = useMemo(() => {
+    if (activity === 'hour') {
+      const buckets = Array.from({ length: 24 }, (_, h) => ({ label: `${h}:00`, uploaded: 0, published: 0 }));
+      allItems.filter((i) => withinRange(i, 1)).forEach((i) => {
+        const h = new Date(i.createdAt).getHours();
+        buckets[h].uploaded += 1;
+        if (i.publishedAt && new Date(i.publishedAt).getHours() === h) buckets[h].published += 1;
+      });
+      return buckets;
     }
-
-    const byDay = new Map<string, number>();
-    for (const item of allItems) {
-      const created = dayKey(item.createdAt);
-      byDay.set(created, (byDay.get(created) ?? 0) + 1);
+    if (activity === 'week') {
+      const buckets = Array.from({ length: 8 }, (_, i) => {
+        const start = Date.now() - (7 - i) * 7 * 86_400_000;
+        return { label: `Wk ${i + 1}`, start, uploaded: 0, published: 0 };
+      });
+      allItems.forEach((i) => {
+        const t = Date.parse(i.createdAt);
+        const b = [...buckets].reverse().find((bk) => t >= bk.start);
+        if (b) b.uploaded += 1;
+      });
+      return buckets.map(({ label, uploaded, published }) => ({ label, uploaded, published }));
     }
-    const last7 = Array.from({ length: 7 }, (_, i) => {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const key = dayKey(d.toISOString());
-      return { key, label: d.toLocaleDateString(undefined, { weekday: 'short' }), count: byDay.get(key) ?? 0 };
-    }).reverse();
-    const maxDay = Math.max(1, ...last7.map((d) => d.count));
+    return stats.trend7.map((d) => ({ label: d.date.slice(5), uploaded: d.uploaded, published: d.published }));
+  }, [activity, allItems, stats.trend7]);
 
-    return {
-      total: items.length,
-      published,
-      draft: items.length - published,
-      byTopic: Array.from(byTopic.entries()).sort((a, b) => b[1] - a[1]),
-      byRegion: Array.from(byRegion.entries()).sort((a, b) => b[1] - a[1]),
-      last7,
-      maxDay,
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- itemTopics/itemRegion close over topicLabelById/regionLabelById, already deps
-  }, [items, allItems, topicLabelById, regionLabelById]);
+  const isLive = secondsAgo < REFRESH_MS / 1000 + 5;
 
   if (website && website.slug !== 'imperialpedia') return null;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Button variant="ghost" size="sm" className="-ml-2 mb-2" asChild>
-          <Link href={`/cms/websites/${websiteId}`}>
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            {website?.name ?? 'Website'}
+    <div className="-m-6 min-h-[calc(100vh-4rem)] p-6" style={{ background: BG }}>
+      {/* Header */}
+      <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-lg font-bold" style={{ color: TEXT }}>ImperialPedia Newsroom</h1>
+          <span className="flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-semibold" style={{ borderColor: SUCCESS, color: SUCCESS }}>
+            <span className="relative flex h-1.5 w-1.5">
+              {isLive && <span className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-75" style={{ background: SUCCESS }} />}
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full" style={{ background: SUCCESS }} />
+            </span>
+            LIVE
+          </span>
+          <span className="text-xs" style={{ color: MUTED }}>
+            {isLoading ? 'Loading…' : `Updated ${secondsAgo}s ago`}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" style={{ color: MUTED }} />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search headlines…"
+              className="h-8 w-48 rounded-md border pl-8 pr-2 text-xs outline-none"
+              style={{ background: BG, borderColor: BORDER, color: TEXT }}
+            />
+          </div>
+          <div className="flex rounded-md border p-0.5" style={{ borderColor: BORDER }}>
+            {RANGES.map((r) => (
+              <button
+                key={r.id}
+                onClick={() => setRange(r.id)}
+                className="rounded px-2.5 py-1 text-xs font-medium transition-colors"
+                style={range === r.id ? { background: ACCENT, color: '#fff' } : { color: MUTED }}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => refetch()}
+            className="flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-colors hover:bg-white/5"
+            style={{ borderColor: BORDER, color: MUTED }}
+          >
+            <RefreshCw className={cn('h-3.5 w-3.5', isLoading && 'animate-spin')} />
+          </button>
+          <Link
+            href={`/cms/websites/${websiteId}/news/new`}
+            className="flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ background: ACCENT }}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Upload News
           </Link>
-        </Button>
-        <PageHeader
-          title="News"
-          description="Track how many stories go out, and in which topic and region."
-          actions={
-            <div className="flex gap-2">
-              <Button size="sm" variant="outline" asChild>
-                <Link href={`/cms/websites/${websiteId}/content?type=news`}>
-                  <FileText className="mr-2 h-4 w-4" />
-                  Full content manager
-                </Link>
-              </Button>
-              <Button size="sm" asChild>
-                <Link href={`/cms/websites/${websiteId}/news/new`}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add News
-                </Link>
-              </Button>
-            </div>
-          }
-        />
+          <button
+            onClick={() => setStatusFilter('pending_review')}
+            className="flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-colors hover:bg-white/5"
+            style={{ borderColor: BORDER, color: MUTED }}
+          >
+            <ListChecks className="h-3.5 w-3.5" />
+            Review Queue
+          </button>
+        </div>
       </div>
 
       {isError && (
-        <div className="flex items-center justify-between rounded-md border border-destructive/30 bg-destructive/5 px-4 py-2 text-sm text-destructive">
-          <span>Couldn&apos;t load news.</span>
-          <Button size="sm" variant="outline" onClick={() => refetch()}>Retry</Button>
+        <div className="mb-4 rounded-md border px-4 py-2 text-sm" style={{ borderColor: DANGER, color: DANGER, background: `${DANGER}0D` }}>
+          Couldn&apos;t load news. <button onClick={() => refetch()} className="underline">Retry</button>
         </div>
       )}
 
-      {/* Range selector */}
-      <div className="flex gap-1.5">
-        {RANGES.map((r) => (
-          <button
-            key={r.id}
-            onClick={() => setRange(r.id)}
-            className={cn(
-              'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
-              range === r.id ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-muted/60',
-            )}
-          >
-            {r.label}
+      {hasFilters && (
+        <div className="mb-4 flex items-center gap-2 text-xs" style={{ color: MUTED }}>
+          Filtered {topicFilter && `· Topic: ${topicFilter}`} {regionFilter && `· Region: ${regionFilter}`} {statusFilter && `· Status: ${statusFilter}`} {search && `· "${search}"`}
+          <button onClick={clearFilters} className="flex items-center gap-0.5 underline">
+            <X className="h-3 w-3" /> clear
           </button>
-        ))}
+        </div>
+      )}
+
+      {/* KPI grid */}
+      <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <KpiCard stat={stats.kpis.published} icon={FileText} />
+        <KpiCard stat={stats.kpis.uploaded} icon={UploadIcon} />
+        <KpiCard stat={stats.kpis.drafts} icon={PenSquare} />
+        <KpiCard stat={stats.kpis.scheduled} icon={Clock} />
+        <KpiCard stat={stats.kpis.breaking} icon={Radio} />
+        <KpiCard stat={stats.kpis.pendingReview} icon={ListChecks} />
+        <KpiCard stat={stats.kpis.staleDrafts} icon={AlertTriangle} />
+        <KpiCard
+          stat={{ label: 'Avg. Publish Time', value: stats.kpis.avgPublishMinutes ?? 0, trendPct: null, sparkline: [], color: ACCENT }}
+          icon={Timer}
+        />
       </div>
 
-      {/* At a glance */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Uploaded</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{isLoading ? <Skeleton className="h-8 w-12" /> : stats.total}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Published</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-green-600">{isLoading ? <Skeleton className="h-8 w-12" /> : stats.published}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Draft</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-muted-foreground">{isLoading ? <Skeleton className="h-8 w-12" /> : stats.draft}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* By topic / by region — the full fixed taxonomy, zeros included */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">By Topic</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1.5">
-            {isLoading ? (
-              <Skeleton className="h-40 w-full" />
-            ) : (
-              stats.byTopic.map(([topic, count]) => (
-                <div key={topic} className="flex items-center gap-2 text-sm">
-                  <span className="w-32 shrink-0 truncate">{topic}</span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary/70"
-                      style={{ width: `${stats.byTopic[0][1] ? (count / stats.byTopic[0][1]) * 100 : 0}%` }}
-                    />
-                  </div>
-                  <span className="w-6 shrink-0 text-right font-semibold">{count}</span>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">By Region</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1.5">
-            {isLoading ? (
-              <Skeleton className="h-40 w-full" />
-            ) : (
-              stats.byRegion.map(([region, count]) => (
-                <div key={region} className="flex items-center gap-2 text-sm">
-                  <span className="w-32 shrink-0 truncate">{region}</span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                    <div
-                      className="h-full rounded-full bg-primary/70"
-                      style={{ width: `${stats.byRegion[0][1] ? (count / stats.byRegion[0][1]) * 100 : 0}%` }}
-                    />
-                  </div>
-                  <span className="w-6 shrink-0 text-right font-semibold">{count}</span>
-                </div>
-              ))
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Last 7 days — always shown regardless of the range filter above, as a trend view */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm text-muted-foreground">Last 7 Days</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-end gap-3 h-24">
-            {stats.last7.map((d) => (
-              <div key={d.key} className="flex flex-1 flex-col items-center gap-1">
-                <div className="flex h-16 w-full items-end">
-                  <div
-                    className="w-full rounded-t bg-primary/70"
-                    style={{ height: `${Math.max(4, (d.count / stats.maxDay) * 100)}%` }}
-                    title={`${d.count} uploaded`}
-                  />
-                </div>
-                <span className="text-[10px] text-muted-foreground">{d.label}</span>
-                <span className="text-[10px] font-semibold">{d.count}</span>
-              </div>
+      <div className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* Publishing activity */}
+        <Panel title="Publishing Activity" icon={TrendingUp} className="lg:col-span-2">
+          <div className="mb-3 flex gap-1">
+            {(['hour', 'day', 'week'] as const).map((a) => (
+              <button
+                key={a}
+                onClick={() => setActivity(a)}
+                className="rounded px-2 py-0.5 text-[11px] font-medium capitalize transition-colors"
+                style={activity === a ? { background: `${ACCENT}26`, color: ACCENT } : { color: MUTED }}
+              >
+                {a}
+              </button>
             ))}
           </div>
-        </CardContent>
-      </Card>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={activityData}>
+              <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
+              <XAxis dataKey="label" tick={{ fontSize: 10, fill: MUTED }} axisLine={false} tickLine={false} interval={activity === 'hour' ? 2 : 0} />
+              <YAxis tick={{ fontSize: 10, fill: MUTED }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
+              <Tooltip contentStyle={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: 12 }} labelStyle={{ color: TEXT }} />
+              <Legend wrapperStyle={{ fontSize: 11, color: MUTED }} />
+              <Bar dataKey="uploaded" name="Uploaded" fill={ACCENT} radius={[3, 3, 0, 0]} isAnimationActive />
+              <Bar dataKey="published" name="Published" fill={SUCCESS} radius={[3, 3, 0, 0]} isAnimationActive />
+            </BarChart>
+          </ResponsiveContainer>
+        </Panel>
 
-      {/* Uploads in the selected range */}
-      <div className="space-y-2">
-        <h2 className="text-sm font-semibold">Uploads — {RANGES.find((r) => r.id === range)!.label}</h2>
-        <div className="rounded-md border divide-y">
-          {isLoading && Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-14 m-2" />)}
-          {!isLoading && items.length === 0 && (
-            <p className="p-6 text-center text-sm text-muted-foreground">
-              Nothing in this range. Click <span className="font-medium">Add News</span> to publish one.
-            </p>
-          )}
-          {items.slice(0, 50).map((item) => {
-            const topics = itemTopics(item);
-            const region = itemRegion(item);
-            return (
+        {/* Editorial pipeline */}
+        <Panel title="Editorial Pipeline" icon={ChevronRight}>
+          <div className="space-y-2">
+            {stats.pipeline.map((stage, i) => (
               <button
-                key={item.id}
-                onClick={() => router.push(`/cms/websites/${websiteId}/content/${item.id}`)}
-                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+                key={stage.key}
+                onClick={() => setStatusFilter(stage.statuses[0])}
+                className="flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors hover:bg-white/5"
+                style={{ borderColor: BORDER }}
               >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="truncate text-sm font-medium">{item.title}</p>
-                    {item.isBreaking && <Radio className="h-3 w-3 shrink-0 text-red-500" />}
-                    {item.isTrending && <TrendingUp className="h-3 w-3 shrink-0 text-orange-500" />}
-                    {item.isFeatured && <Star className="h-3 w-3 shrink-0 text-amber-500" />}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {[topics.join(', ') || 'No topic', region].filter(Boolean).join(' · ')} · {formatDate(item.createdAt)}
-                  </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-mono" style={{ color: MUTED }}>{i + 1}</span>
+                  <span className="h-2 w-2 rounded-full" style={{ background: stage.color }} />
+                  <span className="text-xs font-medium" style={{ color: TEXT }}>{stage.label}</span>
                 </div>
-                <ContentWorkflowBadge status={item.status} />
+                <div className="text-right">
+                  <p className="text-sm font-bold tabular-nums" style={{ color: TEXT }}>{stage.count}</p>
+                  {stage.avgWaitHours !== null && (
+                    <p className="text-[10px]" style={{ color: MUTED }}>{stage.avgWaitHours}h avg</p>
+                  )}
+                </div>
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      <div className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Panel title="Coverage Health — By Topic">
+          <div className="space-y-1.5">
+            {stats.byTopic.map(([topic, count]) => (
+              <button
+                key={topic}
+                onClick={() => setTopicFilter(topicFilter === topic ? '' : topic)}
+                className="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left hover:bg-white/5"
+              >
+                <span className="w-32 shrink-0 truncate text-xs" style={{ color: count === 0 ? DANGER : TEXT }}>{topic}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full" style={{ background: BORDER }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${stats.byTopic[0][1] ? (count / stats.byTopic[0][1]) * 100 : 0}%`,
+                      background: count === 0 ? DANGER : ACCENT,
+                    }}
+                  />
+                </div>
+                <span className="w-6 shrink-0 text-right text-xs font-semibold tabular-nums" style={{ color: count === 0 ? DANGER : TEXT }}>{count}</span>
+              </button>
+            ))}
+          </div>
+        </Panel>
+
+        <Panel title="Regional Coverage">
+          <div className="space-y-1.5">
+            {stats.byRegion.map(([region, count]) => (
+              <button
+                key={region}
+                onClick={() => setRegionFilter(regionFilter === region ? '' : region)}
+                className="flex w-full items-center gap-2 rounded px-1 py-0.5 text-left hover:bg-white/5"
+              >
+                <span className="w-32 shrink-0 truncate text-xs" style={{ color: count === 0 ? DANGER : TEXT }}>{region}</span>
+                <div className="h-2 flex-1 overflow-hidden rounded-full" style={{ background: BORDER }}>
+                  <div
+                    className="h-full rounded-full"
+                    style={{
+                      width: `${stats.byRegion[0][1] ? (count / stats.byRegion[0][1]) * 100 : 0}%`,
+                      background: count === 0 ? DANGER : SUCCESS,
+                    }}
+                  />
+                </div>
+                <span className="w-6 shrink-0 text-right text-xs font-semibold tabular-nums" style={{ color: count === 0 ? DANGER : TEXT }}>{count}</span>
+              </button>
+            ))}
+          </div>
+        </Panel>
+      </div>
+
+      <div className="mb-5 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <Panel title="Live News Feed" icon={Radio}>
+          <LiveFeed items={allItems} topicLabelById={topicLabelById} regionLabelById={regionLabelById} onSelect={(id) => router.push(`/cms/websites/${websiteId}/content/${id}`)} />
+        </Panel>
+
+        <Panel title="Breaking News Monitor" icon={AlertTriangle}>
+          {stats.breakingItems.length === 0 ? (
+            <p className="py-8 text-center text-xs" style={{ color: MUTED }}>No breaking news detected.</p>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
+                {stats.sourceBreakdown.map(([source, count]) => (
+                  <span key={source} className="rounded-full border px-2 py-0.5 text-[11px]" style={{ borderColor: DANGER, color: DANGER }}>
+                    {source} <span className="font-bold">{count}</span>
+                  </span>
+                ))}
+              </div>
+              <div className="space-y-1.5">
+                {stats.breakingItems.slice(0, 6).map((item) => (
+                  <button
+                    key={item.id}
+                    onClick={() => router.push(`/cms/websites/${websiteId}/content/${item.id}`)}
+                    className="flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left hover:bg-white/5"
+                    style={{ borderColor: BORDER }}
+                  >
+                    <span className="truncate text-xs" style={{ color: TEXT }}>{item.title}</span>
+                    <span className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase" style={{ color: item.status === 'published' ? SUCCESS : WARNING, background: item.status === 'published' ? `${SUCCESS}1A` : `${WARNING}1A` }}>
+                      {item.status === 'published' ? 'Published' : 'Awaiting Review'}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </Panel>
+      </div>
+
+      {/* Recent uploads table */}
+      <Panel title={`Recent Uploads — ${RANGES.find((r) => r.id === range)!.label}`} icon={FileText} className="mb-5">
+        <UploadsTable
+          items={filteredItems.slice(0, 50)}
+          topicLabelById={topicLabelById}
+          regionLabelById={regionLabelById}
+          authorNameById={authorNameById}
+          websiteId={websiteId}
+          websiteDomain={website?.domain}
+        />
+      </Panel>
+
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        {/* 7-day trend */}
+        <Panel title="7-Day Trend" icon={TrendingDown} className="lg:col-span-2">
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={stats.trend7}>
+              <CartesianGrid strokeDasharray="3 3" stroke={BORDER} vertical={false} />
+              <XAxis dataKey="date" tickFormatter={(d) => d.slice(5)} tick={{ fontSize: 10, fill: MUTED }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: MUTED }} axisLine={false} tickLine={false} width={24} allowDecimals={false} />
+              <Tooltip contentStyle={{ background: CARD, border: `1px solid ${BORDER}`, borderRadius: 6, fontSize: 12 }} labelStyle={{ color: TEXT }} />
+              <Legend wrapperStyle={{ fontSize: 11, color: MUTED }} />
+              <Bar dataKey="uploaded" name="Uploaded" stackId="a" fill={ACCENT} />
+              <Bar dataKey="published" name="Published" stackId="a" fill={SUCCESS} />
+              <Bar dataKey="draft" name="Draft" stackId="a" fill={WARNING} />
+              <Bar dataKey="scheduled" name="Scheduled" stackId="a" fill="#8B5CF6" radius={[3, 3, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Panel>
+
+        {/* System health — real signals only; no fabricated queue/worker/AI status */}
+        <Panel title="System Health" icon={HeartPulse}>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-2" style={{ color: MUTED }}><Globe className="h-3.5 w-3.5" /> Site Status</span>
+              <span className="flex items-center gap-1.5 font-medium" style={{ color: website?.status === 'active' ? SUCCESS : WARNING }}>
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: website?.status === 'active' ? SUCCESS : WARNING }} />
+                {website?.status === 'active' ? 'Operational' : (website?.status ?? '—')}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-2" style={{ color: MUTED }}><Database className="h-3.5 w-3.5" /> Database</span>
+              <span className="flex items-center gap-1.5 font-medium" style={{ color: isError ? DANGER : SUCCESS }}>
+                <span className="h-1.5 w-1.5 rounded-full" style={{ background: isError ? DANGER : SUCCESS }} />
+                {isError ? 'Degraded' : 'Connected'}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+              <span style={{ color: MUTED }}>Media Storage</span>
+              <span className="font-medium" style={{ color: TEXT }}>
+                {siteStats?.mediaStorageUsedMb ? `${Math.round(siteStats.mediaStorageUsedMb)} MB` : '—'}
+              </span>
+            </div>
+          </div>
+        </Panel>
       </div>
     </div>
   );
