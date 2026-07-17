@@ -1,5 +1,6 @@
 'use strict';
 const contentService = require('../service/contentService');
+const wireImportService = require('../service/wireImportService');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 
 const list = async (req, res, next) => {
@@ -58,6 +59,14 @@ const remove = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+const importWire = async (req, res, next) => {
+    try {
+        const limit = Math.min(100, Math.max(1, parseInt(req.query.limit, 10) || 50));
+        const result = await wireImportService.importWireNews(req.params.websiteId, req.user.id, limit);
+        return sendSuccess(req, res, result);
+    } catch (err) { return next(err); }
+};
+
 const bulk = async (req, res, next) => {
     try {
         const result = await contentService.bulkUpdate(req.params.websiteId, req.user.id, req.validated);
@@ -87,6 +96,6 @@ const dismissDeletionRequest = async (req, res, next) => {
 };
 
 module.exports = {
-    list, create, getOne, getPreviewToken, update, autosave, duplicate, remove, bulk,
+    list, create, getOne, getPreviewToken, update, autosave, duplicate, remove, bulk, importWire,
     listDeletionRequests, requestDeletion, dismissDeletionRequest,
 };

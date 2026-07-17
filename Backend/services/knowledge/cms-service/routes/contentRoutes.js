@@ -14,6 +14,7 @@ const router = Router({ mergeParams: true }); // receives websiteId from parent
 router.get('/', loadCmsRole, requireCmsRole('cms_viewer'), ctrl.list);
 router.post('/', loadCmsRole, requireCmsRole('cms_contributor'), validate(createContentSchema), ctrl.create);
 router.post('/bulk', loadCmsRole, requireCmsRole('cms_editor'), validate(bulkUpdateSchema), ctrl.bulk);
+router.post('/import-wire', loadCmsRole, requireCmsRole('cms_editor'), ctrl.importWire);
 
 // Pending approvals — /cms/websites/:websiteId/content/pending
 router.get('/pending', loadCmsRole, requireCmsRole('cms_reviewer'), wfCtrl.listPending);

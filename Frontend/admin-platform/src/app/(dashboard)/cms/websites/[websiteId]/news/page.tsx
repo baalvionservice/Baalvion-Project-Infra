@@ -6,13 +6,13 @@ import Link from 'next/link';
 import {
   Plus, Search, RefreshCw, ListChecks, FileText, TrendingUp, TrendingDown,
   Upload as UploadIcon, PenSquare, Clock, AlertTriangle, Radio, Timer,
-  Globe, Database, HeartPulse, ChevronRight, X,
+  Globe, Database, HeartPulse, ChevronRight, X, Rss,
 } from 'lucide-react';
 import {
   Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from 'recharts';
 import type { LucideIcon } from 'lucide-react';
-import { useContentList } from '@/lib/queries/cms-content.queries';
+import { useContentList, useImportWireNews } from '@/lib/queries/cms-content.queries';
 import { useWebsite, useWebsiteStats, useWebsiteMembers } from '@/lib/queries/cms-websites.queries';
 import { useNewsTaxonomy } from '@/lib/hooks/useNewsTaxonomy';
 import { NEWS_TOPICS, NEWS_REGIONS } from '@/lib/constants/news-taxonomy';
@@ -96,6 +96,7 @@ export default function NewsroomDashboardPage({ params }: { params: Promise<{ we
     { websiteId, page: 1, limit: 100, type: 'news' },
     { refetchInterval: REFRESH_MS },
   );
+  const { mutate: importWire, isPending: isImporting } = useImportWireNews();
 
   // "Last updated Xs ago" ticker — independent of the fetch interval itself.
   useEffect(() => {
@@ -223,6 +224,16 @@ export default function NewsroomDashboardPage({ params }: { params: Promise<{ we
             style={{ borderColor: BORDER, color: MUTED }}
           >
             <RefreshCw className={cn('h-3.5 w-3.5', isLoading && 'animate-spin')} />
+          </button>
+          <button
+            onClick={() => importWire(websiteId)}
+            disabled={isImporting}
+            className="flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition-colors hover:bg-white/5 disabled:opacity-50"
+            style={{ borderColor: BORDER, color: MUTED }}
+            title="Pull real wire articles (BBC, TechCrunch, MarketWatch, etc.) in as draft news, tagged by topic + region"
+          >
+            <Rss className={cn('h-3.5 w-3.5', isImporting && 'animate-pulse')} />
+            {isImporting ? 'Syncing…' : 'Sync Wire News'}
           </button>
           <Link
             href={`/cms/websites/${websiteId}/news/new`}

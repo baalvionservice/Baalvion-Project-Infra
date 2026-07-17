@@ -209,6 +209,13 @@ export const cmsContentApi = {
   bulkDelete: (ids: string[]) =>
     cmsApiClient.post<ApiResponse<void>>(`/cms/websites/${wid()}/content/bulk`, { ids, action: 'delete' }),
 
+  // Pulls real articles from news-service (the platform's wire-ingestion service) in
+  // as draft news items, tagged by topic + region. See cms-service's wireImportService.
+  importWire: (websiteId: string, limit = 50) =>
+    cmsApiClient.post<ApiResponse<{ imported: number; skipped: number; total: number; configured: boolean }>>(
+      `/cms/websites/${websiteId}/content/import-wire`, null, { params: { limit } },
+    ),
+
   // Deletion requests — the alternative for roles below cms_editor, who can't call `delete` above.
   deletionRequests: {
     list: async (websiteId: string) => {

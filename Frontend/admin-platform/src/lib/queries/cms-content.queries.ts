@@ -126,6 +126,24 @@ export const useBulkDeleteContent = () => {
   });
 };
 
+export const useImportWireNews = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (websiteId: string) => cmsContentApi.importWire(websiteId).then((r) => r.data.data),
+    onSuccess: (result) => {
+      qc.invalidateQueries({ queryKey: contentKeys.all });
+      if (!result.configured) {
+        toast.error('Wire import is not configured on the server yet (missing INTERNAL_API_KEY on cms-service)');
+      } else if (result.imported === 0) {
+        toast.info(result.total === 0 ? 'No new wire articles available right now' : 'Nothing new — all recent wire articles are already imported');
+      } else {
+        toast.success(`Imported ${result.imported} wire ${result.imported === 1 ? 'story' : 'stories'} as drafts`);
+      }
+    },
+    onError: (e: { message: string }) => toast.error(e.message),
+  });
+};
+
 export const useDeletionRequests = (websiteId: string) =>
   useQuery({
     queryKey: contentKeys.deletionRequests(websiteId),
