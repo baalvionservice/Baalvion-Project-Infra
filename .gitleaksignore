@@ -54,12 +54,15 @@ b267882a0ea4f013063e6a4aa2a941705df447e2:Frontend/help-baalvion/src/app/(docs)/a
 # branch, but the original commit remains in this PR's history, so it's
 # suppressed by fingerprint here (the fingerprint pins the specific
 # commit+line, so a real secret introduced anywhere else in this file would
-# still fail the scan).
-838c41c6194b82884b942bcbf5a9c2ff9e20b49e:Frontend/market-underworld/src/data/mockData.ts:generic-api-key:111
+# still fail the scan). Re-pinned after a branch rebase changed this commit's
+# SHA (was 838c41c6); the historical commit content is identical.
+e8e42392968e972b2c71267baeadbedfb3564bdc:Frontend/market-underworld/src/data/mockData.ts:generic-api-key:111
 
 # Same false positive as above — an earlier version of this very comment block
 # quoted the flagged mock value verbatim for documentation purposes, which
 # then itself matched the generic-api-key heuristic in that commit. Fixed
 # going forward by describing the value instead of quoting it; suppressing
 # the already-historical commit by fingerprint rather than rewriting history.
-af050a25b36473f457b0d992e91d814dd4e313f8:.gitleaksignore:generic-api-key:51
+# Re-pinned after a branch rebase changed this commit's SHA (af050a25 -> the
+# SHA below); the historical commit content is identical.
+ff84c90c5d1d992d42a242cbe557b11efc9de3f5:.gitleaksignore:generic-api-key:51
