@@ -4,8 +4,11 @@
  * Real data, fetched server-side with ISR caching, with graceful fallback to the
  * static demo set (./worldRegions) on any failure — the page can never break:
  *
- *   • Markets / indices / FX / commodities / crypto → Yahoo Finance (keyless)
- *   • Watchlist megacaps                             → Yahoo Finance (keyless)
+ *   • Markets / indices / FX / commodities / crypto → imperialpedia-service /assets
+ *     (synced from cms-service's live Finnhub/Twelve Data/Alpha Vantage/FRED/
+ *     CoinGecko pipeline — market_assets is the single source of truth). Falls
+ *     back to Yahoo Finance (keyless) only if that pipeline is unreachable.
+ *   • Watchlist megacaps                             → same, Yahoo fallback
  *   • News: hero, live "Latest", topical sections    → GDELT 2.0 doc API (keyless)
  *   • Owned editorial blended into the feed          → Baalvion CMS (cms-service)
  *
@@ -186,6 +189,57 @@ interface Quote {
   volume?: number;
 }
 
+// ── imperialpedia-service /assets (synced from cms-service's live market-data
+// pipeline — Finnhub/Twelve Data/Alpha Vantage/FRED/CoinGecko) — now the PRIMARY
+// quote source. Yahoo (below) is kept only as a fallback if imperialpedia-service
+// is unreachable, so this page can never go fully dark.
+//
+// Maps every Yahoo-style symbol used in YAHOO_SYMBOLS/WATCHLIST_SYMBOLS to the
+// canonical symbol cms-service's market_assets tracks. A few Yahoo symbols with
+// no dedicated proxy (Shenzhen, CSI 300, ChiNext, Nifty 50, STOXX 600) share the
+// closest broad China/India/Europe proxy already tracked — an approximation,
+// not a 1:1 match, same tradeoff the original 4-region World proxies already made.
+const CANONICAL_SYMBOL_MAP: Record<string, string> = {
+  "^DJI": "DJI", "^GSPC": "SPX", "^IXIC": "IXIC", "^RUT": "RUT", "^VIX": "VIX",
+  "^BVSP": "BOVESPA", "^FTSE": "FTSE100", "^GDAXI": "DAX", "^FCHI": "CAC40",
+  "^IBEX": "IBEX35", "^STOXX": "EUROPE", "FTSEMIB.MI": "FTSEMIB",
+  "^N225": "NIKKEI", "^HSI": "HANGSENG", "000001.SS": "SHANGHAI",
+  "^KS11": "KOSPI", "^AXJO": "ASX200", "^BSESN": "SENSEX", "^NSEI": "SENSEX",
+  "399001.SZ": "SHANGHAI", "000300.SS": "SHANGHAI", "399006.SZ": "SHANGHAI",
+  "GC=F": "XAUUSD", "CL=F": "WTI", "BZ=F": "BRENT", "BTC-USD": "BTC",
+  "EURUSD=X": "EURUSD", "JPY=X": "USDJPY", "CNY=X": "USDCNY",
+  "BRL=X": "USDBRL", "INR=X": "USDINR", "^TNX": "DGS10",
+  // Watchlist tickers are already canonical (AAPL/MSFT/NVDA/GOOGL/AMZN/META/TSLA/JPM).
+};
+
+async function fetchImperialpediaQuote(canonicalSymbol: string): Promise<Quote> {
+  const res = await fetch(`${IMPERIALPEDIA_API}/assets/${encodeURIComponent(canonicalSymbol)}`, {
+    next: { revalidate: 30 },
+  });
+  if (!res.ok) throw new Error(`assets ${res.status} ${canonicalSymbol}`);
+  const json = (await res.json()) as {
+    data?: { current_price?: number | string | null; change_pct_24h?: number | string | null; volume_24h?: number | string | null };
+  };
+  const a = json?.data;
+  const price = a?.current_price != null ? Number(a.current_price) : null;
+  if (!a || price == null || Number.isNaN(price)) throw new Error(`assets: no price for ${canonicalSymbol}`);
+  const changePct = a.change_pct_24h != null ? Number(a.change_pct_24h) : 0;
+  const prev = changePct !== 0 ? price / (1 + changePct / 100) : price;
+  const volume = a.volume_24h != null ? Number(a.volume_24h) : undefined;
+  return { price, prev, volume };
+}
+
+/** Primary quote fetch — imperialpedia-service first, Yahoo as a fallback only if
+ * the internal pipeline has no mapping for this symbol or is unreachable. */
+async function fetchLiveQuote(symbol: string): Promise<Quote> {
+  const canonical = CANONICAL_SYMBOL_MAP[symbol] ?? symbol;
+  try {
+    return await fetchImperialpediaQuote(canonical);
+  } catch {
+    return fetchYahooQuote(symbol);
+  }
+}
+
 export async function fetchYahooQuote(symbol: string): Promise<Quote> {
   const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(
     symbol,
@@ -231,10 +285,10 @@ function toIndicator(def: SymbolDef, q: Quote): Indicator {
   };
 }
 
-/** Fetch indicators from Yahoo for the given symbol set; null if too few succeed. */
+/** Fetch indicators for the given symbol set; null if too few succeed. */
 async function buildIndicators(defs: SymbolDef[]): Promise<Indicator[] | null> {
   if (!defs.length) return null;
-  const settled = await Promise.allSettled(defs.map((d) => fetchYahooQuote(d.symbol)));
+  const settled = await Promise.allSettled(defs.map((d) => fetchLiveQuote(d.symbol)));
   const out: Indicator[] = [];
   settled.forEach((r, i) => {
     if (r.status === "fulfilled") out.push(toIndicator(defs[i], r.value));
@@ -283,7 +337,7 @@ async function buildWatchlist(
   symbols: { symbol: string; name: string }[],
 ): Promise<WorldData["watchlist"] | null> {
   if (!symbols.length) return null;
-  const settled = await Promise.allSettled(symbols.map((w) => fetchYahooQuote(w.symbol)));
+  const settled = await Promise.allSettled(symbols.map((w) => fetchLiveQuote(w.symbol)));
   const out: WorldData["watchlist"] = [];
   settled.forEach((r, i) => {
     if (r.status !== "fulfilled") return;

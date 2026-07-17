@@ -22,6 +22,9 @@ import { getCategoryArticles, listCmsContent, cmsContentToArticle } from "@/serv
 import { staticCategoryNews, staticArticleList } from "@/services/data/static-content";
 import { topicCopy, staticCategoryFor } from "@/lib/topic-config";
 import { marketIndicators } from "@/lib/data/worldData";
+import { getWorldDataLive } from "@/lib/data/worldFeed";
+import { getAllMarketAssets, groupAssets, computeMovers } from "@/lib/data/marketsLoader";
+import { MarketsBreakdown } from "@/components/pages/MarketsBreakdown";
 import { FeaturedArticleCard } from "@/components/pages/FeaturedArticleCard";
 import { HorizontalArticleCard } from "@/components/pages/HorizontalArticleCard";
 import { MarketSnapshot } from "@/components/pages/MarketSnapshot";
@@ -144,6 +147,19 @@ async function fetchTopicArticles(slug: string, limit: number): Promise<NewsArti
  */
 export async function MarketNewsHub() {
   const copy = topicCopy(SLUG);
+
+  // "Today's Markets" — live indicators from the same market_assets-backed
+  // pipeline that powers /world (imperialpedia-service /assets, synced from
+  // cms-service's Finnhub/Twelve Data/Alpha Vantage/FRED/CoinGecko feeds).
+  // Falls back to the static worldData.ts set if that's ever unreachable.
+  const liveWorld = await getWorldDataLive("world");
+  const snapshotIndicators = liveWorld.indicators.length ? liveWorld.indicators : marketIndicators;
+
+  // Full CNBC-depth breakdown (movers/sectors/regions/crypto/commodities/
+  // currencies/bonds) — single source of truth via imperialpedia-service /assets.
+  const allAssets = await getAllMarketAssets();
+  const assetGroups = groupAssets(allAssets);
+  const movers = computeMovers(assetGroups.stocks);
 
   // 1) Main feed — same CMS-first fallback chain as every other topic page.
   let articles: NewsArticle[] = await getCategoryArticles(SLUG, 40);
@@ -310,7 +326,22 @@ export async function MarketNewsHub() {
       <TrustBar />
 
       <div className="max-w-7xl mx-auto px-4 py-4 space-y-16">
-        <MarketSnapshot indicators={marketIndicators} />
+        <MarketSnapshot indicators={snapshotIndicators} />
+
+        <MarketsBreakdown
+          usIndices={assetGroups.usIndices}
+          sectors={assetGroups.sectors}
+          gainers={movers.gainers}
+          losers={movers.losers}
+          europe={assetGroups.europe}
+          asiaPacific={assetGroups.asiaPacific}
+          china={assetGroups.china}
+          emergingMarkets={assetGroups.emergingMarkets}
+          crypto={assetGroups.crypto}
+          commodities={assetGroups.commodities}
+          currencies={assetGroups.currencies}
+          bonds={assetGroups.bonds}
+        />
 
         {featured && (
           <section className="grid grid-cols-1 lg:grid-cols-3 gap-8">

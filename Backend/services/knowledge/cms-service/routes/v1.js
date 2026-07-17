@@ -10,7 +10,9 @@ const publicRoutes = require('./publicRoutes');
 const integrationRoutes = require('./integrationRoutes');
 const analyticsRoutes = require('./analyticsRoutes');
 const collectRoutes = require('./collectRoutes');
+const marketDataRoutes = require('./marketDataRoutes');
 const integrationController = require('../controller/integrationController');
+const marketDataController = require('../controller/marketDataController');
 
 const router = Router();
 
@@ -33,6 +35,19 @@ router.get('/collect.js', require('../controller/collectController').script);
 // INTERNAL resolver — services fetch a website's live (decrypted) keys here.
 router.get('/internal/integrations/:websiteSlug', internalAuth, integrationController.resolve);
 
+// INTERNAL — other services (imperialpedia-service's market_assets/asset_summaries
+// sync) pull live quotes here rather than re-implementing the Finnhub/Twelve Data/
+// Alpha Vantage/FRED/CoinGecko fetchers themselves. Same controller/service as the
+// staff-authenticated /cms/market-data/overview — just gated by the shared internal
+// secret instead of a user session, mirroring the integrations resolver above.
+router.get('/internal/market-data/overview', internalAuth, marketDataController.getOverview);
+
+// INTERNAL — imperialpedia-service's public /assets/:symbol/detail lazily pulls
+// chart/indicators/performance from here to enrich its own asset_summaries row,
+// so the public quote page gets full depth without cms-service being called
+// directly from the frontend (imperialpedia-service stays the single public API).
+router.get('/internal/market-data/quote/:symbol', internalAuth, marketDataController.getQuote);
+
 // Org-wide integration summary for the dashboard "Website Connections" widget.
 router.get('/cms/integrations/summary', authMiddleware, integrationController.summary);
 
@@ -41,6 +56,10 @@ router.use('/cms/websites', authMiddleware, websiteRoutes);
 
 // Media library (org-scoped, global across the org's websites)
 router.use('/cms/media', authMiddleware, mediaRoutes);
+
+// Live market data (indices/stocks/crypto/forex/commodities/bond yields) for the
+// newsroom dashboard — free-tier external feeds, org-wide (not website-scoped).
+router.use('/cms/market-data', authMiddleware, marketDataRoutes);
 
 // Website-scoped taxonomy, content, and integration/key routes.
 // A slug in :websiteId is normalised to the canonical UUID inside loadCmsRole

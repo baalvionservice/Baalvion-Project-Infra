@@ -12,11 +12,22 @@
     "headquarters": "Santa Clara, CA",
     "employees": 26000,
     "website": "https://nvidia.com",
-    "technologies": ["generative-ai", "graphics-processing"],
-    "competitors": ["amd", "intel"],
-    "tags": ["AI", "chips", "growth"],
+    "technologies": [
+      "generative-ai",
+      "graphics-processing"
+    ],
+    "competitors": [
+      "amd",
+      "intel"
+    ],
+    "tags": [
+      "AI",
+      "chips",
+      "growth"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "NVDA"
   },
   {
     "id": "comp-2",
@@ -31,11 +42,24 @@
     "headquarters": "Cupertino, CA",
     "employees": 164000,
     "website": "https://apple.com",
-    "technologies": ["mobile-devices", "semiconductors", "services"],
-    "competitors": ["microsoft", "alphabet"],
-    "tags": ["blue-chip", "dividend", "large-cap", "technology-stocks"],
+    "technologies": [
+      "mobile-devices",
+      "semiconductors",
+      "services"
+    ],
+    "competitors": [
+      "microsoft",
+      "alphabet"
+    ],
+    "tags": [
+      "blue-chip",
+      "dividend",
+      "large-cap",
+      "technology-stocks"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "AAPL"
   },
   {
     "id": "comp-3",
@@ -50,11 +74,25 @@
     "headquarters": "Redmond, WA",
     "employees": 228000,
     "website": "https://microsoft.com",
-    "technologies": ["cloud-computing", "generative-ai", "enterprise-software"],
-    "competitors": ["apple", "alphabet"],
-    "tags": ["blue-chip", "dividend", "large-cap", "technology-stocks", "ai-stocks"],
+    "technologies": [
+      "cloud-computing",
+      "generative-ai",
+      "enterprise-software"
+    ],
+    "competitors": [
+      "apple",
+      "alphabet"
+    ],
+    "tags": [
+      "blue-chip",
+      "dividend",
+      "large-cap",
+      "technology-stocks",
+      "ai-stocks"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "MSFT"
   },
   {
     "id": "comp-4",
@@ -69,11 +107,23 @@
     "headquarters": "Seattle, WA",
     "employees": 1550000,
     "website": "https://amazon.com",
-    "technologies": ["cloud-computing", "logistics-automation", "generative-ai"],
-    "competitors": ["microsoft", "alphabet"],
-    "tags": ["large-cap", "growth", "technology-stocks"],
+    "technologies": [
+      "cloud-computing",
+      "logistics-automation",
+      "generative-ai"
+    ],
+    "competitors": [
+      "microsoft",
+      "alphabet"
+    ],
+    "tags": [
+      "large-cap",
+      "growth",
+      "technology-stocks"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "AMZN"
   },
   {
     "id": "comp-5",
@@ -88,11 +138,23 @@
     "headquarters": "Austin, TX",
     "employees": 140000,
     "website": "https://tesla.com",
-    "technologies": ["electric-vehicles", "battery-storage", "autonomous-driving"],
-    "competitors": ["nvidia"],
-    "tags": ["growth", "meme-stock", "ev-stocks", "large-cap"],
+    "technologies": [
+      "electric-vehicles",
+      "battery-storage",
+      "autonomous-driving"
+    ],
+    "competitors": [
+      "nvidia"
+    ],
+    "tags": [
+      "growth",
+      "meme-stock",
+      "ev-stocks",
+      "large-cap"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "TSLA"
   },
   {
     "id": "comp-6",
@@ -107,11 +169,23 @@
     "headquarters": "Mountain View, CA",
     "employees": 182000,
     "website": "https://abc.xyz",
-    "technologies": ["generative-ai", "cloud-computing", "digital-advertising"],
-    "competitors": ["microsoft", "meta"],
-    "tags": ["large-cap", "technology-stocks", "ai-stocks"],
+    "technologies": [
+      "generative-ai",
+      "cloud-computing",
+      "digital-advertising"
+    ],
+    "competitors": [
+      "microsoft",
+      "meta"
+    ],
+    "tags": [
+      "large-cap",
+      "technology-stocks",
+      "ai-stocks"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "GOOGL"
   },
   {
     "id": "comp-7",
@@ -126,11 +200,22 @@
     "headquarters": "Menlo Park, CA",
     "employees": 74000,
     "website": "https://meta.com",
-    "technologies": ["digital-advertising", "generative-ai", "virtual-reality"],
-    "competitors": ["alphabet"],
-    "tags": ["large-cap", "technology-stocks", "growth"],
+    "technologies": [
+      "digital-advertising",
+      "generative-ai",
+      "virtual-reality"
+    ],
+    "competitors": [
+      "alphabet"
+    ],
+    "tags": [
+      "large-cap",
+      "technology-stocks",
+      "growth"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "META"
   },
   {
     "id": "comp-8",
@@ -147,9 +232,15 @@
     "website": "https://berkshirehathaway.com",
     "technologies": [],
     "competitors": [],
-    "tags": ["value-stocks", "blue-chip", "large-cap", "dividend"],
+    "tags": [
+      "value-stocks",
+      "blue-chip",
+      "large-cap",
+      "dividend"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "BRKB"
   },
   {
     "id": "comp-9",
@@ -164,11 +255,23 @@
     "headquarters": "Santa Clara, CA",
     "employees": 124800,
     "website": "https://intel.com",
-    "technologies": ["quantum-computing", "generative-ai"],
-    "competitors": ["nvidia", "tsmc"],
-    "tags": ["semiconductors", "hardware", "blue-chip", "dividend"],
+    "technologies": [
+      "quantum-computing",
+      "generative-ai"
+    ],
+    "competitors": [
+      "nvidia",
+      "tsmc"
+    ],
+    "tags": [
+      "semiconductors",
+      "hardware",
+      "blue-chip",
+      "dividend"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "INTC"
   },
   {
     "id": "comp-10",
@@ -183,11 +286,20 @@
     "headquarters": "Hsinchu, Taiwan",
     "employees": 76000,
     "website": "https://tsmc.com",
-    "technologies": ["quantum-computing"],
-    "competitors": ["intel"],
-    "tags": ["semiconductors", "foundry", "large-cap"],
+    "technologies": [
+      "quantum-computing"
+    ],
+    "competitors": [
+      "intel"
+    ],
+    "tags": [
+      "semiconductors",
+      "foundry",
+      "large-cap"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": "TSM"
   },
   {
     "id": "comp-11",
@@ -202,10 +314,22 @@
     "headquarters": "San Francisco, CA",
     "employees": 2000,
     "website": "https://openai.com",
-    "technologies": ["generative-ai", "large-language-models", "machine-learning"],
-    "competitors": ["alphabet", "microsoft"],
-    "tags": ["AI", "private-company", "startup"],
+    "technologies": [
+      "generative-ai",
+      "large-language-models",
+      "machine-learning"
+    ],
+    "competitors": [
+      "alphabet",
+      "microsoft"
+    ],
+    "tags": [
+      "AI",
+      "private-company",
+      "startup"
+    ],
     "created_at": "2024-01-01T00:00:00Z",
-    "updated_at": "2024-01-01T00:00:00Z"
+    "updated_at": "2024-01-01T00:00:00Z",
+    "ticker": null
   }
 ]

@@ -17,6 +17,7 @@ import { env } from "@/config/env";
 import { articleUrl } from "@/lib/data/article-url";
 import { ShareBar } from "@/components/article/ShareBar";
 import { articlesService } from "@/services/data";
+import { ArticleMarketWidget } from "@/components/markets/ArticleMarketWidget";
 import {
   resolveArticleForDetail,
   buildArticleDetailMetadata,
@@ -424,6 +425,8 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
 
           {/* ══ RIGHT: Sidebar ═══════════════════════════════════════════ */}
           <aside className="lg:sticky lg:top-24 lg:self-start space-y-8">
+            <ArticleMarketWidget title={article.title} tags={article.tags} excerpt={article.excerpt} />
+
             {relatedArticles.length > 0 && (
               <div>
                 <h3 className="text-xs font-black tracking-widest text-gray-900 uppercase border-b-2 border-[#CC0000] pb-2 mb-4">

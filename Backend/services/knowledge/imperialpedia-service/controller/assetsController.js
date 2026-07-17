@@ -3,6 +3,7 @@ const { Op } = require('sequelize');
 const db = require('../models');
 const { sendSuccess, sendPaginated } = require('../utils/response');
 const { AppError } = require('../utils/errors');
+const marketSyncService = require('../service/marketSyncService');
 
 const buildPagination = (total, page, limit) => ({
     total,
@@ -14,6 +15,7 @@ const buildPagination = (total, page, limit) => ({
 // GET /assets — public
 const listAssets = async (req, res, next) => {
     try {
+        await marketSyncService.ensureFresh();
         const page = Math.max(1, parseInt(req.query.page) || 1);
         const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 20));
         const offset = (page - 1) * limit;
@@ -46,6 +48,7 @@ const listAssets = async (req, res, next) => {
 // GET /assets/:symbol — public
 const getAsset = async (req, res, next) => {
     try {
+        await marketSyncService.ensureFresh();
         const asset = await db.AssetSummary.findOne({
             where: { symbol: req.params.symbol.toUpperCase() },
         });
@@ -98,6 +101,60 @@ const upsertAsset = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
+// GET /assets/:symbol/detail?range=1D|5D|1M|6M|YTD|1Y|5Y|MAX — public
+// Merges the local AssetSummary row with cms-service's richer per-symbol detail
+// (chart/indicators/performance/fundamentals, lazily pulled + cached) and this
+// service's OWN articles (imperialpedia-service is the single public API — the
+// frontend never calls cms-service directly for this).
+const getAssetDetail = async (req, res, next) => {
+    try {
+        await marketSyncService.ensureFresh();
+        const symbol = req.params.symbol.toUpperCase();
+        const range = typeof req.query.range === 'string' ? req.query.range : '1M';
+
+        const asset = await db.AssetSummary.findOne({ where: { symbol } });
+        if (!asset) return next(new AppError('NOT_FOUND', 'Asset not found', 404));
+
+        const detail = await marketSyncService.fetchAssetDetail(symbol, range);
+
+        const relatedArticles = await db.Article.findAll({
+            where: {
+                status: 'published',
+                [Op.or]: [
+                    { title: { [Op.iLike]: `%${asset.name}%` } },
+                    { tags: { [Op.contains]: [asset.name] } },
+                ],
+            },
+            order: [['published_at', 'DESC']],
+            limit: 3,
+            attributes: ['id', 'title', 'slug', 'published_at'],
+        }).catch(() => []);
+
+        return sendSuccess(req, res, {
+            symbol: asset.symbol,
+            name: asset.name,
+            asset_type: asset.asset_type,
+            exchange: asset.exchange,
+            current_price: asset.current_price,
+            change_pct_24h: asset.change_pct_24h,
+            market_cap: asset.market_cap,
+            volume_24h: asset.volume_24h,
+            ai_summary: asset.ai_summary,
+            sentiment: asset.sentiment,
+            last_updated_at: asset.last_updated_at,
+            marketStatus: detail?.marketStatus ?? null,
+            volume: detail?.volume ?? null,
+            chart: detail?.chart ?? [],
+            historical: detail?.historical ?? [],
+            performance: detail?.performance ?? null,
+            indicators: detail?.indicators ?? null,
+            fundamentals: detail?.fundamentals ?? null,
+            relatedCompanies: detail?.relatedCompanies ?? [],
+            relatedArticles,
+        });
+    } catch (err) { return next(err); }
+};
+
 // GET /assets/:symbol/summary — public
 const getAssetSummary = async (req, res, next) => {
     try {
@@ -118,4 +175,4 @@ const getAssetSummary = async (req, res, next) => {
     } catch (err) { return next(err); }
 };
 
-module.exports = { listAssets, getAsset, upsertAsset, getAssetSummary };
+module.exports = { listAssets, getAsset, upsertAsset, getAssetSummary, getAssetDetail };
