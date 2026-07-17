@@ -43,20 +43,24 @@ public class BillingFulfillmentClient {
   private final ObjectMapper objectMapper;
   private final HttpClient httpClient;
   private final String fulfillUrl;
+  private final String communityFulfillUrl;
   private final String internalSecret;
   private final boolean enabled;
 
   public BillingFulfillmentClient(
       ObjectMapper objectMapper,
       @Value("${app.billing.fulfill-url:http://app-edge-realtime:4000/v1/billing/fulfill}") String fulfillUrl,
+      @Value("${app.billing.community-fulfill-url:http://app-community:3064/v1/community/billing/fulfill}") String communityFulfillUrl,
       @Value("${app.billing.fulfill-enabled:true}") boolean enabled,
       @Value("${app.internal-secret:${INTERNAL_SERVICE_SECRET:}}") String internalSecret) {
     this.objectMapper = objectMapper;
     this.fulfillUrl = fulfillUrl;
+    this.communityFulfillUrl = communityFulfillUrl;
     this.enabled = enabled;
     this.internalSecret = internalSecret;
     if (enabled) {
       validateFulfillUrl(fulfillUrl);
+      validateFulfillUrl(communityFulfillUrl);
       if (internalSecret == null || internalSecret.isBlank()) {
         log.warn("Billing fulfillment is enabled but app.internal-secret/INTERNAL_SERVICE_SECRET is blank "
             + "— every CAPTURED webhook dispatch will fail until it is configured.");
@@ -86,10 +90,21 @@ public class BillingFulfillmentClient {
     }
 
     Map<String, Object> metadata = parseMetadata(payment.getRawRequest());
-    Object orgId = metadata.get("orgId");
-    if (orgId == null || String.valueOf(orgId).isBlank()) {
-      log.debug("Fulfillment skipped (no orgId in order metadata): charge={}", payment.getId());
-      return;
+
+    // Community-membership fulfillment (per-USER, no orgId) — a separate target from the
+    // org-level SaaS billing path below, additive and checked FIRST so it never falls through
+    // to the orgId skip-check (a community charge legitimately has no orgId at all).
+    boolean isCommunityFulfillment = "community".equals(metadata.get("fulfillTarget"));
+    String targetUrl;
+    if (isCommunityFulfillment) {
+      targetUrl = communityFulfillUrl;
+    } else {
+      Object orgId = metadata.get("orgId");
+      if (orgId == null || String.valueOf(orgId).isBlank()) {
+        log.debug("Fulfillment skipped (no orgId in order metadata): charge={}", payment.getId());
+        return;
+      }
+      targetUrl = fulfillUrl;
     }
 
     Map<String, Object> body = new LinkedHashMap<>();
@@ -111,7 +126,7 @@ public class BillingFulfillmentClient {
       return;
     }
 
-    HttpRequest request = HttpRequest.newBuilder(URI.create(fulfillUrl))
+    HttpRequest request = HttpRequest.newBuilder(URI.create(targetUrl))
         .timeout(Duration.ofSeconds(8))
         .header("content-type", "application/json")
         .header("x-internal-secret", internalSecret)

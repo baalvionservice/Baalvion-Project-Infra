@@ -1,0 +1,122 @@
+# Market Underworld forum stack — layer this on top of the main consolidated compose.
+#
+#   docker compose \
+#     -f deploy/consolidated/docker-compose.yml \
+#     -f deploy/consolidated/nodebb/docker-compose.nodebb.yml \
+#     --env-file deploy/consolidated/.env \
+#     up -d nodebb nodebb-postgres app-community
+#
+# Formalizes into the repo what was previously a prod-box-only hotfix (see
+# deploy/consolidated/caddy/Caddyfile's "Market Underworld community forum" block, whose
+# comment already notes the route had drifted from git). NodeBB stays genuinely separate —
+# its OWN dedicated Postgres, not the shared baalvion_db — per the existing owner directive;
+# community-service is the only thing that talks to both baalvion_db (its own `community`
+# schema) and NodeBB's Write API.
+#
+# First-time bring-up:
+#   1. up -d nodebb-postgres, wait healthy
+#   2. up -d nodebb, wait healthy, then complete ./nodebb setup interactively OR pass
+#      NODEBB_ADMIN_* env vars per NodeBB's own setup docs (not scripted here — one-time,
+#      operator-supervised step, not something to automate silently on every boot)
+#   3. node deploy/consolidated/nodebb/bootstrap/seed-categories.js  (idempotent — creates
+#      the 5 seed communities' NodeBB categories + member/mod/paid groups, see that file)
+#   4. up -d app-community
+
+x-nodebb-db: &nodebb-db
+  NODEBB_DB_HOST: nodebb-postgres
+  NODEBB_DB_PORT: "5432"
+  NODEBB_DB_USER: ${NODEBB_DB_USER:-nodebb}
+  NODEBB_DB_PASSWORD: ${NODEBB_DB_PASSWORD}
+  NODEBB_DB_NAME: ${NODEBB_DB_NAME:-nodebb}
+
+services:
+  nodebb-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    profiles: ["forum"]
+    mem_limit: 384m
+    mem_reservation: 128m
+    environment:
+      POSTGRES_USER: ${NODEBB_DB_USER:-nodebb}
+      POSTGRES_PASSWORD: ${NODEBB_DB_PASSWORD}
+      POSTGRES_DB: ${NODEBB_DB_NAME:-nodebb}
+    volumes:
+      - nodebb_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${NODEBB_DB_USER:-nodebb}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  nodebb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: baalvion-nodebb:local
+    restart: unless-stopped
+    profiles: ["forum"]
+    mem_limit: 768m
+    mem_reservation: 384m
+    environment:
+      <<: *nodebb-db
+      # NodeBB's real config precedence is config.json < environment (double-underscore
+      # nests, e.g. postgres__host) — ⚠ VERIFY AT EXECUTION TIME against the pinned
+      # NODEBB_VERSION's actual config docs before relying on these key names in prod.
+      postgres__host: nodebb-postgres
+      postgres__port: "5432"
+      postgres__user: ${NODEBB_DB_USER:-nodebb}
+      postgres__password: ${NODEBB_DB_PASSWORD}
+      postgres__database: ${NODEBB_DB_NAME:-nodebb}
+      url: ${NODEBB_URL:-https://forum.marketunderworld.com}
+      secret: ${NODEBB_SESSION_SECRET}
+    depends_on:
+      nodebb-postgres: { condition: service_healthy }
+    volumes:
+      - nodebb_uploads:/usr/src/app/public/uploads
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:4567/api/config',r=>process.exit(r.statusCode<500?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  # community-service — standalone deployment (own image/container), NOT part of the shared
+  # baalvion/backend pm2-multiplexed image or the memory-capped app-ecosystem group (see
+  # deploy/consolidated/pm2/ecosystem.config.js's comment on that box's 3.7GB ceiling).
+  app-community:
+    build:
+      context: ../../..
+      dockerfile: Backend/services/ecosystem/community-service/Dockerfile
+    image: baalvion-community-service:local
+    restart: unless-stopped
+    profiles: ["forum"]
+    env_file:
+      - path: ../.env
+        required: false
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      JWT_PUBLIC_KEY: ${JWT_PUBLIC_KEY}
+      NODEBB_BASE_URL: http://nodebb:4567
+      NODEBB_WRITE_API_TOKEN: ${NODEBB_WRITE_API_TOKEN}
+      INTERNAL_SERVICE_SECRET: ${INTERNAL_SERVICE_SECRET}
+      PORT: "3064"
+    depends_on:
+      nodebb: { condition: service_healthy }
+    mem_limit: 384m
+    mem_reservation: 128m
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:3064/health',r=>process.exit(r.statusCode<400?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+volumes:
+  nodebb_pgdata:
+  nodebb_uploads:

@@ -169,6 +169,24 @@ app:
       merchant-key: ${PAYU_MERCHANT_KEY:}
       merchant-salt: ${PAYU_MERCHANT_SALT:}
       base-url: ${PAYU_BASE_URL:https://secure.payu.in}
+    # Crypto (USDT-TRC20 / ETH-BEP20 / BTC) — NON-CUSTODIAL. These are the merchant's OWN
+    # public receiving addresses (never a private key), injected at deploy time like every
+    # other provider credential above. No mock/live split beyond the shared app.psp.mock flag.
+    # ETH-BEP20 = Binance-Peg Ethereum Token on BNB Smart Chain (BSC) — tracks ETH/USD, not a
+    # stablecoin, so it goes through the same live rate lookup as BTC (see CryptoGateway).
+    crypto:
+      btc-address: ${BTC_ADDRESS:}
+      usdt-trc20-address: ${USDT_TRC20_ADDRESS:}
+      eth-bep20-address: ${ETH_BEP20_ADDRESS:}
+      tron-grid-base-url: ${TRONGRID_BASE_URL:https://api.trongrid.io}
+      usdt-trc20-contract-address: ${USDT_TRC20_CONTRACT_ADDRESS:TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t}
+      mempool-base-url: ${MEMPOOL_BASE_URL:https://mempool.space/api}
+      rate-api-base-url: ${RATE_API_BASE_URL:https://api.coingecko.com/api/v3}
+      bsc-rpc-url: ${BSC_RPC_URL:https://bsc-dataseed.binance.org}
+      eth-bep20-contract-address: ${ETH_BEP20_CONTRACT_ADDRESS:0x2170Ed0880ac9A755fd29B2688956BD959F933F8}
+      btc-confirmations-required: ${BTC_CONFIRMATIONS_REQUIRED:3}
+      bsc-confirmations-required: ${BSC_CONFIRMATIONS_REQUIRED:15}
+      charge-expiry-minutes: ${CRYPTO_CHARGE_EXPIRY_MINUTES:60}
 
 # CMS "Integrations & Keys" vault — source of PER-TENANT PSP provider keys (per website slug).
 # When base-url is blank the resolver stays GLOBAL (app.psp.* env keys) for single-tenant deploys.

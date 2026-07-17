@@ -212,7 +212,6 @@ public class GatewayService {
    * @return the verified result so the controller can ack with the parsed event id
    */
   public WebhookResult applyWebhook(String provider, byte[] rawBody, Map<String, String> headers, String site) {
-    String slug = slugOf(site);
     String providerKey = provider.toLowerCase(Locale.ROOT);
     PaymentGateway gateway = registry.resolve(provider);
     ProviderConfig cfg = resolver.resolve(site, provider);
@@ -221,6 +220,20 @@ public class GatewayService {
     // (WebhookVerificationException → 400). A returned result is always an authenticated event.
     WebhookResult result = gateway.verifyAndParseWebhook(rawBody, headers, cfg);
 
+    return applyVerifiedResult(site, providerKey, result);
+  }
+
+  /**
+   * Apply an ALREADY-TRUSTED {@link WebhookResult} without going through an adapter's
+   * {@code verifyAndParseWebhook}. The ONLY legitimate caller is {@link CryptoChainPoller}: a
+   * self-custodied crypto payment has no provider signature to check, because the poller's own
+   * direct block-explorer confirmation IS the trust anchor (see {@code CryptoGateway}'s javadoc —
+   * its {@code verifyAndParseWebhook} always throws, so {@code POST /v1/gateway/webhooks/crypto}
+   * can never reach here from an external caller). Do not add other callers without the same
+   * level of scrutiny: this method skips signature verification entirely.
+   */
+  public WebhookResult applyVerifiedResult(String site, String providerKey, WebhookResult result) {
+    String slug = slugOf(site);
     String eventKey = dedupKey(result, providerKey);
 
     // Persistent, restart-surviving dedup: a provider redelivery or a replay beyond the adapter's

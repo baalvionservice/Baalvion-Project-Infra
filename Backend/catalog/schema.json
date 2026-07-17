@@ -17,7 +17,7 @@
         "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
         "description": { "type": "string" },
         "domain": { "enum": ["identity", "commerce", "knowledge", "infrastructure", "platform", "ecosystem"], "description": "Locked 6-domain architecture axis (orthogonal to division). REQUIRED — enforced by catalog/enforce.mjs." },
-        "division": { "enum": ["platform-core", "proxy-infrastructure", "commerce", "mining", "legal", "real-estate", "jobs", "shared-developer-platform"] },
+        "division": { "enum": ["platform-core", "proxy-infrastructure", "commerce", "mining", "legal", "real-estate", "jobs", "community", "shared-developer-platform"] },
         "context": { "type": "string", "description": "bounded context name" },
         "owner": { "type": "string", "pattern": "^@baalvion/.+", "description": "owning team (GitHub team handle)" },
         "tier": { "enum": ["tier-0", "tier-1", "tier-2", "tier-3"], "description": "tier-0 = critical path (identity, gateway, billing)" },
