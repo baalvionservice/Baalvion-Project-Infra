@@ -212,7 +212,7 @@ export const cmsContentApi = {
   // Pulls real articles from news-service (the platform's wire-ingestion service) in
   // as draft news items, tagged by topic + region. See cms-service's wireImportService.
   importWire: (websiteId: string, limit = 50) =>
-    cmsApiClient.post<ApiResponse<{ imported: number; skipped: number; total: number; configured: boolean }>>(
+    cmsApiClient.post<ApiResponse<{ imported: number; skipped: number; total: number; configured: boolean; error?: string | null }>>(
       `/cms/websites/${websiteId}/content/import-wire`, null, { params: { limit } },
     ),
 

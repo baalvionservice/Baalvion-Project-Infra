@@ -134,6 +134,8 @@ export const useImportWireNews = () => {
       qc.invalidateQueries({ queryKey: contentKeys.all });
       if (!result.configured) {
         toast.error('Wire import is not configured on the server yet (missing INTERNAL_API_KEY on cms-service)');
+      } else if (result.error) {
+        toast.error(`Wire import failed: ${result.error}`);
       } else if (result.imported === 0) {
         toast.info(result.total === 0 ? 'No new wire articles available right now' : 'Nothing new — all recent wire articles are already imported');
       } else {

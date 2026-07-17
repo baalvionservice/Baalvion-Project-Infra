@@ -47,17 +47,24 @@ const COUNTRY_TO_REGION = {
 };
 const WORLD_REGION = { label: 'World', slug: 'world' };
 
+// Returns { articles, error } instead of throwing/swallowing — the controller
+// surfaces `error` back to the (already role-gated) admin caller so a
+// misconfigured NEWS_SERVICE_URL/INTERNAL_API_KEY is diagnosable from the
+// button click itself, not just silently "0 imported".
 async function fetchWireArticles(limit) {
-    if (!INTERNAL_API_KEY) return [];
+    if (!INTERNAL_API_KEY) return { articles: [], error: 'INTERNAL_API_KEY not set on cms-service' };
     try {
         const res = await fetch(`${NEWS_SERVICE_URL}/internal/v1/news?limit=${limit}`, {
             headers: { 'X-Internal-Key': INTERNAL_API_KEY },
         });
-        if (!res.ok) return [];
+        if (!res.ok) {
+            const body = await res.text().catch(() => '');
+            return { articles: [], error: `news-service responded ${res.status}: ${body.slice(0, 200)}` };
+        }
         const env = await res.json();
-        return Array.isArray(env.data) ? env.data : [];
-    } catch {
-        return [];
+        return { articles: Array.isArray(env.data) ? env.data : [], error: null };
+    } catch (err) {
+        return { articles: [], error: `could not reach ${NEWS_SERVICE_URL}: ${err.message}` };
     }
 }
 
@@ -83,11 +90,11 @@ async function uniqueSlug(websiteId, base) {
 
 async function importWireNews(websiteId, userId, limit = 50) {
     if (!INTERNAL_API_KEY) {
-        return { imported: 0, skipped: 0, total: 0, configured: false };
+        return { imported: 0, skipped: 0, total: 0, configured: false, error: 'INTERNAL_API_KEY not set on cms-service' };
     }
 
-    const articles = await fetchWireArticles(limit);
-    if (!articles.length) return { imported: 0, skipped: 0, total: 0, configured: true };
+    const { articles, error } = await fetchWireArticles(limit);
+    if (!articles.length) return { imported: 0, skipped: 0, total: 0, configured: true, error };
 
     // Resolve/create the 13 topic + 6 region categories once, on demand, as
     // each is first needed (small in-memory cache for this run).
