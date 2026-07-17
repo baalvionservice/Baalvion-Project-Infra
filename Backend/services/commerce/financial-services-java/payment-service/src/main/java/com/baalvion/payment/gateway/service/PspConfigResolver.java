@@ -100,6 +100,16 @@ public class PspConfigResolver {
         secrets.put("merchantSalt", p.getMerchantSalt());
         config.put("baseUrl", p.getBaseUrl());
       }
+      case "crypto" -> {
+        // Receiving addresses are PUBLIC (anyone who pays sees them on-chain anyway) — they live
+        // in `config`, not `secrets`. Nothing here is confidential; CryptoGateway still falls back
+        // to its own PspProperties.Crypto defaults if a tenant override is absent (see
+        // CryptoGateway.requireAddress).
+        PspProperties.Crypto c = pspProperties.getCrypto();
+        config.put("usdtTrc20Address", c.getUsdtTrc20Address());
+        config.put("ethBep20Address", c.getEthBep20Address());
+        config.put("btcAddress", c.getBtcAddress());
+      }
       default -> throw new IllegalArgumentException("Unsupported payment provider: " + provider);
     }
     return new ProviderConfig(provider, mock, secrets, config);
@@ -137,6 +147,8 @@ public class PspConfigResolver {
       case "razorpay" -> pspProperties.getRazorpay().getKeyId();
       case "stripe" -> pspProperties.getStripe().getSecretKey();
       case "payu" -> pspProperties.getPayu().getMerchantKey();
+      case "crypto" -> firstNonBlank(pspProperties.getCrypto().getUsdtTrc20Address(),
+        firstNonBlank(pspProperties.getCrypto().getEthBep20Address(), pspProperties.getCrypto().getBtcAddress()));
       default -> null;
     };
     return key != null && !key.isBlank();
@@ -222,5 +234,12 @@ public class PspConfigResolver {
   /** Strip CR/LF/tab so request-derived values can't forge extra log lines/fields. */
   private static String sanitizeForLog(String value) {
     return value == null ? null : value.replaceAll("[\r\n\t]", "_");
+  }
+
+  private static String firstNonBlank(String a, String b) {
+    if (a != null && !a.isBlank()) {
+      return a;
+    }
+    return b;
   }
 }

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-06T17:50:04.783Z",
+  "generatedAt": "2026-07-17T15:52:06.193Z",
   "services": [
     "about-service",
     "account-service",
@@ -14,6 +14,7 @@
     "cache",
     "cms-service",
     "commerce-service",
+    "community-service",
     "credit-service",
     "ctm-service",
     "dashboard-service",
@@ -36,6 +37,7 @@
     "market-service",
     "mining-service",
     "ml-service",
+    "news-service",
     "notification-service",
     "oauth-service",
     "payment-rails-service",
@@ -90,6 +92,9 @@
       "auth-service"
     ],
     "commerce-service": [
+      "auth-service"
+    ],
+    "community-service": [
       "auth-service"
     ],
     "credit-service": [
@@ -159,6 +164,10 @@
     ],
     "ml-service": [
       "auth-service"
+    ],
+    "news-service": [
+      "auth-service",
+      "developer-service"
     ],
     "notification-service": [
       "auth-service"

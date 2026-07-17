@@ -92,6 +92,20 @@ api.baalvion.com {
 		reverse_proxy app-commerce:3012
 	}
 
+	# Market Underworld community-service (UNAUTHENTICATED read) -- the real multi-community
+	# forum on community.marketunderworld.com/forum fetches its public community list here.
+	# community-service does its own RS256 verification on every other /api/v1/community/*
+	# route below it does not need BFF session-translation, so it gets a direct carve-out
+	# rather than falling through to the session-gated proxy-service BFF.
+	@community_public path /api/v1/community/public /api/v1/community/public/*
+	handle @community_public {
+		reverse_proxy app-community:3064
+	}
+	@community_authed path /api/v1/community/*
+	handle @community_authed {
+		reverse_proxy app-community:3064
+	}
+
 	# Public OAuth2/OIDC provider surface (oauth-service, UNAUTHENTICATED by design) -- exposes
 	# the actual authorization-code flow endpoints (/oauth/authorize, /oauth/token, /oauth/userinfo)
 	# for relying parties like the NodeBB community forum (nodebb-plugin-sso-oauth2-multiple).
@@ -233,6 +247,14 @@ admin.baalvion.com {
 	}
 	handle_path /api-bff/ecosystem/crm/* {
 		reverse_proxy app-ecosystem:3063
+	}
+	# community-service is a standalone deployment (own container, app-community:3064) —
+	# not part of the shared app-ecosystem pm2 group, which is memory-capped (see
+	# deploy/consolidated/pm2/ecosystem.config.js). This is the central admin console's
+	# cross-community oversight view, distinct from the public/authed carve-outs above
+	# that the market-underworld frontend itself calls.
+	handle_path /api-bff/ecosystem/community/* {
+		reverse_proxy app-community:3064
 	}
 	handle_path /api-bff/marketplace/marketplace/* {
 		reverse_proxy app-commerce:3060

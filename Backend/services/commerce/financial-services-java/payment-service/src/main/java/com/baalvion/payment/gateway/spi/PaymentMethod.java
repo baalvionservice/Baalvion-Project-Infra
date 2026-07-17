@@ -12,5 +12,7 @@ public enum PaymentMethod {
   CARD,
   BANK,
   UPI,
-  NETBANKING
+  NETBANKING,
+  /** On-chain payment (USDT-TRC20 or BTC) to the merchant's own receiving address — see CryptoGateway. */
+  CRYPTO
 }

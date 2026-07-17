@@ -1,0 +1,5 @@
+{
+  "port": "4567",
+  "database": "postgres",
+  "bind_address": "0.0.0.0"
+}

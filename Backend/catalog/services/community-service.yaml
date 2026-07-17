@@ -1,0 +1,25 @@
+apiVersion: baalvion.io/v1
+kind: Service
+metadata:
+  name: community-service
+  description: Multi-community forum membership/RBAC/invites/paid-tiers for Market Underworld (community.marketunderworld.com/forum). NodeBB is the downstream content engine — this service owns access decisions and grants/revokes NodeBB group membership.
+  domain: ecosystem
+  division: community
+  context: community
+  owner: "@baalvion/ecosystem"
+  tier: tier-2
+  repo: baalvion-platform
+  path: Backend/services/ecosystem/community-service
+spec:
+  lifecycle: experimental
+  language: node
+  datastores: [postgres, redis]
+  # NodeBB (the downstream forum engine this service grants/revokes group access on) is a
+  # third-party deployment, not a catalog-registered monorepo service — see
+  # deploy/consolidated/nodebb/ for its infra. dependsOn only lists catalog services.
+  dependsOn: [auth-service]
+  consumesEvents: []
+  producesEvents: []
+  apis: ["/v1/community"]
+  slo: { availability: 0.99, latencyP95Ms: 400 }
+  deploy: { chart: baalvion-service, namespace: baalvion-ecosystem, minReplicas: 1, maxReplicas: 4 }
