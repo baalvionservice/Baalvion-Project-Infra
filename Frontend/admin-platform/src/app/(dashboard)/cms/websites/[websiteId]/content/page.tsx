@@ -296,12 +296,14 @@ export default function WebsiteContentPage({
   const CONTENT_TYPES: ContentItemType[] = [
     'page', 'post', 'article', 'news', 'doc', 'event', 'job_listing', 'portfolio_item',
   ];
+  // Core types (page/post/article/news/doc) are always offered — every site writes
+  // pages and articles, and a stale/incomplete `modules` config must never hide a
+  // type that already has real content sitting in it. Only the niche types
+  // (events/jobs/portfolio) stay gated behind their module flag.
+  const CORE_TYPES: ContentItemType[] = ['page', 'post', 'article', 'news', 'doc'];
   const enabledTypes = website?.modules
     ? CONTENT_TYPES.filter((t) => {
-        if (t === 'page') return website.modules.includes('pages');
-        if (t === 'post' || t === 'article') return website.modules.includes('blog');
-        if (t === 'news') return website.modules.includes('news');
-        if (t === 'doc') return website.modules.includes('docs');
+        if (CORE_TYPES.includes(t)) return true;
         if (t === 'event') return website.modules.includes('events');
         if (t === 'job_listing') return website.modules.includes('jobs');
         if (t === 'portfolio_item') return website.modules.includes('portfolio');

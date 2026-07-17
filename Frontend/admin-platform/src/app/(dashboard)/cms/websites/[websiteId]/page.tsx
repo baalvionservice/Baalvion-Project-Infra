@@ -1,7 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
-import { use } from 'react';
+import { useEffect, useState, use } from 'react';
 import Link from 'next/link';
 import {
   FileText,
@@ -22,6 +21,7 @@ import {
   BarChart3,
   Power,
   PowerOff,
+  Newspaper,
 } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -33,6 +33,7 @@ import { useWorkflowStats } from '@/lib/queries/cms-workflow.queries';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import WebsiteDashboard from '@/components/cms/dashboard/WebsiteDashboard';
+import QuickNewsDialog from '@/components/cms/QuickNewsDialog';
 import { Separator } from '@/components/ui/separator';
 
 // The site dashboard is the first screen after choosing a website, so every label
@@ -171,6 +172,7 @@ export default function WebsiteDetailPage({
   const { websiteId } = use(params);
   const { setBreadcrumbs } = useUIStore();
   const setActiveWebsite = useCmsStore((s) => s.setActiveWebsite);
+  const [newsDialogOpen, setNewsDialogOpen] = useState(false);
 
   const { data: website, isLoading } = useWebsite(websiteId);
   // Stats/workflow endpoints key off the canonical UUID. :websiteId may now be a
@@ -274,7 +276,47 @@ export default function WebsiteDetailPage({
       {/* Dashboard overview — metrics, analytics and operational widgets */}
       <WebsiteDashboard websiteId={websiteId} canonicalId={canonicalId} website={website} />
 
-      <Separator />
+      {website.slug === 'imperialpedia' && (
+        <>
+          <Separator />
+
+          {/* News Desk — Imperialpedia-only for now. Deliberately separate from the
+              generic CMS "Content" tool below: daily news uploading is a different
+              workflow (fast, repetitive, one content type) from general site content
+              management (pages, structure, SEO) — the visual split is the point. */}
+          <Card className="border-red-500/30 bg-red-500/[0.04]">
+            <CardHeader className="pb-3">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-red-500/10">
+                    <Newspaper className="h-4.5 w-4.5 text-red-500" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-sm">News Desk</CardTitle>
+                    <CardDescription className="mt-0.5 text-xs">
+                      Upload today&apos;s news fast, and see how many went out per niche today. Separate from
+                      the full Content tool below — no block editor, no SEO panel, just headline → body → publish.
+                    </CardDescription>
+                  </div>
+                </div>
+                <div className="flex shrink-0 gap-2">
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href={`/cms/websites/${websiteId}/news`}>
+                      Open News Desk
+                      <ArrowRight className="ml-1.5 h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button size="sm" onClick={() => setNewsDialogOpen(true)}>
+                    <Newspaper className="mr-1.5 h-4 w-4" />
+                    Add News
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+          </Card>
+          <QuickNewsDialog websiteId={websiteId} open={newsDialogOpen} onOpenChange={setNewsDialogOpen} />
+        </>
+      )}
 
       {/* New here? — plain-language explainer of the publish flow */}
       <Card className="border-primary/20 bg-primary/[0.03]">
