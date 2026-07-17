@@ -7,6 +7,7 @@ import MarketMovers from "@/components/world/MarketMovers";
 import MarketsPanel from "@/components/world/MarketsPanel";
 import MarketsSection from "@/components/world/MarketsSection";
 import MarketTicker from "@/components/world/MarketTicker";
+import NewsroomPulse from "@/components/world/NewsroomPulse";
 import NewsGrid from "@/components/world/NewsGrid";
 import QuickLinks from "@/components/world/QuickLinks";
 import QuoteFinderMovers from "@/components/world/QuoteFinderMovers";
@@ -100,6 +101,9 @@ export default function WorldView({ data }: { data: WorldData }) {
         {/* Market Movers strip — real live indicator data, biggest movers first */}
         <MarketMovers indicators={data.indicators} />
       </div>
+
+      {/* Live newsroom coverage pulse — auto-refreshing, real published-article data */}
+      <NewsroomPulse />
 
       {/* Main layout — responsive:
           • mobile  (<768): single column, stacked
