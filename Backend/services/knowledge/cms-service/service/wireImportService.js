@@ -62,7 +62,10 @@ async function fetchWireArticles(limit) {
             return { articles: [], error: `news-service responded ${res.status}: ${body.slice(0, 200)}` };
         }
         const env = await res.json();
-        return { articles: Array.isArray(env.data) ? env.data : [], error: null };
+        // news-service's listArticles responds via sendPaginated: { data: { items, page,
+        // limit, total, totalPages } } — the array is data.items, not data itself.
+        const items = env.data?.items;
+        return { articles: Array.isArray(items) ? items : [], error: null };
     } catch (err) {
         return { articles: [], error: `could not reach ${NEWS_SERVICE_URL}: ${err.message}` };
     }
