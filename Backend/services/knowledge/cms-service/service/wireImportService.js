@@ -28,10 +28,13 @@ const WIRE_CATEGORY_TO_TOPIC = {
     Finance: 'Finance', World: 'World', Science: 'Health & Science',
 };
 
-// news-service's `country` (ISO 3166-1 alpha-2) → Imperialpedia's 6 regions.
+// news-service's `country` → Imperialpedia's 6 regions. news-service's own seed
+// data (scripts/seedSources.js) stores 'UK' (not the ISO 3166-1 'GB') for BBC —
+// both map here so real seeded sources classify correctly.
 const COUNTRY_TO_REGION = {
     US: { label: 'U.S.', slug: 'us' },
-    GB: { label: 'Europe', slug: 'europe' }, DE: { label: 'Europe', slug: 'europe' },
+    GB: { label: 'Europe', slug: 'europe' }, UK: { label: 'Europe', slug: 'europe' },
+    DE: { label: 'Europe', slug: 'europe' },
     FR: { label: 'Europe', slug: 'europe' }, ES: { label: 'Europe', slug: 'europe' },
     IT: { label: 'Europe', slug: 'europe' }, NL: { label: 'Europe', slug: 'europe' },
     CN: { label: 'China', slug: 'china' }, HK: { label: 'China', slug: 'china' },
