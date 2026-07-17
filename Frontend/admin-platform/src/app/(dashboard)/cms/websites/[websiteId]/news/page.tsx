@@ -1,34 +1,38 @@
 'use client';
 
-import { use, useEffect, useMemo } from 'react';
+import { use, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, Radio, TrendingUp, Star, ArrowLeft, FileText } from 'lucide-react';
 import PageHeader from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils/cn';
 import ContentWorkflowBadge from '@/components/cms/ContentWorkflowBadge';
 import { useContentList } from '@/lib/queries/cms-content.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
-import { useWebsiteCategoryTree } from '@/lib/queries/cms-taxonomy.queries';
+import { useNewsTaxonomy } from '@/lib/hooks/useNewsTaxonomy';
+import { NEWS_TOPICS, NEWS_REGIONS } from '@/lib/constants/news-taxonomy';
 import { useUIStore } from '@/lib/store/uiStore';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import { formatDate } from '@/lib/utils/format';
-import type { CategoryTree } from '@/lib/types/cms-taxonomy.types';
+import type { ContentItem } from '@/lib/types/cms-content.types';
 
 const dayKey = (iso: string) => iso.slice(0, 10);
 
-function flattenNames(tree: CategoryTree[]): Map<string, string> {
-  const m = new Map<string, string>();
-  const walk = (nodes: CategoryTree[]) =>
-    nodes.forEach((n) => {
-      m.set(n.id, n.name);
-      if (n.children?.length) walk(n.children);
-    });
-  walk(tree);
-  return m;
+const RANGES = [
+  { id: 'today', label: 'Today', days: 1 },
+  { id: '7d', label: '7 Days', days: 7 },
+  { id: '30d', label: '30 Days', days: 30 },
+  { id: 'all', label: 'All Time', days: Infinity },
+] as const;
+type RangeId = (typeof RANGES)[number]['id'];
+
+function withinRange(item: ContentItem, days: number): boolean {
+  if (!Number.isFinite(days)) return true;
+  const cutoff = Date.now() - days * 86_400_000;
+  return Date.parse(item.createdAt) >= cutoff;
 }
 
 export default function NewsDashboardPage({ params }: { params: Promise<{ websiteId: string }> }) {
@@ -44,9 +48,11 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
   useEffect(() => {
     if (website && website.slug !== 'imperialpedia') router.replace(`/cms/websites/${websiteId}`);
   }, [website, websiteId, router]);
-  const { data: tree } = useWebsiteCategoryTree(websiteId);
-  // 100 most-recently-touched news items is enough for a "today / this week /
-  // by niche" operational snapshot — this is a live pulse, not a full report.
+
+  const { topicIdByName, regionIdBySlug } = useNewsTaxonomy(websiteId);
+  const [range, setRange] = useState<RangeId>('7d');
+  // cms-service caps list requests at 100 — plenty at current news volume; if this
+  // site is ever publishing 100+ news items within 30 days, paginate here instead.
   const { data, isLoading, isError, refetch } = useContentList({
     websiteId, page: 1, limit: 100, type: 'news',
   });
@@ -59,22 +65,50 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
     ]);
   }, [website, setBreadcrumbs, websiteId]);
 
-  const items = useMemo(() => data?.data ?? [], [data]);
-  const categoryName = useMemo(() => flattenNames(tree ?? []), [tree]);
+  const allItems = useMemo(() => data?.data ?? [], [data]);
 
-  const today = dayKey(new Date().toISOString());
+  // id → label lookups for exactly the 13 fixed topics and 6 fixed regions —
+  // anything else assigned to an item (a leftover CMS category) is ignored here,
+  // this table tracks the taxonomy the newsroom actually uses.
+  const topicLabelById = useMemo(() => {
+    const m = new Map<string, string>();
+    NEWS_TOPICS.forEach((t) => {
+      const id = topicIdByName.get(t.toLowerCase());
+      if (id) m.set(id, t);
+    });
+    return m;
+  }, [topicIdByName]);
+
+  const regionLabelById = useMemo(() => {
+    const m = new Map<string, string>();
+    NEWS_REGIONS.forEach((r) => {
+      const id = regionIdBySlug.get(r.slug);
+      if (id) m.set(id, r.label);
+    });
+    return m;
+  }, [regionIdBySlug]);
+
+  const itemTopics = (item: ContentItem) => item.categoryIds.map((id) => topicLabelById.get(id)).filter((v): v is string => !!v);
+  const itemRegion = (item: ContentItem) => item.categoryIds.map((id) => regionLabelById.get(id)).find((v): v is string => !!v);
+
+  const rangeDays = RANGES.find((r) => r.id === range)!.days;
+  const items = useMemo(() => allItems.filter((i) => withinRange(i, rangeDays)), [allItems, rangeDays]);
+
   const stats = useMemo(() => {
-    const byDay = new Map<string, number>();
-    const todayByNiche = new Map<string, number>();
-    let publishedToday = 0;
+    const byTopic = new Map<string, number>(NEWS_TOPICS.map((t) => [t, 0]));
+    const byRegion = new Map<string, number>(NEWS_REGIONS.map((r) => [r.label, 0]));
+    let published = 0;
     for (const item of items) {
+      itemTopics(item).forEach((t) => byTopic.set(t, (byTopic.get(t) ?? 0) + 1));
+      const region = itemRegion(item);
+      if (region) byRegion.set(region, (byRegion.get(region) ?? 0) + 1);
+      if (item.status === 'published') published += 1;
+    }
+
+    const byDay = new Map<string, number>();
+    for (const item of allItems) {
       const created = dayKey(item.createdAt);
       byDay.set(created, (byDay.get(created) ?? 0) + 1);
-      if (created === today) {
-        const niche = categoryName.get(item.categoryIds[0]) ?? 'Uncategorized';
-        todayByNiche.set(niche, (todayByNiche.get(niche) ?? 0) + 1);
-        if (item.status === 'published') publishedToday += 1;
-      }
     }
     const last7 = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
@@ -83,14 +117,18 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
       return { key, label: d.toLocaleDateString(undefined, { weekday: 'short' }), count: byDay.get(key) ?? 0 };
     }).reverse();
     const maxDay = Math.max(1, ...last7.map((d) => d.count));
+
     return {
-      todayTotal: byDay.get(today) ?? 0,
-      publishedToday,
-      todayByNiche: Array.from(todayByNiche.entries()).sort((a, b) => b[1] - a[1]),
+      total: items.length,
+      published,
+      draft: items.length - published,
+      byTopic: Array.from(byTopic.entries()).sort((a, b) => b[1] - a[1]),
+      byRegion: Array.from(byRegion.entries()).sort((a, b) => b[1] - a[1]),
       last7,
       maxDay,
     };
-  }, [items, categoryName, today]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- itemTopics/itemRegion close over topicLabelById/regionLabelById, already deps
+  }, [items, allItems, topicLabelById, regionLabelById]);
 
   if (website && website.slug !== 'imperialpedia') return null;
 
@@ -105,7 +143,7 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
         </Button>
         <PageHeader
           title="News"
-          description="Today's uploads, by niche — and the fast path to publish another one."
+          description="Track how many stories go out, and in which topic and region."
           actions={
             <div className="flex gap-2">
               <Button size="sm" variant="outline" asChild>
@@ -132,41 +170,102 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
         </div>
       )}
 
-      {/* Today at a glance */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {/* Range selector */}
+      <div className="flex gap-1.5">
+        {RANGES.map((r) => (
+          <button
+            key={r.id}
+            onClick={() => setRange(r.id)}
+            className={cn(
+              'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+              range === r.id ? 'border-primary/40 bg-primary/10 text-primary' : 'border-border text-muted-foreground hover:bg-muted/60',
+            )}
+          >
+            {r.label}
+          </button>
+        ))}
+      </div>
+
+      {/* At a glance */}
+      <div className="grid gap-4 sm:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Uploaded Today</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">Uploaded</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{isLoading ? <Skeleton className="h-8 w-12" /> : stats.todayTotal}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{stats.publishedToday} published</p>
+            <p className="text-3xl font-bold">{isLoading ? <Skeleton className="h-8 w-12" /> : stats.total}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Published</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-green-600">{isLoading ? <Skeleton className="h-8 w-12" /> : stats.published}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">Draft</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold text-muted-foreground">{isLoading ? <Skeleton className="h-8 w-12" /> : stats.draft}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* By topic / by region — the full fixed taxonomy, zeros included */}
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm text-muted-foreground">By Topic</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1.5">
+            {isLoading ? (
+              <Skeleton className="h-40 w-full" />
+            ) : (
+              stats.byTopic.map(([topic, count]) => (
+                <div key={topic} className="flex items-center gap-2 text-sm">
+                  <span className="w-32 shrink-0 truncate">{topic}</span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary/70"
+                      style={{ width: `${stats.byTopic[0][1] ? (count / stats.byTopic[0][1]) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <span className="w-6 shrink-0 text-right font-semibold">{count}</span>
+                </div>
+              ))
+            )}
           </CardContent>
         </Card>
 
-        <Card className="sm:col-span-1 lg:col-span-2">
+        <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm text-muted-foreground">Today by Niche</CardTitle>
+            <CardTitle className="text-sm text-muted-foreground">By Region</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-1.5">
             {isLoading ? (
-              <Skeleton className="h-16 w-full" />
-            ) : stats.todayByNiche.length ? (
-              <div className="flex flex-wrap gap-2">
-                {stats.todayByNiche.map(([niche, count]) => (
-                  <Badge key={niche} variant="secondary" className="text-xs">
-                    {niche} <span className="ml-1 font-bold">{count}</span>
-                  </Badge>
-                ))}
-              </div>
+              <Skeleton className="h-40 w-full" />
             ) : (
-              <p className="text-xs text-muted-foreground">Nothing uploaded yet today.</p>
+              stats.byRegion.map(([region, count]) => (
+                <div key={region} className="flex items-center gap-2 text-sm">
+                  <span className="w-32 shrink-0 truncate">{region}</span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                    <div
+                      className="h-full rounded-full bg-primary/70"
+                      style={{ width: `${stats.byRegion[0][1] ? (count / stats.byRegion[0][1]) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <span className="w-6 shrink-0 text-right font-semibold">{count}</span>
+                </div>
+              ))
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* Last 7 days */}
+      {/* Last 7 days — always shown regardless of the range filter above, as a trend view */}
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm text-muted-foreground">Last 7 Days</CardTitle>
@@ -190,36 +289,40 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
         </CardContent>
       </Card>
 
-      {/* Recent uploads */}
+      {/* Uploads in the selected range */}
       <div className="space-y-2">
-        <h2 className="text-sm font-semibold">Recent Uploads</h2>
+        <h2 className="text-sm font-semibold">Uploads — {RANGES.find((r) => r.id === range)!.label}</h2>
         <div className="rounded-md border divide-y">
           {isLoading && Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-14 m-2" />)}
           {!isLoading && items.length === 0 && (
             <p className="p-6 text-center text-sm text-muted-foreground">
-              No news yet. Click <span className="font-medium">Add News</span> to publish the first one.
+              Nothing in this range. Click <span className="font-medium">Add News</span> to publish one.
             </p>
           )}
-          {items.slice(0, 25).map((item) => (
-            <button
-              key={item.id}
-              onClick={() => router.push(`/cms/websites/${websiteId}/content/${item.id}`)}
-              className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors"
-            >
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-medium">{item.title}</p>
-                  {item.isBreaking && <Radio className="h-3 w-3 shrink-0 text-red-500" />}
-                  {item.isTrending && <TrendingUp className="h-3 w-3 shrink-0 text-orange-500" />}
-                  {item.isFeatured && <Star className="h-3 w-3 shrink-0 text-amber-500" />}
+          {items.slice(0, 50).map((item) => {
+            const topics = itemTopics(item);
+            const region = itemRegion(item);
+            return (
+              <button
+                key={item.id}
+                onClick={() => router.push(`/cms/websites/${websiteId}/content/${item.id}`)}
+                className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors"
+              >
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-sm font-medium">{item.title}</p>
+                    {item.isBreaking && <Radio className="h-3 w-3 shrink-0 text-red-500" />}
+                    {item.isTrending && <TrendingUp className="h-3 w-3 shrink-0 text-orange-500" />}
+                    {item.isFeatured && <Star className="h-3 w-3 shrink-0 text-amber-500" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {[topics.join(', ') || 'No topic', region].filter(Boolean).join(' · ')} · {formatDate(item.createdAt)}
+                  </p>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {categoryName.get(item.categoryIds[0]) ?? 'Uncategorized'} · {formatDate(item.createdAt)}
-                </p>
-              </div>
-              <ContentWorkflowBadge status={item.status} />
-            </button>
-          ))}
+                <ContentWorkflowBadge status={item.status} />
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
