@@ -38,6 +38,17 @@ export interface NewsArticle {
   imageCaption?: string;
   slug: string;
   featured?: boolean;
+  /** Editorial flags mirroring cms_contents — see cms-service migration 20260020. */
+  isBreaking?: boolean;
+  isTrending?: boolean;
+  isEditorsPick?: boolean;
+  isPremium?: boolean;
+  /** Fixed taxonomy: breaking/exclusive/live/analysis/opinion/explained/bullish/bearish. */
+  newsLabels?: string[];
+  galleryImages?: string[];
+  videoUrl?: string;
+  externalSourceName?: string;
+  externalSourceUrl?: string;
   keyTakeaways?: string[];
   body: NewsBodyBlock[];
   tags?: string[];

@@ -10,12 +10,12 @@ type Props = {
 };
 
 /**
- * Ticker item priority: editorially-flagged `customFields.breaking` items first,
- * then `featured` items, then most-recently-published — so it degrades gracefully
- * without requiring the CMS to add a dedicated field before this ships.
+ * Ticker item priority: the real `isBreaking` column first (falling back to the
+ * legacy `customFields.breaking` for content authored before that column existed),
+ * then `featured` items, then most-recently-published.
  */
 function pickBreaking(articles: NewsArticle[]): NewsArticle[] {
-  const breaking = articles.filter((a) => a.customFields?.breaking === true);
+  const breaking = articles.filter((a) => a.isBreaking === true || a.customFields?.breaking === true);
   if (breaking.length) return breaking.slice(0, 10);
   const featured = articles.filter((a) => a.featured);
   if (featured.length) return featured.slice(0, 10);

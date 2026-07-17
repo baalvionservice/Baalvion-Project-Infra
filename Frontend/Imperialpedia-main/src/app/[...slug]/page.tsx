@@ -310,7 +310,17 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-10 xl:gap-14">
           {/* ══ LEFT: Article ══════════════════════════════════════════ */}
           <article className="min-w-0">
-            <CategoryBadge category={article.category} />
+            <div className="flex flex-wrap items-center gap-2">
+              <CategoryBadge category={article.category} />
+              {article.newsLabels?.map((label) => (
+                <span
+                  key={label}
+                  className="inline-block w-fit text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-gray-900 text-white"
+                >
+                  {label}
+                </span>
+              ))}
+            </div>
 
             <h1 className="text-foreground text-3xl md:text-[2.75rem] font-extrabold leading-[1.1] tracking-tight mt-3">
               {article.title}
@@ -373,6 +383,30 @@ async function DatedArticlePage({ segments }: { segments: [string, string, strin
                 <BodyBlock key={i} block={block} />
               ))}
             </div>
+
+            {article.galleryImages && article.galleryImages.length > 0 && (
+              <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {article.galleryImages.map((src) => (
+                  <div key={src} className="relative aspect-square overflow-hidden rounded-sm">
+                    <Image src={src} alt={article.title} fill className="object-cover" sizes="(max-width: 768px) 50vw, 240px" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {article.externalSourceUrl && (
+              <p className="mt-6 text-xs text-gray-500">
+                Source:{" "}
+                <a
+                  href={article.externalSourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-gray-700 hover:text-[#CC0000] underline underline-offset-2"
+                >
+                  {article.externalSourceName || article.externalSourceUrl}
+                </a>
+              </p>
+            )}
 
             {article.tags && article.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mt-8 pt-6 border-t border-gray-200">
@@ -551,6 +585,18 @@ async function BareSlugPage({ slug }: { slug: string }) {
           {/* ══ LEFT: Article ══════════════════════════════════════════════ */}
           <article className="md:m-16">
             {/* Category + title */}
+            {article.newsLabels && article.newsLabels.length > 0 && (
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                {article.newsLabels.map((label) => (
+                  <span
+                    key={label}
+                    className="inline-block w-fit text-xs font-semibold uppercase tracking-wide px-2 py-0.5 rounded bg-foreground text-background"
+                  >
+                    {label}
+                  </span>
+                ))}
+              </div>
+            )}
             <h1 className="text-foreground text-3xl md:text-5xl font-extrabold leading-7 tracking-wider">
               {article.title}
             </h1>
@@ -598,6 +644,30 @@ async function BareSlugPage({ slug }: { slug: string }) {
                 <BodyBlock key={i} block={block} />
               ))}
             </div>
+
+            {article.galleryImages && article.galleryImages.length > 0 && (
+              <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {article.galleryImages.map((src) => (
+                  <div key={src} className="relative aspect-square overflow-hidden rounded-sm">
+                    <Image src={src} alt={article.title} fill className="object-cover" sizes="(max-width: 768px) 50vw, 240px" />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {article.externalSourceUrl && (
+              <p className="mt-6 text-xs text-muted-foreground">
+                Source:{" "}
+                <a
+                  href={article.externalSourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-foreground hover:underline underline-offset-2"
+                >
+                  {article.externalSourceName || article.externalSourceUrl}
+                </a>
+              </p>
+            )}
           </article>
         </div>
 

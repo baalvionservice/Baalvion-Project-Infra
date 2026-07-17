@@ -86,6 +86,17 @@ export interface CmsContent {
   title: string;
   excerpt?: string | null;
   featuredImage?: string | null;
+  galleryImages?: string[] | null;
+  videoUrl?: string | null;
+  readingTimeMinutes?: number | null;
+  isFeatured?: boolean;
+  isBreaking?: boolean;
+  isTrending?: boolean;
+  isEditorsPick?: boolean;
+  isPremium?: boolean;
+  newsLabels?: string[] | null;
+  externalSourceName?: string | null;
+  externalSourceUrl?: string | null;
   contentType: string;
   contentBlocks?: CmsBlock[];
   tagIds?: string[];
@@ -127,6 +138,13 @@ export interface CmsListParams {
   search?: string;
   categorySlug?: string;
   authorSlug?: string;
+  featured?: boolean;
+  breaking?: boolean;
+  trending?: boolean;
+  editorsPick?: boolean;
+  premium?: boolean;
+  label?: string;
+  sort?: 'views';
 }
 
 // Admin-managed author/contributor profile (cms_authors) — powers /authors pages.
@@ -191,6 +209,13 @@ export async function listCmsContent(
   if (params.search) q.set('search', params.search);
   if (params.categorySlug) q.set('categorySlug', params.categorySlug);
   if (params.authorSlug) q.set('authorSlug', params.authorSlug);
+  if (params.featured) q.set('featured', 'true');
+  if (params.breaking) q.set('breaking', 'true');
+  if (params.trending) q.set('trending', 'true');
+  if (params.editorsPick) q.set('editorsPick', 'true');
+  if (params.premium) q.set('premium', 'true');
+  if (params.label) q.set('label', params.label);
+  if (params.sort) q.set('sort', params.sort);
   const qs = q.toString();
   const env = await cmsFetch<CmsListEnvelope>(`/content${qs ? `?${qs}` : ''}`);
   return { items: env.data ?? [], total: env.pagination?.total ?? (env.data?.length ?? 0) };
@@ -494,13 +519,27 @@ export function cmsContentToNews(raw: CmsContent): NewsArticle {
     author: { name: authorName || 'Imperialpedia Newsroom' },
     publishedAt: raw.publishedAt ?? raw.updatedAt ?? new Date().toISOString(),
     updatedAt: raw.updatedAt ?? undefined,
-    readTimeMinutes: Math.max(1, Math.round(words / 200)),
+    // The backend now computes this from the real article body (contentService's
+    // _estimateReadingTime) — only fall back to a client-side word-count estimate
+    // for rows written before that field existed.
+    readTimeMinutes: raw.readingTimeMinutes ?? Math.max(1, Math.round(words / 200)),
     imageUrl: safeImageUrl(
       raw.featuredImage,
       articleArtDataUri({ title: raw.title, category: raw.category?.name, tags: raw.tagIds, excerpt: raw.excerpt, seed: raw.id }),
     ),
     slug: raw.slug,
-    featured: cf.featured === true,
+    // isFeatured is the real modeled column; customFields.featured is a legacy
+    // fallback for content authored before it existed.
+    featured: raw.isFeatured === true || cf.featured === true,
+    isBreaking: raw.isBreaking === true,
+    isTrending: raw.isTrending === true,
+    isEditorsPick: raw.isEditorsPick === true,
+    isPremium: raw.isPremium === true,
+    newsLabels: raw.newsLabels ?? undefined,
+    galleryImages: raw.galleryImages ?? undefined,
+    videoUrl: raw.videoUrl ?? undefined,
+    externalSourceName: raw.externalSourceName ?? undefined,
+    externalSourceUrl: raw.externalSourceUrl ?? undefined,
     body: blocksToNewsBody(raw.contentBlocks),
     tags: raw.tagIds ?? [],
     views: typeof raw.viewCount === 'number' ? raw.viewCount : undefined,

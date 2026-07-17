@@ -25,10 +25,14 @@ interface VideoItem {
   duration?: string;
 }
 
-/** Reads CMS-authored video fields; returns [] until editors attach video content. */
+/**
+ * Reads CMS-authored video fields; returns [] until editors attach video content.
+ * Prefers the real `videoUrl` column (cms-service migration 20260020), falling back
+ * to the legacy `customFields.videoUrl` for content authored before that column existed.
+ */
 function extractVideos(articles: NewsArticle[]): VideoItem[] {
   return articles
-    .filter((a) => typeof a.customFields?.videoUrl === "string" && a.customFields.videoUrl)
+    .filter((a) => a.videoUrl || (typeof a.customFields?.videoUrl === "string" && a.customFields.videoUrl))
     .map((a) => ({
       id: a.id,
       slug: a.slug,

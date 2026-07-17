@@ -51,7 +51,19 @@ export default async function NewsPage() {
   }
 
   const rest = newsList.filter((a) => a.slug !== featured.slug);
-  const trending = rest.slice(0, 12);
+
+  // Prefer editorially-flagged trending items, then real traffic (view count), and
+  // only fall back to "most recent" when neither signal has data yet.
+  let trending = rest.filter((a) => a.isTrending).slice(0, 12);
+  if (trending.length < 12) {
+    try {
+      const { items } = await listCmsContent({ contentType: "news", sort: "views", limit: 12 });
+      if (items.length) trending = items.map(cmsContentToNews).filter((a) => a.slug !== featured.slug);
+    } catch {
+      // keep the editorially-flagged (possibly empty) list; render falls through below
+    }
+  }
+  if (!trending.length) trending = rest.slice(0, 12);
 
   // Initial page of the paginated "Latest News" feed (SSR first page; the client
   // component fetches subsequent pages from /api/news/latest).

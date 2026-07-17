@@ -378,13 +378,40 @@ const REGION_QUERY: Record<RegionId, string> = {
   emerging: "emerging markets stocks economy",
 };
 
+/**
+ * The 13 editorial topic categories the World/News/Market-News sections are
+ * organized under (matches the CMS category slugs editors assign articles to
+ * and the section rails rendered on /world). Every classifier below (wire-news
+ * keyword heuristic and CMS category-name mapper) must emit one of these.
+ */
+export const WORLD_CATEGORIES = [
+  "MARKETS", "BUSINESS", "INVESTING", "TECH", "POLITICS", "WORLD",
+  "FINANCE", "HEALTH & SCIENCE", "MEDIA", "REAL ESTATE", "ENERGY",
+  "CLIMATE", "PERSONAL FINANCE",
+] as const;
+
+const SECTION_TITLES: Record<(typeof WORLD_CATEGORIES)[number], string> = {
+  MARKETS: "Markets",
+  BUSINESS: "Business",
+  INVESTING: "Investing",
+  TECH: "Technology",
+  POLITICS: "Politics",
+  WORLD: "World",
+  FINANCE: "Finance",
+  "HEALTH & SCIENCE": "Health & Science",
+  MEDIA: "Media",
+  "REAL ESTATE": "Real Estate",
+  ENERGY: "Energy",
+  CLIMATE: "Climate",
+  "PERSONAL FINANCE": "Personal Finance",
+};
+
 // Result buckets, keyed by the category classifier, rendered as news sections.
-const SECTION_DEFS: { section: string; cats: string[] }[] = [
-  { section: "Markets & Economy", cats: ["MARKETS", "ECONOMY"] },
-  { section: "Technology", cats: ["TECH", "CRYPTO"] },
-  { section: "Politics & Policy", cats: ["POLITICS"] },
-  { section: "Energy & Climate", cats: ["ENERGY"] },
-];
+// One section per topic category so admin-assigned categories map 1:1 to a rail.
+const SECTION_DEFS: { section: string; cats: string[] }[] = WORLD_CATEGORIES.map((c) => ({
+  section: SECTION_TITLES[c],
+  cats: [c],
+}));
 
 export function relativeTime(ms: number): string {
   if (!Number.isFinite(ms)) return "recently";
@@ -410,11 +437,19 @@ function safeImage(url: string | null | undefined, category: string, _title: str
 
 export function classifyCategory(title: string): string {
   const t = title.toLowerCase();
-  if (/bitcoin|crypto|ethereum|token/.test(t)) return "CRYPTO";
-  if (/\bai\b|chip|nvidia|apple|tech|software|semiconductor/.test(t)) return "TECH";
-  if (/oil|energy|opec|crude|gas|climate/.test(t)) return "ENERGY";
-  if (/fed|inflation|gdp|jobs|economy|rate|ecb/.test(t)) return "ECONOMY";
-  if (/election|senate|policy|government|president|trump|biden/.test(t)) return "POLITICS";
+  // Order matters — most specific checks first, "MARKETS" is the catch-all default.
+  if (/housing|mortgage|home price|real estate|property|homebuyer/.test(t)) return "REAL ESTATE";
+  if (/climate|emissions|carbon|warming|wildfire|drought|net zero/.test(t)) return "CLIMATE";
+  if (/oil|opec|crude|energy|renewable|solar|wind power|pipeline|gas price/.test(t)) return "ENERGY";
+  if (/health|medical|drug|disease|vaccine|hospital|\bfda\b|nasa|space|scientist|research/.test(t)) return "HEALTH & SCIENCE";
+  if (/streaming|film|hollywood|box office|advertising|publisher|broadcast|media company/.test(t)) return "MEDIA";
+  if (/bitcoin|crypto|ethereum|token|\bai\b|chip|nvidia|apple|tech|software|semiconductor/.test(t)) return "TECH";
+  if (/election|senate|policy|government|president|trump|biden|congress|regulator/.test(t)) return "POLITICS";
+  if (/savings|budget|credit score|student loan|401k|retirement account|tax filing|debt payoff/.test(t)) return "PERSONAL FINANCE";
+  if (/portfolio|dividend|\betf\b|mutual fund|brokerage|bond yield/.test(t)) return "INVESTING";
+  if (/fed|inflation|gdp|jobs report|interest rate|\becb\b|central bank|monetary policy/.test(t)) return "FINANCE";
+  if (/layoff|acquisition|merger|\bceo\b|startup|ipo|revenue|quarterly earnings|bankruptcy/.test(t)) return "BUSINESS";
+  if (/war|conflict|diplomat|united nations|geopolit|global summit/.test(t)) return "WORLD";
   return "MARKETS";
 }
 
@@ -575,14 +610,24 @@ async function cmsList(params: {
 const CMS_TIME = (c: CmsContent): string =>
   c.publishedAt ? relativeTime(Date.parse(c.publishedAt)) : "recently";
 
+// Maps an assigned CMS category's name/slug directly onto the 13-topic taxonomy —
+// editors just need a category named/slugged to match (e.g. "Real Estate",
+// "real-estate", "Health & Science") for content to land in the right rail.
 function mapCmsCategory(name: string | null | undefined, title: string): string {
   const n = (name ?? "").toLowerCase();
-  if (/crypto|bitcoin/.test(n)) return "CRYPTO";
-  if (/tech/.test(n)) return "TECH";
-  if (/energy|climate|oil/.test(n)) return "ENERGY";
-  if (/econom|inflation|\bfed\b/.test(n)) return "ECONOMY";
+  if (/real.?estate|housing|mortgage|property/.test(n)) return "REAL ESTATE";
+  if (/climate/.test(n)) return "CLIMATE";
+  if (/energy|oil|renewable/.test(n)) return "ENERGY";
+  if (/health|science|medical/.test(n)) return "HEALTH & SCIENCE";
+  if (/media|entertainment|streaming/.test(n)) return "MEDIA";
+  if (/crypto|bitcoin|\btech(nology)?\b|software|ai\b/.test(n)) return "TECH";
   if (/politic|policy|government/.test(n)) return "POLITICS";
-  if (/market|stock|invest|business/.test(n)) return "MARKETS";
+  if (/personal.?finance|budget|saving|credit.?score/.test(n)) return "PERSONAL FINANCE";
+  if (/invest|portfolio|\betf\b|brokers?\b|bonds?\b|stocks?\b/.test(n)) return "INVESTING";
+  if (/econom|inflation|\bfed\b|banking|monetary/.test(n)) return "FINANCE";
+  if (/business|company.?news|earnings/.test(n)) return "BUSINESS";
+  if (/^world$|geopolit/.test(n)) return "WORLD";
+  if (/market/.test(n)) return "MARKETS";
   return classifyCategory(title);
 }
 

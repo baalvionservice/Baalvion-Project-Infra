@@ -189,12 +189,15 @@ export async function MarketNewsHub() {
     }),
     5
   );
+  // Editorially-flagged trending items first (real cms_contents.is_trending column),
+  // padded with recency so the rail is never sparse before editors start flagging items.
+  const flaggedTrending = articles.filter((a) => a.isTrending);
   const trendingNow = claim(
-    [...articles].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()),
+    [...flaggedTrending, ...[...articles].sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())],
     5
   );
   const editorsPicks = claim(
-    articles.filter((a) => a.featured),
+    [...articles.filter((a) => a.isEditorsPick), ...articles.filter((a) => a.featured)],
     4
   );
 
