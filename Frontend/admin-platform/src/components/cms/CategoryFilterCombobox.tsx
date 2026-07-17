@@ -31,8 +31,12 @@ import type { CategoryTree } from '@/lib/types/cms-taxonomy.types';
 
 interface Props {
   websiteId: string;
-  value: string; // '' = All Sections
+  value: string; // '' = no selection (label controlled by `placeholder`)
   onChange: (categoryId: string) => void;
+  /** Trigger + "clear" item label. Defaults to "All Sections" (this component's
+   * original filter-bar usage); pass e.g. "Select a topic…" when using it to
+   * assign a category to new content rather than to filter an existing list. */
+  placeholder?: string;
 }
 
 interface FlatEntry {
@@ -59,7 +63,7 @@ function flattenForDisplay(tree: CategoryTree[]): FlatEntry[] {
 
 const autoSlug = (val: string) => val.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
 
-export default function CategoryFilterCombobox({ websiteId, value, onChange }: Props) {
+export default function CategoryFilterCombobox({ websiteId, value, onChange, placeholder = 'All Sections' }: Props) {
   const { data: tree } = useWebsiteCategoryTree(websiteId);
   const { data: flatCategories } = useWebsiteCategories(websiteId);
   const { mutate: createCategory, isPending: creating } = useCreateCategory(websiteId);
@@ -102,7 +106,7 @@ export default function CategoryFilterCombobox({ websiteId, value, onChange }: P
             aria-expanded={open}
             className="h-8 w-48 justify-between font-normal"
           >
-            <span className="truncate">{selected ? selected.name : 'All Sections'}</span>
+            <span className="truncate">{selected ? selected.name : placeholder}</span>
             <ChevronsUpDown className="ml-2 h-3.5 w-3.5 shrink-0 opacity-50" />
           </Button>
         </PopoverTrigger>
@@ -122,7 +126,7 @@ export default function CategoryFilterCombobox({ websiteId, value, onChange }: P
                   }}
                 >
                   <Check className={cn('mr-2 h-3.5 w-3.5', value === '' ? 'opacity-100' : 'opacity-0')} />
-                  All Sections
+                  {placeholder}
                 </CommandItem>
                 {entries.map((e) => (
                   <CommandItem

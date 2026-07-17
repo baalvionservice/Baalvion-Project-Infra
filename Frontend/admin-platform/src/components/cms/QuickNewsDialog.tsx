@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Radio, TrendingUp, Star } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Radio, TrendingUp, Star, Upload, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils/cn';
 import { slugify } from '@/lib/utils/format';
 import CategoryFilterCombobox from './CategoryFilterCombobox';
+import DocumentEditor from './document-editor/DocumentEditor';
+import { mediaApi } from '@/lib/api/media';
 import { useCreateContent } from '@/lib/queries/cms-content.queries';
 import { useWorkflowTransition } from '@/lib/queries/cms-workflow.queries';
 import { NEWS_LABELS, type ContentBlock, type CreateContentPayload, type NewsLabel } from '@/lib/types/cms-content.types';
@@ -30,20 +32,10 @@ interface Props {
   onCreated?: () => void;
 }
 
-// One paragraph block per blank-line-separated chunk — good enough for a quick
-// newsroom upload; open "Edit full article" afterward for the real block editor.
-function bodyToBlocks(body: string): ContentBlock[] {
-  return body
-    .split(/\n{2,}/)
-    .map((p) => p.trim())
-    .filter(Boolean)
-    .map((text, i) => ({ id: crypto.randomUUID(), type: 'paragraph', order: i, content: { text } }));
-}
-
 const emptyState = {
   title: '',
   excerpt: '',
-  body: '',
+  blocks: [] as ContentBlock[],
   featuredImage: '',
   topicCategoryId: '',
   regionCategoryId: '',
@@ -61,6 +53,8 @@ const emptyState = {
  */
 export default function QuickNewsDialog({ websiteId, open, onOpenChange, onCreated }: Props) {
   const [f, setF] = useState(emptyState);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { mutateAsync: create, isPending: isCreating } = useCreateContent();
   const { mutateAsync: transition, isPending: isPublishing } = useWorkflowTransition();
   const busy = isCreating || isPublishing;
@@ -73,6 +67,21 @@ export default function QuickNewsDialog({ websiteId, open, onOpenChange, onCreat
 
   const reset = () => setF(emptyState);
 
+  const handleImagePick = async (file: File | undefined) => {
+    if (!file) return;
+    setIsUploadingImage(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await mediaApi.files.upload(form);
+      set('featuredImage', res.data.data.url);
+    } catch {
+      /* surfaced by the global toast layer */
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
   const submit = async (publish: boolean) => {
     if (!f.title.trim()) return;
     const categoryIds = [f.topicCategoryId, f.regionCategoryId].filter(Boolean);
@@ -83,7 +92,7 @@ export default function QuickNewsDialog({ websiteId, open, onOpenChange, onCreat
       slug: slugify(f.title),
       excerpt: f.excerpt || undefined,
       featuredImage: f.featuredImage || undefined,
-      blocks: bodyToBlocks(f.body),
+      blocks: f.blocks,
       categoryIds: categoryIds.length ? categoryIds : undefined,
       isBreaking: f.isBreaking,
       isTrending: f.isTrending,
@@ -102,10 +111,10 @@ export default function QuickNewsDialog({ websiteId, open, onOpenChange, onCreat
 
   return (
     <Dialog open={open} onOpenChange={(o) => { if (!o) reset(); onOpenChange(o); }}>
-      <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[88vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add News</DialogTitle>
-          <DialogDescription>The fast path — title, category, body, publish. No formatting tools needed.</DialogDescription>
+          <DialogDescription>Headline, topic, write the story, publish.</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-3">
@@ -123,11 +132,21 @@ export default function QuickNewsDialog({ websiteId, open, onOpenChange, onCreat
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label className="text-xs">Topic</Label>
-              <CategoryFilterCombobox websiteId={websiteId} value={f.topicCategoryId} onChange={(v) => set('topicCategoryId', v)} />
+              <CategoryFilterCombobox
+                websiteId={websiteId}
+                value={f.topicCategoryId}
+                onChange={(v) => set('topicCategoryId', v)}
+                placeholder="Select a topic…"
+              />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs">Region (optional)</Label>
-              <CategoryFilterCombobox websiteId={websiteId} value={f.regionCategoryId} onChange={(v) => set('regionCategoryId', v)} />
+              <CategoryFilterCombobox
+                websiteId={websiteId}
+                value={f.regionCategoryId}
+                onChange={(v) => set('regionCategoryId', v)}
+                placeholder="No region"
+              />
             </div>
           </div>
 
@@ -135,30 +154,53 @@ export default function QuickNewsDialog({ websiteId, open, onOpenChange, onCreat
             <Label className="text-xs">Summary</Label>
             <Textarea
               className="text-sm min-h-[50px]"
-              placeholder="One or two sentences — shown in cards and search results."
+              placeholder="One or two plain-text sentences — shown in cards and search results, not in the article itself."
               value={f.excerpt}
               onChange={(e) => set('excerpt', e.target.value)}
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Body</Label>
-            <Textarea
-              className="text-sm min-h-[140px]"
-              placeholder="Write the article. Leave a blank line between paragraphs."
-              value={f.body}
-              onChange={(e) => set('body', e.target.value)}
-            />
+            <Label className="text-xs">Article</Label>
+            <div className="rounded-md border px-3 py-2">
+              <DocumentEditor blocks={f.blocks} onChange={(blocks) => set('blocks', blocks)} />
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Type <span className="font-mono">/</span> for headings, lists, images and more — or just select text to format it, like Google Docs.
+            </p>
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-xs">Featured Image URL</Label>
-            <Input
-              className="text-sm"
-              placeholder="https://… (leave blank to auto-generate artwork)"
-              value={f.featuredImage}
-              onChange={(e) => set('featuredImage', e.target.value)}
-            />
+            <Label className="text-xs">Featured Image</Label>
+            <div className="flex gap-2">
+              <Input
+                className="text-sm"
+                placeholder="Paste a URL, or upload a photo →  (leave blank to auto-generate artwork)"
+                value={f.featuredImage}
+                onChange={(e) => set('featuredImage', e.target.value)}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="shrink-0"
+                disabled={isUploadingImage}
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {isUploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => { void handleImagePick(e.target.files?.[0]); e.target.value = ''; }}
+              />
+            </div>
+            {f.featuredImage && (
+              // eslint-disable-next-line @next/next/no-img-element -- arbitrary uploaded/pasted URL, next/image domain allowlisting would reject it
+              <img src={f.featuredImage} alt="" className="h-24 w-40 rounded object-cover border" />
+            )}
           </div>
 
           <div className="flex flex-wrap items-center gap-4 pt-1">
