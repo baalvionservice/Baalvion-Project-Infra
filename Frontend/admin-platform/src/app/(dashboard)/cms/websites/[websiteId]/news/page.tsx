@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useEffect, useMemo, useState } from 'react';
+import { use, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, Radio, TrendingUp, Star, ArrowLeft, FileText } from 'lucide-react';
@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import ContentWorkflowBadge from '@/components/cms/ContentWorkflowBadge';
-import QuickNewsDialog from '@/components/cms/QuickNewsDialog';
 import { useContentList } from '@/lib/queries/cms-content.queries';
 import { useWebsite } from '@/lib/queries/cms-websites.queries';
 import { useWebsiteCategoryTree } from '@/lib/queries/cms-taxonomy.queries';
@@ -39,7 +38,6 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
   const setActiveWebsiteId = useCmsStore((s) => s.setActiveWebsiteId);
   useEffect(() => { setActiveWebsiteId(websiteId); }, [websiteId, setActiveWebsiteId]);
 
-  const [addOpen, setAddOpen] = useState(false);
   const { data: website } = useWebsite(websiteId);
   // News Desk is Imperialpedia-only for now — bounce any other site back to its
   // overview instead of rendering a dashboard scoped to a workflow it doesn't use yet.
@@ -116,9 +114,11 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
                   Full content manager
                 </Link>
               </Button>
-              <Button size="sm" onClick={() => setAddOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                Add News
+              <Button size="sm" asChild>
+                <Link href={`/cms/websites/${websiteId}/news/new`}>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add News
+                </Link>
               </Button>
             </div>
           }
@@ -222,13 +222,6 @@ export default function NewsDashboardPage({ params }: { params: Promise<{ websit
           ))}
         </div>
       </div>
-
-      <QuickNewsDialog
-        websiteId={websiteId}
-        open={addOpen}
-        onOpenChange={setAddOpen}
-        onCreated={() => refetch()}
-      />
     </div>
   );
 }

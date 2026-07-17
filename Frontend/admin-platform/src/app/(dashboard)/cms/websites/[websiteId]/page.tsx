@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import { useEffect, use } from 'react';
 import Link from 'next/link';
 import {
   FileText,
@@ -33,7 +33,6 @@ import { useWorkflowStats } from '@/lib/queries/cms-workflow.queries';
 import { useCmsStore } from '@/lib/store/cmsStore';
 import { useUIStore } from '@/lib/store/uiStore';
 import WebsiteDashboard from '@/components/cms/dashboard/WebsiteDashboard';
-import QuickNewsDialog from '@/components/cms/QuickNewsDialog';
 import { Separator } from '@/components/ui/separator';
 
 // The site dashboard is the first screen after choosing a website, so every label
@@ -172,7 +171,6 @@ export default function WebsiteDetailPage({
   const { websiteId } = use(params);
   const { setBreadcrumbs } = useUIStore();
   const setActiveWebsite = useCmsStore((s) => s.setActiveWebsite);
-  const [newsDialogOpen, setNewsDialogOpen] = useState(false);
 
   const { data: website, isLoading } = useWebsite(websiteId);
   // Stats/workflow endpoints key off the canonical UUID. :websiteId may now be a
@@ -306,15 +304,16 @@ export default function WebsiteDetailPage({
                       <ArrowRight className="ml-1.5 h-4 w-4" />
                     </Link>
                   </Button>
-                  <Button size="sm" onClick={() => setNewsDialogOpen(true)}>
-                    <Newspaper className="mr-1.5 h-4 w-4" />
-                    Add News
+                  <Button size="sm" asChild>
+                    <Link href={`/cms/websites/${websiteId}/news/new`}>
+                      <Newspaper className="mr-1.5 h-4 w-4" />
+                      Add News
+                    </Link>
                   </Button>
                 </div>
               </div>
             </CardHeader>
           </Card>
-          <QuickNewsDialog websiteId={websiteId} open={newsDialogOpen} onOpenChange={setNewsDialogOpen} />
         </>
       )}
 
