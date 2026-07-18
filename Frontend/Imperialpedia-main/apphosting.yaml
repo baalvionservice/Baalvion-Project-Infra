@@ -2,6 +2,10 @@
 # https://firebase.google.com/docs/app-hosting/configure
 
 runConfig:
-  # Increase this value if you'd like to automatically spin up
-  # more instances in response to increased traffic.
-  maxInstances: 1
+  # A single instance means a crawl burst (Googlebot, a search-console
+  # validation pass, or just concurrent visitors) queues every request onto
+  # one Cloud Run instance. Combined with per-request backend fetches, that
+  # queueing is what turned into false "not found" pages under load — see
+  # the mock-fallback-to-notFound() path in articlesService.getArticleBySlug.
+  # Raise this so bursts scale out instead of serializing onto one instance.
+  maxInstances: 4

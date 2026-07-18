@@ -36,6 +36,7 @@ export async function fetchReviewBySlug(slug: string): Promise<ReviewArticle | u
   try {
     const res = await fetch(`${IMP_API}/entities/review/${encodeURIComponent(slug)}`, {
       cache: 'no-store',
+      signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {
       const d = (await res.json())?.data;
