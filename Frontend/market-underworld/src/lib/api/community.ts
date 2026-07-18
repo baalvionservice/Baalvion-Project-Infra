@@ -241,3 +241,35 @@ export async function setMemberStatus(slug: string, userId: string, status: 'app
 export async function revokeMember(slug: string, userId: string) {
     return communityFetch(`/admin/communities/${slug}/members/${userId}`, { method: 'DELETE' });
 }
+
+// Reported content queue — flags live in NodeBB itself, community-service just relays +
+// enriches them with the owning community (see adminController.listFlags).
+export interface FlaggedContent {
+    flagId: string;
+    type: string;
+    state: string;
+    reasons: string[];
+    reporter: { username?: string; uid?: string | number } | null;
+    target: { id: string; content: string | null; title: string | null; author: string | null };
+    community: { slug: string; name: string } | null;
+    createdAt: string | null;
+}
+
+export async function getFlags(): Promise<FlaggedContent[]> {
+    try {
+        return await communityFetch<FlaggedContent[]>('/admin/flags');
+    } catch {
+        return [];
+    }
+}
+
+export async function resolveFlag(
+    flagId: string,
+    action: 'dismiss' | 'remove',
+    opts: { pid?: string; communitySlug?: string | null } = {},
+) {
+    return communityFetch(`/admin/flags/${flagId}/resolve`, {
+        method: 'POST',
+        body: JSON.stringify({ action, pid: opts.pid, communitySlug: opts.communitySlug }),
+    });
+}
