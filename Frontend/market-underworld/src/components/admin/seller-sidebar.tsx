@@ -2,17 +2,14 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { 
-  LayoutDashboard, 
-  ShoppingBag, 
-  TrendingUp, 
+import {
+  LayoutDashboard,
   Boxes,
   Truck,
-  CreditCard, 
   LogOut,
   ChevronRight,
-  User,
-  Plus
+  Store,
+  RefreshCw
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -21,22 +18,14 @@ const SELLER_NAV = [
     group: "OPERATIONS",
     items: [
       { name: "Merchant Overview", path: "/seller-dashboard", icon: LayoutDashboard },
-      { name: "Product Listings", path: "/seller-dashboard/products", icon: ShoppingBag },
-      { name: "Inventory Node", path: "/seller-dashboard/inventory", icon: Boxes },
-    ]
-  },
-  {
-    group: "LOGISTICS",
-    items: [
-      { name: "Trade Requests", path: "/seller-dashboard/orders", icon: Truck },
-      { name: "Sales Analytics", path: "/seller-dashboard/analytics", icon: TrendingUp },
+      { name: "Catalog Inventory", path: "/seller-dashboard/inventory", icon: Boxes },
+      { name: "Orders", path: "/seller-dashboard/orders", icon: Truck },
     ]
   },
   {
     group: "PROFILE",
     items: [
-      { name: "Public Storefront", path: "/marketplace/india", icon: User },
-      { name: "Financials", path: "/seller-dashboard/revenue", icon: CreditCard },
+      { name: "Public Storefront", path: "/marketplace", icon: Store },
     ]
   }
 ];
@@ -54,9 +43,11 @@ export const SellerSidebar = () => {
             <span className="text-[10px] font-bold text-brand-green uppercase tracking-widest">Merchant Node</span>
           </div>
         </Link>
-        <AppButton className="w-full h-10 text-[10px] uppercase font-mono tracking-widest">
-          <Plus className="w-3 h-3 mr-2" /> New Listing
-        </AppButton>
+        <Link href="/seller-dashboard/inventory">
+          <AppButton className="w-full h-10 text-[10px] uppercase font-mono tracking-widest">
+            <RefreshCw className="w-3 h-3 mr-2" /> Sync Catalog
+          </AppButton>
+        </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-6 space-y-8 no-scrollbar">
