@@ -201,4 +201,67 @@ async function listMyOrders(userId) {
     }));
 }
 
-module.exports = { listCatalog, checkout, fulfill, listMyOrders };
+async function listOrdersAdmin({ status, limit, offset } = {}) {
+    const where = {};
+    if (status) where.status = status;
+    const { rows, count } = await db.GiftCardOrder.findAndCountAll({
+        where,
+        include: [{ model: db.GiftCardBrand, as: 'brand' }],
+        order: [['created_at', 'DESC']],
+        limit: Math.min(Number(limit) || 50, 200),
+        offset: Number(offset) || 0,
+    });
+    return {
+        total: count,
+        orders: rows.map((o) => ({
+            id: o.id,
+            userId: o.user_id,
+            brandName: o.brand && o.brand.name,
+            brandLogoUrl: o.brand && o.brand.logo_url,
+            supplier: o.supplier,
+            denominationValue: o.denomination_value,
+            currencyCode: o.currency_code,
+            priceUsdCents: o.price_usd_cents,
+            status: o.status,
+            fulfillmentError: o.status === 'failed' ? o.fulfillment_error : undefined,
+            createdAt: o.created_at,
+            fulfilledAt: o.fulfilled_at,
+        })),
+    };
+}
+
+async function getMerchantStats() {
+    const [totalOrders, fulfilledOrders, pendingOrders, failedOrders, revenueUsdCents, totalBrands, activeBrands] = await Promise.all([
+        db.GiftCardOrder.count(),
+        db.GiftCardOrder.count({ where: { status: 'fulfilled' } }),
+        db.GiftCardOrder.count({ where: { status: ['pending_payment', 'paid', 'fulfilling'] } }),
+        db.GiftCardOrder.count({ where: { status: 'failed' } }),
+        db.GiftCardOrder.sum('price_usd_cents', { where: { status: 'fulfilled' } }),
+        db.GiftCardBrand.count(),
+        db.GiftCardBrand.count({ where: { is_active: true } }),
+    ]);
+    return {
+        totalOrders,
+        fulfilledOrders,
+        pendingOrders,
+        failedOrders,
+        revenueUsdCents: revenueUsdCents || 0,
+        totalBrands,
+        activeBrands,
+    };
+}
+
+async function listCatalogAdmin() {
+    const brands = await db.GiftCardBrand.findAll({ order: [['country_code', 'ASC'], ['name', 'ASC']] });
+    return brands.map((b) => ({
+        ...toPublicBrand(b),
+        supplier: b.supplier,
+        isActive: b.is_active,
+        lastSyncedAt: b.last_synced_at,
+    }));
+}
+
+module.exports = {
+    listCatalog, checkout, fulfill, listMyOrders,
+    listOrdersAdmin, getMerchantStats, listCatalogAdmin,
+};
