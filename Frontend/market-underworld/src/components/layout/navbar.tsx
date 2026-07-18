@@ -13,6 +13,7 @@ import { useNotifications } from '@/context/notification-context';
 
 const NAV_ITEMS = [
   { name: 'Marketplace', path: '/marketplace' },
+  { name: 'My Cards', path: '/my-cards' },
   { name: 'Live Sessions', path: '/live-sessions' },
   { name: 'Forum', path: '/forum' },
   { name: 'Access', path: '/access' },
