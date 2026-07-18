@@ -15,6 +15,7 @@ export async function fetchTermBySlug(slug: string): Promise<Term | undefined> {
   try {
     const res = await fetch(`${IMP_API}/entities/term/${encodeURIComponent(slug)}`, {
       cache: 'no-store',
+      signal: AbortSignal.timeout(6000),
     });
     if (res.ok) {
       const data = (await res.json())?.data;
@@ -28,7 +29,10 @@ export async function fetchTermBySlug(slug: string): Promise<Term | undefined> {
 
 export async function fetchTermsByLetter(letter: string): Promise<Term[]> {
   try {
-    const res = await fetch(`${IMP_API}/entities?type=term&limit=500`, { cache: 'no-store' });
+    const res = await fetch(`${IMP_API}/entities?type=term&limit=500`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(6000),
+    });
     if (res.ok) {
       const items = (((await res.json())?.data?.items ?? []) as Term[]).filter((t) => t?.title);
       if (items.length) {
@@ -45,7 +49,10 @@ export async function fetchTermsByLetter(letter: string): Promise<Term[]> {
 
 export async function fetchAllTerms(): Promise<Term[]> {
   try {
-    const res = await fetch(`${IMP_API}/entities?type=term&limit=500`, { cache: 'no-store' });
+    const res = await fetch(`${IMP_API}/entities?type=term&limit=500`, {
+      cache: 'no-store',
+      signal: AbortSignal.timeout(6000),
+    });
     if (res.ok) {
       const items = (((await res.json())?.data?.items ?? []) as Term[]).filter(
         (t) => t?.title && t?.slug,

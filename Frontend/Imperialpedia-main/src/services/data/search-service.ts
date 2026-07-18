@@ -44,7 +44,7 @@ const routeFor = (type: string, slug: string, name: string): string => {
 };
 
 const j = async (url: string) => {
-  const r = await fetch(url, { cache: 'no-store' });
+  const r = await fetch(url, { cache: 'no-store', signal: AbortSignal.timeout(6000) });
   if (!r.ok) throw new Error(String(r.status));
   return r.json();
 };
